@@ -46,6 +46,18 @@ func init() {
 		t.Desp = "for"
 		return t, nil
 	})
+	lexer.Add([]byte("continue"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Type = TOKEN_CONTINUE
+		t.Desp = "continue"
+		return t, nil
+	})
+	lexer.Add([]byte("break"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Type = TOKEN_BREAK
+		t.Desp = "break"
+		return t, nil
+	})
 	lexer.Add([]byte("return"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_RETURN

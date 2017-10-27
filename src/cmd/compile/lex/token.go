@@ -11,6 +11,8 @@ const (
 	TOKEN_ELSEIF          //elseif
 	TOKEN_ELSE            // else
 	TOKEN_FOR             //for
+	TOKEN_BREAK
+	TOKEN_CONTINUE
 	TOKEN_RETURN          //return
 	TOKEN_NULL   // null
 	TOKEN_TRUE //true
