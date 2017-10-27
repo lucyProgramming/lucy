@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"flag"
 	"bufio"
 	"bytes"
 	"io"
@@ -102,8 +104,24 @@ func (x *exprLex) next() rune {
 func (x *exprLex) Error(s string) {
 	log.Printf("parse error: %s", s)
 }
+var(
+	filename := flag.String("f","","file name")
+)
 
+func showUsage(){
+	fmt.Printf("Usage:%v -f FILENAME\n",os.Args[0])
+}
 func main() {
+	flag.Parse()
+	if *filename == ""{
+		showUsage()
+		return 
+	}
+	
+	
+	
+
+
 	in := bufio.NewReader(os.Stdin)
 	for {
 		if _, err := os.Stdout.WriteString("> "); err != nil {
