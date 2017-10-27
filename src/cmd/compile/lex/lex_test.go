@@ -2,45 +2,46 @@ package lex
 
 import (
 	"testing"
+	"fmt"
+)
+
+var(
+	code = `package test
+	const a = 123;
+		function(){
+		}
+
+	`
 )
 
 func Test_lex(t *testing.T) {
-	s, err := lexer.Scanner([]byte(`
-		//
-
-		package test
-
-		function(){
-
-		}
-
-
-	`))
+	s, err := lexer.Scanner([]byte(code))
 	if err != nil {
 		panic(err)
 	}
-	ts := [...]int{
-		TOKEN_PACKAGE,
-		TOKEN_IDENTIFIER,
-		TOKEN_FUNCTION,
-		TOKEN_LP,
-		TOKEN_RP,
-		TOKEN_LC,
-		TOKEN_CRLF,
-		TOKEN_RC,
-	}
 
-	eof := false
-	i := 0
-	for eof == false {
-		t, err, _ := s.Next()
+	fmt.Println("\n\n\n\n\n\n\n########################")
+
+	fmt.Println(code)
+
+	fmt.Println("\n\n\n\n\n\n\n########################")
+	for {
+		t, err, eof := s.Next()
+		if eof {
+			break
+		}
 		if err != nil {
-			panic(err)
+			fmt.Println("err:",err)
+			continue
 		}
-		if t.(*Token).Type != ts[i] {
-			panic(11)
+		if t == nil {
+			continue
 		}
-		i++
+		if t.(*Token).Type == TOKEN_CRLF{
+			fmt.Println()
+		}else{
+			fmt.Printf("%s ",t.(*Token).Desp)
+		}
 	}
-
+	fmt.Println("\n\n\n\n\n\n\n")
 }
