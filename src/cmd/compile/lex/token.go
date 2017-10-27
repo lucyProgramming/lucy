@@ -4,6 +4,7 @@ package lex
 import(
 	"github.com/timtadh/lexmachine"
 )
+
 const (
 	TOKEN_FUNCTION = iota // function
 	TOKEN_CONST 		//const
@@ -57,8 +58,9 @@ const (
 	TOKEN_CRLF       // enter
 	TOKEN_PACKAGE    //package
 	TOKEN_CLASS      //class
-	TOKEN_INT //int
 	TOKEN_BOOL //bool
+	TOKEN_BYTE  //byte
+	TOKEN_INT //int
 	TOKEN_FLOAT //float
 	TOKEN_STRING //string
 	TOKEN_IDENTIFIER // identifier

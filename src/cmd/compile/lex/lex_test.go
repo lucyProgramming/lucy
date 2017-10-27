@@ -6,7 +6,11 @@ import (
 )
 
 var(
-	code = `package test
+	code = `
+	//11111
+
+
+	package test
 	const a = 123;
 		function(){
 		}

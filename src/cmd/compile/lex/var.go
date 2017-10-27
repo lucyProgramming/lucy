@@ -28,7 +28,7 @@ func init() {
 		t.Desp = "if"
 		return t, nil
 	})
-	lexer.Add([]byte("elseif"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`([elseif])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_ELSEIF
 		t.Desp = "elseif"
@@ -182,19 +182,19 @@ func init() {
 		t.Desp = "<="
 		return t, nil
 	})
-	lexer.Add([]byte(`([\+])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_ADD
 		t.Desp = "+"
 		return t, nil
 	})
-	lexer.Add([]byte(`([\-])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\-)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_SUB
 		t.Desp = "-"
 		return t, nil
 	})
-	lexer.Add([]byte(`([\*])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_MUL
 		t.Desp = "*"
@@ -212,7 +212,7 @@ func init() {
 		t.Desp = "%"
 		return t, nil
 	})
-	lexer.Add([]byte(`([\+\+])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\+\+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_INCREMENT
 		t.Desp = "++"
@@ -224,7 +224,7 @@ func init() {
 		t.Desp = "--"
 		return t, nil
 	})
-	lexer.Add([]byte(`([\.])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\.)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_DOT
 		t.Desp = "."
@@ -248,25 +248,25 @@ func init() {
 		t.Desp = ":"
 		return t, nil
 	})
-	lexer.Add([]byte(`([\+=])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\+=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_PLUS_ASSIGN
 		t.Desp = "+="
 		return t, nil
 	})
-	lexer.Add([]byte(`([\-=])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\-=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_MINUS_ASSIGN
 		t.Desp = "-="
 		return t, nil
 	})
-	lexer.Add([]byte(`([\*=])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\*=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_MUL_ASSIGN
 		t.Desp = "*="
 		return t, nil
 	})
-	lexer.Add([]byte(`([\/=])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`(\/=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_DIV_ASSIGN
 		t.Desp = `/=`
@@ -315,9 +315,9 @@ func init() {
 	lexer.Add([]byte("//[^\n]*\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		return nil , nil
 	})
-	lexer.Add([]byte("/*[.\n]*/"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		return nil , nil
-	})
+	//lexer.Add([]byte(`()`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	//	return nil , nil
+	//})
 	lexer.Add([]byte("package"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_PACKAGE
@@ -330,18 +330,25 @@ func init() {
 		t.Desp = "class"
 		return t, nil
 	})
-	lexer.Add([]byte("int"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Type = TOKEN_INT
-		t.Desp = "int"
-		return t, nil
-	})
 	lexer.Add([]byte("bool"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_BOOL
 		t.Desp = "bool"
 		return t, nil
 	})
+	lexer.Add([]byte("byte"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Type = TOKEN_BYTE
+		t.Desp = "byte"
+		return t, nil
+	})
+	lexer.Add([]byte("int"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Type = TOKEN_INT
+		t.Desp = "int"
+		return t, nil
+	})
+
 	lexer.Add([]byte("float"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Type = TOKEN_FLOAT
