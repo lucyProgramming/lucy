@@ -6,9 +6,7 @@ import (
 )
 
 var (
-	code = `
-	//11111
-	package test
+	code = `	package test
 	const a = 123;
 	function(){
 		a += b;
@@ -60,10 +58,10 @@ func Test_lex(t *testing.T) {
 	}
 
 	fmt.Println("\n\n\n\n\n\n\n########################")
-
 	fmt.Println(code)
 
 	fmt.Println("\n\n\n\n\n\n\n########################")
+	newline := false
 	for {
 		t, err, eof := s.Next()
 		if eof {
@@ -76,10 +74,21 @@ func Test_lex(t *testing.T) {
 		if t == nil {
 			continue
 		}
-		if t.(*Token).Type == TOKEN_CRLF {
+		token := t.(*Token)
+		if token.Type == TOKEN_CRLF {
+			newline = true
 			fmt.Println()
 		} else {
-			fmt.Printf("%s ", t.(*Token).Desp)
+			if newline == true {
+				fmt.Printf("line:%d\t", token.Match.StartLine)
+				newline = false
+			}
+			if token.Data != nil {
+				fmt.Printf("%s(%v) ", token.Desp, token.Data)
+			} else {
+				fmt.Printf("%s ", token.Desp)
+			}
+
 		}
 	}
 	fmt.Println("\n\n\n\n\n\n\n")

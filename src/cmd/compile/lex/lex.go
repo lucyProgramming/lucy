@@ -1,8 +1,9 @@
 package lex
 
 import (
-	"github.com/timtadh/lexmachine/machines"
 	"github.com/timtadh/lexmachine"
+	"github.com/timtadh/lexmachine/machines"
+	"strconv"
 )
 
 func init() {
@@ -386,7 +387,6 @@ func init() {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_PACKAGE
-
 		t.Desp = "package"
 		return t, nil
 	})
@@ -402,6 +402,13 @@ func init() {
 		t.Match = match
 		t.Type = TOKEN_PUBLIC
 		t.Desp = "public"
+		return t, nil
+	})
+	lexer.Add([]byte("protected"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_PROTECTED
+		t.Desp = "protected"
 		return t, nil
 	})
 	lexer.Add([]byte("private"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
@@ -455,19 +462,19 @@ func init() {
 		return t, nil
 	})
 	// 0 or 0755 or 123 or +100 or -100
- 	lexer.Add([]byte(`([\+|\-]?[0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`([\+|\-]?[0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_LITERAL_INT
 		t.Desp = string(match.Bytes)
-		t.Data = parseInt(match.Bytes)
+		t.Data = parseInt64(match.Bytes)
 		return t, nil
 	})
 	//科学计数法
-	lexer.Add([]byte(`([\+|\-]?[1-9](\.[0-9]+)?e[1-9][0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(`([\+|\-]?[1-9](\.[0-9]+)?e[\-|\+]?[1-9][0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_LITERAL_INT
+		t.Data, t.Type = parseScientificNotation(match.Bytes)
 		t.Desp = string(match.Bytes)
 		return t, nil
 	})
@@ -485,13 +492,26 @@ func init() {
 		t.Match = match
 		t.Type = TOKEN_LITERAL_FLOAT
 		t.Desp = string(match.Bytes)
+		t.Data, _ = strconv.ParseFloat(t.Desp, 64)
 		return t, nil
 	})
+
+	// string literal
 	lexer.Add([]byte("(\".*\")"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_STRING
 		t.Desp = string(match.Bytes)
+		t.Data = string(match.Bytes[1:len(match.Bytes)])
+		return t, nil
+	})
+	//byte literal
+	lexer.Add([]byte(`(\'[.|\n]\')`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_BYTE
+		t.Desp = string(match.Bytes)
+		t.Data = match.Bytes[1]
 		return t, nil
 	})
 }
