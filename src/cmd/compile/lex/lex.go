@@ -7,13 +7,14 @@ import (
 )
 
 func init() {
-	lexer.Add([]byte("function"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte("fun"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_FUNCTION
 		t.Desp = "function"
 		return t, nil
 	})
+
 	lexer.Add([]byte("const"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -390,10 +391,24 @@ func init() {
 		t.Desp = "package"
 		return t, nil
 	})
+	lexer.Add([]byte("import"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_IMPORT
+		t.Desp = "import"
+		return t, nil
+	})
 	lexer.Add([]byte("class"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_CLASS
+		t.Desp = "class"
+		return t, nil
+	})
+	lexer.Add([]byte("static"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_STATIC
 		t.Desp = "class"
 		return t, nil
 	})

@@ -48,6 +48,7 @@ const (
 	TOKEN_VAR                   // var a
 	TOKEN_NEW                   // new Object()
 	TOKEN_COLON                 // :
+	TOKEN_COLON_ASSIGN          // :=
 	TOKEN_PLUS_ASSIGN           // +=
 	TOKEN_MINUS_ASSIGN          // -=
 	TOKEN_MUL_ASSIGN            // *=
@@ -59,7 +60,9 @@ const (
 	TOKEN_DEFAULT               //default
 	TOKEN_CRLF                  // enter
 	TOKEN_PACKAGE               //package
+	TOKEN_IMPORT                //import
 	TOKEN_CLASS                 //class
+	TOKEN_STATIC                //static
 	TOKEN_PUBLIC                //public
 	TOKEN_PROTECTED             //protected
 	TOKEN_PRIVATE               //private
