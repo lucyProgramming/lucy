@@ -10,16 +10,34 @@ const (
 	STATEMENT_TYPE_SWITCH
 )
 
+type Block struct {
+	Statements []*Statement
+}
+
 type Statement struct {
-	Typ             int
-	StatementIf     *StatementIF
-	Expression      *Expression // expression statment like a==123
-	StatementFor    *StatementFor
-	StatementReturn *StatementReturn
+	Typ               int
+	StatementIf       *StatementIF
+	Expression        *Expression // expression statment like a=123
+	StatementFor      *StatementFor
+	StatementReturn   *StatementReturn
+	StatementTryCatch *StatementTryCatch
+	StatmentSwitch    *StatmentSwitch
+}
+
+type StatementTryCatch struct {
+	TryBlock     *Block
+	CatchBlock   *Block
+	FinallyBlock *Block
 }
 
 type StatmentSwitch struct {
-	Condition *Expression
+	Condition           *Expression //switch
+	StatmentSwitchCases []*StatmentSwitchCase
+	Default             *Block
+}
+type StatmentSwitchCase struct {
+	Match *Expression
+	Block *Block
 }
 
 type StatementReturn struct {

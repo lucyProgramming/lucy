@@ -34,7 +34,7 @@ var (
 		int a
 		int b
 		int c
-		public Person(){
+		public fun Person(){
 			for(int i = 0 ;i < 0x100;i++){
 				System.out.println(i)
 			}

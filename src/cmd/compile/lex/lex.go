@@ -11,10 +11,16 @@ func init() {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_FUNCTION
-		t.Desp = "function"
+		t.Desp = "fun"
 		return t, nil
 	})
-
+	lexer.Add([]byte("enum"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_ENUM
+		t.Desp = "enum"
+		return t, nil
+	})
 	lexer.Add([]byte("const"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -433,6 +439,13 @@ func init() {
 		t.Desp = "private"
 		return t, nil
 	})
+	lexer.Add([]byte("interface"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_INTERFACE
+		t.Desp = "interface"
+		return t, nil
+	})
 	lexer.Add([]byte("bool"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -529,4 +542,34 @@ func init() {
 		t.Data = match.Bytes[1]
 		return t, nil
 	})
+
+	lexer.Add([]byte("try"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_TRY
+		t.Desp = "try"
+		return t, nil
+	})
+	lexer.Add([]byte("catch"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_CATCH
+		t.Desp = "try"
+		return t, nil
+	})
+	lexer.Add([]byte("finally"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_FINALLY
+		t.Desp = "finally"
+		return t, nil
+	})
+	lexer.Add([]byte("throw"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_THROW
+		t.Desp = "throw"
+		return t, nil
+	})
+
 }

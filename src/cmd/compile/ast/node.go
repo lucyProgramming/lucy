@@ -1,22 +1,8 @@
 package ast
 
+//代表语法数的一个节点
 type Node struct {
-	LNode *Node
-	RNode *Node
+	Pos  Pos
+	Data interface{} //class defination or varialbe Defination
 }
-
-type Expression struct {
-	Typ             int
-	BoolValue       bool
-	IntValue        int64
-	ByteValue       byte
-	FloatValue      float64
-	StringValue     string
-	LeftExpression  *Expression
-	RIghtExpression *Expression
-}
-
-type ExpressionFunctionCall struct {
-	Name string //function name
-	Args []*Expression
-}
+type Tops []*Node

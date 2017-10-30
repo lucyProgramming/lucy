@@ -7,6 +7,7 @@ import (
 
 const (
 	TOKEN_FUNCTION       = iota // function
+	TOKEN_ENUM                  //
 	TOKEN_CONST                 //const
 	TOKEN_IF                    // if
 	TOKEN_ELSEIF                //elseif
@@ -66,6 +67,7 @@ const (
 	TOKEN_PUBLIC                //public
 	TOKEN_PROTECTED             //protected
 	TOKEN_PRIVATE               //private
+	TOKEN_INTERFACE             //interface
 	TOKEN_BOOL                  //bool
 	TOKEN_BYTE                  //byte
 	TOKEN_INT                   //int
@@ -75,6 +77,10 @@ const (
 	TOKEN_LITERAL_INT           // 123
 	TOKEN_LITERAL_STRING        // ""
 	TOKEN_LITERAL_FLOAT         // 0.000
+	TOKEN_TRY                   // try
+	TOKEN_CATCH                 //catch
+	TOKEN_FINALLY               //finally
+	TOKEN_THROW                 //throw
 )
 
 type Token struct {

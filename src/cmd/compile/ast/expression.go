@@ -1,7 +1,5 @@
 package ast
 
-
-
 const (
 	EXPRESSION_TYPE_BOOL = iota
 	EXPRESSION_TYPE_INT
@@ -44,3 +42,29 @@ const (
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_NEW
 	EXPRESSION_TYPE_CLASS
+)
+
+type Expression struct {
+	Typ int
+	/*
+		BoolValue       bool
+		IntValue        int64
+		ByteValue       byte
+		FloatValue      float64
+		StringValue     string
+		LeftExpression  *Expression
+		RIghtExpression *Expression
+	*/
+	Data interface{} //
+}
+
+type ExpressionFunctionCall struct {
+	Name string //function name
+	Args CallArgs
+}
+type ExpressionMethodCall struct {
+	ClassName string
+	ExpressionFunctionCall
+}
+
+type CallArgs []*Expression // f(1,2)　调用参数列表
