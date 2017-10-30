@@ -13,17 +13,17 @@ var (
 		var a int;
 		return a;
 		if(a > b){
-			return true
+			return true;
 		}
 		if(a >= b){
-			return false
+			return false;
 		}
 		if(a && b != 0){
 
-			return null
+			return null;
 		}
 		if(a | b != 0){
-			return byte
+			return byte;
 		}
 		a + b;
 		a / b;
@@ -31,15 +31,15 @@ var (
 
 	}
 	class Person{
-		int a
-		int b
-		int c
+		int a;
+		int b;
+		int c;
 		public fun Person(){
 			for(int i = 0 ;i < 0x100;i++){
-				System.out.println(i)
+				System.out.println(i);
 			}
 			for(int i = 0 ;i < +0x100;i++){
-				System.out.println(i)
+				System.out.println(i);
 			}
 		}
 		a + 1.00

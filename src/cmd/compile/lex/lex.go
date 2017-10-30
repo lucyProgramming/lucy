@@ -373,14 +373,7 @@ func init() {
 		t.Desp = "default"
 		return t, nil
 	})
-	lexer.Add([]byte("\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CRLF
-		t.Desp = "enter"
-		return t, nil
-	})
-	lexer.Add([]byte("( |\t)"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte("( |\t|\n)"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
 	})
 	lexer.Add([]byte("//[^\n]*\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
