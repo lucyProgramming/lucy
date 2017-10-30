@@ -1,9 +1,9 @@
 package ast
 
 const (
-	CLASS_FIELD_PUBLIC = iota
-	CLASS_FIELD_PROTECTED
-	CLASS_FIELD_PRIVATE
+	ACCESS_PUBLIC = iota
+	ACCESS_PROTECTED
+	ACCESS_PRIVATE
 )
 
 type Class struct {
@@ -15,7 +15,6 @@ type Class struct {
 
 type ClassMethod struct {
 	ClassFieldProperty
-	Name string
 	Func Function
 }
 

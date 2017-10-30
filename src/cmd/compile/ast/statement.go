@@ -60,7 +60,3 @@ type StatementElseIf struct {
 	Condition *Expression
 	Block     *Block
 }
-
-type Block struct {
-	Statments []*Statement
-}

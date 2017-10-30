@@ -31,11 +31,11 @@ type CombinationType struct {
 }
 
 //把树型转化为可读字符串
-func (c *CombinationType) String(ret *string) {
+func (c *CombinationType) TypeString(ret *string) {
 	if c.Typ == COMBINATION_TYPE_ARRAY {
 		*ret += "[]"
 	}
-	c.Combination.String(ret)
+	c.Combination.TypeString(ret)
 }
 
 //可读的类型信息
@@ -56,7 +56,7 @@ func (v *VariableType) TypeString(ret *string) {
 	case VARIALBE_TYPE_ENUM:
 		*ret = v.Name
 	case VARIABLE_TYPE_COMBINATION:
-		v.CombinationType.String(ret)
+		v.CombinationType.TypeString(ret)
 	}
 }
 

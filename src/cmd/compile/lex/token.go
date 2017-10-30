@@ -17,8 +17,7 @@ const (
 	TOKEN_CONTINUE              //continue
 	TOKEN_RETURN                //return
 	TOKEN_NULL                  // null
-	TOKEN_TRUE                  //true
-	TOKEN_FALSE                 //false
+	TOKEN_BOOL                  //bool
 	TOKEN_LP                    //(
 	TOKEN_RP                    //)
 	TOKEN_LC                    //{
@@ -59,7 +58,6 @@ const (
 	TOKEN_SWITCH                //swtich
 	TOKEN_CASE                  //case
 	TOKEN_DEFAULT               //default
-	TOKEN_CRLF                  // enter
 	TOKEN_PACKAGE               //package
 	TOKEN_IMPORT                //import
 	TOKEN_CLASS                 //class
@@ -68,12 +66,13 @@ const (
 	TOKEN_PROTECTED             //protected
 	TOKEN_PRIVATE               //private
 	TOKEN_INTERFACE             //interface
-	TOKEN_BOOL                  //bool
 	TOKEN_BYTE                  //byte
 	TOKEN_INT                   //int
 	TOKEN_FLOAT                 //float
 	TOKEN_STRING                //string
 	TOKEN_IDENTIFIER            // identifier
+	TOKEN_LITERAL_BOOL          // true or false
+	TOKEN_LITERAL_BYTE          //'a'
 	TOKEN_LITERAL_INT           // 123
 	TOKEN_LITERAL_STRING        // ""
 	TOKEN_LITERAL_FLOAT         // 0.000

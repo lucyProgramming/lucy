@@ -31,7 +31,6 @@ const (
 	EXPRESSION_TYPE_INDEX
 	EXPRESSION_TYPE_METHOD_CALL
 	EXPRESSION_TYPE_FUNCTION_CALL
-	EXPRESSION_TYPE_EXPRESSION_FUNCTION_CALL
 	EXPRESSION_TYPE_INCREMENT
 	EXPRESSION_TYPE_PRE_INCREMENT
 	EXPRESSION_TYPE_PRE_DECREMENT
@@ -41,7 +40,6 @@ const (
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_NEW
-	EXPRESSION_TYPE_CLASS
 )
 
 type Expression struct {
@@ -65,6 +63,10 @@ type ExpressionFunctionCall struct {
 type ExpressionMethodCall struct {
 	ClassName string
 	ExpressionFunctionCall
+}
+type ExpressionBinary struct {
+	Left  *Expression
+	Right *Expression
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

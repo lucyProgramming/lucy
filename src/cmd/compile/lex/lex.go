@@ -87,7 +87,7 @@ func init() {
 	lexer.Add([]byte("true"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_TRUE
+		t.Type = TOKEN_BOOL
 		t.Desp = "true"
 		t.Data = true
 		return t, nil
@@ -95,7 +95,7 @@ func init() {
 	lexer.Add([]byte("false"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_FALSE
+		t.Type = TOKEN_BOOL
 		t.Desp = "true"
 		t.Data = false
 		return t, nil
@@ -530,7 +530,7 @@ func init() {
 	lexer.Add([]byte(`(\'[.|\n]\')`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_BYTE
+		t.Type = TOKEN_LITERAL_BYTE
 		t.Desp = string(match.Bytes)
 		t.Data = match.Bytes[1]
 		return t, nil

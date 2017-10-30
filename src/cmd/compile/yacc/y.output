@@ -3,7 +3,7 @@ state 0
 	$accept: .top $end 
 	top: .    (1)
 
-	.  reduce 1 (src line 48)
+	.  reduce 1 (src line 36)
 
 	top  goto 1
 
@@ -14,7 +14,7 @@ state 1
 	.  error
 
 
-69 terminals, 2 nonterminals
+70 terminals, 2 nonterminals
 2 grammar rules, 2/8000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 51 working sets used

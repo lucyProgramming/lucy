@@ -1,162 +1,160 @@
-
-//line lucy.y:13
-
+//line lucy.y:2
 package yacc
+
 import __yyfmt__ "fmt"
-//line lucy.y:14
-		
+
+//line lucy.y:3
 import (
 	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"math/big"
-    "github.com/756445638/lucy/src/cmd/compile/lex"
 )
 
-
-//line lucy.y:37
+//line lucy.y:27
 type lucySymType struct {
-	yys int
-    boolvalue bool
-
-
+	yys        int
+	expression *ast.Expression
 }
 
-const lex.TOKEN_FUNCTION = 57346
-const lex.TOKEN_CONST = 57347
-const lex.TOKEN_IF = 57348
-const lex.TOKEN_ELSEIF = 57349
-const lex.TOKEN_ELSE = 57350
-const lex.TOKEN_FOR = 57351
-const lex.TOKEN_BREAK = 57352
-const lex.TOKEN_CONTINUE = 57353
-const ex.TOKEN_RETURN = 57354
-const ex.TOKEN_NULL = 57355
-const lex.TOKEN_LP = 57356
-const lex.TOKEN_RP = 57357
-const lex.TOKEN_LC = 57358
-const lex.TOKEN_RC = 57359
-const lex.TOKEN_LB = 57360
-const lex.TOKEN_RB = 57361
-const lex.TOKEN_SEMICOLON = 57362
-const lex.TOKEN_COMMA = 57363
-const lex.TOKEN_LOGICAL_AND = 57364
-const lex.TOKEN_LOGICAL_OR = 57365
-const lex.TOKEN_AND = 57366
-const lex.TOKEN_OR = 57367
-const lex.TOKEN_ASSIGN = 57368
-const lex.TOKEN_EQUAL = 57369
-const lex.TOKEN_NE = 57370
-const lex.TOKEN_GT = 57371
-const lex.TOKEN_GE = 57372
-const lex.TOKEN_LT = 57373
-const lex.TOKEN_LE = 57374
-const lex.TOKEN_ADD = 57375
-const lex.TOKEN_SUB = 57376
-const lex.TOKEN_MUL = 57377
-const lex.TOKEN_DIV = 57378
-const lex.TOKEN_MOD = 57379
-const lex.TOKEN_INCREMENT = 57380
-const lex.TOKEN_DECREMENT = 57381
-const lex.TOKEN_DOT = 57382
-const lex.TOKEN_VAR = 57383
-const lex.TOKEN_NEW = 57384
-const lex.TOKEN_COLON = 57385
-const lex.TOKEN_PLUS_ASSIGN = 57386
-const lex.TOKEN_MINUS_ASSIGN = 57387
-const lex.TOKEN_MUL_ASSIGN = 57388
-const lex.TOKEN_DIV_ASSIGN = 57389
-const lex.TOKEN_MOD_ASSIGN = 57390
-const lex.TOKEN_NOT = 57391
-const lex.TOKEN_SWITCH = 57392
-const lex.TOKEN_CASE = 57393
-const lex.TOKEN_DEFAULT = 57394
-const lex.TOKEN_CRLF = 57395
-const lex.TOKEN_PACKAGE = 57396
-const lex.TOKEN_CLASS = 57397
-const lex.TOKEN_PUBLIC = 57398
-const lex.TOKEN_PROTECTED = 57399
-const lex.TOKEN_PRIVATE = 57400
-const lex.TOKEN_BOOL = 57401
-const lex.TOKEN_BYTE = 57402
-const lex.TOKEN_INT = 57403
-const lex.TOKEN_FLOAT = 57404
-const lex.TOKEN_STRING = 57405
-const lex.TOKEN_IDENTIFIER = 57406
-const lex.TOKEN_LITERAL_INT = 57407
-const lex.TOKEN_LITERAL_STRING = 57408
-const lex.TOKEN_LITERAL_FLOAT = 57409
-const lex.TOKEN_TRUE = 57410
-const lex.TOKEN_FALSE = 57411
+const TOKEN_FUNCTION = 57346
+const TOKEN_CONST = 57347
+const TOKEN_IF = 57348
+const TOKEN_ELSEIF = 57349
+const TOKEN_ELSE = 57350
+const TOKEN_FOR = 57351
+const TOKEN_BREAK = 57352
+const TOKEN_CONTINUE = 57353
+const TOKEN_RETURN = 57354
+const TOKEN_NULL = 57355
+const TOKEN_LP = 57356
+const TOKEN_RP = 57357
+const TOKEN_LC = 57358
+const TOKEN_RC = 57359
+const TOKEN_LB = 57360
+const TOKEN_RB = 57361
+const TOKEN_SEMICOLON = 57362
+const TOKEN_COMMA = 57363
+const TOKEN_LOGICAL_AND = 57364
+const TOKEN_LOGICAL_OR = 57365
+const TOKEN_AND = 57366
+const TOKEN_OR = 57367
+const TOKEN_ASSIGN = 57368
+const TOKEN_EQUAL = 57369
+const TOKEN_NE = 57370
+const TOKEN_GT = 57371
+const TOKEN_GE = 57372
+const TOKEN_LT = 57373
+const TOKEN_LE = 57374
+const TOKEN_ADD = 57375
+const TOKEN_SUB = 57376
+const TOKEN_MUL = 57377
+const TOKEN_DIV = 57378
+const TOKEN_MOD = 57379
+const TOKEN_INCREMENT = 57380
+const TOKEN_DECREMENT = 57381
+const TOKEN_DOT = 57382
+const TOKEN_VAR = 57383
+const TOKEN_NEW = 57384
+const TOKEN_COLON = 57385
+const TOKEN_PLUS_ASSIGN = 57386
+const TOKEN_MINUS_ASSIGN = 57387
+const TOKEN_MUL_ASSIGN = 57388
+const TOKEN_DIV_ASSIGN = 57389
+const TOKEN_MOD_ASSIGN = 57390
+const TOKEN_NOT = 57391
+const TOKEN_SWITCH = 57392
+const TOKEN_CASE = 57393
+const TOKEN_DEFAULT = 57394
+const TOKEN_PACKAGE = 57395
+const TOKEN_CLASS = 57396
+const TOKEN_PUBLIC = 57397
+const TOKEN_PROTECTED = 57398
+const TOKEN_PRIVATE = 57399
+const TOKEN_BOOL = 57400
+const TOKEN_BYTE = 57401
+const TOKEN_INT = 57402
+const TOKEN_FLOAT = 57403
+const TOKEN_STRING = 57404
+const TOKEN_IDENTIFIER = 57405
+const TOKEN_LITERAL_INT = 57406
+const TOKEN_LITERAL_STRING = 57407
+const TOKEN_LITERAL_FLOAT = 57408
+const TOKEN_IMPORT = 57409
+const TOKEN_COLON_ASSIGN = 57410
+const TOKEN_TRUE = 57411
+const TOKEN_FALSE = 57412
 
 var lucyToknames = [...]string{
 	"$end",
 	"error",
 	"$unk",
-	"lex.TOKEN_FUNCTION",
-	"lex.TOKEN_CONST",
-	"lex.TOKEN_IF",
-	"lex.TOKEN_ELSEIF",
-	"lex.TOKEN_ELSE",
-	"lex.TOKEN_FOR",
-	"lex.TOKEN_BREAK",
-	"lex.TOKEN_CONTINUE",
-	"ex.TOKEN_RETURN",
-	"ex.TOKEN_NULL",
-	"lex.TOKEN_LP",
-	"lex.TOKEN_RP",
-	"lex.TOKEN_LC",
-	"lex.TOKEN_RC",
-	"lex.TOKEN_LB",
-	"lex.TOKEN_RB",
-	"lex.TOKEN_SEMICOLON",
-	"lex.TOKEN_COMMA",
-	"lex.TOKEN_LOGICAL_AND",
-	"lex.TOKEN_LOGICAL_OR",
-	"lex.TOKEN_AND",
-	"lex.TOKEN_OR",
-	"lex.TOKEN_ASSIGN",
-	"lex.TOKEN_EQUAL",
-	"lex.TOKEN_NE",
-	"lex.TOKEN_GT",
-	"lex.TOKEN_GE",
-	"lex.TOKEN_LT",
-	"lex.TOKEN_LE",
-	"lex.TOKEN_ADD",
-	"lex.TOKEN_SUB",
-	"lex.TOKEN_MUL",
-	"lex.TOKEN_DIV",
-	"lex.TOKEN_MOD",
-	"lex.TOKEN_INCREMENT",
-	"lex.TOKEN_DECREMENT",
-	"lex.TOKEN_DOT",
-	"lex.TOKEN_VAR",
-	"lex.TOKEN_NEW",
-	"lex.TOKEN_COLON",
-	"lex.TOKEN_PLUS_ASSIGN",
-	"lex.TOKEN_MINUS_ASSIGN",
-	"lex.TOKEN_MUL_ASSIGN",
-	"lex.TOKEN_DIV_ASSIGN",
-	"lex.TOKEN_MOD_ASSIGN",
-	"lex.TOKEN_NOT",
-	"lex.TOKEN_SWITCH",
-	"lex.TOKEN_CASE",
-	"lex.TOKEN_DEFAULT",
-	"lex.TOKEN_CRLF",
-	"lex.TOKEN_PACKAGE",
-	"lex.TOKEN_CLASS",
-	"lex.TOKEN_PUBLIC",
-	"lex.TOKEN_PROTECTED",
-	"lex.TOKEN_PRIVATE",
-	"lex.TOKEN_BOOL",
-	"lex.TOKEN_BYTE",
-	"lex.TOKEN_INT",
-	"lex.TOKEN_FLOAT",
-	"lex.TOKEN_STRING",
-	"lex.TOKEN_IDENTIFIER",
-	"lex.TOKEN_LITERAL_INT",
-	"lex.TOKEN_LITERAL_STRING",
-	"lex.TOKEN_LITERAL_FLOAT",
-	"lex.TOKEN_TRUE",
-	"lex.TOKEN_FALSE",
+	"TOKEN_FUNCTION",
+	"TOKEN_CONST",
+	"TOKEN_IF",
+	"TOKEN_ELSEIF",
+	"TOKEN_ELSE",
+	"TOKEN_FOR",
+	"TOKEN_BREAK",
+	"TOKEN_CONTINUE",
+	"TOKEN_RETURN",
+	"TOKEN_NULL",
+	"TOKEN_LP",
+	"TOKEN_RP",
+	"TOKEN_LC",
+	"TOKEN_RC",
+	"TOKEN_LB",
+	"TOKEN_RB",
+	"TOKEN_SEMICOLON",
+	"TOKEN_COMMA",
+	"TOKEN_LOGICAL_AND",
+	"TOKEN_LOGICAL_OR",
+	"TOKEN_AND",
+	"TOKEN_OR",
+	"TOKEN_ASSIGN",
+	"TOKEN_EQUAL",
+	"TOKEN_NE",
+	"TOKEN_GT",
+	"TOKEN_GE",
+	"TOKEN_LT",
+	"TOKEN_LE",
+	"TOKEN_ADD",
+	"TOKEN_SUB",
+	"TOKEN_MUL",
+	"TOKEN_DIV",
+	"TOKEN_MOD",
+	"TOKEN_INCREMENT",
+	"TOKEN_DECREMENT",
+	"TOKEN_DOT",
+	"TOKEN_VAR",
+	"TOKEN_NEW",
+	"TOKEN_COLON",
+	"TOKEN_PLUS_ASSIGN",
+	"TOKEN_MINUS_ASSIGN",
+	"TOKEN_MUL_ASSIGN",
+	"TOKEN_DIV_ASSIGN",
+	"TOKEN_MOD_ASSIGN",
+	"TOKEN_NOT",
+	"TOKEN_SWITCH",
+	"TOKEN_CASE",
+	"TOKEN_DEFAULT",
+	"TOKEN_PACKAGE",
+	"TOKEN_CLASS",
+	"TOKEN_PUBLIC",
+	"TOKEN_PROTECTED",
+	"TOKEN_PRIVATE",
+	"TOKEN_BOOL",
+	"TOKEN_BYTE",
+	"TOKEN_INT",
+	"TOKEN_FLOAT",
+	"TOKEN_STRING",
+	"TOKEN_IDENTIFIER",
+	"TOKEN_LITERAL_INT",
+	"TOKEN_LITERAL_STRING",
+	"TOKEN_LITERAL_FLOAT",
+	"TOKEN_IMPORT",
+	"TOKEN_COLON_ASSIGN",
+	"TOKEN_TRUE",
+	"TOKEN_FALSE",
 }
 var lucyStatenames = [...]string{}
 
@@ -164,8 +162,7 @@ const lucyEofCode = 1
 const lucyErrCode = 2
 const lucyInitialStackSize = 16
 
-//line lucy.y:55
-
+//line lucy.y:43
 //line yacctab:1
 var lucyExca = [...]int{
 	-1, 1,
@@ -217,7 +214,7 @@ var lucyTok2 = [...]int{
 	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
 	42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 	52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-	62, 63, 64, 65, 66, 67, 68, 69,
+	62, 63, 64, 65, 66, 67, 68, 69, 70,
 }
 var lucyTok3 = [...]int{
 	0,
@@ -227,8 +224,7 @@ var lucyErrorMessages = [...]struct {
 	state int
 	token int
 	msg   string
-}{
-}
+}{}
 
 //line yaccpar:1
 

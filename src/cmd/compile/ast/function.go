@@ -1,11 +1,11 @@
 package ast
 
 type Function struct {
-	Typ  FunctionType
-	Name string
+	Typ   FunctionType
+	Name  string
+	Block *Block
 }
 type FunctionType struct {
-	Block      *Block
 	Parameters ParameterList
 	Returns    ReturnList
 }
