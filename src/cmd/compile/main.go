@@ -1,16 +1,10 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
-	"flag"
-	"io"
-	"log"
-	"os"
+	"github.com/756445638/lucy/src/cmd/compile/lc"
 )
 
 func main() {
 	flag.Parse()
-	files := flag.Args()
-
+	lc.Compile(flag.Args())
 }

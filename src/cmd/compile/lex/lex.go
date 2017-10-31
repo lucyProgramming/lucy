@@ -21,6 +21,7 @@ func init() {
 		t.Desp = "enum"
 		return t, nil
 	})
+
 	lexer.Add([]byte("const"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -397,6 +398,21 @@ func init() {
 		t.Desp = "import"
 		return t, nil
 	})
+	lexer.Add([]byte("as"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_AS
+		t.Desp = "as"
+		return t, nil
+	})
+	lexer.Add([]byte("include"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_INCLUED
+		t.Desp = "include"
+		return t, nil
+	})
+
 	lexer.Add([]byte("class"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -564,5 +580,4 @@ func init() {
 		t.Desp = "throw"
 		return t, nil
 	})
-
 }

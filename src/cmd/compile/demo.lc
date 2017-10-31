@@ -1,0 +1,41 @@
+package test
+
+
+//111
+
+
+public const NAME="123";
+const age = 345;
+
+global{
+    g_a = 123;
+}
+
+public global xxx = "112";
+
+c := 100;
+
+
+func(x int)Add(a int,b int){
+    return a +b + c;
+}
+
+
+Class Person{
+    public Person(){
+        var abc int;
+        f = fun(){
+            printf(abc);
+        }
+        f();
+    }
+}
+
+
+
+
+
+
+
+
+

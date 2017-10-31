@@ -1,13 +1,13 @@
 package ast
 
-type Variable struct {
+type GlobalVariable struct {
+	Pos  Pos
 	Name string
 	Init *Expression
 }
-type VariableList []*Variable
 
 type Const struct {
+	Pos  Pos
 	Name string
 	Init *Expression
 }
-type ConstList []*Const

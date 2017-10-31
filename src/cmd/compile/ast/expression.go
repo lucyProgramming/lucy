@@ -1,7 +1,12 @@
 package ast
 
+import (
+	"errors"
+)
+
 const (
 	EXPRESSION_TYPE_BOOL = iota
+	EXPRESSION_TYPE_BYTE
 	EXPRESSION_TYPE_INT
 	EXPRESSION_TYPE_FLOAT
 	EXPRESSION_TYPE_STRING
@@ -40,6 +45,7 @@ const (
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_NEW
+	EXPRESSION_TYPE_VAR
 )
 
 type Expression struct {
@@ -67,6 +73,22 @@ type ExpressionMethodCall struct {
 type ExpressionBinary struct {
 	Left  *Expression
 	Right *Expression
+}
+
+var (
+	ValueIsNotAConst = errors.New("value is not a const")
+)
+
+func (e *Expression) getConstValue() (Typ int, Value interface{}, err error) {
+	if e.Typ == EXPRESSION_TYPE_BOOL ||
+		e.Typ == EXPRESSION_TYPE_BYTE ||
+		e.Typ == EXPRESSION_TYPE_INT ||
+		e.Typ == EXPRESSION_TYPE_FLOAT ||
+		e.Typ == EXPRESSION_TYPE_STRING {
+		return e.Typ, e.Data, nil
+	}
+	return ValueIsNotAConst
+
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

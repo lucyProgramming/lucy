@@ -7,7 +7,7 @@ import (
 
 const (
 	TOKEN_FUNCTION       = iota // function
-	TOKEN_ENUM                  //
+	TOKEN_ENUM                  // enum
 	TOKEN_CONST                 //const
 	TOKEN_IF                    // if
 	TOKEN_ELSEIF                //elseif
@@ -60,6 +60,8 @@ const (
 	TOKEN_DEFAULT               //default
 	TOKEN_PACKAGE               //package
 	TOKEN_IMPORT                //import
+	TOKEN_AS                    //as
+	TOKEN_INCLUED               //include
 	TOKEN_CLASS                 //class
 	TOKEN_STATIC                //static
 	TOKEN_PUBLIC                //public

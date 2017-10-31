@@ -7,6 +7,8 @@ const (
 )
 
 type Class struct {
+	Pos         Pos
+	Name        string
 	Fields      []*ClassField
 	Methods     []*ClassMethod
 	Father      *Class

@@ -4,6 +4,7 @@ type Function struct {
 	Typ   FunctionType
 	Name  string
 	Block *Block
+	Pos   Pos
 }
 type FunctionType struct {
 	Parameters ParameterList
