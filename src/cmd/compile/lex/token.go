@@ -25,11 +25,14 @@ const (
 	TOKEN_LB                    //[
 	TOKEN_RB                    //]
 	TOKEN_SEMICOLON             // ;
+	TOKEN_CRLF                  // ;
 	TOKEN_COMMA                 //,
 	TOKEN_LOGICAL_AND           // &&
 	TOKEN_LOGICAL_OR            // ||
 	TOKEN_AND                   // &
 	TOKEN_OR                    // |
+	TOKEN_LEFT_SHIFT            // <<
+	TOKEN_RIGHT_SHIFT           // >>
 	TOKEN_ASSIGN                //=
 	TOKEN_EQUAL                 //== or ===
 	TOKEN_NE                    // !=

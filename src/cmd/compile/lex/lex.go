@@ -170,6 +170,21 @@ func init() {
 		t.Desp = "||"
 		return t, nil
 	})
+	lexer.Add([]byte("<<"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_LEFT_SHIFT
+		t.Desp = "<<"
+		return t, nil
+	})
+	lexer.Add([]byte(">>"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_RIGHT_SHIFT
+		t.Desp = "||"
+		return t, nil
+	})
+
 	lexer.Add([]byte(`(\&)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -374,6 +389,12 @@ func init() {
 		t.Desp = "default"
 		return t, nil
 	})
+	lexer.Add([]byte("\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_CRLF
+		return t, nil
+	})
 	lexer.Add([]byte("( |\t|\n)"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
 	})
@@ -563,7 +584,7 @@ func init() {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_CATCH
-		t.Desp = "try"
+		t.Desp = "catch"
 		return t, nil
 	})
 	lexer.Add([]byte("finally"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {

@@ -5,4 +5,5 @@ type Node struct {
 	Pos  Pos
 	Data interface{} //class defination or varialbe Defination
 }
-type Tops []*Node //语法树顶层结构
+
+//type Tops []*Node //语法树顶层结构

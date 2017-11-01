@@ -46,7 +46,17 @@ var (
 		b + 0.000000000
 		b + +1e5
 	}
-	;;;;100;
+	{
+		try{
+			fsfds();
+		}catch(e Exception){
+
+		}finnaly{
+
+		}
+	}
+
+
 
 	`
 )

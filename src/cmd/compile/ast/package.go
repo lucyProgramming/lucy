@@ -63,8 +63,8 @@ func (p *PackageNameNotConsistentError) Error() string {
 	return ""
 }
 
-func (c *ConvertTops2Package) ConvertTops2Package(t Tops) (p *Package, errs []error) {
-	p := &Package{}
+func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, errs []error) {
+	p = &Package{}
 	p.Files = make(map[string]*File)
 	c.Name = []string{}
 	c.Inits = []*Block{}
@@ -108,17 +108,24 @@ func (c *ConvertTops2Package) ConvertTops2Package(t Tops) (p *Package, errs []er
 			}
 		case *Const:
 			t := v.Data.(*Const)
-			if c.Enums[t.Name] == nil {
-				c.Consts[t.Name] = []*GlobalVariable{t}
+			if c.Consts[t.Name] == nil {
+				c.Consts[t.Name] = []*Const{t}
 			} else {
-				c.Consts[t.Name] = append(c.Vars[t.Name], t)
+				c.Consts[t.Name] = append(c.Consts[t.Name], t)
 			}
 		case *Imports:
 			i := v.Data.(*Imports)
 			if p.Files[i.Pos.Filename] == nil {
 				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Imports)}
 			}
-			p.Files[i.Pos.Filename][i.Name] = i
+
+			if p.Files[i.Pos.Filename] == nil {
+				p.Files[i.Pos.Filename] = &File{}
+			}
+			if p.Files[i.Pos.Filename].Imports == nil {
+				p.Files[i.Pos.Filename].Imports = make(map[string]*Imports)
+			}
+			p.Files[i.Pos.Filename].Imports[i.Name] = i
 		case *PackageNameDeclare:
 			t := v.Data.(*PackageNameDeclare)
 			if p.Files[t.Pos.Filename] == nil {
@@ -134,13 +141,13 @@ func (c *ConvertTops2Package) ConvertTops2Package(t Tops) (p *Package, errs []er
 		m := make(map[string][]*PackageNameDeclare)
 		for _, v := range p.Files {
 			if m[v.Package.Name] == nil {
-				m[v.Package.Name] = []*PackageNameDeclare{v}
+				m[v.Package.Name] = []*PackageNameDeclare{v.Package}
 			}
 		}
 		if len(m) > 0 {
 			t := []*PackageNameDeclare{}
 			for _, v := range m {
-				t = append(t, v)
+				t = append(t, v...)
 			}
 			errs = append(errs, &PackageNameNotConsistentError{t})
 		}
@@ -221,11 +228,11 @@ func (p *Package) TypeCheck() []error {
 	if len(errs) > 10 {
 		return errs
 	}
-
+	return errs
 }
 
 func (p *Package) checkConst() []error {
-	for _, v := range p.Consts {
-		v.Init.Typ
-	}
+	//	for _, v := range p.Consts {
+	//	}
+	return nil
 }

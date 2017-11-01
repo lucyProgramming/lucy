@@ -1,5 +1,5 @@
 package ast
 
 var (
-	Tops = make(Tops, 0)
+	Tops = make([]*Node, 0)
 )
