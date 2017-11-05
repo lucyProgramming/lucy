@@ -67,7 +67,7 @@ type Expression struct {
 	Data interface{} //
 }
 
-type ExpressionUnary Expression
+//type ExpressionUnary Expression
 
 type ExpressionFunctionCall struct {
 	Name string //function name
@@ -161,7 +161,7 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) interf
 }
 
 func float32IsZero(f float32) bool {
-	return f < small_float && f > (-small_float)
+	return float64(f) < small_float && float64(f) > (-small_float)
 }
 func float64IsZero(f float64) bool {
 	return f < small_float && f > (-small_float)
@@ -286,19 +286,15 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				case EXPRESSION_TYPE_MUL:
 					Value = value1.(float64) * value2.(float64)
 				case EXPRESSION_TYPE_DIV:
-					if float64IsZero(value2.(float64)) == 0 {
+					if float64IsZero(value2.(float64)) {
 						is = false
 						err = fmt.Errorf("dividend is 0")
 						return
 					}
 					Value = value1.(float64) / value2.(float64)
 				case EXPRESSION_TYPE_MOD:
-					if float64IsZero(value2.(float64)) == 0 {
-						is = false
-						err = fmt.Errorf("mod number is 0")
-						return
-					}
-					Value = value1.(float64) % value2.(float64)
+					is = false
+					err = fmt.Errorf("can`t not apply % on float")
 				}
 				return
 			}
@@ -320,9 +316,9 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			Typ = EXPRESSION_TYPE_INT
 			err = nil
 			if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
-				Value = value1.(int64) << value2.(int64)
+				Value = value1.(int64) << uint64(value2.(int64))
 			} else {
-				Value = value1.(int64) >> value2.(int64)
+				Value = value1.(int64) >> uint64(value2.(int64))
 			}
 			return
 		})
@@ -367,7 +363,8 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 		})
 	}
 	if e.Typ == EXPRESSION_TYPE_NOT {
-		is, Typ, Value, err = Expression(e.Data.(*ExpressionUnary)).getConstValue()
+		t := e.Data.(*Expression)
+		is, Typ, Value, err = t.getConstValue()
 		if err != nil {
 			return
 		}
@@ -390,21 +387,51 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				is = false
 				return
 			}
-			if typ1 == EXPRESSION_TYPE_BOOL && typ2 == EXPRESSION_TYPE_BOOL {
-				is = true
+			typ1, typ2, value1, value2 = e.typeWider(typ1, typ2, value1, value2)
+			is = true
+			switch typ1 {
+			case EXPRESSION_TYPE_BOOL:
 				Typ = EXPRESSION_TYPE_BOOL
-				if EXPRESSION_TYPE_EQ == e.Typ {
+				if e.Typ == EXPRESSION_TYPE_EQ {
 					Value = value1.(bool) == value2.(bool)
 				} else {
 					Value = value1.(bool) != value2.(bool)
 				}
+			case EXPRESSION_TYPE_BYTE:
+				Typ = EXPRESSION_TYPE_BYTE
+				if e.Typ == EXPRESSION_TYPE_EQ {
+					Value = value1.(byte) == value2.(byte)
+				} else {
+					Value = value1.(byte) != value2.(byte)
+				}
+			case EXPRESSION_TYPE_INT:
+				Typ = EXPRESSION_TYPE_INT
+				if e.Typ == EXPRESSION_TYPE_EQ {
+					Value = value1.(int64) == value2.(int64)
+				} else {
+					Value = value1.(int64) != value2.(int64)
+				}
+			case EXPRESSION_TYPE_FLOAT:
+				Typ = EXPRESSION_TYPE_FLOAT
+				if e.Typ == EXPRESSION_TYPE_EQ {
+					Value = value1.(float64) == value2.(float64)
+				} else {
+					Value = value1.(float64) != value2.(float64)
+				}
+			case EXPRESSION_TYPE_STRING:
+				Typ = EXPRESSION_TYPE_STRING
+				if e.Typ == EXPRESSION_TYPE_EQ {
+					Value = value1.(string) == value2.(string)
+				} else {
+					Value = value1.(string) != value2.(string)
+				}
+			default:
+				is = false
+				return
 			}
-
 			return
 		})
-
 	}
-
 	is = false
 	return
 }

@@ -1,7 +1,7 @@
 package ast
 
 /*
-	enum Day{
+	enum {
 		Mondy = 1,
 		Tuesday
 	}
