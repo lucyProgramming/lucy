@@ -15,8 +15,9 @@ type EnumNames struct {
 }
 
 type Enum struct {
+	Name  string
 	Pos   Pos
-	Names []*EnumNames //anoth form of const
-	Init  *Expression  //should be a int expression
+	Names []*EnumNames
+	Init  *Expression //should be a int expression
 	Value int64
 }

@@ -115,10 +115,6 @@ type ExpressionBinary struct {
 	Right *Expression
 }
 
-//var (
-//	ValueIsNotAConst = errors.New("value is not a const")
-//)
-
 func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {
 	is1, typ1, value1, err1 = binary.Left.getConstValue()
 	is2, typ2, value2, err2 = binary.Right.getConstValue()
@@ -311,6 +307,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			return
 		})
 	}
+
 	// + - * / % algebra arithmetic
 	if e.Typ == EXPRESSION_TYPE_ADD ||
 		e.Typ == EXPRESSION_TYPE_SUB ||

@@ -1,19 +1,20 @@
 package ast
 
 import (
-	"errors"
 	"fmt"
 )
 
 type Package struct {
-	Files   map[string]*File
-	Name    string //if error,should be multi names
-	Inits   []*Block
-	Funcs   map[string]*Function
-	Classes map[string]*Class
-	Enums   []*Enum
-	Vars    map[string]*GlobalVariable
-	Consts  map[string]*Const
+	Files     map[string]*File
+	Name      string //if error,should be multi names
+	Blocks    []*Block
+	Funcs     map[string]*Function
+	Classes   map[string]*Class
+	Enums     map[string]*Enum
+	EnumNames map[string]*EnumNames
+	Vars      map[string]*GlobalVariable
+	Consts    map[string]*Const
+	NErros    int // number of errors should stop compile
 }
 
 //different for other file
@@ -59,53 +60,4 @@ func (p *PackageNameNotConsistentError) Error() string {
 		s += fmt.Sprintf("\tnamed by %s %s %d:%d\n", v.Name, v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn)
 	}
 	return s
-}
-
-func (p *Package) TypeCheck() []error {
-	//name conflict,such as function name and class names
-	errs := []error{}
-	errs = append(errs, p.checkConst()...)
-	if len(errs) > 10 {
-		return errs
-	}
-	return errs
-}
-
-func (p *Package) checkConst() []error {
-	errs := make([]error, 0)
-	var err error
-	for _, v := range p.Consts {
-		if v.Init == nil && v.Typ == nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d %s is has no type and no init value",v.Pos.Filename,v.Pos.StartLine,v.Pos.StartColumn,v.Name))
-		}
-		if v.Init != nil{
-			is, t, value, err := v.Init.getConstValue()
-			if err != nil {
-				errs = append(errs, err)
-				continue
-			}
-			if is == false {
-				errs = append(errs, fmt.Errorf("%s %d:%d %s is not a const value",v.Pos.Filename,v.Pos.StartLine,v.Pos.StartColumn,v.Name))
-				continue
-			}
-			//rewrite
-			v.Init = &Expression{}
-			v.Init.Typ = t
-			v.Init.Data = value
-		}
-		if v.Typ != nil  && v.Init != nil {
-			v.Data,err = v.Typ.assignExpression(v.Init)
-			if err != nil {
-
-			}
-		}
-	}
-	return errs
-}
-func (p *Package) checkGlobalVariables() []error {
-	errs := make([]error, 0)
-	for _, v := range p.Vars {
-
-	}
-	return errs
 }

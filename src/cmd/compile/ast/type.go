@@ -1,9 +1,9 @@
 package ast
 
-
-import(
+import (
 	"fmt"
 )
+
 const (
 	VARIABLE_TYPE_BOOL = iota
 	VARIABLE_TYPE_BYTE
@@ -20,49 +20,59 @@ type AccessProperty struct {
 	Access int // public private or protected
 }
 
-
 type VariableType struct {
 	Typ             int
-	Name            string // class name or function name
+	Name            string // class name or function name or enum name
 	CombinationType *CombinationType
 }
 
-func(t *VariableType)assignExpression(e *Expression)(data interface{},err error){
-	switch t.Typ  {
+//assign some simple expression
+func (t *VariableType) assignExpression(p *Package, e *Expression) (data interface{}, err error) {
+	switch t.Typ {
 	case VARIABLE_TYPE_BOOL:
-		if e.Typ == EXPRESSION_TYPE_BOOL{
+		if e.Typ == EXPRESSION_TYPE_BOOL {
 			data = e.Data.(bool)
 			return
 		}
+	case VARIALBE_TYPE_ENUM:
+		if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
+			if _, ok := p.EnumNames[e.Data.(string)]; ok {
+				data = p.EnumNames[e.Data.(string)]
+			}
+		}
 	case VARIABLE_TYPE_BYTE:
-		if e.Typ == EXPRESSION_TYPE_BYTE{
+		if e.Typ == EXPRESSION_TYPE_BYTE {
 			data = e.Data.(byte)
 			return
 		}
 	case VARIABLE_TYPE_INT:
-		if e.Typ == EXPRESSION_TYPE_BYTE{
+		if e.Typ == EXPRESSION_TYPE_BYTE {
 			data = int64(e.Data.(byte))
 			return
-		}else if e.Typ == EXPRESSION_TYPE_INT{
+		} else if e.Typ == EXPRESSION_TYPE_INT {
 			data = e.Data.(int64)
 			return
 		}
 	case VARIABLE_TYPE_FLOAT:
-		if e.Typ == EXPRESSION_TYPE_BYTE{
+		if e.Typ == EXPRESSION_TYPE_BYTE {
 			data = int64(e.Data.(byte))
 			return
-		}else if e.Typ == EXPRESSION_TYPE_INT{
+		} else if e.Typ == EXPRESSION_TYPE_INT {
 			data = e.Data.(int64)
 			return
-		}else if EXPRESSION_TYPE_FLOAT == e.Typ{
+		} else if EXPRESSION_TYPE_FLOAT == e.Typ {
 			data = e.Data.(float64)
+			return
+		}
+	case VARIABLE_TYPE_STRING:
+		if e.Typ == EXPRESSION_TYPE_STRING {
+			data = e.Data.(string)
 			return
 		}
 	}
 	err = fmt.Errorf("can`t covert type accroding to type")
 	return
 }
-
 
 const (
 	COMBINATION_TYPE_ARRAY = iota

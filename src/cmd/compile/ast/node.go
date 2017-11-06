@@ -12,7 +12,7 @@ type Node struct {
 
 type ConvertTops2Package struct {
 	Name    []string //package name
-	Inits   []*Block
+	Blocks  []*Block
 	Funcs   []*Function
 	Classes []*Class
 	Enums   []*Enum
@@ -26,6 +26,11 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	m := make(map[string][]interface{})
 	//eums
 	for _, v := range p.Enums {
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
+		} else {
+			m[v.Name] = []interface{}{vv}
+		}
 		for _, vv := range v.Names {
 			if _, ok := m[vv.Name]; ok {
 				m[vv.Name] = append(m[vv.Name], vv)
@@ -42,7 +47,6 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 			m[v.Name] = []interface{}{v}
 		}
 	}
-
 	//vars
 	for _, v := range p.Vars {
 		if _, ok := m[v.Name]; ok {
@@ -51,7 +55,6 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 			m[v.Name] = []interface{}{v}
 		}
 	}
-
 	//funcs
 	for _, v := range p.Funcs {
 		if _, ok := m[v.Name]; ok {
@@ -131,7 +134,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	p = &Package{}
 	p.Files = make(map[string]*File)
 	c.Name = []string{}
-	c.Inits = []*Block{}
+	c.Blocks = []*Block{}
 	c.Funcs = make([]*Function, 0)
 	c.Classes = make([]*Class, 0)
 	c.Enums = make([]*Enum, 0)
@@ -141,7 +144,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	for _, v := range t {
 		switch v.Data.(type) {
 		case *Block:
-			c.Inits = append(c.Inits, v.Data.(*Block))
+			c.Blocks = append(c.Blocks, v.Data.(*Block))
 		case *Function:
 			t := v.Data.(*Function)
 			c.Funcs = append(c.Funcs, t)
@@ -161,12 +164,6 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 			i := v.Data.(*Imports)
 			if p.Files[i.Pos.Filename] == nil {
 				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Imports)}
-			}
-			if p.Files[i.Pos.Filename] == nil {
-				p.Files[i.Pos.Filename] = &File{}
-			}
-			if p.Files[i.Pos.Filename].Imports == nil {
-				p.Files[i.Pos.Filename].Imports = make(map[string]*Imports)
 			}
 			p.Files[i.Pos.Filename].Imports[i.Name] = i
 		case *PackageNameDeclare:
@@ -197,19 +194,30 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	}
 	errs = append(errs, c.checkEnum()...)
 	redeclareErrors = c.redeclareErrors()
-	p.Enums = c.Enums
+	p.Consts = make(map[string]*Const)
 	for _, v := range c.Consts {
 		p.Consts[v.Name] = v
 	}
+	p.Vars = make(map[string]*GlobalVariable)
 	for _, v := range c.Vars {
 		p.Vars[v.Name] = v
 	}
+	p.Funcs = make(map[string]*Function)
 	for _, v := range c.Funcs {
 		p.Funcs[v.Name] = v
 	}
+	p.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {
 		p.Classes[v.Name] = v
 	}
-	p.Inits = c.Inits
+	p.Enums = make(map[string]*Enum)
+	p.EnumNames = make(map[string]*EnumNames)
+	for _, v := range c.Enums {
+		p.Enums[v.Name] = v
+		for _, vv := range v.Names {
+			p.EnumNames[vv.Name] = vv
+		}
+	}
+	p.Blocks = c.Blocks
 	return
 }
