@@ -6,9 +6,17 @@ package ast
 		Tuesday
 	}
 */
+
+type EnumNames struct {
+	Enum  *Enum
+	Name  string
+	Pos   Pos
+	Value int64
+}
+
 type Enum struct {
 	Pos   Pos
-	Name  string
-	Names []string
-	Init  *Expression //should be a int expression
+	Names []*EnumNames //anoth form of const
+	Init  *Expression  //should be a int expression
+	Value int64
 }

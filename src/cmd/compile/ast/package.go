@@ -10,9 +10,114 @@ type Package struct {
 	Inits   []*Block
 	Funcs   map[string]*Function
 	Classes map[string]*Class
-	Enums   map[string]*Enum
+	Enums   []*Enum
 	Vars    map[string]*GlobalVariable
 	Consts  map[string]*Const
+}
+
+func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
+	ret := []*RedeclareError{}
+	m := make(map[string][]interface{})
+	//eums
+	for _, v := range p.Enums {
+		for _, vv := range v.Names {
+			if _, ok := m[vv.Name]; ok {
+				m[vv.Name] = append(m[vv.Name], vv)
+			} else {
+				m[vv.Name] = []interface{}{vv}
+			}
+		}
+	}
+	//const
+	for _, v := range p.Consts {
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
+		} else {
+			m[v.Name] = []interface{}{v}
+		}
+	}
+
+	//vars
+	for _, v := range p.Vars {
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
+		} else {
+			m[v.Name] = []interface{}{v}
+		}
+	}
+
+	//funcs
+	for _, v := range p.Funcs {
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
+		} else {
+			m[v.Name] = []interface{}{v}
+		}
+	}
+	//classes
+	for _, v := range p.Classes {
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
+		} else {
+			m[v.Name] = []interface{}{v}
+		}
+	}
+	for k, v := range m {
+		if len(v) == 1 { //very good
+			continue
+		}
+		r := &RedeclareError{}
+		r.Name = k
+		r.Pos = make([]*Pos, 0)
+		for _, vv := range v {
+			switch vv.(type) {
+			case *Const:
+				t := vv.(*Const)
+				r.Pos = append(r.Pos, &t.Pos)
+				r.Type = "const"
+			case *Enum:
+				t := vv.(*EnumNames)
+				r.Pos = append(r.Pos, &t.Pos)
+				r.Type = "enum"
+			case *GlobalVariable:
+				t := vv.(*GlobalVariable)
+				r.Name = t.Name
+				r.Pos = append(r.Pos, &t.Pos)
+				r.Type = "global varialbe"
+			case *Function:
+				t := vv.(*Function)
+				r.Pos = append(r.Pos, &t.Pos)
+				r.Type = "function"
+			case *Class:
+				t := vv.(*Class)
+				r.Pos = append(r.Pos, &t.Pos)
+				r.Type = "class"
+			default:
+				panic("make error")
+			}
+		}
+		ret = append(ret, r)
+	}
+	return ret
+}
+
+func (p *ConvertTops2Package) checkEnum() []error {
+	ret := make([]error, 0)
+	for _, v := range p.Enums {
+		if len(v.Names) == 0 {
+			continue
+		}
+		is, typ, value, err := v.Init.getConstValue()
+		if err != nil || is == false || typ != EXPRESSION_TYPE_INT {
+			ret = append(ret, fmt.Errorf("enum type must inited by integer"))
+			continue
+		}
+		v.Value = value.(int64)
+		for k, vv := range v.Names {
+			vv.Value = int64(k) + v.Value
+		}
+	}
+	return ret
 }
 
 //different for other file
@@ -25,6 +130,7 @@ type Imports struct {
 	Alias string
 	Pos   Pos
 }
+
 type PackageNameDeclare struct {
 	Name string
 	Pos  Pos
@@ -33,11 +139,11 @@ type PackageNameDeclare struct {
 type ConvertTops2Package struct {
 	Name    []string //package name
 	Inits   []*Block
-	Funcs   map[string][]*Function
-	Classes map[string][]*Class
-	Enums   map[string][]*Enum
-	Vars    map[string][]*GlobalVariable
-	Consts  map[string][]*Const
+	Funcs   []*Function
+	Classes []*Class
+	Enums   []*Enum
+	Vars    []*GlobalVariable
+	Consts  []*Const
 	Import  []*Imports
 }
 
@@ -60,19 +166,27 @@ type PackageNameNotConsistentError struct {
 }
 
 func (p *PackageNameNotConsistentError) Error() string {
-	return ""
+	if len(p.Names) == 0 {
+		panic("zero length")
+	}
+	s := fmt.Sprintf("package named not consistently")
+	for _, v := range p.Names {
+		s += fmt.Sprintf("\tnamed by %s %s %d:%d\n", v.Name, v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn)
+	}
+	return s
 }
 
-func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, errs []error) {
+func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redeclareErrors []*RedeclareError, errs []error) {
+	errs = make([]error, 0)
 	p = &Package{}
 	p.Files = make(map[string]*File)
 	c.Name = []string{}
 	c.Inits = []*Block{}
-	c.Funcs = make(map[string][]*Function)
-	c.Classes = make(map[string][]*Class)
-	c.Enums = make(map[string][]*Enum)
-	c.Vars = make(map[string][]*GlobalVariable)
-	c.Consts = make(map[string][]*Const)
+	c.Funcs = make([]*Function, 0)
+	c.Classes = make([]*Class, 0)
+	c.Enums = make([]*Enum, 0)
+	c.Vars = make([]*GlobalVariable, 0)
+	c.Consts = make([]*Const, 0)
 	//主要是检查重复申明
 	for _, v := range t {
 		switch v.Data.(type) {
@@ -80,39 +194,19 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, errs [
 			c.Inits = append(c.Inits, v.Data.(*Block))
 		case *Function:
 			t := v.Data.(*Function)
-			if c.Funcs[t.Name] == nil {
-				c.Funcs[t.Name] = []*Function{t}
-			} else {
-				c.Funcs[t.Name] = append(c.Funcs[t.Name], t)
-			}
-		case *Class:
-			t := v.Data.(*Class)
-			if c.Classes[t.Name] == nil {
-				c.Classes[t.Name] = []*Class{t}
-			} else {
-				c.Classes[t.Name] = append(c.Classes[t.Name], t)
-			}
+			c.Funcs = append(c.Funcs, t)
 		case *Enum:
 			t := v.Data.(*Enum)
-			if c.Enums[t.Name] == nil {
-				c.Enums[t.Name] = []*Enum{t}
-			} else {
-				c.Enums[t.Name] = append(c.Enums[t.Name], t)
-			}
+			c.Enums = append(c.Enums, t)
+		case *Class:
+			t := v.Data.(*Class)
+			c.Classes = append(c.Classes, t)
 		case *GlobalVariable:
 			t := v.Data.(*GlobalVariable)
-			if c.Enums[t.Name] == nil {
-				c.Vars[t.Name] = []*GlobalVariable{t}
-			} else {
-				c.Vars[t.Name] = append(c.Vars[t.Name], t)
-			}
+			c.Vars = append(c.Vars, t)
 		case *Const:
 			t := v.Data.(*Const)
-			if c.Consts[t.Name] == nil {
-				c.Consts[t.Name] = []*Const{t}
-			} else {
-				c.Consts[t.Name] = append(c.Consts[t.Name], t)
-			}
+			c.Consts = append(c.Consts, t)
 		case *Imports:
 			i := v.Data.(*Imports)
 			if p.Files[i.Pos.Filename] == nil {
@@ -152,77 +246,13 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, errs [
 			errs = append(errs, &PackageNameNotConsistentError{t})
 		}
 	}
-	//check redeclare error
-	for name, v := range c.Funcs {
-		if len(v) > 1 {
-			t := []*Pos{}
-			for _, vv := range v {
-				t = append(t, &vv.Pos)
-			}
-			errs = append(errs, &RedeclareError{
-				Name: name,
-				Type: "function",
-				Pos:  t,
-			})
-		}
-	}
-	//class redeclare
-	for name, v := range c.Classes {
-		if len(v) > 1 {
-			t := []*Pos{}
-			for _, vv := range v {
-				t = append(t, &vv.Pos)
-			}
-			errs = append(errs, &RedeclareError{
-				Name: name,
-				Type: "class",
-				Pos:  t,
-			})
-		}
-	}
-	for name, v := range c.Enums {
-		if len(v) > 1 {
-			t := []*Pos{}
-			for _, vv := range v {
-				t = append(t, &vv.Pos)
-			}
-			errs = append(errs, &RedeclareError{
-				Name: name,
-				Type: "enum",
-				Pos:  t,
-			})
-		}
-	}
-	for name, v := range c.Vars {
-		if len(v) > 1 {
-			t := []*Pos{}
-			for _, vv := range v {
-				t = append(t, &vv.Pos)
-			}
-			errs = append(errs, &RedeclareError{
-				Name: name,
-				Type: "variable",
-				Pos:  t,
-			})
-		}
-	}
-	for name, v := range c.Consts {
-		if len(v) > 1 {
-			t := []*Pos{}
-			for _, vv := range v {
-				t = append(t, &vv.Pos)
-			}
-			errs = append(errs, &RedeclareError{
-				Name: name,
-				Type: "const",
-				Pos:  t,
-			})
-		}
-	}
-	return p, nil
+	errs = append(errs, c.checkEnum()...)
+	redeclareErrors = c.redeclareErrors()
+	return
 }
 
 func (p *Package) TypeCheck() []error {
+	//name conflict,such as function name and class names
 	errs := []error{}
 	errs = append(errs, p.checkConst()...)
 	if len(errs) > 10 {
@@ -232,7 +262,8 @@ func (p *Package) TypeCheck() []error {
 }
 
 func (p *Package) checkConst() []error {
-	//	for _, v := range p.Consts {
-	//	}
+	for _, v := range p.Consts {
+		v.Init.getConstValue()
+	}
 	return nil
 }

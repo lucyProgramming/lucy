@@ -53,6 +53,39 @@ const (
 	EXPRESSION_TYPE_VAR
 )
 
+//receiver only one argument
+func (e *Expression) typeName(typ ...int) string {
+	t := e.Typ
+	if len(typ) > 0 {
+		t = typ[0]
+	}
+	switch t {
+	case EXPRESSION_TYPE_BOOL:
+		return "bool"
+	case EXPRESSION_TYPE_BYTE:
+		return "byte"
+	case EXPRESSION_TYPE_INT:
+		return "int"
+	case EXPRESSION_TYPE_FLOAT:
+		return "float"
+	case EXPRESSION_TYPE_STRING:
+		return "string"
+	case EXPRESSION_TYPE_EQ:
+		return "equal"
+	case EXPRESSION_TYPE_NE:
+		return "not equal"
+	case EXPRESSION_TYPE_GE:
+		return "greater than"
+	case EXPRESSION_TYPE_GT:
+		return "greater or equal"
+	case EXPRESSION_TYPE_LE:
+		return "less or equal"
+	case EXPRESSION_TYPE_LT:
+		return "less"
+	}
+	return ""
+}
+
 type Expression struct {
 	Typ int
 	/*
@@ -116,9 +149,9 @@ func (e *Expression) getBinaryExpressionConstValue(f getBinaryExpressionHandler)
 }
 
 //byte -> int
-func (e *Expression) typeWider(typ1, typ2 int, value1, value2 interface{}) (t1 int, t2 int, v1 interface{}, v2 interface{}) { //
+func (e *Expression) typeWider(typ1, typ2 int, value1, value2 interface{}) (t1 int, t2 int, v1 interface{}, v2 interface{}, err error) { //
 	if typ1 == typ2 {
-		return typ1, typ2, value1, value2
+		return typ1, typ2, value1, value2, nil
 	}
 	if typ1 > typ2 {
 		t1, t2 = typ1, typ1
@@ -127,37 +160,39 @@ func (e *Expression) typeWider(typ1, typ2 int, value1, value2 interface{}) (t1 i
 		t1, t2 = typ2, typ2
 	}
 	if t1 == typ1 { //typ1 has is wider
-		v2 = e.typeConvertor(typ1, typ2, value2)
+		v2, err = e.typeConvertor(typ1, typ2, value2)
 		v1 = value1
+
 	} else {
-		v1 = e.typeConvertor(typ2, typ1, value1)
+		v1, err = e.typeConvertor(typ2, typ1, value1)
 		v2 = value2
 	}
-	return
+	if err == nil {
+		return
+	}
+	return typ1, typ2, value1, value2, err
 }
 
-func (e *Expression) typeConvertor(target int, origin int, v interface{}) interface{} {
+func (e *Expression) typeConvertor(target int, origin int, v interface{}) (interface{}, error) {
 	if target == EXPRESSION_TYPE_INT {
 		switch origin {
 		case EXPRESSION_TYPE_BYTE:
-			return int64(v.(byte))
+			return int64(v.(byte)), nil
 		case EXPRESSION_TYPE_INT:
-			return v.(int64)
-		case EXPRESSION_TYPE_FLOAT:
-			panic("convert int to float")
+			return v.(int64), nil
 		}
 	}
 	if target == EXPRESSION_TYPE_FLOAT {
 		switch origin {
 		case EXPRESSION_TYPE_BYTE:
-			return int64(v.(byte))
+			return int64(v.(byte)), nil
 		case EXPRESSION_TYPE_INT:
-			return v.(int64)
+			return v.(int64), nil
 		case EXPRESSION_TYPE_FLOAT:
-			return v.(float64)
+			return v.(float64), nil
 		}
 	}
-	panic(fmt.Sprintf("targt[%d] origin[%d] not handled", target, origin))
+	return nil, fmt.Errorf("targt[%d] origin[%d] not handled", target, origin)
 }
 
 func float32IsZero(f float32) bool {
@@ -165,6 +200,85 @@ func float32IsZero(f float32) bool {
 }
 func float64IsZero(f float64) bool {
 	return f < small_float && f > (-small_float)
+}
+
+func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b bool, err error) {
+	er := fmt.Errorf("can`t compare")
+	switch typ {
+	case EXPRESSION_TYPE_BOOL:
+		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(bool) == value2.(bool)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(bool) != value2.(bool)
+		} else {
+			return false, er
+		}
+	case EXPRESSION_TYPE_BYTE:
+		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(byte) == value2.(byte)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(byte) != value2.(byte)
+		} else if e.Typ == EXPRESSION_TYPE_GT {
+			b = value1.(byte) > value2.(byte)
+		} else if e.Typ == EXPRESSION_TYPE_GE {
+			b = value1.(byte) >= value2.(byte)
+		} else if e.Typ == EXPRESSION_TYPE_LT {
+			b = value1.(byte) < value2.(byte)
+		} else if e.Typ == EXPRESSION_TYPE_LE {
+			b = value1.(byte) <= value2.(byte)
+		} else {
+			return false, er
+		}
+	case EXPRESSION_TYPE_INT:
+		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(int64) == value2.(int64)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(int64) != value2.(int64)
+		} else if e.Typ == EXPRESSION_TYPE_GT {
+			b = value1.(int64) > value2.(int64)
+		} else if e.Typ == EXPRESSION_TYPE_GE {
+			b = value1.(int64) >= value2.(int64)
+		} else if e.Typ == EXPRESSION_TYPE_LT {
+			b = value1.(int64) < value2.(int64)
+		} else if e.Typ == EXPRESSION_TYPE_LE {
+			b = value1.(int64) <= value2.(int64)
+		} else {
+			return false, er
+		}
+	case EXPRESSION_TYPE_FLOAT:
+		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(float64) == value2.(float64)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(float64) != value2.(float64)
+		} else if e.Typ == EXPRESSION_TYPE_GT {
+			b = value1.(float64) > value2.(float64)
+		} else if e.Typ == EXPRESSION_TYPE_GE {
+			b = value1.(float64) >= value2.(float64)
+		} else if e.Typ == EXPRESSION_TYPE_LT {
+			b = value1.(float64) < value2.(float64)
+		} else if e.Typ == EXPRESSION_TYPE_LE {
+			b = value1.(float64) <= value2.(float64)
+		} else {
+			return false, er
+		}
+	case EXPRESSION_TYPE_STRING:
+		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(string) == value2.(string)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(string) != value2.(string)
+		} else if e.Typ == EXPRESSION_TYPE_GT {
+			b = value1.(string) > value2.(string)
+		} else if e.Typ == EXPRESSION_TYPE_GE {
+			b = value1.(string) >= value2.(string)
+		} else if e.Typ == EXPRESSION_TYPE_LT {
+			b = value1.(string) < value2.(string)
+		} else if e.Typ == EXPRESSION_TYPE_LE {
+			b = value1.(string) <= value2.(string)
+		} else {
+			return false, er
+		}
+	}
+	return false, fmt.Errorf("can`t compare")
 }
 
 func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err error) {
@@ -220,7 +334,10 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				err = errors.New("algebra operation must apply to number expressions or string+string or 'a'+'c' or 'a'-'c' ")
 				return
 			}
-			typ1, typ2, value1, value2 = e.typeWider(typ1, typ2, value1, value2)
+			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
+			if err != nil {
+				return
+			}
 			if typ1 == EXPRESSION_TYPE_BYTE {
 				is = true
 				Typ = EXPRESSION_TYPE_BYTE
@@ -294,7 +411,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 					Value = value1.(float64) / value2.(float64)
 				case EXPRESSION_TYPE_MOD:
 					is = false
-					err = fmt.Errorf("can`t not apply % on float")
+					err = fmt.Errorf("can`t not apply mod(%) on float")
 				}
 				return
 			}
@@ -335,7 +452,10 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				err = errors.New("& and | operation must apply to number expressions and byte")
 				return
 			}
-			typ1, typ2, value1, value2 = e.typeWider(typ1, typ2, value1, value2)
+			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
+			if err != nil {
+				return
+			}
 			if typ1 == EXPRESSION_TYPE_INT {
 				is = true
 				Typ = EXPRESSION_TYPE_INT
@@ -379,7 +499,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 		return
 
 	}
-	//  == !=
+	//  == != > < >= <=
 	if e.Typ == EXPRESSION_TYPE_EQ ||
 		EXPRESSION_TYPE_NE == e.Typ {
 		return e.getBinaryExpressionConstValue(func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error) {
@@ -387,48 +507,20 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				is = false
 				return
 			}
-			typ1, typ2, value1, value2 = e.typeWider(typ1, typ2, value1, value2)
-			is = true
-			switch typ1 {
-			case EXPRESSION_TYPE_BOOL:
-				Typ = EXPRESSION_TYPE_BOOL
-				if e.Typ == EXPRESSION_TYPE_EQ {
-					Value = value1.(bool) == value2.(bool)
-				} else {
-					Value = value1.(bool) != value2.(bool)
-				}
-			case EXPRESSION_TYPE_BYTE:
-				Typ = EXPRESSION_TYPE_BYTE
-				if e.Typ == EXPRESSION_TYPE_EQ {
-					Value = value1.(byte) == value2.(byte)
-				} else {
-					Value = value1.(byte) != value2.(byte)
-				}
-			case EXPRESSION_TYPE_INT:
-				Typ = EXPRESSION_TYPE_INT
-				if e.Typ == EXPRESSION_TYPE_EQ {
-					Value = value1.(int64) == value2.(int64)
-				} else {
-					Value = value1.(int64) != value2.(int64)
-				}
-			case EXPRESSION_TYPE_FLOAT:
-				Typ = EXPRESSION_TYPE_FLOAT
-				if e.Typ == EXPRESSION_TYPE_EQ {
-					Value = value1.(float64) == value2.(float64)
-				} else {
-					Value = value1.(float64) != value2.(float64)
-				}
-			case EXPRESSION_TYPE_STRING:
-				Typ = EXPRESSION_TYPE_STRING
-				if e.Typ == EXPRESSION_TYPE_EQ {
-					Value = value1.(string) == value2.(string)
-				} else {
-					Value = value1.(string) != value2.(string)
-				}
-			default:
-				is = false
+			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
+			if err != nil {
+				err = fmt.Errorf("relation operation cannot apply to %s and %s", e.typeName(typ1), e.typeName(typ2))
 				return
 			}
+
+			b, er := e.relationnalCompare(typ1, value1, value2)
+			if er != nil {
+				err = er
+				return
+			}
+			is = b
+			err = nil
+			Typ = EXPRESSION_TYPE_BOOL
 			return
 		})
 	}
