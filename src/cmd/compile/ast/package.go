@@ -73,20 +73,32 @@ func (p *Package) TypeCheck() []error {
 
 func (p *Package) checkConst() []error {
 	errs := make([]error, 0)
+	var err error
 	for _, v := range p.Consts {
-		is, t, value, err := v.Init.getConstValue()
-		if err != nil {
-			errs = append(errs, err)
-			continue
+		if v.Init == nil && v.Typ == nil {
+			errs = append(errs, fmt.Errorf("%s %d:%d %s is has no type and no init value",v.Pos.Filename,v.Pos.StartLine,v.Pos.StartColumn,v.Name))
 		}
-		if is == false {
-			errs = append(errs, errors.New("is not a const value"))
-			continue
+		if v.Init != nil{
+			is, t, value, err := v.Init.getConstValue()
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			if is == false {
+				errs = append(errs, fmt.Errorf("%s %d:%d %s is not a const value",v.Pos.Filename,v.Pos.StartLine,v.Pos.StartColumn,v.Name))
+				continue
+			}
+			//rewrite
+			v.Init = &Expression{}
+			v.Init.Typ = t
+			v.Init.Data = value
 		}
-		//rewrite
-		v.Init = &Expression{}
-		v.Init.Typ = t
-		v.Init.Data = value
+		if v.Typ != nil  && v.Init != nil {
+			v.Data,err = v.Typ.assignExpression(v.Init)
+			if err != nil {
+
+			}
+		}
 	}
 	return errs
 }

@@ -1,5 +1,9 @@
 package ast
 
+
+import(
+	"fmt"
+)
 const (
 	VARIABLE_TYPE_BOOL = iota
 	VARIABLE_TYPE_BYTE
@@ -15,11 +19,50 @@ const (
 type AccessProperty struct {
 	Access int // public private or protected
 }
+
+
 type VariableType struct {
 	Typ             int
 	Name            string // class name or function name
 	CombinationType *CombinationType
 }
+
+func(t *VariableType)assignExpression(e *Expression)(data interface{},err error){
+	switch t.Typ  {
+	case VARIABLE_TYPE_BOOL:
+		if e.Typ == EXPRESSION_TYPE_BOOL{
+			data = e.Data.(bool)
+			return
+		}
+	case VARIABLE_TYPE_BYTE:
+		if e.Typ == EXPRESSION_TYPE_BYTE{
+			data = e.Data.(byte)
+			return
+		}
+	case VARIABLE_TYPE_INT:
+		if e.Typ == EXPRESSION_TYPE_BYTE{
+			data = int64(e.Data.(byte))
+			return
+		}else if e.Typ == EXPRESSION_TYPE_INT{
+			data = e.Data.(int64)
+			return
+		}
+	case VARIABLE_TYPE_FLOAT:
+		if e.Typ == EXPRESSION_TYPE_BYTE{
+			data = int64(e.Data.(byte))
+			return
+		}else if e.Typ == EXPRESSION_TYPE_INT{
+			data = e.Data.(int64)
+			return
+		}else if EXPRESSION_TYPE_FLOAT == e.Typ{
+			data = e.Data.(float64)
+			return
+		}
+	}
+	err = fmt.Errorf("can`t covert type accroding to type")
+	return
+}
+
 
 const (
 	COMBINATION_TYPE_ARRAY = iota
