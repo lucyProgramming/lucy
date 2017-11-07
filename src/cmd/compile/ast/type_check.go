@@ -13,6 +13,7 @@ func (p *Package) TypeCheck() []error {
 	if len(errs) > p.NErros {
 		return errs
 	}
+
 	errs = append(errs, p.checkGlobalVariables()...)
 	if len(errs) > p.NErros {
 		return errs
@@ -40,7 +41,7 @@ func (p *Package) checkFunctions() []error {
 func (p *Package) checkBlocks() []error {
 	errs := []error{}
 	for _, v := range p.Blocks {
-		errs = append(errs, v.check()...)
+		errs = append(errs, v.check(p)...)
 	}
 	return errs
 }
@@ -117,7 +118,7 @@ func (p *Package) checkGlobalVariables() []error {
 	return errs
 }
 
-func (p *Package) getTypeFromExpression(e *Expression) (t *VariableType, err error) {
+func getTypeFromExpression(e *Expression) (t *VariableType, err error) {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
 		t = &VariableType{

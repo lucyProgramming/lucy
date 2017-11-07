@@ -1,11 +1,10 @@
 package ast
 
 type GlobalVariable struct {
+	SymbolicItem
 	AccessProperty
 	Pos  Pos
-	Name string
 	Init *Expression
-	Typ  *VariableType
 }
 
 type Const struct {

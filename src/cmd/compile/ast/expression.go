@@ -40,9 +40,9 @@ const (
 	EXPRESSION_TYPE_METHOD_CALL
 	EXPRESSION_TYPE_FUNCTION_CALL
 	EXPRESSION_TYPE_INCREMENT
+	EXPRESSION_TYPE_DECREMENT
 	EXPRESSION_TYPE_PRE_INCREMENT
 	EXPRESSION_TYPE_PRE_DECREMENT
-	EXPRESSION_TYPE_DECREMENT
 	EXPRESSION_TYPE_NEGATIVE
 	EXPRESSION_TYPE_NOT
 	EXPRESSION_TYPE_IDENTIFIER
@@ -113,6 +113,33 @@ type ExpressionBinary struct {
 	Right *Expression
 }
 
+func (e *Expression) humanReadableString() string {
+	switch e.Typ {
+	case EXPRESSION_TYPE_BOOL:
+		return fmt.Sprintf("bool(%v)", e.Data.(bool))
+	case EXPRESSION_TYPE_BYTE:
+		return fmt.Sprintf("byte(%v)", e.Data.(byte))
+	case EXPRESSION_TYPE_INT:
+		return fmt.Sprintf("int(%d)", e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return fmt.Sprintf("float(%f)", e.Data.(float64))
+	case EXPRESSION_TYPE_STRING:
+		t := []byte(e.Data.(string))
+		if len(t) > 10 {
+			t = t[0:10]
+		}
+		t = append(t, []byte("..."))
+		return fmt.Sprintf("string(%s)", string(t))
+	case EXPRESSION_TYPE_ARRAY:
+		return "array"
+	case EXPRESSION_TYPE_LOGICAL_OR:
+		return "expression_logical_or"
+	case EXPRESSION_TYPE_LOGICAL_AND:
+		return "expression_logical_and"
+	case
+	}
+}
+
 func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {
 	is1, typ1, value1, err1 = binary.Left.getConstValue()
 	is2, typ2, value2, err2 = binary.Right.getConstValue()
@@ -156,7 +183,6 @@ func (e *Expression) typeWider(typ1, typ2 int, value1, value2 interface{}) (t1 i
 	if t1 == typ1 { //typ1 has is wider
 		v2, err = e.typeConvertor(typ1, typ2, value2)
 		v1 = value1
-
 	} else {
 		v1, err = e.typeConvertor(typ2, typ1, value1)
 		v2 = value2

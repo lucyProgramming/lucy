@@ -24,6 +24,7 @@ const (
 	TOKEN_RC                    //}
 	TOKEN_LB                    //[
 	TOKEN_RB                    //]
+	TOKEN_SKIP                  //skip;
 	TOKEN_SEMICOLON             // ;
 	TOKEN_CRLF                  // ;
 	TOKEN_COMMA                 //,

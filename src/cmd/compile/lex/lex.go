@@ -142,10 +142,17 @@ func init() {
 		t.Type = TOKEN_RB
 		return t, nil
 	})
-	lexer.Add([]byte(`(\;)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	lexer.Add([]byte(";"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_SEMICOLON
+		t.Desp = ";"
+		return t, nil
+	})
+	lexer.Add([]byte("skip"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_SKIP
 		t.Desp = ";"
 		return t, nil
 	})
