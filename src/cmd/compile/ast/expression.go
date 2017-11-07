@@ -80,6 +80,16 @@ func (e *Expression) typeName(typ ...int) string {
 		return "less or equal"
 	case EXPRESSION_TYPE_LT:
 		return "less"
+	case EXPRESSION_TYPE_ADD:
+		return "add(+)"
+	case EXPRESSION_TYPE_SUB:
+		return "sub(-)"
+	case EXPRESSION_TYPE_MUL:
+		return "multiply(*)"
+	case EXPRESSION_TYPE_DIV:
+		return "divide(/)"
+	case EXPRESSION_TYPE_MOD:
+		return "mod(%)"
 	}
 	return ""
 }
@@ -136,7 +146,6 @@ func (e *Expression) humanReadableString() string {
 		return "expression_logical_or"
 	case EXPRESSION_TYPE_LOGICAL_AND:
 		return "expression_logical_and"
-	case
 	}
 }
 
