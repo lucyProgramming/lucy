@@ -17,6 +17,36 @@ func (p *Package) TypeCheck() []error {
 	if len(errs) > p.NErros {
 		return errs
 	}
+	errs = append(errs, p.checkFunctions()...)
+	if len(errs) > p.NErros {
+		return errs
+	}
+	errs = append(errs, p.checkBlocks()...)
+	if len(errs) > p.NErros {
+		return errs
+	}
+	errs = append(errs, p.checkClass()...)
+	if len(errs) > p.NErros {
+		return errs
+	}
+	return errs
+}
+
+func (p *Package) checkFunctions() []error {
+	errs := []error{}
+	return errs
+}
+
+func (p *Package) checkBlocks() []error {
+	errs := []error{}
+	for _, v := range p.Blocks {
+		errs = append(errs, v.check()...)
+	}
+	return errs
+}
+
+func (p *Package) checkClass() []error {
+	errs := []error{}
 	return errs
 }
 
@@ -52,44 +82,66 @@ func (p *Package) checkConst() []error {
 	}
 	return errs
 }
+
 func (p *Package) checkGlobalVariables() []error {
 	errs := make([]error, 0)
+	var err error
 	for _, v := range p.Vars {
+		if v.Init == nil && v.Typ == nil {
+			continue
+		}
+		if v.Init != nil {
+			err = v.Init.constFold() //fold const error
+			if err != nil {
+				errs = append(errs, fmt.Errorf("%s %d:%d variable %s defined wrong,err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
+				continue
+			}
+		}
 		if v.Typ == nil && v.Init != nil { //means variable typed by assignment
-			v.Typ = p.getTypeFromExpression(v.Init)
+			v.Typ, err = p.getTypeFromExpression(v.Init)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("%s %d:%d variable %s can`t assigned by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
+				continue
+			}
 			continue
 		}
 		if v.Typ != nil && v.Init != nil { // if typ match
-
+			match := v.Typ.typeCompatible(p.getTypeFromExpression(v.Init))
+			if !match {
+				errs = append(errs, fmt.Errorf("%s %d:%d variable %s dose not matched by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
+				continue
+			}
 		}
 		panic("unhandled situation")
 	}
 	return errs
 }
 
-func (p *Package) getTypeFromExpression(e *Expression) *VariableType {
+func (p *Package) getTypeFromExpression(e *Expression) (t *VariableType, err error) {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
-		return &VariableType{
+		t = &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
 		}
 	case EXPRESSION_TYPE_BYTE:
-		return &VariableType{
+		t = &VariableType{
 			Typ: VARIABLE_TYPE_BYTE,
 		}
 	case EXPRESSION_TYPE_INT:
-		return &VariableType{
+		t = &VariableType{
 			Typ: VARIABLE_TYPE_INT,
 		}
 	case EXPRESSION_TYPE_FLOAT:
-		return &VariableType{
+		t = &VariableType{
 			Typ: VARIABLE_TYPE_FLOAT,
 		}
 	case EXPRESSION_TYPE_STRING:
-		return &VariableType{
+		t = &VariableType{
 			Typ: VARIABLE_TYPE_STRING,
 		}
 	default:
 		panic("unhandled situation")
 	}
+	err = fmt.Errorf("can`t assign")
+	return
 }

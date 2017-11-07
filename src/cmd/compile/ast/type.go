@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -13,6 +14,7 @@ const (
 	VARIALBE_TYPE_FUNCTION
 	VARIALBE_TYPE_ENUM        //enum
 	VARIABLE_TYPE_CLASS       //new Person()
+	VARIABLE_TYPE_NULL        //null
 	VARIABLE_TYPE_COMBINATION // []int
 )
 
@@ -20,10 +22,29 @@ type AccessProperty struct {
 	Access int // public private or protected
 }
 
+const (
+	COMBINATION_TYPE_ARRAY = iota
+)
+
+type CombinationType struct {
+	Typ         int
+	Combination VariableType
+}
 type VariableType struct {
 	Typ             int
 	Name            string // class name or function name or enum name
 	CombinationType *CombinationType
+}
+
+func (t *VariableType) matchExpression(e *Expression) bool {
+	return false
+}
+
+func (t *VariableType) typeCompatible(t2 *VariableType) bool {
+	if t.Equal(t2) {
+		return true
+	}
+	return false
 }
 
 //assign some simple expression
@@ -69,18 +90,13 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 			data = e.Data.(string)
 			return
 		}
+	case VARIABLE_TYPE_CLASS:
+		if e.Typ == EXPRESSION_TYPE_NULL {
+			return nil, nil // null pointer
+		}
 	}
 	err = fmt.Errorf("can`t covert type accroding to type")
 	return
-}
-
-const (
-	COMBINATION_TYPE_ARRAY = iota
-)
-
-type CombinationType struct {
-	Typ         int
-	Combination VariableType
 }
 
 //把树型转化为可读字符串

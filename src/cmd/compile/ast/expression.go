@@ -25,8 +25,6 @@ const (
 	EXPRESSION_TYPE_MUL_ASSIGN
 	EXPRESSION_TYPE_DIV_ASSIGN
 	EXPRESSION_TYPE_MOD_ASSIGN
-	EXPRESSION_TYPE_ASSIGN_FUNCTION
-	EXPRESSION_TYPE_FUNCTION
 	EXPRESSION_TYPE_EQ
 	EXPRESSION_TYPE_NE
 	EXPRESSION_TYPE_GE
@@ -192,10 +190,10 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) (inter
 }
 
 func float32IsZero(f float32) bool {
-	return float64(f) < small_float && float64(f) > (-small_float)
+	return float64IsZero(float64(f))
 }
 func float64IsZero(f float64) bool {
-	return f < small_float && f > (-small_float)
+	return f < small_float && f > negative_small_float
 }
 
 func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b bool, err error) {
@@ -275,6 +273,57 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 		}
 	}
 	return false, fmt.Errorf("can`t compare")
+}
+
+func (e *Expression) constFold() error {
+	is, typ, value, err := e.getConstValue() //something is error
+	if err != nil {
+		return err
+	}
+	if is {
+		e.Typ = typ
+		e.Data = value
+		return nil
+	}
+	//this means below is is not a const definitely
+
+	//  binary expression
+	if e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
+		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
+		e.Typ == EXPRESSION_TYPE_ADD ||
+		e.Typ == EXPRESSION_TYPE_SUB ||
+		e.Typ == EXPRESSION_TYPE_MUL ||
+		e.Typ == EXPRESSION_TYPE_DIV ||
+		e.Typ == EXPRESSION_TYPE_MOD ||
+		e.Typ == EXPRESSION_TYPE_LEFT_SHIFT ||
+		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT ||
+		e.Typ == EXPRESSION_TYPE_AND ||
+		e.Typ == EXPRESSION_TYPE_OR ||
+		e.Typ == EXPRESSION_TYPE_EQ ||
+		e.Typ == EXPRESSION_TYPE_NE ||
+		e.Typ == EXPRESSION_TYPE_GE ||
+		e.Typ == EXPRESSION_TYPE_GT ||
+		e.Typ == EXPRESSION_TYPE_LE ||
+		e.Typ == EXPRESSION_TYPE_LE {
+		binary := e.Data.(*ExpressionBinary)
+		is, typ, value, err = binary.Left.getConstValue()
+		if err != nil {
+			return err
+		}
+		if is {
+			e.Typ = typ
+			e.Data = value
+		}
+		is, typ, value, err = binary.Right.getConstValue()
+		if err != nil {
+			return err
+		}
+		if is {
+			e.Typ = typ
+			e.Data = value
+		}
+	}
+	return nil
 }
 
 func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err error) {
@@ -498,7 +547,11 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 	}
 	//  == != > < >= <=
 	if e.Typ == EXPRESSION_TYPE_EQ ||
-		EXPRESSION_TYPE_NE == e.Typ {
+		e.Typ == EXPRESSION_TYPE_NE ||
+		e.Typ == EXPRESSION_TYPE_GE ||
+		e.Typ == EXPRESSION_TYPE_GT ||
+		e.Typ == EXPRESSION_TYPE_LE ||
+		e.Typ == EXPRESSION_TYPE_LE {
 		return e.getBinaryExpressionConstValue(func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error) {
 			if is1 == false || is2 == false {
 				is = false
@@ -509,7 +562,6 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				err = fmt.Errorf("relation operation cannot apply to %s and %s", e.typeName(typ1), e.typeName(typ2))
 				return
 			}
-
 			b, er := e.relationnalCompare(typ1, value1, value2)
 			if er != nil {
 				err = er
@@ -522,6 +574,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 		})
 	}
 	is = false
+	err = nil
 	return
 }
 

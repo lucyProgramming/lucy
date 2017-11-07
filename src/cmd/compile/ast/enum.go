@@ -1,8 +1,8 @@
 package ast
 
 /*
-	enum {
-		Mondy = 1,
+	enum Day{
+		Monday = 1,
 		Tuesday
 	}
 */
@@ -15,6 +15,7 @@ type EnumNames struct {
 }
 
 type Enum struct {
+	AccessProperty
 	Name  string
 	Pos   Pos
 	Names []*EnumNames

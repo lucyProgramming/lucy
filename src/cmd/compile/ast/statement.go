@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/astaxie/beego/logs/es"
+
 const (
 	STATEMENT_TYPE_EXPRESSION = iota
 	STATEMENT_TYPE_IF
@@ -8,11 +10,9 @@ const (
 	STATEMENT_TYPE_RETURN
 	STATEMENT_TYPE_BREAK
 	STATEMENT_TYPE_SWITCH
+	STATEMENT_TYPE_PASS // skip this block
+	STATEMENT_TYPE_EXIT       //exit program
 )
-
-type Block struct {
-	Statements []*Statement
-}
 
 type Statement struct {
 	Typ               int
@@ -24,6 +24,47 @@ type Statement struct {
 	StatmentSwitch    *StatmentSwitch
 }
 
+func (s *Statement) check(b *Block) []error {
+	if b.istop {
+		if s.Typ
+	}
+
+	errs := []error{}
+	switch s.Typ {
+	case STATEMENT_TYPE_EXPRESSION:
+		errs = append(errs, s.checkExpression(b)...)
+	case STATEMENT_TYPE_IF:
+		s.StatementIf.Block.Outter = b
+		errs = append(errs, s.checkIf()...)
+	case STATEMENT_TYPE_FOR:
+		s.StatementFor.Block.Outter = b
+		errs = append(errs, s.checkFor()...)
+	case STATEMENT_TYPE_SWITCH:
+		s.StatmentSwitch.Outter = b
+		errs = append(errs, s.checkSwitch()...)
+	case STATEMENT_TYPE_BREAK:
+
+	default:
+
+	}
+	return errs
+}
+
+func (s *Statement) checkExpression(b *Block) []error {
+	errs := []error{}
+	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
+		return nil
+	}
+	return errs
+
+}
+
 type StatementTryCatch struct {
 	TryBlock     *Block
 	CatchBlock   *Block
@@ -31,6 +72,7 @@ type StatementTryCatch struct {
 }
 
 type StatmentSwitch struct {
+	Outter              *Block
 	Condition           *Expression //switch
 	StatmentSwitchCases []*StatmentSwitchCase
 	Default             *Block

@@ -1,11 +1,11 @@
 package ast
 
 type GlobalVariable struct {
-	Pos   Pos
-	Name  string
-	Init  *Expression
-	Typ   *VariableType
-	Value interface{}
+	AccessProperty
+	Pos  Pos
+	Name string
+	Init *Expression
+	Typ  *VariableType
 }
 
 type Const struct {
