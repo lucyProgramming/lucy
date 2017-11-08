@@ -99,15 +99,16 @@ func (p *Package) checkGlobalVariables() []error {
 			}
 		}
 		if v.Typ == nil && v.Init != nil { //means variable typed by assignment
-			v.Typ, err = p.getTypeFromExpression(v.Init)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("%s %d:%d variable %s can`t assigned by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
-				continue
-			}
+			v.Typ = getTypeFromExpression(v.Init)
+			//			if err != nil {
+			//				errs = append(errs, fmt.Errorf("%s %d:%d variable %s can`t assigned by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
+			//				continue
+			//			}
 			continue
 		}
 		if v.Typ != nil && v.Init != nil { // if typ match
-			match := v.Typ.typeCompatible(p.getTypeFromExpression(v.Init))
+			t2 := getTypeFromExpression(v.Init)
+			match := v.Typ.typeCompatible(t2)
 			if !match {
 				errs = append(errs, fmt.Errorf("%s %d:%d variable %s dose not matched by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
 				continue
@@ -118,7 +119,7 @@ func (p *Package) checkGlobalVariables() []error {
 	return errs
 }
 
-func getTypeFromExpression(e *Expression) (t *VariableType, err error) {
+func getTypeFromExpression(e *Expression) (t *VariableType) {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
 		t = &VariableType{
@@ -141,8 +142,7 @@ func getTypeFromExpression(e *Expression) (t *VariableType, err error) {
 			Typ: VARIABLE_TYPE_STRING,
 		}
 	default:
-		panic("unhandled situation")
+		panic("unhandled type inference")
 	}
-	err = fmt.Errorf("can`t assign")
 	return
 }

@@ -41,6 +41,18 @@ func (b *Block) inherite(father *Block) {
 	b.file = father.file
 	b.Outter = father
 }
+func (b *Block) searchFunction(name string) *Function {
+	//bb := b
+	//for bb != nil {
+	//	if i, ok := bb.SymbolicTable.itemsMap[name]; ok {
+	//		if i.Typ.Typ == VARIALBE_TYPE_FUNCTION {
+	//			return
+	//		}
+	//	}
+	//	bb = bb.Outter
+	//}
+	return b.p.Funcs[name]
+}
 
 type InheritedAttribute struct {
 	istop bool // if it is a top block
@@ -55,7 +67,7 @@ type SymbolicTable struct {
 
 type SymbolicItem struct {
 	Name string
-	Typ  VariableType
+	Typ  *VariableType
 }
 
 func (b *Block) check(p *Package) []error {

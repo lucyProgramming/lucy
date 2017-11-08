@@ -49,6 +49,7 @@ const (
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_NEW
 	EXPRESSION_TYPE_VAR
+	EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
 )
 
 //receiver only one argument
@@ -108,8 +109,7 @@ type Expression struct {
 	Data interface{} //
 }
 
-//type ExpressionUnary Expression
-
+type CallArgs []*Expression // f(1,2)　调用参数列表
 type ExpressionFunctionCall struct {
 	Name string //function name
 	Args CallArgs
@@ -138,7 +138,7 @@ func (e *Expression) humanReadableString() string {
 		if len(t) > 10 {
 			t = t[0:10]
 		}
-		t = append(t, []byte("..."))
+		t = append(t, []byte("...")...)
 		return fmt.Sprintf("string(%s)", string(t))
 	case EXPRESSION_TYPE_ARRAY:
 		return "array"
@@ -147,6 +147,7 @@ func (e *Expression) humanReadableString() string {
 	case EXPRESSION_TYPE_LOGICAL_AND:
 		return "expression_logical_and"
 	}
+	return ""
 }
 
 func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {
@@ -612,5 +613,3 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 	err = nil
 	return
 }
-
-type CallArgs []*Expression // f(1,2)　调用参数列表

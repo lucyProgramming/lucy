@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -34,6 +33,7 @@ type VariableType struct {
 	Typ             int
 	Name            string // class name or function name or enum name
 	CombinationType *CombinationType
+	FunctionType    *FunctionType
 }
 
 func (t *VariableType) matchExpression(e *Expression) bool {
@@ -41,6 +41,7 @@ func (t *VariableType) matchExpression(e *Expression) bool {
 }
 
 func (t *VariableType) typeCompatible(t2 *VariableType) bool {
+
 	if t.Equal(t2) {
 		return true
 	}

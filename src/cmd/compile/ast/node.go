@@ -29,7 +29,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
-			m[v.Name] = []interface{}{vv}
+			m[v.Name] = []interface{}{v}
 		}
 		for _, vv := range v.Names {
 			if _, ok := m[vv.Name]; ok {

@@ -11,15 +11,15 @@ type FunctionType struct {
 	Returns    ReturnList
 }
 
-type TypedNames struct {
+type TypedName struct {
 	Name string
 	Typ  VariableType
 }
 
 type Parameter struct {
-	TypedNames
+	TypedName
 	Default *Expression //f(a int = 1) default parameter
 }
 
 type ParameterList []*Parameter
-type ReturnList []*TypedNames
+type ReturnList []*TypedName
