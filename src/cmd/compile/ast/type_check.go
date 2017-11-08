@@ -35,6 +35,10 @@ func (p *Package) TypeCheck() []error {
 
 func (p *Package) checkFunctions() []error {
 	errs := []error{}
+	for _, v := range p.Funcs {
+
+	}
+
 	return errs
 }
 
@@ -87,6 +91,9 @@ func (p *Package) checkConst() []error {
 func (p *Package) checkGlobalVariables() []error {
 	errs := make([]error, 0)
 	var err error
+
+	var block Block
+
 	for _, v := range p.Vars {
 		if v.Init == nil && v.Typ == nil {
 			continue
@@ -99,15 +106,19 @@ func (p *Package) checkGlobalVariables() []error {
 			}
 		}
 		if v.Typ == nil && v.Init != nil { //means variable typed by assignment
-			v.Typ = getTypeFromExpression(v.Init)
-			//			if err != nil {
-			//				errs = append(errs, fmt.Errorf("%s %d:%d variable %s can`t assigned by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
-			//				continue
-			//			}
+			var es []error
+			v.Typ, es = block.getTypeFromExpression(v.Init)
+			if es != nil {
+				errs = append(errs, es...)
+			}
 			continue
 		}
 		if v.Typ != nil && v.Init != nil { // if typ match
-			t2 := getTypeFromExpression(v.Init)
+			t2, es := block.getTypeFromExpression(v.Init)
+			if len(es) > 0 {
+				errs = append(errs, es...)
+				continue
+			}
 			match := v.Typ.typeCompatible(t2)
 			if !match {
 				errs = append(errs, fmt.Errorf("%s %d:%d variable %s dose not matched by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
@@ -117,32 +128,4 @@ func (p *Package) checkGlobalVariables() []error {
 		panic("unhandled situation")
 	}
 	return errs
-}
-
-func getTypeFromExpression(e *Expression) (t *VariableType) {
-	switch e.Typ {
-	case EXPRESSION_TYPE_BOOL:
-		t = &VariableType{
-			Typ: VARIABLE_TYPE_BOOL,
-		}
-	case EXPRESSION_TYPE_BYTE:
-		t = &VariableType{
-			Typ: VARIABLE_TYPE_BYTE,
-		}
-	case EXPRESSION_TYPE_INT:
-		t = &VariableType{
-			Typ: VARIABLE_TYPE_INT,
-		}
-	case EXPRESSION_TYPE_FLOAT:
-		t = &VariableType{
-			Typ: VARIABLE_TYPE_FLOAT,
-		}
-	case EXPRESSION_TYPE_STRING:
-		t = &VariableType{
-			Typ: VARIABLE_TYPE_STRING,
-		}
-	default:
-		panic("unhandled type inference")
-	}
-	return
 }

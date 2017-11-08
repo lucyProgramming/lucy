@@ -96,17 +96,9 @@ func (e *Expression) typeName(typ ...int) string {
 }
 
 type Expression struct {
-	Typ int
-	/*
-		BoolValue       bool
-		IntValue        int64
-		ByteValue       byte
-		FloatValue      float64
-		StringValue     string
-		LeftExpression  *Expression
-		RIghtExpression *Expression
-	*/
-	Data interface{} //
+	Pos  Pos
+	Typ  int
+	Data interface{}
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

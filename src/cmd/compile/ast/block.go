@@ -38,6 +38,7 @@ func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.p = father.InheritedAttribute.p
 	b.InheritedAttribute.istop = father.InheritedAttribute.istop
 	b.InheritedAttribute.infor = father.InheritedAttribute.infor
+	b.InheritedAttribute.infunction = father.InheritedAttribute.infunction
 	b.file = father.file
 	b.Outter = father
 }
@@ -55,9 +56,10 @@ func (b *Block) searchFunction(name string) *Function {
 }
 
 type InheritedAttribute struct {
-	istop bool // if it is a top block
-	infor bool // if this statement is in for or not
-	p     *Package
+	istop      bool // if it is a top block
+	infor      bool // if this statement is in for or not
+	infunction bool // if this in a function situation
+	p          *Package
 }
 
 type SymbolicTable struct {
@@ -70,15 +72,57 @@ type SymbolicItem struct {
 	Typ  *VariableType
 }
 
-func (b *Block) check(p *Package) []error {
-	b.p = p
-	if _, ok := b.p.Files[b.Pos.Filename]; !ok {
-		panic("block has no files")
+//check out if expression is bool,must fold const before call this function
+func (b *Block) isBoolValue(e *Expression) (bool, []error) {
+	if e.Typ == EXPRESSION_TYPE_BOOL { //bool literal
+		return true, nil
 	}
-	b.file = b.p.Files[b.Pos.Filename]
+	t, errs := b.getTypeFromExpression(e)
+	if errs != nil && len(errs) > 0 {
+		return false, errs
+	}
+	return t.Typ == VARIABLE_TYPE_BOOL, nil
+}
+func (b *Block) check(p ...*Package) []error {
+	if len(p) > 0 {
+		b.p = p[0]
+		if _, ok := b.p.Files[b.Pos.Filename]; !ok {
+			panic("block has no files")
+		}
+		b.file = b.p.Files[b.Pos.Filename]
+	}
 	errs := []error{}
 	for _, s := range b.Statements {
 		errs = append(errs, s.check(b)...)
 	}
 	return errs
+}
+
+func (b *Block) getTypeFromExpression(e *Expression) (t *VariableType, errs []error) {
+	errs = []error{}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BOOL:
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_BOOL,
+		}
+	case EXPRESSION_TYPE_BYTE:
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_BYTE,
+		}
+	case EXPRESSION_TYPE_INT:
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_INT,
+		}
+	case EXPRESSION_TYPE_FLOAT:
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_FLOAT,
+		}
+	case EXPRESSION_TYPE_STRING:
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_STRING,
+		}
+	default:
+		panic("unhandled type inference")
+	}
+	return
 }

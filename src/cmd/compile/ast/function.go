@@ -6,6 +6,19 @@ type Function struct {
 	Block *Block
 	Pos   Pos
 }
+
+func (f *Function) check(b *Block) []erros {
+	if b != nil {
+		f.Block.inherite(b)
+	}
+	errs := make([]error, 0)
+	checkParaMeterAndRetuns(errs)
+}
+
+func (f *FunctionType) checkParaMeterAndRetuns(errs []error) {
+
+}
+
 type FunctionType struct {
 	Parameters ParameterList
 	Returns    ReturnList

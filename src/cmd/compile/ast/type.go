@@ -36,12 +36,11 @@ type VariableType struct {
 	FunctionType    *FunctionType
 }
 
-func (t *VariableType) matchExpression(e *Expression) bool {
-	return false
-}
+//func (t *VariableType) matchExpression(e *Expression) bool {
+//	return false
+//}
 
 func (t *VariableType) typeCompatible(t2 *VariableType) bool {
-
 	if t.Equal(t2) {
 		return true
 	}
