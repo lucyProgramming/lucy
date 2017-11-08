@@ -15,6 +15,12 @@ type Class struct {
 	Constructor *Function // can be nil
 }
 
+func (c Class) check() []error {
+	errs := make([]error, 0)
+
+	return errs
+}
+
 type ClassMethod struct {
 	ClassFieldProperty
 	Func Function

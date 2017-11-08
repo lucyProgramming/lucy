@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type Block struct {
 	Pos                Pos
 	InheritedAttribute InheritedAttribute
@@ -39,6 +43,7 @@ func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.istop = father.InheritedAttribute.istop
 	b.InheritedAttribute.infor = father.InheritedAttribute.infor
 	b.InheritedAttribute.infunction = father.InheritedAttribute.infunction
+
 	b.file = father.file
 	b.Outter = father
 }
@@ -59,12 +64,24 @@ type InheritedAttribute struct {
 	istop      bool // if it is a top block
 	infor      bool // if this statement is in for or not
 	infunction bool // if this in a function situation
+	returns    ReturnList
 	p          *Package
 }
 
 type SymbolicTable struct {
-	items    []*SymbolicItem
+	//items    []*SymbolicItem
 	itemsMap map[string]*SymbolicItem // easy to access by name
+}
+
+func (s *SymbolicTable) Insert(name string, item *SymbolicItem) error {
+	if s.itemsMap == nil {
+		s.itemsMap = make(map[string]*SymbolicItem)
+	}
+	if _, ok := s.itemsMap[name]; ok {
+		return fmt.Errorf("symbolic %s already declared", name)
+	}
+	s.itemsMap[name] = item
+	return nil
 }
 
 type SymbolicItem struct {

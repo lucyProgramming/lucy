@@ -36,9 +36,8 @@ func (p *Package) TypeCheck() []error {
 func (p *Package) checkFunctions() []error {
 	errs := []error{}
 	for _, v := range p.Funcs {
-
+		errs = append(errs, v.check(nil)...)
 	}
-
 	return errs
 }
 
@@ -52,6 +51,9 @@ func (p *Package) checkBlocks() []error {
 
 func (p *Package) checkClass() []error {
 	errs := []error{}
+	for _, v := range p.Classes {
+		errs = append(errs, v.check()...)
+	}
 	return errs
 }
 

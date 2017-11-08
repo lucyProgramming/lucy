@@ -29,7 +29,7 @@ type Statement struct {
 	Block             *Block
 }
 
-func (s *Statement) stateName() string {
+func (s *Statement) statementName() string {
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
 		return "expression statement"
@@ -76,10 +76,16 @@ func (s *Statement) check(b *Block) []error { // b is father
 	case STATEMENT_TYPE_BREAK:
 	case STATEMENT_TYPE_CONTINUE:
 		if b.InheritedAttribute.infor {
-			errs = append(errs, fmt.Errorf("%s %d:%d %s can`t in this scope", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.stateName()))
+			errs = append(errs, fmt.Errorf("%s %d:%d %s can`t in this scope", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.statementName()))
 		}
+	case STATEMENT_TYPE_RETURN:
+		if b.InheritedAttribute.infunction == false {
+			errs = append(errs, fmt.Errorf("%s %d:%d %s can`t in this scope", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.statementName()))
+			return errs
+		}
+
 	default:
-		panic("unkown type statement")
+		panic("unkown type statement" + s.statementName())
 	}
 	return errs
 }
@@ -241,12 +247,40 @@ func (s *StatmentSwitchCase) check() []error {
 }
 
 type StatementReturn struct {
-	Expression []*Expression
+	Pos         Pos
+	Expressions []*Expression
 }
 
-func (s *StatementReturn) check() []error {
-	errs := []error{}
+func (s *StatementReturn) check(b *Block) []error {
+	errs := make([]error, 0)
+	if len(s.Expressions) > len(b.InheritedAttribute.returns) {
+		errs = append(errs, fmt.Errorf("%s %d:%d too many to return", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
+		return errs
+	} else if len(s.Expressions) < len(b.InheritedAttribute.returns) {
+		errs = append(errs, fmt.Errorf("%s %d:%d too few to return", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
+		return errs
+	} else {
+		return errs // 0 length errs,that is ok
+	}
+	for k, v := range s.Expressions {
+		t, es := b.getTypeFromExpression(v)
+		if es != nil && len(es) > 0 {
+			errs = append(errs, es...)
+			continue
+		}
+		if !b.InheritedAttribute.returns[k].Typ.typeCompatible(t) {
+			errs = append(errs, typeNotMatchError(&v.Pos, &b.InheritedAttribute.returns[k].Typ, t))
+		}
+	}
 	return errs
+}
+
+func typeNotMatchError(pos *Pos, t1, t2 *VariableType) error {
+	typestring1 := ""
+	typestring2 := ""
+	t1.TypeString(&typestring1)
+	t1.TypeString(&typestring2)
+	return fmt.Errorf("%s %d:%d type not match (%s!=%s)", pos.Filename, pos.StartLine, pos.StartColumn, typestring1, typestring2)
 }
 
 type StatementFor struct {
