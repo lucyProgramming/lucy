@@ -22,13 +22,18 @@ import (
 %token <expression> TOKEN_TRUE TOKEN_FALSE
 
 %token <str> TOKEN_IDENTIFIER TOKEN_LITERAL_STRING
+%type <names> namelist
+%type <typ> typ
+%type <typednames>  typednames typedname typednames_or_nil
 
 %union {
     expression *ast.Expression
     str string
-    strs []string
+    names []string
+    typ *ast.VariableType
+	typednames []*ast.TypedName
+	top *ast.Node
 }
-
 
 
 %%
@@ -51,11 +56,6 @@ import:
     {
         importDefination($2,$4)
     }
-    |
-    {
-
-    }
-
 
 
 mainbody:
@@ -68,16 +68,75 @@ block:
 
 
 function_defination:
-    TOKEN_FUNCTION TOKEN_IDENTIFIER TOKEN_LP  TOKEN_RP block
+    TOKEN_FUNCTION TOKEN_LP typednames TOKEN_RP  TOKEN_IDENTIFIER TOKEN_LP typednames_or_nil  TOKEN_RP block
+	{
 
+	}
+	| TOKEN_FUNCTION TOKEN_IDENTIFIER TOKEN_LP typednames_or_nil  TOKEN_RP block
+	{
+
+	}
 
 namelist:
     TOKEN_IDENTIFIER
     {
-        
+        $$ = []string{$1}
+    }
+    | namelist  TOKEN_COMMA TOKEN_IDENTIFIER
+    {
+        $$ = append($1,$3)
     }
 
+
+typednames:
+    typedname
+    {
+
+    }
+    | typednames TOKEN_COMMA typedname
+    {
+
+    }
+
+typednames_or_nil:
+	typednames
+	{
+		$$ = $1
+	}
+	|
+	{
+		$$ = nil
+	}
+
+
 typedname:
+    namelist typ
+    {
+
+    }
+	| typ
+	{
+
+	}
+
+typ:
+    TOKEN_BOOL
+    {
+
+    }
+    | TOKEN_LB TOKEN_RB typ
+    {
+
+    }
+
+
+
+
+
+
+
+
+
 
 
 

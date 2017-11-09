@@ -8,11 +8,15 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 )
 
-//line lucy.y:25
+//line lucy.y:29
 type LucySymType struct {
 	yys        int
 	expression *ast.Expression
 	str        string
+	names      []string
+	typ        *ast.VariableType
+	typednames []*ast.TypedName
+	top        *ast.Node
 }
 
 const TOKEN_FUNCTION = 57346
@@ -187,7 +191,7 @@ const LucyEofCode = 1
 const LucyErrCode = 2
 const LucyInitialStackSize = 16
 
-//line lucy.y:77
+//line lucy.y:149
 //line yacctab:1
 var LucyExca = [...]int{
 	-1, 1,
@@ -197,39 +201,53 @@ var LucyExca = [...]int{
 
 const LucyPrivate = 57344
 
-const LucyLast = 16
+const LucyLast = 64
 
 var LucyAct = [...]int{
 
-	5, 10, 14, 11, 6, 3, 15, 13, 12, 9,
-	16, 8, 7, 4, 2, 1,
+	5, 20, 10, 11, 32, 30, 22, 6, 3, 20,
+	20, 28, 36, 17, 23, 24, 25, 15, 38, 27,
+	34, 35, 21, 29, 24, 13, 9, 8, 7, 4,
+	26, 2, 1, 16, 0, 14, 0, 0, 0, 0,
+	0, 33, 31, 0, 0, 0, 0, 37, 0, 0,
+	19, 39, 0, 0, 0, 0, 0, 18, 19, 19,
+	0, 0, 0, 12,
 }
 var LucyPact = [...]int{
 
-	-57, -1000, -80, -72, 5, -77, -1000, -1000, -1000, -73,
-	-3, -9, -74, -11, -1000, -1000, -1000,
+	-54, -1000, -80, -69, 22, -76, -1000, -1000, -1000, -13,
+	14, -19, 6, -70, -3, -1000, -11, -1000, -1000, -1000,
+	-2, -19, -1000, -71, -19, -72, -1000, -10, 3, -12,
+	5, -1000, -1000, -1000, -1000, -19, -1000, 1, -1000, -1000,
 }
 var LucyPgo = [...]int{
 
-	0, 15, 14, 13, 12, 11, 10, 10,
+	0, 33, 13, 23, 17, 11, 32, 31, 29, 28,
+	27, 12,
 }
 var LucyR1 = [...]int{
 
-	0, 1, 2, 3, 3, 3, 4, 6, 5, 7,
+	0, 6, 7, 8, 8, 8, 9, 11, 10, 10,
+	1, 1, 3, 3, 5, 5, 4, 4, 2, 2,
 }
 var LucyR2 = [...]int{
 
-	0, 3, 2, 2, 4, 0, 1, 0, 5, 0,
+	0, 3, 2, 2, 4, 0, 1, 0, 9, 6,
+	1, 3, 1, 3, 1, 0, 2, 1, 1, 3,
 }
 var LucyChk = [...]int{
 
-	-1000, -1, -2, 62, -3, 80, 76, -4, -5, 4,
-	78, 76, 11, 16, 76, 17, -6,
+	-1000, -6, -7, 62, -8, 80, 76, -9, -10, 4,
+	78, 16, 76, 11, -3, -4, -1, -2, 76, 69,
+	20, 16, 76, 17, 27, 27, -2, 21, -5, -3,
+	76, -4, 76, -2, 17, 16, -11, -5, 17, -11,
 }
 var LucyDef = [...]int{
 
 	0, -2, 5, 0, 0, 0, 2, 1, 6, 0,
-	3, 0, 0, 0, 4, 7, 8,
+	3, 0, 0, 0, 0, 12, 0, 17, 10, 18,
+	0, 15, 4, 0, 0, 0, 16, 0, 0, 14,
+	0, 13, 11, 19, 7, 15, 9, 0, 7, 8,
 }
 var LucyTok1 = [...]int{
 
@@ -590,31 +608,103 @@ Lucydefault:
 
 	case 2:
 		LucyDollar = LucyS[Lucypt-2 : Lucypt+1]
-		//line lucy.y:39
+		//line lucy.y:46
 		{
-			packageDefination(LucyDollar[2].expression)
+			packageDefination(LucyDollar[2].str)
 		}
 	case 3:
 		LucyDollar = LucyS[Lucypt-2 : Lucypt+1]
-		//line lucy.y:45
+		//line lucy.y:52
 		{
-			importDefination(LucyDollar[2].expression)
+			importDefination(LucyDollar[2].str)
 		}
 	case 4:
 		LucyDollar = LucyS[Lucypt-4 : Lucypt+1]
-		//line lucy.y:49
+		//line lucy.y:56
 		{
-			importDefination(LucyDollar[2].expression, LucyDollar[4].expression)
+			importDefination(LucyDollar[2].str, LucyDollar[4].str)
 		}
 	case 5:
 		LucyDollar = LucyS[Lucypt-0 : Lucypt+1]
-		//line lucy.y:53
+		//line lucy.y:60
 		{
 
 		}
 	case 6:
 		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
-		//line lucy.y:61
+		//line lucy.y:68
+		{
+
+		}
+	case 8:
+		LucyDollar = LucyS[Lucypt-9 : Lucypt+1]
+		//line lucy.y:77
+		{
+
+		}
+	case 9:
+		LucyDollar = LucyS[Lucypt-6 : Lucypt+1]
+		//line lucy.y:81
+		{
+
+		}
+	case 10:
+		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
+		//line lucy.y:87
+		{
+			LucyVAL.names = []string{LucyDollar[1].str}
+		}
+	case 11:
+		LucyDollar = LucyS[Lucypt-3 : Lucypt+1]
+		//line lucy.y:91
+		{
+			LucyVAL.names = append(LucyDollar[1].names, LucyDollar[3].str)
+		}
+	case 12:
+		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
+		//line lucy.y:98
+		{
+
+		}
+	case 13:
+		LucyDollar = LucyS[Lucypt-3 : Lucypt+1]
+		//line lucy.y:102
+		{
+
+		}
+	case 14:
+		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
+		//line lucy.y:108
+		{
+			LucyVAL.typednames = LucyDollar[1].typednames
+		}
+	case 15:
+		LucyDollar = LucyS[Lucypt-0 : Lucypt+1]
+		//line lucy.y:112
+		{
+			LucyVAL.typednames = nil
+		}
+	case 16:
+		LucyDollar = LucyS[Lucypt-2 : Lucypt+1]
+		//line lucy.y:119
+		{
+
+		}
+	case 17:
+		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
+		//line lucy.y:123
+		{
+
+		}
+	case 18:
+		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
+		//line lucy.y:129
+		{
+
+		}
+	case 19:
+		LucyDollar = LucyS[Lucypt-3 : Lucypt+1]
+		//line lucy.y:133
 		{
 
 		}
