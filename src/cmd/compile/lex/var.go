@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	lexer = lexmachine.NewLexer()
+	Lexer = lexmachine.NewLexer()
 )

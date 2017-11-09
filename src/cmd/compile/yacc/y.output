@@ -1,11 +1,12 @@
 
 state 0
 	$accept: .top $end 
-	top: .    (1)
 
-	.  reduce 1 (src line 36)
+	TOKEN_PACKAGE  shift 3
+	.  error
 
 	top  goto 1
+	package_name_defination  goto 2
 
 state 1
 	$accept:  top.$end 
@@ -14,15 +15,123 @@ state 1
 	.  error
 
 
-70 terminals, 2 nonterminals
-2 grammar rules, 2/8000 states
+state 2
+	top:  package_name_defination.import mainbody 
+	import: .    (5)
+
+	TOKEN_IMPORT  shift 5
+	.  reduce 5 (src line 52)
+
+	import  goto 4
+
+state 3
+	package_name_defination:  TOKEN_PACKAGE.TOKEN_IDENTIFIER 
+
+	TOKEN_IDENTIFIER  shift 6
+	.  error
+
+
+state 4
+	top:  package_name_defination import.mainbody 
+
+	TOKEN_FUNCTION  shift 9
+	.  error
+
+	mainbody  goto 7
+	function_defination  goto 8
+
+state 5
+	import:  TOKEN_IMPORT.TOKEN_LITERAL_STRING 
+	import:  TOKEN_IMPORT.TOKEN_LITERAL_STRING TOKEN_AS TOKEN_IDENTIFIER 
+
+	TOKEN_LITERAL_STRING  shift 10
+	.  error
+
+
+state 6
+	package_name_defination:  TOKEN_PACKAGE TOKEN_IDENTIFIER.    (2)
+
+	.  reduce 2 (src line 37)
+
+
+state 7
+	top:  package_name_defination import mainbody.    (1)
+
+	.  reduce 1 (src line 34)
+
+
+state 8
+	mainbody:  function_defination.    (6)
+
+	.  reduce 6 (src line 59)
+
+
+state 9
+	function_defination:  TOKEN_FUNCTION.TOKEN_IDENTIFIER TOKEN_LP TOKEN_RP block 
+
+	TOKEN_IDENTIFIER  shift 11
+	.  error
+
+
+state 10
+	import:  TOKEN_IMPORT TOKEN_LITERAL_STRING.    (3)
+	import:  TOKEN_IMPORT TOKEN_LITERAL_STRING.TOKEN_AS TOKEN_IDENTIFIER 
+
+	TOKEN_AS  shift 12
+	.  reduce 3 (src line 43)
+
+
+state 11
+	function_defination:  TOKEN_FUNCTION TOKEN_IDENTIFIER.TOKEN_LP TOKEN_RP block 
+
+	TOKEN_LP  shift 13
+	.  error
+
+
+state 12
+	import:  TOKEN_IMPORT TOKEN_LITERAL_STRING TOKEN_AS.TOKEN_IDENTIFIER 
+
+	TOKEN_IDENTIFIER  shift 14
+	.  error
+
+
+state 13
+	function_defination:  TOKEN_FUNCTION TOKEN_IDENTIFIER TOKEN_LP.TOKEN_RP block 
+
+	TOKEN_RP  shift 15
+	.  error
+
+
+state 14
+	import:  TOKEN_IMPORT TOKEN_LITERAL_STRING TOKEN_AS TOKEN_IDENTIFIER.    (4)
+
+	.  reduce 4 (src line 48)
+
+
+state 15
+	function_defination:  TOKEN_FUNCTION TOKEN_IDENTIFIER TOKEN_LP TOKEN_RP.block 
+	block: .    (7)
+
+	.  reduce 7 (src line 65)
+
+	block  goto 16
+
+state 16
+	function_defination:  TOKEN_FUNCTION TOKEN_IDENTIFIER TOKEN_LP TOKEN_RP block.    (8)
+
+	.  reduce 8 (src line 68)
+
+Rule not reduced: typedname:  
+
+83 terminals, 8 nonterminals
+10 grammar rules, 17/8000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-51 working sets used
-memory: parser 0/120000
+57 working sets used
+memory: parser 5/120000
 0 extra closures
-0 shift entries, 1 exceptions
-1 goto entries
-0 entries saved by goto default
-Optimizer space used: output 1/120000
-1 table entries, 0 zero
-maximum spread: 0, maximum offset: 0
+10 shift entries, 1 exceptions
+7 goto entries
+-1 entries saved by goto default
+Optimizer space used: output 16/120000
+16 table entries, 0 zero
+maximum spread: 80, maximum offset: 80

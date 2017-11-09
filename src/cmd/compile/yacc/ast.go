@@ -5,5 +5,20 @@ import (
 )
 
 var (
-	Tops = make(ast.Tops, 0)
+	current_pos ast.Pos
 )
+
+func packageDefination(s *ast.Expression) {
+	*ast.Nodes = append(*ast.Nodes, &ast.PackageNameDeclare{
+		Name: s.Data.(string),
+		Pos:  s.Pos,
+	})
+}
+
+func importDefination(pname *ast.Expression, alias *ast.Expression) {
+	*ast.Nodes = append(*ast.Nodes, &ast.Imports{
+		Name:  pname.Data.(string),
+		Alias: alias.Data.(string),
+		Pos:   pname.Pos,
+	})
+}

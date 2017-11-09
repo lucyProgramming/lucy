@@ -1,26 +1,42 @@
-package test
+package main
+
+import "github.com/xxx/yyy" as abc
 
 
 
-public const NAME="123";
-const age = 345;
+enum Day {
+	Monday = 1,
+	TuesDay,
+}
+
+public const NAME="123"; // public global variable
+const age = 345;  // private global variable
 
 
-c := 100;
+c := 100;  //private global variable
 
 
-{
-	if(c == 100){
-		break;
+
+{ //block execute at first
+	if c == 100{
+		skip; skip this blok,excute next one
+	}
+	a := 1;
+	if a == 1{
+		print("hello world")
 	}
 }
 
+
+//function defination
 func (x int) Add(a int,b int){
     return a +b + c;
 }
 
 
-Class Person{
+
+//class(key word) Class (class name) this(self name) [colon(:) Persion(father`s name)]
+class Man(this) : Person{
     public Person(){
         var abc int;
         f = fun(){
@@ -29,6 +45,18 @@ Class Person{
         f();
     }
 }
+
+
+
+
+
+
+func main(){
+	for i:= 0 ;i < 100;i++{
+		print(i);
+	}
+}
+
 
 
 

@@ -5,15 +5,14 @@ import __yyfmt__ "fmt"
 
 //line lucy.y:3
 import (
-	"fmt"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"math/big"
 )
 
-//line lucy.y:27
-type lucySymType struct {
+//line lucy.y:25
+type LucySymType struct {
 	yys        int
 	expression *ast.Expression
+	str        string
 }
 
 const TOKEN_FUNCTION = 57346
@@ -23,68 +22,81 @@ const TOKEN_ELSEIF = 57349
 const TOKEN_ELSE = 57350
 const TOKEN_FOR = 57351
 const TOKEN_BREAK = 57352
-const TOKEN_CONTINUE = 57353
-const TOKEN_RETURN = 57354
-const TOKEN_NULL = 57355
-const TOKEN_LP = 57356
-const TOKEN_RP = 57357
-const TOKEN_LC = 57358
-const TOKEN_RC = 57359
-const TOKEN_LB = 57360
-const TOKEN_RB = 57361
-const TOKEN_SEMICOLON = 57362
-const TOKEN_COMMA = 57363
-const TOKEN_LOGICAL_AND = 57364
-const TOKEN_LOGICAL_OR = 57365
-const TOKEN_AND = 57366
-const TOKEN_OR = 57367
-const TOKEN_ASSIGN = 57368
-const TOKEN_EQUAL = 57369
-const TOKEN_NE = 57370
-const TOKEN_GT = 57371
-const TOKEN_GE = 57372
-const TOKEN_LT = 57373
-const TOKEN_LE = 57374
-const TOKEN_ADD = 57375
-const TOKEN_SUB = 57376
-const TOKEN_MUL = 57377
-const TOKEN_DIV = 57378
-const TOKEN_MOD = 57379
-const TOKEN_INCREMENT = 57380
-const TOKEN_DECREMENT = 57381
-const TOKEN_DOT = 57382
-const TOKEN_VAR = 57383
-const TOKEN_NEW = 57384
-const TOKEN_COLON = 57385
-const TOKEN_PLUS_ASSIGN = 57386
-const TOKEN_MINUS_ASSIGN = 57387
-const TOKEN_MUL_ASSIGN = 57388
-const TOKEN_DIV_ASSIGN = 57389
-const TOKEN_MOD_ASSIGN = 57390
-const TOKEN_NOT = 57391
-const TOKEN_SWITCH = 57392
-const TOKEN_CASE = 57393
-const TOKEN_DEFAULT = 57394
-const TOKEN_PACKAGE = 57395
-const TOKEN_CLASS = 57396
-const TOKEN_PUBLIC = 57397
-const TOKEN_PROTECTED = 57398
-const TOKEN_PRIVATE = 57399
-const TOKEN_BOOL = 57400
-const TOKEN_BYTE = 57401
-const TOKEN_INT = 57402
-const TOKEN_FLOAT = 57403
-const TOKEN_STRING = 57404
-const TOKEN_IDENTIFIER = 57405
-const TOKEN_LITERAL_INT = 57406
-const TOKEN_LITERAL_STRING = 57407
-const TOKEN_LITERAL_FLOAT = 57408
-const TOKEN_IMPORT = 57409
-const TOKEN_COLON_ASSIGN = 57410
-const TOKEN_TRUE = 57411
-const TOKEN_FALSE = 57412
+const TOKEN_AS = 57353
+const TOKEN_STATIC = 57354
+const TOKEN_CONTINUE = 57355
+const TOKEN_RETURN = 57356
+const TOKEN_NULL = 57357
+const TOKEN_LP = 57358
+const TOKEN_RP = 57359
+const TOKEN_LC = 57360
+const TOKEN_RC = 57361
+const TOKEN_LB = 57362
+const TOKEN_RB = 57363
+const TOKEN_TRY = 57364
+const TOKEN_CATCH = 57365
+const TOKEN_FINALLY = 57366
+const TOKEN_THROW = 57367
+const TOKEN_SEMICOLON = 57368
+const TOKEN_COMMA = 57369
+const TOKEN_LOGICAL_AND = 57370
+const TOKEN_LOGICAL_OR = 57371
+const TOKEN_AND = 57372
+const TOKEN_OR = 57373
+const TOKEN_ASSIGN = 57374
+const TOKEN_LEFT_SHIFT = 57375
+const TOKEN_RIGHT_SHIFT = 57376
+const TOKEN_EQUAL = 57377
+const TOKEN_NE = 57378
+const TOKEN_GT = 57379
+const TOKEN_GE = 57380
+const TOKEN_LT = 57381
+const TOKEN_LE = 57382
+const TOKEN_ADD = 57383
+const TOKEN_SUB = 57384
+const TOKEN_MUL = 57385
+const TOKEN_LITERAL_BYTE = 57386
+const TOKEN_DIV = 57387
+const TOKEN_MOD = 57388
+const TOKEN_INCREMENT = 57389
+const TOKEN_DECREMENT = 57390
+const TOKEN_DOT = 57391
+const TOKEN_VAR = 57392
+const TOKEN_NEW = 57393
+const TOKEN_COLON = 57394
+const TOKEN_PLUS_ASSIGN = 57395
+const TOKEN_MINUS_ASSIGN = 57396
+const TOKEN_MUL_ASSIGN = 57397
+const TOKEN_DIV_ASSIGN = 57398
+const TOKEN_MOD_ASSIGN = 57399
+const TOKEN_NOT = 57400
+const TOKEN_SWITCH = 57401
+const TOKEN_CASE = 57402
+const TOKEN_DEFAULT = 57403
+const TOKEN_PACKAGE = 57404
+const TOKEN_CLASS = 57405
+const TOKEN_PUBLIC = 57406
+const TOKEN_SKIP = 57407
+const TOKEN_LITERAL_BOOL = 57408
+const TOKEN_PROTECTED = 57409
+const TOKEN_PRIVATE = 57410
+const TOKEN_BOOL = 57411
+const TOKEN_BYTE = 57412
+const TOKEN_INT = 57413
+const TOKEN_FLOAT = 57414
+const TOKEN_STRING = 57415
+const TOKEN_ENUM = 57416
+const TOKEN_INTERFACE = 57417
+const TOKEN_IDENTIFIER = 57418
+const TOKEN_LITERAL_INT = 57419
+const TOKEN_LITERAL_STRING = 57420
+const TOKEN_LITERAL_FLOAT = 57421
+const TOKEN_IMPORT = 57422
+const TOKEN_COLON_ASSIGN = 57423
+const TOKEN_TRUE = 57424
+const TOKEN_FALSE = 57425
 
-var lucyToknames = [...]string{
+var LucyToknames = [...]string{
 	"$end",
 	"error",
 	"$unk",
@@ -95,6 +107,8 @@ var lucyToknames = [...]string{
 	"TOKEN_ELSE",
 	"TOKEN_FOR",
 	"TOKEN_BREAK",
+	"TOKEN_AS",
+	"TOKEN_STATIC",
 	"TOKEN_CONTINUE",
 	"TOKEN_RETURN",
 	"TOKEN_NULL",
@@ -104,6 +118,10 @@ var lucyToknames = [...]string{
 	"TOKEN_RC",
 	"TOKEN_LB",
 	"TOKEN_RB",
+	"TOKEN_TRY",
+	"TOKEN_CATCH",
+	"TOKEN_FINALLY",
+	"TOKEN_THROW",
 	"TOKEN_SEMICOLON",
 	"TOKEN_COMMA",
 	"TOKEN_LOGICAL_AND",
@@ -111,6 +129,8 @@ var lucyToknames = [...]string{
 	"TOKEN_AND",
 	"TOKEN_OR",
 	"TOKEN_ASSIGN",
+	"TOKEN_LEFT_SHIFT",
+	"TOKEN_RIGHT_SHIFT",
 	"TOKEN_EQUAL",
 	"TOKEN_NE",
 	"TOKEN_GT",
@@ -120,6 +140,7 @@ var lucyToknames = [...]string{
 	"TOKEN_ADD",
 	"TOKEN_SUB",
 	"TOKEN_MUL",
+	"TOKEN_LITERAL_BYTE",
 	"TOKEN_DIV",
 	"TOKEN_MOD",
 	"TOKEN_INCREMENT",
@@ -140,6 +161,8 @@ var lucyToknames = [...]string{
 	"TOKEN_PACKAGE",
 	"TOKEN_CLASS",
 	"TOKEN_PUBLIC",
+	"TOKEN_SKIP",
+	"TOKEN_LITERAL_BOOL",
 	"TOKEN_PROTECTED",
 	"TOKEN_PRIVATE",
 	"TOKEN_BOOL",
@@ -147,6 +170,8 @@ var lucyToknames = [...]string{
 	"TOKEN_INT",
 	"TOKEN_FLOAT",
 	"TOKEN_STRING",
+	"TOKEN_ENUM",
+	"TOKEN_INTERFACE",
 	"TOKEN_IDENTIFIER",
 	"TOKEN_LITERAL_INT",
 	"TOKEN_LITERAL_STRING",
@@ -156,57 +181,61 @@ var lucyToknames = [...]string{
 	"TOKEN_TRUE",
 	"TOKEN_FALSE",
 }
-var lucyStatenames = [...]string{}
+var LucyStatenames = [...]string{}
 
-const lucyEofCode = 1
-const lucyErrCode = 2
-const lucyInitialStackSize = 16
+const LucyEofCode = 1
+const LucyErrCode = 2
+const LucyInitialStackSize = 16
 
-//line lucy.y:43
+//line lucy.y:77
 //line yacctab:1
-var lucyExca = [...]int{
+var LucyExca = [...]int{
 	-1, 1,
 	1, -1,
 	-2, 0,
 }
 
-const lucyPrivate = 57344
+const LucyPrivate = 57344
 
-const lucyLast = 1
+const LucyLast = 16
 
-var lucyAct = [...]int{
+var LucyAct = [...]int{
+
+	5, 10, 14, 11, 6, 3, 15, 13, 12, 9,
+	16, 8, 7, 4, 2, 1,
+}
+var LucyPact = [...]int{
+
+	-57, -1000, -80, -72, 5, -77, -1000, -1000, -1000, -73,
+	-3, -9, -74, -11, -1000, -1000, -1000,
+}
+var LucyPgo = [...]int{
+
+	0, 15, 14, 13, 12, 11, 10, 10,
+}
+var LucyR1 = [...]int{
+
+	0, 1, 2, 3, 3, 3, 4, 6, 5, 7,
+}
+var LucyR2 = [...]int{
+
+	0, 3, 2, 2, 4, 0, 1, 0, 5, 0,
+}
+var LucyChk = [...]int{
+
+	-1000, -1, -2, 62, -3, 80, 76, -4, -5, 4,
+	78, 76, 11, 16, 76, 17, -6,
+}
+var LucyDef = [...]int{
+
+	0, -2, 5, 0, 0, 0, 2, 1, 6, 0,
+	3, 0, 0, 0, 4, 7, 8,
+}
+var LucyTok1 = [...]int{
 
 	1,
 }
-var lucyPact = [...]int{
-
-	-1000, -1000,
-}
-var lucyPgo = [...]int{
-
-	0, 0,
-}
-var lucyR1 = [...]int{
-
-	0, 1,
-}
-var lucyR2 = [...]int{
-
-	0, 0,
-}
-var lucyChk = [...]int{
-
-	-1000, -1,
-}
-var lucyDef = [...]int{
-
-	1, -2,
-}
-var lucyTok1 = [...]int{
-
-	1,
-}
-var lucyTok2 = [...]int{
+var LucyTok2 = [...]int{
 
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
@@ -214,13 +243,15 @@ var lucyTok2 = [...]int{
 	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
 	42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 	52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-	62, 63, 64, 65, 66, 67, 68, 69, 70,
+	62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
+	72, 73, 74, 75, 76, 77, 78, 79, 80, 81,
+	82, 83,
 }
-var lucyTok3 = [...]int{
+var LucyTok3 = [...]int{
 	0,
 }
 
-var lucyErrorMessages = [...]struct {
+var LucyErrorMessages = [...]struct {
 	state int
 	token int
 	msg   string
@@ -231,76 +262,76 @@ var lucyErrorMessages = [...]struct {
 /*	parser for yacc output	*/
 
 var (
-	lucyDebug        = 0
-	lucyErrorVerbose = false
+	LucyDebug        = 0
+	LucyErrorVerbose = false
 )
 
-type lucyLexer interface {
-	Lex(lval *lucySymType) int
+type LucyLexer interface {
+	Lex(lval *LucySymType) int
 	Error(s string)
 }
 
-type lucyParser interface {
-	Parse(lucyLexer) int
+type LucyParser interface {
+	Parse(LucyLexer) int
 	Lookahead() int
 }
 
-type lucyParserImpl struct {
-	lval  lucySymType
-	stack [lucyInitialStackSize]lucySymType
+type LucyParserImpl struct {
+	lval  LucySymType
+	stack [LucyInitialStackSize]LucySymType
 	char  int
 }
 
-func (p *lucyParserImpl) Lookahead() int {
+func (p *LucyParserImpl) Lookahead() int {
 	return p.char
 }
 
-func lucyNewParser() lucyParser {
-	return &lucyParserImpl{}
+func LucyNewParser() LucyParser {
+	return &LucyParserImpl{}
 }
 
-const lucyFlag = -1000
+const LucyFlag = -1000
 
-func lucyTokname(c int) string {
-	if c >= 1 && c-1 < len(lucyToknames) {
-		if lucyToknames[c-1] != "" {
-			return lucyToknames[c-1]
+func LucyTokname(c int) string {
+	if c >= 1 && c-1 < len(LucyToknames) {
+		if LucyToknames[c-1] != "" {
+			return LucyToknames[c-1]
 		}
 	}
 	return __yyfmt__.Sprintf("tok-%v", c)
 }
 
-func lucyStatname(s int) string {
-	if s >= 0 && s < len(lucyStatenames) {
-		if lucyStatenames[s] != "" {
-			return lucyStatenames[s]
+func LucyStatname(s int) string {
+	if s >= 0 && s < len(LucyStatenames) {
+		if LucyStatenames[s] != "" {
+			return LucyStatenames[s]
 		}
 	}
 	return __yyfmt__.Sprintf("state-%v", s)
 }
 
-func lucyErrorMessage(state, lookAhead int) string {
+func LucyErrorMessage(state, lookAhead int) string {
 	const TOKSTART = 4
 
-	if !lucyErrorVerbose {
+	if !LucyErrorVerbose {
 		return "syntax error"
 	}
 
-	for _, e := range lucyErrorMessages {
+	for _, e := range LucyErrorMessages {
 		if e.state == state && e.token == lookAhead {
 			return "syntax error: " + e.msg
 		}
 	}
 
-	res := "syntax error: unexpected " + lucyTokname(lookAhead)
+	res := "syntax error: unexpected " + LucyTokname(lookAhead)
 
 	// To match Bison, suggest at most four expected tokens.
 	expected := make([]int, 0, 4)
 
 	// Look for shiftable tokens.
-	base := lucyPact[state]
-	for tok := TOKSTART; tok-1 < len(lucyToknames); tok++ {
-		if n := base + tok; n >= 0 && n < lucyLast && lucyChk[lucyAct[n]] == tok {
+	base := LucyPact[state]
+	for tok := TOKSTART; tok-1 < len(LucyToknames); tok++ {
+		if n := base + tok; n >= 0 && n < LucyLast && LucyChk[LucyAct[n]] == tok {
 			if len(expected) == cap(expected) {
 				return res
 			}
@@ -308,16 +339,16 @@ func lucyErrorMessage(state, lookAhead int) string {
 		}
 	}
 
-	if lucyDef[state] == -2 {
+	if LucyDef[state] == -2 {
 		i := 0
-		for lucyExca[i] != -1 || lucyExca[i+1] != state {
+		for LucyExca[i] != -1 || LucyExca[i+1] != state {
 			i += 2
 		}
 
 		// Look for tokens that we accept or reduce.
-		for i += 2; lucyExca[i] >= 0; i += 2 {
-			tok := lucyExca[i]
-			if tok < TOKSTART || lucyExca[i+1] == 0 {
+		for i += 2; LucyExca[i] >= 0; i += 2 {
+			tok := LucyExca[i]
+			if tok < TOKSTART || LucyExca[i+1] == 0 {
 				continue
 			}
 			if len(expected) == cap(expected) {
@@ -327,7 +358,7 @@ func lucyErrorMessage(state, lookAhead int) string {
 		}
 
 		// If the default action is to accept or reduce, give up.
-		if lucyExca[i+1] != 0 {
+		if LucyExca[i+1] != 0 {
 			return res
 		}
 	}
@@ -338,70 +369,70 @@ func lucyErrorMessage(state, lookAhead int) string {
 		} else {
 			res += " or "
 		}
-		res += lucyTokname(tok)
+		res += LucyTokname(tok)
 	}
 	return res
 }
 
-func lucylex1(lex lucyLexer, lval *lucySymType) (char, token int) {
+func Lucylex1(lex LucyLexer, lval *LucySymType) (char, token int) {
 	token = 0
 	char = lex.Lex(lval)
 	if char <= 0 {
-		token = lucyTok1[0]
+		token = LucyTok1[0]
 		goto out
 	}
-	if char < len(lucyTok1) {
-		token = lucyTok1[char]
+	if char < len(LucyTok1) {
+		token = LucyTok1[char]
 		goto out
 	}
-	if char >= lucyPrivate {
-		if char < lucyPrivate+len(lucyTok2) {
-			token = lucyTok2[char-lucyPrivate]
+	if char >= LucyPrivate {
+		if char < LucyPrivate+len(LucyTok2) {
+			token = LucyTok2[char-LucyPrivate]
 			goto out
 		}
 	}
-	for i := 0; i < len(lucyTok3); i += 2 {
-		token = lucyTok3[i+0]
+	for i := 0; i < len(LucyTok3); i += 2 {
+		token = LucyTok3[i+0]
 		if token == char {
-			token = lucyTok3[i+1]
+			token = LucyTok3[i+1]
 			goto out
 		}
 	}
 
 out:
 	if token == 0 {
-		token = lucyTok2[1] /* unknown char */
+		token = LucyTok2[1] /* unknown char */
 	}
-	if lucyDebug >= 3 {
-		__yyfmt__.Printf("lex %s(%d)\n", lucyTokname(token), uint(char))
+	if LucyDebug >= 3 {
+		__yyfmt__.Printf("lex %s(%d)\n", LucyTokname(token), uint(char))
 	}
 	return char, token
 }
 
-func lucyParse(lucylex lucyLexer) int {
-	return lucyNewParser().Parse(lucylex)
+func LucyParse(Lucylex LucyLexer) int {
+	return LucyNewParser().Parse(Lucylex)
 }
 
-func (lucyrcvr *lucyParserImpl) Parse(lucylex lucyLexer) int {
-	var lucyn int
-	var lucyVAL lucySymType
-	var lucyDollar []lucySymType
-	_ = lucyDollar // silence set and not used
-	lucyS := lucyrcvr.stack[:]
+func (Lucyrcvr *LucyParserImpl) Parse(Lucylex LucyLexer) int {
+	var Lucyn int
+	var LucyVAL LucySymType
+	var LucyDollar []LucySymType
+	_ = LucyDollar // silence set and not used
+	LucyS := Lucyrcvr.stack[:]
 
 	Nerrs := 0   /* number of errors */
 	Errflag := 0 /* error recovery flag */
-	lucystate := 0
-	lucyrcvr.char = -1
-	lucytoken := -1 // lucyrcvr.char translated into internal numbering
+	Lucystate := 0
+	Lucyrcvr.char = -1
+	Lucytoken := -1 // Lucyrcvr.char translated into internal numbering
 	defer func() {
 		// Make sure we report no lookahead when not parsing.
-		lucystate = -1
-		lucyrcvr.char = -1
-		lucytoken = -1
+		Lucystate = -1
+		Lucyrcvr.char = -1
+		Lucytoken = -1
 	}()
-	lucyp := -1
-	goto lucystack
+	Lucyp := -1
+	goto Lucystack
 
 ret0:
 	return 0
@@ -409,81 +440,81 @@ ret0:
 ret1:
 	return 1
 
-lucystack:
+Lucystack:
 	/* put a state and value onto the stack */
-	if lucyDebug >= 4 {
-		__yyfmt__.Printf("char %v in %v\n", lucyTokname(lucytoken), lucyStatname(lucystate))
+	if LucyDebug >= 4 {
+		__yyfmt__.Printf("char %v in %v\n", LucyTokname(Lucytoken), LucyStatname(Lucystate))
 	}
 
-	lucyp++
-	if lucyp >= len(lucyS) {
-		nyys := make([]lucySymType, len(lucyS)*2)
-		copy(nyys, lucyS)
-		lucyS = nyys
+	Lucyp++
+	if Lucyp >= len(LucyS) {
+		nyys := make([]LucySymType, len(LucyS)*2)
+		copy(nyys, LucyS)
+		LucyS = nyys
 	}
-	lucyS[lucyp] = lucyVAL
-	lucyS[lucyp].yys = lucystate
+	LucyS[Lucyp] = LucyVAL
+	LucyS[Lucyp].yys = Lucystate
 
-lucynewstate:
-	lucyn = lucyPact[lucystate]
-	if lucyn <= lucyFlag {
-		goto lucydefault /* simple state */
+Lucynewstate:
+	Lucyn = LucyPact[Lucystate]
+	if Lucyn <= LucyFlag {
+		goto Lucydefault /* simple state */
 	}
-	if lucyrcvr.char < 0 {
-		lucyrcvr.char, lucytoken = lucylex1(lucylex, &lucyrcvr.lval)
+	if Lucyrcvr.char < 0 {
+		Lucyrcvr.char, Lucytoken = Lucylex1(Lucylex, &Lucyrcvr.lval)
 	}
-	lucyn += lucytoken
-	if lucyn < 0 || lucyn >= lucyLast {
-		goto lucydefault
+	Lucyn += Lucytoken
+	if Lucyn < 0 || Lucyn >= LucyLast {
+		goto Lucydefault
 	}
-	lucyn = lucyAct[lucyn]
-	if lucyChk[lucyn] == lucytoken { /* valid shift */
-		lucyrcvr.char = -1
-		lucytoken = -1
-		lucyVAL = lucyrcvr.lval
-		lucystate = lucyn
+	Lucyn = LucyAct[Lucyn]
+	if LucyChk[Lucyn] == Lucytoken { /* valid shift */
+		Lucyrcvr.char = -1
+		Lucytoken = -1
+		LucyVAL = Lucyrcvr.lval
+		Lucystate = Lucyn
 		if Errflag > 0 {
 			Errflag--
 		}
-		goto lucystack
+		goto Lucystack
 	}
 
-lucydefault:
+Lucydefault:
 	/* default state action */
-	lucyn = lucyDef[lucystate]
-	if lucyn == -2 {
-		if lucyrcvr.char < 0 {
-			lucyrcvr.char, lucytoken = lucylex1(lucylex, &lucyrcvr.lval)
+	Lucyn = LucyDef[Lucystate]
+	if Lucyn == -2 {
+		if Lucyrcvr.char < 0 {
+			Lucyrcvr.char, Lucytoken = Lucylex1(Lucylex, &Lucyrcvr.lval)
 		}
 
 		/* look through exception table */
 		xi := 0
 		for {
-			if lucyExca[xi+0] == -1 && lucyExca[xi+1] == lucystate {
+			if LucyExca[xi+0] == -1 && LucyExca[xi+1] == Lucystate {
 				break
 			}
 			xi += 2
 		}
 		for xi += 2; ; xi += 2 {
-			lucyn = lucyExca[xi+0]
-			if lucyn < 0 || lucyn == lucytoken {
+			Lucyn = LucyExca[xi+0]
+			if Lucyn < 0 || Lucyn == Lucytoken {
 				break
 			}
 		}
-		lucyn = lucyExca[xi+1]
-		if lucyn < 0 {
+		Lucyn = LucyExca[xi+1]
+		if Lucyn < 0 {
 			goto ret0
 		}
 	}
-	if lucyn == 0 {
+	if Lucyn == 0 {
 		/* error ... attempt to resume parsing */
 		switch Errflag {
 		case 0: /* brand new error */
-			lucylex.Error(lucyErrorMessage(lucystate, lucytoken))
+			Lucylex.Error(LucyErrorMessage(Lucystate, Lucytoken))
 			Nerrs++
-			if lucyDebug >= 1 {
-				__yyfmt__.Printf("%s", lucyStatname(lucystate))
-				__yyfmt__.Printf(" saw %s\n", lucyTokname(lucytoken))
+			if LucyDebug >= 1 {
+				__yyfmt__.Printf("%s", LucyStatname(Lucystate))
+				__yyfmt__.Printf(" saw %s\n", LucyTokname(Lucytoken))
 			}
 			fallthrough
 
@@ -491,72 +522,102 @@ lucydefault:
 			Errflag = 3
 
 			/* find a state where "error" is a legal shift action */
-			for lucyp >= 0 {
-				lucyn = lucyPact[lucyS[lucyp].yys] + lucyErrCode
-				if lucyn >= 0 && lucyn < lucyLast {
-					lucystate = lucyAct[lucyn] /* simulate a shift of "error" */
-					if lucyChk[lucystate] == lucyErrCode {
-						goto lucystack
+			for Lucyp >= 0 {
+				Lucyn = LucyPact[LucyS[Lucyp].yys] + LucyErrCode
+				if Lucyn >= 0 && Lucyn < LucyLast {
+					Lucystate = LucyAct[Lucyn] /* simulate a shift of "error" */
+					if LucyChk[Lucystate] == LucyErrCode {
+						goto Lucystack
 					}
 				}
 
 				/* the current p has no shift on "error", pop stack */
-				if lucyDebug >= 2 {
-					__yyfmt__.Printf("error recovery pops state %d\n", lucyS[lucyp].yys)
+				if LucyDebug >= 2 {
+					__yyfmt__.Printf("error recovery pops state %d\n", LucyS[Lucyp].yys)
 				}
-				lucyp--
+				Lucyp--
 			}
 			/* there is no state on the stack with an error shift ... abort */
 			goto ret1
 
 		case 3: /* no shift yet; clobber input char */
-			if lucyDebug >= 2 {
-				__yyfmt__.Printf("error recovery discards %s\n", lucyTokname(lucytoken))
+			if LucyDebug >= 2 {
+				__yyfmt__.Printf("error recovery discards %s\n", LucyTokname(Lucytoken))
 			}
-			if lucytoken == lucyEofCode {
+			if Lucytoken == LucyEofCode {
 				goto ret1
 			}
-			lucyrcvr.char = -1
-			lucytoken = -1
-			goto lucynewstate /* try again in the same state */
+			Lucyrcvr.char = -1
+			Lucytoken = -1
+			goto Lucynewstate /* try again in the same state */
 		}
 	}
 
-	/* reduction by production lucyn */
-	if lucyDebug >= 2 {
-		__yyfmt__.Printf("reduce %v in:\n\t%v\n", lucyn, lucyStatname(lucystate))
+	/* reduction by production Lucyn */
+	if LucyDebug >= 2 {
+		__yyfmt__.Printf("reduce %v in:\n\t%v\n", Lucyn, LucyStatname(Lucystate))
 	}
 
-	lucynt := lucyn
-	lucypt := lucyp
-	_ = lucypt // guard against "declared and not used"
+	Lucynt := Lucyn
+	Lucypt := Lucyp
+	_ = Lucypt // guard against "declared and not used"
 
-	lucyp -= lucyR2[lucyn]
-	// lucyp is now the index of $0. Perform the default action. Iff the
+	Lucyp -= LucyR2[Lucyn]
+	// Lucyp is now the index of $0. Perform the default action. Iff the
 	// reduced production is ε, $1 is possibly out of range.
-	if lucyp+1 >= len(lucyS) {
-		nyys := make([]lucySymType, len(lucyS)*2)
-		copy(nyys, lucyS)
-		lucyS = nyys
+	if Lucyp+1 >= len(LucyS) {
+		nyys := make([]LucySymType, len(LucyS)*2)
+		copy(nyys, LucyS)
+		LucyS = nyys
 	}
-	lucyVAL = lucyS[lucyp+1]
+	LucyVAL = LucyS[Lucyp+1]
 
 	/* consult goto table to find next state */
-	lucyn = lucyR1[lucyn]
-	lucyg := lucyPgo[lucyn]
-	lucyj := lucyg + lucyS[lucyp].yys + 1
+	Lucyn = LucyR1[Lucyn]
+	Lucyg := LucyPgo[Lucyn]
+	Lucyj := Lucyg + LucyS[Lucyp].yys + 1
 
-	if lucyj >= lucyLast {
-		lucystate = lucyAct[lucyg]
+	if Lucyj >= LucyLast {
+		Lucystate = LucyAct[Lucyg]
 	} else {
-		lucystate = lucyAct[lucyj]
-		if lucyChk[lucystate] != -lucyn {
-			lucystate = lucyAct[lucyg]
+		Lucystate = LucyAct[Lucyj]
+		if LucyChk[Lucystate] != -Lucyn {
+			Lucystate = LucyAct[Lucyg]
 		}
 	}
 	// dummy call; replaced with literal code
-	switch lucynt {
+	switch Lucynt {
 
+	case 2:
+		LucyDollar = LucyS[Lucypt-2 : Lucypt+1]
+		//line lucy.y:39
+		{
+			packageDefination(LucyDollar[2].expression)
+		}
+	case 3:
+		LucyDollar = LucyS[Lucypt-2 : Lucypt+1]
+		//line lucy.y:45
+		{
+			importDefination(LucyDollar[2].expression)
+		}
+	case 4:
+		LucyDollar = LucyS[Lucypt-4 : Lucypt+1]
+		//line lucy.y:49
+		{
+			importDefination(LucyDollar[2].expression, LucyDollar[4].expression)
+		}
+	case 5:
+		LucyDollar = LucyS[Lucypt-0 : Lucypt+1]
+		//line lucy.y:53
+		{
+
+		}
+	case 6:
+		LucyDollar = LucyS[Lucypt-1 : Lucypt+1]
+		//line lucy.y:61
+		{
+
+		}
 	}
-	goto lucystack /* stack new state and value */
+	goto Lucystack /* stack new state and value */
 }

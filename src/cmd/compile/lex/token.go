@@ -65,7 +65,6 @@ const (
 	TOKEN_PACKAGE               //package
 	TOKEN_IMPORT                //import
 	TOKEN_AS                    //as
-	TOKEN_INCLUED               //include
 	TOKEN_CLASS                 //class
 	TOKEN_STATIC                //static
 	TOKEN_PUBLIC                //public

@@ -123,7 +123,7 @@ func (v *VariableType) TypeString(ret *string) {
 	case VARIABLE_TYPE_CLASS:
 		*ret = v.Name
 	case VARIALBE_TYPE_ENUM:
-		*ret = v.Name
+		*ret = v.Name + "(enum)"
 	case VARIABLE_TYPE_COMBINATION:
 		v.CombinationType.TypeString(ret)
 	}

@@ -9,15 +9,31 @@ const (
 type Class struct {
 	Pos         Pos
 	Name        string
-	Fields      []*ClassField
-	Methods     []*ClassMethod
+	Fields      map[string]*ClassField
+	Methods     map[string]*ClassMethod
 	Father      *Class
 	Constructor *Function // can be nil
 }
 
-func (c Class) check() []error {
+func (c *Class) check() []error {
 	errs := make([]error, 0)
+	errs = append(errs, c.checkFields()...)
+	errs = append(errs, c.checkFields()...)
+	return errs
+}
 
+func (c *Class) checkFields() []error {
+	errs := []error{}
+	//	for _, v := range c.Fields {
+	//	}
+	return errs
+}
+
+func (c *Class) checkMethods() []error {
+	errs := []error{}
+	for _, v := range c.Methods {
+		errs = append(errs, v.Func.check(nil)...)
+	}
 	return errs
 }
 
@@ -37,4 +53,5 @@ type ClassField struct {
 	Typ  VariableType
 	Init *Expression // init value
 	Tag  string      //for reflect
+	Pos  *Pos
 }

@@ -1,1 +1,1 @@
-package compile
+package main

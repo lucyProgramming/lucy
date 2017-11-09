@@ -62,7 +62,7 @@ var (
 )
 
 func Test_lex(t *testing.T) {
-	s, err := lexer.Scanner([]byte(code))
+	s, err := Lexer.Scanner([]byte(code))
 	if err != nil {
 		panic(err)
 	}
