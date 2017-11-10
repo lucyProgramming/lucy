@@ -123,9 +123,9 @@ func (v *VariableType) TypeString(ret *string) {
 	case VARIALBE_TYPE_FUNCTION:
 		*ret = "function"
 	case VARIABLE_TYPE_CLASS:
-		*ret = v.Name
+		*ret = v.Lname
 	case VARIALBE_TYPE_ENUM:
-		*ret = v.Name + "(enum)"
+		*ret = v.Lname + "(enum)"
 	case VARIABLE_TYPE_COMBINATION:
 		v.CombinationType.TypeString(ret)
 	}

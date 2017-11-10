@@ -78,7 +78,8 @@ func (p *Parser) parse() []error {
 		Data: pd,
 	})
 	p.parseImports() // next is called
-	if p.eof {       //end of file
+	if p.eof {
+		//end of file
 		return p.errs
 	}
 	ispublic := false
@@ -114,14 +115,20 @@ func (p *Parser) unexpectedErr() {
 	p.errs = append(p.errs, fmt.Errorf("%s %d:%d unexpected EOF", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
 }
 
-//var a,b,c int,char,bool  | var a,b,c int
+//var a,b,c int,char,bool  | var a,b,c int = 123;
 func (p *Parser) parseVarDefinition(ispublic bool) {
 	p.Next()
 	if p.eof {
 		p.unexpectedErr()
 		return
 	}
-	names, poss := p.parseNameList()
+	names, poss, err := p.parseNameList()
+	if err != nil {
+		p.errs = append(p.errs, err)
+		p.consume(lex.TOKEN_SEMICOLON)
+		p.Next()
+		return
+	}
 	if p.eof {
 		p.unexpectedErr()
 		return
@@ -129,41 +136,75 @@ func (p *Parser) parseVarDefinition(ispublic bool) {
 	if len(names) == 0 {
 		p.errs = append(p.errs, fmt.Errorf("%s %d:%d no variable name defined", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
 		p.consume(lex.TOKEN_SEMICOLON)
+		p.Next()
 		return
 	}
 	t := p.parseType()
 	if t == nil {
 		p.errs = append(p.errs, fmt.Errorf("%s %d:%d no variable type found or defined wrong", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
 		p.consume(lex.TOKEN_SEMICOLON)
+		p.Next()
 		return
 	}
+	//value , no default value definition
+	if p.token.Type == lex.TOKEN_SEMICOLON {
+		//p.errs = append(p.errs, fmt.Errorf("%s %d:%d not a ; after type definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
+		//p.consume(lex.TOKEN_SEMICOLON)
+		p.Next()
+		return
+	} else if TOKEN_ASSIGN == p.token.Type { //assign
+		p.Next()
+		p.parseExpressions()
+	}
+
 	for k, v := range names {
 		gv := &ast.GlobalVariable{}
 		gv.SymbolicItem.Name = v
-		gv.SymbolicItem.Typ = *t
+		vt := &ast.VariableType{}
+		*vt = *t
+		gv.SymbolicItem.Typ = vt
 		if ispublic {
-			gv.AccessProperty = ast.ACCESS_PUBLIC
+			gv.AccessProperty.Access = ast.ACCESS_PUBLIC
 		} else {
-			gv.AccessProperty = ast.ACCESS_PRIVATE
+			gv.AccessProperty.Access = ast.ACCESS_PRIVATE
 		}
 		gv.Pos = *poss[k]
-		p.tops = append(p.tops, &ast.Node{
+		*p.tops = append(*p.tops, &ast.Node{
 			Data: gv,
 		})
 	}
 
-	if p.token.Type == lex.TOKEN_SEMICOLON {
-		p.errs = append(p.errs, fmt.Errorf("%s %d:%d no variable type found or defined wrong", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-		p.consume(lex.TOKEN_SEMICOLON)
-	}
+	p.Next()
+}
 
+func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
+	ret := []*ast.VariableType{}
+	var t *ast.VariableType
+	for {
+		t = p.parseType()
+		if t == nil { // not a type
+			return ret, nil
+		}
+		ret = append(ret, t)
+		p.Next()
+		if p.token.Type != lex.TOKEN_COMMA {
+			break
+		}
+		t = p.parseType()
+		if t == nil {
+			return ret, fmt.Errorf("%s %d:%d is not type", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+		} else {
+			ret = append(ret, t)
+		}
+	}
 }
 
 func (p *Parser) parseType() *ast.VariableType {
 	switch p.token.Type {
 	case lex.TOKEN_LB:
 		p.Next()
-		if p.token.Type != lex.TOKEN_RB { // [ and ] not match
+		if p.token.Type != lex.TOKEN_RB {
+			// [ and ] not match
 			return nil
 		}
 		//lookahead
@@ -178,51 +219,60 @@ func (p *Parser) parseType() *ast.VariableType {
 		tt.CombinationType.Typ = ast.COMBINATION_TYPE_ARRAY
 		tt.CombinationType.Combination = t
 	case lex.TOKEN_BOOL:
+		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		}
 	case lex.TOKEN_BYTE:
+		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
 		}
 	case lex.TOKEN_INT:
+		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
 		}
 	case lex.TOKEN_FLOAT:
+		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
 		}
 	case lex.TOKEN_STRING:
+		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_STRING,
 		}
 	case lex.TOKEN_IDENTIFIER:
-
 	}
 	return nil
 }
 
-func (p *Parser) parseNameList() (names []string, poss []*ast.Pos) {
+func (p *Parser) parseNameList() (names []string, poss []*ast.Pos, err error) {
 	names = []string{}
 	poss = []*ast.Pos{}
 	for p.token.Type == lex.TOKEN_IDENTIFIER && !p.eof {
 		names = append(names, p.token.Data.(string)) //current identifier
 		poss = append(poss, &ast.Pos{
-			Filename:  p.filename,
-			StartLine: p.token.Match.StartLine,
-			StartLine: p.token.Match.StartColumn,
+			Filename:    p.filename,
+			StartLine:   p.token.Match.StartLine,
+			StartColumn: p.token.Match.StartColumn,
 		})
 		p.Next()
-		if p.token.Type != lex.TOKEN_COMMA { // not a ,
+		if p.token.Type != lex.TOKEN_COMMA {
+			// not a ,
 			break
 		}
 		p.Next()
+		if p.token.Type != lex.TOKEN_IDENTIFIER {
+			err = fmt.Errorf("%s %d:%d %s is not identifier", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp)
+		}
 	}
 	return
 }
 
-func (p *Parser) consume(untils ...int) error { //
+func (p *Parser) consume(untils ...int) {
+	//
 	m := make(map[int]bool)
 	if len(untils) == 0 {
 		panic("no token to consume")
@@ -233,7 +283,7 @@ func (p *Parser) consume(untils ...int) error { //
 	var ok bool
 	for p.eof {
 		if _, ok = m[p.token.Type]; ok {
-			return nil
+			return
 		}
 		p.Next()
 	}
@@ -245,7 +295,8 @@ func (p *Parser) parseImports() {
 	if p.eof {
 		return
 	}
-	if p.token.Type != lex.TOKEN_IMPORT { // not a import
+	if p.token.Type != lex.TOKEN_IMPORT {
+		// not a import
 		return
 	}
 	syntaxErr := func() error {
@@ -304,8 +355,4 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.Filename = p.filename
 	pos.StartLine = t.Match.StartLine
 	pos.StartColumn = t.Match.StartColumn
-}
-
-type ExpressionParser struct {
-	pserser *Parser
 }
