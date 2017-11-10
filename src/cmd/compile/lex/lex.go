@@ -556,10 +556,10 @@ func init() {
 	})
 
 	// string literal
-	Lexer.Add([]byte("(\".*\")"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	Lexer.Add([]byte(`(\"[^\"]+\")`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_STRING
+		t.Type = TOKEN_LITERAL_STRING
 		t.Desp = string(match.Bytes)
 		t.Data = string(match.Bytes[1:len(match.Bytes)])
 		return t, nil
@@ -600,6 +600,13 @@ func init() {
 		t.Match = match
 		t.Type = TOKEN_THROW
 		t.Desp = "throw"
+		return t, nil
+	})
+	Lexer.Add([]byte("type"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_TYPE
+		t.Desp = "type"
 		return t, nil
 	})
 }

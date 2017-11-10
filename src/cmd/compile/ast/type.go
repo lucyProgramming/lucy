@@ -23,6 +23,7 @@ type AccessProperty struct {
 
 const (
 	COMBINATION_TYPE_ARRAY = iota
+	COMBINATION_TYPE_DOT
 )
 
 type CombinationType struct {
@@ -31,7 +32,8 @@ type CombinationType struct {
 }
 type VariableType struct {
 	Typ             int
-	Name            string // class name or function name or enum name
+	Lname           string // []Lname Lname something
+	Rname           string // Lname.Rname
 	CombinationType *CombinationType
 	FunctionType    *FunctionType
 }

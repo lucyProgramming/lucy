@@ -39,35 +39,70 @@ import (
 %%
 
 top:
-    package_name_defination import mainbody
+    TOKEN_PACKAGE import mainbody
 
-package_name_defination:
+package_name_definition:
     TOKEN_PACKAGE TOKEN_IDENTIFIER
     {
-        packageDefination($2)
+        packageDefinition($2)
     }
 
 import:
     TOKEN_IMPORT TOKEN_LITERAL_STRING
     {
-         importDefination($2)
+         importDefinition($2)
     }
     | TOKEN_IMPORT TOKEN_LITERAL_STRING TOKEN_AS TOKEN_IDENTIFIER
     {
-        importDefination($2,$4)
+        importDefinition($2,$4)
+    }
+    |
+    {
+
     }
 
 
 mainbody:
-    function_defination
+    mainbody function_definition
+    {
+
+    }
+    | mainbody enum_definition
+    {
+
+    }
+    |
     {
 
     }
 
+
+
+
+enum_definition:
+    TOKEN_ENUM TOKEN_IDENTIFIER TOKEN_LC  namelist  TOKEN_RC
+    {
+
+    }
+
+
+statementlist:
+    statementlist TOKEN_SEMICOLON statement
+    {
+
+    }
+
+
+
+statement:
+
+
+
 block:
+    TOKEN_LC statementlist TOKEN_RC
 
 
-function_defination:
+function_definition:
     TOKEN_FUNCTION TOKEN_LP typednames TOKEN_RP  TOKEN_IDENTIFIER TOKEN_LP typednames_or_nil  TOKEN_RP block
 	{
 
@@ -124,11 +159,26 @@ typ:
     {
 
     }
+    | TOKEN_BYTE
+    {
+
+    }
+    | TOKEN_INT
+    {
+
+    }
+    | TOKEN_FLOAT
+    {
+
+    }
+    | TOKEN_STRING
+    {
+
+    }
     | TOKEN_LB TOKEN_RB typ
     {
 
     }
-
 
 
 

@@ -7,6 +7,8 @@ import (
 
 var (
 	code = `	package test
+	
+	import "github.om/xxx/ggg" as vvv;
 	const a = 123;
 	function(){
 		a += b;
@@ -102,4 +104,5 @@ func Test_lex(t *testing.T) {
 		}
 	}
 	fmt.Println("\n\n\n\n\n\n\n")
+
 }
