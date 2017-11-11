@@ -15,7 +15,7 @@ const eof = 0
 // the methods Lex(*<prefix>SymType) int and Error(string).
 type LucyLex struct {
 	Filename string
-	Scanner *lexmachine.Scanner
+	Scanner  *lexmachine.Scanner
 	//	line    []byte
 	//	peek    rune
 	Errs []error
@@ -40,9 +40,9 @@ retry:
 		}
 	}
 	token = t.(*lex.Token)
-	defer func(){
+	defer func() {
 		current_pos.Filename = x.Filename
-		current_pos.StartLine =
+
 	}()
 	switch token.Type {
 	case lex.TOKEN_FUNCTION:

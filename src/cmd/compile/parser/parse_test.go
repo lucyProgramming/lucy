@@ -15,12 +15,8 @@ import "github.com/xxx/yyy" ;
 
 
 
-public enum Day {
-	Monday = 1,
-	TuesDay,
-}
 
-public const NAME="123"; // public global variable
+public const NAME := "123"; // public global variable
 const age = 345;  // private global variable
 
 

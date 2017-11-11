@@ -36,7 +36,8 @@ const (
 	EXPRESSION_TYPE_MUL
 	EXPRESSION_TYPE_DIV
 	EXPRESSION_TYPE_MOD
-	EXPRESSION_TYPE_INDEX
+	EXPRESSION_TYPE_INDEX // a["b"]
+	EXPRESSION_TYPE_DOT   //a.b
 	EXPRESSION_TYPE_METHOD_CALL
 	EXPRESSION_TYPE_FUNCTION_CALL
 	EXPRESSION_TYPE_INCREMENT
@@ -102,13 +103,15 @@ type Expression struct {
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表
+
 type ExpressionFunctionCall struct {
-	Name string //function name
-	Args CallArgs
+	Expression *Expression
+	Args       CallArgs
 }
+
 type ExpressionMethodCall struct {
-	ClassName string
 	ExpressionFunctionCall
+	Name string
 }
 type ExpressionBinary struct {
 	Left  *Expression

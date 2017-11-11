@@ -47,7 +47,7 @@ func (b *Block) inherite(father *Block) {
 	b.file = father.file
 	b.Outter = father
 }
-func (b *Block) searchFunction(name string) *Function {
+func (b *Block) searchFunction(e *Expression) *Function {
 	//bb := b
 	//for bb != nil {
 	//	if i, ok := bb.SymbolicTable.itemsMap[name]; ok {
@@ -57,7 +57,10 @@ func (b *Block) searchFunction(name string) *Function {
 	//	}
 	//	bb = bb.Outter
 	//}
-	return b.p.Funcs[name]
+	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
+		return nil
+	}
+	return b.p.Funcs[e.Data.(string)]
 }
 
 type InheritedAttribute struct {

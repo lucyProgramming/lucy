@@ -43,7 +43,7 @@ func (p *Parser) Next() {
 
 func (p *Parser) parse() []error {
 	p.ExpressionParser = &ExpressionParser{}
-	p.ExpressionParser.pserser = p
+	p.ExpressionParser.parser = p
 	p.errs = []error{}
 	var err error
 	p.scanner, err = lex.Lexer.Scanner(p.bs)
@@ -93,6 +93,7 @@ func (p *Parser) parse() []error {
 		case lex.TOKEN_LC:
 		case lex.TOKEN_CLASS:
 		case lex.TOKEN_PUBLIC:
+		case lex.TOKEN_CONST:
 			ispublic = true
 			p.Next()
 			if p.eof {
@@ -112,7 +113,14 @@ func (p *Parser) parse() []error {
 }
 
 func (p *Parser) unexpectedErr() {
-	p.errs = append(p.errs, fmt.Errorf("%s %d:%d unexpected EOF", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
+	p.errs = append(p.errs, p.mkUnexpectedErr())
+}
+func (p *Parser) mkUnexpectedErr() error {
+	return fmt.Errorf("%s %d:%d unexpected EOF", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+}
+
+func (p *Parser) errorMsgPrefix() string {
+	return fmt.Sprint("%s %d:%d", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
@@ -146,17 +154,33 @@ func (p *Parser) parseVarDefinition(ispublic bool) {
 		p.Next()
 		return
 	}
+
+	var expressions []*ast.Expression
 	//value , no default value definition
 	if p.token.Type == lex.TOKEN_SEMICOLON {
-		//p.errs = append(p.errs, fmt.Errorf("%s %d:%d not a ; after type definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-		//p.consume(lex.TOKEN_SEMICOLON)
+		p.Next()
+	} else if lex.TOKEN_ASSIGN == p.token.Type { //assign
+		p.Next()
+		expressions, err = p.ExpressionParser.parseExpressions()
+		if err != nil {
+			p.errs = append(p.errs, err)
+		}
+		if p.token.Type != lex.TOKEN_SEMICOLON {
+			p.errs = append(p.errs, fmt.Errorf("%s not a \";\" after a expression list ", p.errorMsgPrefix()))
+			p.consume(lex.TOKEN_SEMICOLON)
+			p.Next()
+			return
+		}
+	} else {
+		p.errs = append(p.errs, fmt.Errorf("%s %d:%d not a ; after type definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
+		p.consume(lex.TOKEN_SEMICOLON)
 		p.Next()
 		return
-	} else if TOKEN_ASSIGN == p.token.Type { //assign
-		p.Next()
-		p.parseExpressions()
 	}
-
+	if len(names) != len(expressions) {
+		p.errs = append(p.errs, fmt.Errorf("%s name list and value list has no same length", p.errorMsgPrefix()))
+		return
+	}
 	for k, v := range names {
 		gv := &ast.GlobalVariable{}
 		gv.SymbolicItem.Name = v
@@ -173,8 +197,6 @@ func (p *Parser) parseVarDefinition(ispublic bool) {
 			Data: gv,
 		})
 	}
-
-	p.Next()
 }
 
 func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
@@ -197,6 +219,7 @@ func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
 			ret = append(ret, t)
 		}
 	}
+	return ret, nil
 }
 
 func (p *Parser) parseType() *ast.VariableType {
@@ -217,7 +240,7 @@ func (p *Parser) parseType() *ast.VariableType {
 			Typ: ast.VARIABLE_TYPE_COMBINATION,
 		}
 		tt.CombinationType.Typ = ast.COMBINATION_TYPE_ARRAY
-		tt.CombinationType.Combination = t
+		tt.CombinationType.Combination = *t
 	case lex.TOKEN_BOOL:
 		p.Next()
 		return &ast.VariableType{
@@ -244,7 +267,12 @@ func (p *Parser) parseType() *ast.VariableType {
 			Typ: ast.VARIABLE_TYPE_STRING,
 		}
 	case lex.TOKEN_IDENTIFIER:
+		return p.parseIdentiferType()
 	}
+	return nil
+}
+
+func (p *Parser) parseIdentiferType() *ast.VariableType {
 	return nil
 }
 
@@ -272,7 +300,6 @@ func (p *Parser) parseNameList() (names []string, poss []*ast.Pos, err error) {
 }
 
 func (p *Parser) consume(untils ...int) {
-	//
 	m := make(map[int]bool)
 	if len(untils) == 0 {
 		panic("no token to consume")

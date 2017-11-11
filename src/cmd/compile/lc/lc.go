@@ -1,20 +1,17 @@
 package lc
 
 import (
+	"github.com/756445638/lucy/src/cmd/compile/parser"
 	"io/ioutil"
-
-	"github.com/756445638/lucy/src/cmd/compile/yacc"
 )
 
-/*
-	files in on package
-*/
 func Main(files []string) {
 	l := &LucyCompile{
 		Files:            files,
 		NerrsStopCompile: 10,
 		Nerrs:            []error{},
 	}
+	l.compile()
 }
 
 type LucyCompile struct {
@@ -24,12 +21,13 @@ type LucyCompile struct {
 }
 
 func (l *LucyCompile) compile() {
-	for k, v := range l.Files {
+	for _, v := range l.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
 			l.Nerrs = append(l.Nerrs, err)
 			continue
 		}
+		parser.Parse(&Tops, v, bs)
 	}
 
 }

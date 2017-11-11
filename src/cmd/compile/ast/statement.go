@@ -144,9 +144,9 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	//func1()
 	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
 		call := s.Expression.Data.(*ExpressionFunctionCall)
-		f := b.searchFunction(call.Name)
+		f := b.searchFunction(call.Expression)
 		if f == nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d", notFoundError(&s.Pos, "function", call.Name)))
+			errs = append(errs, fmt.Errorf("%s %d:%d", notFoundError(&s.Pos, "function", call.Expression.humanReadableString())))
 		} else {
 			errs = append(errs, checkFunctionCall(b, f, call, &s.Pos)...)
 		}
