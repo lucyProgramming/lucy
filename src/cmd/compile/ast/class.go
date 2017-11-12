@@ -7,7 +7,7 @@ const (
 )
 
 type Class struct {
-	Pos         Pos
+	Pos         *Pos
 	Name        string
 	Fields      map[string]*ClassField
 	Methods     map[string]*ClassMethod

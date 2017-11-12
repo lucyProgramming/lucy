@@ -5,3 +5,8 @@ var (
 	negative_small_float = -small_float
 	Nodes                *[]*Node //
 )
+
+type NameWithPos struct {
+	Name string
+	Pos  *Pos
+}

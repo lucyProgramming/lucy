@@ -12,7 +12,7 @@ type Package struct {
 	Classes   map[string]*Class
 	Enums     map[string]*Enum
 	EnumNames map[string]*EnumNames
-	Vars      map[string]*GlobalVariable
+	Vars      map[string]*VariableDefinition
 	Consts    map[string]*Const
 	NErros    int // number of errors should stop compile
 }

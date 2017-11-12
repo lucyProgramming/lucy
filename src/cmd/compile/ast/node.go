@@ -16,7 +16,7 @@ type ConvertTops2Package struct {
 	Funcs   []*Function
 	Classes []*Class
 	Enums   []*Enum
-	Vars    []*GlobalVariable
+	Vars    []*VariableDefinition
 	Consts  []*Const
 	Import  []*Imports
 }
@@ -86,12 +86,12 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				r.Type = "const"
 			case *Enum:
 				t := vv.(*EnumNames)
-				r.Pos = append(r.Pos, &t.Pos)
+				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "enum"
-			case *GlobalVariable:
-				t := vv.(*GlobalVariable)
+			case *VariableDefinition:
+				t := vv.(*VariableDefinition)
 				r.Name = t.Name
-				r.Pos = append(r.Pos, &t.Pos)
+				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "global varialbe"
 			case *Function:
 				t := vv.(*Function)
@@ -99,7 +99,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				r.Type = "function"
 			case *Class:
 				t := vv.(*Class)
-				r.Pos = append(r.Pos, &t.Pos)
+				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "class"
 			default:
 				panic("make error")
@@ -121,9 +121,8 @@ func (p *ConvertTops2Package) checkEnum() []error {
 			ret = append(ret, fmt.Errorf("enum type must inited by integer"))
 			continue
 		}
-		v.Value = value.(int64)
 		for k, vv := range v.Names {
-			vv.Value = int64(k) + v.Value
+			vv.Value = int64(k) + value.(int64)
 		}
 	}
 	return ret
@@ -138,7 +137,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	c.Funcs = make([]*Function, 0)
 	c.Classes = make([]*Class, 0)
 	c.Enums = make([]*Enum, 0)
-	c.Vars = make([]*GlobalVariable, 0)
+	c.Vars = make([]*VariableDefinition, 0)
 	c.Consts = make([]*Const, 0)
 	//主要是检查重复申明
 	for _, v := range t {
@@ -154,8 +153,8 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		case *Class:
 			t := v.Data.(*Class)
 			c.Classes = append(c.Classes, t)
-		case *GlobalVariable:
-			t := v.Data.(*GlobalVariable)
+		case *VariableDefinition:
+			t := v.Data.(*VariableDefinition)
 			c.Vars = append(c.Vars, t)
 		case *Const:
 			t := v.Data.(*Const)
@@ -198,7 +197,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	for _, v := range c.Consts {
 		p.Consts[v.Name] = v
 	}
-	p.Vars = make(map[string]*GlobalVariable)
+	p.Vars = make(map[string]*VariableDefinition)
 	for _, v := range c.Vars {
 		p.Vars[v.Name] = v
 	}

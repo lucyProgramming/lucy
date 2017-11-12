@@ -97,7 +97,7 @@ func (e *Expression) typeName(typ ...int) string {
 }
 
 type Expression struct {
-	Pos  Pos
+	Pos  *Pos
 	Typ  int
 	Data interface{}
 }
@@ -107,6 +107,7 @@ type CallArgs []*Expression // f(1,2)　调用参数列表
 type ExpressionFunctionCall struct {
 	Expression *Expression
 	Args       CallArgs
+	Pos        *Pos
 }
 
 type ExpressionMethodCall struct {

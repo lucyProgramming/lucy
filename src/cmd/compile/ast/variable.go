@@ -1,9 +1,9 @@
 package ast
 
-type GlobalVariable struct {
+type VariableDefinition struct {
 	SymbolicItem
 	AccessProperty
-	Pos  Pos
+	Pos  *Pos
 	Init *Expression
 }
 

@@ -5,7 +5,7 @@ import (
 )
 
 type Block struct {
-	Pos                Pos
+	Pos                *Pos
 	InheritedAttribute InheritedAttribute
 	Outter             *Block //for closure,capture variables
 	SymbolicTable      SymbolicTable

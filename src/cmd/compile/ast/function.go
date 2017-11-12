@@ -6,7 +6,7 @@ import (
 
 type Function struct {
 	Typ   FunctionType
-	Name  string
+	Name  string // if name is nil string,means no name function
 	Block *Block
 	Pos   Pos
 }

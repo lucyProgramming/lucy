@@ -44,6 +44,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 	result := &ast.Expression{}
 	result.Typ = ast.EXPRESSION_TYPE_IDENTIFIER
 	result.Data = ep.parser.token.Data.(string)
+	result.Pos = ep.parser.mkPos()
 	ep.Next()          //look next token
 	if ep.parser.eof { // end of file
 		return result, nil
@@ -63,6 +64,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 					ep.parser.token.Desp)
 			}
 			newresult := &ast.Expression{}
+			newresult.Pos = ep.parser.mkPos()
 			newresult.Typ = ast.EXPRESSION_TYPE_DOT
 			binary := &ast.ExpressionBinary{}
 			newresult.Data = binary
@@ -79,6 +81,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 				return nil, ep.parser.mkUnexpectedErr()
 			}
 			newresult := &ast.Expression{}
+			newresult.Pos = ep.parser.mkPos()
 			newresult.Typ = ast.EXPRESSION_TYPE_INDEX
 			binary := &ast.ExpressionBinary{}
 			newresult.Data = binary
@@ -115,6 +118,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 					Typ: ast.EXPRESSION_TYPE_FUNCTION_CALL,
 				}
 				call := &ast.ExpressionFunctionCall{}
+				call.Pos = ep.parser.mkPos()
 				call.Expression = result
 				call.Args = args
 				newresult.Data = call
@@ -123,6 +127,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 				newresult := &ast.Expression{
 					Typ: ast.EXPRESSION_TYPE_METHOD_CALL,
 				}
+				newresult.Pos = ep.parser.mkPos()
 				call := &ast.ExpressionMethodCall{}
 				binary := result.Data.(*ast.ExpressionBinary)
 				call.Expression = binary.Left
@@ -194,32 +199,33 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 			return nil, fmt.Errorf("%s ( and ) not matched", ep.parser.errorMsgPrefix())
 		}
 	case lex.TOKEN_INCREMENT:
+		newE := &ast.Expression{}
+		newE.Pos = ep.parser.mkPos()
 		left, err = ep.parseExpression(true)
 		if err != nil {
 			return nil, err
 		}
-		newlist := &ast.Expression{}
-		newlist.Typ = ast.EXPRESSION_TYPE_PRE_INCREMENT
-		newlist.Data = left
-		left = newlist
+		newE.Typ = ast.EXPRESSION_TYPE_PRE_INCREMENT
+		newE.Data = left
+		left = newE
 	case lex.TOKEN_DECREMENT:
+		newE := &ast.Expression{}
 		left, err = ep.parseExpression(true)
 		if err != nil {
 			return nil, err
 		}
-		newlist := &ast.Expression{}
-		newlist.Typ = ast.EXPRESSION_TYPE_PRE_DECREMENT
-		newlist.Data = left
-		left = newlist
+		newE.Typ = ast.EXPRESSION_TYPE_PRE_DECREMENT
+		newE.Data = left
+		left = newE
 	case lex.TOKEN_NOT:
+		newE := &ast.Expression{}
 		left, err = ep.parseExpression(true)
 		if err != nil {
 			return nil, err
 		}
-		newlist := &ast.Expression{}
-		newlist.Typ = ast.EXPRESSION_TYPE_NOT
-		newlist.Data = left
-		left = newlist
+		newE.Typ = ast.EXPRESSION_TYPE_NOT
+		newE.Data = left
+		left = newE
 	default:
 		return nil, fmt.Errorf("%s unkown begining of a expression", ep.parser.errorMsgPrefix())
 	}

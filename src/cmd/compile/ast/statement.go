@@ -269,7 +269,7 @@ func (s *StatementReturn) check(b *Block) []error {
 			continue
 		}
 		if !b.InheritedAttribute.returns[k].Typ.typeCompatible(t) {
-			errs = append(errs, typeNotMatchError(&v.Pos, &b.InheritedAttribute.returns[k].Typ, t))
+			errs = append(errs, typeNotMatchError(v.Pos, &b.InheritedAttribute.returns[k].Typ, t))
 		}
 	}
 	return errs

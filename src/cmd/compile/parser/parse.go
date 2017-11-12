@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
@@ -21,6 +20,14 @@ type Parser struct {
 	token            *lex.Token
 	eof              bool
 	errs             []error
+}
+
+func (p *Parser) mkPos() *ast.Pos {
+	return &ast.Pos{
+		Filename:    p.filename,
+		StartLine:   p.token.Match.StartLine,
+		StartColumn: p.token.Match.StartColumn,
+	}
 }
 
 func (p *Parser) Next() {
@@ -85,11 +92,35 @@ func (p *Parser) parse() []error {
 	ispublic := false
 	for !p.eof {
 		switch p.token.Type {
+		case lex.TOKEN_SEMICOLON:
+			p.Next()
+			continue
 		case lex.TOKEN_VAR:
-			p.parseVarDefinition(ispublic)
+			vs := p.parseVarDefinition(ispublic)
+			if vs != nil && len(vs) > 0 {
+				for _, v := range vs {
+					*p.tops = append(*p.tops, &ast.Node{
+						Data: v,
+					})
+				}
+			}
 		case lex.TOKEN_IDENTIFIER:
 		case lex.TOKEN_ENUM:
+			e := p.parseEnum(ispublic)
+			if e != nil {
+				*p.tops = append(*p.tops, &ast.Node{
+					Data: e,
+				})
+			}
 		case lex.TOKEN_FUNCTION:
+			f, err := p.parseFunction(ispublic)
+			if err != nil {
+				p.errs = append(p.errs, err)
+				continue
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: f,
+			})
 		case lex.TOKEN_LC:
 		case lex.TOKEN_CLASS:
 		case lex.TOKEN_PUBLIC:
@@ -124,7 +155,7 @@ func (p *Parser) errorMsgPrefix() string {
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
-func (p *Parser) parseVarDefinition(ispublic bool) {
+func (p *Parser) parseVarDefinition(ispublic bool) (vs []*ast.VariableDefinition) {
 	p.Next()
 	if p.eof {
 		p.unexpectedErr()
@@ -181,22 +212,22 @@ func (p *Parser) parseVarDefinition(ispublic bool) {
 		p.errs = append(p.errs, fmt.Errorf("%s name list and value list has no same length", p.errorMsgPrefix()))
 		return
 	}
+	vs = []*ast.VariableDefinition{}
 	for k, v := range names {
-		gv := &ast.GlobalVariable{}
-		gv.SymbolicItem.Name = v
+		vd := &ast.VariableDefinition{}
+		vd.SymbolicItem.Name = v
 		vt := &ast.VariableType{}
 		*vt = *t
-		gv.SymbolicItem.Typ = vt
+		vd.SymbolicItem.Typ = vt
 		if ispublic {
-			gv.AccessProperty.Access = ast.ACCESS_PUBLIC
+			vd.AccessProperty.Access = ast.ACCESS_PUBLIC
 		} else {
-			gv.AccessProperty.Access = ast.ACCESS_PRIVATE
+			vd.AccessProperty.Access = ast.ACCESS_PRIVATE
 		}
-		gv.Pos = *poss[k]
-		*p.tops = append(*p.tops, &ast.Node{
-			Data: gv,
-		})
+		vd.Pos = poss[k]
+		vs = append(vs, vd)
 	}
+	return vs
 }
 
 func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
@@ -276,15 +307,12 @@ func (p *Parser) parseIdentiferType() *ast.VariableType {
 	return nil
 }
 
-func (p *Parser) parseNameList() (names []string, poss []*ast.Pos, err error) {
-	names = []string{}
-	poss = []*ast.Pos{}
+func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
+	names = []*ast.NameWithPos{}
 	for p.token.Type == lex.TOKEN_IDENTIFIER && !p.eof {
-		names = append(names, p.token.Data.(string)) //current identifier
-		poss = append(poss, &ast.Pos{
-			Filename:    p.filename,
-			StartLine:   p.token.Match.StartLine,
-			StartColumn: p.token.Match.StartColumn,
+		names = append(names, &ast.NameWithPos{
+			Name: p.token.Data.(string),
+			Pos:  p.mkPos(),
 		})
 		p.Next()
 		if p.token.Type != lex.TOKEN_COMMA {
@@ -382,4 +410,19 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.Filename = p.filename
 	pos.StartLine = t.Match.StartLine
 	pos.StartColumn = t.Match.StartColumn
+}
+
+// a,b int or int,bool
+
+func (p *Parser) parseTypedNames() (names []*ast.TypedName, err error) {
+	names = []*ast.TypedName{}
+	for {
+		if p.token.Type == lex.TOKEN_IDENTIFIER {
+			ns, err := p.parseNameList()
+			if err != nil {
+				return nil, err
+			}
+
+		}
+	}
 }
