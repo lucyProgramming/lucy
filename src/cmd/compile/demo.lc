@@ -35,8 +35,9 @@ func (x int) Add(a int,b int){
 
 
 
-//class(key word) Class (class name) this(self name) [colon(:) Persion(father`s name)]
-class Man(this) : Person{
+//class Class (class name) this(self name) [colon(:) Persion(father`s name)]
+
+class Man: Person{
     public Person(){
         var abc int;
         f = fun(){

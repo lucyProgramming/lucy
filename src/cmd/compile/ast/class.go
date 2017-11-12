@@ -11,8 +11,8 @@ type Class struct {
 	Name        string
 	Fields      map[string]*ClassField
 	Methods     map[string]*ClassMethod
-	Father      *Class
-	Constructor *Function // can be nil
+	Father      *Expression // a or a.b
+	Constructor *Function   // can be nil
 }
 
 func (c *Class) check() []error {

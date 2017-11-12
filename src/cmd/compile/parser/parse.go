@@ -16,6 +16,7 @@ type Parser struct {
 	tops             *[]*ast.Node
 	ExpressionParser *ExpressionParser
 	Function         *Function
+	Class            *Class
 	scanner          *lexmachine.Scanner
 	filename         string
 	token            *lex.Token
@@ -23,35 +24,10 @@ type Parser struct {
 	errs             []error
 }
 
-func (p *Parser) mkPos() *ast.Pos {
-	return &ast.Pos{
-		Filename:    p.filename,
-		StartLine:   p.token.Match.StartLine,
-		StartColumn: p.token.Match.StartColumn,
-	}
-}
-
-func (p *Parser) Next() {
-	var err error
-	var tok interface{}
-	for p.eof == false {
-		tok, err, p.eof = p.scanner.Next()
-		if err != nil {
-			p.eof = true
-			return
-		}
-		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
-			p.token = tok.(*lex.Token)
-			fmt.Println("################", p.token.Desp)
-			break
-		}
-	}
-	return
-}
-
 func (p *Parser) parse() []error {
 	p.ExpressionParser = &ExpressionParser{p}
 	p.Function = &Function{p}
+	p.Class = &Class{p}
 	p.errs = []error{}
 	var err error
 	p.scanner, err = lex.Lexer.Scanner(p.bs)
@@ -141,6 +117,32 @@ func (p *Parser) parse() []error {
 		}
 	}
 	return p.errs
+}
+
+func (p *Parser) mkPos() *ast.Pos {
+	return &ast.Pos{
+		Filename:    p.filename,
+		StartLine:   p.token.Match.StartLine,
+		StartColumn: p.token.Match.StartColumn,
+	}
+}
+
+func (p *Parser) Next() {
+	var err error
+	var tok interface{}
+	for p.eof == false {
+		tok, err, p.eof = p.scanner.Next()
+		if err != nil {
+			p.eof = true
+			return
+		}
+		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
+			p.token = tok.(*lex.Token)
+			fmt.Println("################", p.token.Desp)
+			break
+		}
+	}
+	return
 }
 
 func (p *Parser) unexpectedErr() {
@@ -253,7 +255,7 @@ func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
 	return ret, nil
 }
 
-func (p *Parser) parseType() *ast.VariableType {
+func (p *Parser) parseType() (*ast.VariableType, error) {
 	switch p.token.Type {
 	case lex.TOKEN_LB:
 		p.Next()
@@ -276,31 +278,33 @@ func (p *Parser) parseType() *ast.VariableType {
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
-		}
+		}, nil
 	case lex.TOKEN_BYTE:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
-		}
+		}, nil
 	case lex.TOKEN_INT:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
-		}
+		}, nil
 	case lex.TOKEN_FLOAT:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
-		}
+		}, nil
 	case lex.TOKEN_STRING:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_STRING,
-		}
+		}, nil
 	case lex.TOKEN_IDENTIFIER:
 		return p.parseIdentiferType()
+	default:
+		return nil, fmt.Errorf("%s unkown type", p.errorMsgPrefix())
 	}
-	return nil
+	return
 }
 
 func (p *Parser) parseIdentiferType() *ast.VariableType {
