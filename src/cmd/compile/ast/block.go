@@ -17,7 +17,7 @@ type Block struct {
 func (b *Block) searchSymbolicItem(name string) *SymbolicItem {
 	bb := b
 	for bb != nil {
-		if x := bb.SymbolicTable.itemsMap[name]; x != nil {
+		if x := bb.SymbolicTable.ItemsMap[name]; x != nil {
 			return x
 		}
 		bb = bb.Outter
@@ -43,10 +43,10 @@ func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.istop = father.InheritedAttribute.istop
 	b.InheritedAttribute.infor = father.InheritedAttribute.infor
 	b.InheritedAttribute.infunction = father.InheritedAttribute.infunction
-
 	b.file = father.file
 	b.Outter = father
 }
+
 func (b *Block) searchFunction(e *Expression) *Function {
 	//bb := b
 	//for bb != nil {
@@ -72,18 +72,17 @@ type InheritedAttribute struct {
 }
 
 type SymbolicTable struct {
-	//items    []*SymbolicItem
-	itemsMap map[string]*SymbolicItem // easy to access by name
+	ItemsMap map[string]*SymbolicItem // easy to access by name
 }
 
 func (s *SymbolicTable) Insert(name string, item *SymbolicItem) error {
-	if s.itemsMap == nil {
-		s.itemsMap = make(map[string]*SymbolicItem)
+	if s.ItemsMap == nil {
+		s.ItemsMap = make(map[string]*SymbolicItem)
 	}
-	if _, ok := s.itemsMap[name]; ok {
+	if _, ok := s.ItemsMap[name]; ok {
 		return fmt.Errorf("symbolic %s already declared", name)
 	}
-	s.itemsMap[name] = item
+	s.ItemsMap[name] = item
 	return nil
 }
 

@@ -121,10 +121,11 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 			errs = append(errs, es...)
 			continue
 		}
-		if !f.Typ.Parameters[i].TypedName.Typ.typeCompatible(t) {
+
+		if !f.Typ.Parameters[i].VariableDefinition.Typ.typeCompatible(t) {
 			typstring1 := ""
 			typstring2 := ""
-			f.Typ.Parameters[i].TypedName.Typ.TypeString(&typstring1)
+			f.Typ.Parameters[i].VariableDefinition.Typ.TypeString(&typstring1)
 			t.TypeString(&typstring2)
 			errs = append(errs,
 				fmt.Errorf("%s %d:%d %s not match %s,cannot call function",
@@ -182,7 +183,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			return errs
 		}
 		name := binary.Left.Data.(string)
-		if _, ok := b.SymbolicTable.itemsMap[name]; ok {
+		if _, ok := b.SymbolicTable.ItemsMap[name]; ok {
 			errs = append(errs, fmt.Errorf("%s %d:%d variable %s is already declared", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
 			return errs
 		}
@@ -199,7 +200,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		}
 		item.Typ = t
 		item.Name = name
-		b.SymbolicTable.itemsMap[name] = item
+		b.SymbolicTable.ItemsMap[name] = item
 		return errs
 	}
 	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
@@ -269,7 +270,7 @@ func (s *StatementReturn) check(b *Block) []error {
 			continue
 		}
 		if !b.InheritedAttribute.returns[k].Typ.typeCompatible(t) {
-			errs = append(errs, typeNotMatchError(v.Pos, &b.InheritedAttribute.returns[k].Typ, t))
+			errs = append(errs, typeNotMatchError(v.Pos, b.InheritedAttribute.returns[k].Typ, t))
 		}
 	}
 	return errs

@@ -8,10 +8,6 @@ type VariableDefinition struct {
 }
 
 type Const struct {
-	AccessProperty
-	Pos  Pos
-	Name string
-	Init *Expression
-	Typ  *VariableType
+	VariableDefinition
 	Data interface{}
 }

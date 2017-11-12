@@ -15,6 +15,7 @@ type Parser struct {
 	bs               []byte
 	tops             *[]*ast.Node
 	ExpressionParser *ExpressionParser
+	Function         *Function
 	scanner          *lexmachine.Scanner
 	filename         string
 	token            *lex.Token
@@ -49,8 +50,8 @@ func (p *Parser) Next() {
 }
 
 func (p *Parser) parse() []error {
-	p.ExpressionParser = &ExpressionParser{}
-	p.ExpressionParser.parser = p
+	p.ExpressionParser = &ExpressionParser{p}
+	p.Function = &Function{p}
 	p.errs = []error{}
 	var err error
 	p.scanner, err = lex.Lexer.Scanner(p.bs)
@@ -113,7 +114,7 @@ func (p *Parser) parse() []error {
 				})
 			}
 		case lex.TOKEN_FUNCTION:
-			f, err := p.parseFunction(ispublic)
+			f, err := p.Function.parse(ispublic)
 			if err != nil {
 				p.errs = append(p.errs, err)
 				continue
@@ -139,7 +140,6 @@ func (p *Parser) parse() []error {
 			p.consume(lex.TOKEN_SEMICOLON)
 		}
 	}
-
 	return p.errs
 }
 
@@ -155,13 +155,13 @@ func (p *Parser) errorMsgPrefix() string {
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
-func (p *Parser) parseVarDefinition(ispublic bool) (vs []*ast.VariableDefinition) {
+func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition) {
 	p.Next()
 	if p.eof {
 		p.unexpectedErr()
 		return
 	}
-	names, poss, err := p.parseNameList()
+	names, err := p.parseNameList()
 	if err != nil {
 		p.errs = append(p.errs, err)
 		p.consume(lex.TOKEN_SEMICOLON)
@@ -213,18 +213,18 @@ func (p *Parser) parseVarDefinition(ispublic bool) (vs []*ast.VariableDefinition
 		return
 	}
 	vs = []*ast.VariableDefinition{}
-	for k, v := range names {
+	for _, v := range names {
 		vd := &ast.VariableDefinition{}
-		vd.SymbolicItem.Name = v
+		vd.SymbolicItem.Name = v.Name
 		vt := &ast.VariableType{}
 		*vt = *t
 		vd.SymbolicItem.Typ = vt
-		if ispublic {
+		if len(ispublic) > 0 && ispublic[0] {
 			vd.AccessProperty.Access = ast.ACCESS_PUBLIC
 		} else {
 			vd.AccessProperty.Access = ast.ACCESS_PRIVATE
 		}
-		vd.Pos = poss[k]
+		vd.Pos = v.Pos
 		vs = append(vs, vd)
 	}
 	return vs
@@ -412,17 +412,43 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.StartColumn = t.Match.StartColumn
 }
 
-// a,b int or int,bool
+// a,b int or int,bool  c xxx
+func (p *Parser) parseTypedNames() (names []*ast.VariableDefinition, err error) {
+	//names = []*ast.VariableDefinition{}
+	//for {
+	//	if p.token.Type == lex.TOKEN_IDENTIFIER {
+	//		ns, err := p.parseNameList()
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//
+	//	}
+	//}
+	return nil, nil
+}
 
-func (p *Parser) parseTypedNames() (names []*ast.TypedName, err error) {
-	names = []*ast.TypedName{}
-	for {
-		if p.token.Type == lex.TOKEN_IDENTIFIER {
-			ns, err := p.parseNameList()
-			if err != nil {
-				return nil, err
-			}
-
+func (p *Parser) insertVariableIntoBlock(b *ast.Block, vars []*ast.VariableDefinition) {
+	if vars == nil || len(vars) == 0 {
+		return
+	}
+	if b.SymbolicTable.ItemsMap == nil {
+		b.SymbolicTable.ItemsMap = make(map[string]*ast.SymbolicItem)
+	}
+	for _, v := range vars {
+		if v.Name == "" {
+			continue
+		}
+		if b.SymbolicTable.ItemsMap[v.Name] != nil {
+			p.errs = append(p.errs, fmt.Errorf("%s variable %s already declare at %s %d:%d",
+				p.errorMsgPrefix(),
+				v.Name,
+				v.Pos.Filename,
+				v.Pos.StartLine,
+				v.Pos.StartColumn))
+		}
+		b.SymbolicTable.ItemsMap[v.Name] = &ast.SymbolicItem{
+			Name: v.Name,
+			Typ:  v.Typ,
 		}
 	}
 }

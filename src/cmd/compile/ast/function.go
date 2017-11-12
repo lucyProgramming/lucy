@@ -5,6 +5,7 @@ import (
 )
 
 type Function struct {
+	AccessProperty
 	Typ   FunctionType
 	Name  string // if name is nil string,means no name function
 	Block *Block
@@ -30,7 +31,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 		if v.Name != "" {
 			err = block.SymbolicTable.Insert(v.Name, &SymbolicItem{
 				Name: v.Name,
-				Typ:  &v.Typ,
+				Typ:  v.Typ,
 			})
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
@@ -59,7 +60,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 		if v.Name != "" {
 			err = block.SymbolicTable.Insert(v.Name, &SymbolicItem{
 				Name: v.Name,
-				Typ:  &v.Typ,
+				Typ:  v.Typ,
 			})
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
@@ -74,16 +75,10 @@ type FunctionType struct {
 	Returns    ReturnList
 }
 
-type TypedName struct {
-	Pos  Pos
-	Name string
-	Typ  VariableType
-}
-
 type Parameter struct {
-	TypedName
+	VariableDefinition
 	Default *Expression //f(a int = 1) default parameter
 }
 
-type ParameterList []*Parameter
-type ReturnList []*TypedName
+type ParameterList []*Parameter       // actually local variables
+type ReturnList []*VariableDefinition // actually local variables

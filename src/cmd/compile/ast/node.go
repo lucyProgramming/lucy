@@ -82,7 +82,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 			switch vv.(type) {
 			case *Const:
 				t := vv.(*Const)
-				r.Pos = append(r.Pos, &t.Pos)
+				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "const"
 			case *Enum:
 				t := vv.(*EnumNames)

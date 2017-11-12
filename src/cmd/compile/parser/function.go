@@ -4,66 +4,83 @@ import (
 	"fmt"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
-	"github.com/open-falcon/nodata/g"
 )
 
-func (p *Parser) parseFunction(ispublic bool) (f *ast.Function, err error) {
+type Function struct {
+	parser *Parser
+}
+
+func (p *Function) Next() {
+	p.parser.Next()
+}
+
+func (p *Function) consume(untils ...int) {
+	p.parser.consume(untils...)
+}
+
+func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	p.Next()
-	if p.eof {
-		return nil, p.mkUnexpectedErr()
+	if p.parser.eof {
+		return nil, p.parser.mkUnexpectedErr()
 	}
 	f = &ast.Function{}
-	if p.token.Type == lex.TOKEN_LP {
-		f.Typ.Returns, err = p.parseTypedNames()
+	if p.parser.token.Type == lex.TOKEN_LP {
+		f.Typ.Returns, err = p.parser.parseTypedNames()
 		if err != nil {
-			p.consume(lex.TOKEN_RC)
+			p.parser.consume(lex.TOKEN_RC)
 			p.Next()
 			return
 		}
-		if p.token.Type != lex.TOKEN_RP {
-			p.consume(lex.TOKEN_RC)
+		if p.parser.token.Type != lex.TOKEN_RP {
+			p.parser.consume(lex.TOKEN_RC)
 			p.Next()
-			err = fmt.Errorf("%s except ) but %s", p.errorMsgPrefix(), p.token.Desp)
+			err = fmt.Errorf("%s except ) but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
 			return
 		}
 	}
-	if p.token.Type == lex.TOKEN_IDENTIFIER {
-		f.Name = p.token.Data.(string)
+	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
+		f.Name = p.parser.token.Data.(string)
 		p.Next()
 	}
-	if p.token.Type != lex.TOKEN_LC {
-		return nil, fmt.Errorf("%s except { but %s", p.token.Desp)
+	if p.parser.token.Type != lex.TOKEN_LC {
+		return nil, fmt.Errorf("%s except { but %s", p.parser.token.Desp)
 	}
 	p.Next() //
-	if p.eof {
-		return nil, p.mkUnexpectedErr()
+	if p.parser.eof {
+		return nil, p.parser.mkUnexpectedErr()
 	}
-
+	if ispublic {
+		f.Access = ast.ACCESS_PUBLIC
+	} else {
+		f.Access = ast.ACCESS_PRIVATE
+	}
 	f.Block = &ast.Block{}
-	f.Block.Statements = p.parseStatementList()
+	f.Block.Statements = p.parseStatementList(f)
 	p.Next()
 	return f, nil
 }
-func (p *Parser) parseStatementList(ispublic bool) []*ast.Statement {
+func (p *Function) parseStatementList(f *ast.Function) []*ast.Statement {
 	ret := []*ast.Statement{}
 	for {
-		switch p.token {
-		case lex.TOKEN_RC:
+		switch p.parser.token.Type {
+		case lex.TOKEN_RC: // end
 			return ret
 		case lex.TOKEN_IDENTIFIER:
-			e, err := p.ExpressionParser.parseExpression(false)
+			e, err := p.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
-				p.errs = append(p.errs)
+				p.parser.errs = append(p.parser.errs, err)
 			}
 			ret = append(ret, &ast.Statement{
 				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,
 			})
+		case lex.TOKEN_VAR:
+			p.parser.insertVariableIntoBlock(f.Block, p.parser.parseVarDefinition())
 		case lex.TOKEN_IF:
 		case lex.TOKEN_FOR:
 		case lex.TOKEN_SWITCH:
 		default:
-			p.errs = append(p.errs, fmt.Errorf("%s unkown begining of a statement", p.errorMsgPrefix()))
+			p.parser.errs = append(p.parser.errs, fmt.Errorf("%s unkown begining of a statement", p.parser.errorMsgPrefix()))
 			p.consume(lex.TOKEN_SEMICOLON)
 			p.Next()
 		}

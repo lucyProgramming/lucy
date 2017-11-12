@@ -49,7 +49,7 @@ const (
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_NEW
-	EXPRESSION_TYPE_VAR
+	EXPRESSION_TYPE_NAME_LIST
 	EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
 )
 
@@ -388,7 +388,6 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			return
 		})
 	}
-
 	// + - * / % algebra arithmetic
 	if e.Typ == EXPRESSION_TYPE_ADD ||
 		e.Typ == EXPRESSION_TYPE_SUB ||

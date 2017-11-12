@@ -155,15 +155,40 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 	return result, err
 }
 
+func (ep *ExpressionParser) parseIdentifierExpressions() (ret []*ast.Expression, err error) {
+	ret = []*ast.Expression{}
+	var e *ast.Expression
+	for {
+		e, err = ep.parseIdentifierExpression()
+		if err != nil {
+			return
+		}
+		ret = append(ret, e)
+		ep.Next()
+		if ep.parser.token.Type != lex.TOKEN_COMMA {
+			return
+		}
+	}
+	return
+}
+
 // a = 123
 func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch ep.parser.token.Type {
 	case lex.TOKEN_IDENTIFIER:
-		left, err = ep.parseIdentifierExpression()
+		lefts, err := ep.parseIdentifierExpressions()
 		if err != nil {
 			return nil, err
+		}
+		if len(lefts) == 1 {
+			left = lefts[0]
+		} else {
+			left = &ast.Expression{
+				Typ:  ast.EXPRESSION_TYPE_NAME_LIST,
+				Data: lefts,
+			}
 		}
 	case lex.TOKEN_LITERAL_BOOL:
 		left = &ast.Expression{

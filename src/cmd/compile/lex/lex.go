@@ -1,10 +1,9 @@
 package lex
 
 import (
-	"strconv"
-
 	"github.com/timtadh/lexmachine"
 	"github.com/timtadh/lexmachine/machines"
+	"strconv"
 )
 
 func init() {
@@ -518,6 +517,14 @@ func init() {
 		t.Type = TOKEN_IDENTIFIER
 		t.Desp = "identifer_" + string(match.Bytes)
 		t.Data = string(match.Bytes)
+		return t, nil
+	})
+	Lexer.Add([]byte("_"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_IDENTIFIER
+		t.Desp = "identifer(_)"
+		t.Data = "_"
 		return t, nil
 	})
 	// 0 or 0755 or 123 or +100 or -100

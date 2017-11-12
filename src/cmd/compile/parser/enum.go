@@ -18,8 +18,10 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 		p.Next()
 		return
 	}
-	enumName := p.token.Data.(string)
-	enumPos := p.mkPos()
+	enumName := &ast.NameWithPos{
+		Name: p.token.Data.(string),
+		Pos:  p.mkPos(),
+	}
 	p.Next()
 	if p.eof {
 		p.unexpectedErr()
@@ -38,13 +40,17 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	}
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		p.errs = append(p.errs, fmt.Errorf("%s not a name after {", p.errorMsgPrefix()))
+		p.errs = append(p.errs, fmt.Errorf("%s no enum names defined after {", p.errorMsgPrefix()))
 		p.consume(lex.TOKEN_RC)
 		p.Next()
 		return
 	}
-	names := []string{p.token.Data.(string)}
-	poss := []*ast.Pos{p.mkPos()}
+	names := []*ast.NameWithPos{
+		&ast.NameWithPos{
+			Name: p.token.Data.(string),
+			Pos:  p.mkPos(),
+		},
+	}
 	p.Next()
 	if p.eof {
 		p.unexpectedErr()
@@ -63,7 +69,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	}
 	if p.token.Type == lex.TOKEN_COMMA {
 		p.Next()
-		ns, ps, err := p.parseNameList()
+		ns, err := p.parseNameList()
 		if err != nil {
 			p.errs = append(p.errs, fmt.Errorf("%s not a name after {", p.errorMsgPrefix()))
 			p.consume(lex.TOKEN_RC)
@@ -77,9 +83,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 			return
 		}
 		names = append(names, ns...)
-		poss = append(poss, ps...)
-	} else if p.token.Type == lex.TOKEN_RC {
-
+	} else if p.token.Type == lex.TOKEN_RC { //  enmu define ended
 	} else {
 		p.errs = append(p.errs, fmt.Errorf("%s unexcept token(%s) after a enum name", p.token.Desp))
 		p.consume(lex.TOKEN_RC)
@@ -88,9 +92,15 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	}
 	p.Next()
 	e = &ast.Enum{}
-	e.Name = enumName
+	e.Name = enumName.Name
 	e.Init = initExpression
-	e.Pos = enumPos
+	e.Pos = enumName.Pos
+	for _, v := range names {
+		t := &ast.EnumNames{}
+		t.Name = v.Name
+		t.Pos = v.Pos
+		t.Enum = e
+	}
 	if ispublic {
 		e.AccessProperty.Access = ast.ACCESS_PUBLIC
 	} else {
