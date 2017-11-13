@@ -333,6 +333,13 @@ func init() {
 		t.Desp = ":"
 		return t, nil
 	})
+	Lexer.Add([]byte(":="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_COLON_ASSIGN
+		t.Desp = ":="
+		return t, nil
+	})
 	Lexer.Add([]byte(`(\+=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -375,7 +382,6 @@ func init() {
 		t.Desp = "!"
 		return t, nil
 	})
-
 	Lexer.Add([]byte("switch"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match

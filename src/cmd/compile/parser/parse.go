@@ -73,6 +73,7 @@ func (p *Parser) parse() []error {
 		ispublic = false
 	}
 	for !p.eof {
+		fmt.Println("!!!!!!!!!!!!!!!!!!!!", p.token.Desp)
 		switch p.token.Type {
 		case lex.TOKEN_SEMICOLON:
 			p.Next()
@@ -87,7 +88,7 @@ func (p *Parser) parse() []error {
 				}
 			}
 			resetProperty()
-		case lex.TOKEN_IDENTIFIER:
+		//case lex.TOKEN_IDENTIFIER:
 
 		case lex.TOKEN_ENUM:
 			e := p.parseEnum(ispublic)
@@ -105,8 +106,7 @@ func (p *Parser) parse() []error {
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: f,
 			})
-		case lex.TOKEN_LC:
-
+		//case lex.TOKEN_LC:
 		case lex.TOKEN_CLASS:
 			c, err := p.Class.parse(ispublic)
 			if err != nil {
@@ -118,6 +118,7 @@ func (p *Parser) parse() []error {
 			})
 		case lex.TOKEN_PUBLIC:
 			ispublic = true
+			p.Next()
 		case lex.TOKEN_CONST:
 			p.Next()
 			if p.eof {
@@ -140,7 +141,7 @@ func (p *Parser) parse() []error {
 			p.Next()
 			if p.eof {
 				p.errs = append(p.errs, fmt.Errorf("%s %d:%d eof after const", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-				return p.errs
+				continue
 			}
 			es, err := p.ExpressionParser.parseExpressions()
 			if err != nil {
@@ -149,10 +150,38 @@ func (p *Parser) parse() []error {
 				p.Next()
 				continue
 			}
+			if len(es) != len(names) {
+				p.errs = append(p.errs, fmt.Errorf("%s %d:%d mame and value not match", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
+				p.consume(lex.TOKEN_SEMICOLON)
+				p.Next()
+				continue
+			}
+			if p.token.Type != lex.TOKEN_SEMICOLON {
+				p.errs = append(p.errs, fmt.Errorf("%s %d:%d not ; after const definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
+				p.consume(lex.TOKEN_SEMICOLON)
+				p.Next()
+				continue
+			}
+			for k, v := range names {
+				c := &ast.Const{}
+				c.Name = v.Name
+				c.Init = es[k]
+				if ispublic {
+					c.Access = ast.ACCESS_PUBLIC
+				} else {
+					c.Access = ast.ACCESS_PRIVATE
+				}
+				*p.tops = append(*p.tops, &ast.Node{
+					Data: c,
+				})
+			}
+			p.Next()
+			continue
 		case lex.TOKEN_PRIVATE: //is a default attribute
 			ispublic = false
+			p.Next()
 		default:
-			p.errs = append(p.errs, fmt.Errorf("%s %d:%d token is not except", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
+			p.errs = append(p.errs, fmt.Errorf("%s %d:%d token(%s) is not except", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp))
 			p.consume(lex.TOKEN_SEMICOLON)
 			p.Next()
 			resetProperty()
@@ -196,9 +225,9 @@ func (p *Parser) mkUnexpectedErr() error {
 
 func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
-		return fmt.Sprint("%s %d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
+		return fmt.Sprintf("%s %d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
 	}
-	return fmt.Sprint("%s %d:%d", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+	return fmt.Sprintf("%s %d:%d", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
@@ -302,6 +331,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 
 func (p *Parser) parseType() (*ast.VariableType, error) {
 	switch p.token.Type {
+
 	case lex.TOKEN_LB:
 		p.Next()
 		if p.token.Type != lex.TOKEN_RB {
@@ -379,15 +409,16 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 }
 
 func (p *Parser) consume(untils ...int) {
-	m := make(map[int]bool)
+	fmt.Println("consume.........")
 	if len(untils) == 0 {
 		panic("no token to consume")
 	}
+	m := make(map[int]bool)
 	for _, v := range untils {
 		m[v] = true
 	}
 	var ok bool
-	for p.eof {
+	for !p.eof {
 		if _, ok = m[p.token.Type]; ok {
 			return
 		}
