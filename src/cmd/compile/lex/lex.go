@@ -1,9 +1,10 @@
 package lex
 
 import (
+	"strconv"
+
 	"github.com/timtadh/lexmachine"
 	"github.com/timtadh/lexmachine/machines"
-	"strconv"
 )
 
 func init() {
@@ -11,7 +12,7 @@ func init() {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_FUNCTION
-		t.Desp = "fun"
+		t.Desp = "fn"
 		return t, nil
 	})
 	Lexer.Add([]byte("enum"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {

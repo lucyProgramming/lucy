@@ -198,9 +198,11 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			errs = append(errs, es...)
 			return errs
 		}
-		item.Typ = t
-		item.Name = name
-		b.SymbolicTable.ItemsMap[name] = item
+		item.Var = &VariableDefinition{}
+		item.Var.Typ = t
+		item.Var.Name = name
+		item.Typ = ITEM_TYPE_VAR
+		b.SymbolicTable.Insert(name, item)
 		return errs
 	}
 	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||

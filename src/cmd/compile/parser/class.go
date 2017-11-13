@@ -2,16 +2,17 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
 
 type Class struct {
 	parser          *Parser
-	token           lex.Token
+	token           *lex.Token
 	classDefinition *ast.Class
 	access          int
-	isstatic        bool
+	isStatic        bool
 }
 
 func (c *Class) Next() {
@@ -34,10 +35,8 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		c.Next()
 		return nil, fmt.Errorf("%s on name after class", c.parser.errorMsgPrefix())
 	}
-	name := &ast.NameWithPos{
-		Name: c.token.Data.(string),
-		Pos:  c.parser.mkPos(),
-	}
+	c.classDefinition.Name = c.token.Data.(string)
+	c.classDefinition.Pos = c.parser.mkPos()
 	c.Next()
 	if c.parser.eof {
 		return nil, c.parser.mkUnexpectedErr()
@@ -65,49 +64,92 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		return nil, fmt.Errorf("%s except } but %s", c.parser.errorMsgPrefix(), c.token.Desp)
 	}
 	c.access = ast.ACCESS_PRIVATE
-	c.isstatic = false
-	var err error
+	c.isStatic = false
 	for !c.parser.eof {
 		switch c.token.Type {
 		case lex.TOKEN_STATIC:
-			c.isstatic = true
+			c.isStatic = true
 		//access private
 		case lex.TOKEN_PUBLIC:
-			access = ast.ACCESS_PUBLIC
+			c.access = ast.ACCESS_PUBLIC
 		case lex.TOKEN_PROTECTED:
-			access = ast.ACCESS_PROTECTED
+			c.access = ast.ACCESS_PROTECTED
 		case lex.TOKEN_PRIVATE:
-			access = ast.ACCESS_PRIVATE
+			c.access = ast.ACCESS_PRIVATE
 		case lex.TOKEN_IDENTIFIER:
-			err = c.parseFiled(access)
-			c.resetProperty()
+			err = c.parseFiled()
 			if err != nil {
-				c.consume()
+				c.parser.errs = append(c.parser.errs, err)
+				c.consume(lex.TOKEN_SEMICOLON)
+				c.Next()
 			}
+			c.resetProperty()
+		case lex.TOKEN_CONST:
 		case lex.TOKEN_FUNCTION:
+			c.Next()
+			f, err := c.parser.Function.parse(false)
 
+			if err != nil {
+				c.parser.errs = append(c.parser.errs, err)
+				c.consume(lex.TOKEN_RC)
+				c.Next()
+				c.resetProperty()
+				continue
+			}
+			if c.classDefinition.Methods == nil {
+				c.classDefinition.Methods = make(map[string]*ast.ClassMethod)
+			}
+			if f.Name == "" {
+				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s method has no name", c.parser.errorMsgPrefix(f.Pos)))
+				c.resetProperty()
+				continue
+			}
+			if _, ok := c.classDefinition.Methods[f.Name]; ok || (f.Name == c.classDefinition.Name && c.classDefinition.Constructor != nil) {
+				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s method　%s already declared", c.parser.errorMsgPrefix(f.Pos), f.Name))
+				c.resetProperty()
+				continue
+			}
+			m := &ast.ClassMethod{}
+			m.Access = c.access
+			m.IsStatic = c.isStatic
+			m.Func = f
+			c.resetProperty()
+			if f.Name == c.classDefinition.Name {
+				c.classDefinition.Constructor = m
+			} else {
+				c.classDefinition.Methods[f.Name] = m
+			}
+		case lex.TOKEN_RC:
+			c.Next()
+			break
+		default:
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token(%s)", c.parser.errorMsgPrefix(), c.token.Desp))
 		}
 	}
+	c.classDefinition.Father = father
 	return
 }
 
 func (c *Class) resetProperty() {
 	c.access = ast.ACCESS_PRIVATE
-	c.isstatic = false
+	c.isStatic = false
 }
 
 func (c *Class) parseFiled() error {
+	if c.parser.eof {
+		return c.parser.mkUnexpectedErr()
+	}
 	names, err := c.parser.parseNameList()
 	if err != nil {
 		return err
 	}
 	t, err := c.parser.parseType()
-	if err != nil {
+	if t != nil {
 		return err
 	}
 	for _, v := range names {
 		if c.classDefinition.Fields == nil {
-			c.classDefinition.Fields = make(map[string]*ClassField)
+			c.classDefinition.Fields = make(map[string]*ast.ClassField)
 			if _, ok := c.classDefinition.Fields[v.Name]; ok {
 				c.parser.errs = append(c.parser.errs,
 					fmt.Errorf("%s field %s is alreay declared",
@@ -116,13 +158,4 @@ func (c *Class) parseFiled() error {
 		}
 	}
 	return nil
-}
-
-func (c *Class) parseMethod() error {
-	names, err := c.parser.parseNameList()
-	if err != nil {
-		return err
-	}
-	c.parser.parseType()
-	return err
 }

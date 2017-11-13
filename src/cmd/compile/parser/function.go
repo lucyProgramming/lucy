@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -55,11 +56,11 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		f.Access = ast.ACCESS_PRIVATE
 	}
 	f.Block = &ast.Block{}
-	f.Block.Statements = p.parseStatementList(f)
+	f.Block.Statements = p.parseStatementList(f.Block)
 	p.Next()
 	return f, nil
 }
-func (p *Function) parseStatementList(f *ast.Function) []*ast.Statement {
+func (p *Function) parseStatementList(block *ast.Block) []*ast.Statement {
 	ret := []*ast.Statement{}
 	for {
 		switch p.parser.token.Type {
@@ -75,7 +76,10 @@ func (p *Function) parseStatementList(f *ast.Function) []*ast.Statement {
 				Expression: e,
 			})
 		case lex.TOKEN_VAR:
-			p.parser.insertVariableIntoBlock(f.Block, p.parser.parseVarDefinition())
+			errs := p.parser.insertVariableIntoBlock(block, p.parser.parseVarDefinition())
+			if errs != nil {
+				p.parser.errs = append(p.parser.errs, errs...)
+			}
 		case lex.TOKEN_IF:
 		case lex.TOKEN_FOR:
 		case lex.TOKEN_SWITCH:

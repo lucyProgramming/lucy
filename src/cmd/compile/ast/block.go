@@ -33,7 +33,7 @@ func (b *Block) searchSymbolicItemAlsoGlobalVar(name string) *SymbolicItem {
 	//try global variable
 	t := b.p.Vars[name]
 	if t != nil {
-		return &t.SymbolicItem
+		return nil
 	}
 	return nil
 }
@@ -71,22 +71,67 @@ type InheritedAttribute struct {
 	p          *Package
 }
 
-type SymbolicTable struct {
-	ItemsMap map[string]*SymbolicItem // easy to access by name
+const (
+	ITEM_TYPE_CONST = iota
+	ITEM_TYPE_VAR
+	ITEM_TYPE_ENUM
+)
+
+type SymbolicItem struct {
+	Typ   int
+	Var   *VariableDefinition
+	Const *Const
 }
 
-func (s *SymbolicTable) Insert(name string, item *SymbolicItem) error {
+type SymbolicTable struct {
+	//Vars    map[string]*VariableDefinition // easy to access by name
+	//Enums   map[string]*Enum
+	//Const   map[string]*Const
+	ItemsMap map[string]*SymbolicItem
+}
+
+//func (s *SymbolwicTable) Insert(name string, item *SymbolicItem) error {
+//	if s.ItemsMap == nil {
+//		s.ItemsMap = make(map[string]*SymbolicItem)
+//	}
+//	if _, ok := s.ItemsMap[name]; ok {
+//		return fmt.Errorf("symbolic %s already declared", name)
+//	}
+//	s.ItemsMap[name] = item
+//	return nil
+//}
+
+func (s *SymbolicTable) Insert(name string, d interface{}) error {
 	if s.ItemsMap == nil {
 		s.ItemsMap = make(map[string]*SymbolicItem)
 	}
-	if _, ok := s.ItemsMap[name]; ok {
-		return fmt.Errorf("symbolic %s already declared", name)
+
+	switch d.(type) {
+	case *VariableDefinition:
+		if _, ok := s.ItemsMap[name]; ok {
+			return fmt.Errorf("symbolic %s already declared", name)
+		}
+		s.ItemsMap[name] = &SymbolicItem{
+			Typ: ITEM_TYPE_CONST,
+			Var: d.(*VariableDefinition),
+		}
+
+	case *Const:
+		if _, ok := s.ItemsMap[name]; ok {
+			return fmt.Errorf("symbolic %s already declared", name)
+		}
+		s.ItemsMap[name] = &SymbolicItem{
+			Typ:   ITEM_TYPE_CONST,
+			Const: d.(*Const),
+		}
+	default:
+		_, ok := d.(*VariableDefinition)
+		panic(ok) //  ==  panic(false)
 	}
-	s.ItemsMap[name] = item
 	return nil
 }
 
-type SymbolicItem struct {
+type NameWithType struct {
 	Name string
 	Typ  *VariableType
 }

@@ -1,10 +1,10 @@
 package ast
 
 type VariableDefinition struct {
-	SymbolicItem
 	AccessProperty
 	Pos  *Pos
 	Init *Expression
+	NameWithType
 }
 
 type Const struct {

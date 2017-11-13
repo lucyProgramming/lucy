@@ -9,7 +9,7 @@ type Function struct {
 	Typ   FunctionType
 	Name  string // if name is nil string,means no name function
 	Block *Block
-	Pos   Pos
+	Pos   *Pos
 }
 
 func (f *Function) check(b *Block) []error {
@@ -29,10 +29,10 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 	var err error
 	for _, v := range f.Parameters {
 		if v.Name != "" {
-			err = block.SymbolicTable.Insert(v.Name, &SymbolicItem{
-				Name: v.Name,
-				Typ:  v.Typ,
-			})
+			vd := &VariableDefinition{}
+			vd.Name = v.Name
+			vd.Typ = v.Typ
+			err = block.SymbolicTable.Insert(v.Name, vd)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue
@@ -58,10 +58,10 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 	//handler return
 	for _, v := range f.Returns {
 		if v.Name != "" {
-			err = block.SymbolicTable.Insert(v.Name, &SymbolicItem{
-				Name: v.Name,
-				Typ:  v.Typ,
-			})
+			t := VariableDefinition{}
+			t.Name = v.Name
+			t.Typ = v.Typ
+			err = block.SymbolicTable.Insert(v.Name, t)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue

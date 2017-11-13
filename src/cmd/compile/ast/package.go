@@ -11,7 +11,7 @@ type Package struct {
 	Funcs     map[string]*Function
 	Classes   map[string]*Class
 	Enums     map[string]*Enum
-	EnumNames map[string]*EnumNames
+	EnumNames map[string]*EnumName
 	Vars      map[string]*VariableDefinition
 	Consts    map[string]*Const
 	NErros    int // number of errors should stop compile

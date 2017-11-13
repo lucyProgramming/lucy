@@ -96,7 +96,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	e.Init = initExpression
 	e.Pos = enumName.Pos
 	for _, v := range names {
-		t := &ast.EnumNames{}
+		t := &ast.EnumName{}
 		t.Name = v.Name
 		t.Pos = v.Pos
 		t.Enum = e

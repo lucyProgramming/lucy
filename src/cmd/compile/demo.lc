@@ -29,9 +29,12 @@ c := 100;  //private global variable
 
 
 //function defination
-func (x int) Add(a int,b int){
+fn dd(a int,b int)(x int) {
     return a +b + c;
 }
+
+
+
 
 
 
@@ -40,7 +43,7 @@ func (x int) Add(a int,b int){
 class Man: Person{
     public Person(){
         var abc int;
-        f = fun(){
+        f = fn() xxx {
             printf(abc);
         }
         f();

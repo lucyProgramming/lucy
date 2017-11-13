@@ -7,7 +7,7 @@ package ast
 	}
 */
 
-type EnumNames struct {
+type EnumName struct {
 	Enum  *Enum
 	Name  string
 	Pos   *Pos
@@ -18,6 +18,6 @@ type Enum struct {
 	AccessProperty
 	Name  string
 	Pos   *Pos
-	Names []*EnumNames
+	Names []*EnumName
 	Init  *Expression //should be a int expression
 }

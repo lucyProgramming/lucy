@@ -11,8 +11,9 @@ type Class struct {
 	Name        string
 	Fields      map[string]*ClassField
 	Methods     map[string]*ClassMethod
-	Father      *Expression // a or a.b
-	Constructor *Function   // can be nil
+	Const       map[string]*Const
+	Father      *Expression  // a or a.b
+	Constructor *ClassMethod // can be nil
 }
 
 func (c *Class) check() []error {
@@ -39,7 +40,7 @@ func (c *Class) checkMethods() []error {
 
 type ClassMethod struct {
 	ClassFieldProperty
-	Func Function
+	Func *Function
 }
 
 type ClassFieldProperty struct {

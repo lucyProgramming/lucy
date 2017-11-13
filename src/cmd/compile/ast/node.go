@@ -85,7 +85,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "const"
 			case *Enum:
-				t := vv.(*EnumNames)
+				t := vv.(*EnumName)
 				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "enum"
 			case *VariableDefinition:
@@ -95,7 +95,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				r.Type = "global varialbe"
 			case *Function:
 				t := vv.(*Function)
-				r.Pos = append(r.Pos, &t.Pos)
+				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "function"
 			case *Class:
 				t := vv.(*Class)
@@ -210,7 +210,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		p.Classes[v.Name] = v
 	}
 	p.Enums = make(map[string]*Enum)
-	p.EnumNames = make(map[string]*EnumNames)
+	p.EnumNames = make(map[string]*EnumName)
 	for _, v := range c.Enums {
 		p.Enums[v.Name] = v
 		for _, vv := range v.Names {
