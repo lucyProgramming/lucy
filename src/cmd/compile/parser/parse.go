@@ -217,9 +217,9 @@ func (p *Parser) Next() {
 }
 
 func (p *Parser) unexpectedErr() {
-	p.errs = append(p.errs, p.mkUnexpectedErr())
+	p.errs = append(p.errs, p.mkUnexpectedEofErr())
 }
-func (p *Parser) mkUnexpectedErr() error {
+func (p *Parser) mkUnexpectedEofErr() error {
 	return fmt.Errorf("%s %d:%d unexpected EOF", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
 }
 

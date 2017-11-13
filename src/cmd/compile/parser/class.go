@@ -28,7 +28,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.Next()
 	if c.parser.eof {
-		return nil, c.parser.mkUnexpectedErr()
+		return nil, c.parser.mkUnexpectedEofErr()
 	}
 	if c.token.Type != lex.TOKEN_IDENTIFIER {
 		c.consume(lex.TOKEN_SEMICOLON, lex.TOKEN_RC)
@@ -39,13 +39,13 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 	c.classDefinition.Pos = c.parser.mkPos()
 	c.Next()
 	if c.parser.eof {
-		return nil, c.parser.mkUnexpectedErr()
+		return nil, c.parser.mkUnexpectedEofErr()
 	}
 	var father *ast.Expression
 	if c.token.Type == lex.TOKEN_COLON {
 		c.Next()
 		if c.parser.eof {
-			return nil, c.parser.mkUnexpectedErr()
+			return nil, c.parser.mkUnexpectedEofErr()
 		}
 		if c.token.Type != lex.TOKEN_IDENTIFIER {
 			c.consume(lex.TOKEN_SEMICOLON, lex.TOKEN_RC)
@@ -137,7 +137,7 @@ func (c *Class) resetProperty() {
 
 func (c *Class) parseFiled() error {
 	if c.parser.eof {
-		return c.parser.mkUnexpectedErr()
+		return c.parser.mkUnexpectedEofErr()
 	}
 	names, err := c.parser.parseNameList()
 	if err != nil {

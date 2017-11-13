@@ -22,7 +22,7 @@ func (p *Function) consume(untils ...int) {
 func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	p.Next()
 	if p.parser.eof {
-		return nil, p.parser.mkUnexpectedErr()
+		return nil, p.parser.mkUnexpectedEofErr()
 	}
 	f = &ast.Function{}
 	if p.parser.token.Type == lex.TOKEN_LP {
@@ -48,7 +48,7 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	}
 	p.Next() //
 	if p.parser.eof {
-		return nil, p.parser.mkUnexpectedErr()
+		return nil, p.parser.mkUnexpectedEofErr()
 	}
 	if ispublic {
 		f.Access = ast.ACCESS_PUBLIC

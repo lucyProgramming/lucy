@@ -54,7 +54,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 		if ep.parser.token.Type == lex.TOKEN_DOT { // a.b.c.e.f
 			ep.Next()
 			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedErr()
+				return nil, ep.parser.mkUnexpectedEofErr()
 			}
 			if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				return nil, fmt.Errorf("%s %d%d excpet identifier afeter \".\",but %s",
@@ -78,7 +78,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 		} else if ep.parser.token.Type == lex.TOKEN_LB { // a["b"]
 			ep.Next()
 			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedErr()
+				return nil, ep.parser.mkUnexpectedEofErr()
 			}
 			newresult := &ast.Expression{}
 			newresult.Pos = ep.parser.mkPos()
@@ -92,7 +92,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 			}
 			ep.Next()
 			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedErr()
+				return nil, ep.parser.mkUnexpectedEofErr()
 			}
 			if ep.parser.token.Type != lex.TOKEN_RB {
 				err = fmt.Errorf("%s %d:%d [ and ] not match", ep.parser.filename, ep.parser.token.Match.StartLine, ep.parser.token.Match.StartColumn)
@@ -103,7 +103,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 		} else if ep.parser.token.Type == lex.TOKEN_LP { // a() or a.say() a["call"]()
 			ep.Next()
 			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedErr()
+				return nil, ep.parser.mkUnexpectedEofErr()
 			}
 			args := []*ast.Expression{}
 			if ep.parser.token.Type != lex.TOKEN_RP { //a(123)
@@ -216,6 +216,10 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 			Data: ep.parser.token.Data,
 		}
 	case lex.TOKEN_LP:
+		ep.parser.Next()
+		if ep.parser.eof {
+			return nil, ep.parser.mkUnexpectedEofErr()
+		}
 		left, err = ep.parseExpression(false)
 		if err != nil {
 			return nil, err
@@ -264,7 +268,7 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 	mkBinayExpression := func(typ int) (*ast.Expression, error) {
 		ep.Next()
 		if ep.parser.eof {
-			return nil, ep.parser.mkUnexpectedErr()
+			return nil, ep.parser.mkUnexpectedEofErr()
 		}
 		result := &ast.Expression{}
 		result.Typ = typ
