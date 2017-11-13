@@ -228,6 +228,7 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 			return nil, fmt.Errorf("%s ( and ) not matched, but %s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		}
 	case lex.TOKEN_INCREMENT:
+		ep.parser.Next()
 		newE := &ast.Expression{}
 		newE.Pos = ep.parser.mkPos()
 		left, err = ep.parseExpression(true)
@@ -238,6 +239,7 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 		newE.Data = left
 		left = newE
 	case lex.TOKEN_DECREMENT:
+		ep.parser.Next()
 		newE := &ast.Expression{}
 		left, err = ep.parseExpression(true)
 		if err != nil {
@@ -247,12 +249,33 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 		newE.Data = left
 		left = newE
 	case lex.TOKEN_NOT:
+		ep.parser.Next()
 		newE := &ast.Expression{}
 		left, err = ep.parseExpression(true)
 		if err != nil {
 			return nil, err
 		}
 		newE.Typ = ast.EXPRESSION_TYPE_NOT
+		newE.Data = left
+		left = newE
+	case lex.TOKEN_ADD:
+		ep.parser.Next()
+		newE := &ast.Expression{}
+		left, err = ep.parseExpression(true)
+		if err != nil {
+			return nil, err
+		}
+		newE.Typ = ast.EXPRESSION_TYPE_POSITIVE
+		newE.Data = left
+		left = newE
+	case lex.TOKEN_SUB:
+		ep.parser.Next()
+		newE := &ast.Expression{}
+		left, err = ep.parseExpression(true)
+		if err != nil {
+			return nil, err
+		}
+		newE.Typ = ast.EXPRESSION_TYPE_NEGATIVE
 		newE.Data = left
 		left = newE
 	default:
