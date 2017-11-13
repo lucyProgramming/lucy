@@ -14,8 +14,13 @@ var str = `
 import "github.com/xxx/yyy" ;
 
 
-public const NAME = "123" + ( 1+2; // public global variable
+public const NAME = "123" + ( 1+2); // public global variable
 const age = 345;  // private global variable
+
+public enum Day {
+	Monday = 1,
+	TuesDay
+}
 
 `
 

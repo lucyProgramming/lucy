@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -27,8 +28,8 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 		p.unexpectedErr()
 		return
 	}
-	if p.token.Type != lex.TOKEN_RC {
-		p.errs = append(p.errs, fmt.Errorf("%s enum type have no { after it`s name defined", p.errorMsgPrefix()))
+	if p.token.Type != lex.TOKEN_LC {
+		p.errs = append(p.errs, fmt.Errorf("%s enum type have no '{' after it`s name defined,but %s", p.errorMsgPrefix(), p.token.Desp))
 		p.consume(lex.TOKEN_RC)
 		p.Next()
 		return
@@ -59,6 +60,10 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	var initExpression *ast.Expression
 	var err error
 	if p.token.Type == lex.TOKEN_ASSIGN { // first value defined here
+		p.Next()
+		if p.eof {
+			return
+		}
 		initExpression, err = p.ExpressionParser.parseExpression(false)
 		if err != nil {
 			p.errs = append(p.errs, err)
@@ -71,7 +76,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 		p.Next()
 		ns, err := p.parseNameList()
 		if err != nil {
-			p.errs = append(p.errs, fmt.Errorf("%s not a name after {", p.errorMsgPrefix()))
+			p.errs = append(p.errs, err)
 			p.consume(lex.TOKEN_RC)
 			p.Next()
 			return

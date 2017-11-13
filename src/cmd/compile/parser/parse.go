@@ -402,7 +402,7 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		}
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			err = fmt.Errorf("%s %d:%d %s is not identifier", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp)
+			err = fmt.Errorf("%s %d:%d not identifier after a comma,but %s ", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp)
 		}
 	}
 	return

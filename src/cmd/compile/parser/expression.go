@@ -225,7 +225,7 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 			return nil, err
 		}
 		if ep.parser.token.Type != lex.TOKEN_RP {
-			return nil, fmt.Errorf("%s ( and ) not matched", ep.parser.errorMsgPrefix())
+			return nil, fmt.Errorf("%s ( and ) not matched, but %s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		}
 	case lex.TOKEN_INCREMENT:
 		newE := &ast.Expression{}
