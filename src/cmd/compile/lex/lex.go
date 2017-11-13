@@ -544,7 +544,7 @@ func init() {
 		return t, nil
 	})
 	//科学计数法
-	Lexer.Add([]byte(`([\-]?[1-9](\.[0-9]+)?e[\-|\+]?[1-9][0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	Lexer.Add([]byte(`([1-9](\.[0-9]+)?e[\-|\+]?[1-9][0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Data, t.Type = parseScientificNotation(match.Bytes)
@@ -552,7 +552,7 @@ func init() {
 		return t, nil
 	})
 	// 0x12e
-	Lexer.Add([]byte(`([\-]?0x[0-9a-e]+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	Lexer.Add([]byte(`(0x[0-9a-e]+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_LITERAL_INT

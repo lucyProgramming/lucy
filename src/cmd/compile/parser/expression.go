@@ -33,7 +33,7 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 
 //parse equal expression
 func (ep *ExpressionParser) parseExpression(one bool) (*ast.Expression, error) {
-	return ep.parseEqualExpression(one)
+	return ep.parseAssignExpression(one)
 }
 
 //begin with identifier
@@ -172,8 +172,7 @@ func (ep *ExpressionParser) parseIdentifierExpressions() (ret []*ast.Expression,
 	return
 }
 
-// a = 123
-func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch ep.parser.token.Type {
@@ -282,11 +281,33 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 		return nil, fmt.Errorf("%s unkown begining of a expression", ep.parser.errorMsgPrefix())
 	}
 	ep.Next() // look next
-	if one {
-		return left, nil
-	}
 	if ep.parser.eof {
 		return left, nil
+	}
+	// a++ b--
+	if ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT {
+		newe := &ast.Expression{}
+		if ep.parser.token.Type == lex.TOKEN_INCREMENT {
+			newe.Typ = ast.EXPRESSION_TYPE_INCREMENT
+		} else {
+			newe.Typ = ast.EXPRESSION_TYPE_DECREMENT
+		}
+		newe.Data = left
+		left = newe
+	}
+	return left, nil
+}
+
+func (ep *ExpressionParser) parseLogicalExpression(one *ast.Expression) (*ast.Expression, error) {
+
+	return nil, nil
+}
+
+// a = 123
+func (ep *ExpressionParser) parseAssignExpression(one bool) (*ast.Expression, error) {
+	left, err := ep.parseOneExpression()
+	if err != nil {
+		return nil, err
 	}
 	mkBinayExpression := func(typ int) (*ast.Expression, error) {
 		ep.Next()
@@ -317,76 +338,65 @@ func (ep *ExpressionParser) parseEqualExpression(one bool) (*ast.Expression, err
 	case lex.TOKEN_MOD_ASSIGN:
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN)
 	}
-	// && ||
-	switch ep.parser.token.Type {
-	case lex.TOKEN_LOGICAL_AND:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LOGICAL_AND)
-	case lex.TOKEN_LOGICAL_OR:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LOGICAL_OR)
-	}
+	return ep.parseLogicalExpression(left)
 
-	// & |
-
-	switch ep.parser.token.Type {
-	case lex.TOKEN_AND:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_AND)
-	case lex.TOKEN_OR:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_OR)
-	}
-
-	// == !=
-
-	switch ep.parser.token.Type {
-	case lex.TOKEN_EQUAL:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_EQ)
-	case lex.TOKEN_NE:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_NE)
-	}
-	// > < >= <=
-	switch ep.parser.token.Type {
-	case lex.TOKEN_GE:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_GE)
-	case lex.TOKEN_GT:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_GT)
-	case lex.TOKEN_LT:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LT)
-	case lex.TOKEN_LE:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LE)
-	}
-
-	// << >>
-	switch ep.parser.token.Type {
-	case lex.TOKEN_LEFT_SHIFT:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LEFT_SHIFT)
-	case lex.TOKEN_RIGHT_SHIFT:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_RIGHT_SHIFT)
-	}
-
-	// + - * / %
-	switch ep.parser.token.Type {
-	case lex.TOKEN_ADD:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_ADD)
-	case lex.TOKEN_SUB:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_SUB)
-	case lex.TOKEN_MUL:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_MUL)
-	case lex.TOKEN_DIV:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_DIV)
-	case lex.TOKEN_MOD:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD)
-	}
-	// ++ --
-	switch ep.parser.token.Type {
-	case lex.TOKEN_INCREMENT:
-		return &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_INCREMENT,
-			Data: left,
-		}, nil
-	case lex.TOKEN_DECREMENT:
-		return &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_DECREMENT,
-			Data: left,
-		}, nil
-	}
-	return left, nil // no further token can be matched
+	//// && ||
+	//switch ep.parser.token.Type {
+	//case lex.TOKEN_LOGICAL_AND:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_LOGICAL_AND)
+	//case lex.TOKEN_LOGICAL_OR:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_LOGICAL_OR)
+	//}
+	//
+	//// & |
+	//
+	//switch ep.parser.token.Type {
+	//case lex.TOKEN_AND:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_AND)
+	//case lex.TOKEN_OR:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_OR)
+	//}
+	//
+	//// == !=
+	//
+	//switch ep.parser.token.Type {
+	//case lex.TOKEN_EQUAL:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_EQ)
+	//case lex.TOKEN_NE:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_NE)
+	//}
+	//// > < >= <=
+	//switch ep.parser.token.Type {
+	//case lex.TOKEN_GE:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_GE)
+	//case lex.TOKEN_GT:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_GT)
+	//case lex.TOKEN_LT:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_LT)
+	//case lex.TOKEN_LE:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_LE)
+	//}
+	//
+	//// << >>
+	//switch ep.parser.token.Type {
+	//case lex.TOKEN_LEFT_SHIFT:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_LEFT_SHIFT)
+	//case lex.TOKEN_RIGHT_SHIFT:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_RIGHT_SHIFT)
+	//}
+	//
+	//// + - * / %
+	//switch ep.parser.token.Type {
+	//case lex.TOKEN_ADD:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_ADD)
+	//case lex.TOKEN_SUB:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_SUB)
+	//case lex.TOKEN_MUL:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_MUL)
+	//case lex.TOKEN_DIV:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_DIV)
+	//case lex.TOKEN_MOD:
+	//	return mkBinayExpression(ast.EXPRESSION_TYPE_MOD)
+	//}
+	//return left, nil // no further token can be matched
 }
