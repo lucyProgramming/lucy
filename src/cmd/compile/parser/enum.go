@@ -64,7 +64,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 		if p.eof {
 			return
 		}
-		initExpression, err = p.ExpressionParser.parseExpression(false)
+		initExpression, err = p.ExpressionParser.parseExpression()
 		if err != nil {
 			p.errs = append(p.errs, err)
 			p.consume(lex.TOKEN_RC)

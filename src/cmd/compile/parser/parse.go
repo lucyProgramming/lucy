@@ -18,6 +18,7 @@ type Parser struct {
 	ExpressionParser *ExpressionParser
 	Function         *Function
 	Class            *Class
+	Block            *Block
 	scanner          *lexmachine.Scanner
 	filename         string
 	token            *lex.Token
@@ -30,6 +31,8 @@ func (p *Parser) parse() []error {
 	p.Function = &Function{p}
 	p.Class = &Class{}
 	p.Class.parser = p
+	p.Block = &Block{}
+	p.Block.parser = p
 	p.errs = []error{}
 	var err error
 	p.scanner, err = lex.Lexer.Scanner(p.bs)
@@ -69,8 +72,10 @@ func (p *Parser) parse() []error {
 		return p.errs
 	}
 	ispublic := false
+	isconst := false
 	resetProperty := func() {
 		ispublic = false
+		isconst = false
 	}
 	for !p.eof {
 		fmt.Println("!!!!!!!!!!!!!!!!!!!!", p.token.Desp)
@@ -88,78 +93,20 @@ func (p *Parser) parse() []error {
 				}
 			}
 			resetProperty()
-		//case lex.TOKEN_IDENTIFIER:
-
-		case lex.TOKEN_ENUM:
-			e := p.parseEnum(ispublic)
-			if e != nil {
-				*p.tops = append(*p.tops, &ast.Node{
-					Data: e,
-				})
-			}
-		case lex.TOKEN_FUNCTION:
-			f, err := p.Function.parse(ispublic)
-			if err != nil {
-				p.errs = append(p.errs, err)
-				continue
-			}
-			*p.tops = append(*p.tops, &ast.Node{
-				Data: f,
-			})
-		//case lex.TOKEN_LC:
-		case lex.TOKEN_CLASS:
-			c, err := p.Class.parse(ispublic)
-			if err != nil {
-				p.errs = append(p.errs, err)
-				continue
-			}
-			*p.tops = append(*p.tops, &ast.Node{
-				Data: c,
-			})
-		case lex.TOKEN_PUBLIC:
-			ispublic = true
-			p.Next()
-		case lex.TOKEN_CONST:
-			p.Next()
-			if p.eof {
-				p.errs = append(p.errs, fmt.Errorf("%s %d:%d eof after const", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-				return p.errs
-			}
-			names, err := p.parseNameList()
+		case lex.TOKEN_IDENTIFIER:
+			names, es, err := p.parseAssignedNames()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(lex.TOKEN_SEMICOLON)
 				p.Next()
-				continue
-			}
-			if p.token.Type != lex.TOKEN_ASSIGN {
-				p.errs = append(p.errs, fmt.Errorf("%s except = ,but %s", p.errorMsgPrefix(), p.token.Desp))
-				p.consume(lex.TOKEN_SEMICOLON)
-				p.Next()
-				continue
-			}
-			p.Next()
-			if p.eof {
-				p.errs = append(p.errs, fmt.Errorf("%s %d:%d eof after const", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-				continue
-			}
-			es, err := p.ExpressionParser.parseExpressions()
-			if err != nil {
-				p.errs = append(p.errs, err)
-				p.consume(lex.TOKEN_SEMICOLON)
-				p.Next()
-				continue
-			}
-			if len(es) != len(names) {
-				p.errs = append(p.errs, fmt.Errorf("%s %d:%d mame and value not match", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-				p.consume(lex.TOKEN_SEMICOLON)
-				p.Next()
+				resetProperty()
 				continue
 			}
 			if p.token.Type != lex.TOKEN_SEMICOLON {
 				p.errs = append(p.errs, fmt.Errorf("%s %d:%d not ; after const definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
 				p.consume(lex.TOKEN_SEMICOLON)
 				p.Next()
+				resetProperty()
 				continue
 			}
 			for k, v := range names {
@@ -175,6 +122,46 @@ func (p *Parser) parse() []error {
 					Data: c,
 				})
 			}
+			resetProperty()
+			p.Next()
+		case lex.TOKEN_ENUM:
+			e := p.parseEnum(ispublic)
+			if e != nil {
+				*p.tops = append(*p.tops, &ast.Node{
+					Data: e,
+				})
+			}
+		case lex.TOKEN_FUNCTION:
+			f, err := p.Function.parse(ispublic)
+			if err != nil {
+				p.errs = append(p.errs, err)
+				p.consume(lex.TOKEN_RC)
+				p.Next()
+				continue
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: f,
+			})
+		case lex.TOKEN_LC:
+			b := &ast.Block{}
+			p.Block.parse(b)
+		case lex.TOKEN_CLASS:
+			if isconst {
+				p.errs = append(p.errs, fmt.Errorf("%s can`t use const for a class", p.errorMsgPrefix()))
+			}
+			c, err := p.Class.parse(ispublic)
+			if err != nil {
+				p.errs = append(p.errs, err)
+				continue
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: c,
+			})
+		case lex.TOKEN_PUBLIC:
+			ispublic = true
+			p.Next()
+		case lex.TOKEN_CONST:
+			isconst = true
 			p.Next()
 			continue
 		case lex.TOKEN_PRIVATE: //is a default attribute
@@ -196,6 +183,29 @@ func (p *Parser) mkPos() *ast.Pos {
 		StartLine:   p.token.Match.StartLine,
 		StartColumn: p.token.Match.StartColumn,
 	}
+}
+
+// str := "hello world"   a,b = 123 or a b ;
+func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, []*ast.Expression, error) {
+	names, err := p.parseNameList()
+	if err != nil {
+		return nil, nil, err
+	}
+	if p.token.Type != lex.TOKEN_ASSIGN {
+		return nil, nil, err
+	}
+	p.Next()
+	if p.eof {
+		return nil, nil, fmt.Errorf("%s %d:%d eof after const", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+	}
+	es, err := p.ExpressionParser.parseExpressions()
+	if err != nil {
+		return nil, nil, nil
+	}
+	if len(es) != len(names) {
+		return nil, nil, fmt.Errorf("%s %d:%d mame and value not match", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+	}
+	return names, es, nil
 }
 
 func (p *Parser) Next() {
@@ -409,7 +419,6 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 }
 
 func (p *Parser) consume(untils ...int) {
-	fmt.Println("consume.........")
 	if len(untils) == 0 {
 		panic("no token to consume")
 	}
@@ -507,25 +516,4 @@ func (p *Parser) parseTypedNames() (names []*ast.VariableDefinition, err error) 
 	//	}
 	//}
 	return nil, nil
-}
-
-func (p *Parser) insertVariableIntoBlock(b *ast.Block, vars []*ast.VariableDefinition) (errs []error) {
-	errs = []error{}
-	if vars == nil || len(vars) == 0 {
-		return
-	}
-	if b.SymbolicTable.ItemsMap == nil {
-		b.SymbolicTable.ItemsMap = make(map[string]*ast.SymbolicItem)
-	}
-	var err error
-	for _, v := range vars {
-		if v.Name == "" {
-			continue
-		}
-		err = b.SymbolicTable.Insert(v.Name, v)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return
 }

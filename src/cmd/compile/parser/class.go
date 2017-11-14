@@ -88,9 +88,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		case lex.TOKEN_FUNCTION:
 			c.Next()
 			f, err := c.parser.Function.parse(false)
-
 			if err != nil {
-				c.parser.errs = append(c.parser.errs, err)
 				c.consume(lex.TOKEN_RC)
 				c.Next()
 				c.resetProperty()

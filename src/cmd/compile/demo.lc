@@ -29,7 +29,12 @@ c := 100;  //private global variable
 
 
 //function defination
-fn dd(a int,b int)(x int) {
+fn [xxx,yy in] dd(a int,b int) {
+    return a +b + c;
+}
+
+//function defination
+fn dd(a int,b int)(xxx int) {
     return a +b + c;
 }
 
