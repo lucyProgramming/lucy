@@ -13,6 +13,7 @@ type Class struct {
 	classDefinition *ast.Class
 	access          int
 	isStatic        bool
+	isConst         bool
 }
 
 func (c *Class) Next() {
@@ -21,7 +22,7 @@ func (c *Class) Next() {
 }
 
 func (c *Class) consume(untils ...int) {
-	c.parser.consume()
+	c.parser.consume(untils...)
 }
 
 func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
@@ -85,6 +86,13 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_CONST:
+			c.isConst = true
+			c.Next()
+			err := c.parseConst()
+			if err != nil {
+				c.consume(lex.TOKEN_SEMICOLON)
+				continue
+			}
 		case lex.TOKEN_FUNCTION:
 			c.Next()
 			f, err := c.parser.Function.parse(false)
@@ -131,6 +139,27 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 func (c *Class) resetProperty() {
 	c.access = ast.ACCESS_PRIVATE
 	c.isStatic = false
+	c.isConst = false
+}
+
+func (c *Class) parseConst() error {
+	names, _, es, err := c.parser.parseAssignedNames()
+	if err != nil {
+		return err
+	}
+	if c.classDefinition.Consts == nil {
+		c.classDefinition.Consts = make(map[string]*ast.Const)
+	}
+	for k, v := range names {
+		if _, ok := c.classDefinition.Consts[v.Name]; ok {
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const %s alreay declared", v.Name))
+			continue
+		}
+		c.classDefinition.Consts[v.Name] = &ast.Const{}
+		c.classDefinition.Consts[v.Name].Pos = v.Pos
+		c.classDefinition.Consts[v.Name].Init = es[k]
+	}
+	return nil
 }
 
 func (c *Class) parseFiled() error {

@@ -11,7 +11,7 @@ type Class struct {
 	Name        string
 	Fields      map[string]*ClassField
 	Methods     map[string]*ClassMethod
-	Const       map[string]*Const
+	Consts      map[string]*Const
 	Father      *Expression  // a or a.b
 	Constructor *ClassMethod // can be nil
 }

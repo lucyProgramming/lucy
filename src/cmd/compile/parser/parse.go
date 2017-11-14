@@ -94,7 +94,7 @@ func (p *Parser) parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			names, es, err := p.parseAssignedNames()
+			names, _, es, err := p.parseAssignedNames()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(lex.TOKEN_SEMICOLON)
@@ -186,26 +186,27 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, []*ast.Expression, error) {
+func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, int, []*ast.Expression, error) {
 	names, err := p.parseNameList()
 	if err != nil {
-		return nil, nil, err
+		return nil, 0, nil, err
 	}
-	if p.token.Type != lex.TOKEN_ASSIGN {
-		return nil, nil, err
+	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
+		return nil, 0, nil, err
 	}
+	typ := p.token.Type
 	p.Next()
 	if p.eof {
-		return nil, nil, fmt.Errorf("%s %d:%d eof after const", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+		return nil, 0, nil, fmt.Errorf("%s %d:%d eof after const", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
 	}
 	es, err := p.ExpressionParser.parseExpressions()
 	if err != nil {
-		return nil, nil, nil
+		return nil, 0, nil, nil
 	}
 	if len(es) != len(names) {
-		return nil, nil, fmt.Errorf("%s %d:%d mame and value not match", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+		return nil, 0, nil, fmt.Errorf("%s %d:%d mame and value not match", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
 	}
-	return names, es, nil
+	return names, typ, es, nil
 }
 
 func (p *Parser) Next() {
