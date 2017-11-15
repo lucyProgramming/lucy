@@ -115,6 +115,17 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				continue
 			}
 			b.Next()
+		case lex.TOKEN_LC:
+			newblock := &ast.Block{}
+			err = b.parse(newblock)
+			if err != nil {
+				b.consume(untils_block)
+				b.Next()
+			}
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:   ast.STATEMENT_TYPE_BLOCK,
+				Block: newblock,
+			})
 		default:
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but %s", b.parser.errorMsgPrefix()))
 			b.consume(untils_statement)

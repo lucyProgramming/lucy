@@ -16,7 +16,7 @@ const (
 	VARIABLE_TYPE_NULL        //null
 	VARIABLE_TYPE_COMBINATION // []int
 	VARIABLE_TYPE_DOT         // a.b
-	VARIABLE_TYPE_NAME        // name
+	VARIABLE_TYPE_NAME        // naming should search for declaration
 )
 
 type AccessProperty struct {

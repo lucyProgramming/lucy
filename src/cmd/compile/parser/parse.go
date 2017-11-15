@@ -3,7 +3,6 @@ package parser
 import (
 	"bytes"
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
@@ -72,7 +71,6 @@ func (p *Parser) parse() []error {
 	})
 	p.parseImports() // next is called
 	if p.eof {
-		//end of file
 		return p.errs
 	}
 	ispublic := false
@@ -138,13 +136,20 @@ func (p *Parser) parse() []error {
 			resetProperty()
 			p.Next()
 		case lex.TOKEN_ENUM:
+			if isconst {
+				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a enum", p.errorMsgPrefix()))
+			}
 			e := p.parseEnum(ispublic)
 			if e != nil {
 				*p.tops = append(*p.tops, &ast.Node{
 					Data: e,
 				})
 			}
+			resetProperty()
 		case lex.TOKEN_FUNCTION:
+			if isconst {
+				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a enum", p.errorMsgPrefix()))
+			}
 			f, err := p.Function.parse(ispublic)
 			if err != nil {
 				p.errs = append(p.errs, err)
@@ -155,9 +160,17 @@ func (p *Parser) parse() []error {
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: f,
 			})
+			resetProperty()
 		case lex.TOKEN_LC:
+			if isconst {
+				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a block", p.errorMsgPrefix()))
+			}
+			if ispublic {
+				p.errs = append(p.errs, fmt.Errorf("%s cannot use public for a block", p.errorMsgPrefix()))
+			}
 			b := &ast.Block{}
 			p.Block.parse(b)
+			resetProperty()
 		case lex.TOKEN_CLASS:
 			if isconst {
 				p.errs = append(p.errs, fmt.Errorf("%s can`t use const for a class", p.errorMsgPrefix()))
@@ -170,6 +183,7 @@ func (p *Parser) parse() []error {
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: c,
 			})
+			resetProperty()
 		case lex.TOKEN_PUBLIC:
 			ispublic = true
 			p.Next()
@@ -529,19 +543,34 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.StartColumn = t.Match.StartColumn
 }
 
+func (p *Parser) parseTypeOrTypedNames() (names []*ast.VariableDefinition, err error) {
+
+	return nil, nil
+}
+
 // a,b int or int,bool  c xxx
 func (p *Parser) parseTypedNames() (names []*ast.VariableDefinition, err error) {
-	//	names = []*ast.VariableDefinition{}
-	//	var name string
-	//	for !p.eof {
-	//		if p.token.Type == lex.TOKEN_IDENTIFIER {
-	//			name = lex.Token.Data.(string)
-	//			p.Next()
-	//			if p.token.Type == lex.TOKEN_DOT {
-	//				name =
-	//			}
-	//		}
-
-	//	}
+	names = []*ast.VariableDefinition{}
+	for !p.eof {
+		ns, err := p.parseNameList()
+		if err != nil {
+			return names, err
+		}
+		t, err := p.parseType()
+		if err != nil {
+			return names, err
+		}
+		for _, v := range ns {
+			vd := &ast.VariableDefinition{}
+			vd.Name = v.Name
+			vd.Pos = v.Pos
+			vd.Typ = &ast.VariableType{}
+			*vd.Typ = *t
+			names = append(names, vd)
+		}
+		if p.token.Type != lex.TOKEN_COMMA { // not a commna
+			break
+		}
+	}
 	return nil, nil
 }
