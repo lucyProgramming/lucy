@@ -15,6 +15,8 @@ const (
 	VARIABLE_TYPE_CLASS       //new Person()
 	VARIABLE_TYPE_NULL        //null
 	VARIABLE_TYPE_COMBINATION // []int
+	VARIABLE_TYPE_DOT         // a.b
+	VARIABLE_TYPE_NAME        // name
 )
 
 type AccessProperty struct {

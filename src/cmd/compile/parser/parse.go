@@ -402,7 +402,26 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 }
 
 func (p *Parser) parseIdentiferType() (*ast.VariableType, error) {
-	return nil, nil
+	name := p.token.Data.(string)
+	p.Next()
+	if p.token.Type != lex.TOKEN_DOT {
+		return &ast.VariableType{
+			Typ:   ast.VARIABLE_TYPE_NAME,
+			Lname: name,
+		}, nil
+	}
+	// a.b
+	p.Next()
+	if p.token.Type != lex.TOKEN_IDENTIFIER {
+		return nil, fmt.Errorf("%s not a identifier after dot", p.errorMsgPrefix())
+	}
+	name2 := p.token.Data.(string)
+	p.Next()
+	return &ast.VariableType{
+		Typ:   ast.VARIABLE_TYPE_DOT,
+		Lname: name,
+		Rname: name2,
+	}, nil
 }
 
 //at least one name
@@ -512,15 +531,17 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 
 // a,b int or int,bool  c xxx
 func (p *Parser) parseTypedNames() (names []*ast.VariableDefinition, err error) {
-	//names = []*ast.VariableDefinition{}
-	//for {
-	//	if p.token.Type == lex.TOKEN_IDENTIFIER {
-	//		ns, err := p.parseNameList()
-	//		if err != nil {
-	//			return nil, err
+	//	names = []*ast.VariableDefinition{}
+	//	var name string
+	//	for !p.eof {
+	//		if p.token.Type == lex.TOKEN_IDENTIFIER {
+	//			name = lex.Token.Data.(string)
+	//			p.Next()
+	//			if p.token.Type == lex.TOKEN_DOT {
+	//				name =
+	//			}
 	//		}
-	//
+
 	//	}
-	//}
 	return nil, nil
 }
