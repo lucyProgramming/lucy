@@ -15,7 +15,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	}
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		p.errs = append(p.errs, fmt.Errorf("%s enum type have no name", p.errorMsgPrefix()))
-		p.consume(lex.TOKEN_RC)
+		p.consume(untils_block)
 		p.Next()
 		return
 	}
@@ -30,7 +30,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	}
 	if p.token.Type != lex.TOKEN_LC {
 		p.errs = append(p.errs, fmt.Errorf("%s enum type have no '{' after it`s name defined,but %s", p.errorMsgPrefix(), p.token.Desp))
-		p.consume(lex.TOKEN_RC)
+		p.consume(untils_block)
 		p.Next()
 		return
 	}
@@ -42,7 +42,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		p.errs = append(p.errs, fmt.Errorf("%s no enum names defined after {", p.errorMsgPrefix()))
-		p.consume(lex.TOKEN_RC)
+		p.consume(untils_block)
 		p.Next()
 		return
 	}
@@ -67,7 +67,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 		initExpression, err = p.ExpressionParser.parseExpression()
 		if err != nil {
 			p.errs = append(p.errs, err)
-			p.consume(lex.TOKEN_RC)
+			p.consume(untils_block)
 			p.Next()
 			return
 		}
@@ -77,13 +77,13 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 		ns, err := p.parseNameList()
 		if err != nil {
 			p.errs = append(p.errs, err)
-			p.consume(lex.TOKEN_RC)
+			p.consume(untils_block)
 			p.Next()
 			return
 		}
 		if p.token.Type != lex.TOKEN_RC {
 			p.errs = append(p.errs, fmt.Errorf("%s except } after name list,but %s", p.errorMsgPrefix(), p.token.Desp))
-			p.consume(lex.TOKEN_RC)
+			p.consume(untils_block)
 			p.Next()
 			return
 		}
@@ -91,7 +91,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum) {
 	} else if p.token.Type == lex.TOKEN_RC { //  enmu define ended
 	} else {
 		p.errs = append(p.errs, fmt.Errorf("%s unexcept token(%s) after a enum name", p.token.Desp))
-		p.consume(lex.TOKEN_RC)
+		p.consume(untils_block)
 		p.Next()
 		return
 	}

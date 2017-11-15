@@ -15,8 +15,8 @@ func (p *Function) Next() {
 	p.parser.Next()
 }
 
-func (p *Function) consume(untils ...int) {
-	p.parser.consume(untils...)
+func (p *Function) consume(untils map[int]bool) {
+	p.parser.consume(untils)
 }
 
 func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {

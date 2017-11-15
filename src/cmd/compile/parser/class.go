@@ -21,8 +21,8 @@ func (c *Class) Next() {
 	c.token = c.parser.token
 }
 
-func (c *Class) consume(untils ...int) {
-	c.parser.consume(untils...)
+func (c *Class) consume(m map[int]bool) {
+	c.parser.consume(m)
 }
 
 func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
@@ -32,7 +32,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		return nil, c.parser.mkUnexpectedEofErr()
 	}
 	if c.token.Type != lex.TOKEN_IDENTIFIER {
-		c.consume(lex.TOKEN_SEMICOLON, lex.TOKEN_RC)
+		c.consume(untils_block)
 		c.Next()
 		return nil, fmt.Errorf("%s on name after class", c.parser.errorMsgPrefix())
 	}
@@ -49,13 +49,13 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			return nil, c.parser.mkUnexpectedEofErr()
 		}
 		if c.token.Type != lex.TOKEN_IDENTIFIER {
-			c.consume(lex.TOKEN_SEMICOLON, lex.TOKEN_RC)
+			c.consume(untils_block_statement)
 			c.Next()
 			return nil, fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 		}
 		father, err = c.parser.ExpressionParser.parseIdentifierExpression()
 		if err != nil {
-			c.consume(lex.TOKEN_SEMICOLON, lex.TOKEN_RC)
+			c.consume(untils_block_statement)
 			c.Next()
 			return
 		}
@@ -81,7 +81,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			err = c.parseFiled()
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
-				c.consume(lex.TOKEN_SEMICOLON)
+				c.consume(untils_statement)
 				c.Next()
 			}
 			c.resetProperty()
@@ -90,14 +90,14 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			c.Next()
 			err := c.parseConst()
 			if err != nil {
-				c.consume(lex.TOKEN_SEMICOLON)
+				c.consume(untils_statement)
 				continue
 			}
 		case lex.TOKEN_FUNCTION:
 			c.Next()
 			f, err := c.parser.Function.parse(false)
 			if err != nil {
-				c.consume(lex.TOKEN_RC)
+				c.consume(untils_block)
 				c.Next()
 				c.resetProperty()
 				continue

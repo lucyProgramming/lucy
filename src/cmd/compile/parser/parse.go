@@ -84,7 +84,12 @@ func (p *Parser) parse() []error {
 			p.Next()
 			continue
 		case lex.TOKEN_VAR:
-			vs := p.parseVarDefinition(ispublic)
+			vs, err := p.parseVarDefinition(ispublic)
+			if err != nil {
+				p.consume(untils_statement)
+				p.Next()
+				continue
+			}
 			if vs != nil && len(vs) > 0 {
 				for _, v := range vs {
 					*p.tops = append(*p.tops, &ast.Node{
@@ -97,14 +102,14 @@ func (p *Parser) parse() []error {
 			names, _, es, err := p.parseAssignedNames()
 			if err != nil {
 				p.errs = append(p.errs, err)
-				p.consume(lex.TOKEN_SEMICOLON)
+				p.consume(untils_statement)
 				p.Next()
 				resetProperty()
 				continue
 			}
 			if p.token.Type != lex.TOKEN_SEMICOLON {
 				p.errs = append(p.errs, fmt.Errorf("%s %d:%d not ; after const definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-				p.consume(lex.TOKEN_SEMICOLON)
+				p.consume(untils_statement)
 				p.Next()
 				resetProperty()
 				continue
@@ -135,7 +140,7 @@ func (p *Parser) parse() []error {
 			f, err := p.Function.parse(ispublic)
 			if err != nil {
 				p.errs = append(p.errs, err)
-				p.consume(lex.TOKEN_RC)
+				p.consume(untils_block)
 				p.Next()
 				continue
 			}
@@ -169,7 +174,7 @@ func (p *Parser) parse() []error {
 			p.Next()
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s %d:%d token(%s) is not except", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp))
-			p.consume(lex.TOKEN_SEMICOLON)
+			p.consume(untils_statement)
 			p.Next()
 			resetProperty()
 		}
@@ -242,7 +247,7 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
-func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition) {
+func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition, err error) {
 	p.Next()
 	if p.eof {
 		p.unexpectedErr()
@@ -250,27 +255,22 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	}
 	names, err := p.parseNameList()
 	if err != nil {
-		p.errs = append(p.errs, err)
-		p.consume(lex.TOKEN_SEMICOLON)
-		p.Next()
-		return
+		return nil, err
 	}
 	if p.eof {
 		p.unexpectedErr()
 		return
 	}
 	if len(names) == 0 {
-		p.errs = append(p.errs, fmt.Errorf("%s %d:%d no variable name defined", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-		p.consume(lex.TOKEN_SEMICOLON)
-		p.Next()
-		return
+		err = fmt.Errorf("%s %d:%d no variable name defined", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+		p.errs = append(p.errs, err)
+		return nil, err
 	}
 	t, err := p.parseType()
 	if t == nil {
-		p.errs = append(p.errs, fmt.Errorf("%s %d:%d no variable type found or defined wrong", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-		p.consume(lex.TOKEN_SEMICOLON)
-		p.Next()
-		return
+		err = fmt.Errorf("%s %d:%d no variable type found or defined wrong", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+		p.errs = append(p.errs, err)
+		return nil, err
 	}
 
 	var expressions []*ast.Expression
@@ -285,13 +285,13 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		}
 		if p.token.Type != lex.TOKEN_SEMICOLON {
 			p.errs = append(p.errs, fmt.Errorf("%s not a \";\" after a expression list ", p.errorMsgPrefix()))
-			p.consume(lex.TOKEN_SEMICOLON)
+			p.consume(untils_statement)
 			p.Next()
 			return
 		}
 	} else {
 		p.errs = append(p.errs, fmt.Errorf("%s %d:%d not a ; after type definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-		p.consume(lex.TOKEN_SEMICOLON)
+		p.consume(untils_statement)
 		p.Next()
 		return
 	}
@@ -314,7 +314,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		vd.Pos = v.Pos
 		vs = append(vs, vd)
 	}
-	return vs
+	return vs, nil
 }
 
 //func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
@@ -419,17 +419,13 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 	return
 }
 
-func (p *Parser) consume(untils ...int) {
+func (p *Parser) consume(untils map[int]bool) {
 	if len(untils) == 0 {
 		panic("no token to consume")
 	}
-	m := make(map[int]bool)
-	for _, v := range untils {
-		m[v] = true
-	}
 	var ok bool
 	for !p.eof {
-		if _, ok = m[p.token.Type]; ok {
+		if _, ok = untils[p.token.Type]; ok {
 			return
 		}
 		p.Next()
@@ -452,7 +448,7 @@ func (p *Parser) parseImports() {
 	// p.token.Type == lex.TOKEN_IMPORT
 	p.Next()
 	if p.token.Type != lex.TOKEN_LITERAL_STRING {
-		p.consume(lex.TOKEN_SEMICOLON)
+		p.consume(untils_statement)
 		p.errs = append(p.errs, syntaxErr())
 		p.parseImports()
 		return
@@ -465,7 +461,7 @@ func (p *Parser) parseImports() {
 		i.Name = packagename
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			p.consume(lex.TOKEN_SEMICOLON)
+			p.consume(untils_statement)
 			p.errs = append(p.errs, syntaxErr())
 			p.parseImports()
 			return
@@ -473,7 +469,7 @@ func (p *Parser) parseImports() {
 		i.Alias = p.token.Data.(string)
 		p.Next()
 		if p.token.Type != lex.TOKEN_SEMICOLON {
-			p.consume(lex.TOKEN_SEMICOLON)
+			p.consume(untils_statement)
 			p.errs = append(p.errs, syntaxErr())
 			p.parseImports()
 			return
@@ -491,7 +487,7 @@ func (p *Parser) parseImports() {
 		p.parseImports()
 		return
 	} else {
-		p.consume(lex.TOKEN_SEMICOLON)
+		p.consume(untils_block)
 		p.errs = append(p.errs, syntaxErr())
 		p.parseImports()
 		return

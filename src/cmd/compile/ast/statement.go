@@ -25,7 +25,7 @@ type Statement struct {
 	StatementFor      *StatementFor
 	StatementReturn   *StatementReturn
 	StatementTryCatch *StatementTryCatch
-	StatmentSwitch    *StatmentSwitch
+	StatementSwitch   *StatementSwitch
 	Block             *Block
 }
 
@@ -232,7 +232,7 @@ type StatementTryCatch struct {
 	FinallyBlock *Block
 }
 
-type StatmentSwitch struct {
+type StatementSwitch struct {
 	Outter              *Block
 	Condition           *Expression //switch
 	StatmentSwitchCases []*StatmentSwitchCase
