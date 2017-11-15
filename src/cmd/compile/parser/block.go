@@ -9,12 +9,10 @@ import (
 
 type Block struct {
 	parser *Parser
-	token  *lex.Token
 }
 
 func (b *Block) Next() {
 	b.parser.Next()
-	b.token = b.parser.token
 }
 func (b *Block) consume(c map[int]bool) {
 	b.parser.consume(c)
@@ -87,15 +85,38 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			b.Next()
 		case lex.TOKEN_CONST:
 			b.Next()
-			if b.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not identifier after const,but ％s", b.parser.errorMsgPrefix(), b.token.Desp))
+			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_statement)
 				b.Next()
 				continue
 			}
 			b.parser.parseAssignedNames()
+		case lex.TOKEN_RETURN:
+			b.Next()
+			var es []*ast.Expression
+			r := &ast.StatementReturn{}
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:             ast.STATEMENT_TYPE_RETURN,
+				StatementReturn: r,
+			})
+			fmt.Println("##############################", b.parser.token.Desp)
+			if b.parser.ExpressionParser.looksLikeAExprssion() {
+				es, err = b.parser.ExpressionParser.parseExpressions()
+				if err != nil {
+					b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+					b.consume(untils_statement)
+					b.Next()
+				}
+				r.Expressions = es
+			}
+			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  no ; after return statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				continue
+			}
+			b.Next()
 		default:
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement", b.parser.errorMsgPrefix()))
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but %s", b.parser.errorMsgPrefix()))
 			b.consume(untils_statement)
 			b.Next()
 		}
@@ -115,8 +136,8 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	if err != nil {
 		return nil, err
 	}
-	if b.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.token.Desp)
+	if b.parser.token.Type != lex.TOKEN_LC {
+		err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
 		b.parser.errs = append(b.parser.errs)
 		return nil, err
 	}
@@ -131,7 +152,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	// skip }
 	b.Next()
 
-	if b.token.Type == lex.TOKEN_ELSEIF {
+	if b.parser.token.Type == lex.TOKEN_ELSEIF {
 		es, err := b.parseElseIfList()
 		if err != nil {
 			b.consume(untils_block)
@@ -139,7 +160,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		i.ElseIfList = es
 	}
 
-	if b.token.Type == lex.TOKEN_ELSE {
+	if b.parser.token.Type == lex.TOKEN_ELSE {
 
 	}
 
@@ -149,14 +170,14 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 	es = []*ast.StatementElseIf{}
 	var e *ast.Expression
-	for (b.token.Type == lex.TOKEN_ELSEIF) && !b.parser.eof {
+	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && !b.parser.eof {
 		b.Next()
 		e, err = b.parser.ExpressionParser.parseExpression()
 		if err != nil {
 			return es, err
 		}
-		if b.token.Type != lex.TOKEN_LC {
-			err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.token.Desp)
+		if b.parser.token.Type != lex.TOKEN_LC {
+			err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
 			b.parser.errs = append(b.parser.errs)
 			return es, err
 		}

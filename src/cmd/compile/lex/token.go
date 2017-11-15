@@ -87,6 +87,7 @@ const (
 	TOKEN_FINALLY               //finally
 	TOKEN_THROW                 //throw
 	TOKEN_TYPE                  //type
+	TOKEN_ARROW                 //->
 )
 
 type Token struct {

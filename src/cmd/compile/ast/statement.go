@@ -122,10 +122,10 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 			continue
 		}
 
-		if !f.Typ.Parameters[i].VariableDefinition.Typ.typeCompatible(t) {
+		if !f.Typ.Parameters[i].Typ.typeCompatible(t) {
 			typstring1 := ""
 			typstring2 := ""
-			f.Typ.Parameters[i].VariableDefinition.Typ.TypeString(&typstring1)
+			f.Typ.Parameters[i].Typ.TypeString(&typstring1)
 			t.TypeString(&typstring2)
 			errs = append(errs,
 				fmt.Errorf("%s %d:%d %s not match %s,cannot call function",

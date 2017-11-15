@@ -9,7 +9,6 @@ import (
 
 type Class struct {
 	parser          *Parser
-	token           *lex.Token
 	classDefinition *ast.Class
 	access          int
 	isStatic        bool
@@ -18,7 +17,6 @@ type Class struct {
 
 func (c *Class) Next() {
 	c.parser.Next()
-	c.token = c.parser.token
 }
 
 func (c *Class) consume(m map[int]bool) {
@@ -31,24 +29,24 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 	if c.parser.eof {
 		return nil, c.parser.mkUnexpectedEofErr()
 	}
-	if c.token.Type != lex.TOKEN_IDENTIFIER {
+	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 		c.consume(untils_block)
 		c.Next()
 		return nil, fmt.Errorf("%s on name after class", c.parser.errorMsgPrefix())
 	}
-	c.classDefinition.Name = c.token.Data.(string)
+	c.classDefinition.Name = c.parser.token.Data.(string)
 	c.classDefinition.Pos = c.parser.mkPos()
 	c.Next()
 	if c.parser.eof {
 		return nil, c.parser.mkUnexpectedEofErr()
 	}
 	var father *ast.Expression
-	if c.token.Type == lex.TOKEN_COLON {
+	if c.parser.token.Type == lex.TOKEN_COLON {
 		c.Next()
 		if c.parser.eof {
 			return nil, c.parser.mkUnexpectedEofErr()
 		}
-		if c.token.Type != lex.TOKEN_IDENTIFIER {
+		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			c.consume(untils_block_statement)
 			c.Next()
 			return nil, fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
@@ -61,13 +59,13 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		}
 		c.Next()
 	}
-	if c.token.Type != lex.TOKEN_LC {
-		return nil, fmt.Errorf("%s except } but %s", c.parser.errorMsgPrefix(), c.token.Desp)
+	if c.parser.token.Type != lex.TOKEN_LC {
+		return nil, fmt.Errorf("%s except } but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
 	}
 	c.access = ast.ACCESS_PRIVATE
 	c.isStatic = false
 	for !c.parser.eof {
-		switch c.token.Type {
+		switch c.parser.token.Type {
 		case lex.TOKEN_STATIC:
 			c.isStatic = true
 		//access private
@@ -129,7 +127,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			c.Next()
 			break
 		default:
-			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token(%s)", c.parser.errorMsgPrefix(), c.token.Desp))
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token(%s)", c.parser.errorMsgPrefix(), c.parser.token.Desp))
 		}
 	}
 	c.classDefinition.Father = father
@@ -157,7 +155,7 @@ func (c *Class) parseConst() error {
 		}
 		c.classDefinition.Consts[v.Name] = &ast.Const{}
 		c.classDefinition.Consts[v.Name].Pos = v.Pos
-		c.classDefinition.Consts[v.Name].Init = es[k]
+		c.classDefinition.Consts[v.Name].Expression = es[k]
 	}
 	return nil
 }

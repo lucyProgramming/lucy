@@ -61,11 +61,11 @@ func (p *Package) checkConst() []error {
 	errs := make([]error, 0)
 	var err error
 	for _, v := range p.Consts {
-		if v.Init == nil && v.Typ == nil {
+		if v.Expression == nil && v.Typ == nil {
 			errs = append(errs, fmt.Errorf("%s %d:%d %s is has no type and no init value", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name))
 		}
-		if v.Init != nil {
-			is, t, value, err := v.Init.getConstValue()
+		if v.Expression != nil {
+			is, t, value, err := v.Expression.getConstValue()
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -75,12 +75,12 @@ func (p *Package) checkConst() []error {
 				continue
 			}
 			//rewrite
-			v.Init = &Expression{}
-			v.Init.Typ = t
-			v.Init.Data = value
+			v.Expression = &Expression{}
+			v.Expression.Typ = t
+			v.Expression.Data = value
 		}
-		if v.Typ != nil && v.Init != nil {
-			v.Data, err = v.Typ.assignExpression(p, v.Init)
+		if v.Typ != nil && v.Expression != nil {
+			v.Data, err = v.Typ.assignExpression(p, v.Expression)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d can`t assign value to %s", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name))
 				continue
@@ -97,33 +97,33 @@ func (p *Package) checkGlobalVariables() []error {
 	var block Block
 
 	for _, v := range p.Vars {
-		if v.Init == nil && v.Typ == nil {
+		if v.Expression == nil && v.Typ == nil {
 			continue
 		}
-		if v.Init != nil {
-			err = v.Init.constFold() //fold const error
+		if v.Expression != nil {
+			err = v.Expression.constFold() //fold const error
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d variable %s defined wrong,err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue
 			}
 		}
-		if v.Typ == nil && v.Init != nil { //means variable typed by assignment
+		if v.Typ == nil && v.Expression != nil { //means variable typed by assignment
 			var es []error
-			v.Typ, es = block.getTypeFromExpression(v.Init)
+			v.Typ, es = block.getTypeFromExpression(v.Expression)
 			if es != nil {
 				errs = append(errs, es...)
 			}
 			continue
 		}
-		if v.Typ != nil && v.Init != nil { // if typ match
-			t2, es := block.getTypeFromExpression(v.Init)
+		if v.Typ != nil && v.Expression != nil { // if typ match
+			t2, es := block.getTypeFromExpression(v.Expression)
 			if len(es) > 0 {
 				errs = append(errs, es...)
 				continue
 			}
 			match := v.Typ.typeCompatible(t2)
 			if !match {
-				errs = append(errs, fmt.Errorf("%s %d:%d variable %s dose not matched by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Init.typeName()))
+				errs = append(errs, fmt.Errorf("%s %d:%d variable %s dose not matched by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Expression.typeName()))
 				continue
 			}
 		}

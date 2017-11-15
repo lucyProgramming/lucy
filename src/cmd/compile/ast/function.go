@@ -37,8 +37,8 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue
 			}
-			if v.Default != nil {
-				is, typ, value, err := v.Default.getConstValue()
+			if v.Expression != nil {
+				is, typ, value, err := v.Expression.getConstValue()
 				if err != nil {
 					errs = append(errs, fmt.Errorf("%s %d:%d default value is wrong because of %v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 					continue
@@ -75,10 +75,10 @@ type FunctionType struct {
 	Returns    ReturnList
 }
 
-type Parameter struct {
-	VariableDefinition
-	Default *Expression //f(a int = 1) default parameter
-}
+//type Parameter struct {
+//	VariableDefinition
+//	Default *Expression //f(a int = 1) default parameter
+//}
 
-type ParameterList []*Parameter       // actually local variables
-type ReturnList []*VariableDefinition // actually local variables
+type ParameterList []*VariableDefinition // actually local variables
+type ReturnList []*VariableDefinition    // actually local variables

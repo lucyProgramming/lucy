@@ -29,12 +29,28 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 		// == ,
 		ep.Next()
 	}
+	fmt.Println("！！！！！！！！！！！！！！！", ep.parser.token.Desp)
 	return es, nil
 }
 
 //parse assign expression
 func (ep *ExpressionParser) parseExpression() (*ast.Expression, error) {
 	return ep.parseAssignExpression()
+}
+
+func (ep *ExpressionParser) looksLikeAExprssion() bool {
+	return ep.parser.token.Type == lex.TOKEN_IDENTIFIER ||
+		ep.parser.token.Type == lex.TOKEN_LITERAL_BOOL ||
+		ep.parser.token.Type == lex.TOKEN_LITERAL_BYTE ||
+		ep.parser.token.Type == lex.TOKEN_LITERAL_INT ||
+		ep.parser.token.Type == lex.TOKEN_LITERAL_STRING ||
+		ep.parser.token.Type == lex.TOKEN_LITERAL_FLOAT ||
+		ep.parser.token.Type == lex.TOKEN_LP ||
+		ep.parser.token.Type == lex.TOKEN_INCREMENT ||
+		ep.parser.token.Type == lex.TOKEN_DECREMENT ||
+		ep.parser.token.Type == lex.TOKEN_NOT ||
+		ep.parser.token.Type == lex.TOKEN_SUB
+
 }
 
 //begin with identifier

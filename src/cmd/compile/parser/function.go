@@ -25,24 +25,53 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		return nil, p.parser.mkUnexpectedEofErr()
 	}
 	f = &ast.Function{}
-	if p.parser.token.Type == lex.TOKEN_LP {
-		f.Typ.Returns, err = p.parser.parseTypedNames()
-		if err != nil {
-			p.parser.errs = append(p.parser.errs, err)
-			return
-		}
-		if p.parser.token.Type != lex.TOKEN_RP {
-			err = fmt.Errorf("%s except ) but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
-			p.parser.errs = append(p.parser.errs, err)
-			return
-		}
-	}
 	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
 		f.Name = p.parser.token.Data.(string)
 		p.Next()
 	}
+	if p.parser.token.Type != lex.TOKEN_LP {
+		err = fmt.Errorf("%s fn declared wrong,missing (", p.parser.errorMsgPrefix())
+		p.parser.errs = append(p.parser.errs, err)
+		return
+	}
+	p.Next()
+	if p.parser.eof {
+		return nil, p.parser.mkUnexpectedEofErr()
+	}
+	if p.parser.token.Type != lex.TOKEN_LP { // not (
+		f.Typ.Parameters, err = p.parser.parseTypedNames()
+		if err != nil {
+			return
+		}
+	}
+	if p.parser.token.Type != lex.TOKEN_RP { // not (
+		err = fmt.Errorf("%s fn declared wrong,missing ),but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
+		p.parser.errs = append(p.parser.errs, err)
+		return
+	}
+	p.Next()
+	if p.parser.token.Type == lex.TOKEN_ARROW { // ->
+		p.Next()
+		p.Next()
+		if p.parser.token.Type != lex.TOKEN_LP {
+			err = fmt.Errorf("%s fn declared wrong, not ( after ->", p.parser.errorMsgPrefix())
+			p.parser.errs = append(p.parser.errs, err)
+			return
+		}
+		f.Typ.Returns, err = p.parser.parseTypedNames()
+		if err != nil {
+			return
+		}
+		if p.parser.token.Type != lex.TOKEN_RP {
+			err = fmt.Errorf("%s fn declared wrong, ( and ) not match", p.parser.errorMsgPrefix())
+			p.parser.errs = append(p.parser.errs, err)
+			return
+		}
+		p.Next()
+	}
+
 	if p.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s except { but %s", p.parser.token.Desp)
+		err = fmt.Errorf("%s except { but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
 		p.parser.errs = append(p.parser.errs, err)
 		return
 	}

@@ -2,8 +2,8 @@ package ast
 
 type VariableDefinition struct {
 	AccessProperty
-	Pos  *Pos
-	Init *Expression
+	Pos        *Pos
+	Expression *Expression
 	NameWithType
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	Lexer.Add([]byte("fun"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	Lexer.Add([]byte("fn"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_FUNCTION
@@ -621,6 +621,13 @@ func init() {
 		t.Match = match
 		t.Type = TOKEN_TYPE
 		t.Desp = "type"
+		return t, nil
+	})
+	Lexer.Add([]byte("->"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_ARROW
+		t.Desp = "->"
 		return t, nil
 	})
 }

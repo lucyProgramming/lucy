@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
@@ -14,6 +15,7 @@ func Parse(tops *[]*ast.Node, filename string, bs []byte) []error {
 
 type Parser struct {
 	bs               []byte
+	lines            [][]byte
 	tops             *[]*ast.Node
 	ExpressionParser *ExpressionParser
 	Function         *Function
@@ -28,7 +30,8 @@ type Parser struct {
 
 func (p *Parser) parse() []error {
 	p.ExpressionParser = &ExpressionParser{p}
-	p.Function = &Function{p}
+	p.Function = &Function{}
+	p.Function.parser = p
 	p.Class = &Class{}
 	p.Class.parser = p
 	p.Block = &Block{}
@@ -36,6 +39,7 @@ func (p *Parser) parse() []error {
 	p.errs = []error{}
 	var err error
 	p.scanner, err = lex.Lexer.Scanner(p.bs)
+	p.lines = bytes.Split(p.bs, []byte("\n"))
 	if err != nil {
 		p.errs = append(p.errs, err)
 		return p.errs
@@ -78,9 +82,8 @@ func (p *Parser) parse() []error {
 		isconst = false
 	}
 	for !p.eof {
-		fmt.Println("!!!!!!!!!!!!!!!!!!!!", p.token.Desp)
 		switch p.token.Type {
-		case lex.TOKEN_SEMICOLON:
+		case lex.TOKEN_SEMICOLON: // empty statement, no big deal
 			p.Next()
 			continue
 		case lex.TOKEN_VAR:
@@ -99,7 +102,7 @@ func (p *Parser) parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			names, _, es, err := p.parseAssignedNames()
+			names, typ, es, err := p.parseAssignedNames()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(untils_statement)
@@ -107,9 +110,14 @@ func (p *Parser) parse() []error {
 				resetProperty()
 				continue
 			}
-			if p.token.Type != lex.TOKEN_SEMICOLON {
-				p.errs = append(p.errs, fmt.Errorf("%s %d:%d not ; after const definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-				p.consume(untils_statement)
+			if p.token.Type != lex.TOKEN_SEMICOLON { //assume missing ; not big deal
+				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition", p.errorMsgPrefix()))
+				p.Next()
+				resetProperty()
+				continue
+			}
+			if typ != lex.TOKEN_COLON_ASSIGN {
+				p.errs = append(p.errs, fmt.Errorf("%s cannot have statement at top,possible do you mean a := 1 to create a global variable", p.errorMsgPrefix()))
 				p.Next()
 				resetProperty()
 				continue
@@ -117,7 +125,7 @@ func (p *Parser) parse() []error {
 			for k, v := range names {
 				c := &ast.Const{}
 				c.Name = v.Name
-				c.Init = es[k]
+				c.Expression = es[k]
 				if ispublic {
 					c.Access = ast.ACCESS_PUBLIC
 				} else {
@@ -165,6 +173,7 @@ func (p *Parser) parse() []error {
 		case lex.TOKEN_PUBLIC:
 			ispublic = true
 			p.Next()
+			continue
 		case lex.TOKEN_CONST:
 			isconst = true
 			p.Next()
@@ -172,6 +181,7 @@ func (p *Parser) parse() []error {
 		case lex.TOKEN_PRIVATE: //is a default attribute
 			ispublic = false
 			p.Next()
+			continue
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s %d:%d token(%s) is not except", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp))
 			p.consume(untils_statement)
@@ -225,7 +235,7 @@ func (p *Parser) Next() {
 		}
 		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
 			p.token = tok.(*lex.Token)
-			fmt.Println("################", p.token.Desp)
+			fmt.Println("#########", p.token.Desp)
 			break
 		}
 	}
@@ -241,9 +251,9 @@ func (p *Parser) mkUnexpectedEofErr() error {
 
 func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
-		return fmt.Sprintf("%s %d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
+		return fmt.Sprintf("%s %d:%d %s", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine]))
 	}
-	return fmt.Sprintf("%s %d:%d", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+	return fmt.Sprintf("%s %d:%d %s", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine]))
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
