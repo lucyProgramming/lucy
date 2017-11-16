@@ -11,7 +11,7 @@ const (
 	EXPRESSION_TYPE_INT
 	EXPRESSION_TYPE_FLOAT
 	EXPRESSION_TYPE_STRING
-	EXPRESSION_TYPE_ARRAY
+	EXPRESSION_TYPE_ARRAY // []bool{false,true}
 	EXPRESSION_TYPE_LOGICAL_OR
 	EXPRESSION_TYPE_LOGICAL_AND
 	EXPRESSION_TYPE_OR
@@ -45,13 +45,14 @@ const (
 	EXPRESSION_TYPE_PRE_INCREMENT
 	EXPRESSION_TYPE_PRE_DECREMENT
 	EXPRESSION_TYPE_NEGATIVE
-	EXPRESSION_TYPE_POSITIVE
 	EXPRESSION_TYPE_NOT
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_NEW
 	EXPRESSION_TYPE_LIST
-	EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
+	EXPRESSION_TYPE_FUNCTION
+
+	//EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
 )
 
 //receiver only one argument
@@ -108,19 +109,24 @@ type CallArgs []*Expression // f(1,2)　调用参数列表
 type ExpressionFunctionCall struct {
 	Expression *Expression
 	Args       CallArgs
-	Pos        *Pos
 }
 
 type ExpressionMethodCall struct {
 	ExpressionFunctionCall
 	Name string
 }
+
+type ExpressionNew struct {
+	Expression *Expression
+	ExpressionFunctionCall
+}
+
 type ExpressionBinary struct {
 	Left  *Expression
 	Right *Expression
 }
 
-func (e *Expression) humanReadableString() string {
+func (e *Expression) HumanReadableString() string {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
 		return fmt.Sprintf("bool(%v)", e.Data.(bool))

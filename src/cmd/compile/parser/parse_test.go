@@ -16,12 +16,11 @@ import "github.com/xxx/yyy" ;
 fn add(a,b int)->(c int){
 	var i int;
 	i = 10;
-	for i < 100{
-		printf(i);
+	for  {
+		print(i)
 	}
 	return c;
 }
-
 
 `
 

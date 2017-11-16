@@ -25,6 +25,7 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		return nil, p.parser.mkUnexpectedEofErr()
 	}
 	f = &ast.Function{}
+	f.Pos = p.parser.mkPos()
 	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
 		f.Name = p.parser.token.Data.(string)
 		p.Next()

@@ -147,7 +147,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		call := s.Expression.Data.(*ExpressionFunctionCall)
 		f := b.searchFunction(call.Expression)
 		if f == nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d", notFoundError(&s.Pos, "function", call.Expression.humanReadableString())))
+			errs = append(errs, fmt.Errorf("%s %d:%d", notFoundError(&s.Pos, "function", call.Expression.HumanReadableString())))
 		} else {
 			errs = append(errs, checkFunctionCall(b, f, call, &s.Pos)...)
 		}
@@ -173,7 +173,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			}
 			return errs
 		}
-		errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.humanReadableString()))
+		errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.HumanReadableString()))
 		return errs
 	}
 	if EXPRESSION_TYPE_COLON_ASSIGN == s.Expression.Typ { //declare variable
@@ -222,7 +222,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			return errs
 		}
 	}
-	errs = append(errs, fmt.Errorf("%s %d:%d expression(%s) evaluated,but not used", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.Expression.humanReadableString()))
+	errs = append(errs, fmt.Errorf("%s %d:%d expression(%s) evaluated,but not used", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.Expression.HumanReadableString()))
 	return errs
 }
 
@@ -250,7 +250,7 @@ func (s *StatmentSwitchCase) check() []error {
 }
 
 type StatementReturn struct {
-	Pos         Pos
+	Pos         *Pos // use some time
 	Expressions []*Expression
 }
 
@@ -287,6 +287,7 @@ func typeNotMatchError(pos *Pos, t1, t2 *VariableType) error {
 }
 
 type StatementFor struct {
+	Pos       *Pos
 	Init      *Expression
 	Condition *Expression
 	Post      *Expression
