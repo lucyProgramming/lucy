@@ -30,7 +30,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		return nil, c.parser.mkUnexpectedEofErr()
 	}
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		c.consume(untils_block)
+		c.consume(untils_rc)
 		c.Next()
 		return nil, fmt.Errorf("%s on name after class", c.parser.errorMsgPrefix())
 	}
@@ -79,7 +79,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			err = c.parseFiled()
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
-				c.consume(untils_statement)
+				c.consume(untils_semicolon)
 				c.Next()
 			}
 			c.resetProperty()
@@ -88,14 +88,14 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			c.Next()
 			err := c.parseConst()
 			if err != nil {
-				c.consume(untils_statement)
+				c.consume(untils_semicolon)
 				continue
 			}
 		case lex.TOKEN_FUNCTION:
 			c.Next()
 			f, err := c.parser.Function.parse(false)
 			if err != nil {
-				c.consume(untils_block)
+				c.consume(untils_rc)
 				c.Next()
 				c.resetProperty()
 				continue

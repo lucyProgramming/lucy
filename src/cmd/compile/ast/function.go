@@ -32,7 +32,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			vd := &VariableDefinition{}
 			vd.Name = v.Name
 			vd.Typ = v.Typ
-			err = block.SymbolicTable.Insert(v.Name, vd)
+			err = block.SymbolicTable.Insert(v.Name, nil, vd)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue
@@ -61,7 +61,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			t := VariableDefinition{}
 			t.Name = v.Name
 			t.Typ = v.Typ
-			err = block.SymbolicTable.Insert(v.Name, t)
+			err = block.SymbolicTable.Insert(v.Name, nil, t)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue

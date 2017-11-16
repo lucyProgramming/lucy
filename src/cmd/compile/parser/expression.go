@@ -67,7 +67,7 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 		return result, nil
 	}
 	var err error
-	for {
+	for !ep.parser.eof {
 		if ep.parser.token.Type == lex.TOKEN_DOT { // a.b.c.e.f
 			ep.Next()
 			if ep.parser.eof {
@@ -163,10 +163,10 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 					ep.parser.token.Desp)
 				break
 			}
-			ep.Next() //loop next token
+			ep.Next() // skip )
 		} else {
 			// something i can`t handle
-			break
+			return result, err
 		}
 	}
 	return result, err
@@ -181,10 +181,10 @@ func (ep *ExpressionParser) parseIdentifierExpressions() (ret []*ast.Expression,
 			return
 		}
 		ret = append(ret, e)
-		ep.Next()
 		if ep.parser.token.Type != lex.TOKEN_COMMA {
 			return
 		}
+		ep.Next() // == ,
 	}
 	return
 }
@@ -201,39 +201,40 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		if len(lefts) == 1 {
-			left = lefts[0]
-		} else {
-			left = &ast.Expression{
-				Typ:  ast.EXPRESSION_TYPE_NAME_LIST,
-				Data: lefts,
-			}
+		left = &ast.Expression{
+			Typ:  ast.EXPRESSION_TYPE_LIST,
+			Data: lefts,
 		}
 	case lex.TOKEN_LITERAL_BOOL:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_BOOL,
 			Data: ep.parser.token.Data,
 		}
+		ep.Next()
 	case lex.TOKEN_LITERAL_BYTE:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_BYTE,
 			Data: ep.parser.token.Data,
 		}
+		ep.Next()
 	case lex.TOKEN_LITERAL_INT:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_INT,
 			Data: ep.parser.token.Data,
 		}
+		ep.Next()
 	case lex.TOKEN_LITERAL_STRING:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_STRING,
 			Data: ep.parser.token.Data,
 		}
+		ep.Next()
 	case lex.TOKEN_LITERAL_FLOAT:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_STRING,
 			Data: ep.parser.token.Data,
 		}
+		ep.Next()
 	case lex.TOKEN_LP:
 		ep.parser.Next()
 		if ep.parser.eof {
@@ -246,11 +247,12 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if ep.parser.token.Type != lex.TOKEN_RP {
 			return nil, fmt.Errorf("%s ( and ) not matched, but %s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		}
+		ep.Next()
 	case lex.TOKEN_INCREMENT:
 		ep.parser.Next()
 		newE := &ast.Expression{}
 		newE.Pos = ep.parser.mkPos()
-		left, err = ep.parseExpression()
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -260,7 +262,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_DECREMENT:
 		ep.parser.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseExpression()
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -270,7 +272,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_NOT:
 		ep.parser.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseExpression()
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -280,7 +282,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_SUB:
 		ep.parser.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseExpression()
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -288,9 +290,9 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		newE.Data = left
 		left = newE
 	default:
-		return nil, fmt.Errorf("%s unkown begining of a expression or forget to write a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		err = fmt.Errorf("%s unkown begining of a expression or forget to write a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		return nil, err
 	}
-	ep.Next() // look next
 	// a++ b-- for a++++
 	for ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT {
 		newe := &ast.Expression{}
@@ -538,6 +540,8 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 		return mkBinayExpression(ast.EXPRESSION_TYPE_DIV_ASSIGN)
 	case lex.TOKEN_MOD_ASSIGN:
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN)
+	case lex.TOKEN_ASSIGN:
+		return mkBinayExpression(ast.EXPRESSION_TYPE_ASSIGN)
 	}
 	return left, nil
 }

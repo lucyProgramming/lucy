@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
@@ -87,7 +88,7 @@ func (p *Parser) parse() []error {
 		case lex.TOKEN_VAR:
 			vs, err := p.parseVarDefinition(ispublic)
 			if err != nil {
-				p.consume(untils_statement)
+				p.consume(untils_semicolon)
 				p.Next()
 				continue
 			}
@@ -103,7 +104,7 @@ func (p *Parser) parse() []error {
 			names, typ, es, err := p.parseAssignedNames()
 			if err != nil {
 				p.errs = append(p.errs, err)
-				p.consume(untils_statement)
+				p.consume(untils_semicolon)
 				p.Next()
 				resetProperty()
 				continue
@@ -153,7 +154,7 @@ func (p *Parser) parse() []error {
 			f, err := p.Function.parse(ispublic)
 			if err != nil {
 				p.errs = append(p.errs, err)
-				p.consume(untils_block)
+				p.consume(untils_rc)
 				p.Next()
 				continue
 			}
@@ -198,7 +199,7 @@ func (p *Parser) parse() []error {
 			continue
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s %d:%d token(%s) is not except", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp))
-			p.consume(untils_statement)
+			p.consume(untils_semicolon)
 			p.Next()
 			resetProperty()
 		}
@@ -265,9 +266,9 @@ func (p *Parser) mkUnexpectedEofErr() error {
 
 func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
-		return fmt.Sprintf("%s %d:%d %s", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine]))
+		return fmt.Sprintf("%s %d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine-1]))
 	}
-	return fmt.Sprintf("%s %d:%d %s", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine]))
+	return fmt.Sprintf("%s %d:%d '%s'", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine-1]))
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
@@ -296,30 +297,30 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
-
 	var expressions []*ast.Expression
 	//value , no default value definition
+	noDefaultValue := false
 	if p.token.Type == lex.TOKEN_SEMICOLON {
-		p.Next()
+		noDefaultValue = true
 	} else if lex.TOKEN_ASSIGN == p.token.Type { //assign
 		p.Next()
 		expressions, err = p.ExpressionParser.parseExpressions()
 		if err != nil {
 			p.errs = append(p.errs, err)
 		}
-		if p.token.Type != lex.TOKEN_SEMICOLON {
-			p.errs = append(p.errs, fmt.Errorf("%s not a \";\" after a expression list ", p.errorMsgPrefix()))
-			p.consume(untils_statement)
-			p.Next()
-			return
-		}
 	} else {
 		p.errs = append(p.errs, fmt.Errorf("%s %d:%d not a ; after type definition", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn))
-		p.consume(untils_statement)
+		p.consume(untils_semicolon)
 		p.Next()
 		return
 	}
-	if len(names) != len(expressions) {
+	if p.token.Type != lex.TOKEN_SEMICOLON {
+		err = fmt.Errorf("%s not a \";\" after a variable declare ", p.errorMsgPrefix())
+		p.errs = append(p.errs, err)
+		return
+	}
+	p.Next() // look next
+	if !noDefaultValue && len(names) != len(expressions) {
 		p.errs = append(p.errs, fmt.Errorf("%s name list and value list has no same length", p.errorMsgPrefix()))
 		return
 	}
@@ -491,7 +492,7 @@ func (p *Parser) parseImports() {
 	// p.token.Type == lex.TOKEN_IMPORT
 	p.Next()
 	if p.token.Type != lex.TOKEN_LITERAL_STRING {
-		p.consume(untils_statement)
+		p.consume(untils_semicolon)
 		p.errs = append(p.errs, syntaxErr())
 		p.parseImports()
 		return
@@ -504,7 +505,7 @@ func (p *Parser) parseImports() {
 		i.Name = packagename
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			p.consume(untils_statement)
+			p.consume(untils_semicolon)
 			p.errs = append(p.errs, syntaxErr())
 			p.parseImports()
 			return
@@ -512,7 +513,7 @@ func (p *Parser) parseImports() {
 		i.Alias = p.token.Data.(string)
 		p.Next()
 		if p.token.Type != lex.TOKEN_SEMICOLON {
-			p.consume(untils_statement)
+			p.consume(untils_semicolon)
 			p.errs = append(p.errs, syntaxErr())
 			p.parseImports()
 			return
@@ -530,7 +531,7 @@ func (p *Parser) parseImports() {
 		p.parseImports()
 		return
 	} else {
-		p.consume(untils_block)
+		p.consume(untils_rc)
 		p.errs = append(p.errs, syntaxErr())
 		p.parseImports()
 		return

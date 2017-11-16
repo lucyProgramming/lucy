@@ -14,43 +14,58 @@ type Block struct {
 func (b *Block) Next() {
 	b.parser.Next()
 }
+
 func (b *Block) consume(c map[int]bool) {
 	b.parser.consume(c)
 }
+
 func (b *Block) parse(block *ast.Block) (err error) {
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {
 		switch b.parser.token.Type {
-		case lex.TOKEN_RC: // end
-			return
 		case lex.TOKEN_IDENTIFIER:
 			e, err := b.parser.ExpressionParser.parseExpression()
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
-				b.parser.consume(untils_statement)
+				b.parser.consume(untils_semicolon)
 				b.Next()
 				continue
+			}
+			if e.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN { // create  a new variable
+				//				d := e.Data.(*ast.ExpressionBinary)
+				//				err = block.SymbolicTable.Insert(d.Left.Data.(string), &ast.VariableType{}) // I will corrent later
+				//				if err != nil {
+				//					b.parser.errs = append(b.parser.errs, err)
+				//				}
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,
 			})
+			continue
+		case lex.TOKEN_SEMICOLON:
+			b.Next() // look up next
+			continue
+		case lex.TOKEN_RC: // end
 			b.Next()
+			return
 		case lex.TOKEN_VAR:
 			vs, err := b.parser.parseVarDefinition()
 			if err != nil {
-				b.consume(untils_statement)
+				b.consume(untils_semicolon)
 				b.Next()
 				continue
 			}
 			for _, v := range vs {
-				block.SymbolicTable.Insert(v.Name, v)
+				err = block.SymbolicTable.Insert(v.Name, v.Pos, v)
+				if err != nil {
+					b.parser.errs = append(b.parser.errs, err)
+				}
 			}
-			b.Next()
 		case lex.TOKEN_IF:
 			i, err := b.parseIf()
 			if err != nil {
-				b.consume(untils_block)
+				b.consume(untils_rc)
 				b.Next()
 				continue
 			}
@@ -62,7 +77,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_FOR:
 			f, err := b.parseFor()
 			if err != nil {
-				b.consume(untils_block)
+				b.consume(untils_rc)
 				b.Next()
 				continue
 			}
@@ -74,7 +89,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_SWITCH:
 			s, err := b.parseSwitch()
 			if err != nil {
-				b.consume(untils_block)
+				b.consume(untils_rc)
 				b.Next()
 				continue
 			}
@@ -87,25 +102,30 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
-				b.consume(untils_statement)
+				b.consume(untils_semicolon)
 				b.Next()
 				continue
 			}
 			b.parser.parseAssignedNames()
 		case lex.TOKEN_RETURN:
 			b.Next()
-			var es []*ast.Expression
 			r := &ast.StatementReturn{}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:             ast.STATEMENT_TYPE_RETURN,
 				StatementReturn: r,
 			})
-			fmt.Println("##############################", b.parser.token.Desp)
+			if b.parser.token.Type == lex.TOKEN_SEMICOLON {
+				b.Next()
+				continue
+			}
+			var es []*ast.Expression
+
 			if b.parser.ExpressionParser.looksLikeAExprssion() {
 				es, err = b.parser.ExpressionParser.parseExpressions()
+				fmt.Println("", b.parser.token.Desp)
 				if err != nil {
-					b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
-					b.consume(untils_statement)
+					b.parser.errs = append(b.parser.errs, err)
+					b.consume(untils_semicolon)
 					b.Next()
 				}
 				r.Expressions = es
@@ -119,7 +139,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			newblock := &ast.Block{}
 			err = b.parse(newblock)
 			if err != nil {
-				b.consume(untils_block)
+				b.consume(untils_rc)
 				b.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
@@ -127,8 +147,8 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Block: newblock,
 			})
 		default:
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but %s", b.parser.errorMsgPrefix()))
-			b.consume(untils_statement)
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			b.consume(untils_semicolon)
 			b.Next()
 		}
 	}
@@ -166,7 +186,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	if b.parser.token.Type == lex.TOKEN_ELSEIF {
 		es, err := b.parseElseIfList()
 		if err != nil {
-			b.consume(untils_block)
+			b.consume(untils_rc)
 		}
 		i.ElseIfList = es
 	}
@@ -196,7 +216,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		block := &ast.Block{}
 		err = b.parse(block)
 		if err != nil {
-			b.consume(untils_block)
+			b.consume(untils_rc)
 			b.Next()
 			continue
 		}
@@ -231,25 +251,4 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 
 func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 	return nil, nil
-}
-
-func (b *Block) insertVariableIntoBlock(block *ast.Block, vars []*ast.VariableDefinition) (errs []error) {
-	errs = []error{}
-	if vars == nil || len(vars) == 0 {
-		return
-	}
-	if block.SymbolicTable.ItemsMap == nil {
-		block.SymbolicTable.ItemsMap = make(map[string]*ast.SymbolicItem)
-	}
-	var err error
-	for _, v := range vars {
-		if v.Name == "" {
-			continue
-		}
-		err = block.SymbolicTable.Insert(v.Name, v)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return
 }

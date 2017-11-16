@@ -101,11 +101,13 @@ type SymbolicTable struct {
 //	return nil
 //}
 
-func (s *SymbolicTable) Insert(name string, d interface{}) error {
+func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
+	if name == "" {
+		panic("name is null string")
+	}
 	if s.ItemsMap == nil {
 		s.ItemsMap = make(map[string]*SymbolicItem)
 	}
-
 	switch d.(type) {
 	case *VariableDefinition:
 		if _, ok := s.ItemsMap[name]; ok {
@@ -115,7 +117,6 @@ func (s *SymbolicTable) Insert(name string, d interface{}) error {
 			Typ: ITEM_TYPE_CONST,
 			Var: d.(*VariableDefinition),
 		}
-
 	case *Const:
 		if _, ok := s.ItemsMap[name]; ok {
 			return fmt.Errorf("symbolic %s already declared", name)
@@ -126,7 +127,7 @@ func (s *SymbolicTable) Insert(name string, d interface{}) error {
 		}
 	default:
 		_, ok := d.(*VariableDefinition)
-		panic(ok) //  ==  panic(false)
+		panic(ok) // == panic(false)
 	}
 	return nil
 }

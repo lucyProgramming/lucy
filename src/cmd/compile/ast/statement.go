@@ -202,7 +202,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		item.Var.Typ = t
 		item.Var.Name = name
 		item.Typ = ITEM_TYPE_VAR
-		b.SymbolicTable.Insert(name, item)
+		b.SymbolicTable.Insert(name, nil, item)
 		return errs
 	}
 	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||

@@ -38,7 +38,7 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	if p.parser.eof {
 		return nil, p.parser.mkUnexpectedEofErr()
 	}
-	if p.parser.token.Type != lex.TOKEN_LP { // not (
+	if p.parser.token.Type != lex.TOKEN_RP { // not (
 		f.Typ.Parameters, err = p.parser.parseTypedNames()
 		if err != nil {
 			return
@@ -52,12 +52,12 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	p.Next()
 	if p.parser.token.Type == lex.TOKEN_ARROW { // ->
 		p.Next()
-		p.Next()
 		if p.parser.token.Type != lex.TOKEN_LP {
 			err = fmt.Errorf("%s fn declared wrong, not ( after ->", p.parser.errorMsgPrefix())
 			p.parser.errs = append(p.parser.errs, err)
 			return
 		}
+		p.Next()
 		f.Typ.Returns, err = p.parser.parseTypedNames()
 		if err != nil {
 			return

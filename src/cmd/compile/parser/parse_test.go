@@ -15,19 +15,27 @@ import "github.com/xxx/yyy" ;
 
 
 
-fn add(a,b int)->(c int){
-	return a + b ;
+
+fn add(a,b int)->(xx int){
+	c := abc;
+	var b int;
+	var b string;
+	d();
+	x = 123;
+	return 1++;
 }
+
+
 `
 
 func Test_parse(t *testing.T) {
 	nodes := []*ast.Node{}
-	errs := Parse(&nodes, "demo.lucy", []byte(str))
+	errs := Parse(&nodes, "./demo.lucy", []byte(str))
 	for _, v := range errs {
 		fmt.Println(v)
 	}
 	for _, v := range nodes {
-		fmt.Println(v)
+		fmt.Println(v.Data)
 	}
 }
 
