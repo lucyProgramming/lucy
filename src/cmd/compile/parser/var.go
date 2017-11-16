@@ -5,13 +5,16 @@ import (
 )
 
 var (
+	untils_lc = map[int]bool{
+		lex.TOKEN_LC: true,
+	}
 	untils_rc = map[int]bool{
 		lex.TOKEN_RC: true,
 	}
 	untils_semicolon = map[int]bool{
 		lex.TOKEN_SEMICOLON: true,
 	}
-	untils_block_statement = map[int]bool{
+	untils_rc_semicolon = map[int]bool{
 		lex.TOKEN_RC:        true,
 		lex.TOKEN_SEMICOLON: true,
 	}

@@ -74,7 +74,6 @@ type InheritedAttribute struct {
 const (
 	ITEM_TYPE_CONST = iota
 	ITEM_TYPE_VAR
-	ITEM_TYPE_ENUM
 )
 
 type SymbolicItem struct {
@@ -84,22 +83,8 @@ type SymbolicItem struct {
 }
 
 type SymbolicTable struct {
-	//Vars    map[string]*VariableDefinition // easy to access by name
-	//Enums   map[string]*Enum
-	//Const   map[string]*Const
 	ItemsMap map[string]*SymbolicItem
 }
-
-//func (s *SymbolwicTable) Insert(name string, item *SymbolicItem) error {
-//	if s.ItemsMap == nil {
-//		s.ItemsMap = make(map[string]*SymbolicItem)
-//	}
-//	if _, ok := s.ItemsMap[name]; ok {
-//		return fmt.Errorf("symbolic %s already declared", name)
-//	}
-//	s.ItemsMap[name] = item
-//	return nil
-//}
 
 func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
 	if name == "" {
@@ -111,7 +96,7 @@ func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
 	switch d.(type) {
 	case *VariableDefinition:
 		if _, ok := s.ItemsMap[name]; ok {
-			return fmt.Errorf("symbolic %s already declared", name)
+			return fmt.Errorf("%s %d:%d varaible %s already declared", pos.Filename, pos.StartLine, pos.StartColumn, name)
 		}
 		s.ItemsMap[name] = &SymbolicItem{
 			Typ: ITEM_TYPE_CONST,
@@ -119,7 +104,7 @@ func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
 		}
 	case *Const:
 		if _, ok := s.ItemsMap[name]; ok {
-			return fmt.Errorf("symbolic %s already declared", name)
+			return fmt.Errorf("%s %d:%d const %s already declared", pos.Filename, pos.StartLine, pos.StartColumn, name)
 		}
 		s.ItemsMap[name] = &SymbolicItem{
 			Typ:   ITEM_TYPE_CONST,

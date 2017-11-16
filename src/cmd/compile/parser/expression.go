@@ -29,7 +29,6 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 		// == ,
 		ep.Next()
 	}
-	fmt.Println("！！！！！！！！！！！！！！！", ep.parser.token.Desp)
 	return es, nil
 }
 
@@ -445,7 +444,6 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 		binary.Right = e2
 		newe.Data = binary
 		e = newe
-
 	}
 	return e, nil
 }
@@ -502,7 +500,6 @@ func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
 		binary.Right = e2
 		newe.Data = binary
 		e = newe
-		ep.Next()
 	}
 	return e, nil
 }

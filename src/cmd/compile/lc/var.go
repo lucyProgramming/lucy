@@ -5,5 +5,10 @@ import (
 )
 
 var (
-	Tops = make([]*ast.Node, 0)
+	Tops         = make([]*ast.Node, 0)
+	CompileFlags Flags
 )
+
+type Flags struct {
+	OnlyImport bool
+}

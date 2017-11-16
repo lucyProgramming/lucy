@@ -69,15 +69,8 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		}
 		p.Next()
 	}
-
 	if p.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s except { but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
-		p.parser.errs = append(p.parser.errs, err)
-		return
-	}
-	p.Next() //
-	if p.parser.eof {
-		err = p.parser.mkUnexpectedEofErr()
 		p.parser.errs = append(p.parser.errs, err)
 		return
 	}
@@ -88,6 +81,5 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	}
 	f.Block = &ast.Block{}
 	err = p.parser.Block.parse(f.Block)
-	p.Next()
 	return f, err
 }

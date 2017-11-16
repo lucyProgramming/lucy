@@ -1,8 +1,10 @@
 package lc
 
 import (
-	"github.com/756445638/lucy/src/cmd/compile/parser"
+	"fmt"
 	"io/ioutil"
+
+	"github.com/756445638/lucy/src/cmd/compile/parser"
 )
 
 func Main(files []string) {
@@ -20,6 +22,12 @@ type LucyCompile struct {
 	NerrsStopCompile int
 }
 
+func (l *LucyCompile) exit() {
+	for _, v := range l.Nerrs {
+		fmt.Println(v)
+	}
+}
+
 func (l *LucyCompile) compile() {
 	for _, v := range l.Files {
 		bs, err := ioutil.ReadFile(v)
@@ -27,7 +35,11 @@ func (l *LucyCompile) compile() {
 			l.Nerrs = append(l.Nerrs, err)
 			continue
 		}
-		parser.Parse(&Tops, v, bs)
+		l.Nerrs = append(l.Nerrs, parser.Parse(&Tops, v, bs, CompileFlags.OnlyImport)...)
+
+		if len(l.Nerrs) > 10 {
+			l.exit()
+		}
 	}
 
 }

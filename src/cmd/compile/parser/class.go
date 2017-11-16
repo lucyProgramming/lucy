@@ -47,13 +47,13 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			return nil, c.parser.mkUnexpectedEofErr()
 		}
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-			c.consume(untils_block_statement)
+			c.consume(untils_rc_semicolon)
 			c.Next()
 			return nil, fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 		}
 		father, err = c.parser.ExpressionParser.parseIdentifierExpression()
 		if err != nil {
-			c.consume(untils_block_statement)
+			c.consume(untils_rc_semicolon)
 			c.Next()
 			return
 		}
@@ -127,7 +127,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			c.Next()
 			break
 		default:
-			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token(%s)", c.parser.errorMsgPrefix(), c.parser.token.Desp))
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token－>%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
 		}
 	}
 	c.classDefinition.Father = father

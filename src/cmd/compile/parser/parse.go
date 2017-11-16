@@ -9,11 +9,12 @@ import (
 	"github.com/timtadh/lexmachine"
 )
 
-func Parse(tops *[]*ast.Node, filename string, bs []byte) []error {
-	return (&Parser{bs: bs, tops: tops, filename: filename}).parse()
+func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool) []error {
+	return (&Parser{bs: bs, tops: tops, filename: filename, onlyimport: onlyimport}).Parse()
 }
 
 type Parser struct {
+	onlyimport       bool
 	bs               []byte
 	lines            [][]byte
 	tops             *[]*ast.Node
@@ -28,7 +29,7 @@ type Parser struct {
 	errs             []error
 }
 
-func (p *Parser) parse() []error {
+func (p *Parser) Parse() []error {
 	p.ExpressionParser = &ExpressionParser{p}
 	p.Function = &Function{}
 	p.Function.parser = p
@@ -170,7 +171,14 @@ func (p *Parser) parse() []error {
 				p.errs = append(p.errs, fmt.Errorf("%s cannot use public for a block", p.errorMsgPrefix()))
 			}
 			b := &ast.Block{}
-			p.Block.parse(b)
+			err = p.Block.parse(b)
+			if err != nil {
+				p.consume(untils_rc)
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: b,
+			})
+			p.Next()
 			resetProperty()
 		case lex.TOKEN_CLASS:
 			if isconst {
@@ -268,7 +276,7 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
 		return fmt.Sprintf("%s %d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine-1]))
 	}
-	return fmt.Sprintf("%s %d:%d '%s'", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine-1]))
+	return fmt.Sprintf("%s %d:%d '%s'", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine-11]))
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
