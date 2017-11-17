@@ -114,12 +114,14 @@ func (p *Parser) Parse() []error {
 			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
 				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s", p.errorMsgPrefix(), p.token.Desp))
 				p.Next()
+				p.consume(untils_semicolon)
 				resetProperty()
 				continue
 			}
 			if typ != lex.TOKEN_COLON_ASSIGN {
 				p.errs = append(p.errs, fmt.Errorf("%s cannot have statement at top,possible do you mean a := 1 to create a global variable", p.errorMsgPrefix()))
 				p.Next()
+				p.consume(untils_semicolon)
 				resetProperty()
 				continue
 			}
