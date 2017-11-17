@@ -13,14 +13,14 @@ var str = `
 
 import "github.com/xxx/yyy" ;
 
-fn add(a,b int)->(c int){
-	var i int;
-	i = 10;
-	for  {
-		print(i)
-	}
-	return c;
-}
+
+
+arr := [][]int{{1,2}} 
+
+
+
+
+
 
 `
 

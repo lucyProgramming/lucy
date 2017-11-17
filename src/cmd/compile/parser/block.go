@@ -32,7 +32,6 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.Next()
 				continue
 			}
-			fmt.Println("%%%%%%%%%%%%", e.HumanReadableString())
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
 			}

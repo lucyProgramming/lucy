@@ -11,32 +11,23 @@ const (
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_STRING
 	VARIALBE_TYPE_FUNCTION
-	VARIALBE_TYPE_ENUM        //enum
-	VARIABLE_TYPE_CLASS       //new Person()
-	VARIABLE_TYPE_NULL        //null
-	VARIABLE_TYPE_COMBINATION // []int
-	VARIABLE_TYPE_DOT         // a.b
-	VARIABLE_TYPE_NAME        // naming should search for declaration
+	VARIALBE_TYPE_ENUM  //enum
+	VARIABLE_TYPE_CLASS //new Person()
+	VARIABLE_TYPE_NULL  //null
+	VARIABLE_TYPE_ARRAY // []int
+	VARIABLE_TYPE_DOT   // a.b
+	VARIABLE_TYPE_NAME  // naming should search for declaration
 )
 
 type AccessProperty struct {
 	Access int // public private or protected
 }
 
-const (
-	COMBINATION_TYPE_ARRAY = iota
-	COMBINATION_TYPE_DOT
-)
-
-type CombinationType struct {
-	Typ         int
-	Combination VariableType
-}
 type VariableType struct {
 	Typ             int
 	Lname           string // []Lname Lname something
 	Rname           string // Lname.Rname
-	CombinationType *CombinationType
+	CombinationType *VariableType
 	FunctionType    *FunctionType
 }
 
@@ -103,13 +94,13 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 	return
 }
 
-//把树型转化为可读字符串
-func (c *CombinationType) TypeString(ret *string) {
-	if c.Typ == COMBINATION_TYPE_ARRAY {
-		*ret += "[]"
-	}
-	c.Combination.TypeString(ret)
-}
+////把树型转化为可读字符串
+//func (c *CombinationType) TypeString(ret *string) {
+//	if c.Typ == COMBINATION_TYPE_ARRAY {
+//		*ret += "[]"
+//	}
+//	c.Combination.TypeString(ret)
+//}
 
 //可读的类型信息
 func (v *VariableType) TypeString(ret *string) {
@@ -128,7 +119,8 @@ func (v *VariableType) TypeString(ret *string) {
 		*ret = v.Lname
 	case VARIALBE_TYPE_ENUM:
 		*ret = v.Lname + "(enum)"
-	case VARIABLE_TYPE_COMBINATION:
+	case VARIABLE_TYPE_ARRAY:
+		*ret += "[]"
 		v.CombinationType.TypeString(ret)
 	}
 }
@@ -140,5 +132,5 @@ func (v *VariableType) Equal(e *VariableType) bool {
 	if v.CombinationType.Typ != e.CombinationType.Typ {
 		return false
 	}
-	return v.CombinationType.Combination.Equal(&e.CombinationType.Combination)
+	return v.CombinationType.Equal(e.CombinationType)
 }

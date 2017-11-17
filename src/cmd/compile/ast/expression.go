@@ -117,8 +117,8 @@ type ExpressionMethodCall struct {
 }
 
 type ExpressionNew struct {
-	Expression *Expression
-	ExpressionFunctionCall
+	Typ  *VariableType
+	Args CallArgs
 }
 
 type ExpressionBinary struct {
@@ -126,16 +126,21 @@ type ExpressionBinary struct {
 	Right *Expression
 }
 
-func (e *Expression) HumanReadableString() string {
+type ExpressionArray struct {
+	Typ        *VariableType
+	Expression *Expression
+}
+
+func (e *Expression) Name() string {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
-		return fmt.Sprintf("bool(%v)", e.Data.(bool))
+		return fmt.Sprintf("bool_value", e.Data.(bool))
 	case EXPRESSION_TYPE_BYTE:
-		return fmt.Sprintf("byte(%v)", e.Data.(byte))
+		return fmt.Sprintf("byte_value", e.Data.(byte))
 	case EXPRESSION_TYPE_INT:
-		return fmt.Sprintf("int(%d)", e.Data.(int64))
+		return fmt.Sprintf("int_value", e.Data.(int64))
 	case EXPRESSION_TYPE_FLOAT:
-		return fmt.Sprintf("float(%f)", e.Data.(float64))
+		return fmt.Sprintf("float_value", e.Data.(float64))
 	case EXPRESSION_TYPE_STRING:
 		t := []byte(e.Data.(string))
 		if len(t) > 10 {
@@ -144,13 +149,87 @@ func (e *Expression) HumanReadableString() string {
 		t = append(t, []byte("...")...)
 		return fmt.Sprintf("string(%s)", string(t))
 	case EXPRESSION_TYPE_ARRAY:
-		return "array"
+		return "array_literal"
 	case EXPRESSION_TYPE_LOGICAL_OR:
-		return "expression_logical_or"
+		return "||"
 	case EXPRESSION_TYPE_LOGICAL_AND:
-		return "expression_logical_and"
+		return "&&"
+	case EXPRESSION_TYPE_OR:
+		return "|"
+	case EXPRESSION_TYPE_AND:
+		return "&&"
+	case EXPRESSION_TYPE_LEFT_SHIFT:
+		return "<<"
+	case EXPRESSION_TYPE_RIGHT_SHIFT:
+		return ">>"
+	case EXPRESSION_TYPE_ASSIGN:
+		return "="
+	case EXPRESSION_TYPE_COLON_ASSIGN:
+		return ":="
+	case EXPRESSION_TYPE_PLUS_ASSIGN:
+		return "+="
+	case EXPRESSION_TYPE_MINUS_ASSIGN:
+		return "-="
+	case EXPRESSION_TYPE_MUL_ASSIGN:
+		return "*="
+	case EXPRESSION_TYPE_DIV_ASSIGN:
+		return "/="
+	case EXPRESSION_TYPE_MOD_ASSIGN:
+		return "%="
+	case EXPRESSION_TYPE_EQ:
+		return "=="
+	case EXPRESSION_TYPE_NE:
+		return "!="
+	case EXPRESSION_TYPE_GE:
+		return ">="
+	case EXPRESSION_TYPE_GT:
+		return ">"
+	case EXPRESSION_TYPE_LE:
+		return "<="
+	case EXPRESSION_TYPE_LT:
+		return "<"
+	case EXPRESSION_TYPE_ADD:
+		return "+"
+	case EXPRESSION_TYPE_SUB:
+		return "-"
+	case EXPRESSION_TYPE_MUL:
+		return "*"
+	case EXPRESSION_TYPE_DIV:
+		return "/"
+	case EXPRESSION_TYPE_MOD:
+		return "%"
+	case EXPRESSION_TYPE_INDEX: // a["b"]
+		return "[]"
+	case EXPRESSION_TYPE_DOT: //a.b
+		return "."
+	case EXPRESSION_TYPE_METHOD_CALL:
+		return "method_call"
+	case EXPRESSION_TYPE_FUNCTION_CALL:
+		return "function_call"
+	case EXPRESSION_TYPE_INCREMENT:
+		return "++"
+	case EXPRESSION_TYPE_DECREMENT:
+		return "--"
+	case EXPRESSION_TYPE_PRE_INCREMENT:
+		return "++"
+	case EXPRESSION_TYPE_PRE_DECREMENT:
+		return "--"
+	case EXPRESSION_TYPE_NEGATIVE:
+		return "nagative"
+	case EXPRESSION_TYPE_NOT:
+		return "not"
+	case EXPRESSION_TYPE_IDENTIFIER:
+		return "identifier"
+	case EXPRESSION_TYPE_NULL:
+		return "null"
+	case EXPRESSION_TYPE_NEW:
+		return "new"
+	case EXPRESSION_TYPE_LIST:
+		return "expression_list"
+	case EXPRESSION_TYPE_FUNCTION:
+		return "function_literal"
 	}
-	return ""
+	panic("missing type")
 }
 
 func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {

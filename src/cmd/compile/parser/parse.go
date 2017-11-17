@@ -24,6 +24,7 @@ type Parser struct {
 	Block            *Block
 	scanner          *lexmachine.Scanner
 	filename         string
+	lastToken        *lex.Token
 	token            *lex.Token
 	eof              bool
 	errs             []error
@@ -110,8 +111,8 @@ func (p *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
-			if p.token.Type != lex.TOKEN_SEMICOLON { //assume missing ; not big deal
-				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition", p.errorMsgPrefix()))
+			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
+				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s", p.errorMsgPrefix(), p.token.Desp))
 				p.Next()
 				resetProperty()
 				continue
@@ -136,7 +137,6 @@ func (p *Parser) Parse() []error {
 				})
 			}
 			resetProperty()
-			p.Next()
 		case lex.TOKEN_ENUM:
 			if isconst {
 				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a enum", p.errorMsgPrefix()))
@@ -250,6 +250,7 @@ func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, int, []*ast.Expressio
 func (p *Parser) Next() {
 	var err error
 	var tok interface{}
+	p.lastToken = p.token
 	for p.eof == false {
 		tok, err, p.eof = p.scanner.Next()
 		if err != nil {
@@ -375,7 +376,6 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 
 func (p *Parser) parseType() (*ast.VariableType, error) {
 	switch p.token.Type {
-
 	case lex.TOKEN_LB:
 		p.Next()
 		if p.token.Type != lex.TOKEN_RB {
@@ -383,16 +383,16 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, fmt.Errorf("%s [ and ] not match", p.errorMsgPrefix())
 		}
 		//lookahead
-		p.Next()
+		p.Next() //skip ]
 		t, err := p.parseType()
 		if err != nil {
 			return nil, err
 		}
-		tt := &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_COMBINATION,
-		}
-		tt.CombinationType.Typ = ast.COMBINATION_TYPE_ARRAY
-		tt.CombinationType.Combination = *t
+		tt := &ast.VariableType{}
+		tt.CombinationType = &ast.VariableType{}
+		tt.CombinationType.Typ = ast.VARIABLE_TYPE_ARRAY
+		tt.CombinationType = t
+		return tt, nil
 	case lex.TOKEN_BOOL:
 		p.Next()
 		return &ast.VariableType{
@@ -406,7 +406,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 	case lex.TOKEN_INT:
 		p.Next()
 		return &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_BYTE,
+			Typ: ast.VARIABLE_TYPE_INT,
 		}, nil
 	case lex.TOKEN_FLOAT:
 		p.Next()
@@ -434,7 +434,7 @@ func (p *Parser) parseIdentiferType() (*ast.VariableType, error) {
 		}, nil
 	}
 	// a.b
-	p.Next()
+	p.Next() // skip dot
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		return nil, fmt.Errorf("%s not a identifier after dot", p.errorMsgPrefix())
 	}
