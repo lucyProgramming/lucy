@@ -55,7 +55,7 @@ func (ep *ExpressionParser) looksLikeAExprssion() bool {
 //begin with identifier
 func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error) {
 	if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		return nil, fmt.Errorf("it is not a identifier expression")
+		return nil, fmt.Errorf("%s not a identifier expression", ep.parser.errorMsgPrefix())
 	}
 	result := &ast.Expression{}
 	result.Typ = ast.EXPRESSION_TYPE_IDENTIFIER

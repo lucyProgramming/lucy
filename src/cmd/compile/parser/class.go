@@ -3,8 +3,10 @@ package parser
 import (
 	"fmt"
 
+	"cmd/go/testdata/src/cgoasm"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
+	"path"
 )
 
 type Class struct {
@@ -25,42 +27,40 @@ func (c *Class) consume(m map[int]bool) {
 
 func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
-	c.Next()
-	if c.parser.eof {
-		return nil, c.parser.mkUnexpectedEofErr()
-	}
+	c.classDefinition = classDefinition
+	c.Next() // skip class key work
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		c.consume(untils_rc)
-		c.Next()
-		return nil, fmt.Errorf("%s on name after class", c.parser.errorMsgPrefix())
+		err = fmt.Errorf("%s on name after class,but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		c.parser.errs = append(c.parser.errs, err)
+		return nil, err
 	}
 	c.classDefinition.Name = c.parser.token.Data.(string)
 	c.classDefinition.Pos = c.parser.mkPos()
-	c.Next()
+	c.Next() // skip class name
 	if c.parser.eof {
-		return nil, c.parser.mkUnexpectedEofErr()
+		err = c.parser.mkUnexpectedEofErr()
+		c.parser.errs = append(c.parser.errs, err)
+		return nil, err
 	}
 	var father *ast.Expression
-	if c.parser.token.Type == lex.TOKEN_COLON {
-		c.Next()
-		if c.parser.eof {
-			return nil, c.parser.mkUnexpectedEofErr()
-		}
+	if c.parser.token.Type == lex.TOKEN_COLON { // parse father expression
+		c.Next() // skip :
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-			c.consume(untils_rc_semicolon)
-			c.Next()
-			return nil, fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
+			err = fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
+			c.parser.errs = append(c.parser.errs, err)
+			c.consume(untils_lc) //
+		} else {
+			father, err = c.parser.ExpressionParser.parseIdentifierExpression()
+			if err != nil {
+				c.parser.errs = append(c.parser.errs, err)
+				return nil, err
+			}
 		}
-		father, err = c.parser.ExpressionParser.parseIdentifierExpression()
-		if err != nil {
-			c.consume(untils_rc_semicolon)
-			c.Next()
-			return
-		}
-		c.Next()
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
-		return nil, fmt.Errorf("%s except } but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err = fmt.Errorf("%s expect } but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		c.parser.errs = append(c.parser.errs, err)
+		return nil, err
 	}
 	c.access = ast.ACCESS_PRIVATE
 	c.isStatic = false
@@ -161,9 +161,6 @@ func (c *Class) parseConst() error {
 }
 
 func (c *Class) parseFiled() error {
-	if c.parser.eof {
-		return c.parser.mkUnexpectedEofErr()
-	}
 	names, err := c.parser.parseNameList()
 	if err != nil {
 		return err
