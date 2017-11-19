@@ -22,7 +22,9 @@ func (p *Function) consume(untils map[int]bool) {
 func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	p.Next()
 	if p.parser.eof {
-		return nil, p.parser.mkUnexpectedEofErr()
+		err = p.parser.mkUnexpectedEofErr()
+		p.parser.errs = append(p.parser.errs, err)
+		return nil, err
 	}
 	f = &ast.Function{}
 	f.Pos = p.parser.mkPos()
@@ -31,18 +33,15 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		p.Next()
 	}
 	if p.parser.token.Type != lex.TOKEN_LP {
-		err = fmt.Errorf("%s fn declared wrong,missing (", p.parser.errorMsgPrefix())
+		err = fmt.Errorf("%s fn declared wrong,missing (,but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
 		p.parser.errs = append(p.parser.errs, err)
 		return
 	}
 	p.Next()
-	if p.parser.eof {
-		return nil, p.parser.mkUnexpectedEofErr()
-	}
 	if p.parser.token.Type != lex.TOKEN_RP { // not (
 		f.Typ.Parameters, err = p.parser.parseTypedNames()
 		if err != nil {
-			return
+			return f, err
 		}
 	}
 	if p.parser.token.Type != lex.TOKEN_RP { // not (

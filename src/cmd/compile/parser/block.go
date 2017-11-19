@@ -20,10 +20,16 @@ func (b *Block) consume(c map[int]bool) {
 }
 
 func (b *Block) parse(block *ast.Block) (err error) {
-	b.Next()
+	b.Next() // skip {
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {
 		switch b.parser.token.Type {
+		case lex.TOKEN_SEMICOLON:
+			b.Next() // look up next
+			continue
+		case lex.TOKEN_RC: // end
+			b.Next()
+			return
 		case lex.TOKEN_IDENTIFIER:
 			e, err := b.parser.ExpressionParser.parseExpression()
 			if err != nil {
@@ -47,12 +53,6 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Expression: e,
 			})
 			continue
-		case lex.TOKEN_SEMICOLON:
-			b.Next() // look up next
-			continue
-		case lex.TOKEN_RC: // end
-			b.Next()
-			return
 		case lex.TOKEN_VAR:
 			vs, err := b.parser.parseVarDefinition()
 			if err != nil {
@@ -102,16 +102,20 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_CONST:
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
 			}
-			names, _, es, err := b.parser.parseAssignedNames()
+			names, typ, es, err := b.parser.parseAssignedNames()
 			if err != nil {
 				b.consume(untils_rc_semicolon)
 				b.Next()
 				continue
+			}
+			if typ != lex.TOKEN_COLON_ASSIGN {
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s declare const should use := instead of =", b.parser.errorMsgPrefix(names[0].Pos)))
 			}
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after const declaration", b.parser.errorMsgPrefix()))
@@ -184,19 +188,20 @@ func (b *Block) parse(block *ast.Block) (err error) {
 }
 
 func (b *Block) parseIf() (i *ast.StatementIF, err error) {
-	b.Next()
+	b.Next() // skip if
 	if b.parser.eof {
 		err = b.parser.mkUnexpectedEofErr()
-		b.parser.errs = append(b.parser.errs)
+		b.parser.errs = append(b.parser.errs, err)
 		return nil, err
 	}
 	var e *ast.Expression
 	e, err = b.parser.ExpressionParser.parseExpression()
 	if err != nil {
+		b.parser.errs = append(b.parser.errs, err)
 		return nil, err
 	}
 	if b.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+		err = fmt.Errorf("%s missing { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
 		b.parser.errs = append(b.parser.errs)
 		return nil, err
 	}
@@ -214,7 +219,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	if b.parser.token.Type == lex.TOKEN_ELSE {
 		b.Next()
 		if b.parser.token.Type != lex.TOKEN_LC {
-			err = fmt.Errorf("%s no { after else", b.parser.errorMsgPrefix())
+			err = fmt.Errorf("%s missing { after else", b.parser.errorMsgPrefix())
 			return i, err
 		}
 		i.ElseBlock = &ast.Block{}
@@ -230,6 +235,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		b.Next()
 		e, err = b.parser.ExpressionParser.parseExpression()
 		if err != nil {
+			b.parser.errs = append(b.parser.errs, err)
 			return es, err
 		}
 		if b.parser.token.Type != lex.TOKEN_LC {
@@ -256,21 +262,17 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 	f = &ast.StatementFor{}
 	f.Pos = b.parser.mkPos()
 	f.Block = &ast.Block{}
-	b.Next()
-	if b.parser.token.Type == lex.TOKEN_LC {
-		err = b.parser.Block.parse(f.Block)
-		return f, err
+	b.Next()                                 // skip for
+	if b.parser.token.Type != lex.TOKEN_LC { // not {
+		e, err := b.parser.ExpressionParser.parseExpression()
+		if err != nil {
+			b.parser.errs = append(b.parser.errs, err)
+		}
+		f.Condition = e
 	}
-
-	e, err := b.parser.ExpressionParser.parseExpression()
-	if err != nil {
-		b.parser.errs = append(b.parser.errs, err)
-		b.consume(untils_lc)
-	}
-	f.Condition = e
 	if b.parser.token.Type == lex.TOKEN_SEMICOLON {
 		b.Next()
-		e, err = b.parser.ExpressionParser.parseExpression()
+		e, err := b.parser.ExpressionParser.parseExpression()
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 			b.consume(untils_semicolon)
@@ -290,7 +292,6 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 			f.Post = e
 		}
 	}
-
 	if b.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s not { after for", b.parser.errorMsgPrefix())
 		b.parser.errs = append(b.parser.errs, err)

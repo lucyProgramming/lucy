@@ -20,7 +20,7 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 	for !ep.parser.eof {
 		e, err := ep.parseExpression()
 		if err != nil {
-			return nil, err
+			return es, err
 		}
 		es = append(es, e)
 		if ep.parser.token.Type != lex.TOKEN_COMMA {
@@ -626,6 +626,7 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	mkBinayExpression := func(typ int) (*ast.Expression, error) {
 		ep.Next()
 		if ep.parser.eof {

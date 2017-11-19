@@ -14,9 +14,28 @@ var str = `
 import "github.com/xxx/yyy" ;
 
 
+public const NAME="123"; // public global variable
+const age = 345;  // private global variable
 
-arr := [][]int{{1,2}} 
+c := 100;  //private global variable
 
+{ //block execute at first
+	if c == 100{
+		skip; skip this blok,excute next one
+	}
+	a := 1;
+	if a == 1{
+		print("hello world")
+	}
+}
+
+//function defination
+func Add(a int,b int->(c int){
+    return a +b + c;
+}
+
+
+arr := new([][]int) ;
 
 
 
@@ -62,7 +81,7 @@ func Test_parse(t *testing.T) {
 //}
 
 ////function defination
-//func (x int) Add(a int,b int){
+//func Add(a int,b int->(c int){
 //    return a +b + c;
 //}
 

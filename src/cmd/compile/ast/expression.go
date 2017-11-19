@@ -131,7 +131,7 @@ type ExpressionArray struct {
 	Expression *Expression
 }
 
-func (e *Expression) Name() string {
+func (e *Expression) OpName() string {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
 		return fmt.Sprintf("bool_value", e.Data.(bool))

@@ -18,7 +18,7 @@ const (
 )
 
 type Statement struct {
-	Pos               Pos
+	Pos               *Pos
 	Typ               int
 	StatementIf       *StatementIF
 	Expression        *Expression // expression statment like a=123
@@ -91,15 +91,12 @@ func (s *Statement) check(b *Block) []error { // b is father
 }
 
 func notFoundError(pos *Pos, typ, name string) error {
-	return fmt.Errorf("%s %d:%d %s:%s not found", pos.Filename, pos.StartLine, pos.StartColumn, typ, name)
+	return fmt.Errorf("%s %s:%s not found", errMsgPrefix(pos), typ, name)
 }
 
-//func tooManyArgsTocall(p *Pos) error {
-//	return fmt.Errorf("%s %d:%d too many args to call", p.Filename, p.StartLine, p.StartColumn)
-//}
-//func tooewFArgsTocall(p *Pos) error {
-//	return fmt.Errorf("%s %d:%d too fw args to call", p.Filename, p.StartLine, p.StartColumn)
-//}
+func errMsgPrefix(pos *Pos) string {
+	return fmt.Sprintf("%s %d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
+}
 
 func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *Pos) []error {
 	errs := make([]error, 0)
@@ -147,9 +144,9 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		call := s.Expression.Data.(*ExpressionFunctionCall)
 		f := b.searchFunction(call.Expression)
 		if f == nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d", notFoundError(&s.Pos, "function", call.Expression.Name())))
+			errs = append(errs, notFoundError(s.Pos, "function", call.Expression.OpName()))
 		} else {
-			errs = append(errs, checkFunctionCall(b, f, call, &s.Pos)...)
+			errs = append(errs, checkFunctionCall(b, f, call, s.Pos)...)
 		}
 		return errs
 	}
@@ -168,12 +165,12 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			name := left.Data.(string)
 			item := b.searchSymbolicItemAlsoGlobalVar(name)
 			if item == nil {
-				errs = append(errs, notFoundError(&s.Pos, "variable", name))
+				errs = append(errs, notFoundError(s.Pos, "variable", name))
 				return errs
 			}
 			return errs
 		}
-		errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.Name()))
+		errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.OpName()))
 		return errs
 	}
 	if EXPRESSION_TYPE_COLON_ASSIGN == s.Expression.Typ { //declare variable
@@ -216,13 +213,13 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			name := s.Expression.Data.(string)
 			item := b.searchSymbolicItemAlsoGlobalVar(name)
 			if item == nil {
-				errs = append(errs, notFoundError(&s.Pos, "variable", name))
+				errs = append(errs, notFoundError(s.Pos, "variable", name))
 				return errs
 			}
 			return errs
 		}
 	}
-	errs = append(errs, fmt.Errorf("%s %d:%d expression(%s) evaluated,but not used", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.Expression.Name()))
+	errs = append(errs, fmt.Errorf("%s expression(%s) evaluated,but not used", errMsgPrefix(s.Pos), s.Expression.OpName()))
 	return errs
 }
 
