@@ -2,11 +2,8 @@ package parser
 
 import (
 	"fmt"
-
-	"cmd/go/testdata/src/cgoasm"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
-	"path"
 )
 
 type Class struct {
@@ -25,7 +22,7 @@ func (c *Class) consume(m map[int]bool) {
 	c.parser.consume(m)
 }
 
-func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
+func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
 	c.Next() // skip class key work
@@ -42,7 +39,6 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
-	var father *ast.Expression
 	if c.parser.token.Type == lex.TOKEN_COLON { // parse father expression
 		c.Next() // skip :
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
@@ -50,7 +46,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
-			father, err = c.parser.ExpressionParser.parseIdentifierExpression()
+			c.classDefinition.Father, err = c.parser.ExpressionParser.parseIdentifierExpression()
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err
@@ -58,41 +54,48 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s expect } but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err = fmt.Errorf("%s expect { but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
 		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
+	c.Next() // skip {
 	c.access = ast.ACCESS_PRIVATE
 	c.isStatic = false
 	for !c.parser.eof {
 		switch c.parser.token.Type {
+		case lex.TOKEN_SEMICOLON:
+			c.Next()
+			continue
 		case lex.TOKEN_STATIC:
 			c.isStatic = true
+			c.Next()
 		//access private
 		case lex.TOKEN_PUBLIC:
 			c.access = ast.ACCESS_PUBLIC
+			c.Next()
 		case lex.TOKEN_PROTECTED:
 			c.access = ast.ACCESS_PROTECTED
+			c.Next()
 		case lex.TOKEN_PRIVATE:
 			c.access = ast.ACCESS_PRIVATE
+			c.Next()
 		case lex.TOKEN_IDENTIFIER:
 			err = c.parseFiled()
 			if err != nil {
-				c.parser.errs = append(c.parser.errs, err)
 				c.consume(untils_semicolon)
 				c.Next()
 			}
 			c.resetProperty()
-		case lex.TOKEN_CONST:
+		case lex.TOKEN_CONST: // const is for local use
 			c.isConst = true
 			c.Next()
 			err := c.parseConst()
 			if err != nil {
 				c.consume(untils_semicolon)
+				c.Next()
 				continue
 			}
 		case lex.TOKEN_FUNCTION:
-			c.Next()
 			f, err := c.parser.Function.parse(false)
 			if err != nil {
 				c.consume(untils_rc)
@@ -114,7 +117,7 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 				continue
 			}
 			m := &ast.ClassMethod{}
-			m.Access = c.access
+			m.ClassFieldProperty.Access = c.access
 			m.IsStatic = c.isStatic
 			m.Func = f
 			c.resetProperty()
@@ -127,10 +130,10 @@ func (c *Class) parse(ispublic bool) (classDefinition *ast.Class, err error) {
 			c.Next()
 			break
 		default:
-			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token－>%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
+			c.Next()
 		}
 	}
-	c.classDefinition.Father = father
 	return
 }
 
@@ -166,18 +169,28 @@ func (c *Class) parseFiled() error {
 		return err
 	}
 	t, err := c.parser.parseType()
-	if t != nil {
+	if err != nil {
 		return err
 	}
+	if c.classDefinition.Fields == nil {
+		c.classDefinition.Fields = make(map[string]*ast.ClassField)
+	}
+
 	for _, v := range names {
-		if c.classDefinition.Fields == nil {
-			c.classDefinition.Fields = make(map[string]*ast.ClassField)
-			if _, ok := c.classDefinition.Fields[v.Name]; ok {
-				c.parser.errs = append(c.parser.errs,
-					fmt.Errorf("%s field %s is alreay declared",
-						c.parser.errorMsgPrefix(), v.Name))
-			}
+		if _, ok := c.classDefinition.Fields[v.Name]; ok {
+			c.parser.errs = append(c.parser.errs,
+				fmt.Errorf("%s field %s is alreay declared",
+					c.parser.errorMsgPrefix(), v.Name))
+			continue
 		}
+		f := &ast.ClassField{}
+		f.Name = v.Name
+		f.Pos = v.Pos
+		f.Typ = &ast.VariableType{}
+		*f.Typ = *t
+		f.ClassFieldProperty.Access = c.access
+		f.IsStatic = c.isStatic
+		c.classDefinition.Fields[v.Name] = f
 	}
 	return nil
 }

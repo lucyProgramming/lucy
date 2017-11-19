@@ -20,7 +20,7 @@ func (p *Function) consume(untils map[int]bool) {
 }
 
 func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
-	p.Next()
+	p.Next() // skip fn key word
 	if p.parser.eof {
 		err = p.parser.mkUnexpectedEofErr()
 		p.parser.errs = append(p.parser.errs, err)
@@ -37,7 +37,7 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		p.parser.errs = append(p.parser.errs, err)
 		return
 	}
-	p.Next()
+	p.Next()                                 // skip (
 	if p.parser.token.Type != lex.TOKEN_RP { // not (
 		f.Typ.Parameters, err = p.parser.parseTypedNames()
 		if err != nil {

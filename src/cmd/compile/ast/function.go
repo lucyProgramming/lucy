@@ -5,11 +5,11 @@ import (
 )
 
 type Function struct {
-	AccessProperty
-	Typ   FunctionType
-	Name  string // if name is nil string,means no name function
-	Block *Block
-	Pos   *Pos
+	Access int // public private or protected
+	Typ    FunctionType
+	Name   string // if name is nil string,means no name function
+	Block  *Block
+	Pos    *Pos
 }
 
 func (f *Function) check(b *Block) []error {

@@ -19,10 +19,6 @@ const (
 	VARIABLE_TYPE_NAME  // naming should search for declaration
 )
 
-type AccessProperty struct {
-	Access int // public private or protected
-}
-
 type VariableType struct {
 	Typ             int
 	Lname           string // []Lname Lname something

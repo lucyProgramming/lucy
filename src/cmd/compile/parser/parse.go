@@ -194,7 +194,7 @@ func (p *Parser) Parse() []error {
 			if isconst {
 				p.errs = append(p.errs, fmt.Errorf("%s can`t use const for a class", p.errorMsgPrefix()))
 			}
-			c, err := p.Class.parse(ispublic)
+			c, err := p.Class.parse()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(untils_rc)
@@ -203,6 +203,11 @@ func (p *Parser) Parse() []error {
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: c,
 			})
+			if ispublic {
+				c.Access = ast.ACCESS_PUBLIC
+			} else {
+				c.Access = ast.ACCESS_PROTECTED
+			}
 			resetProperty()
 		case lex.TOKEN_PUBLIC:
 			ispublic = true
@@ -325,18 +330,13 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	}
 	var expressions []*ast.Expression
 	//value , no default value definition
-	if p.token.Type == lex.TOKEN_SEMICOLON {
-		p.Next()
-	} else if lex.TOKEN_ASSIGN == p.token.Type { //assign
-		p.Next()
+	if lex.TOKEN_ASSIGN == p.token.Type {
+		//assign
+		p.Next() // skip =
 		expressions, err = p.ExpressionParser.parseExpressions()
 		if err != nil {
 			p.errs = append(p.errs, err)
 		}
-	} else {
-		err = fmt.Errorf("%s not a ; after type definition,but %s", p.errorMsgPrefix(), p.token.Desp)
-		p.errs = append(p.errs, err)
-		return
 	}
 	if p.token.Type != lex.TOKEN_SEMICOLON {
 		err = fmt.Errorf("%s not a \";\" after a variable declare ", p.errorMsgPrefix())
@@ -357,9 +357,9 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		*vt = *t
 		vd.Typ = vt
 		if len(ispublic) > 0 && ispublic[0] {
-			vd.AccessProperty.Access = ast.ACCESS_PUBLIC
+			vd.Access = ast.ACCESS_PUBLIC
 		} else {
-			vd.AccessProperty.Access = ast.ACCESS_PRIVATE
+			vd.Access = ast.ACCESS_PRIVATE
 		}
 		vd.Pos = v.Pos
 		vs[k] = vd
@@ -440,7 +440,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 	case lex.TOKEN_IDENTIFIER:
 		return p.parseIdentiferType()
 	}
-	err = fmt.Errorf("%s unkown type", p.errorMsgPrefix())
+	err = fmt.Errorf("%s unkown type,first token:", p.errorMsgPrefix(), p.token.Desp)
 	p.errs = append(p.errs, err)
 	return nil, err
 }
@@ -486,9 +486,10 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 			// not a ,
 			break
 		}
+		pos := p.mkPos() // more
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			err = fmt.Errorf("%s not identifier after a comma,but %s ", p.errorMsgPrefix(), p.token.Desp)
+			err = fmt.Errorf("%s not identifier after a comma,but %s ", p.errorMsgPrefix(pos), p.token.Desp)
 			p.errs = append(p.errs, err)
 			return names, err
 		}

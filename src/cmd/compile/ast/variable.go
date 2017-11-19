@@ -1,7 +1,7 @@
 package ast
 
 type VariableDefinition struct {
-	AccessProperty
+	Access     int // public private or protected
 	Pos        *Pos
 	Expression *Expression
 	NameWithType

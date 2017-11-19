@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -42,11 +41,20 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
 			}
 			if e.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN { // create  a new variable
-				//				d := e.Data.(*ast.ExpressionBinary)
-				//				err = block.SymbolicTable.Insert(d.Left.Data.(string), &ast.VariableType{}) // I will corrent later
-				//				if err != nil {
-				//					b.parser.errs = append(b.parser.errs, err)
-				//				}
+				// must be a name list
+				d := e.Data.(*ast.ExpressionBinary)
+				namelist := d.Left.Data.([]*ast.Expression)
+				for _, v := range namelist {
+					if v.Typ != ast.EXPRESSION_TYPE_IDENTIFIER {
+						b.parser.errs = append(b.parser.errs, fmt.Errorf("%s must be a name one the left", b.parser.errorMsgPrefix(v.Pos)))
+						continue
+					}
+					// I will correct type later
+					err = block.SymbolicTable.Insert(v.Data.(string), e.Pos, &ast.VariableDefinition{})
+					if err != nil {
+						b.parser.errs = append(b.parser.errs, err)
+					}
+				}
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
@@ -144,16 +152,14 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				continue
 			}
 			var es []*ast.Expression
-			if b.parser.ExpressionParser.looksLikeAExprssion() {
-				es, err = b.parser.ExpressionParser.parseExpressions()
-				fmt.Println("", b.parser.token.Desp)
-				if err != nil {
-					b.parser.errs = append(b.parser.errs, err)
-					b.consume(untils_semicolon)
-					b.Next()
-				}
-				r.Expressions = es
+			es, err = b.parser.ExpressionParser.parseExpressions()
+			fmt.Println("", b.parser.token.Desp)
+			if err != nil {
+				b.parser.errs = append(b.parser.errs, err)
+				b.consume(untils_semicolon)
+				b.Next()
 			}
+			r.Expressions = es
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  no ; after return statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				continue

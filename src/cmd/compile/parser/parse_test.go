@@ -14,31 +14,29 @@ var str = `
 import "github.com/xxx/yyy" ;
 
 
-public const NAME="123"; // public global variable
-const age = 345;  // private global variable
 
-c := 100;  //private global variable
 
-{ //block execute at first
-	if c == 100{
-		skip; skip this blok,excute next one
-	}
-	a := 1;
-	if a == 1{
-		print("hello world")
-	}
-}
 
-//function defination
-func Add(a int,b int->(c int){
-    return a +b + c;
+const str := "hello world";
+
+enum day{
+	monday,
+	tuesday
 }
 
 
-arr := new([][]int) ;
+
+public class Persion:animal{
+	name string;
+	age int;
+
+}
 
 
-
+fn add(a,b int)->(total int){
+	total = 123;
+	x,y := bool(1),2;
+}
 
 
 `

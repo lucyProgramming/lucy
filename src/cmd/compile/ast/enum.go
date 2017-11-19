@@ -15,9 +15,9 @@ type EnumName struct {
 }
 
 type Enum struct {
-	AccessProperty
-	Name  string
-	Pos   *Pos
-	Names []*EnumName
-	Init  *Expression //should be a int expression
+	Access int // public private or protected
+	Name   string
+	Pos    *Pos
+	Names  []*EnumName
+	Init   *Expression //should be a int expression
 }

@@ -7,6 +7,7 @@ const (
 )
 
 type Class struct {
+	Access      int // public private or protected
 	Pos         *Pos
 	Name        string
 	Fields      map[string]*ClassField
@@ -45,14 +46,12 @@ type ClassMethod struct {
 
 type ClassFieldProperty struct {
 	IsStatic bool //static or not
-	AccessProperty
+	Access   int  // public private or protected
 }
 
 type ClassField struct {
 	ClassFieldProperty
-	Name string
-	Typ  VariableType
-	Init *Expression // init value
-	Tag  string      //for reflect
-	Pos  *Pos
+	VariableDefinition
+	Tag string //for reflect
+	Pos *Pos
 }

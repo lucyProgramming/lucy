@@ -73,12 +73,6 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		p.Next()
 		ns, err := p.parseNameList()
 		if err != nil {
-			p.errs = append(p.errs, err)
-			return nil, err
-		}
-		if p.token.Type != lex.TOKEN_RC {
-			err = fmt.Errorf("%s except } after name list,but %s", p.errorMsgPrefix(), p.token.Desp)
-			p.errs = append(p.errs, err)
 			return nil, err
 		}
 		names = append(names, ns...)
@@ -100,9 +94,9 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		t.Enum = e
 	}
 	if ispublic {
-		e.AccessProperty.Access = ast.ACCESS_PUBLIC
+		e.Access = ast.ACCESS_PUBLIC
 	} else {
-		e.AccessProperty.Access = ast.ACCESS_PRIVATE
+		e.Access = ast.ACCESS_PRIVATE
 	}
 	return
 }
