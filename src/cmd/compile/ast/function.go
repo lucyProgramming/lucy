@@ -6,7 +6,7 @@ import (
 
 type Function struct {
 	Access int // public private or protected
-	Typ    FunctionType
+	Typ    *FunctionType
 	Name   string // if name is nil string,means no name function
 	Block  *Block
 	Pos    *Pos

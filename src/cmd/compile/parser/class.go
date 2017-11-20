@@ -87,6 +87,9 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_CONST: // const is for local use
+			if c.access == ast.ACCESS_PUBLIC {
+				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const declared in class,can only be used this block"))
+			}
 			c.isConst = true
 			c.Next()
 			err := c.parseConst()

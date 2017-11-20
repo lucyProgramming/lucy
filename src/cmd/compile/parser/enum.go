@@ -31,18 +31,18 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	if p.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s enum type have no '{' after it`s name defined,but %s", p.errorMsgPrefix(), p.token.Desp)
 		p.errs = append(p.errs, err)
-		return
+		return nil, err
 	}
 	p.Next() // skip {
 	if p.eof {
-		p.unexpectedErr()
-		return
+		err = p.mkUnexpectedEofErr()
+		return nil, err
 	}
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s no enum names defined after {", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)
-		return
+		return nil, err
 	}
 	names := []*ast.NameWithPos{
 		&ast.NameWithPos{
@@ -52,8 +52,9 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	}
 	p.Next()
 	if p.eof {
-		p.unexpectedErr()
-		return
+		err = p.mkUnexpectedEofErr()
+		p.errs = append(p.errs, err)
+		return nil, err
 	}
 	var initExpression *ast.Expression
 	if p.token.Type == lex.TOKEN_ASSIGN { // first value defined here
@@ -61,12 +62,12 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		if p.eof {
 			err = p.mkUnexpectedEofErr()
 			p.errs = append(p.errs, err)
-			return
+			return nil, err
 		}
 		initExpression, err = p.ExpressionParser.parseExpression()
 		if err != nil {
 			p.errs = append(p.errs, err)
-			return
+			return nil, err
 		}
 	}
 	if p.token.Type == lex.TOKEN_COMMA {
@@ -98,5 +99,5 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	} else {
 		e.Access = ast.ACCESS_PRIVATE
 	}
-	return
+	return e, err
 }

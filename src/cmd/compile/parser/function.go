@@ -32,42 +32,9 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		f.Name = p.parser.token.Data.(string)
 		p.Next()
 	}
-	if p.parser.token.Type != lex.TOKEN_LP {
-		err = fmt.Errorf("%s fn declared wrong,missing (,but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
-		p.parser.errs = append(p.parser.errs, err)
-		return
-	}
-	p.Next()                                 // skip (
-	if p.parser.token.Type != lex.TOKEN_RP { // not (
-		f.Typ.Parameters, err = p.parser.parseTypedNames()
-		if err != nil {
-			return f, err
-		}
-	}
-	if p.parser.token.Type != lex.TOKEN_RP { // not (
-		err = fmt.Errorf("%s fn declared wrong,missing ),but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
-		p.parser.errs = append(p.parser.errs, err)
-		return
-	}
-	p.Next()
-	if p.parser.token.Type == lex.TOKEN_ARROW { // ->
-		p.Next()
-		if p.parser.token.Type != lex.TOKEN_LP {
-			err = fmt.Errorf("%s fn declared wrong, not ( after ->", p.parser.errorMsgPrefix())
-			p.parser.errs = append(p.parser.errs, err)
-			return
-		}
-		p.Next()
-		f.Typ.Returns, err = p.parser.parseTypedNames()
-		if err != nil {
-			return
-		}
-		if p.parser.token.Type != lex.TOKEN_RP {
-			err = fmt.Errorf("%s fn declared wrong, ( and ) not match", p.parser.errorMsgPrefix())
-			p.parser.errs = append(p.parser.errs, err)
-			return
-		}
-		p.Next()
+	f.Typ, err = p.parser.parseFunctionType()
+	if err != nil {
+		p.consume(untils_lc)
 	}
 	if p.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s except { but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
