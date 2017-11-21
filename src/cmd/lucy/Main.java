@@ -12,11 +12,12 @@ import java.util.HashMap;
 
 public class Main {
     public static void print_help(){
+        String msg = "lucy\n";
+        msg += "\t run       run a package or files\n";
 
-        System.out.println("");
+        System.out.println(msg);
     }
     public  static HashMap<String,command.Command> handlers;
-
 
 
 
