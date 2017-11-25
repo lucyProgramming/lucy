@@ -7,7 +7,7 @@
 
 
 import command.Command;
-import run.*;
+import run.Run;
 import java.util.HashMap;
 
 public class Main {
@@ -17,17 +17,17 @@ public class Main {
 
         System.out.println(msg);
     }
-    public  static HashMap<String,command.Command> handlers;
-
+    public  static HashMap<String,Command> handlers;
 
 
     public static  void main(String[] args){
-        Main.handlers = new HashMap<String,command.Command>();
+        Main.handlers = new HashMap<String,Command>();
         Main.handlers.put("run",new Run());
         if(args.length == 0){
             Main.print_help();
             return ;
         }
+        
         if (!Main.handlers.containsKey(args[0])){
             System.out.println("command " + args[0] + " is unkown");
             Main.print_help();

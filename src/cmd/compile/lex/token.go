@@ -82,10 +82,8 @@ const (
 	TOKEN_LITERAL_INT           // 123
 	TOKEN_LITERAL_STRING        // ""
 	TOKEN_LITERAL_FLOAT         // 0.000
-	TOKEN_TRY                   // try
-	TOKEN_CATCH                 //catch
-	TOKEN_FINALLY               //finally
-	TOKEN_THROW                 //throw
+	TOKEN_PAINIC                //panic
+	TOKEN_DEFER                 // defer
 	TOKEN_TYPE                  //type
 	TOKEN_ARROW                 //->
 )

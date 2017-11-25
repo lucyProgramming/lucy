@@ -588,35 +588,22 @@ func init() {
 		t.Data = match.Bytes[1]
 		return t, nil
 	})
+	Lexer.Add([]byte("panic"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_PAINIC
+		t.Desp = "panic"
+		return t, nil
+	})
 
-	Lexer.Add([]byte("try"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	Lexer.Add([]byte("defer"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_TRY
-		t.Desp = "try"
+		t.Type = TOKEN_DEFER
+		t.Desp = "defer"
 		return t, nil
 	})
-	Lexer.Add([]byte("catch"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CATCH
-		t.Desp = "catch"
-		return t, nil
-	})
-	Lexer.Add([]byte("finally"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_FINALLY
-		t.Desp = "finally"
-		return t, nil
-	})
-	Lexer.Add([]byte("throw"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_THROW
-		t.Desp = "throw"
-		return t, nil
-	})
+
 	Lexer.Add([]byte("type"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
