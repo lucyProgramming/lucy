@@ -2,12 +2,13 @@ package lc
 
 import (
 	"fmt"
-	"io/ioutil"
-
+	"github.com/756445638/lucy/src/cmd/compile/cg"
 	"github.com/756445638/lucy/src/cmd/compile/parser"
+	"io/ioutil"
 )
 
 func Main(files []string) {
+	go cg.Prinf()
 	l := &LucyCompile{
 		Files:            files,
 		NerrsStopCompile: 10,

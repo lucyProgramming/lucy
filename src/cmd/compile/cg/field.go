@@ -9,9 +9,9 @@ const (
 )
 
 type FieldInfo struct {
-	accessFlags     uint16
-	nameIndex       uint16
-	descriptorIndex uint16
-	attributeCount  uint16
+	accessFlags     U2
+	nameIndex       U2
+	descriptorIndex U2
+	attributeCount  U2
 	attributes      []*AttributeInfo
 }

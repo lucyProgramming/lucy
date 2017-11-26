@@ -1,5 +1,10 @@
 package cg
 
+import (
+	"encoding/binary"
+	"os"
+)
+
 const (
 	ACC_CLASS_PUBLIC     U2 = 0x0001 // 可以被包的类外访问。
 	ACC_CLASS_FINAL      U2 = 0x0010 //不允许有子类。
@@ -16,7 +21,8 @@ const (
 )
 
 type Class struct {
-	magic          uint32
+	f              *os.File
+	magic          uint32 //0xCAFEBABE
 	minorVersion   U2
 	majorVersion   U2
 	constPoolCount U2
@@ -32,4 +38,215 @@ type Class struct {
 	methods        []*MethodInfo
 	attributeCount U2
 	attributes     []*AttributeInfo
+}
+
+func (c *Class) OutPut(filename string) error {
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	//magic number
+	bs4 := make([]byte, 4)
+	binary.BigEndian.PutUint32(bs4, c.magic)
+	_, err = f.Write(bs4)
+	if err != nil {
+		return err
+	}
+	// minorversion
+	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(c.minorVersion))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	// major version
+	binary.BigEndian.PutUint16(bs2, uint16(c.majorVersion))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	//const pool
+	binary.BigEndian.PutUint16(bs2, uint16(c.constPoolCount))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.constPool {
+		_, err = f.Write([]byte{byte(v.tag)})
+		if err != nil {
+			return err
+		}
+		_, err = f.Write(v.info)
+		if err != nil {
+			return err
+		}
+	}
+	//access flag
+	binary.BigEndian.PutUint16(bs2, uint16(c.accessFlag))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	//this class
+	binary.BigEndian.PutUint16(bs2, uint16(c.thisClass))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	//super class
+	binary.BigEndian.PutUint16(bs2, uint16(c.superClass))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	// interface
+	binary.BigEndian.PutUint16(bs2, uint16(c.interfaceCount))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.interfaces {
+		binary.BigEndian.PutUint16(bs2, uint16(v))
+		_, err = f.Write(bs2)
+		if err != nil {
+			return err
+		}
+	}
+	//fields
+	c.f = f
+	err = c.writeFields()
+	if err != nil {
+		return err
+	}
+	//methods
+	err = c.writeMethods()
+	if err != nil {
+		return err
+	}
+	// attribute
+
+	binary.BigEndian.PutUint16(bs2, uint16(c.attributeCount))
+	_, err = f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	if c.attributeCount > 0 {
+		return c.writeAttributeInfo(c.attributes)
+	}
+
+	return nil
+}
+
+/*
+
+type MethodInfo struct {
+	accessFlags     U2
+	nameIndex       U2
+	descriptorIndex U2
+	attributeCount  U2
+	attributes      []*AttributeInfo
+}
+*/
+
+func (c *Class) writeMethods() error {
+	var err error
+	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(c.methodCount))
+	_, err = c.f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.methods {
+		binary.BigEndian.PutUint16(bs2, uint16(v.accessFlags))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(v.nameIndex))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(v.descriptorIndex))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(v.attributeCount))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		if v.attributeCount > 0 {
+			err = c.writeAttributeInfo(v.attributes)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (c *Class) writeFields() error {
+	var err error
+	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(c.fieldCount))
+	_, err = c.f.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.fields {
+		binary.BigEndian.PutUint16(bs2, uint16(v.accessFlags))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(v.nameIndex))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(v.descriptorIndex))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(v.attributeCount))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		if v.attributeCount > 0 {
+			err = c.writeAttributeInfo(v.attributes)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
+	var err error
+	bs2 := make([]byte, 2)
+	bs4 := make([]byte, 4)
+	for _, v := range as {
+		binary.BigEndian.PutUint16(bs2, uint16(v.attributeIndex))
+		_, err = c.f.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint32(bs4, uint32(v.attributeIndex))
+		_, err = c.f.Write(bs4)
+		if err != nil {
+			return err
+		}
+		_, err = c.f.Write(v.info)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
