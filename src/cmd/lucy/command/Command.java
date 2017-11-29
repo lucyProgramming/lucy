@@ -1,4 +1,4 @@
-package command;
+package cmd.lucy.command;
 
 
 

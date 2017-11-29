@@ -6,9 +6,10 @@
 
 
 
-import command.Command;
-import run.Run;
+import cmd.lucy.command.*;
+import cmd.lucy.run.*;
 import java.util.HashMap;
+import cmd.lucy.declass.*;
 
 public class Main {
     public static void print_help(){
@@ -17,8 +18,7 @@ public class Main {
 
         System.out.println(msg);
     }
-    public  static HashMap<String,Command> handlers;
-
+    public  static HashMap<String, Command> handlers;
 
     public static  void main(String[] args){
         Main.handlers = new HashMap<String,Command>();

@@ -1,6 +1,6 @@
-package run;
+package cmd.lucy.run;
 
-import command.Command;
+import cmd.lucy.command.Command;
 
 
 /**
@@ -38,9 +38,6 @@ public class Run implements  Command {
         if(0 != this.parseArgs(args)){  // not 0 means something is error
             return ;
         }
-
-
-
 
 
 
