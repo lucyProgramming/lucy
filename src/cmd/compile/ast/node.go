@@ -201,9 +201,12 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	for _, v := range c.Vars {
 		p.Vars[v.Name] = v
 	}
-	p.Funcs = make(map[string]*Function)
+	p.Funcs = make(map[string][]*Function)
 	for _, v := range c.Funcs {
-		p.Funcs[v.Name] = v
+		if p.Funcs[v.Name] == nil {
+			p.Funcs[v.Name] = []*Function{}
+		}
+		p.Funcs[v.Name] = append(p.Funcs[v.Name], v)
 	}
 	p.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {

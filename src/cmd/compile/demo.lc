@@ -1,11 +1,11 @@
 package main
 
-import "github.com/xxx/yyy" as abc
+import "java/io";
 
 
 
 enum Day {
-	Monday = 1,
+	Monday = 1,＝　吧
 	TuesDay,
 }
 
@@ -25,16 +25,15 @@ c := 100;  //private global variable
 	if a == 1{
 		print("hello world")
 	}
+	io.System.println("11111111111");
+	var a io.PrintStram;
+
 }
 
 
-//function defination
-fn [xxx,yy in] dd(a int,b int) {
-    return a +b + c;
-}
 
 //function defination
-fn dd(a int,b int)(xxx int) {
+fn dd(a int,b int)->(xxx int) {
     return a +b + c;
 }
 
@@ -49,12 +48,11 @@ class Man: Person{
     public Person(){
         var abc int;
         f = fn() xxx {
-            printf(abc);
+            printf(this.abc);
         }
         f();
     }
 }
-
 
 
 

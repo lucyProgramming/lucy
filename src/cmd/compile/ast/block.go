@@ -60,7 +60,7 @@ func (b *Block) searchFunction(e *Expression) *Function {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return nil
 	}
-	return b.p.Funcs[e.Data.(string)]
+	return b.p.Funcs[e.Data.(string)][0]
 }
 
 type InheritedAttribute struct {
@@ -96,7 +96,7 @@ func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
 	switch d.(type) {
 	case *VariableDefinition:
 		if _, ok := s.ItemsMap[name]; ok {
-			return fmt.Errorf("%s %d:%d varaible %s already declared", pos.Filename, pos.StartLine, pos.StartColumn, name)
+			return fmt.Errorf("%s varaible %s already declared", errMsgPrefix(pos), name)
 		}
 		s.ItemsMap[name] = &SymbolicItem{
 			Typ: ITEM_TYPE_CONST,
@@ -104,7 +104,7 @@ func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
 		}
 	case *Const:
 		if _, ok := s.ItemsMap[name]; ok {
-			return fmt.Errorf("%s %d:%d const %s already declared", pos.Filename, pos.StartLine, pos.StartColumn, name)
+			return fmt.Errorf("%s const %s already declared", errMsgPrefix(pos), name)
 		}
 		s.ItemsMap[name] = &SymbolicItem{
 			Typ:   ITEM_TYPE_CONST,
@@ -133,6 +133,7 @@ func (b *Block) isBoolValue(e *Expression) (bool, []error) {
 	}
 	return t.Typ == VARIABLE_TYPE_BOOL, nil
 }
+
 func (b *Block) check(p ...*Package) []error {
 	if len(p) > 0 {
 		b.p = p[0]

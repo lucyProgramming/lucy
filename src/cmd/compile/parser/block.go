@@ -40,22 +40,22 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
 			}
-			if e.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN { // create  a new variable
-				// must be a name list
-				d := e.Data.(*ast.ExpressionBinary)
-				namelist := d.Left.Data.([]*ast.Expression)
-				for _, v := range namelist {
-					if v.Typ != ast.EXPRESSION_TYPE_IDENTIFIER {
-						b.parser.errs = append(b.parser.errs, fmt.Errorf("%s must be a name one the left", b.parser.errorMsgPrefix(v.Pos)))
-						continue
-					}
-					// I will correct type later
-					err = block.SymbolicTable.Insert(v.Data.(string), e.Pos, &ast.VariableDefinition{})
-					if err != nil {
-						b.parser.errs = append(b.parser.errs, err)
-					}
-				}
-			}
+			//if e.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN { // create  a new variable
+			//	// must be a name list
+			//	d := e.Data.(*ast.ExpressionBinary)
+			//	namelist := d.Left.Data.([]*ast.Expression)
+			//	for _, v := range namelist {
+			//		if v.Typ != ast.EXPRESSION_TYPE_IDENTIFIER {
+			//			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s must be a name one the left", b.parser.errorMsgPrefix(v.Pos)))
+			//			continue
+			//		}
+			//		// I will correct type later
+			//		err = block.SymbolicTable.Insert(v.Data.(string), e.Pos, &ast.VariableDefinition{})
+			//		if err != nil {
+			//			b.parser.errs = append(b.parser.errs, err)
+			//		}
+			//	}
+			//}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,
@@ -68,12 +68,14 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.Next()
 				continue
 			}
-			for _, v := range vs {
-				err = block.SymbolicTable.Insert(v.Name, v.Pos, v)
-				if err != nil {
-					b.parser.errs = append(b.parser.errs, err)
-				}
+			s := &ast.Statement{
+				Typ: ast.STATEMENT_TYPE_EXPRESSION,
+				Expression: &ast.Expression{
+					Typ:  ast.EXPRESSION_TYPE_VAR,
+					Data: &ast.ExpressionVar{vs},
+				},
 			}
+			block.Statements = append(block.Statements, s)
 		case lex.TOKEN_IF:
 			i, err := b.parseIf()
 			if err != nil {

@@ -5,11 +5,21 @@ import (
 )
 
 type Function struct {
-	Access int // public private or protected
-	Typ    *FunctionType
-	Name   string // if name is nil string,means no name function
-	Block  *Block
-	Pos    *Pos
+	Access    int // public private or protected
+	Typ       *FunctionType
+	Name      string // if name is nil string,means no name function
+	Block     *Block
+	Pos       *Pos
+	Signature string
+}
+
+func (f *Function) MKSignature() {
+	s := "("
+	for _, v := range f.Typ.Parameters {
+		s += v.NameWithType.Typ.Signature() + ";"
+	}
+	s += ")"
+	f.Signature = s
 }
 
 func (f *Function) check(b *Block) []error {
@@ -74,11 +84,6 @@ type FunctionType struct {
 	Parameters ParameterList
 	Returns    ReturnList
 }
-
-//type Parameter struct {
-//	VariableDefinition
-//	Default *Expression //f(a int = 1) default parameter
-//}
 
 type ParameterList []*VariableDefinition // actually local variables
 type ReturnList []*VariableDefinition    // actually local variables

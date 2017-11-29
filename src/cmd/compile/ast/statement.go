@@ -76,11 +76,11 @@ func (s *Statement) check(b *Block) []error { // b is father
 	case STATEMENT_TYPE_BREAK:
 	case STATEMENT_TYPE_CONTINUE:
 		if b.InheritedAttribute.infor {
-			errs = append(errs, fmt.Errorf("%s %d:%d %s can`t in this scope", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.statementName()))
+			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 		}
 	case STATEMENT_TYPE_RETURN:
 		if b.InheritedAttribute.infunction == false {
-			errs = append(errs, fmt.Errorf("%s %d:%d %s can`t in this scope", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, s.statementName()))
+			errs = append(errs, fmt.Errorf("%s%s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 			return errs
 		}
 
@@ -202,6 +202,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		b.SymbolicTable.Insert(name, nil, item)
 		return errs
 	}
+
 	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
 		s.Expression.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
 		s.Expression.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
@@ -217,6 +218,15 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				return errs
 			}
 			return errs
+		}
+	}
+	if s.Expression.Typ == EXPRESSION_TYPE_VAR {
+		vs := s.Expression.Data.(*ExpressionVar)
+		for _, v := range vs.Vs {
+			err := b.SymbolicTable.Insert(v.Name, v.Pos, v)
+			if err != nil {
+				errs = append(errs, err)
+			}
 		}
 	}
 	errs = append(errs, fmt.Errorf("%s expression(%s) evaluated,but not used", errMsgPrefix(s.Pos), s.Expression.OpName()))

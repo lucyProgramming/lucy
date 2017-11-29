@@ -7,8 +7,11 @@ import (
 const (
 	VARIABLE_TYPE_BOOL = iota
 	VARIABLE_TYPE_BYTE
+	VARIABLE_TYPE_SHORT
 	VARIABLE_TYPE_INT
+	VARIABLE_TYPE_LONG
 	VARIABLE_TYPE_FLOAT
+	VARIABLE_TYPE_DOUBLE
 	VARIABLE_TYPE_STRING
 	VARIALBE_TYPE_FUNCTION
 	VARIALBE_TYPE_ENUM  //enum
@@ -17,6 +20,7 @@ const (
 	VARIABLE_TYPE_ARRAY // []int
 	VARIABLE_TYPE_DOT   // a.b
 	VARIABLE_TYPE_NAME  // naming should search for declaration
+	VARIABLE_TYPE_VOID
 )
 
 type VariableType struct {
@@ -25,6 +29,32 @@ type VariableType struct {
 	Rname           string // Lname.Rname
 	CombinationType *VariableType
 	FunctionType    *FunctionType
+}
+
+func (v *VariableType) Signature() string {
+	switch v.Typ {
+	case VARIABLE_TYPE_BOOL:
+		return "Z"
+	case VARIABLE_TYPE_BYTE:
+		return "B"
+	case VARIABLE_TYPE_INT:
+		return "I"
+	case VARIABLE_TYPE_LONG:
+		return "J"
+	case VARIABLE_TYPE_FLOAT:
+		return "F"
+	case VARIABLE_TYPE_DOUBLE:
+		return "D"
+	case VARIABLE_TYPE_VOID:
+		return "V"
+	case VARIABLE_TYPE_SHORT:
+		return "S"
+	case VARIABLE_TYPE_ARRAY:
+		return "[" + v.CombinationType.Signature()
+	case VARIABLE_TYPE_STRING:
+		return "Ljava/lang/String"
+	}
+	panic("unhandle type signature")
 }
 
 //func (t *VariableType) matchExpression(e *Expression) bool {

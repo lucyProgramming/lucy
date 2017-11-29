@@ -8,7 +8,7 @@ type Package struct {
 	Files     map[string]*File
 	Name      string //if error,should be multi names
 	Blocks    []*Block
-	Funcs     map[string]*Function
+	Funcs     map[string][]*Function
 	Classes   map[string]*Class
 	Enums     map[string]*Enum
 	EnumNames map[string]*EnumName
@@ -23,9 +23,8 @@ type File struct {
 	Package *PackageNameDeclare
 }
 type Imports struct {
-	Name  string
-	Alias string
-	Pos   Pos
+	Name string // full name
+	Pos  Pos
 }
 
 type PackageNameDeclare struct {
