@@ -12,8 +12,7 @@ var str = `
 	package main
 
 import "github.com/xxx/yyy" ;
-
-
+import "github.com/xxx/xxx" as 123 ;
 
 
 
@@ -23,7 +22,6 @@ enum day{
 	monday,
 	tuesday
 }
-
 
 
 public class Persion:animal{

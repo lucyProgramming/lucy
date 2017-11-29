@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Package struct {
@@ -23,8 +24,35 @@ type File struct {
 	Package *PackageNameDeclare
 }
 type Imports struct {
-	Name string // full name
-	Pos  Pos
+	Alias string
+	Name  string // full name
+	Pos   *Pos
+}
+
+/*
+	import "github.com/lucy" should access by lucy.Println
+	import "github.com/lucy" as std should access by std.Println
+*/
+func (i *Imports) AccessPrefix() (string, error) {
+	if i.Alias == "_" { //special case _ is a identifer
+		return "", fmt.Errorf("_ is not legal package name")
+	}
+	if i.Alias != "" {
+		return i.Alias, nil
+	}
+	name := i.Name
+	if strings.Contains(i.Name, "/") {
+		name = name[strings.LastIndex(name, "/")+1:]
+		if name == "" {
+			return "", fmt.Errorf("no last element after/")
+		}
+	}
+	//check if legal
+	if !packageAliasReg.Match([]byte(name)) {
+		return "", fmt.Errorf("%s is not legal package name", name)
+	}
+	i.Alias = name
+	return name, nil
 }
 
 type PackageNameDeclare struct {

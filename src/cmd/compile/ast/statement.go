@@ -326,8 +326,7 @@ func (e ElseIfList) check() []error {
 			errs = append(errs, fmt.Errorf("%s %d:%d expression cannot be defined because of it is not a bool", v.Condition.Pos.Filename, v.Condition.Pos.StartLine, v.Condition.Pos.StartColumn, err))
 			continue
 		}
-
-		errs = append(errs, v.Block.check()...)
+		errs = append(errs, v.Block.check(nil)...)
 	}
 	return errs
 }
@@ -357,11 +356,11 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 		return nil, errs
 	}
 	if s.Condition.Typ == EXPRESSION_TYPE_BOOL && s.Condition.Data.(bool) == true { // if(true){...}
-		errs = append(errs, s.Block.check()...)
+		errs = append(errs, s.Block.check(nil)...)
 		return s.Block, errs
 	}
 	if s.Condition.Typ == EXPRESSION_TYPE_BOOL && s.Condition.Data.(bool) == false { // if(false){}else{...}
-		errs = append(errs, s.ElseBlock.check()...)
+		errs = append(errs, s.ElseBlock.check(nil)...)
 		return s.Block, errs
 	}
 	// handle common situation
@@ -374,12 +373,12 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 		errs = append(errs, fmt.Errorf("%s %d:%d is not a bool expression", s.Condition.Pos.Filename, s.Condition.Pos.StartLine, s.Condition.Pos.StartColumn))
 		return nil, errs
 	}
-	errs = append(errs, s.Block.check()...)
+	errs = append(errs, s.Block.check(nil)...)
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		errs = append(errs, s.ElseIfList.check()...)
 	}
 	if s.ElseBlock != nil {
-		errs = append(errs, s.ElseBlock.check()...)
+		errs = append(errs, s.ElseBlock.check(nil)...)
 	}
 	return nil, errs
 }

@@ -11,7 +11,6 @@ type Block struct {
 	SymbolicTable      SymbolicTable
 	Statements         []*Statement
 	p                  *Package
-	file               *File
 }
 
 func (b *Block) searchSymbolicItem(name string) *SymbolicItem {
@@ -43,7 +42,6 @@ func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.istop = father.InheritedAttribute.istop
 	b.InheritedAttribute.infor = father.InheritedAttribute.infor
 	b.InheritedAttribute.infunction = father.InheritedAttribute.infunction
-	b.file = father.file
 	b.Outter = father
 }
 
@@ -134,14 +132,8 @@ func (b *Block) isBoolValue(e *Expression) (bool, []error) {
 	return t.Typ == VARIABLE_TYPE_BOOL, nil
 }
 
-func (b *Block) check(p ...*Package) []error {
-	if len(p) > 0 {
-		b.p = p[0]
-		if _, ok := b.p.Files[b.Pos.Filename]; !ok {
-			panic("block has no files")
-		}
-		b.file = b.p.Files[b.Pos.Filename]
-	}
+func (b *Block) check(p *Package) []error {
+	b.InheritedAttribute.p = p
 	errs := []error{}
 	for _, s := range b.Statements {
 		errs = append(errs, s.check(b)...)

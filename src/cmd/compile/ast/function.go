@@ -30,7 +30,7 @@ func (f *Function) check(b *Block) []error {
 	f.Typ.checkParaMeterAndRetuns(f.Block, errs)
 	f.Block.InheritedAttribute.infunction = true
 	f.Block.InheritedAttribute.returns = f.Typ.Returns
-	errs = append(errs, f.Block.check()...)
+	errs = append(errs, f.Block.check(nil)...)
 	return errs
 }
 

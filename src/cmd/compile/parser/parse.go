@@ -7,6 +7,7 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
+	"strings"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool) []error {
@@ -28,6 +29,7 @@ type Parser struct {
 	token            *lex.Token
 	eof              bool
 	errs             []error
+	imports          map[string]*ast.Imports
 }
 
 func (p *Parser) Parse() []error {
@@ -228,6 +230,22 @@ func (p *Parser) Parse() []error {
 		}
 	}
 	return p.errs
+}
+
+func (p *Parser) insertImports(im *ast.Imports) {
+	if p.imports == nil {
+		p.imports = make(map[string]*ast.Imports)
+	}
+	access, err := im.AccessPrefix()
+	if err != nil {
+		p.errs = append(p.errs, fmt.Errorf("%s %v", p.errorMsgPrefix(im.Pos), err))
+		return
+	}
+	if p.imports[access] != nil {
+		p.errs = append(p.errs, fmt.Errorf("%s package %s reimported", p.errorMsgPrefix(im.Pos), access))
+		return
+	}
+	p.imports[access] = im
 }
 
 func (p *Parser) mkPos() *ast.Pos {
@@ -513,9 +531,12 @@ func (p *Parser) parseIdentiferType() (*ast.VariableType, error) {
 	}
 	name2 := p.token.Data.(string)
 	p.Next()
+	if p.imports[name] == nil { // package not found
+		return nil, fmt.Errorf("package %s not found", name)
+	}
 	return &ast.VariableType{
 		Typ:   ast.VARIABLE_TYPE_DOT,
-		Lname: name,
+		Lname: p.imports[name].Name, // replace with full name
 		Rname: name2,
 	}, nil
 }
@@ -584,14 +605,17 @@ func (p *Parser) parseImports() {
 		return
 	}
 	packagename := p.token.Data.(string)
+	packagename = strings.Trim(packagename, `"`)
 	p.Next()
 	if p.token.Type == lex.TOKEN_AS {
 		i := &ast.Imports{}
-		p.lexPos2AstPos(p.token, &i.Pos)
+		i.Pos = &ast.Pos{}
+		p.lexPos2AstPos(p.token, i.Pos)
 		i.Name = packagename
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			p.consume(untils_semicolon)
+			p.Next()
 			p.errs = append(p.errs, syntaxErr())
 			p.parseImports()
 			return
@@ -600,24 +624,31 @@ func (p *Parser) parseImports() {
 		p.Next()
 		if p.token.Type != lex.TOKEN_SEMICOLON {
 			p.consume(untils_semicolon)
+			p.Next()
 			p.errs = append(p.errs, syntaxErr())
 			p.parseImports()
 			return
 		}
-		*p.tops = append(*p.tops)
+		*p.tops = append(*p.tops, &ast.Node{
+			Data: i,
+		})
+		p.insertImports(i)
 		p.parseImports()
 		return
 	} else if p.token.Type == lex.TOKEN_SEMICOLON {
 		i := &ast.Imports{}
 		i.Name = packagename
-		p.lexPos2AstPos(p.token, &i.Pos)
+		i.Pos = &ast.Pos{}
+		p.lexPos2AstPos(p.token, i.Pos)
 		*p.tops = append(*p.tops, &ast.Node{
 			Data: i,
 		})
+		p.insertImports(i)
 		p.parseImports()
 		return
 	} else {
 		p.consume(untils_rc)
+		p.Next()
 		p.errs = append(p.errs, syntaxErr())
 		p.parseImports()
 		return
