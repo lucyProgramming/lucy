@@ -1,0 +1,1 @@
+from src.cmd.lucy.declass.declass import Declass
