@@ -6,16 +6,14 @@ import sys
 
 
 class Help(command.Command):
-    def runCommand(self):
-        str = '''
+    def runCommand(self,args):
+        helpMsg = '''
             lucy command tool
                 run         run lucy file or package
                 declass     declass jvm class files
         
         '''
-        print("show help")
-
-
+        print(helpMsg)
 
 
 
@@ -28,12 +26,9 @@ commands = {
 
 
 if sys.argv[1] in commands.keys():
-    commands[sys.argv[1]].runCommand(sys.argv)
+    commands[sys.argv[1]].runCommand(sys.argv[1:])
 else:
-    commands["help"].runCommand()
-
-
-
+    commands["help"].runCommand(sys.argv[1:])
 
 
 
