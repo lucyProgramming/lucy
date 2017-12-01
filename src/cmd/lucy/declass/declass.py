@@ -69,7 +69,6 @@ class Declass(command.Command):
 
 
 
-
 class JvmClass:
     def __init__(self):
         pass
@@ -86,10 +85,29 @@ class JvmClassParser:
             self.__content = fd.read()
         finally:
             fd.close()
+
         ok = self.__parseMagicAndVersion()
         if 0 != ok:
-            print(ok)
+            return {"reason": ok}
+
+        ok = self.__parseConstPool()
+        if 0 != ok:
+            return {"reason": ok}
+
         return {"ok":True}
+
+    def __parseConstPool(self):
+        ret =  struct.unpack_from("!H",self.__content[0:])
+        size = ret[0]
+        for i in range(size):
+            continue
+
+        return 0
+
+
+
+
+
 
     def __parseMagicAndVersion(self):
         ret = struct.unpack_from("!I",self.__content[0:])
@@ -99,11 +117,6 @@ class JvmClassParser:
         self.__result.minorVersion = ret[0]
         self.__result.majorVersion = ret[1]
         self.__content = self.__content[4:]
-    
-
-        print(self.__result.majorVersion)
-
-
         return 0
 
 
