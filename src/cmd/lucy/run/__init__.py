@@ -7,6 +7,7 @@ class Run(command.Command):
     def __init__(self):
         pass
     def __parsrArgs(self,args):
+        pass
 
     def runCommand(self,args):
         args = args[1:] # skip run
