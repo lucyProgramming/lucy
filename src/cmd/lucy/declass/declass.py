@@ -130,7 +130,7 @@ class JvmClass:
         for v in d[1:d.index(')')].split(";"):
             if len(v) == 0 :
                 continue
-            if v[0] == "L":
+            if v[0] == "L" or v[0] == "[":
                 ret["parameters"].append(v)
             else:
                 for vv in v:
