@@ -3,7 +3,7 @@ import sys
 import os
 from optparse import OptionParser
 import struct
-
+import  json
 
 
 
@@ -49,16 +49,24 @@ class Declass(command.Command):
             if d.endswith(".class"):  # class file
                 if d.find("$") != -1:  #name contains $ means a inner class
                     continue
-                self.__parseFile("%s/%s" % (src,d),dest)
+                self.__parseFile("%s/%s" % (src,d),dest,d)
             else:
                 self.__parseDir("%s/%s" % (src,d),"%s/%s" % (dest,d))
 
-    def __parseFile(self,src,dest):
+    def __parseFile(self,src,dest,filename):
         p = JvmClassParser(src,dest)
         ret = p.parse()
         if "ok" not in ret:
             print("declass file %s failed,err:%s" % (src,ret.reason))
-        ret["class"].output()
+            return
+        ret = ret["class"].output()
+        if os.path.exists(dest) == False:
+            os.mkdir(dest)
+
+        filename = "%s/%s.json" % (dest,filename.rstrip(".class"))
+        fd = open(filename,'w')
+        fd.write(ret)
+
 
     def static_usage():
         print("declass jvm class files,command line args are -src and -dest")
@@ -93,16 +101,55 @@ class JvmClass:
         output["magic"] = self.magic
         output["minorVersion"] = self.minorVersion
         output["majorVersion"] = self.majorVersion
-        output["field"] = self.__mk_fileds()
+        output["access_flags"] = self.access_flags
+        output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["bytes"].decode()
+        output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["bytes"].decode()
+        output["fields"] = self.__mk_fileds()
+        output["methods"] = self.__mk_methods()
+        x = json.JSONEncoder()
+        return x.encode(output)
+
+
+
+
+    def __mk_methods(self):
+        ms = []
+        for v in self.methods:
+            m = {}
+            m["access_flags"] = v["access_flags"]
+            m["name"] =  self.constPool[v["name_index"]]["bytes"].decode()
+            descriptor = self.constPool[v["descriptor_index"]]["bytes"].decode()
+            m["typ"] = self.__parseMethodDescriptor(descriptor)
+            ms.append(m)
+        return ms
+
+    def __parseMethodDescriptor(self,d):
+        ret = {}
+        ret["parameters"] = []
+        ret["return"] = ""
+        for v in d[1:d.index(')')].split(";"):
+            if len(v) == 0 :
+                continue
+            if v[0] == "L":
+                ret["parameters"].append(v)
+            else:
+                for vv in v:
+                    ret["parameters"].append(vv)
+        ret["return"] = d[d.index(")") + 1 :]
+        if ret["return"][len(ret["return"])-1] == ";": #cut ;
+            ret["return"] = ret["return"][0:len(ret["return"])-1]
+        return ret
+
 
     def __mk_fileds(self):
         fs = []
         for v in self.fields:
             f = {}
             f["access_flags"] = v["access_flags"]
-            f["name"] = str(self.constPool[v["name_index"]]["bytes"])
+            f["name"] = self.constPool[v["name_index"]]["bytes"].decode()
+            f["descriptor"] = self.constPool[v["descriptor_index"]]["bytes"].decode()
             fs.append(f)
-            print(f)
+        return fs
 
 
 CONSTANT_TAG_Class  = 7
@@ -286,7 +333,6 @@ class JvmClassParser:
                 ret = struct.unpack_from("!H", self.__content)
                 self.__content = self.__content[2:]
                 length = ret[0]
-                print("#%d %s" % (i,self.__content[0:length]))
                 self.__result.constPool.append({"tag": tag, "length":length, "bytes": self.__content[0:length]})
                 self.__content = self.__content[length:]
                 i += 1
@@ -310,7 +356,6 @@ class JvmClassParser:
                 i += 1
                 continue
             return "un know tag: %d" % (tag)
-
 
         return 0
 
