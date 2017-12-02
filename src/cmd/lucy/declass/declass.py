@@ -1,9 +1,14 @@
 import src.cmd.lucy.command as command
-import getopt
 import sys
 import os
 from optparse import OptionParser
 import struct
+
+
+
+
+
+
 
 
 class Declass(command.Command):
@@ -74,6 +79,27 @@ class JvmClass:
         pass
 
 
+CONSTANT_TAG_Class  = 7
+CONSTANT_TAG_Fieldref  = 9
+CONSTANT_TAG_Methodref =  10
+CONSTANT_TAG_InterfaceMethodref = 11
+CONSTANT_TAG_String = 8
+CONSTANT_TAG_Integer = 3
+CONSTANT_TAG_Float = 4
+CONSTANT_TAG_Long = 5
+CONSTANT_TAG_Double = 6
+CONSTANT_TAG_NameAndType = 12
+CONSTANT_TAG_Utf8 = 1
+CONSTANT_TAG_MethodHandle = 15
+CONSTANT_TAG_MethodType = 16
+CONSTANT_TAG_InvokeDynamic = 18
+
+
+
+
+
+
+
 class JvmClassParser:
     def __init__(self,filepath,destfilepath):
         self.__filepath = filepath
@@ -85,35 +111,151 @@ class JvmClassParser:
             self.__content = fd.read()
         finally:
             fd.close()
-
+        #magic and version
         ok = self.__parseMagicAndVersion()
         if 0 != ok:
             return {"reason": ok}
-
+        # const pool
         ok = self.__parseConstPool()
         if 0 != ok:
             return {"reason": ok}
-
+        #access and interfaces
+        ok = self.__parseInterfaces()
+        if 0 != ok:
+            return {"reason": ok}
+        # fields
+        ok = self.__parseFileds()
+        if 0 != ok:
+            return {"reason": ok}
         return {"ok":True}
 
-    def __parseConstPool(self):
-        ret =  struct.unpack_from("!H",self.__content[0:])
-        size = ret[0]
-        for i in range(size):
+    def __parseInterfaces(self):
+        ret = struct.unpack_from("!HHHH",self.__content)
+        self.__result.access_flags = ret[0]
+        self.__result.this_class = ret[1]
+        self.__result.super_class = ret[2]
+        self.__result.interfaces  = [{}] # interface counts
+        self.__content = self.__content[8:]
+        if 0 == ret[3]:
+            return 0
+        for i in range(0,ret[3]):
             continue
+        return 0
 
+    def __parseFileds(self):
         return 0
 
 
 
+    def __parseConstPool(self):
+        ret = struct.unpack_from("!H",self.__content[0:])
+        size = ret[0]
+        self.__result.constPool = [{}]
+        self.__content = self.__content[2:]
+        print(self.__filepath)
+        i = 1
+        while True:
+            if i > size -1:
+                break
+            ret = struct.unpack_from("!B",self.__content)
+            tag = ret[0]
+            self.__content = self.__content[1:]  # skip tag
+            if tag == CONSTANT_TAG_Class:
+                ret = struct.unpack_from("!H",self.__content)
+                self.__content = self.__content[2:]
+                self.__result.constPool.append({"tag":tag,"name_index": ret[0]})
+                i += 1
+                continue
+            if tag == CONSTANT_TAG_Fieldref:
+                ret = struct.unpack_from("!HH",self.__content)
+                self.__content = self.__content[4:]
+                self.__result.constPool.append({"tag": tag, "class_index": ret[0],"name_and_type_index": ret[1]})
+                i += 1
+                continue
+            if tag == CONSTANT_TAG_Methodref:
+                ret = struct.unpack_from("!HH", self.__content)
+                self.__content = self.__content[4:]
+                self.__result.constPool.append({"tag": tag, "class_index": ret[0], "name_and_type_index": ret[1]})
+                i += 1
+                continue
+            if tag == CONSTANT_TAG_InterfaceMethodref:
+                ret = struct.unpack_from("!HH", self.__content)
+                self.__content = self.__content[4:]
+                self.__result.constPool.append({"tag": tag, "class_index": ret[0], "name_and_type_index": ret[1]})
+                i += 1
+                continue
+            if tag == CONSTANT_TAG_String:
+                ret = struct.unpack_from("!H", self.__content)
+                self.__content = self.__content[2:]
+                self.__result.constPool.append({"tag": tag, "string_index": ret[0]})
+                i += 1
+                continue
+            if tag == CONSTANT_TAG_Integer:
+                self.__result.constPool.append({"tag": tag, "bytes": self.__content[0:4]})
+                self.__content = self.__content[4:]
+                i += 1
+                continue
+            if CONSTANT_TAG_Float == tag:
+                self.__result.constPool.append({"tag": tag, "bytes": self.__content[0:4]})
+                self.__content = self.__content[4:]
+                i += 1
+                continue
+            if CONSTANT_TAG_Long == tag:
+                self.__result.constPool.append({"tag": tag, "hight_bytes": self.__content[0:4],"low_bytes": self.__content[4:8]}) # n
+                self.__result.constPool.append({})  # n+1 not available
+                i += 2
+                self.__content = self.__content[8:]
+                continue
+            if CONSTANT_TAG_Double == tag:
+                self.__result.constPool.append({"tag": tag, "hight_bytes": self.__content[0:4], "low_bytes": self.__content[4:8]})
+                self.__result.constPool.append({})
+                i += 2
+                self.__content = self.__content[8:]
+                continue
+            if CONSTANT_TAG_NameAndType == tag:
+                ret = struct.unpack_from("!HH", self.__content)
+                self.__content = self.__content[4:]
+                self.__result.constPool.append({"tag": tag, "name_index": ret[0], "descriptor_index": ret[1]})
+                i += 1
+                continue
+            if CONSTANT_TAG_Utf8 == tag:
+                ret = struct.unpack_from("!H", self.__content)
+                self.__content = self.__content[2:]
+                length = ret[0]
+                print("#%d %s" % (i,self.__content[0:length]))
+                self.__result.constPool.append({"tag": tag, "length":length, "bytes": self.__content[0:length]})
+                self.__content = self.__content[length:]
+                i += 1
+                continue
+            if CONSTANT_TAG_MethodHandle == tag:
+                ret = struct.unpack_from("!BH", self.__content)
+                self.__content = self.__content[3:]
+                self.__result.constPool.append({"tag": tag, "reference_kind": ret[0], "reference_index": ret[1]})
+                i += 1
+                continue
+            if CONSTANT_TAG_MethodType == tag:
+                ret = struct.unpack_from("!H", self.__content)
+                self.__content = self.__content[2:]
+                self.__result.constPool.append({"tag": tag, "descriptor_index": ret[0]})
+                i += 1
+                continue
+            if CONSTANT_TAG_InvokeDynamic == tag:
+                ret = struct.unpack_from("!HH", self.__content)
+                self.__content = self.__content[4:]
+                self.__result.constPool.append({"tag": tag, "bootstrap_method_attr_index": ret[0], "name_and_type_index": ret[1]})
+                i += 1
+                continue
+            return "un know tag: %d" % (tag)
 
+
+        return 0
 
 
     def __parseMagicAndVersion(self):
-        ret = struct.unpack_from("!I",self.__content[0:])
+        ret = struct.unpack_from("!I",self.__content)
         self.__result.magic = ret[0]
         self.__content = self.__content[4:]
-        ret = struct.unpack_from("!HH",self.__content[0:])
+        ret = struct.unpack_from("!HH",self.__content)
         self.__result.minorVersion = ret[0]
         self.__result.majorVersion = ret[1]
         self.__content = self.__content[4:]
