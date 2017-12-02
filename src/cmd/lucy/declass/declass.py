@@ -58,7 +58,7 @@ class Declass(command.Command):
         ret = p.parse()
         if "ok" not in ret:
             print("declass file %s failed,err:%s" % (src,ret.reason))
-
+        ret["class"].output()
 
     def static_usage():
         print("declass jvm class files,command line args are -src and -dest")
@@ -76,7 +76,33 @@ class Declass(command.Command):
 
 class JvmClass:
     def __init__(self):
+        self.magic = 0
+        self.minorVersion = 0
+        self.majorVersion = 0
+        self.constPool = []
+        self.access_flags = 0
+        self.this_class = 0
+        self.super_class = 0
+        self.interfaces = []  # interface counts
+        self.fields = []
+        self.methods = []
+        self.attrs = []
         pass
+    def output(self):
+        output = {}
+        output["magic"] = self.magic
+        output["minorVersion"] = self.minorVersion
+        output["majorVersion"] = self.majorVersion
+        output["field"] = self.__mk_fileds()
+
+    def __mk_fileds(self):
+        fs = []
+        for v in self.fields:
+            f = {}
+            f["access_flags"] = v["access_flags"]
+            f["name"] = str(self.constPool[v["name_index"]]["bytes"])
+            fs.append(f)
+            print(f)
 
 
 CONSTANT_TAG_Class  = 7
@@ -105,6 +131,7 @@ class JvmClassParser:
         self.__filepath = filepath
         self.__descfilepath = destfilepath
         self.__result = JvmClass() # hold result in this
+
     def parse(self):  # file is definitely exits
         fd = open(self.__filepath,"rb")
         try:
@@ -127,25 +154,62 @@ class JvmClassParser:
         ok = self.__parseFileds()
         if 0 != ok:
             return {"reason": ok}
-        return {"ok":True}
+        #methods
+        ok = self.__parseMethods()
+        if 0 != ok:
+            return {"reason": ok}
+        self.__result.attrs = self.__parseAttibute()
+        return {"ok":True,"class":self.__result}
+
 
     def __parseInterfaces(self):
         ret = struct.unpack_from("!HHHH",self.__content)
         self.__result.access_flags = ret[0]
         self.__result.this_class = ret[1]
         self.__result.super_class = ret[2]
-        self.__result.interfaces  = [{}] # interface counts
+        self.__result.interfaces  = [] # interface counts
         self.__content = self.__content[8:]
         if 0 == ret[3]:
             return 0
         for i in range(0,ret[3]):
-            continue
+            ret = struct.unpack_from("!H",self.__content)
+            self.__result.interfaces.append({"index":ret[0]})
+            self.__content = self.__content[2:]
         return 0
 
     def __parseFileds(self):
+        ret = struct.unpack_from("!H",self.__content)
+        self.__content = self.__content[2:]
+        self.__result.fields = []
+        for i in range(0,ret[0]):
+            ret = struct.unpack_from("!HHH",self.__content)
+            self.__content = self.__content[6:]
+            attrs = self.__parseAttibute()
+            self.__result.fields.append({"access_flags": ret[0],"name_index": ret[1],"descriptor_index": ret[2],"attributes": attrs})
         return 0
 
+    def __parseAttibute(self):
+        ret = struct.unpack_from("!H",self.__content)
+        self.__content = self.__content[2:]
+        attrs = []
+        for i in range(0,ret[0]):
+            ret = struct.unpack_from("!HI",self.__content)
+            length = ret[1]
+            self.__content = self.__content[6:]
+            attrs.append({"name_index":ret[0],"length":length,"bytes":self.__content[0:length]})
+            self.__content = self.__content[length:]
+        return attrs
 
+    def __parseMethods(self):
+        ret = struct.unpack_from("!H", self.__content)
+        self.__content = self.__content[2:]
+        self.__result.methods = []
+        for i in range(0, ret[0]):
+            ret = struct.unpack_from("!HHH", self.__content)
+            self.__content = self.__content[6:]
+            attrs = self.__parseAttibute()
+            self.__result.methods.append({"access_flags": ret[0], "name_index": ret[1], "descriptor_index": ret[2], "attributes": attrs})
+        return 0
 
     def __parseConstPool(self):
         ret = struct.unpack_from("!H",self.__content[0:])
