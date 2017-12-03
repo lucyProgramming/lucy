@@ -102,8 +102,8 @@ class JvmClass:
         output["minorVersion"] = self.minorVersion
         output["majorVersion"] = self.majorVersion
         output["access_flags"] = self.access_flags
-        output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["bytes"].decode()
-        output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["bytes"].decode()
+        output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["string"]
+        output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
         output["fields"] = self.__mk_fileds()
         output["methods"] = self.__mk_methods()
         x = json.JSONEncoder()
@@ -117,8 +117,8 @@ class JvmClass:
         for v in self.methods:
             m = {}
             m["access_flags"] = v["access_flags"]
-            m["name"] =  self.constPool[v["name_index"]]["bytes"].decode()
-            descriptor = self.constPool[v["descriptor_index"]]["bytes"].decode()
+            m["name"] =  self.constPool[v["name_index"]]["string"]
+            descriptor = self.constPool[v["descriptor_index"]]["string"]
             m["typ"] = self.__parseMethodDescriptor(descriptor)
             ms.append(m)
         return ms
@@ -146,8 +146,8 @@ class JvmClass:
         for v in self.fields:
             f = {}
             f["access_flags"] = v["access_flags"]
-            f["name"] = self.constPool[v["name_index"]]["bytes"].decode()
-            f["descriptor"] = self.constPool[v["descriptor_index"]]["bytes"].decode()
+            f["name"] = self.constPool[v["name_index"]]["string"]
+            f["descriptor"] = self.constPool[v["descriptor_index"]]["string"]
             fs.append(f)
         return fs
 
@@ -333,7 +333,7 @@ class JvmClassParser:
                 ret = struct.unpack_from("!H", self.__content)
                 self.__content = self.__content[2:]
                 length = ret[0]
-                self.__result.constPool.append({"tag": tag, "length":length, "bytes": self.__content[0:length]})
+                self.__result.constPool.append({"tag": tag, "length":length, "string": self.__content[0:length].decode()})
                 self.__content = self.__content[length:]
                 i += 1
                 continue
