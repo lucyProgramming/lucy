@@ -105,26 +105,100 @@ class JvmClass:
         output["access_flags"] = self.access_flags
         output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["string"]
         output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
-        output["signature"] = self.__mk_signature()
+        output["signature"] = self.__parse_class_attributes()
         output["fields"] = self.__mk_fileds()
         output["methods"] = self.__mk_methods()
-
 
         x = json.JSONEncoder()
         return x.encode(output)
 
-    def __mk_signature(self):
+    def __parse_class_attributes(self):
         for v in self.attrs:
-            if self.constPool[v["name_index"]]["string"] == "Signature":
+            if self.constPool[v["name_index"]]["string"] == "Signature":  # signature found
                 ret = struct.unpack_from("!H",v["bytes"])
                 s = self.constPool[ret[0]]["string"]
-                if s[0] != "<":
-                    continue
-                self.__parse_formal_type_paramter(s)
+                self.__parse_class_signature(s)
+
+
+
+    def __parse_class_signature(self,s):
+        if s[0] == "<":
+            s = s[1:]   # skip <
+            # parse formal type parameter
+            pt = [] # parameterd type
+            while s[0] != ">":
+                (s,t) = self.__parse_formal_type_paramter(s)
+                if t != None:
+                    pt.append(pt)
+                else:
+                    break # should be impossible
+
+        # super class signature
+
+        # interface signature
+
+    def __parse_class_type_signature(self,s):
+        s = s[1:] # skip L
+
+    def __parse_array_type_signature(self,s):
+        s = s[1:] # skip [
+        (s,ret) = self.__parse_type_signature(s)
+        return s,"[" + ret
+
+
+    def __parse_type_signature(self,s):
+        #try basic type
+        (s,ret) = self.__parse_basic_type(s)
+        if ret != "":
+            return s,ret
+        
+
+
 
     def __parse_formal_type_paramter(self,s):
-        s = s[1:]  # skip<
         print(s)
+        s,identifer = self.__parse_identifier(s)
+        if len(identifer) == 0: #should not happen,look next
+            return s[1:],None
+        s = s[1:] # skip :
+        (s,t) = self.__parse_field_type_signature(s)
+        while s[0] == ":":
+            pass
+
+        print(identifer)
+        sys.exit(1)
+        return s,identifer
+
+
+    def __parse_field_type_signature(self,s):
+
+
+    def __parse_identifier(self,s):
+        if False == self.__is_letter(s): # not begin with letter
+            return s,""
+        identifer = s[0]
+        s = s[1:]
+        while self._is_letter_number_underline(s):
+            identifer += s[0]
+            s = s[1:]
+        return s,identifer
+
+    def __is_letter(self,s):
+        if s[0] >= "a" and s[0] <= "z":
+            return True
+        if s[0] >= "A" and s[0] <= "Z":
+            return True
+        return False
+
+    def _is_letter_number_underline(self,s):
+        if self.__is_letter(s):
+            return True
+        if s[0] >= "0" and s[0] <= "9":
+            return True
+        if s[0] == "_":
+            return True
+        return False
+
     def __parse_array_type_signature(self,s):
         s = s[1:] #skip [
         return s + self.__parse_formal_type_paramter()
@@ -168,7 +242,6 @@ class JvmClass:
         if b != "":
             return s, b
         return s,"" #unkown beging of a field type
-
 
 
     def __parse_array_type(self,s):
@@ -230,6 +303,7 @@ class JvmClass:
             f["descriptor"] = self.constPool[v["descriptor_index"]]["string"]
             fs.append(f)
         return fs
+
 
 
 CONSTANT_TAG_Class  = 7
