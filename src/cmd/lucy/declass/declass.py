@@ -105,9 +105,10 @@ class JvmClass:
         output["access_flags"] = self.access_flags
         output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["string"]
         output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
+        output["signature"] = self.__mk_signature()
         output["fields"] = self.__mk_fileds()
         output["methods"] = self.__mk_methods()
-        output["signature"] = self.__mk_signature()
+
 
         x = json.JSONEncoder()
         return x.encode(output)
@@ -128,7 +129,7 @@ class JvmClass:
         s = s[1:] #skip [
         return s + self.__parse_formal_type_paramter()
 
-    def __parse_basic_type(self):
+    def __parse_basic_type(self,s):
         # basic types
         if s[0] == "B":
             s = s[1:]
@@ -154,6 +155,7 @@ class JvmClass:
         if s[0] == "Z":
             s = s[1:]
             return s, "Z"
+        return s,""
 
     def __parse_field_type(self,s):
         (s,b) = self.__parse_basic_type(s)
@@ -167,11 +169,14 @@ class JvmClass:
             return s, b
         return s,"" #unkown beging of a field type
 
+
+
     def __parse_array_type(self,s):
         if s[0] == "[":
             s = s[1:]
             (s,t) = self.__parse_component_type(s)
             return s,"[" + t
+        return s,""
     def __parse_object_type(self,s):
         if s[0] == "L":
             i = s.index(";")
@@ -192,27 +197,29 @@ class JvmClass:
             m["access_flags"] = v["access_flags"]
             m["name"] =  self.constPool[v["name_index"]]["string"]
             descriptor = self.constPool[v["descriptor_index"]]["string"]
-            m["typ"] = self.__parseMethodDescriptor(descriptor)
+            m["typ"] = self.__parse_method_descriptor(descriptor)
             ms.append(m)
         return ms
 
 
-    def __parseMethodDescriptor(self,d):
+    def __parse_method_descriptor(self,d):
         ret = {}
         ret["parameters"] = []
         ret["return"] = ""
-        for v in d[1:d.index(')')].split(";"):
-            if len(v) == 0:
-                continue
-            if v[0] == "L" or v[0] == "[":
-                ret["parameters"].append(v)
-            else:
-                for vv in v:
-                    ret["parameters"].append(vv)
-        ret["return"] = d[d.index(")") + 1 :]
-        if ret["return"][len(ret["return"])-1] == ";": #cut ;
-            ret["return"] = ret["return"][0:len(ret["return"])-1]
+        d = d[1:]  # skip (
+        while True:
+            (d,t) = self.__parse_field_type(d)
+            if t == "":
+                break
+            ret["parameters"].append(t)
+        d = d[1:] #skip )
+        (d,t)  = self.__parse_field_type(d)
+        if t == "":
+            ret["return"] = "V"
+        else:
+            ret["return"] = t
         return ret
+
 
     def __mk_fileds(self):
         fs = []
