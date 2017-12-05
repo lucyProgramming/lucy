@@ -31,7 +31,7 @@ class Declass(command.Command):
 
     def __parse(self):
         if os.path.exists(self.__src) == False:
-            print("src %s directory is not exits" % (self.__src))
+            print("src directory %s is not exits" % (self.__src))
             return
         if os.path.exists(self.__dest) == False:
             os.mkdir(self.__dest)
@@ -95,6 +95,7 @@ class JvmClass:
         self.fields = []
         self.methods = []
         self.attrs = []
+        self.signature = {}
         pass
     def output(self):
         output = {}
@@ -106,10 +107,82 @@ class JvmClass:
         output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
         output["fields"] = self.__mk_fileds()
         output["methods"] = self.__mk_methods()
+        output["signature"] = self.__mk_signature()
+
         x = json.JSONEncoder()
         return x.encode(output)
 
+    def __mk_signature(self):
+        for v in self.attrs:
+            if self.constPool[v["name_index"]]["string"] == "Signature":
+                ret = struct.unpack_from("!H",v["bytes"])
+                s = self.constPool[ret[0]]["string"]
+                if s[0] != "<":
+                    continue
+                self.__parse_formal_type_paramter(s)
 
+    def __parse_formal_type_paramter(self,s):
+        s = s[1:]  # skip<
+        print(s)
+    def __parse_array_type_signature(self,s):
+        s = s[1:] #skip [
+        return s + self.__parse_formal_type_paramter()
+
+    def __parse_basic_type(self):
+        # basic types
+        if s[0] == "B":
+            s = s[1:]
+            return s, "B"
+        if s[0] == "C":
+            s = s[1:]
+            return s, "C"
+        if s[0] == "D":
+            s = s[1:]
+            return s, "D"
+        if s[0] == "F":
+            s = s[1:]
+            return s, "F"
+        if s[0] == "I":
+            s = s[1:]
+            return s, "F"
+        if s[0] == "J":
+            s = s[1:]
+            return s, "J"
+        if s[0] == "S":
+            s = s[1:]
+            return s, "S"
+        if s[0] == "Z":
+            s = s[1:]
+            return s, "Z"
+
+    def __parse_field_type(self,s):
+        (s,b) = self.__parse_basic_type(s)
+        if b != "":
+            return s,b
+        (s, b) = self.__parse_array_type(s)
+        if b != "":
+            return s, b
+        (s, b) = self.__parse_object_type(s)
+        if b != "":
+            return s, b
+        return s,"" #unkown beging of a field type
+
+    def __parse_array_type(self,s):
+        if s[0] == "[":
+            s = s[1:]
+            (s,t) = self.__parse_component_type(s)
+            return s,"[" + t
+    def __parse_object_type(self,s):
+        if s[0] == "L":
+            i = s.index(";")
+            if i <= 0: # no ; found
+                return "",s
+            return s[i+1:],s[0:i+1]
+        return s,""
+
+
+    def __parse_component_type(self,s):
+        return self.__parse_field_type(s)
 
 
     def __mk_methods(self):
@@ -123,12 +196,13 @@ class JvmClass:
             ms.append(m)
         return ms
 
+
     def __parseMethodDescriptor(self,d):
         ret = {}
         ret["parameters"] = []
         ret["return"] = ""
         for v in d[1:d.index(')')].split(";"):
-            if len(v) == 0 :
+            if len(v) == 0:
                 continue
             if v[0] == "L" or v[0] == "[":
                 ret["parameters"].append(v)
@@ -139,7 +213,6 @@ class JvmClass:
         if ret["return"][len(ret["return"])-1] == ";": #cut ;
             ret["return"] = ret["return"][0:len(ret["return"])-1]
         return ret
-
 
     def __mk_fileds(self):
         fs = []
