@@ -122,23 +122,58 @@ class JvmClass:
 
 
     def __parse_class_signature(self,s):
+        print(s)
+        pt = []  # parameterd type
         if s[0] == "<":
             s = s[1:]   # skip <
             # parse formal type parameter
-            pt = [] # parameterd type
             while s[0] != ">":
                 (s,t) = self.__parse_formal_type_paramter(s)
                 if t != None:
-                    pt.append(pt)
+                    pt.append(t)
                 else:
                     break # should be impossible
+            print(pt)
 
         # super class signature
 
         # interface signature
 
+
+
     def __parse_class_type_signature(self,s):
         s = s[1:] # skip L
+        ret = {}
+        name = "L"
+        (s,identifer) = self.__parse_identifier(s)
+        name += identifer
+        while s[0] == "/":  # parse full name
+            s = s[1:]
+            (s, identifer) = self.__parse_identifier(s)
+            if len(identifer) == 0:
+                break
+            name += "/" + identifer
+
+        ret["name"] = name
+        ret["typed_arguments"] = []
+        if s[0] == "<":
+            s = s[1:]
+            while s[0] != ">":
+                if s[0] == "+" or s[0] == "-":
+                    s = s[1:]  #TODO I donnot know what does it mean!!!!!!!
+                (s,p) = self.__parse_field_type_signature(s)
+                if p != None and p != "":
+                    ret["typed_arguments"].append(p)
+
+        if s[0] != ";":
+            print("unhandle class signature:" + s)
+            sys.exit(1)
+        s = s[1:] # skip ;
+        return s,ret
+
+
+
+
 
     def __parse_array_type_signature(self,s):
         s = s[1:] # skip [
@@ -151,27 +186,41 @@ class JvmClass:
         (s,ret) = self.__parse_basic_type(s)
         if ret != "":
             return s,ret
-        
-
 
 
     def __parse_formal_type_paramter(self,s):
-        print(s)
+        if self.__is_letter(s) == False:  # is not a letter
+            return s,None
         s,identifer = self.__parse_identifier(s)
         if len(identifer) == 0: #should not happen,look next
             return s[1:],None
         s = s[1:] # skip :
+        print(s)
         (s,t) = self.__parse_field_type_signature(s)
-        while s[0] == ":":
-            pass
+        interfaces = []
+        while s[0] == ":":   # interfaces
+            s = s[1:]   # skip :
+            (s, t) = self.__parse_field_type_signature(s)
+            interfaces.append(t)
 
-        print(identifer)
-        sys.exit(1)
-        return s,identifer
+        return s,{"name":identifer,"type":t,"interfaces":interfaces}
 
 
     def __parse_field_type_signature(self,s):
+        if s[0] == "T":
+            return self.__parse_type_variable_signature(s)
+        if s[0] == "[":
+            return self.__parse_array_type_signature(s)
+        if s[0] == "L":
+            return self.__parse_class_type_signature(s)
+        return s,"" #I donot know which type
 
+
+    def __parse_type_variable_signature(self,s):
+        if s[0] == "T":
+            s = s[1:]
+            return self.__parse_identifier(s)
+        return s , ""
 
     def __parse_identifier(self,s):
         if False == self.__is_letter(s): # not begin with letter
@@ -201,7 +250,7 @@ class JvmClass:
 
     def __parse_array_type_signature(self,s):
         s = s[1:] #skip [
-        return s + self.__parse_formal_type_paramter()
+        return s + self.__parse_type_signature(s)
 
     def __parse_basic_type(self,s):
         # basic types
@@ -244,12 +293,14 @@ class JvmClass:
         return s,"" #unkown beging of a field type
 
 
+
     def __parse_array_type(self,s):
         if s[0] == "[":
             s = s[1:]
             (s,t) = self.__parse_component_type(s)
             return s,"[" + t
         return s,""
+
     def __parse_object_type(self,s):
         if s[0] == "L":
             i = s.index(";")
