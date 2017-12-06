@@ -75,6 +75,8 @@ const (
 	TOKEN_BYTE                  //byte
 	TOKEN_INT                   //int
 	TOKEN_FLOAT                 //float
+	TOKEN_DOUBLE                //double
+	TOKEN_LONG                  //long
 	TOKEN_STRING                //string
 	TOKEN_IDENTIFIER            // identifier
 	TOKEN_LITERAL_BOOL          // true or false

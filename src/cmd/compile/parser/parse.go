@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"fmt"
 
+	"strings"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
-	"strings"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool) []error {
@@ -122,26 +123,51 @@ func (p *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
-			if typ != lex.TOKEN_COLON_ASSIGN {
+
+			// const a := 1 is wrong,
+			if typ == lex.TOKEN_COLON_ASSIGN && isconst == true {
+				p.errs = append(p.errs, fmt.Errorf("%s use = instead of := for const definition", p.errorMsgPrefix()))
+				resetProperty()
+				continue
+			}
+			// a = 1 is wrong
+			if typ == lex.TOKEN_ASSIGN && isconst == false {
 				p.errs = append(p.errs, fmt.Errorf("%s cannot have statement at top,possible do you mean a := 1 to create a global variable", p.errorMsgPrefix()))
 				p.Next()
 				p.consume(untils_semicolon)
 				resetProperty()
 				continue
 			}
-			for k, v := range names {
-				c := &ast.Const{}
-				c.Name = v.Name
-				c.Expression = es[k]
-				if ispublic {
-					c.Access = ast.ACCESS_PUBLIC
-				} else {
-					c.Access = ast.ACCESS_PRIVATE
+			if isconst {
+				for k, v := range names {
+					c := &ast.Const{}
+					c.Name = v.Name
+					c.Expression = es[k]
+					if ispublic {
+						c.Access = ast.ACCESS_PUBLIC
+					} else {
+						c.Access = ast.ACCESS_PRIVATE
+					}
+					*p.tops = append(*p.tops, &ast.Node{
+						Data: c,
+					})
 				}
-				*p.tops = append(*p.tops, &ast.Node{
-					Data: c,
-				})
+			} else {
+				for k, v := range names {
+					c := &ast.VariableDefinition{}
+					c.Name = v.Name
+					c.Expression = es[k]
+					if ispublic {
+						c.Access = ast.ACCESS_PUBLIC
+					} else {
+						c.Access = ast.ACCESS_PRIVATE
+					}
+					*p.tops = append(*p.tops, &ast.Node{
+						Data: c,
+					})
+				}
 			}
+
 			resetProperty()
 		case lex.TOKEN_ENUM:
 			if isconst {
@@ -193,14 +219,13 @@ func (p *Parser) Parse() []error {
 			})
 			resetProperty()
 		case lex.TOKEN_CLASS:
-			if isconst {
-				p.errs = append(p.errs, fmt.Errorf("%s can`t use const for a class", p.errorMsgPrefix()))
-			}
 			c, err := p.Class.parse()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(untils_rc)
 				p.Next()
+				resetProperty()
+				continue
 			}
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: c,
@@ -218,6 +243,10 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_CONST:
 			isconst = true
 			p.Next()
+			if p.token.Type == lex.TOKEN_ENUM || p.token.Type == lex.TOKEN_CLASS {
+				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for enum or class ", p.errorMsgPrefix()))
+				resetProperty()
+			}
 			continue
 		case lex.TOKEN_PRIVATE: //is a default attribute
 			ispublic = false

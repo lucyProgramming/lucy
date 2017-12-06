@@ -55,6 +55,7 @@ class Declass(command.Command):
 
     def __parseFile(self,src,dest,filename):
         p = JvmClassParser(src,dest)
+        print(src)
         ret = p.parse()
         if "ok" not in ret:
             print("declass file %s failed,err:%s" % (src,ret.reason))
@@ -78,7 +79,6 @@ class Declass(command.Command):
 
         if 0 != self.__parse():
             sys.exit(2)
-
 
 
 
@@ -160,6 +160,13 @@ class JvmClass:
         # i
         if package_specificer[0] == "/":
             package_specificer = package_specificer[1:]
+
+        while s[0] == "$":
+            identifer += "$"
+            s = s[1:]
+            (s,i) = self.__parse_identifier(s)
+            identifer += i
+
         ret["name"] = package_specificer + "/" + identifer
         ret["typed_arguments"] = []
         if s[0] == "<":
@@ -344,9 +351,9 @@ class JvmClass:
                     name_index = struct.unpack_from("!H", a["bytes"])
                     s = self.constPool[name_index[0]]["string"]
                     # ACC_PRIVATE 0x0002
-                    if v["access_flags"] != 0x0002:  # cannot access from outside ,signature is useless
-                        continue
-                    m["signature"] = self.__parse_method_signature(s)
+                    print(m)
+                    if v["access_flags"] & 0x0001 != 0:  # can be access from outside ,signature is useless
+                        m["signature"] = self.__parse_method_signature(s)
             ms.append(m)
         return ms
 
@@ -359,7 +366,7 @@ class JvmClass:
             while s[0] != ">":
                 (s,t) = self.__parse_formal_type_paramter(s)
                 parameteredType.append(t)
-
+            s = s[1:] # skip >
         ret["parametered_types"] = parameteredType
         parameters = []
         s = s[1:]  #skip (
@@ -404,11 +411,9 @@ class JvmClass:
                     name_index = struct.unpack_from("!H",a["bytes"])
                     s = self.constPool[name_index[0]]["string"]
                     print(v)
-                    # acc_private = 0x2
-                    if v["access_flags"] != 0x2: #cannot access from outside ,signature is useless
-                        continue
-                    (s,f["signature"]) = self.__parse_field_type_signature(s)
-                    print(f["signature"])
+                    # ACC_PUBLIC 0x0001
+                    if v["access_flags"] & 0x0001 != 0 : #can be access from outside ,signature is useless
+                        (s,f["signature"]) = self.__parse_field_type_signature(s)
             fs.append(f)
         return fs
 

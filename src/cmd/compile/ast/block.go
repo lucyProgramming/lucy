@@ -109,8 +109,7 @@ func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
 			Const: d.(*Const),
 		}
 	default:
-		_, ok := d.(*VariableDefinition)
-		panic(ok) // == panic(false)
+		panic(d.(*VariableDefinition)) // == panic(false) ,runtime panic definitely
 	}
 	return nil
 }
