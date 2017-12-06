@@ -105,24 +105,24 @@ class JvmClass:
         output["access_flags"] = self.access_flags
         output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["string"]
         output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
-        output["signature"] = self.__parse_class_attributes()
+        self.__parse_class_attributes(output)
         output["fields"] = self.__mk_fileds()
         output["methods"] = self.__mk_methods()
 
         x = json.JSONEncoder()
         return x.encode(output)
 
-    def __parse_class_attributes(self):
+    #at this stage I only care about class signature
+    def __parse_class_attributes(self,output):
         for v in self.attrs:
             if self.constPool[v["name_index"]]["string"] == "Signature":  # signature found
                 ret = struct.unpack_from("!H",v["bytes"])
                 s = self.constPool[ret[0]]["string"]
-                self.__parse_class_signature(s)
-
-
+                output["signature_string"] = s
+                output["signature"] = self.__parse_class_signature(s)
 
     def __parse_class_signature(self,s):
-        print(s)
+        ret = {}
         pt = []  # parameterd type
         if s[0] == "<":
             s = s[1:]   # skip <
@@ -131,62 +131,77 @@ class JvmClass:
                 (s,t) = self.__parse_formal_type_paramter(s)
                 if t != None:
                     pt.append(t)
-                else:
+                if s[0] == ">":
+                    s = s[1:]
                     break # should be impossible
-            print(pt)
 
+        ret["parameterd_types"] = pt
         # super class signature
-
+        s ,superclass = self.__parse_class_type_signature(s)
+        ret["super_class"] = superclass
         # interface signature
-
-
+        interfaces = []
+        while len(s) > 0 and s[0] == "L":
+            (s,i) = self.__parse_class_type_signature(s)
+            if i != None:
+                interfaces.append(i)
+        ret["interfaces"] = interfaces
+        return ret
 
     def __parse_class_type_signature(self,s):
         s = s[1:] # skip L
         ret = {}
-        name = "L"
+        package_specificer = ""
         (s,identifer) = self.__parse_identifier(s)
-        name += identifer
-        while s[0] == "/":  # parse full name
+        while s[0] == "/":  # parse package selector
             s = s[1:]
-            (s, identifer) = self.__parse_identifier(s)
-            if len(identifer) == 0:
-                break
-            name += "/" + identifer
-
-        ret["name"] = name
+            package_specificer += "/" + identifer
+            (s, identifer) = self.__parse_identifier(s) #cannot has empty name after /
+        # i
+        if package_specificer[0] == "/":
+            package_specificer = package_specificer[1:]
+        ret["name"] = package_specificer + "/" + identifer
         ret["typed_arguments"] = []
         if s[0] == "<":
             s = s[1:]
             while s[0] != ">":
-                if s[0] == "+" or s[0] == "-":
-                    s = s[1:]  #TODO I donnot know what does it mean!!!!!!!
+                if s[0] == "*":
+                    s = s[1:]
+                    ret["typed_arguments"].append("*")
+                    continue
+                if s[0] == ";":
+                    break
+                if s[0] == "+" or s[0] == "-":#TODO I donot know what does it mean!!!!!!!
+                    s = s[1:]
                 (s,p) = self.__parse_field_type_signature(s)
                 if p != None and p != "":
                     ret["typed_arguments"].append(p)
+            s = s[1:] #skip >
 
+        while s[0] != ";":  # skip until a ;
+            s = s[1:]
         if s[0] != ";":
+            print("not semicolon after")
             print("unhandle class signature:" + s)
             sys.exit(1)
         s = s[1:] # skip ;
-        return s,ret
-
-
-
-
+        return s,{"kind": "class","class": ret}
 
     def __parse_array_type_signature(self,s):
         s = s[1:] # skip [
-        (s,ret) = self.__parse_type_signature(s)
-        return s,"[" + ret
+        (s,ret) = self.__parse_basic_type(s)
+        if ret != "":
+            return s,{"kind": "array","basic_type": ret}
 
+        (s,ret) = self.__parse_field_type_signature(s)
+        return s,  {"kind":"array","field_type":ret}
 
     def __parse_type_signature(self,s):
         #try basic type
         (s,ret) = self.__parse_basic_type(s)
         if ret != "":
             return s,ret
-
+        return self.__parse_field_type_signature(s)
 
     def __parse_formal_type_paramter(self,s):
         if self.__is_letter(s) == False:  # is not a letter
@@ -195,15 +210,14 @@ class JvmClass:
         if len(identifer) == 0: #should not happen,look next
             return s[1:],None
         s = s[1:] # skip :
-        print(s)
         (s,t) = self.__parse_field_type_signature(s)
         interfaces = []
         while s[0] == ":":   # interfaces
             s = s[1:]   # skip :
             (s, t) = self.__parse_field_type_signature(s)
             interfaces.append(t)
+        return s,{"name":identifer,"super":t,"interfaces":interfaces}
 
-        return s,{"name":identifer,"type":t,"interfaces":interfaces}
 
 
     def __parse_field_type_signature(self,s):
@@ -219,7 +233,9 @@ class JvmClass:
     def __parse_type_variable_signature(self,s):
         if s[0] == "T":
             s = s[1:]
-            return self.__parse_identifier(s)
+            (s,identifier) = self.__parse_identifier(s)
+            s = s[1:] # skip ;
+            return s,{"kind":"type_variable","idenfier":identifier}
         return s , ""
 
     def __parse_identifier(self,s):
@@ -250,7 +266,8 @@ class JvmClass:
 
     def __parse_array_type_signature(self,s):
         s = s[1:] #skip [
-        return s + self.__parse_type_signature(s)
+        (s,t) = self.__parse_type_signature(s)
+        return s , {"typ":"array","aggeration":t}
 
     def __parse_basic_type(self,s):
         # basic types
@@ -322,9 +339,39 @@ class JvmClass:
             m["name"] =  self.constPool[v["name_index"]]["string"]
             descriptor = self.constPool[v["descriptor_index"]]["string"]
             m["typ"] = self.__parse_method_descriptor(descriptor)
+            for a in v["attributes"]:
+                if self.constPool[a["name_index"]]["string"] == "Signature":
+                    name_index = struct.unpack_from("!H", a["bytes"])
+                    s = self.constPool[name_index[0]]["string"]
+                    # ACC_PRIVATE 0x0002
+                    if v["access_flags"] != 0x0002:  # cannot access from outside ,signature is useless
+                        continue
+                    m["signature"] = self.__parse_method_signature(s)
             ms.append(m)
         return ms
 
+    def __parse_method_signature(self,s):
+        print(s)
+        ret = {}
+        parameteredType = []
+        if s[0] == "<":
+            s = s[1:]  # skip <
+            while s[0] != ">":
+                (s,t) = self.__parse_formal_type_paramter(s)
+                parameteredType.append(t)
+
+        ret["parametered_types"] = parameteredType
+        parameters = []
+        s = s[1:]  #skip (
+        while s[0] != ")":
+            (s,t) = self.__parse_type_signature(s)
+            parameters.append(t)
+        s = s[1:] # skip )
+        if s[0] == "V":
+            ret["return"] = "V"
+        else:
+            (s,ret["return"]) = self.__parse_type_signature(s)
+        return ret
 
     def __parse_method_descriptor(self,d):
         ret = {}
@@ -352,6 +399,16 @@ class JvmClass:
             f["access_flags"] = v["access_flags"]
             f["name"] = self.constPool[v["name_index"]]["string"]
             f["descriptor"] = self.constPool[v["descriptor_index"]]["string"]
+            for a in v["attributes"]:
+                if self.constPool[a["name_index"]]["string"] == "Signature":
+                    name_index = struct.unpack_from("!H",a["bytes"])
+                    s = self.constPool[name_index[0]]["string"]
+                    print(v)
+                    # acc_private = 0x2
+                    if v["access_flags"] != 0x2: #cannot access from outside ,signature is useless
+                        continue
+                    (s,f["signature"]) = self.__parse_field_type_signature(s)
+                    print(f["signature"])
             fs.append(f)
         return fs
 
