@@ -326,6 +326,10 @@ func (p *Parser) Next() {
 			p.eof = true
 			return
 		}
+		if tok != nil && tok.(*lex.Token).Type == lex.TOKEN_MULTI_LINE_COMMENT_START {
+			p.multiLineComment()
+			continue
+		}
 		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
 			p.token = tok.(*lex.Token)
 			fmt.Println("#########", p.token.Desp)
@@ -333,6 +337,21 @@ func (p *Parser) Next() {
 		}
 	}
 	return
+}
+
+func (p *Parser) multiLineComment() {
+	var err error
+	var tok interface{}
+	for !p.eof {
+		tok, err, p.eof = p.scanner.Next()
+		if err != nil {
+			p.eof = true
+			return
+		}
+		if tok != nil && tok.(*lex.Token).Type == lex.TOKEN_MULTI_LINE_COMMENT_END {
+			break
+		}
+	}
 }
 
 func (p *Parser) unexpectedErr() {

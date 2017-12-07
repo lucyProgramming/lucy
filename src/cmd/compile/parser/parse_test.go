@@ -12,11 +12,13 @@ var str = `
 	package main
 
 import "github.com/xxx/yyy" ;
-import "github.com/xxx/xxx" as 123 ;
+import "github.com/xxx/xxx" as ax ;
 
+/*
+	111111111111
+*/
 
-
-const str := "hello world";
+const str = "hello world";
 
 enum day{
 	monday,

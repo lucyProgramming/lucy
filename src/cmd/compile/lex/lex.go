@@ -641,4 +641,18 @@ func init() {
 		t.Desp = "->"
 		return t, nil
 	})
+	Lexer.Add([]byte(`(\/\*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_MULTI_LINE_COMMENT_START
+		t.Desp = "/*"
+		return t, nil
+	})
+	Lexer.Add([]byte(`(\*\/)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_MULTI_LINE_COMMENT_END
+		t.Desp = "*/"
+		return t, nil
+	})
 }
