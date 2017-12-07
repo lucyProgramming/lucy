@@ -381,6 +381,7 @@ class JvmClass:
             returns.append(r)
         ret["returns"] = returns
         return ret
+
     def __parse_method_descriptor(self,d):
         ret = {}
         ret["parameters"] = []
@@ -394,9 +395,9 @@ class JvmClass:
         d = d[1:] #skip )
         (d,t)  = self.__parse_field_type(d)
         if t == "":
-            ret["return"] = ["V"]
+            ret["return"] = "V"
         else:
-            ret["return"] = [t]
+            ret["return"] = t
         return ret
 
 
