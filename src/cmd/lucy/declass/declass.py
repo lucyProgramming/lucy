@@ -3,11 +3,7 @@ import sys
 import os
 from optparse import OptionParser
 import struct
-import  json
-
-
-
-
+import json
 
 
 
@@ -292,7 +288,7 @@ class JvmClass:
             return s, "F"
         if s[0] == "I":
             s = s[1:]
-            return s, "F"
+            return s, "I"
         if s[0] == "J":
             s = s[1:]
             return s, "J"
@@ -358,7 +354,6 @@ class JvmClass:
         return ms
 
     def __parse_method_signature(self,s):
-        print(s)
         ret = {}
         parameteredType = []
         if s[0] == "<":
@@ -373,13 +368,19 @@ class JvmClass:
         while s[0] != ")":
             (s,t) = self.__parse_type_signature(s)
             parameters.append(t)
+        ret["parameters"] = parameters
         s = s[1:] # skip )
         if s[0] == "V":
-            ret["return"] = "V"
-        else:
-            (s,ret["return"]) = self.__parse_type_signature(s)
+            ret["returns"] = []
+            return ret
+        returns = []
+        while len(s) > 0 and s[0] != "^":
+            (s,r) = self.__parse_type_signature(s)
+            if r == None or r == "":
+                break
+            returns.append(r)
+        ret["returns"] = returns
         return ret
-
     def __parse_method_descriptor(self,d):
         ret = {}
         ret["parameters"] = []
@@ -393,9 +394,9 @@ class JvmClass:
         d = d[1:] #skip )
         (d,t)  = self.__parse_field_type(d)
         if t == "":
-            ret["return"] = "V"
+            ret["return"] = ["V"]
         else:
-            ret["return"] = t
+            ret["return"] = [t]
         return ret
 
 

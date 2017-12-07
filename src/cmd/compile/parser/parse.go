@@ -469,6 +469,11 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
 		}, nil
+	case lex.TOKEN_SHORT:
+		p.Next()
+		return &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_SHORT,
+		}, nil
 	case lex.TOKEN_INT:
 		p.Next()
 		return &ast.VariableType{
@@ -478,6 +483,16 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
+		}, nil
+	case lex.TOKEN_DOUBLE:
+		p.Next()
+		return &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_DOUBLE,
+		}, nil
+	case lex.TOKEN_LONG:
+		p.Next()
+		return &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_LONG,
 		}, nil
 	case lex.TOKEN_STRING:
 		p.Next()

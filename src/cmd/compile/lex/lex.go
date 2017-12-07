@@ -498,6 +498,13 @@ func init() {
 		t.Desp = "byte"
 		return t, nil
 	})
+	Lexer.Add([]byte("short"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_SHORT
+		t.Desp = "short"
+		return t, nil
+	})
 	Lexer.Add([]byte("int"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -516,7 +523,7 @@ func init() {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_DOUBLE
-		t.Desp = "float"
+		t.Desp = "double"
 		return t, nil
 	})
 

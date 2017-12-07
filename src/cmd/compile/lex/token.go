@@ -1,9 +1,8 @@
 package lex
 
 import (
-	"strconv"
-
 	"github.com/timtadh/lexmachine/machines"
+	"strconv"
 )
 
 const (
@@ -73,6 +72,7 @@ const (
 	TOKEN_PRIVATE               //private
 	TOKEN_INTERFACE             //interface
 	TOKEN_BYTE                  //byte
+	TOKEN_SHORT                 // short
 	TOKEN_INT                   //int
 	TOKEN_FLOAT                 //float
 	TOKEN_DOUBLE                //double

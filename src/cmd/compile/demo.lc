@@ -27,15 +27,31 @@ c := 100;  //private global variable
 	}
 	io.System.println("11111111111");
 	var a io.PrintStram;
-
 }
 
 
 
-//function defination
+
+
+
+//function definition
 fn dd(a int,b int)->(xxx int) {
-    return a +b + c;
+    xxx = a + b ;
+    f := closure();
+    f();
 }
+
+fn closure()(f fn()){
+    x := 123;
+    f := fn(){
+        print(x);
+    }
+    return f;
+}
+
+
+
+
 
 
 
