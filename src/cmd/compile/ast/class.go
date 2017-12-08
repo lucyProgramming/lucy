@@ -1,20 +1,24 @@
 package ast
 
-const (
-	ACCESS_PUBLIC = iota
-	ACCESS_PROTECTED
-	ACCESS_PRIVATE
-)
+import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
+
+//const (
+//	ACCESS_PUBLIC = iota
+//	ACCESS_PROTECTED
+//	ACCESS_PRIVATE
+//)
 
 type Class struct {
-	Access      uint16 // public private or protected
-	Pos         *Pos
-	Name        string
-	Fields      map[string]*ClassField
-	Methods     map[string]*ClassMethod
-	Consts      map[string]*Const
-	Father      *Expression  // a or a.b
-	Constructor *ClassMethod // can be nil
+	Access               uint16 // public private or protected
+	Pos                  *Pos
+	Name                 string
+	Fields               map[string]*ClassField
+	Methods              map[string][]*ClassMethod
+	Consts               map[string]*Const
+	SuperClassExpression *Expression // a or a.b
+	SuperClassName       string
+	SuperClass           *Class
+	Constructors         []*ClassMethod // can be nil
 }
 
 func (c *Class) check() []error {
@@ -34,24 +38,28 @@ func (c *Class) checkFields() []error {
 func (c *Class) checkMethods() []error {
 	errs := []error{}
 	for _, v := range c.Methods {
-		errs = append(errs, v.Func.check(nil)...)
+		for _, vv := range v {
+			errs = append(errs, vv.Func.check(nil)...)
+		}
 	}
 	return errs
 }
 
 type ClassMethod struct {
 	ClassFieldProperty
-	Func *Function
+	Func      *Function
+	Signature *class_json.MethodSignature
 }
 
 type ClassFieldProperty struct {
-	IsStatic bool   //static or not
-	Access   uint16 // public private or protected
+	IsStatic    bool   //static or not
+	AccessFlags uint16 // public private or protected
 }
 
 type ClassField struct {
 	ClassFieldProperty
 	VariableDefinition
-	Tag string //for reflect
-	Pos *Pos
+	Tag       string //for reflect
+	Pos       *Pos
+	Signature *class_json.FieldSignature
 }

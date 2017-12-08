@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
 
@@ -42,10 +42,12 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		return
 	}
 	if ispublic {
-		f.Access = ast.ACCESS_PUBLIC
+		f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	} else {
-		f.Access = ast.ACCESS_PRIVATE
+		f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 	}
+	f.AccessFlags |= cg.ACC_METHOD_STATIC
+	f.AccessFlags |= cg.ACC_METHOD_FINAL
 	f.Block = &ast.Block{}
 	err = p.parser.Block.parse(f.Block)
 	return f, err

@@ -1,9 +1,9 @@
 package ast
 
 type VariableDefinition struct {
-	Access     int // public private or protected
-	Pos        *Pos
-	Expression *Expression
+	AccessFlags uint16 // public private or protected
+	Pos         *Pos
+	Expression  *Expression
 	NameWithType
 }
 

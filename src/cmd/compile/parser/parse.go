@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"strings"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
+	"strings"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool) []error {
@@ -144,9 +144,9 @@ func (p *Parser) Parse() []error {
 					c.Name = v.Name
 					c.Expression = es[k]
 					if ispublic {
-						c.Access = ast.ACCESS_PUBLIC
+						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
-						c.Access = ast.ACCESS_PRIVATE
+						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
 					}
 					*p.tops = append(*p.tops, &ast.Node{
 						Data: c,
@@ -158,9 +158,9 @@ func (p *Parser) Parse() []error {
 					c.Name = v.Name
 					c.Expression = es[k]
 					if ispublic {
-						c.Access = ast.ACCESS_PUBLIC
+						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
-						c.Access = ast.ACCESS_PRIVATE
+						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
 					}
 					*p.tops = append(*p.tops, &ast.Node{
 						Data: c,
@@ -231,9 +231,9 @@ func (p *Parser) Parse() []error {
 				Data: c,
 			})
 			if ispublic {
-				c.Access = ast.ACCESS_PUBLIC
+				c.Access |= cg.ACC_FIELD_PUBLIC
 			} else {
-				c.Access = ast.ACCESS_PROTECTED
+				c.Access |= cg.ACC_FIELD_PRIVATE
 			}
 			resetProperty()
 		case lex.TOKEN_PUBLIC:
@@ -419,9 +419,9 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		*vt = *t
 		vd.Typ = vt
 		if len(ispublic) > 0 && ispublic[0] {
-			vd.Access = ast.ACCESS_PUBLIC
+			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		} else {
-			vd.Access = ast.ACCESS_PRIVATE
+			vd.AccessFlags |= cg.ACC_FIELD_PRIVATE
 		}
 		vd.Pos = v.Pos
 		vs[k] = vd

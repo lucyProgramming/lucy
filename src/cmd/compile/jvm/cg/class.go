@@ -14,10 +14,7 @@ const (
 	ACC_CLASS_SYNTHETIC  uint16 = 0x1000 //标识并非Java源码生成的代码。
 	ACC_CLASS_ANNOTATION uint16 = 0x2000 // 标识注解类型
 	ACC_CLASS_ENUM       uint16 = 0x4000 // 标识枚举类型
-	ACC_VOLATILE         uint16 = 0x0040 //volatile，表示字段是易变的。
-	ACC_TRANSIENT        uint16 = 0x0080 //transient，表示字段不会被序列化。
-	ACC_SYNTHETIC        uint16 = 0x1000 //表示字段由编译器自动产生。
-	ACC_ENUM             uint16 = 0x4000 //enum，表示字段为枚举类型。
+
 )
 
 type Class struct {

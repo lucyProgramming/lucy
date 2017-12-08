@@ -11,7 +11,3 @@ func main() {
 	lc.Main(flag.Args())
 
 }
-
-
-
-

@@ -12,6 +12,7 @@ const (
 	VARIABLE_TYPE_LONG
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_DOUBLE
+	VARIABLE_TYPE_CHAR
 	VARIABLE_TYPE_STRING
 	VARIALBE_TYPE_FUNCTION
 	VARIALBE_TYPE_ENUM  //enum
@@ -29,6 +30,7 @@ type VariableType struct {
 	Rname           string // Lname.Rname
 	CombinationType *VariableType
 	FunctionType    *FunctionType
+	Class           *Class
 }
 
 func (v *VariableType) Signature() string {

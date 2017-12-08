@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
 
@@ -94,10 +95,10 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		t.Pos = v.Pos
 		t.Enum = e
 	}
+	e.Access = 0
 	if ispublic {
-		e.Access = ast.ACCESS_PUBLIC
-	} else {
-		e.Access = ast.ACCESS_PRIVATE
+		e.Access |= cg.ACC_CLASS_PUBLIC
 	}
+	e.Access |= cg.ACC_CLASS_ENUM
 	return e, err
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
 
@@ -47,7 +48,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
-			c.classDefinition.Father, err = c.parser.ExpressionParser.parseIdentifierExpression()
+			c.classDefinition.SuperClassExpression, err = c.parser.ExpressionParser.parseIdentifierExpression()
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err
@@ -60,7 +61,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		return nil, err
 	}
 	c.Next() // skip {
-	c.access = ast.ACCESS_PRIVATE
+	c.access = 0
+	c.access |= cg.ACC_FIELD_PRIVATE
 	c.isStatic = false
 	for !c.parser.eof {
 		switch c.parser.token.Type {
@@ -72,13 +74,16 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			c.Next()
 		//access private
 		case lex.TOKEN_PUBLIC:
-			c.access = ast.ACCESS_PUBLIC
+			c.access = 0
+			c.access |= cg.ACC_FIELD_PUBLIC
 			c.Next()
 		case lex.TOKEN_PROTECTED:
-			c.access = ast.ACCESS_PROTECTED
+			c.access = 0
+			c.access |= cg.ACC_FIELD_PROTECTED
 			c.Next()
 		case lex.TOKEN_PRIVATE:
-			c.access = ast.ACCESS_PRIVATE
+			c.access = 0
+			c.access |= cg.ACC_FIELD_PRIVATE
 			c.Next()
 		case lex.TOKEN_IDENTIFIER:
 			err = c.parseFiled()
@@ -88,9 +93,6 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_CONST: // const is for local use
-			if c.access == ast.ACCESS_PUBLIC {
-				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const declared in class,can only be used this block"))
-			}
 			c.isConst = true
 			c.Next()
 			err := c.parseConst()
@@ -108,28 +110,35 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				continue
 			}
 			if c.classDefinition.Methods == nil {
-				c.classDefinition.Methods = make(map[string]*ast.ClassMethod)
+				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == "" {
 				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s method has no name", c.parser.errorMsgPrefix(f.Pos)))
 				c.resetProperty()
 				continue
 			}
-			if _, ok := c.classDefinition.Methods[f.Name]; ok || (f.Name == c.classDefinition.Name && c.classDefinition.Constructor != nil) {
-				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s method　%s already declared", c.parser.errorMsgPrefix(f.Pos), f.Name))
-				c.resetProperty()
-				continue
-			}
+			//if _, ok := c.classDefinition.Methods[f.Name]; ok || (f.Name == c.classDefinition.Name && c.classDefinition.Constructor != nil) {
+			//	c.parser.errs = append(c.parser.errs, fmt.Errorf("%s method　%s already declared", c.parser.errorMsgPrefix(f.Pos), f.Name))
+			//	c.resetProperty()
+			//	continue
+			//}
 			m := &ast.ClassMethod{}
-			m.ClassFieldProperty.Access = c.access
+			m.ClassFieldProperty.AccessFlags = c.access
 			m.IsStatic = c.isStatic
 			m.Func = f
 			c.resetProperty()
 			if f.Name == c.classDefinition.Name {
-				c.classDefinition.Constructor = m
-			} else {
-				c.classDefinition.Methods[f.Name] = m
+				if c.classDefinition.Constructors == nil {
+					c.classDefinition.Constructors = []*ast.ClassMethod{m}
+				} else {
+					c.classDefinition.Constructors = append(c.classDefinition.Constructors, m)
+				}
 			}
+			continue
+			if c.classDefinition.Methods == nil {
+				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
+			}
+			c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
 		case lex.TOKEN_RC:
 			c.Next()
 			break
@@ -142,7 +151,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 }
 
 func (c *Class) resetProperty() {
-	c.access = ast.ACCESS_PRIVATE
+	c.access = 0
 	c.isStatic = false
 	c.isConst = false
 }
@@ -192,7 +201,7 @@ func (c *Class) parseFiled() error {
 		f.Pos = v.Pos
 		f.Typ = &ast.VariableType{}
 		*f.Typ = *t
-		f.ClassFieldProperty.Access = c.access
+		f.ClassFieldProperty.AccessFlags = c.access
 		f.IsStatic = c.isStatic
 		c.classDefinition.Fields[v.Name] = f
 	}

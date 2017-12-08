@@ -15,7 +15,7 @@ type EnumName struct {
 }
 
 type Enum struct {
-	Access int // public private or protected
+	Access uint16 // public private or protected
 	Name   string
 	Pos    *Pos
 	Names  []*EnumName
