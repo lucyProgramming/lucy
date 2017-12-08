@@ -542,7 +542,7 @@ func init() {
 		t.Desp = "string"
 		return t, nil
 	})
-	Lexer.Add([]byte("([a-z]|[A-Z])([a-z]|[A-Z]|[0-9]|_)*"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	Lexer.Add([]byte("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
 		t.Type = TOKEN_IDENTIFIER
@@ -550,14 +550,7 @@ func init() {
 		t.Data = string(match.Bytes)
 		return t, nil
 	})
-	Lexer.Add([]byte("_"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_IDENTIFIER
-		t.Desp = "identifer(_)"
-		t.Data = "_"
-		return t, nil
-	})
+
 	// 0 or 0755 or 123 or +100 or -100
 	Lexer.Add([]byte(`([\-]?[0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}

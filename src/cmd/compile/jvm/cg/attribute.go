@@ -3,8 +3,8 @@ package cg
 import "encoding/binary"
 
 type AttributeInfo struct {
-	attributeIndex  U2
-	attributeLength U4
+	attributeIndex  uint16
+	attributeLength uint32
 	info            []byte
 }
 
@@ -14,7 +14,7 @@ type ToAttributeInfo interface {
 
 type AttributeConstantValue struct {
 	AttributeInfo
-	constvalueIndex U2
+	constvalueIndex uint16
 }
 
 func (a *AttributeConstantValue) ToAttributeInfo() *AttributeInfo {
@@ -28,7 +28,7 @@ func (a *AttributeConstantValue) ToAttributeInfo() *AttributeInfo {
 
 type AttributeSignature struct {
 	AttributeInfo
-	index U2
+	index uint16
 }
 
 func (a *AttributeSignature) ToAttributeInfo() *AttributeInfo {
@@ -42,7 +42,7 @@ func (a *AttributeSignature) ToAttributeInfo() *AttributeInfo {
 
 type AttributeSourceFile struct {
 	AttributeInfo
-	index U2
+	index uint16
 }
 
 func (a *AttributeSourceFile) ToAttributeInfo() *AttributeInfo {
@@ -62,7 +62,7 @@ type AttributeLineNumber struct {
 func (a *AttributeLineNumber) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.attributeIndex = a.attributeIndex
-	ret.attributeLength = U4(len(a.linenumbers)) * 4
+	ret.attributeLength = uint32(len(a.linenumbers)) * 4
 	ret.info = make([]byte, ret.attributeLength)
 	for k, v := range a.linenumbers {
 		binary.BigEndian.PutUint16(ret.info[k*4:], uint16(v.startPc))
@@ -72,13 +72,13 @@ func (a *AttributeLineNumber) ToAttributeInfo() *AttributeInfo {
 }
 
 type AttributeLinePc struct {
-	startPc    U2
-	lineNumber U2
+	startPc    uint16
+	lineNumber uint16
 }
 
 type AttributeBootstrapMethods struct {
 	AttributeInfo
-	numBootStrapMethods U2
+	numBootStrapMethods uint16
 	methods             []*BootStrapMethod
 }
 
@@ -96,12 +96,12 @@ func (a *AttributeBootstrapMethods) ToAttributeInfo() *AttributeInfo {
 		}
 		ret.info = append(ret.info, bs...)
 	}
-	ret.attributeLength = U4(len(ret.info))
+	ret.attributeLength = uint32(len(ret.info))
 	return ret
 }
 
 type BootStrapMethod struct {
-	bootStrapMethodRef         U2
-	numBootStrapMethodArgument U2
-	bootStrapMethodArguments   []U2
+	bootStrapMethodRef         uint16
+	numBootStrapMethodArgument uint16
+	bootStrapMethodArguments   []uint16
 }

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -9,7 +10,7 @@ import (
 type Class struct {
 	parser          *Parser
 	classDefinition *ast.Class
-	access          int
+	access          uint16
 	isStatic        bool
 	isConst         bool
 }

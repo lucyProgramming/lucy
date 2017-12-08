@@ -6,20 +6,20 @@ import (
 )
 
 const (
-	CONSTANT_POOL_TAG_Utf8               U1 = 1
-	CONSTANT_POOL_TAG_Integer            U1 = 3
-	CONSTANT_POOL_TAG_Float              U1 = 4
-	CONSTANT_POOL_TAG_Long               U1 = 5
-	CONSTANT_POOL_TAG_Double             U1 = 6
-	CONSTANT_POOL_TAG_Class              U1 = 7
-	CONSTANT_POOL_TAG_String             U1 = 8
-	CONSTANT_POOL_TAG_Fieldref           U1 = 9
-	CONSTANT_POOL_TAG_Methodref          U1 = 10
-	CONSTANT_POOL_TAG_InterfaceMethodref U1 = 11
-	CONSTANT_POOL_TAG_NameAndType        U1 = 12
-	CONSTANT_POOL_TAG_MethodHandle       U1 = 15
-	CONSTANT_POOL_TAG_MethodType         U1 = 16
-	CONSTANT_POOL_TAG_InvokeDynamic      U1 = 18
+	CONSTANT_POOL_TAG_Utf8               uint8 = 1
+	CONSTANT_POOL_TAG_Integer            uint8 = 3
+	CONSTANT_POOL_TAG_Float              uint8 = 4
+	CONSTANT_POOL_TAG_Long               uint8 = 5
+	CONSTANT_POOL_TAG_Double             uint8 = 6
+	CONSTANT_POOL_TAG_Class              uint8 = 7
+	CONSTANT_POOL_TAG_String             uint8 = 8
+	CONSTANT_POOL_TAG_Fieldref           uint8 = 9
+	CONSTANT_POOL_TAG_Methodref          uint8 = 10
+	CONSTANT_POOL_TAG_InterfaceMethodref uint8 = 11
+	CONSTANT_POOL_TAG_NameAndType        uint8 = 12
+	CONSTANT_POOL_TAG_MethodHandle       uint8 = 15
+	CONSTANT_POOL_TAG_MethodType         uint8 = 16
+	CONSTANT_POOL_TAG_InvokeDynamic      uint8 = 18
 )
 
 type ToConstPool interface {
@@ -27,13 +27,13 @@ type ToConstPool interface {
 }
 
 type ConstPool struct {
-	tag  U1
+	tag  uint8
 	info []byte
 }
 
 type CONSTANT_Class_info struct {
 	ConstPool
-	nameindex U2
+	nameindex uint16
 }
 
 func (c *CONSTANT_Class_info) ToConstPool() *ConstPool {
@@ -46,7 +46,7 @@ func (c *CONSTANT_Class_info) ToConstPool() *ConstPool {
 
 type CONSTANT_String_info struct {
 	ConstPool
-	stringIndex U2
+	stringIndex uint16
 }
 
 func (c *CONSTANT_String_info) ToConstPool() *ConstPool {
@@ -122,8 +122,8 @@ func (c *CONSTANT_Double_info) ToConstPool() *ConstPool {
 
 type CONSTANT_NameAndType_info struct {
 	ConstPool
-	nameIndex       U2
-	descriptorIndex U2
+	nameIndex       uint16
+	descriptorIndex uint16
 }
 
 func (c *CONSTANT_NameAndType_info) ToConstPool() *ConstPool {
@@ -137,8 +137,8 @@ func (c *CONSTANT_NameAndType_info) ToConstPool() *ConstPool {
 
 type CONSTANT_Methodref_info struct {
 	ConstPool
-	classIndex       U2
-	nameAndTypeIndex U2
+	classIndex       uint16
+	nameAndTypeIndex uint16
 }
 
 func (c *CONSTANT_Methodref_info) ToConstPool() *ConstPool {
@@ -152,8 +152,8 @@ func (c *CONSTANT_Methodref_info) ToConstPool() *ConstPool {
 
 type CONSTANT_InterfaceMethodref_info struct {
 	ConstPool
-	classIndex       U2
-	nameAndTypeIndex U2
+	classIndex       uint16
+	nameAndTypeIndex uint16
 }
 
 func (c *CONSTANT_InterfaceMethodref_info) ToConstPool() *ConstPool {
@@ -167,8 +167,8 @@ func (c *CONSTANT_InterfaceMethodref_info) ToConstPool() *ConstPool {
 
 type CONSTANT_Fieldref_info struct {
 	ConstPool
-	classIndex       U2
-	nameAndTypeIndex U2
+	classIndex       uint16
+	nameAndTypeIndex uint16
 }
 
 func (c *CONSTANT_Fieldref_info) ToConstPool() *ConstPool {
@@ -182,8 +182,8 @@ func (c *CONSTANT_Fieldref_info) ToConstPool() *ConstPool {
 
 type CONSTANT_MethodHandle_info struct {
 	ConstPool
-	referenceKind  U1
-	referenceIndex U2
+	referenceKind  uint8
+	referenceIndex uint16
 }
 
 func (c *CONSTANT_MethodHandle_info) ToConstPool() *ConstPool {
@@ -197,7 +197,7 @@ func (c *CONSTANT_MethodHandle_info) ToConstPool() *ConstPool {
 
 type CONSTANT_Utf8_info struct {
 	ConstPool
-	length U2
+	length uint16
 	bs     []byte
 }
 
@@ -212,7 +212,7 @@ func (c *CONSTANT_Utf8_info) ToConstPool() *ConstPool {
 
 type CONSTANT_MethodType_info struct {
 	ConstPool
-	descriptorIndex U2
+	descriptorIndex uint16
 }
 
 func (c *CONSTANT_MethodType_info) ToConstPool() *ConstPool {
@@ -225,8 +225,8 @@ func (c *CONSTANT_MethodType_info) ToConstPool() *ConstPool {
 
 type CONSTANT_InvokeDynamic_info struct {
 	ConstPool
-	bootstrapMethodAttrIndex U2
-	nameAndTypeIndex         U2
+	bootstrapMethodAttrIndex uint16
+	nameAndTypeIndex         uint16
 }
 
 func (c *CONSTANT_InvokeDynamic_info) ToConstPool() *ConstPool {

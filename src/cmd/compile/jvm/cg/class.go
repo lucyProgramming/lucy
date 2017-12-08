@@ -6,37 +6,37 @@ import (
 )
 
 const (
-	ACC_CLASS_PUBLIC     U2 = 0x0001 // 可以被包的类外访问。
-	ACC_CLASS_FINAL      U2 = 0x0010 //不允许有子类。
-	ACC_CLASS_SUPER      U2 = 0x0020 //当用到invokespecial指令时，需要特殊处理③的父类方法。
-	ACC_CLASS_INTERFACE  U2 = 0x0200 // 标识定义的是接口而不是类。
-	ACC_CLASS_ABSTRACT   U2 = 0x0400 //  不能被实例化。
-	ACC_CLASS_SYNTHETIC  U2 = 0x1000 //标识并非Java源码生成的代码。
-	ACC_CLASS_ANNOTATION U2 = 0x2000 // 标识注解类型
-	ACC_CLASS_ENUM       U2 = 0x4000 // 标识枚举类型
-	ACC_VOLATILE         U2 = 0x0040 //volatile，表示字段是易变的。
-	ACC_TRANSIENT        U2 = 0x0080 //transient，表示字段不会被序列化。
-	ACC_SYNTHETIC        U2 = 0x1000 //表示字段由编译器自动产生。
-	ACC_ENUM             U2 = 0x4000 //enum，表示字段为枚举类型。
+	ACC_CLASS_PUBLIC     uint16 = 0x0001 // 可以被包的类外访问。
+	ACC_CLASS_FINAL      uint16 = 0x0010 //不允许有子类。
+	ACC_CLASS_SUPER      uint16 = 0x0020 //当用到invokespecial指令时，需要特殊处理③的父类方法。
+	ACC_CLASS_INTERFACE  uint16 = 0x0200 // 标识定义的是接口而不是类。
+	ACC_CLASS_ABSTRACT   uint16 = 0x0400 //  不能被实例化。
+	ACC_CLASS_SYNTHETIC  uint16 = 0x1000 //标识并非Java源码生成的代码。
+	ACC_CLASS_ANNOTATION uint16 = 0x2000 // 标识注解类型
+	ACC_CLASS_ENUM       uint16 = 0x4000 // 标识枚举类型
+	ACC_VOLATILE         uint16 = 0x0040 //volatile，表示字段是易变的。
+	ACC_TRANSIENT        uint16 = 0x0080 //transient，表示字段不会被序列化。
+	ACC_SYNTHETIC        uint16 = 0x1000 //表示字段由编译器自动产生。
+	ACC_ENUM             uint16 = 0x4000 //enum，表示字段为枚举类型。
 )
 
 type Class struct {
 	f              *os.File
 	magic          uint32 //0xCAFEBABE
-	minorVersion   U2
-	majorVersion   U2
-	constPoolCount U2
+	minorVersion   uint16
+	majorVersion   uint16
+	constPoolCount uint16
 	constPool      []*ConstPool
-	accessFlag     U2
-	thisClass      U2
-	superClass     U2
-	interfaceCount U2
-	interfaces     []U2
-	fieldCount     U2
+	accessFlag     uint16
+	thisClass      uint16
+	superClass     uint16
+	interfaceCount uint16
+	interfaces     []uint16
+	fieldCount     uint16
 	fields         []*FieldInfo
-	methodCount    U2
+	methodCount    uint16
 	methods        []*MethodInfo
-	attributeCount U2
+	attributeCount uint16
 	attributes     []*AttributeInfo
 }
 
@@ -142,10 +142,10 @@ func (c *Class) OutPut(filename string) error {
 /*
 
 type MethodInfo struct {
-	accessFlags     U2
-	nameIndex       U2
-	descriptorIndex U2
-	attributeCount  U2
+	accessFlags     uint16
+	nameIndex       uint16
+	descriptorIndex uint16
+	attributeCount  uint16
 	attributes      []*AttributeInfo
 }
 */

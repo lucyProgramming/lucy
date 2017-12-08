@@ -7,7 +7,7 @@ const (
 )
 
 type Class struct {
-	Access      int // public private or protected
+	Access      uint16 // public private or protected
 	Pos         *Pos
 	Name        string
 	Fields      map[string]*ClassField
@@ -45,8 +45,8 @@ type ClassMethod struct {
 }
 
 type ClassFieldProperty struct {
-	IsStatic bool //static or not
-	Access   int  // public private or protected
+	IsStatic bool   //static or not
+	Access   uint16 // public private or protected
 }
 
 type ClassField struct {

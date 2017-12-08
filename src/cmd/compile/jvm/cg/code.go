@@ -4,21 +4,21 @@ import "encoding/binary"
 
 type AttributeCode struct {
 	AttributeInfo
-	maxStack             U2
-	maxLocals            U2
-	codeLength           U4
+	maxStack             uint16
+	maxLocals            uint16
+	codeLength           uint32
 	codes                []byte
-	exceptionTableLength U2
+	exceptionTableLength uint16
 	exceptions           []*ExceptionTable
-	attributeCounts      U2
+	attributeCounts      uint16
 	attributes           []*AttributeInfo
 }
 
 type ExceptionTable struct {
-	startPc   U2
-	endpc     U2
-	handlerPc U2
-	catchType U2
+	startPc   uint16
+	endpc     uint16
+	handlerPc uint16
+	catchType uint16
 }
 
 func (a *AttributeCode) ToAttributeInfo() *AttributeInfo {
@@ -30,7 +30,7 @@ func (a *AttributeCode) ToAttributeInfo() *AttributeInfo {
 	ret.info = append(ret.info, a.codes...)
 	ret.info = append(ret.info, a.mkExceptions()...)
 	ret.info = append(ret.info, a.mkAttributes()...)
-	ret.attributeLength = U4(len(ret.info))
+	ret.attributeLength = uint32(len(ret.info))
 	return ret
 }
 func (a *AttributeCode) mkAttributes() []byte {
