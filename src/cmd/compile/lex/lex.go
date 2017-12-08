@@ -1,10 +1,9 @@
 package lex
 
 import (
-	"strconv"
-
 	"github.com/timtadh/lexmachine"
 	"github.com/timtadh/lexmachine/machines"
+	"strconv"
 )
 
 func init() {

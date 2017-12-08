@@ -102,7 +102,7 @@ class JvmClass:
         output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["string"]
         output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
         self.__parse_class_attributes(output)
-        output["fields"] = self.__mk_fileds()
+        output["fields"] = self.__mk_fields()
         output["methods"] = self.__mk_methods()
 
         x = json.JSONEncoder()
@@ -116,6 +116,10 @@ class JvmClass:
                 s = self.constPool[ret[0]]["string"]
                 output["signature_string"] = s
                 output["signature"] = self.__parse_class_signature(s)
+            if self.constPool[v["name_index"]]["string"] == "SourceFile":
+                ret = struct.unpack_from("!H", v["bytes"])
+                output["source_file"] = self.constPool[ret[0]]["string"]
+
 
     def __parse_class_signature(self,s):
         ret = {}
@@ -156,7 +160,6 @@ class JvmClass:
         # i
         if package_specificer[0] == "/":
             package_specificer = package_specificer[1:]
-
         while s[0] == "$":
             identifer += "$"
             s = s[1:]
@@ -170,7 +173,7 @@ class JvmClass:
             while s[0] != ">":
                 if s[0] == "*":
                     s = s[1:]
-                    ret["typed_arguments"].append("*")
+                    ret["typed_arguments"].append({"kind":"*"})  # special kind *
                     continue
                 if s[0] == ";":
                     break
@@ -181,29 +184,25 @@ class JvmClass:
                     ret["typed_arguments"].append(p)
             s = s[1:] #skip >
 
-        while s[0] != ";":  # skip until a ;
+        while s[0] != ";":  # skip until ;
             s = s[1:]
         if s[0] != ";":
             print("not semicolon after")
             print("unhandle class signature:" + s)
             sys.exit(1)
         s = s[1:] # skip ;
-        return s,{"kind": "class","class": ret}
+        return s,{"kind": "class","class_type": ret}
 
     def __parse_array_type_signature(self,s):
         s = s[1:] # skip [
-        (s,ret) = self.__parse_basic_type(s)
-        if ret != "":
-            return s,{"kind": "array","basic_type": ret}
-
-        (s,ret) = self.__parse_field_type_signature(s)
-        return s,  {"kind":"array","field_type":ret}
+        (s,ret) = self.__parse_type_signature(s)
+        return s,  {"kind":"array","array_type":ret}
 
     def __parse_type_signature(self,s):
         #try basic type
         (s,ret) = self.__parse_basic_type(s)
         if ret != "":
-            return s,ret
+            return s,{"kind":ret}
         return self.__parse_field_type_signature(s)
 
     def __parse_formal_type_paramter(self,s):
@@ -238,7 +237,7 @@ class JvmClass:
             s = s[1:]
             (s,identifier) = self.__parse_identifier(s)
             s = s[1:] # skip ;
-            return s,{"kind":"type_variable","idenfier":identifier}
+            return s,{"kind":"type_variable","identifier":identifier}
         return s , ""
 
     def __parse_identifier(self,s):
@@ -339,7 +338,7 @@ class JvmClass:
         for v in self.methods:
             m = {}
             m["access_flags"] = v["access_flags"]
-            m["name"] =  self.constPool[v["name_index"]]["string"]
+            m["name"] = self.constPool[v["name_index"]]["string"]
             descriptor = self.constPool[v["descriptor_index"]]["string"]
             m["typ"] = self.__parse_method_descriptor(descriptor)
             for a in v["attributes"]:
@@ -362,7 +361,7 @@ class JvmClass:
                 (s,t) = self.__parse_formal_type_paramter(s)
                 parameteredType.append(t)
             s = s[1:] # skip >
-        ret["parametered_types"] = parameteredType
+        ret["typed_parameters"] = parameteredType
         parameters = []
         s = s[1:]  #skip (
         while s[0] != ")":
@@ -389,19 +388,20 @@ class JvmClass:
         d = d[1:]  # skip (
         while True:
             (d,t) = self.__parse_field_type(d)
-            if t == "":
+            if t == "" or t == None:
                 break
             ret["parameters"].append(t)
+
         d = d[1:] #skip )
-        (d,t)  = self.__parse_field_type(d)
-        if t == "":
+        if d[0] == "V":
             ret["return"] = "V"
         else:
+            (d, t) = self.__parse_field_type(d)
             ret["return"] = t
         return ret
 
 
-    def __mk_fileds(self):
+    def __mk_fields(self):
         fs = []
         for v in self.fields:
             f = {}

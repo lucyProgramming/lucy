@@ -5,15 +5,14 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/cg"
 	"github.com/756445638/lucy/src/cmd/compile/parser"
 	"io/ioutil"
+	"os"
+	"strings"
 )
 
 func Main(files []string) {
 	go cg.Prinf()
-	l := &LucyCompile{
-		Files:            files,
-		NerrsStopCompile: 10,
-		Nerrs:            []error{},
-	}
+	l.NerrsStopCompile = 10
+	l.Nerrs = []error{}
 	l.compile()
 }
 
@@ -21,6 +20,7 @@ type LucyCompile struct {
 	Files            []string
 	Nerrs            []error
 	NerrsStopCompile int
+	lucyPath         []string
 }
 
 func (l *LucyCompile) exit() {
@@ -29,7 +29,16 @@ func (l *LucyCompile) exit() {
 	}
 }
 
+func (l *LucyCompile) Init() {
+	path := os.Getenv("LUCYPATH")
+	l.lucyPath = strings.Split(path, ":")
+	if len(l.lucyPath) == 0 {
+		fmt.Println("env variable LUCYPATH is not set")
+	}
+}
+
 func (l *LucyCompile) compile() {
+	l.Init()
 	for _, v := range l.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 var (
 	Tops         = make([]*ast.Node, 0)
 	CompileFlags Flags
+	l            LucyCompile
 )
 
 type Flags struct {

@@ -4,11 +4,16 @@ import (
 	"regexp"
 )
 
+type PackageLoader interface {
+	LoadPackage(name string) (*Package, error)
+}
+
 var (
 	small_float          = 0.0001
 	negative_small_float = -small_float
 	Nodes                *[]*Node //
 	packageAliasReg      *regexp.Regexp
+	PackageLoad          PackageLoader
 )
 
 type NameWithPos struct {
