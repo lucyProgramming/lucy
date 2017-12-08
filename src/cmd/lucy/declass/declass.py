@@ -51,14 +51,14 @@ class Declass(command.Command):
 
     def __parseFile(self,src,dest,filename):
         p = JvmClassParser(src,dest)
-        print(src)
+        print(src + "================>" + dest)
         ret = p.parse()
         if "ok" not in ret:
             print("declass file %s failed,err:%s" % (src,ret.reason))
             return
         ret = ret["class"].output()
         if os.path.exists(dest) == False:
-            os.mkdir(dest)
+            os.makedirs(dest)
 
         filename = "%s/%s.json" % (dest,filename.rstrip(".class"))
         fd = open(filename,'w')
@@ -100,11 +100,11 @@ class JvmClass:
         output["majorVersion"] = self.majorVersion
         output["access_flags"] = self.access_flags
         output["this_class"] = self.constPool[self.constPool[self.this_class]["name_index"]]["string"]
-        output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
+        if "java/lang/Object" != output["this_class"]:
+            output["super_class"] = self.constPool[self.constPool[self.super_class]["name_index"]]["string"]
         self.__parse_class_attributes(output)
         output["fields"] = self.__mk_fields()
         output["methods"] = self.__mk_methods()
-
         x = json.JSONEncoder()
         return x.encode(output)
 
@@ -600,9 +600,16 @@ class JvmClassParser:
                 continue
             if CONSTANT_TAG_Utf8 == tag:
                 ret = struct.unpack_from("!H", self.__content)
-                self.__content = self.__content[2:]
                 length = ret[0]
-                self.__result.constPool.append({"tag": tag, "length":length, "string": self.__content[0:length].decode()})
+                self.__content = self.__content[2:]
+                s = {}
+                s["tag"] = tag
+                s["string"] = ""
+                try:
+                    s["string"] = self.__content[0:length].decode()
+                except UnicodeError as e:
+                    print("decode utf-8 failed,err:" + str(e))
+                self.__result.constPool.append(s)
                 self.__content = self.__content[length:]
                 i += 1
                 continue

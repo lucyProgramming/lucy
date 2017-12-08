@@ -1,9 +1,10 @@
 package lex
 
 import (
+	"strconv"
+
 	"github.com/timtadh/lexmachine"
 	"github.com/timtadh/lexmachine/machines"
-	"strconv"
 )
 
 func init() {
@@ -640,18 +641,10 @@ func init() {
 		t.Desp = "->"
 		return t, nil
 	})
-	Lexer.Add([]byte(`(\/\*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MULTI_LINE_COMMENT_START
-		t.Desp = "/*"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\*\/)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MULTI_LINE_COMMENT_END
-		t.Desp = "*/"
-		return t, nil
-	})
+
+	// multi line expression
+	//	Lexer.Add([]byte(`(\/\*(?!\*\/)[.|\n]*\*\/)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+	//		return nil, nil
+	//	})
+
 }

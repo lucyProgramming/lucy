@@ -2,11 +2,12 @@ package lc
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/cg"
-	"github.com/756445638/lucy/src/cmd/compile/parser"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"github.com/756445638/lucy/src/cmd/compile/parser"
 )
 
 func Main(files []string) {
