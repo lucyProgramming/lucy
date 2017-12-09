@@ -57,13 +57,13 @@ class Declass(command.Command):
             print("declass file %s failed,err:%s" % (src,ret.reason))
             return
         ret = ret["class"].output()
+        x = json.JSONEncoder()
+        ret["modify_timestamp"] = int(os.path.getmtime(src))
         if os.path.exists(dest) == False:
             os.makedirs(dest)
-
         filename = "%s/%s.json" % (dest,filename.rstrip(".class"))
         fd = open(filename,'w')
-        fd.write(ret)
-
+        fd.write(x.encode(ret))
 
     def static_usage():
         print("declass jvm class files,command line args are -src and -dest")
@@ -105,8 +105,7 @@ class JvmClass:
         self.__parse_class_attributes(output)
         output["fields"] = self.__mk_fields()
         output["methods"] = self.__mk_methods()
-        x = json.JSONEncoder()
-        return x.encode(output)
+        return output
 
     #at this stage I only care about class signature
     def __parse_class_attributes(self,output):
