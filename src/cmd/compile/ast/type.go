@@ -19,15 +19,14 @@ const (
 	VARIABLE_TYPE_CLASS //new Person()
 	VARIABLE_TYPE_NULL  //null
 	VARIABLE_TYPE_ARRAY // []int
-	VARIABLE_TYPE_DOT   // a.b
 	VARIABLE_TYPE_NAME  // naming should search for declaration
 	VARIABLE_TYPE_VOID
 )
 
 type VariableType struct {
+	Pos             *Pos
 	Typ             int
-	Lname           string // []Lname Lname something
-	Rname           string // Lname.Rname
+	Name            string // Lname.Rname
 	CombinationType *VariableType
 	FunctionType    *FunctionType
 	Class           *Class
@@ -68,6 +67,10 @@ func (t *VariableType) typeCompatible(t2 *VariableType) bool {
 		return true
 	}
 	return false
+}
+
+func (t *VariableType) constValueValid(e *Expression) {
+
 }
 
 //assign some simple expression
@@ -144,9 +147,9 @@ func (v *VariableType) TypeString(ret *string) {
 	case VARIALBE_TYPE_FUNCTION:
 		*ret = "function"
 	case VARIABLE_TYPE_CLASS:
-		*ret = v.Lname
+		*ret = v.Name
 	case VARIALBE_TYPE_ENUM:
-		*ret = v.Lname + "(enum)"
+		*ret = v.Name + "(enum)"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
 		v.CombinationType.TypeString(ret)

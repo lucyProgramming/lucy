@@ -13,7 +13,6 @@ func (p *Package) TypeCheck() []error {
 	if len(errs) > p.NErros {
 		return errs
 	}
-
 	errs = append(errs, p.checkGlobalVariables()...)
 	if len(errs) > p.NErros {
 		return errs
@@ -61,30 +60,28 @@ func (p *Package) checkClass() []error {
 
 func (p *Package) checkConst() []error {
 	errs := make([]error, 0)
-	var err error
 	for _, v := range p.Consts {
 		if v.Expression == nil && v.Typ == nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d %s is has no type and no init value", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name))
+			errs = append(errs, fmt.Errorf("%s const %v has no initiation value", errMsgPrefix(v.Pos), v.Name))
+			continue
 		}
-		if v.Expression != nil {
-			is, t, value, err := v.Expression.getConstValue()
-			if err != nil {
-				errs = append(errs, err)
-				continue
-			}
-			if is == false {
-				errs = append(errs, fmt.Errorf("%s %d:%d %s is not a const value", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name))
-				continue
-			}
-			//rewrite
-			v.Expression = &Expression{}
-			v.Expression.Typ = t
-			v.Expression.Data = value
+		is, t, value, err := v.Expression.getConstValue()
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s const %v cannot be defined by intiation value", errMsgPrefix(v.Pos), err))
+			continue
 		}
+		if is == false {
+			errs = append(errs, fmt.Errorf("%s const %s is not a const value", errMsgPrefix(v.Pos), v.Name))
+			continue
+		}
+		//rewrite
+		v.Expression = &Expression{}
+		v.Expression.Typ = t
+		v.Expression.Data = value
 		if v.Typ != nil && v.Expression != nil {
 			v.Data, err = v.Typ.assignExpression(p, v.Expression)
 			if err != nil {
-				errs = append(errs, fmt.Errorf("%s %d:%d can`t assign value to %s", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name))
+				errs = append(errs, fmt.Errorf("%s const %v has worng initiation value", errMsgPrefix(v.Pos), v.Name))
 				continue
 			}
 		}
@@ -95,9 +92,7 @@ func (p *Package) checkConst() []error {
 func (p *Package) checkGlobalVariables() []error {
 	errs := make([]error, 0)
 	var err error
-
 	var block Block
-
 	for _, v := range p.Vars {
 		if v.Expression == nil && v.Typ == nil {
 			continue
@@ -105,7 +100,7 @@ func (p *Package) checkGlobalVariables() []error {
 		if v.Expression != nil {
 			err = v.Expression.constFold() //fold const error
 			if err != nil {
-				errs = append(errs, fmt.Errorf("%s %d:%d variable %s defined wrong,err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
+				errs = append(errs, fmt.Errorf("%s variable %s defined wrong,err:%v", errMsgPrefix(v.Pos), v.Name, err))
 				continue
 			}
 		}
@@ -125,7 +120,7 @@ func (p *Package) checkGlobalVariables() []error {
 			}
 			match := v.Typ.typeCompatible(t2)
 			if !match {
-				errs = append(errs, fmt.Errorf("%s %d:%d variable %s dose not matched by %s ", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, v.Name, v.Expression.typeName()))
+				errs = append(errs, fmt.Errorf("%s variable %s dose not matched by %s ", errMsgPrefix(v.Pos), v.Name, v.Expression.typeName()))
 				continue
 			}
 		}

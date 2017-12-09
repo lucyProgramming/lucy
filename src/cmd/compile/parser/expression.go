@@ -418,6 +418,11 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
+	case lex.TOKEN_SHORT:
+		left, err = ep.parseTypeConvertionExpression()
+		if err != nil {
+			return left, err
+		}
 	case lex.TOKEN_INT:
 		left, err = ep.parseTypeConvertionExpression()
 		if err != nil {
@@ -428,13 +433,18 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
+	case lex.TOKEN_DOUBLE:
+		left, err = ep.parseTypeConvertionExpression()
+		if err != nil {
+			return left, err
+		}
 	case lex.TOKEN_STRING:
 		left, err = ep.parseTypeConvertionExpression()
 		if err != nil {
 			return left, err
 		}
 	default:
-		err = fmt.Errorf("%s unkown begining of a expression or forget to write a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
 	// a++ b-- for a++++

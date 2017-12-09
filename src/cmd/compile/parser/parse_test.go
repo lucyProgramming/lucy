@@ -14,9 +14,6 @@ var str = `
 import "github.com/xxx/yyy" ;
 import "github.com/xxx/xxx" as ax ;
 
-/*
-	111111111111
-*/
 
 const str = "hello world";
 

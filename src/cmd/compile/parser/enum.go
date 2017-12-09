@@ -39,6 +39,12 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		err = p.mkUnexpectedEofErr()
 		return nil, err
 	}
+	e = &ast.Enum{}
+	e.Name = enumName.Name
+	e.Pos = enumName.Pos
+	if p.token.Type == lex.TOKEN_RC {
+		return e, nil
+	}
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s no enum names defined after {", p.errorMsgPrefix())
@@ -72,7 +78,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		}
 	}
 	if p.token.Type == lex.TOKEN_COMMA {
-		p.Next()
+		p.Next() // skip ,should be a identifier after  commna
 		ns, err := p.parseNameList()
 		if err != nil {
 			return nil, err
@@ -85,10 +91,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		return nil, err
 	}
 	p.Next() // skip }
-	e = &ast.Enum{}
-	e.Name = enumName.Name
 	e.Init = initExpression
-	e.Pos = enumName.Pos
 	for _, v := range names {
 		t := &ast.EnumName{}
 		t.Name = v.Name
@@ -99,6 +102,5 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	if ispublic {
 		e.Access |= cg.ACC_CLASS_PUBLIC
 	}
-	e.Access |= cg.ACC_CLASS_ENUM
 	return e, err
 }

@@ -167,7 +167,6 @@ func (p *Parser) Parse() []error {
 					})
 				}
 			}
-
 			resetProperty()
 		case lex.TOKEN_ENUM:
 			if isconst {
@@ -265,7 +264,7 @@ func (p *Parser) insertImports(im *ast.Imports) {
 	if p.imports == nil {
 		p.imports = make(map[string]*ast.Imports)
 	}
-	access, err := im.AccessPrefix()
+	access, err := im.AccessName()
 	if err != nil {
 		p.errs = append(p.errs, fmt.Errorf("%s %v", p.errorMsgPrefix(im.Pos), err))
 		return
@@ -553,26 +552,18 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 func (p *Parser) parseIdentiferType() (*ast.VariableType, error) {
 	name := p.token.Data.(string)
 	p.Next()
-	if p.token.Type != lex.TOKEN_DOT {
-		return &ast.VariableType{
-			Typ:   ast.VARIABLE_TYPE_NAME,
-			Lname: name,
-		}, nil
-	}
-	// a.b
-	p.Next() // skip dot
-	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		return nil, fmt.Errorf("%s not a identifier after dot", p.errorMsgPrefix())
-	}
-	name2 := p.token.Data.(string)
-	p.Next()
-	if p.imports[name] == nil { // package not found
-		return nil, fmt.Errorf("package %s not found", name)
+	for p.token.Type == lex.TOKEN_DOT && !p.eof {
+		p.Next()
+		if p.token.Type != lex.TOKEN_IDENTIFIER {
+			return nil, fmt.Errorf("%s not a identifier after dot", p.errorMsgPrefix())
+		}
+		name += "." + p.token.Data.(string)
+		p.Next()
 	}
 	return &ast.VariableType{
-		Typ:   ast.VARIABLE_TYPE_DOT,
-		Lname: p.imports[name].Name, // replace with full name
-		Rname: name2,
+		Pos:  p.mkPos(),
+		Typ:  ast.VARIABLE_TYPE_NAME,
+		Name: name,
 	}, nil
 }
 
@@ -628,14 +619,11 @@ func (p *Parser) parseImports() {
 		// not a import
 		return
 	}
-	syntaxErr := func() error {
-		return fmt.Errorf("%s %d:%d import should be like this import \"github.com/xxx/yyy\" [as xyz] ; ", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
-	}
 	// p.token.Type == lex.TOKEN_IMPORT
 	p.Next()
 	if p.token.Type != lex.TOKEN_LITERAL_STRING {
 		p.consume(untils_semicolon)
-		p.errs = append(p.errs, syntaxErr())
+		p.errs = append(p.errs, fmt.Errorf("%s expect string literal after import", p.errorMsgPrefix()))
 		p.parseImports()
 		return
 	}
@@ -651,7 +639,7 @@ func (p *Parser) parseImports() {
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			p.consume(untils_semicolon)
 			p.Next()
-			p.errs = append(p.errs, syntaxErr())
+			p.errs = append(p.errs, fmt.Errorf("%s expect identifier after as", p.errorMsgPrefix()))
 			p.parseImports()
 			return
 		}
@@ -660,7 +648,7 @@ func (p *Parser) parseImports() {
 		if p.token.Type != lex.TOKEN_SEMICOLON {
 			p.consume(untils_semicolon)
 			p.Next()
-			p.errs = append(p.errs, syntaxErr())
+			p.errs = append(p.errs, fmt.Errorf("%s  semicolon after import statement"))
 			p.parseImports()
 			return
 		}
@@ -682,9 +670,9 @@ func (p *Parser) parseImports() {
 		p.parseImports()
 		return
 	} else {
-		p.consume(untils_rc)
+		p.consume(untils_semicolon)
 		p.Next()
-		p.errs = append(p.errs, syntaxErr())
+		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon after", p.errorMsgPrefix()))
 		p.parseImports()
 		return
 	}

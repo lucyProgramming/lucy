@@ -117,33 +117,30 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				c.resetProperty()
 				continue
 			}
-			//if _, ok := c.classDefinition.Methods[f.Name]; ok || (f.Name == c.classDefinition.Name && c.classDefinition.Constructor != nil) {
-			//	c.parser.errs = append(c.parser.errs, fmt.Errorf("%s method　%s already declared", c.parser.errorMsgPrefix(f.Pos), f.Name))
-			//	c.resetProperty()
-			//	continue
-			//}
 			m := &ast.ClassMethod{}
-			m.Func.AccessFlags = c.access
-			m.IsStatic = c.isStatic
 			m.Func = f
-			c.resetProperty()
+			m.Func.AccessFlags = c.access
+			if c.isStatic {
+				m.Func.AccessFlags |= cg.ACC_METHOD_STATIC
+			}
 			if f.Name == c.classDefinition.Name {
 				if c.classDefinition.Constructors == nil {
 					c.classDefinition.Constructors = []*ast.ClassMethod{m}
 				} else {
 					c.classDefinition.Constructors = append(c.classDefinition.Constructors, m)
 				}
+			} else {
+				if c.classDefinition.Methods == nil {
+					c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
+				}
+				c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
 			}
-			continue
-			if c.classDefinition.Methods == nil {
-				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
-			}
-			c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
+			c.resetProperty()
 		case lex.TOKEN_RC:
 			c.Next()
 			break
 		default:
-			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexcept token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
 			c.Next()
 		}
 	}
@@ -188,7 +185,6 @@ func (c *Class) parseFiled() error {
 	if c.classDefinition.Fields == nil {
 		c.classDefinition.Fields = make(map[string]*ast.ClassField)
 	}
-
 	for _, v := range names {
 		if _, ok := c.classDefinition.Fields[v.Name]; ok {
 			c.parser.errs = append(c.parser.errs,
@@ -202,7 +198,9 @@ func (c *Class) parseFiled() error {
 		f.Typ = &ast.VariableType{}
 		*f.Typ = *t
 		f.AccessFlags = c.access
-		f.IsStatic = c.isStatic
+		if c.isStatic {
+			f.AccessFlags |= cg.ACC_FIELD_STATIC
+		}
 		c.classDefinition.Fields[v.Name] = f
 	}
 	return nil

@@ -42,16 +42,10 @@ func (c *Class) checkMethods() []error {
 }
 
 type ClassMethod struct {
-	ClassFieldProperty
 	Func *Function
 }
 
-type ClassFieldProperty struct {
-	IsStatic bool //static or not
-}
-
 type ClassField struct {
-	ClassFieldProperty
 	VariableDefinition
 	Pos *Pos
 }

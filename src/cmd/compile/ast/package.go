@@ -27,13 +27,14 @@ type Imports struct {
 	Alias string
 	Name  string // full name
 	Pos   *Pos
+	Used  bool
 }
 
 /*
 	import "github.com/lucy" should access by lucy.Println
 	import "github.com/lucy" as std should access by std.Println
 */
-func (i *Imports) AccessPrefix() (string, error) {
+func (i *Imports) AccessName() (string, error) {
 	if i.Alias == "_" { //special case _ is a identifer
 		return "", fmt.Errorf("_ is not legal package name")
 	}

@@ -6,13 +6,13 @@ import (
 )
 
 type Function struct {
-	AccessFlags     uint16 // public private or protected
-	Typ             *FunctionType
-	Name            string // if name is nil string,means no name function
-	Block           *Block
-	Pos             *Pos
-	Signature       string
-	MethodSignature *class_json.MethodSignature
+	AccessFlags uint16 // public private or protected
+	Typ         *FunctionType
+	Name        string // if name is nil string,means no name function
+	Block       *Block
+	Pos         *Pos
+	Descriptor  string
+	Signature   *class_json.MethodSignature
 }
 
 func (f *Function) MKSignature() {
@@ -21,7 +21,7 @@ func (f *Function) MKSignature() {
 		s += v.NameWithType.Typ.Signature() + ";"
 	}
 	s += ")"
-	f.Signature = s
+	f.Descriptor = s
 }
 
 func (f *Function) check(b *Block) []error {

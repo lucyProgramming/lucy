@@ -13,25 +13,21 @@ func ParseType(name string) (*ast.VariableType, error) {
 			Typ: ast.VARIABLE_TYPE_VOID,
 		}, nil
 	}
-
 	if name == "B" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
 		}, nil
 	}
-
 	if name == "C" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_CHAR,
 		}, nil
 	}
-
 	if name == "D" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_DOUBLE,
 		}, nil
 	}
-
 	if name == "F" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
@@ -47,13 +43,11 @@ func ParseType(name string) (*ast.VariableType, error) {
 			Typ: ast.VARIABLE_TYPE_LONG,
 		}, nil
 	}
-
 	if name == "S" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
 		}, nil
 	}
-
 	if name == "Z" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
@@ -61,11 +55,10 @@ func ParseType(name string) (*ast.VariableType, error) {
 	}
 	if strings.HasPrefix(name, "L") {
 		return &ast.VariableType{
-			Typ:   ast.VARIABLE_TYPE_CLASS,
-			Lname: name[1:],
+			Typ:  ast.VARIABLE_TYPE_CLASS,
+			Name: name[1:],
 		}, nil
 	}
-
 	if strings.HasPrefix(name, "[") {
 		t, err := ParseType(name[1:])
 		if err != nil {
@@ -76,9 +69,6 @@ func ParseType(name string) (*ast.VariableType, error) {
 			CombinationType: t,
 		}, nil
 	}
-
 	panic(fmt.Errorf("unkown type:%v", name))
 	return nil, fmt.Errorf("unkown type:%v", name)
-
-	//B C D F I J S Z
 }

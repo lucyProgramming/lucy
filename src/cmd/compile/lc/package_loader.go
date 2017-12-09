@@ -70,6 +70,32 @@ func (p *PackageLoader) loadAsLucy(j *class_json.ClassJson) {
 		return
 	}
 	// load regular class
+	c := &ast.Class{} // rebuild the name,trim prefix
+	{
+		t := strings.Split(j.ThisClass, "/")
+		t[len(t)-1] = strings.TrimLeft(t[len(t)-1], p.mainClassName)
+		c.Name = strings.Join(t, "/")
+	}
+	c.Fields = make(map[string]*ast.ClassField)
+	for _, v := range j.Fields {
+		f := &ast.ClassField{}
+		f.VariableDefinition = *p.loadFieldAsVariableDefination(v)
+		c.Fields[v.Name] = f
+	}
+	c.Methods = make(map[string][]*ast.ClassMethod)
+	for _, v := range j.Methods {
+		f := p.loadMethod(v)
+		m := &ast.ClassMethod{}
+		m.Func = f
+		if v.Name == shortname {
+			c.Constructors = append(c.Constructors, m)
+			continue
+		}
+		if _, ok := c.Methods[v.Name]; !ok {
+			c.Methods[v.Name] = []*ast.ClassMethod{}
+		}
+		c.Methods[v.Name] = append(c.Methods[v.Name], m)
+	}
 }
 
 /*
@@ -103,6 +129,7 @@ func (p *PackageLoader) loadFieldAsVariableDefination(field *class_json.Field) *
 	v.Name = field.Name
 	v.AccessFlags = field.AccessFlags
 	v.Typ, _ = jvm.ParseType(field.Descriptor)
+	v.Signature = field.Signature
 	return v
 }
 
@@ -110,7 +137,7 @@ func (p *PackageLoader) loadMethod(m *class_json.Method) *ast.Function {
 	f := &ast.Function{}
 	f.Typ = &ast.FunctionType{}
 	f.AccessFlags = m.AccessFlags
-	//f.Signature = m.Signature
+	f.Signature = m.Signature
 	t, _ := jvm.ParseType(m.Typ.Return)
 	f.Typ.Returns = []*ast.VariableDefinition{
 		&ast.VariableDefinition{},
@@ -152,8 +179,6 @@ func (p *PackageLoader) loadAsJava(j *class_json.ClassJson) {
 	for _, v := range j.Methods {
 		m := &ast.ClassMethod{}
 		m.Func = p.loadMethod(v)
-		//parse signatures
-		m.Func.MethodSignature = v.Signature
 		if v.Name == shortname {
 			c.Constructors = append(c.Constructors, m)
 			continue

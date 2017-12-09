@@ -64,7 +64,7 @@ func (b *Block) searchFunction(e *Expression) *Function {
 type InheritedAttribute struct {
 	istop      bool // if it is a top block
 	infor      bool // if this statement is in for or not
-	infunction bool // if this in a function situation
+	infunction bool // if this in a function situation,return can be availale or not
 	returns    ReturnList
 	p          *Package
 }

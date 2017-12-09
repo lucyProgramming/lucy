@@ -4,7 +4,7 @@ import "fmt"
 
 //代表语法数的一个节点
 type Node struct {
-	Pos  Pos
+	//Pos  Pos
 	Data interface{} //class defination or varialbe Defination
 }
 
@@ -139,7 +139,6 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	c.Enums = make([]*Enum, 0)
 	c.Vars = make([]*VariableDefinition, 0)
 	c.Consts = make([]*Const, 0)
-	//主要是检查重复申明
 	for _, v := range t {
 		switch v.Data.(type) {
 		case *Block:
