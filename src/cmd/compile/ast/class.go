@@ -2,12 +2,6 @@ package ast
 
 import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 
-//const (
-//	ACCESS_PUBLIC = iota
-//	ACCESS_PROTECTED
-//	ACCESS_PRIVATE
-//)
-
 type Class struct {
 	Access               uint16 // public private or protected
 	Pos                  *Pos
@@ -19,6 +13,8 @@ type Class struct {
 	SuperClassName       string
 	SuperClass           *Class
 	Constructors         []*ClassMethod // can be nil
+	Signature            *class_json.ClassSignature
+	SouceFile            string
 }
 
 func (c *Class) check() []error {
@@ -47,19 +43,15 @@ func (c *Class) checkMethods() []error {
 
 type ClassMethod struct {
 	ClassFieldProperty
-	Func      *Function
-	Signature *class_json.MethodSignature
+	Func *Function
 }
 
 type ClassFieldProperty struct {
-	IsStatic    bool   //static or not
-	AccessFlags uint16 // public private or protected
+	IsStatic bool //static or not
 }
 
 type ClassField struct {
 	ClassFieldProperty
 	VariableDefinition
-	Tag       string //for reflect
-	Pos       *Pos
-	Signature *class_json.FieldSignature
+	Pos *Pos
 }

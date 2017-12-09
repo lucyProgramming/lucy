@@ -62,12 +62,68 @@ func (p *PackageLoader) loadAsLucy(j *class_json.ClassJson) {
 	{
 		t := strings.Split(j.ThisClass, "/")
 		shortname = t[len(t)-1]
+		shortname = strings.Title(shortname)
 	}
 	mainclass := shortname == p.mainClassName // if match
 	if mainclass {
+		p.loadMainLucy(j)
+		return
+	}
+	// load regular class
+}
 
+/*
+	main class
+	比如包名为 lucy/lang/xxx/
+	main class wei Xxx
+	main class cannot
+*/
+func (p *PackageLoader) loadMainLucy(j *class_json.ClassJson) {
+	if p.P.Vars == nil {
+		p.P.Vars = make(map[string]*ast.VariableDefinition)
+	}
+	for _, v := range j.Fields {
+		p.P.Vars[v.Name] = p.loadFieldAsVariableDefination(v)
+	}
+	if p.P.Funcs == nil {
+		p.P.Funcs = make(map[string][]*ast.Function)
+	}
+	for _, v := range j.Methods {
+		f := p.loadMethod(v)
+		if p.P.Funcs[v.Name] == nil {
+			p.P.Funcs[v.Name] = []*ast.Function{f}
+		} else {
+			p.P.Funcs[v.Name] = append(p.P.Funcs[v.Name], f)
+		}
+	}
+}
+
+func (p *PackageLoader) loadFieldAsVariableDefination(field *class_json.Field) *ast.VariableDefinition {
+	v := &ast.VariableDefinition{}
+	v.Name = field.Name
+	v.AccessFlags = field.AccessFlags
+	v.Typ, _ = jvm.ParseType(field.Descriptor)
+	return v
+}
+
+func (p *PackageLoader) loadMethod(m *class_json.Method) *ast.Function {
+	f := &ast.Function{}
+	f.Typ = &ast.FunctionType{}
+	f.AccessFlags = m.AccessFlags
+	//f.Signature = m.Signature
+	t, _ := jvm.ParseType(m.Typ.Return)
+	f.Typ.Returns = []*ast.VariableDefinition{
+		&ast.VariableDefinition{},
+	}
+	f.Typ.Returns[0].Typ = t
+	f.Typ.Parameters = make([]*ast.VariableDefinition, len(f.Typ.Parameters))
+	for k, v := range m.Typ.Parameters {
+		vd := &ast.VariableDefinition{}
+		vd.Typ, _ = jvm.ParseType(v)
+		f.Typ.Parameters[k] = vd
 	}
 
+	return f
 }
 
 func (p *PackageLoader) loadAsJava(j *class_json.ClassJson) {
@@ -75,13 +131,15 @@ func (p *PackageLoader) loadAsJava(j *class_json.ClassJson) {
 	c.Fields = make(map[string]*ast.ClassField)
 	c.Name = j.ThisClass
 	c.SuperClassName = j.SuperClass
+	c.SouceFile = j.SourceFile
+	c.Signature = j.Signature
 	for _, v := range j.Fields {
 		t, _ := jvm.ParseType(v.Descriptor)
 		f := &ast.ClassField{}
-		f.ClassFieldProperty.AccessFlags = v.AccessFlags
+		f.AccessFlags = v.AccessFlags
 		f.Name = v.Name
-		f.Signature = v.Signature
 		f.Typ = t
+		f.Signature = v.Signature
 		c.Fields[v.Name] = f
 	}
 	shortname := ""
@@ -93,19 +151,9 @@ func (p *PackageLoader) loadAsJava(j *class_json.ClassJson) {
 	c.Constructors = []*ast.ClassMethod{}
 	for _, v := range j.Methods {
 		m := &ast.ClassMethod{}
-		m.AccessFlags = v.AccessFlags
-		m.Signature = v.Signature
-		m.Func = &ast.Function{}
-		m.Func.Name = v.Name
-		m.Func.Typ = &ast.FunctionType{}
-		m.Func.Typ.Parameters = make([]*ast.VariableDefinition, len(v.Typ.Parameters))
-		for kk, vv := range v.Typ.Parameters {
-			t, _ := jvm.ParseType(vv)
-			m.Func.Typ.Parameters[kk] = &ast.VariableDefinition{}
-			m.Func.Typ.Parameters[kk].Typ = t
-		}
-		m.Func.Typ.Returns = []*ast.VariableDefinition{&ast.VariableDefinition{}}
-		m.Func.Typ.Returns[0].Typ, _ = jvm.ParseType(v.Typ.Return)
+		m.Func = p.loadMethod(v)
+		//parse signatures
+		m.Func.MethodSignature = v.Signature
 		if v.Name == shortname {
 			c.Constructors = append(c.Constructors, m)
 			continue
@@ -115,7 +163,6 @@ func (p *PackageLoader) loadAsJava(j *class_json.ClassJson) {
 		}
 		c.Methods[v.Name] = append(c.Methods[v.Name], m)
 	}
-
 }
 
 func (*PackageLoader) LoadPackage(name string) (*ast.Package, error) {
@@ -138,7 +185,6 @@ func (*PackageLoader) LoadPackage(name string) (*ast.Package, error) {
 			break
 		}
 	}
-
 	if realpath == "" {
 		return nil, fmt.Errorf("package %v not found")
 	}

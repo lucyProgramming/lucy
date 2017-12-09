@@ -2,15 +2,17 @@ package ast
 
 import (
 	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
 type Function struct {
-	AccessFlags uint16 // public private or protected
-	Typ         *FunctionType
-	Name        string // if name is nil string,means no name function
-	Block       *Block
-	Pos         *Pos
-	Signature   string
+	AccessFlags     uint16 // public private or protected
+	Typ             *FunctionType
+	Name            string // if name is nil string,means no name function
+	Block           *Block
+	Pos             *Pos
+	Signature       string
+	MethodSignature *class_json.MethodSignature
 }
 
 func (f *Function) MKSignature() {

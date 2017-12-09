@@ -123,7 +123,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			//	continue
 			//}
 			m := &ast.ClassMethod{}
-			m.ClassFieldProperty.AccessFlags = c.access
+			m.Func.AccessFlags = c.access
 			m.IsStatic = c.isStatic
 			m.Func = f
 			c.resetProperty()
@@ -201,7 +201,7 @@ func (c *Class) parseFiled() error {
 		f.Pos = v.Pos
 		f.Typ = &ast.VariableType{}
 		*f.Typ = *t
-		f.ClassFieldProperty.AccessFlags = c.access
+		f.AccessFlags = c.access
 		f.IsStatic = c.isStatic
 		c.classDefinition.Fields[v.Name] = f
 	}

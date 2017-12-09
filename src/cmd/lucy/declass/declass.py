@@ -134,7 +134,7 @@ class JvmClass:
                     s = s[1:]
                     break # should be impossible
 
-        ret["parameterd_types"] = pt
+        ret["typed_parameters"] = pt
         # super class signature
         s ,superclass = self.__parse_class_type_signature(s)
         ret["super_class"] = superclass

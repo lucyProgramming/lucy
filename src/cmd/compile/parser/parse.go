@@ -429,29 +429,6 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	return vs, nil
 }
 
-//func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
-//	ret := []*ast.VariableType{}
-//	var t *ast.VariableType
-//	for {
-//		t = p.parseType()
-//		if t == nil { // not a type
-//			return ret, nil
-//		}
-//		ret = append(ret, t)
-//		p.Next()
-//		if p.token.Type != lex.TOKEN_COMMA {
-//			break
-//		}
-//		t = p.parseType()
-//		if t == nil {
-//			return ret, fmt.Errorf("%s %d:%d is not type", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
-//		} else {
-//			ret = append(ret, t)
-//		}
-//	}
-//	return ret, nil
-//}
-
 func (p *Parser) parseType() (*ast.VariableType, error) {
 	var err error
 	switch p.token.Type {
@@ -499,6 +476,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
 		}, nil
+
 	case lex.TOKEN_DOUBLE:
 		p.Next()
 		return &ast.VariableType{
@@ -506,9 +484,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		}, nil
 	case lex.TOKEN_LONG:
 		p.Next()
-		return &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_LONG,
-		}, nil
+		return &ast.VariableType{}, nil
 	case lex.TOKEN_STRING:
 		p.Next()
 		return &ast.VariableType{
