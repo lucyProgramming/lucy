@@ -8,11 +8,11 @@ const (
 	VARIABLE_TYPE_BOOL = iota
 	VARIABLE_TYPE_BYTE
 	VARIABLE_TYPE_SHORT
+	VARIABLE_TYPE_CHAR
 	VARIABLE_TYPE_INT
 	VARIABLE_TYPE_LONG
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_DOUBLE
-	VARIABLE_TYPE_CHAR
 	VARIABLE_TYPE_STRING
 	VARIALBE_TYPE_FUNCTION
 	VARIALBE_TYPE_ENUM  //enum
@@ -32,12 +32,19 @@ type VariableType struct {
 	Class           *Class
 }
 
-func (v *VariableType) Signature() string {
+/*
+	mk jvm signature
+*/
+func (v *VariableType) Descriptor() string {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		return "Z"
 	case VARIABLE_TYPE_BYTE:
 		return "B"
+	case VARIABLE_TYPE_SHORT:
+		return "S"
+	case VARIABLE_TYPE_CHAR:
+		return "C"
 	case VARIABLE_TYPE_INT:
 		return "I"
 	case VARIABLE_TYPE_LONG:
@@ -48,19 +55,17 @@ func (v *VariableType) Signature() string {
 		return "D"
 	case VARIABLE_TYPE_VOID:
 		return "V"
-	case VARIABLE_TYPE_SHORT:
-		return "S"
 	case VARIABLE_TYPE_ARRAY:
-		return "[" + v.CombinationType.Signature()
+		return "[" + v.CombinationType.Descriptor()
 	case VARIABLE_TYPE_STRING:
 		return "Ljava/lang/String"
 	}
 	panic("unhandle type signature")
 }
 
-//func (t *VariableType) matchExpression(e *Expression) bool {
-//	return false
-//}
+func (t *VariableType) matchExpression(b *Block, e *Expression) bool {
+	return false
+}
 
 func (t *VariableType) typeCompatible(t2 *VariableType) bool {
 	if t.Equal(t2) {
@@ -69,8 +74,71 @@ func (t *VariableType) typeCompatible(t2 *VariableType) bool {
 	return false
 }
 
-func (t *VariableType) constValueValid(e *Expression) {
+/*
+	check const if valid
+	number
+*/
+func (t *VariableType) isNumber() bool {
+	return t.Typ == VARIABLE_TYPE_BYTE ||
+		t.Typ == VARIABLE_TYPE_SHORT ||
+		t.Typ == VARIABLE_TYPE_CHAR ||
+		t.Typ == VARIABLE_TYPE_INT ||
+		t.Typ == VARIABLE_TYPE_LONG ||
+		t.Typ == VARIABLE_TYPE_FLOAT ||
+		t.Typ == VARIABLE_TYPE_DOUBLE
+}
 
+/*
+	float or double
+*/
+func (t *VariableType) isFloat() bool {
+	return t.Typ == VARIABLE_TYPE_FLOAT || t.Typ == VARIABLE_TYPE_DOUBLE
+}
+
+func (t *VariableType) constValueValid(e *Expression) (data interface{}, err error) {
+	//number type
+	if t.isNumber() {
+		if !t.isNumber() {
+			err = fmt.Errorf("expression is not number")
+			return
+		}
+		if t.isFloat() {
+			f := e.literalValue2Float64()
+			if t.Typ == VARIABLE_TYPE_FLOAT {
+				return float32(f), nil
+			} else {
+				return f, nil
+			}
+		} else {
+			d := e.literalValue2Int64()
+			switch t.Typ {
+			case VARIABLE_TYPE_BYTE:
+				return byte(d), nil
+			case VARIABLE_TYPE_SHORT:
+				return int16(d), nil
+			case VARIABLE_TYPE_CHAR:
+				return int16(d), nil
+			case VARIABLE_TYPE_INT:
+				return int32(d), nil
+			case VARIABLE_TYPE_LONG:
+				return d, nil
+			case VARIABLE_TYPE_FLOAT:
+				return float32(d), nil
+			case VARIABLE_TYPE_DOUBLE:
+				return float64(d), nil
+			}
+		}
+	}
+	if t.Typ == VARIABLE_TYPE_BOOL {
+		return e.canBeCovert2Bool()
+	}
+	if t.Typ == VARIABLE_TYPE_STRING {
+		if e.Typ != EXPRESSION_TYPE_STRING {
+			return nil, fmt.Errorf("expression is not string but %s", e.OpName())
+		}
+		return e.Data.(string), nil
+	}
+	return nil, fmt.Errorf("cannot assign %s to %s", e.OpName(), t.TypeString)
 }
 
 //assign some simple expression
@@ -134,7 +202,7 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 //}
 
 //可读的类型信息
-func (v *VariableType) TypeString(ret *string) {
+func (v *VariableType) TypeString_(ret *string) {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		*ret = "bool"
@@ -152,8 +220,15 @@ func (v *VariableType) TypeString(ret *string) {
 		*ret = v.Name + "(enum)"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
-		v.CombinationType.TypeString(ret)
+		v.CombinationType.TypeString_(ret)
 	}
+}
+
+//可读的类型信息
+func (v *VariableType) TypeString() string {
+	t := ""
+	v.TypeString_(&t)
+	return t
 }
 
 func (v *VariableType) Equal(e *VariableType) bool {

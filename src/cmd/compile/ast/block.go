@@ -124,9 +124,9 @@ func (b *Block) isBoolValue(e *Expression) (bool, []error) {
 	if e.Typ == EXPRESSION_TYPE_BOOL { //bool literal
 		return true, nil
 	}
-	t, errs := b.getTypeFromExpression(e)
-	if errs != nil && len(errs) > 0 {
-		return false, errs
+	t, err := b.getTypeFromExpression(e)
+	if err != nil {
+		return false, err
 	}
 	return t.Typ == VARIABLE_TYPE_BOOL, nil
 }

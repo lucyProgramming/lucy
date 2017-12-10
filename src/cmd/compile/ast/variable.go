@@ -3,7 +3,7 @@ package ast
 import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 
 type VariableDefinition struct {
-	Used        bool
+	Used        bool   // use as right value
 	AccessFlags uint16 // public private or protected
 	Pos         *Pos
 	Expression  *Expression

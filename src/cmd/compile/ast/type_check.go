@@ -79,11 +79,12 @@ func (p *Package) checkConst() []error {
 		v.Expression.Typ = t
 		v.Expression.Data = value
 		if v.Typ != nil && v.Expression != nil {
-			v.Data, err = v.Typ.assignExpression(p, v.Expression)
+			d, err := v.Typ.constValueValid(v.Expression)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s const %v has worng initiation value", errMsgPrefix(v.Pos), v.Name))
 				continue
 			}
+			v.Data = d
 		}
 	}
 	return errs
@@ -91,40 +92,36 @@ func (p *Package) checkConst() []error {
 
 func (p *Package) checkGlobalVariables() []error {
 	errs := make([]error, 0)
-	var err error
-	var block Block
+	var es []error
 	for _, v := range p.Vars {
-		if v.Expression == nil && v.Typ == nil {
-			continue
+		es = p.Block.checkVar(v)
+		if errsNotEmpty(es) {
+			errs = append(errs, es...)
 		}
-		if v.Expression != nil {
-			err = v.Expression.constFold() //fold const error
-			if err != nil {
-				errs = append(errs, fmt.Errorf("%s variable %s defined wrong,err:%v", errMsgPrefix(v.Pos), v.Name, err))
-				continue
-			}
-		}
-		if v.Typ == nil && v.Expression != nil { //means variable typed by assignment
-			var es []error
-			v.Typ, es = block.getTypeFromExpression(v.Expression)
-			if es != nil {
-				errs = append(errs, es...)
-			}
-			continue
-		}
-		if v.Typ != nil && v.Expression != nil { // if typ match
-			t2, es := block.getTypeFromExpression(v.Expression)
-			if len(es) > 0 {
-				errs = append(errs, es...)
-				continue
-			}
-			match := v.Typ.typeCompatible(t2)
-			if !match {
-				errs = append(errs, fmt.Errorf("%s variable %s dose not matched by %s ", errMsgPrefix(v.Pos), v.Name, v.Expression.typeName()))
-				continue
-			}
-		}
-		panic("unhandled situation")
 	}
 	return errs
+}
+
+func (b *Block) checkVar(v *VariableDefinition) []error {
+	if v.Expression == nil && v.Typ == nil {
+		panic(1)
+	}
+	var err error
+	if v.Expression != nil {
+		err = v.Expression.constFold() //fold const error
+		if err != nil {
+			return []error{fmt.Errorf("%s variable %s defined wrong,err:%v", errMsgPrefix(v.Pos), v.Name, err)}
+		}
+	}
+	if v.Typ != nil { //means variable typed by assignment
+		match := v.Typ.matchExpression(b, v.Expression)
+		if !match {
+			return []error{fmt.Errorf("%s variable %s dose not matched by %s ", errMsgPrefix(v.Pos), v.Name, v.Expression.typeName())}
+		}
+		return nil
+	} else {
+		var es []error
+		v.Typ, es = b.getTypeFromExpression(v.Expression)
+		return es
+	}
 }

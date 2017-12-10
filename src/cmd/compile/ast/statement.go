@@ -90,14 +90,6 @@ func (s *Statement) check(b *Block) []error { // b is father
 	return errs
 }
 
-func notFoundError(pos *Pos, typ, name string) error {
-	return fmt.Errorf("%s %s:%s not found", errMsgPrefix(pos), typ, name)
-}
-
-func errMsgPrefix(pos *Pos) string {
-	return fmt.Sprintf("%s %d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
-}
-
 func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *Pos) []error {
 	errs := make([]error, 0)
 	if len(call.Args) == 0 {
@@ -114,16 +106,14 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 	length := len(call.Args)
 	for i := 0; i < length; i++ {
 		t, es := b.getTypeFromExpression(call.Args[i])
-		if len(es) > 0 {
+		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 			continue
 		}
 
 		if !f.Typ.Parameters[i].Typ.typeCompatible(t) {
-			typstring1 := ""
-			typstring2 := ""
-			f.Typ.Parameters[i].Typ.TypeString(&typstring1)
-			t.TypeString(&typstring2)
+			typstring1 := f.Typ.Parameters[i].Typ.TypeString()
+			typstring2 := t.TypeString()
 			errs = append(errs,
 				fmt.Errorf("%s %d:%d %s not match %s,cannot call function",
 					p.Filename,
@@ -191,7 +181,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		}
 		item := &SymbolicItem{}
 		t, es := b.getTypeFromExpression(binary.Right)
-		if len(es) > 0 {
+		if err != nil && len(errs) > 0 {
 			errs = append(errs, es...)
 			return errs
 		}
@@ -286,10 +276,8 @@ func (s *StatementReturn) check(b *Block) []error {
 }
 
 func typeNotMatchError(pos *Pos, t1, t2 *VariableType) error {
-	typestring1 := ""
-	typestring2 := ""
-	t1.TypeString(&typestring1)
-	t1.TypeString(&typestring2)
+	typestring1 := t1.TypeString()
+	typestring2 := t1.TypeString()
 	return fmt.Errorf("%s %d:%d type not match (%s!=%s)", pos.Filename, pos.StartLine, pos.StartColumn, typestring1, typestring2)
 }
 

@@ -6,6 +6,7 @@ import (
 )
 
 type Package struct {
+	Block     Block // package always have a default block
 	Files     map[string]*File
 	Name      string //if error,should be multi names
 	Blocks    []*Block

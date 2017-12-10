@@ -634,10 +634,9 @@ func init() {
 		t.Desp = "->"
 		return t, nil
 	})
-
-	// multi line expression
-	//	Lexer.Add([]byte(`(\/\*(?!\*\/)[.|\n]*\*\/)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	//		return nil, nil
-	//	})
+	//multi line comment
+	Lexer.Add([]byte(`/\*([^*]|\r|\n|(\*+([^*/]|\r|\n)))*\*+/`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		return nil, nil
+	})
 
 }

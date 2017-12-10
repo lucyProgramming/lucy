@@ -1,7 +1,7 @@
 
-from  src.cmd.lucy import  run
-from  src.cmd.lucy import command
-from  src.cmd.lucy import declass
+from src.cmd.lucy import run
+from src.cmd.lucy import command
+from src.cmd.lucy import declass
 import sys
 
 
@@ -14,8 +14,6 @@ class Help(command.Command):
         
         '''
         print(helpMsg)
-
-
 
 
 commands = {

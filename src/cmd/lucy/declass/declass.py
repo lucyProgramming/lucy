@@ -50,7 +50,7 @@ class Declass(command.Command):
                 self.__parseDir("%s/%s" % (src,d),"%s/%s" % (dest,d))
 
     def __parseFile(self,src,dest,filename):
-        p = JvmClassParser(src,dest)
+        p = JvmClassParser(src)
         print(src + "================>" + dest)
         ret = p.parse()
         if "ok" not in ret:
@@ -442,9 +442,8 @@ CONSTANT_TAG_InvokeDynamic = 18
 
 
 class JvmClassParser:
-    def __init__(self,filepath,destfilepath):
+    def __init__(self,filepath):
         self.__filepath = filepath
-        self.__descfilepath = destfilepath
         self.__result = JvmClass() # hold result in this
 
     def parse(self):  # file is definitely exits

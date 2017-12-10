@@ -96,7 +96,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_CONST:
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
@@ -109,7 +109,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			}
 			if typ != lex.TOKEN_COLON_ASSIGN {
 				b.parser.errs = append(b.parser.errs,
-					fmt.Errorf("%s declare const should use := instead of =", b.parser.errorMsgPrefix(names[0].Pos)))
+					fmt.Errorf("%s declare const should use ‘:=’ instead of ‘=’", b.parser.errorMsgPrefix(names[0].Pos)))
 			}
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after const declaration", b.parser.errorMsgPrefix()))
@@ -147,7 +147,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			}
 			r.Expressions = es
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  no ; after return statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  no ‘;’after return statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				continue
 			}
 			b.Next()

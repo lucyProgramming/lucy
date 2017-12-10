@@ -9,5 +9,4 @@ func main() {
 	flag.BoolVar(&lc.CompileFlags.OnlyImport, "io", false, "only parse import package")
 	flag.Parse()
 	lc.Main(flag.Args())
-
 }

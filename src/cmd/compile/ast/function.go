@@ -15,10 +15,10 @@ type Function struct {
 	Signature   *class_json.MethodSignature
 }
 
-func (f *Function) MKSignature() {
+func (f *Function) MkDescriptor() {
 	s := "("
 	for _, v := range f.Typ.Parameters {
-		s += v.NameWithType.Typ.Signature() + ";"
+		s += v.NameWithType.Typ.Descriptor() + ";"
 	}
 	s += ")"
 	f.Descriptor = s

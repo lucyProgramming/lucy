@@ -141,6 +141,53 @@ type ExpressionArray struct {
 	Expression *Expression
 }
 
+/*
+	literal value to float64
+*/
+func (e *Expression) literalValue2Float64() int64 {
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return int64(e.Data.(byte))
+	case EXPRESSION_TYPE_INT:
+		return e.Data.(int64)
+	case EXPRESSION_TYPE_FLOAT:
+		return int64(e.Data.(float64))
+	default:
+		panic("unhandle convert to int64")
+	}
+}
+
+/*
+	literal value to float64
+*/
+func (e *Expression) literalValue2Int64() float64 {
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return float64(e.Data.(byte))
+	case EXPRESSION_TYPE_INT:
+		return float64(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return e.Data.(float64)
+	default:
+		panic("unhandle convert to float64")
+	}
+}
+
+func (e *Expression) canBeCovert2Bool() (bool, error) {
+	switch e.Typ {
+	case EXPRESSION_TYPE_BOOL:
+		return e.Data.(bool), nil
+	case EXPRESSION_TYPE_BYTE:
+		return e.Data.(byte) != 0, nil
+	case EXPRESSION_TYPE_INT:
+		return e.Data.(int64) != 0, nil
+	case EXPRESSION_TYPE_FLOAT:
+		return !float64IsZero(e.Data.(float64)), nil
+	default:
+		return false, fmt.Errorf("can not convert to bool")
+	}
+}
+
 func (e *Expression) OpName() string {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
@@ -403,6 +450,7 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 	return false, fmt.Errorf("can`t compare")
 }
 
+//this function no need to assign back
 func (e *Expression) constFold() error {
 	is, typ, value, err := e.getConstValue() //something is error
 	if err != nil {
