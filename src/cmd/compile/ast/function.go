@@ -25,9 +25,7 @@ func (f *Function) MkDescriptor() {
 }
 
 func (f *Function) check(b *Block) []error {
-	if b != nil {
-		f.Block.inherite(b)
-	}
+	f.Block.inherite(b)
 	errs := make([]error, 0)
 	f.Typ.checkParaMeterAndRetuns(f.Block, errs)
 	f.Block.InheritedAttribute.infunction = true
@@ -44,7 +42,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			vd := &VariableDefinition{}
 			vd.Name = v.Name
 			vd.Typ = v.Typ
-			err = block.SymbolicTable.Insert(v.Name, nil, vd)
+			err = block.insert(v.Name, nil, vd)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue
@@ -52,28 +50,29 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			if v.Expression != nil {
 				is, typ, value, err := v.Expression.getConstValue()
 				if err != nil {
-					errs = append(errs, fmt.Errorf("%s %d:%d default value is wrong because of %v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
+					errs = append(errs, fmt.Errorf("%s default value is wrong because of %v", errMsgPrefix(v.Pos), err))
 					continue
 				}
 				if !is {
-					errs = append(errs, fmt.Errorf("%s %d:%d default value is not a const value %v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
+					errs = append(errs, fmt.Errorf("%s default value is not a const value %v", errMsgPrefix(v.Pos), err))
 					continue
 				}
 				t, _ := block.getTypeFromExpression(&Expression{Typ: typ, Data: value})
 				if !v.Typ.typeCompatible(t) {
-					errs = append(errs, fmt.Errorf("%s %d:%d default value can not assign to variale type %v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn))
+					errs = append(errs, fmt.Errorf("%s default value can not assign to variale type %v", errMsgPrefix(v.Pos)))
 					continue
 				}
 			}
 		}
 	}
+
 	//handler return
 	for _, v := range f.Returns {
 		if v.Name != "" {
 			t := VariableDefinition{}
 			t.Name = v.Name
 			t.Typ = v.Typ
-			err = block.SymbolicTable.Insert(v.Name, nil, t)
+			err = block.insert(v.Name, nil, t)
 			if err != nil {
 				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 				continue

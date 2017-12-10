@@ -105,21 +105,21 @@ func (p *PackageLoader) loadAsLucy(j *class_json.ClassJson) {
 	main class cannot
 */
 func (p *PackageLoader) loadMainLucy(j *class_json.ClassJson) {
-	if p.P.Vars == nil {
-		p.P.Vars = make(map[string]*ast.VariableDefinition)
+	if p.P.Block.Vars == nil {
+		p.P.Block.Vars = make(map[string]*ast.VariableDefinition)
 	}
 	for _, v := range j.Fields {
-		p.P.Vars[v.Name] = p.loadFieldAsVariableDefination(v)
+		p.P.Block.Vars[v.Name] = p.loadFieldAsVariableDefination(v)
 	}
-	if p.P.Funcs == nil {
-		p.P.Funcs = make(map[string][]*ast.Function)
+	if p.P.Block.Funcs == nil {
+		p.P.Block.Funcs = make(map[string][]*ast.Function)
 	}
 	for _, v := range j.Methods {
 		f := p.loadMethod(v)
-		if p.P.Funcs[v.Name] == nil {
-			p.P.Funcs[v.Name] = []*ast.Function{f}
+		if p.P.Block.Funcs[v.Name] == nil {
+			p.P.Block.Funcs[v.Name] = []*ast.Function{f}
 		} else {
-			p.P.Funcs[v.Name] = append(p.P.Funcs[v.Name], f)
+			p.P.Block.Funcs[v.Name] = append(p.P.Block.Funcs[v.Name], f)
 		}
 	}
 }

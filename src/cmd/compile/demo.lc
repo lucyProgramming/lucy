@@ -27,6 +27,20 @@ c := 100;  //private global variable
 	}
 	io.System.println("11111111111");
 	var a io.PrintStram;
+
+	class xx{
+
+	}
+
+    fn aa(){
+        System.out.println(1111111111111);
+        a := fn()->(x xx){
+            return new xx();
+        }
+    }
+
+
+
 }
 
 

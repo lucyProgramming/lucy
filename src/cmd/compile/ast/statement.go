@@ -153,7 +153,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		left := s.Expression.Data.(*Expression)     // left means left value
 		if left.Typ == EXPRESSION_TYPE_IDENTIFIER { //naming
 			name := left.Data.(string)
-			item := b.searchSymbolicItemAlsoGlobalVar(name)
+			item := b.searchByName(name)
 			if item == nil {
 				errs = append(errs, notFoundError(s.Pos, "variable", name))
 				return errs
@@ -169,30 +169,16 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			errs = append(errs, fmt.Errorf("%s %d:%d no name on the left", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
 			return errs
 		}
-		name := binary.Left.Data.(string)
-		if _, ok := b.SymbolicTable.ItemsMap[name]; ok {
-			errs = append(errs, fmt.Errorf("%s %d:%d variable %s is already declared", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
-			return errs
+		vs := binary.Left.Data.(*ExpressionDeclareVariable)
+		for _, v := range vs.Vs {
+			es := b.checkVar(v)
+			if errsNotEmpty(es) {
+				errs = append(errs, es...)
+			}
+			b.insert(v.Name, s.Expression.Pos, v)
 		}
-		err := binary.Right.constFold()
-		if err != nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d varialbe cannot be declare because %v", binary.Right.Pos.Filename, binary.Right.Pos.StartLine, binary.Right.Pos.StartColumn, err))
-			return errs
-		}
-		item := &SymbolicItem{}
-		t, es := b.getTypeFromExpression(binary.Right)
-		if err != nil && len(errs) > 0 {
-			errs = append(errs, es...)
-			return errs
-		}
-		item.Var = &VariableDefinition{}
-		item.Var.Typ = t
-		item.Var.Name = name
-		item.Typ = ITEM_TYPE_VAR
-		b.SymbolicTable.Insert(name, nil, item)
 		return errs
 	}
-
 	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
 		s.Expression.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
 		s.Expression.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
@@ -202,7 +188,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		binary := s.Expression.Data.(*ExpressionBinary)
 		if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			name := s.Expression.Data.(string)
-			item := b.searchSymbolicItemAlsoGlobalVar(name)
+			item := b.searchByName(name)
 			if item == nil {
 				errs = append(errs, notFoundError(s.Pos, "variable", name))
 				return errs
@@ -211,9 +197,9 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		}
 	}
 	if s.Expression.Typ == EXPRESSION_TYPE_VAR {
-		vs := s.Expression.Data.(*ExpressionVar)
+		vs := s.Expression.Data.(*ExpressionDeclareVariable)
 		for _, v := range vs.Vs {
-			err := b.SymbolicTable.Insert(v.Name, v.Pos, v)
+			err := b.insert(v.Name, v.Pos, v)
 			if err != nil {
 				errs = append(errs, err)
 			}

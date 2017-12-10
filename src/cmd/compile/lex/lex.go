@@ -416,10 +416,6 @@ func init() {
 	Lexer.Add([]byte("//[^\n]*\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
 	})
-	//TODO::支持多行注释
-	//Lexer.Add([]byte(`()`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	//	return nil , nil
-	//})
 	Lexer.Add([]byte("package"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
@@ -595,6 +591,7 @@ func init() {
 		t.Data = string(match.Bytes[1:len(match.Bytes)])
 		return t, nil
 	})
+
 	//byte literal
 	Lexer.Add([]byte(`(\'[.|\n]\')`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
@@ -602,13 +599,6 @@ func init() {
 		t.Type = TOKEN_LITERAL_BYTE
 		t.Desp = string(match.Bytes)
 		t.Data = match.Bytes[1]
-		return t, nil
-	})
-	Lexer.Add([]byte("panic"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_PAINIC
-		t.Desp = "panic"
 		return t, nil
 	})
 

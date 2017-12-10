@@ -154,7 +154,7 @@ func (c *Class) resetProperty() {
 }
 
 func (c *Class) parseConst() error {
-	names, _, es, err := c.parser.parseAssignedNames()
+	names, _, es, variabletype, err := c.parser.parseAssignedNames()
 	if err != nil {
 		return err
 	}
@@ -169,6 +169,7 @@ func (c *Class) parseConst() error {
 		c.classDefinition.Consts[v.Name] = &ast.Const{}
 		c.classDefinition.Consts[v.Name].Pos = v.Pos
 		c.classDefinition.Consts[v.Name].Expression = es[k]
+		c.classDefinition.Consts[v.Name].Typ = variabletype
 	}
 	return nil
 }

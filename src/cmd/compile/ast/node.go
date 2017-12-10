@@ -192,31 +192,31 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	}
 	errs = append(errs, c.checkEnum()...)
 	redeclareErrors = c.redeclareErrors()
-	p.Consts = make(map[string]*Const)
+	p.Block.Consts = make(map[string]*Const)
 	for _, v := range c.Consts {
-		p.Consts[v.Name] = v
+		p.Block.Consts[v.Name] = v
 	}
-	p.Vars = make(map[string]*VariableDefinition)
+	p.Block.Vars = make(map[string]*VariableDefinition)
 	for _, v := range c.Vars {
-		p.Vars[v.Name] = v
+		p.Block.Vars[v.Name] = v
 	}
-	p.Funcs = make(map[string][]*Function)
+	p.Block.Funcs = make(map[string][]*Function)
 	for _, v := range c.Funcs {
-		if p.Funcs[v.Name] == nil {
-			p.Funcs[v.Name] = []*Function{}
+		if p.Block.Funcs[v.Name] == nil {
+			p.Block.Funcs[v.Name] = []*Function{}
 		}
-		p.Funcs[v.Name] = append(p.Funcs[v.Name], v)
+		p.Block.Funcs[v.Name] = append(p.Block.Funcs[v.Name], v)
 	}
-	p.Classes = make(map[string]*Class)
+	p.Block.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {
-		p.Classes[v.Name] = v
+		p.Block.Classes[v.Name] = v
 	}
-	p.Enums = make(map[string]*Enum)
-	p.EnumNames = make(map[string]*EnumName)
+	p.Block.Enums = make(map[string]*Enum)
+	p.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range c.Enums {
-		p.Enums[v.Name] = v
+		p.Block.Enums[v.Name] = v
 		for _, vv := range v.Names {
-			p.EnumNames[vv.Name] = vv
+			p.Block.EnumNames[vv.Name] = vv
 		}
 	}
 	p.Blocks = c.Blocks

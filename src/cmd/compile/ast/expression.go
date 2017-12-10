@@ -52,6 +52,7 @@ const (
 	EXPRESSION_TYPE_LIST
 	EXPRESSION_TYPE_FUNCTION
 	EXPRESSION_TYPE_VAR
+	EXPRESSION_TYPE_CONST
 	EXPRESSION_TYPE_CONVERTION // []byte(str)
 	//EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
 )
@@ -112,8 +113,12 @@ type ExpressionFunctionCall struct {
 	Args       CallArgs
 }
 
-type ExpressionVar struct {
+type ExpressionDeclareVariable struct {
 	Vs []*VariableDefinition
+}
+
+type ExpressionDeclareConsts struct {
+	Cs []*Const
 }
 
 type ExpressionTypeConvertion struct {

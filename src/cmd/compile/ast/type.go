@@ -32,6 +32,11 @@ type VariableType struct {
 	Class           *Class
 }
 
+//clone a type
+func (t *VariableType) Clone() *VariableType {
+	return nil
+}
+
 /*
 	mk jvm signature
 */
@@ -151,8 +156,8 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 		}
 	case VARIALBE_TYPE_ENUM:
 		if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
-			if _, ok := p.EnumNames[e.Data.(string)]; ok {
-				data = p.EnumNames[e.Data.(string)]
+			if _, ok := p.Block.EnumNames[e.Data.(string)]; ok {
+				data = p.Block.EnumNames[e.Data.(string)]
 			}
 		}
 	case VARIABLE_TYPE_BYTE:

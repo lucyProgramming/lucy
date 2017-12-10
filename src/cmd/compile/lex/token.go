@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	TOKEN_FUNCTION       = iota // function
+	TOKEN_FUNCTION       = iota // fn
 	TOKEN_ENUM                  // enum
 	TOKEN_CONST                 //const
 	TOKEN_IF                    // if
@@ -84,12 +84,9 @@ const (
 	TOKEN_LITERAL_INT           // 123
 	TOKEN_LITERAL_STRING        // ""
 	TOKEN_LITERAL_FLOAT         // 0.000
-	TOKEN_PAINIC                //panic
 	TOKEN_DEFER                 // defer
 	TOKEN_TYPE                  //type
 	TOKEN_ARROW                 //->
-	///TOKEN_MULTI_LINE_COMMENT_START        //
-	///TOKEN_MULTI_LINE_COMMENT_END
 )
 
 type Token struct {

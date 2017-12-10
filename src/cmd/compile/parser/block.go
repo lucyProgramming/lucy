@@ -56,7 +56,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ: ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: &ast.Expression{
 					Typ:  ast.EXPRESSION_TYPE_VAR,
-					Data: &ast.ExpressionVar{vs},
+					Data: &ast.ExpressionDeclareVariable{vs},
 				},
 			}
 			block.Statements = append(block.Statements, s)
@@ -96,18 +96,18 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_CONST:
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
 			}
-			names, typ, es, err := b.parser.parseAssignedNames()
+			names, typ, es, variabletype, err := b.parser.parseAssignedNames()
 			if err != nil {
 				b.consume(untils_rc_semicolon)
 				b.Next()
 				continue
 			}
-			if typ != lex.TOKEN_COLON_ASSIGN {
+			if typ != lex.TOKEN_ASSIGN {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s declare const should use ‘:=’ instead of ‘=’", b.parser.errorMsgPrefix(names[0].Pos)))
 			}
@@ -115,16 +115,23 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after const declaration", b.parser.errorMsgPrefix()))
 				b.consume(untils_rc_semicolon)
 			}
+			cs := make([]*ast.Const, len(names))
 			for k, v := range names {
 				c := &ast.Const{}
 				c.Name = v.Name
-				c.Pos = v.Pos
 				c.Expression = es[k]
-				err = block.SymbolicTable.Insert(v.Name, v.Pos, c)
-				if err != nil {
-					b.parser.errs = append(b.parser.errs, err)
-				}
+				c.Typ = variabletype
+				cs[k] = c
 			}
+			r := &ast.Statement{}
+			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			r.Expression = &ast.Expression{
+				Typ: ast.EXPRESSION_TYPE_CONST,
+				Data: &ast.ExpressionDeclareConsts{
+					Cs: cs,
+				},
+			}
+			block.Statements = append(block.Statements, r)
 			b.Next()
 		case lex.TOKEN_RETURN:
 			b.Next()

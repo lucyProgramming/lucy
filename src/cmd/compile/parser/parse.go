@@ -109,7 +109,7 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			names, typ, es, err := p.parseAssignedNames()
+			names, typ, es, variabletype, err := p.parseAssignedNames()
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -143,6 +143,7 @@ func (p *Parser) Parse() []error {
 					c := &ast.Const{}
 					c.Name = v.Name
 					c.Expression = es[k]
+					c.Typ = variabletype
 					if ispublic {
 						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
@@ -156,6 +157,7 @@ func (p *Parser) Parse() []error {
 				for k, v := range names {
 					c := &ast.VariableDefinition{}
 					c.Name = v.Name
+					c.Typ = variabletype
 					c.Expression = es[k]
 					if ispublic {
 						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
@@ -285,34 +287,42 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, int, []*ast.Expression, error) {
+func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, int, []*ast.Expression, *ast.VariableType, error) {
 	names, err := p.parseNameList()
 	if err != nil {
-		return nil, 0, nil, err
+		return nil, 0, nil, nil, err
 	}
-
+	//trying to parse type
+	var variableType *ast.VariableType
+	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
+		variableType, err = p.parseType()
+		if err != nil {
+			p.errs = append(p.errs, err)
+		}
+		return nil, 0, nil, nil, err
+	}
 	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
 		err = fmt.Errorf("%s missing = or := after a name list", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)
-		return nil, 0, nil, err
+		return nil, 0, nil, nil, err
 	}
 	typ := p.token.Type
 	p.Next()
 	if p.eof {
 		err = p.mkUnexpectedEofErr()
 		p.errs = append(p.errs, err)
-		return names, typ, nil, err
+		return names, typ, nil, variableType, err
 	}
 	es, err := p.ExpressionParser.parseExpressions()
 	if err != nil {
-		return names, typ, nil, err
+		return names, typ, nil, variableType, err
 	}
 	if len(es) != len(names) {
 		err = fmt.Errorf("%s mame and value not match", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)
-		return names, typ, es, err
+		return names, typ, es, variableType, err
 	}
-	return names, typ, es, nil
+	return names, typ, es, variableType, nil
 }
 
 func (p *Parser) Next() {
@@ -551,20 +561,21 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 }
 func (p *Parser) parseIdentiferType() (*ast.VariableType, error) {
 	name := p.token.Data.(string)
-	p.Next()
+	ret := &ast.VariableType{
+		Pos: p.mkPos(),
+		Typ: ast.VARIABLE_TYPE_NAME,
+	}
+	p.Next() // skip name identifier
 	for p.token.Type == lex.TOKEN_DOT && !p.eof {
-		p.Next()
+		p.Next() // skip .
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			return nil, fmt.Errorf("%s not a identifier after dot", p.errorMsgPrefix())
 		}
 		name += "." + p.token.Data.(string)
-		p.Next()
+		p.Next() // if
 	}
-	return &ast.VariableType{
-		Pos:  p.mkPos(),
-		Typ:  ast.VARIABLE_TYPE_NAME,
-		Name: name,
-	}, nil
+	ret.Name = name
+	return ret, nil
 }
 
 //at least one name
@@ -684,10 +695,10 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.StartColumn = t.Match.StartColumn
 }
 
-func (p *Parser) parseTypeOrTypedNames() (names []*ast.VariableDefinition, err error) {
-
-	return nil, nil
-}
+//func (p *Parser) parseTypeOrTypedNames() (names []*ast.VariableDefinition, err error) {
+//
+//	return nil, nil
+//}
 
 // a,b int or int,bool  c xxx
 func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {

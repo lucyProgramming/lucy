@@ -6,17 +6,11 @@ import (
 )
 
 type Package struct {
-	Block     Block // package always have a default block
-	Files     map[string]*File
-	Name      string //if error,should be multi names
-	Blocks    []*Block
-	Funcs     map[string][]*Function
-	Classes   map[string]*Class
-	Enums     map[string]*Enum
-	EnumNames map[string]*EnumName
-	Vars      map[string]*VariableDefinition
-	Consts    map[string]*Const
-	NErros    int // number of errors should stop compile
+	Block  Block // package always have a default block
+	Files  map[string]*File
+	Name   string //if error,should be multi names
+	Blocks []*Block
+	NErros int // number of errors should stop compile
 }
 
 //different for other file
