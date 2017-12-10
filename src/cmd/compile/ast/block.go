@@ -22,8 +22,30 @@ type Block struct {
 func (b *Block) isTop() bool {
 	return b.Outter == nil
 }
-func (b *Block) searchByName(name string) interface{} {
-	return nil
+func (b *Block) searchByName(name string) (interface{}, error) {
+	bb := b
+	for bb != nil {
+		if t := bb.Funcs[name]; t != nil {
+			return t, nil
+		}
+		if t := bb.Classes[name]; t != nil {
+			return t, nil
+		}
+		if t := bb.Vars[name]; t != nil {
+			return t, nil
+		}
+		if t := bb.Consts[name]; t != nil {
+			return t, nil
+		}
+		if t := bb.Enums[name]; t != nil {
+			return t, nil
+		}
+		if t := bb.EnumNames[name]; t != nil {
+			return t, nil
+		}
+		bb = bb.Outter
+	}
+	return nil, fmt.Errorf("not found")
 }
 
 func (b *Block) inherite(father *Block) {
@@ -34,20 +56,14 @@ func (b *Block) inherite(father *Block) {
 	b.Outter = father
 }
 
-func (b *Block) searchFunction(e *Expression) *Function {
-	//bb := b
-	//for bb != nil {
-	//	if i, ok := bb.SymbolicTable.itemsMap[name]; ok {
-	//		if i.Typ.Typ == VARIALBE_TYPE_FUNCTION {
-	//			return
-	//		}
-	//	}
-	//	bb = bb.Outter
-	//}
-	//if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
-	//	return nil
-	//}
-	//return b.p.Funcs[e.Data.(string)][0]
+func (b *Block) searchFunction(name string) *Function {
+	bb := b
+	for bb != nil {
+		if i, ok := bb.Funcs[name]; ok {
+			return i[0]
+		}
+		bb = bb.Outter
+	}
 	return nil
 }
 
@@ -132,6 +148,12 @@ func (b *Block) checkVar(v *VariableDefinition) []error {
 		}
 	}
 	if v.Typ != nil { //means variable typed by assignment
+		err = v.Typ.resolve(b)
+		if err != nil {
+			if err != nil {
+				return []error{err}
+			}
+		}
 		match := v.Typ.matchExpression(b, v.Expression)
 		if !match {
 			return []error{fmt.Errorf("%s variable %s dose not matched by %s ", errMsgPrefix(v.Pos), v.Name, v.Expression.typeName())}
@@ -184,18 +206,6 @@ func (b *Block) checkConst() []error {
 	return errs
 }
 
-func (b *Block) checkGlobalVariables() []error {
-	errs := make([]error, 0)
-	var es []error
-	for _, v := range b.Vars {
-		es = b.checkVar(v)
-		if errsNotEmpty(es) {
-			errs = append(errs, es...)
-		}
-	}
-	return errs
-}
-
 func (b *Block) checkFunctions() []error {
 	errs := []error{}
 	for _, v := range b.Funcs {
@@ -203,6 +213,8 @@ func (b *Block) checkFunctions() []error {
 		for _, vv := range v {
 			errs = append(errs, vv.check(b)...)
 		}
+		//redeclare errors
+
 	}
 	return errs
 }
@@ -226,46 +238,14 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	return nil
 }
 
-//const (
-//	ITEM_TYPE_CONST = iota
-//	ITEM_TYPE_VAR
-//)
-
-//type SymbolicItem struct {
-//	Typ   int
-//	Var   *VariableDefinition
-//	Const *Const
-//}
-//type SymbolicTable struct {
-//	ItemsMap map[string]*SymbolicItem
-//}
-//
-//func (s *SymbolicTable) Insert(name string, pos *Pos, d interface{}) error {
-//	if name == "" {
-//		panic("name is null string")
+//func (b *Block) checkVars() []error {
+//	errs := make([]error, 0)
+//	var es []error
+//	for _, v := range b.Vars {
+//		es = b.checkVar(v)
+//		if errsNotEmpty(es) {
+//			errs = append(errs, es...)
+//		}
 //	}
-//	if s.ItemsMap == nil {
-//		s.ItemsMap = make(map[string]*SymbolicItem)
-//	}
-//	switch d.(type) {
-//	case *VariableDefinition:
-//		if _, ok := s.ItemsMap[name]; ok {
-//			return fmt.Errorf("%s varaible %s already declared", errMsgPrefix(pos), name)
-//		}
-//		s.ItemsMap[name] = &SymbolicItem{
-//			Typ: ITEM_TYPE_CONST,
-//			Var: d.(*VariableDefinition),
-//		}
-//	case *Const:
-//		if _, ok := s.ItemsMap[name]; ok {
-//			return fmt.Errorf("%s const %s already declared", errMsgPrefix(pos), name)
-//		}
-//		s.ItemsMap[name] = &SymbolicItem{
-//			Typ:   ITEM_TYPE_CONST,
-//			Const: d.(*Const),
-//		}
-//	default:
-//		panic(d.(*VariableDefinition)) // == panic(false) ,runtime panic definitely
-//	}
-//	return nil
+//	return errs
 //}

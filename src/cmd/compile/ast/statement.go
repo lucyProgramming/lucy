@@ -132,7 +132,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	//func1()
 	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
 		call := s.Expression.Data.(*ExpressionFunctionCall)
-		f := b.searchFunction(call.Expression)
+		f := b.searchFunction("")
 		if f == nil {
 			errs = append(errs, notFoundError(s.Pos, "function", call.Expression.OpName()))
 		} else {
@@ -153,7 +153,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		left := s.Expression.Data.(*Expression)     // left means left value
 		if left.Typ == EXPRESSION_TYPE_IDENTIFIER { //naming
 			name := left.Data.(string)
-			item := b.searchByName(name)
+			item, _ := b.searchByName(name)
 			if item == nil {
 				errs = append(errs, notFoundError(s.Pos, "variable", name))
 				return errs
@@ -188,7 +188,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		binary := s.Expression.Data.(*ExpressionBinary)
 		if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			name := s.Expression.Data.(string)
-			item := b.searchByName(name)
+			item, _ := b.searchByName(name)
 			if item == nil {
 				errs = append(errs, notFoundError(s.Pos, "variable", name))
 				return errs

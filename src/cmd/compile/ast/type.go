@@ -2,9 +2,11 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 )
 
 const (
+	//primitive type
 	VARIABLE_TYPE_BOOL = iota
 	VARIABLE_TYPE_BYTE
 	VARIABLE_TYPE_SHORT
@@ -14,13 +16,15 @@ const (
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_DOUBLE
 	VARIABLE_TYPE_STRING
+	//function
 	VARIALBE_TYPE_FUNCTION
-	VARIALBE_TYPE_ENUM  //enum
-	VARIABLE_TYPE_CLASS //new Person()
-	VARIABLE_TYPE_NULL  //null
-	VARIABLE_TYPE_ARRAY // []int
-	VARIABLE_TYPE_NAME  // naming should search for declaration
-	VARIABLE_TYPE_VOID
+	//enum
+	VARIALBE_TYPE_ENUM //enum
+	//class
+	VARIABLE_TYPE_OBJECT //
+	VARIABLE_TYPE_ARRAY  // []int
+	VARIABLE_TYPE_NAME   // naming should search for declaration
+	//VARIABLE_TYPE_VOID
 )
 
 type VariableType struct {
@@ -28,8 +32,8 @@ type VariableType struct {
 	Typ             int
 	Name            string // Lname.Rname
 	CombinationType *VariableType
-	FunctionType    *FunctionType
 	Class           *Class
+	//FunctionType *FunctionType
 }
 
 //clone a type
@@ -37,8 +41,36 @@ func (t *VariableType) Clone() *VariableType {
 	return nil
 }
 
+func (t *VariableType) resolve(block *Block) error {
+	if t.Typ == VARIABLE_TYPE_NAME { //
+		tt, err := t.resolveName(block)
+		if err != nil {
+			return err
+		}
+		*t = *tt //over ride
+		return nil
+	}
+
+	return nil
+}
+
+func (t *VariableType) resolveName(block *Block) (*VariableType, error) {
+	var d interface{}
+	var err error
+	if !strings.Contains(t.Name, ".") {
+		d, err = block.searchByName(t.Name)
+		if err != nil {
+			return nil, err
+		}
+	} else { // a.b  in type situation,must be package name
+
+	}
+
+	return nil, nil
+}
+
 /*
-	mk jvm signature
+	mk jvm descriptor
 */
 func (v *VariableType) Descriptor() string {
 	switch v.Typ {
@@ -58,8 +90,6 @@ func (v *VariableType) Descriptor() string {
 		return "F"
 	case VARIABLE_TYPE_DOUBLE:
 		return "D"
-	case VARIABLE_TYPE_VOID:
-		return "V"
 	case VARIABLE_TYPE_ARRAY:
 		return "[" + v.CombinationType.Descriptor()
 	case VARIABLE_TYPE_STRING:
@@ -189,7 +219,7 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 			data = e.Data.(string)
 			return
 		}
-	case VARIABLE_TYPE_CLASS:
+	case VARIABLE_TYPE_OBJECT:
 		if e.Typ == EXPRESSION_TYPE_NULL {
 			return nil, nil // null pointer
 		}
@@ -219,7 +249,7 @@ func (v *VariableType) TypeString_(ret *string) {
 		*ret = "float"
 	case VARIALBE_TYPE_FUNCTION:
 		*ret = "function"
-	case VARIABLE_TYPE_CLASS:
+	case VARIABLE_TYPE_OBJECT:
 		*ret = v.Name
 	case VARIALBE_TYPE_ENUM:
 		*ret = v.Name + "(enum)"

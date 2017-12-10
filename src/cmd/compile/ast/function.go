@@ -37,46 +37,32 @@ func (f *Function) check(b *Block) []error {
 func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 	//handler parameter first
 	var err error
+	errs = []error{}
+	var es []error
 	for _, v := range f.Parameters {
 		if v.Name != "" {
-			vd := &VariableDefinition{}
-			vd.Name = v.Name
-			vd.Typ = v.Typ
-			err = block.insert(v.Name, nil, vd)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
+			es = block.checkVar(v)
+			if errsNotEmpty(es) {
+				errs = append(errs, es...)
 				continue
 			}
-			if v.Expression != nil {
-				is, typ, value, err := v.Expression.getConstValue()
-				if err != nil {
-					errs = append(errs, fmt.Errorf("%s default value is wrong because of %v", errMsgPrefix(v.Pos), err))
-					continue
-				}
-				if !is {
-					errs = append(errs, fmt.Errorf("%s default value is not a const value %v", errMsgPrefix(v.Pos), err))
-					continue
-				}
-				t, _ := block.getTypeFromExpression(&Expression{Typ: typ, Data: value})
-				if !v.Typ.typeCompatible(t) {
-					errs = append(errs, fmt.Errorf("%s default value can not assign to variale type %v", errMsgPrefix(v.Pos)))
-					continue
-				}
+			err = block.insert(v.Name, v.Pos, v)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+				continue
 			}
 		}
 	}
-
 	//handler return
 	for _, v := range f.Returns {
-		if v.Name != "" {
-			t := VariableDefinition{}
-			t.Name = v.Name
-			t.Typ = v.Typ
-			err = block.insert(v.Name, nil, t)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
-				continue
-			}
+		es = block.checkVar(v)
+		if errsNotEmpty(es) {
+			errs = append(errs, es...)
+			continue
+		}
+		err = block.insert(v.Name, v.Pos, v)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s %d:%d err:%v", v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn, err))
 		}
 	}
 }
