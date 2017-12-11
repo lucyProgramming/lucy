@@ -45,7 +45,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		}
 		bb = bb.Outter
 	}
-	return nil, fmt.Errorf("not found")
+	return nil, fmt.Errorf("%s not found", name)
 }
 
 func (b *Block) inherite(father *Block) {
@@ -237,6 +237,12 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	}
 	return nil
 }
+
+func (b *Block) loadPackage(name string) (*Package, error) {
+	return b.InheritedAttribute.p.loadPackage(name)
+}
+
+//func (b *Block) getPackageName(name )
 
 //func (b *Block) checkVars() []error {
 //	errs := make([]error, 0)

@@ -63,10 +63,31 @@ func (t *VariableType) resolveName(block *Block) (*VariableType, error) {
 			return nil, err
 		}
 	} else { // a.b  in type situation,must be package name
-
+		d, err = t.resolvePackageName(block)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return nil, nil
+}
+
+func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
+	accessname := t.Name[0:strings.Index(t.Name, ".")] // package name
+	var f *File
+	var ok bool
+	if f, ok = block.InheritedAttribute.p.Files[t.Pos.Filename]; !ok {
+		return nil, fmt.Errorf("package %v not imported", accessname)
+	}
+	pname, accessResouce, err := f.fullPackageName(accessname, t.Name)
+	if err != nil {
+		return nil, err
+	}
+	p, err := block.loadPackage(pname)
+	if err != nil {
+		return nil, err
+	}
+	return p.Block.searchByName(accessResouce)
 }
 
 /*
