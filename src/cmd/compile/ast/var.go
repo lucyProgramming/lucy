@@ -31,11 +31,11 @@ func init() {
 }
 
 func notFoundError(pos *Pos, typ, name string) error {
-	return fmt.Errorf("%s %s:%s not found", errMsgPrefix(pos), typ, name)
+	return fmt.Errorf("%s %s named %s not found", errMsgPrefix(pos), typ, name)
 }
 
 func errMsgPrefix(pos *Pos) string {
-	return fmt.Sprintf("%s %d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
+	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
 func errsNotEmpty(errs []error) bool {

@@ -12,6 +12,7 @@ const (
 	EXPRESSION_TYPE_FLOAT
 	EXPRESSION_TYPE_STRING
 	EXPRESSION_TYPE_ARRAY // []bool{false,true}
+	//binary expression
 	EXPRESSION_TYPE_LOGICAL_OR
 	EXPRESSION_TYPE_LOGICAL_AND
 	EXPRESSION_TYPE_OR
@@ -36,6 +37,7 @@ const (
 	EXPRESSION_TYPE_MUL
 	EXPRESSION_TYPE_DIV
 	EXPRESSION_TYPE_MOD
+	//
 	EXPRESSION_TYPE_INDEX // a["b"]
 	EXPRESSION_TYPE_DOT   //a.b
 	EXPRESSION_TYPE_METHOD_CALL
@@ -455,57 +457,48 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 	return false, fmt.Errorf("can`t compare")
 }
 
-//this function no need to assign back
-func (e *Expression) constFold() error {
-	is, typ, value, err := e.getConstValue() //something is error
-	if err != nil {
-		return err
-	}
-	if is {
-		e.Typ = typ
-		e.Data = value
-		return nil
-	}
-	//this means below is is not a const definitely
-
-	//  binary expression
-	if e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
-		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
-		e.Typ == EXPRESSION_TYPE_ADD ||
-		e.Typ == EXPRESSION_TYPE_SUB ||
-		e.Typ == EXPRESSION_TYPE_MUL ||
-		e.Typ == EXPRESSION_TYPE_DIV ||
-		e.Typ == EXPRESSION_TYPE_MOD ||
-		e.Typ == EXPRESSION_TYPE_LEFT_SHIFT ||
-		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT ||
-		e.Typ == EXPRESSION_TYPE_AND ||
-		e.Typ == EXPRESSION_TYPE_OR ||
-		e.Typ == EXPRESSION_TYPE_EQ ||
-		e.Typ == EXPRESSION_TYPE_NE ||
-		e.Typ == EXPRESSION_TYPE_GE ||
-		e.Typ == EXPRESSION_TYPE_GT ||
-		e.Typ == EXPRESSION_TYPE_LE ||
-		e.Typ == EXPRESSION_TYPE_LE {
-		binary := e.Data.(*ExpressionBinary)
-		is, typ, value, err = binary.Left.getConstValue()
-		if err != nil {
-			return err
-		}
-		if is {
-			e.Typ = typ
-			e.Data = value
-		}
-		is, typ, value, err = binary.Right.getConstValue()
-		if err != nil {
-			return err
-		}
-		if is {
-			e.Typ = typ
-			e.Data = value
-		}
-	}
-	return nil
-}
+////this function no need to assign back
+//func (e *Expression) foldConst() error {
+//	is, typ, value, err := e.getConstValue() //something is error
+//	if err != nil {
+//		return err
+//	}
+//	if is { //overide
+//		e.Typ = typ
+//		e.Data = value
+//		return nil
+//	}
+//	//this means below is is not a const definitely
+//	//binary expression
+//	if e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
+//		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
+//		e.Typ == EXPRESSION_TYPE_ADD ||
+//		e.Typ == EXPRESSION_TYPE_SUB ||
+//		e.Typ == EXPRESSION_TYPE_MUL ||
+//		e.Typ == EXPRESSION_TYPE_DIV ||
+//		e.Typ == EXPRESSION_TYPE_MOD ||
+//		e.Typ == EXPRESSION_TYPE_LEFT_SHIFT ||
+//		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT ||
+//		e.Typ == EXPRESSION_TYPE_AND ||
+//		e.Typ == EXPRESSION_TYPE_OR ||
+//		e.Typ == EXPRESSION_TYPE_EQ ||
+//		e.Typ == EXPRESSION_TYPE_NE ||
+//		e.Typ == EXPRESSION_TYPE_GE ||
+//		e.Typ == EXPRESSION_TYPE_GT ||
+//		e.Typ == EXPRESSION_TYPE_LE ||
+//		e.Typ == EXPRESSION_TYPE_LE {
+//		binary := e.Data.(*ExpressionBinary)
+//		err = binary.Left.constFold()
+//		if err != nil {
+//			return err
+//		}
+//		err = binary.Right.constFold()
+//		if err != nil {
+//			return err
+//		}
+//	}
+//	return nil
+//}
 
 func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err error) {
 	if e.Typ == EXPRESSION_TYPE_BOOL ||

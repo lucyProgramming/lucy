@@ -18,15 +18,14 @@ const (
 )
 
 type Statement struct {
-	Pos               *Pos
-	Typ               int
-	StatementIf       *StatementIF
-	Expression        *Expression // expression statment like a=123
-	StatementFor      *StatementFor
-	StatementReturn   *StatementReturn
-	StatementTryCatch *StatementTryCatch
-	StatementSwitch   *StatementSwitch
-	Block             *Block
+	Pos             *Pos
+	Typ             int
+	StatementIf     *StatementIF
+	Expression      *Expression // expression statment like a=123
+	StatementFor    *StatementFor
+	StatementReturn *StatementReturn
+	StatementSwitch *StatementSwitch
+	Block           *Block
 }
 
 func (s *Statement) statementName() string {
@@ -79,7 +78,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 		}
 	case STATEMENT_TYPE_RETURN:
-		if b.InheritedAttribute.infunction == false {
+		if b.InheritedAttribute.function == nil {
 			errs = append(errs, fmt.Errorf("%s%s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 			return errs
 		}
@@ -105,12 +104,11 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 	}
 	length := len(call.Args)
 	for i := 0; i < length; i++ {
-		t, es := b.getTypeFromExpression(call.Args[i])
+		t, es := b.checkExpression(call.Args[i])
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 			continue
 		}
-
 		if !f.Typ.Parameters[i].Typ.typeCompatible(t) {
 			typstring1 := f.Typ.Parameters[i].Typ.TypeString()
 			typstring2 := t.TypeString()
@@ -128,18 +126,19 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 }
 
 func (s *Statement) checkStatementExpression(b *Block) []error {
+	fmt.Println(s.Expression.OpName())
 	errs := []error{}
 	//func1()
-	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
-		call := s.Expression.Data.(*ExpressionFunctionCall)
-		f := b.searchFunction("")
-		if f == nil {
-			errs = append(errs, notFoundError(s.Pos, "function", call.Expression.OpName()))
-		} else {
-			errs = append(errs, checkFunctionCall(b, f, call, s.Pos)...)
-		}
-		return errs
-	}
+	//	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
+	//		call := s.Expression.Data.(*ExpressionFunctionCall)
+	//		f := b.searchFunction("")
+	//		if f == nil {
+	//			errs = append(errs, notFoundError(s.Pos, "function", call.Expression.OpName()))
+	//		} else {
+	//			errs = append(errs, checkFunctionCall(b, f, call, s.Pos)...)
+	//		}
+	//		return errs
+	//	}
 	//System.log("hello world")
 	//if EXPRESSION_TYPE_METHOD_CALL == s.Expression.Typ {
 	//	return errs
@@ -169,13 +168,24 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			errs = append(errs, fmt.Errorf("%s %d:%d no name on the left", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
 			return errs
 		}
-		vs := binary.Left.Data.(*ExpressionDeclareVariable)
-		for _, v := range vs.Vs {
-			es := b.checkVar(v)
+		vs := binary.Left.Data.([]*Expression)
+		values := binary.Right.Data.([]*Expression)
+		for k, v := range vs {
+			if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
+				errs = append(errs, fmt.Errorf("%s not name on left", errMsgPrefix(v.Pos)))
+				continue
+			}
+			if v.Data.(string) == "_" { // not receive
+				continue
+			}
+			vd := &VariableDefinition{}
+			vd.Name = v.Data.(string)
+			vd.Expression = values[k]
+			es := b.checkVar(vd)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
-			b.insert(v.Name, s.Expression.Pos, v)
+			b.insert(vd.Name, s.Expression.Pos, vd)
 		}
 		return errs
 	}
@@ -207,12 +217,6 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	errs = append(errs, fmt.Errorf("%s expression(%s) evaluated,but not used", errMsgPrefix(s.Pos), s.Expression.OpName()))
 	return errs
-}
-
-type StatementTryCatch struct {
-	TryBlock     *Block
-	CatchBlock   *Block
-	FinallyBlock *Block
 }
 
 type StatementSwitch struct {
@@ -249,7 +253,7 @@ func (s *StatementReturn) check(b *Block) []error {
 		return errs // 0 length errs,that is ok
 	}
 	for k, v := range s.Expressions {
-		t, es := b.getTypeFromExpression(v)
+		t, es := b.checkExpression(v)
 		if es != nil && len(es) > 0 {
 			errs = append(errs, es...)
 			continue
@@ -286,11 +290,7 @@ func (e ElseIfList) check() []error {
 	errs := make([]error, 0)
 	var err error
 	for _, v := range e {
-		err = v.Condition.constFold()
-		if err != nil {
-			errs = append(errs, fmt.Errorf("%s %d:%d expression cannot be defined because of %v", v.Condition.Pos.Filename, v.Condition.Pos.StartLine, v.Condition.Pos.StartColumn, err))
-			continue
-		}
+
 		is, es := v.Block.isBoolValue(v.Condition)
 		if es != nil && len(es) > 0 {
 			errs = append(errs, es...)
@@ -323,12 +323,8 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 	if s.ElseBlock != nil {
 		s.ElseBlock.inherite(father)
 	}
+
 	// condition should a bool expression
-	err := s.Condition.constFold()
-	if err != nil {
-		errs = append(errs, fmt.Errorf("%s %d:%d expression is  defined wrong,because of %v", s.Condition.Pos.Filename, s.Condition.Pos.StartLine, s.Condition.Pos.StartColumn, err))
-		return nil, errs
-	}
 	if s.Condition.Typ == EXPRESSION_TYPE_BOOL && s.Condition.Data.(bool) == true { // if(true){...}
 		errs = append(errs, s.Block.check(nil)...)
 		return s.Block, errs

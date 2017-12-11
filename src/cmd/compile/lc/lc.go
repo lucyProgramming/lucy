@@ -2,26 +2,35 @@ package lc
 
 import (
 	"fmt"
+
 	"io/ioutil"
 	"os"
 	"strings"
 
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/parser"
 )
 
 func Main(files []string) {
-	go cg.Prinf()
 	l.NerrsStopCompile = 10
 	l.Nerrs = []error{}
+	l.Files = files
 	l.compile()
 }
 
 type LucyCompile struct {
+	Tops             []*ast.Node
 	Files            []string
 	Nerrs            []error
 	NerrsStopCompile int
 	lucyPath         []string
+}
+
+func (l *LucyCompile) shouldExit() {
+	if len(l.Nerrs) > l.NerrsStopCompile {
+		l.exit()
+	}
+
 }
 
 func (l *LucyCompile) exit() {
@@ -46,11 +55,16 @@ func (l *LucyCompile) compile() {
 			l.Nerrs = append(l.Nerrs, err)
 			continue
 		}
-		l.Nerrs = append(l.Nerrs, parser.Parse(&Tops, v, bs, CompileFlags.OnlyImport)...)
-
-		if len(l.Nerrs) > 10 {
-			l.exit()
-		}
+		l.Nerrs = append(l.Nerrs, parser.Parse(&l.Tops, v, bs, CompileFlags.OnlyImport)...)
+		l.shouldExit()
 	}
-
+	c := ast.ConvertTops2Package{}
+	p, rs, errs := c.ConvertTops2Package(l.Tops)
+	l.Nerrs = append(l.Nerrs, errs...)
+	for _, v := range rs {
+		l.Nerrs = append(l.Nerrs, v.Error())
+	}
+	l.shouldExit()
+	l.Nerrs = append(l.Nerrs, p.TypeCheck()...)
+	l.shouldExit()
 }

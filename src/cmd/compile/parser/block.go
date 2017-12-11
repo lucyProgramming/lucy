@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -101,7 +102,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.Next()
 				continue
 			}
-			names, typ, es, variabletype, err := b.parser.parseAssignedNames()
+			vs, typ, err := b.parser.parseAssignedNames()
 			if err != nil {
 				b.consume(untils_rc_semicolon)
 				b.Next()
@@ -109,18 +110,16 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			}
 			if typ != lex.TOKEN_ASSIGN {
 				b.parser.errs = append(b.parser.errs,
-					fmt.Errorf("%s declare const should use ‘:=’ instead of ‘=’", b.parser.errorMsgPrefix(names[0].Pos)))
+					fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’", b.parser.errorMsgPrefix(vs[0].Pos)))
 			}
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after const declaration", b.parser.errorMsgPrefix()))
 				b.consume(untils_rc_semicolon)
 			}
-			cs := make([]*ast.Const, len(names))
-			for k, v := range names {
+			cs := make([]*ast.Const, len(vs))
+			for k, v := range vs {
 				c := &ast.Const{}
-				c.Name = v.Name
-				c.Expression = es[k]
-				c.Typ = variabletype
+				c.VariableDefinition = *v
 				cs[k] = c
 			}
 			r := &ast.Statement{}
@@ -146,7 +145,6 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			}
 			var es []*ast.Expression
 			es, err = b.parser.ExpressionParser.parseExpressions()
-			fmt.Println("", b.parser.token.Desp)
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 				b.consume(untils_semicolon)

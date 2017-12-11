@@ -1,0 +1,28 @@
+package main
+
+import "java/io";
+
+
+
+{
+		
+	a := 1 + true;
+	if a == 1{
+		io.System.println("hello world")
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -21,10 +21,10 @@ const (
 	//enum
 	VARIALBE_TYPE_ENUM //enum
 	//class
-	VARIABLE_TYPE_OBJECT //
-	VARIABLE_TYPE_ARRAY  // []int
-	VARIABLE_TYPE_NAME   // naming should search for declaration
-	//VARIABLE_TYPE_VOID
+	VARIABLE_TYPE_CLASS //
+	VARIABLE_TYPE_ARRAY // []int
+	VARIABLE_TYPE_NAME  // naming
+	VARIABLE_TYPE_VOID
 )
 
 type VariableType struct {
@@ -33,43 +33,66 @@ type VariableType struct {
 	Name            string // Lname.Rname
 	CombinationType *VariableType
 	Class           *Class
-	//FunctionType *FunctionType
+	Enum            *Enum
+	EnumName        *EnumName
+	FunctionType    *FunctionType
 }
 
-//clone a type
-func (t *VariableType) Clone() *VariableType {
+/*
+	clone a type
+	only copy primitive type or type basic on name
+*/
+func (t *VariableType) CloneNameTypeOrPrimitive() *VariableType {
+	ret := &VariableType{}
+	*ret = *t // primitive copied,name should be copied too
+	if ret.Typ == VARIABLE_TYPE_ARRAY {
+		ret.CombinationType = t.CombinationType.CloneNameTypeOrPrimitive()
+	}
 	return nil
 }
 
 func (t *VariableType) resolve(block *Block) error {
 	if t.Typ == VARIABLE_TYPE_NAME { //
-		tt, err := t.resolveName(block)
+		err := t.resolveName(block)
 		if err != nil {
 			return err
 		}
-		*t = *tt //over ride
 		return nil
 	}
-
 	return nil
 }
 
-func (t *VariableType) resolveName(block *Block) (*VariableType, error) {
+func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
 	var err error
 	if !strings.Contains(t.Name, ".") {
 		d, err = block.searchByName(t.Name)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	} else { // a.b  in type situation,must be package name
 		d, err = t.resolvePackageName(block)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-
-	return nil, nil
+	switch d.(type) {
+	case *VariableDefinition:
+		return fmt.Errorf("name %s is a variable,not a type", t.Name)
+	case []*Function:
+		return fmt.Errorf("name %s is a function,not a type", t.Name)
+	case *Const:
+		return fmt.Errorf("name %s is a const,not a type", t.Name)
+	case *Class:
+		t.Typ = VARIABLE_TYPE_CLASS
+		t.Class = d.(*Class)
+	case *Enum:
+		t.Typ = VARIALBE_TYPE_ENUM
+		t.Enum = d.(*Enum)
+	default:
+		return fmt.Errorf("name %s is not type")
+	}
+	return nil
 }
 
 func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
@@ -117,10 +140,6 @@ func (v *VariableType) Descriptor() string {
 		return "Ljava/lang/String"
 	}
 	panic("unhandle type signature")
-}
-
-func (t *VariableType) matchExpression(b *Block, e *Expression) bool {
-	return false
 }
 
 func (t *VariableType) typeCompatible(t2 *VariableType) bool {
@@ -240,7 +259,7 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 			data = e.Data.(string)
 			return
 		}
-	case VARIABLE_TYPE_OBJECT:
+	case VARIABLE_TYPE_CLASS:
 		if e.Typ == EXPRESSION_TYPE_NULL {
 			return nil, nil // null pointer
 		}
@@ -270,7 +289,7 @@ func (v *VariableType) TypeString_(ret *string) {
 		*ret = "float"
 	case VARIALBE_TYPE_FUNCTION:
 		*ret = "function"
-	case VARIABLE_TYPE_OBJECT:
+	case VARIABLE_TYPE_CLASS:
 		*ret = v.Name
 	case VARIALBE_TYPE_ENUM:
 		*ret = v.Name + "(enum)"

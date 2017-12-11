@@ -3,12 +3,12 @@ package parser
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 	"github.com/timtadh/lexmachine"
-	"strings"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool) []error {
@@ -109,7 +109,7 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			names, typ, es, variabletype, err := p.parseAssignedNames()
+			vs, typ, err := p.parseAssignedNames()
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -123,7 +123,6 @@ func (p *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
-
 			// const a := 1 is wrong,
 			if typ == lex.TOKEN_COLON_ASSIGN && isconst == true {
 				p.errs = append(p.errs, fmt.Errorf("%s use = instead of := for const definition", p.errorMsgPrefix()))
@@ -132,18 +131,16 @@ func (p *Parser) Parse() []error {
 			}
 			// a = 1 is wrong
 			if typ == lex.TOKEN_ASSIGN && isconst == false {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot have statement at top,possible do you mean a := 1 to create a global variable", p.errorMsgPrefix()))
+				p.errs = append(p.errs, fmt.Errorf("%s cannot have statement at top,possibly do you mean a := 1 to create a global variable", p.errorMsgPrefix()))
 				p.Next()
 				p.consume(untils_semicolon)
 				resetProperty()
 				continue
 			}
 			if isconst {
-				for k, v := range names {
+				for _, v := range vs {
 					c := &ast.Const{}
-					c.Name = v.Name
-					c.Expression = es[k]
-					c.Typ = variabletype
+					c.VariableDefinition = *v
 					if ispublic {
 						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
@@ -154,18 +151,14 @@ func (p *Parser) Parse() []error {
 					})
 				}
 			} else {
-				for k, v := range names {
-					c := &ast.VariableDefinition{}
-					c.Name = v.Name
-					c.Typ = variabletype
-					c.Expression = es[k]
+				for _, v := range vs {
 					if ispublic {
-						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
+						v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
-						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
+						v.AccessFlags |= cg.ACC_FIELD_PRIVATE
 					}
 					*p.tops = append(*p.tops, &ast.Node{
-						Data: c,
+						Data: v,
 					})
 				}
 			}
@@ -266,7 +259,7 @@ func (p *Parser) insertImports(im *ast.Imports) {
 	if p.imports == nil {
 		p.imports = make(map[string]*ast.Imports)
 	}
-	access, err := im.AccessName()
+	access, err := im.GetAccessName()
 	if err != nil {
 		p.errs = append(p.errs, fmt.Errorf("%s %v", p.errorMsgPrefix(im.Pos), err))
 		return
@@ -287,10 +280,10 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, int, []*ast.Expression, *ast.VariableType, error) {
+func (p *Parser) parseAssignedNames() ([]*ast.VariableDefinition, int, error) {
 	names, err := p.parseNameList()
 	if err != nil {
-		return nil, 0, nil, nil, err
+		return nil, 0, err
 	}
 	//trying to parse type
 	var variableType *ast.VariableType
@@ -299,30 +292,39 @@ func (p *Parser) parseAssignedNames() ([]*ast.NameWithPos, int, []*ast.Expressio
 		if err != nil {
 			p.errs = append(p.errs, err)
 		}
-		return nil, 0, nil, nil, err
+		return nil, 0, err
 	}
 	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
 		err = fmt.Errorf("%s missing = or := after a name list", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)
-		return nil, 0, nil, nil, err
+		return nil, 0, err
 	}
 	typ := p.token.Type
 	p.Next()
 	if p.eof {
 		err = p.mkUnexpectedEofErr()
 		p.errs = append(p.errs, err)
-		return names, typ, nil, variableType, err
+		return nil, typ, err
 	}
 	es, err := p.ExpressionParser.parseExpressions()
 	if err != nil {
-		return names, typ, nil, variableType, err
+		return nil, typ, err
 	}
 	if len(es) != len(names) {
 		err = fmt.Errorf("%s mame and value not match", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)
-		return names, typ, es, variableType, err
+		return nil, typ, err
 	}
-	return names, typ, es, variableType, nil
+	vs := make([]*ast.VariableDefinition, len(names))
+	for k, v := range names {
+		vd := &ast.VariableDefinition{}
+		vs[k] = vd
+		vd.Name = v.Name
+		vd.Typ = variableType
+		vd.Pos = v.Pos
+		vd.Expression = es[k]
+	}
+	return vs, typ, nil
 }
 
 func (p *Parser) Next() {
@@ -337,43 +339,27 @@ func (p *Parser) Next() {
 		}
 		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
 			p.token = tok.(*lex.Token)
-			fmt.Println("#########", p.token.Desp)
 			break
 		}
 	}
 	return
 }
 
-//func (p *Parser) multiLineComment() {
-//	var err error
-//	var tok interface{}
-//	for !p.eof {
-//		tok, err, p.eof = p.scanner.Next()
-//		if err != nil {
-//			p.eof = true
-//			return
-//		}
-//		if tok != nil && tok.(*lex.Token).Type == lex.TOKEN_MULTI_LINE_COMMENT_END {
-//			break
-//		}
-//	}
-//}
-
 func (p *Parser) unexpectedErr() {
 	p.errs = append(p.errs, p.mkUnexpectedEofErr())
 }
 func (p *Parser) mkUnexpectedEofErr() error {
-	return fmt.Errorf("%s %d:%d unexpected EOF", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn)
+	return fmt.Errorf("%s unexpected EOF", p.errorMsgPrefix())
 }
 
 /*
-	errorMsgPrefix(pos) will receive one argument
+	errorMsgPrefix(pos) only receive one argument
 */
 func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
-		return fmt.Sprintf("%s %d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine-1]))
+		return fmt.Sprintf("%s:%d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine-1]))
 	}
-	return fmt.Sprintf("%s %d:%d '%s'", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine-1]))
+	return fmt.Sprintf("%s:%d:%d '%s'", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine-1]))
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
@@ -424,9 +410,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	for k, v := range names {
 		vd := &ast.VariableDefinition{}
 		vd.Name = v.Name
-		vt := &ast.VariableType{} // new a type
-		*vt = *t
-		vd.Typ = vt
+		vd.Typ = t
 		if len(ispublic) > 0 && ispublic[0] {
 			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		} else {
@@ -654,7 +638,7 @@ func (p *Parser) parseImports() {
 			p.parseImports()
 			return
 		}
-		i.Alias = p.token.Data.(string)
+		i.AccessName = p.token.Data.(string)
 		p.Next()
 		if p.token.Type != lex.TOKEN_SEMICOLON {
 			p.consume(untils_semicolon)

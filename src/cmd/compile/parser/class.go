@@ -154,22 +154,24 @@ func (c *Class) resetProperty() {
 }
 
 func (c *Class) parseConst() error {
-	names, _, es, variabletype, err := c.parser.parseAssignedNames()
+	vs, typ, err := c.parser.parseAssignedNames()
 	if err != nil {
 		return err
+	}
+	if typ != lex.TOKEN_ASSIGN {
+		c.parser.errs = append(c.parser.errs,
+			fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’", c.parser.errorMsgPrefix(vs[0].Pos)))
 	}
 	if c.classDefinition.Consts == nil {
 		c.classDefinition.Consts = make(map[string]*ast.Const)
 	}
-	for k, v := range names {
+	for _, v := range vs {
 		if _, ok := c.classDefinition.Consts[v.Name]; ok {
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const %s alreay declared", v.Name))
 			continue
 		}
 		c.classDefinition.Consts[v.Name] = &ast.Const{}
-		c.classDefinition.Consts[v.Name].Pos = v.Pos
-		c.classDefinition.Consts[v.Name].Expression = es[k]
-		c.classDefinition.Consts[v.Name].Typ = variabletype
+		c.classDefinition.Consts[v.Name].VariableDefinition = *v
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -94,12 +95,12 @@ type RedeclareError struct {
 	Type string //varialbe or function
 }
 
-func (r *RedeclareError) Error() string {
+func (r *RedeclareError) Error() error {
 	s := fmt.Sprintf("%s:%s redeclare")
 	for _, v := range r.Pos {
-		s += fmt.Sprintf("\t%s %d:%d\n", v.Filename, v.StartLine, v.StartColumn)
+		s += fmt.Sprintf("\t%s", errMsgPrefix(v))
 	}
-	return s
+	return errors.New(s)
 }
 
 type PackageNameNotConsistentError struct {
