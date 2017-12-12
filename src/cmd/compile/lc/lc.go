@@ -67,4 +67,6 @@ func (l *LucyCompile) compile() {
 	l.shouldExit()
 	l.Nerrs = append(l.Nerrs, p.TypeCheck()...)
 	l.shouldExit()
+
+	l.exit()
 }

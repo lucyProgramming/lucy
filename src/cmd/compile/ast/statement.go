@@ -126,7 +126,7 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 }
 
 func (s *Statement) checkStatementExpression(b *Block) []error {
-	fmt.Println(s.Expression.OpName())
+	fmt.Println("##############", s.Expression.OpName())
 	errs := []error{}
 	//func1()
 	//	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
@@ -143,14 +143,13 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	//if EXPRESSION_TYPE_METHOD_CALL == s.Expression.Typ {
 	//	return errs
 	//}
-
 	// i++ i-- ++i --i
 	if EXPRESSION_TYPE_INCREMENT == s.Expression.Typ ||
 		EXPRESSION_TYPE_DECREMENT == s.Expression.Typ ||
 		EXPRESSION_TYPE_PRE_INCREMENT == s.Expression.Typ ||
 		EXPRESSION_TYPE_PRE_DECREMENT == s.Expression.Typ {
 		left := s.Expression.Data.(*Expression)     // left means left value
-		if left.Typ == EXPRESSION_TYPE_IDENTIFIER { //naming
+		if left.Typ != EXPRESSION_TYPE_IDENTIFIER { //naming
 			name := left.Data.(string)
 			item, _ := b.searchByName(name)
 			if item == nil {
@@ -164,15 +163,20 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	if EXPRESSION_TYPE_COLON_ASSIGN == s.Expression.Typ { //declare variable
 		binary := s.Expression.Data.(*ExpressionBinary)
-		if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
-			errs = append(errs, fmt.Errorf("%s %d:%d no name on the left", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
+		if binary.Left.Typ != EXPRESSION_TYPE_IDENTIFIER && binary.Left.Typ != EXPRESSION_TYPE_LIST {
+			errs = append(errs, fmt.Errorf("%s no name on the left,but %s", errMsgPrefix(binary.Left.Pos), binary.Left.OpName()))
 			return errs
 		}
-		vs := binary.Left.Data.([]*Expression)
+		var names []*Expression
+		if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
+			names = append(names, binary.Left)
+		} else {
+			names = binary.Left.Data.([]*Expression)
+		}
 		values := binary.Right.Data.([]*Expression)
-		for k, v := range vs {
+		for k, v := range names {
 			if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
-				errs = append(errs, fmt.Errorf("%s not name on left", errMsgPrefix(v.Pos)))
+				errs = append(errs, fmt.Errorf("%s expression is not a name,but %s", errMsgPrefix(v.Pos), v.OpName()))
 				continue
 			}
 			if v.Data.(string) == "_" { // not receive
@@ -184,6 +188,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			es := b.checkVar(vd)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
+				continue
 			}
 			b.insert(vd.Name, s.Expression.Pos, vd)
 		}
@@ -340,7 +345,7 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 		return nil, errs
 	}
 	if !is {
-		errs = append(errs, fmt.Errorf("%s %d:%d is not a bool expression", s.Condition.Pos.Filename, s.Condition.Pos.StartLine, s.Condition.Pos.StartColumn))
+		errs = append(errs, fmt.Errorf("%s is not a bool expression", errMsgPrefix(s.Condition.Pos)))
 		return nil, errs
 	}
 	errs = append(errs, s.Block.check(nil)...)

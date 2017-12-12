@@ -1,12 +1,5 @@
 package ast
 
-/*
-	enum Day{
-		Monday = 1,
-		Tuesday
-	}
-*/
-
 type EnumName struct {
 	Enum  *Enum
 	Name  string

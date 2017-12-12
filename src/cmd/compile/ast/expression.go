@@ -123,6 +123,16 @@ type ExpressionDeclareConsts struct {
 	Cs []*Const
 }
 
+//type ExprssionIdentifier struct {
+//	Identifer string
+//	//Variable  *VariableDefinition
+//	//Function  []*Function
+//	//Class     *Class
+//	//Enum      *Enum
+//	//EnumName  *EnumName
+//	//Const     *Const
+//}
+
 type ExpressionTypeConvertion struct {
 	Typ        *VariableType
 	Expression *Expression

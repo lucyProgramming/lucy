@@ -18,6 +18,8 @@ const (
 	TOKEN_RETURN                //return
 	TOKEN_NULL                  // null
 	TOKEN_BOOL                  //bool
+	TOKEN_TRUE                  //true
+	TOKEN_FALSE                 //false
 	TOKEN_LP                    //(
 	TOKEN_RP                    //)
 	TOKEN_LC                    //{

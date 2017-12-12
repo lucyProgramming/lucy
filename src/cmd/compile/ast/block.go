@@ -23,27 +23,34 @@ func (b *Block) isTop() bool {
 	return b.Outter == nil
 }
 func (b *Block) searchByName(name string) (interface{}, error) {
-	bb := b
-	for bb != nil {
-		if t := bb.Funcs[name]; t != nil {
-			return t, nil
+	if t, ok := b.Funcs[name]; ok {
+		return t, nil
+	}
+	if t, ok := b.Classes[name]; ok {
+		return t, nil
+	}
+	if t, ok := b.Vars[name]; ok {
+		return t, nil
+	}
+	if t, ok := b.Consts[name]; ok {
+		return t, nil
+	}
+	if t, ok := b.Enums[name]; ok {
+		return t, nil
+	}
+	if t, ok := b.EnumNames[name]; ok {
+		return t, nil
+	}
+	if b.InheritedAttribute.function.Typ.ClosureVars != nil && b.InheritedAttribute.function.Typ.ClosureVars[name] != nil {
+		return b.InheritedAttribute.function.Typ.ClosureVars[name], nil
+	}
+	if b.Outter != nil {
+		t, err := b.Outter.searchByName(name)
+		if err == nil && b.isFuntionTopBlock() { //found and in function top block
+			if _, ok := t.(*VariableDefinition); ok {
+				b.InheritedAttribute.function.Typ.ClosureVars[name] = t.(*VariableDefinition)
+			}
 		}
-		if t := bb.Classes[name]; t != nil {
-			return t, nil
-		}
-		if t := bb.Vars[name]; t != nil {
-			return t, nil
-		}
-		if t := bb.Consts[name]; t != nil {
-			return t, nil
-		}
-		if t := bb.Enums[name]; t != nil {
-			return t, nil
-		}
-		if t := bb.EnumNames[name]; t != nil {
-			return t, nil
-		}
-		bb = bb.Outter
 	}
 	return nil, fmt.Errorf("%s not found", name)
 }
@@ -107,8 +114,23 @@ func (b *Block) check(p *Package) []error {
 	return errs
 }
 
-func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
+func (b *Block) checkExpression_(e *Expression) (t []*VariableType, errs []error) {
 	return e.check(b)
+}
+
+func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
+	ts, es := b.checkExpression_(e)
+	if ts != nil && len(ts) > 1 {
+		if es == nil {
+			es = make([]error, 0)
+		}
+		es = append(es, fmt.Errorf("%s multi returns in single value context", errMsgPrefix(e.Pos)))
+	}
+	if len(ts) > 0 {
+		t = ts[0]
+	}
+	errs = es
+	return
 }
 
 func (b *Block) checkVar(v *VariableDefinition) []error {
@@ -266,10 +288,7 @@ func (b *Block) isFuntionTopBlock() bool {
 	if b.InheritedAttribute.function == nil { // not in a function
 		return false
 	}
-	if b.Outter == nil { // top function
-		return true
-	}
-	return b.Outter.InheritedAttribute.function != b.InheritedAttribute.function
+	return b.InheritedAttribute.function != b.Outter.InheritedAttribute.function
 }
 
 //func (b *Block) checkExpression(Expression *e) (*VariableType, error) {

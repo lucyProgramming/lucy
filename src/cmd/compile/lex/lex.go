@@ -89,7 +89,7 @@ func init() {
 	Lexer.Add([]byte("true"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_BOOL
+		t.Type = TOKEN_TRUE
 		t.Desp = "true"
 		t.Data = true
 		return t, nil
@@ -97,8 +97,8 @@ func init() {
 	Lexer.Add([]byte("false"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match
-		t.Type = TOKEN_BOOL
-		t.Desp = "true"
+		t.Type = TOKEN_FALSE
+		t.Desp = "false"
 		t.Data = false
 		return t, nil
 	})
