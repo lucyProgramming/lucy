@@ -8,7 +8,7 @@ type Block struct {
 	Pos                *Pos
 	Vars               map[string]*VariableDefinition
 	Consts             map[string]*Const
-	Funcs              map[string][]*Function
+	Funcs              map[string]*Function
 	Classes            map[string]*Class
 	Enums              map[string]*Enum
 	EnumNames          map[string]*EnumName
@@ -23,36 +23,52 @@ func (b *Block) isTop() bool {
 	return b.Outter == nil
 }
 func (b *Block) searchByName(name string) (interface{}, error) {
-	if t, ok := b.Funcs[name]; ok {
-		return t, nil
-	}
-	if t, ok := b.Classes[name]; ok {
-		return t, nil
-	}
-	if t, ok := b.Vars[name]; ok {
-		return t, nil
-	}
-	if t, ok := b.Consts[name]; ok {
-		return t, nil
-	}
-	if t, ok := b.Enums[name]; ok {
-		return t, nil
-	}
-	if t, ok := b.EnumNames[name]; ok {
-		return t, nil
-	}
-	if b.InheritedAttribute.function.Typ.ClosureVars != nil && b.InheritedAttribute.function.Typ.ClosureVars[name] != nil {
-		return b.InheritedAttribute.function.Typ.ClosureVars[name], nil
-	}
-	if b.Outter != nil {
-		t, err := b.Outter.searchByName(name)
-		if err == nil && b.isFuntionTopBlock() { //found and in function top block
-			if _, ok := t.(*VariableDefinition); ok {
-				b.InheritedAttribute.function.Typ.ClosureVars[name] = t.(*VariableDefinition)
-			}
+	if b.Funcs != nil {
+		if t, ok := b.Funcs[name]; ok {
+			return t, nil
 		}
 	}
-	return nil, fmt.Errorf("%s not found", name)
+	if b.Classes != nil {
+		if t, ok := b.Classes[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Vars != nil {
+		if t, ok := b.Vars[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Consts != nil {
+		if t, ok := b.Consts[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Enums != nil {
+		if t, ok := b.Enums[name]; ok {
+			return t, nil
+		}
+	}
+	if b.EnumNames != nil {
+		if t, ok := b.EnumNames[name]; ok {
+			return t, nil
+		}
+	}
+	if b.InheritedAttribute.function != nil &&
+		b.InheritedAttribute.function.Typ.ClosureVars != nil &&
+		b.InheritedAttribute.function.Typ.ClosureVars[name] != nil {
+		return b.InheritedAttribute.function.Typ.ClosureVars[name], nil
+	}
+	if b.Outter == nil {
+		return nil, fmt.Errorf("%s not found", name)
+	}
+
+	t, err := b.Outter.searchByName(name)
+	if err == nil && b.isFuntionTopBlock() && b.Outter.Outter != nil { //found and in function top block and b.Outter is not top block
+		if _, ok := t.(*VariableDefinition); ok {
+			b.InheritedAttribute.function.Typ.ClosureVars[name] = t.(*VariableDefinition)
+		}
+	}
+	return t, err
 }
 
 func (b *Block) inherite(father *Block) {
@@ -62,17 +78,6 @@ func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.function = father.InheritedAttribute.function
 	b.Outter = father
 }
-
-//func (b *Block) searchFunction(name string) *Function {
-//	bb := b
-//	for bb != nil {
-//		if i, ok := bb.Funcs[name]; ok {
-//			return i[0]
-//		}
-//		bb = bb.Outter
-//	}
-//	return nil
-//}
 
 type InheritedAttribute struct {
 	istop    bool // if it is a top block
@@ -87,17 +92,17 @@ type NameWithType struct {
 	Typ  *VariableType
 }
 
-//check out if expression is bool,must fold const before call this function
-func (b *Block) isBoolValue(e *Expression) (bool, []error) {
-	if e.Typ == EXPRESSION_TYPE_BOOL { //bool literal
-		return true, nil
-	}
-	t, err := b.checkExpression(e)
-	if err != nil {
-		return false, err
-	}
-	return t.Typ == VARIABLE_TYPE_BOOL, nil
-}
+////check out if expression is bool,must fold const before call this function
+//func (b *Block) isBoolValue(e *Expression) (bool, []error) {
+//	if e.Typ == EXPRESSION_TYPE_BOOL { //bool literal
+//		return true, nil
+//	}
+//	t, err := b.checkExpression(e)
+//	if err != nil {
+//		return false, err
+//	}
+//	return t.Typ == VARIABLE_TYPE_BOOL, nil
+//}
 
 func (b *Block) check(p *Package) []error {
 	b.InheritedAttribute.p = p
@@ -119,17 +124,17 @@ func (b *Block) checkExpression_(e *Expression) (t []*VariableType, errs []error
 }
 
 func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
+	errs = []error{}
 	ts, es := b.checkExpression_(e)
+	if errsNotEmpty(es) {
+		errs = append(errs, es...)
+	}
 	if ts != nil && len(ts) > 1 {
-		if es == nil {
-			es = make([]error, 0)
-		}
-		es = append(es, fmt.Errorf("%s multi returns in single value context", errMsgPrefix(e.Pos)))
+		errs = append(errs, fmt.Errorf("%s multi values in single value context", errMsgPrefix(e.Pos)))
 	}
 	if len(ts) > 0 {
 		t = ts[0]
 	}
-	errs = es
 	return
 }
 
@@ -207,9 +212,9 @@ func (b *Block) checkFunctions() []error {
 	errs := []error{}
 	for _, v := range b.Funcs {
 		//function has the sames
-		for _, vv := range v {
-			errs = append(errs, vv.check(b)...)
-		}
+
+		errs = append(errs, v.check(b)...)
+
 		//redeclare errors
 
 	}
@@ -220,17 +225,17 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}
-	if b.Vars[name] == nil {
+	if b.Vars[name] != nil {
 		return fmt.Errorf("%s name %s already declared as variable", name)
 	}
-	if b.Classes != nil {
+	if b.Classes == nil {
 		b.Classes = make(map[string]*Class)
 	}
 	if b.Classes[name] != nil {
 		return fmt.Errorf("%s name %s already declared as class", errMsgPrefix(pos), name)
 	}
 	if b.Funcs == nil {
-		b.Funcs = make(map[string][]*Function)
+		b.Funcs = make(map[string]*Function)
 	}
 	if b.Funcs[name] != nil {
 		return fmt.Errorf("%s name %s already declared as function", errMsgPrefix(pos), name)
@@ -253,11 +258,12 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if b.EnumNames[name] != nil {
 		return fmt.Errorf("%s name %s already declared as enumName", errMsgPrefix(pos), name)
 	}
+
 	switch d.(type) {
 	case *Class:
 		b.Classes[name] = d.(*Class)
 	case *Function:
-		b.Funcs[name] = append(b.Funcs[name], d.(*Function))
+		b.Funcs[name] = d.(*Function)
 	case *Const:
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
@@ -290,21 +296,3 @@ func (b *Block) isFuntionTopBlock() bool {
 	}
 	return b.InheritedAttribute.function != b.Outter.InheritedAttribute.function
 }
-
-//func (b *Block) checkExpression(Expression *e) (*VariableType, error) {
-//	return nil, nil
-//}
-
-//func (b *Block) getPackageName(name )
-
-//func (b *Block) checkVars() []error {
-//	errs := make([]error, 0)
-//	var es []error
-//	for _, v := range b.Vars {
-//		es = b.checkVar(v)
-//		if errsNotEmpty(es) {
-//			errs = append(errs, es...)
-//		}
-//	}
-//	return errs
-//}

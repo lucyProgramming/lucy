@@ -112,15 +112,11 @@ func (p *PackageLoader) loadMainLucy(j *class_json.ClassJson) {
 		p.P.Block.Vars[v.Name] = p.loadFieldAsVariableDefination(v)
 	}
 	if p.P.Block.Funcs == nil {
-		p.P.Block.Funcs = make(map[string][]*ast.Function)
+		p.P.Block.Funcs = make(map[string]*ast.Function)
 	}
 	for _, v := range j.Methods {
 		f := p.loadMethod(v)
-		if p.P.Block.Funcs[v.Name] == nil {
-			p.P.Block.Funcs[v.Name] = []*ast.Function{f}
-		} else {
-			p.P.Block.Funcs[v.Name] = append(p.P.Block.Funcs[v.Name], f)
-		}
+		p.P.Block.Funcs[v.Name] = f
 	}
 }
 

@@ -1,6 +1,8 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+)
 
 //代表语法数的一个节点
 type Node struct {
@@ -182,7 +184,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 				m[v.Package.Name] = []*PackageNameDeclare{v.Package}
 			}
 		}
-		if len(m) > 0 {
+		if len(m) > 1 {
 			t := []*PackageNameDeclare{}
 			for _, v := range m {
 				t = append(t, v...)
@@ -200,12 +202,14 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	for _, v := range c.Vars {
 		p.Block.Vars[v.Name] = v
 	}
-	p.Block.Funcs = make(map[string][]*Function)
+	p.Block.Funcs = make(map[string]*Function)
 	for _, v := range c.Funcs {
 		if p.Block.Funcs[v.Name] == nil {
-			p.Block.Funcs[v.Name] = []*Function{}
+			p.Block.Funcs[v.Name] = v
+		} else {
+			errs = append(errs, fmt.Errorf("%s  function %s redeclared", errMsgPrefix(v.Pos), v.Name))
+			errs = append(errs, fmt.Errorf("%s  function %s first declared here", errMsgPrefix(v.Pos), v.Name))
 		}
-		p.Block.Funcs[v.Name] = append(p.Block.Funcs[v.Name], v)
 	}
 	p.Block.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {

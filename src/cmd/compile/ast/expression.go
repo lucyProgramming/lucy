@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	EXPRESSION_TYPE_BOOL = iota
+	_ = iota
+	EXPRESSION_TYPE_BOOL
 	EXPRESSION_TYPE_BYTE
 	EXPRESSION_TYPE_INT
 	EXPRESSION_TYPE_FLOAT
@@ -32,6 +33,7 @@ const (
 	EXPRESSION_TYPE_GT
 	EXPRESSION_TYPE_LE
 	EXPRESSION_TYPE_LT
+
 	EXPRESSION_TYPE_ADD
 	EXPRESSION_TYPE_SUB
 	EXPRESSION_TYPE_MUL
@@ -389,16 +391,18 @@ func float64IsZero(f float64) bool {
 }
 
 func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b bool, err error) {
-	er := fmt.Errorf("can`t compare")
+	fmt.Println("$$$$$$$$$$$", typ)
+	fmt.Println(value1)
+	fmt.Println(value2)
+
 	switch typ {
 	case EXPRESSION_TYPE_BOOL:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(bool) == value2.(bool)
 		} else if e.Typ == EXPRESSION_TYPE_NE {
 			b = value1.(bool) != value2.(bool)
-		} else {
-			return false, er
 		}
+		return
 	case EXPRESSION_TYPE_BYTE:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(byte) == value2.(byte)
@@ -412,9 +416,9 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 			b = value1.(byte) < value2.(byte)
 		} else if e.Typ == EXPRESSION_TYPE_LE {
 			b = value1.(byte) <= value2.(byte)
-		} else {
-			return false, er
 		}
+		return
+
 	case EXPRESSION_TYPE_INT:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(int64) == value2.(int64)
@@ -428,9 +432,9 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 			b = value1.(int64) < value2.(int64)
 		} else if e.Typ == EXPRESSION_TYPE_LE {
 			b = value1.(int64) <= value2.(int64)
-		} else {
-			return false, er
 		}
+		return
+
 	case EXPRESSION_TYPE_FLOAT:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(float64) == value2.(float64)
@@ -444,9 +448,9 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 			b = value1.(float64) < value2.(float64)
 		} else if e.Typ == EXPRESSION_TYPE_LE {
 			b = value1.(float64) <= value2.(float64)
-		} else {
-			return false, er
 		}
+		return
+
 	case EXPRESSION_TYPE_STRING:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(string) == value2.(string)
@@ -460,10 +464,11 @@ func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b 
 			b = value1.(string) < value2.(string)
 		} else if e.Typ == EXPRESSION_TYPE_LE {
 			b = value1.(string) <= value2.(string)
-		} else {
-			return false, er
 		}
+		return
+
 	}
+
 	return false, fmt.Errorf("can`t compare")
 }
 
@@ -750,7 +755,8 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				err = er
 				return
 			}
-			is = b
+			is = true
+			Value = b
 			err = nil
 			Typ = EXPRESSION_TYPE_BOOL
 			return

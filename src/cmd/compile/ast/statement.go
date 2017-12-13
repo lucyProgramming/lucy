@@ -190,7 +190,10 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				errs = append(errs, es...)
 				continue
 			}
-			b.insert(vd.Name, s.Expression.Pos, vd)
+			err := b.insert(vd.Name, s.Expression.Pos, vd)
+			if err != nil {
+				errs = append(errs, err)
+			}
 		}
 		return errs
 	}
@@ -220,7 +223,8 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			}
 		}
 	}
-	errs = append(errs, fmt.Errorf("%s expression(%s) evaluated,but not used", errMsgPrefix(s.Pos), s.Expression.OpName()))
+	fmt.Println("!!!!!!!!!!!!!1", s.Expression.OpName())
+	errs = append(errs, fmt.Errorf("%s expression(%s) evaluated,but not used", errMsgPrefix(s.Expression.Pos), s.Expression.OpName()))
 	return errs
 }
 
@@ -295,14 +299,13 @@ func (e ElseIfList) check() []error {
 	errs := make([]error, 0)
 	var err error
 	for _, v := range e {
-
-		is, es := v.Block.isBoolValue(v.Condition)
-		if es != nil && len(es) > 0 {
+		t, es := v.Block.checkExpression(v.Condition)
+		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 			continue
 		}
-		if !is {
-			errs = append(errs, fmt.Errorf("%s %d:%d expression cannot be defined because of it is not a bool", v.Condition.Pos.Filename, v.Condition.Pos.StartLine, v.Condition.Pos.StartColumn, err))
+		if t.Typ != VARIABLE_TYPE_BOOL {
+			errs = append(errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(v.Condition.Pos), err))
 			continue
 		}
 		errs = append(errs, v.Block.check(nil)...)
@@ -319,6 +322,7 @@ type StatementIF struct {
 
 func (s *StatementIF) check(father *Block) (*Block, []error) {
 	errs := []error{}
+	//inherite
 	s.Block.inherite(father)
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		for _, v := range s.ElseIfList {
@@ -328,7 +332,15 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 	if s.ElseBlock != nil {
 		s.ElseBlock.inherite(father)
 	}
-
+	conditionType, es := s.Block.checkExpression(s.Condition)
+	if errsNotEmpty(es) {
+		errs = append(errs, es...)
+	}
+	if conditionType != nil {
+		if conditionType.Typ != VARIABLE_TYPE_BOOL {
+			errs = append(errs, fmt.Errorf("%s condition is not a bool expression", errMsgPrefix(s.Condition.Pos)))
+		}
+	}
 	// condition should a bool expression
 	if s.Condition.Typ == EXPRESSION_TYPE_BOOL && s.Condition.Data.(bool) == true { // if(true){...}
 		errs = append(errs, s.Block.check(nil)...)
@@ -338,16 +350,7 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 		errs = append(errs, s.ElseBlock.check(nil)...)
 		return s.Block, errs
 	}
-	// handle common situation
-	is, es := father.isBoolValue(s.Condition)
-	if es != nil && len(es) > 0 {
-		errs = append(errs, es...)
-		return nil, errs
-	}
-	if !is {
-		errs = append(errs, fmt.Errorf("%s is not a bool expression", errMsgPrefix(s.Condition.Pos)))
-		return nil, errs
-	}
+
 	errs = append(errs, s.Block.check(nil)...)
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		errs = append(errs, s.ElseIfList.check()...)

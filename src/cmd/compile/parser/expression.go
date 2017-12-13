@@ -126,8 +126,8 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 			} else if result.Typ == ast.EXPRESSION_TYPE_DOT {
 				newresult := &ast.Expression{
 					Typ: ast.EXPRESSION_TYPE_METHOD_CALL,
+					Pos: ep.parser.mkPos(),
 				}
-				newresult.Pos = ep.parser.mkPos()
 				call := &ast.ExpressionMethodCall{}
 				binary := result.Data.(*ast.ExpressionBinary)
 				call.Expression = binary.Left
@@ -139,10 +139,8 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 				break
 			}
 			if ep.parser.token.Type != lex.TOKEN_RP {
-				err = fmt.Errorf("%s %d%d except \")\" ,but %s",
-					ep.parser.filename,
-					ep.parser.token.Match.StartLine,
-					ep.parser.token.Match.StartColumn,
+				err = fmt.Errorf("%s except ')' ,but %s",
+					ep.parser.errorMsgPrefix(),
 					ep.parser.token.Desp)
 				break
 			}
@@ -387,7 +385,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		}, nil
 	case lex.TOKEN_NEW:
 		ep.Next()
-		t, err := ep.parser.parseIdentiferType()
+		t, err := ep.parser.parseIdentifierType()
 		if err != nil {
 			return nil, err
 		}

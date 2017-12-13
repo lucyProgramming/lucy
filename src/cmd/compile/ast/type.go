@@ -7,7 +7,8 @@ import (
 
 const (
 	//primitive type
-	VARIABLE_TYPE_BOOL = iota
+	_ = iota
+	VARIABLE_TYPE_BOOL
 	VARIABLE_TYPE_BYTE
 	VARIABLE_TYPE_SHORT
 	VARIABLE_TYPE_CHAR
@@ -17,10 +18,11 @@ const (
 	VARIABLE_TYPE_DOUBLE
 	VARIABLE_TYPE_STRING
 	//function
-	VARIALBE_TYPE_FUNCTION
+	VARIABLE_TYPE_FUNCTION
 	//enum
-	VARIALBE_TYPE_ENUM //enum
+	VARIABLE_TYPE_ENUM //enum
 	//class
+	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_CLASS //
 	VARIABLE_TYPE_ARRAY // []int
 	VARIABLE_TYPE_NAME  // naming
@@ -28,13 +30,16 @@ const (
 )
 
 type VariableType struct {
+	LeftValueValid  bool // can be used as left value
 	Pos             *Pos
 	Typ             int
 	Name            string // Lname.Rname
 	CombinationType *VariableType
+	Var             *VariableDefinition
 	Class           *Class
 	Enum            *Enum
 	EnumName        *EnumName
+	Function        *Function
 	FunctionType    *FunctionType
 }
 
@@ -42,11 +47,11 @@ type VariableType struct {
 	clone a type
 	only copy primitive type or type basic on name
 */
-func (t *VariableType) CloneNameTypeOrPrimitive() *VariableType {
+func (t *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
 	*ret = *t // primitive copied,name should be copied too
 	if ret.Typ == VARIABLE_TYPE_ARRAY {
-		ret.CombinationType = t.CombinationType.CloneNameTypeOrPrimitive()
+		ret.CombinationType = t.CombinationType.Clone()
 	}
 	return nil
 }
@@ -87,7 +92,7 @@ func (t *VariableType) resolveName(block *Block) error {
 		t.Typ = VARIABLE_TYPE_CLASS
 		t.Class = d.(*Class)
 	case *Enum:
-		t.Typ = VARIALBE_TYPE_ENUM
+		t.Typ = VARIABLE_TYPE_ENUM
 		t.Enum = d.(*Enum)
 	default:
 		return fmt.Errorf("name %s is not type")
@@ -154,13 +159,16 @@ func (t *VariableType) typeCompatible(t2 *VariableType) bool {
 	number
 */
 func (t *VariableType) isNumber() bool {
+	return t.isInteger() || t.isFloat()
+
+}
+
+func (t *VariableType) isInteger() bool {
 	return t.Typ == VARIABLE_TYPE_BYTE ||
 		t.Typ == VARIABLE_TYPE_SHORT ||
 		t.Typ == VARIABLE_TYPE_CHAR ||
 		t.Typ == VARIABLE_TYPE_INT ||
-		t.Typ == VARIABLE_TYPE_LONG ||
-		t.Typ == VARIABLE_TYPE_FLOAT ||
-		t.Typ == VARIABLE_TYPE_DOUBLE
+		t.Typ == VARIABLE_TYPE_LONG
 }
 
 /*
@@ -224,7 +232,7 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 			data = e.Data.(bool)
 			return
 		}
-	case VARIALBE_TYPE_ENUM:
+	case VARIABLE_TYPE_ENUM:
 		if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			if _, ok := p.Block.EnumNames[e.Data.(string)]; ok {
 				data = p.Block.EnumNames[e.Data.(string)]
@@ -268,14 +276,6 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 	return
 }
 
-////把树型转化为可读字符串
-//func (c *CombinationType) TypeString(ret *string) {
-//	if c.Typ == COMBINATION_TYPE_ARRAY {
-//		*ret += "[]"
-//	}
-//	c.Combination.TypeString(ret)
-//}
-
 //可读的类型信息
 func (v *VariableType) TypeString_(ret *string) {
 	switch v.Typ {
@@ -283,15 +283,23 @@ func (v *VariableType) TypeString_(ret *string) {
 		*ret = "bool"
 	case VARIABLE_TYPE_BYTE:
 		*ret = "byte"
+	case VARIABLE_TYPE_SHORT:
+		*ret = "short"
+	case VARIABLE_TYPE_CHAR:
+		*ret = "char"
 	case VARIABLE_TYPE_INT:
 		*ret = "int"
+	case VARIABLE_TYPE_LONG:
+		*ret = "long"
 	case VARIABLE_TYPE_FLOAT:
 		*ret = "float"
-	case VARIALBE_TYPE_FUNCTION:
+	case VARIABLE_TYPE_DOUBLE:
+		*ret = "double"
+	case VARIABLE_TYPE_FUNCTION:
 		*ret = "function"
 	case VARIABLE_TYPE_CLASS:
 		*ret = v.Name
-	case VARIALBE_TYPE_ENUM:
+	case VARIABLE_TYPE_ENUM:
 		*ret = v.Name + "(enum)"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
@@ -306,12 +314,16 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
-func (v *VariableType) Equal(e *VariableType) bool {
-	if v.Typ != e.Typ {
+func (v *VariableType) isPrimitive() bool {
+	return v.isNumber() || v.Typ == VARIABLE_TYPE_STRING
+}
+
+func (t1 *VariableType) Equal(t2 *VariableType) bool {
+	if t1.isPrimitive() && t2.isPrimitive() {
+		return t1.Typ == t2.Typ
+	}
+	if t1.Typ != t2.Typ {
 		return false
 	}
-	if v.CombinationType.Typ != e.CombinationType.Typ {
-		return false
-	}
-	return v.CombinationType.Equal(e.CombinationType)
+	return t1.CombinationType.Equal(t2.CombinationType)
 }

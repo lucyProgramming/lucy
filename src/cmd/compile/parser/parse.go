@@ -71,7 +71,8 @@ func (p *Parser) Parse() []error {
 	pd := &ast.PackageNameDeclare{
 		Name: p.token.Data.(string),
 	}
-	p.lexPos2AstPos(p.token, &pd.Pos)
+	pd.Pos = &ast.Pos{}
+	p.lexPos2AstPos(p.token, pd.Pos)
 	*p.tops = append(*p.tops, &ast.Node{
 		Data: pd,
 	})
@@ -109,59 +110,7 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			vs, typ, err := p.parseAssignedNames()
-			if err != nil {
-				p.consume(untils_semicolon)
-				p.Next()
-				resetProperty()
-				continue
-			}
-			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
-				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s", p.errorMsgPrefix(), p.token.Desp))
-				p.Next()
-				p.consume(untils_semicolon)
-				resetProperty()
-				continue
-			}
-			// const a := 1 is wrong,
-			if typ == lex.TOKEN_COLON_ASSIGN && isconst == true {
-				p.errs = append(p.errs, fmt.Errorf("%s use = instead of := for const definition", p.errorMsgPrefix()))
-				resetProperty()
-				continue
-			}
-			// a = 1 is wrong
-			if typ == lex.TOKEN_ASSIGN && isconst == false {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot have statement at top,possibly do you mean a := 1 to create a global variable", p.errorMsgPrefix()))
-				p.Next()
-				p.consume(untils_semicolon)
-				resetProperty()
-				continue
-			}
-			if isconst {
-				for _, v := range vs {
-					c := &ast.Const{}
-					c.VariableDefinition = *v
-					if ispublic {
-						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
-					} else {
-						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
-					}
-					*p.tops = append(*p.tops, &ast.Node{
-						Data: c,
-					})
-				}
-			} else {
-				for _, v := range vs {
-					if ispublic {
-						v.AccessFlags |= cg.ACC_FIELD_PUBLIC
-					} else {
-						v.AccessFlags |= cg.ACC_FIELD_PRIVATE
-					}
-					*p.tops = append(*p.tops, &ast.Node{
-						Data: v,
-					})
-				}
-			}
+
 			resetProperty()
 		case lex.TOKEN_ENUM:
 			if isconst {
@@ -240,6 +189,38 @@ func (p *Parser) Parse() []error {
 			if p.token.Type == lex.TOKEN_ENUM || p.token.Type == lex.TOKEN_CLASS {
 				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for enum or class ", p.errorMsgPrefix()))
 				resetProperty()
+			}
+			vs, typ, err := p.parseAssignedNames()
+			if err != nil {
+				p.consume(untils_semicolon)
+				p.Next()
+				resetProperty()
+				continue
+			}
+			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
+				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s", p.errorMsgPrefix(), p.token.Desp))
+				p.Next()
+				p.consume(untils_semicolon)
+				resetProperty()
+				continue
+			}
+			// const a := 1 is wrong,
+			if typ == lex.TOKEN_COLON_ASSIGN && isconst == true {
+				p.errs = append(p.errs, fmt.Errorf("%s use = instead of := for const definition", p.errorMsgPrefix()))
+				resetProperty()
+				continue
+			}
+			for _, v := range vs {
+				c := &ast.Const{}
+				c.VariableDefinition = *v
+				if ispublic {
+					c.AccessFlags |= cg.ACC_FIELD_PUBLIC
+				} else {
+					c.AccessFlags |= cg.ACC_FIELD_PRIVATE
+				}
+				*p.tops = append(*p.tops, &ast.Node{
+					Data: c,
+				})
 			}
 			continue
 		case lex.TOKEN_PRIVATE: //is a default attribute
@@ -485,7 +466,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Typ: ast.VARIABLE_TYPE_STRING,
 		}, nil
 	case lex.TOKEN_IDENTIFIER:
-		return p.parseIdentiferType()
+		return p.parseIdentifierType()
 	case lex.TOKEN_FUNCTION:
 		p.Next()
 		t, err := p.parseFunctionType()
@@ -493,7 +474,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, err
 		}
 		return &ast.VariableType{
-			Typ:          ast.VARIALBE_TYPE_FUNCTION,
+			Typ:          ast.VARIABLE_TYPE_FUNCTION,
 			FunctionType: t,
 		}, nil
 	}
@@ -544,7 +525,7 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 	}
 	return t, err
 }
-func (p *Parser) parseIdentiferType() (*ast.VariableType, error) {
+func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
 	name := p.token.Data.(string)
 	ret := &ast.VariableType{
 		Pos: p.mkPos(),

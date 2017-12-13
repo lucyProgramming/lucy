@@ -86,7 +86,7 @@ func (i *Imports) GetAccessName() (string, error) {
 
 type PackageNameDeclare struct {
 	Name string
-	Pos  Pos
+	Pos  *Pos
 }
 
 type RedeclareError struct {
@@ -111,9 +111,9 @@ func (p *PackageNameNotConsistentError) Error() string {
 	if len(p.Names) == 0 {
 		panic("zero length")
 	}
-	s := fmt.Sprintf("package named not consistently")
+	s := fmt.Sprintf("package named not consistently\n")
 	for _, v := range p.Names {
-		s += fmt.Sprintf("\tnamed by %s %s %d:%d\n", v.Name, v.Pos.Filename, v.Pos.StartLine, v.Pos.StartColumn)
+		s += fmt.Sprintf("%s named by %s\n", errMsgPrefix(v.Pos), v.Name)
 	}
 	return s
 }
