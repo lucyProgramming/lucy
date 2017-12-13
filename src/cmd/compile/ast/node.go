@@ -112,24 +112,6 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	return ret
 }
 
-func (p *ConvertTops2Package) checkEnum() []error {
-	ret := make([]error, 0)
-	for _, v := range p.Enums {
-		if len(v.Names) == 0 {
-			continue
-		}
-		is, typ, value, err := v.Init.getConstValue()
-		if err != nil || is == false || typ != EXPRESSION_TYPE_INT {
-			ret = append(ret, fmt.Errorf("enum type must inited by integer"))
-			continue
-		}
-		for k, vv := range v.Names {
-			vv.Value = int64(k) + value.(int64)
-		}
-	}
-	return ret
-}
-
 func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redeclareErrors []*RedeclareError, errs []error) {
 	errs = make([]error, 0)
 	p = &Package{}
@@ -192,7 +174,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 			errs = append(errs, &PackageNameNotConsistentError{t})
 		}
 	}
-	errs = append(errs, c.checkEnum()...)
+	errs = append(errs, checkEnum(c.Enums)...)
 	redeclareErrors = c.redeclareErrors()
 	p.Block.Consts = make(map[string]*Const)
 	for _, v := range c.Consts {
@@ -204,6 +186,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	}
 	p.Block.Funcs = make(map[string]*Function)
 	for _, v := range c.Funcs {
+		v.mkVariableType()
 		if p.Block.Funcs[v.Name] == nil {
 			p.Block.Funcs[v.Name] = v
 		} else {
@@ -213,11 +196,13 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	}
 	p.Block.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {
+		v.mkVariableType()
 		p.Block.Classes[v.Name] = v
 	}
 	p.Block.Enums = make(map[string]*Enum)
 	p.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range c.Enums {
+		v.mkVariableType()
 		p.Block.Enums[v.Name] = v
 		for _, vv := range v.Names {
 			p.Block.EnumNames[vv.Name] = vv

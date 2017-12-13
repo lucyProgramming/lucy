@@ -15,6 +15,15 @@ type Class struct {
 	Constructors         []*ClassMethod // can be nil
 	Signature            *class_json.ClassSignature
 	SouceFile            string
+	Used                 bool
+	VariableType         *VariableType
+}
+
+func (c *Class) mkVariableType() {
+	c.VariableType = &VariableType{}
+	c.VariableType.Typ = VARIABLE_TYPE_CLASS
+	c.VariableType.Resource = &VariableTypeResource{}
+	c.VariableType.Resource.Class = c
 }
 
 func (c *Class) check() []error {

@@ -17,30 +17,34 @@ const (
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_DOUBLE
 	VARIABLE_TYPE_STRING
+	VARIABLE_TYPE_OBJECT
 	//function
 	VARIABLE_TYPE_FUNCTION
+	VARIABLE_TYPE_FUNCTION_POINTER
 	//enum
 	VARIABLE_TYPE_ENUM //enum
 	//class
-	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_CLASS //
-	VARIABLE_TYPE_ARRAY // []int
-	VARIABLE_TYPE_NAME  // naming
+	VARIABLE_TYPE_ARRAY //[]int
+	VARIABLE_TYPE_NAME  //naming
 	VARIABLE_TYPE_VOID
 )
 
 type VariableType struct {
-	LeftValueValid  bool // can be used as left value
 	Pos             *Pos
 	Typ             int
 	Name            string // Lname.Rname
 	CombinationType *VariableType
-	Var             *VariableDefinition
-	Class           *Class
-	Enum            *Enum
-	EnumName        *EnumName
-	Function        *Function
 	FunctionType    *FunctionType
+	Resource        *VariableTypeResource
+}
+
+type VariableTypeResource struct {
+	Var   *VariableDefinition
+	Class *Class
+	Enum  *Enum
+	//EnumName *EnumName
+	Function *Function
 }
 
 /*
@@ -54,6 +58,13 @@ func (t *VariableType) Clone() *VariableType {
 		ret.CombinationType = t.CombinationType.Clone()
 	}
 	return nil
+}
+
+func (t *VariableType) markAsUsed() {
+	if t.Resource == nil {
+		return
+	}
+
 }
 
 func (t *VariableType) resolve(block *Block) error {
@@ -90,10 +101,12 @@ func (t *VariableType) resolveName(block *Block) error {
 		return fmt.Errorf("name %s is a const,not a type", t.Name)
 	case *Class:
 		t.Typ = VARIABLE_TYPE_CLASS
-		t.Class = d.(*Class)
+		t.Resource = &VariableTypeResource{}
+		t.Resource.Class = d.(*Class)
 	case *Enum:
 		t.Typ = VARIABLE_TYPE_ENUM
-		t.Enum = d.(*Enum)
+		t.Resource = &VariableTypeResource{}
+		t.Resource.Enum = d.(*Enum)
 	default:
 		return fmt.Errorf("name %s is not type")
 	}

@@ -7,13 +7,22 @@ import (
 )
 
 type Function struct {
-	AccessFlags uint16 // public private or protected
-	Typ         *FunctionType
-	Name        string // if name is nil string,means no name function
-	Block       *Block
-	Pos         *Pos
-	Descriptor  string
-	Signature   *class_json.MethodSignature
+	Used         bool
+	AccessFlags  uint16 // public private or protected
+	Typ          *FunctionType
+	Name         string // if name is nil string,means no name function
+	Block        *Block
+	Pos          *Pos
+	Descriptor   string
+	Signature    *class_json.MethodSignature
+	VariableType *VariableType
+}
+
+func (f *Function) mkVariableType() {
+	f.VariableType = &VariableType{}
+	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
+	f.VariableType.Resource = &VariableTypeResource{}
+	f.VariableType.Resource.Function = f
 }
 
 func (f *Function) MkDescriptor() {

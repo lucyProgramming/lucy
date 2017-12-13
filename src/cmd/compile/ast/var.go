@@ -41,3 +41,20 @@ func errMsgPrefix(pos *Pos) string {
 func errsNotEmpty(errs []error) bool {
 	return errs != nil && len(errs) > 0
 }
+func checkEnum(enums []*Enum) []error {
+	ret := make([]error, 0)
+	for _, v := range enums {
+		if len(v.Names) == 0 {
+			continue
+		}
+		is, typ, value, err := v.Init.getConstValue()
+		if err != nil || is == false || typ != EXPRESSION_TYPE_INT {
+			ret = append(ret, fmt.Errorf("enum type must inited by integer"))
+			continue
+		}
+		for k, vv := range v.Names {
+			vv.Value = int64(k) + value.(int64)
+		}
+	}
+	return ret
+}

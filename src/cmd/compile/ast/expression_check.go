@@ -142,8 +142,8 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	}
 	switch d.(type) {
 	case *Function:
-		f := d.(*Function)
-		return f.Typ, nil
+		//		f := d.(*Function)
+		return nil, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
 		return t.Typ, nil
@@ -152,14 +152,10 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return t.Typ, nil
 	case *Enum:
 		t := d.(*Enum)
-		return &VariableType{
-			Typ:  VARIABLE_TYPE_ENUM,
-			Enum: t,
-		}, nil
+		return t.VariableType, nil
 	default:
 		panic(1111111)
 	}
-
 	return nil, nil
 }
 
@@ -223,14 +219,13 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
-		if !t1.LeftValueValid {
+		if t1.Resource == nil || t1.Resource.Var == nil {
 			*errs = append(*errs, fmt.Errorf("%s cannot be used as left value", errMsgPrefix(e.Pos)))
 		}
 		if t1.isNumber() {
 			if !t2.isNumber() {
 				*errs = append(*errs, fmt.Errorf("%s not a number on the right of the equation", errMsgPrefix(e.Pos)))
 			}
-
 		}
 		if t1.Typ == VARIABLE_TYPE_STRING {
 			if e.Typ != EXPRESSION_TYPE_PLUS_ASSIGN {
@@ -279,7 +274,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		}
 		return t1
 	}
-
 	panic("missing check")
 	return nil
 }

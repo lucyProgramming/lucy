@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
@@ -42,6 +43,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	e = &ast.Enum{}
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
+	e.NamesMap = make(map[string]*ast.EnumName)
 	if p.token.Type == lex.TOKEN_RC {
 		return e, nil
 	}
@@ -97,6 +99,12 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		t.Name = v.Name
 		t.Pos = v.Pos
 		t.Enum = e
+		e.Names = append(e.Names, t)
+		if e.NamesMap[v.Name] != nil {
+			p.errs = append(p.errs, fmt.Errorf("%s enumname %s already declared", p.errorMsgPrefix(v.Pos)))
+		} else {
+			e.NamesMap[v.Name] = t
+		}
 	}
 	e.Access = 0
 	if ispublic {

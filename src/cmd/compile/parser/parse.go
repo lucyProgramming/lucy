@@ -392,7 +392,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	for k, v := range names {
 		vd := &ast.VariableDefinition{}
 		vd.Name = v.Name
-		vd.Typ = t
+		vd.Typ = t.Clone()
 		if len(ispublic) > 0 && ispublic[0] {
 			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		} else {
