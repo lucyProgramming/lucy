@@ -22,7 +22,6 @@ func init() {
 		t.Desp = "enum"
 		return t, nil
 	})
-
 	Lexer.Add([]byte("const"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		t := &Token{}
 		t.Match = match

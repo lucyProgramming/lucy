@@ -126,8 +126,8 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 }
 
 func (s *Statement) checkStatementExpression(b *Block) []error {
-	fmt.Println("##############", s.Expression.OpName())
-	errs := []error{}
+	//fmt.Println("##############", s.Expression.OpName())
+	//errs := []error{}
 	//func1()
 	//	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
 	//		call := s.Expression.Data.(*ExpressionFunctionCall)
@@ -144,88 +144,62 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	//	return errs
 	//}
 	// i++ i-- ++i --i
-	if EXPRESSION_TYPE_INCREMENT == s.Expression.Typ ||
-		EXPRESSION_TYPE_DECREMENT == s.Expression.Typ ||
-		EXPRESSION_TYPE_PRE_INCREMENT == s.Expression.Typ ||
-		EXPRESSION_TYPE_PRE_DECREMENT == s.Expression.Typ {
-		left := s.Expression.Data.(*Expression)     // left means left value
-		if left.Typ != EXPRESSION_TYPE_IDENTIFIER { //naming
-			name := left.Data.(string)
-			item, _ := b.searchByName(name)
-			if item == nil {
-				errs = append(errs, notFoundError(s.Pos, "variable", name))
-				return errs
-			}
-			return errs
-		}
-		errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.OpName()))
-		return errs
-	}
-	if EXPRESSION_TYPE_COLON_ASSIGN == s.Expression.Typ { //declare variable
-		binary := s.Expression.Data.(*ExpressionBinary)
-		if binary.Left.Typ != EXPRESSION_TYPE_IDENTIFIER && binary.Left.Typ != EXPRESSION_TYPE_LIST {
-			errs = append(errs, fmt.Errorf("%s no name on the left,but %s", errMsgPrefix(binary.Left.Pos), binary.Left.OpName()))
-			return errs
-		}
-		var names []*Expression
-		if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
-			names = append(names, binary.Left)
-		} else {
-			names = binary.Left.Data.([]*Expression)
-		}
-		values := binary.Right.Data.([]*Expression)
-		for k, v := range names {
-			if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
-				errs = append(errs, fmt.Errorf("%s expression is not a name,but %s", errMsgPrefix(v.Pos), v.OpName()))
-				continue
-			}
-			if v.Data.(string) == "_" { // not receive
-				continue
-			}
-			vd := &VariableDefinition{}
-			vd.Name = v.Data.(string)
-			vd.Expression = values[k]
-			es := b.checkVar(vd)
-			if errsNotEmpty(es) {
-				errs = append(errs, es...)
-				continue
-			}
-			err := b.insert(vd.Name, s.Expression.Pos, vd)
-			if err != nil {
-				errs = append(errs, err)
-			}
-		}
-		return errs
-	}
-	if s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
-		binary := s.Expression.Data.(*ExpressionBinary)
-		if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
-			name := s.Expression.Data.(string)
-			item, _ := b.searchByName(name)
-			if item == nil {
-				errs = append(errs, notFoundError(s.Pos, "variable", name))
-				return errs
-			}
-			return errs
-		}
-	}
-	if s.Expression.Typ == EXPRESSION_TYPE_VAR {
-		vs := s.Expression.Data.(*ExpressionDeclareVariable)
-		for _, v := range vs.Vs {
-			err := b.insert(v.Name, v.Pos, v)
-			if err != nil {
-				errs = append(errs, err)
-			}
-		}
-	}
-	fmt.Println("!!!!!!!!!!!!!1", s.Expression.OpName())
-	errs = append(errs, fmt.Errorf("%s expression(%s) evaluated,but not used", errMsgPrefix(s.Expression.Pos), s.Expression.OpName()))
-	return errs
+	//if EXPRESSION_TYPE_INCREMENT == s.Expression.Typ ||
+	//	EXPRESSION_TYPE_DECREMENT == s.Expression.Typ ||
+	//	EXPRESSION_TYPE_PRE_INCREMENT == s.Expression.Typ ||
+	//	EXPRESSION_TYPE_PRE_DECREMENT == s.Expression.Typ {
+	//	left := s.Expression.Data.(*Expression)     // left means left value
+	//	if left.Typ != EXPRESSION_TYPE_IDENTIFIER { //naming
+	//		name := left.Data.(string)
+	//		item, _ := b.searchByName(name)
+	//		if item == nil {
+	//			errs = append(errs, notFoundError(s.Pos, "variable", name))
+	//			return errs
+	//		}
+	//		return errs
+	//	}
+	//	errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.OpName()))
+	//	return errs
+	//}
+	//if EXPRESSION_TYPE_COLON_ASSIGN == s.Expression.Typ { //declare variable
+	//	binary := s.Expression.Data.(*ExpressionBinary)
+	//	if binary.Left.Typ != EXPRESSION_TYPE_IDENTIFIER && binary.Left.Typ != EXPRESSION_TYPE_LIST {
+	//		errs = append(errs, fmt.Errorf("%s no name on the left,but %s", errMsgPrefix(binary.Left.Pos), binary.Left.OpName()))
+	//		return errs
+	//	}
+	//	var names []*Expression
+	//	if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
+	//		names = append(names, binary.Left)
+	//	} else {
+	//		names = binary.Left.Data.([]*Expression)
+	//	}
+	//	values := binary.Right.Data.([]*Expression)
+	//	for k, v := range names {
+	//		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
+	//			errs = append(errs, fmt.Errorf("%s expression is not a name,but %s", errMsgPrefix(v.Pos), v.OpName()))
+	//			continue
+	//		}
+	//		if v.Data.(string) == "_" { // not receive
+	//			continue
+	//		}
+	//		vd := &VariableDefinition{}
+	//		vd.Name = v.Data.(string)
+	//		vd.Expression = values[k]
+	//		es := b.checkVar(vd)
+	//		if errsNotEmpty(es) {
+	//			errs = append(errs, es...)
+	//			continue
+	//		}
+	//		err := b.insert(vd.Name, s.Expression.Pos, vd)
+	//		if err != nil {
+	//			errs = append(errs, err)
+	//		}
+	//	}
+	//	return errs
+	//}
+
+	_, es := b.checkExpression(s.Expression)
+	return es
 }
 
 type StatementSwitch struct {

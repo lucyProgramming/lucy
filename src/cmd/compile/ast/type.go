@@ -40,10 +40,10 @@ type VariableType struct {
 }
 
 type VariableTypeResource struct {
-	Var   *VariableDefinition
-	Class *Class
-	Enum  *Enum
-	//EnumName *EnumName
+	Const    *Const
+	Var      *VariableDefinition
+	Class    *Class
+	Enum     *Enum
 	Function *Function
 }
 
@@ -53,9 +53,28 @@ type VariableTypeResource struct {
 */
 func (t *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
-	*ret = *t // primitive copied,name should be copied too
+	ret.Typ = t.Typ // primitive copied,name should be copied too
+	ret.Pos = &Pos{}
+	*ret.Pos = *t.Pos
+	if t.Resource != nil {
+		ret.Resource = &VariableTypeResource{}
+		*ret.Resource = *t.Resource
+	}
 	if ret.Typ == VARIABLE_TYPE_ARRAY {
 		ret.CombinationType = t.CombinationType.Clone()
+	}
+	return ret
+}
+
+func (t *VariableType) assignAble() error {
+	if t.Resource == nil {
+		return fmt.Errorf("cannot been assign value")
+	}
+	if t.Resource.Const != nil {
+		return fmt.Errorf("const %v cannot been assign value", t.Resource.Const.Name)
+	}
+	if t.Resource.Var == nil {
+		return fmt.Errorf("cannot been assign value")
 	}
 	return nil
 }

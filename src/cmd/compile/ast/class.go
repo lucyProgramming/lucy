@@ -56,5 +56,4 @@ type ClassMethod struct {
 
 type ClassField struct {
 	VariableDefinition
-	Pos *Pos
 }

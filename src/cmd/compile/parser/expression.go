@@ -230,7 +230,6 @@ func (ep *ExpressionParser) parseValueGroups() (*ast.Expression, error) {
 }
 
 func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, error) {
-	panic(1)
 	t, err := ep.parser.parseType()
 	if err != nil {
 		return nil, err
@@ -248,7 +247,7 @@ func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, er
 	}
 	ep.Next() // skip ) for next process
 	return &ast.Expression{
-		Typ: ast.EXPRESSION_TYPE_CONVERTION,
+		Typ: ast.EXPRESSION_TYPE_CONVERTION_TYPE,
 		Data: &ast.ExpressionTypeConvertion{
 			Typ:        t,
 			Expression: e,
@@ -268,14 +267,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		if len(lefts) == 1 {
-			left = lefts[0]
-		} else {
+		if len(lefts) > 1 {
 			left = &ast.Expression{
 				Typ:  ast.EXPRESSION_TYPE_LIST,
 				Data: lefts,
-				Pos:  ep.parser.mkPos(),
 			}
+		} else {
+			left = lefts[0]
 		}
 	case lex.TOKEN_TRUE:
 		left = &ast.Expression{}
@@ -453,7 +451,6 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
-
 	default:
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
@@ -466,8 +463,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		} else {
 			newe.Typ = ast.EXPRESSION_TYPE_DECREMENT
 		}
-		newe.Data = left
-		left = newe
+		if left.Typ != ast.EXPRESSION_TYPE_LIST {
+			newe.Data = left
+			left = newe
+		} else {
+			list := left.Data.([]*ast.Expression)
+			newe.Data = list[len(list)-1]
+		}
 		ep.Next()
 	}
 	return left, nil
@@ -703,6 +705,7 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(left)
 	mkBinayExpression := func(typ int, multi bool) (*ast.Expression, error) {
 		ep.Next()
 		if ep.parser.eof {
@@ -723,7 +726,7 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 			binary.Right.Typ = ast.EXPRESSION_TYPE_LIST
 			binary.Right.Data = es
 		} else {
-			binary.Right, err = ep.parseLogicalExpression()
+			binary.Right, err = ep.parseExpression()
 		}
 		return result, err
 	}

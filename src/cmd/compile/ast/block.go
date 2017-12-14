@@ -222,6 +222,10 @@ func (b *Block) checkFunctions() []error {
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
+	if name == "__main__" { // special name
+		return fmt.Errorf("%s __main__ already been token", errMsgPrefix(pos))
+	}
+	fmt.Println("***************", name, d)
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}

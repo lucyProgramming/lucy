@@ -5,11 +5,10 @@ import "java/io";
 
 
 {
-    a := true;
-    xxx := 123;
-	if "123" == xxx {
-		io.System.println("hello world");
-	}
+
+	c := 1+2;
+    c++;
+    c++ = 2;
 }
 
 

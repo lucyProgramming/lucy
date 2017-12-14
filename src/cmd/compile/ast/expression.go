@@ -57,7 +57,7 @@ const (
 	EXPRESSION_TYPE_FUNCTION
 	EXPRESSION_TYPE_VAR
 	EXPRESSION_TYPE_CONST
-	EXPRESSION_TYPE_CONVERTION // []byte(str)
+	EXPRESSION_TYPE_CONVERTION_TYPE // []byte(str)
 	//EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
 )
 
@@ -304,6 +304,8 @@ func (e *Expression) OpName() string {
 		return "expression_list"
 	case EXPRESSION_TYPE_FUNCTION:
 		return "function_literal"
+	case EXPRESSION_TYPE_CONST:
+		return "const"
 	}
 	panic("missing type")
 }

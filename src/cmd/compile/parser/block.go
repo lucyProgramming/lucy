@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -129,6 +128,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Data: &ast.ExpressionDeclareConsts{
 					Cs: cs,
 				},
+				Pos: b.parser.mkPos(),
 			}
 			block.Statements = append(block.Statements, r)
 			b.Next()
