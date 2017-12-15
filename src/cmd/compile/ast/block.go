@@ -23,7 +23,6 @@ func (b *Block) isTop() bool {
 	return b.Outter == nil
 }
 func (b *Block) searchByName(name string) (interface{}, error) {
-	fmt.Println("!!!!!!!!!!!!!!", name, b.Funcs, b.Outter)
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
 			return t, nil
@@ -83,6 +82,7 @@ type InheritedAttribute struct {
 	istop    bool // if it is a top block
 	infor    bool // if this statement is in for or not
 	function *Function
+	class    *Class
 	returns  ReturnList
 	p        *Package
 }
@@ -99,10 +99,10 @@ func (b *Block) check(father *Block) []error {
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
 	errs = append(errs, b.checkFunctions()...)
+	errs = append(errs, b.checkClass()...)
 	for _, v := range b.Vars {
 		errs = append(errs, b.checkVar(v)...)
 	}
-	errs = append(errs, b.checkClass()...)
 	for _, s := range b.Statements {
 		errs = append(errs, s.check(b)...)
 	}
@@ -207,10 +207,12 @@ func (b *Block) checkFunctions() []error {
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
+	if name == "" {
+		panic("null name")
+	}
 	if name == "__main__" { // special name
 		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
 	}
-	fmt.Println("***************", name, d)
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}

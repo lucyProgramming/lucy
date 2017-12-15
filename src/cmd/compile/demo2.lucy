@@ -5,7 +5,10 @@ import "java/io";
 
 {
     c := 123;
-    dd := add();
+    dd := add1();
+}
+
+fn add1(){
 }
 
 fn add()->(xx int){
