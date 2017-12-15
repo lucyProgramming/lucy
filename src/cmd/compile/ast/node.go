@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"fmt"
+//"fmt"
 )
 
 //代表语法数的一个节点
@@ -126,7 +126,9 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	for _, v := range t {
 		switch v.Data.(type) {
 		case *Block:
-			c.Blocks = append(c.Blocks, v.Data.(*Block))
+			t := v.Data.(*Block)
+			t.p = p
+			c.Blocks = append(c.Blocks, t)
 		case *Function:
 			t := v.Data.(*Function)
 			c.Funcs = append(c.Funcs, t)
@@ -178,7 +180,8 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	redeclareErrors = c.redeclareErrors()
 	p.Block.Consts = make(map[string]*Const)
 	for _, v := range c.Consts {
-		p.Block.Consts[v.Name] = v
+		p.Block.insert(v.Name, v.Pos, v)
+
 	}
 	p.Block.Vars = make(map[string]*VariableDefinition)
 	for _, v := range c.Vars {
@@ -187,12 +190,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	p.Block.Funcs = make(map[string]*Function)
 	for _, v := range c.Funcs {
 		v.mkVariableType()
-		if p.Block.Funcs[v.Name] == nil {
-			p.Block.Funcs[v.Name] = v
-		} else {
-			errs = append(errs, fmt.Errorf("%s  function %s redeclared", errMsgPrefix(v.Pos), v.Name))
-			errs = append(errs, fmt.Errorf("%s  function %s first declared here", errMsgPrefix(v.Pos), v.Name))
-		}
+		p.Block.insert(v.Name, v.Pos, v)
 	}
 	p.Block.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {

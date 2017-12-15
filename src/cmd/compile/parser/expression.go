@@ -113,6 +113,12 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 				}
 			} else { //ep.parser.token.Type == lex.TOKEN_RP
 			}
+			if ep.parser.token.Type != lex.TOKEN_RP {
+				err = fmt.Errorf("%s except ')' ,but %s",
+					ep.parser.errorMsgPrefix(),
+					ep.parser.token.Desp)
+				break
+			}
 			if result.Typ == ast.EXPRESSION_TYPE_IDENTIFIER || result.Typ == ast.EXPRESSION_TYPE_INDEX {
 				newresult := &ast.Expression{
 					Typ: ast.EXPRESSION_TYPE_FUNCTION_CALL,
@@ -136,12 +142,6 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 				result = newresult
 			} else {
 				err = fmt.Errorf("%s %d%d can`t make call on that situation", ep.parser.filename, ep.parser.token.Match.StartLine, ep.parser.token.Match.StartColumn)
-				break
-			}
-			if ep.parser.token.Type != lex.TOKEN_RP {
-				err = fmt.Errorf("%s except ')' ,but %s",
-					ep.parser.errorMsgPrefix(),
-					ep.parser.token.Desp)
 				break
 			}
 			ep.Next() // skip )
@@ -705,7 +705,15 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(left)
+	mustBeOneExpression := func() {
+		if left.Typ == ast.EXPRESSION_TYPE_LIST {
+			es := left.Data.([]*ast.Expression)
+			left = es[0]
+			if len(es) > 1 {
+				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s expect one left value", ep.parser.errorMsgPrefix(es[1].Pos)))
+			}
+		}
+	}
 	mkBinayExpression := func(typ int, multi bool) (*ast.Expression, error) {
 		ep.Next()
 		if ep.parser.eof {
@@ -735,14 +743,19 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	case lex.TOKEN_COLON_ASSIGN:
 		return mkBinayExpression(ast.EXPRESSION_TYPE_COLON_ASSIGN, true)
 	case lex.TOKEN_PLUS_ASSIGN:
+		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_PLUS_ASSIGN, false)
 	case lex.TOKEN_MINUS_ASSIGN:
+		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MINUS_ASSIGN, false)
 	case lex.TOKEN_MUL_ASSIGN:
+		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MUL_ASSIGN, false)
 	case lex.TOKEN_DIV_ASSIGN:
+		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_DIV_ASSIGN, false)
 	case lex.TOKEN_MOD_ASSIGN:
+		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
 	case lex.TOKEN_ASSIGN:
 		return mkBinayExpression(ast.EXPRESSION_TYPE_ASSIGN, true)

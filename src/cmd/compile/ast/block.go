@@ -23,6 +23,7 @@ func (b *Block) isTop() bool {
 	return b.Outter == nil
 }
 func (b *Block) searchByName(name string) (interface{}, error) {
+	fmt.Println("!!!!!!!!!!!!!!", name, b.Funcs, b.Outter)
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
 			return t, nil
@@ -61,7 +62,6 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 	if b.Outter == nil {
 		return nil, fmt.Errorf("%s not found", name)
 	}
-
 	t, err := b.Outter.searchByName(name)
 	if err == nil && b.isFuntionTopBlock() && b.Outter.Outter != nil { //found and in function top block and b.Outter is not top block
 		if _, ok := t.(*VariableDefinition); ok {
@@ -92,20 +92,10 @@ type NameWithType struct {
 	Typ  *VariableType
 }
 
-////check out if expression is bool,must fold const before call this function
-//func (b *Block) isBoolValue(e *Expression) (bool, []error) {
-//	if e.Typ == EXPRESSION_TYPE_BOOL { //bool literal
-//		return true, nil
-//	}
-//	t, err := b.checkExpression(e)
-//	if err != nil {
-//		return false, err
-//	}
-//	return t.Typ == VARIABLE_TYPE_BOOL, nil
-//}
-
-func (b *Block) check(p *Package) []error {
-	b.InheritedAttribute.p = p
+func (b *Block) check(father *Block) []error {
+	if father != nil {
+		b.inherite(father)
+	}
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
 	errs = append(errs, b.checkFunctions()...)
@@ -158,7 +148,7 @@ func (b *Block) checkVar(v *VariableDefinition) []error {
 				return []error{fmt.Errorf("%s err", errMsgPrefix(v.Pos))}
 			}
 		}
-		if !v.Typ.typeCompatible(expressionVariableType) {
+		if expressionVariableType != nil && !v.Typ.typeCompatible(expressionVariableType) {
 			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign %s to %s", errMsgPrefix(v.Pos), v.Typ.TypeString(), expressionVariableType.TypeString())}
 		}
 		return nil
@@ -202,7 +192,7 @@ func (b *Block) checkConst() []error {
 				errs = append(errs, fmt.Errorf("%s const %v has worng initiation value", errMsgPrefix(v.Pos), v.Name))
 				continue
 			}
-			v.Data = d
+			v.Value = d
 		}
 	}
 	return errs
@@ -211,44 +201,39 @@ func (b *Block) checkConst() []error {
 func (b *Block) checkFunctions() []error {
 	errs := []error{}
 	for _, v := range b.Funcs {
-		//function has the sames
-
 		errs = append(errs, v.check(b)...)
-
-		//redeclare errors
-
 	}
 	return errs
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == "__main__" { // special name
-		return fmt.Errorf("%s __main__ already been token", errMsgPrefix(pos))
+		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
 	}
 	fmt.Println("***************", name, d)
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}
 	if b.Vars[name] != nil {
-		return fmt.Errorf("%s name %s already declared as variable", name)
+		return fmt.Errorf("%s name '%s' already declared as variable", errMsgPrefix(pos), name)
 	}
 	if b.Classes == nil {
 		b.Classes = make(map[string]*Class)
 	}
 	if b.Classes[name] != nil {
-		return fmt.Errorf("%s name %s already declared as class", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s name '%s' already declared as class", errMsgPrefix(pos), name)
 	}
 	if b.Funcs == nil {
 		b.Funcs = make(map[string]*Function)
 	}
 	if b.Funcs[name] != nil {
-		return fmt.Errorf("%s name %s already declared as function", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s name '%s' already declared as function", errMsgPrefix(pos), name)
 	}
 	if b.Consts == nil {
 		b.Consts = make(map[string]*Const)
 	}
 	if b.Consts[name] != nil {
-		return fmt.Errorf("%s name %s already declared as const", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s name '%s' already declared as const", errMsgPrefix(pos), name)
 	}
 	if b.Enums == nil {
 		b.Enums = make(map[string]*Enum)
@@ -260,7 +245,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.EnumNames = make(map[string]*EnumName)
 	}
 	if b.EnumNames[name] != nil {
-		return fmt.Errorf("%s name %s already declared as enumName", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s name '%s' already declared as enumName", errMsgPrefix(pos), name)
 	}
 
 	switch d.(type) {

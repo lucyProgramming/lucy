@@ -24,6 +24,9 @@ func (f *Function) mkVariableType() {
 	f.VariableType.Resource = &VariableTypeResource{}
 	f.VariableType.Resource.Function = f
 }
+func (f *Function) MkVariableType() {
+	f.mkVariableType()
+}
 
 func (f *Function) MkDescriptor() {
 	s := "("

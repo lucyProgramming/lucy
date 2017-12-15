@@ -140,6 +140,8 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
+
+			f.MkVariableType()
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: f,
 			})
@@ -373,6 +375,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		//assign
 		p.Next() // skip =
 		expressions, err = p.ExpressionParser.parseExpressions()
+		panic(expressions)
 		if err != nil {
 			p.errs = append(p.errs, err)
 		}
@@ -388,6 +391,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		p.errs = append(p.errs, err)
 		return
 	}
+	fmt.Println(expressions)
 	vs = make([]*ast.VariableDefinition, len(names))
 	for k, v := range names {
 		vd := &ast.VariableDefinition{}
@@ -397,6 +401,9 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		} else {
 			vd.AccessFlags |= cg.ACC_FIELD_PRIVATE
+		}
+		if k >= 0 && k < len(expressions) {
+			vd.Expression = expressions[k]
 		}
 		vd.Pos = v.Pos
 		vs[k] = vd
@@ -430,40 +437,50 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
+			Pos: p.mkPos(),
 		}, nil
 	case lex.TOKEN_BYTE:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
+			Pos: p.mkPos(),
 		}, nil
 	case lex.TOKEN_SHORT:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
+			Pos: p.mkPos(),
 		}, nil
 	case lex.TOKEN_INT:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_INT,
+			Pos: p.mkPos(),
 		}, nil
 	case lex.TOKEN_FLOAT:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
+			Pos: p.mkPos(),
 		}, nil
 
 	case lex.TOKEN_DOUBLE:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_DOUBLE,
+			Pos: p.mkPos(),
 		}, nil
 	case lex.TOKEN_LONG:
 		p.Next()
-		return &ast.VariableType{}, nil
+		return &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_LONG,
+			Pos: p.mkPos(),
+		}, nil
 	case lex.TOKEN_STRING:
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_STRING,
+			Pos: p.mkPos(),
 		}, nil
 	case lex.TOKEN_IDENTIFIER:
 		return p.parseIdentifierType()
@@ -476,6 +493,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		return &ast.VariableType{
 			Typ:          ast.VARIABLE_TYPE_FUNCTION,
 			FunctionType: t,
+			Pos:          p.mkPos(),
 		}, nil
 	}
 	err = fmt.Errorf("%s unkown type,first token:", p.errorMsgPrefix(), p.token.Desp)
@@ -682,8 +700,7 @@ func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 			vd := &ast.VariableDefinition{}
 			vd.Name = v.Name
 			vd.Pos = v.Pos
-			vd.Typ = &ast.VariableType{}
-			*vd.Typ = *t
+			vd.Typ = t.Clone()
 			vs = append(vs, vd)
 		}
 		if p.token.Type != lex.TOKEN_COMMA { // not a commna

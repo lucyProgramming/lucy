@@ -58,7 +58,6 @@ const (
 	EXPRESSION_TYPE_VAR
 	EXPRESSION_TYPE_CONST
 	EXPRESSION_TYPE_CONVERTION_TYPE // []byte(str)
-	//EXPRESSION_TYPE_SYMBOLIC_ITEM //符号表的条目，在语义分析的时候做替换
 )
 
 //receiver only one argument
@@ -125,17 +124,8 @@ type ExpressionDeclareConsts struct {
 	Cs []*Const
 }
 
-//type ExprssionIdentifier struct {
-//	Identifer string
-//	//Variable  *VariableDefinition
-//	//Function  []*Function
-//	//Class     *Class
-//	//Enum      *Enum
-//	//EnumName  *EnumName
-//	//Const     *Const
-//}
-
 type ExpressionTypeConvertion struct {
+	User       bool
 	Typ        *VariableType
 	Expression *Expression
 }
@@ -306,6 +296,8 @@ func (e *Expression) OpName() string {
 		return "function_literal"
 	case EXPRESSION_TYPE_CONST:
 		return "const"
+	case EXPRESSION_TYPE_VAR:
+		return "var"
 	}
 	panic("missing type")
 }
@@ -729,9 +721,10 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 		}
 		if Typ != EXPRESSION_TYPE_BOOL {
 			err = fmt.Errorf("!(not) can only apply to bool expression")
+		} else {
+			is = true
+			Value = !Value.(bool)
 		}
-		is = true
-		Value = !Value.(bool)
 		return
 
 	}

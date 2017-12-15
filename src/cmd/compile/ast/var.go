@@ -58,3 +58,20 @@ func checkEnum(enums []*Enum) []error {
 	}
 	return ret
 }
+
+func mkVoidVariableTypes(length ...int) []*VariableType {
+	l := 1
+	if len(length) > 0 && length[0] > 0 {
+		l = length[0]
+	}
+	ret := make([]*VariableType, l)
+	for k, _ := range ret {
+		ret[k] = mkVoidVariableType()
+	}
+	return ret
+}
+func mkVoidVariableType() *VariableType {
+	return &VariableType{
+		Typ: VARIABLE_TYPE_VOID,
+	}
+}

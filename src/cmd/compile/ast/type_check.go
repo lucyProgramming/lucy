@@ -5,9 +5,9 @@ func (p *Package) TypeCheck() []error {
 		p.NErros = 10
 	}
 	errs := []error{}
-	errs = append(errs, p.Block.check(p)...)
+	errs = append(errs, p.Block.check(nil)...)
 	for _, v := range p.Blocks {
-		errs = append(errs, v.check(p)...)
+		errs = append(errs, v.check(&p.Block)...)
 	}
 	return errs
 }

@@ -14,5 +14,5 @@ type VariableDefinition struct {
 
 type Const struct {
 	VariableDefinition
-	Data interface{}
+	Value interface{}
 }

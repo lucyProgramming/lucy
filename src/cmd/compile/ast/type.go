@@ -20,7 +20,7 @@ const (
 	VARIABLE_TYPE_OBJECT
 	//function
 	VARIABLE_TYPE_FUNCTION
-	VARIABLE_TYPE_FUNCTION_POINTER
+	VARIABLE_TYPE_FUNCTION_TYPE
 	//enum
 	VARIABLE_TYPE_ENUM //enum
 	//class
@@ -39,6 +39,10 @@ type VariableType struct {
 	Resource        *VariableTypeResource
 }
 
+func (v *VariableType) rightValueValid() bool {
+	return v.Typ != VARIABLE_TYPE_VOID
+}
+
 type VariableTypeResource struct {
 	Const    *Const
 	Var      *VariableDefinition
@@ -49,7 +53,6 @@ type VariableTypeResource struct {
 
 /*
 	clone a type
-	only copy primitive type or type basic on name
 */
 func (t *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
@@ -71,7 +74,7 @@ func (t *VariableType) assignAble() error {
 		return fmt.Errorf("cannot been assign value")
 	}
 	if t.Resource.Const != nil {
-		return fmt.Errorf("const %v cannot been assign value", t.Resource.Const.Name)
+		return fmt.Errorf("const '%v' cannot been assign value", t.Resource.Const.Name)
 	}
 	if t.Resource.Var == nil {
 		return fmt.Errorf("cannot been assign value")
@@ -175,6 +178,8 @@ func (v *VariableType) Descriptor() string {
 		return "[" + v.CombinationType.Descriptor()
 	case VARIABLE_TYPE_STRING:
 		return "Ljava/lang/String"
+	case VARIABLE_TYPE_VOID:
+		return "void"
 	}
 	panic("unhandle type signature")
 }
@@ -253,7 +258,7 @@ func (t *VariableType) constValueValid(e *Expression) (data interface{}, err err
 		}
 		return e.Data.(string), nil
 	}
-	return nil, fmt.Errorf("cannot assign %s to %s", e.OpName(), t.TypeString)
+	return nil, fmt.Errorf("cannot assign %s to %s", e.OpName(), t.TypeString())
 }
 
 //assign some simple expression
@@ -336,6 +341,8 @@ func (v *VariableType) TypeString_(ret *string) {
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
 		v.CombinationType.TypeString_(ret)
+	case VARIABLE_TYPE_VOID:
+		*ret = "void"
 	}
 }
 

@@ -3,16 +3,14 @@ package main
 import "java/io";
 
 
-
 {
-
-	c := 1+2;
-    c++;
-    c++ = 2;
+    c := 123;
+    dd := add();
 }
 
-
-
+fn add()->(xx int){
+   xx = 1;
+}
 
 
 
