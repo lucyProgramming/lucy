@@ -1,10 +1,10 @@
 package lex
 
 import (
-	"strconv"
-
 	"github.com/timtadh/lexmachine"
 	"github.com/timtadh/lexmachine/machines"
+	"strconv"
+	"strings"
 )
 
 func init() {
@@ -588,6 +588,7 @@ func init() {
 		t.Type = TOKEN_LITERAL_STRING
 		t.Desp = string(match.Bytes)
 		t.Data = string(match.Bytes[1:len(match.Bytes)])
+		t.Data = strings.Trim(t.Data.(string), `"`)
 		return t, nil
 	})
 

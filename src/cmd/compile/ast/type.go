@@ -122,13 +122,11 @@ func (t *VariableType) resolveName(block *Block) error {
 	case *Const:
 		return fmt.Errorf("name %s is a const,not a type", t.Name)
 	case *Class:
-		t.Typ = VARIABLE_TYPE_CLASS
-		t.Resource = &VariableTypeResource{}
-		t.Resource.Class = d.(*Class)
+		*t = *d.(*Class).VariableType
+		return nil
 	case *Enum:
-		t.Typ = VARIABLE_TYPE_ENUM
-		t.Resource = &VariableTypeResource{}
-		t.Resource.Enum = d.(*Enum)
+		*t = *d.(*Enum).VariableType
+		return nil
 	default:
 		return fmt.Errorf("name %s is not type")
 	}
@@ -142,15 +140,15 @@ func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
 	if f, ok = block.InheritedAttribute.p.Files[t.Pos.Filename]; !ok {
 		return nil, fmt.Errorf("package %v not imported", accessname)
 	}
-	pname, accessResouce, err := f.fullPackageName(accessname, t.Name)
+	if _, ok = f.Imports[accessname]; !ok {
+		return nil, fmt.Errorf("package %s is not imported", accessname)
+	}
+	p, err := block.loadPackage(f.Imports[accessname].Name)
 	if err != nil {
 		return nil, err
 	}
-	p, err := block.loadPackage(pname)
-	if err != nil {
-		return nil, err
-	}
-	return p.Block.searchByName(accessResouce)
+
+	return p.Block.searchByName(strings.Trim(t.Name, accessname+"."))
 }
 
 /*

@@ -11,30 +11,20 @@ var str = `
 
 	package main
 
-import "github.com/xxx/yyy" ;
-import "github.com/xxx/xxx" as ax ;
+import "java/io";
 
 
-const str = "hello world";
-
-enum day{
-	monday,
-	tuesday
+{
+    c := 123;
+    dd := add1();
 }
 
-
-public class Persion:animal{
-	name string;
-	age int;
-
+fn add1(){
 }
 
-
-fn add(a,b int)->(total int){
-	total = 123;
-	x,y := bool(1),2;
+fn add()->(xx int){
+   xx = 1;
 }
-
 
 `
 

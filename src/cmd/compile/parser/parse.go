@@ -3,7 +3,6 @@ package parser
 import (
 	"bytes"
 	"fmt"
-	"strings"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
@@ -34,6 +33,7 @@ type Parser struct {
 }
 
 func (p *Parser) Parse() []error {
+
 	p.ExpressionParser = &ExpressionParser{p}
 	p.Function = &Function{}
 	p.Function.parser = p
@@ -52,20 +52,20 @@ func (p *Parser) Parse() []error {
 	p.Next()
 	//package name definition
 	if p.eof {
-		p.errs = append(p.errs, fmt.Errorf("no package name definition found"))
+		p.errs = append(p.errs, fmt.Errorf("%s no package name definition found", p.errorMsgPrefix()))
 		return p.errs
 	}
 	if p.token.Type != lex.TOKEN_PACKAGE {
-		p.errs = append(p.errs, fmt.Errorf("first token must be a  package name definition"))
+		p.errs = append(p.errs, fmt.Errorf("%s first token must be a  package name definition", p.errorMsgPrefix()))
 		return p.errs
 	}
 	p.Next()
 	if p.eof {
-		p.errs = append(p.errs, fmt.Errorf("no package name definition found(no name after)"))
+		p.errs = append(p.errs, fmt.Errorf("%s no package name definition found(no name after)", p.errorMsgPrefix()))
 		return p.errs
 	}
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		p.errs = append(p.errs, fmt.Errorf("no package name definition found(no name after)"))
+		p.errs = append(p.errs, fmt.Errorf("%s no package name definition found(no name after)", p.errorMsgPrefix()))
 		return p.errs
 	}
 	pd := &ast.PackageNameDeclare{
@@ -80,6 +80,7 @@ func (p *Parser) Parse() []error {
 	if p.eof {
 		return p.errs
 	}
+
 	if p.onlyimport { // only parse imports
 		return p.errs
 	}
@@ -90,7 +91,9 @@ func (p *Parser) Parse() []error {
 		isconst = false
 	}
 	for !p.eof {
+
 		switch p.token.Type {
+
 		case lex.TOKEN_SEMICOLON: // empty statement, no big deal
 			p.Next()
 			continue
@@ -623,7 +626,6 @@ func (p *Parser) parseImports() {
 		return
 	}
 	packagename := p.token.Data.(string)
-	packagename = strings.Trim(packagename, `"`)
 	p.Next()
 	if p.token.Type == lex.TOKEN_AS {
 		i := &ast.Imports{}

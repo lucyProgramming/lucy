@@ -44,19 +44,19 @@ type Imports struct {
 	Used       bool
 }
 
-func (f *File) fullPackageName(accessname, name string) (fullname string, accessResouce string, err error) {
-	if f.Imports[accessname] == nil {
-		err = fmt.Errorf("package %s not imported", accessname)
-		return
-	}
-	t := strings.Split(name, ".")
-	fullname = f.Imports[accessname].Name
-	for i := 0; i < len(t)-1; i++ {
-		fullname += "/" + t[i]
-	}
-	accessResouce = t[len(t)-1] // last element
-	return
-}
+//func (f *File) fullPackageName(accessname, name string) (fullname string, accessResouce string, err error) {
+//	if f.Imports[accessname] == nil {
+//		err = fmt.Errorf("package %s not imported", accessname)
+//		return
+//	}
+//	t := strings.Split(name, ".")
+//	fullname = f.Imports[accessname].Name
+//	for i := 0; i < len(t)-1; i++ {
+//		fullname += "/" + t[i]
+//	}
+//	accessResouce = t[len(t)-1] // last element
+//	return
+//}
 
 /*
 	import "github.com/lucy" should access by lucy.Println

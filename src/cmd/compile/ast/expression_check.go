@@ -160,10 +160,65 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		return e.checkVarExpression(block, &errs), errs
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		return e.checkFunctionCallExpression(block, &errs), errs
+	case EXPRESSION_TYPE_NOT:
+		tt := e.checkUnaryExpression(block, &errs)
+		if tt != nil {
+			return []*VariableType{tt}, errs
+		} else {
+			return nil, errs
+		}
+	case EXPRESSION_TYPE_NEGATIVE:
+		tt := e.checkUnaryExpression(block, &errs)
+		if tt != nil {
+			return []*VariableType{tt}, errs
+		} else {
+			return nil, errs
+		}
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
 	return
+}
+
+func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *VariableType {
+	ee := e.Data.(*Expression)
+	ts, es := ee.check(block)
+	if errsNotEmpty(es) {
+		*errs = append(*errs, es...)
+	}
+	t, err := e.mustBeValueContext(ts)
+	if err != nil {
+		*errs = append(*errs, err)
+	}
+	if t == nil {
+		if e.Typ == EXPRESSION_TYPE_NOT {
+			return &VariableType{
+				Typ: EXPRESSION_TYPE_BOOL,
+			}
+		} else {
+			return &VariableType{
+				Typ: EXPRESSION_TYPE_INT,
+			}
+		}
+	}
+	if e.Typ == EXPRESSION_TYPE_NOT {
+		if t.Typ != VARIABLE_TYPE_BOOL {
+			*errs = append(*errs, fmt.Errorf("%s not(!) only works with bool expression", errMsgPrefix(e.Pos)))
+		}
+		return &VariableType{
+			Typ: EXPRESSION_TYPE_BOOL,
+		}
+	}
+	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
+		if !t.isNumber() {
+			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on %s", errMsgPrefix(e.Pos), t.TypeString()))
+		}
+		tt := t.Clone()
+		tt.Resource = nil
+		return tt
+	}
+	panic("missing handle")
+	return t
 }
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
@@ -183,9 +238,48 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, fmt.Errorf("%s not a function", errMsgPrefix(call.Expression.Pos)))
 		return mkVoidVariableTypes()
 	}
-
-	return mkVoidVariableTypes()
+	return e.checkFunctionCall(block, errs, t.Resource.Function, call.Args)
 }
+
+func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
+	callargsTypes := []*VariableType{}
+	for _, v := range args {
+		tt, es := v.check(block)
+		if errsNotEmpty(es) {
+			*errs = append(*errs, es...)
+		}
+		if tt != nil {
+			for _, vv := range tt {
+				if vv.Typ == VARIABLE_TYPE_VOID {
+					*errs = append(*errs, fmt.Errorf("%s function has no return value,cannot be used as right value", errMsgPrefix(v.Pos)))
+					continue
+				}
+				callargsTypes = append(callargsTypes, vv)
+			}
+		}
+	}
+	if len(callargsTypes) > len(f.Typ.Parameters) {
+		*errs = append(*errs, fmt.Errorf("%s too many paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
+	}
+	if len(callargsTypes) < len(f.Typ.Parameters) {
+		*errs = append(*errs, fmt.Errorf("%s too few paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
+	}
+	for k, v := range f.Typ.Parameters {
+		if k < len(callargsTypes) {
+			if !v.Typ.typeCompatible(callargsTypes[k]) {
+				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(callargsTypes[k].Pos), v.Typ.TypeString(), callargsTypes[k].TypeString()))
+			}
+		}
+	}
+	ret := make([]*VariableType, len(f.Typ.Returns))
+	for k, _ := range ret {
+		ret[k] = f.Typ.Returns[k].Typ.Clone()
+		ret[k].Resource = nil
+	}
+	return ret
+
+}
+
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) []*VariableType {
 	ts := []*VariableType{}
 	vs := e.Data.(*ExpressionDeclareVariable)
