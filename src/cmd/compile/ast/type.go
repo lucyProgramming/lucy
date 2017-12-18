@@ -28,6 +28,7 @@ const (
 	VARIABLE_TYPE_ARRAY //[]int
 	VARIABLE_TYPE_NAME  //naming
 	VARIABLE_TYPE_VOID
+	VARIABLE_TYPE_NULL
 )
 
 type VariableType struct {
@@ -36,19 +37,15 @@ type VariableType struct {
 	Name            string // Lname.Rname
 	CombinationType *VariableType
 	FunctionType    *FunctionType
-	Resource        *VariableTypeResource
+	Const           *Const
+	Var             *VariableDefinition
+	Class           *Class
+	Enum            *Enum
+	Function        *Function
 }
 
 func (v *VariableType) rightValueValid() bool {
 	return v.Typ != VARIABLE_TYPE_VOID
-}
-
-type VariableTypeResource struct {
-	Const    *Const
-	Var      *VariableDefinition
-	Class    *Class
-	Enum     *Enum
-	Function *Function
 }
 
 /*
@@ -56,13 +53,7 @@ type VariableTypeResource struct {
 */
 func (t *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
-	ret.Typ = t.Typ // primitive copied,name should be copied too
-	ret.Pos = &Pos{}
-	*ret.Pos = *t.Pos
-	if t.Resource != nil {
-		ret.Resource = &VariableTypeResource{}
-		*ret.Resource = *t.Resource
-	}
+	*ret = *t
 	if ret.Typ == VARIABLE_TYPE_ARRAY {
 		ret.CombinationType = t.CombinationType.Clone()
 	}
@@ -70,23 +61,7 @@ func (t *VariableType) Clone() *VariableType {
 }
 
 func (t *VariableType) assignAble() error {
-	if t.Resource == nil {
-		return fmt.Errorf("cannot been assign value")
-	}
-	if t.Resource.Const != nil {
-		return fmt.Errorf("const '%v' cannot been assign value", t.Resource.Const.Name)
-	}
-	if t.Resource.Var == nil {
-		return fmt.Errorf("cannot been assign value")
-	}
 	return nil
-}
-
-func (t *VariableType) markAsUsed() {
-	if t.Resource == nil {
-		return
-	}
-
 }
 
 func (t *VariableType) resolve(block *Block) error {
@@ -122,10 +97,10 @@ func (t *VariableType) resolveName(block *Block) error {
 	case *Const:
 		return fmt.Errorf("name %s is a const,not a type", t.Name)
 	case *Class:
-		*t = *d.(*Class).VariableType
+		*t = d.(*Class).VariableType
 		return nil
 	case *Enum:
-		*t = *d.(*Enum).VariableType
+		*t = d.(*Enum).VariableType
 		return nil
 	default:
 		return fmt.Errorf("name %s is not type")

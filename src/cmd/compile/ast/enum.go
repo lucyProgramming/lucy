@@ -15,12 +15,10 @@ type Enum struct {
 	NamesMap     map[string]*EnumName
 	Init         *Expression //should be a int expression
 	Used         bool
-	VariableType *VariableType
+	VariableType VariableType
 }
 
 func (e *Enum) mkVariableType() {
-	e.VariableType = &VariableType{}
 	e.VariableType.Typ = VARIABLE_TYPE_ENUM
-	e.VariableType.Resource = &VariableTypeResource{}
-	e.VariableType.Resource.Enum = e
+	e.VariableType.Enum = e
 }

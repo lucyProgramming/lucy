@@ -33,7 +33,6 @@ type Parser struct {
 }
 
 func (p *Parser) Parse() []error {
-
 	p.ExpressionParser = &ExpressionParser{p}
 	p.Function = &Function{}
 	p.Function.parser = p

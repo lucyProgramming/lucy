@@ -15,14 +15,12 @@ type Function struct {
 	Pos          *Pos
 	Descriptor   string
 	Signature    *class_json.MethodSignature
-	VariableType *VariableType
+	VariableType VariableType
 }
 
 func (f *Function) mkVariableType() {
-	f.VariableType = &VariableType{}
 	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
-	f.VariableType.Resource = &VariableTypeResource{}
-	f.VariableType.Resource.Function = f
+	f.VariableType.Function = f
 }
 func (f *Function) MkVariableType() {
 	f.mkVariableType()
@@ -64,10 +62,6 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			errs = append(errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 			continue
 		}
-		if v.Typ.Resource == nil {
-			v.Typ.Resource = &VariableTypeResource{}
-		}
-		v.Typ.Resource.Var = v
 	}
 
 	//handler return
@@ -81,10 +75,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}
-		if v.Typ.Resource == nil {
-			v.Typ.Resource = &VariableTypeResource{}
-		}
-		v.Typ.Resource.Var = v
+
 	}
 }
 
