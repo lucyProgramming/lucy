@@ -62,6 +62,13 @@ func (c *Class) accessField(name string) (f *ClassField, accessable bool, err er
 	return
 }
 
+func (c *Class) matchContructionFunction(ts []*VariableType) (f *ClassMethod, accessable bool, err error) {
+	if len(c.Constructors) == 0 && len(ts) == 0 {
+		return nil, true, nil
+	}
+
+}
+
 type ClassMethod struct {
 	Func *Function
 }

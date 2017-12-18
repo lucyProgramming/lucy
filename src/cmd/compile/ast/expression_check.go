@@ -28,38 +28,38 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	switch e.Typ {
 	case EXPRESSION_TYPE_NULL:
 		t = []*VariableType{
-			&VariableType{
+			{
 				Typ: VARIABLE_TYPE_NULL,
 				Pos: e.Pos,
 			},
 		}
 	case EXPRESSION_TYPE_BOOL:
 		t = []*VariableType{
-			&VariableType{
+			{
 				Typ: VARIABLE_TYPE_BOOL,
 				Pos: e.Pos,
 			},
 		}
 	case EXPRESSION_TYPE_BYTE:
-		t = []*VariableType{&VariableType{
+		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_BYTE,
 			Pos: e.Pos,
 		},
 		}
 	case EXPRESSION_TYPE_INT:
-		t = []*VariableType{&VariableType{
+		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_INT,
 			Pos: e.Pos,
 		},
 		}
 	case EXPRESSION_TYPE_FLOAT:
-		t = []*VariableType{&VariableType{
+		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_FLOAT,
 			Pos: e.Pos,
 		},
 		}
 	case EXPRESSION_TYPE_STRING:
-		t = []*VariableType{&VariableType{
+		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_STRING,
 			Pos: e.Pos,
 		}}
@@ -70,97 +70,143 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			errs = append(errs, err)
 		}
 		if tt != nil {
-			fmt.Println("1")
-			return []*VariableType{tt}, errs
-		} else {
-			return nil, errs
+			t = []*VariableType{tt}
 		}
 		//binaries
 	case EXPRESSION_TYPE_LOGICAL_OR:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_LOGICAL_AND:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_OR:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_AND:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_LEFT_SHIFT:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_RIGHT_SHIFT:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_PLUS_ASSIGN:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_MINUS_ASSIGN:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_MUL_ASSIGN:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_DIV_ASSIGN:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_MOD_ASSIGN:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_EQ:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_NE:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_GE:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_GT:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_LE:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_LT:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_ADD:
 		tt := e.checkBinaryExpression(block, &errs)
-		if tt == nil {
-			panic(1)
+		if tt != nil {
+			t = []*VariableType{tt}
 		}
-		t = []*VariableType{tt}
 	case EXPRESSION_TYPE_SUB:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_MUL:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_DIV:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_MOD:
 		tt := e.checkBinaryExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_COLON_ASSIGN:
 		t = e.checkColonAssignExpression(block, &errs)
 	case EXPRESSION_TYPE_ASSIGN:
 		t = e.checkAssignExpression(block, &errs)
 	case EXPRESSION_TYPE_INCREMENT:
 		tt := e.checkIncrementExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_DECREMENT:
 		tt := e.checkIncrementExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_PRE_INCREMENT:
 		tt := e.checkIncrementExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_PRE_DECREMENT:
 		tt := e.checkIncrementExpression(block, &errs)
-		t = []*VariableType{tt}
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_CONST:
 		t = e.checkConstExpression(block, &errs)
 	case EXPRESSION_TYPE_VAR:
@@ -171,20 +217,77 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
-		} else {
-			t = nil
 		}
 	case EXPRESSION_TYPE_NEGATIVE:
 		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
-		} else {
-			t = nil
+		}
+	case EXPRESSION_TYPE_INDEX:
+		tt := e.checkIncrementExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
+	case EXPRESSION_TYPE_DOT:
+		tt := e.checkIncrementExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
+	case EXPRESSION_TYPE_CONVERTION_TYPE:
+		tt := e.checkTypeConvertionExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
+	case EXPRESSION_TYPE_NEW:
+		tt := e.checkNewExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
 		}
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
 	return
+}
+
+func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableType {
+	no := e.Data.(*ExpressionNew)
+	err := no.Typ.resolve(block)
+	if err != nil {
+		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+		return nil
+	}
+	if no.Typ.Typ != VARIABLE_TYPE_CLASS {
+		*errs = append(*errs, fmt.Errorf("%s only class type can be used by new", errMsgPrefix(e.Pos)))
+		return nil
+	}
+
+	args := []*VariableType{}
+	for _, v := range no.Args {
+		ts, es := v.check(block)
+		if errsNotEmpty(es...) {
+			*errs = append(*errs, es...)
+		}
+		if ts != nil {
+			args = append(args, ts...)
+		}
+	}
+
+}
+func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
+	c := e.Data.(*ExpressionTypeConvertion)
+	ts, es := c.Expression.check(block)
+	if errsNotEmpty(es) {
+		*errs = append(*errs, es...)
+	}
+	t, err := e.mustBeOneValueContext(ts)
+	if err != nil {
+		*errs = append(*errs, err)
+	}
+	if t == nil {
+		return nil
+	}
+
+	return nil
 }
 
 func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *VariableType {
@@ -277,7 +380,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 	}
 	ret := make([]*VariableType, len(f.Typ.Returns))
-	for k, _ := range ret {
+	for k := range ret {
 		ret[k] = f.Typ.Returns[k].Typ
 	}
 	return ret
@@ -450,6 +553,9 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 			continue
 		}
 		vd := &VariableDefinition{}
+		if k < len(ts) {
+			vd.Typ = *ts[k]
+		}
 		vd.Name = names[i].Data.(string)
 		vd.Pos = names[i].Pos
 		if i < len(ts) {
@@ -558,7 +664,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		}
 		if t != nil {
 			if !t.isInteger() {
-				*errs = append(*errs, fmt.Errorf("%s "))
+				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index", errMsgPrefix(e.Pos)))
 			}
 		}
 		return obj.CombinationType
@@ -566,11 +672,20 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 
 	if obj.Typ == VARIABLE_TYPE_OBJECT {
 		if e.Typ != EXPRESSION_TYPE_DOT {
-
+			*errs = append(*errs, fmt.Errorf("%s object`s field can only access by '.'", errMsgPrefix(e.Pos)))
+			return nil
 		}
-
+		name := binary.Right.Data.(string)
+		f, accessable, err := obj.Class.accessField(name)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+		}
+		if !accessable {
+			*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), name))
+		}
+		return f.Typ
 	}
-
+	panic("111")
 	return nil
 }
 

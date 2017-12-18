@@ -125,7 +125,7 @@ type ExpressionDeclareConsts struct {
 }
 
 type ExpressionTypeConvertion struct {
-	User       bool
+	//User       bool
 	Typ        *VariableType
 	Expression *Expression
 }

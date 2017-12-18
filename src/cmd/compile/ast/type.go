@@ -66,11 +66,10 @@ func (t *VariableType) assignAble() error {
 
 func (t *VariableType) resolve(block *Block) error {
 	if t.Typ == VARIABLE_TYPE_NAME { //
-		err := t.resolveName(block)
-		if err != nil {
-			return err
-		}
-		return nil
+		return t.resolveName(block)
+	}
+	if t.Typ == VARIABLE_TYPE_ARRAY {
+		return t.CombinationType.resolve(block)
 	}
 	return nil
 }
