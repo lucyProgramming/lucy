@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
+import (
+	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
+)
 
 type Class struct {
 	Access               uint16 // public private or protected
@@ -46,6 +50,16 @@ func (c *Class) checkMethods() []error {
 		}
 	}
 	return errs
+}
+
+func (c *Class) accessField(name string) (f *ClassField, accessable bool, err error) {
+	if c.Fields[name] == nil {
+		err = fmt.Errorf("field %s not found")
+		return
+	}
+	f = c.Fields[name]
+	accessable = (f.AccessFlags | cg.ACC_FIELD_PUBLIC) != 0
+	return
 }
 
 type ClassMethod struct {

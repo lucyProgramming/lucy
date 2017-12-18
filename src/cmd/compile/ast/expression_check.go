@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func (e *Expression) mustBeValueContext(ts []*VariableType) (*VariableType, error) {
+func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, error) {
 	if len(ts) == 0 {
 		return nil, nil // no-type,no error
 	}
@@ -193,7 +193,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := e.mustBeValueContext(ts)
+	t, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -232,7 +232,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := e.mustBeValueContext(tt)
+	t, err := e.mustBeOneValueContext(tt)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -295,7 +295,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) []*Variable
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
-			t, err = e.mustBeValueContext(tt)
+			t, err = e.mustBeOneValueContext(tt)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
@@ -313,7 +313,6 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) []*Variable
 			*errs = append(*errs, err)
 		}
 	}
-
 	return ts
 
 }
@@ -515,29 +514,66 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 			return nil, []error{}
 		}
 	case EXPRESSION_TYPE_INDEX:
-		return e.getLeftValue(block)
+		return e.checkIndexExpression(block, &errs), errs
 	case EXPRESSION_TYPE_DOT:
-		return e.getLeftValue(block)
-	}
-	panic("missing handle")
-	return nil, nil
-}
-func (e *Expression) getLeftValueIndex(block *Block) (t *VariableType, errs []error) {
-	errs = []error{}
-	binary := e.Data.(*ExpressionBinary)
-	ts, es := binary.Left.check(block)
-	if errsNotEmpty(es) {
-		errs = append(errs, es...)
-	}
-	t, err := e.mustBeValueContext(ts)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	if t == nil {
+		return e.checkIndexExpression(block, &errs), errs
+	default:
+		errs = append(errs, fmt.Errorf("%s cannot be used as left value", errMsgPrefix(e.Pos)))
 		return nil, errs
 	}
-	return nil, nil
 }
+
+func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *VariableType) {
+	binary := e.Data.(*ExpressionBinary)
+	f := func() *VariableType {
+		ts, es := binary.Left.check(block)
+		if errsNotEmpty(es) {
+			*errs = append(*errs, es...)
+		}
+		t, err := e.mustBeOneValueContext(ts)
+		if err != nil {
+			*errs = append(*errs, err)
+		}
+		if t == nil {
+			return nil
+		}
+		if t.Typ != VARIABLE_TYPE_ARRAY && VARIABLE_TYPE_OBJECT != t.Typ {
+			*errs = append(*errs, fmt.Errorf("%s cannot index this type", errMsgPrefix(e.Pos)))
+			return nil
+		}
+		return t
+	}
+	obj := f()
+	if obj == nil {
+		return nil
+	}
+	if obj.Typ == VARIABLE_TYPE_ARRAY {
+		ts, es := binary.Right.check(block)
+		if errsNotEmpty(es) {
+			*errs = append(*errs, es...)
+		}
+		t, err := e.mustBeOneValueContext(ts)
+		if err != nil {
+			*errs = append(*errs, err)
+		}
+		if t != nil {
+			if !t.isInteger() {
+				*errs = append(*errs, fmt.Errorf("%s "))
+			}
+		}
+		return obj.CombinationType
+	}
+
+	if obj.Typ == VARIABLE_TYPE_OBJECT {
+		if e.Typ != EXPRESSION_TYPE_DOT {
+
+		}
+
+	}
+
+	return nil
+}
+
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *VariableType) {
 	binary := e.Data.(*ExpressionBinary)
 	ts1, err1 := binary.Left.check(block)
@@ -549,11 +585,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		*errs = append(*errs, err2...)
 	}
 	var err error
-	t1, err := e.mustBeValueContext(ts1)
+	t1, err := e.mustBeOneValueContext(ts1)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-	t2, err := e.mustBeValueContext(ts2)
+	t2, err := e.mustBeOneValueContext(ts2)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -608,7 +644,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		if err := t1.assignAble(); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
-
 		if t1.isNumber() {
 			if !t2.isNumber() {
 				*errs = append(*errs, fmt.Errorf("%s not a number on the right of the equation", errMsgPrefix(e.Pos)))
