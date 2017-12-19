@@ -137,9 +137,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_RC:
-			fmt.Println("111111111111111111")
 			c.Next()
-			break
+			return
 		default:
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
 			c.Next()

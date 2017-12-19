@@ -5,16 +5,6 @@ import (
 	"math"
 )
 
-func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, error) {
-	if len(ts) == 0 {
-		return nil, nil // no-type,no error
-	}
-	if len(ts) > 1 {
-		return ts[0], fmt.Errorf("multi value in single value context ")
-	}
-	return ts[0], nil
-}
-
 func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	is, typ, data, err := e.getConstValue()
 	if err != nil {
@@ -249,6 +239,16 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	return
 }
 
+func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, error) {
+	if len(ts) == 0 {
+		return nil, nil // no-type,no error
+	}
+	if len(ts) > 1 {
+		return ts[0], fmt.Errorf("multi value in single value context ")
+	}
+	return ts[0], nil
+}
+
 func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableType {
 	no := e.Data.(*ExpressionNew)
 	err := no.Typ.resolve(block)
@@ -270,7 +270,20 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 			args = append(args, ts...)
 		}
 	}
-	return nil
+
+	f, accessable, err := no.Typ.Class.matchContructionFunction(args)
+	if err != nil {
+		*errs = append(*errs, err)
+	} else {
+		if !accessable {
+			*errs = append(*errs, fmt.Errorf("%s construction method is private", errMsgPrefix(e.Pos)))
+		}
+	}
+	no.Construction = f
+	ret := &VariableType{}
+	*ret = *no.Typ
+	ret.Typ = VARIABLE_TYPE_OBJECT
+	return ret
 }
 func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
 	c := e.Data.(*ExpressionTypeConvertion)
@@ -374,7 +387,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	for k, v := range f.Typ.Parameters {
 		if k < len(callargsTypes) {
 			if !v.Typ.typeCompatible(callargsTypes[k]) {
-				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(callargsTypes[k].Pos), v.Typ.TypeString(), callargsTypes[k].TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(args[k].Pos), v.Typ.TypeString(), callargsTypes[k].TypeString()))
 			}
 		}
 	}
@@ -687,11 +700,17 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		f, accessable, err := obj.Class.accessField(name)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+		} else {
+			if !binary.Left.isThis() && !accessable {
+				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), name))
+			}
 		}
-		if !binary.Left.isThis() && !accessable {
-			*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), name))
+		if f != nil {
+			return f.Typ
+		} else {
+			return nil
 		}
-		return f.Typ
+
 	}
 
 	panic("111")

@@ -182,10 +182,9 @@ func (b *Block) checkConst() []error {
 			errs = append(errs, fmt.Errorf("%s const %s is not a const value", errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
-		//rewrite
-		v.Expression = &Expression{}
 		v.Expression.Typ = t
 		v.Expression.Data = value
+		ts, _ := v.Expression.check(b)
 		v.Value = value
 		if v.Typ != nil && v.Expression != nil {
 			err = v.Typ.resolve(b)
@@ -193,7 +192,6 @@ func (b *Block) checkConst() []error {
 				errs = append(errs, err)
 				continue
 			}
-			ts, _ := v.Expression.check(b)
 			if !v.Typ.Equal(ts[0]) {
 				errs = append(errs, fmt.Errorf("%s cannot assign %s %s", v.Typ.TypeString(), ts[0].TypeString()))
 				continue

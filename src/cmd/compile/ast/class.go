@@ -21,6 +21,7 @@ type Class struct {
 	SouceFile            string
 	Used                 bool
 	VariableType         VariableType
+	ClosureVars          map[string]*VariableDefinition // closure variable
 }
 
 func (c *Class) mkVariableType() {
@@ -54,12 +55,9 @@ func (c *Class) checkMethods() []error {
 	errs := []error{}
 	for _, v := range c.Methods {
 		for _, vv := range v {
-			if vv.Func.AccessFlags|cg.ACC_METHOD_STATIC == 0 { // bind this
+			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
 				if vv.Func.Block.Vars == nil {
 					vv.Func.Block.Vars = make(map[string]*VariableDefinition)
-				}
-				if vv.Func.Block.Vars["this"] != nil {
-					panic("this been token")
 				}
 				vv.Func.Block.Vars[THIS] = &VariableDefinition{}
 				vv.Func.Block.Vars[THIS].Name = THIS
@@ -77,11 +75,11 @@ func (c *Class) checkMethods() []error {
 
 func (c *Class) accessField(name string) (f *ClassField, accessable bool, err error) {
 	if c.Fields[name] == nil {
-		err = fmt.Errorf("field %s not found")
+		err = fmt.Errorf("field %s not found", name)
 		return
 	}
 	f = c.Fields[name]
-	accessable = (f.AccessFlags | cg.ACC_FIELD_PUBLIC) != 0
+	accessable = (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
 	return
 }
 
@@ -90,7 +88,7 @@ func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, 
 		return nil, true, nil
 	}
 	f, err = c.reloadMethod(c.Constructors, args)
-	if (f.Func.AccessFlags | cg.ACC_METHOD_PUBLIC) != 0 {
+	if (f.Func.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0 {
 		accessable = true
 	}
 	return
