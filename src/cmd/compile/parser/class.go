@@ -137,6 +137,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_RC:
+			fmt.Println("111111111111111111")
 			c.Next()
 			break
 		default:
@@ -162,16 +163,16 @@ func (c *Class) parseConst() error {
 		c.parser.errs = append(c.parser.errs,
 			fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’", c.parser.errorMsgPrefix(vs[0].Pos)))
 	}
-	if c.classDefinition.Consts == nil {
-		c.classDefinition.Consts = make(map[string]*ast.Const)
+	if c.classDefinition.Block.Consts == nil {
+		c.classDefinition.Block.Consts = make(map[string]*ast.Const)
 	}
 	for _, v := range vs {
-		if _, ok := c.classDefinition.Consts[v.Name]; ok {
+		if _, ok := c.classDefinition.Block.Consts[v.Name]; ok {
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const %s alreay declared", v.Name))
 			continue
 		}
-		c.classDefinition.Consts[v.Name] = &ast.Const{}
-		c.classDefinition.Consts[v.Name].VariableDefinition = *v
+		c.classDefinition.Block.Consts[v.Name] = &ast.Const{}
+		c.classDefinition.Block.Consts[v.Name].VariableDefinition = *v
 	}
 	return nil
 }

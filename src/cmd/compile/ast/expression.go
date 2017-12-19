@@ -114,6 +114,7 @@ type CallArgs []*Expression // f(1,2)　调用参数列表
 type ExpressionFunctionCall struct {
 	Expression *Expression
 	Args       CallArgs
+	Func       *Function
 }
 
 type ExpressionDeclareVariable struct {
@@ -125,14 +126,14 @@ type ExpressionDeclareConsts struct {
 }
 
 type ExpressionTypeConvertion struct {
-	//User       bool
 	Typ        *VariableType
 	Expression *Expression
 }
 
 type ExpressionMethodCall struct {
 	ExpressionFunctionCall
-	Name string
+	Name   string
+	Method *ClassMethod
 }
 
 type ExpressionNew struct {

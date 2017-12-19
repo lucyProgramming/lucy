@@ -4,6 +4,8 @@ import (
 //"fmt"
 )
 
+//import "fmt"
+
 //代表语法数的一个节点
 type Node struct {
 	//Pos  Pos

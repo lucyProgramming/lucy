@@ -305,16 +305,20 @@ func (v *VariableType) TypeString_(ret *string) {
 	case VARIABLE_TYPE_DOUBLE:
 		*ret = "double"
 	case VARIABLE_TYPE_FUNCTION:
-		*ret = "function"
+		*ret = "function(" + v.Function.Name + ")"
 	case VARIABLE_TYPE_CLASS:
 		*ret = v.Name
 	case VARIABLE_TYPE_ENUM:
-		*ret = v.Name + "(enum)"
+		*ret = "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
 		v.CombinationType.TypeString_(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret = "void"
+	case VARIABLE_TYPE_STRING:
+		*ret = "string"
+	default:
+		panic(1)
 	}
 }
 

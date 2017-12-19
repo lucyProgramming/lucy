@@ -70,11 +70,20 @@ func (p *Parser) Parse() []error {
 	pd := &ast.PackageNameDeclare{
 		Name: p.token.Data.(string),
 	}
+	p.Next()
+	if p.token.Type != lex.TOKEN_SEMICOLON {
+		p.errs = append(p.errs, fmt.Errorf("%s no semicolon after package name definition", p.errorMsgPrefix()))
+		p.consume(untils_semicolon)
+		p.Next()
+	} else {
+		p.Next()
+	}
 	pd.Pos = &ast.Pos{}
 	p.lexPos2AstPos(p.token, pd.Pos)
 	*p.tops = append(*p.tops, &ast.Node{
 		Data: pd,
 	})
+
 	p.parseImports() // next is called
 	if p.eof {
 		return p.errs
@@ -90,9 +99,7 @@ func (p *Parser) Parse() []error {
 		isconst = false
 	}
 	for !p.eof {
-
 		switch p.token.Type {
-
 		case lex.TOKEN_SEMICOLON: // empty statement, no big deal
 			p.Next()
 			continue
@@ -142,7 +149,6 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
-
 			f.MkVariableType()
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: f,
@@ -232,7 +238,7 @@ func (p *Parser) Parse() []error {
 			p.Next()
 			continue
 		default:
-			p.errs = append(p.errs, fmt.Errorf("%s %d:%d token(%s) is not except", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, p.token.Desp))
+			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except", p.errorMsgPrefix(), p.token.Desp))
 			p.consume(untils_semicolon)
 			resetProperty()
 		}
@@ -608,10 +614,6 @@ func (p *Parser) consume(untils map[int]bool) {
 
 //imports,alway call next
 func (p *Parser) parseImports() {
-	p.Next()
-	if p.eof {
-		return
-	}
 	if p.token.Type != lex.TOKEN_IMPORT {
 		// not a import
 		return
@@ -644,10 +646,11 @@ func (p *Parser) parseImports() {
 		if p.token.Type != lex.TOKEN_SEMICOLON {
 			p.consume(untils_semicolon)
 			p.Next()
-			p.errs = append(p.errs, fmt.Errorf("%s  semicolon after import statement"))
+			p.errs = append(p.errs, fmt.Errorf("%s  semicolon after import statement", p.errorMsgPrefix()))
 			p.parseImports()
 			return
 		}
+		p.Next()
 		*p.tops = append(*p.tops, &ast.Node{
 			Data: i,
 		})
@@ -662,6 +665,7 @@ func (p *Parser) parseImports() {
 		*p.tops = append(*p.tops, &ast.Node{
 			Data: i,
 		})
+		p.Next()
 		p.insertImports(i)
 		p.parseImports()
 		return

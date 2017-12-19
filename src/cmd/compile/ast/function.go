@@ -57,9 +57,13 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			errs = append(errs, es...)
 			continue
 		}
+		err = v.Typ.resolve(block)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
+		}
 		err = block.insert(v.Name, v.Pos, v)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+			errs = append(errs, err)
 			continue
 		}
 	}
@@ -71,11 +75,14 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			errs = append(errs, es...)
 			continue
 		}
+		err = v.Typ.resolve(block)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
+		}
 		err = block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}
-
 	}
 }
 

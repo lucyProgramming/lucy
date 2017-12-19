@@ -158,10 +158,10 @@ func (b *Block) checkVar(v *VariableDefinition) []error {
 	return nil
 }
 
-func (p *Block) checkClass() []error {
+func (b *Block) checkClass() []error {
 	errs := []error{}
-	for _, v := range p.Classes {
-		errs = append(errs, v.check()...)
+	for _, v := range b.Classes {
+		errs = append(errs, v.check(b)...)
 	}
 	return errs
 }
@@ -186,13 +186,18 @@ func (b *Block) checkConst() []error {
 		v.Expression = &Expression{}
 		v.Expression.Typ = t
 		v.Expression.Data = value
+		v.Value = value
 		if v.Typ != nil && v.Expression != nil {
-			d, err := v.Typ.constValueValid(v.Expression)
+			err = v.Typ.resolve(b)
 			if err != nil {
-				errs = append(errs, fmt.Errorf("%s const %v has worng initiation value", errMsgPrefix(v.Pos), v.Name))
+				errs = append(errs, err)
 				continue
 			}
-			v.Value = d
+			ts, _ := v.Expression.check(b)
+			if !v.Typ.Equal(ts[0]) {
+				errs = append(errs, fmt.Errorf("%s cannot assign %s %s", v.Typ.TypeString(), ts[0].TypeString()))
+				continue
+			}
 		}
 	}
 	return errs
@@ -207,10 +212,14 @@ func (b *Block) checkFunctions() []error {
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
+	fmt.Println("EEEEEEEEEEEEEEEE", name, d)
 	if name == "" {
 		panic("null name")
 	}
 	if name == "__main__" { // special name
+		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
+	}
+	if name == THIS {
 		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
 	}
 	if b.Vars == nil {
@@ -255,6 +264,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Classes[name] = d.(*Class)
 	case *Function:
 		b.Funcs[name] = d.(*Function)
+
 	case *Const:
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:

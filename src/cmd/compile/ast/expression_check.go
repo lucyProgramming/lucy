@@ -224,12 +224,12 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			t = []*VariableType{tt}
 		}
 	case EXPRESSION_TYPE_INDEX:
-		tt := e.checkIncrementExpression(block, &errs)
+		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
 	case EXPRESSION_TYPE_DOT:
-		tt := e.checkIncrementExpression(block, &errs)
+		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
@@ -260,18 +260,17 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		*errs = append(*errs, fmt.Errorf("%s only class type can be used by new", errMsgPrefix(e.Pos)))
 		return nil
 	}
-
 	args := []*VariableType{}
 	for _, v := range no.Args {
 		ts, es := v.check(block)
-		if errsNotEmpty(es...) {
+		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if ts != nil {
 			args = append(args, ts...)
 		}
 	}
-
+	return nil
 }
 func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
 	c := e.Data.(*ExpressionTypeConvertion)
@@ -544,24 +543,25 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 		}
 	}
 	var err error
-	for i := 0; i < len(names); i++ {
-		if names[i].Typ != EXPRESSION_TYPE_IDENTIFIER {
-			*errs = append(*errs, fmt.Errorf("%s not a name on the left", errMsgPrefix(names[i].Pos)))
+	for k, v := range names {
+		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
+			*errs = append(*errs, fmt.Errorf("%s not a name on the left", errMsgPrefix(v.Pos)))
 			continue
 		}
-		if names[i].Data.(string) == "_" {
+		name := v.Data.(string)
+		if name == "_" {
 			continue
 		}
 		vd := &VariableDefinition{}
 		if k < len(ts) {
-			vd.Typ = *ts[k]
+			vd.Typ = ts[k]
 		}
-		vd.Name = names[i].Data.(string)
-		vd.Pos = names[i].Pos
-		if i < len(ts) {
-			vd.Typ = ts[i]
+		vd.Name = name
+		vd.Pos = v.Pos
+		if k < len(ts) {
+			vd.Typ = ts[k]
 		}
-		err = block.insert(vd.Name, names[i].Pos, vd)
+		err = block.insert(vd.Name, v.Pos, vd)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
@@ -629,6 +629,15 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	}
 }
 
+func (e *Expression) isThis() (b bool) {
+	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
+		return
+	}
+	b = e.Data.(string) == THIS
+	return
+
+}
+
 func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *VariableType) {
 	binary := e.Data.(*ExpressionBinary)
 	f := func() *VariableType {
@@ -669,7 +678,6 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		}
 		return obj.CombinationType
 	}
-
 	if obj.Typ == VARIABLE_TYPE_OBJECT {
 		if e.Typ != EXPRESSION_TYPE_DOT {
 			*errs = append(*errs, fmt.Errorf("%s object`s field can only access by '.'", errMsgPrefix(e.Pos)))
@@ -680,11 +688,12 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
-		if !accessable {
+		if !binary.Left.isThis() && !accessable {
 			*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), name))
 		}
 		return f.Typ
 	}
+
 	panic("111")
 	return nil
 }
