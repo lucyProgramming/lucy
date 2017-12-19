@@ -83,7 +83,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 			errs = append(errs, fmt.Errorf("%s%s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 			return errs
 		}
-
+		errs = append(errs, s.StatementReturn.check(b)...)
 	default:
 		panic("unkown type statement" + s.statementName())
 	}
@@ -126,81 +126,26 @@ func checkFunctionCall(b *Block, f *Function, call *ExpressionFunctionCall, p *P
 	return errs
 }
 
-func (s *Statement) checkStatementExpression(b *Block) []error {
-	//fmt.Println("##############", s.Expression.OpName())
-	//errs := []error{}
-	//func1()
-	//	if EXPRESSION_TYPE_FUNCTION_CALL == s.Expression.Typ {
-	//		call := s.Expression.Data.(*ExpressionFunctionCall)
-	//		f := b.searchFunction("")
-	//		if f == nil {
-	//			errs = append(errs, notFoundError(s.Pos, "function", call.Expression.OpName()))
-	//		} else {
-	//			errs = append(errs, checkFunctionCall(b, f, call, s.Pos)...)
-	//		}
-	//		return errs
-	//	}
-	//System.log("hello world")
-	//if EXPRESSION_TYPE_METHOD_CALL == s.Expression.Typ {
-	//	return errs
-	//}
-	// i++ i-- ++i --i
-	//if EXPRESSION_TYPE_INCREMENT == s.Expression.Typ ||
-	//	EXPRESSION_TYPE_DECREMENT == s.Expression.Typ ||
-	//	EXPRESSION_TYPE_PRE_INCREMENT == s.Expression.Typ ||
-	//	EXPRESSION_TYPE_PRE_DECREMENT == s.Expression.Typ {
-	//	left := s.Expression.Data.(*Expression)     // left means left value
-	//	if left.Typ != EXPRESSION_TYPE_IDENTIFIER { //naming
-	//		name := left.Data.(string)
-	//		item, _ := b.searchByName(name)
-	//		if item == nil {
-	//			errs = append(errs, notFoundError(s.Pos, "variable", name))
-	//			return errs
-	//		}
-	//		return errs
-	//	}
-	//	errs = append(errs, fmt.Errorf("%s %d:%d cannot apply ++ or -- on %s", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn, left.OpName()))
-	//	return errs
-	//}
-	//if EXPRESSION_TYPE_COLON_ASSIGN == s.Expression.Typ { //declare variable
-	//	binary := s.Expression.Data.(*ExpressionBinary)
-	//	if binary.Left.Typ != EXPRESSION_TYPE_IDENTIFIER && binary.Left.Typ != EXPRESSION_TYPE_LIST {
-	//		errs = append(errs, fmt.Errorf("%s no name on the left,but %s", errMsgPrefix(binary.Left.Pos), binary.Left.OpName()))
-	//		return errs
-	//	}
-	//	var names []*Expression
-	//	if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
-	//		names = append(names, binary.Left)
-	//	} else {
-	//		names = binary.Left.Data.([]*Expression)
-	//	}
-	//	values := binary.Right.Data.([]*Expression)
-	//	for k, v := range names {
-	//		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
-	//			errs = append(errs, fmt.Errorf("%s expression is not a name,but %s", errMsgPrefix(v.Pos), v.OpName()))
-	//			continue
-	//		}
-	//		if v.Data.(string) == "_" { // not receive
-	//			continue
-	//		}
-	//		vd := &VariableDefinition{}
-	//		vd.Name = v.Data.(string)
-	//		vd.Expression = values[k]
-	//		es := b.checkVar(vd)
-	//		if errsNotEmpty(es) {
-	//			errs = append(errs, es...)
-	//			continue
-	//		}
-	//		err := b.insert(vd.Name, s.Expression.Pos, vd)
-	//		if err != nil {
-	//			errs = append(errs, err)
-	//		}
-	//	}
-	//	return errs
-	//}
-
+func (s *Statement) checkStatementExpression(b *Block) (errs []error) {
+	errs = []error{}
+	if s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
+		s.Expression.Typ == EXPRESSION_TYPE_METHOD_CALL ||
+		s.Expression.Typ == EXPRESSION_TYPE_FUNCTION ||
+		s.Expression.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
+		s.Expression.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
+	} else {
+		errs = append(errs, fmt.Errorf("%s expression evaluate but not used", errMsgPrefix(s.Expression.Pos)))
+	}
 	_, es := b.checkExpression(s.Expression)
-	return es
+	if errsNotEmpty(es) {
+		errs = append(errs, es...)
+	}
+	return errs
 }
 
 type StatementSwitch struct {
@@ -226,26 +171,38 @@ type StatementReturn struct {
 }
 
 func (s *StatementReturn) check(b *Block) []error {
-	errs := make([]error, 0)
-	if len(s.Expressions) > len(b.InheritedAttribute.returns) {
-		errs = append(errs, fmt.Errorf("%s %d:%d too many to return", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
-		return errs
-	} else if len(s.Expressions) < len(b.InheritedAttribute.returns) {
-		errs = append(errs, fmt.Errorf("%s %d:%d too few to return", s.Pos.Filename, s.Pos.StartLine, s.Pos.StartColumn))
-		return errs
-	} else {
-		return errs // 0 length errs,that is ok
+	if len(s.Expressions) == 0 {
+		return nil
 	}
+	errs := make([]error, 0)
+	returndValueTypes := []*VariableType{}
 	for k, v := range s.Expressions {
-		t, es := b.checkExpression(v)
-		if es != nil && len(es) > 0 {
+		t, es := v.check(b)
+		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 			continue
 		}
-		if !b.InheritedAttribute.returns[k].Typ.typeCompatible(t) {
-			errs = append(errs, typeNotMatchError(v.Pos, b.InheritedAttribute.returns[k].Typ, t))
+		if t != nil {
+			returndValueTypes = append(returndValueTypes, t...)
 		}
 	}
+	pos := s.Expressions[len(s.Expressions)-1].Pos
+	rs := b.InheritedAttribute.function.Typ.Returns
+	if len(returndValueTypes) < len(rs) && len(s.Expressions) < len(rs) {
+		errs = append(errs, fmt.Errorf("%s too few value to return", errMsgPrefix(pos)))
+	}
+	if len(returndValueTypes) > len(rs) {
+		errs = append(errs, fmt.Errorf("%s too many value to return", errMsgPrefix(pos)))
+	}
+
+	for k, v := range rs {
+		if k < len(returndValueTypes) {
+			if !v.Typ.typeCompatible(returndValueTypes[k]) {
+				errs = append(errs, fmt.Errorf("%s cannot use %s as %s to return", errMsgPrefix(returndValueTypes[k].Pos), returndValueTypes[k].TypeString(), v.Typ.TypeString()))
+			}
+		}
+	}
+
 	return errs
 }
 

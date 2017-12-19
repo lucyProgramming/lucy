@@ -18,6 +18,7 @@ const (
 	VARIABLE_TYPE_DOUBLE
 	VARIABLE_TYPE_STRING
 	VARIABLE_TYPE_OBJECT
+	VARIABLE_TYPE_ARRAY_INSTANCE
 	//function
 	VARIABLE_TYPE_FUNCTION
 	VARIABLE_TYPE_FUNCTION_TYPE
@@ -160,6 +161,7 @@ func (t *VariableType) typeCompatible(t2 *VariableType) bool {
 	if t.Equal(t2) {
 		return true
 	}
+	// maybe cannot be convert
 	return false
 }
 
@@ -286,7 +288,7 @@ func (t *VariableType) assignExpression(p *Package, e *Expression) (data interfa
 }
 
 //可读的类型信息
-func (v *VariableType) TypeString_(ret *string) {
+func (v *VariableType) TypeStringRecursive(ret *string) {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		*ret = "bool"
@@ -312,7 +314,7 @@ func (v *VariableType) TypeString_(ret *string) {
 		*ret = "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
-		v.CombinationType.TypeString_(ret)
+		v.CombinationType.TypeStringRecursive(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret = "void"
 	case VARIABLE_TYPE_STRING:
@@ -325,7 +327,7 @@ func (v *VariableType) TypeString_(ret *string) {
 //可读的类型信息
 func (v *VariableType) TypeString() string {
 	t := ""
-	v.TypeString_(&t)
+	v.TypeStringRecursive(&t)
 	return t
 }
 

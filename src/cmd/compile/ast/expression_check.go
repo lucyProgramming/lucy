@@ -511,7 +511,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) (ts []*V
 			leftTypes = append(leftTypes, t)
 		}
 	}
-	if len(lefts) != len(valueTypes) {
+	if len(lefts) != len(valueTypes) && len(values) != len(lefts) {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations", errMsgPrefix(e.Pos), len(valueTypes), len(lefts)))
 	}
 	for k, v := range lefts {
@@ -665,7 +665,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		if t == nil {
 			return nil
 		}
-		if t.Typ != VARIABLE_TYPE_ARRAY && VARIABLE_TYPE_OBJECT != t.Typ {
+		if t.Typ != VARIABLE_TYPE_ARRAY && VARIABLE_TYPE_ARRAY_INSTANCE != t.Typ {
 			*errs = append(*errs, fmt.Errorf("%s cannot index this type", errMsgPrefix(e.Pos)))
 			return nil
 		}
@@ -675,7 +675,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	if obj == nil {
 		return nil
 	}
-	if obj.Typ == VARIABLE_TYPE_ARRAY {
+	if obj.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		ts, es := binary.Right.check(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)

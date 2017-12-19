@@ -22,6 +22,7 @@ const (
 	EXPRESSION_TYPE_LEFT_SHIFT
 	EXPRESSION_TYPE_RIGHT_SHIFT
 	EXPRESSION_TYPE_ASSIGN
+	//
 	EXPRESSION_TYPE_COLON_ASSIGN
 	EXPRESSION_TYPE_PLUS_ASSIGN
 	EXPRESSION_TYPE_MINUS_ASSIGN
@@ -380,7 +381,7 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) (inter
 			return v.(float64), nil
 		}
 	}
-	return nil, fmt.Errorf("targt[%d] origin[%d] not handled", target, origin)
+	return nil, fmt.Errorf("cannot convert %s to %s", e.typeName(origin), e.typeName(target))
 }
 
 func float32IsZero(f float32) bool {

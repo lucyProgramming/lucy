@@ -83,7 +83,6 @@ type InheritedAttribute struct {
 	infor    bool // if this statement is in for or not
 	function *Function
 	class    *Class
-	returns  ReturnList
 	p        *Package
 }
 

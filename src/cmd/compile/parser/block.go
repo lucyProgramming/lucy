@@ -31,21 +31,11 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			b.Next()
 			return
 		case lex.TOKEN_IDENTIFIER:
-			e, err := b.parser.ExpressionParser.parseExpression()
-			if err != nil {
-				b.parser.errs = append(b.parser.errs, err)
-				b.parser.consume(untils_semicolon)
-				b.Next()
-				continue
-			}
-			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
-			}
-			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
-				Expression: e,
-			})
-			continue
+			b.parseExpressionStatement(block)
+		case lex.TOKEN_LP:
+			b.parseExpressionStatement(block)
+		case lex.TOKEN_FUNCTION:
+			b.parseExpressionStatement(block)
 		case lex.TOKEN_VAR:
 			vs, err := b.parser.parseVarDefinition()
 			if err != nil {
@@ -183,6 +173,23 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		}
 	}
 	return
+}
+
+func (b *Block) parseExpressionStatement(block *ast.Block) {
+	e, err := b.parser.ExpressionParser.parseExpression()
+	if err != nil {
+		b.parser.errs = append(b.parser.errs, err)
+		b.parser.consume(untils_semicolon)
+		b.Next()
+		return
+	}
+	if b.parser.token.Type != lex.TOKEN_SEMICOLON {
+		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
+	}
+	block.Statements = append(block.Statements, &ast.Statement{
+		Typ:        ast.STATEMENT_TYPE_EXPRESSION,
+		Expression: e,
+	})
 }
 
 func (b *Block) parseIf() (i *ast.StatementIF, err error) {
