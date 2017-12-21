@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
@@ -82,7 +83,10 @@ func (c *Class) accessField(name string) (f *ClassField, accessable bool, err er
 	accessable = (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
 	return
 }
+func (c *Class) accessMethod(name string, args []*VariableType) (f *ClassMethod, accessable bool, err error) {
 
+	return
+}
 func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, accessable bool, err error) {
 	if len(c.Constructors) == 0 && len(args) == 0 {
 		return nil, true, nil

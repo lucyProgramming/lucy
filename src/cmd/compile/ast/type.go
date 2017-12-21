@@ -46,7 +46,18 @@ type VariableType struct {
 }
 
 func (v *VariableType) rightValueValid() bool {
-	return v.Typ != VARIABLE_TYPE_VOID
+	return v.Typ == VARIABLE_TYPE_BOOL ||
+		v.Typ == VARIABLE_TYPE_BOOL ||
+		v.Typ == VARIABLE_TYPE_BYTE ||
+		v.Typ == VARIABLE_TYPE_SHORT ||
+		v.Typ == VARIABLE_TYPE_CHAR ||
+		v.Typ == VARIABLE_TYPE_INT ||
+		v.Typ == VARIABLE_TYPE_LONG ||
+		v.Typ == VARIABLE_TYPE_FLOAT ||
+		v.Typ == VARIABLE_TYPE_DOUBLE ||
+		v.Typ == VARIABLE_TYPE_STRING ||
+		v.Typ == VARIABLE_TYPE_OBJECT ||
+		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
 }
 
 /*
@@ -59,10 +70,6 @@ func (t *VariableType) Clone() *VariableType {
 		ret.CombinationType = t.CombinationType.Clone()
 	}
 	return ret
-}
-
-func (t *VariableType) assignAble() error {
-	return nil
 }
 
 func (t *VariableType) resolve(block *Block) error {
@@ -91,11 +98,11 @@ func (t *VariableType) resolveName(block *Block) error {
 	}
 	switch d.(type) {
 	case *VariableDefinition:
-		return fmt.Errorf("name %s is a variable,not a type", t.Name)
+		return fmt.Errorf("%s name %s is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
 	case []*Function:
-		return fmt.Errorf("name %s is a function,not a type", t.Name)
+		return fmt.Errorf("%s name %s is a function,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Const:
-		return fmt.Errorf("name %s is a const,not a type", t.Name)
+		return fmt.Errorf("%s name %s is a const,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Class:
 		*t = d.(*Class).VariableType
 		return nil
@@ -113,16 +120,15 @@ func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
 	var f *File
 	var ok bool
 	if f, ok = block.InheritedAttribute.p.Files[t.Pos.Filename]; !ok {
-		return nil, fmt.Errorf("package %v not imported", accessname)
+		return nil, fmt.Errorf("%s package %v not imported", errMsgPrefix(t.Pos), accessname)
 	}
 	if _, ok = f.Imports[accessname]; !ok {
-		return nil, fmt.Errorf("package %s is not imported", accessname)
+		return nil, fmt.Errorf("%s package %s is not imported", errMsgPrefix(t.Pos), accessname)
 	}
 	p, err := block.loadPackage(f.Imports[accessname].Name)
 	if err != nil {
 		return nil, err
 	}
-
 	return p.Block.searchByName(strings.Trim(t.Name, accessname+"."))
 }
 
@@ -319,6 +325,10 @@ func (v *VariableType) TypeStringRecursive(ret *string) {
 		*ret = "void"
 	case VARIABLE_TYPE_STRING:
 		*ret = "string"
+	case VARIABLE_TYPE_OBJECT:
+		*ret = "object"
+	case VARIABLE_TYPE_ARRAY_INSTANCE:
+		*ret = "array_instance"
 	default:
 		panic(1)
 	}

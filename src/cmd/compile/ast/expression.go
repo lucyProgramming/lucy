@@ -29,13 +29,14 @@ const (
 	EXPRESSION_TYPE_MUL_ASSIGN
 	EXPRESSION_TYPE_DIV_ASSIGN
 	EXPRESSION_TYPE_MOD_ASSIGN
+	//
 	EXPRESSION_TYPE_EQ
 	EXPRESSION_TYPE_NE
 	EXPRESSION_TYPE_GE
 	EXPRESSION_TYPE_GT
 	EXPRESSION_TYPE_LE
 	EXPRESSION_TYPE_LT
-
+	//
 	EXPRESSION_TYPE_ADD
 	EXPRESSION_TYPE_SUB
 	EXPRESSION_TYPE_MUL
@@ -123,7 +124,8 @@ type ExpressionFunctionCall struct {
 }
 
 type ExpressionDeclareVariable struct {
-	Vs []*VariableDefinition
+	Vs          []*VariableDefinition
+	Expressions []*Expression
 }
 
 type ExpressionDeclareConsts struct {

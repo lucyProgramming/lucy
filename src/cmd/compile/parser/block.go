@@ -37,7 +37,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_FUNCTION:
 			b.parseExpressionStatement(block)
 		case lex.TOKEN_VAR:
-			vs, err := b.parser.parseVarDefinition()
+			vs, es, err := b.parser.parseVarDefinition()
 			if err != nil {
 				b.consume(untils_semicolon)
 				b.Next()
@@ -47,7 +47,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ: ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: &ast.Expression{
 					Typ:  ast.EXPRESSION_TYPE_VAR,
-					Data: &ast.ExpressionDeclareVariable{vs},
+					Data: &ast.ExpressionDeclareVariable{vs, es},
 				},
 			}
 			block.Statements = append(block.Statements, s)

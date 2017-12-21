@@ -104,22 +104,18 @@ func (p *Parser) Parse() []error {
 			p.Next()
 			continue
 		case lex.TOKEN_VAR:
-			vs, err := p.parseVarDefinition(ispublic)
+			vs, es, err := p.parseVarDefinition(ispublic)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
 				continue
 			}
-			if vs != nil && len(vs) > 0 {
-				for _, v := range vs {
-					*p.tops = append(*p.tops, &ast.Node{
-						Data: v,
-					})
-				}
-			}
+			d := &ast.ExpressionDeclareVariable{vs, es}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: d,
+			})
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-
 			resetProperty()
 		case lex.TOKEN_ENUM:
 			if isconst {
@@ -355,7 +351,7 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
-func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition, err error) {
+func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition, expressions []*ast.Expression, err error) {
 	p.Next()
 	if p.eof {
 		err = p.mkUnexpectedEofErr()
@@ -364,7 +360,7 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	}
 	names, err := p.parseNameList()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if p.eof {
 		err = p.mkUnexpectedEofErr()
@@ -375,9 +371,8 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 	if t == nil {
 		err = fmt.Errorf("%s no variable type found or defined wrong", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)
-		return nil, err
+		return nil, nil, err
 	}
-	var expressions []*ast.Expression
 	//value , no default value definition
 	if lex.TOKEN_ASSIGN == p.token.Type {
 		//assign
@@ -394,12 +389,11 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		return
 	}
 	p.Next() // look next
-	if len(expressions) > 0 && len(names) != len(expressions) {
-		err = fmt.Errorf("%s name list and value list has no same length", p.errorMsgPrefix())
-		p.errs = append(p.errs, err)
-		return
-	}
-	fmt.Println(expressions)
+	//	if len(expressions) > 0 && len(names) != len(expressions) {
+	//		err = fmt.Errorf("%s name list and value list has no same length", p.errorMsgPrefix())
+	//		p.errs = append(p.errs, err)
+	//		return
+	//	}
 	vs = make([]*ast.VariableDefinition, len(names))
 	for k, v := range names {
 		vd := &ast.VariableDefinition{}
@@ -410,13 +404,10 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		} else {
 			vd.AccessFlags |= cg.ACC_FIELD_PRIVATE
 		}
-		if k >= 0 && k < len(expressions) {
-			vd.Expression = expressions[k]
-		}
 		vd.Pos = v.Pos
 		vs[k] = vd
 	}
-	return vs, nil
+	return
 }
 
 func (p *Parser) parseType() (*ast.VariableType, error) {

@@ -40,7 +40,6 @@ func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Typ.checkParaMeterAndRetuns(f.Block, errs)
 	f.Block.InheritedAttribute.function = f
-	f.Block.InheritedAttribute.returns = f.Typ.Returns
 	errs = append(errs, f.Block.check(nil)...)
 	return errs
 }
@@ -67,7 +66,6 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 			continue
 		}
 	}
-
 	//handler return
 	for _, v := range f.Returns {
 		es = block.checkVar(v)
@@ -77,7 +75,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs []error) {
 		}
 		err = v.Typ.resolve(block)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
+			errs = append(errs, err)
 		}
 		err = block.insert(v.Name, v.Pos, v)
 		if err != nil {
@@ -94,3 +92,14 @@ type FunctionType struct {
 
 type ParameterList []*VariableDefinition // actually local variables
 type ReturnList []*VariableDefinition    // actually local variables
+
+func (r ReturnList) retTypes() []*VariableType {
+	if len(r) == 0 {
+		return mkVoidVariableTypes()
+	}
+	ret := make([]*VariableType, len(r))
+	for k, v := range r {
+		ret[k] = v.Typ.Clone()
+	}
+	return ret
+}

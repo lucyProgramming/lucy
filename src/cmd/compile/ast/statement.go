@@ -176,7 +176,7 @@ func (s *StatementReturn) check(b *Block) []error {
 	}
 	errs := make([]error, 0)
 	returndValueTypes := []*VariableType{}
-	for k, v := range s.Expressions {
+	for _, v := range s.Expressions {
 		t, es := v.check(b)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
