@@ -163,12 +163,20 @@ func (v *VariableType) Descriptor() string {
 	panic("unhandle type signature")
 }
 
-func (t *VariableType) typeCompatible(t2 *VariableType) bool {
-	if t.Equal(t2) {
+func (t *VariableType) typeCompatible(comp *VariableType) bool {
+	if t.Equal(comp) {
 		return true
 	}
-	// maybe cannot be convert
-	return false
+	if t.isInteger() && comp.isInteger() {
+		return true
+	}
+	if t.isFloat() && comp.isFloat() {
+		return true
+	}
+	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
+		return false
+	}
+	return comp.Class.instanceOf(t.Class)
 }
 
 /*
@@ -193,6 +201,10 @@ func (t *VariableType) isInteger() bool {
 */
 func (t *VariableType) isFloat() bool {
 	return t.Typ == VARIABLE_TYPE_FLOAT || t.Typ == VARIABLE_TYPE_DOUBLE
+}
+
+func (v *VariableType) isPrimitive() bool {
+	return v.isNumber() || v.Typ == VARIABLE_TYPE_STRING || v.Typ == VARIABLE_TYPE_BOOL
 }
 
 func (t *VariableType) constValueValid(e *Expression) (data interface{}, err error) {
@@ -339,10 +351,6 @@ func (v *VariableType) TypeString() string {
 	t := ""
 	v.TypeStringRecursive(&t)
 	return t
-}
-
-func (v *VariableType) isPrimitive() bool {
-	return v.isNumber() || v.Typ == VARIABLE_TYPE_STRING
 }
 
 func (t1 *VariableType) Equal(t2 *VariableType) bool {

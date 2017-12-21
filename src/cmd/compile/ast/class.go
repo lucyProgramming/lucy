@@ -8,21 +8,45 @@ import (
 )
 
 type Class struct {
-	Block                Block
-	Access               uint16
-	Pos                  *Pos
-	Name                 string
-	Fields               map[string]*ClassField
-	Methods              map[string][]*ClassMethod
-	SuperClassExpression *Expression // a or a.b
-	SuperClassName       string
-	SuperClass           *Class
-	Constructors         []*ClassMethod // can be nil
-	Signature            *class_json.ClassSignature
-	SouceFile            string
-	Used                 bool
-	VariableType         VariableType
-	ClosureVars          map[string]*VariableDefinition // closure variable
+	Block   Block
+	Access  uint16
+	Pos     *Pos
+	Name    string
+	Fields  map[string]*ClassField
+	Methods map[string][]*ClassMethod
+	//SuperClassExpression *Expression // a or a.b
+	SuperClassName string
+	SuperClass     *Class
+	Interfaces     []*Class
+	Constructors   []*ClassMethod // can be nil
+	Signature      *class_json.ClassSignature
+	SouceFile      string
+	Used           bool
+	VariableType   VariableType
+	ClosureVars    map[string]*VariableDefinition // closure variable
+}
+
+func (c *Class) isInterface() bool {
+	return c.Access&cg.ACC_CLASS_INTERFACE != 0
+}
+
+func (c *Class) implementInterfaceOf(father *Class) bool {
+	if father.Access&cg.ACC_CLASS_INTERFACE == 0 {
+		panic("not a interface")
+	}
+	for _, v := range c.Interfaces {
+		if v.Name == father.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Class) instanceOf(father *Class) bool {
+	if father.Access&cg.ACC_CLASS_INTERFACE != 0 {
+		return c.implementInterfaceOf(father)
+	}
+	return false
 }
 
 func (c *Class) mkVariableType() {

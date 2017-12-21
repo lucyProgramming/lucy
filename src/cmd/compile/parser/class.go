@@ -48,7 +48,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
-			c.classDefinition.SuperClassExpression, err = c.parser.ExpressionParser.parseIdentifierExpression()
+			t, err := c.parser.parseType()
+			c.classDefinition.Name = t.Name
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err

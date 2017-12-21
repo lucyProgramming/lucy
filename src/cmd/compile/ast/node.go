@@ -92,11 +92,6 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				t := vv.(*EnumName)
 				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "enum"
-			case *VariableDefinition:
-				t := vv.(*VariableDefinition)
-				r.Name = t.Name
-				r.Pos = append(r.Pos, t.Pos)
-				r.Type = "global varialbe"
 			case *Function:
 				t := vv.(*Function)
 				r.Pos = append(r.Pos, t.Pos)
@@ -105,6 +100,8 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				t := vv.(*Class)
 				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "class"
+			case *ExpressionDeclareVariable:
+				panic("1")
 			default:
 				panic("make error")
 			}
