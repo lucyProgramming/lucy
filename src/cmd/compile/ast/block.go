@@ -73,17 +73,17 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.p = father.InheritedAttribute.p
 	b.InheritedAttribute.istop = father.InheritedAttribute.istop
-	b.InheritedAttribute.infor = father.InheritedAttribute.infor
+	b.InheritedAttribute.for_statement = father.InheritedAttribute.for_statement
 	b.InheritedAttribute.function = father.InheritedAttribute.function
 	b.Outter = father
 }
 
 type InheritedAttribute struct {
-	istop    bool // if it is a top block
-	infor    bool // if this statement is in for or not
-	function *Function
-	class    *Class
-	p        *Package
+	istop         bool          // if it is a top block
+	for_statement *StatementFor // if this statement is in for or not
+	function      *Function
+	class         *Class
+	p             *Package
 }
 
 type NameWithType struct {

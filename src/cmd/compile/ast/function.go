@@ -29,7 +29,7 @@ func (f *Function) MkVariableType() {
 func (f *Function) MkDescriptor() {
 	s := "("
 	for _, v := range f.Typ.Parameters {
-		s += v.NameWithType.Typ.Descriptor() + ";"
+		s += v.NameWithType.Typ.Descriptor()
 	}
 	s += ")"
 	f.Descriptor = s
@@ -40,7 +40,7 @@ func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Typ.checkParaMeterAndRetuns(f.Block, errs)
 	f.Block.InheritedAttribute.function = f
-	errs = append(errs, f.Block.check(nil)...)
+	errs = append(errs, f.Block.check(b)...)
 	return errs
 }
 

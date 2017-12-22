@@ -90,6 +90,8 @@ const (
 	TOKEN_DEFER          // defer
 	TOKEN_TYPE           //type
 	TOKEN_ARROW          //->
+	TOKEN_EXTENDS        //extends
+	TOKEN_IMPLEMENTS     // implements
 )
 
 type Token struct {

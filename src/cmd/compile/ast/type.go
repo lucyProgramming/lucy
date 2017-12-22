@@ -156,14 +156,16 @@ func (v *VariableType) Descriptor() string {
 	case VARIABLE_TYPE_ARRAY:
 		return "[" + v.CombinationType.Descriptor()
 	case VARIABLE_TYPE_STRING:
-		return "Ljava/lang/String"
+		return "Ljava/lang/String;"
 	case VARIABLE_TYPE_VOID:
-		return "void"
+		return "V"
+	case VARIABLE_TYPE_OBJECT:
+		return "L" + v.Class.Name + ";"
 	}
 	panic("unhandle type signature")
 }
 
-func (t *VariableType) typeCompatible(comp *VariableType) bool {
+func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
 	if t.Equal(comp) {
 		return true
 	}

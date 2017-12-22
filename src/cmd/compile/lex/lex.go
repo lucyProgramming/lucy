@@ -628,5 +628,18 @@ func init() {
 	Lexer.Add([]byte(`/\*([^*]|\r|\n|(\*+([^*/]|\r|\n)))*\*+/`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
 		return nil, nil
 	})
-
+	Lexer.Add([]byte("extends"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_EXTENDS
+		t.Desp = "extends"
+		return t, nil
+	})
+	Lexer.Add([]byte("implements"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
+		t := &Token{}
+		t.Match = match
+		t.Type = TOKEN_IMPLEMENTS
+		t.Desp = "implements"
+		return t, nil
+	})
 }

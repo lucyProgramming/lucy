@@ -64,85 +64,37 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		}
 		//binaries
 	case EXPRESSION_TYPE_LOGICAL_OR:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_LOGICAL_AND:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_OR:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_AND:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_LEFT_SHIFT:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_RIGHT_SHIFT:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_EQ:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_NE:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_GE:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_GT:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_LE:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_LT:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_ADD:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_SUB:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_MUL:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_DIV:
-		tt := e.checkBinaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_MOD:
 		tt := e.checkBinaryExpression(block, &errs)
 		if tt != nil {
@@ -153,20 +105,11 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_ASSIGN:
 		t = e.checkAssignExpression(block, &errs)
 	case EXPRESSION_TYPE_INCREMENT:
-		tt := e.checkIncrementExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_DECREMENT:
-		tt := e.checkIncrementExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_PRE_INCREMENT:
-		tt := e.checkIncrementExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_PRE_DECREMENT:
 		tt := e.checkIncrementExpression(block, &errs)
 		if tt != nil {
@@ -181,20 +124,14 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
 	case EXPRESSION_TYPE_NOT:
-		tt := e.checkUnaryExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:
 		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
 	case EXPRESSION_TYPE_INDEX:
-		tt := e.checkIndexExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_DOT:
 		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
@@ -211,25 +148,13 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			t = []*VariableType{tt}
 		}
 	case EXPRESSION_TYPE_PLUS_ASSIGN:
-		tt := e.checkOpAssignExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_MINUS_ASSIGN:
-		tt := e.checkOpAssignExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_MUL_ASSIGN:
-		tt := e.checkOpAssignExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_DIV_ASSIGN:
-		tt := e.checkOpAssignExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
+		fallthrough
 	case EXPRESSION_TYPE_MOD_ASSIGN:
 		tt := e.checkOpAssignExpression(block, &errs)
 		if tt != nil {
@@ -566,6 +491,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 		}
 	}
 	var err error
+	var noNewVaraible bool
 	for k, v := range names {
 		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left", errMsgPrefix(v.Pos)))
@@ -575,19 +501,34 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 		if name == "_" {
 			continue
 		}
-		vd := &VariableDefinition{}
-		if k < len(ts) {
-			vd.Typ = ts[k]
+		if variable, ok := block.Vars[name]; ok {
+			if k < len(ts) {
+				if !variable.Typ.typeCompatible(ts[k]) {
+					*errs = append(*errs, fmt.Errorf("%s type '%s' is not compatible with '%s'",
+						errMsgPrefix(ts[k].Pos),
+						variable.Typ.TypeString(),
+						ts[k].TypeString()))
+				}
+			}
+		} else { // should be no error
+			noNewVaraible = true
+			vd := &VariableDefinition{}
+			if k < len(ts) {
+				vd.Typ = ts[k]
+			}
+			vd.Name = name
+			vd.Pos = v.Pos
+			if k < len(ts) {
+				vd.Typ = ts[k]
+			}
+			err = block.insert(vd.Name, v.Pos, vd)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
 		}
-		vd.Name = name
-		vd.Pos = v.Pos
-		if k < len(ts) {
-			vd.Typ = ts[k]
-		}
-		err = block.insert(vd.Name, v.Pos, vd)
-		if err != nil {
-			*errs = append(*errs, err)
-		}
+	}
+	if !noNewVaraible {
+		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 	}
 	return ts
 }
@@ -596,6 +537,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	name := e.Data.(string)
 	d, err := block.searchByName(name)
 	if err != nil {
+		fmt.Println("!!!!!!!!!!!", fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
 		return nil, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err)
 	}
 
@@ -632,8 +574,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		name := e.Data.(string)
 		d, err := block.searchByName(name)
 		if err != nil {
-
-			return nil, []error{err}
+			return nil, []error{fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error())}
 		}
 		switch d.(type) {
 		case *VariableDefinition:
