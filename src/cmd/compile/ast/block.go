@@ -219,6 +219,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == THIS {
 		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
 	}
+	if name == "_" {
+		panic("_")
+	}
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}

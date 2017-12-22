@@ -360,7 +360,6 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 }
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) []*VariableType {
-	ts := []*VariableType{}
 	vs := e.Data.(*ExpressionDeclareVariable)
 	args := e.checkExpressions(block, vs.Expressions, errs)
 	args = e.checkRightValues(args, errs)
@@ -381,18 +380,17 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) []*Variable
 			*errs = append(*errs, err)
 		}
 	}
-	return ts
+	return nil
 
 }
 func (e *Expression) checkConstExpression(block *Block, errs *[]error) []*VariableType {
 	cs := e.Data.(*ExpressionDeclareConsts)
-	ts := []*VariableType{}
 	for _, v := range cs.Cs {
 		is, typ, value, err := v.Expression.getConstValue()
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
-		if !is && err == nil {
+		if !is {
 			*errs = append(*errs, fmt.Errorf("%s const %v is not defined by const value", errMsgPrefix(v.Pos), v.Name))
 		}
 		if is {
@@ -403,7 +401,6 @@ func (e *Expression) checkConstExpression(block *Block, errs *[]error) []*Variab
 			v.Expression.Data = math.MaxInt64
 		}
 		tt, _ := v.Expression.check(block)
-		ts = append(ts, tt[0])
 		v.Value = v.Expression.Data
 		v.Typ = tt[0]
 		err = block.insert(v.Name, v.Pos, v)
@@ -411,7 +408,7 @@ func (e *Expression) checkConstExpression(block *Block, errs *[]error) []*Variab
 			*errs = append(*errs, err)
 		}
 	}
-	return ts
+	return nil
 }
 
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {
@@ -442,9 +439,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) (ts []*V
 	leftTypes := []*VariableType{}
 	for _, v := range lefts {
 		if v.Typ == EXPRESSION_TYPE_IDENTIFIER && v.Data.(string) == "_" {
-			leftTypes = append(leftTypes, &VariableType{
-				Typ: VARIABLE_TYPE_VOID,
-			})
+			lefts = append(lefts, nil)
 			continue
 		}
 		t, es := v.getLeftValue(block)
@@ -455,25 +450,25 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) (ts []*V
 			leftTypes = append(leftTypes, t)
 		}
 	}
-	if len(lefts) != len(valueTypes) && len(values) != len(lefts) {
+	if len(lefts) != len(valueTypes) {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations", errMsgPrefix(e.Pos), len(valueTypes), len(lefts)))
 	}
-	for k, v := range lefts {
-		if v.Typ == EXPRESSION_TYPE_IDENTIFIER && v.Data.(string) == "_" {
+	for k, v := range leftTypes {
+		if v == nil {
 			continue
 		}
-		if k < len(leftTypes) {
-			if k < len(valueTypes) {
-				if !leftTypes[k].typeCompatible(valueTypes[k]) {
-					*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(e.Pos), leftTypes[k].TypeString(), valueTypes[k].TypeString()))
-				}
+
+		if k < len(valueTypes) {
+			if !leftTypes[k].typeCompatible(valueTypes[k]) {
+				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(e.Pos), leftTypes[k].TypeString(), valueTypes[k].TypeString()))
 			}
 		}
+
 	}
 	return valueTypes
 }
 
-func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts []*VariableType) {
+func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) []*VariableType {
 	binary := e.Data.(*ExpressionBinary)
 	var names []*Expression
 	if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
@@ -484,11 +479,9 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 		*errs = append(*errs, fmt.Errorf("%s no name one the left", errMsgPrefix(e.Pos)))
 	}
 	values := binary.Right.Data.([]*Expression)
-	ts = e.checkExpressions(block, values, errs)
-	if len(names) > 0 {
-		if len(names) != len(ts) && len(names) != len(values) {
-			*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations", errMsgPrefix(e.Pos), len(ts), len(names)))
-		}
+	ts := e.checkExpressions(block, values, errs)
+	if len(names) != len(ts) {
+		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations", errMsgPrefix(e.Pos), len(ts), len(names)))
 	}
 	var err error
 	var noNewVaraible bool
@@ -499,6 +492,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 		}
 		name := v.Data.(string)
 		if name == "_" {
+
 			continue
 		}
 		if variable, ok := block.Vars[name]; ok {
@@ -530,14 +524,13 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) (ts
 	if !noNewVaraible {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 	}
-	return ts
+	return nil
 }
 
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	name := e.Data.(string)
 	d, err := block.searchByName(name)
 	if err != nil {
-		fmt.Println("!!!!!!!!!!!", fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
 		return nil, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err)
 	}
 
@@ -588,7 +581,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	case EXPRESSION_TYPE_DOT:
 		return e.checkIndexExpression(block, &errs), errs
 	default:
-		errs = append(errs, fmt.Errorf("%s cannot be used as left value", errMsgPrefix(e.Pos)))
+		errs = append(errs, fmt.Errorf("%s %s cannot be used as left value", errMsgPrefix(e.Pos), e.OpName()))
 		return nil, errs
 	}
 }
@@ -689,7 +682,6 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		return
 	}
 	//number
-
 	if t1.isNumber() {
 		if !t2.isNumber() {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on number and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
@@ -701,10 +693,9 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	} else {
 		*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
 	}
-	return &VariableType{
-		Typ: VARIABLE_TYPE_BOOL,
-	}
-
+	tt := t1.Clone()
+	tt.Pos = e.Pos
+	return tt
 }
 
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *VariableType) {
@@ -741,6 +732,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		}
 		return &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
+			Pos: e.Pos,
 		}
 	}
 	// & |
@@ -751,7 +743,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		if !t2.isNumber() {
 			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(binary.Right.Pos)))
 		}
-		return t1
+		tt := t1.Clone()
+		tt.Pos = e.Pos
+		return tt
 	}
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.isNumber() {
@@ -760,7 +754,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		if !t2.isInteger() {
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression", errMsgPrefix(binary.Right.Pos)))
 		}
-		return t1
+		tt := t1.Clone()
+		tt.Pos = e.Pos
+		return tt
 	}
 	if e.Typ == EXPRESSION_TYPE_EQ ||
 		e.Typ == EXPRESSION_TYPE_NE ||
@@ -782,9 +778,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		}
 		return &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
+			Pos: e.Pos,
 		}
 	}
-
 	if e.Typ == EXPRESSION_TYPE_ADD ||
 		e.Typ == EXPRESSION_TYPE_SUB ||
 		e.Typ == EXPRESSION_TYPE_MUL ||
@@ -802,6 +798,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
 		}
 		tt := t1.Clone()
+		tt.Pos = e.Pos
 		return tt
 	}
 	panic("missing check" + e.OpName())

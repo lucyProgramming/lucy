@@ -209,13 +209,13 @@ func (e *Expression) canBeCovert2Bool() (bool, error) {
 func (e *Expression) OpName() string {
 	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
-		return fmt.Sprintf("bool_value", e.Data.(bool))
+		return fmt.Sprintf("bool(%v)", e.Data.(bool))
 	case EXPRESSION_TYPE_BYTE:
-		return fmt.Sprintf("byte_value", e.Data.(byte))
+		return fmt.Sprintf("byte(%v)", e.Data.(byte))
 	case EXPRESSION_TYPE_INT:
-		return fmt.Sprintf("int_value", e.Data.(int64))
+		return fmt.Sprintf("int(%v)", e.Data.(int64))
 	case EXPRESSION_TYPE_FLOAT:
-		return fmt.Sprintf("float_value", e.Data.(float64))
+		return fmt.Sprintf("float(%v)", e.Data.(float64))
 	case EXPRESSION_TYPE_STRING:
 		t := []byte(e.Data.(string))
 		if len(t) > 10 {
