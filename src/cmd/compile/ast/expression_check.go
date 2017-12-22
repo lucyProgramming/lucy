@@ -287,14 +287,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	args := e.checkExpressions(block, call.Args, errs)
 	args = e.checkRightValues(args, errs)
-	f, accessable, err := t.Class.accessMethod(call.Name, args)
+	f, err := t.Class.accessMethod(call.Name, args)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
 	} else {
 		if !call.Expression.isThisIdentifierExpression() {
-			if accessable == false {
-				*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
-			}
+			*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
 		}
 	}
 	if f == nil {

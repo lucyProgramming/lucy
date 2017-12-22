@@ -18,6 +18,30 @@ type Function struct {
 	VariableType VariableType
 }
 
+func (f *Function) readableMsg() string {
+	s := "fn" + f.Name + "("
+	for k, v := range f.Typ.Parameters {
+		if k != len(f.Typ.Parameters)-1 {
+			s += v.Typ.TypeString() + ","
+		} else {
+			s += v.Typ.TypeString()
+		}
+	}
+	s += ")"
+	if len(f.Typ.Returns) > 0 {
+		for k, v := range f.Typ.Returns {
+			s += "("
+			if k != len(f.Typ.Returns)-1 {
+				s += v.Typ.TypeString() + ","
+			} else {
+				s += v.Typ.TypeString()
+			}
+			s += ")"
+		}
+	}
+	return s
+}
+
 func (f *Function) mkVariableType() {
 	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
 	f.VariableType.Function = f

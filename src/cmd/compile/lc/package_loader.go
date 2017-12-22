@@ -136,7 +136,7 @@ func (p *PackageLoader) loadMethod(m *class_json.Method) *ast.Function {
 	f.Signature = m.Signature
 	t, _ := jvm.ParseType(m.Typ.Return)
 	f.Typ.Returns = []*ast.VariableDefinition{
-		&ast.VariableDefinition{},
+		{},
 	}
 	f.Typ.Returns[0].Typ = t
 	f.Typ.Parameters = make([]*ast.VariableDefinition, len(f.Typ.Parameters))

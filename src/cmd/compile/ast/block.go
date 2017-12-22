@@ -264,7 +264,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Classes[name] = d.(*Class)
 	case *Function:
 		b.Funcs[name] = d.(*Function)
-
 	case *Const:
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
@@ -289,6 +288,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 
 func (b *Block) loadPackage(name string) (*Package, error) {
 	return b.InheritedAttribute.p.loadPackage(name)
+}
+func (b *Block) loadClass(name string) (*Class, error) {
+	return nil, nil
 }
 
 func (b *Block) isFuntionTopBlock() bool {

@@ -16,6 +16,7 @@ var (
 	Nodes                *[]*Node //
 	packageAliasReg      *regexp.Regexp
 	PackageLoad          PackageLoader
+	JAVA_ADAMS_CLASS     = "java/lang/Object"
 )
 
 type NameWithPos struct {
@@ -66,7 +67,7 @@ func mkVoidVariableTypes(length ...int) []*VariableType {
 		l = length[0]
 	}
 	ret := make([]*VariableType, l)
-	for k, _ := range ret {
+	for k := range ret {
 		ret[k] = mkVoidVariableType()
 	}
 	return ret
@@ -75,4 +76,12 @@ func mkVoidVariableType() *VariableType {
 	return &VariableType{
 		Typ: VARIABLE_TYPE_VOID,
 	}
+}
+
+func mkSignatureByVariableTypes(ts []*VariableType) string {
+	s := ""
+	for _, v := range ts {
+		s += v.Descriptor()
+	}
+	return s
 }
