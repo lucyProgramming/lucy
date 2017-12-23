@@ -145,20 +145,10 @@ func (s *StatementReturn) check(b *Block) []error {
 		return nil
 	}
 	errs := make([]error, 0)
-	returndValueTypes := []*VariableType{}
-	for _, v := range s.Expressions {
-		t, es := v.check(b)
-		if errsNotEmpty(es) {
-			errs = append(errs, es...)
-			continue
-		}
-		if t != nil {
-			returndValueTypes = append(returndValueTypes, t...)
-		}
-	}
+	returndValueTypes := s.Expressions[0].checkExpressions(b, s.Expressions, &errs)
 	pos := s.Expressions[len(s.Expressions)-1].Pos
 	rs := b.InheritedAttribute.function.Typ.Returns
-	if len(returndValueTypes) < len(rs) && len(s.Expressions) < len(rs) {
+	if len(returndValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few value to return", errMsgPrefix(pos)))
 	}
 	if len(returndValueTypes) > len(rs) {
@@ -175,12 +165,6 @@ func (s *StatementReturn) check(b *Block) []error {
 
 	return errs
 }
-
-//func typeNotMatchError(pos *Pos, t1, t2 *VariableType) error {
-//	typestring1 := t1.TypeString()
-//	typestring2 := t1.TypeString()
-//	return fmt.Errorf("%s %d:%d type not match (%s!=%s)", pos.Filename, pos.StartLine, pos.StartColumn, typestring1, typestring2)
-//}
 
 type StatementFor struct {
 	Pos       *Pos

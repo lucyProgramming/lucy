@@ -2,9 +2,9 @@ package ast
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
-	"strings"
 )
 
 type Class struct {
@@ -28,32 +28,42 @@ type Class struct {
 
 func (c *Class) check(father *Block) []error {
 	errs := make([]error, 0)
+	err := c.loadSuperClass()
+	if err != nil {
+		errs = append(errs, err)
+	}
+	c.loadInterfaces(&errs)
 	c.Block.check(father)
+	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
 	errs = append(errs, c.checkConstructionFunctions()...)
 	errs = append(errs, c.checkMethods()...)
 	return errs
 }
 
+func (c *Class) loadInterfaces(errs *[]error) {
+
+}
+
 func (c *Class) isInterface() bool {
 	return c.Access&cg.ACC_CLASS_INTERFACE != 0
 }
 
-func (c *Class) implementInterfaceOf(father *Class) bool {
-	if father.Access&cg.ACC_CLASS_INTERFACE == 0 {
+func (c *Class) implementInterfaceOf(super *Class) bool {
+	if super.Access&cg.ACC_CLASS_INTERFACE == 0 {
 		panic("not a interface")
 	}
 	for _, v := range c.Interfaces {
-		if v.Name == father.Name {
+		if v.Name == super.Name {
 			return true
 		}
 	}
 	return false
 }
 
-func (c *Class) instanceOf(father *Class) bool {
-	if father.Access&cg.ACC_CLASS_INTERFACE != 0 {
-		return c.implementInterfaceOf(father)
+func (c *Class) instanceOf(super *Class) bool {
+	if super.Access&cg.ACC_CLASS_INTERFACE != 0 {
+		return c.implementInterfaceOf(super)
 	}
 	return false
 }
@@ -137,43 +147,57 @@ func (c *Class) accessField(name string) (f *ClassField, accessable bool, err er
 	accessable = (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
 	return
 }
-func (c *Class) accessMethod(name string, args []*VariableType) (f *ClassMethod, errs []error) {
+func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *ClassMethod, errs []error) {
 	errs = []error{}
-	ms, ok := c.Methods[name]
-	if !ok {
-		return
-	}
-	s := mkSignatureByVariableTypes(args)
-	s = "(" + s + ")"
-	for _, m := range ms {
-		if s == m.Func.Descriptor {
-			f = m
-			return
-		}
-	}
 	cc := c
-	for cc.Name != JAVA_ADAMS_CLASS {
+	matchString := mkSignatureByVariableTypes(args)
+	matchString = "(" + matchString + ")"
+	for cc.SuperClassName != "" { // java/lang/Object has no super class
+		ms, ok := c.Methods[name]
+		if ok {
+			for _, m := range ms {
+				if matchString == m.Func.Descriptor {
+					f = m
+					return
+				}
+			}
+		}
 		if cc.SuperClass == nil { // super class is not loaded
-			es := cc.loadSuperClass()
-			if errsNotEmpty(es) {
-				errs = append(errs, es...)
+			err := cc.loadSuperClass()
+			if err != nil {
+				errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(pos), err.Error()))
 				break
+			} else {
+				cc = cc.SuperClass
 			}
 		}
 	}
 	// not found,trying to access father`s method
-
 	return
 }
 
-func (c *Class) loadSuperClass() []error {
-	errs := []error{}
-	if c.SuperClassName == "" {
-		c.SuperClassName = "java/lang/Object"
+func (c *Class) loadSuperClass() error {
+	if c.Name == JAVA_ROOT_CLASS { // root class
+		c.SuperClassName = ""
+		c.SuperClass = nil
+		return nil
 	}
-	pname := c.SuperClassName[0:strings.LastIndex(c.SuperClassName, "/")]
-	c.Block.loadPackage(pname)
-	return errs
+	if c.SuperClassName == "" {
+		c.SuperClassName = JAVA_ROOT_CLASS
+	}
+	t := &VariableType{Typ: VARIABLE_TYPE_NAME, Name: c.SuperClassName}
+	err := t.resolve(&c.Block)
+	if err != nil {
+		return err
+	}
+	if t.Typ != VARIABLE_TYPE_CLASS {
+		return fmt.Errorf("superclass is not class,but %s", t.TypeString())
+	}
+	if t.Class.isInterface() {
+		return fmt.Errorf("superclass is interface", t.TypeString())
+	}
+	c.SuperClass = t.Class
+	return nil
 }
 
 func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, accessable bool, err error) {
@@ -193,6 +217,10 @@ func (c *Class) reloadMethod(ms []*ClassMethod, args []*VariableType) (f *ClassM
 
 type ClassMethod struct {
 	Func *Function
+}
+
+func (m *ClassMethod) isPublic() bool {
+	return (m.Func.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0
 }
 
 type ClassField struct {

@@ -2,9 +2,11 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Block struct {
+	IsClassBlock       bool
 	Pos                *Pos
 	Vars               map[string]*VariableDefinition
 	Consts             map[string]*Const
@@ -58,13 +60,33 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		b.InheritedAttribute.function.Typ.ClosureVars[name] != nil {
 		return b.InheritedAttribute.function.Typ.ClosureVars[name], nil
 	}
+
+	if b.InheritedAttribute.class != nil &&
+		b.InheritedAttribute.class.ClosureVars != nil &&
+		b.InheritedAttribute.class.ClosureVars[name] != nil {
+		return b.InheritedAttribute.class.ClosureVars[name], nil
+	}
+
 	if b.Outter == nil {
 		return nil, fmt.Errorf("%s not found", name)
 	}
 	t, err := b.Outter.searchByName(name)
-	if err == nil && b.isFuntionTopBlock() && b.Outter.Outter != nil { //found and in function top block and b.Outter is not top block
-		if _, ok := t.(*VariableDefinition); ok {
-			b.InheritedAttribute.function.Typ.ClosureVars[name] = t.(*VariableDefinition)
+	if err == nil && b.Outter.Outter != nil { //found and in function top block and b.Outter is not top block
+		if b.InheritedAttribute.function != nil {
+			if v, ok := t.(*VariableDefinition); ok {
+				if b.InheritedAttribute.function != nil && b.isFuntionTopBlock() {
+					if b.InheritedAttribute.function.Typ.ClosureVars == nil {
+						b.InheritedAttribute.function.Typ.ClosureVars = make(map[string]*VariableDefinition)
+					}
+					b.InheritedAttribute.function.Typ.ClosureVars[name] = v
+				}
+				if b.InheritedAttribute.class != nil && b.IsClassBlock {
+					if b.InheritedAttribute.class.ClosureVars == nil {
+						b.InheritedAttribute.class.ClosureVars = make(map[string]*VariableDefinition)
+					}
+					b.InheritedAttribute.class.ClosureVars[name] = t.(*VariableDefinition)
+				}
+			}
 		}
 	}
 	return t, err
@@ -203,6 +225,9 @@ func (b *Block) checkConst() []error {
 func (b *Block) checkFunctions() []error {
 	errs := []error{}
 	for _, v := range b.Funcs {
+		if v.Isbuildin {
+			continue
+		}
 		errs = append(errs, v.check(b)...)
 	}
 	return errs
@@ -217,7 +242,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
 	}
 	if name == THIS {
-		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
+		return fmt.Errorf("%s 'this' already been token", errMsgPrefix(pos))
 	}
 	if name == "_" {
 		panic("_")
@@ -290,7 +315,17 @@ func (b *Block) loadPackage(name string) (*Package, error) {
 	return b.InheritedAttribute.p.loadPackage(name)
 }
 func (b *Block) loadClass(name string) (*Class, error) {
-	return nil, nil
+	pname := name[0:strings.LastIndex(name, "/")]
+	cname := name[strings.LastIndex(name, "/")+1:]
+	p, err := b.loadPackage(pname)
+	if err != nil {
+		return nil, err
+	}
+	c := p.Block.Classes[cname]
+	if c == nil {
+		err = fmt.Errorf("class %s not found", cname)
+	}
+	return c, err
 }
 
 func (b *Block) isFuntionTopBlock() bool {

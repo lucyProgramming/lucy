@@ -15,6 +15,46 @@ type Package struct {
 	NErros         int // number of errors should stop compile
 }
 
+func (p *Package) addBuildFunctions() {
+	if p.Block.Funcs == nil {
+		p.Block.Funcs = make(map[string]*Function)
+	}
+	{
+		name := "print"
+		f := mkBuildFunction(name, true, nil, nil)
+		f.CallChcker = func(errs *[]error, args []*VariableType, pos *Pos) {
+		}
+		p.Block.Funcs[name] = f
+	}
+	{
+		name := "typeof"
+		var v VariableDefinition
+		v.Typ = &VariableType{}
+		v.Typ.Typ = VARIABLE_TYPE_STRING
+
+		f := mkBuildFunction(name, false, nil, []*VariableDefinition{&v})
+		f.CallChcker = func(errs *[]error, args []*VariableType, pos *Pos) {
+			if len(args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s typeof only except one parameter", errMsgPrefix(pos)))
+			}
+		}
+		p.Block.Funcs[name] = f
+	}
+
+}
+func (p *Package) TypeCheck() []error {
+	p.addBuildFunctions()
+	if p.NErros <= 2 {
+		p.NErros = 10
+	}
+	errs := []error{}
+	errs = append(errs, p.Block.check(nil)...)
+	for _, v := range p.Blocks {
+		errs = append(errs, v.check(&p.Block)...)
+	}
+	return errs
+}
+
 func (p *Package) loadPackage(name string) (*Package, error) {
 	if p.loadedPackages == nil {
 		p.loadedPackages = make(map[string]*Package)

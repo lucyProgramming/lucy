@@ -47,7 +47,6 @@ type VariableType struct {
 
 func (v *VariableType) rightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||
-		v.Typ == VARIABLE_TYPE_BOOL ||
 		v.Typ == VARIABLE_TYPE_BYTE ||
 		v.Typ == VARIABLE_TYPE_SHORT ||
 		v.Typ == VARIABLE_TYPE_CHAR ||
@@ -253,58 +252,6 @@ func (t *VariableType) constValueValid(e *Expression) (data interface{}, err err
 		return e.Data.(string), nil
 	}
 	return nil, fmt.Errorf("cannot assign %s to %s", e.OpName(), t.TypeString())
-}
-
-//assign some simple expression
-func (t *VariableType) assignExpression(p *Package, e *Expression) (data interface{}, err error) {
-	switch t.Typ {
-	case VARIABLE_TYPE_BOOL:
-		if e.Typ == EXPRESSION_TYPE_BOOL {
-			data = e.Data.(bool)
-			return
-		}
-	case VARIABLE_TYPE_ENUM:
-		if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
-			if _, ok := p.Block.EnumNames[e.Data.(string)]; ok {
-				data = p.Block.EnumNames[e.Data.(string)]
-			}
-		}
-	case VARIABLE_TYPE_BYTE:
-		if e.Typ == EXPRESSION_TYPE_BYTE {
-			data = e.Data.(byte)
-			return
-		}
-	case VARIABLE_TYPE_INT:
-		if e.Typ == EXPRESSION_TYPE_BYTE {
-			data = int64(e.Data.(byte))
-			return
-		} else if e.Typ == EXPRESSION_TYPE_INT {
-			data = e.Data.(int64)
-			return
-		}
-	case VARIABLE_TYPE_FLOAT:
-		if e.Typ == EXPRESSION_TYPE_BYTE {
-			data = int64(e.Data.(byte))
-			return
-		} else if e.Typ == EXPRESSION_TYPE_INT {
-			data = e.Data.(int64)
-			return
-		} else if EXPRESSION_TYPE_FLOAT == e.Typ {
-			data = e.Data.(float64)
-			return
-		}
-	case VARIABLE_TYPE_STRING:
-		if e.Typ == EXPRESSION_TYPE_STRING {
-			data = e.Data.(string)
-			return
-		}
-	case VARIABLE_TYPE_CLASS:
-		if e.Typ == EXPRESSION_TYPE_NULL {
-			return nil, nil // null pointer
-		}
-	}
-	err = fmt.Errorf("can`t covert type accroding to type")
-	return
 }
 
 //可读的类型信息

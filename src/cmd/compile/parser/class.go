@@ -27,6 +27,7 @@ func (c *Class) consume(m map[int]bool) {
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
+	classDefinition.Block.IsClassBlock = true
 	c.Next() // skip class key work
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s on name after class,but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)

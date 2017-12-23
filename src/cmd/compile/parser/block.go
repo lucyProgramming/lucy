@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )

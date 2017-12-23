@@ -6,7 +6,14 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
+type FunctionBuildProperty struct {
+	IsAnyNumberParameter bool
+	CallChcker           func(errs *[]error, args []*VariableType, pos *Pos)
+}
+
 type Function struct {
+	FunctionBuildProperty
+	Isbuildin    bool
 	Used         bool
 	AccessFlags  uint16 // public private or protected
 	Typ          *FunctionType
@@ -117,13 +124,14 @@ type FunctionType struct {
 type ParameterList []*VariableDefinition // actually local variables
 type ReturnList []*VariableDefinition    // actually local variables
 
-func (r ReturnList) retTypes() []*VariableType {
-	if len(r) == 0 {
-		return mkVoidVariableTypes()
+func (r ReturnList) retTypes(pos *Pos) []*VariableType {
+	if r == nil || len(r) == 0 {
+		return mkVoidVariableTypes(pos)
 	}
 	ret := make([]*VariableType, len(r))
 	for k, v := range r {
 		ret[k] = v.Typ.Clone()
+		ret[k].Pos = pos
 	}
 	return ret
 }

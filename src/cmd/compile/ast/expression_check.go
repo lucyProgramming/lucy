@@ -287,8 +287,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	args := e.checkExpressions(block, call.Args, errs)
 	args = e.checkRightValues(args, errs)
-	f, err := t.Class.accessMethod(call.Name, args)
-	if err != nil {
+	f, es := t.Class.accessMethod(call.Name, e.Pos, args)
+	if errsNotEmpty(es) {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
 	} else {
 		if !call.Expression.isThisIdentifierExpression() {
@@ -324,13 +324,60 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, err)
 	}
 	if t == nil {
-		return mkVoidVariableTypes()
+		return mkVoidVariableTypes(e.Pos)
 	}
 	if t.Typ != VARIABLE_TYPE_FUNCTION {
 		*errs = append(*errs, fmt.Errorf("%s not a function", errMsgPrefix(call.Expression.Pos)))
-		return mkVoidVariableTypes()
+		return mkVoidVariableTypes(e.Pos)
 	}
-	return e.checkFunctionCall(block, errs, t.Function, call.Args)
+	call.Func = t.Function
+	if t.Function.Isbuildin {
+		return e.checkBuildFunctionCall(block, errs, t.Function, call.Args)
+	} else {
+		return e.checkFunctionCall(block, errs, t.Function, call.Args)
+	}
+}
+
+func (e *Expression) checkBuildFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
+	callargsTypes := e.checkRightValues(e.checkExpressions(block, args, errs), errs)
+	if f.CallChcker != nil {
+		f.CallChcker(errs, callargsTypes, e.Pos)
+	} else {
+		var t *VariableType
+		if f.IsAnyNumberParameter {
+			if f.Typ.Parameters != nil && len(f.Typ.Parameters) > 0 && f.Typ.Parameters[0] != nil {
+				t = f.Typ.Parameters[0].Typ
+			}
+		}
+
+		if !f.IsAnyNumberParameter {
+			if len(callargsTypes) > len(f.Typ.Parameters) {
+				*errs = append(*errs, fmt.Errorf("%s too many paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
+			}
+			if len(callargsTypes) < len(f.Typ.Parameters) && len(args) < len(f.Typ.Parameters) {
+				*errs = append(*errs, fmt.Errorf("%s too few paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
+			}
+		}
+		if f.IsAnyNumberParameter {
+			for k, v := range callargsTypes {
+				if t != nil {
+					if !t.typeCompatible(v) {
+						*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(args[k].Pos), v.TypeString(), t.TypeString()))
+					}
+				}
+			}
+		} else {
+			for k, v := range f.Typ.Parameters {
+				if k < len(callargsTypes) {
+					if !v.Typ.typeCompatible(callargsTypes[k]) {
+						*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(args[k].Pos), v.Typ.TypeString(), callargsTypes[k].TypeString()))
+					}
+				}
+
+			}
+		}
+	}
+	return f.Typ.Returns.retTypes(e.Pos)
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
@@ -342,6 +389,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	if len(callargsTypes) < len(f.Typ.Parameters) && len(args) < len(f.Typ.Parameters) {
 		*errs = append(*errs, fmt.Errorf("%s too few paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
 	}
+
 	for k, v := range f.Typ.Parameters {
 		if k < len(callargsTypes) {
 			if !v.Typ.typeCompatible(callargsTypes[k]) {
@@ -349,12 +397,8 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			}
 		}
 	}
-	ret := make([]*VariableType, len(f.Typ.Returns))
-	for k := range ret {
-		ret[k] = f.Typ.Returns[k].Typ
-	}
-	return ret
 
+	return f.Typ.Returns.retTypes(e.Pos)
 }
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) []*VariableType {
@@ -536,23 +580,35 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	case *Function:
 		f := d.(*Function)
 		f.Used = true
-		return &f.VariableType, nil
+		t = &f.VariableType
+		tt := t.Clone()
+		tt.Pos = e.Pos
+		return tt, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
 		t.Used = true
-		return t.Typ, nil
+		tt := t.Typ.Clone()
+		tt.Pos = e.Pos
+		return tt, nil
 	case *Const:
 		t := d.(*Const)
 		t.Used = true
-		return t.Typ, nil
+		tt := t.Typ.Clone()
+		tt.Pos = e.Pos
+
+		return tt, nil
 	case *Enum:
 		t := d.(*Enum)
 		t.Used = true
-		return &t.VariableType, nil
+		tt := t.VariableType.Clone()
+		tt.Pos = e.Pos
+		return tt, nil
 	case *EnumName:
 		t := d.(*EnumName)
 		t.Enum.Used = true
-		return &t.Enum.VariableType, nil
+		tt := t.Enum.VariableType.Clone()
+		tt.Pos = e.Pos
+		return tt, nil
 	default:
 		panic(1111111)
 	}

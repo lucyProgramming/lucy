@@ -16,7 +16,7 @@ var (
 	Nodes                *[]*Node //
 	packageAliasReg      *regexp.Regexp
 	PackageLoad          PackageLoader
-	JAVA_ADAMS_CLASS     = "java/lang/Object"
+	JAVA_ROOT_CLASS      = "java/lang/Object"
 )
 
 type NameWithPos struct {
@@ -61,20 +61,21 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func mkVoidVariableTypes(length ...int) []*VariableType {
+func mkVoidVariableTypes(pos *Pos, length ...int) []*VariableType {
 	l := 1
 	if len(length) > 0 && length[0] > 0 {
 		l = length[0]
 	}
 	ret := make([]*VariableType, l)
 	for k := range ret {
-		ret[k] = mkVoidVariableType()
+		ret[k] = mkVoidVariableType(pos)
 	}
 	return ret
 }
-func mkVoidVariableType() *VariableType {
+func mkVoidVariableType(pos *Pos) *VariableType {
 	return &VariableType{
 		Typ: VARIABLE_TYPE_VOID,
+		Pos: pos,
 	}
 }
 
@@ -84,4 +85,16 @@ func mkSignatureByVariableTypes(ts []*VariableType) string {
 		s += v.Descriptor()
 	}
 	return s
+}
+
+func mkBuildFunction(name string, IsAnyNumberParameter bool, args []*VariableDefinition, rs []*VariableDefinition) *Function {
+	f := &Function{}
+	f.Isbuildin = true
+	f.Used = true
+	f.IsAnyNumberParameter = IsAnyNumberParameter
+	f.Typ = &FunctionType{}
+	f.Typ.Parameters = args
+	f.Typ.Returns = rs
+	f.mkVariableType()
+	return f
 }
