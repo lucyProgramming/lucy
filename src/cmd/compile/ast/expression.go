@@ -138,10 +138,27 @@ type ExpressionTypeConvertion struct {
 	Expression *Expression
 }
 
+type ExpressionIdentifer struct {
+	Name     string
+	Const    *Const
+	Var      *VariableDefinition
+	Enum     *Enum
+	Func     *Function
+	EnumName *EnumName
+}
+
+type ExpressionIndex struct {
+	Expression *Expression
+	Index      *Expression
+	Name       string
+	Field      *ClassField
+}
+
 type ExpressionMethodCall struct {
-	ExpressionFunctionCall
-	Name   string
-	Method *ClassMethod
+	Expression *Expression
+	Args       CallArgs
+	Name       string
+	Method     *ClassMethod
 }
 
 type ExpressionNew struct {

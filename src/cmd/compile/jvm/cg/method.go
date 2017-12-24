@@ -16,9 +16,9 @@ const (
 )
 
 type MethodInfo struct {
-	accessFlags     uint16
+	AccessFlags     uint16
 	nameIndex       uint16
 	descriptorIndex uint16
 	attributeCount  uint16
-	attributes      []*AttributeInfo
+	Attributes      []*AttributeInfo
 }

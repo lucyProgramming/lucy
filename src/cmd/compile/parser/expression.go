@@ -48,7 +48,9 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 	}
 	result := &ast.Expression{}
 	result.Typ = ast.EXPRESSION_TYPE_IDENTIFIER
-	result.Data = ep.parser.token.Data.(string)
+	identifer := &ast.ExpressionIdentifer{}
+	identifer.Name = ep.parser.token.Data.(string)
+	result.Data = identifer
 	result.Pos = ep.parser.mkPos()
 	ep.Next()          //look next token
 	if ep.parser.eof { // end of file
@@ -73,8 +75,10 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 			newresult.Data = binary
 			binary.Left = result
 			binary.Right = &ast.Expression{
-				Typ:  ast.EXPRESSION_TYPE_IDENTIFIER,
-				Data: ep.parser.token.Data.(string),
+				Typ: ast.EXPRESSION_TYPE_IDENTIFIER,
+				Data: &ast.ExpressionIdentifer{
+					Name: ep.parser.token.Data.(string),
+				},
 			}
 			result = newresult // reassignment
 			ep.Next()

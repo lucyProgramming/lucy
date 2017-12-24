@@ -37,11 +37,15 @@ type Class struct {
 	attributes     []*AttributeInfo
 }
 
+func (c *Class) ToLowLevel(level *ClassHighLevel) {
+
+}
+
 func (c *Class) OutPut(dest io.Writer) error {
 	c.dest = dest
 	//magic number
 	bs4 := make([]byte, 4)
-	binary.BigEndian.PutUint32(bs4, c.magic)
+	binary.BigEndian.PutUint32(bs4, 0xCAFEBABE)
 	_, err := dest.Write(bs4)
 	if err != nil {
 		return err
@@ -150,7 +154,7 @@ func (c *Class) writeMethods() error {
 		return err
 	}
 	for _, v := range c.methods {
-		binary.BigEndian.PutUint16(bs2, uint16(v.accessFlags))
+		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
 		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
@@ -171,7 +175,7 @@ func (c *Class) writeMethods() error {
 			return err
 		}
 		if v.attributeCount > 0 {
-			err = c.writeAttributeInfo(v.attributes)
+			err = c.writeAttributeInfo(v.Attributes)
 			if err != nil {
 				return err
 			}
@@ -189,7 +193,7 @@ func (c *Class) writeFields() error {
 		return err
 	}
 	for _, v := range c.fields {
-		binary.BigEndian.PutUint16(bs2, uint16(v.accessFlags))
+		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
 		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
@@ -210,7 +214,7 @@ func (c *Class) writeFields() error {
 			return err
 		}
 		if v.attributeCount > 0 {
-			err = c.writeAttributeInfo(v.attributes)
+			err = c.writeAttributeInfo(v.Attributes)
 			if err != nil {
 				return err
 			}

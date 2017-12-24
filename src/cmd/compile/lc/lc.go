@@ -2,13 +2,12 @@ package lc
 
 import (
 	"fmt"
-
+	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm"
+	"github.com/756445638/lucy/src/cmd/compile/parser"
 	"io/ioutil"
 	"os"
 	"strings"
-
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/parser"
 )
 
 func Main(files []string) {
@@ -24,6 +23,7 @@ type LucyCompile struct {
 	Nerrs            []error
 	NerrsStopCompile int
 	lucyPath         []string
+	Maker            jvm.MakeClass
 }
 
 func (l *LucyCompile) shouldExit() {
@@ -67,5 +67,8 @@ func (l *LucyCompile) compile() {
 	l.shouldExit()
 	l.Nerrs = append(l.Nerrs, p.TypeCheck()...)
 	l.shouldExit()
+	if len(l.Nerrs) == 0 {
+		l.Nerrs = append(l.Nerrs, l.Maker.Make(p)...)
+	}
 	l.exit()
 }

@@ -6,6 +6,7 @@ import (
 )
 
 type Block struct {
+	IsFunctionTop      bool
 	IsClassBlock       bool
 	Pos                *Pos
 	Vars               map[string]*VariableDefinition
@@ -21,9 +22,6 @@ type Block struct {
 	LocalVars          []string
 }
 
-func (b *Block) isTop() bool {
-	return b.Outter == nil
-}
 func (b *Block) searchByName(name string) (interface{}, error) {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
@@ -60,32 +58,30 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		b.InheritedAttribute.function.Typ.ClosureVars[name] != nil {
 		return b.InheritedAttribute.function.Typ.ClosureVars[name], nil
 	}
-
 	if b.InheritedAttribute.class != nil &&
 		b.InheritedAttribute.class.ClosureVars != nil &&
 		b.InheritedAttribute.class.ClosureVars[name] != nil {
 		return b.InheritedAttribute.class.ClosureVars[name], nil
 	}
-
 	if b.Outter == nil {
 		return nil, fmt.Errorf("%s not found", name)
 	}
 	t, err := b.Outter.searchByName(name)
-	if err == nil && b.Outter.Outter != nil { //found and in function top block and b.Outter is not top block
-		if b.InheritedAttribute.function != nil {
-			if v, ok := t.(*VariableDefinition); ok {
-				if b.InheritedAttribute.function != nil && b.isFuntionTopBlock() {
-					if b.InheritedAttribute.function.Typ.ClosureVars == nil {
-						b.InheritedAttribute.function.Typ.ClosureVars = make(map[string]*VariableDefinition)
-					}
-					b.InheritedAttribute.function.Typ.ClosureVars[name] = v
+	if err == nil { //found and in function top block and b.Outter is not top block
+		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
+			if b.InheritedAttribute.function != nil && b.IsFunctionTop && b.InheritedAttribute.function.IsGlobal == false {
+				if b.InheritedAttribute.function.Typ.ClosureVars == nil {
+					b.InheritedAttribute.function.Typ.ClosureVars = make(map[string]*VariableDefinition)
 				}
-				if b.InheritedAttribute.class != nil && b.IsClassBlock {
-					if b.InheritedAttribute.class.ClosureVars == nil {
-						b.InheritedAttribute.class.ClosureVars = make(map[string]*VariableDefinition)
-					}
-					b.InheritedAttribute.class.ClosureVars[name] = t.(*VariableDefinition)
+				b.InheritedAttribute.function.Typ.ClosureVars[name] = v
+				v.BeenCaptured = true
+			}
+			if b.InheritedAttribute.class != nil && b.IsClassBlock && b.InheritedAttribute.class.IsGlobal == false {
+				if b.InheritedAttribute.class.ClosureVars == nil {
+					b.InheritedAttribute.class.ClosureVars = make(map[string]*VariableDefinition)
 				}
+				b.InheritedAttribute.class.ClosureVars[name] = t.(*VariableDefinition)
+				v.BeenCaptured = true
 			}
 		}
 	}
@@ -101,11 +97,12 @@ func (b *Block) inherite(father *Block) {
 }
 
 type InheritedAttribute struct {
-	istop         bool          // if it is a top block
-	for_statement *StatementFor // if this statement is in for or not
-	function      *Function
-	class         *Class
-	p             *Package
+	istop            bool          // if it is a top block
+	for_statement    *StatementFor // if this statement is in for or not
+	switch_statement *StatementSwitch
+	function         *Function
+	class            *Class
+	p                *Package
 }
 
 type NameWithType struct {
@@ -326,11 +323,4 @@ func (b *Block) loadClass(name string) (*Class, error) {
 		err = fmt.Errorf("class %s not found", cname)
 	}
 	return c, err
-}
-
-func (b *Block) isFuntionTopBlock() bool {
-	if b.InheritedAttribute.function == nil { // not in a function
-		return false
-	}
-	return b.InheritedAttribute.function != b.Outter.InheritedAttribute.function
 }

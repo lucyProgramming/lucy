@@ -7,6 +7,7 @@ import (
 )
 
 type Package struct {
+	Expressions    []*Expression
 	loadedPackages map[string]*Package
 	Block          Block // package always have a default block
 	Files          map[string]*File
@@ -22,25 +23,21 @@ func (p *Package) addBuildFunctions() {
 	{
 		name := "print"
 		f := mkBuildFunction(name, true, nil, nil)
-		f.CallChcker = func(errs *[]error, args []*VariableType, pos *Pos) {
-		}
+		f.CallChecker = func(errs *[]error, args []*VariableType, pos *Pos) {}
 		p.Block.Funcs[name] = f
 	}
 	{
-		name := "typeof"
-		var v VariableDefinition
-		v.Typ = &VariableType{}
-		v.Typ.Typ = VARIABLE_TYPE_STRING
-
-		f := mkBuildFunction(name, false, nil, []*VariableDefinition{&v})
-		f.CallChcker = func(errs *[]error, args []*VariableType, pos *Pos) {
-			if len(args) != 1 {
-				*errs = append(*errs, fmt.Errorf("%s typeof only except one parameter", errMsgPrefix(pos)))
-			}
-		}
+		name := "panic"
+		f := mkBuildFunction(name, true, nil, nil)
+		f.CallChecker = oneAnyTypeParameterChecker
 		p.Block.Funcs[name] = f
 	}
-
+	{
+		name := "recover"
+		f := mkBuildFunction(name, false, nil, nil)
+		f.CallChecker = oneAnyTypeParameterChecker
+		p.Block.Funcs[name] = f
+	}
 }
 func (p *Package) TypeCheck() []error {
 	p.addBuildFunctions()

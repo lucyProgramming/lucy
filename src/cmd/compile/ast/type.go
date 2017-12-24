@@ -35,7 +35,7 @@ const (
 type VariableType struct {
 	Pos             *Pos
 	Typ             int
-	Name            string // Lname.Rname
+	Name            string
 	CombinationType *VariableType
 	FunctionType    *FunctionType
 	Const           *Const

@@ -8,10 +8,17 @@ import (
 
 type FunctionBuildProperty struct {
 	IsAnyNumberParameter bool
-	CallChcker           func(errs *[]error, args []*VariableType, pos *Pos)
+	CallChecker          func(errs *[]error, args []*VariableType, pos *Pos)
+}
+
+func oneAnyTypeParameterChecker(errs *[]error, args []*VariableType, pos *Pos) {
+	if len(args) != 1 {
+		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
+	}
 }
 
 type Function struct {
+	IsGlobal bool
 	FunctionBuildProperty
 	Isbuildin    bool
 	Used         bool

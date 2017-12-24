@@ -340,8 +340,8 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 
 func (e *Expression) checkBuildFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := e.checkRightValues(e.checkExpressions(block, args, errs), errs)
-	if f.CallChcker != nil {
-		f.CallChcker(errs, callargsTypes, e.Pos)
+	if f.CallChecker != nil {
+		f.CallChecker(errs, callargsTypes, e.Pos)
 	} else {
 		var t *VariableType
 		if f.IsAnyNumberParameter {
@@ -570,12 +570,11 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) []*
 }
 
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
-	name := e.Data.(string)
-	d, err := block.searchByName(name)
+	identifer := e.Data.(*ExpressionIdentifer)
+	d, err := block.searchByName(identifer.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err)
 	}
-
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
@@ -583,31 +582,35 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		t = &f.VariableType
 		tt := t.Clone()
 		tt.Pos = e.Pos
+		identifer.Func = f
 		return tt, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
 		t.Used = true
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
+		identifer.Var = t
 		return tt, nil
 	case *Const:
 		t := d.(*Const)
 		t.Used = true
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
-
+		identifer.Const = t
 		return tt, nil
 	case *Enum:
 		t := d.(*Enum)
 		t.Used = true
 		tt := t.VariableType.Clone()
 		tt.Pos = e.Pos
+		identifer.Enum = t
 		return tt, nil
 	case *EnumName:
 		t := d.(*EnumName)
 		t.Enum.Used = true
 		tt := t.Enum.VariableType.Clone()
 		tt.Pos = e.Pos
+		identifer.EnumName = t
 		return tt, nil
 	default:
 		panic(1111111)
@@ -644,15 +647,15 @@ func (e *Expression) isThisIdentifierExpression() (b bool) {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return
 	}
-	b = e.Data.(string) == THIS
+	t := e.Data.(*ExpressionIdentifer)
+	b = (t.Name == THIS)
 	return
-
 }
 
 func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *VariableType) {
-	binary := e.Data.(*ExpressionBinary)
+	index := e.Data.(*ExpressionIndex)
 	f := func() *VariableType {
-		ts, es := binary.Left.check(block)
+		ts, es := index.Expression.check(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
@@ -678,7 +681,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		return nil
 	}
 	if obj.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
-		ts, es := binary.Right.check(block)
+		ts, es := index.Index.check(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
@@ -698,13 +701,12 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 			*errs = append(*errs, fmt.Errorf("%s object`s field can only access by '.'", errMsgPrefix(e.Pos)))
 			return nil
 		}
-		name := binary.Right.Data.(string)
-		f, accessable, err := obj.Class.accessField(name)
+		f, accessable, err := obj.Class.accessField(index.Name)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		} else {
-			if !binary.Left.isThisIdentifierExpression() && !accessable {
-				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), name))
+			if !index.Expression.isThisIdentifierExpression() && !accessable {
+				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), index.Name))
 			}
 		}
 		if f != nil {
@@ -712,7 +714,6 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		} else {
 			return nil
 		}
-
 	}
 	panic("111")
 	return nil

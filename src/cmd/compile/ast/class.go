@@ -8,12 +8,13 @@ import (
 )
 
 type Class struct {
-	Block   Block
-	Access  uint16
-	Pos     *Pos
-	Name    string
-	Fields  map[string]*ClassField
-	Methods map[string][]*ClassMethod
+	IsGlobal bool
+	Block    Block
+	Access   uint16
+	Pos      *Pos
+	Name     string
+	Fields   map[string]*ClassField
+	Methods  map[string][]*ClassMethod
 	//SuperClassExpression *Expression // a or a.b
 	SuperClassName string
 	SuperClass     *Class

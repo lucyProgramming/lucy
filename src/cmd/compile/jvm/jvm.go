@@ -1,8 +1,10 @@
 package jvm
 
-import "github.com/756445638/lucy/src/cmd/compile/ast"
-import "fmt"
-import "strings"
+import (
+	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"strings"
+)
 
 type Jvm struct {
 }
