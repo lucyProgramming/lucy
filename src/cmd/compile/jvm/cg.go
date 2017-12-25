@@ -7,8 +7,9 @@ import (
 )
 
 type MakeClass struct {
-	p       *ast.Package
-	Classes []*cg.ClassHighLevel
+	p         *ast.Package
+	Classes   []*cg.ClassHighLevel
+	mainclass *cg.ClassHighLevel
 }
 
 func (m *MakeClass) Make(p *ast.Package) []error {
@@ -27,6 +28,8 @@ func (m *MakeClass) Make(p *ast.Package) []error {
 		f.Descriptor = v.Typ.Descriptor()
 		mainclass.Fields[k] = f
 	}
+
+	m.mainclass = mainclass
 
 	return errs
 }

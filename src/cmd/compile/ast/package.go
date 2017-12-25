@@ -45,7 +45,11 @@ func (p *Package) TypeCheck() []error {
 		p.NErros = 10
 	}
 	errs := []error{}
-	errs = append(errs, p.Block.check(nil)...)
+	errs = append(errs, p.Block.checkConst()...)
+	for _, v := range p.Block.Funcs {
+		v.Block.inherite(&p.Block)
+		v.checkParaMeterAndRetuns(&errs)
+	}
 	for _, v := range p.Blocks {
 		errs = append(errs, v.check(&p.Block)...)
 	}

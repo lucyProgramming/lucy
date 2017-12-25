@@ -532,12 +532,12 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) []*
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left", errMsgPrefix(v.Pos)))
 			continue
 		}
-		name := v.Data.(string)
-		if name == "_" {
+		name := v.Data.(*ExpressionIdentifer)
+		if name.Name == "_" {
 
 			continue
 		}
-		if variable, ok := block.Vars[name]; ok {
+		if variable, ok := block.Vars[name.Name]; ok {
 			if k < len(ts) {
 				if !variable.Typ.typeCompatible(ts[k]) {
 					*errs = append(*errs, fmt.Errorf("%s type '%s' is not compatible with '%s'",
@@ -552,7 +552,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) []*
 			if k < len(ts) {
 				vd.Typ = ts[k]
 			}
-			vd.Name = name
+			vd.Name = name.Name
 			vd.Pos = v.Pos
 			if k < len(ts) {
 				vd.Typ = ts[k]
