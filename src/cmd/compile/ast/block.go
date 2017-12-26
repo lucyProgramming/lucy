@@ -187,7 +187,8 @@ func (b *Block) checkClass() []error {
 func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
 	for _, v := range b.Consts {
-		if v.Expression == nil && v.Typ == nil {
+		if v.Expression == nil {
+			panic("should not happen")
 			errs = append(errs, fmt.Errorf("%s const %v has no initiation value", errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
@@ -204,7 +205,7 @@ func (b *Block) checkConst() []error {
 		v.Expression.Data = value
 		ts, _ := v.Expression.check(b)
 		v.Value = value
-		if v.Typ != nil && v.Expression != nil {
+		if v.Typ != nil {
 			err = v.Typ.resolve(b)
 			if err != nil {
 				errs = append(errs, err)

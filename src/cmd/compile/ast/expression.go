@@ -7,6 +7,7 @@ import (
 
 const (
 	_ = iota
+	//value type
 	EXPRESSION_TYPE_NULL
 	EXPRESSION_TYPE_BOOL
 	EXPRESSION_TYPE_BYTE
@@ -111,9 +112,10 @@ func (e *Expression) typeName(typ ...int) string {
 }
 
 type Expression struct {
-	Pos  *Pos
-	Typ  int
-	Data interface{}
+	IsPublic bool // only used in top
+	Pos      *Pos
+	Typ      int
+	Data     interface{}
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

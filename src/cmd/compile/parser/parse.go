@@ -111,11 +111,25 @@ func (p *Parser) Parse() []error {
 				continue
 			}
 			d := &ast.ExpressionDeclareVariable{vs, es}
-			*p.tops = append(*p.tops, &ast.Node{
+			e := &ast.Expression{
+				Typ:  ast.EXPRESSION_TYPE_VAR,
 				Data: d,
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: e,
 			})
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
+			e, err := p.ExpressionParser.parseExpression()
+			if err != nil {
+				p.consume(untils_semicolon)
+				p.Next()
+				continue
+			}
+			p.validStatementEnding(e.Pos)
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: e,
+			})
 			resetProperty()
 		case lex.TOKEN_ENUM:
 			if isconst {
@@ -240,6 +254,18 @@ func (p *Parser) Parse() []error {
 		}
 	}
 	return p.errs
+}
+
+func (p *Parser) validStatementEnding(pos ...*ast.Pos) {
+	if p.token.Type == lex.TOKEN_SEMICOLON || p.lastToken != nil && p.lastToken.Type == lex.TOKEN_RC {
+		return
+	}
+	if len(pos) > 0 {
+		p.errs = append(p.errs, fmt.Errorf("%s missing semicolon", p.errorMsgPrefix(pos[0])))
+	} else {
+		p.errs = append(p.errs, fmt.Errorf("%s missing semicolon", p.errorMsgPrefix()))
+	}
+
 }
 
 func (p *Parser) insertImports(im *ast.Imports) {
@@ -495,7 +521,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Pos:          p.mkPos(),
 		}, nil
 	}
-	err = fmt.Errorf("%s unkown type,first token:", p.errorMsgPrefix(), p.token.Desp)
+	err = fmt.Errorf("%s unkown type,first token:%s", p.errorMsgPrefix(), p.token.Desp)
 	p.errs = append(p.errs, err)
 	return nil, err
 }

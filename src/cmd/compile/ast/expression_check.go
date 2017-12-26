@@ -160,10 +160,24 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
+	case EXPRESSION_TYPE_FUNCTION:
+		tt := e.checkFunctionExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
 	return
+}
+func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
+	f := e.Data.(*Function)
+	*errs = append(*errs, f.check(block)...)
+	return &VariableType{
+		Pos:      e.Pos,
+		Typ:      VARIABLE_TYPE_FUNCTION,
+		Function: f,
+	}
 }
 
 func (e *Expression) checkExpressions(block *Block, es []*Expression, errs *[]error) []*VariableType {
@@ -480,9 +494,12 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) (ts []*V
 	valueTypes := e.checkExpressions(block, values, errs)
 	leftTypes := []*VariableType{}
 	for _, v := range lefts {
-		if v.Typ == EXPRESSION_TYPE_IDENTIFIER && v.Data.(string) == "_" {
-			lefts = append(lefts, nil)
-			continue
+		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
+			name := v.Data.(*ExpressionIdentifer)
+			if name.Name == "_" { // skip "_"
+				lefts = append(lefts, nil)
+				continue
+			}
 		}
 		t, es := v.getLeftValue(block)
 		if errsNotEmpty(es) {
@@ -621,8 +638,8 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	errs = []error{}
 	switch e.Typ {
 	case EXPRESSION_TYPE_IDENTIFIER:
-		name := e.Data.(string)
-		d, err := block.searchByName(name)
+		name := e.Data.(*ExpressionIdentifer)
+		d, err := block.searchByName(name.Name)
 		if err != nil {
 			return nil, []error{fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error())}
 		}
@@ -630,7 +647,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		case *VariableDefinition:
 			return d.(*VariableDefinition).Typ, nil
 		default:
-			errs = append(errs, fmt.Errorf("%s identifier %s is not variable", errMsgPrefix(e.Pos), name))
+			errs = append(errs, fmt.Errorf("%s identifier %s is not variable", errMsgPrefix(e.Pos), name.Name))
 			return nil, []error{}
 		}
 	case EXPRESSION_TYPE_INDEX:

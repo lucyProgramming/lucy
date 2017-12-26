@@ -8,6 +8,7 @@ import (
 const (
 	//primitive type
 	_ = iota
+	//value types
 	VARIABLE_TYPE_BOOL
 	VARIABLE_TYPE_BYTE
 	VARIABLE_TYPE_SHORT
@@ -19,8 +20,8 @@ const (
 	VARIABLE_TYPE_STRING
 	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_ARRAY_INSTANCE
-	//function
 	VARIABLE_TYPE_FUNCTION
+	//function type
 	VARIABLE_TYPE_FUNCTION_TYPE
 	//enum
 	VARIABLE_TYPE_ENUM //enum
@@ -56,7 +57,8 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_DOUBLE ||
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
-		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
+		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
+		v.Typ == VARIABLE_TYPE_FUNCTION
 }
 
 /*
