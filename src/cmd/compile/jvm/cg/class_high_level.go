@@ -10,10 +10,13 @@ type ClassHighLevel struct {
 }
 
 type FiledHighLevel struct {
+	Name       string
 	Descriptor string
 	FieldInfo
 }
 type MethodHighLevel struct {
+	Name       string
 	Descriptor string
 	MethodInfo
+	Code AttributeCode
 }

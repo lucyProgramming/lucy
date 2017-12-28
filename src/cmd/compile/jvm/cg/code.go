@@ -4,10 +4,10 @@ import "encoding/binary"
 
 type AttributeCode struct {
 	AttributeInfo
-	maxStack             uint16
-	maxLocals            uint16
-	codeLength           uint32
-	codes                []byte
+	MaxStack             uint16
+	MaxLocals            uint16
+	CodeLength           uint32
+	Codes                []byte
 	exceptionTableLength uint16
 	exceptions           []*ExceptionTable
 	attributeCounts      uint16
@@ -24,10 +24,10 @@ type ExceptionTable struct {
 func (a *AttributeCode) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.info = make([]byte, 8)
-	binary.BigEndian.PutUint16(ret.info, uint16(a.maxStack))
-	binary.BigEndian.PutUint16(ret.info[2:], uint16(a.maxLocals))
-	binary.BigEndian.PutUint32(ret.info[4:], uint32(len(a.codes)))
-	ret.info = append(ret.info, a.codes...)
+	binary.BigEndian.PutUint16(ret.info, uint16(a.MaxStack))
+	binary.BigEndian.PutUint16(ret.info[2:], uint16(a.MaxLocals))
+	binary.BigEndian.PutUint32(ret.info[4:], uint32(len(a.Codes)))
+	ret.info = append(ret.info, a.Codes...)
 	ret.info = append(ret.info, a.mkExceptions()...)
 	ret.info = append(ret.info, a.mkAttributes()...)
 	ret.attributeLength = uint32(len(ret.info))

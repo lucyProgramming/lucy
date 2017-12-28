@@ -67,8 +67,6 @@ func (l *LucyCompile) compile() {
 	l.shouldExit()
 	l.Nerrs = append(l.Nerrs, p.TypeCheck()...)
 	l.shouldExit()
-	if len(l.Nerrs) == 0 {
-		l.Nerrs = append(l.Nerrs, l.Maker.Make(p)...)
-	}
+	l.Maker.Make(p)
 	l.exit()
 }

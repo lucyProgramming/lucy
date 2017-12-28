@@ -9,7 +9,7 @@ type Block struct {
 	IsFunctionTop      bool
 	IsClassBlock       bool
 	Pos                *Pos
-	Vars               map[string]*VariableDefinition
+	p                  *Package
 	Consts             map[string]*Const
 	Funcs              map[string]*Function
 	Classes            map[string]*Class
@@ -18,7 +18,7 @@ type Block struct {
 	Outter             *Block //for closure,capture variables
 	InheritedAttribute InheritedAttribute
 	Statements         []*Statement
-	p                  *Package
+	Vars               map[string]*VariableDefinition
 	LocalVars          []string
 }
 
