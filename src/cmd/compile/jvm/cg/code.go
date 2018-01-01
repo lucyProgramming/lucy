@@ -6,7 +6,7 @@ type AttributeCode struct {
 	AttributeInfo
 	MaxStack             uint16
 	MaxLocals            uint16
-	CodeLength           uint32
+	CodeLength           uint16
 	Codes                []byte
 	exceptionTableLength uint16
 	exceptions           []*ExceptionTable

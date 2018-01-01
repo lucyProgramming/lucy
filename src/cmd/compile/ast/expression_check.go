@@ -103,7 +103,10 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_COLON_ASSIGN:
 		t = e.checkColonAssignExpression(block, &errs)
 	case EXPRESSION_TYPE_ASSIGN:
-		t = e.checkAssignExpression(block, &errs)
+		tt := e.checkAssignExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	case EXPRESSION_TYPE_INCREMENT:
 		fallthrough
 	case EXPRESSION_TYPE_DECREMENT:
@@ -482,7 +485,7 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Vari
 	return t
 }
 
-func (e *Expression) checkAssignExpression(block *Block, errs *[]error) (ts []*VariableType) {
+func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *VariableType {
 	binary := e.Data.(*ExpressionBinary)
 	lefts := make([]*Expression, 1)
 	if binary.Left.Typ == EXPRESSION_TYPE_LIST {
@@ -524,7 +527,9 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) (ts []*V
 		}
 
 	}
-	return valueTypes
+	tt := valueTypes[0].Clone()
+	tt.Pos = e.Pos
+	return tt
 }
 
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) []*VariableType {

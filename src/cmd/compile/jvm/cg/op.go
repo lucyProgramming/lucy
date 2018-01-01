@@ -178,7 +178,7 @@ const (
 	OP_freturn         byte = 0xae //从当前方法返回 float。
 	OP_dreturn         byte = 0xaf //从当前方法返回 double。
 	OP_areturn         byte = 0xb0 //从当前方法返回对象引用。
-	OP_return_         byte = 0xb1 //从当前方法返回 void。
+	OP_return          byte = 0xb1 //从当前方法返回 void。
 	OP_getstatic       byte = 0xb2 //获取指定类的静态域，并将其值压入栈顶。
 	OP_putstatic       byte = 0xb3 //为指定的类的静态域赋值。
 	OP_getfield        byte = 0xb4 //获取指定类的实例域，并将其值压入栈顶。

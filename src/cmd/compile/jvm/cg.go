@@ -1,15 +1,19 @@
 package jvm
 
 import (
+	"encoding/binary"
+	"fmt"
+	"strings"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
-	"strings"
 )
 
 type MakeClass struct {
-	p         *ast.Package
-	Classes   []*cg.ClassHighLevel
-	mainclass *cg.ClassHighLevel
+	p              *ast.Package
+	Classes        []*cg.ClassHighLevel
+	mainclass      *cg.ClassHighLevel
+	MakeExpression MakeExpression
 }
 
 func (m *MakeClass) Make(p *ast.Package) {
@@ -78,34 +82,175 @@ func (m *MakeClass) mkFuncStaticMethodMode(f *ast.Function, path string) *cg.Met
 	ret.AccessFlags |= cg.ACC_METHOD_STATIC
 	ret.AccessFlags |= cg.ACC_METHOD_FINAL
 	ret.Name = mkPath(path, f.Name)
-	ret.Code.MaxLocals, ret.Code.MaxStack = m.buildBlock(&ret.Code, f.Block, ret.Name)
+	ret.Code.Codes = make([]byte, 65536)
+	m.buildBlock(m.mainclass, &ret.Code, f.Block, ret.Name)
 	ret.Descriptor = f.Descriptor
 	return ret
 }
 
-func (m *MakeClass) buildBlock(code *cg.AttributeCode, b *ast.Block, path string) (locals uint16, stack uint16) {
-
-	return
-}
-
-func (m *MakeClass) buildStatement(code *cg.AttributeCode, s *ast.Statement, offset uint16) (locals uint16, stack uint16) {
-	switch s.Typ {
-	case ast.STATEMENT_TYPE_EXPRESSION:
-
-	case ast.STATEMENT_TYPE_IF:
-
-	case ast.STATEMENT_TYPE_BLOCK:
-	case ast.STATEMENT_TYPE_FOR:
-	case ast.STATEMENT_TYPE_CONTINUE:
-	case ast.STATEMENT_TYPE_RETURN:
-	case ast.STATEMENT_TYPE_BREAK:
-	case ast.STATEMENT_TYPE_SWITCH:
-	case ast.STATEMENT_TYPE_SKIP: // skip this block
-
+func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, path string) {
+	for _, s := range b.Statements {
+		m.buildStatement(class, code, s, path)
 	}
 	return
 }
 
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, path string) {
+	var maxstack uint16
+	switch s.Typ {
+	case ast.STATEMENT_TYPE_EXPRESSION:
+		var slot2 bool
+		var es [][]byte
+		maxstack, slot2, es = m.MakeExpression.build(class, code, s.Expression)
+		if slot2 {
+			code.Codes[code.CodeLength] = cg.OP_pop2
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		}
+		code.CodeLength++
+		backPatchEs(es, code)
+	case ast.STATEMENT_TYPE_IF:
+		maxstack = m.buildIfStatement(class, code, s.StatementIf, path)
+		if maxstack > code.MaxStack {
+			code.MaxStack = maxstack
+		}
+		backPatchEs(s.StatementIf.BackPatchs, code)
+	case ast.STATEMENT_TYPE_BLOCK:
+		m.buildBlock(class, code, s.Block, path)
+	case ast.STATEMENT_TYPE_FOR:
+		maxstack = m.buildForStatement(class, code, s.StatementFor, path)
+		if maxstack > code.MaxStack {
+			code.MaxStack = maxstack
+		}
+		backPatchEs(s.StatementFor.BackPatchs, code)
+	case ast.STATEMENT_TYPE_CONTINUE:
+		code.Codes[code.CodeLength] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[1:3], s.StatementFor.LoopBegin)
+		code.CodeLength += 3
+	case ast.STATEMENT_TYPE_BREAK:
+		code.Codes[code.CodeLength] = cg.OP_goto
+		if s.StatementBreak.StatementFor != nil {
+			appendBackPatch(&s.StatementFor.BackPatchs, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		} else { // switch
+			appendBackPatch(&s.StatementSwitch.BackPatchs, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		}
+		code.CodeLength += 3
+	case ast.STATEMENT_TYPE_RETURN:
+		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, path)
+		if maxstack > code.MaxStack {
+			code.MaxStack = maxstack
+		}
+	case ast.STATEMENT_TYPE_SWITCH:
+		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, path)
+		if maxstack > code.MaxStack {
+			code.MaxStack = maxstack
+		}
+		backPatchEs(s.StatementSwitch.BackPatchs, code)
+	case ast.STATEMENT_TYPE_SKIP: // skip this block
+		panic("11111111")
+	}
+	return
+}
+func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, path string) (maxstack uint16) {
+	return
+}
+
+func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, path string) (maxstack uint16) {
+	//init
+	if s.Init != nil {
+		stack, slot2, es := m.MakeExpression.build(class, code, s.Init)
+		if slot2 {
+			code.Codes[code.CodeLength] = cg.OP_pop2
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		}
+		code.CodeLength++
+		if stack > maxstack {
+			maxstack = stack
+		}
+		backPatchEs(es, code)
+	}
+	s.LoopBegin = code.CodeLength
+	//condition
+	stack, _, es := m.MakeExpression.build(class, code, s.Init)
+	backPatchEs(es, code)
+	if stack > maxstack {
+		maxstack = stack
+	}
+	code.Codes[code.CodeLength] = cg.OP_ifeq
+	appendBackPatch(&s.BackPatchs, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	m.buildBlock(class, code, s.Block, mkPath(path, fmt.Sprintf("for%d", s.Num)))
+	if s.Post != nil {
+		stack, slot2, es := m.MakeExpression.build(class, code, s.Init)
+		if slot2 {
+			code.Codes[code.CodeLength] = cg.OP_pop2
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		}
+		code.CodeLength++
+		if stack > maxstack {
+			maxstack = stack
+		}
+		backPatchEs(es, code)
+	}
+	code.Codes[code.CodeLength] = cg.OP_goto
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], s.LoopBegin)
+	code.CodeLength += 3
+	return
+}
+
+func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, path string) (maxstack uint16) {
+	return
+}
+func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, path string) (maxstack uint16) {
+	if len(s.Function.Typ.Returns) == 0 {
+		code.Codes[code.CodeLength] = cg.OP_return
+		code.CodeLength++
+	} else if len(s.Function.Typ.Returns) == 1 {
+		if len(s.Expressions) != 1 {
+			panic("this is not happening")
+		}
+		stack, _, es := m.MakeExpression.build(class, code, s.Expressions[0])
+		if stack > maxstack {
+			maxstack = stack
+		}
+		backPatchEs(es, code)
+		switch s.Function.Typ.Returns[0].Typ.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_CHAR:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_ireturn
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_ireturn
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_freturn
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_dreturn
+		case ast.VARIABLE_TYPE_STRING:
+			fallthrough
+		case ast.VARIABLE_TYPE_OBJECT:
+			fallthrough
+		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+			fallthrough
+		case ast.VARIABLE_TYPE_FUNCTION:
+			panic("1111111")
+		default:
+			panic("......a")
+		}
+		code.CodeLength++
+
+	} else {
+		panic("still working")
+	}
+	return
+}
 func (m *MakeClass) mkFuncClassMode(f *ast.Function, path string) *cg.MethodHighLevel {
 	ret := &cg.MethodHighLevel{}
 	return ret

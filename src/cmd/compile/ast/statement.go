@@ -19,14 +19,24 @@ const (
 )
 
 type Statement struct {
-	Pos             *Pos
-	Typ             int
-	StatementIf     *StatementIF
-	Expression      *Expression // expression statment like a=123
+	Pos               *Pos
+	Typ               int
+	StatementIf       *StatementIF
+	Expression        *Expression // expression statment like a=123
+	StatementFor      *StatementFor
+	StatementReturn   *StatementReturn
+	StatementSwitch   *StatementSwitch
+	StatementBreak    *StatementBreak
+	Block             *Block
+	StatementContinue *StatementContinue
+}
+
+type StatementContinue struct {
+	StatementFor *StatementFor
+}
+type StatementBreak struct {
 	StatementFor    *StatementFor
-	StatementReturn *StatementReturn
 	StatementSwitch *StatementSwitch
-	Block           *Block
 }
 
 func (s *Statement) statementName() string {
@@ -73,18 +83,30 @@ func (s *Statement) check(b *Block) []error { // b is father
 	case STATEMENT_TYPE_SWITCH:
 		panic("........")
 	case STATEMENT_TYPE_BREAK:
-		if b.InheritedAttribute.for_statement == nil {
+		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
 			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
+		} else {
+			s.StatementBreak = &StatementBreak{}
+			if b.InheritedAttribute.closed_is_for {
+				s.StatementBreak.StatementFor = b.InheritedAttribute.StatementFor
+			} else {
+				s.StatementBreak.StatementSwitch = b.InheritedAttribute.StatementSwitch
+			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
-		if b.InheritedAttribute.for_statement == nil {
+		if b.InheritedAttribute.StatementFor == nil {
 			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
+		} else {
+			if s.StatementContinue == nil {
+				s.StatementContinue = &StatementContinue{b.InheritedAttribute.StatementFor}
+			}
 		}
 	case STATEMENT_TYPE_RETURN:
 		if b.InheritedAttribute.function == nil {
 			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 			return errs
 		}
+		s.StatementReturn.Function = b.InheritedAttribute.function
 		errs = append(errs, s.StatementReturn.check(b)...)
 	default:
 		panic("unkown type statement" + s.statementName())
@@ -119,6 +141,7 @@ func (s *Statement) checkStatementExpression(b *Block) (errs []error) {
 }
 
 type StatementSwitch struct {
+	BackPatchs          [][]byte
 	Outter              *Block
 	Condition           *Expression //switch
 	StatmentSwitchCases []*StatmentSwitchCase
@@ -136,6 +159,7 @@ func (s *StatmentSwitchCase) check() []error {
 }
 
 type StatementReturn struct {
+	Function    *Function
 	Pos         *Pos // use some time
 	Expressions []*Expression
 }
@@ -167,15 +191,20 @@ func (s *StatementReturn) check(b *Block) []error {
 }
 
 type StatementFor struct {
-	Pos       *Pos
-	Init      *Expression
-	Condition *Expression
-	Post      *Expression
-	Block     *Block
+	Num        int
+	BackPatchs [][]byte
+	LoopBegin  uint16
+	Pos        *Pos
+	Init       *Expression
+	Condition  *Expression
+	Post       *Expression
+	Block      *Block
 }
 
 func (s *StatementFor) check(block *Block) []error {
 	s.Block.inherite(block)
+	s.Block.InheritedAttribute.StatementFor = s
+	s.Block.InheritedAttribute.closed_is_for = true
 	errs := []error{}
 	if s.Init != nil {
 		_, es := s.Block.checkExpression(s.Init)
@@ -227,6 +256,7 @@ func (e ElseIfList) check(father *Block) []error {
 }
 
 type StatementIF struct {
+	BackPatchs [][]byte
 	Condition  *Expression
 	Block      *Block
 	ElseBlock  *Block

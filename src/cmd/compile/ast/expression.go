@@ -18,10 +18,16 @@ const (
 	//binary expression
 	EXPRESSION_TYPE_LOGICAL_OR
 	EXPRESSION_TYPE_LOGICAL_AND
+	//
 	EXPRESSION_TYPE_OR
 	EXPRESSION_TYPE_AND
 	EXPRESSION_TYPE_LEFT_SHIFT
 	EXPRESSION_TYPE_RIGHT_SHIFT
+	EXPRESSION_TYPE_ADD
+	EXPRESSION_TYPE_SUB
+	EXPRESSION_TYPE_MUL
+	EXPRESSION_TYPE_DIV
+	EXPRESSION_TYPE_MOD
 	//
 	EXPRESSION_TYPE_ASSIGN
 	EXPRESSION_TYPE_COLON_ASSIGN
@@ -39,11 +45,7 @@ const (
 	EXPRESSION_TYPE_LE
 	EXPRESSION_TYPE_LT
 	//
-	EXPRESSION_TYPE_ADD
-	EXPRESSION_TYPE_SUB
-	EXPRESSION_TYPE_MUL
-	EXPRESSION_TYPE_DIV
-	EXPRESSION_TYPE_MOD
+
 	//
 	EXPRESSION_TYPE_INDEX // a["b"]
 	EXPRESSION_TYPE_DOT   //a.b
@@ -112,10 +114,11 @@ func (e *Expression) typeName(typ ...int) string {
 }
 
 type Expression struct {
-	IsPublic bool // only used in top
-	Pos      *Pos
-	Typ      int
-	Data     interface{}
+	VariableType *VariableType
+	IsPublic     bool // only used in top
+	Pos          *Pos
+	Typ          int
+	Data         interface{}
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表
