@@ -13,7 +13,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength += 1
+		code.CodeLength++
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_BOOL:
 		if e.Data.(bool) {
@@ -21,9 +21,11 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_0
 		}
-		code.CodeLength += 1
+		code.CodeLength++
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_BYTE:
+		fallthrough
+	case ast.EXPRESSION_TYPE_INT:
 		value := e.Data.(byte)
 		if value == 0 {
 			code.Codes[code.CodeLength] = cg.OP_iconst_0
@@ -45,17 +47,17 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			code.CodeLength += 1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertIntConst(int32(value), code.Codes[code.CodeLength:])
+			class.InsertIntConst(int32(value), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxstack = 1
-	case ast.EXPRESSION_TYPE_INT:
-
 	case ast.EXPRESSION_TYPE_FLOAT:
-
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertFloatConst(float32(e.Data.(float64)), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.EXPRESSION_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst(e.Data.(string), code.Codes[1:3])
+		class.InsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_ARRAY: // []bool{false,true}
@@ -95,12 +97,17 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_MOD_ASSIGN:
 	//
 	case ast.EXPRESSION_TYPE_EQ:
+		fallthrough
 	case ast.EXPRESSION_TYPE_NE:
+		fallthrough
 	case ast.EXPRESSION_TYPE_GE:
+		fallthrough
 	case ast.EXPRESSION_TYPE_GT:
+		fallthrough
 	case ast.EXPRESSION_TYPE_LE:
+		fallthrough
 	case ast.EXPRESSION_TYPE_LT:
-	//
+		maxstack = m.buildRelations(class, code, e)
 
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
@@ -115,7 +122,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
 	//
 	case ast.EXPRESSION_TYPE_NEGATIVE:
+		fallthrough
 	case ast.EXPRESSION_TYPE_NOT:
+		m.buildUnary(class, code, e)
 	//
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 	case ast.EXPRESSION_TYPE_NEW:
@@ -128,27 +137,48 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	return
 }
 
-func (m *MakeExpression) tt2What(t1, t2 int) int {
-	if t1 == t2 {
-		return -1
+func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16) {
+	maxstack = 2
+	maxstack1, _, es := m.build(class, code, e.Data.(*ast.Expression)) // in case !(xxx && a())
+	if maxstack1 > maxstack {
+		maxstack = maxstack1
 	}
-	if t1 == ast.VARIABLE_TYPE_DOUBLE || t2 == ast.VARIABLE_TYPE_DOUBLE {
-		return ast.VARIABLE_TYPE_DOUBLE
+	backPatchEs(es, code)
+	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
+		switch e.VariableType.Typ {
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_ineg
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_fneg
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_dneg
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_lneg
+		}
+		code.CodeLength++
+		return
 	}
-	if t1 == ast.VARIABLE_TYPE_FLOAT || t2 == ast.VARIABLE_TYPE_FLOAT {
-		return ast.VARIABLE_TYPE_FLOAT
+	if e.Typ == ast.EXPRESSION_TYPE_NOT {
+
 	}
-	if t1 == ast.VARIABLE_TYPE_LONG || t2 == ast.VARIABLE_TYPE_LONG {
-		return ast.VARIABLE_TYPE_LONG
-	}
-	if t1 == ast.VARIABLE_TYPE_INT || t2 == ast.VARIABLE_TYPE_INT {
-		return ast.VARIABLE_TYPE_INT
-	}
-	if t1 == ast.VARIABLE_TYPE_SHORT || t2 == ast.VARIABLE_TYPE_SHORT {
-		return ast.VARIABLE_TYPE_SHORT
-	}
-	return -1
+
+	panic(2)
+	return
 }
+func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16) {
+	maxstack = 4
+	bin := e.Data.(*ast.ExpressionBinary)
+	maxstack1, _, _ := m.build(class, code, bin.Left)
+	if maxstack1 > maxstack {
+		maxstack = maxstack1
+	}
+
+}
+
 func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, slot2 bool, exits [][]byte) {
 	maxstack = 4
 	bin := e.Data.(*ast.ExpressionBinary)
@@ -157,12 +187,37 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		maxstack = maxstack1
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-
+		switch target {
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			fallthrough
+		case ast.VARIABLE_TYPE_FLOAT:
+			if e.Typ == ast.EXPRESSION_TYPE_AND {
+				code.Codes[code.CodeLength] = cg.OP_iand
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ior
+			}
+		case ast.VARIABLE_TYPE_DOUBLE:
+			fallthrough
+		case ast.VARIABLE_TYPE_LONG:
+			if e.Typ == ast.EXPRESSION_TYPE_AND {
+				code.Codes[code.CodeLength] = cg.OP_land
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_lor
+			}
+		default:
+			panic("~~~~~~~~~~~~")
+		}
+		code.CodeLength++
+		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_ADD || e.Typ == ast.EXPRESSION_TYPE_SUB || e.Typ == ast.EXPRESSION_TYPE_MUL ||
 		e.Typ == ast.EXPRESSION_TYPE_DIV || e.Typ == ast.EXPRESSION_TYPE_MOD {
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
-			panic(11)
+			panic(1)
 		}
 		//
 		target := m.tt2What(bin.Left.Typ, bin.Right.Typ)
@@ -176,8 +231,73 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if target > 0 {
 			m.primitiveConverter(code, bin.Right.Typ, target)
 		}
+		if target == -1 {
+			target = bin.Left.Typ
+		}
+		switch target {
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			switch e.Typ {
+			case ast.EXPRESSION_TYPE_ADD:
+				code.Codes[code.CodeLength] = cg.OP_iadd
+			case ast.EXPRESSION_TYPE_SUB:
+				code.Codes[code.CodeLength] = cg.OP_isub
+			case ast.EXPRESSION_TYPE_MUL:
+				code.Codes[code.CodeLength] = cg.OP_imul
+			case ast.EXPRESSION_TYPE_DIV:
+				code.Codes[code.CodeLength] = cg.OP_idiv
+			case ast.EXPRESSION_TYPE_MOD:
+				code.Codes[code.CodeLength] = cg.OP_irem
+			}
+			code.CodeLength++
+		case ast.VARIABLE_TYPE_FLOAT:
+			switch e.Typ {
+			case ast.EXPRESSION_TYPE_ADD:
+				code.Codes[code.CodeLength] = cg.OP_fadd
+			case ast.EXPRESSION_TYPE_SUB:
+				code.Codes[code.CodeLength] = cg.OP_fsub
+			case ast.EXPRESSION_TYPE_MUL:
+				code.Codes[code.CodeLength] = cg.OP_fmul
+			case ast.EXPRESSION_TYPE_DIV:
+				code.Codes[code.CodeLength] = cg.OP_fdiv
+			case ast.EXPRESSION_TYPE_MOD:
+				code.Codes[code.CodeLength] = cg.OP_frem
+			}
+			code.CodeLength++
+		case ast.VARIABLE_TYPE_DOUBLE:
+			switch e.Typ {
+			case ast.EXPRESSION_TYPE_ADD:
+				code.Codes[code.CodeLength] = cg.OP_dadd
+			case ast.EXPRESSION_TYPE_SUB:
+				code.Codes[code.CodeLength] = cg.OP_dsub
+			case ast.EXPRESSION_TYPE_MUL:
+				code.Codes[code.CodeLength] = cg.OP_dmul
+			case ast.EXPRESSION_TYPE_DIV:
+				code.Codes[code.CodeLength] = cg.OP_ddiv
+			case ast.EXPRESSION_TYPE_MOD:
+				code.Codes[code.CodeLength] = cg.OP_drem
+			}
+		case ast.VARIABLE_TYPE_LONG:
+			switch e.Typ {
+			case ast.EXPRESSION_TYPE_ADD:
+				code.Codes[code.CodeLength] = cg.OP_ladd
+			case ast.EXPRESSION_TYPE_SUB:
+				code.Codes[code.CodeLength] = cg.OP_lsub
+			case ast.EXPRESSION_TYPE_MUL:
+				code.Codes[code.CodeLength] = cg.OP_lmul
+			case ast.EXPRESSION_TYPE_DIV:
+				code.Codes[code.CodeLength] = cg.OP_ldiv
+			case ast.EXPRESSION_TYPE_MOD:
+				code.Codes[code.CodeLength] = cg.OP_lrem
+			}
+		default:
+			panic("~~~~~~~~~~~~")
 
-		panic("missing")
+		}
+		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack2, _, _ := m.build(class, code, bin.Right)
@@ -389,4 +509,26 @@ func (m *MakeExpression) primitiveConverter(code *cg.AttributeCode, typ int, tar
 	default:
 		panic(1)
 	}
+}
+
+func (m *MakeExpression) tt2What(t1, t2 int) int {
+	if t1 == t2 {
+		return -1
+	}
+	if t1 == ast.VARIABLE_TYPE_DOUBLE || t2 == ast.VARIABLE_TYPE_DOUBLE {
+		return ast.VARIABLE_TYPE_DOUBLE
+	}
+	if t1 == ast.VARIABLE_TYPE_FLOAT || t2 == ast.VARIABLE_TYPE_FLOAT {
+		return ast.VARIABLE_TYPE_FLOAT
+	}
+	if t1 == ast.VARIABLE_TYPE_LONG || t2 == ast.VARIABLE_TYPE_LONG {
+		return ast.VARIABLE_TYPE_LONG
+	}
+	if t1 == ast.VARIABLE_TYPE_INT || t2 == ast.VARIABLE_TYPE_INT {
+		return ast.VARIABLE_TYPE_INT
+	}
+	if t1 == ast.VARIABLE_TYPE_SHORT || t2 == ast.VARIABLE_TYPE_SHORT {
+		return ast.VARIABLE_TYPE_SHORT
+	}
+	return -1
 }
