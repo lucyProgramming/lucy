@@ -159,6 +159,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	//init
 	if s.Init != nil {
 		stack, slot2, es := m.MakeExpression.build(class, code, s.Init)
+		backPatchEs(es, code)
 		if slot2 {
 			code.Codes[code.CodeLength] = cg.OP_pop2
 		} else {
@@ -168,21 +169,25 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
-		backPatchEs(es, code)
 	}
 	s.LoopBegin = code.CodeLength
 	//condition
-	stack, _, es := m.MakeExpression.build(class, code, s.Init)
-	backPatchEs(es, code)
-	if stack > maxstack {
-		maxstack = stack
+	if s.Condition != nil {
+		stack, _, es := m.MakeExpression.build(class, code, s.Condition)
+		backPatchEs(es, code)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		code.Codes[code.CodeLength] = cg.OP_ifeq
+		appendBackPatch(&s.BackPatchs, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	} else {
+
 	}
-	code.Codes[code.CodeLength] = cg.OP_ifeq
-	appendBackPatch(&s.BackPatchs, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
 	m.buildBlock(class, code, s.Block, mkPath(path, fmt.Sprintf("for%d", s.Num)))
 	if s.Post != nil {
 		stack, slot2, es := m.MakeExpression.build(class, code, s.Init)
+		backPatchEs(es, code)
 		if slot2 {
 			code.Codes[code.CodeLength] = cg.OP_pop2
 		} else {
@@ -192,7 +197,6 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
-		backPatchEs(es, code)
 	}
 	code.Codes[code.CodeLength] = cg.OP_goto
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], s.LoopBegin)
