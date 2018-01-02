@@ -127,23 +127,104 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	}
 	return
 }
+func (m *MakeExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
+	switch typ {
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		code.Codes[code.CodeLength] = cg.OP_i2l
+		code.CodeLength++
+		return
+	case ast.VARIABLE_TYPE_FLOAT:
+		code.Codes[code.CodeLength] = cg.OP_f2l
+		code.CodeLength++
+		return
+	case ast.VARIABLE_TYPE_DOUBLE:
+		code.Codes[code.CodeLength] = cg.OP_d2l
+		code.CodeLength++
+		return
+	case ast.VARIABLE_TYPE_LONG:
+		return
+	default:
+		panic("~~~~~~~~~~~~")
+	}
+}
+func (m *MakeExpression) stackTop2Int(code *cg.AttributeCode, typ int) {
+	switch typ {
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		return
+	case ast.VARIABLE_TYPE_FLOAT:
+		code.Codes[code.CodeLength] = cg.OP_f2i
+		code.CodeLength++
+		return
+	case ast.VARIABLE_TYPE_DOUBLE:
+		code.Codes[code.CodeLength] = cg.OP_d2i
+		code.CodeLength++
+		return
+	case ast.VARIABLE_TYPE_LONG:
+		code.Codes[code.CodeLength] = cg.OP_l2i
+		CodeLength++
+		return
+	default:
+		panic("~~~~~~~~~~~~")
+	}
+}
 
 func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, slot2 bool, exits [][]byte) {
-	maxstack = 2
-	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack1, _, _ := m.build(class, code, bin.Left)
-	if maxstack1 > maxstack {
-		maxstack = maxstack1
-	}
-	maxstack2, _, _ := m.build(class, code, bin.Right)
-	if maxstack2 > maxstack {
-		maxstack = maxstack2
-	}
-
-	if e.Typ == ast.EXPRESSION_TYPE_LOGICAL_OR || e.Typ == ast.EXPRESSION_TYPE_LOGICAL_AND {
+	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
 
 	}
+	if e.Typ == ast.EXPRESSION_TYPE_ADD || e.Typ == ast.EXPRESSION_TYPE_SUB || e.Typ == ast.EXPRESSION_TYPE_MUL ||
+		e.Typ == ast.EXPRESSION_TYPE_DIV || e.Typ == ast.EXPRESSION_TYPE_MOD {
+		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
+			panic(11)
+		}
+		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_DOUBLE {
+			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_DOUBLE {
 
+			}
+		}
+		panic("missing")
+	}
+	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
+		maxstack = 4
+		bin := e.Data.(*ast.ExpressionBinary)
+		maxstack1, _, _ := m.build(class, code, bin.Left)
+		if maxstack1 > maxstack {
+			maxstack = maxstack1
+		}
+		maxstack2, _, _ := m.build(class, code, bin.Right)
+		if maxstack2 > maxstack {
+			maxstack = maxstack2
+		}
+		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_LONG { // long
+			if bin.Right.VariableType.Typ != VARIABLE_TYPE_LONG {
+				m.stackTop2Long(code, bin.Right.VariableType.Typ)
+			}
+			if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+				code.Codes[code.CodeLength] = cg.OP_lshl
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_lshr
+			}
+		} else { // int
+			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_INT {
+				m.stackTop2Int(code, bin.Right.VariableType.Typ)
+			}
+			if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+				code.Codes[code.CodeLength] = cg.OP_ishl
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ishr
+			}
+		}
+		code.CodeLength++
+		return
+	}
 	return
 }
 

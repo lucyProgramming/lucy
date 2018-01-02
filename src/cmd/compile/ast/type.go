@@ -170,10 +170,7 @@ func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
 	if t.Equal(comp) {
 		return true
 	}
-	if t.isInteger() && comp.isInteger() {
-		return true
-	}
-	if t.isFloat() && comp.isFloat() {
+	if t.IsNumber() && comp.IsNumber() {
 		return true
 	}
 	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
@@ -186,12 +183,12 @@ func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
 	check const if valid
 	number
 */
-func (t *VariableType) isNumber() bool {
-	return t.isInteger() || t.isFloat()
+func (t *VariableType) IsNumber() bool {
+	return t.IsInteger() || t.IsFloat()
 
 }
 
-func (t *VariableType) isInteger() bool {
+func (t *VariableType) IsInteger() bool {
 	return t.Typ == VARIABLE_TYPE_BYTE ||
 		t.Typ == VARIABLE_TYPE_SHORT ||
 		t.Typ == VARIABLE_TYPE_CHAR ||
@@ -202,22 +199,22 @@ func (t *VariableType) isInteger() bool {
 /*
 	float or double
 */
-func (t *VariableType) isFloat() bool {
+func (t *VariableType) IsFloat() bool {
 	return t.Typ == VARIABLE_TYPE_FLOAT || t.Typ == VARIABLE_TYPE_DOUBLE
 }
 
 func (v *VariableType) isPrimitive() bool {
-	return v.isNumber() || v.Typ == VARIABLE_TYPE_STRING || v.Typ == VARIABLE_TYPE_BOOL
+	return v.IsNumber() || v.Typ == VARIABLE_TYPE_STRING || v.Typ == VARIABLE_TYPE_BOOL
 }
 
 func (t *VariableType) constValueValid(e *Expression) (data interface{}, err error) {
 	//number type
-	if t.isNumber() {
-		if !t.isNumber() {
+	if t.IsNumber() {
+		if !t.IsNumber() {
 			err = fmt.Errorf("expression is not number")
 			return
 		}
-		if t.isFloat() {
+		if t.IsFloat() {
 			f := e.literalValue2Float64()
 			if t.Typ == VARIABLE_TYPE_FLOAT {
 				return float32(f), nil
@@ -305,11 +302,8 @@ func (v *VariableType) TypeString() string {
 }
 
 func (t1 *VariableType) Equal(t2 *VariableType) bool {
-	if t1.isPrimitive() && t2.isPrimitive() {
+	if t1.isPrimitive() || t2.isPrimitive() {
 		return t1.Typ == t2.Typ
-	}
-	if t1.Typ != t2.Typ {
-		return false
 	}
 	return t1.CombinationType.Equal(t2.CombinationType)
 }
