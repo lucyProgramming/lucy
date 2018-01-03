@@ -9,7 +9,7 @@ import (
 type MakeExpression struct {
 }
 
-func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool, exits [][]byte) {
+func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits [][]byte) {
 	exits = [][]byte{}
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
@@ -25,9 +25,10 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		code.CodeLength++
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_BYTE:
+		e.Data = int64(e.Data.(byte))
 		fallthrough
 	case ast.EXPRESSION_TYPE_INT:
-		value := e.Data.(byte)
+		value := e.Data.(int64)
 		if value == 0 {
 			code.Codes[code.CodeLength] = cg.OP_iconst_0
 			code.CodeLength += 1
@@ -46,6 +47,10 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		} else if value == 5 {
 			code.Codes[code.CodeLength] = cg.OP_iconst_5
 			code.CodeLength += 1
+		} else if -127 >= value && value <= 128 {
+			code.Codes[code.CodeLength] = cg.OP_bipush
+			code.Codes[code.CodeLength+1] = byte(value)
+			code.CodeLength += 2
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
 			class.InsertIntConst(int32(value), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -67,8 +72,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LOGICAL_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_LOGICAL_AND:
-		maxstack, exits = m.buildLogical(class, code, e)
-
+		maxstack, exits = m.buildLogical(class, code, e, context)
 	case ast.EXPRESSION_TYPE_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_AND:
@@ -86,8 +90,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD:
-		maxstack, slot2 = m.buildArithmetic(class, code, e)
-		return
+		maxstack = m.buildArithmetic(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
 
@@ -103,7 +106,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV_ASSIGN:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD_ASSIGN:
-
+		maxstack = m.buildOpAssign(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_EQ:
 		fallthrough
@@ -116,7 +119,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_LT:
-		maxstack = m.buildRelations(class, code, e)
+		maxstack = m.buildRelations(class, code, e, context)
 
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
@@ -132,43 +135,165 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_PRE_INCREMENT:
 		fallthrough
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
-		maxstack, slot2 = m.buildSelfIncrement(class, code, e)
+		maxstack = m.buildSelfIncrement(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NOT:
-		maxstack, slot2 = m.buildUnary(class, code, e)
+		maxstack = m.buildUnary(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
-
+		maxstack = m.buildIdentifer(class, code, e, context)
 	case ast.EXPRESSION_TYPE_NEW:
+
 	case ast.EXPRESSION_TYPE_LIST:
 	case ast.EXPRESSION_TYPE_FUNCTION:
 	case ast.EXPRESSION_TYPE_VAR:
-	case ast.EXPRESSION_TYPE_CONST:
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 	}
 	return
 }
-func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, stack uint16, op uint16, typ int) {
-	switch e.Typ {
-
+func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	maxstack = 1
+	return
+}
+func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	maxstack = 1
+	identifier := e.Data.(*ast.ExpressionIdentifer)
+	if identifier.Var.BeenCaptured {
+		panic("11111111")
+	} else {
+		switch identifier.Var.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			if identifier.Var.LocalValOffset == 0 {
+				code.Codes[code.CodeLength] = cg.OP_iload_0
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 1 {
+				code.Codes[code.CodeLength] = cg.OP_iload_1
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 2 {
+				code.Codes[code.CodeLength] = cg.OP_iload_2
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 3 {
+				code.Codes[code.CodeLength] = cg.OP_iload_3
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset < 255 {
+				code.Codes[code.CodeLength] = cg.OP_iload
+				code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
+				code.CodeLength += 2
+			} else {
+				panic("local int var out of range")
+			}
+		case ast.VARIABLE_TYPE_FLOAT:
+			if identifier.Var.LocalValOffset == 0 {
+				code.Codes[code.CodeLength] = cg.OP_fload_0
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 1 {
+				code.Codes[code.CodeLength] = cg.OP_fload_1
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 2 {
+				code.Codes[code.CodeLength] = cg.OP_fload_2
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 3 {
+				code.Codes[code.CodeLength] = cg.OP_fload_3
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset < 255 {
+				code.Codes[code.CodeLength] = cg.OP_fload
+				code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
+				code.CodeLength += 2
+			} else {
+				panic("local float var out of range")
+			}
+		case ast.VARIABLE_TYPE_DOUBLE:
+			if identifier.Var.LocalValOffset == 0 {
+				code.Codes[code.CodeLength] = cg.OP_dload_0
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 1 {
+				code.Codes[code.CodeLength] = cg.OP_dload_1
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 2 {
+				code.Codes[code.CodeLength] = cg.OP_dload_2
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 3 {
+				code.Codes[code.CodeLength] = cg.OP_dload_3
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset < 255 {
+				code.Codes[code.CodeLength] = cg.OP_dload
+				code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
+				code.CodeLength += 2
+			} else {
+				panic("local double var out of range")
+			}
+			maxstack = 2
+		case ast.VARIABLE_TYPE_LONG:
+			if identifier.Var.LocalValOffset == 0 {
+				code.Codes[code.CodeLength] = cg.OP_lload_0
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 1 {
+				code.Codes[code.CodeLength] = cg.OP_lload_1
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 2 {
+				code.Codes[code.CodeLength] = cg.OP_lload_2
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 3 {
+				code.Codes[code.CodeLength] = cg.OP_lload_3
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset < 255 {
+				code.Codes[code.CodeLength] = cg.OP_lload
+				code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
+				code.CodeLength += 2
+			} else {
+				panic("local double var out of range")
+			}
+			maxstack = 2
+		case ast.VARIABLE_TYPE_OBJECT:
+			if identifier.Var.LocalValOffset == 0 {
+				code.Codes[code.CodeLength] = cg.OP_aload_0
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 1 {
+				code.Codes[code.CodeLength] = cg.OP_aload_1
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 2 {
+				code.Codes[code.CodeLength] = cg.OP_aload_2
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset == 3 {
+				code.Codes[code.CodeLength] = cg.OP_aload_3
+				code.CodeLength++
+			} else if identifier.Var.LocalValOffset < 255 {
+				code.Codes[code.CodeLength] = cg.OP_aload
+				code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
+				code.CodeLength += 2
+			} else {
+				panic("local object var out of range")
+			}
+		}
 	}
 	return
 }
-func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool) {
-
+func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, left_value_type int, op uint16, target int) {
+	switch e.Typ {
+	case ast.EXPRESSION_TYPE_IDENTIFIER:
+		d := e.Data.(*ast.ExpressionIdentifer)
+	}
 	return
 }
-func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool) {
+func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	maxstack, _, op, target := m.buildLeftValue(class, code, e, context)
+	return
+}
+func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	//ee := e.Data.(*ast.Expression)
 	// m.leftValue(class, code, e)
 	return
 }
 
-func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool) {
+func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	maxstack = 2
-	maxstack1, _, es := m.build(class, code, e.Data.(*ast.Expression)) // in case !(xxx && a())
+	maxstack1, es := m.build(class, code, e.Data.(*ast.Expression), context) // in case !(xxx && a())
 	if maxstack1 > maxstack {
 		maxstack = maxstack1
 	}
@@ -202,19 +327,18 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 	return
 }
-func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16) {
+func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	maxstack = 4
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack1, _, _ := m.build(class, code, bin.Left)
+	maxstack1, _ := m.build(class, code, bin.Left, context)
 	if maxstack1 > maxstack {
 		maxstack = maxstack1
 	}
-
 	if bin.Left.VariableType.IsNumber() {
 		if bin.Left.VariableType.IsInteger() {
 			m.primitiveConverter(code, bin.Left.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
 		}
-		maxstack2, _, _ := m.build(class, code, bin.Left)
+		maxstack2, _ := m.build(class, code, bin.Left, context)
 		if maxstack2+2 > maxstack {
 			maxstack = maxstack2 + 2
 		}
@@ -232,15 +356,15 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, slot2 bool) {
+func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxstack = 4
-	maxstack1, _, _ := m.build(class, code, bin.Left)
+	maxstack1, _ := m.build(class, code, bin.Left, context)
 	if maxstack1 > maxstack {
 		maxstack = maxstack1
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		maxstack2, _, _ := m.build(class, code, bin.Right)
+		maxstack2, _ := m.build(class, code, bin.Right, context)
 		if maxstack2+2 > maxstack {
 			maxstack = maxstack2 + 2
 		}
@@ -265,7 +389,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lor
 			}
-			slot2 = true
 		default:
 			panic("~~~~~~~~~~~~")
 		}
@@ -282,7 +405,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if target > 0 {
 			m.primitiveConverter(code, bin.Left.Typ, target)
 		}
-		maxstack2, _, _ := m.build(class, code, bin.Right)
+		maxstack2, _ := m.build(class, code, bin.Right, context)
 		if maxstack2 > maxstack {
 			maxstack = maxstack2
 		}
@@ -338,7 +461,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_drem
 			}
-			slot2 = true
 		case ast.VARIABLE_TYPE_LONG:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -352,7 +474,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_lrem
 			}
-			slot2 = true
 		default:
 			panic("~~~~~~~~~~~~")
 
@@ -360,7 +481,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
-		maxstack2, _, _ := m.build(class, code, bin.Right)
+		maxstack2, _ := m.build(class, code, bin.Right, context)
 		if maxstack2+2 > maxstack {
 			maxstack = maxstack2 + 2
 		}
@@ -373,7 +494,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lshr
 			}
-			slot2 = true
 		} else { // int
 			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_INT {
 				m.stackTop2Int(code, bin.Right.VariableType.Typ)
@@ -390,19 +510,19 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	return
 }
 
-func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, exits [][]byte) {
+func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits [][]byte) {
 	exits = [][]byte{}
 	bin := e.Data.(*ast.ExpressionBinary)
 	var stack1, stack2 uint16
 	var exits1, exits2 [][]byte
-	stack1, _, exits1 = m.build(class, code, bin.Left)
+	stack1, exits1 = m.build(class, code, bin.Left, context)
 	exits = append(exits, exits1...)
 	if e.Typ == ast.EXPRESSION_TYPE_LOGICAL_OR {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.Codes[code.CodeLength+1] = cg.OP_ifge
 		exits = append(exits, code.Codes[code.CodeLength+2:])
 		code.CodeLength += 4
-		stack2, _, exits2 = m.build(class, code, bin.Right)
+		stack2, exits2 = m.build(class, code, bin.Right, context)
 		exits = append(exits, exits2...)
 	} else { //and
 

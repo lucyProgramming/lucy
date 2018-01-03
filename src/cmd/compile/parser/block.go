@@ -185,6 +185,7 @@ func (b *Block) parseExpressionStatement(block *ast.Block) {
 	if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
 	}
+	e.IsStatementExpression = true
 	block.Statements = append(block.Statements, &ast.Statement{
 		Typ:        ast.STATEMENT_TYPE_EXPRESSION,
 		Expression: e,

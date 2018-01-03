@@ -128,6 +128,7 @@ type Expression struct {
 	Pos          *Pos
 	Typ          int
 	Data         interface{}
+	IsStatementExpression bool
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

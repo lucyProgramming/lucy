@@ -6,4 +6,5 @@ import (
 
 type Context struct {
 	Vars map[string]*ast.VariableDefinition
+	Receiver *ast.VariableType
 }

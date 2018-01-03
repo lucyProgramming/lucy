@@ -111,15 +111,8 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	var maxstack uint16
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
-		var slot2 bool
 		var es [][]byte
-		maxstack, slot2, es = m.MakeExpression.build(class, code, s.Expression, context)
-		if slot2 {
-			code.Codes[code.CodeLength] = cg.OP_pop2
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_pop
-		}
-		code.CodeLength++
+		maxstack, es = m.MakeExpression.build(class, code, s.Expression, context)
 		backPatchEs(es, code)
 	case ast.STATEMENT_TYPE_IF:
 		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, path)
@@ -164,7 +157,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	return
 }
 func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context, path string) (maxstack uint16) {
-	stack, _, es := m.MakeExpression.build(class, code, s.Condition, context)
+	stack, es := m.MakeExpression.build(class, code, s.Condition, context)
 	backPatchEs(es, code)
 	if stack > maxstack {
 		maxstack = stack
@@ -175,7 +168,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	m.buildBlock(class, code, s.Block, context, path)
 	for _, v := range s.ElseIfList {
 		backPatchEs([][]byte{falseExit}, code)
-		stack, _, es := m.MakeExpression.build(class, code, v.Condition, context)
+		stack, es := m.MakeExpression.build(class, code, v.Condition, context)
 		backPatchEs(es, code)
 		if stack > maxstack {
 			maxstack = stack
@@ -199,14 +192,8 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, path string) (maxstack uint16) {
 	//init
 	if s.Init != nil {
-		stack, slot2, es := m.MakeExpression.build(class, code, s.Init, context)
+		stack, es := m.MakeExpression.build(class, code, s.Init, context)
 		backPatchEs(es, code)
-		if slot2 {
-			code.Codes[code.CodeLength] = cg.OP_pop2
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_pop
-		}
-		code.CodeLength++
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -214,7 +201,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	s.LoopBegin = code.CodeLength
 	//condition
 	if s.Condition != nil {
-		stack, _, es := m.MakeExpression.build(class, code, s.Condition, context)
+		stack, es := m.MakeExpression.build(class, code, s.Condition, context)
 		backPatchEs(es, code)
 		if stack > maxstack {
 			maxstack = stack
@@ -225,16 +212,10 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	} else {
 
 	}
-	m.buildBlock(class, code, s.Block, mkPath(path, fmt.Sprintf("for%d", s.Num)))
+	m.buildBlock(class, code, s.Block, context, mkPath(path, fmt.Sprintf("for%d", s.Num)))
 	if s.Post != nil {
-		stack, slot2, es := m.MakeExpression.build(class, code, s.Init, context)
+		stack, es := m.MakeExpression.build(class, code, s.Init, context)
 		backPatchEs(es, code)
-		if slot2 {
-			code.Codes[code.CodeLength] = cg.OP_pop2
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_pop
-		}
-		code.CodeLength++
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -256,7 +237,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if len(s.Expressions) != 1 {
 			panic("this is not happening")
 		}
-		stack, _, es := m.MakeExpression.build(class, code, s.Expressions[0], context)
+		stack, es := m.MakeExpression.build(class, code, s.Expressions[0], context)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -273,7 +254,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_ireturn
 		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_ireturn
+			code.Codes[code.CodeLength] = cg.OP_lreturn
 		case ast.VARIABLE_TYPE_FLOAT:
 			code.Codes[code.CodeLength] = cg.OP_freturn
 		case ast.VARIABLE_TYPE_DOUBLE:
