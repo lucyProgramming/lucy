@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"encoding/binary"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -8,7 +9,7 @@ import (
 type MakeExpression struct {
 }
 
-func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, slot2 bool, exits [][]byte) {
+func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool, exits [][]byte) {
 	exits = [][]byte{}
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
@@ -67,7 +68,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		fallthrough
 	case ast.EXPRESSION_TYPE_LOGICAL_AND:
 		maxstack, exits = m.buildLogical(class, code, e)
-		return
+
 	case ast.EXPRESSION_TYPE_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_AND:
@@ -85,16 +86,24 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD:
-		return m.buildArithmetic(class, code, e)
+		maxstack, slot2 = m.buildArithmetic(class, code, e)
+		return
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
+
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
+
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
+		fallthrough
 	case ast.EXPRESSION_TYPE_MINUS_ASSIGN:
+		fallthrough
 	case ast.EXPRESSION_TYPE_MUL_ASSIGN:
+		fallthrough
 	case ast.EXPRESSION_TYPE_DIV_ASSIGN:
+		fallthrough
 	case ast.EXPRESSION_TYPE_MOD_ASSIGN:
+
 	//
 	case ast.EXPRESSION_TYPE_EQ:
 		fallthrough
@@ -117,16 +126,21 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_FUNCTION_CALL:
 	//
 	case ast.EXPRESSION_TYPE_INCREMENT:
+		fallthrough
 	case ast.EXPRESSION_TYPE_DECREMENT:
+		fallthrough
 	case ast.EXPRESSION_TYPE_PRE_INCREMENT:
+		fallthrough
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
+		maxstack, slot2 = m.buildSelfIncrement(class, code, e)
 	//
 	case ast.EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NOT:
-		m.buildUnary(class, code, e)
+		maxstack, slot2 = m.buildUnary(class, code, e)
 	//
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
+
 	case ast.EXPRESSION_TYPE_NEW:
 	case ast.EXPRESSION_TYPE_LIST:
 	case ast.EXPRESSION_TYPE_FUNCTION:
@@ -136,8 +150,23 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	}
 	return
 }
+func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, stack uint16, op uint16, typ int) {
+	switch e.Typ {
 
-func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16) {
+	}
+	return
+}
+func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool) {
+
+	return
+}
+func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool) {
+	//ee := e.Data.(*ast.Expression)
+	// m.leftValue(class, code, e)
+	return
+}
+
+func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, slot2 bool) {
 	maxstack = 2
 	maxstack1, _, es := m.build(class, code, e.Data.(*ast.Expression)) // in case !(xxx && a())
 	if maxstack1 > maxstack {
@@ -163,10 +192,14 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_NOT {
-
+		code.Codes[code.CodeLength] = cg.OP_ifne                                      // length 1
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7) // length 2
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_1                                // length 1
+		code.Codes[code.CodeLength+4] = cg.OP_goto                                    // length 1
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8) // length 2
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_0                                // length 1
+		return
 	}
-
-	panic(2)
 	return
 }
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16) {
@@ -177,17 +210,41 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		maxstack = maxstack1
 	}
 
+	if bin.Left.VariableType.IsNumber() {
+		if bin.Left.VariableType.IsInteger() {
+			m.primitiveConverter(code, bin.Left.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
+		}
+		maxstack2, _, _ := m.build(class, code, bin.Left)
+		if maxstack2+2 > maxstack {
+			maxstack = maxstack2 + 2
+		}
+		if bin.Right.VariableType.IsInteger() {
+			m.primitiveConverter(code, bin.Right.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
+		}
+
+		return
+	}
+	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL {
+
+		return
+	}
+	panic(1)
+	return
 }
 
-func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, slot2 bool, exits [][]byte) {
-	maxstack = 4
+func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression) (maxstack uint16, slot2 bool) {
 	bin := e.Data.(*ast.ExpressionBinary)
+	maxstack = 4
 	maxstack1, _, _ := m.build(class, code, bin.Left)
 	if maxstack1 > maxstack {
 		maxstack = maxstack1
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		switch target {
+		maxstack2, _, _ := m.build(class, code, bin.Right)
+		if maxstack2+2 > maxstack {
+			maxstack = maxstack2 + 2
+		}
+		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -208,6 +265,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lor
 			}
+			slot2 = true
 		default:
 			panic("~~~~~~~~~~~~")
 		}
@@ -280,6 +338,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_drem
 			}
+			slot2 = true
 		case ast.VARIABLE_TYPE_LONG:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -293,6 +352,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_lrem
 			}
+			slot2 = true
 		default:
 			panic("~~~~~~~~~~~~")
 
@@ -301,8 +361,8 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack2, _, _ := m.build(class, code, bin.Right)
-		if maxstack2 > maxstack {
-			maxstack = maxstack2
+		if maxstack2+2 > maxstack {
+			maxstack = maxstack2 + 2
 		}
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_LONG { // long
 			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_LONG {
@@ -313,6 +373,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lshr
 			}
+			slot2 = true
 		} else { // int
 			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_INT {
 				m.stackTop2Int(code, bin.Right.VariableType.Typ)
@@ -453,7 +514,7 @@ func (m *MakeExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_i2l
 		code.CodeLength++
-		return
+
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_f2l
 		code.CodeLength++
@@ -477,13 +538,16 @@ func (m *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_i2d
 		code.CodeLength++
+
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_f2d
 		code.CodeLength++
+
 	case ast.VARIABLE_TYPE_DOUBLE:
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2d
 		code.CodeLength++
+
 	default:
 		panic("~~~~~~~~~~~~")
 	}

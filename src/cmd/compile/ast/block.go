@@ -19,7 +19,6 @@ type Block struct {
 	InheritedAttribute InheritedAttribute
 	Statements         []*Statement
 	Vars               map[string]*VariableDefinition
-	LocalVars          []string
 }
 
 func (b *Block) searchByName(name string) (interface{}, error) {
@@ -293,7 +292,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
 		b.Vars[name] = d.(*VariableDefinition)
-		b.LocalVars = append(b.LocalVars, name)
 	case *Enum:
 		e := d.(*Enum)
 		b.Enums[name] = e

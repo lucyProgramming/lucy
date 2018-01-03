@@ -1,6 +1,7 @@
 package cg
 
 type ClassHighLevel struct {
+	InnerClasss  []*ClassHighLevel
 	AccessFlags  uint16
 	IntConsts    map[int32][][]byte
 	LongConsts   map[int64][][]byte
@@ -72,8 +73,9 @@ type FiledHighLevel struct {
 	FieldInfo
 }
 type MethodHighLevel struct {
-	Name       string
-	Descriptor string
+	ClassHighLevel *ClassHighLevel
+	Name           string
+	Descriptor     string
 	MethodInfo
 	Code AttributeCode
 }

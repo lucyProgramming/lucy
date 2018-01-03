@@ -67,41 +67,53 @@ func (m *MakeClass) mkFuncs() {
 
 func (m *MakeClass) mkFunc(f *ast.Function, path string) {
 	if f.IsGlobal || f.Typ.ClosureVars == nil || len(f.Typ.ClosureVars) == 0 {
-		m.mkFuncStaticMethodMode(f, path)
-	} else {
-		m.mkFuncClassMode(f, path)
+		context := &Context{}
+		method := m.buildFunction(m.mainclass, f, context, true, path)
+		m.mainclass.Methods[method.Name] = []*cg.MethodHighLevel{method}
+		method.AccessFlags = 0
+		if method.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 {
+			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		}
+		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		method.AccessFlags |= cg.ACC_METHOD_FINAL
+		method.ClassHighLevel = m.mainclass
+		return
 	}
+	context := &Context{}
+	class := m.mkClosureFunctionClass()
+	m.buildFunction(class, f, context, false, path)
 }
 
-func (m *MakeClass) mkFuncStaticMethodMode(f *ast.Function, path string) *cg.MethodHighLevel {
+func (m *MakeClass) mkClosureFunctionClass() *cg.ClassHighLevel {
+	ret := &cg.ClassHighLevel{}
+	ret.AccessFlags = cg.ACC_CLASS_FINAL
+	return ret
+}
+func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, f *ast.Function, context *Context, isstatic bool, path string) *cg.MethodHighLevel {
 	ret := &cg.MethodHighLevel{}
-	ret.AccessFlags = 0
-	if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 {
-		ret.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	}
-	ret.AccessFlags |= cg.ACC_METHOD_STATIC
-	ret.AccessFlags |= cg.ACC_METHOD_FINAL
 	ret.Name = mkPath(path, f.Name)
+	f.Method = ret
 	ret.Code.Codes = make([]byte, 65536)
-	m.buildBlock(m.mainclass, &ret.Code, f.Block, ret.Name)
+	ret.Code.CodeLength = 0
+	m.buildBlock(class, &ret.Code, f.Block, context, ret.Name)
 	ret.Descriptor = f.Descriptor
 	return ret
 }
 
-func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, path string) {
+func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, path string) {
 	for _, s := range b.Statements {
-		m.buildStatement(class, code, s, path)
+		m.buildStatement(class, code, s, context, path)
 	}
 	return
 }
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, path string) {
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context, path string) {
 	var maxstack uint16
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		var slot2 bool
 		var es [][]byte
-		maxstack, slot2, es = m.MakeExpression.build(class, code, s.Expression)
+		maxstack, slot2, es = m.MakeExpression.build(class, code, s.Expression, context)
 		if slot2 {
 			code.Codes[code.CodeLength] = cg.OP_pop2
 		} else {
@@ -110,15 +122,15 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		code.CodeLength++
 		backPatchEs(es, code)
 	case ast.STATEMENT_TYPE_IF:
-		maxstack = m.buildIfStatement(class, code, s.StatementIf, path)
+		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, path)
 		if maxstack > code.MaxStack {
 			code.MaxStack = maxstack
 		}
 		backPatchEs(s.StatementIf.BackPatchs, code)
 	case ast.STATEMENT_TYPE_BLOCK:
-		m.buildBlock(class, code, s.Block, path)
+		m.buildBlock(class, code, s.Block, context, path)
 	case ast.STATEMENT_TYPE_FOR:
-		maxstack = m.buildForStatement(class, code, s.StatementFor, path)
+		maxstack = m.buildForStatement(class, code, s.StatementFor, context, path)
 		if maxstack > code.MaxStack {
 			code.MaxStack = maxstack
 		}
@@ -136,12 +148,12 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		}
 		code.CodeLength += 3
 	case ast.STATEMENT_TYPE_RETURN:
-		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, path)
+		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, path)
 		if maxstack > code.MaxStack {
 			code.MaxStack = maxstack
 		}
 	case ast.STATEMENT_TYPE_SWITCH:
-		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, path)
+		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, path)
 		if maxstack > code.MaxStack {
 			code.MaxStack = maxstack
 		}
@@ -151,14 +163,43 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	}
 	return
 }
-func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, path string) (maxstack uint16) {
+func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context, path string) (maxstack uint16) {
+	stack, _, es := m.MakeExpression.build(class, code, s.Condition, context)
+	backPatchEs(es, code)
+	if stack > maxstack {
+		maxstack = stack
+	}
+	code.Codes[code.CodeLength] = cg.OP_ifeq
+	falseExit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
+	code.CodeLength += 3
+	m.buildBlock(class, code, s.Block, context, path)
+	for _, v := range s.ElseIfList {
+		backPatchEs([][]byte{falseExit}, code)
+		stack, _, es := m.MakeExpression.build(class, code, v.Condition, context)
+		backPatchEs(es, code)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		code.Codes[code.CodeLength] = cg.OP_ifeq
+		falseExit = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+		code.CodeLength += 3
+		m.buildBlock(class, code, v.Block, context, path)
+	}
+	if s.ElseBlock != nil {
+		backPatchEs([][]byte{falseExit}, code)
+		falseExit = nil
+		m.buildBlock(class, code, s.ElseBlock, context, path)
+	}
+	if falseExit != nil {
+		backPatchEs([][]byte{falseExit}, code)
+	}
 	return
 }
 
-func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, path string) (maxstack uint16) {
+func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, path string) (maxstack uint16) {
 	//init
 	if s.Init != nil {
-		stack, slot2, es := m.MakeExpression.build(class, code, s.Init)
+		stack, slot2, es := m.MakeExpression.build(class, code, s.Init, context)
 		backPatchEs(es, code)
 		if slot2 {
 			code.Codes[code.CodeLength] = cg.OP_pop2
@@ -173,7 +214,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	s.LoopBegin = code.CodeLength
 	//condition
 	if s.Condition != nil {
-		stack, _, es := m.MakeExpression.build(class, code, s.Condition)
+		stack, _, es := m.MakeExpression.build(class, code, s.Condition, context)
 		backPatchEs(es, code)
 		if stack > maxstack {
 			maxstack = stack
@@ -186,7 +227,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	}
 	m.buildBlock(class, code, s.Block, mkPath(path, fmt.Sprintf("for%d", s.Num)))
 	if s.Post != nil {
-		stack, slot2, es := m.MakeExpression.build(class, code, s.Init)
+		stack, slot2, es := m.MakeExpression.build(class, code, s.Init, context)
 		backPatchEs(es, code)
 		if slot2 {
 			code.Codes[code.CodeLength] = cg.OP_pop2
@@ -204,10 +245,10 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	return
 }
 
-func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, path string) (maxstack uint16) {
+func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context, path string) (maxstack uint16) {
 	return
 }
-func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, path string) (maxstack uint16) {
+func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context, path string) (maxstack uint16) {
 	if len(s.Function.Typ.Returns) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
@@ -215,7 +256,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if len(s.Expressions) != 1 {
 			panic("this is not happening")
 		}
-		stack, _, es := m.MakeExpression.build(class, code, s.Expressions[0])
+		stack, _, es := m.MakeExpression.build(class, code, s.Expressions[0], context)
 		if stack > maxstack {
 			maxstack = stack
 		}

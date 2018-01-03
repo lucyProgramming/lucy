@@ -20,6 +20,10 @@ func appendBackPatch(p *[][]byte, b []byte) {
 		*p = append(*p, b)
 	}
 }
+
+/*
+	backpatch exits
+*/
 func backPatchEs(es [][]byte, code *cg.AttributeCode) {
 	for _, v := range es {
 		binary.BigEndian.PutUint16(v, code.CodeLength)

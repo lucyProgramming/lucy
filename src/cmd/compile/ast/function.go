@@ -2,7 +2,7 @@ package ast
 
 import (
 	"fmt"
-
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
@@ -18,6 +18,7 @@ func oneAnyTypeParameterChecker(errs *[]error, args []*VariableType, pos *Pos) {
 }
 
 type Function struct {
+	Method   *cg.MethodHighLevel
 	IsGlobal bool
 	FunctionBuildProperty
 	Isbuildin    bool
