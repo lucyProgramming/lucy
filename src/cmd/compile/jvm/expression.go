@@ -120,9 +120,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		fallthrough
 	case ast.EXPRESSION_TYPE_LT:
 		maxstack = m.buildRelations(class, code, e, context)
-
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
+
 	case ast.EXPRESSION_TYPE_DOT:
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:
@@ -153,18 +153,108 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	}
 	return
 }
+
+func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	index := e.Data.(*ast.ExpressionIndex)
+	maxstack = 2
+	stack, _ := m.build(class, code, index.Expression, context)
+	if stack > maxstack {
+		maxstack = stack
+	}
+	switch index.Expression.VariableType.Typ {
+	case ast.VARIABLE_TYPE_OBJECT:
+
+	}
+	return
+}
+func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	maxstack = 2
+	index := e.Data.(*ast.ExpressionIndex)
+	stack, _ := m.build(class, code, index.Expression, context)
+	if stack > maxstack {
+		maxstack = stack
+	}
+	stack, _ = m.build(class, code, index.Expression, context)
+	if stack+2 > maxstack {
+		maxstack = stack + 2
+	}
+	switch e.VariableType.Typ {
+	case ast.VARIABLE_TYPE_BOOL:
+		fallthrough
+	case ast.VARIABLE_TYPE_BYTE:
+		code.Codes[code.CodeLength] = cg.OP_baload
+	case ast.VARIABLE_TYPE_SHORT:
+		code.Codes[code.CodeLength] = cg.OP_saload
+	case ast.VARIABLE_TYPE_INT:
+		code.Codes[code.CodeLength] = cg.OP_iaload
+	case ast.VARIABLE_TYPE_LONG:
+		code.Codes[code.CodeLength] = cg.OP_laload
+	case ast.VARIABLE_TYPE_FLOAT:
+		code.Codes[code.CodeLength] = cg.OP_faload
+	case ast.VARIABLE_TYPE_DOUBLE:
+		code.Codes[code.CodeLength] = cg.OP_daload
+	case ast.VARIABLE_TYPE_STRING:
+		panic(1)
+	case ast.VARIABLE_TYPE_OBJECT:
+		code.Codes[code.CodeLength] = cg.OP_aaload
+	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+		code.Codes[code.CodeLength] = cg.OP_aaload
+	}
+	code.CodeLength++
+	return
+}
+
 func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	maxstack = 1
 	return
 }
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack = 1
 	identifier := e.Data.(*ast.ExpressionIdentifer)
 	if identifier.Var.BeenCaptured {
-		panic("11111111")
-	} else {
-		switch identifier.Var.Typ {
+		if identifier.Var.LocalValOffset == 0 {
+			code.Codes[code.CodeLength] = cg.OP_aload_0
+			code.CodeLength++
+		} else if identifier.Var.LocalValOffset == 1 {
+			code.Codes[code.CodeLength] = cg.OP_aload_1
+			code.CodeLength++
+		} else if identifier.Var.LocalValOffset == 2 {
+			code.Codes[code.CodeLength] = cg.OP_aload_2
+			code.CodeLength++
+		} else if identifier.Var.LocalValOffset == 3 {
+			code.Codes[code.CodeLength] = cg.OP_aload_3
+			code.CodeLength++
+		} else if identifier.Var.LocalValOffset < 255 {
+			code.Codes[code.CodeLength] = cg.OP_aload
+			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
+			code.CodeLength += 2
+		} else {
+			panic("local object var out of range")
+		}
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		switch identifier.Var.Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_BYTE:
+			code.Codes[code.CodeLength+1] = cg.OP_baload
+		case ast.VARIABLE_TYPE_SHORT:
+			code.Codes[code.CodeLength+1] = cg.OP_saload
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength+1] = cg.OP_iaload
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength+1] = cg.OP_faload
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength+1] = cg.OP_daload
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength+1] = cg.OP_laload
+		case ast.VARIABLE_TYPE_OBJECT:
+			code.Codes[code.CodeLength+1] = cg.OP_aaload
+		}
+		code.CodeLength += 2
+	} else {
+		switch identifier.Var.Typ.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
@@ -274,15 +364,116 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 	}
 	return
 }
-func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, left_value_type int, op uint16, target int) {
+
+func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, left_value_type int, op []byte, target *ast.VariableType) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
-		d := e.Data.(*ast.ExpressionIdentifer)
+		identifier := e.Data.(*ast.ExpressionIdentifer)
+		if identifier.Var.BeenCaptured {
+			panic(1)
+		} else {
+			switch identifier.Var.Typ.Typ {
+			case ast.VARIABLE_TYPE_BOOL:
+				fallthrough
+			case ast.VARIABLE_TYPE_BYTE:
+				fallthrough
+			case ast.VARIABLE_TYPE_SHORT:
+				fallthrough
+			case ast.VARIABLE_TYPE_INT:
+				if identifier.Var.LocalValOffset == 0 {
+					op = []byte{cg.OP_istore_0}
+				} else if identifier.Var.LocalValOffset == 1 {
+					op = []byte{cg.OP_istore_1}
+				} else if identifier.Var.LocalValOffset == 2 {
+					op = []byte{cg.OP_istore_2}
+				} else if identifier.Var.LocalValOffset == 3 {
+					op = []byte{cg.OP_istore_3}
+				} else if identifier.Var.LocalValOffset <= 255 {
+					op = []byte{cg.OP_istore, byte(identifier.Var.LocalValOffset)}
+				} else {
+					panic("local int var out of range")
+				}
+			case ast.VARIABLE_TYPE_FLOAT:
+				if identifier.Var.LocalValOffset == 0 {
+					op = []byte{cg.OP_fstore_0}
+				} else if identifier.Var.LocalValOffset == 1 {
+					op = []byte{cg.OP_fstore_1}
+				} else if identifier.Var.LocalValOffset == 2 {
+					op = []byte{cg.OP_fstore_2}
+				} else if identifier.Var.LocalValOffset == 3 {
+					op = []byte{cg.OP_fstore_3}
+				} else if identifier.Var.LocalValOffset <= 255 {
+					op = []byte{cg.OP_fstore, identifier.Var.LocalValOffset}
+				} else {
+					panic("local float var out of range")
+				}
+			case ast.VARIABLE_TYPE_DOUBLE:
+				if identifier.Var.LocalValOffset == 0 {
+					op = []byte{cg.OP_dstore_0}
+				} else if identifier.Var.LocalValOffset == 1 {
+					op = []byte{cg.OP_dstore_1}
+				} else if identifier.Var.LocalValOffset == 2 {
+					op = []byte{cg.OP_dstore_2}
+				} else if identifier.Var.LocalValOffset == 3 {
+					op = []byte{cg.OP_dstore_3}
+				} else if identifier.Var.LocalValOffset <= 255 {
+					op = []byte{cg.OP_dstore, identifier.Var.LocalValOffset}
+				} else {
+					panic("local float var out of range")
+				}
+			case ast.VARIABLE_TYPE_LONG:
+				if identifier.Var.LocalValOffset == 0 {
+					op = []byte{cg.OP_lstore_0}
+				} else if identifier.Var.LocalValOffset == 1 {
+					op = []byte{cg.OP_lstore_1}
+				} else if identifier.Var.LocalValOffset == 2 {
+					op = []byte{cg.OP_lstore_2}
+				} else if identifier.Var.LocalValOffset == 3 {
+					op = []byte{cg.OP_lstore_3}
+				} else if identifier.Var.LocalValOffset <= 255 {
+					op = []byte{cg.OP_lstore, identifier.Var.LocalValOffset}
+				} else {
+					panic("local float var out of range")
+				}
+			}
+			target = identifier.Var.Typ
+		}
+	case ast.EXPRESSION_TYPE_INDEX:
+		maxstack = 2
+		index := e.Data.(*ast.ExpressionIndex)
+		stack, _ := m.build(class, code, index.Expression, context)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		stack, _ = m.build(class, code, index.Index, context)
+		if stack+2 > maxstack {
+			maxstack = stack + 2
+		}
+		switch e.VariableType.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_BYTE:
+			op = []byte{cg.OP_bastore}
+		case ast.VARIABLE_TYPE_SHORT:
+			op = []byte{cg.OP_sastore}
+		case ast.VARIABLE_TYPE_INT:
+			op = []byte{cg.OP_iastore}
+		case ast.VARIABLE_TYPE_FLOAT:
+			op = []byte{cg.OP_fastore}
+		case ast.VARIABLE_TYPE_DOUBLE:
+			op = []byte{cg.OP_dastore}
+		case ast.VARIABLE_TYPE_LONG:
+			op = []byte{cg.OP_lastore}
+		}
+	case ast.EXPRESSION_TYPE_DOT:
+
+	default:
+		panic(2)
 	}
 	return
 }
 func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack, _, op, target := m.buildLeftValue(class, code, e, context)
+	//maxstack, _, op, target := m.buildLeftValue(class, code, e, context)
 	return
 }
 func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {

@@ -1,6 +1,7 @@
 package cg
 
 type ClassHighLevel struct {
+	MainClass    *ClassHighLevel
 	InnerClasss  []*ClassHighLevel
 	AccessFlags  uint16
 	IntConsts    map[int32][][]byte
@@ -68,11 +69,13 @@ func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 }
 
 type FiledHighLevel struct {
+	BackPatchs [][]byte
 	Name       string
 	Descriptor string
 	FieldInfo
 }
 type MethodHighLevel struct {
+	BackPatchs     [][]byte
 	ClassHighLevel *ClassHighLevel
 	Name           string
 	Descriptor     string

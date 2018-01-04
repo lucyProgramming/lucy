@@ -3,7 +3,7 @@ package ast
 import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 
 type VariableDefinition struct {
-	LocalValOffset      uint16
+	LocalValOffset      byte
 	IsGlobal            bool
 	BeenCaptured        bool
 	isFunctionParameter bool

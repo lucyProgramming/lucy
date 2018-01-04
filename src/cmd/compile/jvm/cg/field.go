@@ -14,8 +14,8 @@ const (
 
 type FieldInfo struct {
 	AccessFlags     uint16
-	nameIndex       uint16
-	descriptorIndex uint16
+	NameIndex       uint16
+	DescriptorIndex uint16
 	attributeCount  uint16
 	Attributes      []*AttributeInfo
 }

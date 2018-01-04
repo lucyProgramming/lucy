@@ -198,12 +198,12 @@ func (c *Class) writeFields() error {
 		if err != nil {
 			return err
 		}
-		binary.BigEndian.PutUint16(bs2, uint16(v.nameIndex))
+		binary.BigEndian.PutUint16(bs2, uint16(v.NameIndex))
 		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
 		}
-		binary.BigEndian.PutUint16(bs2, uint16(v.descriptorIndex))
+		binary.BigEndian.PutUint16(bs2, uint16(v.DescriptorIndex))
 		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
