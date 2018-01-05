@@ -73,14 +73,14 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 					b.InheritedAttribute.function.ClosureVars = make(map[string]*VariableDefinition)
 				}
 				b.InheritedAttribute.function.ClosureVars[name] = v
-				v.BeenCaptured = true
+				v.BeenCaptured++
 			}
 			if b.InheritedAttribute.class != nil && b.IsClassBlock && b.InheritedAttribute.class.IsGlobal == false {
 				if b.InheritedAttribute.class.ClosureVars == nil {
 					b.InheritedAttribute.class.ClosureVars = make(map[string]*VariableDefinition)
 				}
 				b.InheritedAttribute.class.ClosureVars[name] = t.(*VariableDefinition)
-				v.BeenCaptured = true
+				v.BeenCaptured++
 			}
 		}
 	}

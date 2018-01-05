@@ -161,7 +161,7 @@ const (
 	OP_ifgt            byte = 0x9d //当栈顶 int 型数值大于 0 时跳转。
 	OP_ifle            byte = 0x9e //当栈顶 int 型数值小于等于 0 时跳转。
 	OP_if_icmpeq       byte = 0x9f //比较栈顶两 int 型数值大小，当结果等于 0 时跳转。
-	OP_if_icmpne       byte = 0xa0 // 比较栈顶两 int 型数值大小，当结果不等于 0 时跳转。
+	OP_if_icmpne       byte = 0xa0 //比较栈顶两 int 型数值大小，当结果不等于 0 时跳转。
 	OP_if_icmplt       byte = 0xa1 //比较栈顶两 int 型数值大小，当结果小于 0 时跳转。
 	OP_if_icmpge       byte = 0xa2 //比较栈顶两 int 型数值大小，当结果大于等于 0 时跳转。
 	OP_if_icmpgt       byte = 0xa3 //比较栈顶两 int 型数值大小，当结果大于 0 时跳转

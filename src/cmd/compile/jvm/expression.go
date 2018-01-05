@@ -3,6 +3,7 @@ package jvm
 import (
 	"encoding/binary"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/common"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -51,6 +52,11 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			code.Codes[code.CodeLength] = cg.OP_bipush
 			code.Codes[code.CodeLength+1] = byte(value)
 			code.CodeLength += 2
+		} else if -32768 <= value && 32767 >= value {
+			code.Codes[code.CodeLength] = cg.OP_sipush
+			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
+			code.Codes[code.CodeLength+2] = byte(value)
+			code.CodeLength += 3
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
 			class.InsertIntConst(int32(value), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -58,9 +64,20 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_FLOAT:
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertFloatConst(float32(e.Data.(float64)), code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		if common.Float64Equal(e.Data.(float64), 0.0) {
+			code.Codes[code.CodeLength] = cg.OP_fconst_0
+			code.CodeLength++
+		} else if common.Float64Equal(e.Data.(float64), 1.0) {
+			code.Codes[code.CodeLength] = cg.OP_fconst_1
+			code.CodeLength++
+		} else if common.Float64Equal(e.Data.(float64), 2.0) {
+			code.Codes[code.CodeLength] = cg.OP_fconst_2
+			code.CodeLength++
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertFloatConst(float32(e.Data.(float64)), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
 	case ast.EXPRESSION_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		class.InsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -94,6 +111,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
+
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -222,7 +240,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
-	if identifier.Var.BeenCaptured {
+	if identifier.Var.BeenCaptured > 0 {
 		if identifier.Var.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_aload_0
 			code.CodeLength++
@@ -381,7 +399,7 @@ func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.Attri
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifer)
-		if identifier.Var.BeenCaptured {
+		if identifier.Var.BeenCaptured > 0 {
 			panic(1)
 		} else {
 			switch identifier.Var.Typ.Typ {
@@ -526,40 +544,150 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength+4] = cg.OP_goto                                    // length 1
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8) // length 2
 		code.Codes[code.CodeLength+7] = cg.OP_iconst_0                                // length 1
+		code.CodeLength += 8
 		return
 	}
 	return
 }
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack = 2
+	maxstack = 4
 	bin := e.Data.(*ast.ExpressionBinary)
-	stack, _ := m.build(class, code, bin.Left, context)
-	if stack > maxstack {
-		maxstack = stack
-	}
 	if bin.Left.VariableType.IsNumber() { // number types
-		if bin.Left.VariableType.IsInteger() {
-			m.primitiveConverter(code, bin.Left.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
+		stack, _ := m.build(class, code, bin.Left, context)
+		if stack > maxstack {
+			maxstack = stack
 		}
-		maxstack2, _ := m.build(class, code, bin.Left, context)
-		if maxstack2+2 > maxstack {
-			maxstack = maxstack2 + 2
+		target := bin.Left.VariableType.NumberTypeConvertRule(bin.Right.VariableType)
+		if target == ast.VARIABLE_TYPE_INT || target == ast.VARIABLE_TYPE_SHORT || target == ast.VARIABLE_TYPE_BYTE {
+			target = ast.VARIABLE_TYPE_LONG
 		}
-		if bin.Right.VariableType.IsInteger() {
-			m.primitiveConverter(code, bin.Right.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
+		if target != bin.Left.VariableType.Typ {
+			m.primitiveConverter(code, bin.Left.VariableType.Typ, target)
 		}
-
+		stack, _ = m.build(class, code, bin.Right, context)
+		if stack+2 > maxstack {
+			maxstack = stack + 2
+		}
+		if target != bin.Right.VariableType.Typ {
+			m.primitiveConverter(code, bin.Right.VariableType.Typ, target)
+		}
+		switch target {
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_lcmp
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_fcmpl
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_dcmpl
+		}
+		code.CodeLength++
+		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE { // > and <=
+			code.Codes[code.CodeLength] = cg.OP_lcmp
+			code.CodeLength++
+			if e.Typ == ast.EXPRESSION_TYPE_GT {
+				code.Codes[code.CodeLength] = cg.OP_ifge
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ifge
+			}
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+6)
+			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			code.CodeLength += 8
+		}
+		if e.Typ == ast.EXPRESSION_TYPE_EQ || e.Typ == ast.EXPRESSION_TYPE_NE { // == and !=
+			code.Codes[code.CodeLength] = cg.OP_lcmp
+			code.CodeLength++
+			if e.Typ == ast.EXPRESSION_TYPE_EQ {
+				code.Codes[code.CodeLength] = cg.OP_ifeq
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ifne
+			}
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+6)
+			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			code.CodeLength += 8
+		}
+		if e.Typ == ast.EXPRESSION_TYPE_EQ || e.Typ == ast.EXPRESSION_TYPE_NE { // < and >=
+			code.Codes[code.CodeLength] = cg.OP_lcmp
+			code.CodeLength++
+			if e.Typ == ast.EXPRESSION_TYPE_LE {
+				code.Codes[code.CodeLength] = cg.OP_iflt
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ifge
+			}
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+6)
+			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			code.CodeLength += 8
+		}
+		return
 	}
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
-
+		if e.Typ == ast.EXPRESSION_TYPE_EQ {
+			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_if_icmpne
+		}
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+6)
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+6)
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		code.CodeLength += 8
+		return
 	}
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_NULL || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_NULL {
-
+		var stack uint16
+		if bin.Left.VariableType.Typ != ast.VARIABLE_TYPE_NULL {
+			stack, _ = m.build(class, code, bin.Left, context)
+		} else {
+			stack, _ = m.build(class, code, bin.Right, context)
+		}
+		if stack > maxstack {
+			maxstack = stack
+		}
+		if e.Typ == ast.EXPRESSION_TYPE_EQ {
+			code.Codes[code.CodeLength] = cg.OP_ifnull
+		} else { // ne
+			code.Codes[code.CodeLength] = cg.OP_ifnonnull
+		}
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		code.CodeLength += 8
+		return
 	}
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_OBJECT || ast.VARIABLE_TYPE_ARRAY_INSTANCE == bin.Left.VariableType.Typ { //
-
+		maxstack = uint16(1)
+		stack, _ := m.build(class, code, bin.Left, context)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		stack, _ = m.build(class, code, bin.Right, context)
+		if stack+1 > maxstack {
+			maxstack = stack + 1
+		}
+		if e.Typ == ast.EXPRESSION_TYPE_EQ {
+			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
+		} else { // ne
+			code.Codes[code.CodeLength] = cg.OP_if_acmpne
+		}
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		code.CodeLength += 8
+		return
 	}
-
+	panic("missing")
 	return
 }
 

@@ -138,7 +138,7 @@ func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
 */
 func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
 	if t.Typ == t2.Typ {
-		return t1
+		return t.Typ
 	}
 	if t.Typ == VARIABLE_TYPE_DOUBLE || t2.Typ == VARIABLE_TYPE_DOUBLE {
 		return VARIABLE_TYPE_DOUBLE

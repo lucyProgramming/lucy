@@ -19,7 +19,6 @@ type ClassHighLevel struct {
 }
 
 type CONSTANT_Fieldref_info_high_level struct {
-	//CONSTANT_Fieldref_info
 	Class string
 	Field string
 }
