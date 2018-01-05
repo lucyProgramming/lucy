@@ -1,20 +1,50 @@
 package cg
 
 type ClassHighLevel struct {
-	MainClass    *ClassHighLevel
-	InnerClasss  []*ClassHighLevel
-	AccessFlags  uint16
-	IntConsts    map[int32][][]byte
-	LongConsts   map[int64][][]byte
-	StringConsts map[string][][]byte
-	FloatConsts  map[float32][][]byte
-	DoubleConsts map[float64][][]byte
-	Name         string
-	SuperClass   string
-	Interfaces   []string
-	Fields       map[string]*FiledHighLevel
-	Methods      map[string][]*MethodHighLevel
+	IsClosureFunctionClass bool
+	MainClass              *ClassHighLevel
+	InnerClasss            []*ClassHighLevel
+	AccessFlags            uint16
+	IntConsts              map[int32][][]byte
+	LongConsts             map[int64][][]byte
+	StringConsts           map[string][][]byte
+	FloatConsts            map[float32][][]byte
+	DoubleConsts           map[float64][][]byte
+	FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
+	Name                   string
+	SuperClass             string
+	Interfaces             []string
+	Fields                 map[string]*FiledHighLevel
+	Methods                map[string][]*MethodHighLevel
 }
+
+type CONSTANT_Fieldref_info_high_level struct {
+	//CONSTANT_Fieldref_info
+	Class string
+	Field string
+}
+
+func (c *ClassHighLevel) InsertFieldRef(fr CONSTANT_Fieldref_info_high_level, location []byte) {
+	if c.FieldRefs == nil {
+		c.FieldRefs = make(map[CONSTANT_Fieldref_info_high_level][][]byte)
+	}
+	if x, ok := c.FieldRefs[fr]; ok {
+		x = append(x, location)
+	} else {
+		c.FieldRefs[fr] = [][]byte{location}
+	}
+}
+
+// func (c *ClassHighLevel) InsertClasses(s string, location []byte) {
+// 	if c.Classes == nil {
+// 		c.Classes = make(map[int32][][]byte)
+// 	}
+// 	if x, ok := c.Classes[i]; ok {
+// 		x = append(x, location)
+// 	} else {
+// 		c.Classes[i] = [][]byte{location}
+// 	}
+// }
 
 func (c *ClassHighLevel) InsertIntConst(i int32, location []byte) {
 	if c.IntConsts == nil {

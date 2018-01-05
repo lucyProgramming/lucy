@@ -53,9 +53,9 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		}
 	}
 	if b.InheritedAttribute.function != nil &&
-		b.InheritedAttribute.function.Typ.ClosureVars != nil &&
-		b.InheritedAttribute.function.Typ.ClosureVars[name] != nil {
-		return b.InheritedAttribute.function.Typ.ClosureVars[name], nil
+		b.InheritedAttribute.function.ClosureVars != nil &&
+		b.InheritedAttribute.function.ClosureVars[name] != nil {
+		return b.InheritedAttribute.function.ClosureVars[name], nil
 	}
 	if b.InheritedAttribute.class != nil &&
 		b.InheritedAttribute.class.ClosureVars != nil &&
@@ -69,10 +69,10 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 	if err == nil { //found and in function top block and b.Outter is not top block
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
 			if b.InheritedAttribute.function != nil && b.IsFunctionTop && b.InheritedAttribute.function.IsGlobal == false {
-				if b.InheritedAttribute.function.Typ.ClosureVars == nil {
-					b.InheritedAttribute.function.Typ.ClosureVars = make(map[string]*VariableDefinition)
+				if b.InheritedAttribute.function.ClosureVars == nil {
+					b.InheritedAttribute.function.ClosureVars = make(map[string]*VariableDefinition)
 				}
-				b.InheritedAttribute.function.Typ.ClosureVars[name] = v
+				b.InheritedAttribute.function.ClosureVars[name] = v
 				v.BeenCaptured = true
 			}
 			if b.InheritedAttribute.class != nil && b.IsClassBlock && b.InheritedAttribute.class.IsGlobal == false {
@@ -282,7 +282,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if b.EnumNames[name] != nil {
 		return fmt.Errorf("%s name '%s' already declared as enumName", errMsgPrefix(pos), name)
 	}
-
 	switch d.(type) {
 	case *Class:
 		b.Classes[name] = d.(*Class)

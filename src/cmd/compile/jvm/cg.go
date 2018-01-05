@@ -3,10 +3,9 @@ package jvm
 import (
 	"encoding/binary"
 	"fmt"
-	"strings"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"strings"
 )
 
 type MakeClass struct {
@@ -66,7 +65,7 @@ func (m *MakeClass) mkFuncs() {
 }
 
 func (m *MakeClass) mkFunc(f *ast.Function, path string) {
-	if f.IsGlobal || f.Typ.ClosureVars == nil || len(f.Typ.ClosureVars) == 0 {
+	if f.IsGlobal || f.IsClosureFunction() {
 		context := &Context{}
 		method := m.buildFunction(m.mainclass, f, context, true, path)
 		m.mainclass.Methods[method.Name] = []*cg.MethodHighLevel{method}

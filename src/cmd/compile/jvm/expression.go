@@ -93,9 +93,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildArithmetic(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
-
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
-
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -122,8 +120,10 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildRelations(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
-
+		maxstack = m.buildIndex(class, code, e, context)
 	case ast.EXPRESSION_TYPE_DOT:
+		maxstack = m.buildDot(class, code, e, context)
+
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:
 	case ast.EXPRESSION_TYPE_FUNCTION_CALL:
@@ -145,7 +145,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		maxstack = m.buildIdentifer(class, code, e, context)
 	case ast.EXPRESSION_TYPE_NEW:
-
 	case ast.EXPRESSION_TYPE_LIST:
 	case ast.EXPRESSION_TYPE_FUNCTION:
 	case ast.EXPRESSION_TYPE_VAR:
@@ -163,7 +162,19 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	switch index.Expression.VariableType.Typ {
 	case ast.VARIABLE_TYPE_OBJECT:
-
+		fallthrough
+	case ast.VARIABLE_TYPE_CLASS:
+		if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
+			code.Codes[code.CodeLength] = cg.OP_getstatic
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_getfield
+		}
+		f := cg.CONSTANT_Fieldref_info_high_level{}
+		f.Class = index.Expression.VariableType.Class.Name
+		f.Field = index.Name
+		class.InsertFieldRef(f, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	default:
+		panic(1)
 	}
 	return
 }
@@ -208,6 +219,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	maxstack = 1
 	return
 }
+
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
 	if identifier.Var.BeenCaptured {
@@ -519,13 +531,13 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 	return
 }
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack = 4
+	maxstack = 2
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack1, _ := m.build(class, code, bin.Left, context)
-	if maxstack1 > maxstack {
-		maxstack = maxstack1
+	stack, _ := m.build(class, code, bin.Left, context)
+	if stack > maxstack {
+		maxstack = stack
 	}
-	if bin.Left.VariableType.IsNumber() {
+	if bin.Left.VariableType.IsNumber() { // number types
 		if bin.Left.VariableType.IsInteger() {
 			m.primitiveConverter(code, bin.Left.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
 		}
@@ -537,27 +549,31 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			m.primitiveConverter(code, bin.Right.VariableType.Typ, ast.VARIABLE_TYPE_LONG)
 		}
 
-		return
 	}
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL {
+	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 
-		return
 	}
-	panic(1)
+	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_NULL || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_NULL {
+
+	}
+	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_OBJECT || ast.VARIABLE_TYPE_ARRAY_INSTANCE == bin.Left.VariableType.Typ { //
+
+	}
+
 	return
 }
 
 func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack = 4
-	maxstack1, _ := m.build(class, code, bin.Left, context)
-	if maxstack1 > maxstack {
-		maxstack = maxstack1
+	maxstack = 2
+	stack, _ := m.build(class, code, bin.Left, context)
+	if stack > maxstack {
+		maxstack = stack
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		maxstack2, _ := m.build(class, code, bin.Right, context)
-		if maxstack2+2 > maxstack {
-			maxstack = maxstack2 + 2
+		stack, _ := m.build(class, code, bin.Right, context)
+		if stack+2 > maxstack {
+			maxstack = stack + 2
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -591,22 +607,17 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 			panic(1)
 		}
-		//
-		target := m.tt2What(bin.Left.Typ, bin.Right.Typ)
-		if target > 0 {
-			m.primitiveConverter(code, bin.Left.Typ, target)
+		if e.VariableType.Typ != bin.Left.Typ {
+			m.primitiveConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
-		maxstack2, _ := m.build(class, code, bin.Right, context)
-		if maxstack2 > maxstack {
-			maxstack = maxstack2
+		stack, _ = m.build(class, code, bin.Right, context)
+		if stack+2 > maxstack {
+			maxstack = stack + 2
 		}
-		if target > 0 {
-			m.primitiveConverter(code, bin.Right.Typ, target)
+		if e.VariableType.Typ != bin.Right.VariableType.Typ {
+			m.primitiveConverter(code, bin.Right.Typ, e.VariableType.Typ)
 		}
-		if target == -1 {
-			target = bin.Left.Typ
-		}
-		switch target {
+		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -667,14 +678,13 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			}
 		default:
 			panic("~~~~~~~~~~~~")
-
 		}
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
-		maxstack2, _ := m.build(class, code, bin.Right, context)
-		if maxstack2+2 > maxstack {
-			maxstack = maxstack2 + 2
+		stack, _ := m.build(class, code, bin.Right, context)
+		if stack+2 > maxstack {
+			maxstack = stack + 2
 		}
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_LONG { // long
 			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_LONG {
@@ -884,26 +894,4 @@ func (m *MakeExpression) primitiveConverter(code *cg.AttributeCode, typ int, tar
 	default:
 		panic(1)
 	}
-}
-
-func (m *MakeExpression) tt2What(t1, t2 int) int {
-	if t1 == t2 {
-		return -1
-	}
-	if t1 == ast.VARIABLE_TYPE_DOUBLE || t2 == ast.VARIABLE_TYPE_DOUBLE {
-		return ast.VARIABLE_TYPE_DOUBLE
-	}
-	if t1 == ast.VARIABLE_TYPE_FLOAT || t2 == ast.VARIABLE_TYPE_FLOAT {
-		return ast.VARIABLE_TYPE_FLOAT
-	}
-	if t1 == ast.VARIABLE_TYPE_LONG || t2 == ast.VARIABLE_TYPE_LONG {
-		return ast.VARIABLE_TYPE_LONG
-	}
-	if t1 == ast.VARIABLE_TYPE_INT || t2 == ast.VARIABLE_TYPE_INT {
-		return ast.VARIABLE_TYPE_INT
-	}
-	if t1 == ast.VARIABLE_TYPE_SHORT || t2 == ast.VARIABLE_TYPE_SHORT {
-		return ast.VARIABLE_TYPE_SHORT
-	}
-	return -1
 }

@@ -134,6 +134,31 @@ func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
 }
 
 /*
+	number convert rule
+*/
+func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
+	if t.Typ == t2.Typ {
+		return t1
+	}
+	if t.Typ == VARIABLE_TYPE_DOUBLE || t2.Typ == VARIABLE_TYPE_DOUBLE {
+		return VARIABLE_TYPE_DOUBLE
+	}
+	if t.Typ == VARIABLE_TYPE_FLOAT || t2.Typ == VARIABLE_TYPE_FLOAT {
+		return VARIABLE_TYPE_FLOAT
+	}
+	if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
+		return VARIABLE_TYPE_LONG
+	}
+	if t.Typ == VARIABLE_TYPE_INT || t2.Typ == VARIABLE_TYPE_INT {
+		return VARIABLE_TYPE_INT
+	}
+	if t.Typ == VARIABLE_TYPE_SHORT || t2.Typ == VARIABLE_TYPE_SHORT {
+		return VARIABLE_TYPE_SHORT
+	}
+	return VARIABLE_TYPE_BYTE
+}
+
+/*
 	mk jvm descriptor
 */
 func (v *VariableType) Descriptor() string {
@@ -185,6 +210,11 @@ func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
 */
 func (t *VariableType) IsNumber() bool {
 	return t.IsInteger() || t.IsFloat()
+
+}
+
+func (t *VariableType) IsPointer() bool {
+	return t.Typ == VARIABLE_TYPE_OBJECT || t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
 
 }
 
@@ -254,7 +284,7 @@ func (t *VariableType) constValueValid(e *Expression) (data interface{}, err err
 }
 
 //可读的类型信息
-func (v *VariableType) TypeStringRecursive(ret *string) {
+func (v *VariableType) typeString_(ret *string) {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		*ret = "bool"
@@ -280,7 +310,7 @@ func (v *VariableType) TypeStringRecursive(ret *string) {
 		*ret = "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
-		v.CombinationType.TypeStringRecursive(ret)
+		v.CombinationType.typeString_(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret = "void"
 	case VARIABLE_TYPE_STRING:
@@ -297,7 +327,7 @@ func (v *VariableType) TypeStringRecursive(ret *string) {
 //可读的类型信息
 func (v *VariableType) TypeString() string {
 	t := ""
-	v.TypeStringRecursive(&t)
+	v.typeString_(&t)
 	return t
 }
 

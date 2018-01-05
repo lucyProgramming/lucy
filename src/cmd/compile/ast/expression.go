@@ -3,6 +3,7 @@ package ast
 import (
 	"errors"
 	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/common"
 )
 
 const (
@@ -123,11 +124,11 @@ func (e *Expression) typeName(typ ...int) string {
 }
 
 type Expression struct {
-	VariableType *VariableType //
-	IsPublic     bool          // only used in top
-	Pos          *Pos
-	Typ          int
-	Data         interface{}
+	VariableType          *VariableType //
+	IsPublic              bool          // only used in top
+	Pos                   *Pos
+	Typ                   int
+	Data                  interface{}
 	IsStatementExpression bool
 }
 
@@ -233,10 +234,9 @@ func (e *Expression) canBeCovert2Bool() (bool, error) {
 	case EXPRESSION_TYPE_INT:
 		return e.Data.(int64) != 0, nil
 	case EXPRESSION_TYPE_FLOAT:
-		return !float64IsZero(e.Data.(float64)), nil
-	default:
-		return false, fmt.Errorf("can not convert to bool")
+		common.Float64Equal(e.Data.(float64), 0.0)
 	}
+	return false, fmt.Errorf("can not convert to bool")
 }
 
 func (e *Expression) OpName() string {
@@ -419,13 +419,6 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) (inter
 	return nil, fmt.Errorf("cannot convert %s to %s", e.typeName(origin), e.typeName(target))
 }
 
-func float32IsZero(f float32) bool {
-	return float64IsZero(float64(f))
-}
-func float64IsZero(f float64) bool {
-	return f < small_float && f > negative_small_float
-}
-
 func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b bool, err error) {
 	fmt.Println("$$$$$$$$$$$", typ)
 	fmt.Println(value1)
@@ -511,7 +504,8 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 		e.Typ == EXPRESSION_TYPE_BYTE ||
 		e.Typ == EXPRESSION_TYPE_INT ||
 		e.Typ == EXPRESSION_TYPE_FLOAT ||
-		e.Typ == EXPRESSION_TYPE_STRING {
+		e.Typ == EXPRESSION_TYPE_STRING ||
+		e.Typ == EXPRESSION_TYPE_NULL {
 		return true, e.Typ, e.Data, nil
 	}
 	// && and ||
@@ -628,9 +622,9 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				case EXPRESSION_TYPE_MUL:
 					Value = value1.(float64) * value2.(float64)
 				case EXPRESSION_TYPE_DIV:
-					if float64IsZero(value2.(float64)) {
+					if common.Float64Equal(value2.(float64), 0.0) {
 						is = false
-						err = fmt.Errorf("dividend is 0")
+						err = fmt.Errorf("divided by 0")
 						return
 					}
 					Value = value1.(float64) / value2.(float64)
@@ -736,6 +730,16 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			if is1 == false || is2 == false {
 				is = false
 				return
+			}
+			if typ1 == VARIABLE_TYPE_NULL || typ2 == VARIABLE_TYPE_NULL {
+				if e.Typ != EXPRESSION_TYPE_EQ && EXPRESSION_TYPE_NE != e.Typ {
+					err = fmt.Errorf("cannot apply '%s' on 'null' and 'null'", e.OpName())
+				} else {
+					is = true
+					Typ = EXPRESSION_TYPE_BOOL
+					Value = e.Typ == EXPRESSION_TYPE_EQ
+					return
+				}
 			}
 			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
 			if err != nil {

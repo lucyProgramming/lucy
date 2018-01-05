@@ -18,6 +18,7 @@ func oneAnyTypeParameterChecker(errs *[]error, args []*VariableType, pos *Pos) {
 }
 
 type Function struct {
+	Class    *cg.ClassHighLevel
 	Method   *cg.MethodHighLevel
 	IsGlobal bool
 	FunctionBuildProperty
@@ -25,6 +26,7 @@ type Function struct {
 	Used         bool
 	AccessFlags  uint16 // public private or protected
 	Typ          *FunctionType
+	ClosureVars  map[string]*VariableDefinition
 	Name         string // if name is nil string,means no name function
 	Block        *Block
 	Pos          *Pos
@@ -33,6 +35,13 @@ type Function struct {
 	VariableType VariableType
 }
 
+func (f *Function) IsClosureFunction() bool {
+	return f.ClosureVars != nil && len(f.ClosureVars) > 0
+}
+
+func (f *Function) ClosureVarExist(name string) bool {
+	return f.ClosureVars != nil && f.ClosureVars[name] != nil
+}
 func (f *Function) readableMsg() string {
 	s := "fn" + f.Name + "("
 	for k, v := range f.Typ.Parameters {
@@ -131,9 +140,8 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs *[]error) {
 }
 
 type FunctionType struct {
-	ClosureVars map[string]*VariableDefinition
-	Parameters  ParameterList
-	Returns     ReturnList
+	Parameters ParameterList
+	Returns    ReturnList
 }
 
 type ParameterList []*VariableDefinition // actually local variables

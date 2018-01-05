@@ -817,10 +817,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR || EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
 		if t1.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but %s", errMsgPrefix(binary.Left.Pos), t1.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'", errMsgPrefix(binary.Left.Pos), t1.TypeString()))
 		}
 		if t2.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but %s", errMsgPrefix(binary.Right.Pos), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'", errMsgPrefix(binary.Right.Pos), t2.TypeString()))
 		}
 		t = &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
@@ -838,19 +838,20 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(binary.Right.Pos)))
 		}
 		if t1.Typ != t2.Typ {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply '&'or '|' on %s and %s", errMsgPrefix(binary.Right.Pos), t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'", errMsgPrefix(binary.Right.Pos), t1.TypeString(), t2.TypeString()))
 		}
 		tt := t1.Clone()
 		tt.Pos = e.Pos
 		e.VariableType = tt
 		return tt
 	}
+
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.IsInteger() {
-			*errs = append(*errs, fmt.Errorf("%s not a integer expression", errMsgPrefix(binary.Left.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'", errMsgPrefix(binary.Left.Pos), t1.TypeString()))
 		}
 		if !t2.IsInteger() {
-			*errs = append(*errs, fmt.Errorf("%s not a integer expression", errMsgPrefix(binary.Right.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'", errMsgPrefix(binary.Right.Pos), t2.TypeString()))
 		}
 		tt := t1.Clone()
 		tt.Pos = e.Pos
@@ -864,15 +865,24 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		e.Typ == EXPRESSION_TYPE_LE ||
 		e.Typ == EXPRESSION_TYPE_LT {
 		//number
-		if t1.IsNumber() {
+		switch t1.Typ {
+		case VARIABLE_TYPE_BYTE:
+			fallthrough
+		case VARIABLE_TYPE_SHORT:
+			fallthrough
+		case VARIABLE_TYPE_CHAR:
+			fallthrough
+		case VARIABLE_TYPE_INT:
+			fallthrough
+		case VARIABLE_TYPE_LONG:
 			if !t2.IsNumber() {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'number' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
 			}
-		} else if t1.Typ == VARIABLE_TYPE_STRING {
+		case VARIABLE_TYPE_STRING:
 			if t2.Typ != VARIABLE_TYPE_STRING {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'string' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
 			}
-		} else if t1.Typ == VARIABLE_TYPE_BOOL {
+		case VARIABLE_TYPE_BOOL:
 			if t2.Typ == VARIABLE_TYPE_BOOL {
 				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
 					*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and 'bool'", errMsgPrefix(e.Pos), e.OpName()))
@@ -880,7 +890,23 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
 			}
-		} else {
+		case VARIABLE_TYPE_NULL:
+			if t2.IsPointer() {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'(non-pointer)", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+			}
+			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ", errMsgPrefix(e.Pos), e.OpName()))
+			}
+		case VARIABLE_TYPE_ARRAY_INSTANCE:
+			fallthrough
+		case VARIABLE_TYPE_OBJECT:
+			if t2.IsPointer() == false && t2.Typ != VARIABLE_TYPE_NULL {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'pointer' and '%s'(non-pointer)", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+			}
+			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ", errMsgPrefix(e.Pos), e.OpName()))
+			}
+		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
 		}
 		t := &VariableType{
@@ -900,15 +926,18 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(binary.Right.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
 			}
 		} else if t1.Typ == VARIABLE_TYPE_STRING {
-			if e.Typ != EXPRESSION_TYPE_PLUS_ASSIGN {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm  '%s' on string", errMsgPrefix(binary.Right.Pos), e.OpName()))
+			if e.Typ != EXPRESSION_TYPE_ADD || t2.Typ != VARIABLE_TYPE_STRING {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm  '%s' on 'string' and ", errMsgPrefix(binary.Right.Pos), e.OpName(), t2.TypeString()))
 			}
+			tt := t1.Clone()
+			tt.Pos = e.Pos
+			return tt
 		} else {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
 		}
-		tt := t1.Clone()
+		tt := &VariableType{}
 		tt.Pos = e.Pos
-		e.VariableType = tt
+		tt.Typ = t1.NumberTypeConvertRule(t2)
 		return tt
 	}
 	panic("missing check" + e.OpName())
