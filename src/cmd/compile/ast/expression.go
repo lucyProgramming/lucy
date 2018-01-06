@@ -3,7 +3,6 @@ package ast
 import (
 	"errors"
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/common"
 )
 
 const (
@@ -223,20 +222,6 @@ func (e *Expression) literalValue2Int64() float64 {
 	default:
 		panic("unhandle convert to float64")
 	}
-}
-
-func (e *Expression) canBeCovert2Bool() (bool, error) {
-	switch e.Typ {
-	case EXPRESSION_TYPE_BOOL:
-		return e.Data.(bool), nil
-	case EXPRESSION_TYPE_BYTE:
-		return e.Data.(byte) != 0, nil
-	case EXPRESSION_TYPE_INT:
-		return e.Data.(int64) != 0, nil
-	case EXPRESSION_TYPE_FLOAT:
-		common.Float64Equal(e.Data.(float64), 0.0)
-	}
-	return false, fmt.Errorf("can not convert to bool")
 }
 
 func (e *Expression) OpName() string {
@@ -622,7 +607,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				case EXPRESSION_TYPE_MUL:
 					Value = value1.(float64) * value2.(float64)
 				case EXPRESSION_TYPE_DIV:
-					if common.Float64Equal(value2.(float64), 0.0) {
+					if value2.(float64) == 0.0 {
 						is = false
 						err = fmt.Errorf("divided by 0")
 						return
