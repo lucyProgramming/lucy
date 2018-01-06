@@ -52,15 +52,17 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 			return t, nil
 		}
 	}
-	if b.InheritedAttribute.function != nil &&
-		b.InheritedAttribute.function.ClosureVars != nil &&
-		b.InheritedAttribute.function.ClosureVars[name] != nil {
-		return b.InheritedAttribute.function.ClosureVars[name], nil
+	if b.InheritedAttribute.function != nil {
+		v := b.InheritedAttribute.function.ClosureVars.Search(name)
+		if v != nil {
+			return v, nil
+		}
 	}
-	if b.InheritedAttribute.class != nil &&
-		b.InheritedAttribute.class.ClosureVars != nil &&
-		b.InheritedAttribute.class.ClosureVars[name] != nil {
-		return b.InheritedAttribute.class.ClosureVars[name], nil
+	if b.InheritedAttribute.class != nil {
+		v := b.InheritedAttribute.function.ClosureVars.Search(name)
+		if v != nil {
+			return v, nil
+		}
 	}
 	if b.Outter == nil {
 		return nil, fmt.Errorf("%s not found", name)
@@ -69,18 +71,10 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 	if err == nil { //found and in function top block and b.Outter is not top block
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
 			if b.InheritedAttribute.function != nil && b.IsFunctionTop && b.InheritedAttribute.function.IsGlobal == false {
-				if b.InheritedAttribute.function.ClosureVars == nil {
-					b.InheritedAttribute.function.ClosureVars = make(map[string]*VariableDefinition)
-				}
-				b.InheritedAttribute.function.ClosureVars[name] = v
-				v.BeenCaptured++
+				b.InheritedAttribute.function.ClosureVars.Insert(v)
 			}
 			if b.InheritedAttribute.class != nil && b.IsClassBlock && b.InheritedAttribute.class.IsGlobal == false {
-				if b.InheritedAttribute.class.ClosureVars == nil {
-					b.InheritedAttribute.class.ClosureVars = make(map[string]*VariableDefinition)
-				}
-				b.InheritedAttribute.class.ClosureVars[name] = t.(*VariableDefinition)
-				v.BeenCaptured++
+				b.InheritedAttribute.class.ClosureVars.Insert(v)
 			}
 		}
 	}

@@ -26,7 +26,7 @@ type Function struct {
 	Used         bool
 	AccessFlags  uint16 // public private or protected
 	Typ          *FunctionType
-	ClosureVars  map[string]*VariableDefinition
+	ClosureVars  ClosureVars
 	Name         string // if name is nil string,means no name function
 	Block        *Block
 	Pos          *Pos
@@ -36,11 +36,11 @@ type Function struct {
 }
 
 func (f *Function) IsClosureFunction() bool {
-	return f.ClosureVars != nil && len(f.ClosureVars) > 0
+	return f.ClosureVars.NotEmpty()
 }
 
-func (f *Function) ClosureVarExist(name string) bool {
-	return f.ClosureVars != nil && f.ClosureVars[name] != nil
+func (f *Function) ClosureVarExist(name string, v *VariableDefinition) (uint8, bool) {
+	return f.ClosureVars.ClosureVarsExist(name, v)
 }
 func (f *Function) readableMsg() string {
 	s := "fn" + f.Name + "("
@@ -53,6 +53,7 @@ func (f *Function) readableMsg() string {
 	}
 	s += ")"
 	if len(f.Typ.Returns) > 0 {
+		s += "->"
 		for k, v := range f.Typ.Returns {
 			s += "("
 			if k != len(f.Typ.Returns)-1 {
@@ -105,7 +106,7 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs *[]error) {
 	var err error
 	var es []error
 	for _, v := range f.Parameters {
-		v.isFunctionParameter = true
+		v.IsFunctionParameter = true
 		es = block.checkVar(v)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)

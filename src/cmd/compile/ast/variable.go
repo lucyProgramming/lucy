@@ -6,7 +6,7 @@ type VariableDefinition struct {
 	LocalValOffset      byte
 	IsGlobal            bool
 	BeenCaptured        uint8
-	isFunctionParameter bool
+	IsFunctionParameter bool
 	Used                bool   // use as right value
 	AccessFlags         uint16 // public private or protected
 	Pos                 *Pos

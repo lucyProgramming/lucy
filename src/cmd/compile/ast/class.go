@@ -24,7 +24,7 @@ type Class struct {
 	SouceFile      string
 	Used           bool
 	VariableType   VariableType
-	ClosureVars    map[string]*VariableDefinition // closure variable
+	ClosureVars    ClosureVars
 }
 
 func (c *Class) check(father *Block) []error {
@@ -76,10 +76,26 @@ func (c *Class) mkVariableType() {
 
 func (c *Class) checkConstructionFunctions() []error {
 	errs := []error{}
+	if c.Constructors == nil || len(c.Constructors) == 0 {
+		c.Constructors = []*ClassMethod{c.mkDefaultConstructionMethod()}
+	}
 	c.checkReloadFunctions(c.Constructors, &errs)
 	return errs
 }
-
+func (c *Class) mkDefaultConstructionMethod() *ClassMethod {
+	ret := &ClassMethod{}
+	ret.Func = &Function{}
+	ret.Func.AccessFlags = cg.ACC_METHOD_PUBLIC
+	ret.Func.AccessFlags = cg.ACC_METHOD_FINAL
+	ret.Func.Typ = &FunctionType{}
+	ret.Func.Descriptor = "()V"
+	ret.Func.Block = &Block{}
+	ret.Func.Block.Statements = append(ret.Func.Block.Statements, &Statement{
+		Typ:             STATEMENT_TYPE_RETURN,
+		StatementReturn: &StatementReturn{},
+	})
+	return ret
+}
 func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 	m := make(map[string][]*ClassMethod)
 	for _, v := range ms {

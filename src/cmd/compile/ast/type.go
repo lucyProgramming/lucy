@@ -158,9 +158,19 @@ func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
 	return VARIABLE_TYPE_BYTE
 }
 
-/*
-	mk jvm descriptor
-*/
+func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
+	if t.Equal(comp) {
+		return true
+	}
+	if t.IsNumber() && comp.IsNumber() {
+		return true
+	}
+	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
+		return false
+	}
+	return comp.Class.instanceOf(t.Class)
+}
+
 func (v *VariableType) Descriptor() string {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
@@ -189,19 +199,6 @@ func (v *VariableType) Descriptor() string {
 		return "L" + v.Class.Name + ";"
 	}
 	panic("unhandle type signature")
-}
-
-func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
-	if t.Equal(comp) {
-		return true
-	}
-	if t.IsNumber() && comp.IsNumber() {
-		return true
-	}
-	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
-		return false
-	}
-	return comp.Class.instanceOf(t.Class)
 }
 
 /*
