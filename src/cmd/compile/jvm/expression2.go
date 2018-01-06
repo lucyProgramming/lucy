@@ -74,18 +74,18 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxstack = 2
+	stackneed := maxstack
 	size := uint16(0)
 	for _, v := range n.Args {
 		if v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || ast.EXPRESSION_TYPE_METHOD_CALL == v.Typ {
 			panic(1)
 		}
 		size = m.slotSize(e.VariableType)
-		maxstack2, es := m.build(class, code, v, context)
-		if maxstack2 > size {
-			maxstack += maxstack2
-		} else {
-			maxstack += size
+		stack, es := m.build(class, code, v, context)
+		if stackneed+stack > maxstack {
+			maxstack = stackneed + stack
 		}
+		stackneed += size
 		backPatchEs(es, code)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
