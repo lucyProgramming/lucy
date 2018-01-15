@@ -3,9 +3,10 @@ package jvm
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
-	"strings"
 )
 
 type MakeClass struct {

@@ -92,7 +92,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	methodref := cg.CONSTANT_Methodref_info_high_level{
 		Class: n.Typ.Class.Name,
 		Name:  n.Construction.Func.Name,
-		Name:  n.Construction.Func.Descriptor,
+		// :  n.Construction.Func.Descriptor,
 	}
 	class.InsertMethodRef(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

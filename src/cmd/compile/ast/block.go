@@ -58,12 +58,6 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 			return v, nil
 		}
 	}
-	if b.InheritedAttribute.class != nil {
-		v := b.InheritedAttribute.function.ClosureVars.Search(name)
-		if v != nil {
-			return v, nil
-		}
-	}
 	if b.Outter == nil {
 		return nil, fmt.Errorf("%s not found", name)
 	}
@@ -72,9 +66,6 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
 			if b.InheritedAttribute.function != nil && b.IsFunctionTop && b.InheritedAttribute.function.IsGlobal == false {
 				b.InheritedAttribute.function.ClosureVars.Insert(v)
-			}
-			if b.InheritedAttribute.class != nil && b.IsClassBlock && b.InheritedAttribute.class.IsGlobal == false {
-				b.InheritedAttribute.class.ClosureVars.Insert(v)
 			}
 		}
 	}

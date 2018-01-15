@@ -137,6 +137,7 @@ type ExpressionFunctionCall struct {
 	Expression *Expression
 	Args       CallArgs
 	Func       *Function
+	FuncType   *FunctionType
 }
 
 type ExpressionDeclareVariable struct {
@@ -170,6 +171,7 @@ type ExpressionIndex struct {
 }
 
 type ExpressionMethodCall struct {
+	Returns    []*VariableType
 	Expression *Expression
 	Args       CallArgs
 	Name       string
@@ -365,7 +367,6 @@ func (e *Expression) typeWider(typ1, typ2 int, value1, value2 interface{}) (t1 i
 	}
 	if typ1 > typ2 {
 		t1, t2 = typ1, typ1
-
 	} else {
 		t1, t2 = typ2, typ2
 	}

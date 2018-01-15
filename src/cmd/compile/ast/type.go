@@ -234,53 +234,6 @@ func (v *VariableType) isPrimitive() bool {
 	return v.IsNumber() || v.Typ == VARIABLE_TYPE_STRING || v.Typ == VARIABLE_TYPE_BOOL
 }
 
-//
-//func (t *VariableType) constValueValid(e *Expression) (data interface{}, err error) {
-//	//number type
-//	if t.IsNumber() {
-//		if !t.IsNumber() {
-//			err = fmt.Errorf("expression is not number")
-//			return
-//		}
-//		if t.IsFloat() {
-//			f := e.literalValue2Float64()
-//			if t.Typ == VARIABLE_TYPE_FLOAT {
-//				return float32(f), nil
-//			} else {
-//				return f, nil
-//			}
-//		} else {
-//			d := e.literalValue2Int64()
-//			switch t.Typ {
-//			case VARIABLE_TYPE_BYTE:
-//				return byte(d), nil
-//			case VARIABLE_TYPE_SHORT:
-//				return int16(d), nil
-//			case VARIABLE_TYPE_CHAR:
-//				return int16(d), nil
-//			case VARIABLE_TYPE_INT:
-//				return int32(d), nil
-//			case VARIABLE_TYPE_LONG:
-//				return d, nil
-//			case VARIABLE_TYPE_FLOAT:
-//				return float32(d), nil
-//			case VARIABLE_TYPE_DOUBLE:
-//				return float64(d), nil
-//			}
-//		}
-//	}
-//	if t.Typ == VARIABLE_TYPE_BOOL {
-//
-//	}
-//	if t.Typ == VARIABLE_TYPE_STRING {
-//		if e.Typ != EXPRESSION_TYPE_STRING {
-//			return nil, fmt.Errorf("expression is not string but %s", e.OpName())
-//		}
-//		return e.Data.(string), nil
-//	}
-//	return nil, fmt.Errorf("cannot assign %s to %s", e.OpName(), t.TypeString())
-//}
-
 //可读的类型信息
 func (v *VariableType) typeString_(ret *string) {
 	switch v.Typ {

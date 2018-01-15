@@ -426,7 +426,6 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			}
 		}
 	}
-
 	return f.Typ.Returns.retTypes(e.Pos)
 }
 
@@ -539,9 +538,11 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(e.Pos), leftTypes[k].TypeString(), valueTypes[k].TypeString()))
 			}
 		}
-
 	}
-	tt := valueTypes[0].Clone()
+	if len(leftTypes) > 1 {
+		return nil
+	}
+	tt := leftTypes[0].Clone()
 	tt.Pos = e.Pos
 	e.VariableType = tt
 	return tt

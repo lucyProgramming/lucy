@@ -24,7 +24,6 @@ type Class struct {
 	SouceFile      string
 	Used           bool
 	VariableType   VariableType
-	ClosureVars    ClosureVars
 }
 
 func (c *Class) check(father *Block) []error {
