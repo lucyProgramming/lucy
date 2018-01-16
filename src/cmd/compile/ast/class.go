@@ -35,6 +35,7 @@ func (c *Class) check(father *Block) []error {
 	c.loadInterfaces(&errs)
 	c.Block.check(father)
 	c.Block.InheritedAttribute.class = c
+	c.Block.inherite(&father.InheritedAttribute.p.Block) // inherite from package
 	errs = append(errs, c.checkFields()...)
 	errs = append(errs, c.checkConstructionFunctions()...)
 	errs = append(errs, c.checkMethods()...)
@@ -109,6 +110,7 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 				Typ:   VARIABLE_TYPE_OBJECT,
 				Class: c,
 			}
+			v.Func.Block.Varoffset = 1 //this function
 		}
 		es := v.Func.check(&c.Block)
 		if errsNotEmpty(es) {
@@ -139,6 +141,7 @@ func (c *Class) checkFields() []error {
 	}
 	return errs
 }
+
 func (c *Class) checkField(f *ClassField, errs *[]error) {
 	err := c.VariableType.resolve(&c.Block)
 	if err != nil {
@@ -154,13 +157,12 @@ func (c *Class) checkMethods() []error {
 	return errs
 }
 
-func (c *Class) accessField(name string) (f *ClassField, accessable bool, err error) {
+func (c *Class) accessField(name string) (f *ClassField, err error) {
 	if c.Fields[name] == nil {
 		err = fmt.Errorf("field %s not found", name)
 		return
 	}
 	f = c.Fields[name]
-	accessable = (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
 	return
 }
 func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *ClassMethod, errs []error) {
@@ -229,16 +231,4 @@ func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, 
 
 func (c *Class) reloadMethod(ms []*ClassMethod, args []*VariableType) (f *ClassMethod, err error) {
 	return
-}
-
-type ClassMethod struct {
-	Func *Function
-}
-
-func (m *ClassMethod) isPublic() bool {
-	return (m.Func.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0
-}
-
-type ClassField struct {
-	VariableDefinition
 }

@@ -46,6 +46,15 @@ type VariableType struct {
 	Function        *Function
 }
 
+func (v *VariableType) JvmSlotSize() uint16 {
+	if !v.rightValueValid() {
+		panic(1)
+	}
+	if v.Typ == VARIABLE_TYPE_DOUBLE || VARIABLE_TYPE_LONG == v.Typ {
+		return 2
+	}
+	return 1
+}
 func (v *VariableType) rightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||
 		v.Typ == VARIABLE_TYPE_BYTE ||
@@ -57,8 +66,7 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_DOUBLE ||
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
-		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
-		v.Typ == VARIABLE_TYPE_FUNCTION
+		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
 }
 
 /*
@@ -74,6 +82,9 @@ func (t *VariableType) Clone() *VariableType {
 }
 
 func (t *VariableType) resolve(block *Block) error {
+	if t.isPrimitive() {
+		return nil
+	}
 	if t.Typ == VARIABLE_TYPE_NAME { //
 		return t.resolveName(block)
 	}
@@ -87,9 +98,9 @@ func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
 	var err error
 	if !strings.Contains(t.Name, ".") {
-		d, err = block.searchByName(t.Name)
-		if err != nil {
-			return err
+		d = block.searchByName(t.Name)
+		if d == nil {
+			return fmt.Errorf("%s not found", t.Name)
 		}
 	} else { // a.b  in type situation,must be package name
 		d, err = t.resolvePackageName(block)
@@ -130,7 +141,11 @@ func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return p.Block.searchByName(strings.Trim(t.Name, accessname+"."))
+	d := p.Block.searchByName(strings.Trim(t.Name, accessname+"."))
+	if d == nil {
+		err = fmt.Errorf("%s not found", t.Name)
+	}
+	return d, err
 }
 
 /*

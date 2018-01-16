@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
@@ -101,22 +102,21 @@ func (f *Function) check(b *Block) []error {
 	return errs
 }
 
-func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs *[]error) {
-	//handler parameter first
+func (f *FunctionType) checkParaMeterAndRetuns(functionblock *Block, errs *[]error) {
 	var err error
 	var es []error
 	for _, v := range f.Parameters {
 		v.IsFunctionParameter = true
-		es = block.checkVar(v)
+		es = functionblock.checkVar(v)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
 		}
-		err = v.Typ.resolve(block)
+		err = v.Typ.resolve(functionblock)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
-		err = block.insert(v.Name, v.Pos, v)
+		err = functionblock.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, err)
 			continue
@@ -124,16 +124,16 @@ func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs *[]error) {
 	}
 	//handler return
 	for _, v := range f.Returns {
-		es = block.checkVar(v)
+		es = functionblock.checkVar(v)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
 		}
-		err = v.Typ.resolve(block)
+		err = v.Typ.resolve(functionblock)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
-		err = block.insert(v.Name, v.Pos, v)
+		err = functionblock.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}

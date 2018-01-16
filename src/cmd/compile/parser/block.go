@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -22,6 +23,9 @@ func (b *Block) parse(block *ast.Block) (err error) {
 	b.Next() // skip {
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {
+		if len(b.parser.errs) > b.parser.nerr {
+			break
+		}
 		switch b.parser.token.Type {
 		case lex.TOKEN_SEMICOLON:
 			b.Next() // look up next

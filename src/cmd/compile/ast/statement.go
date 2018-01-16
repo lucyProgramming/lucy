@@ -70,14 +70,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 	case STATEMENT_TYPE_EXPRESSION:
 		errs = append(errs, s.checkStatementExpression(b)...)
 	case STATEMENT_TYPE_IF:
-		t, es := s.StatementIf.check(b)
-		if len(es) > 0 {
-			errs = append(errs, es...)
-		}
-		if t != nil {
-			s.Typ = STATEMENT_TYPE_BLOCK
-		}
-		s.Block = t
+		errs = append(errs, s.StatementIf.check(b)...)
 	case STATEMENT_TYPE_FOR:
 		errs = append(errs, s.StatementFor.check(b)...)
 	case STATEMENT_TYPE_SWITCH:
@@ -236,37 +229,16 @@ func (s *StatementFor) check(block *Block) []error {
 	return errs
 }
 
-type ElseIfList []*StatementElseIf
-
-func (e ElseIfList) check(father *Block) []error {
-	errs := make([]error, 0)
-	var err error
-	for _, v := range e {
-		t, es := v.Block.checkExpression(v.Condition)
-		if errsNotEmpty(es) {
-			errs = append(errs, es...)
-			continue
-		}
-		if t.Typ != VARIABLE_TYPE_BOOL {
-			errs = append(errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(v.Condition.Pos), err))
-		}
-		errs = append(errs, v.Block.check(father)...)
-	}
-	return errs
-}
-
 type StatementIF struct {
 	BackPatchs [][]byte
 	Condition  *Expression
 	Block      *Block
 	ElseBlock  *Block
-	ElseIfList ElseIfList
+	ElseIfList []*StatementElseIf
 }
 
-func (s *StatementIF) check(father *Block) (*Block, []error) {
+func (s *StatementIF) check(father *Block) []error {
 	errs := []error{}
-	//inherite
-	s.Block.inherite(father)
 	conditionType, es := s.Block.checkExpression(s.Condition)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
@@ -276,31 +248,28 @@ func (s *StatementIF) check(father *Block) (*Block, []error) {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression", errMsgPrefix(s.Condition.Pos)))
 		}
 	}
-	// condition should a bool expression
-	if s.Condition.Typ == EXPRESSION_TYPE_BOOL && s.Condition.Data.(bool) == true { // if(true){...}
-		errs = append(errs, s.Block.check(nil)...)
-		return s.Block, errs
-	}
-	if s.Condition.Typ == EXPRESSION_TYPE_BOOL && s.Condition.Data.(bool) == false { // if(false){}else{...}
-		errs = append(errs, s.ElseBlock.check(father)...)
-		return s.Block, errs
-	}
-	errs = append(errs, s.Block.check(nil)...)
+	errs = append(errs, s.Block.check(father)...)
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
-		errs = append(errs, s.ElseIfList.check(father)...)
+		for _, v := range s.ElseIfList {
+			conditionType, es := s.Block.checkExpression(s.Condition)
+			if errsNotEmpty(es) {
+				errs = append(errs, es...)
+			}
+			if conditionType != nil {
+				if conditionType.Typ != VARIABLE_TYPE_BOOL {
+					errs = append(errs, fmt.Errorf("%s condition is not a bool expression", errMsgPrefix(s.Condition.Pos)))
+				}
+			}
+			errs = append(errs, v.Block.check(father)...)
+		}
 	}
 	if s.ElseBlock != nil {
 		errs = append(errs, s.ElseBlock.check(father)...)
 	}
-	return nil, errs
+	return errs
 }
 
 type StatementElseIf struct {
 	Condition *Expression
 	Block     *Block
 }
-
-//func (s *StatementElseIf) check() []error {
-//	errs := []error{}
-//	return errs
-//}

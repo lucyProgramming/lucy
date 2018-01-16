@@ -7,7 +7,6 @@ import (
 )
 
 type Package struct {
-	Expressions    []*Expression
 	loadedPackages map[string]*Package
 	Block          Block // package always have a default block
 	Files          map[string]*File
@@ -45,7 +44,6 @@ func (p *Package) TypeCheck() []error {
 		p.NErros = 10
 	}
 	errs := []error{}
-
 	errs = append(errs, p.Block.checkConst()...)
 	//
 	for _, v := range p.Block.Funcs {
@@ -58,24 +56,10 @@ func (p *Package) TypeCheck() []error {
 	for _, v := range p.Block.Classes {
 		errs = append(errs, v.check(&p.Block)...)
 	}
-	p.checkExpressions(&errs)
 	for _, v := range p.Blocks {
 		errs = append(errs, v.check(&p.Block)...)
 	}
 	return errs
-}
-
-func (p *Package) checkExpressions(errs *[]error) {
-	for _, v := range p.Expressions {
-		if v.Typ != EXPRESSION_TYPE_VAR && v.Typ != EXPRESSION_TYPE_COLON_ASSIGN {
-			*errs = append(*errs, fmt.Errorf("%s %s is not acceptable at top", errMsgPrefix(v.Pos), v.OpName()))
-			continue
-		}
-		_, es := v.check(&p.Block)
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
-	}
 }
 
 func (p *Package) loadPackage(name string) (*Package, error) {

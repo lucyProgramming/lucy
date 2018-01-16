@@ -181,12 +181,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	// m.leftValue(class, code, e)
 	return
 }
-func (m *MakeExpression) slotSize(v *ast.VariableType) uint16 {
-	if v.Typ == ast.VARIABLE_TYPE_LONG || v.Typ == ast.VARIABLE_TYPE_LONG {
-		return 2
-	}
-	return 1
-}
+
 func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	maxstack = 2
 	maxstack1, es := m.build(class, code, e.Data.(*ast.Expression), context) // in case !(xxx && a())

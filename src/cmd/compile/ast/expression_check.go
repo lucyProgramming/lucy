@@ -609,9 +609,27 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	identifer := e.Data.(*ExpressionIdentifer)
-	d, err := block.searchByName(identifer.Name)
-	if err != nil {
-		return nil, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err)
+	d := block.searchByName(identifer.Name)
+	if d == nil { // search failed
+		if block.InheritedAttribute.class != nil { // in class
+			f, err := block.InheritedAttribute.class.accessField(identifer.Name)
+			if err != nil {
+				return nil, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err)
+			} else {
+				if f.isStatic() {
+
+				} else {
+
+				}
+				e.Typ = EXPRESSION_TYPE_DOT
+				t := &ExpressionIndex{}
+				//				t.Expression =
+				e.Data = t
+			}
+		}
+	}
+	if d == nil {
+		return nil, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifer.Name)
 	}
 	switch d.(type) {
 	case *Function:
@@ -660,9 +678,9 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	switch e.Typ {
 	case EXPRESSION_TYPE_IDENTIFIER:
 		name := e.Data.(*ExpressionIdentifer)
-		d, err := block.searchByName(name.Name)
-		if err != nil {
-			return nil, []error{fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error())}
+		d := block.searchByName(name.Name)
+		if d == nil {
+			return nil, []error{fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), name.Name)}
 		}
 		switch d.(type) {
 		case *VariableDefinition:
@@ -739,11 +757,11 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 			*errs = append(*errs, fmt.Errorf("%s object`s field can only access by '.'", errMsgPrefix(e.Pos)))
 			return nil
 		}
-		f, accessable, err := obj.Class.accessField(index.Name)
+		f, err := obj.Class.accessField(index.Name)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		} else {
-			if !index.Expression.isThisIdentifierExpression() && !accessable {
+			if !index.Expression.isThisIdentifierExpression() && !f.isPublic() {
 				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), index.Name))
 			}
 		}

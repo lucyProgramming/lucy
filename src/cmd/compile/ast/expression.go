@@ -79,48 +79,48 @@ func (e *Expression) IsLiteral() bool {
 		e.Typ == EXPRESSION_TYPE_STRING
 }
 
-//receiver only one argument
-func (e *Expression) typeName(typ ...int) string {
-	t := e.Typ
-	if len(typ) > 0 {
-		t = typ[0]
-	}
-	switch t {
-	case EXPRESSION_TYPE_BOOL:
-		return "bool"
-	case EXPRESSION_TYPE_BYTE:
-		return "byte"
-	case EXPRESSION_TYPE_INT:
-		return "int"
-	case EXPRESSION_TYPE_FLOAT:
-		return "float"
-	case EXPRESSION_TYPE_STRING:
-		return "string"
-	case EXPRESSION_TYPE_EQ:
-		return "equal"
-	case EXPRESSION_TYPE_NE:
-		return "not equal"
-	case EXPRESSION_TYPE_GE:
-		return "greater than"
-	case EXPRESSION_TYPE_GT:
-		return "greater or equal"
-	case EXPRESSION_TYPE_LE:
-		return "less or equal"
-	case EXPRESSION_TYPE_LT:
-		return "less"
-	case EXPRESSION_TYPE_ADD:
-		return "add(+)"
-	case EXPRESSION_TYPE_SUB:
-		return "sub(-)"
-	case EXPRESSION_TYPE_MUL:
-		return "multiply(*)"
-	case EXPRESSION_TYPE_DIV:
-		return "divide(/)"
-	case EXPRESSION_TYPE_MOD:
-		return "mod(%)"
-	}
-	return ""
-}
+////receiver only one argument
+//func (e *Expression) typeName(typ ...int) string {
+//	t := e.Typ
+//	if len(typ) > 0 {
+//		t = typ[0]
+//	}
+//	switch t {
+//	case EXPRESSION_TYPE_BOOL:
+//		return "bool"
+//	case EXPRESSION_TYPE_BYTE:
+//		return "byte"
+//	case EXPRESSION_TYPE_INT:
+//		return "int"
+//	case EXPRESSION_TYPE_FLOAT:
+//		return "float"
+//	case EXPRESSION_TYPE_STRING:
+//		return "string"
+//	case EXPRESSION_TYPE_EQ:
+//		return "equal"
+//	case EXPRESSION_TYPE_NE:
+//		return "not equal"
+//	case EXPRESSION_TYPE_GE:
+//		return "greater than"
+//	case EXPRESSION_TYPE_GT:
+//		return "greater or equal"
+//	case EXPRESSION_TYPE_LE:
+//		return "less or equal"
+//	case EXPRESSION_TYPE_LT:
+//		return "less"
+//	case EXPRESSION_TYPE_ADD:
+//		return "add(+)"
+//	case EXPRESSION_TYPE_SUB:
+//		return "sub(-)"
+//	case EXPRESSION_TYPE_MUL:
+//		return "multiply(*)"
+//	case EXPRESSION_TYPE_DIV:
+//		return "divide(/)"
+//	case EXPRESSION_TYPE_MOD:
+//		return "mod(%)"
+//	}
+//	return ""
+//}
 
 type Expression struct {
 	VariableType          *VariableType //
@@ -137,7 +137,6 @@ type ExpressionFunctionCall struct {
 	Expression *Expression
 	Args       CallArgs
 	Func       *Function
-	FuncType   *FunctionType
 }
 
 type ExpressionDeclareVariable struct {
@@ -226,8 +225,12 @@ func (e *Expression) literalValue2Int64() float64 {
 	}
 }
 
-func (e *Expression) OpName() string {
-	switch e.Typ {
+func (e *Expression) OpName(typ ...int) string {
+	t := e.Typ
+	if len(typ) > 0 {
+		t = typ[0]
+	}
+	switch t {
 	case EXPRESSION_TYPE_BOOL:
 		return fmt.Sprintf("bool(%v)", e.Data.(bool))
 	case EXPRESSION_TYPE_BYTE:
@@ -402,7 +405,7 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) (inter
 			return v.(float64), nil
 		}
 	}
-	return nil, fmt.Errorf("cannot convert %s to %s", e.typeName(origin), e.typeName(target))
+	return nil, fmt.Errorf("cannot convert %s to %s", e.OpName(origin), e.OpName(target))
 }
 
 func (e *Expression) relationnalCompare(typ int, value1, value2 interface{}) (b bool, err error) {
@@ -729,7 +732,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			}
 			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
 			if err != nil {
-				err = fmt.Errorf("relation operation cannot apply to %s and %s", e.typeName(typ1), e.typeName(typ2))
+				err = fmt.Errorf("relation operation cannot apply to %s and %s", e.OpName(typ1), e.OpName(typ2))
 				return
 			}
 			b, er := e.relationnalCompare(typ1, value1, value2)

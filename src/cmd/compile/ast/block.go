@@ -7,7 +7,6 @@ import (
 
 type Block struct {
 	IsFunctionTop      bool
-	IsClassBlock       bool
 	Pos                *Pos
 	p                  *Package
 	Consts             map[string]*Const
@@ -19,57 +18,58 @@ type Block struct {
 	InheritedAttribute InheritedAttribute
 	Statements         []*Statement
 	Vars               map[string]*VariableDefinition
+	Varoffset          uint16
 }
 
-func (b *Block) searchByName(name string) (interface{}, error) {
+func (b *Block) searchByName(name string) interface{} {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
-			return t, nil
+			return t
 		}
 	}
 	if b.Classes != nil {
 		if t, ok := b.Classes[name]; ok {
-			return t, nil
+			return t
 		}
 	}
 	if b.Vars != nil {
 		if t, ok := b.Vars[name]; ok {
-			return t, nil
+			return t
 		}
 	}
 	if b.Consts != nil {
 		if t, ok := b.Consts[name]; ok {
-			return t, nil
+			return t
 		}
 	}
 	if b.Enums != nil {
 		if t, ok := b.Enums[name]; ok {
-			return t, nil
+			return t
 		}
 	}
 	if b.EnumNames != nil {
 		if t, ok := b.EnumNames[name]; ok {
-			return t, nil
+			return t
 		}
 	}
 	if b.InheritedAttribute.function != nil {
 		v := b.InheritedAttribute.function.ClosureVars.Search(name)
 		if v != nil {
-			return v, nil
+			return v
 		}
 	}
 	if b.Outter == nil {
-		return nil, fmt.Errorf("%s not found", name)
+		return nil
 	}
-	t, err := b.Outter.searchByName(name)
-	if err == nil { //found and in function top block and b.Outter is not top block
+	t := b.Outter.searchByName(name)
+	if t != nil { //found and in function top block and b.Outter is not top block
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
 			if b.InheritedAttribute.function != nil && b.IsFunctionTop && b.InheritedAttribute.function.IsGlobal == false {
 				b.InheritedAttribute.function.ClosureVars.Insert(v)
 			}
 		}
 	}
-	return t, err
+	return t
 }
 
 func (b *Block) inherite(father *Block) {
@@ -78,6 +78,7 @@ func (b *Block) inherite(father *Block) {
 	b.InheritedAttribute.StatementFor = father.InheritedAttribute.StatementFor
 	b.InheritedAttribute.function = father.InheritedAttribute.function
 	b.InheritedAttribute.closed_is_for = father.InheritedAttribute.closed_is_for
+	b.InheritedAttribute.topblock = father.InheritedAttribute.topblock
 	b.Outter = father
 }
 
@@ -89,6 +90,7 @@ type InheritedAttribute struct {
 	function        *Function
 	class           *Class
 	p               *Package
+	topblock        *Block
 }
 
 type NameWithType struct {
@@ -213,6 +215,8 @@ func (b *Block) checkFunctions() []error {
 			continue
 		}
 		errs = append(errs, v.check(b)...)
+		v.Block.Varoffset = 0
+		v.Block.InheritedAttribute.topblock = v.Block
 	}
 	return errs
 }
@@ -275,7 +279,11 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *Const:
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
-		b.Vars[name] = d.(*VariableDefinition)
+		t := d.(*VariableDefinition)
+		t.LocalValOffset = b.InheritedAttribute.topblock.Varoffset
+		b.InheritedAttribute.topblock.Varoffset += t.NameWithType.Typ.JvmSlotSize()
+		t.mkTypRight()
+		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)
 		b.Enums[name] = e

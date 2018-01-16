@@ -200,7 +200,7 @@ func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.Attri
 				} else if identifier.Var.LocalValOffset == 3 {
 					op = []byte{cg.OP_fstore_3}
 				} else if identifier.Var.LocalValOffset <= 255 {
-					op = []byte{cg.OP_fstore, identifier.Var.LocalValOffset}
+					op = []byte{cg.OP_fstore, byte(identifier.Var.LocalValOffset)}
 				} else {
 					panic("local float var out of range")
 				}
@@ -214,7 +214,7 @@ func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.Attri
 				} else if identifier.Var.LocalValOffset == 3 {
 					op = []byte{cg.OP_dstore_3}
 				} else if identifier.Var.LocalValOffset <= 255 {
-					op = []byte{cg.OP_dstore, identifier.Var.LocalValOffset}
+					op = []byte{cg.OP_dstore, byte(identifier.Var.LocalValOffset)}
 				} else {
 					panic("local float var out of range")
 				}
@@ -228,7 +228,7 @@ func (m *MakeExpression) buildLeftValue(class *cg.ClassHighLevel, code *cg.Attri
 				} else if identifier.Var.LocalValOffset == 3 {
 					op = []byte{cg.OP_lstore_3}
 				} else if identifier.Var.LocalValOffset <= 255 {
-					op = []byte{cg.OP_lstore, identifier.Var.LocalValOffset}
+					op = []byte{cg.OP_lstore, byte(identifier.Var.LocalValOffset)}
 				} else {
 					panic("local float var out of range")
 				}

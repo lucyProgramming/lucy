@@ -30,6 +30,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	c.Enums = make([]*Enum, 0)
 	c.Vars = make([]*VariableDefinition, 0)
 	c.Consts = make([]*Const, 0)
+	expressions := []*Expression{}
 	for _, v := range t {
 		switch v.Data.(type) {
 		case *Block:
@@ -64,15 +65,9 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 			}
 			p.Files[t.Pos.Filename].Package = t
 			p.Name = t.Name
-		case *ExpressionDeclareVariable: // var a,b int
-			t := v.Data.(*ExpressionDeclareVariable)
-			p.Expressions = append(p.Expressions, &Expression{
-				Typ:  EXPRESSION_TYPE_VAR,
-				Data: t,
-			})
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
-			p.Expressions = append(p.Expressions, t)
+			expressions = append(expressions, t)
 		default:
 			panic("tops have unkown type")
 		}
@@ -130,7 +125,19 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 			p.Block.EnumNames[vv.Name] = vv
 		}
 	}
-	p.Blocks = c.Blocks
+	if len(expressions) > 0 {
+		s := make([]*Statement, len(expressions))
+		for k, v := range expressions {
+			s[k] = &Statement{
+				Typ:        STATEMENT_TYPE_EXPRESSION,
+				Expression: v,
+			}
+		}
+		p.Blocks = []*Block{&Block{Statements: s}}
+	} else {
+		p.Blocks = []*Block{}
+	}
+	p.Blocks = append(p.Blocks, c.Blocks...)
 	return
 }
 

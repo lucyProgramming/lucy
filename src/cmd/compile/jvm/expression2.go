@@ -80,7 +80,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 		if v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || ast.EXPRESSION_TYPE_METHOD_CALL == v.Typ {
 			panic(1)
 		}
-		size = m.slotSize(e.VariableType)
+		size = e.VariableType.JvmSlotSize()
 		stack, es := m.build(class, code, v, context)
 		if stackneed+stack > maxstack {
 			maxstack = stackneed + stack

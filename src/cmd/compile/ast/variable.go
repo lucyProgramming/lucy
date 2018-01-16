@@ -3,7 +3,7 @@ package ast
 import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 
 type VariableDefinition struct {
-	LocalValOffset      byte
+	LocalValOffset      uint16
 	IsGlobal            bool
 	BeenCaptured        uint8
 	IsFunctionParameter bool
@@ -12,11 +12,20 @@ type VariableDefinition struct {
 	Pos                 *Pos
 	Expression          *Expression
 	NameWithType
-
 	Signature *class_json.FieldSignature
 }
 
-type Const struct {
-	VariableDefinition
-	Value interface{}
+func (v *VariableDefinition) mkTypRight() {
+	if v.Typ.isPrimitive() {
+		return
+	}
+	switch v.Typ.Typ {
+	case VARIABLE_TYPE_CLASS:
+		v.Typ.Typ = VARIABLE_TYPE_OBJECT
+	case VARIABLE_TYPE_ARRAY:
+		v.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+	default:
+		panic("......")
+	}
+
 }

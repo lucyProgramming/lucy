@@ -10,8 +10,8 @@ import (
 	"github.com/timtadh/lexmachine"
 )
 
-func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool) []error {
-	return (&Parser{bs: bs, tops: tops, filename: filename, onlyimport: onlyimport}).Parse()
+func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
+	return (&Parser{bs: bs, tops: tops, filename: filename, onlyimport: onlyimport, nerr: nerr}).Parse()
 }
 
 type Parser struct {
@@ -30,6 +30,7 @@ type Parser struct {
 	eof              bool
 	errs             []error
 	imports          map[string]*ast.Imports
+	nerr             int
 }
 
 func (p *Parser) Parse() []error {
@@ -99,6 +100,9 @@ func (p *Parser) Parse() []error {
 		isconst = false
 	}
 	for !p.eof {
+		if len(p.errs) > p.nerr {
+			break
+		}
 		switch p.token.Type {
 		case lex.TOKEN_SEMICOLON: // empty statement, no big deal
 			p.Next()
@@ -509,17 +513,6 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		}, nil
 	case lex.TOKEN_IDENTIFIER:
 		return p.parseIdentifierType()
-	case lex.TOKEN_FUNCTION:
-		p.Next()
-		t, err := p.parseFunctionType()
-		if err != nil {
-			return nil, err
-		}
-		return &ast.VariableType{
-			Typ:          ast.VARIABLE_TYPE_FUNCTION,
-			FunctionType: t,
-			Pos:          p.mkPos(),
-		}, nil
 	}
 	err = fmt.Errorf("%s unkown type,first token:%s", p.errorMsgPrefix(), p.token.Desp)
 	p.errs = append(p.errs, err)

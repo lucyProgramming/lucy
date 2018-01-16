@@ -2,12 +2,13 @@ package lc
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm"
-	"github.com/756445638/lucy/src/cmd/compile/parser"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm"
+	"github.com/756445638/lucy/src/cmd/compile/parser"
 )
 
 func Main(files []string) {
@@ -55,7 +56,7 @@ func (l *LucyCompile) compile() {
 			l.Nerrs = append(l.Nerrs, err)
 			continue
 		}
-		l.Nerrs = append(l.Nerrs, parser.Parse(&l.Tops, v, bs, CompileFlags.OnlyImport)...)
+		l.Nerrs = append(l.Nerrs, parser.Parse(&l.Tops, v, bs, CompileFlags.OnlyImport, l.NerrsStopCompile)...)
 		l.shouldExit()
 	}
 	c := ast.ConvertTops2Package{}
