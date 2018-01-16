@@ -5,14 +5,14 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) mkBuildinFunctionCall(class *cg.ClassHighLevel, call *ast.ExpressionFunctionCall, code cg.AttributeCode) {
+func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall) (maxstack uint16) {
 	switch call.Func.Name {
 	case "print":
-		m.mkBuildinPrint(class, call, code)
+		return m.mkBuildinPrint(class, code, call)
 	case "panic":
-		m.mkBuildinPanic(class, call, code)
+		return m.mkBuildinPanic(class, code, call)
 	case "recover":
-		m.mkBuildinRecover(class, call, code)
+		return m.mkBuildinRecover(class, code, call)
 	default:
 		panic("unhandle buildin function" + call.Func.Name)
 	}

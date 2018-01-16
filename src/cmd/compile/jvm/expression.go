@@ -144,7 +144,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:
+
 	case ast.EXPRESSION_TYPE_FUNCTION_CALL:
+
 	//
 	case ast.EXPRESSION_TYPE_INCREMENT:
 		fallthrough
@@ -358,7 +360,7 @@ func (m *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 	}
 }
 
-func (m *MakeExpression) primitiveConverter(code *cg.AttributeCode, typ int, target int) {
+func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, target int) {
 	if typ == target {
 		return
 	}

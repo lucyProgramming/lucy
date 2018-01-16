@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -19,14 +20,14 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			target = ast.VARIABLE_TYPE_LONG
 		}
 		if target != bin.Left.VariableType.Typ {
-			m.primitiveConverter(code, bin.Left.VariableType.Typ, target)
+			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
 		}
 		stack, _ = m.build(class, code, bin.Right, context)
 		if stack+2 > maxstack {
 			maxstack = stack + 2
 		}
 		if target != bin.Right.VariableType.Typ {
-			m.primitiveConverter(code, bin.Right.VariableType.Typ, target)
+			m.numberTypeConverter(code, bin.Right.VariableType.Typ, target)
 		}
 		switch target {
 		case ast.VARIABLE_TYPE_LONG:
@@ -187,14 +188,14 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			panic(1)
 		}
 		if e.VariableType.Typ != bin.Left.Typ {
-			m.primitiveConverter(code, bin.Left.Typ, e.VariableType.Typ)
+			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
 		stack, _ = m.build(class, code, bin.Right, context)
 		if stack+2 > maxstack {
 			maxstack = stack + 2
 		}
 		if e.VariableType.Typ != bin.Right.VariableType.Typ {
-			m.primitiveConverter(code, bin.Right.Typ, e.VariableType.Typ)
+			m.numberTypeConverter(code, bin.Right.Typ, e.VariableType.Typ)
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:

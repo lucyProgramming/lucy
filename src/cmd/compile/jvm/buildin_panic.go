@@ -5,6 +5,6 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) mkBuildinPanic(class *cg.ClassHighLevel, call *ast.ExpressionFunctionCall, code cg.AttributeCode) {
-
+func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall) (maxstack uint16) {
+	return
 }
