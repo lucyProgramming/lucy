@@ -288,6 +288,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
+	panic(12)
 	return
 }
 

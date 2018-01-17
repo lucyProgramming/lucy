@@ -79,53 +79,10 @@ func (e *Expression) IsLiteral() bool {
 		e.Typ == EXPRESSION_TYPE_STRING
 }
 
-////receiver only one argument
-//func (e *Expression) typeName(typ ...int) string {
-//	t := e.Typ
-//	if len(typ) > 0 {
-//		t = typ[0]
-//	}
-//	switch t {
-//	case EXPRESSION_TYPE_BOOL:
-//		return "bool"
-//	case EXPRESSION_TYPE_BYTE:
-//		return "byte"
-//	case EXPRESSION_TYPE_INT:
-//		return "int"
-//	case EXPRESSION_TYPE_FLOAT:
-//		return "float"
-//	case EXPRESSION_TYPE_STRING:
-//		return "string"
-//	case EXPRESSION_TYPE_EQ:
-//		return "equal"
-//	case EXPRESSION_TYPE_NE:
-//		return "not equal"
-//	case EXPRESSION_TYPE_GE:
-//		return "greater than"
-//	case EXPRESSION_TYPE_GT:
-//		return "greater or equal"
-//	case EXPRESSION_TYPE_LE:
-//		return "less or equal"
-//	case EXPRESSION_TYPE_LT:
-//		return "less"
-//	case EXPRESSION_TYPE_ADD:
-//		return "add(+)"
-//	case EXPRESSION_TYPE_SUB:
-//		return "sub(-)"
-//	case EXPRESSION_TYPE_MUL:
-//		return "multiply(*)"
-//	case EXPRESSION_TYPE_DIV:
-//		return "divide(/)"
-//	case EXPRESSION_TYPE_MOD:
-//		return "mod(%)"
-//	}
-//	return ""
-//}
-
 type Expression struct {
-	VariableType          *VariableType //
-	VariableTypes         *VariableType // f
-	IsPublic              bool          // only used in top
+	VariableType          *VariableType   //
+	VariableTypes         []*VariableType // f
+	IsPublic              bool            // only used in top
 	Pos                   *Pos
 	Typ                   int
 	Data                  interface{}

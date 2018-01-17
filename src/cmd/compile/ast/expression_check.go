@@ -130,8 +130,10 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		e.checkVarExpression(block, &errs)
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		t = e.checkFunctionCallExpression(block, &errs)
+		e.VariableTypes = t
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
+		e.VariableTypes = t
 	case EXPRESSION_TYPE_NOT:
 		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:
@@ -314,15 +316,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		switch call.Name {
 		case "size":
-			e.VariableType = &VariableType{}
-			e.VariableType.Typ = VARIABLE_TYPE_INT
-			e.VariableType.Pos = e.Pos
+			t = &VariableType{}
+			t.Typ = VARIABLE_TYPE_INT
+			t.Pos = e.Pos
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call 'size'", errMsgPrefix(e.Pos)))
 			}
-			return []*VariableType{
-				e.VariableType,
-			}
+			return []*VariableType{t}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call %s on array", errMsgPrefix(e.Pos), call.Name))
 		}

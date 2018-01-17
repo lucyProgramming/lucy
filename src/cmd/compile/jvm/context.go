@@ -5,8 +5,5 @@ import (
 )
 
 type Context struct {
-	Vars     map[string]*ast.VariableDefinition
-	Receiver *ast.VariableType
 	Function *ast.Function
-	Class    *ast.Class
 }

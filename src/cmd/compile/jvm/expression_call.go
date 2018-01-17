@@ -8,8 +8,9 @@ import (
 func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Func.Isbuildin {
-		return m.mkBuildinFunctionCall(class, code, call)
+		return m.mkBuildinFunctionCall(class, code, call, context)
 	}
+
 	return
 }
 
