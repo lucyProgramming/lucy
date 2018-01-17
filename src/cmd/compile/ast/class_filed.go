@@ -13,5 +13,5 @@ func (f *ClassField) isStatic() bool {
 }
 
 func (f *ClassField) isPublic() bool {
-	return (f.AccessFlags & cg.ACC_FIELD_STATIC) != 0
+	return (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
 }

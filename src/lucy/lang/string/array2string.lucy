@@ -1,0 +1,78 @@
+package string;
+
+import "java/lang" as javalang;
+
+public class ArrayToString{
+	public static fn(arr []bool)->(result string){
+		result = "[";
+		length := arr.size();
+		for i := 0;i<length;i++{
+			result += javalang.String.valueOf(arr[i]);
+			if i != length -1{
+				result += " "
+			}
+		}
+		result += "]"
+	}
+	public static fn(arr []int)->(result string){
+		result = "[";
+		length := arr.size();
+		for i := 0;i<length;i++{
+			result += javalang.String.valueOf(arr[i]);
+			if i != length -1{
+				result += " "
+			}
+		}
+		result += "]"
+	}
+	public static fn(arr []long)->(result string){
+		result = "[";
+		length := arr.size();
+		for i := 0;i<length;i++{
+			result += javalang.String.valueOf(arr[i]);
+			if i != length -1{
+				result += " "
+			}
+		}
+		result += "]"
+	}
+	public static fn(arr []float)->(result string){
+		result = "[";
+		length := arr.size();
+		for i := 0;i<length;i++{
+			result += javalang.String.valueOf(arr[i]);
+			if i != length -1{
+				result += " "
+			}
+		}
+		result += "]"
+	}
+	public static fn(arr []double)->(result string){
+		result = "[";
+		length := arr.size();
+		for i := 0;i<length;i++{
+			result += javalang.String.valueOf(arr[i]);
+			if i != length -1{
+				result += " "
+			}
+		}
+		result += "]"
+	}
+	public static fn(arr []javalang.Object)->(result string){
+		result = "[";
+		length := arr.size();
+		for i := 0;i<length;i++{
+			result += javalang.String.valueOf(arr[i]);
+			if i != length -1{
+				result += " "
+			}
+		}
+		result += "]"
+	}	
+}
+
+
+
+
+
+

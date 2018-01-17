@@ -124,6 +124,7 @@ func (e *Expression) IsLiteral() bool {
 
 type Expression struct {
 	VariableType          *VariableType //
+	VariableTypes         *VariableType // f
 	IsPublic              bool          // only used in top
 	Pos                   *Pos
 	Typ                   int

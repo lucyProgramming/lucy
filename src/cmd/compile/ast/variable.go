@@ -12,7 +12,8 @@ type VariableDefinition struct {
 	Pos                 *Pos
 	Expression          *Expression
 	NameWithType
-	Signature *class_json.FieldSignature
+	Signature  *class_json.FieldSignature
+	Descriptor string
 }
 
 func (v *VariableDefinition) mkTypRight() {

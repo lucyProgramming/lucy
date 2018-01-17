@@ -311,6 +311,23 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if err != nil {
 		*errs = append(*errs, err)
 	}
+	if t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+		switch call.Name {
+		case "size":
+			e.VariableType = &VariableType{}
+			e.VariableType.Typ = VARIABLE_TYPE_INT
+			e.VariableType.Pos = e.Pos
+			if len(call.Args) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call 'size'", errMsgPrefix(e.Pos)))
+			}
+			return []*VariableType{
+				e.VariableType,
+			}
+		default:
+			*errs = append(*errs, fmt.Errorf("%s unkown call %s on array", errMsgPrefix(e.Pos), call.Name))
+		}
+		return nil
+	}
 	if t.Typ != VARIABLE_TYPE_OBJECT {
 		*errs = append(*errs, fmt.Errorf("%s cannot make method call on a none object", errMsgPrefix(e.Pos)))
 	}

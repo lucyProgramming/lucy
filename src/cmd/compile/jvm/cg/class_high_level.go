@@ -38,8 +38,9 @@ func (c *ClassHighLevel) InsertNameAndType(nt CONSTANT_NameAndType_info_high_Lev
 }
 
 type CONSTANT_Methodref_info_high_level struct {
-	Class       string
-	NameAndType string
+	Class string
+	Name  string
+	Type  string
 }
 
 func (c *ClassHighLevel) InsertMethodRef(mr CONSTANT_Methodref_info_high_level, location []byte) {
@@ -54,8 +55,9 @@ func (c *ClassHighLevel) InsertMethodRef(mr CONSTANT_Methodref_info_high_level, 
 }
 
 type CONSTANT_Fieldref_info_high_level struct {
-	Class       string
-	NameAndType string
+	Class string
+	Name  string
+	Type  string
 }
 
 func (c *ClassHighLevel) InsertFieldRef(fr CONSTANT_Fieldref_info_high_level, location []byte) {

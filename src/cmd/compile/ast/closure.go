@@ -4,7 +4,7 @@ type ClosureVars struct {
 	Vars map[string]*ClosureVar
 }
 
-func (c *ClosureVars) ClosureVarsExist(name string, v *VariableDefinition) (times uint8, is bool) {
+func (c *ClosureVars) ClosureVarsExist(name string, v *VariableDefinition) (level uint8, is bool) {
 	if c.Vars == nil {
 		is = false
 		return
@@ -14,9 +14,9 @@ func (c *ClosureVars) ClosureVarsExist(name string, v *VariableDefinition) (time
 		is = false
 		return
 	}
-	times, is = vv.Level, true
-	return
+	return vv.Level, true
 }
+
 func (c *ClosureVars) NotEmpty() bool {
 	return c.Vars != nil && len(c.Vars) > 0
 }

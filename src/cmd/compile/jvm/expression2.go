@@ -23,7 +23,8 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		}
 		f := cg.CONSTANT_Fieldref_info_high_level{}
 		f.Class = index.Expression.VariableType.Class.Name
-		f.NameAndType = index.Name
+		f.Name = index.Name
+		f.Type = index.Field.Descriptor
 		class.InsertFieldRef(f, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	default:
 		panic(1)
@@ -90,8 +91,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{
-		Class:       n.Typ.Class.Name,
-		NameAndType: n.Construction.Func.Name + n.Construction.Func.Descriptor,
+		Class: n.Typ.Class.Name,
+		Name:  n.Construction.Func.Name,
+		Type:  n.Construction.Func.Descriptor,
 	}
 	class.InsertMethodRef(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
