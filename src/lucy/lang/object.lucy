@@ -1,0 +1,19 @@
+package lang;
+
+import "java/lang" as javalang;
+
+
+
+public class LucyObject extends  javalang.Object{
+	
+	
+
+
+}
+
+
+
+
+
+
+

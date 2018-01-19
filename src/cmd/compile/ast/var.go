@@ -10,12 +10,12 @@ type PackageLoader interface {
 }
 
 var (
-	THIS = "this"
-
-	Nodes           *[]*Node //
-	packageAliasReg *regexp.Regexp
-	PackageLoad     PackageLoader
-	JAVA_ROOT_CLASS = "java/lang/Object"
+	THIS                    = "this"
+	SIGNAL_UNERDERLINE_NAME = "_"
+	Nodes                   *[]*Node //
+	packageAliasReg         *regexp.Regexp
+	PackageLoad             PackageLoader
+	JAVA_ROOT_CLASS         = "java/lang/Object"
 )
 
 type NameWithPos struct {

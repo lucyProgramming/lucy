@@ -41,8 +41,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
-	if c.parser.token.Type == lex.TOKEN_COLON { // parse father expression
-		c.Next() // skip :
+	if c.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
+		c.Next() // skip extends
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 			c.parser.errs = append(c.parser.errs, err)
@@ -54,6 +54,12 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err
 			}
+		}
+	}
+	if c.parser.token.Type == lex.TOKEN_IMPLEMENTS {
+		c.Next() // skip implements
+		for c.parser.token.Type != lex.TOKEN_LC {
+			c.Next() // skip all until  {
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {

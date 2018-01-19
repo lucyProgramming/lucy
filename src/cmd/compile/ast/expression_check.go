@@ -529,7 +529,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 	for _, v := range lefts {
 		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifer)
-			if name.Name == "_" { // skip "_"
+			if name.Name == SIGNAL_UNERDERLINE_NAME { // skip "_"
 				lefts = append(lefts, nil)
 				continue
 			}
@@ -549,7 +549,6 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		if v == nil {
 			continue
 		}
-
 		if k < len(valueTypes) {
 			if !leftTypes[k].typeCompatible(valueTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(e.Pos), leftTypes[k].TypeString(), valueTypes[k].TypeString()))
@@ -588,8 +587,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			continue
 		}
 		name := v.Data.(*ExpressionIdentifer)
-		if name.Name == "_" {
-
+		if name.Name == SIGNAL_UNERDERLINE_NAME {
 			continue
 		}
 		if variable, ok := block.Vars[name.Name]; ok {

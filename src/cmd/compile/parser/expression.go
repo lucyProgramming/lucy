@@ -104,57 +104,55 @@ func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error)
 			ep.Next() // skip ]
 			ep.Next()
 			result = newresult
-		} else if ep.parser.token.Type == lex.TOKEN_LP { // a() or a.say() a["call"]()
-			ep.Next()
-			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedEofErr()
-			}
-			args := []*ast.Expression{}
-			if ep.parser.token.Type != lex.TOKEN_RP { //a(123)
-				args, err = ep.parseExpressions()
-				if err != nil {
-					break
-				}
-			} else { //ep.parser.token.Type == lex.TOKEN_RP
-			}
-			if ep.parser.token.Type != lex.TOKEN_RP {
-				err = fmt.Errorf("%s except ')' ,but %s",
-					ep.parser.errorMsgPrefix(),
-					ep.parser.token.Desp)
-				break
-			}
-			if result.Typ == ast.EXPRESSION_TYPE_IDENTIFIER || result.Typ == ast.EXPRESSION_TYPE_INDEX {
-				newresult := &ast.Expression{
-					Typ: ast.EXPRESSION_TYPE_FUNCTION_CALL,
-					Pos: ep.parser.mkPos(),
-				}
-				call := &ast.ExpressionFunctionCall{}
-				call.Expression = result
-				call.Args = args
-				newresult.Data = call
-				result = newresult
-			} else if result.Typ == ast.EXPRESSION_TYPE_DOT {
-				newresult := &ast.Expression{
-					Typ: ast.EXPRESSION_TYPE_METHOD_CALL,
-					Pos: ep.parser.mkPos(),
-				}
-				call := &ast.ExpressionMethodCall{}
-				binary := result.Data.(*ast.ExpressionBinary)
-				call.Expression = binary.Left
-				call.Name = binary.Right.Data.(string)
-				call.Args = args
-				result = newresult
-			} else {
-				err = fmt.Errorf("%s %d%d can`t make call on that situation", ep.parser.filename, ep.parser.token.Match.StartLine, ep.parser.token.Match.StartColumn)
-				break
-			}
-			ep.Next() // skip )
 		} else {
 			// something i can`t handle
 			return result, err
 		}
 	}
 	return result, err
+}
+
+func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
+	var err error
+	ep.Next() // skip (
+	if ep.parser.eof {
+		return nil, ep.parser.mkUnexpectedEofErr()
+	}
+	args := []*ast.Expression{}
+	if ep.parser.token.Type != lex.TOKEN_RP { //a(123)
+		args, err = ep.parseExpressions()
+		if err != nil {
+			return nil, err
+		}
+	} else { //ep.parser.token.Type == lex.TOKEN_RP
+	}
+	if ep.parser.token.Type != lex.TOKEN_RP {
+		return nil, fmt.Errorf("%s except ')' ,but %s",
+			ep.parser.errorMsgPrefix(),
+			ep.parser.token.Desp)
+	}
+	var result ast.Expression
+	if e.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {
+		call := &ast.ExpressionFunctionCall{}
+		call.Expression = e
+		call.Args = args
+		result.Typ = ast.EXPRESSION_TYPE_FUNCTION_CALL
+		result.Data = call
+		result.Pos = ep.parser.mkPos()
+	} else if result.Typ == ast.EXPRESSION_TYPE_DOT {
+		call := &ast.ExpressionMethodCall{}
+		binary := result.Data.(*ast.ExpressionBinary)
+		call.Expression = binary.Left
+		call.Name = binary.Right.Data.(string)
+		call.Args = args
+		result.Typ = ast.EXPRESSION_TYPE_METHOD_CALL
+		result.Data = call
+		result.Pos = ep.parser.mkPos()
+	} else {
+		err = fmt.Errorf("%s can`t make call on '%s'", ep.parser.errorMsgPrefix())
+	}
+	ep.Next() // skip )
+	return &result, nil
 }
 
 func (ep *ExpressionParser) parseIdentifierExpressions() (ret []*ast.Expression, err error) {
