@@ -412,7 +412,10 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	for k, v := range f.Typ.Parameters {
 		if k < len(callargsTypes) {
 			if !v.Typ.typeCompatible(callargsTypes[k]) {
-				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(args[k].Pos), v.Typ.TypeString(), callargsTypes[k].TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s",
+					errMsgPrefix(args[k].Pos),
+					v.Typ.TypeString(),
+					callargsTypes[k].TypeString()))
 			}
 		}
 	}
@@ -480,7 +483,8 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Vari
 		return nil
 	}
 	if !t.IsNumber() {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply ++ or -- on %s", errMsgPrefix(ee.Pos), t.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot apply ++ or -- on %s",
+			errMsgPrefix(ee.Pos), t.TypeString()))
 	}
 	tt := t.Clone()
 	tt.Pos = e.Pos
@@ -516,7 +520,10 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		}
 	}
 	if len(lefts) != len(valueTypes) {
-		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations", errMsgPrefix(e.Pos), len(valueTypes), len(lefts)))
+		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
+			errMsgPrefix(e.Pos),
+			len(valueTypes),
+			len(lefts)))
 	}
 	for k, v := range leftTypes {
 		if v == nil {
@@ -524,7 +531,10 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		}
 		if k < len(valueTypes) {
 			if !leftTypes[k].typeCompatible(valueTypes[k]) {
-				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(e.Pos), leftTypes[k].TypeString(), valueTypes[k].TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s",
+					errMsgPrefix(e.Pos),
+					leftTypes[k].TypeString(),
+					valueTypes[k].TypeString()))
 			}
 		}
 	}
@@ -550,7 +560,10 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	values := binary.Right.Data.([]*Expression)
 	ts := e.checkExpressions(block, values, errs)
 	if len(names) != len(ts) {
-		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations", errMsgPrefix(e.Pos), len(ts), len(names)))
+		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
+			errMsgPrefix(e.Pos),
+			len(ts),
+			len(names)))
 	}
 	var err error
 	var noNewVaraible bool
@@ -674,7 +687,8 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		case *VariableDefinition:
 			return d.(*VariableDefinition).Typ, nil
 		default:
-			errs = append(errs, fmt.Errorf("%s identifier %s is not variable", errMsgPrefix(e.Pos), name.Name))
+			errs = append(errs, fmt.Errorf("%s identifier %s is not variable",
+				errMsgPrefix(e.Pos), name.Name))
 			return nil, []error{}
 		}
 	case EXPRESSION_TYPE_INDEX:
@@ -682,7 +696,9 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	case EXPRESSION_TYPE_DOT:
 		return e.checkIndexExpression(block, &errs), errs
 	default:
-		errs = append(errs, fmt.Errorf("%s %s cannot be used as left value", errMsgPrefix(e.Pos), e.OpName()))
+		errs = append(errs, fmt.Errorf("%s %s cannot be used as left value",
+			errMsgPrefix(e.Pos),
+			e.OpName()))
 		return nil, errs
 	}
 }
@@ -735,14 +751,16 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		}
 		if t != nil {
 			if !t.IsInteger() {
-				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index", errMsgPrefix(e.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index",
+					errMsgPrefix(e.Pos)))
 			}
 		}
 		return obj.CombinationType
 	}
 	if obj.Typ == VARIABLE_TYPE_OBJECT {
 		if e.Typ != EXPRESSION_TYPE_DOT {
-			*errs = append(*errs, fmt.Errorf("%s object`s field can only access by '.'", errMsgPrefix(e.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s object`s field can only access by '.'",
+				errMsgPrefix(e.Pos)))
 			return nil
 		}
 		f, err := obj.Class.accessField(index.Name)
@@ -750,7 +768,8 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		} else {
 			if !index.Expression.isThisIdentifierExpression() && !f.isPublic() {
-				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos), index.Name))
+				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos),
+					index.Name))
 			}
 		}
 		if f != nil {
@@ -783,14 +802,24 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	//number
 	if t1.IsNumber() {
 		if !t2.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on number and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on number and '%s'",
+				errMsgPrefix(e.Pos),
+				e.OpName(),
+				t2.TypeString()))
 		}
 	} else if t1.Typ == VARIABLE_TYPE_STRING {
 		if t2.Typ != VARIABLE_TYPE_STRING {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
+				errMsgPrefix(e.Pos),
+				e.OpName(),
+				t2.TypeString()))
 		}
 	} else {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
+			errMsgPrefix(e.Pos),
+			e.OpName(),
+			t1.TypeString(),
+			t2.TypeString()))
 	}
 	tt := t1.Clone()
 	tt.Pos = e.Pos
@@ -824,10 +853,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR || EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
 		if t1.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'", errMsgPrefix(binary.Left.Pos), t1.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
+				errMsgPrefix(binary.Left.Pos),
+				t1.TypeString()))
 		}
 		if t2.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'", errMsgPrefix(binary.Right.Pos), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
+				errMsgPrefix(binary.Right.Pos),
+				t2.TypeString()))
 		}
 		t = &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
@@ -845,7 +878,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(binary.Right.Pos)))
 		}
 		if t1.Typ != t2.Typ {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'", errMsgPrefix(binary.Right.Pos), t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
+				errMsgPrefix(binary.Right.Pos),
+				t1.TypeString(),
+				t2.TypeString()))
 		}
 		tt := t1.Clone()
 		tt.Pos = e.Pos
@@ -855,10 +891,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.IsInteger() {
-			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'", errMsgPrefix(binary.Left.Pos), t1.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
+				errMsgPrefix(binary.Left.Pos),
+				t1.TypeString()))
 		}
 		if !t2.IsInteger() {
-			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'", errMsgPrefix(binary.Right.Pos), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
+				errMsgPrefix(binary.Right.Pos),
+				t2.TypeString()))
 		}
 		tt := t1.Clone()
 		tt.Pos = e.Pos
@@ -883,38 +923,60 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 			fallthrough
 		case VARIABLE_TYPE_LONG:
 			if !t2.IsNumber() {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'number' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'number' and '%s'",
+					errMsgPrefix(e.Pos),
+					e.OpName(),
+					t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
 			if t2.Typ != VARIABLE_TYPE_STRING {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'string' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'string' and '%s'",
+					errMsgPrefix(e.Pos),
+					e.OpName(),
+					t2.TypeString()))
 			}
 		case VARIABLE_TYPE_BOOL:
 			if t2.Typ == VARIABLE_TYPE_BOOL {
 				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-					*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and 'bool'", errMsgPrefix(e.Pos), e.OpName()))
+					*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and 'bool'",
+						errMsgPrefix(e.Pos),
+						e.OpName()))
 				}
 			} else {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and '%s'",
+					errMsgPrefix(e.Pos),
+					e.OpName(),
+					t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
 			if t2.IsPointer() {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'(non-pointer)", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'(non-pointer)",
+					errMsgPrefix(e.Pos),
+					e.OpName(),
+					t2.TypeString()))
 			}
 			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ", errMsgPrefix(e.Pos), e.OpName()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ",
+					errMsgPrefix(e.Pos),
+					e.OpName()))
 			}
 		case VARIABLE_TYPE_ARRAY_INSTANCE:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:
 			if t2.IsPointer() == false && t2.Typ != VARIABLE_TYPE_NULL {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'pointer' and '%s'(non-pointer)", errMsgPrefix(e.Pos), e.OpName(), t2.TypeString()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'pointer' and '%s'(non-pointer)",
+					errMsgPrefix(e.Pos),
+					e.OpName(),
+					t2.TypeString()))
 			}
 			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ", errMsgPrefix(e.Pos), e.OpName()))
 			}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos),
+				e.OpName(),
+				t1.TypeString(),
+				t2.TypeString()))
 		}
 		t := &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
@@ -928,19 +990,25 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		e.Typ == EXPRESSION_TYPE_MUL ||
 		e.Typ == EXPRESSION_TYPE_DIV ||
 		e.Typ == EXPRESSION_TYPE_MOD {
-		if t1.IsNumber() {
-			if !t2.IsNumber() {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(binary.Right.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
-			}
-		} else if t1.Typ == VARIABLE_TYPE_STRING {
-			if e.Typ != EXPRESSION_TYPE_ADD || t2.Typ != VARIABLE_TYPE_STRING {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm  '%s' on 'string' and ", errMsgPrefix(binary.Right.Pos), e.OpName(), t2.TypeString()))
-			}
+		if t1.Typ == VARIABLE_TYPE_STRING || t2.Typ == VARIABLE_TYPE_STRING {
 			tt := t1.Clone()
 			tt.Pos = e.Pos
 			return tt
+		}
+		if t1.IsNumber() {
+			if !t2.IsNumber() {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
+					errMsgPrefix(binary.Right.Pos),
+					e.OpName(),
+					t1.TypeString(),
+					t2.TypeString()))
+			}
 		} else {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
+				errMsgPrefix(e.Pos),
+				e.OpName(),
+				t1.TypeString(),
+				t2.TypeString()))
 		}
 		tt := &VariableType{}
 		tt.Pos = e.Pos

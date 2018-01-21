@@ -1,160 +1,21 @@
 package jvm
 
 import (
-	"encoding/binary"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	bin := e.Data.(*ast.ExpressionBinary)
-	if bin.Left.VariableType.IsNumber() { // in this case ,right must be a number type
-		maxstack = 4
-		stack, _ := m.build(class, code, bin.Left, context)
-		if stack > maxstack {
-			maxstack = stack
-		}
-		target := e.VariableType.Typ // this is target
-		if target == ast.VARIABLE_TYPE_INT || target == ast.VARIABLE_TYPE_SHORT || target == ast.VARIABLE_TYPE_BYTE {
-			target = ast.VARIABLE_TYPE_LONG
-		}
-		if target != bin.Left.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
-		}
-		stack, _ = m.build(class, code, bin.Right, context)
-		if 2+stack > maxstack {
-			maxstack = 2 + stack
-		}
-		if target != bin.Right.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Right.VariableType.Typ, target)
-		}
-		switch target {
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_lcmp
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_fcmpl
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_dcmpl
-		}
-		code.CodeLength++
-		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE { // > and <=
-			if e.Typ == ast.EXPRESSION_TYPE_GT {
-				code.Codes[code.CodeLength] = cg.OP_ifge
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifge
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		}
-		if e.Typ == ast.EXPRESSION_TYPE_EQ || e.Typ == ast.EXPRESSION_TYPE_NE { // == and !=
-			if e.Typ == ast.EXPRESSION_TYPE_EQ {
-				code.Codes[code.CodeLength] = cg.OP_ifeq
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifne
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		}
-		if e.Typ == ast.EXPRESSION_TYPE_EQ || e.Typ == ast.EXPRESSION_TYPE_NE { // < and >=
-			if e.Typ == ast.EXPRESSION_TYPE_LE {
-				code.Codes[code.CodeLength] = cg.OP_iflt
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifge
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		}
-		return
-	}
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
-		maxstack = 2
-		if e.Typ == ast.EXPRESSION_TYPE_EQ {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
-		return
-	}
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_NULL || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_NULL {
-		var stack uint16
-		if bin.Left.VariableType.Typ != ast.VARIABLE_TYPE_NULL {
-			stack, _ = m.build(class, code, bin.Left, context)
-		} else {
-			stack, _ = m.build(class, code, bin.Right, context)
-		}
-		if stack > maxstack {
-			maxstack = stack
-		}
-		if e.Typ == ast.EXPRESSION_TYPE_EQ {
-			code.Codes[code.CodeLength] = cg.OP_ifnull
-		} else { // ne
-			code.Codes[code.CodeLength] = cg.OP_ifnonnull
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
-		return
-	}
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_OBJECT || ast.VARIABLE_TYPE_ARRAY_INSTANCE == bin.Left.VariableType.Typ { //
-		maxstack = uint16(1)
-		stack, _ := m.build(class, code, bin.Left, context)
-		if stack > maxstack {
-			maxstack = stack
-		}
-		stack, _ = m.build(class, code, bin.Right, context)
-		if stack+1 > maxstack {
-			maxstack = stack + 1
-		}
-		if e.Typ == ast.EXPRESSION_TYPE_EQ {
-			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
-		} else { // ne
-			code.Codes[code.CodeLength] = cg.OP_if_acmpne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
-		return
-	}
-	panic("missing")
-	return
-}
-
 func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack = 2
-	stack, _ := m.build(class, code, bin.Left, context)
-	if stack > maxstack {
-		maxstack = stack
-	}
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		stack, _ := m.build(class, code, bin.Right, context)
-		if stack+2 > maxstack {
-			maxstack = stack + 2
+		stack, _ := m.build(class, code, bin.Left, context)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		size := bin.Left.VariableType.JvmSlotSize()
+		stack, _ = m.build(class, code, bin.Right, context)
+		if stack+size > maxstack {
+			maxstack = stack + size
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -185,14 +46,16 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_ADD || e.Typ == ast.EXPRESSION_TYPE_SUB || e.Typ == ast.EXPRESSION_TYPE_MUL ||
 		e.Typ == ast.EXPRESSION_TYPE_DIV || e.Typ == ast.EXPRESSION_TYPE_MOD {
-		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
-			panic(1)
+		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
+			return m.buildStrCat(class, code, bin, context)
 		}
+		maxstack, _ = m.build(class, code, bin.Left, context)
+		//number type,no doubt
 		if e.VariableType.Typ != bin.Left.Typ {
 			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
-		stack, _ = m.build(class, code, bin.Right, context)
-		if stack+2 > maxstack {
+		stack, _ := m.build(class, code, bin.Right, context)
+		if stack+2 > maxstack { // 2 in case long or double type on stack top
 			maxstack = stack + 2
 		}
 		if e.VariableType.Typ != bin.Right.VariableType.Typ {
@@ -291,6 +154,39 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	panic(12)
 	return
+}
+
+func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary, context *Context) (maxstack uint16) {
+	code.Codes[code.CodeLength] = cg.OP_new
+	class.InsertClasses("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength+3] = cg.OP_dup
+	code.CodeLength += 4
+	maxstack = 2 // current stack is 2
+	stack, _ := m.build(class, code, e.Left, context)
+	maxstack += stack
+	code.Codes[code.CodeLength] = cg.OP_invokespecial
+	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		Class: "java/lang/StringBuilder",
+		Name:  `<init>`,
+		Type:  "(Ljava/lang/String;)V",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	stack, _ = m.build(class, code, e.Right, context)
+	maxstack += stack
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		Class: "java/lang/StringBuilder",
+		Name:  `append`,
+		Type:  "(Ljava/lang/String;)java/lang/StringBuilder;",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		Class: "java/lang/StringBuilder",
+		Name:  `toString`,
+		Type:  "()java/lang/String;",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	return maxstack
 }
 
 func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits [][]byte) {

@@ -126,6 +126,7 @@ func (s *Statement) checkStatementExpression(b *Block) (errs []error) {
 	} else {
 		errs = append(errs, fmt.Errorf("%s expression evaluate but not used", errMsgPrefix(s.Expression.Pos)))
 	}
+	s.Expression.IsStatementExpression = true
 	_, es := b.checkExpression_(s.Expression)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
@@ -200,6 +201,7 @@ func (s *StatementFor) check(block *Block) []error {
 	s.Block.InheritedAttribute.mostCloseForOrSwitchForBreak = s
 	errs := []error{}
 	if s.Init != nil {
+		s.Init.IsStatementExpression = true
 		_, es := s.Block.checkExpression(s.Init)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
@@ -217,6 +219,7 @@ func (s *StatementFor) check(block *Block) []error {
 		}
 	}
 	if s.Post != nil {
+		s.Post.IsStatementExpression = true
 		_, es := s.Block.checkExpression(s.Post)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)

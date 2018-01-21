@@ -246,7 +246,8 @@ func (t *VariableType) IsFloat() bool {
 }
 
 func (v *VariableType) isPrimitive() bool {
-	return v.IsNumber() || v.Typ == VARIABLE_TYPE_STRING || v.Typ == VARIABLE_TYPE_BOOL
+	return v.IsNumber() || v.Typ == VARIABLE_TYPE_STRING ||
+		v.Typ == VARIABLE_TYPE_BOOL
 }
 
 //可读的类型信息
