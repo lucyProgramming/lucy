@@ -24,18 +24,29 @@ func (c *Class) consume(m map[int]bool) {
 	c.parser.consume(m)
 }
 
+func (c *Class) parseClassName() (string, error) {
+	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
+		err := fmt.Errorf("%s on name after class,but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		c.parser.errs = append(c.parser.errs, err)
+		return "", err
+	}
+	name := c.parser.token.Data.(string)
+	c.Next()
+	return name, nil
+
+}
+
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
 	c.Next() // skip class key work
-	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		err = fmt.Errorf("%s on name after class,but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
-		c.parser.errs = append(c.parser.errs, err)
+
+	c.classDefinition.Name, err = c.parseClassName()
+	if err != nil {
 		return nil, err
 	}
-	c.classDefinition.Name = c.parser.token.Data.(string)
 	c.classDefinition.Pos = c.parser.mkPos()
-	c.Next() // skip class name
+
 	if c.parser.eof {
 		err = c.parser.mkUnexpectedEofErr()
 		c.parser.errs = append(c.parser.errs, err)

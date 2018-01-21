@@ -15,7 +15,7 @@ var (
 	Nodes                   *[]*Node //
 	packageAliasReg         *regexp.Regexp
 	PackageLoad             PackageLoader
-	JAVA_ROOT_CLASS         = "java/lang/Object"
+	ROOT_CLASS              = "lucy/lang/LucyObject"
 )
 
 type NameWithPos struct {

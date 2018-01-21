@@ -41,77 +41,6 @@ func (ep *ExpressionParser) parseExpression() (*ast.Expression, error) {
 	return ep.parseAssignExpression()
 }
 
-//begin with identifier
-func (ep *ExpressionParser) parseIdentifierExpression() (*ast.Expression, error) {
-	if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		return nil, fmt.Errorf("%s not a identifier expression", ep.parser.errorMsgPrefix())
-	}
-	result := &ast.Expression{}
-	result.Typ = ast.EXPRESSION_TYPE_IDENTIFIER
-	identifer := &ast.ExpressionIdentifer{}
-	identifer.Name = ep.parser.token.Data.(string)
-	result.Data = identifer
-	result.Pos = ep.parser.mkPos()
-	ep.Next()          //look next token
-	if ep.parser.eof { // end of file
-		return result, nil
-	}
-	var err error
-	for !ep.parser.eof {
-		if ep.parser.token.Type == lex.TOKEN_DOT { // a.b.c.e.f
-			ep.Next()
-			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedEofErr()
-			}
-			if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				return nil, fmt.Errorf("%s excpet identifier afeter \".\",but %s",
-					ep.parser.errorMsgPrefix(),
-					ep.parser.token.Desp)
-			}
-			newresult := &ast.Expression{}
-			newresult.Pos = ep.parser.mkPos()
-			newresult.Typ = ast.EXPRESSION_TYPE_DOT
-			binary := &ast.ExpressionBinary{}
-			newresult.Data = binary
-			binary.Left = result
-			binary.Right = &ast.Expression{
-				Typ: ast.EXPRESSION_TYPE_IDENTIFIER,
-				Data: &ast.ExpressionIdentifer{
-					Name: ep.parser.token.Data.(string),
-				},
-			}
-			result = newresult // reassignment
-			ep.Next()
-		} else if ep.parser.token.Type == lex.TOKEN_LB { // a["b"]
-			ep.Next() // skip [
-			if ep.parser.eof {
-				return nil, ep.parser.mkUnexpectedEofErr()
-			}
-			newresult := &ast.Expression{}
-			newresult.Pos = ep.parser.mkPos()
-			newresult.Typ = ast.EXPRESSION_TYPE_INDEX
-			binary := &ast.ExpressionBinary{}
-			newresult.Data = binary
-			binary.Left = result
-			binary.Right, err = ep.parseExpression()
-			if err != nil {
-				return nil, err
-			}
-			if ep.parser.token.Type != lex.TOKEN_RB {
-				err = fmt.Errorf("%s %d:%d [ and ] not match", ep.parser.filename, ep.parser.token.Match.StartLine, ep.parser.token.Match.StartColumn)
-				break
-			}
-			ep.Next() // skip ]
-			ep.Next()
-			result = newresult
-		} else {
-			// something i can`t handle
-			return result, err
-		}
-	}
-	return result, err
-}
-
 func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
 	ep.Next() // skip (
@@ -124,8 +53,8 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 		if err != nil {
 			return nil, err
 		}
-	} else { //ep.parser.token.Type == lex.TOKEN_RP
 	}
+
 	if ep.parser.token.Type != lex.TOKEN_RP {
 		return nil, fmt.Errorf("%s except ')' ,but %s",
 			ep.parser.errorMsgPrefix(),
@@ -133,43 +62,25 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 	}
 	var result ast.Expression
 	if e.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {
+		result.Typ = ast.EXPRESSION_TYPE_FUNCTION_CALL
 		call := &ast.ExpressionFunctionCall{}
 		call.Expression = e
 		call.Args = args
-		result.Typ = ast.EXPRESSION_TYPE_FUNCTION_CALL
 		result.Data = call
 		result.Pos = ep.parser.mkPos()
 	} else if result.Typ == ast.EXPRESSION_TYPE_DOT {
-		call := &ast.ExpressionMethodCall{}
-		binary := result.Data.(*ast.ExpressionBinary)
-		call.Expression = binary.Left
-		call.Name = binary.Right.Data.(string)
-		call.Args = args
 		result.Typ = ast.EXPRESSION_TYPE_METHOD_CALL
+		call := &ast.ExpressionMethodCall{}
+		index := e.Data.(*ast.ExpressionIndex)
+		call.Expression = index.Expression
+		call.Args = args
 		result.Data = call
-		result.Pos = ep.parser.mkPos()
+		result.Pos = e.Pos
 	} else {
-		err = fmt.Errorf("%s can`t make call on '%s'", ep.parser.errorMsgPrefix())
+		return nil, fmt.Errorf("%s can`t make call on '%s'", ep.parser.errorMsgPrefix())
 	}
 	ep.Next() // skip )
 	return &result, nil
-}
-
-func (ep *ExpressionParser) parseIdentifierExpressions() (ret []*ast.Expression, err error) {
-	ret = []*ast.Expression{}
-	var e *ast.Expression
-	for {
-		e, err = ep.parseIdentifierExpression()
-		if err != nil {
-			return
-		}
-		ret = append(ret, e)
-		if ep.parser.token.Type != lex.TOKEN_COMMA {
-			return
-		}
-		ep.Next() // == ,
-	}
-	return
 }
 
 // []int{1,2,3}
@@ -265,18 +176,12 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	var err error
 	switch ep.parser.token.Type {
 	case lex.TOKEN_IDENTIFIER:
-		lefts, err := ep.parseIdentifierExpressions()
-		if err != nil {
-			return nil, err
-		}
-		if len(lefts) > 1 {
-			left = &ast.Expression{
-				Typ:  ast.EXPRESSION_TYPE_LIST,
-				Data: lefts,
-			}
-		} else {
-			left = lefts[0]
-		}
+		left = &ast.Expression{}
+		left.Typ = ast.EXPRESSION_TYPE_IDENTIFIER
+		identifier := &ast.ExpressionIdentifer{}
+		identifier.Name = ep.parser.token.Data.(string)
+		left.Data = identifier
+		ep.Next()
 	case lex.TOKEN_TRUE:
 		left = &ast.Expression{}
 		left.Typ = ast.EXPRESSION_TYPE_BOOL
@@ -331,7 +236,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		}
 		ep.Next()
 	case lex.TOKEN_INCREMENT:
-		ep.Next()
+		ep.Next() // skip ++
 		newE := &ast.Expression{}
 		newE.Pos = ep.parser.mkPos()
 		left, err = ep.parseOneExpression()
@@ -342,7 +247,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		newE.Data = left
 		left = newE
 	case lex.TOKEN_DECREMENT:
-		ep.Next()
+		ep.Next() // skip --
 		newE := &ast.Expression{}
 		left, err = ep.parseOneExpression()
 		if err != nil {
@@ -423,6 +328,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
+		//
 	case lex.TOKEN_BYTE:
 		left, err = ep.parseTypeConvertionExpression()
 		if err != nil {
@@ -457,29 +363,76 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
-	// a++ b-- for a++++
-	for ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT {
-		newe := &ast.Expression{}
-		if ep.parser.token.Type == lex.TOKEN_INCREMENT {
-			newe.Typ = ast.EXPRESSION_TYPE_INCREMENT
-		} else {
-			newe.Typ = ast.EXPRESSION_TYPE_DECREMENT
+	for ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT ||
+		ep.parser.token.Type == lex.TOKEN_LP || ep.parser.token.Type == lex.TOKEN_LB ||
+		ep.parser.token.Type == lex.TOKEN_DOT {
+		if ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT { //  ++ or --
+			newe := &ast.Expression{}
+			if ep.parser.token.Type == lex.TOKEN_INCREMENT {
+				newe.Typ = ast.EXPRESSION_TYPE_INCREMENT
+			} else {
+				newe.Typ = ast.EXPRESSION_TYPE_DECREMENT
+			}
+			if left.Typ != ast.EXPRESSION_TYPE_LIST {
+				newe.Data = left
+				left = newe
+			} else {
+				list := left.Data.([]*ast.Expression)
+				newe.Data = list[len(list)-1]
+			}
+			ep.Next()
+			continue
 		}
-		if left.Typ != ast.EXPRESSION_TYPE_LIST {
-			newe.Data = left
+		if ep.parser.token.Type == lex.TOKEN_LB {
+			ep.Next() // skip [
+			e, err := ep.parseExpression()
+			if err != nil {
+				return nil, err
+			}
+			if ep.parser.token.Type != lex.TOKEN_RB {
+				return nil, fmt.Errorf("%s not ] after a expression", ep.parser.errorMsgPrefix())
+			}
+			newe := &ast.Expression{}
+			newe.Typ = ast.EXPRESSION_TYPE_INDEX
+			index := &ast.ExpressionIndex{}
+			index.Expression = left
+			index.Index = e
+			index.Name = ep.parser.token.Data.(string)
+			newe.Data = index
 			left = newe
-		} else {
-			list := left.Data.([]*ast.Expression)
-			newe.Data = list[len(list)-1]
+			ep.Next()
+			continue
 		}
-		ep.Next()
+		if ep.parser.token.Type == lex.TOKEN_DOT {
+			ep.parser.Next() // skip .
+			if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
+				return nil, fmt.Errorf("%s not identifier after dot", ep.parser.errorMsgPrefix())
+			}
+			newe := &ast.Expression{}
+			newe.Typ = ast.EXPRESSION_TYPE_DOT
+			index := &ast.ExpressionIndex{}
+			index.Expression = left
+			index.Name = ep.parser.token.Data.(string)
+			newe.Data = index
+			left = newe
+			ep.Next()
+			continue
+		}
+		if ep.parser.token.Type == lex.TOKEN_LP {
+			newe, err := ep.parseCallExpression(left)
+			if err != nil {
+				return nil, err
+			}
+			left = newe
+			continue
+		}
 	}
 	return left, nil
 }
 
 // && ||
 func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
-	e, err := ep.parseAndExpression()
+	e, err := ep.parseBitANDORExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -487,7 +440,7 @@ func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
 		typ := ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseAndExpression()
+		e2, err := ep.parseBitANDORExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -508,7 +461,7 @@ func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
 }
 
 // & |
-func (ep *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseBitANDORExpression() (*ast.Expression, error) {
 	e, err := ep.parseEqualExpression()
 	if err != nil {
 		return nil, err
@@ -601,7 +554,6 @@ func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
 		binary.Right = e2
 		newe.Data = binary
 		e = newe
-
 	}
 	return e, nil
 }
@@ -703,9 +655,26 @@ func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
 
 //a = 123
 func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
-	left, err := ep.parseLogicalExpression()
+	left, err := ep.parseLogicalExpression() //
 	if err != nil {
 		return nil, err
+	}
+	for ep.parser.token.Type == lex.TOKEN_COMMA { // read more
+		ep.Next()                                 //  skip comma
+		left2, err := ep.parseLogicalExpression() //
+		if err != nil {
+			return nil, err
+		}
+		if left.Typ == ast.EXPRESSION_TYPE_LIST {
+			list := left.Data.([]*ast.Expression)
+			left.Data = append(list, left2)
+		} else {
+			newe := &ast.Expression{}
+			newe.Typ = ast.EXPRESSION_TYPE_LIST
+			list := []*ast.Expression{left, left2}
+			newe.Data = list
+			left = newe
+		}
 	}
 	mustBeOneExpression := func() {
 		if left.Typ == ast.EXPRESSION_TYPE_LIST {
@@ -717,7 +686,7 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 		}
 	}
 	mkBinayExpression := func(typ int, multi bool) (*ast.Expression, error) {
-		ep.Next()
+		ep.Next() // skip = :=
 		if ep.parser.eof {
 			return nil, ep.parser.mkUnexpectedEofErr()
 		}
@@ -742,6 +711,8 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	}
 	// := += -= *= /= %=
 	switch ep.parser.token.Type {
+	case lex.TOKEN_ASSIGN:
+		return mkBinayExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
 	case lex.TOKEN_COLON_ASSIGN:
 		return mkBinayExpression(ast.EXPRESSION_TYPE_COLON_ASSIGN, true)
 	case lex.TOKEN_PLUS_ASSIGN:
@@ -759,8 +730,6 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	case lex.TOKEN_MOD_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
-	case lex.TOKEN_ASSIGN:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
 	}
 	return left, nil
 }
