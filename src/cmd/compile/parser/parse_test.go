@@ -30,7 +30,7 @@ fn add()->(xx int){
 
 func Test_parse(t *testing.T) {
 	nodes := []*ast.Node{}
-	errs := Parse(&nodes, "./demo.lucy", []byte(str), false)
+	errs := Parse(&nodes, "demo.lucy", []byte(str), false, 10)
 	for _, v := range errs {
 		fmt.Println(v)
 	}

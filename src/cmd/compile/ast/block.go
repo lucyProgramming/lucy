@@ -6,7 +6,8 @@ import (
 )
 
 type Block struct {
-	IsFunctionTop      bool
+	IsFunctionTopBlock bool
+	IsClassBlock       bool
 	Pos                *Pos
 	p                  *Package
 	Consts             map[string]*Const
@@ -62,10 +63,15 @@ func (b *Block) searchByName(name string) interface{} {
 		return nil
 	}
 	t := b.Outter.searchByName(name)
-	if t != nil { //found and in function top block and b.Outter is not top block
+	if t != nil { //
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
-			if b.InheritedAttribute.function != nil && b.IsFunctionTop && b.InheritedAttribute.function.IsGlobal == false {
+			if b.InheritedAttribute.function != nil && b.IsFunctionTopBlock &&
+				b.InheritedAttribute.function.IsGlobal == false {
 				b.InheritedAttribute.function.ClosureVars.Insert(v)
+			}
+			//cannot search variable from class body
+			if b.InheritedAttribute.class != nil && b.IsClassBlock {
+				return nil //
 			}
 		}
 	}
@@ -73,24 +79,19 @@ func (b *Block) searchByName(name string) interface{} {
 }
 
 func (b *Block) inherite(father *Block) {
-	b.InheritedAttribute.p = father.InheritedAttribute.p
-	b.InheritedAttribute.istop = father.InheritedAttribute.istop
-	b.InheritedAttribute.StatementFor = father.InheritedAttribute.StatementFor
-	b.InheritedAttribute.function = father.InheritedAttribute.function
-	b.InheritedAttribute.closed_is_for = father.InheritedAttribute.closed_is_for
-	b.InheritedAttribute.topblock = father.InheritedAttribute.topblock
+	b.InheritedAttribute = father.InheritedAttribute
 	b.Outter = father
 }
 
 type InheritedAttribute struct {
-	istop           bool          // if it is a top block
-	StatementFor    *StatementFor // if this statement is in for or not
-	StatementSwitch *StatementSwitch
-	closed_is_for   bool //for and switch is not nil,
-	function        *Function
-	class           *Class
-	p               *Package
-	topblock        *Block
+	istop                        bool          // if it is a top block
+	StatementFor                 *StatementFor // if this statement is in for or not
+	StatementSwitch              *StatementSwitch
+	mostCloseForOrSwitchForBreak interface{}
+	function                     *Function
+	class                        *Class
+	p                            *Package
+	topblock                     *Block
 }
 
 type NameWithType struct {
@@ -275,7 +276,11 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *Class:
 		b.Classes[name] = d.(*Class)
 	case *Function:
-		b.Funcs[name] = d.(*Function)
+		t := d.(*Function)
+		if buildinFunctionsMap[t.Name] != nil {
+			return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
+		}
+		b.Funcs[name] = t
 	case *Const:
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:

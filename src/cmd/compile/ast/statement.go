@@ -42,19 +42,19 @@ type StatementBreak struct {
 func (s *Statement) statementName() string {
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
-		return "expression statement"
+		return "'expression statement'"
 	case STATEMENT_TYPE_IF:
-		return "if statement"
+		return "'if statement'"
 	case STATEMENT_TYPE_FOR:
-		return "for statement"
+		return "'for statement'"
 	case STATEMENT_TYPE_CONTINUE:
-		return "continue statement"
+		return "'continue statement'"
 	case STATEMENT_TYPE_BREAK:
-		return "break statement"
+		return "'break statement'"
 	case STATEMENT_TYPE_SWITCH:
-		return "switch statement"
+		return "'switch statement'"
 	case STATEMENT_TYPE_SKIP:
-		return "skip statement"
+		return "'skip statement'"
 	}
 	return ""
 }
@@ -80,10 +80,10 @@ func (s *Statement) check(b *Block) []error { // b is father
 			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 		} else {
 			s.StatementBreak = &StatementBreak{}
-			if b.InheritedAttribute.closed_is_for {
-				s.StatementBreak.StatementFor = b.InheritedAttribute.StatementFor
+			if f, ok := b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
+				s.StatementBreak.StatementFor = f
 			} else {
-				s.StatementBreak.StatementSwitch = b.InheritedAttribute.StatementSwitch
+				s.StatementBreak.StatementSwitch = b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementSwitch)
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
@@ -197,7 +197,7 @@ type StatementFor struct {
 func (s *StatementFor) check(block *Block) []error {
 	s.Block.inherite(block)
 	s.Block.InheritedAttribute.StatementFor = s
-	s.Block.InheritedAttribute.closed_is_for = true
+	s.Block.InheritedAttribute.mostCloseForOrSwitchForBreak = s
 	errs := []error{}
 	if s.Init != nil {
 		_, es := s.Block.checkExpression(s.Init)

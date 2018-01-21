@@ -5,5 +5,5 @@ import (
 )
 
 type Context struct {
-	Function *ast.Function
+	method *ast.Function
 }

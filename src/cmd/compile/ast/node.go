@@ -133,11 +133,11 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 				Expression: v,
 			}
 		}
-		p.Blocks = []*Block{&Block{Statements: s}}
-	} else {
-		p.Blocks = []*Block{}
+		c.Blocks = append([]*Block{&Block{
+			Statements: s,
+		}}, c.Blocks...)
 	}
-	p.Blocks = append(p.Blocks, c.Blocks...)
+	p.mkInitFunctions(c.Blocks...)
 	return
 }
 

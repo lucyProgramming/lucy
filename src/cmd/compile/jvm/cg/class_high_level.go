@@ -139,6 +139,7 @@ type FiledHighLevel struct {
 	FieldInfo
 }
 type MethodHighLevel struct {
+	Class          *ClassHighLevel
 	BackPatchs     [][]byte
 	ClassHighLevel *ClassHighLevel
 	Name           string

@@ -369,12 +369,21 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-	if t == nil {
-		return mkVoidVariableTypes(e.Pos)
+	if t == nil || t.Typ != VARIABLE_TYPE_FUNCTION {
+		*errs = append(*errs, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), e.OpName()))
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_VOID,
+			Pos: e.Pos,
+		}
+		return []*VariableType{t}
 	}
 	if t.Typ != VARIABLE_TYPE_FUNCTION {
-		*errs = append(*errs, fmt.Errorf("%s not a function", errMsgPrefix(call.Expression.Pos)))
-		return mkVoidVariableTypes(e.Pos)
+		*errs = append(*errs, fmt.Errorf("%s %s is not a function", errMsgPrefix(e.Pos), e.OpName()))
+		t = &VariableType{
+			Typ: VARIABLE_TYPE_VOID,
+			Pos: e.Pos,
+		}
+		return []*VariableType{t}
 	}
 	call.Func = t.Function
 	if t.Function.Isbuildin {
@@ -386,43 +395,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := e.checkRightValues(e.checkExpressions(block, args, errs), errs)
-	if f.CallChecker != nil {
-		f.CallChecker(errs, callargsTypes, e.Pos)
-	} else {
-		var t *VariableType
-		if f.IsAnyNumberParameter {
-			if f.Typ.Parameters != nil && len(f.Typ.Parameters) > 0 && f.Typ.Parameters[0] != nil {
-				t = f.Typ.Parameters[0].Typ
-			}
-		}
-
-		if !f.IsAnyNumberParameter {
-			if len(callargsTypes) > len(f.Typ.Parameters) {
-				*errs = append(*errs, fmt.Errorf("%s too many paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
-			}
-			if len(callargsTypes) < len(f.Typ.Parameters) && len(args) < len(f.Typ.Parameters) {
-				*errs = append(*errs, fmt.Errorf("%s too few paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
-			}
-		}
-		if f.IsAnyNumberParameter {
-			for k, v := range callargsTypes {
-				if t != nil {
-					if !t.typeCompatible(v) {
-						*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(args[k].Pos), v.TypeString(), t.TypeString()))
-					}
-				}
-			}
-		} else {
-			for k, v := range f.Typ.Parameters {
-				if k < len(callargsTypes) {
-					if !v.Typ.typeCompatible(callargsTypes[k]) {
-						*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s", errMsgPrefix(args[k].Pos), v.Typ.TypeString(), callargsTypes[k].TypeString()))
-					}
-				}
-
-			}
-		}
-	}
+	f.callchecker(errs, callargsTypes, e.Pos)
 	return f.Typ.Returns.retTypes(e.Pos)
 }
 

@@ -23,7 +23,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainclass.AccessFlags |= cg.ACC_CLASS_ABSTRACT
-	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
+	mainclass.SuperClass = ast.ROOT_CLASS
 	mainclass.Name = strings.Title(p.Name)
 	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
 	mainclass.Methods = make(map[string][]*cg.MethodHighLevel)
@@ -238,10 +238,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			panic("this is not happening")
 		}
 		stack, es := m.MakeExpression.build(class, code, s.Expressions[0], context)
+		backPatchEs(es, code)
 		if stack > maxstack {
 			maxstack = stack
 		}
-		backPatchEs(es, code)
 		switch s.Function.Typ.Returns[0].Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough

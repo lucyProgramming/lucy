@@ -33,9 +33,8 @@ func (c *Class) check(father *Block) []error {
 		errs = append(errs, err)
 	}
 	c.loadInterfaces(&errs)
-	c.Block.check(father)
+	c.Block.check(father) // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
-	c.Block.inherite(&father.InheritedAttribute.p.Block) // inherite from package
 	errs = append(errs, c.checkFields()...)
 	errs = append(errs, c.checkConstructionFunctions()...)
 	errs = append(errs, c.checkMethods()...)
@@ -195,13 +194,13 @@ func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *Cl
 }
 
 func (c *Class) loadSuperClass() error {
-	if c.Name == JAVA_ROOT_CLASS { // root class
+	if c.Name == ROOT_CLASS { // root class
 		c.SuperClassName = ""
 		c.SuperClass = nil
 		return nil
 	}
 	if c.SuperClassName == "" {
-		c.SuperClassName = JAVA_ROOT_CLASS
+		c.SuperClassName = ROOT_CLASS
 	}
 	t := &VariableType{Typ: VARIABLE_TYPE_NAME, Name: c.SuperClassName}
 	err := t.resolve(&c.Block)

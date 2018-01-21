@@ -10,7 +10,16 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	if call.Func.Isbuildin {
 		return m.mkBuildinFunctionCall(class, code, call, context)
 	}
+	return
+}
 
+func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode, args []*ast.Expression, context *Context) (maxstack uint16) {
+	stack := uint16(0)
+	for _, e := range args {
+		ms, es := m.build(class, code, e, context)
+		backPatchEs(es, code)
+		maxstack = ms + stack
+	}
 	return
 }
 

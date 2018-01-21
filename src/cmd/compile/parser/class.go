@@ -40,13 +40,12 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
 	c.Next() // skip class key work
-
 	c.classDefinition.Name, err = c.parseClassName()
 	if err != nil {
 		return nil, err
 	}
 	c.classDefinition.Pos = c.parser.mkPos()
-
+	c.classDefinition.Block.IsClassBlock = true
 	if c.parser.eof {
 		err = c.parser.mkUnexpectedEofErr()
 		c.parser.errs = append(c.parser.errs, err)

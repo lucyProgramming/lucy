@@ -2,19 +2,20 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack = 4
 	bin := e.Data.(*ast.ExpressionBinary)
-	if bin.Left.VariableType.IsNumber() { // number types
+	if bin.Left.VariableType.IsNumber() { // in this case ,right must be a number type
+		maxstack = 4
 		stack, _ := m.build(class, code, bin.Left, context)
 		if stack > maxstack {
 			maxstack = stack
 		}
-		target := bin.Left.VariableType.NumberTypeConvertRule(bin.Right.VariableType)
+		target := e.VariableType.Typ // this is target
 		if target == ast.VARIABLE_TYPE_INT || target == ast.VARIABLE_TYPE_SHORT || target == ast.VARIABLE_TYPE_BYTE {
 			target = ast.VARIABLE_TYPE_LONG
 		}
@@ -22,8 +23,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
 		}
 		stack, _ = m.build(class, code, bin.Right, context)
-		if stack+2 > maxstack {
-			maxstack = stack + 2
+		if 2+stack > maxstack {
+			maxstack = 2 + stack
 		}
 		if target != bin.Right.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Right.VariableType.Typ, target)
@@ -79,6 +80,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
+		maxstack = 2
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
 		} else {

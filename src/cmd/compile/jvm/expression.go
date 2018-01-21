@@ -186,11 +186,11 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 
 func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	maxstack = 2
-	maxstack1, es := m.build(class, code, e.Data.(*ast.Expression), context) // in case !(xxx && a())
+	maxstack1, es := m.build(class, code, e.Data.(*ast.Expression), context)
+	backPatchEs(es, code)
 	if maxstack1 > maxstack {
 		maxstack = maxstack1
 	}
-	backPatchEs(es, code)
 	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:

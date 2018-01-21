@@ -7,22 +7,12 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
-type FunctionBuildProperty struct {
-	IsAnyNumberParameter bool
-	CallChecker          func(errs *[]error, args []*VariableType, pos *Pos)
-}
-
-func oneAnyTypeParameterChecker(errs *[]error, args []*VariableType, pos *Pos) {
-	if len(args) != 1 {
-		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
-	}
-}
+type CallChecker func(errs *[]error, args []*VariableType, pos *Pos)
 
 type Function struct {
-	Class    *cg.ClassHighLevel
-	Method   *cg.MethodHighLevel
-	IsGlobal bool
-	FunctionBuildProperty
+	callchecker  CallChecker // used in build function
+	Method       *cg.MethodHighLevel
+	IsGlobal     bool
 	Isbuildin    bool
 	Used         bool
 	AccessFlags  uint16 // public private or protected
@@ -150,7 +140,9 @@ type ReturnList []*VariableDefinition    // actually local variables
 
 func (r ReturnList) retTypes(pos *Pos) []*VariableType {
 	if r == nil || len(r) == 0 {
-		return mkVoidVariableTypes(pos)
+		t := &VariableType{}
+		t.Typ = VARIABLE_TYPE_FUNCTION
+		return []*VariableType{t}
 	}
 	ret := make([]*VariableType, len(r))
 	for k, v := range r {

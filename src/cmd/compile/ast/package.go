@@ -10,34 +10,34 @@ type Package struct {
 	loadedPackages map[string]*Package
 	Block          Block // package always have a default block
 	Files          map[string]*File
-	Name           string //if error,should be multi names
-	Blocks         []*Block
+	Name           string //if error,should be multi names ,taken first is ok
+	InitFunctions  []*Function
 	NErros         int // number of errors should stop compile
+}
+
+func (p *Package) mkInitFunctions(bs ...*Block) {
+	p.InitFunctions = make([]*Function, len(bs))
+	for k, b := range bs {
+		f := &Function{}
+		f.Name = fmt.Sprintf("<init%d>", k)
+		f.Block = b
+		f.Typ = &FunctionType{}
+		f.mkVariableType()
+		p.InitFunctions[k] = f
+		f.Used = true
+	}
 }
 
 func (p *Package) addBuildFunctions() {
 	if p.Block.Funcs == nil {
 		p.Block.Funcs = make(map[string]*Function)
 	}
-	{
-		name := "print"
-		f := mkBuildFunction(name, true, nil, nil)
-		f.CallChecker = func(errs *[]error, args []*VariableType, pos *Pos) {}
-		p.Block.Funcs[name] = f
-	}
-	{
-		name := "panic"
-		f := mkBuildFunction(name, true, nil, nil)
-		f.CallChecker = oneAnyTypeParameterChecker
-		p.Block.Funcs[name] = f
-	}
-	{
-		name := "recover"
-		f := mkBuildFunction(name, false, nil, nil)
-		f.CallChecker = oneAnyTypeParameterChecker
-		p.Block.Funcs[name] = f
+	for k, f := range buildinFunctionsMap {
+		ff := mkBuildinFunction(k, f.args, f.returns, f.checker)
+		p.Block.Funcs[k] = ff
 	}
 }
+
 func (p *Package) TypeCheck() []error {
 	p.addBuildFunctions()
 	if p.NErros <= 2 {
@@ -56,7 +56,7 @@ func (p *Package) TypeCheck() []error {
 	for _, v := range p.Block.Classes {
 		errs = append(errs, v.check(&p.Block)...)
 	}
-	for _, v := range p.Blocks {
+	for _, v := range p.InitFunctions {
 		errs = append(errs, v.check(&p.Block)...)
 	}
 	return errs
@@ -93,7 +93,7 @@ type Imports struct {
 
 /*
 	import "github.com/lucy" should access by lucy.Println
-	import "github.com/lucy" as std should access by std.Println
+	import "github.com/std" as std should access by std.Println
 */
 func (i *Imports) GetAccessName() (string, error) {
 	if i.AccessName == "_" { //special case _ is a identifer

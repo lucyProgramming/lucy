@@ -275,7 +275,7 @@ func (e *Expression) OpName(typ ...int) string {
 	case EXPRESSION_TYPE_NOT:
 		return "not"
 	case EXPRESSION_TYPE_IDENTIFIER:
-		return "identifier"
+		return fmt.Sprintf("identifier(%s)", e.Data.(*ExpressionIdentifer).Name)
 	case EXPRESSION_TYPE_NULL:
 		return "null"
 	case EXPRESSION_TYPE_NEW:
@@ -288,6 +288,7 @@ func (e *Expression) OpName(typ ...int) string {
 		return "const"
 	case EXPRESSION_TYPE_VAR:
 		return "var"
+
 	}
 	panic("missing type")
 }
