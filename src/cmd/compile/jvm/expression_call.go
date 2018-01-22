@@ -16,9 +16,11 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode, args []*ast.Expression, context *Context) (maxstack uint16) {
 	stack := uint16(0)
 	for _, e := range args {
+
 		ms, es := m.build(class, code, e, context)
 		backPatchEs(es, code)
 		maxstack = ms + stack
+		stack += e.VariableType.JvmSlotSize()
 	}
 	return
 }

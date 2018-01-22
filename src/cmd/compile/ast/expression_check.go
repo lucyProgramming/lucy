@@ -396,20 +396,20 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := e.checkRightValues(e.checkExpressions(block, args, errs), errs)
 	f.callchecker(errs, callargsTypes, e.Pos)
-	return f.Typ.Returns.retTypes(e.Pos)
+	return f.Typ.ReturnList.retTypes(e.Pos)
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := e.checkExpressions(block, args, errs)
 	callargsTypes = e.checkRightValues(callargsTypes, errs)
-	if len(callargsTypes) > len(f.Typ.Parameters) {
+	if len(callargsTypes) > len(f.Typ.ParameterList) {
 		*errs = append(*errs, fmt.Errorf("%s too many paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
 	}
-	if len(callargsTypes) < len(f.Typ.Parameters) && len(args) < len(f.Typ.Parameters) {
+	if len(callargsTypes) < len(f.Typ.ParameterList) && len(args) < len(f.Typ.ParameterList) {
 		*errs = append(*errs, fmt.Errorf("%s too few paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
 	}
 
-	for k, v := range f.Typ.Parameters {
+	for k, v := range f.Typ.ParameterList {
 		if k < len(callargsTypes) {
 			if !v.Typ.typeCompatible(callargsTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s",
@@ -419,7 +419,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			}
 		}
 	}
-	return f.Typ.Returns.retTypes(e.Pos)
+	return f.Typ.ReturnList.retTypes(e.Pos)
 }
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {

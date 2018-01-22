@@ -529,7 +529,7 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 	}
 	p.Next()                          // skip (
 	if p.token.Type != lex.TOKEN_RP { // not (
-		t.Parameters, err = p.parseTypedNames()
+		t.ParameterList, err = p.parseTypedNames()
 		if err != nil {
 			return nil, err
 		}
@@ -548,7 +548,7 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 			return
 		}
 		p.Next()
-		t.Returns, err = p.parseTypedNames()
+		t.ReturnList, err = p.parseTypedNames()
 		if err != nil {
 			return
 		}

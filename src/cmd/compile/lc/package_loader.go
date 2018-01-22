@@ -3,13 +3,14 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
 type PackageLoader struct {
@@ -135,17 +136,16 @@ func (p *PackageLoader) loadMethod(m *class_json.Method) *ast.Function {
 	f.AccessFlags = m.AccessFlags
 	f.Signature = m.Signature
 	t, _ := jvm.ParseType(m.Typ.Return)
-	f.Typ.Returns = []*ast.VariableDefinition{
+	f.Typ.ReturnList = []*ast.VariableDefinition{
 		{},
 	}
-	f.Typ.Returns[0].Typ = t
-	f.Typ.Parameters = make([]*ast.VariableDefinition, len(f.Typ.Parameters))
+	f.Typ.ReturnList[0].Typ = t
+	f.Typ.ParameterList = make([]*ast.VariableDefinition, len(f.Typ.ParameterList))
 	for k, v := range m.Typ.Parameters {
 		vd := &ast.VariableDefinition{}
 		vd.Typ, _ = jvm.ParseType(v)
-		f.Typ.Parameters[k] = vd
+		f.Typ.ParameterList[k] = vd
 	}
-
 	return f
 }
 

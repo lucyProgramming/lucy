@@ -79,6 +79,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
 			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
 		} else {
+
 			s.StatementBreak = &StatementBreak{}
 			if f, ok := b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
@@ -88,7 +89,8 @@ func (s *Statement) check(b *Block) []error { // b is father
 		}
 	case STATEMENT_TYPE_CONTINUE:
 		if b.InheritedAttribute.StatementFor == nil {
-			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
+			errs = append(errs, fmt.Errorf("%s %s can`t in this scope",
+				errMsgPrefix(s.Pos), s.statementName()))
 		} else {
 			if s.StatementContinue == nil {
 				s.StatementContinue = &StatementContinue{b.InheritedAttribute.StatementFor}
@@ -96,7 +98,8 @@ func (s *Statement) check(b *Block) []error { // b is father
 		}
 	case STATEMENT_TYPE_RETURN:
 		if b.InheritedAttribute.function == nil {
-			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
+			errs = append(errs, fmt.Errorf("%s %s can`t in this scope",
+				errMsgPrefix(s.Pos), s.statementName()))
 			return errs
 		}
 		s.StatementReturn.Function = b.InheritedAttribute.function
@@ -124,7 +127,8 @@ func (s *Statement) checkStatementExpression(b *Block) (errs []error) {
 		s.Expression.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
 		s.Expression.Typ == EXPRESSION_TYPE_PRE_DECREMENT {
 	} else {
-		errs = append(errs, fmt.Errorf("%s expression evaluate but not used", errMsgPrefix(s.Expression.Pos)))
+		errs = append(errs, fmt.Errorf("%s expression evaluate but not used",
+			errMsgPrefix(s.Expression.Pos)))
 	}
 	s.Expression.IsStatementExpression = true
 	_, es := b.checkExpression_(s.Expression)
@@ -165,7 +169,7 @@ func (s *StatementReturn) check(b *Block) []error {
 	errs := make([]error, 0)
 	returndValueTypes := s.Expressions[0].checkExpressions(b, s.Expressions, &errs)
 	pos := s.Expressions[len(s.Expressions)-1].Pos
-	rs := b.InheritedAttribute.function.Typ.Returns
+	rs := b.InheritedAttribute.function.Typ.ReturnList
 	if len(returndValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few value to return", errMsgPrefix(pos)))
 	}
@@ -176,7 +180,10 @@ func (s *StatementReturn) check(b *Block) []error {
 	for k, v := range rs {
 		if k < len(returndValueTypes) {
 			if !v.Typ.typeCompatible(returndValueTypes[k]) {
-				errs = append(errs, fmt.Errorf("%s cannot use %s as %s to return", errMsgPrefix(returndValueTypes[k].Pos), returndValueTypes[k].TypeString(), v.Typ.TypeString()))
+				errs = append(errs, fmt.Errorf("%s cannot use %s as %s to return",
+					errMsgPrefix(returndValueTypes[k].Pos),
+					returndValueTypes[k].TypeString(),
+					v.Typ.TypeString()))
 			}
 		}
 	}
@@ -214,7 +221,8 @@ func (s *StatementFor) check(block *Block) []error {
 		}
 		if t != nil {
 			if t.Typ != VARIABLE_TYPE_BOOL {
-				errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s", errMsgPrefix(s.Condition.Pos), t.TypeString()))
+				errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
+					errMsgPrefix(s.Condition.Pos), t.TypeString()))
 			}
 		}
 	}
@@ -248,7 +256,8 @@ func (s *StatementIF) check(father *Block) []error {
 	}
 	if conditionType != nil {
 		if conditionType.Typ != VARIABLE_TYPE_BOOL {
-			errs = append(errs, fmt.Errorf("%s condition is not a bool expression", errMsgPrefix(s.Condition.Pos)))
+			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+				errMsgPrefix(s.Condition.Pos)))
 		}
 	}
 	errs = append(errs, s.Block.check(father)...)
@@ -260,7 +269,8 @@ func (s *StatementIF) check(father *Block) []error {
 			}
 			if conditionType != nil {
 				if conditionType.Typ != VARIABLE_TYPE_BOOL {
-					errs = append(errs, fmt.Errorf("%s condition is not a bool expression", errMsgPrefix(s.Condition.Pos)))
+					errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+						errMsgPrefix(s.Condition.Pos)))
 				}
 			}
 			errs = append(errs, v.Block.check(father)...)

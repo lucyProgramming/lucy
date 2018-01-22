@@ -46,8 +46,8 @@ func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDe
 	f.Isbuildin = true
 	f.callchecker = checker
 	f.Typ = &FunctionType{}
-	f.Typ.Parameters = args
-	f.Typ.Returns = rs
+	f.Typ.ParameterList = args
+	f.Typ.ReturnList = rs
 	f.mkVariableType()
 	return f
 }

@@ -109,7 +109,7 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 				Typ:   VARIABLE_TYPE_OBJECT,
 				Class: c,
 			}
-			v.Func.Block.Varoffset = 1 //this function
+			v.Func.Varoffset = 1 //this function
 		}
 		es := v.Func.check(&c.Block)
 		if errsNotEmpty(es) {
@@ -194,13 +194,13 @@ func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *Cl
 }
 
 func (c *Class) loadSuperClass() error {
-	if c.Name == ROOT_CLASS { // root class
+	if c.Name == LUCY_ROOT_CLASS { // root class
 		c.SuperClassName = ""
 		c.SuperClass = nil
 		return nil
 	}
 	if c.SuperClassName == "" {
-		c.SuperClassName = ROOT_CLASS
+		c.SuperClassName = LUCY_ROOT_CLASS
 	}
 	t := &VariableType{Typ: VARIABLE_TYPE_NAME, Name: c.SuperClassName}
 	err := t.resolve(&c.Block)

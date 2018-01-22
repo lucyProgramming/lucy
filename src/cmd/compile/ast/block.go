@@ -19,7 +19,6 @@ type Block struct {
 	InheritedAttribute InheritedAttribute
 	Statements         []*Statement
 	Vars               map[string]*VariableDefinition
-	Varoffset          uint16
 }
 
 func (b *Block) searchByName(name string) interface{} {
@@ -91,7 +90,6 @@ type InheritedAttribute struct {
 	function                     *Function
 	class                        *Class
 	p                            *Package
-	topblock                     *Block
 }
 
 type NameWithType struct {
@@ -216,8 +214,7 @@ func (b *Block) checkFunctions() []error {
 			continue
 		}
 		errs = append(errs, v.check(b)...)
-		v.Block.Varoffset = 0
-		v.Block.InheritedAttribute.topblock = v.Block
+
 	}
 	return errs
 }
@@ -285,8 +282,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		t.LocalValOffset = b.InheritedAttribute.topblock.Varoffset
-		b.InheritedAttribute.topblock.Varoffset += t.NameWithType.Typ.JvmSlotSize()
+		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
+		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
 		t.mkTypRight()
 		b.Vars[name] = t
 	case *Enum:
