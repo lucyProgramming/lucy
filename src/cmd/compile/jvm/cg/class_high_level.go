@@ -55,9 +55,9 @@ func (c *ClassHighLevel) InsertMethodRef(mr CONSTANT_Methodref_info_high_level, 
 }
 
 type CONSTANT_Fieldref_info_high_level struct {
-	Class string
-	Name  string
-	Type  string
+	Class      string
+	Name       string
+	Descriptor string
 }
 
 func (c *ClassHighLevel) InsertFieldRef(fr CONSTANT_Fieldref_info_high_level, location []byte) {

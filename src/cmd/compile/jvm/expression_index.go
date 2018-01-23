@@ -19,13 +19,13 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_getfield
+			code.Codes[code.CodeLength] = cg.OP_getfield // object
 		}
-		f := cg.CONSTANT_Fieldref_info_high_level{}
-		f.Class = index.Expression.VariableType.Class.Name
-		f.Name = index.Name
-		f.Type = index.Field.Descriptor
-		class.InsertFieldRef(f, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      index.Expression.VariableType.Class.Name,
+			Name:       index.Name,
+			Descriptor: index.Field.Descriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	default:
 		panic(1)
 	}
@@ -58,7 +58,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_daload
 	case ast.VARIABLE_TYPE_STRING:
-		panic(1)
+		code.Codes[code.CodeLength] = cg.OP_aaload
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_aaload
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:

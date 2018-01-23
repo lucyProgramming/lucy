@@ -7,7 +7,6 @@ import (
 
 var (
 	code = `	package test
-	
 	import "github.om/xxx/ggg" as vvv;
 	const a = 123;
 	function(){
@@ -48,7 +47,6 @@ var (
 		b + 0.000000000
 		b + +1e5
 	}
-
 	`
 )
 
@@ -57,10 +55,8 @@ func Test_lex(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-
 	fmt.Println("\n\n\n\n\n\n\n########################")
 	fmt.Println(code)
-
 	fmt.Println("\n\n\n\n\n\n\n########################")
 	newline := false
 	for {

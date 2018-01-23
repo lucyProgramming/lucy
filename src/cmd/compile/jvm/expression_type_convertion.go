@@ -7,6 +7,11 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
+func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+
+	return
+}
+
 func (m *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VARIABLE_TYPE_BYTE:
@@ -145,6 +150,9 @@ func (m *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 	}
 }
 
+/*
+	convert stack top to target
+*/
 func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, target int) {
 	if typ == target {
 		return

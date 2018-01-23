@@ -23,7 +23,6 @@ import "java/io";
 		System.out.println(a()());
     }
 	aa();
-
 }
 
 

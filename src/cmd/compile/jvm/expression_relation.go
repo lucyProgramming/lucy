@@ -23,8 +23,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
 		}
 		stack, _ = m.build(class, code, bin.Right, context)
-		if 2+stack > maxstack {
-			maxstack = 2 + stack
+		if t := 2 + stack; t > maxstack {
+			maxstack = t
 		}
 		if target != bin.Right.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Right.VariableType.Typ, target)
@@ -36,8 +36,6 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength] = cg.OP_fcmpl
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_dcmpl
-		default:
-			panic(11)
 		}
 		code.CodeLength++
 		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE { // > and <=

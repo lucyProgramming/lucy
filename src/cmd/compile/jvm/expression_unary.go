@@ -8,13 +8,10 @@ import (
 )
 
 func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack = 2
-	maxstack1, es := m.build(class, code, e.Data.(*ast.Expression), context)
-	backPatchEs(es, code)
-	if maxstack1 > maxstack {
-		maxstack = maxstack1
-	}
 	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
+		var es [][]byte
+		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context)
+		backPatchEs(es, code)
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
@@ -33,6 +30,9 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_NOT {
+		var es [][]byte
+		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context)
+		backPatchEs(es, code)
 		code.Codes[code.CodeLength] = cg.OP_ifne                                      // length 1
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], code.CodeLength+7) // length 2
 		code.Codes[code.CodeLength+3] = cg.OP_iconst_1                                // length 1
@@ -40,7 +40,6 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], code.CodeLength+8) // length 2
 		code.Codes[code.CodeLength+7] = cg.OP_iconst_0                                // length 1
 		code.CodeLength += 8
-		return
 	}
 	return
 }

@@ -11,9 +11,9 @@ import (
 func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall, context *Context) (maxstack uint16) {
 	code.Codes[code.CodeLength] = cg.OP_getstatic
 	class.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
-		Class: "java/lang/System",
-		Name:  "out",
-		Type:  "Ljava/io/PrintStream;",
+		Class:      "java/lang/System",
+		Name:       "out",
+		Descriptor: "Ljava/io/PrintStream;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_new

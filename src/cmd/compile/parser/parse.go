@@ -694,11 +694,6 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.StartColumn = t.Match.StartColumn
 }
 
-//func (p *Parser) parseTypeOrTypedNames() (names []*ast.VariableDefinition, err error) {
-//
-//	return nil, nil
-//}
-
 // a,b int or int,bool  c xxx
 func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 	vs = []*ast.VariableDefinition{}
