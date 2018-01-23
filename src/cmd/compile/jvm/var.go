@@ -22,10 +22,3 @@ func backPatchEs(es [][]byte, code *cg.AttributeCode) {
 		binary.BigEndian.PutUint16(v, code.CodeLength)
 	}
 }
-
-//func mkPath(path, name string) string {
-//	if path == "" {
-//		return name
-//	}
-//	return path + "$" + name
-//}

@@ -134,7 +134,9 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if len(s.Function.Typ.ReturnList) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
-	} else if len(s.Function.Typ.ReturnList) == 1 {
+		return
+	}
+	if len(s.Function.Typ.ReturnList) == 1 {
 		if len(s.Expressions) != 1 {
 			panic("this is not happening")
 		}
@@ -163,15 +165,131 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-			fallthrough
-		case ast.VARIABLE_TYPE_FUNCTION:
-			panic("1111111")
+			code.Codes[code.CodeLength] = cg.OP_areturn
 		default:
 			panic("......a")
 		}
 		code.CodeLength++
-	} else {
-
+		return
 	}
+	//multi value to return
+	//load array list
+	switch context.function.ArrayListVarForMultiReturn.Offset {
+	case 0:
+		code.Codes[code.CodeLength] = cg.OP_aload_0
+		code.CodeLength++
+	case 1:
+		code.Codes[code.CodeLength] = cg.OP_aload_1
+		code.CodeLength++
+	case 2:
+		code.Codes[code.CodeLength] = cg.OP_aload_2
+		code.CodeLength++
+	case 3:
+		code.Codes[code.CodeLength] = cg.OP_aload_3
+		code.CodeLength++
+	default:
+		if context.function.ArrayListVarForMultiReturn.Offset > 255 {
+			panic("local var offset over 255")
+		}
+		code.Codes[code.CodeLength] = cg.OP_aload
+		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
+		code.CodeLength += 2
+	}
+	// call clear
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.Codes[code.CodeLength+1] = cg.OP_invokevirtual
+	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		Class:      "java/util/ArrayList",
+		Name:       "clear",
+		Descriptor: "()V",
+	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
+	code.CodeLength += 4
+	maxstack = 2
+	currentStack := uint16(1)
+	for _, v := range s.Expressions {
+		if (v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || v.Typ == ast.EXPRESSION_TYPE_METHOD_CALL) && len(v.VariableTypes) > 0 {
+			code.Codes[code.CodeLength] = cg.OP_dup // dup array list
+			currentStack++
+			if currentStack > maxstack {
+				maxstack = maxstack
+			} // make the call
+			stack, es := m.MakeExpression.build(class, code, v, context)
+			backPatchEs(es, code)
+			if t := currentStack + stack; t > maxstack {
+				maxstack = t
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/util/ArrayList",
+				Name:       "addAll",
+				Descriptor: "Ljava/util/Collection;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+		code.Codes[code.CodeLength] = cg.OP_dup // dup array list
+		currentStack++
+		if currentStack > maxstack {
+			maxstack = maxstack
+		}
+		stack, es := m.MakeExpression.build(class, code, v, context)
+		backPatchEs(es, code)
+		if t := stack + currentStack; t > maxstack {
+			maxstack = t
+		}
+		//convert to object
+		switch v.VariableType.Typ {
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/Integer",
+				Name:       "valueOf",
+				Descriptor: "(I)Ljava/lang/Integer;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/Float",
+				Name:       "valueOf",
+				Descriptor: "(F)Ljava/lang/Float;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/Double",
+				Name:       "valueOf",
+				Descriptor: "(D)Ljava/lang/Double;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/Long",
+				Name:       "valueOf",
+				Descriptor: "(J)Ljava/lang/Long;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+		default:
+			panic("~~~~~~~~~~~~")
+		}
+		// append
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/util/ArrayList",
+			Name:       "add",
+			Descriptor: "java/lang/Object",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		currentStack = 1
+	}
+	code.Codes[code.CodeLength] = cg.OP_areturn
+	code.CodeLength++
 	return
 }

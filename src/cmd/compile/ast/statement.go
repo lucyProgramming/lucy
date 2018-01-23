@@ -102,7 +102,6 @@ func (s *Statement) check(b *Block) []error { // b is father
 				errMsgPrefix(s.Pos), s.statementName()))
 			return errs
 		}
-		s.StatementReturn.Function = b.InheritedAttribute.function
 		errs = append(errs, s.StatementReturn.check(b)...)
 	default:
 		panic("unkown type statement" + s.statementName())
@@ -163,10 +162,23 @@ type StatementReturn struct {
 }
 
 func (s *StatementReturn) check(b *Block) []error {
+	if len(b.InheritedAttribute.function.Typ.ReturnList) > 0 && len(s.Expressions) == 0 {
+		s.Expressions = make([]*Expression, len(b.InheritedAttribute.function.Typ.ReturnList))
+		for k, v := range b.InheritedAttribute.function.Typ.ReturnList {
+			identifer := &ExpressionIdentifer{
+				Name: v.Name,
+			}
+			s.Expressions[k] = &Expression{
+				Data: identifer,
+				Typ:  EXPRESSION_TYPE_IDENTIFIER,
+			}
+		}
+	}
 	if len(s.Expressions) == 0 {
 		return nil
 	}
 	errs := make([]error, 0)
+
 	returndValueTypes := s.Expressions[0].checkExpressions(b, s.Expressions, &errs)
 	pos := s.Expressions[len(s.Expressions)-1].Pos
 	rs := b.InheritedAttribute.function.Typ.ReturnList

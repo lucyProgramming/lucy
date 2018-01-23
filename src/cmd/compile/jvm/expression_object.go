@@ -28,9 +28,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{
-		Class: n.Typ.Class.Name,
-		Name:  n.Construction.Func.Name,
-		Type:  n.Construction.Func.Descriptor,
+		Class:      n.Typ.Class.Name,
+		Name:       n.Construction.Func.Name,
+		Descriptor: n.Construction.Func.Descriptor,
 	}
 	class.InsertMethodRef(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

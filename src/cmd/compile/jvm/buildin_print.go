@@ -22,9 +22,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class: "java/lang/StringBuilder",
-		Name:  `<init>`,
-		Type:  "()V",
+		Class:      "java/lang/StringBuilder",
+		Name:       `<init>`,
+		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxstack = 3
@@ -49,9 +49,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		m.stackTop2String(class, code, variableType)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-			Class: "java/lang/StringBuilder",
-			Name:  "append",
-			Type:  "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
+			Class:      "java/lang/StringBuilder",
+			Name:       "append",
+			Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
@@ -61,24 +61,24 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class: "java/lang/StringBuilder",
-		Name:  "append",
-		Type:  "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
+		Class:      "java/lang/StringBuilder",
+		Name:       "append",
+		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	// tostring
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class: "java/lang/StringBuilder",
-		Name:  "toString",
-		Type:  "()Ljava/lang/String",
+		Class:      "java/lang/StringBuilder",
+		Name:       "toString",
+		Descriptor: "()Ljava/lang/String",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class: "java/io/PrintStream",
-		Name:  "println",
-		Type:  "(Ljava/lang/String;)V",
+		Class:      "java/io/PrintStream",
+		Name:       "println",
+		Descriptor: "(Ljava/lang/String;)V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	return
 }

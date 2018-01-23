@@ -41,9 +41,9 @@ func (m *MakeClass) buildAtuoArrayListVar(class *cg.ClassHighLevel, code *cg.Att
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class: "java/util/ArrayList",
-		Name:  "<init>",
-		Type:  "()V",
+		Class:      "java/util/ArrayList",
+		Name:       "<init>",
+		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	switch context.function.ArrayListVarForMultiReturn.Offset {
