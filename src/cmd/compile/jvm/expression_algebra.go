@@ -8,14 +8,11 @@ import (
 func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		stack, _ := m.build(class, code, bin.Left, context)
-		if stack > maxstack {
-			maxstack = stack
-		}
+		maxstack, _ = m.build(class, code, bin.Left, context)
 		size := bin.Left.VariableType.JvmSlotSize()
-		stack, _ = m.build(class, code, bin.Right, context)
-		if stack+size > maxstack {
-			maxstack = stack + size
+		stack, _ := m.build(class, code, bin.Right, context)
+		if t := stack + size; t > maxstack {
+			maxstack = t
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -38,14 +35,14 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lor
 			}
-		default:
-			panic("~~~~~~~~~~~~")
 		}
 		code.CodeLength++
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_ADD || e.Typ == ast.EXPRESSION_TYPE_SUB || e.Typ == ast.EXPRESSION_TYPE_MUL ||
-		e.Typ == ast.EXPRESSION_TYPE_DIV || e.Typ == ast.EXPRESSION_TYPE_MOD {
+	if e.Typ == ast.EXPRESSION_TYPE_ADD || e.Typ == ast.EXPRESSION_TYPE_SUB ||
+		e.Typ == ast.EXPRESSION_TYPE_MUL || e.Typ == ast.EXPRESSION_TYPE_DIV ||
+		e.Typ == ast.EXPRESSION_TYPE_MOD {
+		//handle string first
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 			return m.buildStrCat(class, code, bin, context)
 		}
@@ -126,27 +123,34 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
-		stack, _ := m.build(class, code, bin.Right, context)
-		if stack+2 > maxstack {
-			maxstack = stack + 2
+		maxstack, _ = m.build(class, code, bin.Left, context)
+		if e.VariableType.Typ != bin.Left.VariableType.Typ {
+			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
-		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_LONG { // long
-			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_LONG {
-				m.stackTop2Long(code, bin.Right.VariableType.Typ)
-			}
-			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
-				code.Codes[code.CodeLength] = cg.OP_lshl
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_lshr
-			}
-		} else { // int
-			if bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_INT {
-				m.stackTop2Int(code, bin.Right.VariableType.Typ)
-			}
+		size := e.VariableType.JvmSlotSize()
+		stack, _ := m.build(class, code, bin.Right, context)
+		if t := stack + size; t > maxstack {
+			maxstack = t
+		}
+		if e.VariableType.Typ != bin.Right.VariableType.Typ {
+			m.numberTypeConverter(code, bin.Right.Typ, e.VariableType.Typ)
+		}
+		switch e.VariableType.Typ {
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
 			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
+			}
+		case ast.VARIABLE_TYPE_LONG:
+			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+				code.Codes[code.CodeLength] = cg.OP_lshl
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_lshr
 			}
 		}
 		code.CodeLength++
@@ -154,37 +158,4 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	panic(12)
 	return
-}
-
-func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary, context *Context) (maxstack uint16) {
-	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClasses("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	maxstack = 2 // current stack is 2
-	stack, _ := m.build(class, code, e.Left, context)
-	maxstack += stack
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
-		Name:       `<init>`,
-		Descriptor: "(Ljava/lang/String;)V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	stack, _ = m.build(class, code, e.Right, context)
-	maxstack += stack
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
-		Name:       `append`,
-		Descriptor: "(Ljava/lang/String;)java/lang/StringBuilder;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
-		Name:       `toString`,
-		Descriptor: "()java/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	return maxstack
 }

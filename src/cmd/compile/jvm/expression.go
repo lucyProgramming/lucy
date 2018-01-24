@@ -6,6 +6,7 @@ import (
 )
 
 type MakeExpression struct {
+	MakeClass *MakeClass
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits [][]byte) {
@@ -109,7 +110,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
-
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -167,7 +167,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LIST:
 		panic("")
 	case ast.EXPRESSION_TYPE_FUNCTION:
-
 	case ast.EXPRESSION_TYPE_VAR:
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 		maxstack = m.buildTypeConvertion(class, code, e, context)
@@ -183,4 +182,58 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	//ee := e.Data.(*ast.Expression)
 	// m.leftValue(class, code, e)
 	return
+}
+
+/*
+	stack is 1
+*/
+func (m *MakeExpression) buildLoadArrayListAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) {
+	switch context.function.ArrayListVarForMultiReturn.Offset {
+	case 0:
+		code.Codes[code.CodeLength] = cg.OP_aload_0
+		code.CodeLength++
+	case 1:
+		code.Codes[code.CodeLength] = cg.OP_aload_1
+		code.CodeLength++
+	case 2:
+		code.Codes[code.CodeLength] = cg.OP_aload_2
+		code.CodeLength++
+	case 3:
+		code.Codes[code.CodeLength] = cg.OP_aload_3
+		code.CodeLength++
+	default:
+		if context.function.ArrayListVarForMultiReturn.Offset > 255 {
+			panic("local var offset over 255")
+		}
+		code.Codes[code.CodeLength] = cg.OP_aload
+		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
+		code.CodeLength += 2
+	}
+}
+
+/*
+	stack is 1
+*/
+func (m *MakeExpression) buildStoreArrayListAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) {
+	switch context.function.ArrayListVarForMultiReturn.Offset {
+	case 0:
+		code.Codes[code.CodeLength] = cg.OP_astore_0
+		code.CodeLength++
+	case 1:
+		code.Codes[code.CodeLength] = cg.OP_astore_1
+		code.CodeLength++
+	case 2:
+		code.Codes[code.CodeLength] = cg.OP_astore_2
+		code.CodeLength++
+	case 3:
+		code.Codes[code.CodeLength] = cg.OP_astore_3
+		code.CodeLength++
+	default:
+		if context.function.ArrayListVarForMultiReturn.Offset > 255 {
+			panic("local var offset over 255")
+		}
+		code.Codes[code.CodeLength] = cg.OP_astore
+		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
+		code.CodeLength += 2
+	}
 }

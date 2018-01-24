@@ -209,10 +209,11 @@ func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, e
 	if len(ts) == 0 {
 		return nil, nil // no-type,no error
 	}
+	var err error
 	if len(ts) > 1 {
-		return ts[0], fmt.Errorf("%s multi value in single value context", errMsgPrefix(e.Pos))
+		err = fmt.Errorf("%s multi value in single value context", errMsgPrefix(e.Pos))
 	}
-	return ts[0], nil
+	return ts[0], err
 }
 
 func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableType {
@@ -408,7 +409,6 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	if len(callargsTypes) < len(f.Typ.ParameterList) && len(args) < len(f.Typ.ParameterList) {
 		*errs = append(*errs, fmt.Errorf("%s too few paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
 	}
-
 	for k, v := range f.Typ.ParameterList {
 		if k < len(callargsTypes) {
 			if !v.Typ.typeCompatible(callargsTypes[k]) {
@@ -826,7 +826,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	return tt
 }
 
-func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *VariableType) {
+func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *VariableType) {
 	binary := e.Data.(*ExpressionBinary)
 	ts1, err1 := binary.Left.check(block)
 	ts2, err2 := binary.Right.check(block)
@@ -846,9 +846,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		*errs = append(*errs, err)
 	}
 	if t1 == nil || t2 == nil {
-		return &VariableType{
-			Typ: VARIABLE_TYPE_LONG,
-		}
+		return nil
 	}
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR || EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
@@ -862,12 +860,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 				errMsgPrefix(binary.Right.Pos),
 				t2.TypeString()))
 		}
-		t = &VariableType{
+		result = &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
 			Pos: e.Pos,
 		}
-		e.VariableType = t
-		return t
+		e.VariableType = result
+		return result
 	}
 	// & |
 	if e.Typ == EXPRESSION_TYPE_OR || EXPRESSION_TYPE_AND == e.Typ {
@@ -877,18 +875,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		if !t2.IsNumber() {
 			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(binary.Right.Pos)))
 		}
-		if t1.Typ != t2.Typ {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
-				errMsgPrefix(binary.Right.Pos),
-				t1.TypeString(),
-				t2.TypeString()))
+		if t1.IsNumber() && t2.IsNumber() {
+			if t1.Typ != t2.Typ {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
+					errMsgPrefix(binary.Right.Pos),
+					t1.TypeString(),
+					t2.TypeString()))
+			}
 		}
-		tt := t1.Clone()
-		tt.Pos = e.Pos
-		e.VariableType = tt
-		return tt
+		result = t1.Clone()
+		result.Pos = e.Pos
+		e.VariableType = result
+		return result
 	}
-
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.IsInteger() {
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
@@ -900,10 +899,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 				errMsgPrefix(binary.Right.Pos),
 				t2.TypeString()))
 		}
-		tt := t1.Clone()
-		tt.Pos = e.Pos
-		e.VariableType = tt
-		return tt
+		result = t1.Clone()
+		result.Pos = e.Pos
+		e.VariableType = result
+		return result
 	}
 	if e.Typ == EXPRESSION_TYPE_EQ ||
 		e.Typ == EXPRESSION_TYPE_NE ||
@@ -921,32 +920,25 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 			fallthrough
 		case VARIABLE_TYPE_INT:
 			fallthrough
+		case VARIABLE_TYPE_FLOAT:
+			fallthrough
 		case VARIABLE_TYPE_LONG:
+			fallthrough
+		case VARIABLE_TYPE_DOUBLE:
 			if !t2.IsNumber() {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'number' and '%s'",
-					errMsgPrefix(e.Pos),
-					e.OpName(),
-					t2.TypeString()))
+				*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
 			}
 		case VARIABLE_TYPE_STRING:
 			if t2.Typ != VARIABLE_TYPE_STRING {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'string' and '%s'",
-					errMsgPrefix(e.Pos),
-					e.OpName(),
-					t2.TypeString()))
+				*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
 			}
 		case VARIABLE_TYPE_BOOL:
 			if t2.Typ == VARIABLE_TYPE_BOOL {
 				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-					*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and 'bool'",
-						errMsgPrefix(e.Pos),
-						e.OpName()))
+					*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
 				}
 			} else {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'bool' and '%s'",
-					errMsgPrefix(e.Pos),
-					e.OpName(),
-					t2.TypeString()))
+				*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
 			}
 		case VARIABLE_TYPE_NULL:
 			if t2.IsPointer() {
@@ -990,30 +982,22 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (t *Vari
 		e.Typ == EXPRESSION_TYPE_MUL ||
 		e.Typ == EXPRESSION_TYPE_DIV ||
 		e.Typ == EXPRESSION_TYPE_MOD {
-		if t1.Typ == VARIABLE_TYPE_STRING || t2.Typ == VARIABLE_TYPE_STRING {
-			tt := t1.Clone()
-			tt.Pos = e.Pos
-			return tt
+		if t1.Typ == VARIABLE_TYPE_STRING || t2.Typ == VARIABLE_TYPE_STRING { // string is always ok
+			result = &VariableType{}
+			result.Typ = VARIABLE_TYPE_STRING
+			result.Pos = e.Pos
+			return result
 		}
-		if t1.IsNumber() {
-			if !t2.IsNumber() {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-					errMsgPrefix(binary.Right.Pos),
-					e.OpName(),
-					t1.TypeString(),
-					t2.TypeString()))
-			}
-		} else {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-				errMsgPrefix(e.Pos),
-				e.OpName(),
-				t1.TypeString(),
-				t2.TypeString()))
+		if t1.IsNumber() == false || t2.IsNumber() == false {
+			*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
+			result = t1.Clone()
+			result.Pos = e.Pos
+			return result
 		}
-		tt := &VariableType{}
-		tt.Pos = e.Pos
-		tt.Typ = t1.NumberTypeConvertRule(t2)
-		return tt
+		result = &VariableType{}
+		result.Pos = e.Pos
+		result.Typ = t1.NumberTypeConvertRule(t2)
+		return result
 	}
 	panic("missing check" + e.OpName())
 	return nil

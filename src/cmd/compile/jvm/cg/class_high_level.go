@@ -12,29 +12,12 @@ type ClassHighLevel struct {
 	DoubleConsts           map[float64][][]byte
 	Classes                map[string][][]byte
 	FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
-	NameAndTypes           map[CONSTANT_NameAndType_info_high_Level][][]byte
 	MethodRefs             map[CONSTANT_Methodref_info_high_level][][]byte
 	Name                   string
 	SuperClass             string
 	Interfaces             []string
 	Fields                 map[string]*FiledHighLevel
 	Methods                map[string][]*MethodHighLevel
-}
-
-type CONSTANT_NameAndType_info_high_Level struct {
-	Name       string
-	Descriptor string
-}
-
-func (c *ClassHighLevel) InsertNameAndType(nt CONSTANT_NameAndType_info_high_Level, location []byte) {
-	if c.NameAndTypes == nil {
-		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_Level][][]byte)
-	}
-	if x, ok := c.NameAndTypes[nt]; ok {
-		x = append(x, location)
-	} else {
-		c.NameAndTypes[nt] = [][]byte{location}
-	}
 }
 
 type CONSTANT_Methodref_info_high_level struct {
@@ -147,3 +130,19 @@ type MethodHighLevel struct {
 	MethodInfo
 	Code AttributeCode
 }
+
+//type CONSTANT_NameAndType_info_high_Level struct {
+//	Name       string
+//	Descriptor string
+//}
+
+//func (c *ClassHighLevel) InsertNameAndType(nt CONSTANT_NameAndType_info_high_Level, location []byte) {
+//	if c.NameAndTypes == nil {
+//		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_Level][][]byte)
+//	}
+//	if x, ok := c.NameAndTypes[nt]; ok {
+//		x = append(x, location)
+//	} else {
+//		c.NameAndTypes[nt] = [][]byte{location}
+//	}
+//}

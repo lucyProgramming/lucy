@@ -174,27 +174,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	//multi value to return
 	//load array list
-	switch context.function.ArrayListVarForMultiReturn.Offset {
-	case 0:
-		code.Codes[code.CodeLength] = cg.OP_aload_0
-		code.CodeLength++
-	case 1:
-		code.Codes[code.CodeLength] = cg.OP_aload_1
-		code.CodeLength++
-	case 2:
-		code.Codes[code.CodeLength] = cg.OP_aload_2
-		code.CodeLength++
-	case 3:
-		code.Codes[code.CodeLength] = cg.OP_aload_3
-		code.CodeLength++
-	default:
-		if context.function.ArrayListVarForMultiReturn.Offset > 255 {
-			panic("local var offset over 255")
-		}
-		code.Codes[code.CodeLength] = cg.OP_aload
-		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
-		code.CodeLength += 2
-	}
+	m.MakeExpression.buildLoadArrayListAutoVar(class, code, context)
 	// call clear
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.Codes[code.CodeLength+1] = cg.OP_invokevirtual
