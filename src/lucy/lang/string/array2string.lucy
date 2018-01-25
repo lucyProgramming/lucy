@@ -3,7 +3,7 @@ package string;
 import "java/lang" as javalang;
 
 public class ArrayToString{
-	public static fn toString(arr []bool)->(result string){
+	public static fn boolArray2String(arr []bool)->(result string){
 		result = "[";
 		length := arr.size();
 		for i := 0;i<length;i++{
@@ -14,7 +14,7 @@ public class ArrayToString{
 		}
 		result += "]"
 	}
-	public static fn toString(arr []int)->(result string){
+	public static fn intArray2String(arr []int)->(result string){
 		result = "[";
 		length := arr.size();
 		for i := 0;i<length;i++{
@@ -25,7 +25,7 @@ public class ArrayToString{
 		}
 		result += "]"
 	}
-	public static fn toString(arr []long)->(result string){
+	public static fn longArray2String(arr []long)->(result string){
 		result = "[";
 		length := arr.size();
 		for i := 0;i<length;i++{
@@ -36,7 +36,7 @@ public class ArrayToString{
 		}
 		result += "]"
 	}
-	public static fn toString(arr []float)->(result string){
+	public static fn floatArray2String(arr []float)->(result string){
 		result = "[";
 		length := arr.size();
 		for i := 0;i<length;i++{
@@ -47,7 +47,7 @@ public class ArrayToString{
 		}
 		result += "]"
 	}
-	public static fn toString(arr []double)->(result string){
+	public static fn doubleArray2String(arr []double)->(result string){
 		result = "[";
 		length := arr.size();
 		for i := 0;i<length;i++{
@@ -58,7 +58,7 @@ public class ArrayToString{
 		}
 		result += "]"
 	}
-	public static fn toString(arr []javalang.Object)->(result string){
+	public static fn objectArray2String(arr []javalang.Object)->(result string){
 		result = "[";
 		length := arr.size();
 		for i := 0;i<length;i++{

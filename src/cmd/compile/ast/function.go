@@ -11,7 +11,7 @@ type CallChecker func(errs *[]error, args []*VariableType, pos *Pos)
 
 type Function struct {
 	callchecker                CallChecker // used in build function
-	Method                     *cg.MethodHighLevel
+	ClassMethod                *cg.MethodHighLevel
 	IsGlobal                   bool
 	Isbuildin                  bool
 	Used                       bool

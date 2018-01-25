@@ -7,7 +7,7 @@ import (
 
 func (m *MakeClass) mkFunc(f *ast.Function) {
 	if f.IsGlobal || f.IsClosureFunction() {
-		context := &Context{f}
+		context := &Context{f, nil}
 		method := m.buildFunction(m.mainclass, f, context, true)
 		m.mainclass.Methods[method.Name] = []*cg.MethodHighLevel{method}
 		method.AccessFlags = 0
@@ -19,14 +19,14 @@ func (m *MakeClass) mkFunc(f *ast.Function) {
 		method.ClassHighLevel = m.mainclass
 		return
 	}
-	context := &Context{f}
+	context := &Context{f, nil}
 	class := m.mkClosureFunctionClass()
 	m.buildFunction(class, f, context, false)
 }
 func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, f *ast.Function, context *Context, isstatic bool) *cg.MethodHighLevel {
 	ret := &cg.MethodHighLevel{}
 	ret.Name = f.Name
-	f.Method = ret
+	f.ClassMethod = ret
 	ret.Code.Codes = make([]byte, 65536)
 	ret.Code.CodeLength = 0
 	m.buildAtuoArrayListVar(class, &ret.Code, context)

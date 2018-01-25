@@ -13,7 +13,7 @@ import (
 
 func Main(files []string) {
 	l.NerrsStopCompile = 10
-	l.Nerrs = []error{}
+	l.Errs = []error{}
 	l.Files = files
 	l.compile()
 }
@@ -21,23 +21,28 @@ func Main(files []string) {
 type LucyCompile struct {
 	Tops             []*ast.Node
 	Files            []string
-	Nerrs            []error
+	Errs             []error
 	NerrsStopCompile int
 	lucyPath         []string
 	Maker            jvm.MakeClass
 }
 
 func (l *LucyCompile) shouldExit() {
-	if len(l.Nerrs) > l.NerrsStopCompile {
+	if len(l.Errs) > l.NerrsStopCompile {
 		l.exit()
 	}
-
 }
 
 func (l *LucyCompile) exit() {
-	for _, v := range l.Nerrs {
+	code := 0
+	if len(l.Errs) > 0 {
+		code = 1
+	}
+	for _, v := range l.Errs {
 		fmt.Println(v)
 	}
+	os.Exit(code)
+
 }
 
 func (l *LucyCompile) Init() {
@@ -53,20 +58,20 @@ func (l *LucyCompile) compile() {
 	for _, v := range l.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
-			l.Nerrs = append(l.Nerrs, err)
+			l.Errs = append(l.Errs, err)
 			continue
 		}
-		l.Nerrs = append(l.Nerrs, parser.Parse(&l.Tops, v, bs, CompileFlags.OnlyImport, l.NerrsStopCompile)...)
+		l.Errs = append(l.Errs, parser.Parse(&l.Tops, v, bs, CompileFlags.OnlyImport, l.NerrsStopCompile)...)
 		l.shouldExit()
 	}
 	c := ast.ConvertTops2Package{}
 	p, rs, errs := c.ConvertTops2Package(l.Tops)
-	l.Nerrs = append(l.Nerrs, errs...)
+	l.Errs = append(l.Errs, errs...)
 	for _, v := range rs {
-		l.Nerrs = append(l.Nerrs, v.Error())
+		l.Errs = append(l.Errs, v.Error())
 	}
 	l.shouldExit()
-	l.Nerrs = append(l.Nerrs, p.TypeCheck()...)
+	l.Errs = append(l.Errs, p.TypeCheck()...)
 	l.shouldExit()
 	l.Maker.Make(p)
 	l.exit()

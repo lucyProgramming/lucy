@@ -251,6 +251,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if b.Funcs[name] != nil {
 		return fmt.Errorf("%s name '%s' already declared as function", errMsgPrefix(pos), name)
 	}
+	if _, ok := buildinFunctionsMap[name]; ok {
+		return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
+	}
 	if b.Consts == nil {
 		b.Consts = make(map[string]*Const)
 	}

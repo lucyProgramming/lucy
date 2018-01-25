@@ -37,10 +37,14 @@ type Class struct {
 	attributes     []*AttributeInfo
 }
 
-func (c *Class) ToLowLevel(level *ClassHighLevel) {
+func (c *Class) FromHighLevel(high *ClassHighLevel) {
+	c.minorVersion = 0
+	c.majorVersion = 52
+	c.accessFlag = high.AccessFlags
+	c.accessFlag = high.AccessFlags
 
+	return
 }
-
 func (c *Class) OutPut(dest io.Writer) error {
 	c.dest = dest
 	//magic number

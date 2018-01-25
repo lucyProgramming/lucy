@@ -1,6 +1,7 @@
 package cg
 
 type ClassHighLevel struct {
+	Name                   string
 	IsClosureFunctionClass bool
 	MainClass              *ClassHighLevel
 	InnerClasss            []*ClassHighLevel
@@ -13,7 +14,6 @@ type ClassHighLevel struct {
 	Classes                map[string][][]byte
 	FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
 	MethodRefs             map[CONSTANT_Methodref_info_high_level][][]byte
-	Name                   string
 	SuperClass             string
 	Interfaces             []string
 	Fields                 map[string]*FiledHighLevel
