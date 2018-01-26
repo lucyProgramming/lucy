@@ -7,7 +7,6 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
-	"github.com/timtadh/lexmachine"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
@@ -23,7 +22,7 @@ type Parser struct {
 	Function         *Function
 	Class            *Class
 	Block            *Block
-	scanner          *lexmachine.Scanner
+	scanner          *lex.LucyLexer
 	filename         string
 	lastToken        *lex.Token
 	token            *lex.Token
@@ -42,13 +41,8 @@ func (p *Parser) Parse() []error {
 	p.Block = &Block{}
 	p.Block.parser = p
 	p.errs = []error{}
-	var err error
-	p.scanner, err = lex.Lexer.Scanner(p.bs)
+	p.scanner = lex.New(p.bs)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
-	if err != nil {
-		p.errs = append(p.errs, err)
-		return p.errs
-	}
 	p.Next()
 	//package name definition
 	if p.eof {
@@ -99,6 +93,7 @@ func (p *Parser) Parse() []error {
 		ispublic = false
 		isconst = false
 	}
+	var err error
 	for !p.eof {
 		if len(p.errs) > p.nerr {
 			break
@@ -291,8 +286,8 @@ func (p *Parser) insertImports(im *ast.Imports) {
 func (p *Parser) mkPos() *ast.Pos {
 	return &ast.Pos{
 		Filename:    p.filename,
-		StartLine:   p.token.Match.StartLine,
-		StartColumn: p.token.Match.StartColumn,
+		StartLine:   p.token.StartLine,
+		StartColumn: p.token.StartColumn,
 	}
 }
 
@@ -349,9 +344,9 @@ func (p *Parser) Next() {
 	var tok interface{}
 	p.lastToken = p.token
 	for !p.eof {
-		tok, err, p.eof = p.scanner.Next()
+		tok, p.eof, err = p.scanner.Next()
 		if err != nil {
-			p.eof = true
+			p.errs = append(p.errs, fmt.Errorf("%s %s", p.errorMsgPrefix(), err.Error()))
 			return
 		}
 		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
@@ -377,7 +372,7 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
 		return fmt.Sprintf("%s:%d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine-1]))
 	}
-	return fmt.Sprintf("%s:%d:%d '%s'", p.filename, p.token.Match.StartLine, p.token.Match.StartColumn, string(p.lines[p.token.Match.StartLine-1]))
+	return fmt.Sprintf("%s:%d:%d '%s'", p.filename, p.token.StartLine, p.token.StartColumn, string(p.lines[p.token.StartLine-1]))
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;
@@ -690,8 +685,8 @@ func (p *Parser) parseImports() {
 
 func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.Filename = p.filename
-	pos.StartLine = t.Match.StartLine
-	pos.StartColumn = t.Match.StartColumn
+	pos.StartLine = t.StartLine
+	pos.StartColumn = t.StartColumn
 }
 
 // a,b int or int,bool  c xxx

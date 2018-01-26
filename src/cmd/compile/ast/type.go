@@ -52,8 +52,9 @@ func (v *VariableType) JvmSlotSize() uint16 {
 	}
 	if v.Typ == VARIABLE_TYPE_DOUBLE || VARIABLE_TYPE_LONG == v.Typ {
 		return 2
+	} else {
+		return 1
 	}
-	return 1
 }
 func (v *VariableType) rightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||

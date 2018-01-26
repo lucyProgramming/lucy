@@ -1,7 +1,6 @@
 package lex
 
 import (
-	"github.com/timtadh/lexmachine/machines"
 	"strconv"
 )
 
@@ -38,7 +37,7 @@ const (
 	TOKEN_LEFT_SHIFT     // <<
 	TOKEN_RIGHT_SHIFT    // >>
 	TOKEN_ASSIGN         //=
-	TOKEN_EQUAL          //== or ===
+	TOKEN_EQUAL          //== or ==
 	TOKEN_NE             // !=
 	TOKEN_GT             //>
 	TOKEN_GE             //>=
@@ -56,8 +55,8 @@ const (
 	TOKEN_NEW            // new Object()
 	TOKEN_COLON          // :
 	TOKEN_COLON_ASSIGN   // :=
-	TOKEN_PLUS_ASSIGN    // +=
-	TOKEN_MINUS_ASSIGN   // -=
+	TOKEN_ADD_ASSIGN     // +=
+	TOKEN_SUB_ASSIGN     // -=
 	TOKEN_MUL_ASSIGN     // *=
 	TOKEN_DIV_ASSIGN     // /=
 	TOKEN_MOD_ASSIGN     // %=
@@ -94,11 +93,59 @@ const (
 	TOKEN_IMPLEMENTS     // implements
 )
 
+var (
+	keywordMap = map[string]int{
+		"fn":         TOKEN_FUNCTION,
+		"enum":       TOKEN_ENUM,
+		"const":      TOKEN_CONST,
+		"if":         TOKEN_IF,
+		"elseif":     TOKEN_ELSEIF,
+		"else":       TOKEN_ELSE,
+		"for":        TOKEN_FOR,
+		"break":      TOKEN_BREAK,
+		"continue":   TOKEN_CONTINUE,
+		"return":     TOKEN_RETURN,
+		"null":       TOKEN_NULL,
+		"bool":       TOKEN_BOOL,
+		"true":       TOKEN_TRUE,
+		"false":      TOKEN_FALSE,
+		"skip":       TOKEN_SKIP,
+		"var":        TOKEN_VAR,
+		"new":        TOKEN_NEW,
+		"switch":     TOKEN_SWITCH,
+		"case":       TOKEN_CASE,
+		"default":    TOKEN_DEFAULT,
+		"package":    TOKEN_PACKAGE,
+		"import":     TOKEN_IMPORT,
+		"as":         TOKEN_AS,
+		"class":      TOKEN_CLASS,
+		"static":     TOKEN_STATIC,
+		"public":     TOKEN_PUBLIC,
+		"protected":  TOKEN_PROTECTED,
+		"private":    TOKEN_PRIVATE,
+		"interface":  TOKEN_INTERFACE,
+		"byte":       TOKEN_BYTE,
+		"short":      TOKEN_SHORT,
+		"int":        TOKEN_INT,
+		"float":      TOKEN_FLOAT,
+		"double":     TOKEN_DOUBLE,
+		"long":       TOKEN_LONG,
+		"string":     TOKEN_STRING,
+		"defer":      TOKEN_DEFER,
+		"type":       TOKEN_TYPE,
+		"extends":    TOKEN_EXTENDS,
+		"implements": TOKEN_IMPLEMENTS,
+	}
+)
+
 type Token struct {
-	Type  int
-	Match *machines.Match
-	Desp  string
-	Data  interface{}
+	Type        int
+	StartLine   int
+	StartColumn int
+	EndLine     int
+	EndColumn   int
+	Desp        string
+	Data        interface{}
 }
 
 func parseInt64(bs []byte) int64 {

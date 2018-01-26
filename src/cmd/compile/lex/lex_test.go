@@ -20,7 +20,6 @@ var (
 			return false;
 		}
 		if(a && b != 0){
-
 			return null;
 		}
 		if(a | b != 0){
@@ -29,7 +28,6 @@ var (
 		a + b;
 		a / b;
 		a % b;
-
 	}
 	class Person{
 		int a;
@@ -89,5 +87,4 @@ func Test_lex(t *testing.T) {
 		}
 	}
 	fmt.Println("\n\n\n\n\n\n\n")
-
 }

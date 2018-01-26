@@ -715,10 +715,10 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 		return mkBinayExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
 	case lex.TOKEN_COLON_ASSIGN:
 		return mkBinayExpression(ast.EXPRESSION_TYPE_COLON_ASSIGN, true)
-	case lex.TOKEN_PLUS_ASSIGN:
+	case lex.TOKEN_ADD_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_PLUS_ASSIGN, false)
-	case lex.TOKEN_MINUS_ASSIGN:
+	case lex.TOKEN_SUB_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MINUS_ASSIGN, false)
 	case lex.TOKEN_MUL_ASSIGN:

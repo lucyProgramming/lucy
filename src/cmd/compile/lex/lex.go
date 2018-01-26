@@ -1,645 +1,417 @@
 package lex
 
 import (
-	"github.com/timtadh/lexmachine"
-	"github.com/timtadh/lexmachine/machines"
-	"strconv"
-	"strings"
+	"fmt"
 )
 
-func init() {
-	Lexer.Add([]byte("fn"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_FUNCTION
-		t.Desp = "fn"
-		return t, nil
-	})
-	Lexer.Add([]byte("enum"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_ENUM
-		t.Desp = "enum"
-		return t, nil
-	})
-	Lexer.Add([]byte("const"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CONST
-		t.Desp = "const"
-		return t, nil
-	})
-	Lexer.Add([]byte("if"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_IF
-		t.Desp = "if"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(else[ ]*if)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_ELSEIF
-		t.Desp = "elseif"
-		return t, nil
-	})
-	Lexer.Add([]byte("else"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_ELSE
-		t.Desp = "else"
-		return t, nil
-	})
-	Lexer.Add([]byte("for"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_FOR
-		t.Desp = "for"
-		return t, nil
-	})
-	Lexer.Add([]byte("continue"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CONTINUE
-		t.Desp = "continue"
-		return t, nil
-	})
-	Lexer.Add([]byte("break"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_BREAK
-		t.Desp = "break"
-		return t, nil
-	})
-	Lexer.Add([]byte("return"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_RETURN
-		t.Desp = "return"
-		return t, nil
-	})
-	Lexer.Add([]byte("null"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_NULL
-		t.Desp = "null"
-		return t, nil
-	})
-	Lexer.Add([]byte("true"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_TRUE
-		t.Desp = "true"
-		t.Data = true
-		return t, nil
-	})
-	Lexer.Add([]byte("false"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_FALSE
-		t.Desp = "false"
-		t.Data = false
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\()`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LP
-		t.Desp = "("
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\))`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_RP
-		t.Desp = ")"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\{)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LC
-		t.Desp = "{"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\})`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_RC
-		t.Desp = "}"
-		return t, nil
-	})
-	Lexer.Add([]byte(`([\[])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LB
-		t.Desp = "["
-		return t, nil
-	})
-	Lexer.Add([]byte(`([\]])`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_RB
-		t.Desp = "]"
-		return t, nil
-	})
-	Lexer.Add([]byte(";"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_SEMICOLON
-		t.Desp = ";"
-		return t, nil
-	})
-	Lexer.Add([]byte("skip"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_SKIP
-		t.Desp = ";"
-		return t, nil
-	})
-	Lexer.Add([]byte(","), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_COMMA
-		t.Desp = ","
-		return t, nil
-	})
-	Lexer.Add([]byte("&&"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LOGICAL_AND
-		t.Desp = "&&"
-		return t, nil
-	})
-	Lexer.Add([]byte("||"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LOGICAL_OR
-		t.Desp = "||"
-		return t, nil
-	})
-	Lexer.Add([]byte("<<"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LEFT_SHIFT
-		t.Desp = "<<"
-		return t, nil
-	})
-	Lexer.Add([]byte(">>"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_RIGHT_SHIFT
-		t.Desp = "||"
-		return t, nil
-	})
+func New(bs []byte) *LucyLexer {
+	lex := &LucyLexer{bs: bs}
+	lex.end = len(bs) - 1
+	if lex.end == -1 {
+		lex.end = 0
+	}
+	return lex
+}
 
-	Lexer.Add([]byte(`(\&)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_AND
-		t.Desp = "&"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\|)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_OR
-		t.Desp = "|"
-		return t, nil
-	})
-	Lexer.Add([]byte("="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_ASSIGN
-		t.Desp = "="
-		return t, nil
-	})
-	Lexer.Add([]byte("=="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_EQUAL
-		t.Desp = "=="
-		return t, nil
-	})
-	Lexer.Add([]byte("!="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_NE
-		t.Desp = "!="
-		return t, nil
-	})
-	Lexer.Add([]byte(">"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_GT
-		t.Desp = ">"
-		return t, nil
-	})
-	Lexer.Add([]byte(">="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_GE
-		t.Desp = ">="
-		return t, nil
-	})
-	Lexer.Add([]byte("<"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LT
-		t.Desp = "<"
-		return t, nil
-	})
-	Lexer.Add([]byte("<="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LT
-		t.Desp = "<="
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_ADD
-		t.Desp = "+"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\-)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_SUB
-		t.Desp = "-"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MUL
-		t.Desp = "*"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\/)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DIV
-		t.Desp = "/"
-		return t, nil
-	})
-	Lexer.Add([]byte("%"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MOD
-		t.Desp = "%"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\+\+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_INCREMENT
-		t.Desp = "++"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\-\-)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DECREMENT
-		t.Desp = "--"
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\.)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DOT
-		t.Desp = "."
-		return t, nil
-	})
-	Lexer.Add([]byte("var"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_VAR
-		t.Desp = "var"
-		return t, nil
-	})
-	Lexer.Add([]byte("new"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_NEW
-		t.Desp = "new"
-		return t, nil
-	})
-	Lexer.Add([]byte(":"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_COLON
-		t.Desp = ":"
-		return t, nil
-	})
-	Lexer.Add([]byte(":="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_COLON_ASSIGN
-		t.Desp = ":="
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\+=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_PLUS_ASSIGN
-		t.Desp = "+="
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\-=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MINUS_ASSIGN
-		t.Desp = "-="
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\*=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MUL_ASSIGN
-		t.Desp = "*="
-		return t, nil
-	})
-	Lexer.Add([]byte(`(\/=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DIV_ASSIGN
-		t.Desp = `/=`
-		return t, nil
-	})
-	Lexer.Add([]byte("%="), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_MOD_ASSIGN
-		t.Desp = "%="
-		return t, nil
-	})
-	Lexer.Add([]byte("!"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_NOT
-		t.Desp = "!"
-		return t, nil
-	})
-	Lexer.Add([]byte("switch"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_SWITCH
-		t.Desp = "switch"
-		return t, nil
-	})
-	Lexer.Add([]byte("case"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CASE
-		t.Desp = "case"
-		return t, nil
-	})
-	Lexer.Add([]byte("default"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DEFAULT
-		t.Desp = "default"
-		return t, nil
-	})
-	Lexer.Add([]byte("\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CRLF
-		return t, nil
-	})
-	Lexer.Add([]byte("( |\t|\n)"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		return nil, nil
-	})
-	Lexer.Add([]byte("//[^\n]*\n"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		return nil, nil
-	})
-	Lexer.Add([]byte("package"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_PACKAGE
-		t.Desp = "package"
-		return t, nil
-	})
-	Lexer.Add([]byte("import"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_IMPORT
-		t.Desp = "import"
-		return t, nil
-	})
-	Lexer.Add([]byte("as"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_AS
-		t.Desp = "as"
-		return t, nil
-	})
+type LucyLexer struct {
+	bs                                 []byte
+	lastline, lastcolumn, line, column int
+	offset, end                        int
+}
 
-	Lexer.Add([]byte("class"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_CLASS
-		t.Desp = "class"
-		return t, nil
-	})
-	Lexer.Add([]byte("static"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_STATIC
-		t.Desp = "class"
-		return t, nil
-	})
-	Lexer.Add([]byte("public"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_PUBLIC
-		t.Desp = "public"
-		return t, nil
-	})
-	Lexer.Add([]byte("protected"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_PROTECTED
-		t.Desp = "protected"
-		return t, nil
-	})
-	Lexer.Add([]byte("private"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_PRIVATE
-		t.Desp = "private"
-		return t, nil
-	})
-	Lexer.Add([]byte("interface"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_INTERFACE
-		t.Desp = "interface"
-		return t, nil
-	})
-	Lexer.Add([]byte("bool"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_BOOL
-		t.Desp = "bool"
-		return t, nil
-	})
-	Lexer.Add([]byte("byte"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_BYTE
-		t.Desp = "byte"
-		return t, nil
-	})
-	Lexer.Add([]byte("short"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_SHORT
-		t.Desp = "short"
-		return t, nil
-	})
-	Lexer.Add([]byte("int"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_INT
-		t.Desp = "int"
-		return t, nil
-	})
-	Lexer.Add([]byte("float"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_FLOAT
-		t.Desp = "float"
-		return t, nil
-	})
-	Lexer.Add([]byte("double"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DOUBLE
-		t.Desp = "double"
-		return t, nil
-	})
+func (lex *LucyLexer) incrementLine() {
+	lex.lastline = lex.line
+	lex.line++
+}
 
-	Lexer.Add([]byte("long"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LONG
-		t.Desp = "long"
-		return t, nil
-	})
+func (lex *LucyLexer) getchar() (c byte, eof bool) {
+	if lex.offset == lex.end {
+		eof = true
+		return
+	}
+	lex.lastcolumn = lex.column
+	lex.column++
+	offset := lex.offset
+	lex.offset++
+	c = lex.bs[offset]
+	return
+}
+func (lex *LucyLexer) isLetter(c byte) bool {
+	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+}
+func (lex *LucyLexer) isDigit(c byte) bool {
+	return '0' <= c && c <= '9'
+}
+func (lex *LucyLexer) isHex(c byte) bool {
+	return lex.isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
+}
+func (lex *LucyLexer) hexbyte2Byte(c byte) byte {
+	if 'a' <= c && c <= 'f' {
+		return c - 'a'
+	}
+	if 'A' <= c && c <= 'F' {
+		return c - 'A'
+	}
+	return c - '0'
+}
 
-	Lexer.Add([]byte("string"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_STRING
-		t.Desp = "string"
-		return t, nil
-	})
-	Lexer.Add([]byte("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_IDENTIFIER
-		t.Desp = "identifer_" + string(match.Bytes)
-		t.Data = string(match.Bytes)
-		return t, nil
-	})
+func (lex *LucyLexer) ungetchar() {
+	lex.offset--
+	lex.line, lex.column = lex.lastline, lex.lastcolumn
+}
+func (lex *LucyLexer) lexNumber(c byte) (token *Token, eof bool, err error) {
+	return
+}
+func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) {
+	token = &Token{}
+	token.StartLine = lex.line
+	token.StartLine = lex.column
+	bs := []byte{c}
+	c, eof = lex.getchar()
+	for eof == false {
+		if lex.isLetter(c) || c == '_' || lex.isDigit(c) {
+			bs = append(bs, c)
+			c, eof = lex.getchar()
+		} else {
+			break
+		}
+	}
+	lex.ungetchar()
+	token.EndLine = lex.line
+	token.EndColumn = lex.column
+	identifier := string(bs)
+	if t, ok := keywordMap[identifier]; ok {
+		token.Type = t
+		return
+	}
+	token.Type = TOKEN_IDENTIFIER
+	token.Data = identifier
+	token.Desp = identifier
+	token.EndLine = lex.line
+	token.EndColumn = lex.column
+	return
+}
 
-	// 0 or 0755 or 123 or +100 or -100
-	Lexer.Add([]byte(`([\-]?[0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LITERAL_INT
-		t.Desp = string(match.Bytes)
-		t.Data = parseInt64(match.Bytes)
-		return t, nil
-	})
-	//科学计数法
-	Lexer.Add([]byte(`([1-9](\.[0-9]+)?e[\-|\+]?[1-9][0-9]*)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Data, t.Type = parseScientificNotation(match.Bytes)
-		t.Desp = string(match.Bytes)
-		return t, nil
-	})
-	// 0x12e
-	Lexer.Add([]byte(`(0x[0-9a-e]+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LITERAL_INT
-		t.Desp = string(match.Bytes)
-		return t, nil
-	})
-	// 12.122 0.00
-	Lexer.Add([]byte(`([0-9]+\.[0-9]+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LITERAL_FLOAT
-		t.Desp = string(match.Bytes)
-		t.Data, _ = strconv.ParseFloat(t.Desp, 64)
-		return t, nil
-	})
+func (lex *LucyLexer) lexString() (token *Token, eof bool, err error) {
+	token = &Token{}
+	token.StartLine = lex.line
+	token.StartLine = lex.column
+	bs := []byte{}
+	var c byte
+	c, eof = lex.getchar()
+	for c != '"' && c != '\n' && eof == false {
+		if c != '\\' {
+			bs = append(bs, c)
+			c, eof = lex.getchar()
+			continue
+		}
+		c, eof = lex.getchar()
+		if eof {
+			break
+		}
+		switch c {
+		case 'a':
+			bs = append(bs, '\a')
+			c, eof = lex.getchar()
+		case 'b':
+			bs = append(bs, '\b')
+			c, eof = lex.getchar()
+		case 'f':
+			bs = append(bs, '\f')
+			c, eof = lex.getchar()
+		case 'n':
+			bs = append(bs, '\n')
+			c, eof = lex.getchar()
+		case 'r':
+			bs = append(bs, '\r')
+			c, eof = lex.getchar()
+		case 't':
+			bs = append(bs, '\t')
+			c, eof = lex.getchar()
+		case 'v':
+			bs = append(bs, '\v')
+			c, eof = lex.getchar()
+		case '\\':
+			bs = append(bs, '\\')
+			c, eof = lex.getchar()
+		case '\'':
+			bs = append(bs, '\'')
+			c, eof = lex.getchar()
+		case '"':
+			bs = append(bs, '"')
+			c, eof = lex.getchar()
+		case 'x':
+			var c1, c2 byte
+			c1, eof = lex.getchar() // skip 'x'
+			if eof {
+				err = fmt.Errorf("unexpect EOF")
+				break
+			}
+			if !lex.isHex(c) {
+				err = fmt.Errorf("unknown escape sequence")
+				continue
+			}
+			b := lex.hexbyte2Byte(c1)
+			c2, eof = lex.getchar()
+			if lex.isHex(c2) {
+				b2 := lex.hexbyte2Byte(c2)
+				if t := b*16 + b2; t > 127 { // only support standard accii
+					bs = append(bs, b)W
+					lex.ungetchar()
+				} else {
+					bs = append(bs, t)
+					lex.ungetchar()
+				}
+			} else {
+				bs = append(bs, b)
+				lex.ungetchar()
+			}
+		case '0', '1', '2', '3', '4', '5', '7':
 
-	// string literal
-	Lexer.Add([]byte(`(\"[^\"]+\")`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LITERAL_STRING
-		t.Desp = string(match.Bytes)
-		t.Data = string(match.Bytes[1:len(match.Bytes)])
-		t.Data = strings.Trim(t.Data.(string), `"`)
-		return t, nil
-	})
+		}
+	}
+	if c == '\n' && eof == false {
+		lex.incrementLine()
+	}
+	return
+}
+func (lex *LucyLexer) lexMultiLineComment() {
+redo:
+	c, eof := lex.getchar()
+	if eof {
+		return
+	}
+	if c == '\n' {
+		lex.incrementLine()
+	}
+	for c != '*' && eof == false {
+		c, eof = lex.getchar()
+		if c == '\n' {
+			lex.incrementLine()
+		}
+	}
+	if c == '\n' {
+		lex.incrementLine()
+	}
+	c, eof = lex.getchar()
+	if c == '/' {
+		return
+	}
+	if c == '\n' {
+		lex.incrementLine()
+	}
+	goto redo
+}
 
-	//byte literal
-	Lexer.Add([]byte(`(\'[.|\n]\')`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_LITERAL_BYTE
-		t.Desp = string(match.Bytes)
-		t.Data = match.Bytes[1]
-		return t, nil
-	})
-
-	Lexer.Add([]byte("defer"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_DEFER
-		t.Desp = "defer"
-		return t, nil
-	})
-
-	Lexer.Add([]byte("type"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_TYPE
-		t.Desp = "type"
-		return t, nil
-	})
-	Lexer.Add([]byte("->"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_ARROW
-		t.Desp = "->"
-		return t, nil
-	})
-	//multi line comment
-	Lexer.Add([]byte(`/\*([^*]|\r|\n|(\*+([^*/]|\r|\n)))*\*+/`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		return nil, nil
-	})
-	Lexer.Add([]byte("extends"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_EXTENDS
-		t.Desp = "extends"
-		return t, nil
-	})
-	Lexer.Add([]byte("implements"), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-		t := &Token{}
-		t.Match = match
-		t.Type = TOKEN_IMPLEMENTS
-		t.Desp = "implements"
-		return t, nil
-	})
+func (lex *LucyLexer) Next() (token *Token, eof bool, err error) {
+redo:
+	var c byte
+	c, eof = lex.getchar()
+	if eof {
+		return
+	}
+	for c == ' ' || c == '\t' || c == '\r' {
+		c, eof = lex.getchar()
+	}
+	if eof {
+		return
+	}
+	if lex.isLetter(c) || c == '_' {
+		return lex.lexIdentifier(c)
+	}
+	if lex.isDigit(c) {
+		return lex.lexNumber(c)
+	}
+	token = &Token{}
+	token.StartLine = lex.line
+	token.StartColumn = lex.column
+	switch c {
+	case '(':
+		token.Type = TOKEN_LP
+	case ')':
+		token.Type = TOKEN_RP
+	case '{':
+		token.Type = TOKEN_LC
+	case '}':
+		token.Type = TOKEN_RC
+	case '[':
+		token.Type = TOKEN_LB
+	case ']':
+		token.Type = TOKEN_RB
+	case ';':
+		token.Type = TOKEN_SEMICOLON
+	case ',':
+		token.Type = TOKEN_COMMA
+	case '&':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_AND
+			break
+		}
+		if c == '&' {
+			token.Type = TOKEN_LOGICAL_AND
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_AND
+		}
+	case '|':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_OR
+			break
+		}
+		if c == '|' {
+			token.Type = TOKEN_LOGICAL_OR
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_OR
+		}
+	case '=':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_ASSIGN
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_EQUAL
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_ASSIGN
+		}
+	case '!':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_NOT
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_NE
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_NOT
+		}
+	case '>':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_GT
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_GE
+		} else if c == '>' {
+			token.Type = TOKEN_RIGHT_SHIFT
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_GT
+		}
+	case '<':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_GT
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_LE
+		} else if c == '<' {
+			token.Type = TOKEN_LEFT_SHIFT
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_LT
+		}
+	case '+':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_ADD
+			break
+		}
+		if c == '+' {
+			token.Type = TOKEN_INCREMENT
+		} else if c == '=' {
+			token.Type = TOKEN_ADD_ASSIGN
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_ADD
+		}
+	case '-':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_SUB
+			break
+		}
+		if c == '-' {
+			token.Type = TOKEN_DECREMENT
+		} else if c == '=' {
+			token.Type = TOKEN_SUB_ASSIGN
+		} else if c == '>' {
+			token.Type = TOKEN_ARROW
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_SUB
+		}
+	case '*':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_MUL
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_MUL_ASSIGN
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_MUL
+		}
+	case '%':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_MOD
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_MOD_ASSIGN
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_MOD
+		}
+	case '/':
+		c, eof = lex.getchar()
+		if eof == true {
+			token.Type = TOKEN_DIV
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_DIV_ASSIGN
+		} else if c == '/' {
+			for c != '\n' && eof == false {
+				c, eof = lex.getchar()
+			}
+			lex.incrementLine()
+			goto redo
+		} else if c == '*' {
+			lex.lexMultiLineComment()
+			goto redo
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_DIV
+		}
+	case '\n':
+		lex.incrementLine()
+		token.Type = TOKEN_CRLF
+	case '.':
+		token.Type = TOKEN_DOT
+	case '`':
+		bs := []byte{}
+		c, eof = lex.getchar()
+		for c != '`' && eof == false {
+			bs = append(bs, c)
+			c, eof = lex.getchar()
+		}
+		token.Type = TOKEN_LITERAL_STRING
+		token.Data = string(bs)
+		token.Desp = string(bs)
+	case '"':
+		return lex.lexString()
+	}
+	token.EndLine = lex.line
+	token.EndColumn = lex.column
+	return
 }

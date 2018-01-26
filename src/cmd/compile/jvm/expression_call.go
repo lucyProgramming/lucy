@@ -17,10 +17,22 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 			Class: class.Name,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		return
+	} else {
+		//closure function call
 	}
-	//closure function call
-
+	if e.IsStatementExpression && len(e.VariableTypes) > 0 {
+		if len(e.VariableTypes) == 1 {
+			if 2 == e.VariableTypes[0].JvmSlotSize() {
+				code.Codes[code.CodeLength] = cg.OP_pop2
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_pop
+			}
+			code.CodeLength++
+		} else { // > 1
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
+		}
+	}
 	return
 }
 
