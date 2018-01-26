@@ -50,10 +50,10 @@ func (lex *LucyLexer) isHex(c byte) bool {
 }
 func (lex *LucyLexer) hexbyte2Byte(c byte) byte {
 	if 'a' <= c && c <= 'f' {
-		return c - 'a'
+		return c - 'a' + 10
 	}
 	if 'A' <= c && c <= 'F' {
-		return c - 'A'
+		return c - 'A' + 10
 	}
 	return c - '0'
 }
@@ -63,6 +63,9 @@ func (lex *LucyLexer) ungetchar() {
 	lex.line, lex.column = lex.lastline, lex.lastcolumn
 }
 func (lex *LucyLexer) lexNumber(c byte) (token *Token, eof bool, err error) {
+	token = &Token{}
+	token.StartLine = lex.line
+	token.StartLine = lex.column
 	return
 }
 func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) {
@@ -174,20 +177,27 @@ func (lex *LucyLexer) lexString() (token *Token, eof bool, err error) {
 			for i := 0; i < 3; i++ {
 				bb := lex.hexbyte2Byte(c)
 				b = b*16 + bb
-				if b > 127 {
+				if b > 127 { // only support standard accii
+					lex.ungetchar()
 					break
 				}
 				c, eof = lex.getchar()
-				if lex.isOctal(c) == false || eof {
+				if eof {
 					break
+				}
+				if lex.isOctal(c) == false {
+					lex.ungetchar()
 				}
 			}
 			bs = append(bs, b)
 		}
 	}
+
 	if c == '\n' && eof == false {
 		lex.incrementLine()
 	}
+	token.EndLine = lex.line
+	token.EndColumn = lex.column
 	return
 }
 func (lex *LucyLexer) lexMultiLineComment() {
