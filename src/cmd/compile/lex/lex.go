@@ -42,6 +42,9 @@ func (lex *LucyLexer) isLetter(c byte) bool {
 func (lex *LucyLexer) isDigit(c byte) bool {
 	return '0' <= c && c <= '9'
 }
+func (lex *LucyLexer) isOctal(c byte) bool {
+	return '0' <= c && c <= '7'
+}
 func (lex *LucyLexer) isHex(c byte) bool {
 	return lex.isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
 }
@@ -156,7 +159,7 @@ func (lex *LucyLexer) lexString() (token *Token, eof bool, err error) {
 			if lex.isHex(c2) {
 				b2 := lex.hexbyte2Byte(c2)
 				if t := b*16 + b2; t > 127 { // only support standard accii
-					bs = append(bs, b)W
+					bs = append(bs, b)
 					lex.ungetchar()
 				} else {
 					bs = append(bs, t)
@@ -167,7 +170,19 @@ func (lex *LucyLexer) lexString() (token *Token, eof bool, err error) {
 				lex.ungetchar()
 			}
 		case '0', '1', '2', '3', '4', '5', '7':
-
+			b := byte(0)
+			for i := 0; i < 3; i++ {
+				bb := lex.hexbyte2Byte(c)
+				b = b*16 + bb
+				if b > 127 {
+					break
+				}
+				c, eof = lex.getchar()
+				if lex.isOctal(c) == false || eof {
+					break
+				}
+			}
+			bs = append(bs, b)
 		}
 	}
 	if c == '\n' && eof == false {
