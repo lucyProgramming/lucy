@@ -2,14 +2,14 @@ package lex
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
 var (
-	code = `	package test
-	import "github.om/xxx/ggg" as vvv;
-	const a = 123;
-	function(){
+	code = `import "github.om/xxx/ggg" as vvv;
+    const a = 123;
+	fn aaa(){
 		a += b;
 		var a int;
 		return a;
@@ -29,6 +29,7 @@ var (
 		a / b;
 		a % b;
 	}
+	/*
 	class Person{
 		int a;
 		int b;
@@ -45,20 +46,27 @@ var (
 		b + 0.000000000
 		b + +1e5
 	}
+	*/
+	
+	fsdfd fd
+	
+	fsdfs 
+	1134
+	;;
+	if ske 
+	
+	a++
+	
 	`
 )
 
 func Test_lex(t *testing.T) {
-	s, err := Lexer.Scanner([]byte(code))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("\n\n\n\n\n\n\n########################")
+	s := New([]byte(code))
+	fmt.Println("\n\n\n\n\n\n\n########################", len(strings.Split(code, "\n")))
 	fmt.Println(code)
 	fmt.Println("\n\n\n\n\n\n\n########################")
-	newline := false
 	for {
-		t, err, eof := s.Next()
+		token, eof, err := s.Next()
 		if eof {
 			break
 		}
@@ -66,25 +74,14 @@ func Test_lex(t *testing.T) {
 			fmt.Println("err:", err)
 			continue
 		}
-		if t == nil {
+		if token.Type == TOKEN_CRLF {
+			fmt.Println()
 			continue
 		}
-		token := t.(*Token)
-		if token.Type == TOKEN_CRLF {
-			newline = true
-			fmt.Println()
-		} else {
-			if newline == true {
-				fmt.Printf("line:%d\t", token.Match.StartLine)
-				newline = false
-			}
-			if token.Data != nil {
-				fmt.Printf("%s(%v) ", token.Desp, token.Data)
-			} else {
-				fmt.Printf("%s ", token.Desp)
-			}
+		fmt.Println("token ", "line:", token.StartLine, token.StartColumn, token.Data, token.Desp)
+		fmt.Println()
 
-		}
 	}
-	fmt.Println("\n\n\n\n\n\n\n")
+
+	fmt.Println("\n\n\n\n\n\n\n", s.line)
 }

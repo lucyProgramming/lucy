@@ -1,70 +1,66 @@
 package lex
 
-import (
-	"strconv"
-)
-
 const (
-	_                    = iota
-	TOKEN_FUNCTION       // fn
-	TOKEN_ENUM           // enum
-	TOKEN_CONST          //const
-	TOKEN_IF             // if
-	TOKEN_ELSEIF         //elseif
-	TOKEN_ELSE           // else
-	TOKEN_FOR            //for
-	TOKEN_BREAK          //break
-	TOKEN_CONTINUE       //continue
-	TOKEN_RETURN         //return
-	TOKEN_NULL           // null
-	TOKEN_BOOL           //bool
-	TOKEN_TRUE           //true
-	TOKEN_FALSE          //false
-	TOKEN_LP             //(
-	TOKEN_RP             //)
-	TOKEN_LC             //{
-	TOKEN_RC             //}
-	TOKEN_LB             //[
-	TOKEN_RB             //]
-	TOKEN_SKIP           //skip;
-	TOKEN_SEMICOLON      // ;
-	TOKEN_CRLF           // enter
-	TOKEN_COMMA          //,
-	TOKEN_LOGICAL_AND    // &&
-	TOKEN_LOGICAL_OR     // ||
-	TOKEN_AND            // &
-	TOKEN_OR             // |
-	TOKEN_LEFT_SHIFT     // <<
-	TOKEN_RIGHT_SHIFT    // >>
-	TOKEN_ASSIGN         //=
-	TOKEN_EQUAL          //== or ==
-	TOKEN_NE             // !=
-	TOKEN_GT             //>
-	TOKEN_GE             //>=
-	TOKEN_LT             //<
-	TOKEN_LE             //<=
-	TOKEN_ADD            //+
-	TOKEN_SUB            //-
-	TOKEN_MUL            //*
-	TOKEN_DIV            // a/c
-	TOKEN_MOD            // a%b
-	TOKEN_INCREMENT      //a++
-	TOKEN_DECREMENT      //a--
-	TOKEN_DOT            // a.do()
-	TOKEN_VAR            // var a
-	TOKEN_NEW            // new Object()
-	TOKEN_COLON          // :
-	TOKEN_COLON_ASSIGN   // :=
-	TOKEN_ADD_ASSIGN     // +=
-	TOKEN_SUB_ASSIGN     // -=
-	TOKEN_MUL_ASSIGN     // *=
-	TOKEN_DIV_ASSIGN     // /=
-	TOKEN_MOD_ASSIGN     // %=
-	TOKEN_NOT            // !false
-	TOKEN_SWITCH         //swtich
-	TOKEN_CASE           //case
-	TOKEN_DEFAULT        //default
-	TOKEN_PACKAGE        //package
+	_                  = iota
+	TOKEN_FUNCTION     // fn
+	TOKEN_ENUM         // enum
+	TOKEN_CONST        //const
+	TOKEN_IF           // if
+	TOKEN_ELSEIF       //elseif
+	TOKEN_ELSE         // else
+	TOKEN_FOR          //for
+	TOKEN_BREAK        //break
+	TOKEN_CONTINUE     //continue
+	TOKEN_RETURN       //return
+	TOKEN_NULL         // null
+	TOKEN_BOOL         //bool
+	TOKEN_TRUE         //true
+	TOKEN_FALSE        //false
+	TOKEN_LP           //(
+	TOKEN_RP           //)
+	TOKEN_LC           //{
+	TOKEN_RC           //}
+	TOKEN_LB           //[
+	TOKEN_RB           //]
+	TOKEN_SKIP         //skip;
+	TOKEN_SEMICOLON    // ;
+	TOKEN_CRLF         // enter
+	TOKEN_COMMA        //,
+	TOKEN_LOGICAL_AND  // &&
+	TOKEN_LOGICAL_OR   // ||
+	TOKEN_AND          // &
+	TOKEN_OR           // |
+	TOKEN_LEFT_SHIFT   // <<
+	TOKEN_RIGHT_SHIFT  // >>
+	TOKEN_ASSIGN       //=
+	TOKEN_EQUAL        //== or ==
+	TOKEN_NE           // !=
+	TOKEN_GT           //>
+	TOKEN_GE           //>=
+	TOKEN_LT           //<
+	TOKEN_LE           //<=
+	TOKEN_ADD          //+
+	TOKEN_SUB          //-
+	TOKEN_MUL          //*
+	TOKEN_DIV          // a/c
+	TOKEN_MOD          // a%b
+	TOKEN_INCREMENT    //a++
+	TOKEN_DECREMENT    //a--
+	TOKEN_DOT          // a.do()
+	TOKEN_VAR          // var a
+	TOKEN_NEW          // new Object()
+	TOKEN_COLON        // :
+	TOKEN_COLON_ASSIGN // :=
+	TOKEN_ADD_ASSIGN   // +=
+	TOKEN_SUB_ASSIGN   // -=
+	TOKEN_MUL_ASSIGN   // *=
+	TOKEN_DIV_ASSIGN   // /=
+	TOKEN_MOD_ASSIGN   // %=
+	TOKEN_NOT          // !false
+	TOKEN_SWITCH       //swtich
+	TOKEN_CASE         //case
+	TOKEN_DEFAULT      //default
+	//	TOKEN_PACKAGE        //package
 	TOKEN_IMPORT         //import
 	TOKEN_AS             //as
 	TOKEN_CLASS          //class
@@ -115,7 +111,6 @@ var (
 		"switch":     TOKEN_SWITCH,
 		"case":       TOKEN_CASE,
 		"default":    TOKEN_DEFAULT,
-		"package":    TOKEN_PACKAGE,
 		"import":     TOKEN_IMPORT,
 		"as":         TOKEN_AS,
 		"class":      TOKEN_CLASS,
@@ -146,32 +141,4 @@ type Token struct {
 	EndColumn   int
 	Desp        string
 	Data        interface{}
-}
-
-func parseInt64(bs []byte) int64 {
-	t, _ := strconv.ParseInt(string(bs), 0, 64)
-	return t
-}
-
-//TODO::解析科学计数法
-func parseScientificNotation(bs []byte) (data interface{}, token int) {
-	////negative := false
-	//if bs[0] == '+' {
-	//	bs = bs[1:]
-	//}
-	//if bs[0] == '-' {
-	//	//negative = true
-	//	bs = bs[1:]
-	//}
-	//index := bytes.IndexByte(bs, 'e')
-	//pre := bs[0:index]
-	//suf := bs[index+1:]
-	//power := int(parseInt64(suf))
-	////1e5  or 1e-5
-	//token = TOKEN_INT
-	//base := parseInt64(pre)
-	//
-	//fmt.Println("@@@@@@@@@@@@@@@@", string(pre), string(suf), string(power))
-	return 100, TOKEN_INT
-
 }
