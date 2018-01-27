@@ -1,0 +1,42 @@
+
+
+import "java/lang" as javalang;
+
+public class ClousreInt extends LucyObject{
+	public value int;
+	public ClousreInt(v int){
+		this.value = v; 
+	}
+}
+public class ClousreFloat extends LucyObject{
+	punlic value float;
+	public ClousreFloat(v float){
+		this.value = v;
+	}
+}
+public class ClousreDouble extends LucyObject{
+	punlic value double;
+	punlic ClousreDouble(v double){
+		this.value = v ;
+	}
+}
+public class ClousreLong extends LucyObject{
+	public value long;
+	public ClousreDouble(v long){
+		this.value = v; 
+	}
+}
+
+public class ClousreLong extends  LucyObject{
+	public value javalang.Object;
+	public ClousreDouble(v javalang.Object){
+		this.value = v; 
+	}
+}
+
+
+
+
+
+
+

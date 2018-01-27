@@ -12,7 +12,8 @@ type Package struct {
 	Files          map[string]*File
 	Name           string //if error,should be multi names ,taken first is ok
 	InitFunctions  []*Function
-	NErros         int // number of errors should stop compile
+	NErros2Stop    int // number of errors should stop compile
+	Errors         []error
 }
 
 func (p *Package) mkInitFunctions(bs ...*Block) {
@@ -40,26 +41,26 @@ func (p *Package) addBuildFunctions() {
 
 func (p *Package) TypeCheck() []error {
 	p.addBuildFunctions()
-	if p.NErros <= 2 {
-		p.NErros = 10
+	if p.NErros2Stop <= 2 {
+		p.NErros2Stop = 10
 	}
-	errs := []error{}
-	errs = append(errs, p.Block.checkConst()...)
+	p.Errors = []error{}
+	p.Errors = append(p.Errors, p.Block.checkConst()...)
 	//
 	for _, v := range p.Block.Funcs {
 		if v.Isbuildin {
 			continue
 		}
 		v.Block.inherite(&p.Block)
-		errs = append(errs, v.check(&p.Block)...)
+		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
 	for _, v := range p.Block.Classes {
-		errs = append(errs, v.check(&p.Block)...)
+		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
 	for _, v := range p.InitFunctions {
-		errs = append(errs, v.check(&p.Block)...)
+		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
-	return errs
+	return p.Errors
 }
 
 func (p *Package) loadPackage(name string) (*Package, error) {

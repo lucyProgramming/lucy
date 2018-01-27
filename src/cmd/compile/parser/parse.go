@@ -341,7 +341,7 @@ func (p *Parser) parseAssignedNames() ([]*ast.VariableDefinition, int, error) {
 
 func (p *Parser) Next() {
 	var err error
-	var tok interface{}
+	var tok *lex.Token
 	p.lastToken = p.token
 	for !p.eof {
 		tok, p.eof, err = p.scanner.Next()
@@ -349,8 +349,8 @@ func (p *Parser) Next() {
 			p.errs = append(p.errs, fmt.Errorf("%s %s", p.errorMsgPrefix(), err.Error()))
 			return
 		}
-		if tok != nil && tok.(*lex.Token).Type != lex.TOKEN_CRLF {
-			p.token = tok.(*lex.Token)
+		if tok.Type != lex.TOKEN_CRLF {
+			p.token = tok
 			fmt.Println("#########", p.token.Desp)
 			break
 		}

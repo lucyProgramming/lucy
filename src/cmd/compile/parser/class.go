@@ -9,11 +9,10 @@ import (
 )
 
 type Class struct {
-	parser          *Parser
-	classDefinition *ast.Class
-	access          uint16
-	isStatic        bool
-	isConst         bool
+	parser             *Parser
+	classDefinition    *ast.Class
+	isStatic           bool
+	accessControlToken *lex.Token
 }
 
 func (c *Class) Next() {
@@ -37,9 +36,11 @@ func (c *Class) parseClassName() (string, error) {
 }
 
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
+	c.resetProperty()
+	defer c.resetProperty()
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
-	c.Next() // skip class key work
+	c.Next() // skip class key word
 	c.classDefinition.Name, err = c.parseClassName()
 	if err != nil {
 		return nil, err
@@ -73,14 +74,20 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s expect { but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err = fmt.Errorf("%s expect '{' but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
 		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
 	c.Next() // skip {
-	c.access = 0
-	c.access |= cg.ACC_FIELD_PRIVATE
-	c.isStatic = false
+	c.resetProperty()
+	validAfterPublic := func(token *lex.Token) error {
+		if token.Type == lex.TOKEN_IDENTIFIER ||
+			token.Type == lex.TOKEN_FUNCTION ||
+			token.Type == lex.TOKEN_STATIC {
+			return nil
+		}
+		return fmt.Errorf("%s not a valid token after (public|private|protected)", c.parser.errorMsgPrefix())
+	}
 	for !c.parser.eof {
 		if len(c.parser.errs) > c.parser.nerr {
 			break
@@ -92,18 +99,28 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		case lex.TOKEN_STATIC:
 			c.isStatic = true
 			c.Next()
+			err := validAfterPublic(c.parser.token)
+			if err != nil {
+				c.parser.errs = append(c.parser.errs, err)
+				c.Next()
+			}
 		//access private
 		case lex.TOKEN_PUBLIC:
-			c.access = 0
-			c.access |= cg.ACC_FIELD_PUBLIC
+			c.accessControlToken = c.parser.token
 			c.Next()
+			if err != nil {
+				c.parser.errs = append(c.parser.errs, err)
+				c.Next()
+			}
 		case lex.TOKEN_PROTECTED:
-			c.access = 0
-			c.access |= cg.ACC_FIELD_PROTECTED
+			c.accessControlToken = c.parser.token
 			c.Next()
+			if err != nil {
+				c.parser.errs = append(c.parser.errs, err)
+				c.Next()
+			}
 		case lex.TOKEN_PRIVATE:
-			c.access = 0
-			c.access |= cg.ACC_FIELD_PRIVATE
+			c.accessControlToken = c.parser.token
 			c.Next()
 		case lex.TOKEN_IDENTIFIER:
 			err = c.parseFiled()
@@ -113,7 +130,6 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_CONST: // const is for local use
-			c.isConst = true
 			c.Next()
 			err := c.parseConst()
 			if err != nil {
@@ -139,9 +155,20 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			m := &ast.ClassMethod{}
 			m.Func = f
-			m.Func.AccessFlags = c.access
 			if c.isStatic {
 				m.Func.AccessFlags |= cg.ACC_METHOD_STATIC
+			}
+			if c.accessControlToken == nil {
+				m.Func.AccessFlags |= cg.ACC_METHOD_PRIVATE
+			} else {
+				switch c.accessControlToken.Type {
+				case lex.TOKEN_PRIVATE:
+					m.Func.AccessFlags |= cg.ACC_METHOD_PRIVATE
+				case lex.TOKEN_PUBLIC:
+					m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
+				case lex.TOKEN_PROTECTED:
+					m.Func.AccessFlags |= cg.ACC_METHOD_PROTECTED
+				}
 			}
 			if f.Name == c.classDefinition.Name {
 				if c.classDefinition.Constructors == nil {
@@ -168,9 +195,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 }
 
 func (c *Class) resetProperty() {
-	c.access = 0
 	c.isStatic = false
-	c.isConst = false
+	c.accessControlToken = nil
 }
 
 func (c *Class) parseConst() error {
@@ -220,9 +246,21 @@ func (c *Class) parseFiled() error {
 		f.Pos = v.Pos
 		f.Typ = &ast.VariableType{}
 		*f.Typ = *t
-		f.AccessFlags = c.access
+		f.AccessFlags = 0
 		if c.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
+		}
+		if c.accessControlToken == nil {
+			f.AccessFlags |= cg.ACC_FIELD_PRIVATE
+		} else {
+			switch c.accessControlToken.Type {
+			case lex.TOKEN_PUBLIC:
+				f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+			case lex.TOKEN_PRIVATE:
+				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
+			case lex.TOKEN_PROTECTED:
+				f.AccessFlags |= cg.ACC_FIELD_PROTECTED
+			}
 		}
 		c.classDefinition.Fields[v.Name] = f
 	}

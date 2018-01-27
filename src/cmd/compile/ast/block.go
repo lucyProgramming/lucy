@@ -21,6 +21,10 @@ type Block struct {
 	Vars               map[string]*VariableDefinition
 }
 
+func (b *Block) shouldStop(errs []error) bool {
+	return (len(b.InheritedAttribute.p.Errors) + len(errs)) >= b.InheritedAttribute.p.NErros2Stop
+}
+
 func (b *Block) searchByName(name string) interface{} {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
@@ -103,13 +107,28 @@ func (b *Block) check(father *Block) []error {
 	}
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
+	if b.shouldStop(errs) {
+		return errs
+	}
 	errs = append(errs, b.checkFunctions()...)
+	if father.shouldStop(errs) {
+		return errs
+	}
 	errs = append(errs, b.checkClass()...)
+	if father.shouldStop(errs) {
+		return errs
+	}
 	for _, v := range b.Vars {
 		errs = append(errs, b.checkVar(v)...)
+		if father.shouldStop(errs) {
+			return errs
+		}
 	}
 	for _, s := range b.Statements {
 		errs = append(errs, s.check(b)...)
+		if father.shouldStop(errs) {
+			return errs
+		}
 	}
 	return errs
 }

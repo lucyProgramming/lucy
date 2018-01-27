@@ -36,8 +36,37 @@ func (c *Class) check(father *Block) []error {
 	c.Block.check(father) // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
+	if father.shouldStop(errs) {
+		return errs
+	}
 	errs = append(errs, c.checkConstructionFunctions()...)
+	if father.shouldStop(errs) {
+		return errs
+	}
 	errs = append(errs, c.checkMethods()...)
+	if father.shouldStop(errs) {
+		return errs
+	}
+	if len(c.Constructors) > 1 {
+		errs = append(errs, fmt.Errorf("class named '%s' has %d contructor,declare at:", c.Name, len(c.Constructors)))
+		for _, v := range c.Constructors {
+			errs = append(errs, fmt.Errorf("%s contructor method", errMsgPrefix(v.Func.Pos)))
+		}
+	}
+	if father.shouldStop(errs) {
+		return errs
+	}
+	for _, ms := range c.Methods {
+		if len(ms) > 1 {
+			errs = append(errs, fmt.Errorf("class named '%s' has %d contructor,declare at:", c.Name, len(c.Constructors)))
+			for _, v := range ms {
+				errs = append(errs, fmt.Errorf("%s contructor method", errMsgPrefix(v.Func.Pos)))
+			}
+		}
+	}
+	if father.shouldStop(errs) {
+		return errs
+	}
 	return errs
 }
 

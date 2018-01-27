@@ -70,7 +70,7 @@ func (p *PackageLoader) loadAsLucy(j *class_json.ClassJson) {
 		p.loadMainLucy(j)
 		return
 	}
-	// load regular class
+	//load regular class
 	c := &ast.Class{} // rebuild the name,trim prefix
 	{
 		t := strings.Split(j.ThisClass, "/")
