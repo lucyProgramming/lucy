@@ -14,10 +14,27 @@ type ClassHighLevel struct {
 	Classes                map[string][][]byte
 	FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
 	MethodRefs             map[CONSTANT_Methodref_info_high_level][][]byte
+	NameAndTypes           map[CONSTANT_NameAndType_info_high_level][][]byte
 	SuperClass             string
 	Interfaces             []string
 	Fields                 map[string]*FiledHighLevel
 	Methods                map[string][]*MethodHighLevel
+}
+
+type CONSTANT_NameAndType_info_high_level struct {
+	Name string
+	Type string
+}
+
+func (c *ClassHighLevel) InsertNameAndType(nameAndType CONSTANT_NameAndType_info_high_level, location []byte) {
+	if c.NameAndTypes == nil {
+		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_level][][]byte)
+	}
+	if x, ok := c.NameAndTypes[nameAndType]; ok {
+		x = append(x, location)
+	} else {
+		c.NameAndTypes[nameAndType] = [][]byte{location}
+	}
 }
 
 type CONSTANT_Methodref_info_high_level struct {
@@ -116,33 +133,15 @@ func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 }
 
 type FiledHighLevel struct {
-	BackPatchs [][]byte
 	Name       string
 	Descriptor string
 	FieldInfo
 }
+
 type MethodHighLevel struct {
-	Class          *ClassHighLevel
-	BackPatchs     [][]byte
-	ClassHighLevel *ClassHighLevel
-	Name           string
-	Descriptor     string
+	Class      *ClassHighLevel
+	Name       string
+	Descriptor string
 	MethodInfo
 	Code AttributeCode
 }
-
-//type CONSTANT_NameAndType_info_high_Level struct {
-//	Name       string
-//	Descriptor string
-//}
-
-//func (c *ClassHighLevel) InsertNameAndType(nt CONSTANT_NameAndType_info_high_Level, location []byte) {
-//	if c.NameAndTypes == nil {
-//		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_Level][][]byte)
-//	}
-//	if x, ok := c.NameAndTypes[nt]; ok {
-//		x = append(x, location)
-//	} else {
-//		c.NameAndTypes[nt] = [][]byte{location}
-//	}
-//}

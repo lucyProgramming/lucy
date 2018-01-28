@@ -32,20 +32,16 @@ type ConstPool struct {
 }
 
 type CONSTANT_Class_info struct {
-	ConstPool
-	nameindex uint16
 }
 
 func (c *CONSTANT_Class_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_Class
 	p.info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.info, uint16(c.nameindex))
 	return p
 }
 
 type CONSTANT_String_info struct {
-	ConstPool
 	stringIndex uint16
 }
 
@@ -58,7 +54,6 @@ func (c *CONSTANT_String_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Integer_info struct {
-	ConstPool
 	value int32
 }
 
@@ -75,7 +70,6 @@ func (c *CONSTANT_Integer_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Float_info struct {
-	ConstPool
 	value float32
 }
 
@@ -88,8 +82,7 @@ func (c *CONSTANT_Float_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Long_info struct {
-	ConstPool
-	value uint64
+	value int64
 }
 
 func (c *CONSTANT_Long_info) ToConstPool() *ConstPool {
@@ -108,7 +101,6 @@ func (c *CONSTANT_Long_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Double_info struct {
-	ConstPool
 	value float64
 }
 
@@ -121,37 +113,26 @@ func (c *CONSTANT_Double_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_NameAndType_info struct {
-	ConstPool
-	nameIndex       uint16
-	descriptorIndex uint16
 }
 
 func (c *CONSTANT_NameAndType_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_NameAndType
 	p.info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.info, uint16(c.nameIndex))
-	binary.BigEndian.PutUint16(p.info[2:], uint16(c.descriptorIndex))
 	return p
 }
 
 type CONSTANT_Methodref_info struct {
-	ConstPool
-	classIndex       uint16
-	nameAndTypeIndex uint16
 }
 
 func (c *CONSTANT_Methodref_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_Methodref
 	p.info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.info, uint16(c.classIndex))
-	binary.BigEndian.PutUint16(p.info[2:], uint16(c.nameAndTypeIndex))
 	return p
 }
 
 type CONSTANT_InterfaceMethodref_info struct {
-	ConstPool
 	classIndex       uint16
 	nameAndTypeIndex uint16
 }
@@ -166,22 +147,16 @@ func (c *CONSTANT_InterfaceMethodref_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Fieldref_info struct {
-	ConstPool
-	classIndex       uint16
-	nameAndTypeIndex uint16
 }
 
 func (c *CONSTANT_Fieldref_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_Fieldref
 	p.info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.info, uint16(c.classIndex))
-	binary.BigEndian.PutUint16(p.info[2:], uint16(c.nameAndTypeIndex))
 	return p
 }
 
 type CONSTANT_MethodHandle_info struct {
-	ConstPool
 	referenceKind  uint8
 	referenceIndex uint16
 }
@@ -196,7 +171,6 @@ func (c *CONSTANT_MethodHandle_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Utf8_info struct {
-	ConstPool
 	length uint16
 	bs     []byte
 }
@@ -211,7 +185,6 @@ func (c *CONSTANT_Utf8_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_MethodType_info struct {
-	ConstPool
 	descriptorIndex uint16
 }
 
@@ -223,17 +196,15 @@ func (c *CONSTANT_MethodType_info) ToConstPool() *ConstPool {
 	return p
 }
 
-type CONSTANT_InvokeDynamic_info struct {
-	ConstPool
-	bootstrapMethodAttrIndex uint16
-	nameAndTypeIndex         uint16
-}
+//type CONSTANT_InvokeDynamic_info struct {
+//	//	bootstrapMethodAttrIndex uint16
+//	//	nameAndTypeIndex         uint16
+//}
 
-func (c *CONSTANT_InvokeDynamic_info) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.tag = CONSTANT_POOL_TAG_InvokeDynamic
-	p.info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.info, uint16(c.bootstrapMethodAttrIndex))
-	binary.BigEndian.PutUint16(p.info[2:], uint16(c.nameAndTypeIndex))
-	return p
-}
+//func (c *CONSTANT_InvokeDynamic_info) ToConstPool() *ConstPool {
+//	p := &ConstPool{}
+//	p.tag = CONSTANT_POOL_TAG_InvokeDynamic
+//	p.info = make([]byte, 4)
+
+//	return p
+//}

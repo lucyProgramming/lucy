@@ -33,12 +33,13 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 	c = lex.bs[offset]
 	if c == '\n' {
 		lex.lastline = lex.line
+		lex.lastcolumn = lex.column
 		lex.line++
 		lex.column = 1
 	} else {
 		lex.lastcolumn = lex.column
-		lex.column++
 		lex.lastline = lex.line
+		lex.column++
 	}
 	return
 }
@@ -160,12 +161,13 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 			c, eof = lex.getchar()
 		} else if lex.isDigit(c) { // nothing to do
 
-		} else if c == '+' {
+		} else if c == '+' { // default is true
 			c, eof = lex.getchar()
 		} else {
 			err = fmt.Errorf("wrong format scientific notation")
 		}
 		if lex.isDigit(c) == false && c == '0' {
+			lex.ungetchar() //
 			err = fmt.Errorf("wrong format scientific notation")
 		} else {
 			power = append(power, c)
@@ -178,25 +180,20 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 					break
 				}
 			}
-			lex.ungetchar()
 		}
 	} else {
 		lex.ungetchar()
 	}
-	//TODO:: which char can be followed after number
-	//	c, eof = lex.getchar()
-	//	if c != ' ' && c != '\t' && c != '\n' && c != ';' { //check is number ended normally
-	//		err = fmt.Errorf("unexpected character after number")
-	//	}
-	//	lex.ungetchar() // ungetchar anyway
 	if ishex && isScientificNotation {
 		token.Type = TOKEN_LITERAL_INT
 		token.Data = 0
 		token.Desp = "0"
-		err = fmt.Errorf("wrong format scientific notation")
+		err = fmt.Errorf("mix up hex and seientific notation")
 		return
 	}
-	//
+	/*
+		parse float part
+	*/
 	parseFloat := func(bs []byte) float64 {
 		index := len(bs) - 1
 		var fp float64
@@ -206,52 +203,9 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 		}
 		return fp
 	}
-	if isScientificNotation {
-		if t := lex.parseInt(integerpart); t > 10 || t < 1 {
-			err = fmt.Errorf("wrong format scientific notation")
-			token.Type = TOKEN_LITERAL_INT
-			token.Data = 0
-			return
-		}
-		p := int(lex.parseInt(power))
-		if powerPositive {
-			if p >= len(floatpart) { // int
-				integerpart = append(integerpart, floatpart...)
-				b := make([]byte, p-len(floatpart))
-				for k, _ := range b {
-					b[k] = '0'
-				}
-				integerpart = append(integerpart, b...)
-				value := lex.parseInt(integerpart)
-				if isPositive == false {
-					value = -value
-				}
-				token.Data = value
-			} else { // float
-				integerpart = append(integerpart, floatpart[0:p]...)
-				fmt.Println(floatpart[p:], parseFloat(floatpart[p:]))
-				value := float64(lex.parseInt(integerpart)) + parseFloat(floatpart[p:])
-				if isPositive == false {
-					value = -value
-				}
-				token.Type = TOKEN_LITERAL_FLOAT
-				token.Data = value
-			}
-		} else { // power is negative,must be float number
-			b := make([]byte, p-len(integerpart))
-			for k, _ := range b {
-				b[k] = '0'
-			}
-			b = append(b, integerpart...)
-			b = append(b, floatpart...)
-			value := parseFloat(b)
-			if isPositive == false {
-				value = -value
-			}
-			token.Type = TOKEN_LITERAL_FLOAT
-			token.Data = value
-		}
-	} else {
+	token.EndLine = lex.line
+	token.EndColumn = lex.column
+	if isScientificNotation == false {
 		if isfloat {
 			token.Type = TOKEN_LITERAL_FLOAT
 			value := parseFloat(floatpart) + float64(lex.parseInt(integerpart))
@@ -267,6 +221,52 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 			}
 			token.Data = value
 		}
+		return
+	}
+	//scientific notation
+	if t := lex.parseInt(integerpart); t > 10 || t < 1 {
+		err = fmt.Errorf("wrong format scientific notation")
+		token.Type = TOKEN_LITERAL_INT
+		token.Data = 0
+		return
+	}
+	p := int(lex.parseInt(power))
+	if powerPositive {
+		if p >= len(floatpart) { // int
+			integerpart = append(integerpart, floatpart...)
+			b := make([]byte, p-len(floatpart))
+			for k, _ := range b {
+				b[k] = '0'
+			}
+			integerpart = append(integerpart, b...)
+			value := lex.parseInt(integerpart)
+			if isPositive == false {
+				value = -value
+			}
+			token.Data = value
+		} else { // float
+			integerpart = append(integerpart, floatpart[0:p]...)
+			fmt.Println(floatpart[p:], parseFloat(floatpart[p:]))
+			value := float64(lex.parseInt(integerpart)) + parseFloat(floatpart[p:])
+			if isPositive == false {
+				value = -value
+			}
+			token.Type = TOKEN_LITERAL_FLOAT
+			token.Data = value
+		}
+	} else { // power is negative,must be float number
+		b := make([]byte, p-len(integerpart))
+		for k, _ := range b {
+			b[k] = '0'
+		}
+		b = append(b, integerpart...)
+		b = append(b, floatpart...)
+		value := parseFloat(b)
+		if isPositive == false {
+			value = -value
+		}
+		token.Type = TOKEN_LITERAL_FLOAT
+		token.Data = value
 	}
 	return
 }
@@ -408,7 +408,7 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, eof bool, err error) {
 
 func (lex *LucyLexer) lexMultiLineComment() {
 redo:
-	c, eof := lex.getchar() // skip *
+	c, eof := lex.getchar()
 	if eof {
 		return
 	}
@@ -416,10 +416,8 @@ redo:
 		c, eof = lex.getchar()
 	}
 	c, eof = lex.getchar()
-	if eof == false {
-		if c == '/' {
-			return
-		}
+	if eof == true || c == '/' {
+		return
 	}
 	goto redo
 }
@@ -553,7 +551,7 @@ redo:
 	case '<':
 		c, eof = lex.getchar()
 		if eof == true {
-			token.Type = TOKEN_GT
+			token.Type = TOKEN_LT
 			token.Desp = "<"
 			break
 		}
@@ -691,6 +689,22 @@ redo:
 				err = fmt.Errorf("expect one char")
 			}
 		}
+		return
+	case ':':
+		c, eof = lex.getchar()
+		if eof {
+			token.Type = TOKEN_COLON
+			token.Desp = ":"
+			break
+		}
+		if c == '=' {
+			token.Type = TOKEN_COLON_ASSIGN
+			token.Desp = ":= "
+		} else {
+			lex.ungetchar()
+		}
+	default:
+		err = fmt.Errorf("unkonw beginning of token:%d", c)
 		return
 	}
 	token.EndLine = lex.line

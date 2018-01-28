@@ -3,7 +3,6 @@ package cg
 import "encoding/binary"
 
 type AttributeCode struct {
-	AttributeInfo
 	MaxStack             uint16
 	MaxLocals            uint16
 	CodeLength           uint16
@@ -24,9 +23,9 @@ type ExceptionTable struct {
 func (a *AttributeCode) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.info = make([]byte, 8)
-	binary.BigEndian.PutUint16(ret.info, uint16(a.MaxStack))
-	binary.BigEndian.PutUint16(ret.info[2:], uint16(a.MaxLocals))
-	binary.BigEndian.PutUint32(ret.info[4:], uint32(len(a.Codes)))
+	binary.BigEndian.PutUint16(ret.info, a.MaxStack)
+	binary.BigEndian.PutUint16(ret.info[2:], a.MaxLocals)
+	binary.BigEndian.PutUint32(ret.info[4:8], uint32(a.CodeLength))
 	ret.info = append(ret.info, a.Codes...)
 	ret.info = append(ret.info, a.mkExceptions()...)
 	ret.info = append(ret.info, a.mkAttributes()...)
@@ -40,7 +39,6 @@ func (a *AttributeCode) mkAttributes() []byte {
 		b := make([]byte, 0)
 		for _, v := range a.attributes {
 			bb := make([]byte, 6)
-			binary.BigEndian.PutUint16(bb, uint16(v.attributeIndex))
 			binary.BigEndian.PutUint32(bb[2:], uint32(v.attributeLength))
 			bb = append(bb, v.info...)
 			b = append(b, bb...)

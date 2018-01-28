@@ -3,37 +3,34 @@ package cg
 import "encoding/binary"
 
 type AttributeInfo struct {
-	attributeIndex  uint16
-	attributeLength uint32
-	info            []byte
+	attributeNameIndex [2]byte
+	attributeLength    uint32
+	info               []byte
 }
 
 type ToAttributeInfo interface {
 	ToAttributeInfo() *AttributeInfo
 }
 
-type AttributeConstantValue struct {
-	AttributeInfo
-	constvalueIndex uint16
-}
+//type AttributeConstantValue struct {
+//	constvalueIndex uint16
+//}
 
-func (a *AttributeConstantValue) ToAttributeInfo() *AttributeInfo {
-	ret := &AttributeInfo{}
-	ret.attributeIndex = a.attributeIndex
-	ret.attributeLength = 2
-	ret.info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.info, uint16(a.constvalueIndex))
-	return ret
-}
+//func (a *AttributeConstantValue) ToAttributeInfo() *AttributeInfo {
+//	ret := &AttributeInfo{}
+//	ret.attributeIndex = a.attributeIndex
+//	ret.attributeLength = 2
+//	ret.info = make([]byte, 2)
+//	binary.BigEndian.PutUint16(ret.info, uint16(a.constvalueIndex))
+//	return ret
+//}
 
 type AttributeSignature struct {
-	AttributeInfo
 	index uint16
 }
 
 func (a *AttributeSignature) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.attributeIndex = a.attributeIndex
 	ret.attributeLength = 2
 	ret.info = make([]byte, 2)
 	binary.BigEndian.PutUint16(ret.info, uint16(a.index))
@@ -41,13 +38,11 @@ func (a *AttributeSignature) ToAttributeInfo() *AttributeInfo {
 }
 
 type AttributeSourceFile struct {
-	AttributeInfo
 	index uint16
 }
 
 func (a *AttributeSourceFile) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.attributeIndex = a.attributeIndex
 	ret.attributeLength = 2
 	ret.info = make([]byte, 2)
 	binary.BigEndian.PutUint16(ret.info, uint16(a.index))
@@ -55,13 +50,12 @@ func (a *AttributeSourceFile) ToAttributeInfo() *AttributeInfo {
 }
 
 type AttributeLineNumber struct {
-	AttributeInfo
 	linenumbers []*AttributeLinePc
 }
 
 func (a *AttributeLineNumber) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.attributeIndex = a.attributeIndex
+
 	ret.attributeLength = uint32(len(a.linenumbers)) * 4
 	ret.info = make([]byte, ret.attributeLength)
 	for k, v := range a.linenumbers {
@@ -77,14 +71,12 @@ type AttributeLinePc struct {
 }
 
 type AttributeBootstrapMethods struct {
-	AttributeInfo
 	numBootStrapMethods uint16
 	methods             []*BootStrapMethod
 }
 
 func (a *AttributeBootstrapMethods) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.attributeIndex = a.attributeIndex
 	ret.info = make([]byte, 2)
 	binary.BigEndian.PutUint16(ret.info, uint16(a.numBootStrapMethods))
 	for _, v := range a.methods {

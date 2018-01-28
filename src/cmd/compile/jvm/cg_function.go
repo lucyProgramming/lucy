@@ -16,7 +16,7 @@ func (m *MakeClass) mkFunc(f *ast.Function) {
 		}
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
-		method.ClassHighLevel = m.mainclass
+		method.Class = m.mainclass
 		return
 	}
 	context := &Context{f, nil}
