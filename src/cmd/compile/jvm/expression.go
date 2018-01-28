@@ -178,11 +178,6 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	//maxstack, _, op, target := m.buildLeftValue(class, code, e, context)
 	return
 }
-func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	//ee := e.Data.(*ast.Expression)
-	// m.leftValue(class, code, e)
-	return
-}
 
 /*
 	stack is 1
