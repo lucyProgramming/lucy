@@ -10,6 +10,7 @@ import (
 type CallChecker func(errs *[]error, args []*VariableType, pos *Pos)
 
 type Function struct {
+	isPackageBlockFunction     bool
 	callchecker                CallChecker // used in build function
 	ClassMethod                *cg.MethodHighLevel
 	IsGlobal                   bool

@@ -61,7 +61,7 @@ func (s *Statement) statementName() string {
 
 func (s *Statement) check(b *Block) []error { // b is father
 	errs := []error{}
-	if b.InheritedAttribute.istop {
+	if b.InheritedAttribute.function.isPackageBlockFunction {
 		if s.Typ == STATEMENT_TYPE_SKIP { //special case
 			return errs // 0 length error
 		}

@@ -1,6 +1,7 @@
 package cg
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 )
@@ -31,7 +32,12 @@ type Class struct {
 	attributes   []*AttributeInfo
 }
 
-func (c *Class) FromHighLevel(high *ClassHighLevel) {
+func FromHighLevel(high *ClassHighLevel) *Class {
+	c := &Class{}
+	c.fromHighLevel(high)
+	return c
+}
+func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.minorVersion = 0
 	c.majorVersion = 52
 	//int const
@@ -39,7 +45,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 		info := CONSTANT_Integer_info{}
 		info.value = i
 		c.ifConstPoolOverMaxSize()
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info.ToConstPool())
 	}
@@ -48,7 +54,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 		info := CONSTANT_Long_info{}
 		info.value = l
 		c.ifConstPoolOverMaxSize()
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info.ToConstPool(), nil)
 	}
@@ -57,7 +63,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 		info := CONSTANT_Float_info{}
 		info.value = f
 		c.ifConstPoolOverMaxSize()
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info.ToConstPool())
 	}
@@ -66,7 +72,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 		info := CONSTANT_Double_info{}
 		info.value = d
 		c.ifConstPoolOverMaxSize()
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info.ToConstPool(), nil)
 	}
@@ -74,7 +80,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 	for f, locations := range high.FieldRefs {
 		info := (&CONSTANT_Fieldref_info{}).ToConstPool()
 		high.InsertClasses(f.Class, info.info[0:2])
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 		high.InsertNameAndType(CONSTANT_NameAndType_info_high_level{
@@ -86,7 +92,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 	for m, locations := range high.MethodRefs {
 		info := (&CONSTANT_Methodref_info{}).ToConstPool()
 		high.InsertClasses(m.Class, info.info[0:2])
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 		high.InsertNameAndType(CONSTANT_NameAndType_info_high_level{
@@ -98,7 +104,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 	for cn, locations := range high.Classes {
 		info := (&CONSTANT_Class_info{}).ToConstPool()
 		high.InsertStringConst(cn, info.info[0:2])
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 	}
@@ -107,7 +113,7 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 		info := (&CONSTANT_NameAndType_info{}).ToConstPool()
 		high.InsertStringConst(nt.Name, info.info[0:2])
 		high.InsertStringConst(nt.Type, info.info[2:4])
-		index := uint16(len(c.constPool))
+		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 	}
@@ -121,6 +127,8 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{}).ToConstPool()
 		high.InsertStringConst(i, inter.info[0:2])
+		index := c.constPoolUint16Length()
+		c.interfaces = append(c.interfaces, index)
 		c.constPool = append(c.constPool, inter)
 	}
 	for _, f := range high.Fields {
@@ -136,218 +144,214 @@ func (c *Class) FromHighLevel(high *ClassHighLevel) {
 			info.AccessFlags = m.AccessFlags
 			high.InsertStringConst(m.Name, info.nameIndex[0:2])
 			high.InsertStringConst(m.Descriptor, info.descriptorIndex[0:2])
-			m.Attributes = append(m.Attributes, m.Code.ToAttributeInfo())
+			codeinfo := m.Code.ToAttributeInfo()
+			high.InsertStringConst("Code", codeinfo.nameIndex[0:2])
+			m.Attributes = append(m.Attributes, codeinfo)
 		}
 	}
+	//string consts
+	for s, locations := range high.StringConsts {
+		if len(s) > 65536 {
+			panic("string length over 65536")
+		}
+		info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
+		index := c.constPoolUint16Length()
+		backPatchIndex(locations, index)
+		c.constPool = append(c.constPool, info)
+	}
+	c.ifConstPoolOverMaxSize()
 	return
 }
-
+func (c *Class) constPoolUint16Length() uint16 {
+	return uint16(len(c.constPool))
+}
 func (c *Class) ifConstPoolOverMaxSize() {
-	if len(c.constPool) > CONST_POOL_MAX_SIZE {
-		panic(fmt.Sprintf("const pool max size is:%d", CONST_POOL_MAX_SIZE))
+	if len(c.constPool) > 65535 {
+		panic(fmt.Sprintf("const pool max size is:%d", 65535))
 	}
 }
 
-//func (c *Class) OutPut(dest io.Writer) error {
-//	c.dest = dest
-//	//magic number
-//	bs4 := make([]byte, 4)
-//	binary.BigEndian.PutUint32(bs4, 0xCAFEBABE)
-//	_, err := dest.Write(bs4)
-//	if err != nil {
-//		return err
-//	}
-//	// minorversion
-//	bs2 := make([]byte, 2)
-//	binary.BigEndian.PutUint16(bs2, uint16(c.minorVersion))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	// major version
-//	binary.BigEndian.PutUint16(bs2, uint16(c.majorVersion))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	//const pool
-//	binary.BigEndian.PutUint16(bs2, uint16(c.constPoolCount))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	for _, v := range c.constPool {
-//		_, err = dest.Write([]byte{byte(v.tag)})
-//		if err != nil {
-//			return err
-//		}
-//		_, err = dest.Write(v.info)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//	//access flag
-//	binary.BigEndian.PutUint16(bs2, uint16(c.accessFlag))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	//this class
-//	binary.BigEndian.PutUint16(bs2, uint16(c.thisClass))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	//super class
-//	binary.BigEndian.PutUint16(bs2, uint16(c.superClass))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	// interface
-//	binary.BigEndian.PutUint16(bs2, uint16(c.interfaceCount))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	for _, v := range c.interfaces {
-//		binary.BigEndian.PutUint16(bs2, uint16(v))
-//		_, err = dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//	}
+func (c *Class) OutPut(dest io.Writer) error {
+	c.dest = dest
+	//magic number
+	bs4 := make([]byte, 4)
+	binary.BigEndian.PutUint32(bs4, 0xCAFEBABE)
+	_, err := dest.Write(bs4)
+	if err != nil {
+		return err
+	}
+	// minorversion
+	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(c.minorVersion))
+	_, err = dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	// major version
+	binary.BigEndian.PutUint16(bs2, uint16(c.majorVersion))
+	_, err = dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	//const pool
+	binary.BigEndian.PutUint16(bs2, c.constPoolUint16Length())
+	_, err = dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.constPool {
+		_, err = dest.Write([]byte{byte(v.tag)})
+		if err != nil {
+			return err
+		}
+		_, err = dest.Write(v.info)
+		if err != nil {
+			return err
+		}
+	}
+	//access flag
+	binary.BigEndian.PutUint16(bs2, uint16(c.accessFlag))
+	_, err = dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	//this class
+	_, err = dest.Write(c.thisClass[0:2])
+	if err != nil {
+		return err
+	}
+	//super Class
+	_, err = dest.Write(c.superClass[0:2])
+	if err != nil {
+		return err
+	}
+	// interface
+	binary.BigEndian.PutUint16(bs2, uint16(len(c.interfaces)))
+	_, err = dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.interfaces {
+		binary.BigEndian.PutUint16(bs2, uint16(v))
+		_, err = dest.Write(bs2)
+		if err != nil {
+			return err
+		}
+	}
 
-//	err = c.writeFields()
-//	if err != nil {
-//		return err
-//	}
-//	//methods
-//	err = c.writeMethods()
-//	if err != nil {
-//		return err
-//	}
-//	// attribute
+	err = c.writeFields()
+	if err != nil {
+		return err
+	}
+	//methods
+	err = c.writeMethods()
+	if err != nil {
+		return err
+	}
+	// attribute
+	binary.BigEndian.PutUint16(bs2, uint16(len(c.attributes)))
+	_, err = dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	if len(c.attributes) > 0 {
+		return c.writeAttributeInfo(c.attributes)
+	}
+	return nil
+}
 
-//	binary.BigEndian.PutUint16(bs2, uint16(c.attributeCount))
-//	_, err = dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	if c.attributeCount > 0 {
-//		return c.writeAttributeInfo(c.attributes)
-//	}
+func (c *Class) writeMethods() error {
+	var err error
+	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(len(c.methods)))
+	_, err = c.dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.methods {
+		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
+		_, err = c.dest.Write(bs2)
+		if err != nil {
+			return err
+		}
+		_, err = c.dest.Write(v.nameIndex[0:2])
+		if err != nil {
+			return err
+		}
+		_, err = c.dest.Write(v.descriptorIndex[0:2])
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(len(v.Attributes)))
+		_, err = c.dest.Write(bs2)
+		if err != nil {
+			return err
+		}
+		if len(v.Attributes) > 0 {
+			err = c.writeAttributeInfo(v.Attributes)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 
-//	return nil
-//}
+func (c *Class) writeFields() error {
+	var err error
+	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(len(c.fields)))
+	_, err = c.dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	for _, v := range c.fields {
+		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
+		_, err = c.dest.Write(bs2)
+		if err != nil {
+			return err
+		}
+		_, err = c.dest.Write(v.NameIndex[0:2])
+		if err != nil {
+			return err
+		}
+		_, err = c.dest.Write(v.DescriptorIndex[0:2])
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint16(bs2, uint16(len(v.Attributes)))
+		_, err = c.dest.Write(bs2)
+		if err != nil {
+			return err
+		}
+		if len(v.Attributes) > 0 {
+			err = c.writeAttributeInfo(v.Attributes)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 
-///*
-
-//type MethodInfo struct {
-//	accessFlags     uint16
-//	nameIndex       uint16
-//	descriptorIndex uint16
-//	attributeCount  uint16
-//	attributes      []*AttributeInfo
-//}
-//*/
-
-//func (c *Class) writeMethods() error {
-//	var err error
-//	bs2 := make([]byte, 2)
-//	binary.BigEndian.PutUint16(bs2, uint16(c.methodCount))
-//	_, err = c.dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	for _, v := range c.methods {
-//		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint16(bs2, uint16(v.nameIndex))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint16(bs2, uint16(v.descriptorIndex))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint16(bs2, uint16(v.attributeCount))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		if v.attributeCount > 0 {
-//			err = c.writeAttributeInfo(v.Attributes)
-//			if err != nil {
-//				return err
-//			}
-//		}
-//	}
-//	return nil
-//}
-
-//func (c *Class) writeFields() error {
-//	var err error
-//	bs2 := make([]byte, 2)
-//	binary.BigEndian.PutUint16(bs2, uint16(c.fieldCount))
-//	_, err = c.dest.Write(bs2)
-//	if err != nil {
-//		return err
-//	}
-//	for _, v := range c.fields {
-//		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint16(bs2, uint16(v.NameIndex))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint16(bs2, uint16(v.DescriptorIndex))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint16(bs2, uint16(v.attributeCount))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		if v.attributeCount > 0 {
-//			err = c.writeAttributeInfo(v.Attributes)
-//			if err != nil {
-//				return err
-//			}
-//		}
-//	}
-//	return nil
-//}
-//func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
-//	var err error
-//	bs2 := make([]byte, 2)
-//	bs4 := make([]byte, 4)
-//	for _, v := range as {
-//		binary.BigEndian.PutUint16(bs2, uint16(v.attributeIndex))
-//		_, err = c.dest.Write(bs2)
-//		if err != nil {
-//			return err
-//		}
-//		binary.BigEndian.PutUint32(bs4, uint32(v.attributeIndex))
-//		_, err = c.dest.Write(bs4)
-//		if err != nil {
-//			return err
-//		}
-//		_, err = c.dest.Write(v.info)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//	return nil
-//}
+func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
+	var err error
+	bs2 := make([]byte, 2)
+	bs4 := make([]byte, 4)
+	for _, v := range as {
+		_, err = c.dest.Write(bs2)
+		if err != nil {
+			return err
+		}
+		binary.BigEndian.PutUint32(bs4, uint32(v.attributeLength))
+		_, err = c.dest.Write(bs4)
+		if err != nil {
+			return err
+		}
+		_, err = c.dest.Write(v.info)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

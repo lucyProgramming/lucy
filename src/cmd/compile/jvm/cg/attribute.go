@@ -3,27 +3,14 @@ package cg
 import "encoding/binary"
 
 type AttributeInfo struct {
-	attributeNameIndex [2]byte
-	attributeLength    uint32
-	info               []byte
+	nameIndex       [2]byte
+	attributeLength uint32
+	info            []byte
 }
 
 type ToAttributeInfo interface {
 	ToAttributeInfo() *AttributeInfo
 }
-
-//type AttributeConstantValue struct {
-//	constvalueIndex uint16
-//}
-
-//func (a *AttributeConstantValue) ToAttributeInfo() *AttributeInfo {
-//	ret := &AttributeInfo{}
-//	ret.attributeIndex = a.attributeIndex
-//	ret.attributeLength = 2
-//	ret.info = make([]byte, 2)
-//	binary.BigEndian.PutUint16(ret.info, uint16(a.constvalueIndex))
-//	return ret
-//}
 
 type AttributeSignature struct {
 	index uint16
@@ -55,7 +42,6 @@ type AttributeLineNumber struct {
 
 func (a *AttributeLineNumber) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
-
 	ret.attributeLength = uint32(len(a.linenumbers)) * 4
 	ret.info = make([]byte, ret.attributeLength)
 	for k, v := range a.linenumbers {

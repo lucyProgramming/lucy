@@ -87,7 +87,6 @@ func (b *Block) inherite(father *Block) {
 }
 
 type InheritedAttribute struct {
-	istop                        bool          // if it is a top block
 	StatementFor                 *StatementFor // if this statement is in for or not
 	StatementSwitch              *StatementSwitch
 	mostCloseForOrSwitchForBreak interface{}

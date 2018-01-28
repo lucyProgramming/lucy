@@ -347,7 +347,10 @@ func (p *Parser) Next() {
 		tok, p.eof, err = p.scanner.Next()
 		if err != nil {
 			p.errs = append(p.errs, fmt.Errorf("%s %s", p.errorMsgPrefix(), err.Error()))
-			return
+			continue
+		}
+		if p.eof {
+			break
 		}
 		if tok.Type != lex.TOKEN_CRLF {
 			p.token = tok

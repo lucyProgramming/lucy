@@ -6,9 +6,10 @@ import (
 )
 
 func (m *MakeClass) mkFunc(f *ast.Function) {
+	method := &cg.MethodHighLevel{}
+	context := &Context{f, nil}
 	if f.IsGlobal || f.IsClosureFunction() {
-		context := &Context{f, nil}
-		method := m.buildFunction(m.mainclass, f, context, true)
+		m.buildFunction(m.mainclass, method, f, context)
 		m.mainclass.Methods[method.Name] = []*cg.MethodHighLevel{method}
 		method.AccessFlags = 0
 		if method.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 {
@@ -19,20 +20,17 @@ func (m *MakeClass) mkFunc(f *ast.Function) {
 		method.Class = m.mainclass
 		return
 	}
-	context := &Context{f, nil}
 	class := m.mkClosureFunctionClass()
-	m.buildFunction(class, f, context, false)
+	m.buildFunction(class, method, f, context)
 }
-func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, f *ast.Function, context *Context, isstatic bool) *cg.MethodHighLevel {
-	ret := &cg.MethodHighLevel{}
-	ret.Name = f.Name
-	f.ClassMethod = ret
-	ret.Code.Codes = make([]byte, 65536)
-	ret.Code.CodeLength = 0
-	m.buildAtuoArrayListVar(class, &ret.Code, context)
-	m.buildBlock(class, &ret.Code, f.Block, context)
-	ret.Descriptor = f.Descriptor
-	return ret
+func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function, context *Context) {
+	f.ClassMethod = method
+	method.Code.Codes = make([]byte, 65536)
+	method.Code.CodeLength = 0
+	m.buildAtuoArrayListVar(class, &method.Code, context)
+	m.buildBlock(class, &method.Code, f.Block, context)
+	method.Descriptor = f.Descriptor
+	return
 }
 func (m *MakeClass) buildAtuoArrayListVar(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) (maxstack uint16) {
 	code.Codes[code.CodeLength] = cg.OP_new

@@ -58,13 +58,13 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Imports)}
 			}
 			p.Files[i.Pos.Filename].Imports[i.Name] = i
-		case *PackageNameDeclare:
-			t := v.Data.(*PackageNameDeclare)
-			if p.Files[t.Pos.Filename] == nil {
-				p.Files[t.Pos.Filename] = &File{Imports: make(map[string]*Imports)}
-			}
-			p.Files[t.Pos.Filename].Package = t
-			p.Name = t.Name
+			//		case *PackageNameDeclare:
+			//			t := v.Data.(*PackageNameDeclare)
+			//			if p.Files[t.Pos.Filename] == nil {
+			//				p.Files[t.Pos.Filename] = &File{Imports: make(map[string]*Imports)}
+			//			}
+			//			p.Files[t.Pos.Filename].Package = t
+			//			p.Name = t.Name
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
 			expressions = append(expressions, t)
@@ -73,21 +73,21 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		}
 	}
 	//package name not be the same one
-	{
-		m := make(map[string][]*PackageNameDeclare)
-		for _, v := range p.Files {
-			if m[v.Package.Name] == nil {
-				m[v.Package.Name] = []*PackageNameDeclare{v.Package}
-			}
-		}
-		if len(m) > 1 {
-			t := []*PackageNameDeclare{}
-			for _, v := range m {
-				t = append(t, v...)
-			}
-			errs = append(errs, &PackageNameNotConsistentError{t})
-		}
-	}
+	//	{
+	//		m := make(map[string][]*PackageNameDeclare)
+	//		for _, v := range p.Files {
+	//			if m[v.Package.Name] == nil {
+	//				m[v.Package.Name] = []*PackageNameDeclare{v.Package}
+	//			}
+	//		}
+	//		if len(m) > 1 {
+	//			t := []*PackageNameDeclare{}
+	//			for _, v := range m {
+	//				t = append(t, v...)
+	//			}
+	//			errs = append(errs, &PackageNameNotConsistentError{t})
+	//		}
+	//	}
 	errs = append(errs, checkEnum(c.Enums)...)
 	redeclareErrors = c.redeclareErrors()
 	p.Block.Consts = make(map[string]*Const)

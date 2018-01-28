@@ -55,6 +55,7 @@ func (l *LucyCompile) Init() {
 
 func (l *LucyCompile) compile() {
 	l.Init()
+
 	for _, v := range l.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {

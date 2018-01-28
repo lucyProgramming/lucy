@@ -7,6 +7,7 @@ import (
 )
 
 type Package struct {
+	DestPath       string
 	loadedPackages map[string]*Package
 	Block          Block // package always have a default block
 	Files          map[string]*File
@@ -20,12 +21,12 @@ func (p *Package) mkInitFunctions(bs ...*Block) {
 	p.InitFunctions = make([]*Function, len(bs))
 	for k, b := range bs {
 		f := &Function{}
-		f.Name = fmt.Sprintf("<init%d>", k)
 		f.Block = b
 		f.Typ = &FunctionType{}
 		f.mkVariableType()
 		p.InitFunctions[k] = f
 		f.Used = true
+		f.isPackageBlockFunction = true
 	}
 }
 
@@ -45,6 +46,7 @@ func (p *Package) TypeCheck() []error {
 		p.NErros2Stop = 10
 	}
 	p.Errors = []error{}
+	p.Block.InheritedAttribute.p = p
 	p.Errors = append(p.Errors, p.Block.checkConst()...)
 	//
 	for _, v := range p.Block.Funcs {
@@ -82,7 +84,7 @@ func (p *Package) loadPackage(name string) (*Package, error) {
 //different for other file
 type File struct {
 	Imports map[string]*Imports // n
-	Package *PackageNameDeclare
+	//Package *PackageNameDeclare
 }
 
 type Imports struct {
@@ -118,10 +120,10 @@ func (i *Imports) GetAccessName() (string, error) {
 	return name, nil
 }
 
-type PackageNameDeclare struct {
-	Name string
-	Pos  *Pos
-}
+//type PackageNameDeclare struct {
+//	Name string
+//	Pos  *Pos
+//}
 
 type RedeclareError struct {
 	Name string
@@ -137,17 +139,17 @@ func (r *RedeclareError) Error() error {
 	return errors.New(s)
 }
 
-type PackageNameNotConsistentError struct {
-	Names []*PackageNameDeclare
-}
+//type PackageNameNotConsistentError struct {
+//	Names []*PackageNameDeclare
+//}
 
-func (p *PackageNameNotConsistentError) Error() string {
-	if len(p.Names) == 0 {
-		panic("zero length")
-	}
-	s := fmt.Sprintf("package named not consistently\n")
-	for _, v := range p.Names {
-		s += fmt.Sprintf("%s named by %s\n", errMsgPrefix(v.Pos), v.Name)
-	}
-	return s
-}
+//func (p *PackageNameNotConsistentError) Error() string {
+//	if len(p.Names) == 0 {
+//		panic("zero length")
+//	}
+//	s := fmt.Sprintf("package named not consistently\n")
+//	for _, v := range p.Names {
+//		s += fmt.Sprintf("%s named by %s\n", errMsgPrefix(v.Pos), v.Name)
+//	}
+//	return s
+//}
