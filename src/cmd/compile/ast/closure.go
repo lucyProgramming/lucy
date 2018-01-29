@@ -1,16 +1,16 @@
 package ast
 
 type ClosureVars struct {
-	Vars map[string]*ClosureVar
+	Vars map[*VariableDefinition]*ClosureVar
 }
 
-func (c *ClosureVars) ClosureVarsExist(name string, v *VariableDefinition) (level uint8, is bool) {
+func (c *ClosureVars) ClosureVarsExist(v *VariableDefinition) (level uint8, is bool) {
 	if c.Vars == nil {
 		is = false
 		return
 	}
-	vv, ok := c.Vars[name]
-	if !ok || vv.Var != v {
+	vv, ok := c.Vars[v]
+	if ok == false {
 		is = false
 		return
 	}
@@ -22,27 +22,27 @@ func (c *ClosureVars) NotEmpty() bool {
 }
 func (c *ClosureVars) Insert(v *VariableDefinition) {
 	if c.Vars == nil {
-		c.Vars = make(map[string]*ClosureVar)
+		c.Vars = make(map[*VariableDefinition]*ClosureVar)
 	}
-	v.BeenCaptured++
-	c.Vars[v.Name] = &ClosureVar{
-		Var:   v,
-		Level: v.BeenCaptured,
+	c.Vars[v] = &ClosureVar{
+		Level: v.CaptureLevel,
 	}
+	v.BeenCaptured = true
+	v.CaptureLevel++
 }
 
 func (c *ClosureVars) Search(name string) *VariableDefinition {
 	if c.Vars == nil {
 		return nil
 	}
-	if x, ok := c.Vars[name]; ok {
-		return x.Var
-	} else {
-		return nil
+	for v, _ := range c.Vars {
+		if v.Name == name {
+			return v
+		}
 	}
+	return nil
 }
 
 type ClosureVar struct {
-	Var   *VariableDefinition
 	Level uint8
 }

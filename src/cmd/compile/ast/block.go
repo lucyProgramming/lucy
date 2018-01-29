@@ -65,10 +65,11 @@ func (b *Block) searchByName(name string) interface{} {
 	if b.Outter == nil {
 		return nil
 	}
-	t := b.Outter.searchByName(name)
-	if t != nil { //
-		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false {
-			if b.InheritedAttribute.function != nil && b.IsFunctionTopBlock &&
+	t := b.Outter.searchByName(name) // search by outter block
+	if t != nil {                    //
+		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
+			if b.InheritedAttribute.function != nil &&
+				b.IsFunctionTopBlock &&
 				b.InheritedAttribute.function.IsGlobal == false {
 				b.InheritedAttribute.function.ClosureVars.Insert(v)
 			}

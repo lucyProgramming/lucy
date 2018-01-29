@@ -36,8 +36,8 @@ func (f *Function) IsClosureFunction() bool {
 	return f.ClosureVars.NotEmpty()
 }
 
-func (f *Function) ClosureVarExist(name string, v *VariableDefinition) (uint8, bool) {
-	return f.ClosureVars.ClosureVarsExist(name, v)
+func (f *Function) ClosureVarExist(v *VariableDefinition) (uint8, bool) {
+	return f.ClosureVars.ClosureVarsExist(v)
 }
 func (f *Function) readableMsg() string {
 	s := "fn" + f.Name + "("

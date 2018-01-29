@@ -27,6 +27,9 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	f.ClassMethod = method
 	method.Code.Codes = make([]byte, 65536)
 	method.Code.CodeLength = 0
+	defer func() {
+		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
+	}()
 	m.buildAtuoArrayListVar(class, &method.Code, context)
 	m.buildBlock(class, &method.Code, f.Block, context)
 	method.Descriptor = f.Descriptor

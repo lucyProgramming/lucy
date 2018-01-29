@@ -183,12 +183,9 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 }
 func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
 	f := e.Data.(*Function)
+	f.mkVariableType()
 	*errs = append(*errs, f.check(block)...)
-	return &VariableType{
-		Pos:      e.Pos,
-		Typ:      VARIABLE_TYPE_FUNCTION,
-		Function: f,
-	}
+	return &f.VariableType
 }
 
 func (e *Expression) checkExpressions(block *Block, es []*Expression, errs *[]error) []*VariableType {
@@ -223,25 +220,27 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		return nil
 	}
-	if no.Typ.Typ != VARIABLE_TYPE_CLASS {
+	if no.Typ.Typ == VARIABLE_TYPE_CLASS {
+		args := e.checkExpressions(block, no.Args, errs)
+		f, accessable, err := no.Typ.Class.matchContructionFunction(args)
+		if err != nil {
+			*errs = append(*errs, err)
+		} else {
+			if !accessable {
+				*errs = append(*errs, fmt.Errorf("%s construction method is private", errMsgPrefix(e.Pos)))
+			}
+		}
+		no.Construction = f
+		ret := &VariableType{}
+		*ret = *no.Typ
+		ret.Typ = VARIABLE_TYPE_OBJECT
+		ret.Pos = e.Pos
+		return ret
+	} else {
 		*errs = append(*errs, fmt.Errorf("%s only class type can be used by new", errMsgPrefix(e.Pos)))
 		return nil
 	}
-	args := e.checkExpressions(block, no.Args, errs)
 
-	f, accessable, err := no.Typ.Class.matchContructionFunction(args)
-	if err != nil {
-		*errs = append(*errs, err)
-	} else {
-		if !accessable {
-			*errs = append(*errs, fmt.Errorf("%s construction method is private", errMsgPrefix(e.Pos)))
-		}
-	}
-	no.Construction = f
-	ret := &VariableType{}
-	*ret = *no.Typ
-	ret.Typ = VARIABLE_TYPE_OBJECT
-	return ret
 }
 func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
 	c := e.Data.(*ExpressionTypeConvertion)
@@ -256,7 +255,6 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 	if t == nil {
 		return nil
 	}
-
 	return nil
 }
 
@@ -274,34 +272,33 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 		if e.Typ == EXPRESSION_TYPE_NOT {
 			return &VariableType{
 				Typ: EXPRESSION_TYPE_BOOL,
+				Pos: e.Pos,
 			}
 		} else {
 			return &VariableType{
 				Typ: EXPRESSION_TYPE_INT,
+				Pos: e.Pos,
 			}
 		}
 	}
 	if e.Typ == EXPRESSION_TYPE_NOT {
 		if t.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not(!) only works with bool expression", errMsgPrefix(e.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(t.Pos)))
 		}
 		t := &VariableType{
 			Typ: EXPRESSION_TYPE_BOOL,
 			Pos: e.Pos,
 		}
-		e.VariableType = t
 		return t
 	}
 	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
-		if !t.IsNumber() {
+		if t.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'", errMsgPrefix(e.Pos), t.TypeString()))
 		}
 		tt := t.Clone()
 		tt.Pos = e.Pos
-		e.VariableType = tt
 		return tt
 	}
-	panic("missing handle")
 	return t
 }
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*VariableType {
@@ -329,11 +326,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
-	if t.Typ != VARIABLE_TYPE_OBJECT {
-		*errs = append(*errs, fmt.Errorf("%s cannot make method call on a none object", errMsgPrefix(e.Pos)))
+	if t.Typ != VARIABLE_TYPE_OBJECT && t.Typ != VARIABLE_TYPE_CLASS {
+		*errs = append(*errs, fmt.Errorf("%s method call only can be made on 'object' or 'class'", errMsgPrefix(e.Pos)))
+		return nil
 	}
+
 	args := e.checkExpressions(block, call.Args, errs)
-	args = e.checkRightValues(args, errs)
+	args = e.checkRightValuesValid(args, errs)
 	f, es := t.Class.accessMethod(call.Name, e.Pos, args)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
@@ -348,7 +347,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	return args
 }
 
-func (e *Expression) checkRightValues(ts []*VariableType, errs *[]error) (ret []*VariableType) {
+func (e *Expression) checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
 	ret = []*VariableType{}
 	for _, v := range ts {
 		if !v.rightValueValid() {
@@ -395,14 +394,14 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 }
 
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
-	callargsTypes := e.checkRightValues(e.checkExpressions(block, args, errs), errs)
+	callargsTypes := e.checkRightValuesValid(e.checkExpressions(block, args, errs), errs)
 	f.callchecker(errs, callargsTypes, e.Pos)
 	return f.Typ.ReturnList.retTypes(e.Pos)
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := e.checkExpressions(block, args, errs)
-	callargsTypes = e.checkRightValues(callargsTypes, errs)
+	callargsTypes = e.checkRightValuesValid(callargsTypes, errs)
 	if len(callargsTypes) > len(f.Typ.ParameterList) {
 		*errs = append(*errs, fmt.Errorf("%s too many paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
 	}
@@ -425,7 +424,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	vs := e.Data.(*ExpressionDeclareVariable)
 	args := e.checkExpressions(block, vs.Expressions, errs)
-	args = e.checkRightValues(args, errs)
+	args = e.checkRightValuesValid(args, errs)
 	var err error
 	for k, v := range vs.Vs {
 		err = v.Typ.resolve(block)
@@ -611,24 +610,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	identifer := e.Data.(*ExpressionIdentifer)
 	d := block.searchByName(identifer.Name)
-	if d == nil { // search failed
-		if block.InheritedAttribute.class != nil { // in class
-			f, err := block.InheritedAttribute.class.accessField(identifer.Name)
-			if err != nil {
-				return nil, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err)
-			} else {
-				if f.isStatic() {
-
-				} else {
-
-				}
-				e.Typ = EXPRESSION_TYPE_DOT
-				t := &ExpressionIndex{}
-				//				t.Expression =
-				e.Data = t
-			}
-		}
-	}
 	if d == nil {
 		return nil, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifer.Name)
 	}
@@ -643,6 +624,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
+		t.CaptureLevel = 0
 		t.Used = true
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
@@ -685,7 +667,9 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		}
 		switch d.(type) {
 		case *VariableDefinition:
-			return d.(*VariableDefinition).Typ, nil
+			t := d.(*VariableDefinition)
+			t.CaptureLevel = 0
+			return t.Typ, nil
 		default:
 			errs = append(errs, fmt.Errorf("%s identifier %s is not variable",
 				errMsgPrefix(e.Pos), name.Name))

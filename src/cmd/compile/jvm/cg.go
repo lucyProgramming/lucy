@@ -40,7 +40,6 @@ func (m *MakeClass) Make(p *ast.Package) {
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
 	}
-	//dump main class
 
 }
 

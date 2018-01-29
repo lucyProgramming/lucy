@@ -5,7 +5,8 @@ import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 type VariableDefinition struct {
 	LocalValOffset      uint16
 	IsGlobal            bool
-	BeenCaptured        uint8
+	BeenCaptured        bool
+	CaptureLevel        uint8
 	IsFunctionParameter bool
 	Used                bool   // use as right value
 	AccessFlags         uint16 // public private or protected

@@ -112,7 +112,7 @@ func (t *VariableType) resolveName(block *Block) error {
 	switch d.(type) {
 	case *VariableDefinition:
 		return fmt.Errorf("%s name %s is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
-	case []*Function:
+	case *Function:
 		return fmt.Errorf("%s name %s is a function,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Const:
 		return fmt.Errorf("%s name %s is a const,not a type", errMsgPrefix(t.Pos), t.Name)
