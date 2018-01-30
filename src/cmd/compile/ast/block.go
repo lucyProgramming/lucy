@@ -248,9 +248,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == "" {
 		panic("null name")
 	}
-	if name == PACKAGE_RUN_MAIN_VAR { // special name
-		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), PACKAGE_RUN_MAIN_VAR)
-	}
 	if name == THIS {
 		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), THIS)
 	}

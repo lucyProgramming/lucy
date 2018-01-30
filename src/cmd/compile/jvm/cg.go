@@ -28,16 +28,6 @@ func (m *MakeClass) Make(p *ast.Package) {
 	if p.Name == "" {
 		p.Name = "test"
 	}
-	{
-		filed := &cg.FiledHighLevel{}
-		filed.Name = ast.PACKAGE_RUN_MAIN_VAR
-		filed.Descriptor = "B"
-		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
-		filed.AccessFlags |= cg.ACC_FIELD_STATIC
-		mainclass.Fields = map[string]*cg.FiledHighLevel{
-			ast.PACKAGE_RUN_MAIN_VAR: filed,
-		}
-	}
 	mainclass.Name = p.Name
 	mainclass.SuperClass = ast.LUCY_ROOT_CLASS
 	mainclass.Name = p.Name
@@ -111,12 +101,6 @@ func (m *MakeClass) mkInitFunctions() {
 }
 
 func (m *MakeClass) buildEntryMethod(method *cg.MethodHighLevel, ms []*cg.MethodHighLevel, ismain bool) {
-	if ismain {
-		method.Name = "main"
-	} else {
-		method.Name = "bloks"
-		method.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
-	}
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	method.AccessFlags |= cg.ACC_METHOD_STATIC
 	method.Descriptor = "()V"
@@ -125,16 +109,6 @@ func (m *MakeClass) buildEntryMethod(method *cg.MethodHighLevel, ms []*cg.Method
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
-	if ismain {
-		method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_1
-		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_putstatic
-		m.mainclass.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      m.mainclass.Name,
-			Name:       ast.PACKAGE_RUN_MAIN_VAR,
-			Descriptor: "B",
-		}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
-		method.Code.CodeLength += 4
-	}
 	for _, v := range ms {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_invokestatic
 		m.mainclass.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
