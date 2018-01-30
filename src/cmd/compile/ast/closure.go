@@ -4,17 +4,11 @@ type ClosureVars struct {
 	Vars map[*VariableDefinition]*ClosureVar
 }
 
-func (c *ClosureVars) ClosureVarsExist(v *VariableDefinition) (level uint8, is bool) {
+func (c *ClosureVars) ClosureVarsExist(v *VariableDefinition) (cv *ClosureVar) {
 	if c.Vars == nil {
-		is = false
-		return
+		return nil
 	}
-	vv, ok := c.Vars[v]
-	if ok == false {
-		is = false
-		return
-	}
-	return vv.Level, true
+	return c.Vars[v]
 }
 
 func (c *ClosureVars) NotEmpty() bool {
@@ -27,7 +21,6 @@ func (c *ClosureVars) Insert(v *VariableDefinition) {
 	c.Vars[v] = &ClosureVar{
 		Level: v.CaptureLevel,
 	}
-	v.BeenCaptured = true
 	v.CaptureLevel++
 }
 

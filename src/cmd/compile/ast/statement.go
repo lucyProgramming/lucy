@@ -162,6 +162,7 @@ type StatementReturn struct {
 }
 
 func (s *StatementReturn) check(b *Block) []error {
+	s.Function = b.InheritedAttribute.function
 	if len(b.InheritedAttribute.function.Typ.ReturnList) > 0 && len(s.Expressions) == 0 {
 		s.Expressions = make([]*Expression, len(b.InheritedAttribute.function.Typ.ReturnList))
 		for k, v := range b.InheritedAttribute.function.Typ.ReturnList {

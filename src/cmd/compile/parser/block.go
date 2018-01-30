@@ -20,7 +20,6 @@ func (b *Block) consume(c map[int]bool) {
 }
 
 func (b *Block) parse(block *ast.Block) (err error) {
-
 	b.Next() // skip {
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {

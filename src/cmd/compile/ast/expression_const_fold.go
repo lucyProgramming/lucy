@@ -77,6 +77,8 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 		e.Typ == EXPRESSION_TYPE_INT ||
 		e.Typ == EXPRESSION_TYPE_FLOAT ||
 		e.Typ == EXPRESSION_TYPE_STRING ||
+		e.Typ == EXPRESSION_TYPE_DOUBLE ||
+		e.Typ == EXPRESSION_TYPE_LONG ||
 		e.Typ == EXPRESSION_TYPE_NULL {
 		return true, e.Typ, e.Data, nil
 	}

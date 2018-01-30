@@ -97,7 +97,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	p.Block.Vars = make(map[string]*VariableDefinition)
 	{
 		v := &VariableDefinition{}
-		v.Name = "__main__"
+		v.Name = PACKAGE_RUN_MAIN_VAR
 		v.Typ = &VariableType{}
 		v.IsGlobal = true
 	}

@@ -2,5 +2,8 @@ package ast
 
 type Const struct {
 	VariableDefinition
-	Value interface{}
+	BoolValue    bool
+	Int64Value   int64
+	Float64Value float64
+	StringValue  string
 }

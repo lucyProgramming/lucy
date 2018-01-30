@@ -144,17 +144,3 @@ func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 		c.DoubleConsts[d] = [][]byte{location}
 	}
 }
-
-type FiledHighLevel struct {
-	Name       string
-	Descriptor string
-	FieldInfo
-}
-
-type MethodHighLevel struct {
-	Class      *ClassHighLevel
-	Name       string
-	Descriptor string
-	MethodInfo
-	Code AttributeCode
-}

@@ -12,6 +12,8 @@ const (
 	EXPRESSION_TYPE_BYTE
 	EXPRESSION_TYPE_INT
 	EXPRESSION_TYPE_FLOAT
+	EXPRESSION_TYPE_DOUBLE
+	EXPRESSION_TYPE_LONG
 	EXPRESSION_TYPE_STRING
 	EXPRESSION_TYPE_ARRAY // []bool{false,true}
 	//binary expression
@@ -110,12 +112,14 @@ type ExpressionTypeConvertion struct {
 }
 
 type ExpressionIdentifer struct {
-	Name     string
-	Const    *Const
-	Var      *VariableDefinition
+	Name string
+	Var  *VariableDefinition
+	Func *Function
+	//enumas
 	Enum     *Enum
-	Func     *Function
 	EnumName *EnumName
+	//class
+	Class *Class
 }
 
 type ExpressionIndex struct {

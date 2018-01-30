@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
@@ -26,26 +25,36 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	mainclass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	mainclass.SuperClass = ast.LUCY_ROOT_CLASS
-	mainclass.Name = strings.Title(p.Name)
-	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
-	mainclass.Methods = make(map[string][]*cg.MethodHighLevel)
+	if p.Name == "" {
+		p.Name = "test"
+	}
+	{
+		filed := &cg.FiledHighLevel{}
+		filed.Name = ast.PACKAGE_RUN_MAIN_VAR
+		filed.Descriptor = "B"
+		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		filed.AccessFlags |= cg.ACC_FIELD_STATIC
+		mainclass.Fields = map[string]*cg.FiledHighLevel{
+			ast.PACKAGE_RUN_MAIN_VAR: filed,
+		}
+	}
+	mainclass.Name = p.Name
+	mainclass.SuperClass = ast.LUCY_ROOT_CLASS
+	mainclass.Name = p.Name
 	m.mkVars()
 	m.mkEnums()
 	m.mkClass()
 	m.mkFuncs()
-
 	m.mkInitFunctions()
-
 	err := m.Dump()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
 	}
-
 }
 
 func (m *MakeClass) Dump() error {
 	//dump main class
-	f, err := os.OpenFile(filepath.Join(m.p.DestPath, m.mainclass.Name+".class"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("test.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -83,8 +92,8 @@ func (m *MakeClass) mkInitFunctions() {
 		ms = append(ms, method)
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
-		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
-		method.Name = fmt.Sprintf("<block%d>", k)
+		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+		method.Name = fmt.Sprintf("block%d", k)
 		method.Class = m.mainclass
 		method.Descriptor = "()V"
 		context := &Context{v, nil}
@@ -104,11 +113,11 @@ func (m *MakeClass) buildEntryMethod(method *cg.MethodHighLevel, ms []*cg.Method
 	if ismain {
 		method.Name = "main"
 	} else {
-		method.Name = "<bloks>"
+		method.Name = "bloks"
+		method.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
 	}
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	method.AccessFlags |= cg.ACC_METHOD_STATIC
-	method.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
 	method.Descriptor = "()V"
 	method.Class = m.mainclass
 	method.Code.Codes = make([]byte, 65536)
@@ -120,8 +129,8 @@ func (m *MakeClass) buildEntryMethod(method *cg.MethodHighLevel, ms []*cg.Method
 		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_putstatic
 		m.mainclass.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      m.mainclass.Name,
-			Name:       "__main__",
-			Descriptor: "I",
+			Name:       ast.PACKAGE_RUN_MAIN_VAR,
+			Descriptor: "B",
 		}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
 		method.Code.CodeLength += 4
 	}
@@ -132,6 +141,7 @@ func (m *MakeClass) buildEntryMethod(method *cg.MethodHighLevel, ms []*cg.Method
 			Name:       v.Name,
 			Descriptor: "()V",
 		}, method.Code.Codes[method.Code.CodeLength+1:method.Code.CodeLength+3])
+		method.Code.CodeLength += 3
 	}
 }
 

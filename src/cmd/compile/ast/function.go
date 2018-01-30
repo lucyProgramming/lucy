@@ -36,30 +36,25 @@ func (f *Function) IsClosureFunction() bool {
 	return f.ClosureVars.NotEmpty()
 }
 
-func (f *Function) ClosureVarExist(v *VariableDefinition) (uint8, bool) {
-	return f.ClosureVars.ClosureVarsExist(v)
-}
 func (f *Function) readableMsg() string {
 	s := "fn" + f.Name + "("
 	for k, v := range f.Typ.ParameterList {
+		s += v.Name + " " + v.Typ.TypeString()
 		if k != len(f.Typ.ParameterList)-1 {
-			s += v.Typ.TypeString() + ","
-		} else {
-			s += v.Typ.TypeString()
+			s += ","
 		}
 	}
 	s += ")"
 	if len(f.Typ.ReturnList) > 0 {
 		s += "->"
+		s += "("
 		for k, v := range f.Typ.ReturnList {
-			s += "("
+			s += v.Name + " " + v.Typ.TypeString() + ","
 			if k != len(f.Typ.ReturnList)-1 {
-				s += v.Typ.TypeString() + ","
-			} else {
-				s += v.Typ.TypeString()
+				s += ","
 			}
-			s += ")"
 		}
+		s += ")"
 	}
 	return s
 }
@@ -81,8 +76,8 @@ func (f *Function) MkDescriptor() {
 	f.Descriptor = s
 }
 
-func (f *Function) checkBlocks(errs *[]error) {
-	f.Block.InheritedAttribute.function = f
+func (f *Function) checkBlock(errs *[]error) {
+	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.check(nil)...)
 }
 
@@ -96,39 +91,34 @@ func (f *Function) check(b *Block) []error {
 	f.Block.InheritedAttribute.function = f
 	f.checkParaMeterAndRetuns(&errs)
 	//
-	{
-		s := &StatementReturn{}
-		es := []*Expression{}
-		for _, v := range f.Typ.ReturnList {
-			identifer := &ExpressionIdentifer{}
-			identifer.Name = v.Name
-			es = append(es, &Expression{
-				Typ:  EXPRESSION_TYPE_IDENTIFIER,
-				Data: identifer,
-			})
-		}
-		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
-	}
 
-	f.checkBlocks(&errs)
+	f.checkBlock(&errs)
 	return errs
 }
 
-func (f *FunctionType) checkParaMeterAndRetuns(functionblock *Block, errs *[]error) {
+func (f *Function) mkLastRetrunStatement() {
+	s := &StatementReturn{}
+	es := []*Expression{}
+	for _, v := range f.Typ.ReturnList {
+		identifer := &ExpressionIdentifer{}
+		identifer.Name = v.Name
+		es = append(es, &Expression{
+			Typ:  EXPRESSION_TYPE_IDENTIFIER,
+			Data: identifer,
+		})
+	}
+	f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
+}
+
+func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs *[]error) {
 	var err error
-	var es []error
 	for _, v := range f.ParameterList {
 		v.IsFunctionParameter = true
-		es = functionblock.checkVar(v)
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-			continue
-		}
-		err = v.Typ.resolve(functionblock)
+		err = v.Typ.resolve(block)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
-		err = functionblock.insert(v.Name, v.Pos, v)
+		err = block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, err)
 			continue
@@ -136,16 +126,11 @@ func (f *FunctionType) checkParaMeterAndRetuns(functionblock *Block, errs *[]err
 	}
 	//handler return
 	for _, v := range f.ReturnList {
-		es = functionblock.checkVar(v)
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-			continue
-		}
-		err = v.Typ.resolve(functionblock)
+		err = v.Typ.resolve(block)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
-		err = functionblock.insert(v.Name, v.Pos, v)
+		err = block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}

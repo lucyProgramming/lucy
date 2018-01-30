@@ -37,7 +37,13 @@ func (b *Block) searchByName(name string) interface{} {
 		}
 	}
 	if b.Vars != nil {
-		if t, ok := b.Vars[name]; ok {
+		if t, ok := b.Vars[name]; ok { //correct the type
+			if t.Typ.Typ == VARIABLE_TYPE_ARRAY {
+				t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+			}
+			if t.Typ.Typ == VARIABLE_TYPE_CLASS {
+				t.Typ.Typ = VARIABLE_TYPE_OBJECT
+			}
 			return t
 		}
 	}
@@ -111,22 +117,22 @@ func (b *Block) check(father *Block) []error {
 		return errs
 	}
 	errs = append(errs, b.checkFunctions()...)
-	if father.shouldStop(errs) {
+	if b.shouldStop(errs) {
 		return errs
 	}
 	errs = append(errs, b.checkClass()...)
-	if father.shouldStop(errs) {
+	if b.shouldStop(errs) {
 		return errs
 	}
 	for _, v := range b.Vars {
 		errs = append(errs, b.checkVar(v)...)
-		if father.shouldStop(errs) {
+		if b.shouldStop(errs) {
 			return errs
 		}
 	}
 	for _, s := range b.Statements {
 		errs = append(errs, s.check(b)...)
-		if father.shouldStop(errs) {
+		if b.shouldStop(errs) {
 			return errs
 		}
 	}
@@ -210,7 +216,6 @@ func (b *Block) checkConst() []error {
 		v.Expression.Typ = t
 		v.Expression.Data = value
 		ts, _ := v.Expression.check(b)
-		v.Value = value
 		if v.Typ != nil {
 			err = v.Typ.resolve(b)
 			if err != nil {
@@ -222,6 +227,7 @@ func (b *Block) checkConst() []error {
 				continue
 			}
 		}
+
 	}
 	return errs
 }
@@ -243,11 +249,11 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == "" {
 		panic("null name")
 	}
-	if name == "__main__" { // special name
-		return fmt.Errorf("%s '__main__' already been token", errMsgPrefix(pos))
+	if name == PACKAGE_RUN_MAIN_VAR { // special name
+		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), PACKAGE_RUN_MAIN_VAR)
 	}
 	if name == THIS {
-		return fmt.Errorf("%s 'this' already been token", errMsgPrefix(pos))
+		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), THIS)
 	}
 	if name == "_" {
 		panic("_")
@@ -306,7 +312,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		t := d.(*VariableDefinition)
 		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
 		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
-		t.mkTypRight()
 		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)

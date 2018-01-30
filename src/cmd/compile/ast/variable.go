@@ -16,18 +16,3 @@ type VariableDefinition struct {
 	Signature  *class_json.FieldSignature
 	Descriptor string
 }
-
-func (v *VariableDefinition) mkTypRight() {
-	if v.Typ.isPrimitive() {
-		return
-	}
-	switch v.Typ.Typ {
-	case VARIABLE_TYPE_CLASS:
-		v.Typ.Typ = VARIABLE_TYPE_OBJECT
-	case VARIABLE_TYPE_ARRAY:
-		v.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
-	default:
-		panic("......")
-	}
-
-}

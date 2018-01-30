@@ -53,15 +53,26 @@ func (p *Package) TypeCheck() []error {
 		if v.Isbuildin {
 			continue
 		}
-		v.Block.inherite(&p.Block)
-		p.Errors = append(p.Errors, v.check(&p.Block)...)
-	}
-	for _, v := range p.Block.Classes {
-		p.Errors = append(p.Errors, v.check(&p.Block)...)
+		v.checkParaMeterAndRetuns(&p.Errors)
+		if p.Block.shouldStop(nil) {
+			return p.Errors
+		}
 	}
 	for _, v := range p.InitFunctions {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
+
+	for _, v := range p.Block.Classes {
+		p.Errors = append(p.Errors, v.check(&p.Block)...)
+	}
+
+	for _, v := range p.Block.Funcs {
+		if v.Isbuildin {
+			continue
+		}
+		v.checkBlock(&p.Errors)
+	}
+
 	return p.Errors
 }
 

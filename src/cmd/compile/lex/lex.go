@@ -212,14 +212,14 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 			if isPositive == false {
 				value = -value
 			}
-			token.Data = value
+			token.Data = float32(value)
 		} else {
 			token.Type = TOKEN_LITERAL_INT
 			value := lex.parseInt(integerpart)
 			if isPositive == false {
 				value = -value
 			}
-			token.Data = value
+			token.Data = int32(value)
 		}
 		return
 	}

@@ -160,7 +160,11 @@ func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
 		return VARIABLE_TYPE_DOUBLE
 	}
 	if t.Typ == VARIABLE_TYPE_FLOAT || t2.Typ == VARIABLE_TYPE_FLOAT {
-		return VARIABLE_TYPE_FLOAT
+		if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
+			return VARIABLE_TYPE_DOUBLE
+		} else {
+			return VARIABLE_TYPE_FLOAT
+		}
 	}
 	if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
 		return VARIABLE_TYPE_LONG
