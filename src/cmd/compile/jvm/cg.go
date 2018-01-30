@@ -98,6 +98,7 @@ func (m *MakeClass) mkInitFunctions() {
 		method.Descriptor = "()V"
 		context := &Context{v, nil}
 		m.buildFunction(m.mainclass, method, v, context)
+		fmt.Println(method.Code)
 	}
 	// mk main function
 	method := &cg.MethodHighLevel{}

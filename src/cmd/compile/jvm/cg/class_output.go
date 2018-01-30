@@ -100,7 +100,7 @@ func (c *Class) writeMethods() error {
 	var err error
 	bs2 := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs2, uint16(len(c.methods)))
-	panic(len(c.methods))
+	//	panic(len(c.methods))
 	_, err = c.dest.Write(bs2)
 	if err != nil {
 		return err

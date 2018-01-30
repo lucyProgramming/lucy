@@ -9,7 +9,6 @@ type Block struct {
 	IsFunctionTopBlock bool
 	IsClassBlock       bool
 	Pos                *Pos
-	p                  *Package
 	Consts             map[string]*Const
 	Funcs              map[string]*Function
 	Classes            map[string]*Class
