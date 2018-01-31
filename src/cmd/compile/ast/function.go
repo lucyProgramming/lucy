@@ -28,6 +28,7 @@ type Function struct {
 	Varoffset                  uint16
 	ArrayListVarForMultiReturn ArrayListVarForMultiReturn
 }
+
 type ArrayListVarForMultiReturn struct {
 	Offset uint16
 }
@@ -67,22 +68,25 @@ func (f *Function) MkVariableType() {
 	f.mkVariableType()
 }
 
-func (f *Function) MkDescriptor() {
+func (f *Function) MkDescriptor() string {
 	s := "("
 	for _, v := range f.Typ.ParameterList {
 		s += v.NameWithType.Typ.Descriptor()
 	}
 	s += ")"
-	f.Descriptor = s
+	if len(f.Typ.ReturnList) == 0 {
+		s += "V"
+	} else if len(f.Typ.ReturnList) == 1 {
+		s += f.Typ.ReturnList[0].Typ.Descriptor()
+	} else {
+		s += "java/util/ArrayList"
+	}
+	return s
 }
 
 func (f *Function) checkBlock(errs *[]error) {
 	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.check(nil)...)
-}
-
-func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
-	f.Typ.checkParaMeterAndRetuns(f.Block, errs)
 }
 
 func (f *Function) check(b *Block) []error {
@@ -110,31 +114,33 @@ func (f *Function) mkLastRetrunStatement() {
 	f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 }
 
-func (f *FunctionType) checkParaMeterAndRetuns(block *Block, errs *[]error) {
+func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	var err error
-	for _, v := range f.ParameterList {
+	for _, v := range f.Typ.ParameterList {
 		v.IsFunctionParameter = true
-		err = v.Typ.resolve(block)
+		err = v.Typ.resolve(f.Block)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
-		err = block.insert(v.Name, v.Pos, v)
+		err = f.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, err)
 			continue
 		}
 	}
 	//handler return
-	for _, v := range f.ReturnList {
-		err = v.Typ.resolve(block)
+	for _, v := range f.Typ.ReturnList {
+		err = v.Typ.resolve(f.Block)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
-		err = block.insert(v.Name, v.Pos, v)
+		err = f.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}
 	}
+	f.ArrayListVarForMultiReturn.Offset = f.Varoffset
+	f.Varoffset++
 }
 
 type FunctionType struct {

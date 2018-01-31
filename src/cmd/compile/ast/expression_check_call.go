@@ -95,7 +95,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	}
 	for k, v := range f.Typ.ParameterList {
 		if k < len(callargsTypes) {
-			if !v.Typ.typeCompatible(callargsTypes[k]) {
+			if !v.Typ.TypeCompatible(callargsTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s",
 					errMsgPrefix(args[k].Pos),
 					v.Typ.TypeString(),

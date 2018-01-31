@@ -15,8 +15,8 @@ var (
 	Nodes               *[]*Node //
 	packageAliasReg     *regexp.Regexp
 	PackageLoad         PackageLoader
-	LUCY_ROOT_CLASS     = "lucy/lang/LucyObject"
-	JAVA_ROOT_CLASS     = "lucy/lang/Object"
+	LUCY_ROOT_CLASS     = "lucy/lang/Object"
+	JAVA_ROOT_CLASS     = "java/lang/Object"
 	buildinFunctionsMap = make(map[string]*buildFunction)
 )
 

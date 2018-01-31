@@ -109,7 +109,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildArithmetic(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
+		maxstack = m.buildAssign(class, code, e, context)
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
+		maxstack = m.buildColonAssign(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -142,9 +144,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:
-
+		maxstack = m.buildMethodCall(class, code, e, context)
 	case ast.EXPRESSION_TYPE_FUNCTION_CALL:
-
+		maxstack = m.buildFunctionCall(class, code, e, context)
 	//
 	case ast.EXPRESSION_TYPE_INCREMENT:
 		fallthrough
@@ -182,7 +184,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 /*
 	stack is 1
 */
-func (m *MakeExpression) buildLoadArrayListAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) {
+func (m *MakeExpression) buildLoadArrayListAutoVar(code *cg.AttributeCode, context *Context) {
 	switch context.function.ArrayListVarForMultiReturn.Offset {
 	case 0:
 		code.Codes[code.CodeLength] = cg.OP_aload_0
@@ -209,7 +211,7 @@ func (m *MakeExpression) buildLoadArrayListAutoVar(class *cg.ClassHighLevel, cod
 /*
 	stack is 1
 */
-func (m *MakeExpression) buildStoreArrayListAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) {
+func (m *MakeExpression) buildStoreArrayListAutoVar(code *cg.AttributeCode, context *Context) {
 	switch context.function.ArrayListVarForMultiReturn.Offset {
 	case 0:
 		code.Codes[code.CodeLength] = cg.OP_astore_0

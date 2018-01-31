@@ -35,7 +35,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		if variable, ok := block.Vars[name.Name]; ok {
 			if k < len(ts) {
-				if variable.Typ.typeCompatible(ts[k]) == false {
+				if variable.Typ.TypeCompatible(ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s type '%s' is not compatible with '%s'",
 						errMsgPrefix(ts[k].Pos),
 						variable.Typ.TypeString(),
@@ -59,7 +59,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 		}
 	}
-	if noNewVaraible == false {
+	if noNewVaraible {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 	}
 }
@@ -109,45 +109,48 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 }
 
 func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *VariableType {
-	binary := e.Data.(*ExpressionBinary)
+	bin := e.Data.(*ExpressionBinary)
 	lefts := make([]*Expression, 1)
-	if binary.Left.Typ == EXPRESSION_TYPE_LIST {
-		lefts = binary.Left.Data.([]*Expression)
+	if bin.Left.Typ == EXPRESSION_TYPE_LIST {
+		lefts = bin.Left.Data.([]*Expression)
 	} else {
-		lefts[0] = binary.Left
+		lefts[0] = bin.Left
 	}
-	values := binary.Right.Data.([]*Expression)
+	bin.Left.Typ = EXPRESSION_TYPE_LIST
+	bin.Left.Data = lefts // rewrite to list anyway
+	values := bin.Right.Data.([]*Expression)
 	valueTypes := e.checkExpressions(block, values, errs)
 	leftTypes := []*VariableType{}
+	noAssign := true
 	for _, v := range lefts {
 		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifer)
 			if name.Name == NO_NAME_IDENTIFIER { // skip "_"
-				lefts = append(lefts, nil)
+				leftTypes = append(leftTypes, nil) // this is no assign situation
 				continue
 			}
 		}
+		noAssign = false
 		t, es := v.getLeftValue(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
 		}
-		if t != nil {
-			leftTypes = append(leftTypes, t)
-		}
+		leftTypes = append(leftTypes, t) // append even if it`s nil
 	}
-	if len(lefts) != len(valueTypes) {
+	bin.Left.VariableTypes = leftTypes
+	if len(lefts) != len(valueTypes) { //expression length compare with value types is more appropriate
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
 			errMsgPrefix(e.Pos),
 			len(valueTypes),
 			len(lefts)))
 	}
 	for k, v := range leftTypes {
-		if v == nil {
+		if v == nil { // get left value error or "_"
 			continue
 		}
 		if k < len(valueTypes) {
-			if !leftTypes[k].typeCompatible(valueTypes[k]) {
+			if !leftTypes[k].TypeCompatible(valueTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s",
 					errMsgPrefix(e.Pos),
 					leftTypes[k].TypeString(),
@@ -155,11 +158,14 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 			}
 		}
 	}
+	if noAssign {
+		*errs = append(*errs, fmt.Errorf("%s not assign", errMsgPrefix(e.Pos)))
+		return nil
+	}
 	if len(leftTypes) > 1 {
 		return nil
 	}
 	tt := leftTypes[0].Clone()
 	tt.Pos = e.Pos
-	e.VariableType = tt
 	return tt
 }

@@ -26,14 +26,15 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
 		Name:       `append`,
-		Descriptor: "(Ljava/lang/String;)java/lang/StringBuilder;",
+		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
 		Name:       `toString`,
-		Descriptor: "()java/lang/String;",
+		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
 	return maxstack
 }

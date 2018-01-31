@@ -3,7 +3,7 @@
 import "java/lang" as javalang;
 
 
-public class LucyObject extends  javalang.Object{
+public class Object extends  javalang.Object{
 
 }
 

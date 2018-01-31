@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -8,18 +10,23 @@ import (
 func (m *MakeClass) mkFunc(f *ast.Function) {
 	method := &cg.MethodHighLevel{}
 	context := &Context{f, nil}
-	if f.IsGlobal || f.IsClosureFunction() {
+	if f.IsGlobal || f.IsClosureFunction() == false {
 		m.buildFunction(m.mainclass, method, f, context)
-		m.mainclass.Methods[method.Name] = []*cg.MethodHighLevel{method}
 		method.AccessFlags = 0
-		if method.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 {
-			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-		}
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
+		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 {
+			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		} else {
+			method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+		}
 		method.Class = m.mainclass
+		method.Name = f.Name
+		method.Descriptor = f.MkDescriptor()
+		m.mainclass.AppendMethod(method)
 		return
 	}
+
 	class := m.mkClosureFunctionClass()
 	m.buildFunction(class, method, f, context)
 }
@@ -30,8 +37,11 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
+	method.Code.MaxLocals = f.Varoffset
 	m.buildAtuoArrayListVar(class, &method.Code, context)
 	m.buildBlock(class, &method.Code, f.Block, context)
+	fmt.Println("$$$$$$$$$$$$$$$$", method.Code.MaxStack)
+	panic(method.Code.MaxStack)
 	method.Descriptor = f.Descriptor
 	return
 }

@@ -34,7 +34,6 @@ public class ArrayInt extends Array {
 		}
 		this.elements[this.start + index] = v;
 	}
-	
 	public void append(int e){
 		if(this.end < this.cap){
 		}else{

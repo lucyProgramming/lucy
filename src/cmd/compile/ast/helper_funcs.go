@@ -43,6 +43,7 @@ func mkSignatureByVariableTypes(ts []*VariableType) string {
 
 func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDefinition, checker CallChecker) *Function {
 	f := &Function{}
+	f.Name = name
 	f.Isbuildin = true
 	f.callchecker = checker
 	f.Typ = &FunctionType{}

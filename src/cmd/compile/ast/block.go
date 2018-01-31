@@ -177,7 +177,7 @@ func (b *Block) checkVar(v *VariableDefinition) []error {
 				return []error{fmt.Errorf("%s err", errMsgPrefix(v.Pos))}
 			}
 		}
-		if expressionVariableType != nil && !v.Typ.typeCompatible(expressionVariableType) {
+		if expressionVariableType != nil && !v.Typ.TypeCompatible(expressionVariableType) {
 			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign %s to %s", errMsgPrefix(v.Pos), v.Typ.TypeString(), expressionVariableType.TypeString())}
 		}
 		return nil

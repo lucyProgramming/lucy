@@ -20,17 +20,14 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.p = p
 	mainclass := &cg.ClassHighLevel{}
 	m.mainclass = mainclass
-	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
-	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
-	mainclass.AccessFlags |= cg.ACC_CLASS_ABSTRACT
-	mainclass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
-	mainclass.SuperClass = ast.LUCY_ROOT_CLASS
+	//	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
+	//	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
+	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
 	if p.Name == "" {
 		p.Name = "test"
 	}
 	mainclass.Name = p.Name
-	mainclass.SuperClass = ast.LUCY_ROOT_CLASS
-	mainclass.Name = p.Name
+	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
 	m.mkVars()
 	m.mkEnums()
 	m.mkClass()
@@ -76,48 +73,28 @@ func (m *MakeClass) mkVars() {
 }
 
 func (m *MakeClass) mkInitFunctions() {
-	ms := []*cg.MethodHighLevel{}
-	for k, v := range m.p.InitFunctions {
-		method := &cg.MethodHighLevel{}
-		ms = append(ms, method)
-		method.AccessFlags |= cg.ACC_METHOD_STATIC
-		method.AccessFlags |= cg.ACC_METHOD_FINAL
-		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
-		method.Name = fmt.Sprintf("block%d", k)
-		method.Class = m.mainclass
-		method.Descriptor = "()V"
-		context := &Context{v, nil}
-		m.buildFunction(m.mainclass, method, v, context)
-		fmt.Println(method.Code)
-	}
-	// mk main function
-	method := &cg.MethodHighLevel{}
-	m.buildEntryMethod(method, ms, true)
-	m.mainclass.AppendMethod(method)
-	method2 := &cg.MethodHighLevel{}
-	m.buildEntryMethod(method2, ms, false)
-	m.mainclass.AppendMethod(method2)
-	m.mainclass.AppendMethod(ms...)
-}
+	//	ms := []*cg.MethodHighLevel{}
+	//	for k, v := range m.p.InitFunctions {
+	//		method := &cg.MethodHighLevel{}
+	//		ms = append(ms, method)
+	//		method.AccessFlags |= cg.ACC_METHOD_STATIC
+	//		method.AccessFlags |= cg.ACC_METHOD_FINAL
+	//		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+	//		method.Name = fmt.Sprintf("block%d", k)
+	//		method.Class = m.mainclass
+	//		method.Descriptor = "()V"
+	//		context := &Context{v, nil}
+	//		m.buildFunction(m.mainclass, method, v, context)
+	//		fmt.Println(method.Code)
+	//	}
 
-func (m *MakeClass) buildEntryMethod(method *cg.MethodHighLevel, ms []*cg.MethodHighLevel, ismain bool) {
-	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	method.AccessFlags |= cg.ACC_METHOD_STATIC
-	method.Descriptor = "()V"
-	method.Class = m.mainclass
-	method.Code.Codes = make([]byte, 65536)
-	defer func() {
-		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
-	}()
-	for _, v := range ms {
-		method.Code.Codes[method.Code.CodeLength] = cg.OP_invokestatic
-		m.mainclass.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
-			Class:      m.mainclass.Name,
-			Name:       v.Name,
-			Descriptor: "()V",
-		}, method.Code.Codes[method.Code.CodeLength+1:method.Code.CodeLength+3])
-		method.Code.CodeLength += 3
-	}
+	//	method := &cg.MethodHighLevel{}
+	//	m.buildEntryMethod(method, ms, true)
+	//	m.mainclass.AppendMethod(method)
+	//	method2 := &cg.MethodHighLevel{}
+	//	m.buildEntryMethod(method2, ms, false)
+	//	m.mainclass.AppendMethod(method2)
+	//	m.mainclass.AppendMethod(ms...)
 }
 
 func (m *MakeClass) mkEnums() {
@@ -143,8 +120,12 @@ func (m *MakeClass) mkClosureFunctionClass() *cg.ClassHighLevel {
 }
 
 func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context) {
+	var maxstack uint16
 	for _, s := range b.Statements {
-		m.buildStatement(class, code, s, context)
+		maxstack = m.buildStatement(class, code, s, context)
+		if maxstack > code.MaxStack {
+			code.MaxStack = maxstack
+		}
 	}
 	return
 }

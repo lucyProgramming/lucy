@@ -71,7 +71,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
 		Name:       "toString",
-		Descriptor: "()Ljava/lang/String",
+		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -80,5 +80,6 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		Name:       "println",
 		Descriptor: "(Ljava/lang/String;)V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
 	return
 }

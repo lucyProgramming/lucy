@@ -42,12 +42,12 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 		var variabletype *ast.VariableType
 		if e.Typ == ast.EXPRESSION_TYPE_METHOD_CALL || e.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL {
 			if len(e.VariableTypes) > 1 {
-				m.buildStoreArrayListAutoVar(class, code, context)
+				m.buildStoreArrayListAutoVar(code, context)
 				if t := currentStack + 1; t > maxstack {
 					maxstack = t
 				}
 				for k, t := range e.VariableTypes {
-					m.buildLoadArrayListAutoVar(class, code, context)
+					m.buildLoadArrayListAutoVar(code, context)
 					switch k {
 					case 0:
 						code.Codes[code.CodeLength] = cg.OP_iconst_0

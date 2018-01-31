@@ -15,7 +15,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			*errs = append(*errs, err)
 		} else {
 			if k < len(args) {
-				if !v.Typ.typeCompatible(args[k]) {
+				if !v.Typ.TypeCompatible(args[k]) {
 					fmt.Errorf("%s cannot assign %s to %s", errMsgPrefix(args[k].Pos), args[k].TypeString(), v.Typ.TypeString())
 				}
 			}

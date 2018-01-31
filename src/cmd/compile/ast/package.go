@@ -53,6 +53,8 @@ func (p *Package) TypeCheck() []error {
 		if v.Isbuildin {
 			continue
 		}
+		v.Block.inherite(&p.Block)
+		v.Block.InheritedAttribute.function = v
 		v.checkParaMeterAndRetuns(&p.Errors)
 		if p.Block.shouldStop(nil) {
 			return p.Errors
@@ -61,18 +63,15 @@ func (p *Package) TypeCheck() []error {
 	for _, v := range p.InitFunctions {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
-
 	for _, v := range p.Block.Classes {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
-
 	for _, v := range p.Block.Funcs {
 		if v.Isbuildin {
 			continue
 		}
 		v.checkBlock(&p.Errors)
 	}
-
 	return p.Errors
 }
 
@@ -95,7 +94,6 @@ func (p *Package) loadPackage(name string) (*Package, error) {
 //different for other file
 type File struct {
 	Imports map[string]*Imports // n
-	//Package *PackageNameDeclare
 }
 
 type Imports struct {
@@ -111,7 +109,7 @@ type Imports struct {
 */
 func (i *Imports) GetAccessName() (string, error) {
 	if i.AccessName == "_" { //special case _ is a identifer
-		return "", fmt.Errorf("_ is not legal package name")
+		return "", fmt.Errorf("'_' is not legal package name")
 	}
 	if i.AccessName != "" {
 		return i.AccessName, nil

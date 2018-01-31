@@ -21,6 +21,7 @@ func (c *ClosureVars) Insert(v *VariableDefinition) {
 	c.Vars[v] = &ClosureVar{
 		Level: v.CaptureLevel,
 	}
+	v.BeenCaptured = true
 	v.CaptureLevel++
 }
 

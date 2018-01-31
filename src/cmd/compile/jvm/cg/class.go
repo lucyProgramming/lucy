@@ -23,8 +23,8 @@ type Class struct {
 	majorVersion uint16
 	constPool    []*ConstPool
 	accessFlag   uint16
-	thisClass    [2]byte
-	superClass   [2]byte
+	thisClass    uint16
+	superClass   uint16
 	interfaces   []uint16
 	fields       []*FieldInfo
 	methods      []*MethodInfo
@@ -116,9 +116,11 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.accessFlag = high.AccessFlags
 	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
 	high.InsertStringConst(high.Name, thisClassConst.info[0:2])
+	c.thisClass = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, thisClassConst)
 	superClassConst := (&CONSTANT_Class_info{}).ToConstPool()
 	high.InsertStringConst(high.SuperClass, superClassConst.info[0:2])
+	c.superClass = c.thisClass + 1
 	c.constPool = append(c.constPool, superClassConst)
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{}).ToConstPool()
@@ -138,6 +140,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		for _, m := range ms {
 			info := &MethodInfo{}
 			info.AccessFlags = m.AccessFlags
+			fmt.Printf("method:%v descriptor:%v accessflag:%x\n", m.Name, m.Descriptor, m.AccessFlags)
 			high.InsertStringConst(m.Name, info.nameIndex[0:2])
 			high.InsertStringConst(m.Descriptor, info.descriptorIndex[0:2])
 			codeinfo := m.Code.ToAttributeInfo()
@@ -154,7 +157,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 	}
-
 	c.ifConstPoolOverMaxSize()
 	return
 }

@@ -178,7 +178,7 @@ func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
 	return VARIABLE_TYPE_BYTE
 }
 
-func (t *VariableType) typeCompatible(comp *VariableType, err ...*error) bool {
+func (t *VariableType) TypeCompatible(comp *VariableType, err ...*error) bool {
 	if t.Equal(comp) {
 		return true
 	}

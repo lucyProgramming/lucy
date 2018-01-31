@@ -181,6 +181,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		identifier := &ast.ExpressionIdentifer{}
 		identifier.Name = ep.parser.token.Data.(string)
 		left.Data = identifier
+		left.Pos = ep.parser.mkPos()
 		ep.Next()
 	case lex.TOKEN_TRUE:
 		left = &ast.Expression{}

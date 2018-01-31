@@ -7,8 +7,7 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context) {
-	var maxstack uint16
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context) (maxstack uint16) {
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		var es [][]byte
@@ -16,17 +15,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		backPatchEs(es, code)
 	case ast.STATEMENT_TYPE_IF:
 		maxstack = m.buildIfStatement(class, code, s.StatementIf, context)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
-		}
 		backPatchEs(s.StatementIf.BackPatchs, code)
 	case ast.STATEMENT_TYPE_BLOCK:
 		m.buildBlock(class, code, s.Block, context)
 	case ast.STATEMENT_TYPE_FOR:
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
-		}
 		backPatchEs(s.StatementFor.BackPatchs, code)
 	case ast.STATEMENT_TYPE_CONTINUE:
 		code.Codes[code.CodeLength] = cg.OP_goto
@@ -42,18 +35,13 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		code.CodeLength += 3
 	case ast.STATEMENT_TYPE_RETURN:
 		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
-		}
 	case ast.STATEMENT_TYPE_SWITCH:
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
-		}
 		backPatchEs(s.StatementSwitch.BackPatchs, code)
 	case ast.STATEMENT_TYPE_SKIP: // skip this block
-		panic("11111111")
+		panic("no skip")
 	}
+
 	return
 }
 func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context) (maxstack uint16) {
@@ -174,7 +162,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	//multi value to return
 	//load array list
-	m.MakeExpression.buildLoadArrayListAutoVar(class, code, context)
+	m.MakeExpression.buildLoadArrayListAutoVar(code, context)
 	// call clear
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.Codes[code.CodeLength+1] = cg.OP_invokevirtual

@@ -1,5 +1,7 @@
 package cg
 
+//	"fmt"
+
 type ClassHighLevel struct {
 	Name                   string
 	IsClosureFunctionClass bool
@@ -26,6 +28,9 @@ func (c *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
 		c.Methods = make(map[string][]*MethodHighLevel)
 	}
 	for _, v := range ms {
+		if v.Name == "" {
+			panic(1)
+		}
 		if _, ok := c.Methods[v.Name]; ok {
 			c.Methods[v.Name] = append(c.Methods[v.Name], v)
 		} else {

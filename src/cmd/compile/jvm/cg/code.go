@@ -1,16 +1,17 @@
 package cg
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"fmt"
+)
 
 type AttributeCode struct {
-	MaxStack             uint16
-	MaxLocals            uint16
-	CodeLength           uint16
-	Codes                []byte
-	exceptionTableLength uint16
-	exceptions           []*ExceptionTable
-	attributeCounts      uint16
-	attributes           []*AttributeInfo
+	MaxStack   uint16
+	MaxLocals  uint16
+	CodeLength uint16
+	Codes      []byte
+	exceptions []*ExceptionTable
+	attributes []*AttributeInfo
 }
 
 type ExceptionTable struct {
@@ -23,9 +24,13 @@ type ExceptionTable struct {
 func (a *AttributeCode) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.info = make([]byte, 8)
-	binary.BigEndian.PutUint16(ret.info, a.MaxStack)
-	binary.BigEndian.PutUint16(ret.info[2:], a.MaxLocals)
+	binary.BigEndian.PutUint16(ret.info[0:2], a.MaxStack)
+	binary.BigEndian.PutUint16(ret.info[2:4], a.MaxLocals)
 	binary.BigEndian.PutUint32(ret.info[4:8], uint32(a.CodeLength))
+	if int(a.CodeLength) != len(a.Codes) {
+		panic(123)
+	}
+	fmt.Println(len(a.Codes), a.CodeLength)
 	ret.info = append(ret.info, a.Codes...)
 	ret.info = append(ret.info, a.mkExceptions()...)
 	ret.info = append(ret.info, a.mkAttributes()...)
