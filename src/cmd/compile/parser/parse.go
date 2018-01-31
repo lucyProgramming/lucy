@@ -44,46 +44,10 @@ func (p *Parser) Parse() []error {
 	p.scanner = lex.New(p.bs)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
-	//package name definition
-	//	if p.eof {
-	//		p.errs = append(p.errs, fmt.Errorf("%s no package name definition found", p.errorMsgPrefix()))
-	//		return p.errs
-	//	}
-	//	if p.token.Type != lex.TOKEN_PACKAGE {
-	//		p.errs = append(p.errs, fmt.Errorf("%s first token must be a  package name definition", p.errorMsgPrefix()))
-	//		return p.errs
-	//	}
-	//	p.Next()
-	//	if p.eof {
-	//		p.errs = append(p.errs, fmt.Errorf("%s no package name definition found(no name after)", p.errorMsgPrefix()))
-	//		return p.errs
-	//	}
-	//	if p.token.Type != lex.TOKEN_IDENTIFIER {
-	//		p.errs = append(p.errs, fmt.Errorf("%s no package name definition found(no name after)", p.errorMsgPrefix()))
-	//		return p.errs
-	//	}
-	//	pd := &ast.PackageNameDeclare{
-	//		Name: p.token.Data.(string),
-	//	}
-	//	p.Next()
-	//	if p.token.Type != lex.TOKEN_SEMICOLON {
-	//		p.errs = append(p.errs, fmt.Errorf("%s no semicolon after package name definition", p.errorMsgPrefix()))
-	//		p.consume(untils_semicolon)
-	//		p.Next()
-	//	} else {
-	//		p.Next()
-	//	}
-	//	pd.Pos = &ast.Pos{}
-	//	p.lexPos2AstPos(p.token, pd.Pos)
-	//	*p.tops = append(*p.tops, &ast.Node{
-	//		Data: pd,
-	//	})
-
 	p.parseImports() // next is called
 	if p.eof {
 		return p.errs
 	}
-
 	if p.onlyimport { // only parse imports
 		return p.errs
 	}
@@ -375,7 +339,8 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
 		return fmt.Sprintf("%s:%d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn, string(p.lines[pos[0].StartLine-1]))
 	}
-	return fmt.Sprintf("%s:%d:%d '%s'", p.filename, p.token.StartLine, p.token.StartColumn, string(p.lines[p.token.StartLine-1]))
+	line, column := p.scanner.Pos()
+	return fmt.Sprintf("%s:%d:%d ", p.filename, line, column, line-1)
 }
 
 //var a,b,c int,char,bool  | var a,b,c int = 123;

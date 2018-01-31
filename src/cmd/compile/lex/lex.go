@@ -23,6 +23,10 @@ type LucyLexer struct {
 	offset, end                        int
 }
 
+func (lex *LucyLexer) Pos() (int, int) {
+	return lex.line, lex.column
+}
+
 func (lex *LucyLexer) getchar() (c byte, eof bool) {
 	if lex.offset == lex.end {
 		eof = true
