@@ -34,8 +34,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 
-	args := e.checkExpressions(block, call.Args, errs)
-	args = e.checkRightValuesValid(args, errs)
+	args := checkExpressions(block, call.Args, errs)
+	args = checkRightValuesValid(args, errs)
 	f, es := t.Class.accessMethod(call.Name, e.Pos, args)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
@@ -85,8 +85,8 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
-	callargsTypes := e.checkExpressions(block, args, errs)
-	callargsTypes = e.checkRightValuesValid(callargsTypes, errs)
+	callargsTypes := checkExpressions(block, args, errs)
+	callargsTypes = checkRightValuesValid(callargsTypes, errs)
 	if len(callargsTypes) > len(f.Typ.ParameterList) {
 		*errs = append(*errs, fmt.Errorf("%s too many paramaters to call function %s", errMsgPrefix(e.Pos), f.Name))
 	}

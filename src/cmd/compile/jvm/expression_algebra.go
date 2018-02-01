@@ -43,20 +43,24 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_MUL || e.Typ == ast.EXPRESSION_TYPE_DIV ||
 		e.Typ == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
+		maxstack = 4
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 			return m.buildStrCat(class, code, bin, context)
 		}
-		maxstack, _ = m.build(class, code, bin.Left, context)
-		//number type,no doubt
-		if e.VariableType.Typ != bin.Left.Typ {
-			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
+		stack, _ := m.build(class, code, bin.Left, context)
+		if stack > maxstack {
+			maxstack = stack
 		}
-		stack, _ := m.build(class, code, bin.Right, context)
-		if stack+2 > maxstack { // 2 in case long or double type on stack top
-			maxstack = stack + 2
+		//number type,no doubt
+		if e.VariableType.Typ != bin.Left.VariableType.Typ {
+			m.numberTypeConverter(code, bin.Left.VariableType.Typ, e.VariableType.Typ)
+		}
+		stack, _ = m.build(class, code, bin.Right, context)
+		if t := 2 + stack; t > maxstack {
+			maxstack = t
 		}
 		if e.VariableType.Typ != bin.Right.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Right.Typ, e.VariableType.Typ)
+			m.numberTypeConverter(code, bin.Right.VariableType.Typ, e.VariableType.Typ)
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -76,7 +80,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_irem
 			}
-			code.CodeLength++
 		case ast.VARIABLE_TYPE_FLOAT:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -90,7 +93,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_frem
 			}
-			code.CodeLength++
 		case ast.VARIABLE_TYPE_DOUBLE:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -120,6 +122,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		default:
 			panic("~~~~~~~~~~~~")
 		}
+		code.CodeLength++
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {

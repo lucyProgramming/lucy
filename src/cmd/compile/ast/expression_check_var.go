@@ -6,8 +6,8 @@ import (
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	vs := e.Data.(*ExpressionDeclareVariable)
-	args := e.checkExpressions(block, vs.Expressions, errs)
-	args = e.checkRightValuesValid(args, errs)
+	args := checkExpressions(block, vs.Expressions, errs)
+	args = checkRightValuesValid(args, errs)
 	var err error
 	for k, v := range vs.Vs {
 		err = v.Typ.resolve(block)

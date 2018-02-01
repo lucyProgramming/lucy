@@ -1,24 +1,6 @@
 package jvm
 
-import (
-	"encoding/binary"
-
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+var (
+	arrylistclassname   = "java/util/ArrayList"
+	specail_method_init = "<init>"
 )
-
-func appendBackPatch(p *[][]byte, b []byte) {
-	if *p == nil {
-		*p = [][]byte{b}
-	} else {
-		*p = append(*p, b)
-	}
-}
-
-/*
-	backpatch exits
-*/
-func backPatchEs(es [][]byte, code *cg.AttributeCode) {
-	for _, v := range es {
-		binary.BigEndian.PutUint16(v, code.CodeLength)
-	}
-}

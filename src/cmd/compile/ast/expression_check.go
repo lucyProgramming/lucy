@@ -147,9 +147,15 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		t = e.checkFunctionCallExpression(block, &errs)
 		e.VariableTypes = t
+		if len(t) > 1 {
+			block.InheritedAttribute.function.mkArrayListVarForMultiReturn()
+		}
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
 		e.VariableTypes = t
+		if len(t) > 1 {
+			block.InheritedAttribute.function.mkArrayListVarForMultiReturn()
+		}
 	case EXPRESSION_TYPE_NOT:
 		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:
@@ -205,20 +211,6 @@ func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *Varia
 	return &f.VariableType
 }
 
-func (e *Expression) checkExpressions(block *Block, es []*Expression, errs *[]error) []*VariableType {
-	ret := []*VariableType{}
-	for _, v := range es {
-		ts, e := v.check(block)
-		if errsNotEmpty(e) {
-			*errs = append(*errs, e...)
-		}
-		if ts != nil {
-			ret = append(ret, ts...)
-		}
-	}
-	return ret
-}
-
 func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, error) {
 	if len(ts) == 0 {
 		return nil, nil // no-type,no error
@@ -246,20 +238,8 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 	return nil
 }
 
-func (e *Expression) checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
-	ret = []*VariableType{}
-	for _, v := range ts {
-		if !v.rightValueValid() {
-			*errs = append(*errs, fmt.Errorf("%s %s cannot used as right value", errMsgPrefix(v.Pos), v.TypeString()))
-			continue
-		}
-		ret = append(ret, v)
-	}
-	return ret
-}
-
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
-	callargsTypes := e.checkRightValuesValid(e.checkExpressions(block, args, errs), errs)
+	callargsTypes := checkRightValuesValid(checkExpressions(block, args, errs), errs)
 	f.callchecker(errs, callargsTypes, e.Pos)
 	return f.Typ.ReturnList.retTypes(e.Pos)
 }

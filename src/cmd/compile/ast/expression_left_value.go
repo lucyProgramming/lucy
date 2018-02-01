@@ -8,19 +8,20 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	errs = []error{}
 	switch e.Typ {
 	case EXPRESSION_TYPE_IDENTIFIER:
-		name := e.Data.(*ExpressionIdentifer)
-		d := block.searchByName(name.Name)
+		identifier := e.Data.(*ExpressionIdentifer)
+		d := block.searchByName(identifier.Name)
 		if d == nil {
-			return nil, []error{fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), name.Name)}
+			return nil, []error{fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifier.Name)}
 		}
 		switch d.(type) {
 		case *VariableDefinition:
 			t := d.(*VariableDefinition)
 			t.CaptureLevel = 0
+			identifier.Var = t
 			return t.Typ, nil
 		default:
 			errs = append(errs, fmt.Errorf("%s identifier %s is not variable",
-				errMsgPrefix(e.Pos), name.Name))
+				errMsgPrefix(e.Pos), identifier.Name))
 			return nil, []error{}
 		}
 	case EXPRESSION_TYPE_INDEX:

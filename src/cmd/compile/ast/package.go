@@ -7,6 +7,7 @@ import (
 )
 
 type Package struct {
+	Main           *Function
 	DestPath       string
 	loadedPackages map[string]*Package
 	Block          Block // package always have a default block

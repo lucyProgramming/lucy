@@ -5,16 +5,19 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, value *ast.VariableType, classname, fieldname, fieldDescriptor string) {
+func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
 	return
 }
 
-func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, value *ast.VariableType, classname, fieldname, fieldDescriptor string) {
+func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifer)
 		if identifier.Var.BeenCaptured {
 			return m.getCaptureIdentiferLeftValue(class, code, e, context)
+		}
+		if identifier.Name == ast.NO_NAME_IDENTIFIER {
+			return //
 		}
 		switch identifier.Var.Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
@@ -35,7 +38,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			} else if identifier.Var.LocalValOffset <= 255 {
 				op = []byte{cg.OP_istore, byte(identifier.Var.LocalValOffset)}
 			} else {
-				panic("local int var out of range")
+				panic("local int var offset > 255")
 			}
 		case ast.VARIABLE_TYPE_FLOAT:
 			if identifier.Var.LocalValOffset == 0 {
@@ -94,6 +97,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 				panic("local float var out of range")
 			}
 		}
+		target = identifier.Var.Typ
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
 		maxstack, _ = m.build(class, code, index.Expression, context)
@@ -136,7 +140,5 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 	default:
 		panic("unkown type ")
 	}
-
-	value = e.VariableType
 	return
 }

@@ -91,7 +91,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		return
 	}
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
+	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL ||
+		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es [][]byte
 		maxstack, es = m.build(class, code, bin.Left, context)
 		backPatchEs(es, code)

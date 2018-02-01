@@ -25,10 +25,10 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		code.CodeLength++
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_BYTE:
-		e.Data = int64(e.Data.(byte))
+		e.Data = int32(e.Data.(byte))
 		fallthrough
 	case ast.EXPRESSION_TYPE_INT:
-		value := e.Data.(int64)
+		value := e.Data.(int32)
 		if value == 0 {
 			code.Codes[code.CodeLength] = cg.OP_iconst_0
 			code.CodeLength += 1
@@ -176,11 +176,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	return
 }
 
-func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	//maxstack, _, op, target := m.buildLeftValue(class, code, e, context)
-	return
-}
-
 /*
 	stack is 1
 */
@@ -233,4 +228,89 @@ func (m *MakeExpression) buildStoreArrayListAutoVar(code *cg.AttributeCode, cont
 		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
 		code.CodeLength += 2
 	}
+}
+
+func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.AttributeCode, k int, typ *ast.VariableType, context *Context) (maxstack uint16) {
+	m.buildLoadArrayListAutoVar(code, context) // local array list on stack
+	switch k {
+	case 0:
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+	case 1:
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+	case 2:
+		code.Codes[code.CodeLength] = cg.OP_iconst_2
+		code.CodeLength++
+	case 3:
+		code.Codes[code.CodeLength] = cg.OP_iconst_3
+		code.CodeLength++
+	case 4:
+		code.Codes[code.CodeLength] = cg.OP_iconst_4
+		code.CodeLength++
+	case 5:
+		code.Codes[code.CodeLength] = cg.OP_iconst_5
+		code.CodeLength++
+	default:
+		if k > 127 {
+			panic("over 127")
+		}
+		code.Codes[code.CodeLength] = cg.OP_bipush
+		code.Codes[code.CodeLength+1] = byte(k)
+		code.CodeLength += 2
+	}
+	maxstack = 2
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		Class:      arrylistclassname,
+		Name:       "get",
+		Descriptor: "(I)Ljava/lang/Object;",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	switch typ.Typ {
+	case ast.VARIABLE_TYPE_BOOL:
+		fallthrough
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_CHAR:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Integer",
+			Name:       "intValue",
+			Descriptor: "()I",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_LONG:
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Long",
+			Name:       "longValue",
+			Descriptor: "()J",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_FLOAT:
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Float",
+			Name:       "floatValue",
+			Descriptor: "()F",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_DOUBLE:
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Double",
+			Name:       "doubleValue",
+			Descriptor: "()D",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_STRING:
+	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	}
+	return
 }

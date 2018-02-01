@@ -244,7 +244,6 @@ func (b *Block) checkFunctions() []error {
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
-	fmt.Println("EEEEEEEEEEEEEEEE", name, d)
 	if name == "" {
 		panic("null name")
 	}

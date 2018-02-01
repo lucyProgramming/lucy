@@ -63,3 +63,29 @@ func oneAnyTypeParameterChecker(errs *[]error, args []*VariableType, pos *Pos) {
 func devisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
+
+func checkExpressions(block *Block, es []*Expression, errs *[]error) []*VariableType {
+	ret := []*VariableType{}
+	for _, v := range es {
+		ts, e := v.check(block)
+		if errsNotEmpty(e) {
+			*errs = append(*errs, e...)
+		}
+		if ts != nil {
+			ret = append(ret, ts...)
+		}
+	}
+	return ret
+}
+
+func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
+	ret = []*VariableType{}
+	for _, v := range ts {
+		if !v.rightValueValid() {
+			*errs = append(*errs, fmt.Errorf("%s %s cannot used as right value", errMsgPrefix(v.Pos), v.TypeString()))
+			continue
+		}
+		ret = append(ret, v)
+	}
+	return ret
+}

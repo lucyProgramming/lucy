@@ -20,14 +20,14 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.p = p
 	mainclass := &cg.ClassHighLevel{}
 	m.mainclass = mainclass
-	//	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
-	//	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
+	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
 	if p.Name == "" {
 		p.Name = "test"
 	}
 	mainclass.Name = p.Name
 	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
+	mkClassDefaultContruction(m.mainclass)
 	m.mkVars()
 	m.mkEnums()
 	m.mkClass()

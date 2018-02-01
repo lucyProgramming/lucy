@@ -47,8 +47,8 @@ type VariableType struct {
 }
 
 func (v *VariableType) JvmSlotSize() uint16 {
-	if !v.rightValueValid() {
-		panic(1)
+	if v.rightValueValid() == false {
+		panic("right value invalid")
 	}
 	if v.Typ == VARIABLE_TYPE_DOUBLE || VARIABLE_TYPE_LONG == v.Typ {
 		return 2

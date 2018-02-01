@@ -26,7 +26,14 @@ type Function struct {
 	Signature                  *class_json.MethodSignature
 	VariableType               VariableType
 	Varoffset                  uint16
-	ArrayListVarForMultiReturn ArrayListVarForMultiReturn
+	ArrayListVarForMultiReturn *ArrayListVarForMultiReturn
+}
+
+func (f *Function) mkArrayListVarForMultiReturn() {
+	t := &ArrayListVarForMultiReturn{}
+	t.Offset = f.Varoffset
+	f.ArrayListVarForMultiReturn = t
+	f.Varoffset++
 }
 
 type ArrayListVarForMultiReturn struct {
@@ -79,7 +86,7 @@ func (f *Function) MkDescriptor() string {
 	} else if len(f.Typ.ReturnList) == 1 {
 		s += f.Typ.ReturnList[0].Typ.Descriptor()
 	} else {
-		s += "java/util/ArrayList"
+		s += "Ljava/util/ArrayList;" //always this type
 	}
 	return s
 }
@@ -95,7 +102,6 @@ func (f *Function) check(b *Block) []error {
 	f.Block.InheritedAttribute.function = f
 	f.checkParaMeterAndRetuns(&errs)
 	//
-
 	f.checkBlock(&errs)
 	return errs
 }
@@ -139,8 +145,6 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}
 	}
-	f.ArrayListVarForMultiReturn.Offset = f.Varoffset
-	f.Varoffset++
 }
 
 type FunctionType struct {
@@ -148,13 +152,13 @@ type FunctionType struct {
 	ReturnList    ReturnList
 }
 
-type ParameterList []*VariableDefinition // actually local variables
-type ReturnList []*VariableDefinition    // actually local variables
+type ParameterList []*VariableDefinition
+type ReturnList []*VariableDefinition
 
 func (r ReturnList) retTypes(pos *Pos) []*VariableType {
 	if r == nil || len(r) == 0 {
 		t := &VariableType{}
-		t.Typ = VARIABLE_TYPE_FUNCTION
+		t.Typ = VARIABLE_TYPE_VOID // means no return;
 		return []*VariableType{t}
 	}
 	ret := make([]*VariableType, len(r))

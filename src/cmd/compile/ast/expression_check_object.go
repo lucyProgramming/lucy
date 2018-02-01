@@ -12,7 +12,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		return nil
 	}
 	if no.Typ.Typ == VARIABLE_TYPE_CLASS {
-		args := e.checkExpressions(block, no.Args, errs)
+		args := checkExpressions(block, no.Args, errs)
 		f, accessable, err := no.Typ.Class.matchContructionFunction(args)
 		if err != nil {
 			*errs = append(*errs, err)

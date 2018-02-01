@@ -1,6 +1,7 @@
 package cg
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 )
@@ -136,13 +137,32 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		high.InsertStringConst(f.Descriptor, field.DescriptorIndex[0:2])
 		c.fields = append(c.fields, field)
 	}
+	oldstringconst := make(map[string]uint16)
+	writeStringConsts := func() {
+		for s, locations := range high.StringConsts {
+			info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
+			index := c.constPoolUint16Length()
+			backPatchIndex(locations, index)
+			oldstringconst[s] = index
+			c.constPool = append(c.constPool, info)
+		}
+	}
+	writeStringConsts()
+	high.StringConsts = nil
 	for _, ms := range high.Methods {
 		for _, m := range ms {
 			info := &MethodInfo{}
 			info.AccessFlags = m.AccessFlags
-			fmt.Printf("method:%v descriptor:%v accessflag:%x\n", m.Name, m.Descriptor, m.AccessFlags)
-			high.InsertStringConst(m.Name, info.nameIndex[0:2])
-			high.InsertStringConst(m.Descriptor, info.descriptorIndex[0:2])
+			if index, ok := oldstringconst[m.Name]; ok {
+				binary.BigEndian.PutUint16(info.nameIndex[0:2], index)
+			} else {
+				high.InsertStringConst(m.Name, info.nameIndex[0:2])
+			}
+			if index, ok := oldstringconst[m.Descriptor]; ok {
+				binary.BigEndian.PutUint16(info.descriptorIndex[0:2], index)
+			} else {
+				high.InsertStringConst(m.Descriptor, info.descriptorIndex[0:2])
+			}
 			codeinfo := m.Code.ToAttributeInfo()
 			high.InsertStringConst("Code", codeinfo.nameIndex[0:2])
 			info.Attributes = append(info.Attributes, codeinfo)
@@ -150,13 +170,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		}
 	}
 	//string consts
-	for s, locations := range high.StringConsts {
-		fmt.Println(s)
-		info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
-		index := c.constPoolUint16Length()
-		backPatchIndex(locations, index)
-		c.constPool = append(c.constPool, info)
-	}
+	writeStringConsts()
 	c.ifConstPoolOverMaxSize()
 	return
 }

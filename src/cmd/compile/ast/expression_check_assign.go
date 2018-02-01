@@ -15,7 +15,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		*errs = append(*errs, fmt.Errorf("%s no name one the left", errMsgPrefix(e.Pos)))
 	}
 	values := binary.Right.Data.([]*Expression)
-	ts := e.checkRightValuesValid(e.checkExpressions(block, values, errs), errs)
+	ts := checkRightValuesValid(checkExpressions(block, values, errs), errs)
 	if len(names) != len(ts) {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(e.Pos),
@@ -115,11 +115,12 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		lefts = bin.Left.Data.([]*Expression)
 	} else {
 		lefts[0] = bin.Left
+		bin.Left = &Expression{}
+		bin.Left.Typ = EXPRESSION_TYPE_LIST
+		bin.Left.Data = lefts // rewrite to list anyway
 	}
-	bin.Left.Typ = EXPRESSION_TYPE_LIST
-	bin.Left.Data = lefts // rewrite to list anyway
 	values := bin.Right.Data.([]*Expression)
-	valueTypes := e.checkExpressions(block, values, errs)
+	valueTypes := checkExpressions(block, values, errs)
 	leftTypes := []*VariableType{}
 	noAssign := true
 	for _, v := range lefts {

@@ -9,10 +9,9 @@ type PackageLoader interface {
 }
 
 var (
-	THIS               = "this"
-	NO_NAME_IDENTIFIER = "_"
-	//PACKAGE_RUN_MAIN_VAR = "__main__"
-	Nodes               *[]*Node //
+	THIS                = "this"
+	NO_NAME_IDENTIFIER  = "_"
+	Nodes               *[]*Node
 	packageAliasReg     *regexp.Regexp
 	PackageLoad         PackageLoader
 	LUCY_ROOT_CLASS     = "lucy/lang/Object"

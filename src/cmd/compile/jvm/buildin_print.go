@@ -23,7 +23,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
-		Name:       `<init>`,
+		Name:       specail_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -31,21 +31,21 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	stack := uint16(2)
 	for _, v := range call.Args {
 		var variableType *ast.VariableType
+		if (v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || v.Typ == ast.EXPRESSION_TYPE_METHOD_CALL) &&
+			len(v.VariableTypes) > 1 {
+			panic(1)
+
+			continue
+		}
+		variableType = v.VariableType
 		if v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || v.Typ == ast.EXPRESSION_TYPE_METHOD_CALL {
-			if len(v.VariableTypes) > 1 {
-				panic(111)
-			} else {
-				variableType = v.VariableTypes[0]
-			}
-		} else {
-			variableType = v.VariableType
+			variableType = v.VariableTypes[0]
 		}
 		s, es := m.build(class, code, v, context)
 		backPatchEs(es, code)
 		if stack+s > maxstack {
 			maxstack = stack + s
 		}
-		stack += v.VariableType.JvmSlotSize()
 		m.stackTop2String(class, code, variableType)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
