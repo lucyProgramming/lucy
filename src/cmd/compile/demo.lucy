@@ -1,33 +1,18 @@
-package main
-
-import "java/io";
 
 
+fn main(){
+	print("hello world");
 
-
-{ //block execute at first
-	a := 1;
-	if a == 1{
-		print("hello world")
-	}
-	io.System.println("11111111111");
-	var a io.PrintStram;
-    fn aa(){
-        System.out.println(1111111111111);
-        a := fn()->(x fn()){
-			str := "hello world";
-            x = fn(){
-				System.out.println(str)
-			}
-        }
-		System.out.println(a()());
-    }
-	aa();
 }
 
 
 
 
+
+fn add(a string){
+	print(a += " world");
+
+}
 
 
 

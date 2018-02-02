@@ -196,11 +196,13 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
+		e.VariableType = tt
 	case EXPRESSION_TYPE_FUNCTION:
 		tt := e.checkFunctionExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
+
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}

@@ -65,16 +65,17 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {
-	binary := e.Data.(*ExpressionBinary)
-	t1, es := binary.Left.getLeftValue(block)
+	bin := e.Data.(*ExpressionBinary)
+	t1, es := bin.Left.getLeftValue(block)
+	bin.Left.VariableType = t1
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	ts, es := binary.Right.check(block)
+	ts, es := bin.Right.check(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t2, err := binary.Right.mustBeOneValueContext(ts)
+	t2, err := bin.Right.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
