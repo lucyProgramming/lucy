@@ -43,10 +43,10 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_MUL || e.Typ == ast.EXPRESSION_TYPE_DIV ||
 		e.Typ == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
-		maxstack = 4
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 			return m.buildStrCat(class, code, bin, context)
 		}
+		maxstack = 4
 		stack, _ := m.build(class, code, bin.Left, context)
 		if stack > maxstack {
 			maxstack = stack
@@ -119,8 +119,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_lrem
 			}
-		default:
-			panic("~~~~~~~~~~~~")
 		}
 		code.CodeLength++
 		return

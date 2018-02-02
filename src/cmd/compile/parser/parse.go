@@ -318,7 +318,11 @@ func (p *Parser) Next() {
 		}
 		if tok.Type != lex.TOKEN_CRLF {
 			p.token = tok
-			fmt.Println("#########", p.token.Desp)
+			if p.token.Desp != "" {
+				fmt.Println("#########", p.token.Desp)
+			} else {
+				fmt.Println("#########", p.token.Data)
+			}
 			break
 		}
 	}

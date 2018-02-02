@@ -17,7 +17,7 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Code.Codes = make([]byte, 5)
 	method.Code.Codes[0] = cg.OP_aload_0
 	method.Code.Codes[1] = cg.OP_invokespecial
-	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      class.SuperClass,
 		Name:       specail_method_init,
 		Descriptor: "()V",

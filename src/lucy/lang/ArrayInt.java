@@ -9,7 +9,7 @@ public class ArrayInt extends Array {
 		this.elements = values;
 	}
 	private ArrayInt(){
-
+			
 	}
 	public ArrayInt slice(int start,int end){
 		ArrayInt result = new ArrayInt();

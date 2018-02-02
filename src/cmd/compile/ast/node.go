@@ -71,15 +71,17 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		p.Block.insert(v.Name, v.Pos, v)
 	}
 	p.Block.Vars = make(map[string]*VariableDefinition)
-
 	for _, v := range c.Vars {
 		p.Block.Vars[v.Name] = v
 		v.IsGlobal = true
 	}
 	p.Block.Funcs = make(map[string]*Function)
 	for _, v := range c.Funcs {
-		v.mkVariableType()
-		p.Block.insert(v.Name, v.Pos, v)
+		v.MkVariableType()
+		err := p.Block.insert(v.Name, v.Pos, v)
+		if err != nil {
+			errs = append(errs, err)
+		}
 		v.IsGlobal = true
 	}
 	p.Block.Classes = make(map[string]*Class)

@@ -73,28 +73,43 @@ func (m *MakeClass) mkVars() {
 }
 
 func (m *MakeClass) mkInitFunctions() {
-	//	ms := []*cg.MethodHighLevel{}
-	//	for k, v := range m.p.InitFunctions {
-	//		method := &cg.MethodHighLevel{}
-	//		ms = append(ms, method)
-	//		method.AccessFlags |= cg.ACC_METHOD_STATIC
-	//		method.AccessFlags |= cg.ACC_METHOD_FINAL
-	//		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
-	//		method.Name = fmt.Sprintf("block%d", k)
-	//		method.Class = m.mainclass
-	//		method.Descriptor = "()V"
-	//		context := &Context{v, nil}
-	//		m.buildFunction(m.mainclass, method, v, context)
-	//		fmt.Println(method.Code)
-	//	}
-
-	//	method := &cg.MethodHighLevel{}
-	//	m.buildEntryMethod(method, ms, true)
-	//	m.mainclass.AppendMethod(method)
-	//	method2 := &cg.MethodHighLevel{}
-	//	m.buildEntryMethod(method2, ms, false)
-	//	m.mainclass.AppendMethod(method2)
-	//	m.mainclass.AppendMethod(ms...)
+	ms := []*cg.MethodHighLevel{}
+	for _, v := range m.p.InitFunctions {
+		method := &cg.MethodHighLevel{}
+		ms = append(ms, method)
+		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		method.AccessFlags |= cg.ACC_METHOD_FINAL
+		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+		method.Name = m.mainclass.NewFunctionName("block")
+		method.Class = m.mainclass
+		method.Descriptor = "()V"
+		m.buildFunction(m.mainclass, method, v)
+		m.mainclass.AppendMethod(method)
+	}
+	if len(ms) == 0 {
+		return
+	}
+	method := &cg.MethodHighLevel{}
+	method.AccessFlags |= cg.ACC_METHOD_STATIC
+	method.Name = "<clinit>"
+	method.Descriptor = "()V"
+	codes := make([]byte, 65536)
+	codelength := uint16(0)
+	for _, v := range ms {
+		codes[codelength] = cg.OP_invokestatic
+		m.mainclass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      m.mainclass.Name,
+			Name:       v.Name,
+			Descriptor: "()V",
+		}, codes[codelength+1:codelength+3])
+		codelength += 3
+	}
+	codes[codelength] = cg.OP_return
+	codelength++
+	codes = codes[0:codelength]
+	method.Code.Codes = codes
+	method.Code.CodeLength = codelength
+	m.mainclass.AppendMethod(method)
 }
 
 func (m *MakeClass) mkEnums() {
@@ -105,11 +120,29 @@ func (m *MakeClass) mkClass() {
 }
 
 func (m *MakeClass) mkFuncs() {
-	for _, f := range m.p.Block.Funcs {
+	ms := make(map[string]*cg.MethodHighLevel)
+	for k, f := range m.p.Block.Funcs { // fisrt round
 		if f.Isbuildin { //
 			continue
 		}
-		m.mkFunc(f)
+		method := &cg.MethodHighLevel{}
+		method.Class = m.mainclass
+		method.Name = f.Name
+		method.Descriptor = f.MkDescriptor()
+		method.AccessFlags = 0
+		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
+			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		}
+		ms[k] = method
+		f.ClassMethod = method
+		m.mainclass.AppendMethod(method)
+	}
+	for k, f := range m.p.Block.Funcs { // fisrt round
+		if f.Isbuildin { //
+			continue
+		}
+		m.buildFunction(ms[k].Class, ms[k], f)
 	}
 }
 

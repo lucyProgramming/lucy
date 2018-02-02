@@ -52,7 +52,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				code.CodeLength += uint16(len(ops[0]))
 			}
 			if classnames[0] != "" {
-				class.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
+				class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 					Class:      classnames[0],
 					Name:       fieldnames[0],
 					Descriptor: fieldDescriptors[0],

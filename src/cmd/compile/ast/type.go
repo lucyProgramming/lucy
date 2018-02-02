@@ -12,7 +12,7 @@ const (
 	VARIABLE_TYPE_BOOL
 	VARIABLE_TYPE_BYTE
 	VARIABLE_TYPE_SHORT
-	VARIABLE_TYPE_CHAR
+	//VARIABLE_TYPE_CHAR
 	VARIABLE_TYPE_INT
 	VARIABLE_TYPE_LONG
 	VARIABLE_TYPE_FLOAT
@@ -60,7 +60,6 @@ func (v *VariableType) rightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||
 		v.Typ == VARIABLE_TYPE_BYTE ||
 		v.Typ == VARIABLE_TYPE_SHORT ||
-		v.Typ == VARIABLE_TYPE_CHAR ||
 		v.Typ == VARIABLE_TYPE_INT ||
 		v.Typ == VARIABLE_TYPE_LONG ||
 		v.Typ == VARIABLE_TYPE_FLOAT ||
@@ -199,8 +198,8 @@ func (v *VariableType) Descriptor() string {
 		return "B"
 	case VARIABLE_TYPE_SHORT:
 		return "S"
-	case VARIABLE_TYPE_CHAR:
-		return "C"
+		//	case VARIABLE_TYPE_CHAR:
+		//		return "C"
 	case VARIABLE_TYPE_INT:
 		return "I"
 	case VARIABLE_TYPE_LONG:
@@ -238,7 +237,7 @@ func (t *VariableType) IsPointer() bool {
 func (t *VariableType) IsInteger() bool {
 	return t.Typ == VARIABLE_TYPE_BYTE ||
 		t.Typ == VARIABLE_TYPE_SHORT ||
-		t.Typ == VARIABLE_TYPE_CHAR ||
+		//		t.Typ == VARIABLE_TYPE_CHAR ||
 		t.Typ == VARIABLE_TYPE_INT ||
 		t.Typ == VARIABLE_TYPE_LONG
 }
@@ -264,8 +263,6 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret = "byte"
 	case VARIABLE_TYPE_SHORT:
 		*ret = "short"
-	case VARIABLE_TYPE_CHAR:
-		*ret = "char"
 	case VARIABLE_TYPE_INT:
 		*ret = "int"
 	case VARIABLE_TYPE_LONG:

@@ -80,7 +80,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
-		high.InsertNameAndType(CONSTANT_NameAndType_info_high_level{
+		high.InsertNameAndTypeConst(CONSTANT_NameAndType_info_high_level{
 			Name: f.Name,
 			Type: f.Descriptor,
 		}, info.info[2:4])
@@ -92,7 +92,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
-		high.InsertNameAndType(CONSTANT_NameAndType_info_high_level{
+		high.InsertNameAndTypeConst(CONSTANT_NameAndType_info_high_level{
 			Name: m.Name,
 			Type: m.Descriptor,
 		}, info.info[2:4])
@@ -100,7 +100,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	//classess
 	for cn, locations := range high.Classes {
 		info := (&CONSTANT_Class_info{}).ToConstPool()
-		high.InsertStringConst(cn, info.info[0:2])
+		high.InsertUtf8Const(cn, info.info[0:2])
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
@@ -108,24 +108,33 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	//name and type
 	for nt, locations := range high.NameAndTypes {
 		info := (&CONSTANT_NameAndType_info{}).ToConstPool()
-		high.InsertStringConst(nt.Name, info.info[0:2])
-		high.InsertStringConst(nt.Type, info.info[2:4])
+		high.InsertUtf8Const(nt.Name, info.info[0:2])
+		high.InsertUtf8Const(nt.Type, info.info[2:4])
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 	}
+	//string
+	for s, locations := range high.StringConsts {
+		info := (&CONSTANT_String_info{}).ToConstPool()
+		index := c.constPoolUint16Length()
+		backPatchIndex(locations, index)
+		high.InsertUtf8Const(s, info.info[0:2])
+		c.constPool = append(c.constPool, info)
+	}
+
 	c.accessFlag = high.AccessFlags
 	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	high.InsertStringConst(high.Name, thisClassConst.info[0:2])
+	high.InsertUtf8Const(high.Name, thisClassConst.info[0:2])
 	c.thisClass = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, thisClassConst)
 	superClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	high.InsertStringConst(high.SuperClass, superClassConst.info[0:2])
+	high.InsertUtf8Const(high.SuperClass, superClassConst.info[0:2])
 	c.superClass = c.thisClass + 1
 	c.constPool = append(c.constPool, superClassConst)
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{}).ToConstPool()
-		high.InsertStringConst(i, inter.info[0:2])
+		high.InsertUtf8Const(i, inter.info[0:2])
 		index := c.constPoolUint16Length()
 		c.interfaces = append(c.interfaces, index)
 		c.constPool = append(c.constPool, inter)
@@ -133,13 +142,13 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	for _, f := range high.Fields {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
-		high.InsertStringConst(f.Name, field.NameIndex[0:2])
-		high.InsertStringConst(f.Descriptor, field.DescriptorIndex[0:2])
+		high.InsertUtf8Const(f.Name, field.NameIndex[0:2])
+		high.InsertUtf8Const(f.Descriptor, field.DescriptorIndex[0:2])
 		c.fields = append(c.fields, field)
 	}
 	oldstringconst := make(map[string]uint16)
 	writeStringConsts := func() {
-		for s, locations := range high.StringConsts {
+		for s, locations := range high.Utf8Consts {
 			info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
 			index := c.constPoolUint16Length()
 			backPatchIndex(locations, index)
@@ -148,7 +157,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		}
 	}
 	writeStringConsts()
-	high.StringConsts = nil
+	high.Utf8Consts = nil
 	for _, ms := range high.Methods {
 		for _, m := range ms {
 			info := &MethodInfo{}
@@ -156,15 +165,15 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			if index, ok := oldstringconst[m.Name]; ok {
 				binary.BigEndian.PutUint16(info.nameIndex[0:2], index)
 			} else {
-				high.InsertStringConst(m.Name, info.nameIndex[0:2])
+				high.InsertUtf8Const(m.Name, info.nameIndex[0:2])
 			}
 			if index, ok := oldstringconst[m.Descriptor]; ok {
 				binary.BigEndian.PutUint16(info.descriptorIndex[0:2], index)
 			} else {
-				high.InsertStringConst(m.Descriptor, info.descriptorIndex[0:2])
+				high.InsertUtf8Const(m.Descriptor, info.descriptorIndex[0:2])
 			}
 			codeinfo := m.Code.ToAttributeInfo()
-			high.InsertStringConst("Code", codeinfo.nameIndex[0:2])
+			high.InsertUtf8Const("Code", codeinfo.nameIndex[0:2])
 			info.Attributes = append(info.Attributes, codeinfo)
 			c.methods = append(c.methods, info)
 		}

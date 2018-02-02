@@ -10,7 +10,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
 		maxstack = e.VariableType.JvmSlotSize()
 		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      index.Expression.VariableType.Class.Name,
 			Name:       index.Name,
 			Descriptor: e.VariableType.Descriptor(),
@@ -23,7 +23,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		maxstack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRef(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      index.Expression.VariableType.Class.Name,
 		Name:       index.Name,
 		Descriptor: e.VariableType.Descriptor(),

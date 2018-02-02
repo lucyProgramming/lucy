@@ -91,7 +91,7 @@ func (lex *LucyLexer) parseInt(bs []byte) int64 {
 	return result
 }
 
-func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool, err error) {
+func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	integerpart := []byte{c}
 	ishex := false
 	isOctal := false
@@ -213,16 +213,10 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 		if isfloat {
 			token.Type = TOKEN_LITERAL_FLOAT
 			value := parseFloat(floatpart) + float64(lex.parseInt(integerpart))
-			if isPositive == false {
-				value = -value
-			}
 			token.Data = float32(value)
 		} else {
 			token.Type = TOKEN_LITERAL_INT
 			value := lex.parseInt(integerpart)
-			if isPositive == false {
-				value = -value
-			}
 			token.Data = int32(value)
 		}
 		return
@@ -244,17 +238,12 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 			}
 			integerpart = append(integerpart, b...)
 			value := lex.parseInt(integerpart)
-			if isPositive == false {
-				value = -value
-			}
+
 			token.Data = value
 		} else { // float
 			integerpart = append(integerpart, floatpart[0:p]...)
 			fmt.Println(floatpart[p:], parseFloat(floatpart[p:]))
 			value := float64(lex.parseInt(integerpart)) + parseFloat(floatpart[p:])
-			if isPositive == false {
-				value = -value
-			}
 			token.Type = TOKEN_LITERAL_FLOAT
 			token.Data = value
 		}
@@ -266,9 +255,6 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte, isPositive bool) (eof bool
 		b = append(b, integerpart...)
 		b = append(b, floatpart...)
 		value := parseFloat(b)
-		if isPositive == false {
-			value = -value
-		}
 		token.Type = TOKEN_LITERAL_FLOAT
 		token.Data = value
 	}
@@ -446,7 +432,7 @@ redo:
 	token.StartLine = lex.line
 	token.StartColumn = lex.column - 1
 	if lex.isDigit(c) {
-		eof, err = lex.lexNumber(token, c, true)
+		eof, err = lex.lexNumber(token, c)
 		return
 	}
 	switch c {
@@ -584,7 +570,7 @@ redo:
 			token.Type = TOKEN_ADD_ASSIGN
 			token.Desp = "+="
 		} else if lex.isDigit(c) {
-			eof, err = lex.lexNumber(token, c, true)
+			eof, err = lex.lexNumber(token, c)
 			return
 		} else {
 			lex.ungetchar()
@@ -607,9 +593,6 @@ redo:
 		} else if c == '>' {
 			token.Type = TOKEN_ARROW
 			token.Desp = "->"
-		} else if lex.isDigit(c) {
-			eof, err = lex.lexNumber(token, c, false)
-			return
 		} else {
 			lex.ungetchar()
 			token.Type = TOKEN_SUB

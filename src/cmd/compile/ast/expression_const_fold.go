@@ -72,15 +72,50 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) (inter
 }
 
 func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err error) {
-	if e.Typ == EXPRESSION_TYPE_BOOL ||
-		e.Typ == EXPRESSION_TYPE_BYTE ||
-		e.Typ == EXPRESSION_TYPE_INT ||
-		e.Typ == EXPRESSION_TYPE_FLOAT ||
-		e.Typ == EXPRESSION_TYPE_STRING ||
-		e.Typ == EXPRESSION_TYPE_DOUBLE ||
-		e.Typ == EXPRESSION_TYPE_LONG ||
-		e.Typ == EXPRESSION_TYPE_NULL {
+	if e.IsLiteral() {
 		return true, e.Typ, e.Data, nil
+	}
+	// !
+	if e.Typ == EXPRESSION_TYPE_NOT {
+		ee := e.Data.(*Expression)
+		is, Typ, Value, err = ee.getConstValue()
+		if err != nil || is == false {
+			return
+		}
+		if Typ != EXPRESSION_TYPE_BOOL {
+			err = fmt.Errorf("%s cannot apply '!' on a non-bool expression", errMsgPrefix(e.Pos))
+			return
+		}
+		Value = !Value.(bool)
+		return
+	}
+	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
+		ee := e.Data.(*Expression)
+		is, Typ, Value, err = ee.getConstValue()
+		if err != nil || is == false {
+			return
+		}
+		if e.IsNumber(Typ) == false {
+			is = false
+			err = fmt.Errorf("%s cannot apply '-' on '%s'", errMsgPrefix(e.Pos), e.OpName(Typ))
+			return
+		}
+		if Typ == EXPRESSION_TYPE_BYTE {
+			is = false
+			err = fmt.Errorf("%s cannot apply '-' on 'byte'", errMsgPrefix(e.Pos))
+			return
+		}
+		switch Typ {
+		case EXPRESSION_TYPE_INT:
+			Value = -Value.(int32)
+		case EXPRESSION_TYPE_LONG:
+			Value = -Value.(int64)
+		case EXPRESSION_TYPE_FLOAT:
+			Value = -Value.(float32)
+		case EXPRESSION_TYPE_DOUBLE:
+			Value = -Value.(float64)
+		}
+		return
 	}
 	// && and ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_AND || e.Typ == EXPRESSION_TYPE_LOGICAL_OR {
@@ -129,8 +164,8 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				is = true
 				Value = value1.(string) + value2.(string)
 				return
-			} else if e.isNumber(typ1) || e.isNumber(typ2) {
-				if e.isNumber(typ1) == false || e.isNumber(typ2) == false {
+			} else if e.IsNumber(typ1) || e.IsNumber(typ2) {
+				if e.IsNumber(typ1) == false || e.IsNumber(typ2) == false {
 					err = e.wrongOpErr(typ1, typ2)
 				}
 				typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
@@ -144,6 +179,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				} else {
 					is = false
 				}
+				return
 			}
 			err = e.wrongOpErr(typ1, typ2)
 			return
@@ -155,7 +191,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			if is1 == false || is2 == false {
 				return
 			}
-			if typ2 != EXPRESSION_TYPE_INT || e.isNumber(typ1) == false {
+			if typ2 != EXPRESSION_TYPE_INT || e.IsNumber(typ1) == false {
 				err = e.wrongOpErr(typ1, typ2)
 				return
 			}
@@ -188,7 +224,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				is = false
 				return
 			}
-			if e.isNumber(typ1) == false || e.isNumber(typ2) == false {
+			if e.IsNumber(typ1) == false || e.IsNumber(typ2) == false {
 				err = e.wrongOpErr(typ1, typ2)
 				return
 			}
@@ -261,7 +297,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			}
 			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
 			if err != nil {
-				err = fmt.Errorf("relation operation cannot apply to %s and %s", e.OpName(typ1), e.OpName(typ2))
+				err = fmt.Errorf("%s relation operation cannot apply to '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(typ1), e.OpName(typ2))
 				return
 			}
 			b, er := e.relationCompare(typ1, value1, value2)
@@ -308,8 +344,50 @@ func (e *Expression) numberTypeFold(typ int, value1, value2 interface{}) (value 
 	case EXPRESSION_TYPE_INT:
 		switch e.Typ {
 		case EXPRESSION_TYPE_ADD:
+			value = value1.(int32) + value2.(int32)
+		case EXPRESSION_TYPE_SUB:
+			fmt.Println(value1.(int32), value2.(int32))
+			value = value1.(int32) - value2.(int32)
+		case EXPRESSION_TYPE_MUL:
+			value = value1.(int32) * value2.(int32)
+		case EXPRESSION_TYPE_DIV:
+			if value2.(int32) == 0 {
+				err = devisionByZeroErr(e.Pos)
+			} else {
+				value = value1.(int32) / value2.(int32)
+			}
+		case EXPRESSION_TYPE_MOD:
+			if value2.(int32) == 0 {
+				err = devisionByZeroErr(e.Pos)
+			} else {
+				value = value1.(int32) % value2.(int32)
+			}
+		}
+		return
+	case EXPRESSION_TYPE_FLOAT:
+		switch e.Typ {
+		case EXPRESSION_TYPE_ADD:
+			value = value1.(float32) + value2.(float32)
+		case EXPRESSION_TYPE_SUB:
+			value = value1.(float32) - value2.(float32)
+		case EXPRESSION_TYPE_MUL:
+			value = value1.(float32) * value2.(float32)
+		case EXPRESSION_TYPE_DIV:
+			if value2.(float32) == 0.0 {
+				err = devisionByZeroErr(e.Pos)
+			} else {
+				value = value1.(float32) / value2.(float32)
+			}
+		case EXPRESSION_TYPE_MOD:
+			return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(typ), e.OpName(typ))
+		}
+		return
+	case EXPRESSION_TYPE_LONG:
+		switch e.Typ {
+		case EXPRESSION_TYPE_ADD:
 			value = value1.(int64) + value2.(int64)
 		case EXPRESSION_TYPE_SUB:
+			fmt.Println(value1.(int64), value2.(int64))
 			value = value1.(int64) - value2.(int64)
 		case EXPRESSION_TYPE_MUL:
 			value = value1.(int64) * value2.(int64)
@@ -327,7 +405,7 @@ func (e *Expression) numberTypeFold(typ int, value1, value2 interface{}) (value 
 			}
 		}
 		return
-	case EXPRESSION_TYPE_FLOAT:
+	case EXPRESSION_TYPE_DOUBLE:
 		switch e.Typ {
 		case EXPRESSION_TYPE_ADD:
 			value = value1.(float64) + value2.(float64)
@@ -377,6 +455,21 @@ func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b boo
 		return
 	case EXPRESSION_TYPE_INT:
 		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(int32) == value2.(int32)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(int32) != value2.(int32)
+		} else if e.Typ == EXPRESSION_TYPE_GT {
+			b = value1.(int32) > value2.(int32)
+		} else if e.Typ == EXPRESSION_TYPE_GE {
+			b = value1.(int32) >= value2.(int32)
+		} else if e.Typ == EXPRESSION_TYPE_LT {
+			b = value1.(int32) < value2.(int32)
+		} else if e.Typ == EXPRESSION_TYPE_LE {
+			b = value1.(int32) <= value2.(int32)
+		}
+		return
+	case EXPRESSION_TYPE_LONG:
+		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(int64) == value2.(int64)
 		} else if e.Typ == EXPRESSION_TYPE_NE {
 			b = value1.(int64) != value2.(int64)
@@ -390,8 +483,22 @@ func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b boo
 			b = value1.(int64) <= value2.(int64)
 		}
 		return
-
 	case EXPRESSION_TYPE_FLOAT:
+		if e.Typ == EXPRESSION_TYPE_EQ {
+			b = value1.(float32) == value2.(float32)
+		} else if e.Typ == EXPRESSION_TYPE_NE {
+			b = value1.(float32) != value2.(float32)
+		} else if e.Typ == EXPRESSION_TYPE_GT {
+			b = value1.(float32) > value2.(float32)
+		} else if e.Typ == EXPRESSION_TYPE_GE {
+			b = value1.(float32) >= value2.(float32)
+		} else if e.Typ == EXPRESSION_TYPE_LT {
+			b = value1.(float32) < value2.(float32)
+		} else if e.Typ == EXPRESSION_TYPE_LE {
+			b = value1.(float32) <= value2.(float32)
+		}
+		return
+	case EXPRESSION_TYPE_DOUBLE:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(float64) == value2.(float64)
 		} else if e.Typ == EXPRESSION_TYPE_NE {
@@ -406,7 +513,6 @@ func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b boo
 			b = value1.(float64) <= value2.(float64)
 		}
 		return
-
 	case EXPRESSION_TYPE_STRING:
 		if e.Typ == EXPRESSION_TYPE_EQ {
 			b = value1.(string) == value2.(string)
@@ -422,6 +528,7 @@ func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b boo
 			b = value1.(string) <= value2.(string)
 		}
 		return
+
 	}
 	return false, fmt.Errorf("%s can`t apply '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(), e.OpName(typ), e.OpName(typ))
 }

@@ -57,7 +57,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		ep.Next()
 	case lex.TOKEN_LITERAL_FLOAT:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_STRING,
+			Typ:  ast.EXPRESSION_TYPE_FLOAT,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}

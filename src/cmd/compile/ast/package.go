@@ -24,7 +24,7 @@ func (p *Package) mkInitFunctions(bs ...*Block) {
 		f := &Function{}
 		f.Block = b
 		f.Typ = &FunctionType{}
-		f.mkVariableType()
+		f.MkVariableType()
 		p.InitFunctions[k] = f
 		f.Used = true
 		f.isPackageBlockFunction = true

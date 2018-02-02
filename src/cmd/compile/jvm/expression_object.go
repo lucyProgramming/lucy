@@ -32,7 +32,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 		Name:       n.Construction.Func.Name,
 		Descriptor: n.Construction.Func.Descriptor,
 	}
-	class.InsertMethodRef(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertMethodRefConst(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return
 }

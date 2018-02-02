@@ -25,8 +25,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
-		case ast.VARIABLE_TYPE_CHAR:
-			fallthrough
+			//		case ast.VARIABLE_TYPE_CHAR:
+			//			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_ireturn
 		case ast.VARIABLE_TYPE_LONG:
@@ -54,7 +54,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	code.CodeLength += 4
 	//call init
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      arrylistclassname,
 		Name:       specail_method_init,
 		Descriptor: "()V",
@@ -78,7 +78,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				maxstack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/util/ArrayList",
 				Name:       "addAll",
 				Descriptor: "(Ljava/util/Collection;)Z",
@@ -102,7 +102,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/lang/Integer",
 				Name:       "valueOf",
 				Descriptor: "(I)Ljava/lang/Integer;",
@@ -110,7 +110,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_FLOAT:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/lang/Float",
 				Name:       "valueOf",
 				Descriptor: "(F)Ljava/lang/Float;",
@@ -118,7 +118,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/lang/Double",
 				Name:       "valueOf",
 				Descriptor: "(D)Ljava/lang/Double;",
@@ -126,7 +126,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/lang/Long",
 				Name:       "valueOf",
 				Descriptor: "(J)Ljava/lang/Long;",
@@ -135,7 +135,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		// append
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      arrylistclassname,
 			Name:       "add",
 			Descriptor: "(Ljava/lang/Object;)Z",

@@ -60,26 +60,24 @@ func (s *Statement) statementName() string {
 }
 
 func (s *Statement) check(b *Block) []error { // b is father
-	errs := []error{}
 	if b.InheritedAttribute.function.isPackageBlockFunction {
 		if s.Typ == STATEMENT_TYPE_SKIP { //special case
-			return errs // 0 length error
+			return nil // 0 length error
 		}
 	}
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
-		errs = append(errs, s.checkStatementExpression(b)...)
+		return s.checkStatementExpression(b)
 	case STATEMENT_TYPE_IF:
-		errs = append(errs, s.StatementIf.check(b)...)
+		return s.StatementIf.check(b)
 	case STATEMENT_TYPE_FOR:
-		errs = append(errs, s.StatementFor.check(b)...)
+		return s.StatementFor.check(b)
 	case STATEMENT_TYPE_SWITCH:
 		panic("........")
 	case STATEMENT_TYPE_BREAK:
 		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
-			errs = append(errs, fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName()))
+			return []error{fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName())}
 		} else {
-
 			s.StatementBreak = &StatementBreak{}
 			if f, ok := b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
@@ -89,8 +87,8 @@ func (s *Statement) check(b *Block) []error { // b is father
 		}
 	case STATEMENT_TYPE_CONTINUE:
 		if b.InheritedAttribute.StatementFor == nil {
-			errs = append(errs, fmt.Errorf("%s %s can`t in this scope",
-				errMsgPrefix(s.Pos), s.statementName()))
+			return []error{fmt.Errorf("%s %s can`t in this scope",
+				errMsgPrefix(s.Pos), s.statementName())}
 		} else {
 			if s.StatementContinue == nil {
 				s.StatementContinue = &StatementContinue{b.InheritedAttribute.StatementFor}
@@ -98,19 +96,18 @@ func (s *Statement) check(b *Block) []error { // b is father
 		}
 	case STATEMENT_TYPE_RETURN:
 		if b.InheritedAttribute.function == nil {
-			errs = append(errs, fmt.Errorf("%s %s can`t in this scope",
-				errMsgPrefix(s.Pos), s.statementName()))
-			return errs
+			return []error{fmt.Errorf("%s %s can`t in this scope",
+				errMsgPrefix(s.Pos), s.statementName())}
 		}
-		errs = append(errs, s.StatementReturn.check(b)...)
+		return s.StatementReturn.check(b)
 	default:
 		panic("unkown type statement" + s.statementName())
 	}
-	return errs
+	return nil
 }
 
-func (s *Statement) checkStatementExpression(b *Block) (errs []error) {
-	errs = []error{}
+func (s *Statement) checkStatementExpression(b *Block) []error {
+	errs := []error{}
 	if s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
 		s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
 		s.Expression.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||

@@ -9,6 +9,7 @@ type PackageLoader interface {
 }
 
 var (
+	MAIN_FUNCTION_NAME  = "main"
 	THIS                = "this"
 	NO_NAME_IDENTIFIER  = "_"
 	Nodes               *[]*Node

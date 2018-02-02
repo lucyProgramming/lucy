@@ -6,14 +6,17 @@ import (
 
 const (
 	_ = iota
-	//value type
+	//null
 	EXPRESSION_TYPE_NULL
+	// bool
 	EXPRESSION_TYPE_BOOL
+	// int types
 	EXPRESSION_TYPE_BYTE
 	EXPRESSION_TYPE_INT
+	EXPRESSION_TYPE_LONG
 	EXPRESSION_TYPE_FLOAT
 	EXPRESSION_TYPE_DOUBLE
-	EXPRESSION_TYPE_LONG
+
 	EXPRESSION_TYPE_STRING
 	EXPRESSION_TYPE_ARRAY // []bool{false,true}
 	//binary expression
@@ -74,10 +77,31 @@ const (
 func (e *Expression) IsLiteral() bool {
 	return e.Typ == EXPRESSION_TYPE_NULL ||
 		e.Typ == EXPRESSION_TYPE_BOOL ||
-		e.Typ == EXPRESSION_TYPE_BYTE ||
-		e.Typ == EXPRESSION_TYPE_INT ||
-		e.Typ == EXPRESSION_TYPE_FLOAT ||
-		e.Typ == EXPRESSION_TYPE_STRING
+		e.Typ == EXPRESSION_TYPE_STRING ||
+		e.IsNumber()
+}
+
+/*
+	take one argument
+*/
+func (e *Expression) IsNumber(typ ...int) bool {
+	t := e.Typ
+	if len(typ) > 0 {
+		t = typ[0]
+	}
+	return t == EXPRESSION_TYPE_BYTE ||
+		t == EXPRESSION_TYPE_INT ||
+		t == EXPRESSION_TYPE_FLOAT ||
+		t == EXPRESSION_TYPE_LONG ||
+		t == EXPRESSION_TYPE_DOUBLE
+}
+
+/*
+	check this expression is increment or decrement
+*/
+func (e *Expression) IsIncrement() bool {
+	return e.Typ == EXPRESSION_TYPE_INCREMENT || e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
+
 }
 
 type Expression struct {
@@ -191,20 +215,15 @@ func (e *Expression) OpName(typ ...int) string {
 	}
 	switch t {
 	case EXPRESSION_TYPE_BOOL:
-		return fmt.Sprintf("bool(%v)", e.Data.(bool))
+		return "bool_expression"
 	case EXPRESSION_TYPE_BYTE:
-		return fmt.Sprintf("byte(%v)", e.Data.(byte))
+		return "byte_literal"
 	case EXPRESSION_TYPE_INT:
-		return fmt.Sprintf("int(%v)", e.Data.(int64))
+		return "int_literal"
 	case EXPRESSION_TYPE_FLOAT:
-		return fmt.Sprintf("float(%v)", e.Data.(float64))
+		return "float_literal"
 	case EXPRESSION_TYPE_STRING:
-		t := []byte(e.Data.(string))
-		if len(t) > 10 {
-			t = t[0:10]
-		}
-		t = append(t, []byte("...")...)
-		return fmt.Sprintf("string(%s)", string(t))
+		return "string_literal"
 	case EXPRESSION_TYPE_ARRAY:
 		return "array_literal"
 	case EXPRESSION_TYPE_LOGICAL_OR:
@@ -301,14 +320,3 @@ func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, 
 }
 
 type getBinaryExpressionHandler func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)
-
-/*
-	take one argument
-*/
-func (e *Expression) isNumber(typ ...int) bool {
-	t := e.Typ
-	if len(typ) > 0 {
-		t = typ[0]
-	}
-	return t == EXPRESSION_TYPE_BYTE || t == EXPRESSION_TYPE_INT || t == EXPRESSION_TYPE_FLOAT
-}

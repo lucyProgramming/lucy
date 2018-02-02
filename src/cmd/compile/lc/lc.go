@@ -72,7 +72,9 @@ func (l *LucyCompile) compile() {
 	}
 	l.shouldExit()
 	l.Errs = append(l.Errs, p.TypeCheck()...)
-	l.shouldExit()
+	if len(l.Errs) > 0 {
+		l.exit()
+	}
 	l.Maker.Make(p)
 	l.exit()
 }

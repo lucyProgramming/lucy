@@ -37,12 +37,6 @@ func (b *Block) searchByName(name string) interface{} {
 	}
 	if b.Vars != nil {
 		if t, ok := b.Vars[name]; ok { //correct the type
-			if t.Typ.Typ == VARIABLE_TYPE_ARRAY {
-				t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
-			}
-			if t.Typ.Typ == VARIABLE_TYPE_CLASS {
-				t.Typ.Typ = VARIABLE_TYPE_OBJECT
-			}
 			return t
 		}
 	}
@@ -222,7 +216,7 @@ func (b *Block) checkConst() []error {
 				continue
 			}
 			if !v.Typ.Equal(ts[0]) {
-				errs = append(errs, fmt.Errorf("%s cannot assign %s %s", v.Typ.TypeString(), ts[0].TypeString()))
+				errs = append(errs, fmt.Errorf("%s cannot assign %s %s", errMsgPrefix(v.Pos), v.Typ.TypeString(), ts[0].TypeString()))
 				continue
 			}
 		}
@@ -250,6 +244,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == THIS {
 		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), THIS)
 	}
+
 	if name == "_" {
 		panic("_")
 	}
@@ -297,8 +292,12 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Classes[name] = d.(*Class)
 	case *Function:
 		t := d.(*Function)
+		t.MkVariableType()
 		if buildinFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
+		}
+		if name == MAIN_FUNCTION_NAME && b.Outter != nil {
+			return fmt.Errorf("%s '%s' is not available", errMsgPrefix(pos), MAIN_FUNCTION_NAME)
 		}
 		b.Funcs[name] = t
 	case *Const:
@@ -308,6 +307,12 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
 		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
 		b.Vars[name] = t
+		if t.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
+			t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+		}
+		if t.Typ.Typ == VARIABLE_TYPE_CLASS {
+			t.Typ.Typ = VARIABLE_TYPE_OBJECT
+		}
 	case *Enum:
 		e := d.(*Enum)
 		b.Enums[name] = e

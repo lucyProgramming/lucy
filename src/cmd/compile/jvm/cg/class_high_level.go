@@ -1,6 +1,9 @@
 package cg
 
-//	"fmt"
+import (
+	"fmt"
+	"math"
+)
 
 type ClassHighLevel struct {
 	Name                   string
@@ -10,10 +13,11 @@ type ClassHighLevel struct {
 	AccessFlags            uint16
 	IntConsts              map[int32][][]byte
 	LongConsts             map[int64][][]byte
-	StringConsts           map[string][][]byte
+	Utf8Consts             map[string][][]byte
 	FloatConsts            map[float32][][]byte
 	DoubleConsts           map[float64][][]byte
 	Classes                map[string][][]byte
+	StringConsts           map[string][][]byte
 	FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
 	MethodRefs             map[CONSTANT_Methodref_info_high_level][][]byte
 	NameAndTypes           map[CONSTANT_NameAndType_info_high_level][][]byte
@@ -21,6 +25,29 @@ type ClassHighLevel struct {
 	Interfaces             []string
 	Fields                 map[string]*FiledHighLevel
 	Methods                map[string][]*MethodHighLevel
+}
+
+/*
+	new a method name,mksure it does exists before
+*/
+func (c *ClassHighLevel) NewFunctionName(prefix string) string {
+	for i := 0; i < math.MaxInt16; i++ {
+		name := prefix + fmt.Sprintf("%d", i)
+		if _, ok := c.Methods[name]; ok == false {
+			return name
+		}
+	}
+	panic(1)
+}
+func (c *ClassHighLevel) InsertStringConst(s string, location []byte) {
+	if c.StringConsts == nil {
+		c.StringConsts = make(map[string][][]byte)
+	}
+	if _, ok := c.StringConsts[s]; ok {
+		c.StringConsts[s] = append(c.StringConsts[s], location)
+	} else {
+		c.StringConsts[s] = [][]byte{location}
+	}
 }
 
 func (c *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
@@ -44,7 +71,7 @@ type CONSTANT_NameAndType_info_high_level struct {
 	Type string
 }
 
-func (c *ClassHighLevel) InsertNameAndType(nameAndType CONSTANT_NameAndType_info_high_level, location []byte) {
+func (c *ClassHighLevel) InsertNameAndTypeConst(nameAndType CONSTANT_NameAndType_info_high_level, location []byte) {
 	if c.NameAndTypes == nil {
 		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_level][][]byte)
 	}
@@ -61,7 +88,7 @@ type CONSTANT_Methodref_info_high_level struct {
 	Descriptor string
 }
 
-func (c *ClassHighLevel) InsertMethodRef(mr CONSTANT_Methodref_info_high_level, location []byte) {
+func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {
 	if c.MethodRefs == nil {
 		c.MethodRefs = make(map[CONSTANT_Methodref_info_high_level][][]byte)
 	}
@@ -78,7 +105,7 @@ type CONSTANT_Fieldref_info_high_level struct {
 	Descriptor string
 }
 
-func (c *ClassHighLevel) InsertFieldRef(fr CONSTANT_Fieldref_info_high_level, location []byte) {
+func (c *ClassHighLevel) InsertFieldRefConst(fr CONSTANT_Fieldref_info_high_level, location []byte) {
 	if c.FieldRefs == nil {
 		c.FieldRefs = make(map[CONSTANT_Fieldref_info_high_level][][]byte)
 	}
@@ -118,14 +145,15 @@ func (c *ClassHighLevel) InsertLongConst(i int64, location []byte) {
 		c.LongConsts[i] = [][]byte{location}
 	}
 }
-func (c *ClassHighLevel) InsertStringConst(s string, location []byte) {
-	if c.StringConsts == nil {
-		c.StringConsts = make(map[string][][]byte)
+
+func (c *ClassHighLevel) InsertUtf8Const(s string, location []byte) {
+	if c.Utf8Consts == nil {
+		c.Utf8Consts = make(map[string][][]byte)
 	}
-	if _, ok := c.StringConsts[s]; ok {
-		c.StringConsts[s] = append(c.StringConsts[s], location)
+	if _, ok := c.Utf8Consts[s]; ok {
+		c.Utf8Consts[s] = append(c.Utf8Consts[s], location)
 	} else {
-		c.StringConsts[s] = [][]byte{location}
+		c.Utf8Consts[s] = [][]byte{location}
 	}
 }
 

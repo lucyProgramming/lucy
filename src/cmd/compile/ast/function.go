@@ -7,8 +7,6 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
-type CallChecker func(errs *[]error, args []*VariableType, pos *Pos)
-
 type Function struct {
 	isPackageBlockFunction     bool
 	callchecker                CallChecker // used in build function
@@ -30,10 +28,12 @@ type Function struct {
 }
 
 func (f *Function) mkArrayListVarForMultiReturn() {
-	t := &ArrayListVarForMultiReturn{}
-	t.Offset = f.Varoffset
-	f.ArrayListVarForMultiReturn = t
-	f.Varoffset++
+	if f.ArrayListVarForMultiReturn == nil {
+		t := &ArrayListVarForMultiReturn{}
+		t.Offset = f.Varoffset
+		f.ArrayListVarForMultiReturn = t
+		f.Varoffset++
+	}
 }
 
 type ArrayListVarForMultiReturn struct {
@@ -67,15 +67,15 @@ func (f *Function) readableMsg() string {
 	return s
 }
 
-func (f *Function) mkVariableType() {
+func (f *Function) MkVariableType() {
 	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
 	f.VariableType.Function = f
 }
-func (f *Function) MkVariableType() {
-	f.mkVariableType()
-}
 
 func (f *Function) MkDescriptor() string {
+	if f.Name == MAIN_FUNCTION_NAME {
+		return "([Ljava/lang/String;)V"
+	}
 	s := "("
 	for _, v := range f.Typ.ParameterList {
 		s += v.NameWithType.Typ.Descriptor()
@@ -101,26 +101,39 @@ func (f *Function) check(b *Block) []error {
 	f.Block.inherite(b)
 	f.Block.InheritedAttribute.function = f
 	f.checkParaMeterAndRetuns(&errs)
-	//
 	f.checkBlock(&errs)
 	return errs
 }
 
 func (f *Function) mkLastRetrunStatement() {
-	s := &StatementReturn{}
-	es := []*Expression{}
-	for _, v := range f.Typ.ReturnList {
-		identifer := &ExpressionIdentifer{}
-		identifer.Name = v.Name
-		es = append(es, &Expression{
-			Typ:  EXPRESSION_TYPE_IDENTIFIER,
-			Data: identifer,
-		})
+	if len(f.Block.Statements) == 0 ||
+		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN) {
+		s := &StatementReturn{}
+		es := []*Expression{}
+		for _, v := range f.Typ.ReturnList {
+			identifer := &ExpressionIdentifer{}
+			identifer.Name = v.Name
+			es = append(es, &Expression{
+				Typ:  EXPRESSION_TYPE_IDENTIFIER,
+				Data: identifer,
+			})
+		}
+		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 	}
-	f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 }
 
 func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
+	if f.Name == MAIN_FUNCTION_NAME {
+		if len(f.Typ.ParameterList) > 0 {
+			*errs = append(*errs, fmt.Errorf("%s function main must not taken no parameters ", errMsgPrefix(f.Pos)))
+		}
+		if len(f.Typ.ReturnList) > 0 {
+			*errs = append(*errs, fmt.Errorf("%s function main must have no return values ", errMsgPrefix(f.Pos)))
+		}
+		f.Varoffset++
+		return
+	}
+
 	var err error
 	for _, v := range f.Typ.ParameterList {
 		v.IsFunctionParameter = true

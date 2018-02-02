@@ -6,8 +6,9 @@ import (
 
 func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	is, typ, data, err := e.getConstValue()
+	fmt.Println(e.OpName())
 	if err != nil {
-		return nil, []error{fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error())}
+		return nil, []error{err}
 	}
 	if is {
 		e.Typ = typ
@@ -31,6 +32,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			},
 		}
 		e.VariableType = t[0]
+
 	case EXPRESSION_TYPE_BYTE:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_BYTE,
@@ -202,11 +204,11 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
-	return
+	return t, errs
 }
 func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
 	f := e.Data.(*Function)
-	f.mkVariableType()
+	f.MkVariableType()
 	*errs = append(*errs, f.check(block)...)
 	return &f.VariableType
 }
@@ -240,6 +242,6 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := checkRightValuesValid(checkExpressions(block, args, errs), errs)
-	f.callchecker(errs, callargsTypes, e.Pos)
+	f.callchecker(block, errs, callargsTypes, e.Pos)
 	return f.Typ.ReturnList.retTypes(e.Pos)
 }

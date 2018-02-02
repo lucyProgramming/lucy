@@ -63,18 +63,18 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_FLOAT:
-		if e.Data.(float64) == 0.0 {
+		if e.Data.(float32) == 0.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_0
 			code.CodeLength++
-		} else if e.Data.(float64) == 1.0 {
+		} else if e.Data.(float32) == 1.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_1
 			code.CodeLength++
-		} else if e.Data.(float64) == 2.0 {
+		} else if e.Data.(float32) == 2.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_2
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertFloatConst(float32(e.Data.(float64)), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertFloatConst(e.Data.(float32), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	case ast.EXPRESSION_TYPE_STRING:
@@ -261,7 +261,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	maxstack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      arrylistclassname,
 		Name:       "get",
 		Descriptor: "(I)Ljava/lang/Object;",
@@ -274,35 +274,49 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
-	case ast.VARIABLE_TYPE_CHAR:
-		fallthrough
 	case ast.VARIABLE_TYPE_INT:
+		//cast to real object
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClasses("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Integer",
 			Name:       "intValue",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_LONG:
+		//cast to real object
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClasses("java/lang/Long", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Long",
 			Name:       "longValue",
 			Descriptor: "()J",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_FLOAT:
+		//cast to real object
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClasses("java/lang/Float", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Float",
 			Name:       "floatValue",
 			Descriptor: "()F",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_DOUBLE:
+		//cast to real object
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClasses("java/lang/Double", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Double",
 			Name:       "doubleValue",
 			Descriptor: "()D",
@@ -312,5 +326,59 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_OBJECT:
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
 	}
+	return
+}
+
+func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, stackTopType *ast.VariableType) (increment uint16) {
+	// no object after value,just dup top
+	if op[0] == cg.OP_istore || // 将栈顶 int 型数值存入指定局部变量。
+		op[0] == cg.OP_lstore || //将栈顶 long 型数值存入指定局部变量。
+		op[0] == cg.OP_fstore || //将栈顶 float 型数值存入指定局部变量。
+		op[0] == cg.OP_dstore || //将栈顶 double 型数值存入指定局部变量。
+		op[0] == cg.OP_astore || // 将栈顶引用型数值存入指定局部变量。
+		op[0] == cg.OP_istore_0 || //将栈顶 int 型数值存入第一个局部变量。
+		op[0] == cg.OP_istore_1 || // 将栈顶 int 型数值存入第二个局部变量。
+		op[0] == cg.OP_istore_2 || //将栈顶 int 型数值存入第三个局部变量。
+		op[0] == cg.OP_istore_3 || // 将栈顶 int 型数值存入第四个局部变量。
+		op[0] == cg.OP_lstore_0 || //将栈顶 long 型数值存入第一个局部变量。
+		op[0] == cg.OP_lstore_1 || // 将栈顶 long 型数值存入第二个局部变量。
+		op[0] == cg.OP_lstore_2 || //将栈顶 long 型数值存入第三个局部变量。
+		op[0] == cg.OP_lstore_3 || // 将栈顶 long 型数值存入第四个局部变量。
+		op[0] == cg.OP_fstore_0 || //将栈顶 float 型数值存入第一个局部变量。
+		op[0] == cg.OP_fstore_1 || //将栈顶 float 型数值存入第二个局部变量。
+		op[0] == cg.OP_fstore_2 || //将栈顶 float 型数值存入第三个局部变量。
+		op[0] == cg.OP_fstore_3 || //将栈顶 float 型数值存入第四个局部变量。
+		op[0] == cg.OP_dstore_0 || //将栈顶 double 型数值存入第一个局部变量。
+		op[0] == cg.OP_dstore_1 || //将栈顶 double 型数值存入第二个局部变量。
+		op[0] == cg.OP_dstore_2 || // 将栈顶 double 型数值存入第三个局部变量。
+		op[0] == cg.OP_dstore_3 || //将栈顶 double 型数值存入第四个局部变量。
+		op[0] == cg.OP_astore_0 || //将栈顶引用型数值存入第一个局部变量。
+		op[0] == cg.OP_astore_1 || ///将栈顶引用型数值存入第二个局部变量。
+		op[0] == cg.OP_astore_2 || //将栈顶引用型数值存入第三个局部变量
+		op[0] == cg.OP_astore_3 ||
+		op[0] == cg.OP_putstatic { //为指定的类的静态域赋值。
+		if stackTopType.JvmSlotSize() == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_dup2
+			increment = 2
+		}
+		code.CodeLength++
+		return
+	}
+	if op[0] == cg.OP_putfield {
+		if stackTopType.JvmSlotSize() == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup_x1
+		} else {
+			increment = 2
+			code.Codes[code.CodeLength] = cg.OP_dup_x2
+		}
+		code.CodeLength++
+		return
+	}
+
+	panic(111111111)
 	return
 }

@@ -42,14 +42,12 @@ func (c *CONSTANT_Class_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_String_info struct {
-	stringIndex uint16
 }
 
 func (c *CONSTANT_String_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_String
 	p.info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.info, uint16(c.stringIndex))
 	return p
 }
 

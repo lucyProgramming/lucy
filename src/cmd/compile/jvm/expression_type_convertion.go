@@ -179,7 +179,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	switch typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/String",
 			Name:       "valueOf",
 			Descriptor: "(Z)Ljava/lang/String;",
@@ -189,11 +189,11 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
-	case ast.VARIABLE_TYPE_CHAR:
-		fallthrough
+		//	case ast.VARIABLE_TYPE_CHAR:
+		//		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/String",
 			Name:       "valueOf",
 			Descriptor: "(I)Ljava/lang/String;",
@@ -201,7 +201,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/String",
 			Name:       "valueOf",
 			Descriptor: "(J)Ljava/lang/String;",
@@ -209,7 +209,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/String",
 			Name:       "valueOf",
 			Descriptor: "(F)Ljava/lang/String;",
@@ -217,7 +217,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRef(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/String",
 			Name:       "valueOf",
 			Descriptor: "(D)Ljava/lang/String;",

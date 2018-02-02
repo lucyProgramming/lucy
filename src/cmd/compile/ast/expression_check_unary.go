@@ -48,6 +48,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {
 	ee := e.Data.(*Expression)
 	t, es := ee.getLeftValue(block)
+	ee.VariableType = t
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
@@ -55,11 +56,11 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Vari
 		return nil
 	}
 	if !t.IsNumber() {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply ++ or -- on %s",
+		*errs = append(*errs, fmt.Errorf("%s cannot apply ++ or -- on '%s'",
 			errMsgPrefix(ee.Pos), t.TypeString()))
+		return nil
 	}
 	tt := t.Clone()
 	tt.Pos = e.Pos
-	e.VariableType = tt
 	return tt
 }
