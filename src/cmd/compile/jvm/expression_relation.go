@@ -8,6 +8,7 @@ import (
 )
 
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+
 	bin := e.Data.(*ast.ExpressionBinary)
 	if bin.Left.VariableType.IsNumber() { // in this case ,right must be a number type
 		maxstack = 4
@@ -15,10 +16,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if stack > maxstack {
 			maxstack = stack
 		}
-		target := e.VariableType.Typ // this is target
-		if target == ast.VARIABLE_TYPE_INT || target == ast.VARIABLE_TYPE_SHORT || target == ast.VARIABLE_TYPE_BYTE {
-			target = ast.VARIABLE_TYPE_LONG
-		}
+		target := bin.Left.VariableType.NumberTypeConvertRule(bin.Right.VariableType)
 		if target != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
 		}
@@ -30,6 +28,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			m.numberTypeConverter(code, bin.Right.VariableType.Typ, target)
 		}
 		switch target {
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_isub
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_lcmp
 		case ast.VARIABLE_TYPE_FLOAT:
@@ -40,22 +40,21 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength++
 		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE { // > and <=
 			code.Codes[code.CodeLength] = cg.OP_ifgt
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], code.CodeLength+7)
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
 			if e.Typ == ast.EXPRESSION_TYPE_GT {
 				code.Codes[code.CodeLength+3] = cg.OP_iconst_0
 			} else {
 				code.Codes[code.CodeLength+3] = cg.OP_iconst_1
 			}
 			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], code.CodeLength+8)
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
 			if e.Typ == ast.EXPRESSION_TYPE_GT {
 				code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 			} else {
 				code.Codes[code.CodeLength+7] = cg.OP_iconst_0
 			}
 			code.CodeLength += 8
-		}
-		if e.Typ == ast.EXPRESSION_TYPE_LT || e.Typ == ast.EXPRESSION_TYPE_GE { // < and >=
+		} else if e.Typ == ast.EXPRESSION_TYPE_LT || e.Typ == ast.EXPRESSION_TYPE_GE { // < and >=
 			code.Codes[code.CodeLength] = cg.OP_iflt
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], code.CodeLength+7)
 			if e.Typ == ast.EXPRESSION_TYPE_LT {
@@ -71,8 +70,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 				code.Codes[code.CodeLength+7] = cg.OP_iconst_0
 			}
 			code.CodeLength += 8
-		}
-		if e.Typ == ast.EXPRESSION_TYPE_EQ || e.Typ == ast.EXPRESSION_TYPE_NE { // == and !=
+		} else {
 			code.Codes[code.CodeLength] = cg.OP_ifeq
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], code.CodeLength+7)
 			if e.Typ == ast.EXPRESSION_TYPE_EQ {
@@ -91,6 +89,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		return
 	}
+
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL ||
 		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es [][]byte

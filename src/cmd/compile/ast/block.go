@@ -232,7 +232,6 @@ func (b *Block) checkFunctions() []error {
 			continue
 		}
 		errs = append(errs, v.check(b)...)
-
 	}
 	return errs
 }
@@ -244,48 +243,56 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == THIS {
 		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), THIS)
 	}
-
 	if name == "_" {
 		panic("_")
 	}
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}
-	if b.Vars[name] != nil {
-		return fmt.Errorf("%s name '%s' already declared as variable", errMsgPrefix(pos), name)
+	if v, ok := b.Vars[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,last declared at:\n", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
+		return fmt.Errorf(errmsg)
 	}
 	if b.Classes == nil {
 		b.Classes = make(map[string]*Class)
 	}
-	if b.Classes[name] != nil {
-		return fmt.Errorf("%s name '%s' already declared as class", errMsgPrefix(pos), name)
+	if c, ok := b.Classes[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as class,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(c.Pos))
+		return fmt.Errorf(errmsg)
 	}
 	if b.Funcs == nil {
 		b.Funcs = make(map[string]*Function)
 	}
-	if b.Funcs[name] != nil {
-		return fmt.Errorf("%s name '%s' already declared as function", errMsgPrefix(pos), name)
-	}
-	if _, ok := buildinFunctionsMap[name]; ok {
-		return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
+	if f, ok := b.Funcs[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as function,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(f.Pos))
+		return fmt.Errorf(errmsg)
 	}
 	if b.Consts == nil {
 		b.Consts = make(map[string]*Const)
 	}
-	if b.Consts[name] != nil {
-		return fmt.Errorf("%s name '%s' already declared as const", errMsgPrefix(pos), name)
+	if c, ok := b.Consts[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as const,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(c.Pos))
+		return fmt.Errorf(errmsg)
 	}
 	if b.Enums == nil {
 		b.Enums = make(map[string]*Enum)
 	}
-	if b.Enums[name] != nil {
-		return fmt.Errorf("%s name %s already declared as enum", errMsgPrefix(pos), name)
+	if e, ok := b.Enums[name]; ok {
+		errmsg := fmt.Sprintf("%s name %s already declared as enum,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(e.Pos))
+		return fmt.Errorf(errmsg)
 	}
 	if b.EnumNames == nil {
 		b.EnumNames = make(map[string]*EnumName)
 	}
-	if b.EnumNames[name] != nil {
-		return fmt.Errorf("%s name '%s' already declared as enumName", errMsgPrefix(pos), name)
+	if en, ok := b.EnumNames[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(en.Pos))
+		return fmt.Errorf(errmsg)
 	}
 	switch d.(type) {
 	case *Class:

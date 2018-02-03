@@ -4,64 +4,91 @@ import (
 	"fmt"
 )
 
+func (e *Expression) convertColonAssignAndVar2Assign(names []*Expression, values []*Expression) {
+	e.Typ = EXPRESSION_TYPE_ASSIGN
+	bin := &ExpressionBinary{}
+	bin.Left = &Expression{}
+	bin.Left.Typ = EXPRESSION_TYPE_LIST
+	bin.Left.Data = names
+	bin.Right = &Expression{}
+	bin.Right.Typ = EXPRESSION_TYPE_LIST
+	bin.Right.Data = values
+	e.Data = bin
+}
+
+//when no error,convert to assign
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
-	binary := e.Data.(*ExpressionBinary)
+	bin := e.Data.(*ExpressionBinary)
 	var names []*Expression
-	if binary.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
-		names = append(names, binary.Left)
-	} else if binary.Left.Typ == EXPRESSION_TYPE_LIST {
-		names = binary.Left.Data.([]*Expression)
+	if bin.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
+		names = append(names, bin.Left)
+	} else if bin.Left.Typ == EXPRESSION_TYPE_LIST {
+		names = bin.Left.Data.([]*Expression)
 	} else {
-		*errs = append(*errs, fmt.Errorf("%s no name one the left", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s no names on the left", errMsgPrefix(e.Pos)))
+		return
 	}
-	values := binary.Right.Data.([]*Expression)
+	noErr := true
+	values := bin.Right.Data.([]*Expression)
 	ts := checkRightValuesValid(checkExpressions(block, values, errs), errs)
 	if len(names) != len(ts) {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(e.Pos),
 			len(ts),
 			len(names)))
+		noErr = false
 	}
 	var err error
 	noNewVaraible := true
 	for k, v := range names {
 		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
-			*errs = append(*errs, fmt.Errorf("%s not a name on the left", errMsgPrefix(v.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'", errMsgPrefix(v.Pos), v.OpName()))
+			noErr = false
 			continue
 		}
-		name := v.Data.(*ExpressionIdentifer)
-		if name.Name == NO_NAME_IDENTIFIER {
+		identifier := v.Data.(*ExpressionIdentifer)
+		if identifier.Name == NO_NAME_IDENTIFIER {
 			continue
 		}
-		if variable, ok := block.Vars[name.Name]; ok {
+		if variable, ok := block.Vars[identifier.Name]; ok {
 			if k < len(ts) {
 				if variable.Typ.TypeCompatible(ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s type '%s' is not compatible with '%s'",
 						errMsgPrefix(ts[k].Pos),
 						variable.Typ.TypeString(),
 						ts[k].TypeString()))
+					noErr = false
 				}
 			}
+			identifier.Var = variable
 		} else { // should be no error
 			noNewVaraible = false
 			vd := &VariableDefinition{}
 			if k < len(ts) {
 				vd.Typ = ts[k]
 			}
-			vd.Name = name.Name
+			vd.Name = identifier.Name
 			vd.Pos = v.Pos
 			if k < len(ts) {
 				vd.Typ = ts[k]
 			}
 			err = block.insert(vd.Name, v.Pos, vd)
+			identifier.Var = vd
 			if err != nil {
 				*errs = append(*errs, err)
+				noErr = false
 			}
 		}
 	}
 	if noNewVaraible {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
+		noErr = false
 	}
+	if noErr == false {
+		return
+	}
+	e.convertColonAssignAndVar2Assign(names, values)
+
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {

@@ -150,6 +150,20 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
+	isdouble := false
+	islong := false
+	c, eof = lex.getchar()
+	if c == 'l' || c == 'f' || c == 'd' {
+		if c == 'd' {
+			isdouble = true
+		}
+		if c == 'l' {
+			islong = true
+		}
+	} else {
+		lex.ungetchar()
+	}
+
 	isScientificNotation := false
 	power := []byte{}
 	powerPositive := true
@@ -211,13 +225,23 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	token.EndColumn = lex.column
 	if isScientificNotation == false {
 		if isfloat {
-			token.Type = TOKEN_LITERAL_FLOAT
 			value := parseFloat(floatpart) + float64(lex.parseInt(integerpart))
-			token.Data = float32(value)
+			if isdouble {
+				token.Type = TOKEN_LITERAL_DOUBLE
+				token.Data = value
+			} else {
+				token.Type = TOKEN_LITERAL_FLOAT
+				token.Data = float32(value)
+			}
 		} else {
-			token.Type = TOKEN_LITERAL_INT
 			value := lex.parseInt(integerpart)
-			token.Data = int32(value)
+			if islong {
+				token.Type = TOKEN_LITERAL_LONG
+				token.Data = value
+			} else {
+				token.Type = TOKEN_LITERAL_INT
+				token.Data = int32(value)
+			}
 		}
 		return
 	}
@@ -691,7 +715,7 @@ redo:
 			lex.ungetchar()
 		}
 	default:
-		err = fmt.Errorf("unkonw beginning of token:%d", c)
+		err = fmt.Errorf("unkown beginning of token:%d", c)
 		return
 	}
 	token.EndLine = lex.line

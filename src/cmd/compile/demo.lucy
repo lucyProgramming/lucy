@@ -1,18 +1,18 @@
 
 
+
+
+
 fn main(){
-	print("hello world");
-
+	a := 1;
+	b := a > 2 ;
 }
 
 
 
 
 
-fn add(a string){
-	print(a += " world");
 
-}
 
 
 

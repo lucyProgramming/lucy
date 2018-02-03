@@ -6,7 +6,6 @@ import (
 
 func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	is, typ, data, err := e.getConstValue()
-	fmt.Println(e.OpName())
 	if err != nil {
 		return nil, []error{err}
 	}
@@ -202,7 +201,6 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}

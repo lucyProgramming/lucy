@@ -48,6 +48,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
+	case lex.TOKEN_LITERAL_LONG:
+		left = &ast.Expression{
+			Typ:  ast.EXPRESSION_TYPE_LONG,
+			Data: ep.parser.token.Data,
+			Pos:  ep.parser.mkPos(),
+		}
+		ep.Next()
 	case lex.TOKEN_LITERAL_STRING:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_STRING,
@@ -58,6 +65,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_LITERAL_FLOAT:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_FLOAT,
+			Data: ep.parser.token.Data,
+			Pos:  ep.parser.mkPos(),
+		}
+		ep.Next()
+	case lex.TOKEN_LITERAL_DOUBLE:
+		left = &ast.Expression{
+			Typ:  ast.EXPRESSION_TYPE_DOUBLE,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}

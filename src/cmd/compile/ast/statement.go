@@ -121,7 +121,8 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		s.Expression.Typ == EXPRESSION_TYPE_INCREMENT ||
 		s.Expression.Typ == EXPRESSION_TYPE_DECREMENT ||
 		s.Expression.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
-		s.Expression.Typ == EXPRESSION_TYPE_PRE_DECREMENT {
+		s.Expression.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
+		s.Expression.Typ == EXPRESSION_TYPE_VAR {
 	} else {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())

@@ -67,6 +67,7 @@ func (p *Parser) Parse() []error {
 			p.Next()
 			continue
 		case lex.TOKEN_VAR:
+			pos := p.mkPos()
 			vs, es, err := p.parseVarDefinition(ispublic)
 			if err != nil {
 				p.consume(untils_semicolon)
@@ -77,6 +78,7 @@ func (p *Parser) Parse() []error {
 			e := &ast.Expression{
 				Typ:  ast.EXPRESSION_TYPE_VAR,
 				Data: d,
+				Pos:  pos,
 			}
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: e,
@@ -375,7 +377,6 @@ func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinit
 		//assign
 		p.Next() // skip =
 		expressions, err = p.ExpressionParser.parseExpressions()
-		panic(expressions)
 		if err != nil {
 			p.errs = append(p.errs, err)
 		}

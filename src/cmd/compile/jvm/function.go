@@ -14,6 +14,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
+
 	method.Code.MaxLocals = f.Varoffset
 	m.buildBlock(class, &method.Code, f.Block, context)
 	return

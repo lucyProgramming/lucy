@@ -62,6 +62,19 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			code.CodeLength += 3
 		}
 		maxstack = 1
+	case ast.EXPRESSION_TYPE_LONG:
+		if e.Data.(int64) == 0 {
+			code.Codes[code.CodeLength] = cg.OP_lconst_0
+			code.CodeLength++
+		} else if e.Data.(int64) == 1 {
+			code.Codes[code.CodeLength] = cg.OP_lconst_1
+			code.CodeLength++
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_ldc2_w
+			class.InsertLongConst(e.Data.(int64), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+		maxstack = 2
 	case ast.EXPRESSION_TYPE_FLOAT:
 		if e.Data.(float32) == 0.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_0
@@ -77,6 +90,20 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			class.InsertFloatConst(e.Data.(float32), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
+		maxstack = 1
+	case ast.EXPRESSION_TYPE_DOUBLE:
+		if e.Data.(float64) == 0.0 {
+			code.Codes[code.CodeLength] = cg.OP_dconst_0
+			code.CodeLength++
+		} else if e.Data.(float64) == 1.0 {
+			code.Codes[code.CodeLength] = cg.OP_dconst_1
+			code.CodeLength++
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_ldc2_w
+			class.InsertDoubleConst(e.Data.(float64), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+		maxstack = 2
 	case ast.EXPRESSION_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		class.InsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -166,13 +193,13 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildIdentifer(class, code, e, context)
 	case ast.EXPRESSION_TYPE_NEW:
 		maxstack = m.buildNew(class, code, e, context)
-	case ast.EXPRESSION_TYPE_LIST:
-		panic("")
 	case ast.EXPRESSION_TYPE_FUNCTION:
-	case ast.EXPRESSION_TYPE_VAR:
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 		maxstack = m.buildTypeConvertion(class, code, e, context)
+	default:
+		panic(e.OpName())
 	}
+
 	return
 }
 

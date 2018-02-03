@@ -122,8 +122,8 @@ type ExpressionFunctionCall struct {
 }
 
 type ExpressionDeclareVariable struct {
-	Vs          []*VariableDefinition
-	Expressions []*Expression
+	Vs     []*VariableDefinition
+	Values []*Expression
 }
 
 type ExpressionDeclareConsts struct {
@@ -220,8 +220,12 @@ func (e *Expression) OpName(typ ...int) string {
 		return "byte_literal"
 	case EXPRESSION_TYPE_INT:
 		return "int_literal"
+	case EXPRESSION_TYPE_LONG:
+		return "long_literal"
 	case EXPRESSION_TYPE_FLOAT:
 		return "float_literal"
+	case EXPRESSION_TYPE_DOUBLE:
+		return "double_literal"
 	case EXPRESSION_TYPE_STRING:
 		return "string_literal"
 	case EXPRESSION_TYPE_ARRAY:

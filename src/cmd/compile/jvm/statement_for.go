@@ -39,7 +39,8 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], s.LoopBegin)
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], s.LoopBegin)
 	code.CodeLength += 3
+	panic(s.LoopBegin)
 	return
 }

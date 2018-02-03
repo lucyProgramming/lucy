@@ -83,7 +83,6 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 		return m.buildStrPlusAssi(class, code, e, context)
 	}
-
 	maxstack, remainStack, op, _, classname, fieldname, fieldDescriptor := m.getLeftValue(class, code, bin.Left, context)
 	//left value must can be used as right value,
 	stack, _ := m.build(class, code, bin.Left, context) // load it`s value
@@ -99,8 +98,12 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	//convert stack top to same type
-	if bin.Left.VariableType.Typ != bin.Right.VariableType.Typ {
-		m.numberTypeConverter(code, bin.Right.VariableType.Typ, bin.Left.VariableType.Typ)
+	if bin.Left.VariableType.IsInteger() {
+		if bin.Left.VariableType.JvmSlotSize() != bin.Right.VariableType.JvmSlotSize() {
+			m.numberTypeConverter(code, bin.Right.VariableType.Typ, bin.Left.VariableType.Typ)
+		} else if bin.Right.VariableType.IsFloat() {
+			m.numberTypeConverter(code, bin.Right.VariableType.Typ, bin.Left.VariableType.Typ)
+		}
 	}
 	currentStack += bin.Left.VariableType.JvmSlotSize()
 	if currentStack > maxstack {

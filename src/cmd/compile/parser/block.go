@@ -40,6 +40,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_FUNCTION:
 			b.parseExpressionStatement(block)
 		case lex.TOKEN_VAR:
+			pos := b.parser.mkPos()
 			vs, es, err := b.parser.parseVarDefinition()
 			if err != nil {
 				b.consume(untils_semicolon)
@@ -51,6 +52,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Expression: &ast.Expression{
 					Typ:  ast.EXPRESSION_TYPE_VAR,
 					Data: &ast.ExpressionDeclareVariable{vs, es},
+					Pos:  pos,
 				},
 			}
 			block.Statements = append(block.Statements, s)
