@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -39,8 +38,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], s.LoopBegin)
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], s.LoopBegin-code.CodeLength)
 	code.CodeLength += 3
-	panic(s.LoopBegin)
 	return
 }
