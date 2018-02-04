@@ -74,7 +74,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			variableType = v.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, v, context)
-		backPatchEs(es, code)
+		backPatchEs(es, code.CodeLength)
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}

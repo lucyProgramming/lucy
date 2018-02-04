@@ -63,6 +63,9 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.InitFunctions {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
+		if p.Block.shouldStop(nil) {
+			return p.Errors
+		}
 	}
 	for _, v := range p.Block.Classes {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
@@ -72,6 +75,9 @@ func (p *Package) TypeCheck() []error {
 			continue
 		}
 		v.checkBlock(&p.Errors)
+		if p.Block.shouldStop(nil) {
+			return p.Errors
+		}
 	}
 	return p.Errors
 }

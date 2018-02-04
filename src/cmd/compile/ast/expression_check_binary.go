@@ -5,9 +5,9 @@ import (
 )
 
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *VariableType) {
-	binary := e.Data.(*ExpressionBinary)
-	ts1, err1 := binary.Left.check(block)
-	ts2, err2 := binary.Right.check(block)
+	bin := e.Data.(*ExpressionBinary)
+	ts1, err1 := bin.Left.check(block)
+	ts2, err2 := bin.Right.check(block)
 	if errsNotEmpty(err1) {
 		*errs = append(*errs, err1...)
 	}
@@ -30,12 +30,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR || EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
 		if t1.Typ != VARIABLE_TYPE_BOOL {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
-				errMsgPrefix(binary.Left.Pos),
+				errMsgPrefix(bin.Left.Pos),
 				t1.TypeString()))
 		}
 		if t2.Typ != VARIABLE_TYPE_BOOL {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
-				errMsgPrefix(binary.Right.Pos),
+				errMsgPrefix(bin.Right.Pos),
 				t2.TypeString()))
 		}
 		result = &VariableType{
@@ -47,15 +47,15 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	// & |
 	if e.Typ == EXPRESSION_TYPE_OR || EXPRESSION_TYPE_AND == e.Typ {
 		if !t1.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(binary.Left.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(bin.Left.Pos)))
 		}
 		if !t2.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(binary.Right.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(bin.Right.Pos)))
 		}
 		if t1.IsNumber() && t2.IsNumber() {
 			if t1.Typ != t2.Typ {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
-					errMsgPrefix(binary.Right.Pos),
+					errMsgPrefix(bin.Right.Pos),
 					t1.TypeString(),
 					t2.TypeString()))
 			}
@@ -67,12 +67,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.IsInteger() {
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
-				errMsgPrefix(binary.Left.Pos),
+				errMsgPrefix(bin.Left.Pos),
 				t1.TypeString()))
 		}
 		if !t2.IsInteger() {
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
-				errMsgPrefix(binary.Right.Pos),
+				errMsgPrefix(bin.Right.Pos),
 				t2.TypeString()))
 		}
 		result = t1.Clone()

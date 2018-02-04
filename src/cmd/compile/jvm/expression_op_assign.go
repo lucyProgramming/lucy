@@ -36,7 +36,7 @@ func (m *MakeExpression) buildStrPlusAssi(class *cg.ClassHighLevel, code *cg.Att
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	stack, es := m.build(class, code, bin.Right, context)
-	backPatchEs(es, code)
+	backPatchEs(es, code.CodeLength)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}

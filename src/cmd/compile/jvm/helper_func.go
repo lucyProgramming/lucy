@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
-
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -28,19 +26,20 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Code.CodeLength = uint16(len(method.Code.Codes))
 	class.AppendMethod(method)
 }
-func appendBackPatch(p *[][]byte, b []byte) {
-	if *p == nil {
-		*p = [][]byte{b}
-	} else {
-		*p = append(*p, b)
+
+func backPatchEs(es []*cg.JumpBackPatch, to uint16) {
+	for _, e := range es {
+		offset := int16(int(to) - int(e.CurrentCodeLength))
+		e.Bs[0] = byte(offset >> 8)
+		e.Bs[1] = byte(offset)
 	}
 }
 
-/*
-	backpatch exits
-*/
-func backPatchEs(es [][]byte, code *cg.AttributeCode) {
-	for _, v := range es {
-		binary.BigEndian.PutUint16(v, code.CodeLength)
-	}
+func jumpto(op byte, code *cg.AttributeCode, to uint16) {
+	code.Codes[code.CodeLength] = cg.OP_goto
+	b := &cg.JumpBackPatch{}
+	b.CurrentCodeLength = code.CodeLength
+	b.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+	backPatchEs([]*cg.JumpBackPatch{b}, to)
+	code.CodeLength += 3
 }

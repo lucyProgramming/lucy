@@ -21,11 +21,6 @@ func ParseType(name string) (*ast.VariableType, error) {
 			Typ: ast.VARIABLE_TYPE_BYTE,
 		}, nil
 	}
-	//	if name == "C" {
-	//		return &ast.VariableType{
-	//			Typ: ast.VARIABLE_TYPE_CHAR,
-	//		}, nil
-	//	}
 	if name == "D" {
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_DOUBLE,

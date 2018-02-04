@@ -66,8 +66,13 @@ func (m *MakeClass) Dump() error {
 func (m *MakeClass) mkVars() {
 	for k, v := range m.p.Block.Vars {
 		f := &cg.FiledHighLevel{}
-		f.AccessFlags = v.AccessFlags
+		f.AccessFlags = 0
+		f.AccessFlags |= cg.ACC_FIELD_STATIC
+		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.Descriptor = v.Typ.Descriptor()
+		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
+			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		}
 		m.mainclass.Fields[k] = f
 	}
 }

@@ -81,6 +81,24 @@ func (e *Expression) IsLiteral() bool {
 		e.IsNumber()
 }
 
+func (e *Expression) canBeUsedAsStatementExpression() bool {
+	return e.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
+		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
+		e.Typ == EXPRESSION_TYPE_FUNCTION ||
+		e.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_INCREMENT ||
+		e.Typ == EXPRESSION_TYPE_DECREMENT ||
+		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
+		e.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
+		e.Typ == EXPRESSION_TYPE_VAR
+}
+
 /*
 	take one argument
 */
@@ -111,6 +129,13 @@ type Expression struct {
 	Typ                   int
 	Data                  interface{}
 	IsStatementExpression bool
+}
+
+func (e *Expression) CallHasReturnValue() bool {
+	if e.Typ != EXPRESSION_TYPE_FUNCTION_CALL && e.Typ != EXPRESSION_TYPE_METHOD_CALL {
+		panic("")
+	}
+	return len(e.VariableTypes) >= 1 && e.VariableTypes[0].rightValueValid()
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

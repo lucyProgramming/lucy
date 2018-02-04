@@ -39,7 +39,7 @@ func FromHighLevel(high *ClassHighLevel) *Class {
 }
 func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.minorVersion = 0
-	c.majorVersion = 52
+	c.majorVersion = 49
 	c.constPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	//int const
 	for i, locations := range high.IntConsts {

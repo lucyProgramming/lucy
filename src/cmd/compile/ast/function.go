@@ -93,7 +93,7 @@ func (f *Function) MkDescriptor() string {
 
 func (f *Function) checkBlock(errs *[]error) {
 	f.mkLastRetrunStatement()
-	*errs = append(*errs, f.Block.check(nil)...)
+	*errs = append(*errs, f.Block.check()...)
 }
 
 func (f *Function) check(b *Block) []error {

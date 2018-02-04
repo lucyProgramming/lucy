@@ -37,6 +37,12 @@ func (b *Block) searchByName(name string) interface{} {
 	}
 	if b.Vars != nil {
 		if t, ok := b.Vars[name]; ok { //correct the type
+			if t.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
+				t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+			}
+			if t.Typ.Typ == VARIABLE_TYPE_CLASS {
+				t.Typ.Typ = VARIABLE_TYPE_OBJECT
+			}
 			return t
 		}
 	}
@@ -82,8 +88,10 @@ func (b *Block) searchByName(name string) interface{} {
 }
 
 func (b *Block) inherite(father *Block) {
-	b.InheritedAttribute = father.InheritedAttribute
-	b.Outter = father
+	if b != father {
+		b.InheritedAttribute = father.InheritedAttribute
+		b.Outter = father
+	}
 }
 
 type InheritedAttribute struct {
@@ -100,10 +108,7 @@ type NameWithType struct {
 	Typ  *VariableType
 }
 
-func (b *Block) check(father *Block) []error {
-	if father != nil {
-		b.inherite(father)
-	}
+func (b *Block) check() []error {
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
 	if b.shouldStop(errs) {
@@ -147,7 +152,9 @@ func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
 	}
 	if len(ts) > 0 {
 		t = ts[0]
+		e.VariableType = t
 	}
+
 	return
 }
 
@@ -237,6 +244,10 @@ func (b *Block) checkFunctions() []error {
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
+	if v, ok := d.(*VariableDefinition); ok && v.IsGlobal {
+		return b.InheritedAttribute.p.Block.insert(name, pos, v)
+	}
+	fmt.Println("insert to block:", name, pos, d)
 	if name == "" {
 		panic("null name")
 	}
@@ -251,6 +262,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	}
 	if v, ok := b.Vars[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,last declared at:\n", errMsgPrefix(pos), name)
+		panic(name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
 		return fmt.Errorf(errmsg)
 	}

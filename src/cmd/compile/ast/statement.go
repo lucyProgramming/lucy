@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
 const (
@@ -91,7 +93,10 @@ func (s *Statement) check(b *Block) []error { // b is father
 				errMsgPrefix(s.Pos), s.statementName())}
 		} else {
 			if s.StatementContinue == nil {
-				s.StatementContinue = &StatementContinue{b.InheritedAttribute.StatementFor}
+				s.StatementContinue = &StatementContinue{}
+			}
+			if s.StatementContinue.StatementFor == nil {
+				s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
 			}
 		}
 	case STATEMENT_TYPE_RETURN:
@@ -108,21 +113,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
-	if s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
-		s.Expression.Typ == EXPRESSION_TYPE_METHOD_CALL ||
-		s.Expression.Typ == EXPRESSION_TYPE_FUNCTION ||
-		s.Expression.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_MOD_ASSIGN ||
-		s.Expression.Typ == EXPRESSION_TYPE_INCREMENT ||
-		s.Expression.Typ == EXPRESSION_TYPE_DECREMENT ||
-		s.Expression.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
-		s.Expression.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
-		s.Expression.Typ == EXPRESSION_TYPE_VAR {
+	if s.Expression.canBeUsedAsStatementExpression() {
 	} else {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
@@ -137,7 +128,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 }
 
 type StatementSwitch struct {
-	BackPatchs          [][]byte
+	BackPatchs          []*cg.JumpBackPatch
 	Outter              *Block
 	Condition           *Expression //switch
 	StatmentSwitchCases []*StatmentSwitchCase

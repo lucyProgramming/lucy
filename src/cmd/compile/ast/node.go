@@ -106,9 +106,9 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 				Expression: v,
 			}
 		}
-		c.Blocks = append([]*Block{&Block{
-			Statements: s,
-		}}, c.Blocks...)
+		b := &Block{}
+		b.Statements = s
+		c.Blocks = append([]*Block{b}, c.Blocks...)
 	}
 	p.mkInitFunctions(c.Blocks...)
 	return

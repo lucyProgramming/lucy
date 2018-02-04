@@ -39,7 +39,6 @@ func Test_lex(t *testing.T) {
 		}
 		fmt.Println("token ", "line:", token.StartLine, token.StartColumn, token.Data, token.Desp)
 		fmt.Println()
-
 	}
 
 	fmt.Println("\n\n\n\n\n\n\n", s.line)

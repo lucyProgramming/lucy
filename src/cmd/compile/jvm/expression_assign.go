@@ -102,7 +102,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			continue
 		}
 		stack, es := m.build(class, code, v, context)
-		backPatchEs(es, code) // true or false need to backpatch
+		backPatchEs(es, code.CodeLength) // true or false need to backpatch
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}

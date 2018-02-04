@@ -24,7 +24,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 			maxstack = stackneed + stack
 		}
 		stackneed += size
-		backPatchEs(es, code)
+		backPatchEs(es, code.CodeLength)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{

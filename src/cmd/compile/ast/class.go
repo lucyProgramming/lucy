@@ -33,7 +33,8 @@ func (c *Class) check(father *Block) []error {
 		errs = append(errs, err)
 	}
 	c.loadInterfaces(&errs)
-	c.Block.check(father) // check innerclass mainly
+	c.Block.inherite((father))
+	c.Block.check() // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
 	if father.shouldStop(errs) {

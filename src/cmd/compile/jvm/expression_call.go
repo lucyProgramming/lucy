@@ -26,7 +26,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		//closure function call
 	}
 	if e.IsStatementExpression {
-		if len(e.VariableTypes) == 0 { // nothing to do
+		if e.CallHasReturnValue() == false { // nothing to do
 		} else if len(e.VariableTypes) == 1 {
 			if 2 == e.VariableTypes[0].JvmSlotSize() {
 				code.Codes[code.CodeLength] = cg.OP_pop2
@@ -40,7 +40,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		}
 	}
 
-	if len(e.VariableTypes) == 0 { // nothing
+	if e.CallHasReturnValue() == false { // nothing
 
 	} else if len(e.VariableTypes) == 1 {
 		if t := e.VariableTypes[0].JvmSlotSize(); t > maxstack {
@@ -84,7 +84,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			variabletype = e.VariableTypes[0]
 		}
 		ms, es := m.build(class, code, e, context)
-		backPatchEs(es, code)
+		backPatchEs(es, code.CodeLength)
 		if t := ms + currentStack; t > maxstack {
 			maxstack = t
 		}

@@ -15,9 +15,9 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if len(s.Expressions) != 1 {
 			panic("this is not happening")
 		}
-		var es [][]byte
+		var es []*cg.JumpBackPatch
 		maxstack, es = m.MakeExpression.build(class, code, s.Expressions[0], context)
-		backPatchEs(es, code)
+		backPatchEs(es, code.CodeLength)
 		switch s.Function.Typ.ReturnList[0].Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
@@ -88,7 +88,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			continue
 		}
 		stack, es := m.MakeExpression.build(class, code, v, context)
-		backPatchEs(es, code)
+		backPatchEs(es, code.CodeLength)
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}

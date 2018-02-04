@@ -166,13 +166,35 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_SKIP:
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after skip", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'skip'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ: ast.STATEMENT_TYPE_SKIP,
 			})
+		case lex.TOKEN_CONTINUE:
+			b.Next()
+			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'continue'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			} else {
+				b.Next()
+			}
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:               ast.STATEMENT_TYPE_CONTINUE,
+				StatementContinue: &ast.StatementContinue{},
+			})
+		case lex.TOKEN_BREAK:
+			b.Next()
+			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'break'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			} else {
+				b.Next()
+			}
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:               ast.STATEMENT_TYPE_CONTINUE,
+				StatementContinue: &ast.StatementContinue{},
+			})
 		default:
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			b.consume(untils_rc_semicolon)
 			b.Next()
 		}

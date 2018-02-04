@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -9,36 +8,71 @@ import (
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	//init
 	if s.Init != nil {
-		stack, es := m.MakeExpression.build(class, code, s.Init, context)
-		backPatchEs(es, code)
+		stack, _ := m.MakeExpression.build(class, code, s.Init, context)
 		if stack > maxstack {
 			maxstack = stack
 		}
 	}
 	s.LoopBegin = code.CodeLength
+	s.ContinueOPOffset = s.LoopBegin
 	//condition
 	if s.Condition != nil {
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context)
-		backPatchEs(es, code)
+		backPatchEs(es, code.CodeLength)
 		if stack > maxstack {
 			maxstack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_ifeq
-		appendBackPatch(&s.BackPatchs, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		b := cg.JumpBackPatch{}
+		b.CurrentCodeLength = code.CodeLength
+		b.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+		s.BackPatchs = append(s.BackPatchs, &b)
 		code.CodeLength += 3
 	} else {
-
 	}
 	m.buildBlock(class, code, s.Block, context)
 	if s.Post != nil {
-		stack, es := m.MakeExpression.build(class, code, s.Init, context)
-		backPatchEs(es, code)
+		s.ContinueOPOffset = code.CodeLength
+		stack, _ := m.MakeExpression.build(class, code, s.Post, context)
 		if stack > maxstack {
 			maxstack = stack
 		}
 	}
-	code.Codes[code.CodeLength] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], s.LoopBegin-code.CodeLength)
-	code.CodeLength += 3
+	jumpto(cg.OP_goto, code, s.LoopBegin)
 	return
 }
+
+//func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
+//	//init
+//	if s.Init != nil {
+//		stack, _ := m.MakeExpression.build(class, code, s.Init, context)
+//		if stack > maxstack {
+//			maxstack = stack
+//		}
+//	}
+//	s.LoopBegin = code.CodeLength
+//	//condition
+//	if s.Condition != nil {
+//		stack, es := m.MakeExpression.build(class, code, s.Condition, context)
+//		backPatchEs(es, code.CodeLength)
+//		if stack > maxstack {
+//			maxstack = stack
+//		}
+//		code.Codes[code.CodeLength] = cg.OP_ifeq
+//		b := cg.JumpBackPatch{}
+//		b.CurrentCodeLength = code.CodeLength
+//		b.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+//		s.BackPatchs = append(s.BackPatchs, &b)
+//		code.CodeLength += 3
+//	} else {
+//	}
+//	m.buildBlock(class, code, s.Block, context)
+//	if s.Post != nil {
+//		stack, _ := m.MakeExpression.build(class, code, s.Post, context)
+//		if stack > maxstack {
+//			maxstack = stack
+//		}
+//	}
+//	jumpto(cg.OP_goto, code, s.LoopBegin)
+//	return
+//}
