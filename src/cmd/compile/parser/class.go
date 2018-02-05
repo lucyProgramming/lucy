@@ -200,7 +200,7 @@ func (c *Class) resetProperty() {
 }
 
 func (c *Class) parseConst() error {
-	vs, typ, err := c.parser.parseAssignedNames()
+	vs, es, typ, err := c.parser.parseConstDefinition()
 	if err != nil {
 		return err
 	}
@@ -211,13 +211,17 @@ func (c *Class) parseConst() error {
 	if c.classDefinition.Block.Consts == nil {
 		c.classDefinition.Block.Consts = make(map[string]*ast.Const)
 	}
-	for _, v := range vs {
+	for k, v := range vs {
 		if _, ok := c.classDefinition.Block.Consts[v.Name]; ok {
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const %s alreay declared", v.Name))
 			continue
 		}
-		c.classDefinition.Block.Consts[v.Name] = &ast.Const{}
-		c.classDefinition.Block.Consts[v.Name].VariableDefinition = *v
+		if k < len(es) {
+			t := &ast.Const{}
+			t.VariableDefinition = *v
+			t.Expression = es[k]
+			c.classDefinition.Block.Consts[v.Name] = t
+		}
 	}
 	return nil
 }

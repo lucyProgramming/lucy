@@ -18,11 +18,12 @@ type Package struct {
 	Errors         []error
 }
 
-func (p *Package) mkInitFunctions(bs ...*Block) {
+func (p *Package) mkInitFunctions(bs []*Block) {
 	p.InitFunctions = make([]*Function, len(bs))
 	for k, b := range bs {
 		f := &Function{}
 		f.Block = b
+		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition
 		f.Typ = &FunctionType{}
 		f.MkVariableType()
 		p.InitFunctions[k] = f

@@ -98,8 +98,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		backPatchEs(es, code.CodeLength)
 		stack, es := m.build(class, code, bin.Right, context)
 		backPatchEs(es, code.CodeLength)
-		if 1+stack > maxstack {
-			maxstack = stack + 1
+		if t := 1 + stack; t > maxstack {
+			maxstack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_if_icmpeq
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
@@ -111,9 +111,9 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.Codes[code.CodeLength+4] = cg.OP_goto
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_1
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 		} else {
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_0
 		}
 		code.CodeLength += 8
 		return
@@ -145,8 +145,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			maxstack = stack
 		}
 		stack, _ = m.build(class, code, bin.Right, context)
-		if stack+1 > maxstack {
-			maxstack = stack + 1
+		if t := stack + 1; t > maxstack {
+			maxstack = t
 		}
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
@@ -161,6 +161,5 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 8
 		return
 	}
-	panic("missing")
 	return
 }

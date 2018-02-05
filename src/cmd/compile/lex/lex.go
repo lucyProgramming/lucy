@@ -43,7 +43,12 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 	} else {
 		lex.lastcolumn = lex.column
 		lex.lastline = lex.line
-		lex.column++
+		if c == '\t' {
+			lex.column += 8 // TODO:: 4 OR 8
+		} else {
+			lex.column++
+		}
+
 	}
 	return
 }
@@ -593,9 +598,6 @@ redo:
 		} else if c == '=' {
 			token.Type = TOKEN_ADD_ASSIGN
 			token.Desp = "+="
-		} else if lex.isDigit(c) {
-			eof, err = lex.lexNumber(token, c)
-			return
 		} else {
 			lex.ungetchar()
 			token.Type = TOKEN_ADD

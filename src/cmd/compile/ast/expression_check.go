@@ -206,6 +206,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	}
 	return t, errs
 }
+
 func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
 	f := e.Data.(*Function)
 	f.MkVariableType()

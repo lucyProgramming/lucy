@@ -57,6 +57,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 					Name:       fieldnames[0],
 					Descriptor: fieldDescriptors[0],
 				}, code.Codes[code.CodeLength:code.CodeLength+2])
+				code.CodeLength += 2
 			}
 		}
 		targets = targets[1:] // slice

@@ -82,7 +82,7 @@ func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableTy
 	ret = []*VariableType{}
 	for _, v := range ts {
 		if !v.rightValueValid() {
-			*errs = append(*errs, fmt.Errorf("%s %s cannot used as right value", errMsgPrefix(v.Pos), v.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value", errMsgPrefix(v.Pos), v.TypeString()))
 			continue
 		}
 		ret = append(ret, v)

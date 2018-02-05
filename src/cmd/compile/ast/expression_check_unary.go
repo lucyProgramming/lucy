@@ -20,9 +20,8 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 				Typ: EXPRESSION_TYPE_BOOL,
 				Pos: e.Pos,
 			}
-		} else {
-			return nil
 		}
+		return nil
 	}
 	if e.Typ == EXPRESSION_TYPE_NOT {
 		if t.Typ != VARIABLE_TYPE_BOOL {

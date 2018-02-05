@@ -52,10 +52,8 @@ func (p *Parser) Parse() []error {
 		return p.errs
 	}
 	ispublic := false
-	isconst := false
 	resetProperty := func() {
 		ispublic = false
-		isconst = false
 	}
 	var err error
 	for !p.eof {
@@ -68,7 +66,7 @@ func (p *Parser) Parse() []error {
 			continue
 		case lex.TOKEN_VAR:
 			pos := p.mkPos()
-			vs, es, err := p.parseVarDefinition(ispublic)
+			vs, es, _, err := p.parseConstDefinition()
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -97,9 +95,6 @@ func (p *Parser) Parse() []error {
 			})
 			resetProperty()
 		case lex.TOKEN_ENUM:
-			if isconst {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a enum", p.errorMsgPrefix()))
-			}
 			e, err := p.parseEnum(ispublic)
 			if err != nil {
 				p.consume(untils_rc)
@@ -114,9 +109,6 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_FUNCTION:
-			if isconst {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a enum", p.errorMsgPrefix()))
-			}
 			f, err := p.Function.parse(ispublic)
 			if err != nil {
 				p.errs = append(p.errs, err)
@@ -130,12 +122,6 @@ func (p *Parser) Parse() []error {
 			})
 			resetProperty()
 		case lex.TOKEN_LC:
-			if isconst {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for a block", p.errorMsgPrefix()))
-			}
-			if ispublic {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot use public for a block", p.errorMsgPrefix()))
-			}
 			b := &ast.Block{}
 			err = p.Block.parse(b) // this function will lookup next
 			if err != nil {
@@ -167,15 +153,11 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_PUBLIC:
 			ispublic = true
 			p.Next()
+			p.validAfterPublic()
 			continue
 		case lex.TOKEN_CONST:
-			isconst = true
-			p.Next()
-			if p.token.Type == lex.TOKEN_ENUM || p.token.Type == lex.TOKEN_CLASS {
-				p.errs = append(p.errs, fmt.Errorf("%s cannot use const for enum or class ", p.errorMsgPrefix()))
-				resetProperty()
-			}
-			vs, typ, err := p.parseAssignedNames()
+			p.Next() // skip const key word
+			vs, es, typ, err := p.parseConstDefinition()
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -190,27 +172,32 @@ func (p *Parser) Parse() []error {
 				continue
 			}
 			// const a := 1 is wrong,
-			if typ == lex.TOKEN_COLON_ASSIGN && isconst == true {
+			if typ == lex.TOKEN_COLON_ASSIGN {
 				p.errs = append(p.errs, fmt.Errorf("%s use = instead of := for const definition", p.errorMsgPrefix()))
 				resetProperty()
 				continue
 			}
-			for _, v := range vs {
-				c := &ast.Const{}
-				c.VariableDefinition = *v
-				if ispublic {
-					c.AccessFlags |= cg.ACC_FIELD_PUBLIC
-				} else {
-					c.AccessFlags |= cg.ACC_FIELD_PRIVATE
+			for k, v := range vs {
+				if k < len(es) {
+					c := &ast.Const{}
+					c.VariableDefinition = *v
+					c.Expression = es[k]
+					if ispublic {
+						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
+					} else {
+						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
+					}
+					*p.tops = append(*p.tops, &ast.Node{
+						Data: c,
+					})
 				}
-				*p.tops = append(*p.tops, &ast.Node{
-					Data: c,
-				})
 			}
+			resetProperty()
 			continue
 		case lex.TOKEN_PRIVATE: //is a default attribute
 			ispublic = false
 			p.Next()
+			p.validAfterPublic()
 			continue
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except", p.errorMsgPrefix(), p.token.Desp))
@@ -221,6 +208,18 @@ func (p *Parser) Parse() []error {
 	return p.errs
 }
 
+func (p *Parser) validAfterPublic() {
+	if p.token.Type == lex.TOKEN_FUNCTION || p.token.Type == lex.TOKEN_CLASS || p.token.Type == lex.TOKEN_ENUM || p.token.Type == lex.TOKEN_IDENTIFIER {
+		return
+	}
+	var err error
+	if p.token.Desp != "" {
+		err = fmt.Errorf("%s cannot have token:'%s' after 'public' or 'private'", p.errorMsgPrefix(), p.token.Desp)
+	} else {
+		err = fmt.Errorf("%s cannot have token:'%v' after 'public' or 'private'", p.errorMsgPrefix(), p.token.Data)
+	}
+	p.errs = append(p.errs, err)
+}
 func (p *Parser) validStatementEnding(pos ...*ast.Pos) {
 	if p.token.Type == lex.TOKEN_SEMICOLON || p.lastToken != nil && p.lastToken.Type == lex.TOKEN_RC {
 		return
@@ -233,22 +232,6 @@ func (p *Parser) validStatementEnding(pos ...*ast.Pos) {
 
 }
 
-func (p *Parser) insertImports(im *ast.Imports) {
-	if p.imports == nil {
-		p.imports = make(map[string]*ast.Imports)
-	}
-	access, err := im.GetAccessName()
-	if err != nil {
-		p.errs = append(p.errs, fmt.Errorf("%s %v", p.errorMsgPrefix(im.Pos), err))
-		return
-	}
-	if p.imports[access] != nil {
-		p.errs = append(p.errs, fmt.Errorf("%s package %s reimported", p.errorMsgPrefix(im.Pos), access))
-		return
-	}
-	p.imports[access] = im
-}
-
 func (p *Parser) mkPos() *ast.Pos {
 	return &ast.Pos{
 		Filename:    p.filename,
@@ -258,51 +241,51 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseAssignedNames() ([]*ast.VariableDefinition, int, error) {
+func (p *Parser) parseConstDefinition() ([]*ast.VariableDefinition, []*ast.Expression, int, error) {
 	names, err := p.parseNameList()
 	if err != nil {
-		return nil, 0, err
+		return nil, nil, 0, err
 	}
-	//trying to parse type
 	var variableType *ast.VariableType
-	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
+	//trying to parse type
+	if p.isValidTypeBegin() {
 		variableType, err = p.parseType()
 		if err != nil {
 			p.errs = append(p.errs, err)
+			return nil, nil, 0, err
 		}
-		return nil, 0, err
 	}
+	f := func() []*ast.VariableDefinition {
+		vs := make([]*ast.VariableDefinition, len(names))
+		for k, v := range names {
+			vd := &ast.VariableDefinition{}
+			vd.Name = v.Name
+			vd.Pos = v.Pos
+			if variableType != nil {
+				vd.Typ = variableType.Clone()
+			}
+			vs[k] = vd
+		}
+		return vs
+	}
+
 	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
-		err = fmt.Errorf("%s missing = or := after a name list", p.errorMsgPrefix())
-		p.errs = append(p.errs, err)
-		return nil, 0, err
+
+		return f(), nil, 0, err
 	}
 	typ := p.token.Type
-	p.Next()
+	p.Next() // skip = or :=
 	if p.eof {
 		err = p.mkUnexpectedEofErr()
 		p.errs = append(p.errs, err)
-		return nil, typ, err
+		return nil, nil, typ, err
 	}
 	es, err := p.ExpressionParser.parseExpressions()
 	if err != nil {
-		return nil, typ, err
+		return nil, nil, typ, err
 	}
-	if len(es) != len(names) {
-		err = fmt.Errorf("%s mame and value not match", p.errorMsgPrefix())
-		p.errs = append(p.errs, err)
-		return nil, typ, err
-	}
-	vs := make([]*ast.VariableDefinition, len(names))
-	for k, v := range names {
-		vd := &ast.VariableDefinition{}
-		vs[k] = vd
-		vd.Name = v.Name
-		vd.Typ = variableType
-		vd.Pos = v.Pos
-		vd.Expression = es[k]
-	}
-	return vs, typ, nil
+
+	return f(), es, typ, nil
 }
 
 func (p *Parser) Next() {
@@ -331,105 +314,15 @@ func (p *Parser) Next() {
 	return
 }
 
-func (p *Parser) unexpectedErr() {
-	p.errs = append(p.errs, p.mkUnexpectedEofErr())
-}
-func (p *Parser) mkUnexpectedEofErr() error {
-	return fmt.Errorf("%s unexpected EOF", p.errorMsgPrefix())
-}
-
 /*
 	errorMsgPrefix(pos) only receive one argument
 */
 func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
-		return fmt.Sprintf("%s:%d:%d '%s'", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
+		return fmt.Sprintf("%s:%d:%d ", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
 	}
 	line, column := p.scanner.Pos()
 	return fmt.Sprintf("%s:%d:%d ", p.filename, line, column)
-}
-
-//var a,b,c int,char,bool  | var a,b,c int = 123;
-func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition, expressions []*ast.Expression, err error) {
-	p.Next()
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		p.errs = append(p.errs, err)
-		return
-	}
-	names, err := p.parseNameList()
-	if err != nil {
-		return nil, nil, err
-	}
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		p.errs = append(p.errs, err)
-		return
-	}
-	t, err := p.parseType()
-	if t == nil {
-		err = fmt.Errorf("%s no variable type found or defined wrong", p.errorMsgPrefix())
-		p.errs = append(p.errs, err)
-		return nil, nil, err
-	}
-	//value , no default value definition
-	if lex.TOKEN_ASSIGN == p.token.Type {
-		//assign
-		p.Next() // skip =
-		expressions, err = p.ExpressionParser.parseExpressions()
-		if err != nil {
-			p.errs = append(p.errs, err)
-		}
-	}
-	if p.token.Type != lex.TOKEN_SEMICOLON {
-		err = fmt.Errorf("%s not a \";\" after a variable declare ", p.errorMsgPrefix())
-		p.errs = append(p.errs, err)
-		return
-	}
-	p.Next() // look next
-	vs = make([]*ast.VariableDefinition, len(names))
-	for k, v := range names {
-		vd := &ast.VariableDefinition{}
-		vd.Name = v.Name
-		vd.Typ = t.Clone()
-		if len(ispublic) > 0 && ispublic[0] {
-			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
-		} else {
-			vd.AccessFlags |= cg.ACC_FIELD_PRIVATE
-		}
-		vd.Pos = v.Pos
-		vs[k] = vd
-	}
-	return
-}
-
-//at least one name
-func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
-	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		err = fmt.Errorf("%s is not identifer,but %s", p.errorMsgPrefix(), p.token.Desp)
-		p.errs = append(p.errs, err)
-		return nil, err
-	}
-	names = []*ast.NameWithPos{}
-	for p.token.Type == lex.TOKEN_IDENTIFIER && !p.eof {
-		names = append(names, &ast.NameWithPos{
-			Name: p.token.Data.(string),
-			Pos:  p.mkPos(),
-		})
-		p.Next()
-		if p.token.Type != lex.TOKEN_COMMA {
-			// not a ,
-			break
-		}
-		pos := p.mkPos() // more
-		p.Next()
-		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			err = fmt.Errorf("%s not identifier after a comma,but %s ", p.errorMsgPrefix(pos), p.token.Desp)
-			p.errs = append(p.errs, err)
-			return names, err
-		}
-	}
-	return
 }
 
 func (p *Parser) consume(untils map[int]bool) {
@@ -449,6 +342,25 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.Filename = p.filename
 	pos.StartLine = t.StartLine
 	pos.StartColumn = t.StartColumn
+}
+func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
+	names, err := p.parseNameList()
+	if err != nil {
+		return nil, err
+	}
+	t, err := p.parseType()
+	if err != nil {
+		return nil, err
+	}
+	vs = make([]*ast.VariableDefinition, len(names))
+	for k, v := range names {
+		vd := &ast.VariableDefinition{}
+		vs[k] = vd
+		vd.Name = v.Name
+		vd.Pos = v.Pos
+		vd.Typ = t.Clone()
+	}
+	return vs, nil
 }
 
 // a,b int or int,bool  c xxx
@@ -472,7 +384,63 @@ func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 		}
 		if p.token.Type != lex.TOKEN_COMMA { // not a commna
 			break
+		} else {
+			p.Next()
 		}
 	}
 	return vs, nil
 }
+
+////var a,b,c int,char,bool  | var a,b,c int = 123;
+//func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition, expressions []*ast.Expression, err error) {
+//	p.Next()
+//	if p.eof {
+//		err = p.mkUnexpectedEofErr()
+//		p.errs = append(p.errs, err)
+//		return
+//	}
+//	names, err := p.parseNameList()
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//	if p.eof {
+//		err = p.mkUnexpectedEofErr()
+//		p.errs = append(p.errs, err)
+//		return
+//	}
+//	t, err := p.parseType()
+//	if t == nil {
+//		err = fmt.Errorf("%s no variable type found or defined wrong", p.errorMsgPrefix())
+//		p.errs = append(p.errs, err)
+//		return nil, nil, err
+//	}
+//	//value , no default value definition
+//	if lex.TOKEN_ASSIGN == p.token.Type {
+//		//assign
+//		p.Next() // skip =
+//		expressions, err = p.ExpressionParser.parseExpressions()
+//		if err != nil {
+//			p.errs = append(p.errs, err)
+//		}
+//	}
+//	if p.token.Type != lex.TOKEN_SEMICOLON {
+//		err = fmt.Errorf("%s not a \";\" after a variable declare ", p.errorMsgPrefix())
+//		p.errs = append(p.errs, err)
+//		return
+//	}
+//	p.Next() // look next
+//	vs = make([]*ast.VariableDefinition, len(names))
+//	for k, v := range names {
+//		vd := &ast.VariableDefinition{}
+//		vd.Name = v.Name
+//		vd.Typ = t.Clone()
+//		if len(ispublic) > 0 && ispublic[0] {
+//			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
+//		} else {
+//			vd.AccessFlags |= cg.ACC_FIELD_PRIVATE
+//		}
+//		vd.Pos = v.Pos
+//		vs[k] = vd
+//	}
+//	return
+//}

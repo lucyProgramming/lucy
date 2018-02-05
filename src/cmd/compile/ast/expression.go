@@ -96,7 +96,8 @@ func (e *Expression) canBeUsedAsStatementExpression() bool {
 		e.Typ == EXPRESSION_TYPE_DECREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
-		e.Typ == EXPRESSION_TYPE_VAR
+		e.Typ == EXPRESSION_TYPE_VAR ||
+		e.Typ == EXPRESSION_TYPE_CONST
 }
 
 /*
@@ -119,7 +120,23 @@ func (e *Expression) IsNumber(typ ...int) bool {
 */
 func (e *Expression) IsIncrement() bool {
 	return e.Typ == EXPRESSION_TYPE_INCREMENT || e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
+}
 
+func (e *Expression) GetTheOnlyOneVariableType() *VariableType {
+	if e.HaveOneValue() == false {
+		panic("...")
+	}
+	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL {
+		return e.VariableTypes[0]
+	}
+	return e.VariableType
+}
+
+func (e *Expression) HaveOneValue() bool {
+	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL {
+		return len(e.VariableTypes) == 1
+	}
+	return true
 }
 
 type Expression struct {
@@ -152,7 +169,8 @@ type ExpressionDeclareVariable struct {
 }
 
 type ExpressionDeclareConsts struct {
-	Cs []*Const
+	Consts      []*Const
+	Expressions []*Expression
 }
 
 type ExpressionTypeConvertion struct {
@@ -164,6 +182,7 @@ type ExpressionIdentifer struct {
 	Name string
 	Var  *VariableDefinition
 	Func *Function
+	//	Const *Const
 	//enumas
 	Enum     *Enum
 	EnumName *EnumName

@@ -45,9 +45,9 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		case *Class:
 			t := v.Data.(*Class)
 			c.Classes = append(c.Classes, t)
-		case *VariableDefinition:
-			t := v.Data.(*VariableDefinition)
-			c.Vars = append(c.Vars, t)
+			//		case *VariableDefinition:
+			//			t := v.Data.(*VariableDefinition)
+			//			c.Vars = append(c.Vars, t)
 		case *Const:
 			t := v.Data.(*Const)
 			c.Consts = append(c.Consts, t)
@@ -71,10 +71,10 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		p.Block.insert(v.Name, v.Pos, v)
 	}
 	p.Block.Vars = make(map[string]*VariableDefinition)
-	for _, v := range c.Vars {
-		p.Block.Vars[v.Name] = v
-		v.IsGlobal = true
-	}
+	//	for _, v := range c.Vars {
+	//		p.Block.Vars[v.Name] = v
+	//		v.IsGlobal = true
+	//	}
 	p.Block.Funcs = make(map[string]*Function)
 	for _, v := range c.Funcs {
 		v.MkVariableType()
@@ -98,6 +98,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 			p.Block.EnumNames[vv.Name] = vv
 		}
 	}
+
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))
 		for k, v := range expressions {
@@ -108,9 +109,10 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		}
 		b := &Block{}
 		b.Statements = s
+		b.isGlobalVariableDefinition = true
 		c.Blocks = append([]*Block{b}, c.Blocks...)
 	}
-	p.mkInitFunctions(c.Blocks...)
+	p.mkInitFunctions(c.Blocks)
 	return
 }
 

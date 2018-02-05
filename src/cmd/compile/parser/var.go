@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
 
@@ -19,3 +21,10 @@ var (
 		lex.TOKEN_SEMICOLON: true,
 	}
 )
+
+func (p *Parser) unexpectedErr() {
+	p.errs = append(p.errs, p.mkUnexpectedEofErr())
+}
+func (p *Parser) mkUnexpectedEofErr() error {
+	return fmt.Errorf("%s unexpected EOF", p.errorMsgPrefix())
+}

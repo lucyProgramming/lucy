@@ -7,6 +7,6 @@ import (
 
 type Context struct {
 	function *ast.Function
-	method   *cg.MethodHighLevel
-	//	OutterClass *cg.ClassHighLevel
+	//	method   *cg.MethodHighLevel
+	mainclass *cg.ClassHighLevel
 }

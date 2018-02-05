@@ -8,7 +8,8 @@ import (
 func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
 	context.function = f
-	context.method = method
+	// 	context.method = method
+	context.mainclass = m.mainclass
 	method.Code.Codes = make([]byte, 65536)
 	method.Code.CodeLength = 0
 	defer func() {

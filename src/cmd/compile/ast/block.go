@@ -6,18 +6,19 @@ import (
 )
 
 type Block struct {
-	IsFunctionTopBlock bool
-	IsClassBlock       bool
-	Pos                *Pos
-	Consts             map[string]*Const
-	Funcs              map[string]*Function
-	Classes            map[string]*Class
-	Enums              map[string]*Enum
-	EnumNames          map[string]*EnumName
-	Outter             *Block //for closure,capture variables
-	InheritedAttribute InheritedAttribute
-	Statements         []*Statement
-	Vars               map[string]*VariableDefinition
+	isGlobalVariableDefinition bool
+	IsFunctionTopBlock         bool
+	IsClassBlock               bool
+	Pos                        *Pos
+	Consts                     map[string]*Const
+	Funcs                      map[string]*Function
+	Classes                    map[string]*Class
+	Enums                      map[string]*Enum
+	EnumNames                  map[string]*EnumName
+	Outter                     *Block //for closure,capture variables
+	InheritedAttribute         InheritedAttribute
+	Statements                 []*Statement
+	Vars                       map[string]*VariableDefinition
 }
 
 func (b *Block) shouldStop(errs []error) bool {
@@ -109,6 +110,7 @@ type NameWithType struct {
 }
 
 func (b *Block) check() []error {
+
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
 	if b.shouldStop(errs) {
@@ -200,23 +202,26 @@ func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
 	for _, v := range b.Consts {
 		if v.Expression == nil {
-			panic("should not happen")
+			//			panic(1)
 			errs = append(errs, fmt.Errorf("%s const %v has no initiation value", errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
 		is, t, value, err := v.Expression.getConstValue()
 		if err != nil {
-			errs = append(errs, fmt.Errorf("%s const %v cannot be defined by intiation value", errMsgPrefix(v.Pos), err))
+			errs = append(errs, fmt.Errorf("%s const '%v' defined wrong", errMsgPrefix(v.Pos), v.Name, err))
 			continue
 		}
 		if is == false {
 			errs = append(errs, fmt.Errorf("%s const %s is not a const value", errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
+		v.Data = value
 		v.Expression.Typ = t
 		v.Expression.Data = value
 		ts, _ := v.Expression.check(b)
-		if v.Typ != nil {
+		if v.Typ == nil {
+			v.Typ = ts[0]
+		} else {
 			err = v.Typ.resolve(b)
 			if err != nil {
 				errs = append(errs, err)
@@ -227,7 +232,6 @@ func (b *Block) checkConst() []error {
 				continue
 			}
 		}
-
 	}
 	return errs
 }
@@ -244,10 +248,18 @@ func (b *Block) checkFunctions() []error {
 }
 
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
-	if v, ok := d.(*VariableDefinition); ok && v.IsGlobal {
-		return b.InheritedAttribute.p.Block.insert(name, pos, v)
-	}
 	fmt.Println("insert to block:", name, pos, d)
+	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.function.isGlobalVariableDefinition { // global var insert into block
+		b := b.InheritedAttribute.p.Block
+		if _, ok := b.Vars[name]; ok {
+			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,last declared at:\n", errMsgPrefix(pos), name)
+			errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
+			return fmt.Errorf(errmsg)
+		}
+		b.Vars[name] = v
+		v.IsGlobal = true // it`s global
+		return nil
+	}
 	if name == "" {
 		panic("null name")
 	}
@@ -262,7 +274,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	}
 	if v, ok := b.Vars[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,last declared at:\n", errMsgPrefix(pos), name)
-		panic(name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -323,15 +334,15 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
-		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
-		b.Vars[name] = t
 		if t.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
 			t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
 		}
 		if t.Typ.Typ == VARIABLE_TYPE_CLASS {
 			t.Typ.Typ = VARIABLE_TYPE_OBJECT
 		}
+		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
+		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
+		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)
 		b.Enums[name] = e

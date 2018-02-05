@@ -11,8 +11,13 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxstack = 2 // current stack is 2
-	stack, _ := m.build(class, code, e.Left, context)
-	maxstack += stack
+	currenStack := maxstack
+	stack, es := m.build(class, code, e.Left, context)
+	backPatchEs(es, code.CodeLength)
+	if t := currenStack + stack; t > maxstack {
+		maxstack = t
+	}
+	m.stackTop2String(class, code, e.Left.GetTheOnlyOneVariableType())
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
@@ -20,8 +25,13 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		Descriptor: "(Ljava/lang/String;)V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, _ = m.build(class, code, e.Right, context)
-	maxstack += stack
+	currenStack = 1
+	stack, es = m.build(class, code, e.Right, context)
+	backPatchEs(es, code.CodeLength)
+	if t := currenStack + stack; t > maxstack {
+		maxstack = t
+	}
+	m.stackTop2String(class, code, e.Right.GetTheOnlyOneVariableType())
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",

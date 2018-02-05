@@ -7,9 +7,25 @@ import (
 
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
+	//	if identifier.Const != nil { // handle first
+	//		return m.buildConst(class, code, identifier.Const)
+	//	}
+	if identifier.Var.IsGlobal { //fetch global var
+		code.Codes[code.CodeLength] = cg.OP_getstatic
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      context.mainclass.Name,
+			Name:       identifier.Name,
+			Descriptor: identifier.Var.Typ.Descriptor(),
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		maxstack = identifier.Var.Typ.JvmSlotSize()
+		return
+	}
+
 	if identifier.Var.BeenCaptured {
 		panic(1)
 	}
+
 	switch identifier.Var.Typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough

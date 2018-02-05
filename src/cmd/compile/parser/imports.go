@@ -72,3 +72,19 @@ func (p *Parser) parseImports() {
 		return
 	}
 }
+
+func (p *Parser) insertImports(im *ast.Imports) {
+	if p.imports == nil {
+		p.imports = make(map[string]*ast.Imports)
+	}
+	access, err := im.GetAccessName()
+	if err != nil {
+		p.errs = append(p.errs, fmt.Errorf("%s %v", p.errorMsgPrefix(im.Pos), err))
+		return
+	}
+	if p.imports[access] != nil {
+		p.errs = append(p.errs, fmt.Errorf("%s package %s reimported", p.errorMsgPrefix(im.Pos), access))
+		return
+	}
+	p.imports[access] = im
+}

@@ -195,6 +195,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_FUNCTION:
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 		maxstack = m.buildTypeConvertion(class, code, e, context)
+	case ast.EXPRESSION_TYPE_CONST: // const will analyse at ast stage
 	default:
 		panic(e.OpName())
 	}

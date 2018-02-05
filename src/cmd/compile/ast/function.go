@@ -8,6 +8,7 @@ import (
 )
 
 type Function struct {
+	isGlobalVariableDefinition bool
 	isPackageBlockFunction     bool
 	callchecker                CallChecker // used in build function
 	ClassMethod                *cg.MethodHighLevel
@@ -146,6 +147,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			*errs = append(*errs, err)
 			continue
 		}
+
 	}
 	//handler return
 	for _, v := range f.Typ.ReturnList {
@@ -156,6 +158,20 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		err = f.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+		}
+		if v.Expression != nil {
+			ts, es := v.Expression.check(f.Block)
+			if errsNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			t, err := v.Expression.mustBeOneValueContext(ts)
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+			}
+			if t.TypeCompatible(v.Typ) == false {
+				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString())
+				*errs = append(*errs, err)
+			}
 		}
 	}
 }
@@ -172,6 +188,7 @@ func (r ReturnList) retTypes(pos *Pos) []*VariableType {
 	if r == nil || len(r) == 0 {
 		t := &VariableType{}
 		t.Typ = VARIABLE_TYPE_VOID // means no return;
+		t.Pos = pos
 		return []*VariableType{t}
 	}
 	ret := make([]*VariableType, len(r))

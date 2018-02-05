@@ -13,6 +13,14 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifer)
+		if identifier.Var.IsGlobal {
+			op = []byte{cg.OP_putstatic}
+			target = identifier.Var.Typ
+			classname = context.mainclass.Name
+			fieldname = identifier.Name
+			fieldDescriptor = identifier.Var.Typ.Descriptor()
+			return
+		}
 		if identifier.Var.BeenCaptured {
 			return m.getCaptureIdentiferLeftValue(class, code, e, context)
 		}

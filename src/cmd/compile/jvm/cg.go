@@ -73,6 +73,7 @@ func (m *MakeClass) mkVars() {
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
+		f.Name = v.Name
 		m.mainclass.Fields[k] = f
 	}
 }

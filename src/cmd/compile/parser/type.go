@@ -86,6 +86,18 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 	return nil, err
 }
 
+func (p *Parser) isValidTypeBegin() bool {
+	return p.token.Type == lex.TOKEN_LB ||
+		p.token.Type == lex.TOKEN_BOOL ||
+		p.token.Type == lex.TOKEN_BYTE ||
+		p.token.Type == lex.TOKEN_SHORT ||
+		p.token.Type == lex.TOKEN_INT ||
+		p.token.Type == lex.TOKEN_FLOAT ||
+		p.token.Type == lex.TOKEN_DOUBLE ||
+		p.token.Type == lex.TOKEN_LONG ||
+		p.token.Type == lex.TOKEN_STRING ||
+		p.token.Type == lex.TOKEN_IDENTIFIER
+}
 func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
 	name := p.token.Data.(string)
 	ret := &ast.VariableType{

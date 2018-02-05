@@ -41,7 +41,8 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			b.parseExpressionStatement(block)
 		case lex.TOKEN_VAR:
 			pos := b.parser.mkPos()
-			vs, es, err := b.parser.parseVarDefinition()
+			b.Next() // skip var key word
+			vs, es, _, err := b.parser.parseConstDefinition()
 			if err != nil {
 				b.consume(untils_semicolon)
 				b.Next()
@@ -90,14 +91,15 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				StatementSwitch: s,
 			})
 		case lex.TOKEN_CONST:
+			pos := b.parser.mkPos()
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but ％s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
 			}
-			vs, typ, err := b.parser.parseAssignedNames()
+			vs, es, typ, err := b.parser.parseConstDefinition()
 			if err != nil {
 				b.consume(untils_rc_semicolon)
 				b.Next()
@@ -111,20 +113,25 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after const declaration", b.parser.errorMsgPrefix()))
 				b.consume(untils_rc_semicolon)
 			}
+			if len(vs) != len(es) {
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s cannot assign %d values to %d destination", b.parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
+			}
+			r := &ast.Statement{}
+			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
 			cs := make([]*ast.Const, len(vs))
 			for k, v := range vs {
 				c := &ast.Const{}
 				c.VariableDefinition = *v
 				cs[k] = c
 			}
-			r := &ast.Statement{}
-			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
 			r.Expression = &ast.Expression{
 				Typ: ast.EXPRESSION_TYPE_CONST,
 				Data: &ast.ExpressionDeclareConsts{
-					Cs: cs,
+					Consts:      cs,
+					Expressions: es,
 				},
-				Pos: b.parser.mkPos(),
+				Pos: pos,
 			}
 			block.Statements = append(block.Statements, r)
 			b.Next()

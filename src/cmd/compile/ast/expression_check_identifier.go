@@ -31,8 +31,8 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *Const:
 		t := d.(*Const)
-		e.fromConst(t)
 		t.Used = true
+		e.fromConst(t)
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
 		return tt, nil
@@ -60,25 +60,25 @@ func (e *Expression) fromConst(c *Const) {
 	switch c.Typ.Typ {
 	case VARIABLE_TYPE_BOOL:
 		e.Typ = EXPRESSION_TYPE_BOOL
-		e.Data = c.BoolValue
+		e.Data = c.Data.(bool)
 	case VARIABLE_TYPE_BYTE:
 		e.Typ = EXPRESSION_TYPE_BYTE
-		e.Data = byte(c.Int64Value)
+		e.Data = c.Data.(byte)
 	case VARIABLE_TYPE_INT:
-		e.Typ = EXPRESSION_TYPE_BYTE
-		e.Data = int32(c.Int64Value)
+		e.Typ = EXPRESSION_TYPE_INT
+		e.Data = c.Data.(int32)
 	case VARIABLE_TYPE_LONG:
 		e.Typ = EXPRESSION_TYPE_LONG
-		e.Data = c.Int64Value
+		e.Data = c.Data.(int64)
 	case VARIABLE_TYPE_FLOAT:
 		e.Typ = EXPRESSION_TYPE_FLOAT
-		e.Data = float32(c.Float64Value)
+		e.Data = c.Data.(float32)
 	case VARIABLE_TYPE_DOUBLE:
 		e.Typ = EXPRESSION_TYPE_DOUBLE
-		e.Data = c.Float64Value
+		e.Data = c.Data.(float64)
 	case VARIABLE_TYPE_STRING:
 		e.Typ = EXPRESSION_TYPE_STRING
-		e.Data = c.StringValue
+		e.Data = c.Data.(string)
 	}
 }
 

@@ -16,6 +16,90 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		Descriptor: "Ljava/io/PrintStream;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	maxstack = 1
+	if len(call.Args) == 0 {
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/io/PrintStream",
+			Name:       "println",
+			Descriptor: "()V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
+	}
+	if len(call.Args) == 1 && call.Args[0].HaveOneValue() {
+		stack, es := m.build(class, code, call.Args[0], context)
+		backPatchEs(es, code.CodeLength)
+		if t := 1 + stack; t > maxstack {
+			maxstack = t
+		}
+		switch call.Args[0].GetTheOnlyOneVariableType().Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(Z)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(I)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(I)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(F)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(D)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_STRING:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(Ljava/lang/String;)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_OBJECT:
+			fallthrough
+		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(Ljava/lang/Object;)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+		return
+	}
+
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClasses("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
