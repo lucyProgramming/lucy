@@ -159,7 +159,9 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}
-		if v.Expression != nil {
+		if v.Expression == nil {
+			v.Expression = v.Typ.mkDefaultValueExpression()
+		} else {
 			ts, es := v.Expression.check(f.Block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)

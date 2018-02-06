@@ -45,6 +45,52 @@ type VariableType struct {
 	Function        *Function
 }
 
+func (v *VariableType) mkDefaultValueExpression() *Expression {
+	var e Expression
+	switch v.Typ {
+	case VARIABLE_TYPE_BOOL:
+		e.Typ = EXPRESSION_TYPE_BOOL
+		e.Data = false
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_BYTE:
+		e.Typ = EXPRESSION_TYPE_BYTE
+		e.Data = byte(0)
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_SHORT:
+		e.Typ = EXPRESSION_TYPE_INT
+		e.Data = int32(0)
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_INT:
+		e.Typ = EXPRESSION_TYPE_INT
+		e.Data = int32(0)
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_LONG:
+		e.Typ = EXPRESSION_TYPE_LONG
+		e.Data = int64(0)
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_FLOAT:
+		e.Typ = EXPRESSION_TYPE_FLOAT
+		e.Data = float32(0)
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_DOUBLE:
+		e.Typ = EXPRESSION_TYPE_DOUBLE
+		e.Data = float64(0)
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_STRING:
+		e.Typ = EXPRESSION_TYPE_STRING
+		e.Data = ""
+		e.VariableType = v.Clone()
+	case VARIABLE_TYPE_OBJECT:
+		fallthrough
+	case VARIABLE_TYPE_ARRAY_INSTANCE:
+		e.Typ = EXPRESSION_TYPE_NULL
+		e.VariableType = v.Clone()
+	default:
+		panic("....")
+	}
+	return &e
+}
+
 func (v *VariableType) JvmSlotSize() uint16 {
 	if v.rightValueValid() == false {
 		panic("right value invalid")

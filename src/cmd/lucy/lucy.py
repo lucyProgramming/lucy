@@ -2,6 +2,7 @@
 from src.cmd.lucy import run
 from src.cmd.lucy import command
 from src.cmd.lucy import declass
+from src.cmd.lucy import mklucyarray
 import sys
 
 
@@ -20,6 +21,7 @@ commands = {
     "run":run.Run(),
     "help":Help(),
     "declass":declass.Declass(),
+    "mklucyarray":  mklucyarray.MkLucyArray(),
 }
 
 
@@ -27,6 +29,8 @@ if sys.argv[1] in commands.keys():
     commands[sys.argv[1]].runCommand(sys.argv[1:])
 else:
     commands["help"].runCommand(sys.argv[1:])
+
+
 
 
 

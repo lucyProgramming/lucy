@@ -17,7 +17,8 @@ const (
 	STATEMENT_TYPE_BREAK
 	STATEMENT_TYPE_SWITCH
 	STATEMENT_TYPE_SKIP // skip this block
-
+	STATEMENT_TYPE_LABLE
+	STATEMENT_TYPE_GOTO
 )
 
 type Statement struct {
@@ -31,6 +32,21 @@ type Statement struct {
 	StatementBreak    *StatementBreak
 	Block             *Block
 	StatementContinue *StatementContinue
+	StatmentLable     *StatementLable
+	StatementGoto     *StatementGoto
+}
+
+type StatementGoto struct {
+	Name           string
+	Pos            *Pos
+	StatementLable *StatementLable
+}
+
+type StatementLable struct {
+	Name string
+	Pos  *Pos
+	//	OPOffset    uint16
+	BackPatches []*cg.JumpBackPatch
 }
 
 type StatementContinue struct {
@@ -57,6 +73,10 @@ func (s *Statement) statementName() string {
 		return "'switch statement'"
 	case STATEMENT_TYPE_SKIP:
 		return "'skip statement'"
+	case STATEMENT_TYPE_LABLE:
+		return "'lable statement'"
+	case STATEMENT_TYPE_GOTO:
+		return "'goto statement'"
 	}
 	return ""
 }
@@ -105,12 +125,30 @@ func (s *Statement) check(b *Block) []error { // b is father
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
 		return s.StatementReturn.check(b)
+	case STATEMENT_TYPE_LABLE:
+	case STATEMENT_TYPE_GOTO:
+		err := s.checkStatementGoto(b)
+		if err != nil {
+			return []error{err}
+		}
 	default:
 		panic("unkown type statement" + s.statementName())
 	}
 	return nil
 }
 
+func (s *Statement) checkStatementGoto(b *Block) error {
+	t := b.searchByName(s.StatementGoto.Name)
+	if t == nil {
+		return fmt.Errorf("%s label named '%s' not found", s.StatementGoto.Pos, s.StatementGoto.Name)
+	}
+	if l, ok := t.(*StatementLable); ok == false {
+		return fmt.Errorf("%s '%s' is not a lable", s.StatementGoto.Pos, s.StatementGoto.Name)
+	} else {
+		s.StatementGoto.StatementLable = l
+	}
+	return nil
+}
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
 	if s.Expression.canBeUsedAsStatementExpression() {

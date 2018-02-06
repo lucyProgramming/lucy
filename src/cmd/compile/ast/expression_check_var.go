@@ -79,64 +79,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			var e Expression
-			switch v.Typ.Typ {
-			case VARIABLE_TYPE_BOOL:
-				e.Typ = EXPRESSION_TYPE_BOOL
-				e.Data = false
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_BOOL
-			case VARIABLE_TYPE_BYTE:
-				e.Typ = EXPRESSION_TYPE_BYTE
-				e.Data = byte(0)
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_BYTE
-			case VARIABLE_TYPE_SHORT:
-				e.Typ = EXPRESSION_TYPE_INT
-				e.Data = int32(0)
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_BYTE
-			case VARIABLE_TYPE_INT:
-				e.Typ = EXPRESSION_TYPE_INT
-				e.Data = int32(0)
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_BYTE
-			case VARIABLE_TYPE_LONG:
-				e.Typ = EXPRESSION_TYPE_LONG
-				e.Data = int64(0)
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_LONG
-			case VARIABLE_TYPE_FLOAT:
-				e.Typ = EXPRESSION_TYPE_FLOAT
-				e.Data = float32(0)
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_FLOAT
-			case VARIABLE_TYPE_DOUBLE:
-				e.Typ = EXPRESSION_TYPE_DOUBLE
-				e.Data = float64(0)
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_DOUBLE
-			case VARIABLE_TYPE_STRING:
-				e.Typ = EXPRESSION_TYPE_STRING
-				e.Data = ""
-				e.VariableType = &VariableType{}
-				e.VariableType.Pos = v.Pos
-				e.VariableType.Typ = VARIABLE_TYPE_STRING
-			case VARIABLE_TYPE_OBJECT:
-				fallthrough
-			case VARIABLE_TYPE_ARRAY_INSTANCE:
-				e.Typ = EXPRESSION_TYPE_NULL
-			default:
-				panic("....")
-			}
-			values = append(values, &e)
+			values = append(values, v.Typ.mkDefaultValueExpression())
 			var nameExpression Expression
 			nameExpression.Typ = EXPRESSION_TYPE_IDENTIFIER
 			nameExpression.Pos = v.Pos
@@ -151,5 +94,4 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 		return
 	}
 	e.convertColonAssignAndVar2Assign(names, values)
-
 }

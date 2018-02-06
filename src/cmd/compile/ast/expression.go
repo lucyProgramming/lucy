@@ -72,6 +72,8 @@ const (
 	EXPRESSION_TYPE_VAR
 	EXPRESSION_TYPE_CONST
 	EXPRESSION_TYPE_CONVERTION_TYPE // []byte(str)
+	EXPRESSION_TYPE_LABLE           // end:
+	EXPRESSION_TYPE_RANGE           // for range
 )
 
 func (e *Expression) IsLiteral() bool {
@@ -356,7 +358,6 @@ func (e *Expression) OpName(typ ...int) string {
 		return "const"
 	case EXPRESSION_TYPE_VAR:
 		return "var"
-
 	}
 	panic("missing type")
 }

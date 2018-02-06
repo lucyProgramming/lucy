@@ -217,6 +217,12 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
+	if ep.parser.token.Type == lex.TOKEN_COLON && left.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {
+		left.Typ = ast.EXPRESSION_TYPE_LABLE
+		ep.Next()
+		return left, nil // lable here
+	}
+
 	for ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT ||
 		ep.parser.token.Type == lex.TOKEN_LP || ep.parser.token.Type == lex.TOKEN_LB ||
 		ep.parser.token.Type == lex.TOKEN_DOT {

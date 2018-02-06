@@ -200,6 +200,27 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ:               ast.STATEMENT_TYPE_CONTINUE,
 				StatementContinue: &ast.StatementContinue{},
 			})
+		case lex.TOKEN_GOTO:
+			pos := b.parser.mkPos()
+			b.Next() // skip goto key word
+			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing identifier after goto statement", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.consume(untils_semicolon)
+				b.Next()
+				continue
+			}
+			s := &ast.StatementGoto{}
+			s.Name = b.parser.token.Data.(string)
+			s.Pos = pos
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:           ast.STATEMENT_TYPE_GOTO,
+				StatementGoto: s,
+			})
+			b.Next()
+			if b.parser.token.Type != lex.TOKEN_SEMICOLON { // incase forget
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolog after goto statement", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			}
+			b.Next()
 		default:
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			b.consume(untils_rc_semicolon)
@@ -217,14 +238,24 @@ func (b *Block) parseExpressionStatement(block *ast.Block) {
 		b.Next()
 		return
 	}
-	if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon", b.parser.errorMsgPrefix(e.Pos)))
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		s := &ast.Statement{}
+		s.Typ = ast.STATEMENT_TYPE_LABLE
+		lable := &ast.StatementLable{}
+		s.StatmentLable = lable
+		lable.Pos = e.Pos
+		lable.Name = e.Data.(*ast.ExpressionIdentifer).Name
+		block.Statements = append(block.Statements, s)
+		block.Insert(lable.Name, e.Pos, lable)
+	} else {
+		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression", b.parser.errorMsgPrefix(e.Pos)))
+		}
+		block.Statements = append(block.Statements, &ast.Statement{
+			Typ:        ast.STATEMENT_TYPE_EXPRESSION,
+			Expression: e,
+		})
 	}
-	e.IsStatementExpression = true
-	block.Statements = append(block.Statements, &ast.Statement{
-		Typ:        ast.STATEMENT_TYPE_EXPRESSION,
-		Expression: e,
-	})
 }
 
 func (b *Block) parseIf() (i *ast.StatementIF, err error) {

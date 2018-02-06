@@ -159,10 +159,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		}
 	}
 	//copy op
-	for _, v := range op {
-		code.Codes[code.CodeLength] = v
-		code.CodeLength++
-	}
+	copyOP(code, op...)
 	if classname != "" {
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      classname,

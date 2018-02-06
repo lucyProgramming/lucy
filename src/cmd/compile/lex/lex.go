@@ -714,6 +714,8 @@ redo:
 			token.Type = TOKEN_COLON_ASSIGN
 			token.Desp = ":= "
 		} else {
+			token.Type = TOKEN_COLON
+			token.Desp = ":"
 			lex.ungetchar()
 		}
 	default:

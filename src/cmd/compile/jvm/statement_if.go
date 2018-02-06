@@ -39,6 +39,5 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	if falseExit != nil {
 		binary.BigEndian.PutUint16(falseExit, code.CodeLength-codelength)
 	}
-
 	return
 }

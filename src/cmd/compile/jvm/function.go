@@ -15,8 +15,25 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
-
 	method.Code.MaxLocals = f.Varoffset
+	m.buildFunctionParameterAndReturnList(class, &method.Code, f.Typ, context)
 	m.buildBlock(class, &method.Code, f.Block, context)
 	return
+}
+
+func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, ft *ast.FunctionType, context *Context) {
+	for _, v := range ft.ReturnList {
+		if v.BeenCaptured {
+			panic("111111111")
+		}
+		maxstack, es := m.MakeExpression.build(class, code, v.Expression, context)
+		backPatchEs(es, code.CodeLength)
+		if maxstack > code.MaxStack {
+			code.MaxStack = maxstack
+		}
+		if v.Typ.IsNumber() && v.Typ.Typ != v.Expression.VariableType.Typ {
+			m.MakeExpression.numberTypeConverter(code, v.Expression.VariableType.Typ, v.Typ.Typ)
+		}
+		copyOP(code, storeSimpleVarOp(v.Typ, v.LocalValOffset)...)
+	}
 }

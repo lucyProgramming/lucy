@@ -38,6 +38,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
 	case ast.STATEMENT_TYPE_SKIP: // skip this block
 		panic("no skip")
+	case ast.STATEMENT_TYPE_GOTO:
+		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
+		s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
+	case ast.STATEMENT_TYPE_LABLE:
+		backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
 	}
 	return
 }

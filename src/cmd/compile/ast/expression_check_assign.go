@@ -188,11 +188,14 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		}
 	}
 	if noAssign {
-		*errs = append(*errs, fmt.Errorf("%s not assign", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s no assign able expression on the left", errMsgPrefix(e.Pos)))
+		return nil
+	}
+	if len(leftTypes) == 0 {
 		return nil
 	}
 	if len(leftTypes) > 1 {
-		return nil
+		return mkVoidType(e.Pos)
 	}
 	tt := leftTypes[0].Clone()
 	tt.Pos = e.Pos

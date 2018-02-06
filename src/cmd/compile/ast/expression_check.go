@@ -143,8 +143,12 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		e.VariableType = tt
 	case EXPRESSION_TYPE_CONST:
 		e.checkConstExpression(block, &errs)
+		e.VariableType = mkVoidType(e.Pos)
+		t = []*VariableType{e.VariableType}
 	case EXPRESSION_TYPE_VAR:
 		e.checkVarExpression(block, &errs)
+		e.VariableType = mkVoidType(e.Pos)
+		t = []*VariableType{e.VariableType}
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		t = e.checkFunctionCallExpression(block, &errs)
 		e.VariableTypes = t

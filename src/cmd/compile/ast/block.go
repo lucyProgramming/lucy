@@ -15,6 +15,7 @@ type Block struct {
 	Classes                    map[string]*Class
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
+	Lables                     map[string]*StatementLable
 	Outter                     *Block //for closure,capture variables
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
@@ -45,6 +46,11 @@ func (b *Block) searchByName(name string) interface{} {
 				t.Typ.Typ = VARIABLE_TYPE_OBJECT
 			}
 			return t
+		}
+	}
+	if b.Lables != nil {
+		if l, ok := b.Lables[name]; ok {
+			return l
 		}
 	}
 	if b.Consts != nil {
@@ -84,6 +90,13 @@ func (b *Block) searchByName(name string) interface{} {
 				return nil //
 			}
 		}
+		if l, ok := t.(*StatementLable); ok {
+			if b.IsFunctionTopBlock { // search lable from outside out allow
+				return nil
+			} else {
+				return l
+			}
+		}
 	}
 	return t
 }
@@ -110,8 +123,13 @@ type NameWithType struct {
 }
 
 func (b *Block) check() []error {
-
 	errs := []error{}
+	//	for _, v := range b.Lables {
+	//		if b.IsFunctionTopBlock == false {
+	//			errs = append(errs, fmt.Errorf("%s cannot have lable in innerBlock", errMsgPrefix(v.Pos)))
+	//		}
+	//	}
+
 	errs = append(errs, b.checkConst()...)
 	if b.shouldStop(errs) {
 		return errs
@@ -246,7 +264,9 @@ func (b *Block) checkFunctions() []error {
 	}
 	return errs
 }
-
+func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
+	return b.insert(name, pos, d)
+}
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	fmt.Println("insert to block:", name, pos, d)
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.function.isGlobalVariableDefinition { // global var insert into block
@@ -317,6 +337,14 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errmsg)
 	}
+	if b.Lables == nil {
+		b.Lables = make(map[string]*StatementLable)
+	}
+	if l, ok := b.Lables[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
+		return fmt.Errorf(errmsg)
+	}
 	switch d.(type) {
 	case *Class:
 		b.Classes[name] = d.(*Class)
@@ -354,6 +382,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		}
 	case *EnumName:
 		b.EnumNames[name] = d.(*EnumName)
+	case *StatementLable:
+		b.Lables[name] = d.(*StatementLable)
 	default:
 		panic("????????")
 	}

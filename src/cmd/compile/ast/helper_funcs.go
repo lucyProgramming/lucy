@@ -78,6 +78,13 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Variable
 	return ret
 }
 
+func mkVoidType(pos *Pos) *VariableType {
+	t := &VariableType{}
+	t.Typ = VARIABLE_TYPE_VOID // means no return;
+	t.Pos = pos
+	return t
+}
+
 func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
 	ret = []*VariableType{}
 	for _, v := range ts {
