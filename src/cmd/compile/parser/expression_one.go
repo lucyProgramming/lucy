@@ -144,14 +144,14 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		}, nil
 	case lex.TOKEN_NEW:
 		ep.Next()
-		t, err := ep.parser.parseIdentifierType()
+		t, err := ep.parser.parseType()
 		if err != nil {
 			return nil, err
 		}
 		if ep.parser.token.Type != lex.TOKEN_LP {
-			return nil, fmt.Errorf("%s missing ( after new", ep.parser.errorMsgPrefix())
+			return nil, fmt.Errorf("%s missing '(' after new", ep.parser.errorMsgPrefix())
 		}
-		ep.Next()
+		ep.Next() // skip (
 		var es []*ast.Expression
 		if ep.parser.token.Type != lex.TOKEN_RP { //
 			es, err = ep.parseExpressions()
@@ -244,6 +244,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			continue
 		}
 		if ep.parser.token.Type == lex.TOKEN_LB {
+			pos := ep.parser.mkPos()
 			ep.Next() // skip [
 			e, err := ep.parseExpression()
 			if err != nil {
@@ -253,11 +254,11 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				return nil, fmt.Errorf("%s not ] after a expression", ep.parser.errorMsgPrefix())
 			}
 			newe := &ast.Expression{}
+			newe.Pos = pos
 			newe.Typ = ast.EXPRESSION_TYPE_INDEX
 			index := &ast.ExpressionIndex{}
 			index.Expression = left
 			index.Index = e
-			index.Name = ep.parser.token.Data.(string)
 			newe.Data = index
 			left = newe
 			ep.Next()

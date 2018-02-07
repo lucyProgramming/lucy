@@ -43,11 +43,13 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		}
 		if t != nil {
 			if !t.IsInteger() {
-				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index",
-					errMsgPrefix(e.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
+					errMsgPrefix(e.Pos), t.TypeString()))
 			}
 		}
-		return obj.CombinationType
+		tt := obj.CombinationType.Clone()
+		tt.Pos = e.Pos
+		return tt
 	}
 	if obj.Typ == VARIABLE_TYPE_OBJECT {
 		if e.Typ != EXPRESSION_TYPE_DOT {

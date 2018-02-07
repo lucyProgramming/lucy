@@ -76,7 +76,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	//fieldref
 	for f, locations := range high.FieldRefs {
 		info := (&CONSTANT_Fieldref_info{}).ToConstPool()
-		high.InsertClasses(f.Class, info.info[0:2])
+		high.InsertClassConst(f.Class, info.info[0:2])
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
@@ -88,7 +88,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	//methodref
 	for m, locations := range high.MethodRefs {
 		info := (&CONSTANT_Methodref_info{}).ToConstPool()
-		high.InsertClasses(m.Class, info.info[0:2])
+		high.InsertClassConst(m.Class, info.info[0:2])
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)

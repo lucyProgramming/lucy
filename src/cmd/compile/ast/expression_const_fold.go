@@ -18,12 +18,12 @@ func (e *Expression) getBinaryExpressionConstValue(f getBinaryExpressionHandler)
 	return f(is1, typ1, value1, is2, typ2, value2)
 }
 
-func (e *Expression) wrongOpErr(typ1, typ2 int) error {
+func (e *Expression) wrongOpErr(typ1, typ2 string) error {
 	return fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
 		errMsgPrefix(e.Pos),
 		e.OpName(),
-		e.OpName(typ1),
-		e.OpName(typ2))
+		typ1,
+		typ2)
 }
 
 //byte -> int
@@ -68,7 +68,7 @@ func (e *Expression) typeConvertor(target int, origin int, v interface{}) (inter
 			return v.(float64), nil
 		}
 	}
-	return nil, e.wrongOpErr(origin, target)
+	return nil, e.wrongOpErr(e.OpName(origin), e.OpName(target))
 }
 
 func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err error) {
@@ -152,12 +152,12 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			}
 			if typ1 == EXPRESSION_TYPE_STRING || typ2 == EXPRESSION_TYPE_STRING {
 				if e.Typ != EXPRESSION_TYPE_ADD {
-					err = e.wrongOpErr(typ1, typ2)
+					err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 					return
 				}
 				if typ1 == EXPRESSION_TYPE_STRING || typ2 == EXPRESSION_TYPE_STRING {
 					if typ1 != EXPRESSION_TYPE_STRING || typ2 != EXPRESSION_TYPE_STRING {
-						err = e.wrongOpErr(typ1, typ2)
+						err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 					}
 					return
 				}
@@ -166,7 +166,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				return
 			} else if e.IsNumber(typ1) || e.IsNumber(typ2) {
 				if e.IsNumber(typ1) == false || e.IsNumber(typ2) == false {
-					err = e.wrongOpErr(typ1, typ2)
+					err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 				}
 				typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
 				if err != nil {
@@ -181,7 +181,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				}
 				return
 			}
-			err = e.wrongOpErr(typ1, typ2)
+			err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 			return
 		})
 	}
@@ -192,7 +192,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				return
 			}
 			if typ2 != EXPRESSION_TYPE_INT || e.IsNumber(typ1) == false {
-				err = e.wrongOpErr(typ1, typ2)
+				err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 				return
 			}
 			switch typ1 {
@@ -209,7 +209,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 					Value = value1.(int64) >> uint64(value2.(int64))
 				}
 			case EXPRESSION_TYPE_FLOAT:
-				err = e.wrongOpErr(typ1, typ2)
+				err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 				return
 			}
 			Typ = typ1
@@ -225,7 +225,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 				return
 			}
 			if e.IsNumber(typ1) == false || e.IsNumber(typ2) == false {
-				err = e.wrongOpErr(typ1, typ2)
+				err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 				return
 			}
 			typ1, typ2, value1, value2, err = e.typeWider(typ1, typ2, value1, value2)
@@ -246,7 +246,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 					e.Data = value1.(int64) | value2.(int64)
 				}
 			default:
-				err = e.wrongOpErr(typ1, typ2)
+				err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 				return
 			}
 			is = true
@@ -287,7 +287,7 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			if typ1 == EXPRESSION_TYPE_NULL || typ2 == EXPRESSION_TYPE_NULL {
 				if (typ1 != VARIABLE_TYPE_NULL || typ2 != VARIABLE_TYPE_NULL) ||
 					(e.Typ != EXPRESSION_TYPE_EQ || EXPRESSION_TYPE_NE != e.Typ) {
-					err = e.wrongOpErr(typ1, typ2)
+					err = e.wrongOpErr(e.OpName(typ1), e.OpName(typ2))
 					return
 				}
 				is = true

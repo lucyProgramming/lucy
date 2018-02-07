@@ -99,19 +99,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			fallthrough
 		case VARIABLE_TYPE_DOUBLE:
 			if !t2.IsNumber() {
-				*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
+				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
 			if t2.Typ != VARIABLE_TYPE_STRING {
-				*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
+				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_BOOL:
 			if t2.Typ == VARIABLE_TYPE_BOOL {
 				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-					*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
+					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 				}
 			} else {
-				*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
+				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
 			if t2.IsPointer() {
@@ -161,7 +161,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return result
 		}
 		if t1.IsNumber() == false || t2.IsNumber() == false {
-			*errs = append(*errs, e.wrongOpErr(t1.Typ, t2.Typ))
+			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			result = t1.Clone()
 			result.Pos = e.Pos
 			return result

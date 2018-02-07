@@ -303,36 +303,36 @@ func (v *VariableType) isPrimitive() bool {
 func (v *VariableType) typeString_(ret *string) {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
-		*ret = "bool"
+		*ret += "bool"
 	case VARIABLE_TYPE_BYTE:
-		*ret = "byte"
+		*ret += "byte"
 	case VARIABLE_TYPE_SHORT:
-		*ret = "short"
+		*ret += "short"
 	case VARIABLE_TYPE_INT:
-		*ret = "int"
+		*ret += "int"
 	case VARIABLE_TYPE_LONG:
-		*ret = "long"
+		*ret += "long"
 	case VARIABLE_TYPE_FLOAT:
-		*ret = "float"
+		*ret += "float"
 	case VARIABLE_TYPE_DOUBLE:
-		*ret = "double"
+		*ret += "double"
 	case VARIABLE_TYPE_FUNCTION:
-		*ret = "function(" + v.Function.Name + ")"
+		*ret += "function(" + v.Function.Name + ")"
 	case VARIABLE_TYPE_CLASS:
-		*ret = v.Name
+		*ret += v.Name
 	case VARIABLE_TYPE_ENUM:
-		*ret = "enum(" + v.Name + ")"
+		*ret += "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
 		v.CombinationType.typeString_(ret)
 	case VARIABLE_TYPE_VOID:
-		*ret = "void"
+		*ret += "void"
 	case VARIABLE_TYPE_STRING:
-		*ret = "string"
+		*ret += "string"
 	case VARIABLE_TYPE_OBJECT:
-		*ret = "object"
+		*ret += "object"
 	case VARIABLE_TYPE_ARRAY_INSTANCE:
-		*ret = "array_instance"
+		*ret += "array_instance"
 	default:
 		panic(1)
 	}

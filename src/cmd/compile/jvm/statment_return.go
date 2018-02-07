@@ -49,7 +49,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	//new a array list
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClasses(arrylistclassname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(arrylistclassname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup // dup on stack
 	code.CodeLength += 4
 	//call init

@@ -25,8 +25,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, err
 		}
 		tt := &ast.VariableType{}
-		tt.CombinationType = &ast.VariableType{}
-		tt.CombinationType.Typ = ast.VARIABLE_TYPE_ARRAY
+		tt.Typ = ast.VARIABLE_TYPE_ARRAY
 		tt.CombinationType = t
 		return tt, nil
 	case lex.TOKEN_BOOL:
@@ -59,7 +58,6 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Typ: ast.VARIABLE_TYPE_FLOAT,
 			Pos: p.mkPos(),
 		}, nil
-
 	case lex.TOKEN_DOUBLE:
 		p.Next()
 		return &ast.VariableType{

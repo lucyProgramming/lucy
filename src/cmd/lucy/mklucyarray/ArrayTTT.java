@@ -1,5 +1,5 @@
 
-
+package lucy.lang;
 public class ArrayTTT   {
 	public int start;
 	public int end; // not include

@@ -31,7 +31,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
 	ts := checkRightValuesValid(checkExpressions(block, values, errs), errs)
-	if len(names) != len(ts) {
+	if len(names) != len(ts) && len(ts) != 0 {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(e.Pos),
 			len(ts),
@@ -40,6 +40,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	var err error
 	noNewVaraible := true
+
 	for k, v := range names {
 		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'", errMsgPrefix(v.Pos), v.OpName()))
@@ -50,8 +51,12 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		if identifier.Name == NO_NAME_IDENTIFIER {
 			continue
 		}
+		var variableType *VariableType
+		if k < len(ts) && ts[k] != nil {
+			variableType = ts[k]
+		}
 		if variable, ok := block.Vars[identifier.Name]; ok {
-			if k < len(ts) {
+			if variableType != nil {
 				if variable.Typ.TypeCompatible(ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s type '%s' is not compatible with '%s'",
 						errMsgPrefix(ts[k].Pos),
@@ -69,8 +74,11 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
-			if k < len(ts) {
-				vd.Typ = ts[k]
+			vd.Typ = variableType
+			if vd.Typ == nil { // still cannot have type,new false int type
+				vd.Typ = &VariableType{}
+				vd.Typ.Typ = VARIABLE_TYPE_INT
+				vd.Typ.Pos = v.Pos
 			}
 			err = block.insert(vd.Name, v.Pos, vd)
 			identifier.Var = vd
@@ -80,6 +88,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 		}
 	}
+
 	if noNewVaraible {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 		noErr = false

@@ -13,6 +13,9 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
+	if left.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return left, nil
+	}
 	for ep.parser.token.Type == lex.TOKEN_COMMA { // read more
 		ep.Next()                                 //  skip comma
 		left2, err := ep.parseLogicalExpression() //

@@ -9,7 +9,7 @@ func (m *MakeExpression) buildStrPlusAssi(class *cg.ClassHighLevel, code *cg.Att
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxstack, remainStack, op, _, classname, fieldname, fieldDescriptor := m.getLeftValue(class, code, bin.Left, context)
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClasses("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial

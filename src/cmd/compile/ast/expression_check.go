@@ -175,17 +175,22 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
+			e.VariableType = tt
 		}
 	case EXPRESSION_TYPE_CONVERTION_TYPE:
 		tt := e.checkTypeConvertionExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
+			e.VariableType = tt
 		}
 	case EXPRESSION_TYPE_NEW:
 		tt := e.checkNewExpression(block, &errs)
+		fmt.Println(tt.TypeString())
 		if tt != nil {
 			t = []*VariableType{tt}
+			e.VariableType = tt
 		}
+
 	case EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
 	case EXPRESSION_TYPE_MINUS_ASSIGN:

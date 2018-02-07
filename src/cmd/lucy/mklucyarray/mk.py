@@ -8,6 +8,7 @@ javacode = '''
     
 
 
+package lucy.lang;
 
 public class ArrayTTT   {
 	public int start;
@@ -98,9 +99,8 @@ class MkLucyArray(command.Command):
         pass
 
     def runCommand(self,args):
-        javaBasicTypes = ["boolean","byte","char","short","int","float","long","double","Object"]
+        javaBasicTypes = ["boolean","byte","char","short","int","float","long","double","Object","String"]
         files = []
-
         for t in javaBasicTypes:
             s = javacode.replace("TTT",t)
             name = "Array" + t
@@ -109,7 +109,6 @@ class MkLucyArray(command.Command):
             files.append(name + ".java")
             f.write(s)
         for f in files:
-            print("javac ./" + f  )
             os.system("javac ./" + f  )
 
 

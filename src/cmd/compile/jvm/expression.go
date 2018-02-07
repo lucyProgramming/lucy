@@ -304,7 +304,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_INT:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClasses("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -316,7 +316,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_LONG:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClasses("java/lang/Long", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst("java/lang/Long", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -328,7 +328,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_FLOAT:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClasses("java/lang/Float", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst("java/lang/Float", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -340,7 +340,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_DOUBLE:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClasses("java/lang/Double", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst("java/lang/Double", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
