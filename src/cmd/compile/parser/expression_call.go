@@ -9,6 +9,7 @@ import (
 
 func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
+	pos := ep.parser.mkPos()
 	ep.Next() // skip (
 	if ep.parser.eof {
 		return nil, ep.parser.mkUnexpectedEofErr()
@@ -22,7 +23,7 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 	}
 
 	if ep.parser.token.Type != lex.TOKEN_RP {
-		return nil, fmt.Errorf("%s except ')' ,but %s",
+		return nil, fmt.Errorf("%s except ')' ,but '%s'",
 			ep.parser.errorMsgPrefix(),
 			ep.parser.token.Desp)
 	}
@@ -34,17 +35,19 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 		call.Args = args
 		result.Data = call
 		result.Pos = ep.parser.mkPos()
-	} else if result.Typ == ast.EXPRESSION_TYPE_DOT {
+	} else if e.Typ == ast.EXPRESSION_TYPE_DOT {
 		result.Typ = ast.EXPRESSION_TYPE_METHOD_CALL
 		call := &ast.ExpressionMethodCall{}
 		index := e.Data.(*ast.ExpressionIndex)
 		call.Expression = index.Expression
 		call.Args = args
+		call.Name = index.Name
 		result.Data = call
-		result.Pos = e.Pos
+		result.Pos = ep.parser.mkPos()
 	} else {
 		return nil, fmt.Errorf("%s can`t make call on '%s'", ep.parser.errorMsgPrefix())
 	}
 	ep.Next() // skip )
+	result.Pos = pos
 	return &result, nil
 }

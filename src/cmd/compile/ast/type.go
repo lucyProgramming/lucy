@@ -85,6 +85,8 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 	case VARIABLE_TYPE_ARRAY_INSTANCE:
 		e.Typ = EXPRESSION_TYPE_NULL
 		e.VariableType = v.Clone()
+		e.Pos = v.Pos
+		fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@", v.Pos == nil)
 	default:
 		panic("....")
 	}
@@ -233,36 +235,6 @@ func (t *VariableType) TypeCompatible(comp *VariableType, err ...*error) bool {
 		return false
 	}
 	return comp.Class.instanceOf(t.Class)
-}
-
-func (v *VariableType) Descriptor() string {
-	switch v.Typ {
-	case VARIABLE_TYPE_BOOL:
-		return "Z"
-	case VARIABLE_TYPE_BYTE:
-		return "B"
-	case VARIABLE_TYPE_SHORT:
-		return "S"
-		//	case VARIABLE_TYPE_CHAR:
-		//		return "C"
-	case VARIABLE_TYPE_INT:
-		return "I"
-	case VARIABLE_TYPE_LONG:
-		return "J"
-	case VARIABLE_TYPE_FLOAT:
-		return "F"
-	case VARIABLE_TYPE_DOUBLE:
-		return "D"
-	case VARIABLE_TYPE_ARRAY:
-		return "[" + v.CombinationType.Descriptor()
-	case VARIABLE_TYPE_STRING:
-		return "Ljava/lang/String;"
-	case VARIABLE_TYPE_VOID:
-		return "V"
-	case VARIABLE_TYPE_OBJECT:
-		return "L" + v.Class.Name + ";"
-	}
-	panic("unhandle type signature")
 }
 
 /*

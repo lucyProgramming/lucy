@@ -145,7 +145,6 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		v.Func.MkDescriptor()
 		if m[v.Func.Descriptor] == nil {
 			m[v.Func.Descriptor] = []*ClassMethod{v}
 		} else {
@@ -195,31 +194,31 @@ func (c *Class) accessField(name string) (f *ClassField, err error) {
 	return
 }
 func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *ClassMethod, errs []error) {
-	errs = []error{}
-	cc := c
-	matchString := mkSignatureByVariableTypes(args)
-	matchString = "(" + matchString + ")"
-	for cc.SuperClassName != "" { // java/lang/Object has no super class
-		ms, ok := c.Methods[name]
-		if ok {
-			for _, m := range ms {
-				if matchString == m.Func.Descriptor {
-					f = m
-					return
-				}
-			}
-		}
-		if cc.SuperClass == nil { // super class is not loaded
-			err := cc.loadSuperClass()
-			if err != nil {
-				errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(pos), err.Error()))
-				break
-			} else {
-				cc = cc.SuperClass
-			}
-		}
-	}
-	// not found,trying to access father`s method
+	//	errs = []error{}
+	//	cc := c
+	//	matchString := mkSignatureByVariableTypes(args)
+	//	matchString = "(" + matchString + ")"
+	//	for cc.SuperClassName != "" { // java/lang/Object has no super class
+	//		ms, ok := c.Methods[name]
+	//		if ok {
+	//			for _, m := range ms {
+	//				if matchString == m.Func.Descriptor {
+	//					f = m
+	//					return
+	//				}
+	//			}
+	//		}
+	//		if cc.SuperClass == nil { // super class is not loaded
+	//			err := cc.loadSuperClass()
+	//			if err != nil {
+	//				errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(pos), err.Error()))
+	//				break
+	//			} else {
+	//				cc = cc.SuperClass
+	//			}
+	//		}
+	//	}
+	//	// not found,trying to access father`s method
 	return
 }
 

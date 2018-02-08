@@ -8,6 +8,7 @@ import (
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	//init
 	if s.Init != nil {
+		code.MKLineNumber(s.Init.Pos.StartLine)
 		stack, _ := m.MakeExpression.build(class, code, s.Init, context)
 		if stack > maxstack {
 			maxstack = stack
@@ -17,6 +18,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	s.ContinueOPOffset = s.LoopBegin
 	//condition
 	if s.Condition != nil {
+		code.MKLineNumber(s.Condition.Pos.StartLine)
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context)
 		backPatchEs(es, code.CodeLength)
 		if stack > maxstack {
@@ -32,6 +34,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	}
 	m.buildBlock(class, code, s.Block, context)
 	if s.Post != nil {
+		code.MKLineNumber(s.Post.Pos.StartLine)
 		s.ContinueOPOffset = code.CodeLength
 		stack, _ := m.MakeExpression.build(class, code, s.Post, context)
 		if stack > maxstack {

@@ -27,8 +27,9 @@ type ToConstPool interface {
 }
 
 type ConstPool struct {
-	tag  uint8
-	info []byte
+	selfindex uint16 // using when is is utf
+	tag       uint8
+	info      []byte
 }
 
 type CONSTANT_Class_info struct {

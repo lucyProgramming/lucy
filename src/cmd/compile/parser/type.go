@@ -11,6 +11,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 	var err error
 	switch p.token.Type {
 	case lex.TOKEN_LB:
+		pos := p.mkPos()
 		p.Next()
 		if p.token.Type != lex.TOKEN_RB {
 			// [ and ] not match
@@ -25,56 +26,65 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, err
 		}
 		tt := &ast.VariableType{}
+		tt.Pos = pos
 		tt.Typ = ast.VARIABLE_TYPE_ARRAY
 		tt.CombinationType = t
 		return tt, nil
 	case lex.TOKEN_BOOL:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_BYTE:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_SHORT:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_INT:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_INT,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_FLOAT:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_DOUBLE:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_DOUBLE,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_LONG:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_LONG,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_STRING:
+		pos := p.mkPos()
 		p.Next()
 		return &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_STRING,
-			Pos: p.mkPos(),
+			Pos: pos,
 		}, nil
 	case lex.TOKEN_IDENTIFIER:
 		return p.parseIdentifierType()

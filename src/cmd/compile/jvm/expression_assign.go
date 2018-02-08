@@ -13,14 +13,14 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	targets := make([]*ast.VariableType, len(lefts))
 	ops := make([][]byte, len(lefts))
 	classnames := make([]string, len(lefts))
-	fieldnames := make([]string, len(lefts))
-	fieldDescriptors := make([]string, len(lefts))
+	names := make([]string, len(lefts))
+	descriptors := make([]string, len(lefts))
 	remainstacks := make([]uint16, len(lefts))
 	noDestinations := make([]bool, len(lefts))
 	// put left value one the stack
 	index := len(lefts) - 1
 	for index >= 0 { //
-		stack, remainstack, op, target, classname, fieldname, fieldDescriptor := m.getLeftValue(class, code, lefts[index], context)
+		stack, remainstack, op, target, classname, name, descriptor := m.getLeftValue(class, code, lefts[index], context)
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
@@ -33,8 +33,8 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		targets[index] = target
 		ops[index] = op
 		classnames[index] = classname
-		fieldnames[index] = fieldname
-		fieldDescriptors[index] = fieldDescriptor
+		names[index] = name
+		descriptors[index] = descriptor
 		remainstacks[index] = remainstack
 		noDestinations[index] = noDestination
 		currentStack += remainstack
@@ -52,19 +52,29 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				code.CodeLength += uint16(len(ops[0]))
 			}
 			if classnames[0] != "" {
-				class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-					Class:      classnames[0],
-					Name:       fieldnames[0],
-					Descriptor: fieldDescriptors[0],
-				}, code.Codes[code.CodeLength:code.CodeLength+2])
+				if ops[0][0] == cg.OP_putfield || ops[0][0] == cg.OP_putstatic {
+					class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+						Class:      classnames[0],
+						Name:       names[0],
+						Descriptor: descriptors[0],
+					}, code.Codes[code.CodeLength:code.CodeLength+2])
+				} else if ops[0][0] == cg.OP_invokevirtual {
+					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+						Class:      classnames[0],
+						Name:       names[0],
+						Descriptor: descriptors[0],
+					}, code.Codes[code.CodeLength:code.CodeLength+2])
+				} else {
+					panic("...")
+				}
 				code.CodeLength += 2
 			}
 		}
 		targets = targets[1:] // slice
 		ops = ops[1:]
 		classnames = classnames[1:]
-		fieldnames = fieldnames[1:]
-		fieldDescriptors = fieldDescriptors[1:]
+		names = names[1:]
+		descriptors = descriptors[1:]
 		remainstacks = remainstacks[1:]
 	}
 	for _, v := range rights {

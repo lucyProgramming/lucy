@@ -43,9 +43,8 @@ type StatementGoto struct {
 }
 
 type StatementLable struct {
-	Name string
-	Pos  *Pos
-	//	OPOffset    uint16
+	Name        string
+	Pos         *Pos
 	BackPatches []*cg.JumpBackPatch
 }
 

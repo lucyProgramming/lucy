@@ -49,20 +49,20 @@ func (ep *ExpressionParser) parseAssignExpression() (*ast.Expression, error) {
 		}
 		result := &ast.Expression{}
 		result.Typ = typ
-		binary := &ast.ExpressionBinary{}
-		result.Data = binary
-		binary.Left = left
+		bin := &ast.ExpressionBinary{}
+		result.Data = bin
+		bin.Left = left
 		result.Pos = ep.parser.mkPos()
 		if multi {
 			es, err := ep.parseExpressions()
 			if err != nil {
 				return result, err
 			}
-			binary.Right = &ast.Expression{}
-			binary.Right.Typ = ast.EXPRESSION_TYPE_LIST
-			binary.Right.Data = es
+			bin.Right = &ast.Expression{}
+			bin.Right.Typ = ast.EXPRESSION_TYPE_LIST
+			bin.Right.Data = es
 		} else {
-			binary.Right, err = ep.parseExpression()
+			bin.Right, err = ep.parseExpression()
 		}
 		return result, err
 	}

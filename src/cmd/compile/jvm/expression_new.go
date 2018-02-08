@@ -43,39 +43,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
-	var classname string
+	meta := ArrayMetas[e.VariableType.CombinationType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_new
-	switch e.VariableType.CombinationType.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		classname = "lucy/lang/Arrayboolean"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_BYTE:
-		classname = "lucy/lang/Arraybyte"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_SHORT:
-		classname = "lucy/lang/Arrayshort"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_INT:
-		classname = "lucy/lang/Arrayint"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_LONG:
-		classname = "lucy/lang/Arraylong"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_FLOAT:
-		class.InsertClassConst("lucy/lang/Arrayfloat", code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_DOUBLE:
-		classname = "lucy/lang/Arraydouble"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	case ast.VARIABLE_TYPE_STRING:
-		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
-		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		classname = "lucy/lang/ArrayObject"
-		class.InsertClassConst(classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	default:
-		panic(1)
-	}
+	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxstack = 2
@@ -120,90 +90,24 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst("lang/java/String", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst("java/lang/String", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
-		panic(1)
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		panic(1)
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+
 	default:
-		panic(1)
+
 	}
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	switch e.VariableType.CombinationType.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([ZI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_BYTE:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([BI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_SHORT:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([SI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_INT:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([II)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_LONG:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([JI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_FLOAT:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([FI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_DOUBLE:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([DI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_STRING:
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      classname,
-			Name:       specail_method_init,
-			Descriptor: "([Ljava/lang/ObjectI)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_OBJECT:
-		panic(1)
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		panic(1)
-	default:
-		panic(1)
-	}
-
+	code.Codes[code.CodeLength] = cg.OP_invokespecial
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      meta.classname,
+		Name:       specail_method_init,
+		Descriptor: meta.initFuncDescriptor,
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
 	return
 
 }

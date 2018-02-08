@@ -277,6 +277,12 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 			return fmt.Errorf(errmsg)
 		}
 		b.Vars[name] = v
+		if v.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
+			v.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+		}
+		if v.Typ.Typ == VARIABLE_TYPE_CLASS {
+			v.Typ.Typ = VARIABLE_TYPE_OBJECT
+		}
 		v.IsGlobal = true // it`s global
 		return nil
 	}

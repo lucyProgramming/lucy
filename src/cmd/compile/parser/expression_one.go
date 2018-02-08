@@ -240,6 +240,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				list := left.Data.([]*ast.Expression)
 				newe.Data = list[len(list)-1]
 			}
+			newe.Pos = ep.parser.mkPos()
 			ep.Next()
 			continue
 		}
@@ -265,11 +266,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			continue
 		}
 		if ep.parser.token.Type == lex.TOKEN_DOT {
+			pos := ep.parser.mkPos()
 			ep.parser.Next() // skip .
 			if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				return nil, fmt.Errorf("%s not identifier after dot", ep.parser.errorMsgPrefix())
 			}
 			newe := &ast.Expression{}
+			newe.Pos = pos
 			newe.Typ = ast.EXPRESSION_TYPE_DOT
 			index := &ast.ExpressionIndex{}
 			index.Expression = left

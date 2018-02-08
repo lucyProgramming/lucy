@@ -9,7 +9,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, 
 	return
 }
 
-func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
+func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifer)
@@ -17,8 +17,8 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Var.Typ
 			classname = context.mainclass.Name
-			fieldname = identifier.Name
-			fieldDescriptor = identifier.Var.Typ.Descriptor()
+			name = identifier.Name
+			descriptor = m.MakeClass.typeDescriptor(identifier.Var.Typ)
 			return
 		}
 		if identifier.Var.BeenCaptured {
@@ -113,37 +113,25 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		if t := stack + 1; t > maxstack {
 			maxstack = t
 		}
-		switch e.VariableType.Typ {
-		case ast.VARIABLE_TYPE_BOOL:
-			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
-			op = []byte{cg.OP_bastore}
-		case ast.VARIABLE_TYPE_SHORT:
-			op = []byte{cg.OP_sastore}
-		case ast.VARIABLE_TYPE_INT:
-			op = []byte{cg.OP_iastore}
-		case ast.VARIABLE_TYPE_FLOAT:
-			op = []byte{cg.OP_fastore}
-		case ast.VARIABLE_TYPE_DOUBLE:
-			op = []byte{cg.OP_dastore}
-		case ast.VARIABLE_TYPE_LONG:
-			op = []byte{cg.OP_lastore}
-		default:
-			op = []byte{cg.OP_aastore}
-		}
-		remainStack = 2 // objectref index
+		meta := ArrayMetas[e.VariableType.Typ]
+		classname = meta.classname
+		name = "set"
+		descriptor = meta.setDescriptor
+		target = e.VariableType
+		remainStack = 2 // [objectref ,index]
+		op = []byte{cg.OP_invokevirtual}
 	case ast.EXPRESSION_TYPE_DOT:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Typ == ast.VARIABLE_TYPE_CLASS {
 			op = []byte{cg.OP_getstatic}
 			classname = index.Expression.VariableType.Class.Name
-			fieldname = index.Name
-			fieldDescriptor = index.Field.Descriptor
+			name = index.Name
+			descriptor = index.Field.Descriptor
 		} else {
 			maxstack, _ = m.build(class, code, index.Expression, context)
 			classname = index.Expression.VariableType.Class.Name
-			fieldname = index.Name
-			fieldDescriptor = index.Field.Descriptor
+			name = index.Name
+			descriptor = index.Field.Descriptor
 		}
 	default:
 		panic("unkown type ")

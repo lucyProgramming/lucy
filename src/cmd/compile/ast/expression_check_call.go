@@ -10,18 +10,19 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := e.mustBeOneValueContext(ts)
+	object, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-	if t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+	if object.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		switch call.Name {
-		case "size":
-			t = &VariableType{}
+		case "size", "cap":
+			t := &VariableType{}
 			t.Typ = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
 			if len(call.Args) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call 'size'", errMsgPrefix(e.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call 'size',method '%s' expect 0 argument",
+					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{t}
 		default:
@@ -29,14 +30,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
-	if t.Typ != VARIABLE_TYPE_OBJECT && t.Typ != VARIABLE_TYPE_CLASS {
+	if object.Typ != VARIABLE_TYPE_OBJECT && object.Typ != VARIABLE_TYPE_CLASS {
 		*errs = append(*errs, fmt.Errorf("%s method call only can be made on 'object' or 'class'", errMsgPrefix(e.Pos)))
 		return nil
 	}
-
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
-	f, es := t.Class.accessMethod(call.Name, e.Pos, args)
+	f, es := object.Class.accessMethod(call.Name, e.Pos, args)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
 	} else {

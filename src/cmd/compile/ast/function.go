@@ -73,25 +73,6 @@ func (f *Function) MkVariableType() {
 	f.VariableType.Function = f
 }
 
-func (f *Function) MkDescriptor() string {
-	if f.Name == MAIN_FUNCTION_NAME {
-		return "([Ljava/lang/String;)V"
-	}
-	s := "("
-	for _, v := range f.Typ.ParameterList {
-		s += v.NameWithType.Typ.Descriptor()
-	}
-	s += ")"
-	if len(f.Typ.ReturnList) == 0 {
-		s += "V"
-	} else if len(f.Typ.ReturnList) == 1 {
-		s += f.Typ.ReturnList[0].Typ.Descriptor()
-	} else {
-		s += "Ljava/util/ArrayList;" //always this type
-	}
-	return s
-}
-
 func (f *Function) checkBlock(errs *[]error) {
 	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.check()...)

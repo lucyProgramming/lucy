@@ -59,7 +59,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
 				Name:       "println",
-				Descriptor: "(I)V",
+				Descriptor: "(J)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_FLOAT:

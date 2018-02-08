@@ -23,6 +23,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if err != nil {
 		*errs = append(*errs, err)
 	}
+	bin.Left.VariableType = t1
+	bin.Right.VariableType = t2
 	if t1 == nil || t2 == nil {
 		return nil
 	}

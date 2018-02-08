@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -10,6 +12,11 @@ type MakeExpression struct {
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
+	if class.SourceFiles == nil {
+		class.SourceFiles = make(map[string]struct{})
+	}
+	fmt.Println(e.OpName())
+	class.SourceFiles[e.Pos.Filename] = struct{}{}
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null

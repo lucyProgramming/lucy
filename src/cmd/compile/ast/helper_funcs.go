@@ -33,13 +33,13 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func mkSignatureByVariableTypes(ts []*VariableType) string {
-	s := ""
-	for _, v := range ts {
-		s += v.Descriptor()
-	}
-	return s
-}
+//func mkSignatureByVariableTypes(ts []*VariableType) string {
+//	s := ""
+//	for _, v := range ts {
+//		s += v.Descriptor()
+//	}
+//	return s
+//}
 
 func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDefinition, checker CallChecker) *Function {
 	f := &Function{}

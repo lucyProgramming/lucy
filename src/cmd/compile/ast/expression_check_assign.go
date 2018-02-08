@@ -101,6 +101,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {
+
 	bin := e.Data.(*ExpressionBinary)
 	t1, es := bin.Left.getLeftValue(block)
 	bin.Left.VariableType = t1
@@ -170,6 +171,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		}
 		noAssign = false
 		t, es := v.getLeftValue(block)
+		v.VariableType = t
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
@@ -189,10 +191,9 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		}
 		if k < len(valueTypes) {
 			if !leftTypes[k].TypeCompatible(valueTypes[k]) {
-				*errs = append(*errs, fmt.Errorf("%s type %s is not compatible with %s",
+				*errs = append(*errs, fmt.Errorf("%s type '%s' is not compatible with '%s'",
 					errMsgPrefix(e.Pos),
-					leftTypes[k].TypeString(),
-					valueTypes[k].TypeString()))
+					valueTypes[k].TypeString(), leftTypes[k].TypeString()))
 			}
 		}
 	}

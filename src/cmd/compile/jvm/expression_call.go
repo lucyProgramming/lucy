@@ -19,7 +19,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
 			Name:       call.Func.Name,
-			Descriptor: call.Func.MkDescriptor(),
+			Descriptor: m.MakeClass.methodDescriptor(call.Func),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
@@ -100,6 +100,9 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 
 func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
+	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY_INSTANCE {
+		return m.buildArrayMethodCall(class, code, e, context)
+	}
 	if call.Method.IsStatic() {
 		maxstack = m.buildCallArgs(class, code, call.Args, nil, context)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -123,5 +126,25 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		Descriptor: call.Method.Func.Descriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	return
+}
+
+func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	call := e.Data.(*ast.ExpressionMethodCall)
+	switch call.Name {
+	case "size", "cap":
+		maxstack, _ = m.build(class, code, call.Expression, context)
+		meta := ArrayMetas[call.Expression.VariableType.CombinationType.Typ]
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      meta.classname,
+			Name:       call.Name,
+			Descriptor: "()I",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+
+	default:
+		panic("unkown method:%v" + call.Name)
+	}
 	return
 }

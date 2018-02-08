@@ -66,6 +66,7 @@ func (p *Parser) Parse() []error {
 			continue
 		case lex.TOKEN_VAR:
 			pos := p.mkPos()
+			p.Next() // skip var key word
 			vs, es, _, err := p.parseConstDefinition()
 			if err != nil {
 				p.consume(untils_semicolon)

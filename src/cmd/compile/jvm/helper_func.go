@@ -151,7 +151,3 @@ func copyOP(code *cg.AttributeCode, op ...byte) {
 	}
 	code.CodeLength += uint16(len(op))
 }
-
-func getArrayClassNameAccoringToVariableType(t *ast.VariableType) string {
-	return ""
-}

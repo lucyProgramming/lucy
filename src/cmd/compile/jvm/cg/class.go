@@ -30,6 +30,7 @@ type Class struct {
 	fields       []*FieldInfo
 	methods      []*MethodInfo
 	attributes   []*AttributeInfo
+	Utf8Consts   map[string]*ConstPool
 }
 
 func FromHighLevel(high *ClassHighLevel) *Class {
@@ -37,6 +38,20 @@ func FromHighLevel(high *ClassHighLevel) *Class {
 	c.fromHighLevel(high)
 	return c
 }
+
+func (c *Class) insertUtfConst(s string) uint16 {
+	if c.Utf8Consts == nil {
+		c.Utf8Consts = make(map[string]*ConstPool)
+	}
+	if con, ok := c.Utf8Consts[s]; ok {
+		return con.selfindex
+	}
+	info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
+	info.selfindex = c.constPoolUint16Length()
+	c.constPool = append(c.constPool, info)
+	return info.selfindex
+}
+
 func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.minorVersion = 0
 	c.majorVersion = 49
@@ -100,7 +115,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	//classess
 	for cn, locations := range high.Classes {
 		info := (&CONSTANT_Class_info{}).ToConstPool()
-		high.InsertUtf8Const(cn, info.info[0:2])
+		binary.BigEndian.PutUint16(info.info[0:2], c.insertUtfConst(cn))
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
@@ -108,33 +123,35 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	//name and type
 	for nt, locations := range high.NameAndTypes {
 		info := (&CONSTANT_NameAndType_info{}).ToConstPool()
-		high.InsertUtf8Const(nt.Name, info.info[0:2])
-		high.InsertUtf8Const(nt.Type, info.info[2:4])
+		binary.BigEndian.PutUint16(info.info[0:2], c.insertUtfConst(nt.Name))
+		binary.BigEndian.PutUint16(info.info[2:4], c.insertUtfConst(nt.Type))
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
+
 	}
 	//string
 	for s, locations := range high.StringConsts {
 		info := (&CONSTANT_String_info{}).ToConstPool()
+		binary.BigEndian.PutUint16(info.info[0:2], c.insertUtfConst(s))
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
-		high.InsertUtf8Const(s, info.info[0:2])
 		c.constPool = append(c.constPool, info)
+		info.selfindex = index
 	}
 
 	c.accessFlag = high.AccessFlags
 	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	high.InsertUtf8Const(high.Name, thisClassConst.info[0:2])
+	binary.BigEndian.PutUint16(thisClassConst.info[0:2], c.insertUtfConst(high.Name))
 	c.thisClass = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, thisClassConst)
 	superClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	high.InsertUtf8Const(high.SuperClass, superClassConst.info[0:2])
-	c.superClass = c.thisClass + 1
+	binary.BigEndian.PutUint16(superClassConst.info[0:2], c.insertUtfConst(high.SuperClass))
+	c.superClass = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, superClassConst)
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{}).ToConstPool()
-		high.InsertUtf8Const(i, inter.info[0:2])
+		binary.BigEndian.PutUint16(inter.info[0:2], c.insertUtfConst(i))
 		index := c.constPoolUint16Length()
 		c.interfaces = append(c.interfaces, index)
 		c.constPool = append(c.constPool, inter)
@@ -142,44 +159,26 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	for _, f := range high.Fields {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
-		high.InsertUtf8Const(f.Name, field.NameIndex[0:2])
-		high.InsertUtf8Const(f.Descriptor, field.DescriptorIndex[0:2])
+		binary.BigEndian.PutUint16(field.NameIndex[0:2], c.insertUtfConst(f.Name))
+		binary.BigEndian.PutUint16(field.DescriptorIndex[0:2], c.insertUtfConst(f.Descriptor))
 		c.fields = append(c.fields, field)
 	}
-	oldstringconst := make(map[string]uint16)
-	writeStringConsts := func() {
-		for s, locations := range high.Utf8Consts {
-			info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
-			index := c.constPoolUint16Length()
-			backPatchIndex(locations, index)
-			oldstringconst[s] = index
-			c.constPool = append(c.constPool, info)
-		}
-	}
-	writeStringConsts()
-	high.Utf8Consts = nil
 	for _, ms := range high.Methods {
 		for _, m := range ms {
 			info := &MethodInfo{}
-			info.AccessFlags = m.AccessFlags
-			if index, ok := oldstringconst[m.Name]; ok {
-				binary.BigEndian.PutUint16(info.nameIndex[0:2], index)
-			} else {
-				high.InsertUtf8Const(m.Name, info.nameIndex[0:2])
-			}
-			if index, ok := oldstringconst[m.Descriptor]; ok {
-				binary.BigEndian.PutUint16(info.descriptorIndex[0:2], index)
-			} else {
-				high.InsertUtf8Const(m.Descriptor, info.descriptorIndex[0:2])
-			}
-			codeinfo := m.Code.ToAttributeInfo()
-			high.InsertUtf8Const("Code", codeinfo.nameIndex[0:2])
+			info.AccessFlags = m.AccessFlags //accessflag
+			binary.BigEndian.PutUint16(info.nameIndex[0:2], c.insertUtfConst(m.Name))
+			binary.BigEndian.PutUint16(info.descriptorIndex[0:2], c.insertUtfConst(m.Descriptor))
+			codeinfo := m.Code.ToAttributeInfo(c)
+			binary.BigEndian.PutUint16(codeinfo.nameIndex[0:2], c.insertUtfConst("Code"))
 			info.Attributes = append(info.Attributes, codeinfo)
 			c.methods = append(c.methods, info)
 		}
 	}
-	//string consts
-	writeStringConsts()
+
+	//source file
+	c.attributes = append(c.attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
+
 	c.ifConstPoolOverMaxSize()
 	return
 }

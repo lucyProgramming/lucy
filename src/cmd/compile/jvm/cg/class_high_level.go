@@ -3,9 +3,11 @@ package cg
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 type ClassHighLevel struct {
+	SourceFiles            map[string]struct{} // one class file can be compile form multi
 	Name                   string
 	IsClosureFunctionClass bool
 	MainClass              *ClassHighLevel
@@ -13,7 +15,6 @@ type ClassHighLevel struct {
 	AccessFlags            uint16
 	IntConsts              map[int32][][]byte
 	LongConsts             map[int64][][]byte
-	Utf8Consts             map[string][][]byte
 	FloatConsts            map[float32][][]byte
 	DoubleConsts           map[float64][][]byte
 	Classes                map[string][][]byte
@@ -147,17 +148,6 @@ func (c *ClassHighLevel) InsertLongConst(i int64, location []byte) {
 	}
 }
 
-func (c *ClassHighLevel) InsertUtf8Const(s string, location []byte) {
-	if c.Utf8Consts == nil {
-		c.Utf8Consts = make(map[string][][]byte)
-	}
-	if _, ok := c.Utf8Consts[s]; ok {
-		c.Utf8Consts[s] = append(c.Utf8Consts[s], location)
-	} else {
-		c.Utf8Consts[s] = [][]byte{location}
-	}
-}
-
 func (c *ClassHighLevel) InsertFloatConst(f float32, location []byte) {
 	if c.FloatConsts == nil {
 		c.FloatConsts = make(map[float32][][]byte)
@@ -168,6 +158,7 @@ func (c *ClassHighLevel) InsertFloatConst(f float32, location []byte) {
 		c.FloatConsts[f] = [][]byte{location}
 	}
 }
+
 func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 	if c.DoubleConsts == nil {
 		c.DoubleConsts = make(map[float64][][]byte)
@@ -177,4 +168,14 @@ func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 	} else {
 		c.DoubleConsts[d] = [][]byte{location}
 	}
+}
+func (c *ClassHighLevel) getSourceFile() string {
+	s := ""
+	for f, _ := range c.SourceFiles {
+		s += f + " "
+	}
+	if s != "" {
+		s = strings.TrimRight(s, " ")
+	}
+	return s
 }
