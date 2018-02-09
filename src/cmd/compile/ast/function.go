@@ -25,19 +25,39 @@ type Function struct {
 	Signature                  *class_json.MethodSignature
 	VariableType               VariableType
 	Varoffset                  uint16
-	ArrayListVarForMultiReturn *ArrayListVarForMultiReturn
+	AutoVarForMultiReturn      *AutoVarForMultiReturn
+	AutoVarForRange            *AutoVarForRange
 }
 
-func (f *Function) mkArrayListVarForMultiReturn() {
-	if f.ArrayListVarForMultiReturn == nil {
-		t := &ArrayListVarForMultiReturn{}
-		t.Offset = f.Varoffset
-		f.ArrayListVarForMultiReturn = t
-		f.Varoffset++
+func (f *Function) mkAutoVarForMultiReturn() {
+	if f.AutoVarForMultiReturn != nil {
+		return
 	}
+	t := &AutoVarForMultiReturn{}
+	t.Offset = f.Varoffset
+	f.AutoVarForMultiReturn = t
+	f.Varoffset++
 }
 
-type ArrayListVarForMultiReturn struct {
+func (f *Function) mkAutoVarForRange() {
+	if f.AutoVarForRange != nil {
+		return
+	}
+	t := &AutoVarForRange{}
+	t.K = f.Varoffset
+	t.Elements = f.Varoffset + 1
+	t.Start = f.Varoffset + 2
+	t.End = f.Varoffset + 3
+	f.Varoffset += 4
+	f.AutoVarForRange = t
+}
+
+type AutoVarForRange struct {
+	K          uint16
+	Elements   uint16
+	Start, End uint16
+}
+type AutoVarForMultiReturn struct {
 	Offset uint16
 }
 

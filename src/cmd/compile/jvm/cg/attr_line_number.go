@@ -9,6 +9,9 @@ type AttributeLineNumber struct {
 }
 
 func (a *AttributeLineNumber) ToAttributeInfo(class *Class) *AttributeInfo {
+	if len(a.linenumbers) == 0 {
+		return nil
+	}
 	ret := &AttributeInfo{}
 	binary.BigEndian.PutUint16(ret.nameIndex[0:2], class.insertUtfConst("LineNumberTable"))
 	ret.info = make([]byte, 2)

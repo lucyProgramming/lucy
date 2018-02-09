@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-//	"fmt"
-
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	vs := e.Data.(*ExpressionDeclareVariable)
 	noErr := true

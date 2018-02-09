@@ -89,6 +89,7 @@ const (
 	TOKEN_EXTENDS        //extends
 	TOKEN_IMPLEMENTS     // implements
 	TOKEN_GOTO           //goto
+	TOKEN_RANGE          //range
 )
 
 var (
@@ -133,6 +134,7 @@ var (
 		"extends":    TOKEN_EXTENDS,
 		"implements": TOKEN_IMPLEMENTS,
 		"goto":       TOKEN_GOTO,
+		"range":      TOKEN_RANGE,
 	}
 )
 

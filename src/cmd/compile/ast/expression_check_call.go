@@ -25,13 +25,18 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{t}
+		case "append":
+			t := &VariableType{}
+			t.Typ = VARIABLE_TYPE_VOID
+			t.Pos = e.Pos
+			return []*VariableType{t}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call %s on array", errMsgPrefix(e.Pos), call.Name))
 		}
 		return nil
 	}
 	if object.Typ != VARIABLE_TYPE_OBJECT && object.Typ != VARIABLE_TYPE_CLASS {
-		*errs = append(*errs, fmt.Errorf("%s method call only can be made on 'object' or 'class'", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'", errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
 	args := checkExpressions(block, call.Args, errs)

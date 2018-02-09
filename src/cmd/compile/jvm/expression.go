@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -12,11 +10,7 @@ type MakeExpression struct {
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
-	if class.SourceFiles == nil {
-		class.SourceFiles = make(map[string]struct{})
-	}
-	fmt.Println(e.OpName())
-	class.SourceFiles[e.Pos.Filename] = struct{}{}
+	context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -214,7 +208,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	stack is 1
 */
 func (m *MakeExpression) buildLoadArrayListAutoVar(code *cg.AttributeCode, context *Context) {
-	switch context.function.ArrayListVarForMultiReturn.Offset {
+	switch context.function.AutoVarForMultiReturn.Offset {
 	case 0:
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
@@ -228,11 +222,11 @@ func (m *MakeExpression) buildLoadArrayListAutoVar(code *cg.AttributeCode, conte
 		code.Codes[code.CodeLength] = cg.OP_aload_3
 		code.CodeLength++
 	default:
-		if context.function.ArrayListVarForMultiReturn.Offset > 255 {
+		if context.function.AutoVarForMultiReturn.Offset > 255 {
 			panic("local var offset over 255")
 		}
 		code.Codes[code.CodeLength] = cg.OP_aload
-		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
+		code.Codes[code.CodeLength+1] = byte(context.function.AutoVarForMultiReturn.Offset)
 		code.CodeLength += 2
 	}
 }
@@ -241,7 +235,7 @@ func (m *MakeExpression) buildLoadArrayListAutoVar(code *cg.AttributeCode, conte
 	stack is 1
 */
 func (m *MakeExpression) buildStoreArrayListAutoVar(code *cg.AttributeCode, context *Context) {
-	switch context.function.ArrayListVarForMultiReturn.Offset {
+	switch context.function.AutoVarForMultiReturn.Offset {
 	case 0:
 		code.Codes[code.CodeLength] = cg.OP_astore_0
 		code.CodeLength++
@@ -255,11 +249,11 @@ func (m *MakeExpression) buildStoreArrayListAutoVar(code *cg.AttributeCode, cont
 		code.Codes[code.CodeLength] = cg.OP_astore_3
 		code.CodeLength++
 	default:
-		if context.function.ArrayListVarForMultiReturn.Offset > 255 {
+		if context.function.AutoVarForMultiReturn.Offset > 255 {
 			panic("local var offset over 255")
 		}
 		code.Codes[code.CodeLength] = cg.OP_astore
-		code.Codes[code.CodeLength+1] = byte(context.function.ArrayListVarForMultiReturn.Offset)
+		code.Codes[code.CodeLength+1] = byte(context.function.AutoVarForMultiReturn.Offset)
 		code.CodeLength += 2
 	}
 }

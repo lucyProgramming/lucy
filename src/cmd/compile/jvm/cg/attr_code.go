@@ -29,7 +29,9 @@ func (a *AttributeCode) ToAttributeInfo(class *Class) *AttributeInfo {
 	binary.BigEndian.PutUint32(ret.info[4:8], uint32(a.CodeLength))
 	ret.info = append(ret.info, a.Codes...)
 	ret.info = append(ret.info, a.mkExceptions()...)
-	a.attributes = append(a.attributes, a.LineNumbers.ToAttributeInfo(class))
+	if info := a.LineNumbers.ToAttributeInfo(class); info != nil {
+		a.attributes = append(a.attributes, info)
+	}
 	ret.info = append(ret.info, a.mkAttributes(class)...)
 	ret.attributeLength = uint32(len(ret.info))
 	return ret

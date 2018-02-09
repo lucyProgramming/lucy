@@ -153,13 +153,13 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		t = e.checkFunctionCallExpression(block, &errs)
 		e.VariableTypes = t
 		if len(t) > 1 {
-			block.InheritedAttribute.function.mkArrayListVarForMultiReturn()
+			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
 		e.VariableTypes = t
 		if len(t) > 1 {
-			block.InheritedAttribute.function.mkArrayListVarForMultiReturn()
+			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_NOT:
 		fallthrough
@@ -210,6 +210,8 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
+	case EXPRESSION_TYPE_RANGE:
+		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement", errMsgPrefix(e.Pos)))
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}

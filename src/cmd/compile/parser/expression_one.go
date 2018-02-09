@@ -213,6 +213,18 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
+	case lex.TOKEN_RANGE:
+		pos := ep.parser.mkPos()
+		ep.Next()
+		e, err := ep.parseExpression()
+		if err != nil {
+			return nil, err
+		}
+		left = &ast.Expression{}
+		left.Typ = ast.EXPRESSION_TYPE_RANGE
+		left.Pos = pos
+		left.Data = e
+		return left, nil
 	default:
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err

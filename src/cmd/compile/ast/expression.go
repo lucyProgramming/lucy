@@ -140,6 +140,20 @@ func (e *Expression) HaveOneValue() bool {
 	}
 	return true
 }
+func (e *Expression) canbeUsedAsForRange() bool {
+	if e.Typ != EXPRESSION_TYPE_ASSIGN && e.Typ != EXPRESSION_TYPE_COLON_ASSIGN {
+		return false
+	}
+	bin := e.Data.(*ExpressionBinary)
+	if bin.Right.Typ == EXPRESSION_TYPE_RANGE {
+		return true
+	}
+	if bin.Right.Typ == EXPRESSION_TYPE_LIST {
+		t := bin.Right.Data.([]*Expression)
+		return len(t) > 0 && t[0].Typ == EXPRESSION_TYPE_RANGE
+	}
+	return false
+}
 
 type Expression struct {
 	VariableType          *VariableType   //
@@ -156,6 +170,12 @@ func (e *Expression) CallHasReturnValue() bool {
 	}
 	return len(e.VariableTypes) >= 1 && e.VariableTypes[0].rightValueValid()
 }
+
+//func (e *Expression) GetRangeExprssion() *Expression {
+//	if e.Typ == EXPRESSION_TYPE_RANGE {
+//		return e.Data.(*Expression)
+//	}
+//}
 
 type CallArgs []*Expression // f(1,2)　调用参数列表
 
@@ -358,6 +378,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "const"
 	case EXPRESSION_TYPE_VAR:
 		return "var"
+	case EXPRESSION_TYPE_RANGE:
+		return "range"
 	}
 	panic("missing type")
 }

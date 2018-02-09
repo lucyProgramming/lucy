@@ -124,12 +124,6 @@ type NameWithType struct {
 
 func (b *Block) check() []error {
 	errs := []error{}
-	//	for _, v := range b.Lables {
-	//		if b.IsFunctionTopBlock == false {
-	//			errs = append(errs, fmt.Errorf("%s cannot have lable in innerBlock", errMsgPrefix(v.Pos)))
-	//		}
-	//	}
-
 	errs = append(errs, b.checkConst()...)
 	if b.shouldStop(errs) {
 		return errs
@@ -174,7 +168,6 @@ func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
 		t = ts[0]
 		e.VariableType = t
 	}
-
 	return
 }
 
