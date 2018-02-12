@@ -16,6 +16,7 @@ func Main(files []string) {
 	l.Errs = []error{}
 	l.Files = files
 	l.compile()
+
 }
 
 type LucyCompile struct {

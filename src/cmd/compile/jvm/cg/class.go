@@ -114,17 +114,14 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	}
 	//classess
 	for cn, locations := range high.Classes {
-		info := (&CONSTANT_Class_info{}).ToConstPool()
-		binary.BigEndian.PutUint16(info.info[0:2], c.insertUtfConst(cn))
+		info := (&CONSTANT_Class_info{c.insertUtfConst(cn)}).ToConstPool()
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
 	}
 	//name and type
 	for nt, locations := range high.NameAndTypes {
-		info := (&CONSTANT_NameAndType_info{}).ToConstPool()
-		binary.BigEndian.PutUint16(info.info[0:2], c.insertUtfConst(nt.Name))
-		binary.BigEndian.PutUint16(info.info[2:4], c.insertUtfConst(nt.Type))
+		info := (&CONSTANT_NameAndType_info{c.insertUtfConst(nt.Name), c.insertUtfConst(nt.Type)}).ToConstPool()
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
@@ -132,8 +129,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	}
 	//string
 	for s, locations := range high.StringConsts {
-		info := (&CONSTANT_String_info{}).ToConstPool()
-		binary.BigEndian.PutUint16(info.info[0:2], c.insertUtfConst(s))
+		info := (&CONSTANT_String_info{c.insertUtfConst(s)}).ToConstPool()
 		index := c.constPoolUint16Length()
 		backPatchIndex(locations, index)
 		c.constPool = append(c.constPool, info)
@@ -150,8 +146,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.superClass = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, superClassConst)
 	for _, i := range high.Interfaces {
-		inter := (&CONSTANT_Class_info{}).ToConstPool()
-		binary.BigEndian.PutUint16(inter.info[0:2], c.insertUtfConst(i))
+		inter := (&CONSTANT_Class_info{c.insertUtfConst(i)}).ToConstPool()
 		index := c.constPoolUint16Length()
 		c.interfaces = append(c.interfaces, index)
 		c.constPool = append(c.constPool, inter)
@@ -178,7 +173,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 
 	//source file
 	c.attributes = append(c.attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
-
 	c.ifConstPoolOverMaxSize()
 	return
 }

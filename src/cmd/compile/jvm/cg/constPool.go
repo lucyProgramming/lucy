@@ -33,22 +33,26 @@ type ConstPool struct {
 }
 
 type CONSTANT_Class_info struct {
+	nameindex uint16
 }
 
 func (c *CONSTANT_Class_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_Class
 	p.info = make([]byte, 2)
+	binary.BigEndian.PutUint16(p.info, c.nameindex)
 	return p
 }
 
 type CONSTANT_String_info struct {
+	index uint16
 }
 
 func (c *CONSTANT_String_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_String
 	p.info = make([]byte, 2)
+	binary.BigEndian.PutUint16(p.info, c.index)
 	return p
 }
 
@@ -112,12 +116,15 @@ func (c *CONSTANT_Double_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_NameAndType_info struct {
+	name, descriptor uint16
 }
 
 func (c *CONSTANT_NameAndType_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_NameAndType
 	p.info = make([]byte, 4)
+	binary.BigEndian.PutUint16(p.info, c.name)
+	binary.BigEndian.PutUint16(p.info[2:], c.descriptor)
 	return p
 }
 
