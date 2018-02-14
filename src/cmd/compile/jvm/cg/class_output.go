@@ -111,11 +111,13 @@ func (c *Class) writeMethods() error {
 		if err != nil {
 			return err
 		}
-		_, err = c.dest.Write(v.nameIndex[0:2])
+		binary.BigEndian.PutUint16(bs2, v.nameIndex)
+		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
 		}
-		_, err = c.dest.Write(v.descriptorIndex[0:2])
+		binary.BigEndian.PutUint16(bs2, v.descriptorIndex)
+		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
 		}
@@ -146,11 +148,13 @@ func (c *Class) writeFields() error {
 		if err != nil {
 			return err
 		}
-		_, err = c.dest.Write(v.NameIndex[0:2])
+		binary.BigEndian.PutUint16(bs2, v.NameIndex)
+		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
 		}
-		_, err = c.dest.Write(v.DescriptorIndex[0:2])
+		binary.BigEndian.PutUint16(bs2, v.DescriptorIndex)
+		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
 		}

@@ -154,16 +154,16 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	for _, f := range high.Fields {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
-		binary.BigEndian.PutUint16(field.NameIndex[0:2], c.insertUtfConst(f.Name))
-		binary.BigEndian.PutUint16(field.DescriptorIndex[0:2], c.insertUtfConst(f.Descriptor))
+		field.NameIndex = c.insertUtfConst(f.Name)
+		field.DescriptorIndex = c.insertUtfConst(f.Descriptor)
 		c.fields = append(c.fields, field)
 	}
 	for _, ms := range high.Methods {
 		for _, m := range ms {
 			info := &MethodInfo{}
 			info.AccessFlags = m.AccessFlags //accessflag
-			binary.BigEndian.PutUint16(info.nameIndex[0:2], c.insertUtfConst(m.Name))
-			binary.BigEndian.PutUint16(info.descriptorIndex[0:2], c.insertUtfConst(m.Descriptor))
+			info.nameIndex = c.insertUtfConst(m.Name)
+			info.descriptorIndex = c.insertUtfConst(m.Descriptor)
 			codeinfo := m.Code.ToAttributeInfo(c)
 			binary.BigEndian.PutUint16(codeinfo.nameIndex[0:2], c.insertUtfConst("Code"))
 			info.Attributes = append(info.Attributes, codeinfo)
