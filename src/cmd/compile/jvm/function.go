@@ -34,6 +34,6 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		if v.Typ.IsNumber() && v.Typ.Typ != v.Expression.VariableType.Typ {
 			m.MakeExpression.numberTypeConverter(code, v.Expression.VariableType.Typ, v.Typ.Typ)
 		}
-		copyOP(code, storeSimpleVarOp(v.Typ, v.LocalValOffset)...)
+		copyOP(code, storeSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
 	}
 }

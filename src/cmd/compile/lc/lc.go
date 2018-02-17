@@ -43,7 +43,6 @@ func (l *LucyCompile) exit() {
 		fmt.Println(v)
 	}
 	os.Exit(code)
-
 }
 
 func (l *LucyCompile) Init() {

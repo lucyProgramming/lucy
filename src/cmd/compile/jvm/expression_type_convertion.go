@@ -180,7 +180,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/String",
+			Class:      java_string_class,
 			Name:       "valueOf",
 			Descriptor: "(Z)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -192,7 +192,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/String",
+			Class:      java_string_class,
 			Name:       "valueOf",
 			Descriptor: "(I)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -200,7 +200,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/String",
+			Class:      java_string_class,
 			Name:       "valueOf",
 			Descriptor: "(J)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -208,7 +208,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/String",
+			Class:      java_string_class,
 			Name:       "valueOf",
 			Descriptor: "(F)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -216,7 +216,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/String",
+			Class:      java_string_class,
 			Name:       "valueOf",
 			Descriptor: "(D)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

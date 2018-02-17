@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -44,6 +46,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	//new
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.VariableType.CombinationType.Typ]
+	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@", e.VariableType.CombinationType.Typ == ast.VARIABLE_TYPE_ARRAY)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -90,14 +93,16 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst("java/lang/String", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-
+		meta := ArrayMetas[e.VariableType.CombinationType.CombinationType.Typ]
+		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	default:
-
+		panic("sssssssssssss")
 	}
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++

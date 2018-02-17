@@ -128,6 +128,21 @@ func (t *VariableType) Clone() *VariableType {
 	return ret
 }
 
+/*
+	when typ is VARIABLE_TYPE_CLASS ,convert to object assoiate with class
+*/
+func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
+	if t.Typ == VARIABLE_TYPE_CLASS {
+		t.Typ = VARIABLE_TYPE_OBJECT // correct
+		return                       // no further need be done
+	}
+	if t.Typ == VARIABLE_TYPE_ARRAY {
+		t.Typ = VARIABLE_TYPE_ARRAY_INSTANCE                       // correct
+		t.CombinationType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
+		return
+	}
+}
+
 func (t *VariableType) resolve(block *Block) error {
 	if t.isPrimitive() {
 		return nil
@@ -254,7 +269,6 @@ func (t *VariableType) IsPointer() bool {
 func (t *VariableType) IsInteger() bool {
 	return t.Typ == VARIABLE_TYPE_BYTE ||
 		t.Typ == VARIABLE_TYPE_SHORT ||
-		//		t.Typ == VARIABLE_TYPE_CHAR ||
 		t.Typ == VARIABLE_TYPE_INT ||
 		t.Typ == VARIABLE_TYPE_LONG
 }

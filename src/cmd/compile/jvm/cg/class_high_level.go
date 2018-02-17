@@ -117,7 +117,6 @@ func (c *ClassHighLevel) InsertFieldRefConst(fr CONSTANT_Fieldref_info_high_leve
 	}
 }
 func (c *ClassHighLevel) InsertClassConst(classname string, location []byte) {
-
 	if c.Classes == nil {
 		c.Classes = make(map[string][][]byte)
 	}

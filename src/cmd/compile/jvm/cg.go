@@ -10,6 +10,7 @@ import (
 )
 
 type MakeClass struct {
+	Descriptor     *Descriptor
 	p              *ast.Package
 	Classes        []*cg.ClassHighLevel
 	mainclass      *cg.ClassHighLevel
@@ -69,7 +70,7 @@ func (m *MakeClass) mkVars() {
 		f.AccessFlags = 0
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
-		f.Descriptor = m.typeDescriptor(v.Typ)
+		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
@@ -134,7 +135,7 @@ func (m *MakeClass) mkFuncs() {
 		method := &cg.MethodHighLevel{}
 		method.Class = m.mainclass
 		method.Name = f.Name
-		method.Descriptor = m.methodDescriptor(f)
+		method.Descriptor = m.Descriptor.methodDescriptor(f)
 		method.AccessFlags = 0
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
@@ -167,53 +168,6 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 	}
 	return
-}
-
-func (m *MakeClass) typeDescriptor(v *ast.VariableType) string {
-	switch v.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		return "Z"
-	case ast.VARIABLE_TYPE_BYTE:
-		return "B"
-	case ast.VARIABLE_TYPE_SHORT:
-		return "S"
-	case ast.VARIABLE_TYPE_INT:
-		return "I"
-	case ast.VARIABLE_TYPE_LONG:
-		return "J"
-	case ast.VARIABLE_TYPE_FLOAT:
-		return "F"
-	case ast.VARIABLE_TYPE_DOUBLE:
-		return "D"
-	case ast.VARIABLE_TYPE_ARRAY, ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		return "[" + m.typeDescriptor(v.CombinationType)
-	case ast.VARIABLE_TYPE_STRING:
-		return "Ljava/lang/String;"
-	case ast.VARIABLE_TYPE_VOID:
-		return "V"
-	case ast.VARIABLE_TYPE_OBJECT:
-		return "L" + v.Class.Name + ";"
-	}
-	panic("unhandle type signature")
-}
-
-func (m *MakeClass) methodDescriptor(f *ast.Function) string {
-	if f.Name == ast.MAIN_FUNCTION_NAME {
-		return "([Ljava/lang/String;)V"
-	}
-	s := "("
-	for _, v := range f.Typ.ParameterList {
-		s += m.typeDescriptor(v.Typ)
-	}
-	s += ")"
-	if len(f.Typ.ReturnList) == 0 {
-		s += "V"
-	} else if len(f.Typ.ReturnList) == 1 {
-		s += m.typeDescriptor(f.Typ.ReturnList[0].Typ)
-	} else {
-		s += "Ljava/util/ArrayList;" //always this type
-	}
-	return s
 }
 
 func (m *MakeClass) mkFuncClassMode(f *ast.Function) *cg.MethodHighLevel {

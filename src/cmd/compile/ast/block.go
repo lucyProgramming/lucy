@@ -38,13 +38,7 @@ func (b *Block) searchByName(name string) interface{} {
 		}
 	}
 	if b.Vars != nil {
-		if t, ok := b.Vars[name]; ok { //correct the type
-			if t.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
-				t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
-			}
-			if t.Typ.Typ == VARIABLE_TYPE_CLASS {
-				t.Typ.Typ = VARIABLE_TYPE_OBJECT
-			}
+		if t, ok := b.Vars[name]; ok {
 			return t
 		}
 	}
@@ -270,12 +264,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 			return fmt.Errorf(errmsg)
 		}
 		b.Vars[name] = v
-		if v.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
-			v.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
-		}
-		if v.Typ.Typ == VARIABLE_TYPE_CLASS {
-			v.Typ.Typ = VARIABLE_TYPE_OBJECT
-		}
+		v.Typ.actionNeedBeenDoneWhenDescribeVariable()
 		v.IsGlobal = true // it`s global
 		return nil
 	}
@@ -361,12 +350,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		if t.Typ.Typ == VARIABLE_TYPE_ARRAY { // correct the type
-			t.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
-		}
-		if t.Typ.Typ == VARIABLE_TYPE_CLASS {
-			t.Typ.Typ = VARIABLE_TYPE_OBJECT
-		}
+		t.Typ.actionNeedBeenDoneWhenDescribeVariable()
 		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
 		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
 		b.Vars[name] = t

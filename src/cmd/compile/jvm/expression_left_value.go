@@ -18,7 +18,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			target = identifier.Var.Typ
 			classname = context.mainclass.Name
 			name = identifier.Name
-			descriptor = m.MakeClass.typeDescriptor(identifier.Var.Typ)
+			descriptor = m.MakeClass.Descriptor.typeDescriptor(identifier.Var.Typ)
 			return
 		}
 		if identifier.Var.BeenCaptured {

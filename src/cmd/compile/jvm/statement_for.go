@@ -9,11 +9,11 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	//build array expression
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.AarrayExpression, context) // array on stack
 	meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ]
-	//get elements
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	if 2 > maxstack {
 		maxstack = 2
 	}
+	//get elements
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      meta.classname,
@@ -21,7 +21,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		Descriptor: meta.elementsFieldDescriptor,
 	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 	code.CodeLength += 4
-	copyOP(code, storeSimpleVarOp2(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForRange.Elements)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForRange.Elements)...)
 	//get start
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
@@ -31,7 +31,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		Descriptor: "I",
 	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 	code.CodeLength += 4
-	copyOP(code, storeSimpleVarOp2(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.Start)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.Start)...)
 	//get end
 	code.Codes[code.CodeLength] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -40,7 +40,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		Descriptor: "I",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	copyOP(code, storeSimpleVarOp2(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.End)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.End)...)
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		// k set to 0
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
@@ -51,24 +51,24 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		} else {
 			koffset = context.function.AutoVarForRange.K
 		}
-		copyOP(code, storeSimpleVarOp2(ast.VARIABLE_TYPE_INT, koffset)...)
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
 		loopbegin := code.CodeLength
 		// load start
-		copyOP(code, loadSimpleVarOp2(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.Start)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.Start)...)
 		// load k
-		copyOP(code, loadSimpleVarOp2(ast.VARIABLE_TYPE_INT, koffset)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
 		// mk index
 		code.Codes[code.CodeLength] = cg.OP_iadd
 		code.Codes[code.CodeLength+1] = cg.OP_dup
 		code.CodeLength += 2
 		//check if need to break
-		copyOP(code, loadSimpleVarOp2(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.End)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForRange.End)...)
 		if 3 > maxstack {
 			maxstack = 3
 		}
 		s.BackPatchs = append(s.BackPatchs, (*&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)) // k + start >= end
 		//load elements
-		copyOP(code, loadSimpleVarOp2(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForRange.Elements)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForRange.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
 		// load value
@@ -96,7 +96,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		}
 		code.CodeLength++
 		// store to v
-		copyOP(code, storeSimpleVarOp2(s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
+		copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
 		// build block
 		m.buildBlock(class, code, s.Block, context)
 		//innc k

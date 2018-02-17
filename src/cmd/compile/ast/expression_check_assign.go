@@ -75,7 +75,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
 			vd.Typ = variableType
-			if vd.Typ == nil { // still cannot have type,new false int type
+			if vd.Typ == nil { // still cannot have type,new fake int type
 				vd.Typ = &VariableType{}
 				vd.Typ.Typ = VARIABLE_TYPE_INT
 				vd.Typ.Pos = v.Pos
@@ -88,7 +88,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 		}
 	}
-
 	if noNewVaraible {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 		noErr = false
@@ -101,7 +100,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {
-
 	bin := e.Data.(*ExpressionBinary)
 	t1, es := bin.Left.getLeftValue(block)
 	bin.Left.VariableType = t1

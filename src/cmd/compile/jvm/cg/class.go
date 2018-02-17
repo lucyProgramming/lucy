@@ -33,12 +33,6 @@ type Class struct {
 	Utf8Consts   map[string]*ConstPool
 }
 
-func FromHighLevel(high *ClassHighLevel) *Class {
-	c := &Class{}
-	c.fromHighLevel(high)
-	return c
-}
-
 func (c *Class) insertUtfConst(s string) uint16 {
 	if c.Utf8Consts == nil {
 		c.Utf8Consts = make(map[string]*ConstPool)
@@ -50,6 +44,12 @@ func (c *Class) insertUtfConst(s string) uint16 {
 	info.selfindex = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, info)
 	return info.selfindex
+}
+
+func FromHighLevel(high *ClassHighLevel) *Class {
+	c := &Class{}
+	c.fromHighLevel(high)
+	return c
 }
 
 func (c *Class) fromHighLevel(high *ClassHighLevel) {
@@ -180,7 +180,7 @@ func (c *Class) constPoolUint16Length() uint16 {
 	return uint16(len(c.constPool))
 }
 func (c *Class) ifConstPoolOverMaxSize() {
-	if len(c.constPool) > 65536 {
-		panic(fmt.Sprintf("const pool max size is:%d", 65535))
+	if len(c.constPool) > CONSTANT_POOL_MAX_SIZE {
+		panic(fmt.Sprintf("const pool max size is:%d", CONSTANT_POOL_MAX_SIZE))
 	}
 }

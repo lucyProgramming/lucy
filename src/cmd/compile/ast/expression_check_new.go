@@ -38,9 +38,8 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 }
 
 func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew, errs *[]error) *VariableType {
-	ret := &VariableType{}
-	*ret = *newArray.Typ
-	ret.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+	newArray.Typ.actionNeedBeenDoneWhenDescribeVariable()
+	ret := newArray.Typ.Clone() // clone the type
 	ret.Pos = e.Pos
 	if len(newArray.Args) > 1 { // 0 and 1 is accpect
 		*errs = append(*errs, fmt.Errorf("%s new array must have one int argument"))

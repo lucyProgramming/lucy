@@ -4,6 +4,10 @@ import (
 	"encoding/binary"
 )
 
+const (
+	CONSTANT_POOL_MAX_SIZE = 65536
+)
+
 func backPatchIndex(locations [][]byte, index uint16) {
 	for _, v := range locations {
 		binary.BigEndian.PutUint16(v, index)
