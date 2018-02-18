@@ -26,7 +26,7 @@ type Function struct {
 	VariableType               VariableType
 	Varoffset                  uint16
 	AutoVarForMultiReturn      *AutoVarForMultiReturn
-	AutoVarForRange            *AutoVarForRange
+	// 	AutoVarForRange            *AutoVarForRange
 }
 
 func (f *Function) mkAutoVarForMultiReturn() {
@@ -39,24 +39,6 @@ func (f *Function) mkAutoVarForMultiReturn() {
 	f.Varoffset++
 }
 
-func (f *Function) mkAutoVarForRange() {
-	if f.AutoVarForRange != nil {
-		return
-	}
-	t := &AutoVarForRange{}
-	t.K = f.Varoffset
-	t.Elements = f.Varoffset + 1
-	t.Start = f.Varoffset + 2
-	t.End = f.Varoffset + 3
-	f.Varoffset += 4
-	f.AutoVarForRange = t
-}
-
-type AutoVarForRange struct {
-	K          uint16
-	Elements   uint16
-	Start, End uint16
-}
 type AutoVarForMultiReturn struct {
 	Offset uint16
 }

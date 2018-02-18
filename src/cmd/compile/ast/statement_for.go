@@ -26,6 +26,21 @@ type StatmentForRangeAttr struct {
 	IdentifierV      *ExpressionIdentifer
 	AarrayExpression *Expression
 	Lefts            []*Expression
+	AutoVarForRange  AutoVarForRange
+}
+
+func (t *AutoVarForRange) mkAutoVarForRange(f *Function) {
+	t.K = f.Varoffset
+	t.Elements = f.Varoffset + 1
+	t.Start = f.Varoffset + 2
+	t.End = f.Varoffset + 3
+	f.Varoffset += 4
+}
+
+type AutoVarForRange struct {
+	K          uint16
+	Elements   uint16
+	Start, End uint16
 }
 
 func (s *StatementFor) checkRange() []error {
@@ -75,7 +90,7 @@ func (s *StatementFor) checkRange() []error {
 	s.StatmentForRangeAttr = &StatmentForRangeAttr{}
 	s.StatmentForRangeAttr.ModelKV = modelkv
 	s.StatmentForRangeAttr.AarrayExpression = arrayExpression
-
+	s.StatmentForRangeAttr.AutoVarForRange.mkAutoVarForRange(s.Block.InheritedAttribute.function)
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
@@ -153,7 +168,6 @@ func (s *StatementFor) checkRange() []error {
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
 		panic("...")
 	}
-	s.Block.InheritedAttribute.function.mkAutoVarForRange()
 	errs = append(errs, s.Block.check()...)
 	return errs
 }
