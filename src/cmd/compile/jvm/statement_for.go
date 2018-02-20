@@ -8,12 +8,23 @@ import (
 func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	//build array expression
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.AarrayExpression, context) // array on stack
-	meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ]
+	var rangeend []*cg.JumpBackPatch
+	defer func() {
+		backPatchEs(rangeend, code.CodeLength) // jump to here
+		//pop index on stack
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.CodeLength++
+	}()
+	//check if array is null
+	//	code.Codes[code.CodeLength] = cg.OP_dup //dup top
+	//	code.CodeLength++
+	//	rangeend = append(rangeend, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifnull, code))
+	//get elements
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	if 2 > maxstack {
 		maxstack = 2
 	}
-	//get elements
+	meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ]
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      meta.classname,
@@ -41,6 +52,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRange.End)...)
+
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		// k set to 0
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
@@ -52,7 +64,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 			koffset = s.StatmentForRangeAttr.AutoVarForRange.K
 		}
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
-		loopbegin := code.CodeLength
+		s.ContinueOPOffset = code.CodeLength
 		// load start
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRange.Start)...)
 		// load k
@@ -66,7 +78,10 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		if 3 > maxstack {
 			maxstack = 3
 		}
-		s.BackPatchs = append(s.BackPatchs, (*&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)) // k + start >= end,break loop
+		/*
+			k + start >= end,break loop,pop index on stack
+		*/
+		rangeend = append(rangeend, (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code))
 		//load elements
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRange.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_swap
@@ -119,7 +134,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		code.Codes[code.CodeLength+2] = 1
 		code.CodeLength += 3
 		//goto begin
-		jumpto(cg.OP_goto, code, loopbegin)
+		jumpto(cg.OP_goto, code, s.ContinueOPOffset)
 		return
 	}
 

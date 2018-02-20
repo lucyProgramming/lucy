@@ -308,17 +308,15 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret += v.Name
 	case VARIABLE_TYPE_ENUM:
 		*ret += "enum(" + v.Name + ")"
-	case VARIABLE_TYPE_ARRAY:
+	case VARIABLE_TYPE_ARRAY, VARIABLE_TYPE_ARRAY_INSTANCE:
 		*ret += "[]"
 		v.CombinationType.typeString_(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret += "void"
 	case VARIABLE_TYPE_STRING:
 		*ret += "string"
-	case VARIABLE_TYPE_OBJECT:
-		*ret += "object"
-	case VARIABLE_TYPE_ARRAY_INSTANCE:
-		*ret += "array_instance"
+	case VARIABLE_TYPE_OBJECT: // class name
+		*ret += v.Class.Name
 	default:
 		panic(1)
 	}

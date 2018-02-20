@@ -29,6 +29,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass.Name = p.Name
 	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
 	mkClassDefaultContruction(m.mainclass)
+	m.MakeExpression.MakeClass = m
 	m.mkVars()
 	m.mkEnums()
 	m.mkClass()
