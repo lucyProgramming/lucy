@@ -74,7 +74,13 @@ const (
 	EXPRESSION_TYPE_CONVERTION_TYPE // []byte(str)
 	EXPRESSION_TYPE_LABLE           // end:
 	EXPRESSION_TYPE_RANGE           // for range
+	EXPRESSSION_TYPE_SLICE          // arr[0:2]
 )
+
+type ExpressionSlice struct {
+	Expression *Expression
+	Start, End *Expression
+}
 
 func (e *Expression) IsLiteral() bool {
 	return e.Typ == EXPRESSION_TYPE_NULL ||
@@ -204,7 +210,6 @@ type ExpressionIdentifer struct {
 	Name string
 	Var  *VariableDefinition
 	Func *Function
-	//	Const *Const
 	//enumas
 	Enum     *Enum
 	EnumName *EnumName
@@ -380,6 +385,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "var"
 	case EXPRESSION_TYPE_RANGE:
 		return "range"
+	case EXPRESSSION_TYPE_SLICE:
+		return "slice"
 	}
 	panic("missing type")
 }

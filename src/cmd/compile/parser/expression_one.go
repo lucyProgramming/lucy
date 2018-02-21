@@ -263,8 +263,38 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			if err != nil {
 				return nil, err
 			}
+			if e.Typ == ast.EXPRESSION_TYPE_LABLE || ep.parser.token.Type == lex.TOKEN_COLON {
+				if e.Typ == ast.EXPRESSION_TYPE_LABLE && ep.parser.token.Type == lex.TOKEN_COLON {
+					//
+					ep.parser.Next()
+				}
+				if ep.parser.token.Type == lex.TOKEN_COLON {
+					ep.parser.Next() // skip :
+				}
+				if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+					e.Typ = ast.EXPRESSION_TYPE_IDENTIFIER // corrent to identifier
+				}
+				end, err := ep.parseExpression()
+				if err != nil {
+					return nil, err
+				}
+				if ep.parser.token.Type != lex.TOKEN_RB {
+					return nil, fmt.Errorf("%s '[' and ']' not match", ep.parser.errorMsgPrefix())
+				}
+				ep.Next() // skip ]
+				newe := &ast.Expression{}
+				newe.Typ = ast.EXPRESSSION_TYPE_SLICE
+				newe.Pos = ep.parser.mkPos()
+				slice := &ast.ExpressionSlice{}
+				newe.Data = slice
+				slice.Start = e
+				slice.Expression = left
+				slice.End = end
+				left = newe
+				continue
+			}
 			if ep.parser.token.Type != lex.TOKEN_RB {
-				return nil, fmt.Errorf("%s not ] after a expression", ep.parser.errorMsgPrefix())
+				return nil, fmt.Errorf("%s '[' and ']' not match", ep.parser.errorMsgPrefix())
 			}
 			newe := &ast.Expression{}
 			newe.Pos = pos

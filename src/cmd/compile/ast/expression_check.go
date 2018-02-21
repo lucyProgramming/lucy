@@ -212,6 +212,12 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		}
 	case EXPRESSION_TYPE_RANGE:
 		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement", errMsgPrefix(e.Pos)))
+	case EXPRESSSION_TYPE_SLICE:
+		tt := e.checkSlice(block, &errs)
+		e.VariableType = tt
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}

@@ -269,9 +269,7 @@ func (p *Parser) parseConstDefinition() ([]*ast.VariableDefinition, []*ast.Expre
 		}
 		return vs
 	}
-
 	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
-
 		return f(), nil, 0, err
 	}
 	typ := p.token.Type
@@ -285,7 +283,6 @@ func (p *Parser) parseConstDefinition() ([]*ast.VariableDefinition, []*ast.Expre
 	if err != nil {
 		return nil, nil, typ, err
 	}
-
 	return f(), es, typ, nil
 }
 

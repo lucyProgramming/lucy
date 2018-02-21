@@ -101,7 +101,7 @@ func (p *PackageLoader) loadAsLucy(j *class_json.ClassJson) {
 
 /*
 	main class
-	比如包名为 lucy/lang/xxx/
+	比如包名为 lucy/lang/xxx
 	main class wei Xxx
 	main class cannot
 */
@@ -187,7 +187,7 @@ func (p *PackageLoader) loadAsJava(j *class_json.ClassJson) {
 }
 
 func (*PackageLoader) LoadPackage(name string) (*ast.Package, error) {
-	if len(l.lucyPath) == 0 {
+	if len(compiler.lucyPath) == 0 {
 		return nil, fmt.Errorf("no env variable LUCYPATH found")
 	}
 	packagename := name
@@ -199,7 +199,7 @@ func (*PackageLoader) LoadPackage(name string) (*ast.Package, error) {
 		}
 	}
 	var realpath string
-	for _, v := range l.lucyPath {
+	for _, v := range compiler.lucyPath {
 		_, err := os.Stat(filepath.Join(v, name))
 		if err == nil {
 			realpath = filepath.Join(v, name)

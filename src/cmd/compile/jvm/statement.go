@@ -8,7 +8,6 @@ import (
 func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context) (maxstack uint16) {
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
-		//code.MKLineNumber(s.Expression.Pos.StartLine)
 		var es []*cg.JumpBackPatch
 		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context)
 		backPatchEs(es, code.CodeLength)

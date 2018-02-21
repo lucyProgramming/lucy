@@ -24,23 +24,29 @@ type StatmentForRangeAttr struct {
 	ModelKV          bool
 	IdentifierK      *ExpressionIdentifer
 	IdentifierV      *ExpressionIdentifer
+	ExpressionK      *Expression
+	ExpressionV      *Expression
 	AarrayExpression *Expression
 	Lefts            []*Expression
+	Typ              int
 	AutoVarForRange  AutoVarForRange
 }
 
-func (t *AutoVarForRange) mkAutoVarForRange(f *Function) {
+func (t *AutoVarForRange) mkAutoVarForRange(f *Function, vt *VariableType) {
 	t.K = f.Varoffset
 	t.Elements = f.Varoffset + 1
 	t.Start = f.Varoffset + 2
 	t.End = f.Varoffset + 3
 	f.Varoffset += 4
+	t.V = f.Varoffset
+	f.Varoffset += vt.JvmSlotSize()
 }
 
 type AutoVarForRange struct {
 	K          uint16
 	Elements   uint16
 	Start, End uint16
+	V          uint16
 }
 
 func (s *StatementFor) checkRange() []error {
@@ -53,7 +59,7 @@ func (s *StatementFor) checkRange() []error {
 	} else if bin.Right.Typ == EXPRESSION_TYPE_LIST {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
-			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument", errMsgPrefix(t[1].Pos)))
+			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right", errMsgPrefix(t[1].Pos)))
 		}
 		arrayExpression = t[0].Data.(*Expression)
 	}
@@ -90,7 +96,8 @@ func (s *StatementFor) checkRange() []error {
 	s.StatmentForRangeAttr = &StatmentForRangeAttr{}
 	s.StatmentForRangeAttr.ModelKV = modelkv
 	s.StatmentForRangeAttr.AarrayExpression = arrayExpression
-	s.StatmentForRangeAttr.AutoVarForRange.mkAutoVarForRange(s.Block.InheritedAttribute.function)
+	s.StatmentForRangeAttr.AutoVarForRange.mkAutoVarForRange(s.Block.InheritedAttribute.function, arrayt.CombinationType)
+	s.StatmentForRangeAttr.Lefts = lefts
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
@@ -126,7 +133,6 @@ func (s *StatementFor) checkRange() []error {
 					identifier.Var = vd
 					s.StatmentForRangeAttr.IdentifierK = identifier
 				}
-
 			}
 			if identifier2 != nil {
 				if identifier2.Name == NO_NAME_IDENTIFIER {
@@ -142,7 +148,6 @@ func (s *StatementFor) checkRange() []error {
 					identifier2.Var = vd
 					s.StatmentForRangeAttr.IdentifierV = identifier2
 				}
-
 			}
 		} else {
 			if identifier != nil && identifier.Name == NO_NAME_IDENTIFIER {
@@ -166,8 +171,42 @@ func (s *StatementFor) checkRange() []error {
 		}
 	}
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
-		panic("...")
+		t1, es := lefts[0].getLeftValue(s.Block)
+		if errsNotEmpty(es) {
+			errs = append(errs, es...)
+		}
+		var t2 *VariableType
+		if modelkv {
+			t2, es = lefts[0].getLeftValue(s.Block)
+			if errsNotEmpty(es) {
+				errs = append(errs, es...)
+			}
+		}
+		if t1 == nil {
+			goto checkBlock
+		}
+		if modelkv && t2 == nil {
+			goto checkBlock
+		}
+		lefts[0].VariableType = t1
+		if modelkv && t2 != nil {
+			lefts[1].VariableType = t2
+		}
+		if modelkv {
+			if t1.IsInteger() == false {
+				errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
+			}
+			if t2.TypeCompatible(arrayt.CombinationType) == false {
+				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.CombinationType.TypeString(), t2.TypeString()))
+			}
+
+		} else { // v model
+			if t1.TypeCompatible(arrayt.CombinationType) == false {
+				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.CombinationType.TypeString(), t2.TypeString()))
+			}
+		}
 	}
+checkBlock:
 	errs = append(errs, s.Block.check()...)
 	return errs
 }

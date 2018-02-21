@@ -12,10 +12,10 @@ import (
 )
 
 func Main(files []string) {
-	l.NerrsStopCompile = 10
-	l.Errs = []error{}
-	l.Files = files
-	l.compile()
+	compiler.NerrsStopCompile = 10
+	compiler.Errs = []error{}
+	compiler.Files = files
+	compiler.compile()
 
 }
 

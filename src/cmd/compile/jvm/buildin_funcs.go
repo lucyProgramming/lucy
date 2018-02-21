@@ -11,7 +11,7 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 		return m.mkBuildinPrint(class, code, call, context)
 	case "panic":
 		return m.mkBuildinPanic(class, code, call, context)
-	case "recover":
+	case "catch":
 		return m.mkBuildinRecover(class, code, call, context)
 	default:
 		panic("unhandle buildin function:" + call.Func.Name)

@@ -47,6 +47,7 @@ type VariableType struct {
 
 func (v *VariableType) mkDefaultValueExpression() *Expression {
 	var e Expression
+	e.Pos = v.Pos
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		e.Typ = EXPRESSION_TYPE_BOOL
@@ -85,8 +86,6 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 	case VARIABLE_TYPE_ARRAY_INSTANCE:
 		e.Typ = EXPRESSION_TYPE_NULL
 		e.VariableType = v.Clone()
-		e.Pos = v.Pos
-		fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@", v.Pos == nil)
 	default:
 		panic("....")
 	}
@@ -103,6 +102,7 @@ func (v *VariableType) JvmSlotSize() uint16 {
 		return 1
 	}
 }
+
 func (v *VariableType) rightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||
 		v.Typ == VARIABLE_TYPE_BYTE ||
@@ -320,6 +320,7 @@ func (v *VariableType) typeString_(ret *string) {
 	default:
 		panic(1)
 	}
+
 }
 
 //可读的类型信息

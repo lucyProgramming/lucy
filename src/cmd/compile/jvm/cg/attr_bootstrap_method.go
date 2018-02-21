@@ -5,14 +5,14 @@ import (
 )
 
 type AttributeBootstrapMethods struct {
-	numBootStrapMethods uint16
-	methods             []*BootStrapMethod
+	// numBootStrapMethods uint16
+	methods []*BootStrapMethod
 }
 
 func (a *AttributeBootstrapMethods) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.info, uint16(a.numBootStrapMethods))
+	binary.BigEndian.PutUint16(ret.info, uint16(len(a.methods)))
 	for _, v := range a.methods {
 		bs := make([]byte, 4+len(v.bootStrapMethodArguments)*2)
 		binary.BigEndian.PutUint16(bs, uint16(v.bootStrapMethodRef))

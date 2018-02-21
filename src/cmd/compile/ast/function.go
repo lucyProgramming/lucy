@@ -26,7 +26,6 @@ type Function struct {
 	VariableType               VariableType
 	Varoffset                  uint16
 	AutoVarForMultiReturn      *AutoVarForMultiReturn
-	// 	AutoVarForRange            *AutoVarForRange
 }
 
 func (f *Function) mkAutoVarForMultiReturn() {

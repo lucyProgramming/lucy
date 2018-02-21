@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -10,6 +12,7 @@ type MakeExpression struct {
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
+	fmt.Println(e.OpName())
 	context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
@@ -197,6 +200,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 		maxstack = m.buildTypeConvertion(class, code, e, context)
 	case ast.EXPRESSION_TYPE_CONST: // const will analyse at ast stage
+	case ast.EXPRESSSION_TYPE_SLICE:
+		maxstack = m.buildSlice(class, code, e, context)
 	default:
 		panic(e.OpName())
 	}

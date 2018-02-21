@@ -16,7 +16,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			panic("this is not happening")
 		}
 		var es []*cg.JumpBackPatch
-		//code.MKLineNumber(s.Expressions[0].Pos.StartLine)
 		maxstack, es = m.MakeExpression.build(class, code, s.Expressions[0], context)
 		backPatchEs(es, code.CodeLength)
 		switch s.Function.Typ.ReturnList[0].Typ.Typ {
@@ -72,7 +71,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if currentStack > maxstack {
 				maxstack = maxstack
 			} // make the call
-			//code.MKLineNumber(v.Pos.StartLine)
 			stack, _ := m.MakeExpression.build(class, code, v, context)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
@@ -87,7 +85,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 4
 			continue
 		}
-		//code.MKLineNumber(v.Pos.StartLine)
 		stack, es := m.MakeExpression.build(class, code, v, context)
 		backPatchEs(es, code.CodeLength)
 		if t := stack + currentStack; t > maxstack {

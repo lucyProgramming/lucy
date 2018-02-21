@@ -19,6 +19,7 @@ type ArrayMeta struct {
 	classname, initFuncDescriptor string
 	getDescriptor, setDescriptor  string
 	elementsFieldDescriptor       string
+	sliceDescriptor               string
 }
 
 var (
@@ -32,6 +33,7 @@ func init() {
 		getDescriptor:           "(I)Z",
 		setDescriptor:           "(IZ)V",
 		elementsFieldDescriptor: "[Z",
+		sliceDescriptor:         "(II)Llucy/lang/Arrayboolean;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_BYTE] = &ArrayMeta{
 		classname:               "lucy/lang/Arraybyte",
@@ -39,6 +41,7 @@ func init() {
 		getDescriptor:           "(I)B",
 		setDescriptor:           "(IB)V",
 		elementsFieldDescriptor: "[B",
+		sliceDescriptor:         "(II)Llucy/lang/Arraybyte;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_SHORT] = &ArrayMeta{
 		classname:               "lucy/lang/Arrayshort",
@@ -46,6 +49,7 @@ func init() {
 		getDescriptor:           "(I)S",
 		setDescriptor:           "(IS)V",
 		elementsFieldDescriptor: "[S",
+		sliceDescriptor:         "(II)Llucy/lang/Arrayshort;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_INT] = &ArrayMeta{
 		classname:               "lucy/lang/Arrayint",
@@ -53,6 +57,7 @@ func init() {
 		getDescriptor:           "(I)I",
 		setDescriptor:           "(II)V",
 		elementsFieldDescriptor: "[I",
+		sliceDescriptor:         "(II)Llucy/lang/Arrayint;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_LONG] = &ArrayMeta{
 		classname:               "lucy/lang/Arraylong",
@@ -60,6 +65,7 @@ func init() {
 		getDescriptor:           "(I)J",
 		setDescriptor:           "(IJ)V",
 		elementsFieldDescriptor: "[J",
+		sliceDescriptor:         "(II)Llucy/lang/Arraylong;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_FLOAT] = &ArrayMeta{
 		classname:               "lucy/lang/Arrayfloat",
@@ -67,6 +73,7 @@ func init() {
 		getDescriptor:           "(I)F",
 		setDescriptor:           "(IF)V",
 		elementsFieldDescriptor: "[F",
+		sliceDescriptor:         "(II)Llucy/lang/Arrayfloat;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_DOUBLE] = &ArrayMeta{
 		classname:               "lucy/lang/Arraydouble",
@@ -74,6 +81,7 @@ func init() {
 		getDescriptor:           "(I)D",
 		setDescriptor:           "(ID)V",
 		elementsFieldDescriptor: "[D",
+		sliceDescriptor:         "(II)Llucy/lang/Arraydouble;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_STRING] = &ArrayMeta{
 		classname:               "lucy/lang/ArrayString",
@@ -81,6 +89,7 @@ func init() {
 		getDescriptor:           "(I)Ljava/lang/String;",
 		setDescriptor:           "(ILjava/lang/String;)V",
 		elementsFieldDescriptor: "[Ljava/lang/String;",
+		sliceDescriptor:         "(II)Llucy/lang/ArrayString;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_OBJECT] = &ArrayMeta{
 		classname:               "lucy/lang/ArrayObject",
@@ -88,6 +97,7 @@ func init() {
 		getDescriptor:           "(I)Ljava/lang/Object;",
 		setDescriptor:           "(ILjava/lang/Object;)V",
 		elementsFieldDescriptor: "[Ljava/lang/Object;",
+		sliceDescriptor:         "(II)Llucy/lang/ArrayObject;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_ARRAY_INSTANCE] = &ArrayMeta{
 		classname:               "lucy/lang/ArrayObject",
@@ -95,5 +105,6 @@ func init() {
 		getDescriptor:           "(I)Ljava/lang/Object;",
 		setDescriptor:           "(ILjava/lang/Object;)V",
 		elementsFieldDescriptor: "[Ljava/lang/Object;",
+		sliceDescriptor:         "(II)Llucy/lang/ArrayObject;",
 	}
 }

@@ -2,7 +2,7 @@ package lc
 
 var (
 	CompileFlags Flags
-	l            LucyCompile
+	compiler     LucyCompile
 )
 
 type Flags struct {

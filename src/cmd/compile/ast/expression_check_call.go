@@ -21,11 +21,24 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			t.Typ = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
 			if len(call.Args) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call 'size',method '%s' expect 0 argument",
+				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{t}
 		case "append":
+			if len(call.Args) == 0 {
+				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			for _, e := range call.Args {
+				_, es := e.check(block)
+				if errsNotEmpty(es) {
+					*errs = append(*errs, es...)
+				}
+				//				for _, t := range ts {
+
+				//				}
+			}
 			t := &VariableType{}
 			t.Typ = VARIABLE_TYPE_VOID
 			t.Pos = e.Pos
