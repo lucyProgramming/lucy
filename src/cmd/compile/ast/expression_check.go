@@ -185,12 +185,10 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		}
 	case EXPRESSION_TYPE_NEW:
 		tt := e.checkNewExpression(block, &errs)
-		fmt.Println(tt.TypeString())
 		if tt != nil {
 			t = []*VariableType{tt}
 			e.VariableType = tt
 		}
-
 	case EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
 	case EXPRESSION_TYPE_MINUS_ASSIGN:
@@ -214,6 +212,12 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement", errMsgPrefix(e.Pos)))
 	case EXPRESSSION_TYPE_SLICE:
 		tt := e.checkSlice(block, &errs)
+		e.VariableType = tt
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
+	case EXPRESSION_TYPE_ARRAY:
+		tt := e.checkArray(block, &errs)
 		e.VariableType = tt
 		if tt != nil {
 			t = []*VariableType{tt}

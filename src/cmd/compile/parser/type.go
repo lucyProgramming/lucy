@@ -15,7 +15,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		p.Next()
 		if p.token.Type != lex.TOKEN_RB {
 			// [ and ] not match
-			err = fmt.Errorf("%s [ and ] not match", p.errorMsgPrefix())
+			err = fmt.Errorf("%s '[' and ']' not match", p.errorMsgPrefix())
 			p.errs = append(p.errs, err)
 			return nil, err
 		}

@@ -132,7 +132,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	switch call.Name {
-	case "size", "cap":
+	case "size", "cap", "start", "end":
 		maxstack, _ = m.build(class, code, call.Expression, context)
 		meta := ArrayMetas[call.Expression.VariableType.CombinationType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -144,7 +144,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 		code.CodeLength += 3
 
 	default:
-		panic("unkown method:%v" + call.Name)
+		panic("unkown method:" + call.Name)
 	}
 	return
 }

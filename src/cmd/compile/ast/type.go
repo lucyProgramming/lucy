@@ -37,12 +37,12 @@ type VariableType struct {
 	Typ             int
 	Name            string
 	CombinationType *VariableType
-	FunctionType    *FunctionType
-	Const           *Const
-	Var             *VariableDefinition
-	Class           *Class
-	Enum            *Enum
-	Function        *Function
+	//	FunctionType    *FunctionType
+	Const    *Const
+	Var      *VariableDefinition
+	Class    *Class
+	Enum     *Enum
+	Function *Function
 }
 
 func (v *VariableType) mkDefaultValueExpression() *Expression {
@@ -96,11 +96,12 @@ func (v *VariableType) JvmSlotSize() uint16 {
 	if v.rightValueValid() == false {
 		panic("right value invalid")
 	}
-	if v.Typ == VARIABLE_TYPE_DOUBLE || VARIABLE_TYPE_LONG == v.Typ {
-		return 2
-	} else {
-		return 1
-	}
+	return JvmSlotSizeHandler(v)
+	//	if v.Typ == VARIABLE_TYPE_DOUBLE || VARIABLE_TYPE_LONG == v.Typ {
+	//		return 2
+	//	} else {
+	//		return 1
+	//	}
 }
 
 func (v *VariableType) rightValueValid() bool {
@@ -114,6 +115,7 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
 		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
+
 }
 
 /*
@@ -132,6 +134,9 @@ func (t *VariableType) Clone() *VariableType {
 	when typ is VARIABLE_TYPE_CLASS ,convert to object assoiate with class
 */
 func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
+	if t == nil { // in some case identifier is insert into block,but typ is still wrong
+		return
+	}
 	if t.Typ == VARIABLE_TYPE_CLASS {
 		t.Typ = VARIABLE_TYPE_OBJECT // correct
 		return                       // no further need be done
@@ -277,11 +282,13 @@ func (t *VariableType) IsInteger() bool {
 	float or double
 */
 func (t *VariableType) IsFloat() bool {
-	return t.Typ == VARIABLE_TYPE_FLOAT || t.Typ == VARIABLE_TYPE_DOUBLE
+	return t.Typ == VARIABLE_TYPE_FLOAT ||
+		t.Typ == VARIABLE_TYPE_DOUBLE
 }
 
 func (v *VariableType) isPrimitive() bool {
-	return v.IsNumber() || v.Typ == VARIABLE_TYPE_STRING ||
+	return v.IsNumber() ||
+		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_BOOL
 }
 

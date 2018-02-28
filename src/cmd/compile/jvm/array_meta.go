@@ -22,10 +22,6 @@ type ArrayMeta struct {
 	sliceDescriptor               string
 }
 
-var (
-	ArrayMetas = map[int]*ArrayMeta{}
-)
-
 func init() {
 	ArrayMetas[ast.VARIABLE_TYPE_BOOL] = &ArrayMeta{
 		classname:               "lucy/lang/Arrayboolean",

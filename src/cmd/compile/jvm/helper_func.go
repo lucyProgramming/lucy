@@ -13,7 +13,8 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Name = specail_method_init
 	method.Descriptor = "()V"
 	method.AccessFlags |= cg.ACC_METHOD_PRIVATE
-	method.Code.Codes = make([]byte, 5)
+	length := 5
+	method.Code.Codes = make([]byte, length)
 	method.Code.Codes[0] = cg.OP_aload_0
 	method.Code.Codes[1] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -24,7 +25,7 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Code.Codes[4] = cg.OP_return
 	method.Code.MaxStack = 1
 	method.Code.MaxLocals = 1
-	method.Code.CodeLength = uint16(len(method.Code.Codes))
+	method.Code.CodeLength = uint16(length)
 	class.AppendMethod(method)
 }
 
@@ -249,11 +250,8 @@ func copyOP(code *cg.AttributeCode, op ...byte) {
 	code.CodeLength += uint16(len(op))
 }
 
-func copyOP2(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname, name, descriptor string) {
-	for k, v := range ops {
-		code.Codes[code.CodeLength+uint16(k)] = v
-	}
-	code.CodeLength += uint16(len(ops))
+func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname, name, descriptor string) {
+	copyOP(code, ops...)
 	if classname != "" || name != "" || descriptor != "" {
 		if classname == "" || name == "" || descriptor == "" {
 			panic("....")
@@ -275,4 +273,45 @@ func copyOP2(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, class
 		}
 		code.CodeLength += 2
 	}
+}
+func loadInt32(code *cg.AttributeCode, class *cg.ClassHighLevel, value int32) {
+	switch value {
+	case -1:
+		code.Codes[code.CodeLength] = cg.OP_iconst_m1
+		code.CodeLength++
+	case 0:
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+	case 1:
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+	case 2:
+		code.Codes[code.CodeLength] = cg.OP_iconst_2
+		code.CodeLength++
+	case 3:
+		code.Codes[code.CodeLength] = cg.OP_iconst_3
+		code.CodeLength++
+	case 4:
+		code.Codes[code.CodeLength] = cg.OP_iconst_4
+		code.CodeLength++
+	case 5:
+		code.Codes[code.CodeLength] = cg.OP_iconst_5
+		code.CodeLength++
+	default:
+		if -127 >= value && value <= 128 {
+			code.Codes[code.CodeLength] = cg.OP_bipush
+			code.Codes[code.CodeLength+1] = byte(value)
+			code.CodeLength += 2
+		} else if -32768 <= value && 32767 >= value {
+			code.Codes[code.CodeLength] = cg.OP_sipush
+			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
+			code.Codes[code.CodeLength+2] = byte(value)
+			code.CodeLength += 3
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertIntConst(int32(value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+	}
+
 }

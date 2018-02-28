@@ -43,6 +43,7 @@ func (c *Class) insertUtfConst(s string) uint16 {
 	info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, info)
+	c.Utf8Consts[s] = info
 	return info.selfindex
 }
 

@@ -5,7 +5,6 @@ import os
 
 javacode = '''
 
-      
 package lucy.lang;
 public class ArrayTTT   {
 	public int start;
@@ -15,6 +14,15 @@ public class ArrayTTT   {
 	public TTT[] elements;
 	public int size(){
 		return this.end - this.start;
+	}
+	public int start(){
+        return this.start;
+	}
+	public int end(){
+         return this.end;
+	}
+	public int cap(){
+         return this.end;
 	}
 	public ArrayTTT(TTT[] values,int end){
 		this.start = 0;
@@ -26,6 +34,9 @@ public class ArrayTTT   {
 
 	}
 	public ArrayTTT slice(int start,int end){
+		if(end  < 0 ){
+		      end = this.end - this.start;  // whole length
+		}
 		ArrayTTT result = new ArrayTTT();
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
@@ -77,12 +88,6 @@ public class ArrayTTT   {
 		this.end += es.length;
 	}
 }
-
-
-
-
-
-
 
 
 

@@ -16,7 +16,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	if object.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		switch call.Name {
-		case "size", "cap":
+		case "size", "start", "end", "cap":
 			t := &VariableType{}
 			t.Typ = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
@@ -44,7 +44,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			t.Pos = e.Pos
 			return []*VariableType{t}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s unkown call %s on array", errMsgPrefix(e.Pos), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}
 		return nil
 	}

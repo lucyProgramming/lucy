@@ -41,65 +41,6 @@ func (ep *ExpressionParser) parseExpression() (*ast.Expression, error) {
 	return ep.parseAssignExpression()
 }
 
-// []int{1,2,3}
-func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
-	fmt.Println(ep.parser.token.Desp)
-	t, err := ep.parser.parseType()
-	if err != nil {
-		return nil, err
-	}
-	arr := &ast.ExpressionArray{}
-	arr.Typ = t
-	arr.Expression, err = ep.parseValueGroups()
-	return &ast.Expression{
-		Typ:  ast.EXPRESSION_TYPE_ARRAY,
-		Data: arr,
-	}, err
-}
-
-//{1,2,3}  {{1,2,3},{456}}
-func (ep *ExpressionParser) parseValueGroups() (*ast.Expression, error) {
-	if ep.parser.token.Type != lex.TOKEN_LC {
-		return nil, fmt.Errorf("%s no { after type definition", ep.parser.errorMsgPrefix())
-	}
-	ret := &ast.Expression{}
-	ret.Typ = ast.EXPRESSION_TYPE_LIST
-	es := []*ast.Expression{}
-	var e *ast.Expression
-	var err error
-	defer func() {
-		ret.Data = es
-	}()
-	ep.Next() // skip {
-	if ep.parser.token.Type == lex.TOKEN_RC {
-		return ret, nil
-	}
-	if ep.parser.token.Type == lex.TOKEN_LC {
-		for !ep.parser.eof && ep.parser.token.Type == lex.TOKEN_LC {
-			e, err = ep.parseValueGroups()
-			if err != nil {
-				return ret, err
-			}
-			es = append(es, e)
-			if ep.parser.token.Type != lex.TOKEN_COMMA {
-				break
-			}
-			ep.Next()
-		}
-	} else {
-		es, err = ep.parseExpressions()
-		if err != nil {
-			return ret, nil
-		}
-	}
-	if ep.parser.token.Type != lex.TOKEN_RC {
-		return ret, fmt.Errorf("%s missing } ", ep.parser.errorMsgPrefix())
-	}
-	ep.Next()
-	return ret, nil
-
-}
-
 func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, error) {
 	t, err := ep.parser.parseType()
 	if err != nil {

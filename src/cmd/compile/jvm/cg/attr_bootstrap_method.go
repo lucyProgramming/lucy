@@ -5,7 +5,6 @@ import (
 )
 
 type AttributeBootstrapMethods struct {
-	// numBootStrapMethods uint16
 	methods []*BootStrapMethod
 }
 

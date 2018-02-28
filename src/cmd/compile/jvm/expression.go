@@ -31,39 +31,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		e.Data = int32(e.Data.(byte))
 		fallthrough
 	case ast.EXPRESSION_TYPE_INT:
-		value := e.Data.(int32)
-		if value == 0 {
-			code.Codes[code.CodeLength] = cg.OP_iconst_0
-			code.CodeLength += 1
-		} else if value == 1 {
-			code.Codes[code.CodeLength] = cg.OP_iconst_1
-			code.CodeLength += 1
-		} else if value == 2 {
-			code.Codes[code.CodeLength] = cg.OP_iconst_2
-			code.CodeLength += 1
-		} else if value == 3 {
-			code.Codes[code.CodeLength] = cg.OP_iconst_3
-			code.CodeLength += 1
-		} else if value == 4 {
-			code.Codes[code.CodeLength] = cg.OP_iconst_4
-			code.CodeLength += 1
-		} else if value == 5 {
-			code.Codes[code.CodeLength] = cg.OP_iconst_5
-			code.CodeLength += 1
-		} else if -127 >= value && value <= 128 {
-			code.Codes[code.CodeLength] = cg.OP_bipush
-			code.Codes[code.CodeLength+1] = byte(value)
-			code.CodeLength += 2
-		} else if -32768 <= value && 32767 >= value {
-			code.Codes[code.CodeLength] = cg.OP_sipush
-			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
-			code.Codes[code.CodeLength+2] = byte(value)
-			code.CodeLength += 3
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertIntConst(int32(value), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		}
+		loadInt32(code, class, e.Data.(int32))
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_LONG:
 		if e.Data.(int64) == 0 {
@@ -112,8 +80,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		class.InsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		maxstack = 1
-	case ast.EXPRESSION_TYPE_ARRAY: // []bool{false,true}
-		panic("11")
 	//binary expression
 	case ast.EXPRESSION_TYPE_LOGICAL_OR:
 		fallthrough
@@ -202,6 +168,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_CONST: // const will analyse at ast stage
 	case ast.EXPRESSSION_TYPE_SLICE:
 		maxstack = m.buildSlice(class, code, e, context)
+	case ast.EXPRESSION_TYPE_ARRAY:
+		maxstack = m.buildArray(class, code, e, context)
 	default:
 		panic(e.OpName())
 	}

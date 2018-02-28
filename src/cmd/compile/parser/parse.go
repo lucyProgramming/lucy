@@ -328,7 +328,7 @@ func (p *Parser) consume(untils map[int]bool) {
 		panic("no token to consume")
 	}
 	var ok bool
-	for !p.eof {
+	for p.eof == false {
 		if _, ok = untils[p.token.Type]; ok {
 			return
 		}

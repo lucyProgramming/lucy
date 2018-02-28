@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"encoding/binary"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -8,17 +10,17 @@ import (
 func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	//build array expression
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.AarrayExpression, context) // array on stack
-	var rangeend []*cg.JumpBackPatch
-	defer func() {
-		backPatchEs(rangeend, code.CodeLength) // jump to here
-		//pop index on stack
-		code.Codes[code.CodeLength] = cg.OP_pop
-		code.CodeLength++
-	}()
-	//TODO::
-	//	code.Codes[code.CodeLength] = cg.OP_dup //dup top
-	//	code.CodeLength++
-	//	rangeend = append(rangeend, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifnull, code))
+
+	// if null skip
+	code.Codes[code.CodeLength] = cg.OP_dup //dup top
+	code.Codes[code.CodeLength+1] = cg.OP_ifnull
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+2:code.CodeLength+4], 6) // goto pop
+	code.Codes[code.CodeLength+4] = cg.OP_goto
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 7) //goto for
+	code.Codes[code.CodeLength+7] = cg.OP_pop
+	code.CodeLength += 8
+	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+
 	//get elements
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	if 2 > maxstack {
@@ -62,7 +64,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		koffset = s.StatmentForRangeAttr.AutoVarForRange.K
 	}
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
-	s.ContinueOPOffset = code.CodeLength
+	loopbeginAt := code.CodeLength
 	// load start
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRange.Start)...)
 	// load k
@@ -79,7 +81,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	/*
 		k + start >= end,break loop,pop index on stack
 	*/
-	rangeend = append(rangeend, (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code))
+	rangeend := (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)
 	//load elements
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRange.Elements)...)
 	code.Codes[code.CodeLength] = cg.OP_swap
@@ -156,7 +158,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		if t := remainStack + target.JvmSlotSize(); t > maxstack {
 			maxstack = t
 		}
-		copyOP2(class, code, ops, classname, name, descriptor)
+		copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		if s.StatmentForRangeAttr.ModelKV { // set to k
 			stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
 				code, vExpression, context)
@@ -172,13 +174,14 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 			if t := target.JvmSlotSize() + remainStack; t > maxstack {
 				maxstack = t
 			}
-			copyOP2(class, code, ops, classname, name, descriptor)
+			copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		}
 	}
 
 	// build block
 	m.buildBlock(class, code, s.Block, context)
 	//innc k
+	s.ContinueOPOffset = code.CodeLength
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if koffset > 255 {
 		panic("over 255")
@@ -186,10 +189,12 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	code.Codes[code.CodeLength+1] = byte(koffset)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
-
 	//goto begin
-	jumpto(cg.OP_goto, code, s.ContinueOPOffset)
-
+	jumpto(cg.OP_goto, code, loopbeginAt)
+	backPatchEs([]*cg.JumpBackPatch{rangeend}, code.CodeLength) // jump to here
+	//pop index on stack
+	code.Codes[code.CodeLength] = cg.OP_pop
+	code.CodeLength++
 	return
 }
 

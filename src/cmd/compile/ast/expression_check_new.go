@@ -14,27 +14,27 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	if no.Typ.Typ == VARIABLE_TYPE_ARRAY {
 		return e.checkNewArrayExpression(block, no, errs)
 	}
-
-	if no.Typ.Typ == VARIABLE_TYPE_CLASS {
-		args := checkExpressions(block, no.Args, errs)
-		f, accessable, err := no.Typ.Class.matchContructionFunction(args)
-		if err != nil {
-			*errs = append(*errs, err)
-		} else {
-			if !accessable {
-				*errs = append(*errs, fmt.Errorf("%s construction method is private", errMsgPrefix(e.Pos)))
-			}
-		}
-		no.Construction = f
-		ret := &VariableType{}
-		*ret = *no.Typ
-		ret.Typ = VARIABLE_TYPE_OBJECT
-		ret.Pos = e.Pos
-		return ret
-	} else {
-		*errs = append(*errs, fmt.Errorf("%s only class type can be used by new", errMsgPrefix(e.Pos)))
+	// new object
+	if no.Typ.Typ != VARIABLE_TYPE_CLASS {
+		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'", errMsgPrefix(e.Pos), no.Typ.TypeString()))
 		return nil
 	}
+	args := checkExpressions(block, no.Args, errs)
+	f, accessable, err := no.Typ.Class.matchContructionFunction(args)
+	if err != nil {
+		*errs = append(*errs, err)
+	} else {
+		if !accessable {
+			*errs = append(*errs, fmt.Errorf("%s construction method is private", errMsgPrefix(e.Pos)))
+		}
+	}
+	no.Construction = f
+	ret := &VariableType{}
+	*ret = *no.Typ
+	ret.Typ = VARIABLE_TYPE_OBJECT
+	ret.Pos = e.Pos
+	return ret
+
 }
 
 func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew, errs *[]error) *VariableType {

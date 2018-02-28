@@ -75,6 +75,7 @@ const (
 	EXPRESSION_TYPE_LABLE           // end:
 	EXPRESSION_TYPE_RANGE           // for range
 	EXPRESSSION_TYPE_SLICE          // arr[0:2]
+	// 	EXPRESSION_TYPE_ARRAY_VALUES
 )
 
 type ExpressionSlice struct {
@@ -170,18 +171,16 @@ type Expression struct {
 	IsStatementExpression bool
 }
 
+func (e *Expression) IsCall() bool {
+	return e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL
+}
+
 func (e *Expression) CallHasReturnValue() bool {
 	if e.Typ != EXPRESSION_TYPE_FUNCTION_CALL && e.Typ != EXPRESSION_TYPE_METHOD_CALL {
 		panic("")
 	}
 	return len(e.VariableTypes) >= 1 && e.VariableTypes[0].rightValueValid()
 }
-
-//func (e *Expression) GetRangeExprssion() *Expression {
-//	if e.Typ == EXPRESSION_TYPE_RANGE {
-//		return e.Data.(*Expression)
-//	}
-//}
 
 type CallArgs []*Expression // f(1,2)　调用参数列表
 
@@ -242,9 +241,10 @@ type ExpressionBinary struct {
 	Right *Expression
 }
 
-type ExpressionArray struct {
-	Typ        *VariableType
-	Expression *Expression
+type ExpressionArrayLiteral struct {
+	Typ         *VariableType
+	Expressions []*Expression
+	Length      int
 }
 
 /*

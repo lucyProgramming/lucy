@@ -99,7 +99,9 @@ func (f *Function) mkLastRetrunStatement() {
 			es = append(es, &Expression{
 				Typ:  EXPRESSION_TYPE_IDENTIFIER,
 				Data: identifer,
+				Pos:  v.Pos,
 			})
+			fmt.Println("!!!!!!!!!!!1", v.Pos)
 		}
 		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 	}

@@ -40,7 +40,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	var err error
 	noNewVaraible := true
-
 	for k, v := range names {
 		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'", errMsgPrefix(v.Pos), v.OpName()))

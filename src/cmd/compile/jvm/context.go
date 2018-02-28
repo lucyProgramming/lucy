@@ -13,6 +13,9 @@ type Context struct {
 }
 
 func (c *Context) appendLimeNumberAndSourceFile(pos *ast.Pos, code *cg.AttributeCode, class *cg.ClassHighLevel) {
+	if pos == nil {
+		return
+	}
 	if pos.Filename != c.currentSoureFile {
 		if class.SourceFiles == nil {
 			class.SourceFiles = make(map[string]struct{})
