@@ -228,8 +228,21 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		class.InsertStringConst(fmt.Sprintf("object@%s", typ.Class.Name), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst("[]", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		meta := ArrayMetas[typ.CombinationType.Typ]
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      meta.classname,
+			Name:       "toString",
+			Descriptor: "()Ljava/lang/String;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_MAP:
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_hashmap_class,
+			Name:       "toString",
+			Descriptor: "()Ljava/lang/String;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	default:
 		panic(1111111111)

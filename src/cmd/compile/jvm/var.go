@@ -8,6 +8,7 @@ var (
 	arrylistclassname   = "java/util/ArrayList"
 	specail_method_init = "<init>"
 	java_string_class   = "java/lang/String"
+	java_hashmap_class  = "java/util/HashMap"
 	ArrayMetas          = map[int]*ArrayMeta{}
 )
 

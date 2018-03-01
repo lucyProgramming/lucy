@@ -11,6 +11,9 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		return nil
 	}
+	if no.Typ.Typ == VARIABLE_TYPE_MAP {
+		return e.checkNewMapExpression(block, no, errs)
+	}
 	if no.Typ.Typ == VARIABLE_TYPE_ARRAY {
 		return e.checkNewArrayExpression(block, no, errs)
 	}
@@ -34,7 +37,16 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	ret.Typ = VARIABLE_TYPE_OBJECT
 	ret.Pos = e.Pos
 	return ret
+}
 
+func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew, errs *[]error) *VariableType {
+	if len(newMap.Args) > 0 {
+		*errs = append(*errs, fmt.Errorf("%s new map expect no arguments", errMsgPrefix(newMap.Args[0].Pos)))
+	}
+	newMap.Typ.actionNeedBeenDoneWhenDescribeVariable()
+	tt := newMap.Typ.Clone()
+	tt.Pos = e.Pos
+	return tt
 }
 
 func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew, errs *[]error) *VariableType {
@@ -49,14 +61,18 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 		ee := &Expression{}
 		ee.Typ = EXPRESSION_TYPE_INT
 		ee.Data = int32(0)
+		newArray.Args = []*Expression{ee}
 	}
 	ts := checkRightValuesValid(checkExpressions(block, newArray.Args, errs), errs)
-	t, err := e.mustBeOneValueContext(ts)
+	amount, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-	if t.Typ != VARIABLE_TYPE_INT {
-		*errs = append(*errs, fmt.Errorf("%s argument must be 'int'", errMsgPrefix(t.Pos)))
+	if amount == nil {
+		return ret
+	}
+	if amount.Typ != VARIABLE_TYPE_INT {
+		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'", errMsgPrefix(amount.Pos), amount.TypeString()))
 	}
 	//no further checks
 	return ret

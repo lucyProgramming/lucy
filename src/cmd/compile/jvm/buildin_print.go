@@ -96,6 +96,14 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 				Descriptor: "(Ljava/lang/Object;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_MAP:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Name:       "println",
+				Descriptor: "(Ljava/lang/Object;)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
 		}
 		return
 	}
@@ -136,8 +144,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	}
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
-		if (v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || v.Typ == ast.EXPRESSION_TYPE_METHOD_CALL) &&
-			len(v.VariableTypes) > 1 {
+		if v.IsCall() && len(v.VariableTypes) > 1 {
 			stack := m.buildFunctionCall(class, code, v, context)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
@@ -154,7 +161,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			continue
 		}
 		variableType = v.VariableType
-		if v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || v.Typ == ast.EXPRESSION_TYPE_METHOD_CALL {
+		if v.IsCall() {
 			variableType = v.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, v, context)

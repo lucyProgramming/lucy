@@ -11,6 +11,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY_INSTANCE {
 		return m.buildNewArray(class, code, e, context)
 	}
+	if e.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
+		return m.buildNewMap(class, code, e, context)
+	}
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -41,7 +44,21 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.CodeLength += 3
 	return
 }
-
+func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	maxstack = 2
+	code.Codes[code.CodeLength] = cg.OP_new
+	class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength+3] = cg.OP_dup
+	code.CodeLength += 4
+	code.Codes[code.CodeLength] = cg.OP_invokespecial
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      java_hashmap_class,
+		Name:       specail_method_init,
+		Descriptor: "()V",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	return
+}
 func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)

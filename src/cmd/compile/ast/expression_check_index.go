@@ -18,7 +18,9 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		if t == nil {
 			return nil
 		}
-		if t.Typ != VARIABLE_TYPE_ARRAY_INSTANCE && VARIABLE_TYPE_OBJECT != t.Typ {
+		if t.Typ != VARIABLE_TYPE_ARRAY_INSTANCE &&
+			VARIABLE_TYPE_OBJECT != t.Typ &&
+			t.Typ != VARIABLE_TYPE_MAP {
 			op := "access"
 			if e.Typ == EXPRESSION_TYPE_INDEX {
 				op = "index"
@@ -33,27 +35,46 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		return nil
 	}
 	if e.Typ == EXPRESSION_TYPE_INDEX { // index
-		if obj.Typ != VARIABLE_TYPE_ARRAY_INSTANCE {
-			*errs = append(*errs, fmt.Errorf("%s expresson is not a array", errMsgPrefix(e.Pos)))
+		if obj.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+			ts, es := index.Index.check(block)
+			if errsNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			t, err := e.mustBeOneValueContext(ts)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			if t != nil {
+				if !t.IsInteger() {
+					*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
+						errMsgPrefix(e.Pos), t.TypeString()))
+				}
+			}
+			tt := obj.CombinationType.Clone()
+			tt.Pos = e.Pos
+			return tt
+		} else if obj.Typ == VARIABLE_TYPE_MAP {
+			ts, es := index.Index.check(block)
+			if errsNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			t, err := e.mustBeOneValueContext(ts)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			if t != nil {
+				if t.Equal(obj.Map.K) == false {
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
+						errMsgPrefix(e.Pos), t.TypeString(), obj.Map.K.TypeString()))
+				}
+			}
+			tt := obj.Map.V.Clone()
+			tt.Pos = e.Pos
+			return tt
+		} else {
+			*errs = append(*errs, fmt.Errorf("%s cannot have operate 'op' on '%s'", errMsgPrefix(e.Pos), obj.TypeString()))
 			return nil
 		}
-		ts, es := index.Index.check(block)
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
-		t, err := e.mustBeOneValueContext(ts)
-		if err != nil {
-			*errs = append(*errs, err)
-		}
-		if t != nil {
-			if !t.IsInteger() {
-				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
-					errMsgPrefix(e.Pos), t.TypeString()))
-			}
-		}
-		tt := obj.CombinationType.Clone()
-		tt.Pos = e.Pos
-		return tt
 	}
 	// dot
 	if obj.Typ != VARIABLE_TYPE_OBJECT && obj.Typ != VARIABLE_TYPE_CLASS {

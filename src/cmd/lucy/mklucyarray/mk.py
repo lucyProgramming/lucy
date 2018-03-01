@@ -5,6 +5,8 @@ import os
 
 javacode = '''
 
+
+
 package lucy.lang;
 public class ArrayTTT   {
 	public int start;
@@ -87,7 +89,26 @@ public class ArrayTTT   {
 		}
 		this.end += es.length;
 	}
+	public String toString(){
+	    String s = "[";
+	    int size = this.end - this.start;
+	    for(int i= 0;i < size;i ++){
+            s += this.elements[this.start + i ];
+            if(i != size -1){
+                s += " ";
+            }
+	    }
+	    s += "]";
+	    return s;
+	}
+
 }
+
+
+
+
+
+
 
 
 

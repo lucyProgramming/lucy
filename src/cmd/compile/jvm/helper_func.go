@@ -251,7 +251,11 @@ func copyOP(code *cg.AttributeCode, op ...byte) {
 }
 
 func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname, name, descriptor string) {
-	copyOP(code, ops...)
+	if len(ops) == 0 {
+		return
+	}
+	code.Codes[code.CodeLength] = ops[0]
+	code.CodeLength++
 	if classname != "" || name != "" || descriptor != "" {
 		if classname == "" || name == "" || descriptor == "" {
 			panic("....")
@@ -273,6 +277,8 @@ func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byt
 		}
 		code.CodeLength += 2
 	}
+	copyOP(code, ops[1:]...)
+
 }
 func loadInt32(code *cg.AttributeCode, class *cg.ClassHighLevel, value int32) {
 	switch value {

@@ -19,6 +19,7 @@ const (
 	VARIABLE_TYPE_STRING
 	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_ARRAY_INSTANCE
+	VARIABLE_TYPE_MAP
 	VARIABLE_TYPE_FUNCTION
 	//function type
 	VARIABLE_TYPE_FUNCTION_TYPE
@@ -43,6 +44,12 @@ type VariableType struct {
 	Class    *Class
 	Enum     *Enum
 	Function *Function
+	Map      *Map
+}
+
+type Map struct {
+	K *VariableType
+	V *VariableType
 }
 
 func (v *VariableType) mkDefaultValueExpression() *Expression {
@@ -97,11 +104,6 @@ func (v *VariableType) JvmSlotSize() uint16 {
 		panic("right value invalid")
 	}
 	return JvmSlotSizeHandler(v)
-	//	if v.Typ == VARIABLE_TYPE_DOUBLE || VARIABLE_TYPE_LONG == v.Typ {
-	//		return 2
-	//	} else {
-	//		return 1
-	//	}
 }
 
 func (v *VariableType) rightValueValid() bool {
@@ -114,8 +116,8 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_DOUBLE ||
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
-		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
-
+		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
+		v.Typ == VARIABLE_TYPE_MAP
 }
 
 /*
@@ -267,7 +269,9 @@ func (t *VariableType) IsNumber() bool {
 }
 
 func (t *VariableType) IsPointer() bool {
-	return t.Typ == VARIABLE_TYPE_OBJECT || t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE
+	return t.Typ == VARIABLE_TYPE_OBJECT ||
+		t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
+		t.Typ == VARIABLE_TYPE_MAP
 
 }
 
@@ -324,10 +328,15 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret += "string"
 	case VARIABLE_TYPE_OBJECT: // class name
 		*ret += v.Class.Name
+	case VARIABLE_TYPE_MAP:
+		*ret += "map["
+		*ret += v.Map.K.TypeString()
+		*ret += " -> "
+		*ret += v.Map.V.TypeString()
+		*ret += "]"
 	default:
 		panic(1)
 	}
-
 }
 
 //可读的类型信息

@@ -9,7 +9,7 @@ type AttributeLineNumber struct {
 }
 
 func (a *AttributeLineNumber) ToAttributeInfo(class *Class) *AttributeInfo {
-	if len(a.linenumbers) == 0 {
+	if a == nil || len(a.linenumbers) == 0 {
 		return nil
 	}
 	ret := &AttributeInfo{}

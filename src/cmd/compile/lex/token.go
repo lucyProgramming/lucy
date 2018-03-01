@@ -90,6 +90,7 @@ const (
 	TOKEN_IMPLEMENTS     // implements
 	TOKEN_GOTO           //goto
 	TOKEN_RANGE          //range
+	TOKEN_MAP            //map
 )
 
 var (
@@ -135,6 +136,7 @@ var (
 		"implements": TOKEN_IMPLEMENTS,
 		"goto":       TOKEN_GOTO,
 		"range":      TOKEN_RANGE,
+		"map":        TOKEN_MAP,
 	}
 )
 

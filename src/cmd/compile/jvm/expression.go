@@ -379,7 +379,58 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		code.CodeLength++
 		return
 	}
-
 	panic(111111111)
 	return
+}
+
+/*
+	stack is ... objectref value
+*/
+func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+	switch t.Typ {
+	case ast.VARIABLE_TYPE_BOOL:
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Boolean",
+			Name:       specail_method_init,
+			Descriptor: "(Z)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Integer",
+			Name:       specail_method_init,
+			Descriptor: "(I)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_LONG:
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Long",
+			Name:       specail_method_init,
+			Descriptor: "(J)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_FLOAT:
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Float",
+			Name:       specail_method_init,
+			Descriptor: "(F)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_DOUBLE:
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Double",
+			Name:       specail_method_init,
+			Descriptor: "(D)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	}
 }
