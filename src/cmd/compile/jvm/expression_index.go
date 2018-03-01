@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"encoding/binary"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -97,6 +99,38 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	// if null
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.Codes[code.CodeLength+1] = cg.OP_ifnull
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+2:code.CodeLength+4], 6)
+	code.Codes[code.CodeLength+4] = cg.OP_goto
+	//	code.Codes[code.CodeLength+5 : code.CodeLength+7]
+	code.CodeLength += 8
+
+	if index.Expression.VariableType.Map.V.IsPointer() == false {
+		switch index.Expression.VariableType.Map.V.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.Codes[code.CodeLength] = cg.OP_iconst_0
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.Codes[code.CodeLength] = cg.OP_lconst_0
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.Codes[code.CodeLength] = cg.OP_fconst_0
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.Codes[code.CodeLength] = cg.OP_dconst_0
+		}
+	}
+	nullexit := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
+
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
 		switch index.Expression.VariableType.Map.V.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -149,6 +183,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength += 3
 		}
 	}
+	backPatchEs([]*cg.JumpBackPatch{nullexit}, code.CodeLength)
 	return
 }
 func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
