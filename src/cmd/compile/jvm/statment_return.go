@@ -101,7 +101,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Integer",
+				Class:      java_integer_class,
 				Name:       "valueOf",
 				Descriptor: "(I)Ljava/lang/Integer;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -109,7 +109,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_FLOAT:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Float",
+				Class:      java_float_class,
 				Name:       "valueOf",
 				Descriptor: "(F)Ljava/lang/Float;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -117,7 +117,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Double",
+				Class:      java_double_class,
 				Name:       "valueOf",
 				Descriptor: "(D)Ljava/lang/Double;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -125,7 +125,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Long",
+				Class:      java_long_class,
 				Name:       "valueOf",
 				Descriptor: "(J)Ljava/lang/Long;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])

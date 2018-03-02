@@ -8,6 +8,7 @@ import (
 func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
 	return
 }
+
 func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxstack, _ = m.build(class, code, index.Expression, context)
@@ -18,7 +19,7 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_integer_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		if 3 > maxstack { // current stack is 4
 			maxstack = 3
@@ -30,14 +31,14 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Integer",
+			Class:      java_integer_class,
 			Name:       specail_method_init,
 			Descriptor: "(I)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst("java/lang/Long", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		if 3 > maxstack { // current stack is 4
 			maxstack = 3
@@ -49,14 +50,14 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Long",
+			Class:      java_long_class,
 			Name:       specail_method_init,
 			Descriptor: "(J)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst("java/lang/Float", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		if 3 > maxstack { // current stack is 4
 			maxstack = 3
@@ -68,14 +69,14 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Float",
+			Class:      java_float_class,
 			Name:       specail_method_init,
 			Descriptor: "(F)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst("java/lang/Double", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		if 3 > maxstack { // current stack is 4
 			maxstack = 3
@@ -87,7 +88,7 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Double",
+			Class:      java_double_class,
 			Name:       specail_method_init,
 			Descriptor: "(D)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

@@ -61,7 +61,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Integer",
+				Class:      java_integer_class,
 				Name:       specail_method_init,
 				Descriptor: "(I)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -69,7 +69,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Long",
+				Class:      java_long_class,
 				Name:       specail_method_init,
 				Descriptor: "(J)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -77,7 +77,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		case ast.VARIABLE_TYPE_FLOAT:
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Float",
+				Class:      java_float_class,
 				Name:       specail_method_init,
 				Descriptor: "(F)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -85,7 +85,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Double",
+				Class:      java_double_class,
 				Name:       specail_method_init,
 				Descriptor: "(D)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -104,9 +104,12 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+2:code.CodeLength+4], 6)
 	code.Codes[code.CodeLength+4] = cg.OP_goto
-	//	code.Codes[code.CodeLength+5 : code.CodeLength+7]
-	code.CodeLength += 8
-
+	if index.Expression.VariableType.Map.V.IsPointer() == false {
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 8)
+	} else {
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 6)
+	}
+	code.CodeLength += 7
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
 		switch index.Expression.VariableType.Map.V.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
@@ -117,20 +120,20 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength] = cg.OP_iconst_0
+			code.Codes[code.CodeLength+1] = cg.OP_iconst_0
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength] = cg.OP_lconst_0
+			code.Codes[code.CodeLength+1] = cg.OP_lconst_0
 		case ast.VARIABLE_TYPE_FLOAT:
 			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength] = cg.OP_fconst_0
+			code.Codes[code.CodeLength+1] = cg.OP_fconst_0
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength] = cg.OP_dconst_0
+			code.Codes[code.CodeLength+1] = cg.OP_dconst_0
 		}
+		code.CodeLength += 2
 	}
 	nullexit := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
-
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
 		switch index.Expression.VariableType.Map.V.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -143,40 +146,40 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Integer",
+				Class:      java_integer_class,
 				Name:       "intValue",
 				Descriptor: "()I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst("java/lang/Long", code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Long",
+				Class:      java_long_class,
 				Name:       "longValue",
 				Descriptor: "()J",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_FLOAT:
 			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst("java/lang/Float", code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Float",
+				Class:      java_float_class,
 				Name:       "floatValue",
 				Descriptor: "()F",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst("java/lang/Double", code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Double",
+				Class:      java_double_class,
 				Name:       "doubleValue",
 				Descriptor: "()D",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])

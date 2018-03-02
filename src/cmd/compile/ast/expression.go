@@ -163,12 +163,13 @@ func (e *Expression) canbeUsedAsForRange() bool {
 }
 
 type Expression struct {
-	VariableType          *VariableType   //
-	VariableTypes         []*VariableType // functioncall or methodcall can with multi results
-	Pos                   *Pos
-	Typ                   int
-	Data                  interface{}
-	IsStatementExpression bool
+	IsCompileAutoExpression bool
+	VariableType            *VariableType   //
+	VariableTypes           []*VariableType // functioncall or methodcall can with multi results
+	Pos                     *Pos
+	Typ                     int
+	Data                    interface{}
+	IsStatementExpression   bool
 }
 
 func (e *Expression) IsCall() bool {

@@ -121,7 +121,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Pos: pos,
 		}, nil
 	}
-	err = fmt.Errorf("%s unkown type,first token:%s", p.errorMsgPrefix(), p.token.Desp)
+	err = fmt.Errorf("%s unkown type,begining token is '%s'", p.errorMsgPrefix(), p.token.Desp)
 	p.errs = append(p.errs, err)
 	return nil, err
 }

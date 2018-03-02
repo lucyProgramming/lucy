@@ -152,6 +152,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		c.interfaces = append(c.interfaces, index)
 		c.constPool = append(c.constPool, inter)
 	}
+
 	for _, f := range high.Fields {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
@@ -171,7 +172,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			c.methods = append(c.methods, info)
 		}
 	}
-
 	//source file
 	c.attributes = append(c.attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
 	c.ifConstPoolOverMaxSize()

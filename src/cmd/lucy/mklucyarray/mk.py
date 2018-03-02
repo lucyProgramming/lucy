@@ -6,7 +6,6 @@ import os
 javacode = '''
 
 
-
 package lucy.lang;
 public class ArrayTTT   {
 	public int start;
@@ -33,7 +32,7 @@ public class ArrayTTT   {
 		this.elements = values;
 	}
 	private ArrayTTT(){
-
+        
 	}
 	public ArrayTTT slice(int start,int end){
 		if(end  < 0 ){

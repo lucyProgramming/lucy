@@ -278,11 +278,11 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_INT:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_integer_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Integer",
+			Class:      java_integer_class,
 			Name:       "intValue",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -290,11 +290,11 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_LONG:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst("java/lang/Long", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Long",
+			Class:      java_long_class,
 			Name:       "longValue",
 			Descriptor: "()J",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -302,11 +302,11 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_FLOAT:
 		//cast to real object
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst("java/lang/Float", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Float",
+			Class:      java_float_class,
 			Name:       "floatValue",
 			Descriptor: "()F",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -318,7 +318,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Double",
+			Class:      java_double_class,
 			Name:       "doubleValue",
 			Descriptor: "()D",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -403,7 +403,7 @@ func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.Attribut
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Integer",
+			Class:      java_integer_class,
 			Name:       specail_method_init,
 			Descriptor: "(I)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -411,7 +411,7 @@ func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.Attribut
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Long",
+			Class:      java_long_class,
 			Name:       specail_method_init,
 			Descriptor: "(J)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -419,7 +419,7 @@ func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.Attribut
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Float",
+			Class:      java_float_class,
 			Name:       specail_method_init,
 			Descriptor: "(F)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -427,7 +427,7 @@ func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.Attribut
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/Double",
+			Class:      java_double_class,
 			Name:       specail_method_init,
 			Descriptor: "(D)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

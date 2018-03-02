@@ -25,7 +25,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 			if e.Typ == EXPRESSION_TYPE_INDEX {
 				op = "index"
 			}
-			*errs = append(*errs, fmt.Errorf("%s cannot %s on %s", errMsgPrefix(e.Pos), op, t.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot have '%s' on '%s'", errMsgPrefix(e.Pos), op, t.TypeString()))
 			return nil
 		}
 		return t

@@ -5,7 +5,6 @@ import (
 )
 
 type AttributeSignature struct {
-	// index     uint16
 	Signature string
 }
 
