@@ -39,6 +39,30 @@ type Class struct {
 	StringConsts      map[string]*ConstPool
 	FieldRefConsts    map[CONSTANT_Fieldref_info_high_level]*ConstPool
 	NameAndTypeConsts map[CONSTANT_NameAndType_info_high_level]*ConstPool
+	MethodrefConsts   map[CONSTANT_Methodref_info_high_level]*ConstPool
+}
+
+func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint16 {
+	if c.MethodrefConsts == nil {
+		c.MethodrefConsts = make(map[CONSTANT_Methodref_info_high_level]*ConstPool)
+	}
+	if len(c.constPool) == 0 {
+		c.constPool = []*ConstPool{nil}
+	}
+	if con, ok := c.MethodrefConsts[n]; ok {
+		return con.selfindex
+	}
+	info := (&CONSTANT_Methodref_info{
+		classIndex: c.InsertClassConst(n.Class),
+		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{
+			Name:       n.Name,
+			Descriptor: n.Descriptor,
+		}),
+	}).ToConstPool()
+	info.selfindex = c.constPoolUint16Length()
+	c.constPool = append(c.constPool, info)
+	c.MethodrefConsts[n] = info
+	return info.selfindex
 }
 
 func (c *Class) InsertNameAndConst(n CONSTANT_NameAndType_info_high_level) uint16 {
@@ -53,7 +77,7 @@ func (c *Class) InsertNameAndConst(n CONSTANT_NameAndType_info_high_level) uint1
 	}
 	info := (&CONSTANT_NameAndType_info{
 		name:       c.insertUtfConst(n.Name),
-		descriptor: c.insertUtfConst(n.Type),
+		descriptor: c.insertUtfConst(n.Descriptor),
 	}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
 	c.constPool = append(c.constPool, info)
@@ -124,7 +148,7 @@ func (c *Class) InsertLongConst(i int64) uint16 {
 	}
 	info := (&CONSTANT_Long_info{i}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.constPool = append(c.constPool, info, nil)
 	c.LongConsts[i] = info
 	return info.selfindex
 }
@@ -158,7 +182,7 @@ func (c *Class) InsertDoubleConst(f float64) uint16 {
 	}
 	info := (&CONSTANT_Double_info{f}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.constPool = append(c.constPool, info, nil)
 	c.DoubleConsts[f] = info
 	return info.selfindex
 }
@@ -209,39 +233,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	if len(c.constPool) == 0 {
 		c.constPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}
-	//fieldref
-	//	for f, locations := range high.FieldRefs {
-	//		info := (&CONSTANT_Fieldref_info{}).ToConstPool()
-	//		high.InsertClassConst(f.Class, info.info[0:2])
-	//		index := c.constPoolUint16Length()
-	//		backPatchIndex(locations, index)
-	//		c.constPool = append(c.constPool, info)
-	//		high.InsertNameAndTypeConst(CONSTANT_NameAndType_info_high_level{
-	//			Name: f.Name,
-	//			Type: f.Descriptor,
-	//		}, info.info[2:4])
-	//	}
-	//methodref
-	for m, locations := range high.MethodRefs {
-		info := (&CONSTANT_Methodref_info{}).ToConstPool()
-		high.InsertClassConst(m.Class, info.info[0:2])
-		index := c.constPoolUint16Length()
-		backPatchIndex(locations, index)
-		c.constPool = append(c.constPool, info)
-		binary.BigEndian.PutUint16(info.info[2:4], c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{
-			Name: m.Name,
-			Type: m.Descriptor,
-		}))
-
-	}
-	//name and type
-	//	for nt, locations := range high.NameAndTypes {
-	//		info := (&CONSTANT_NameAndType_info{c.insertUtfConst(nt.Name), c.insertUtfConst(nt.Type)}).ToConstPool()
-	//		index := c.constPoolUint16Length()
-	//		backPatchIndex(locations, index)
-	//		c.constPool = append(c.constPool, info)
-
-	//	}
 	c.accessFlag = high.AccessFlags
 	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
 	binary.BigEndian.PutUint16(thisClassConst.info[0:2], c.insertUtfConst(high.Name))
@@ -257,7 +248,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		c.interfaces = append(c.interfaces, index)
 		c.constPool = append(c.constPool, inter)
 	}
-
 	for _, f := range high.Fields {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags

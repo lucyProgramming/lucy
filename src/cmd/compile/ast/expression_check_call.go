@@ -14,6 +14,75 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if err != nil {
 		*errs = append(*errs, err)
 	}
+	if object.Typ == VARIABLE_TYPE_MAP {
+		switch call.Name {
+		case "keyExist", "valueExist":
+			ret := &VariableType{}
+			ret.Pos = e.Pos
+			ret.Typ = VARIABLE_TYPE_BOOL
+			if len(call.Args) == 0 || len(call.Args) > 1 {
+				*errs = append(*errs, fmt.Errorf("%s call expect one argument", errMsgPrefix(e.Pos), call.Name))
+				return []*VariableType{ret}
+			}
+			matchkey := true
+			if call.Name == "valueExist" {
+				matchkey = false
+			}
+			ts, es := call.Args[0].check(block)
+			if errsNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			t, err := call.Args[0].mustBeOneValueContext(ts)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			if matchkey {
+				if false == object.Map.K.Equal(t) {
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
+				}
+			} else {
+				if false == object.Map.V.Equal(t) {
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.V.TypeString()))
+				}
+			}
+			return []*VariableType{ret}
+		case "remove":
+			ret := &VariableType{}
+			ret.Pos = e.Pos
+			ret.Typ = VARIABLE_TYPE_VOID
+			if len(call.Args) == 0 {
+				*errs = append(*errs, fmt.Errorf("%s remove expect at last on argement",
+					errMsgPrefix(e.Pos), e.Pos))
+			}
+			for _, v := range call.Args {
+				ts, es := v.check(block)
+				if errsNotEmpty(es) {
+					*errs = append(*errs, es...)
+				}
+				for _, t := range ts {
+					if object.Map.K.Equal(t) == false {
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
+					}
+				}
+			}
+			return []*VariableType{ret}
+		case "removeAll":
+			ret := &VariableType{}
+			ret.Pos = e.Pos
+			ret.Typ = VARIABLE_TYPE_VOID
+			if len(call.Args) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s removeAll expect no arguments",
+					errMsgPrefix(e.Pos), e.Pos))
+			}
+		default:
+			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on map", errMsgPrefix(e.Pos), call.Name))
+			return nil
+		}
+		return nil
+	}
 	if object.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		switch call.Name {
 		case "size", "start", "end", "cap":

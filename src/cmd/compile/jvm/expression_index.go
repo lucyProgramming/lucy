@@ -135,56 +135,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	nullexit := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
-		switch index.Expression.VariableType.Map.V.Typ {
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_integer_class,
-				Name:       "intValue",
-				Descriptor: "()I",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_long_class,
-				Name:       "longValue",
-				Descriptor: "()J",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_float_class,
-				Name:       "floatValue",
-				Descriptor: "()F",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_double_class,
-				Name:       "doubleValue",
-				Descriptor: "()D",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		}
+		PrimitiveObjectConverter.getFromObject(class, code, index.Expression.VariableType.Map.V)
 	}
 	backPatchEs([]*cg.JumpBackPatch{nullexit}, code.CodeLength)
 	return

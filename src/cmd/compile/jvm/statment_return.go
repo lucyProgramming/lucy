@@ -47,13 +47,13 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	//new a array list
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(arrylistclassname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(java_arrylist_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup // dup on stack
 	code.CodeLength += 4
 	//call init
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      arrylistclassname,
+		Class:      java_arrylist_class,
 		Name:       specail_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -77,7 +77,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/util/ArrayList",
+				Class:      java_arrylist_class,
 				Name:       "addAll",
 				Descriptor: "(Ljava/util/Collection;)Z",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -134,7 +134,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		// append
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      arrylistclassname,
+			Class:      java_arrylist_class,
 			Name:       "add",
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

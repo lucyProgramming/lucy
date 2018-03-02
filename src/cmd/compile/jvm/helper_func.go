@@ -319,5 +319,4 @@ func loadInt32(code *cg.AttributeCode, class *cg.ClassHighLevel, value int32) {
 			code.CodeLength += 3
 		}
 	}
-
 }

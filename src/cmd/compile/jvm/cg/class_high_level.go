@@ -16,7 +16,7 @@ type ClassHighLevel struct {
 	InnerClasss            []*ClassHighLevel
 	AccessFlags            uint16
 	//FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
-	MethodRefs map[CONSTANT_Methodref_info_high_level][][]byte
+	//MethodRefs map[CONSTANT_Methodref_info_high_level][][]byte
 	//NameAndTypes map[CONSTANT_NameAndType_info_high_level][][]byte
 	SuperClass string
 	Interfaces []string
@@ -57,20 +57,9 @@ func (c *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
 }
 
 type CONSTANT_NameAndType_info_high_level struct {
-	Name string
-	Type string
+	Name       string
+	Descriptor string
 }
-
-//func (c *ClassHighLevel) InsertNameAndTypeConst(nameAndType CONSTANT_NameAndType_info_high_level, location []byte) {
-//	if c.NameAndTypes == nil {
-//		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_level][][]byte)
-//	}
-//	if _, ok := c.NameAndTypes[nameAndType]; ok {
-//		c.NameAndTypes[nameAndType] = append(c.NameAndTypes[nameAndType], location)
-//	} else {
-//		c.NameAndTypes[nameAndType] = [][]byte{location}
-//	}
-//}
 
 type CONSTANT_Methodref_info_high_level struct {
 	Class      string
@@ -79,14 +68,7 @@ type CONSTANT_Methodref_info_high_level struct {
 }
 
 func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {
-	if c.MethodRefs == nil {
-		c.MethodRefs = make(map[CONSTANT_Methodref_info_high_level][][]byte)
-	}
-	if _, ok := c.MethodRefs[mr]; ok {
-		c.MethodRefs[mr] = append(c.MethodRefs[mr], location)
-	} else {
-		c.MethodRefs[mr] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertMethodrefConst(mr))
 }
 
 type CONSTANT_Fieldref_info_high_level struct {
@@ -99,7 +81,6 @@ func (c *ClassHighLevel) InsertFieldRefConst(fr CONSTANT_Fieldref_info_high_leve
 	binary.BigEndian.PutUint16(location, c.Class.InsertFieldRefConst(fr))
 }
 func (c *ClassHighLevel) InsertClassConst(classname string, location []byte) {
-
 	binary.BigEndian.PutUint16(location, c.Class.InsertClassConst(classname))
 }
 func (c *ClassHighLevel) InsertIntConst(i int32, location []byte) {
