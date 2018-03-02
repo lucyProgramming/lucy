@@ -47,7 +47,7 @@ func (m *MakeClass) Dump() error {
 	if err != nil {
 		return err
 	}
-	if err := cg.FromHighLevel(m.mainclass).OutPut(f); err != nil {
+	if err := m.mainclass.FromHighLevel().OutPut(f); err != nil {
 		f.Close()
 		return err
 	}
@@ -57,7 +57,7 @@ func (m *MakeClass) Dump() error {
 		if err != nil {
 			return err
 		}
-		if err = cg.FromHighLevel(c).OutPut(f); err != nil {
+		if err = c.FromHighLevel().OutPut(f); err != nil {
 			f.Close()
 			return err
 		}

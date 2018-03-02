@@ -153,12 +153,16 @@ func (c *CONSTANT_InterfaceMethodref_info) ToConstPool() *ConstPool {
 }
 
 type CONSTANT_Fieldref_info struct {
+	classIndex       uint16
+	nameAndTypeIndex uint16
 }
 
 func (c *CONSTANT_Fieldref_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.tag = CONSTANT_POOL_TAG_Fieldref
 	p.info = make([]byte, 4)
+	binary.BigEndian.PutUint16(p.info, c.classIndex)
+	binary.BigEndian.PutUint16(p.info[2:], c.nameAndTypeIndex)
 	return p
 }
 

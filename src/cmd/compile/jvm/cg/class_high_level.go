@@ -1,31 +1,27 @@
 package cg
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math"
 	"strings"
 )
 
 type ClassHighLevel struct {
+	Class                  Class
 	SourceFiles            map[string]struct{} // one class file can be compile form multi
 	Name                   string
 	IsClosureFunctionClass bool
 	MainClass              *ClassHighLevel
 	InnerClasss            []*ClassHighLevel
 	AccessFlags            uint16
-	IntConsts              map[int32][][]byte
-	LongConsts             map[int64][][]byte
-	FloatConsts            map[float32][][]byte
-	DoubleConsts           map[float64][][]byte
-	Classes                map[string][][]byte
-	StringConsts           map[string][][]byte
-	FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
-	MethodRefs             map[CONSTANT_Methodref_info_high_level][][]byte
-	NameAndTypes           map[CONSTANT_NameAndType_info_high_level][][]byte
-	SuperClass             string
-	Interfaces             []string
-	Fields                 map[string]*FiledHighLevel
-	Methods                map[string][]*MethodHighLevel
+	//FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
+	MethodRefs map[CONSTANT_Methodref_info_high_level][][]byte
+	//NameAndTypes map[CONSTANT_NameAndType_info_high_level][][]byte
+	SuperClass string
+	Interfaces []string
+	Fields     map[string]*FiledHighLevel
+	Methods    map[string][]*MethodHighLevel
 }
 
 /*
@@ -41,14 +37,7 @@ func (c *ClassHighLevel) NewFunctionName(prefix string) string {
 	panic(1)
 }
 func (c *ClassHighLevel) InsertStringConst(s string, location []byte) {
-	if c.StringConsts == nil {
-		c.StringConsts = make(map[string][][]byte)
-	}
-	if _, ok := c.StringConsts[s]; ok {
-		c.StringConsts[s] = append(c.StringConsts[s], location)
-	} else {
-		c.StringConsts[s] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertStringConst(s))
 }
 
 func (c *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
@@ -72,16 +61,16 @@ type CONSTANT_NameAndType_info_high_level struct {
 	Type string
 }
 
-func (c *ClassHighLevel) InsertNameAndTypeConst(nameAndType CONSTANT_NameAndType_info_high_level, location []byte) {
-	if c.NameAndTypes == nil {
-		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_level][][]byte)
-	}
-	if _, ok := c.NameAndTypes[nameAndType]; ok {
-		c.NameAndTypes[nameAndType] = append(c.NameAndTypes[nameAndType], location)
-	} else {
-		c.NameAndTypes[nameAndType] = [][]byte{location}
-	}
-}
+//func (c *ClassHighLevel) InsertNameAndTypeConst(nameAndType CONSTANT_NameAndType_info_high_level, location []byte) {
+//	if c.NameAndTypes == nil {
+//		c.NameAndTypes = make(map[CONSTANT_NameAndType_info_high_level][][]byte)
+//	}
+//	if _, ok := c.NameAndTypes[nameAndType]; ok {
+//		c.NameAndTypes[nameAndType] = append(c.NameAndTypes[nameAndType], location)
+//	} else {
+//		c.NameAndTypes[nameAndType] = [][]byte{location}
+//	}
+//}
 
 type CONSTANT_Methodref_info_high_level struct {
 	Class      string
@@ -107,66 +96,25 @@ type CONSTANT_Fieldref_info_high_level struct {
 }
 
 func (c *ClassHighLevel) InsertFieldRefConst(fr CONSTANT_Fieldref_info_high_level, location []byte) {
-	if c.FieldRefs == nil {
-		c.FieldRefs = make(map[CONSTANT_Fieldref_info_high_level][][]byte)
-	}
-	if _, ok := c.FieldRefs[fr]; ok {
-		c.FieldRefs[fr] = append(c.FieldRefs[fr], location)
-	} else {
-		c.FieldRefs[fr] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertFieldRefConst(fr))
 }
 func (c *ClassHighLevel) InsertClassConst(classname string, location []byte) {
-	if c.Classes == nil {
-		c.Classes = make(map[string][][]byte)
-	}
-	if _, ok := c.Classes[classname]; ok {
-		c.Classes[classname] = append(c.Classes[classname], location)
-	} else {
-		c.Classes[classname] = [][]byte{location}
-	}
+
+	binary.BigEndian.PutUint16(location, c.Class.InsertClassConst(classname))
 }
 func (c *ClassHighLevel) InsertIntConst(i int32, location []byte) {
-	if c.IntConsts == nil {
-		c.IntConsts = make(map[int32][][]byte)
-	}
-	if _, ok := c.IntConsts[i]; ok {
-		c.IntConsts[i] = append(c.IntConsts[i], location)
-	} else {
-		c.IntConsts[i] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertIntConst(i))
 }
 func (c *ClassHighLevel) InsertLongConst(i int64, location []byte) {
-	if c.LongConsts == nil {
-		c.LongConsts = make(map[int64][][]byte)
-	}
-	if _, ok := c.LongConsts[i]; ok {
-		c.LongConsts[i] = append(c.LongConsts[i], location)
-	} else {
-		c.LongConsts[i] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertLongConst(i))
 }
 
 func (c *ClassHighLevel) InsertFloatConst(f float32, location []byte) {
-	if c.FloatConsts == nil {
-		c.FloatConsts = make(map[float32][][]byte)
-	}
-	if _, ok := c.FloatConsts[f]; ok {
-		c.FloatConsts[f] = append(c.FloatConsts[f], location)
-	} else {
-		c.FloatConsts[f] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertFloatConst(f))
 }
 
 func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
-	if c.DoubleConsts == nil {
-		c.DoubleConsts = make(map[float64][][]byte)
-	}
-	if _, ok := c.DoubleConsts[d]; ok {
-		c.DoubleConsts[d] = append(c.DoubleConsts[d], location)
-	} else {
-		c.DoubleConsts[d] = [][]byte{location}
-	}
+	binary.BigEndian.PutUint16(location, c.Class.InsertDoubleConst(d))
 }
 func (c *ClassHighLevel) getSourceFile() string {
 	s := ""
