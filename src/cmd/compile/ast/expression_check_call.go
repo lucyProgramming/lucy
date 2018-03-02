@@ -77,6 +77,15 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				*errs = append(*errs, fmt.Errorf("%s removeAll expect no arguments",
 					errMsgPrefix(e.Pos), e.Pos))
 			}
+			return []*VariableType{ret}
+		case "size":
+			ret := &VariableType{}
+			ret.Pos = e.Pos
+			ret.Typ = VARIABLE_TYPE_INT
+			if len(call.Args) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s too many argument to call size'", errMsgPrefix(e.Pos)))
+			}
+			return []*VariableType{ret}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on map", errMsgPrefix(e.Pos), call.Name))
 			return nil
