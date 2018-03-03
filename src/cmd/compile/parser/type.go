@@ -28,7 +28,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		tt := &ast.VariableType{}
 		tt.Pos = pos
 		tt.Typ = ast.VARIABLE_TYPE_ARRAY
-		tt.CombinationType = t
+		tt.ArrayType = t
 		return tt, nil
 	case lex.TOKEN_BOOL:
 		pos := p.mkPos()

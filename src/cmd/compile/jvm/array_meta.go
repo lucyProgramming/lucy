@@ -20,6 +20,7 @@ type ArrayMeta struct {
 	getDescriptor, setDescriptor  string
 	elementsFieldDescriptor       string
 	sliceDescriptor               string
+	appendDescriptor              string
 }
 
 func init() {
@@ -54,6 +55,7 @@ func init() {
 		setDescriptor:           "(II)V",
 		elementsFieldDescriptor: "[I",
 		sliceDescriptor:         "(II)Llucy/lang/Arrayint;",
+		appendDescriptor:        "(I)V",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_LONG] = &ArrayMeta{
 		classname:               "lucy/lang/Arraylong",

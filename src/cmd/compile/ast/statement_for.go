@@ -96,7 +96,7 @@ func (s *StatementFor) checkRange() []error {
 	s.StatmentForRangeAttr = &StatmentForRangeAttr{}
 	s.StatmentForRangeAttr.ModelKV = modelkv
 	s.StatmentForRangeAttr.AarrayExpression = arrayExpression
-	s.StatmentForRangeAttr.AutoVarForRange.mkAutoVarForRange(s.Block.InheritedAttribute.function, arrayt.CombinationType)
+	s.StatmentForRangeAttr.AutoVarForRange.mkAutoVarForRange(s.Block.InheritedAttribute.function, arrayt.ArrayType)
 	s.StatmentForRangeAttr.Lefts = lefts
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
@@ -139,7 +139,7 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 				} else {
 					vd := &VariableDefinition{}
-					vd.Typ = arrayt.CombinationType.Clone()
+					vd.Typ = arrayt.ArrayType.Clone()
 					vd.Pos = pos2
 					err = s.Block.insert(identifier2.Name, s.Condition.Pos, vd)
 					if err != nil {
@@ -158,7 +158,7 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 				} else {
 					vd := &VariableDefinition{}
-					vd.Typ = arrayt.CombinationType.Clone()
+					vd.Typ = arrayt.ArrayType.Clone()
 					vd.Pos = pos2
 					err = s.Block.insert(identifier.Name, s.Condition.Pos, vd)
 					if err != nil {
@@ -196,13 +196,13 @@ func (s *StatementFor) checkRange() []error {
 			if t1.IsInteger() == false {
 				errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
 			}
-			if t2.TypeCompatible(arrayt.CombinationType) == false {
-				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.CombinationType.TypeString(), t2.TypeString()))
+			if t2.TypeCompatible(arrayt.ArrayType) == false {
+				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
 			}
 
 		} else { // v model
-			if t1.TypeCompatible(arrayt.CombinationType) == false {
-				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.CombinationType.TypeString(), t2.TypeString()))
+			if t1.TypeCompatible(arrayt.ArrayType) == false {
+				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
 			}
 		}
 	}

@@ -8,13 +8,13 @@ import (
 func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	arr := e.Data.(*ast.ExpressionArrayLiteral)
 	//	new array ,
-	meta := ArrayMetas[e.VariableType.CombinationType.Typ]
+	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	loadInt32(code, class, int32(arr.Length*2))
-	switch e.VariableType.CombinationType.Typ {
+	switch e.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -45,10 +45,10 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(e.VariableType.CombinationType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(e.VariableType.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		meta := ArrayMetas[e.VariableType.CombinationType.CombinationType.Typ]
+		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -72,7 +72,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 				if t := 5 + stack; t > maxstack {
 					maxstack = t
 				}
-				switch e.VariableType.CombinationType.Typ {
+				switch e.VariableType.ArrayType.Typ {
 				case ast.VARIABLE_TYPE_BOOL:
 					fallthrough
 				case ast.VARIABLE_TYPE_BYTE:
@@ -107,7 +107,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		if t := 5 + stack; t > maxstack {
 			maxstack = t
 		}
-		switch e.VariableType.CombinationType.Typ {
+		switch e.VariableType.ArrayType.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:

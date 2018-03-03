@@ -43,7 +43,7 @@ func (m *Descriptor) typeDescriptor(v *ast.VariableType) string {
 	case ast.VARIABLE_TYPE_DOUBLE:
 		return "D"
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		meta := ArrayMetas[v.CombinationType.Typ] // combination type
+		meta := ArrayMetas[v.ArrayType.Typ] // combination type
 		return "L" + meta.classname + ";"
 	case ast.VARIABLE_TYPE_STRING:
 		return "Ljava/lang/String;"

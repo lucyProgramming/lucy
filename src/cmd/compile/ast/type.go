@@ -36,17 +36,16 @@ const (
 )
 
 type VariableType struct {
-	Pos             *Pos
-	Typ             int
-	Name            string
-	CombinationType *VariableType
-	//	FunctionType    *FunctionType
-	Const    *Const
-	Var      *VariableDefinition
-	Class    *Class
-	Enum     *Enum
-	Function *Function
-	Map      *Map
+	Pos       *Pos
+	Typ       int
+	Name      string
+	ArrayType *VariableType
+	Const     *Const
+	Var       *VariableDefinition
+	Class     *Class
+	Enum      *Enum
+	Function  *Function
+	Map       *Map
 }
 
 type Map struct {
@@ -129,7 +128,7 @@ func (t *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
 	*ret = *t
 	if ret.Typ == VARIABLE_TYPE_ARRAY {
-		ret.CombinationType = t.CombinationType.Clone()
+		ret.ArrayType = t.ArrayType.Clone()
 	}
 	return ret
 }
@@ -146,8 +145,8 @@ func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
 		return                       // no further need be done
 	}
 	if t.Typ == VARIABLE_TYPE_ARRAY {
-		t.Typ = VARIABLE_TYPE_ARRAY_INSTANCE                       // correct
-		t.CombinationType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
+		t.Typ = VARIABLE_TYPE_ARRAY_INSTANCE                 // correct
+		t.ArrayType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
 		return
 	}
 }
@@ -160,7 +159,7 @@ func (t *VariableType) resolve(block *Block) error {
 		return t.resolveName(block)
 	}
 	if t.Typ == VARIABLE_TYPE_ARRAY {
-		return t.CombinationType.resolve(block)
+		return t.ArrayType.resolve(block)
 	}
 	return nil
 }
@@ -323,7 +322,7 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret += "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY, VARIABLE_TYPE_ARRAY_INSTANCE:
 		*ret += "[]"
-		v.CombinationType.typeString_(ret)
+		v.ArrayType.typeString_(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret += "void"
 	case VARIABLE_TYPE_STRING:
@@ -352,5 +351,5 @@ func (t1 *VariableType) Equal(t2 *VariableType) bool {
 	if t1.isPrimitive() || t2.isPrimitive() {
 		return t1.Typ == t2.Typ
 	}
-	return t1.CombinationType.Equal(t2.CombinationType)
+	return t1.ArrayType.Equal(t2.ArrayType)
 }

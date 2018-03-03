@@ -252,6 +252,12 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
 		field.NameIndex = c.insertUtfConst(f.Name)
+		if f.Signature != nil {
+			field.Attributes = append(field.Attributes, f.Signature.ToAttributeInfo(c))
+		}
+		if f.ConstantValue != nil {
+			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
+		}
 		field.DescriptorIndex = c.insertUtfConst(f.Descriptor)
 		c.fields = append(c.fields, field)
 	}
@@ -267,6 +273,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			c.methods = append(c.methods, info)
 		}
 	}
+
 	//source file
 	c.attributes = append(c.attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
 	c.ifConstPoolOverMaxSize()

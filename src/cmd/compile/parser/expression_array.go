@@ -39,7 +39,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 	if t != nil {
 		arr.Typ = &ast.VariableType{}
 		arr.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
-		arr.Typ.CombinationType = t
+		arr.Typ.ArrayType = t
 		arr.Typ.Pos = pos
 	}
 	arr.Expressions, err = ep.parseArrayValues()

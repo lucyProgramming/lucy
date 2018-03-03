@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/common"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -9,7 +10,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxstack, _ = m.build(class, code, call.Expression, context)
 	switch call.Name {
-	case "keyExist", "valueExist":
+	case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
 		variableType := call.Args[0].VariableType
 		if call.Args[0].IsCall() {
 			variableType = call.Args[0].VariableTypes[0]
@@ -30,7 +31,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		code.CodeLength++
 		name := "containsKey"
-		if call.Name != "keyExist" {
+		if call.Name != common.MAP_METHOD_KEY_EXISTS {
 			name = "containsValue"
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -39,7 +40,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
-	case "remove":
+	case common.MAP_METHOD_REMOVE:
 		currentStack := uint16(1)
 		removeMethodName := "remove"
 		removeDescriptor := "(Ljava/lang/Object;)Ljava/lang/Object;"
@@ -115,7 +116,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength+3] = cg.OP_pop
 			code.CodeLength += 4
 		}
-	case "removeAll":
+	case common.MAP_METHOD_REMOVEALL:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
@@ -123,7 +124,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case "size":
+	case common.MAP_METHOD_SIZE:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,

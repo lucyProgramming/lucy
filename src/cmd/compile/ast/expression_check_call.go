@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/756445638/lucy/src/cmd/compile/common"
 )
 
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*VariableType {
@@ -16,7 +18,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	if object.Typ == VARIABLE_TYPE_MAP {
 		switch call.Name {
-		case "keyExist", "valueExist":
+		case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_BOOL
@@ -25,7 +27,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				return []*VariableType{ret}
 			}
 			matchkey := true
-			if call.Name == "valueExist" {
+			if call.Name == common.MAP_METHOD_VALUE_EXISTS {
 				matchkey = false
 			}
 			ts, es := call.Args[0].check(block)
@@ -48,7 +50,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				}
 			}
 			return []*VariableType{ret}
-		case "remove":
+		case common.MAP_METHOD_REMOVE:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_VOID
@@ -69,7 +71,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				}
 			}
 			return []*VariableType{ret}
-		case "removeAll":
+		case common.MAP_METHOD_REMOVEALL:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_VOID
@@ -78,7 +80,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos), e.Pos))
 			}
 			return []*VariableType{ret}
-		case "size":
+		case common.MAP_METHOD_SIZE:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_INT
@@ -94,7 +96,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	if object.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		switch call.Name {
-		case "size", "start", "end", "cap":
+		case common.ARRAY_METHOD_SIZE,
+			common.ARRAY_METHOD_CAP,
+			common.ARRAY_METHOD_START,
+			common.ARRAY_METHOD_END:
 			t := &VariableType{}
 			t.Typ = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
@@ -103,24 +108,33 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{t}
-		case "append":
+		case common.ARRAY_METHOD_APPEND:
 			if len(call.Args) == 0 {
-				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
+				*errs = append(*errs, fmt.Errorf("%s too few arguments to call append,expect at least one argument",
 					errMsgPrefix(e.Pos), call.Name))
 			}
+			data := []*VariableType{}
+
 			for _, e := range call.Args {
-				_, es := e.check(block)
+				ts, es := e.check(block)
 				if errsNotEmpty(es) {
 					*errs = append(*errs, es...)
 				}
-				//				for _, t := range ts {
-
-				//				}
+				if ts != nil {
+					data = append(data, ts...)
+				}
+				for _, t := range ts {
+					if object.ArrayType.Equal(t) == false {
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method 'append'",
+							errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString()))
+					}
+				}
 			}
 			t := &VariableType{}
 			t.Typ = VARIABLE_TYPE_VOID
 			t.Pos = e.Pos
 			return []*VariableType{t}
+
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}

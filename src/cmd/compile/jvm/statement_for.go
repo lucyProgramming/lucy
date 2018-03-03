@@ -26,7 +26,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	if 2 > maxstack {
 		maxstack = 2
 	}
-	meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ]
+	meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ]
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      meta.classname,
@@ -87,7 +87,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
 	// load value
-	switch s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ {
+	switch s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -115,7 +115,7 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.CombinationType.Typ]
+		meta := ArrayMetas[s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_aaload // cast into real type
 		code.Codes[code.CodeLength+1] = cg.OP_checkcast
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+2:code.CodeLength+4])
@@ -124,11 +124,11 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 	// store to v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		copyOP(code,
-			storeSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ,
+			storeSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ,
 				s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
 	} else {
 		copyOP(code,
-			storeSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ,
+			storeSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ,
 				s.StatmentForRangeAttr.AutoVarForRange.V)...)
 	}
 	//current stack is 0
@@ -146,14 +146,14 @@ func (m *MakeClass) buildForRangeStatement(class *cg.ClassHighLevel, code *cg.At
 			maxstack = stack
 		}
 		//load v
-		copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ,
+		copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ,
 			s.StatmentForRangeAttr.AutoVarForRange.V)...)
-		if t := remainStack + s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.JvmSlotSize(); t > maxstack {
+		if t := remainStack + s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.JvmSlotSize(); t > maxstack {
 			maxstack = t
 		}
 		//convert to suitable type
-		if target.IsInteger() && target.Typ != s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ {
-			m.MakeExpression.numberTypeConverter(code, s.StatmentForRangeAttr.AarrayExpression.VariableType.CombinationType.Typ, target.Typ)
+		if target.IsInteger() && target.Typ != s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ {
+			m.MakeExpression.numberTypeConverter(code, s.StatmentForRangeAttr.AarrayExpression.VariableType.ArrayType.Typ, target.Typ)
 		}
 		if t := remainStack + target.JvmSlotSize(); t > maxstack {
 			maxstack = t

@@ -7,9 +7,6 @@ import (
 
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
-	//	if identifier.Const != nil { // handle first
-	//		return m.buildConst(class, code, identifier.Const)
-	//	}
 	if identifier.Var.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

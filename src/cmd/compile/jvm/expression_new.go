@@ -62,8 +62,8 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
-	meta := ArrayMetas[e.VariableType.CombinationType.Typ]
-	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@", e.VariableType.CombinationType.Typ == ast.VARIABLE_TYPE_ARRAY)
+	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
+	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@", e.VariableType.ArrayType.Typ == ast.VARIABLE_TYPE_ARRAY)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -79,7 +79,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = 5
 	}
 	code.CodeLength += 3
-	switch e.VariableType.CombinationType.Typ {
+	switch e.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -115,7 +115,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	case ast.VARIABLE_TYPE_OBJECT:
 	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		meta := ArrayMetas[e.VariableType.CombinationType.CombinationType.Typ]
+		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	default:

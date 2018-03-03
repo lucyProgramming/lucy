@@ -229,6 +229,7 @@ type ExpressionMethodCall struct {
 	Args       CallArgs
 	Name       string
 	Method     *ClassMethod
+	Data       interface{}
 }
 
 type ExpressionNew struct {

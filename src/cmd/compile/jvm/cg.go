@@ -34,6 +34,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.mkEnums()
 	m.mkClass()
 	m.mkFuncs()
+	m.mkConsts()
 	m.mkInitFunctions()
 	err := m.Dump()
 	if err != nil {
@@ -64,11 +65,46 @@ func (m *MakeClass) Dump() error {
 	}
 	return nil
 }
-
+func (m *MakeClass) mkConsts() {
+	for k, v := range m.p.Block.Consts {
+		f := &cg.FiledHighLevel{}
+		f.AccessFlags |= cg.ACC_FIELD_STATIC
+		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
+		f.AccessFlags |= cg.ACC_FIELD_FINAL
+		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
+			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		}
+		f.Name = v.Name
+		f.ConstantValue = &cg.AttributeConstantValue{}
+		switch v.Typ.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			if v.Data.(bool) {
+				f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(1)
+			} else {
+				f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(0)
+			}
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(v.Data.(int32))
+		case ast.VARIABLE_TYPE_LONG:
+			f.ConstantValue.Index = m.mainclass.Class.InsertLongConst(v.Data.(int64))
+		case ast.VARIABLE_TYPE_FLOAT:
+			f.ConstantValue.Index = m.mainclass.Class.InsertFloatConst(v.Data.(float32))
+		case ast.VARIABLE_TYPE_DOUBLE:
+			f.ConstantValue.Index = m.mainclass.Class.InsertDoubleConst(v.Data.(float64))
+		}
+		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)
+		f.Signature = &cg.AttributeSignature{}
+		f.Signature.Signature = f.Descriptor
+		m.mainclass.Fields[k] = f
+	}
+}
 func (m *MakeClass) mkVars() {
 	for k, v := range m.p.Block.Vars {
 		f := &cg.FiledHighLevel{}
-		f.AccessFlags = 0
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)

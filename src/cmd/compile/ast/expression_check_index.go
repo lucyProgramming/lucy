@@ -50,7 +50,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 						errMsgPrefix(e.Pos), t.TypeString()))
 				}
 			}
-			tt := obj.CombinationType.Clone()
+			tt := obj.ArrayType.Clone()
 			tt.Pos = e.Pos
 			return tt
 		} else if obj.Typ == VARIABLE_TYPE_MAP {

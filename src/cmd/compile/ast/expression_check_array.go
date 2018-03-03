@@ -30,15 +30,15 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 				tt.Pos = e.Pos
 				arr.Typ = &VariableType{}
 				arr.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
-				arr.Typ.CombinationType = tt
+				arr.Typ.ArrayType = tt
 			}
-			if arr.Typ.CombinationType.Equal(t) == false {
+			if arr.Typ.ArrayType.Equal(t) == false {
 				if notyp {
 					*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
-						errMsgPrefix(t.Pos), arr.Typ.CombinationType.TypeString(), t.TypeString()))
+						errMsgPrefix(t.Pos), arr.Typ.ArrayType.TypeString(), t.TypeString()))
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(t.Pos), t.TypeString(), arr.Typ.CombinationType.TypeString()))
+						errMsgPrefix(t.Pos), t.TypeString(), arr.Typ.ArrayType.TypeString()))
 				}
 			}
 		}

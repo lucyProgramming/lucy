@@ -63,8 +63,8 @@ func ParseType(name string) (*ast.VariableType, error) {
 			return nil, err
 		}
 		return &ast.VariableType{
-			Typ:             ast.VARIABLE_TYPE_ARRAY,
-			CombinationType: t,
+			Typ:       ast.VARIABLE_TYPE_ARRAY,
+			ArrayType: t,
 		}, nil
 	}
 	panic(fmt.Errorf("unkown type:%v", name))
