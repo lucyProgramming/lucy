@@ -62,7 +62,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					}
 					//load
 					m.buildLoadArrayListAutoVar(code, context)
-					loadInt32(code, class, int32(kk))
+					loadInt32(class, code, int32(kk))
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 						Class:      java_arrylist_class,

@@ -7,7 +7,7 @@ import (
 type AttributeCode struct {
 	MaxStack    uint16
 	MaxLocals   uint16
-	CodeLength  uint16
+	CodeLength  int
 	Codes       []byte
 	LineNumbers AttributeLineNumber
 	Exceptions  []*ExceptionTable
@@ -42,7 +42,7 @@ func (a *AttributeCode) ToAttributeInfo(class *Class) *AttributeInfo {
 */
 func (a *AttributeCode) MKLineNumber(lineno int) {
 	line := &AttributeLinePc{}
-	line.startPc = a.CodeLength
+	line.startPc = uint16(a.CodeLength)
 	line.lineNumber = uint16(lineno)
 	a.LineNumbers.linenumbers = append(a.LineNumbers.linenumbers, line)
 }

@@ -16,11 +16,11 @@ const (
 )
 
 type ArrayMeta struct {
-	classname, initFuncDescriptor string
-	getDescriptor, setDescriptor  string
-	elementsFieldDescriptor       string
-	sliceDescriptor               string
-	appendDescriptor              string
+	classname, initFuncDescriptor         string
+	getDescriptor, setDescriptor          string
+	elementsFieldDescriptor               string
+	sliceDescriptor                       string
+	appendDescriptor, appendAllDescriptor string
 }
 
 func init() {
@@ -55,7 +55,8 @@ func init() {
 		setDescriptor:           "(II)V",
 		elementsFieldDescriptor: "[I",
 		sliceDescriptor:         "(II)Llucy/lang/Arrayint;",
-		appendDescriptor:        "(I)V",
+		appendDescriptor:        "(I)Llucy/lang/Arrayint;",
+		appendAllDescriptor:     "([I)Llucy/lang/Arrayint;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_LONG] = &ArrayMeta{
 		classname:               "lucy/lang/Arraylong",

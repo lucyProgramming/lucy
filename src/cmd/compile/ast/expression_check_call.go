@@ -108,33 +108,33 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{t}
-		case common.ARRAY_METHOD_APPEND:
+		case common.ARRAY_METHOD_APPEND, common.ARRAY_METHOD_APPEND_ALL:
 			if len(call.Args) == 0 {
-				*errs = append(*errs, fmt.Errorf("%s too few arguments to call append,expect at least one argument",
+				*errs = append(*errs, fmt.Errorf("%s too few arguments to call %s,expect at least one argument",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			data := []*VariableType{}
-
 			for _, e := range call.Args {
 				ts, es := e.check(block)
 				if errsNotEmpty(es) {
 					*errs = append(*errs, es...)
 				}
-				if ts != nil {
-					data = append(data, ts...)
-				}
 				for _, t := range ts {
-					if object.ArrayType.Equal(t) == false {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method 'append'",
-							errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString()))
+					if call.Name == common.ARRAY_METHOD_APPEND {
+						if object.ArrayType.Equal(t) == false {
+							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
+								errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString(), call.Name))
+						}
+					} else {
+						if object.Equal(t) == false {
+							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
+								errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString(), call.Name))
+						}
 					}
 				}
 			}
-			t := &VariableType{}
-			t.Typ = VARIABLE_TYPE_VOID
+			t := object.Clone()
 			t.Pos = e.Pos
 			return []*VariableType{t}
-
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}

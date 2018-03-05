@@ -152,15 +152,22 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		t = e.checkFunctionCallExpression(block, &errs)
 		e.VariableTypes = t
+		if len(t) == 1 {
+			e.VariableType = t[0]
+		}
 		if len(t) > 1 {
 			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
 		e.VariableTypes = t
+		if len(t) == 1 {
+			e.VariableType = t[0]
+		}
 		if len(t) > 1 {
 			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
 		}
+
 	case EXPRESSION_TYPE_NOT:
 		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:

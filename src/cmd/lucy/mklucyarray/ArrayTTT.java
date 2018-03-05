@@ -53,14 +53,18 @@ public class ArrayTTT   {
 		}
 		this.elements[this.start + index] = v;
 	}
-	public void append(TTT e){
+	public ArrayTTT append(TTT e){
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
 		}
 		this.elements[this.end++] = e;
+		return this;
 	}
 	private void expand(int cap){
+		if(cap <= 0){
+		    cap = 10;
+		}
 		TTT[] eles = new TTT[cap];
 		int length = this.size();
 		for(int i = 0;i < length;i++){
@@ -71,7 +75,7 @@ public class ArrayTTT   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public void append(TTT[] es){
+	public ArrayTTT append(TTT[] es){
 		if(this.end + es.length < this.cap){
 		}else {
 			this.expand((this.cap + es.length) * 2);
@@ -80,6 +84,7 @@ public class ArrayTTT   {
 			this.elements[this.end + i] = es[i];
 		}
 		this.end += es.length;
+		return this;
 	}
 	public String toString(){
 	    String s = "[";

@@ -15,7 +15,7 @@ func backPatchIndex(locations [][]byte, index uint16) {
 }
 
 type JumpBackPatch struct {
-	CurrentCodeLength uint16
+	CurrentCodeLength int
 	Bs                []byte
 }
 

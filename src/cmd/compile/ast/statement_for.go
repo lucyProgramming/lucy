@@ -11,8 +11,8 @@ type StatementFor struct {
 	Num                  int
 	BackPatchs           []*cg.JumpBackPatch
 	ContinueBackPatchs   []*cg.JumpBackPatch
-	LoopBegin            uint16
-	ContinueOPOffset     uint16
+	LoopBegin            int
+	ContinueOPOffset     int
 	Pos                  *Pos
 	Init                 *Expression
 	Condition            *Expression
@@ -21,18 +21,45 @@ type StatementFor struct {
 }
 
 type StatmentForRangeAttr struct {
-	ModelKV          bool
-	IdentifierK      *ExpressionIdentifer
-	IdentifierV      *ExpressionIdentifer
-	ExpressionK      *Expression
-	ExpressionV      *Expression
-	AarrayExpression *Expression
-	Lefts            []*Expression
-	Typ              int
-	AutoVarForRange  AutoVarForRange
+	ModelKV              bool
+	IdentifierK          *ExpressionIdentifer
+	IdentifierV          *ExpressionIdentifer
+	ExpressionK          *Expression
+	ExpressionV          *Expression
+	Expression           *Expression
+	Lefts                []*Expression
+	Typ                  int
+	AutoVarForRangeArray *AutoVarForRangeArray
+	AutoVarForRangeMap   *AutoVarForRangeMap
+}
+type AutoVarForRangeMap struct {
+	MapObject                uint16
+	KeySets                  uint16
+	KeySetsK, KeySetsKLength uint16
+	K, V                     uint16
 }
 
-func (t *AutoVarForRange) mkAutoVarForRange(f *Function, vt *VariableType) {
+func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType) {
+	t.MapObject = f.Varoffset
+	t.KeySets = f.Varoffset + 1
+	t.KeySetsK = f.Varoffset + 2
+	t.KeySetsKLength = f.Varoffset + 3
+	f.Varoffset += 4
+
+	t.K = f.Varoffset
+	f.Varoffset += kt.JvmSlotSize()
+	t.V = f.Varoffset
+	f.Varoffset += vt.JvmSlotSize()
+}
+
+type AutoVarForRangeArray struct {
+	K          uint16
+	Elements   uint16
+	Start, End uint16
+	V          uint16
+}
+
+func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
 	t.K = f.Varoffset
 	t.Elements = f.Varoffset + 1
 	t.Start = f.Varoffset + 2
@@ -40,13 +67,6 @@ func (t *AutoVarForRange) mkAutoVarForRange(f *Function, vt *VariableType) {
 	f.Varoffset += 4
 	t.V = f.Varoffset
 	f.Varoffset += vt.JvmSlotSize()
-}
-
-type AutoVarForRange struct {
-	K          uint16
-	Elements   uint16
-	Start, End uint16
-	V          uint16
 }
 
 func (s *StatementFor) checkRange() []error {
@@ -74,8 +94,8 @@ func (s *StatementFor) checkRange() []error {
 	if arrayt == nil {
 		return errs
 	}
-	if arrayt.Typ != VARIABLE_TYPE_ARRAY_INSTANCE {
-		errs = append(errs, fmt.Errorf("%s not a array expression", errMsgPrefix(arrayExpression.Pos)))
+	if arrayt.Typ != VARIABLE_TYPE_ARRAY_INSTANCE && arrayt.Typ != VARIABLE_TYPE_MAP {
+		errs = append(errs, fmt.Errorf("%s cannot use '%s' for range,only allow 'array' and 'map'", errMsgPrefix(arrayExpression.Pos), arrayt.TypeString()))
 		return errs
 	}
 	arrayExpression.VariableType = arrayt
@@ -95,8 +115,17 @@ func (s *StatementFor) checkRange() []error {
 	}
 	s.StatmentForRangeAttr = &StatmentForRangeAttr{}
 	s.StatmentForRangeAttr.ModelKV = modelkv
-	s.StatmentForRangeAttr.AarrayExpression = arrayExpression
-	s.StatmentForRangeAttr.AutoVarForRange.mkAutoVarForRange(s.Block.InheritedAttribute.function, arrayt.ArrayType)
+	s.StatmentForRangeAttr.Expression = arrayExpression
+	if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
+		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.function,
+			arrayt.ArrayType)
+	} else {
+		s.StatmentForRangeAttr.AutoVarForRangeMap = &AutoVarForRangeMap{}
+		s.StatmentForRangeAttr.AutoVarForRangeMap.mkAutoVarForRange(s.Block.InheritedAttribute.function,
+			arrayt.Map.K, arrayt.Map.V)
+	}
+
 	s.StatmentForRangeAttr.Lefts = lefts
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
@@ -123,8 +152,15 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos)))
 				} else {
 					vd := &VariableDefinition{}
-					vd.Typ = &VariableType{}
-					vd.Typ.Typ = VARIABLE_TYPE_INT // k
+					var vt *VariableType
+					if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+						vt = &VariableType{}
+						vt.Typ = VARIABLE_TYPE_INT
+					} else {
+						vt = arrayt.Map.K.Clone()
+						vt.Pos = arrayt.Pos
+					}
+					vd.Typ = vt
 					vd.Pos = pos
 					err = s.Block.insert(identifier.Name, pos, vd)
 					if err != nil {
@@ -139,7 +175,11 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 				} else {
 					vd := &VariableDefinition{}
-					vd.Typ = arrayt.ArrayType.Clone()
+					if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+						vd.Typ = arrayt.ArrayType.Clone()
+					} else {
+						vd.Typ = arrayt.Map.V.Clone()
+					}
 					vd.Pos = pos2
 					err = s.Block.insert(identifier2.Name, s.Condition.Pos, vd)
 					if err != nil {
@@ -158,7 +198,12 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 				} else {
 					vd := &VariableDefinition{}
-					vd.Typ = arrayt.ArrayType.Clone()
+					if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+						vd.Typ = arrayt.ArrayType.Clone()
+					} else {
+						vd.Typ = arrayt.Map.V.Clone()
+					}
+					vd.Typ.Pos = pos2
 					vd.Pos = pos2
 					err = s.Block.insert(identifier.Name, s.Condition.Pos, vd)
 					if err != nil {
@@ -192,20 +237,36 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv && t2 != nil {
 			lefts[1].VariableType = t2
 		}
-		if modelkv {
-			if t1.IsInteger() == false {
-				errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
-			}
-			if t2.TypeCompatible(arrayt.ArrayType) == false {
-				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
-			}
+		if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+			if modelkv {
+				if t1.IsInteger() == false {
+					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
+				}
+				if t2.TypeCompatible(arrayt.ArrayType) == false {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+				}
 
-		} else { // v model
-			if t1.TypeCompatible(arrayt.ArrayType) == false {
-				errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+			} else { // v model
+				if t1.TypeCompatible(arrayt.ArrayType) == false {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+				}
+			}
+		} else {
+			if modelkv {
+				if false == t1.Equal(arrayt.Map.K) {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+				}
+				if false == t2.Equal(arrayt.Map.V) {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t2.TypeString()))
+				}
+			} else {
+				if false == t1.Equal(arrayt.Map.V) {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+				}
 			}
 		}
 	}
+
 checkBlock:
 	errs = append(errs, s.Block.check()...)
 	return errs

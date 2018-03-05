@@ -1,7 +1,7 @@
 package jvm
 
 import (
-	"fmt"
+	//"encoding/binary"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
@@ -63,7 +63,6 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	//new
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
-	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@", e.VariableType.ArrayType.Typ == ast.VARIABLE_TYPE_ARRAY)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -71,14 +70,23 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	maxstack = 2
 	// call init
 	stack, _ := m.build(class, code, n.Args[0], context) // must be a interger
+	if t := 2 + stack; t > maxstack {
+		maxstack = t
+	}
 	maxstack += stack
 	code.Codes[code.CodeLength] = cg.OP_dup // dup top
 	code.Codes[code.CodeLength+1] = cg.OP_iconst_2
-	code.Codes[code.CodeLength+2] = cg.OP_imul
-	if 5 > maxstack {
-		maxstack = 5
+	currentStack := uint16(5)
+	if currentStack > maxstack {
+		maxstack = currentStack
 	}
+	code.Codes[code.CodeLength+2] = cg.OP_imul
 	code.CodeLength += 3
+	// check stack top if negative
+	currentStack = 4
+	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code) + currentStack; t > maxstack {
+		maxstack = t
+	}
 	switch e.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray

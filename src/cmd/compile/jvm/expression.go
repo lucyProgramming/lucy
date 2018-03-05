@@ -13,7 +13,9 @@ type MakeExpression struct {
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
 	fmt.Println(e.OpName())
-	context.appendLimeNumberAndSourceFile(e.Pos, code, class)
+	if e.IsCompileAutoExpression == false {
+		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
+	}
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_NULL:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -31,7 +33,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		e.Data = int32(e.Data.(byte))
 		fallthrough
 	case ast.EXPRESSION_TYPE_INT:
-		loadInt32(code, class, e.Data.(int32))
+		loadInt32(class, code, e.Data.(int32))
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_LONG:
 		if e.Data.(int64) == 0 {

@@ -18,28 +18,52 @@ const (
 )
 
 type Class struct {
-	dest              io.Writer
-	magic             uint32 //0xCAFEBABE
-	minorVersion      uint16
-	majorVersion      uint16
-	constPool         []*ConstPool
-	accessFlag        uint16
-	thisClass         uint16
-	superClass        uint16
-	interfaces        []uint16
-	fields            []*FieldInfo
-	methods           []*MethodInfo
-	attributes        []*AttributeInfo
-	Utf8Consts        map[string]*ConstPool
-	IntConsts         map[int32]*ConstPool
-	LongConsts        map[int64]*ConstPool
-	FloatConsts       map[float32]*ConstPool
-	DoubleConsts      map[float64]*ConstPool
-	ClassConsts       map[string]*ConstPool
-	StringConsts      map[string]*ConstPool
-	FieldRefConsts    map[CONSTANT_Fieldref_info_high_level]*ConstPool
-	NameAndTypeConsts map[CONSTANT_NameAndType_info_high_level]*ConstPool
-	MethodrefConsts   map[CONSTANT_Methodref_info_high_level]*ConstPool
+	dest                     io.Writer
+	magic                    uint32 //0xCAFEBABE
+	minorVersion             uint16
+	majorVersion             uint16
+	constPool                []*ConstPool
+	accessFlag               uint16
+	thisClass                uint16
+	superClass               uint16
+	interfaces               []uint16
+	fields                   []*FieldInfo
+	methods                  []*MethodInfo
+	attributes               []*AttributeInfo
+	Utf8Consts               map[string]*ConstPool
+	IntConsts                map[int32]*ConstPool
+	LongConsts               map[int64]*ConstPool
+	FloatConsts              map[float32]*ConstPool
+	DoubleConsts             map[float64]*ConstPool
+	ClassConsts              map[string]*ConstPool
+	StringConsts             map[string]*ConstPool
+	FieldRefConsts           map[CONSTANT_Fieldref_info_high_level]*ConstPool
+	NameAndTypeConsts        map[CONSTANT_NameAndType_info_high_level]*ConstPool
+	MethodrefConsts          map[CONSTANT_Methodref_info_high_level]*ConstPool
+	InterfaceMethodrefConsts map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
+}
+
+func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
+	if c.InterfaceMethodrefConsts == nil {
+		c.InterfaceMethodrefConsts = make(map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool)
+	}
+	if len(c.constPool) == 0 {
+		c.constPool = []*ConstPool{nil}
+	}
+	if con, ok := c.InterfaceMethodrefConsts[n]; ok {
+		return con.selfindex
+	}
+	info := (&CONSTANT_InterfaceMethodref_info{
+		classIndex: c.InsertClassConst(n.Class),
+		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{
+			Name:       n.Name,
+			Descriptor: n.Descriptor,
+		}),
+	}).ToConstPool()
+	info.selfindex = c.constPoolUint16Length()
+	c.constPool = append(c.constPool, info)
+	c.InterfaceMethodrefConsts[n] = info
+	return info.selfindex
 }
 
 func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint16 {

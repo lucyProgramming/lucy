@@ -115,7 +115,6 @@ func (PrimitiveObjectConvert) getFromObject(class *cg.ClassHighLevel, code *cg.A
 			Name:       "floatValue",
 			Descriptor: "()F",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])

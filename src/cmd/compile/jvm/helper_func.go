@@ -1,6 +1,9 @@
 package jvm
 
 import (
+	"encoding/binary"
+	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -25,11 +28,12 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Code.Codes[4] = cg.OP_return
 	method.Code.MaxStack = 1
 	method.Code.MaxLocals = 1
-	method.Code.CodeLength = uint16(length)
+	method.Code.CodeLength = length
 	class.AppendMethod(method)
 }
 
-func backPatchEs(es []*cg.JumpBackPatch, to uint16) {
+func backPatchEs(es []*cg.JumpBackPatch, t int) {
+	to := uint16(t)
 	for _, e := range es {
 		offset := int16(int(to) - int(e.CurrentCodeLength))
 		e.Bs[0] = byte(offset >> 8)
@@ -37,7 +41,7 @@ func backPatchEs(es []*cg.JumpBackPatch, to uint16) {
 	}
 }
 
-func jumpto(op byte, code *cg.AttributeCode, to uint16) {
+func jumpto(op byte, code *cg.AttributeCode, to int) {
 	code.Codes[code.CodeLength] = op
 	b := &cg.JumpBackPatch{}
 	b.CurrentCodeLength = code.CodeLength
@@ -142,7 +146,7 @@ func storeSimpleVarOp(t int, offset uint16) []byte {
 			return []byte{cg.OP_astore, byte(offset)}
 		}
 	default:
-		panic("...")
+		panic(fmt.Sprintf("typ:%v", t))
 	}
 }
 
@@ -245,9 +249,9 @@ func loadSimpleVarOp(t int, offset uint16) []byte {
 
 func copyOP(code *cg.AttributeCode, op ...byte) {
 	for k, v := range op {
-		code.Codes[code.CodeLength+uint16(k)] = v
+		code.Codes[code.CodeLength+k] = v
 	}
-	code.CodeLength += uint16(len(op))
+	code.CodeLength += len(op)
 }
 
 func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname, name, descriptor string) {
@@ -278,9 +282,9 @@ func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byt
 		code.CodeLength += 2
 	}
 	copyOP(code, ops[1:]...)
-
 }
-func loadInt32(code *cg.AttributeCode, class *cg.ClassHighLevel, value int32) {
+
+func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	switch value {
 	case -1:
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -319,4 +323,27 @@ func loadInt32(code *cg.AttributeCode, class *cg.ClassHighLevel, value int32) {
 			code.CodeLength += 3
 		}
 	}
+}
+
+func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode) (maxstack uint16) {
+	maxstack = 2
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.CodeLength++
+	code.Codes[code.CodeLength] = cg.OP_iflt
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+	code.Codes[code.CodeLength+3] = cg.OP_goto
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 12)
+	code.Codes[code.CodeLength+6] = cg.OP_pop
+	code.Codes[code.CodeLength+7] = cg.OP_new
+	class.InsertClassConst(java_index_out_of_range_exception_class, code.Codes[code.CodeLength+8:code.CodeLength+10])
+	code.Codes[code.CodeLength+10] = cg.OP_dup
+	code.Codes[code.CodeLength+11] = cg.OP_invokespecial
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      java_index_out_of_range_exception_class,
+		Name:       specail_method_init,
+		Descriptor: "()V",
+	}, code.Codes[code.CodeLength+12:code.CodeLength+14])
+	code.Codes[code.CodeLength+14] = cg.OP_athrow
+	code.CodeLength += 15
+	return
 }

@@ -138,7 +138,7 @@ func (m *MakeClass) mkInitFunctions() {
 	method.Name = "<clinit>"
 	method.Descriptor = "()V"
 	codes := make([]byte, 65536)
-	codelength := uint16(0)
+	codelength := int(0)
 	for _, v := range ms {
 		codes[codelength] = cg.OP_invokestatic
 		m.mainclass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

@@ -91,8 +91,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 	case lex.TOKEN_MAP:
 		pos := p.mkPos()
 		p.Next() // skip map key word
-		if p.token.Type != lex.TOKEN_LB {
-			return nil, fmt.Errorf("%s expect '[',but '%s'", p.errorMsgPrefix(), p.token.Desp)
+		if p.token.Type != lex.TOKEN_LC {
+			return nil, fmt.Errorf("%s expect '{',but '%s'", p.errorMsgPrefix(), p.token.Desp)
 		}
 		p.Next() // skip [
 		k, err := p.parseType()
@@ -107,8 +107,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		if err != nil {
 			return nil, err
 		}
-		if p.token.Type != lex.TOKEN_RB {
-			return nil, fmt.Errorf("%s expect ']',but '%s'", p.errorMsgPrefix(), p.token.Desp)
+		if p.token.Type != lex.TOKEN_RC {
+			return nil, fmt.Errorf("%s expect '}',but '%s'", p.errorMsgPrefix(), p.token.Desp)
 		}
 		p.Next()
 		m := &ast.Map{
@@ -136,7 +136,8 @@ func (p *Parser) isValidTypeBegin() bool {
 		p.token.Type == lex.TOKEN_DOUBLE ||
 		p.token.Type == lex.TOKEN_LONG ||
 		p.token.Type == lex.TOKEN_STRING ||
-		p.token.Type == lex.TOKEN_IDENTIFIER
+		p.token.Type == lex.TOKEN_IDENTIFIER ||
+		p.token.Type == lex.TOKEN_MAP
 }
 func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
 	name := p.token.Data.(string)

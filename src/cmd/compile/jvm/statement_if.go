@@ -18,7 +18,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	m.buildBlock(class, code, s.Block, context)
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	for _, v := range s.ElseIfList {
-		binary.BigEndian.PutUint16(falseExit, code.CodeLength-codelength)
+		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context)
 		backPatchEs(es, code.CodeLength)
 		if stack > maxstack {
@@ -32,12 +32,12 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	}
 	if s.ElseBlock != nil {
-		binary.BigEndian.PutUint16(falseExit, code.CodeLength-codelength)
+		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		falseExit = nil
 		m.buildBlock(class, code, s.ElseBlock, context)
 	}
 	if falseExit != nil {
-		binary.BigEndian.PutUint16(falseExit, code.CodeLength-codelength)
+		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 	}
 	return
 }

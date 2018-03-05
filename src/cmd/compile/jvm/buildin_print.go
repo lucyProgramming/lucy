@@ -27,7 +27,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 3
 		return
 	}
-	if len(call.Args) == 1 && call.Args[0].HaveOneValue() {
+	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context)
 		backPatchEs(es, code.CodeLength)
 		if t := 1 + stack; t > maxstack {

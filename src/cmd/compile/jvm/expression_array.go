@@ -13,7 +13,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	loadInt32(code, class, int32(arr.Length*2))
+	loadInt32(class, code, int32(arr.Length*2))
 	switch e.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
@@ -67,7 +67,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			for k, t := range v.VariableTypes {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
-				loadInt32(code, class, index) // load index
+				loadInt32(class, code, index) // load index
 				stack := m.unPackArraylist(class, code, k, t, context)
 				if t := 5 + stack; t > maxstack {
 					maxstack = t
@@ -101,7 +101,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		loadInt32(code, class, index) // load index
+		loadInt32(class, code, index) // load index
 		stack, es := m.build(class, code, v, context)
 		backPatchEs(es, code.CodeLength)
 		if t := 5 + stack; t > maxstack {
@@ -132,7 +132,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 		index++
 	}
-	loadInt32(code, class, int32(arr.Length))
+	loadInt32(class, code, int32(arr.Length))
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,

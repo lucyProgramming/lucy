@@ -132,7 +132,7 @@ func (e *Expression) IsIncrement() bool {
 }
 
 func (e *Expression) GetTheOnlyOneVariableType() *VariableType {
-	if e.HaveOneValue() == false {
+	if e.HaveOnlyOneValue() == false {
 		panic("...")
 	}
 	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL {
@@ -141,7 +141,7 @@ func (e *Expression) GetTheOnlyOneVariableType() *VariableType {
 	return e.VariableType
 }
 
-func (e *Expression) HaveOneValue() bool {
+func (e *Expression) HaveOnlyOneValue() bool {
 	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL {
 		return len(e.VariableTypes) == 1
 	}
