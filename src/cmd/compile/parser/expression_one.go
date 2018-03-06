@@ -76,6 +76,12 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
+	case lex.TOKEN_NULL:
+		left = &ast.Expression{
+			Typ: ast.EXPRESSION_TYPE_NULL,
+			Pos: ep.parser.mkPos(),
+		}
+		ep.Next()
 	case lex.TOKEN_LP:
 		ep.Next()
 		if ep.parser.eof {
@@ -171,6 +177,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				Typ:  t,
 			},
 		}
+
 	case lex.TOKEN_LB:
 		left, err = ep.parseArrayExpression()
 		if err != nil {
@@ -225,6 +232,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		left.Pos = pos
 		left.Data = e
 		return left, nil
+
 	default:
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err

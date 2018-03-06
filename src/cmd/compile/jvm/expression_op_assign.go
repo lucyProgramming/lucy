@@ -59,7 +59,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	code.CodeLength += 3
 
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, bin.Left.VariableType)
+		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
 	}
 	//copy op
 	for _, v := range op {
@@ -251,7 +251,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	currentStack -= bin.Left.VariableType.JvmSlotSize() // stack reduce
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, bin.Left.VariableType)
+		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
 		if currentStack > maxstack {
 			maxstack = currentStack
 		}

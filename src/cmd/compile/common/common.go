@@ -11,7 +11,7 @@ const (
 	// map
 	MAP_METHOD_REMOVE       = "remove"
 	MAP_METHOD_REMOVEALL    = "removeAll"
-	MAP_METHOD_KEY_EXISTS   = "kexExist"
-	MAP_METHOD_VALUE_EXISTS = "valueExist"
+	MAP_METHOD_KEY_EXISTS   = "contains"
+	MAP_METHOD_VALUE_EXISTS = "containsValue"
 	MAP_METHOD_SIZE         = "size"
 )

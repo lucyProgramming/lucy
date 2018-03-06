@@ -71,7 +71,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
-			currentStack += m.controlStack2FitAssign(code, op, e.VariableType)
+			currentStack += m.controlStack2FitAssign(code, op, classname, e.VariableType)
 			if currentStack > maxstack {
 				maxstack = currentStack
 			}
@@ -152,7 +152,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
-			currentStack += m.controlStack2FitAssign(code, op, e.VariableType)
+			currentStack += m.controlStack2FitAssign(code, op, classname, e.VariableType)
 			if currentStack > maxstack {
 				maxstack = currentStack
 			}

@@ -310,6 +310,36 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) 
 	if t, ok := keywordMap[identifier]; ok {
 		token.Type = t
 		token.Desp = identifier
+		//		if identifier == "else" {
+		//			c, eof = lex.getchar()
+		//			for (c == ' ' || c == '\t') && eof == false { // skip some charactor
+		//				c, eof = lex.getchar()
+		//			}
+		//			if eof == false {
+		//				if c == 'i' {
+		//					c, eof = lex.getchar()
+		//					if eof == false {
+		//						if c == 'f' {
+		//							c, eof = lex.getchar()
+		//							if eof == false && lex.isLetter(c) {
+		//								token.Type = TOKEN_ELSEIF
+		//								token.Desp = "elseif"
+		//								lex.ungetchar()
+		//							} else {
+		//								lex.ungetchar()
+		//								lex.ungetchar()
+		//								lex.ungetchar()
+		//							}
+		//						} else {
+		//							lex.ungetchar()
+		//							lex.ungetchar()
+		//						}
+		//					}
+		//				} else {
+		//					lex.ungetchar()
+		//				}
+		//			}
+		//		}
 	} else {
 		token.Type = TOKEN_IDENTIFIER
 		token.Data = identifier

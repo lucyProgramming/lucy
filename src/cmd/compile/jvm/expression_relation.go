@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-	"fmt"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
@@ -10,7 +9,6 @@ import (
 
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	fmt.Println(e.Pos)
 	if bin.Left.VariableType.IsNumber() { // in this case ,right must be a number type
 		maxstack = 4
 		stack, _ := m.build(class, code, bin.Left, context)

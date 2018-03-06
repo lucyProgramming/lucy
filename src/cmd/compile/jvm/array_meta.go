@@ -106,4 +106,7 @@ func init() {
 		elementsFieldDescriptor: "[Ljava/lang/Object;",
 		sliceDescriptor:         "(II)Llucy/lang/ArrayObject;",
 	}
+	for _, v := range ArrayMetas {
+		ArrayMetasMap[v.classname] = v
+	}
 }

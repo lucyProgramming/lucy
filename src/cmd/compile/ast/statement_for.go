@@ -11,7 +11,6 @@ type StatementFor struct {
 	Num                  int
 	BackPatchs           []*cg.JumpBackPatch
 	ContinueBackPatchs   []*cg.JumpBackPatch
-	LoopBegin            int
 	ContinueOPOffset     int
 	Pos                  *Pos
 	Init                 *Expression
@@ -27,7 +26,6 @@ type StatmentForRangeAttr struct {
 	ExpressionK          *Expression
 	ExpressionV          *Expression
 	Expression           *Expression
-	Lefts                []*Expression
 	Typ                  int
 	AutoVarForRangeArray *AutoVarForRangeArray
 	AutoVarForRangeMap   *AutoVarForRangeMap
@@ -72,22 +70,22 @@ func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) 
 func (s *StatementFor) checkRange() []error {
 	errs := []error{}
 	//
-	var arrayExpression *Expression
+	var rangeExpression *Expression
 	bin := s.Condition.Data.(*ExpressionBinary)
 	if bin.Right.Typ == EXPRESSION_TYPE_RANGE {
-		arrayExpression = s.Condition.Data.(*Expression)
+		rangeExpression = s.Condition.Data.(*Expression)
 	} else if bin.Right.Typ == EXPRESSION_TYPE_LIST {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
 			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right", errMsgPrefix(t[1].Pos)))
 		}
-		arrayExpression = t[0].Data.(*Expression)
+		rangeExpression = t[0].Data.(*Expression)
 	}
-	ts, es := arrayExpression.check(s.Block)
+	ts, es := rangeExpression.check(s.Block)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	arrayt, err := arrayExpression.mustBeOneValueContext(ts)
+	arrayt, err := rangeExpression.mustBeOneValueContext(ts)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -95,10 +93,10 @@ func (s *StatementFor) checkRange() []error {
 		return errs
 	}
 	if arrayt.Typ != VARIABLE_TYPE_ARRAY_INSTANCE && arrayt.Typ != VARIABLE_TYPE_MAP {
-		errs = append(errs, fmt.Errorf("%s cannot use '%s' for range,only allow 'array' and 'map'", errMsgPrefix(arrayExpression.Pos), arrayt.TypeString()))
+		errs = append(errs, fmt.Errorf("%s cannot use '%s' for range,only allow 'array' and 'map'", errMsgPrefix(rangeExpression.Pos), arrayt.TypeString()))
 		return errs
 	}
-	arrayExpression.VariableType = arrayt
+	rangeExpression.VariableType = arrayt
 	var lefts []*Expression
 	if bin.Left.Typ == EXPRESSION_TYPE_LIST {
 		lefts = bin.Left.Data.([]*Expression)
@@ -115,7 +113,16 @@ func (s *StatementFor) checkRange() []error {
 	}
 	s.StatmentForRangeAttr = &StatmentForRangeAttr{}
 	s.StatmentForRangeAttr.ModelKV = modelkv
-	s.StatmentForRangeAttr.Expression = arrayExpression
+	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
+		if modelkv {
+			s.StatmentForRangeAttr.ExpressionK = lefts[0]
+			s.StatmentForRangeAttr.ExpressionV = lefts[1]
+		} else {
+			s.StatmentForRangeAttr.ExpressionV = lefts[0]
+		}
+	}
+
+	s.StatmentForRangeAttr.Expression = rangeExpression
 	if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
 		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.function,
@@ -126,7 +133,6 @@ func (s *StatementFor) checkRange() []error {
 			arrayt.Map.K, arrayt.Map.V)
 	}
 
-	s.StatmentForRangeAttr.Lefts = lefts
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos

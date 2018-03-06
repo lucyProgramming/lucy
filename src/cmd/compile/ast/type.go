@@ -55,6 +55,7 @@ type Map struct {
 
 func (v *VariableType) mkDefaultValueExpression() *Expression {
 	var e Expression
+	e.IsCompileAutoExpression = true
 	e.Pos = v.Pos
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
@@ -91,6 +92,8 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 		e.VariableType = v.Clone()
 	case VARIABLE_TYPE_OBJECT:
 		fallthrough
+	case VARIABLE_TYPE_MAP:
+		fallthrough
 	case VARIABLE_TYPE_ARRAY_INSTANCE:
 		e.Typ = EXPRESSION_TYPE_NULL
 		e.VariableType = v.Clone()
@@ -118,8 +121,23 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
 		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
-		v.Typ == VARIABLE_TYPE_MAP
+		v.Typ == VARIABLE_TYPE_MAP ||
+		v.Typ == VARIABLE_TYPE_NULL
 }
+
+//func (v *VariableType) typeInferenceAble() bool {
+//	return v.Typ == VARIABLE_TYPE_BOOL ||
+//		v.Typ == VARIABLE_TYPE_BYTE ||
+//		v.Typ == VARIABLE_TYPE_SHORT ||
+//		v.Typ == VARIABLE_TYPE_INT ||
+//		v.Typ == VARIABLE_TYPE_LONG ||
+//		v.Typ == VARIABLE_TYPE_FLOAT ||
+//		v.Typ == VARIABLE_TYPE_DOUBLE ||
+//		v.Typ == VARIABLE_TYPE_STRING ||
+//		v.Typ == VARIABLE_TYPE_OBJECT ||
+//		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
+//		v.Typ == VARIABLE_TYPE_MAP
+//}
 
 /*
 	clone a type
@@ -254,6 +272,7 @@ func (t *VariableType) TypeCompatible(comp *VariableType, err ...*error) bool {
 	if t.IsNumber() && comp.IsNumber() {
 		return true
 	}
+
 	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
 		return false
 	}
@@ -272,7 +291,8 @@ func (t *VariableType) IsNumber() bool {
 func (t *VariableType) IsPointer() bool {
 	return t.Typ == VARIABLE_TYPE_OBJECT ||
 		t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
-		t.Typ == VARIABLE_TYPE_MAP
+		t.Typ == VARIABLE_TYPE_MAP ||
+		t.Typ == VARIABLE_TYPE_STRING
 
 }
 
@@ -350,6 +370,9 @@ func (v *VariableType) TypeString() string {
 func (t1 *VariableType) Equal(t2 *VariableType) bool {
 	if t1.isPrimitive() || t2.isPrimitive() {
 		return t1.Typ == t2.Typ
+	}
+	if t1.IsPointer() && t1.Typ == VARIABLE_TYPE_NULL {
+		return true
 	}
 	return t1.ArrayType.Equal(t2.ArrayType)
 }

@@ -234,6 +234,7 @@ func (m *MakeExpression) buildStoreArrayListAutoVar(code *cg.AttributeCode, cont
 }
 
 func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.AttributeCode, k int, typ *ast.VariableType, context *Context) (maxstack uint16) {
+	maxstack = 2
 	m.buildLoadArrayListAutoVar(code, context) // local array list on stack
 	switch k {
 	case 0:
@@ -262,7 +263,6 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength+1] = byte(k)
 		code.CodeLength += 2
 	}
-	maxstack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_arrylist_class,
@@ -332,7 +332,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 	return
 }
 
-func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, stackTopType *ast.VariableType) (increment uint16) {
+func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string, stackTopType *ast.VariableType) (increment uint16) {
 	// no object after value,just dup top
 	if op[0] == cg.OP_istore || // 将栈顶 int 型数值存入指定局部变量。
 		op[0] == cg.OP_lstore || //将栈顶 long 型数值存入指定局部变量。
@@ -380,6 +380,31 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		}
 		code.CodeLength++
 		return
+	}
+	if op[0] == cg.OP_invokevirtual { // array or map
+		if ArrayMetasMap[(classname)] != nil { // stack is arrayref index
+			if stackTopType.JvmSlotSize() == 1 {
+				increment = 1
+				code.Codes[code.CodeLength] = cg.OP_dup2_x1
+				code.CodeLength++
+			} else {
+				increment = 2
+				code.Codes[code.CodeLength] = cg.OP_dup2_x2
+				code.CodeLength++
+			}
+			return
+		} else if classname == java_hashmap_class { // stack is mapref kref vref
+			if stackTopType.JvmSlotSize() == 1 {
+				increment = 1
+				code.Codes[code.CodeLength] = cg.OP_dup_x2
+				code.CodeLength++
+			} else {
+				increment = 2
+				code.Codes[code.CodeLength] = cg.OP_dup2_x2
+				code.CodeLength++
+			}
+			return
+		}
 	}
 	panic(111111111)
 	return

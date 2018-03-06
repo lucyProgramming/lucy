@@ -9,6 +9,16 @@ import (
 
 func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context) // map instance on stack
+	// if null skip
+	code.Codes[code.CodeLength] = cg.OP_dup //dup top
+	code.Codes[code.CodeLength+1] = cg.OP_ifnull
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+2:code.CodeLength+4], 6) // goto pop
+	code.Codes[code.CodeLength+4] = cg.OP_goto
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 7) //goto for
+	code.Codes[code.CodeLength+7] = cg.OP_pop
+	code.CodeLength += 8
+	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
 	if 2 > maxstack {
@@ -48,7 +58,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
 	//continue offset start from here
-	s.ContinueOPOffset = code.CodeLength
+	loopBeginsAt := code.CodeLength
 	// load  map object
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.MapObject)...)
 	// load k sets
@@ -74,29 +84,15 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	switch s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
-	case ast.VARIABLE_TYPE_INT:
-		fallthrough
-	case ast.VARIABLE_TYPE_LONG:
-		fallthrough
-	case ast.VARIABLE_TYPE_FLOAT:
-		fallthrough
-	case ast.VARIABLE_TYPE_DOUBLE:
-		//ref types
+	if s.StatmentForRangeAttr.Expression.VariableType.Map.V.IsPointer() == false {
 		PrimitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.V)
-	case ast.VARIABLE_TYPE_STRING:
-	case ast.VARIABLE_TYPE_OBJECT:
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-	case ast.VARIABLE_TYPE_MAP:
+	} else {
+		PrimitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.V)
 	}
+
 	//store to V
 	copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
+	// store to k,if need
 	if s.StatmentForRangeAttr.ModelKV {
 		// load k sets
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
@@ -104,26 +100,10 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
-		switch s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ {
-		case ast.VARIABLE_TYPE_BOOL:
-			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			fallthrough
-		case ast.VARIABLE_TYPE_LONG:
-			fallthrough
-		case ast.VARIABLE_TYPE_FLOAT:
-			fallthrough
-		case ast.VARIABLE_TYPE_DOUBLE:
-			//ref types
+		if s.StatmentForRangeAttr.Expression.VariableType.Map.K.IsPointer() == false {
 			PrimitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
-		case ast.VARIABLE_TYPE_STRING:
-		case ast.VARIABLE_TYPE_OBJECT:
-		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		case ast.VARIABLE_TYPE_MAP:
+		} else {
+			PrimitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
 		}
 		copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.K)...)
 	}
@@ -137,11 +117,39 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
 		copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
 		if s.StatmentForRangeAttr.ModelKV {
+			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {
+				panic(1)
+			}
+			//
+			// load k sets
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
+			// load k
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
+			code.Codes[code.CodeLength] = cg.OP_aaload
+			code.CodeLength++
+			PrimitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
 
+			copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
 		}
-	} else {
-
+	} else { // for k,v  = range xxx
+		// store v
+		if s.StatmentForRangeAttr.ExpressionV == nil {
+			panic("1111111")
+		}
+		stack, remainStack, op, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class, code, s.StatmentForRangeAttr.ExpressionV, context)
+		if stack > maxstack { // this means  current stack is 0
+			maxstack = stack
+		}
+		copyOP(code,
+			loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
+		if t := remainStack + s.StatmentForRangeAttr.Expression.VariableType.Map.V.JvmSlotSize(); t > maxstack {
+			maxstack = t
+		}
+		copyOPLeftValue(class, code, op, classname, name, descriptor)
 	}
+	// build block
+	m.buildBlock(class, code, s.Block, context)
+	s.ContinueOPOffset = code.CodeLength
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK > 255 {
 		panic("over 255")
@@ -149,8 +157,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+1] = byte(s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
-	jumpto(cg.OP_goto, code, s.ContinueOPOffset)
+	jumpto(cg.OP_goto, code, loopBeginsAt)
 	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+
 	// pop 3
 	code.Codes[code.CodeLength] = cg.OP_pop
 	code.Codes[code.CodeLength+1] = cg.OP_pop
@@ -285,15 +294,10 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_ASSIGN {
+		// store v
 		//get ops,make ops ready
-		var vExpression *ast.Expression
-		if s.StatmentForRangeAttr.ModelKV {
-			vExpression = s.StatmentForRangeAttr.Lefts[1]
-		} else {
-			vExpression = s.StatmentForRangeAttr.Lefts[0]
-		}
 		stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
-			code, vExpression, context)
+			code, s.StatmentForRangeAttr.ExpressionV, context)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -313,7 +317,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		if s.StatmentForRangeAttr.ModelKV { // set to k
 			stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
-				code, vExpression, context)
+				code, s.StatmentForRangeAttr.ExpressionK, context)
 			if stack > maxstack {
 				maxstack = stack
 			}
@@ -357,7 +361,6 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		} else { // for map
 			return m.buildForRangeStatementForMap(class, code, s, context)
 		}
-
 	}
 	//init
 	if s.Init != nil {
@@ -366,8 +369,8 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			maxstack = stack
 		}
 	}
-	s.LoopBegin = code.CodeLength
-	s.ContinueOPOffset = s.LoopBegin
+	loopBeginAt := code.CodeLength
+	s.ContinueOPOffset = loopBeginAt
 	//condition
 	if s.Condition != nil {
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context)
@@ -375,12 +378,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
-		code.Codes[code.CodeLength] = cg.OP_ifeq
-		b := cg.JumpBackPatch{}
-		b.CurrentCodeLength = code.CodeLength
-		b.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
-		s.BackPatchs = append(s.BackPatchs, &b)
-		code.CodeLength += 3
+		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
 	} else {
 	}
 	m.buildBlock(class, code, s.Block, context)
@@ -391,6 +389,6 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			maxstack = stack
 		}
 	}
-	jumpto(cg.OP_goto, code, s.LoopBegin)
+	jumpto(cg.OP_goto, code, loopBeginAt)
 	return
 }

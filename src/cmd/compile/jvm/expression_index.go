@@ -39,58 +39,12 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	maxstack, _ = m.build(class, code, index.Expression, context)
 	currentStack := uint16(1)
 	//build index
-	if index.Expression.VariableType.Map.K.IsPointer() == false {
-		currentStack += m.prepareStackForMapAssignWhenValueIsNotPointer(class, code, index.Expression.VariableType.Map.K)
-	}
 	stack, _ := m.build(class, code, index.Index, context)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	if index.Expression.VariableType.Map.K.IsInteger() && index.Expression.VariableType.Map.K.Typ != index.Index.VariableType.Typ {
-		m.numberTypeConverter(code, index.Index.VariableType.Typ, index.Expression.VariableType.Map.K.Typ)
-	}
-	if t := currentStack + index.Expression.VariableType.Map.K.JvmSlotSize(); t > maxstack {
-		maxstack = t
-	}
 	if index.Expression.VariableType.Map.K.IsPointer() == false {
-		switch index.Expression.VariableType.Map.K.Typ {
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_integer_class,
-				Name:       specail_method_init,
-				Descriptor: "(I)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_long_class,
-				Name:       specail_method_init,
-				Descriptor: "(J)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_float_class,
-				Name:       specail_method_init,
-				Descriptor: "(F)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_double_class,
-				Name:       specail_method_init,
-				Descriptor: "(D)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		}
+		PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Expression.VariableType.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -106,36 +60,47 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	code.Codes[code.CodeLength+4] = cg.OP_goto
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 8)
+	} else if index.Expression.VariableType.Map.V.Typ == ast.VARIABLE_TYPE_STRING {
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 10)
 	} else {
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 6)
 	}
 	code.CodeLength += 7
-	if index.Expression.VariableType.Map.V.IsPointer() == false {
-		switch index.Expression.VariableType.Map.V.Typ {
-		case ast.VARIABLE_TYPE_BOOL:
-			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength+1] = cg.OP_iconst_0
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength+1] = cg.OP_lconst_0
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength+1] = cg.OP_fconst_0
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength+1] = cg.OP_dconst_0
-		}
+
+	switch index.Expression.VariableType.Map.V.Typ {
+	case ast.VARIABLE_TYPE_BOOL:
+		fallthrough
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.Codes[code.CodeLength+1] = cg.OP_iconst_0
 		code.CodeLength += 2
+	case ast.VARIABLE_TYPE_LONG:
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.Codes[code.CodeLength+1] = cg.OP_lconst_0
+		code.CodeLength += 2
+	case ast.VARIABLE_TYPE_FLOAT:
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.Codes[code.CodeLength+1] = cg.OP_fconst_0
+		code.CodeLength += 2
+	case ast.VARIABLE_TYPE_DOUBLE:
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.Codes[code.CodeLength+1] = cg.OP_dconst_0
+		code.CodeLength += 2
+	case ast.VARIABLE_TYPE_STRING:
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.Codes[code.CodeLength+1] = cg.OP_ldc_w
+		class.InsertStringConst("", code.Codes[code.CodeLength+2:code.CodeLength+4])
+		code.CodeLength += 4
 	}
 	nullexit := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
 		PrimitiveObjectConverter.getFromObject(class, code, index.Expression.VariableType.Map.V)
+	} else {
+		PrimitiveObjectConverter.castPointerTypeToRealType(class, code, index.Expression.VariableType.Map.V)
 	}
 	backPatchEs([]*cg.JumpBackPatch{nullexit}, code.CodeLength)
 	return
@@ -145,7 +110,6 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 	if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildMapIndex(class, code, e, context)
 	}
-
 	maxstack, _ = m.build(class, code, index.Expression, context)
 	stack, _ := m.build(class, code, index.Index, context)
 	if t := stack + 1; t > maxstack {

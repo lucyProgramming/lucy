@@ -33,9 +33,8 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 }
 
 func backPatchEs(es []*cg.JumpBackPatch, t int) {
-	to := uint16(t)
 	for _, e := range es {
-		offset := int16(int(to) - int(e.CurrentCodeLength))
+		offset := int16(t - int(e.CurrentCodeLength))
 		e.Bs[0] = byte(offset >> 8)
 		e.Bs[1] = byte(offset)
 	}
@@ -283,7 +282,13 @@ func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byt
 	}
 	copyOP(code, ops[1:]...)
 }
+func postion(class *cg.ClassHighLevel, code *cg.AttributeCode, s string) {
+	code.Codes[code.CodeLength] = cg.OP_ldc_w
+	class.InsertStringConst(s, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength+3] = cg.OP_pop
+	code.CodeLength += 4
 
+}
 func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	switch value {
 	case -1:

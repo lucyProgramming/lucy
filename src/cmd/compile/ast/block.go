@@ -207,7 +207,6 @@ func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
 	for _, v := range b.Consts {
 		if v.Expression == nil {
-			//			panic(1)
 			errs = append(errs, fmt.Errorf("%s const %v has no initiation value", errMsgPrefix(v.Pos), v.Name))
 			continue
 		}

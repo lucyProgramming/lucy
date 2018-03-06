@@ -12,99 +12,11 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, 
 func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxstack, _ = m.build(class, code, index.Expression, context)
-	switch index.Expression.VariableType.Map.K.Typ {
-	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
-	case ast.VARIABLE_TYPE_INT:
-		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(java_integer_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_dup
-		if 3 > maxstack { // current stack is 4
-			maxstack = 3
-		}
-		code.CodeLength += 4
-		stack, _ := m.build(class, code, index.Index, context)
-		if t := stack + 3; t > maxstack {
-			maxstack = t
-		}
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_integer_class,
-			Name:       specail_method_init,
-			Descriptor: "(I)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_LONG:
-		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_dup
-		if 3 > maxstack { // current stack is 4
-			maxstack = 3
-		}
-		code.CodeLength += 4
-		stack, _ := m.build(class, code, index.Index, context)
-		if t := stack + 3; t > maxstack {
-			maxstack = t
-		}
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_long_class,
-			Name:       specail_method_init,
-			Descriptor: "(J)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_FLOAT:
-		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_dup
-		if 3 > maxstack { // current stack is 4
-			maxstack = 3
-		}
-		code.CodeLength += 4
-		stack, _ := m.build(class, code, index.Index, context)
-		if t := stack + 3; t > maxstack {
-			maxstack = t
-		}
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_float_class,
-			Name:       specail_method_init,
-			Descriptor: "(F)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_DOUBLE:
-		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_dup
-		if 3 > maxstack { // current stack is 4
-			maxstack = 3
-		}
-		code.CodeLength += 4
-		stack, _ := m.build(class, code, index.Index, context)
-		if t := stack + 3; t > maxstack {
-			maxstack = t
-		}
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_double_class,
-			Name:       specail_method_init,
-			Descriptor: "(D)V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_STRING:
-		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
-		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
-		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
-		stack, _ := m.build(class, code, index.Index, context)
-		if t := stack + 1; t > maxstack {
-			maxstack = t
-		}
+	stack, _ := m.build(class, code, index.Index, context)
+	if t := 1 + stack; t > maxstack {
+		maxstack = t
 	}
+	PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.VariableType)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
 	target = index.Expression.VariableType.Map.V
@@ -112,7 +24,6 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 	name = "put"
 	descriptor = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
 	return
-
 }
 
 func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
@@ -229,7 +140,6 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			op = []byte{cg.OP_invokevirtual}
 		} else { // map
 			return m.getMapLeftValue(class, code, e, context)
-
 		}
 
 	case ast.EXPRESSION_TYPE_DOT:

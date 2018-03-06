@@ -67,7 +67,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if currentStack > maxstack {
 			maxstack = maxstack
 		}
-		if (v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || v.Typ == ast.EXPRESSION_TYPE_METHOD_CALL) && len(v.VariableTypes) > 0 {
+		if v.IsCall() && len(v.VariableTypes) > 1 {
 			if currentStack > maxstack {
 				maxstack = maxstack
 			} // make the call
@@ -85,52 +85,18 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 4
 			continue
 		}
+		var variableType *ast.VariableType
+		variableType = v.VariableType
+		if v.IsCall() {
+			variableType = v.VariableTypes[0]
+		}
 		stack, es := m.MakeExpression.build(class, code, v, context)
 		backPatchEs(es, code.CodeLength)
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
 		//convert to object
-		switch v.VariableType.Typ {
-		case ast.VARIABLE_TYPE_BOOL:
-			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_integer_class,
-				Name:       "valueOf",
-				Descriptor: "(I)Ljava/lang/Integer;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_float_class,
-				Name:       "valueOf",
-				Descriptor: "(F)Ljava/lang/Float;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_double_class,
-				Name:       "valueOf",
-				Descriptor: "(D)Ljava/lang/Double;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_long_class,
-				Name:       "valueOf",
-				Descriptor: "(J)Ljava/lang/Long;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		}
+		PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		// append
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

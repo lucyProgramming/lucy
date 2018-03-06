@@ -197,7 +197,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				b.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:               ast.STATEMENT_TYPE_CONTINUE,
+				Typ:               ast.STATEMENT_TYPE_BREAK,
 				StatementContinue: &ast.StatementContinue{},
 			})
 		case lex.TOKEN_GOTO:
@@ -270,10 +270,11 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	e, err = b.parser.ExpressionParser.parseExpression()
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
-		return nil, err
+		b.consume(untils_lc)
+		b.Next()
 	}
 	if b.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s missing { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+		err = fmt.Errorf("%s missing '{' after a expression,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
 		b.parser.errs = append(b.parser.errs)
 		b.consume(untils_lc) // consume and next
 		b.Next()
@@ -305,7 +306,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 	es = []*ast.StatementElseIf{}
 	var e *ast.Expression
 	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && !b.parser.eof {
-		b.Next()
+		b.Next() // skip elseif token
 		e, err = b.parser.ExpressionParser.parseExpression()
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)

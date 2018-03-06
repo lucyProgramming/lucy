@@ -48,7 +48,6 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 	if t.Typ != VARIABLE_TYPE_ARRAY_INSTANCE {
 		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'", errMsgPrefix(slice.Expression.Pos), t.TypeString()))
 	}
-
 	tt := t.Clone()
 	tt.Pos = e.Pos
 	return tt
