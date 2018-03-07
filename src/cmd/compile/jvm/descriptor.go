@@ -50,7 +50,7 @@ func (m *Descriptor) typeDescriptor(v *ast.VariableType) string {
 	case ast.VARIABLE_TYPE_VOID:
 		return "V"
 	case ast.VARIABLE_TYPE_OBJECT:
-		return "L" + v.Class.Name + ";"
+		return "L" + v.Class.ClassNameDefinition.Name + ";"
 	}
 	panic("unhandle type signature")
 }

@@ -2,43 +2,37 @@
 
 import "java/lang" as javalang;
 
-public class ClousreInt{
+public class ClosureInt{
 	public value int;
-	public ClousreInt(v int){
+	public fn ClosureInt(v int){
 		this.value = v; 
 	}
 }
-public class ClousreFloat{
-	punlic value float;
-	public ClousreFloat(v float){
+public class ClosureFloat{
+	public value float;
+	public fn ClosureFloat(v float){
 		this.value = v;
 	}
 }
-public class ClousreDouble{
-	punlic value double;
-	punlic ClousreDouble(v double){
+public class ClosureDouble{
+	public value double;
+	public fn ClosureDouble(v double){
 		this.value = v ;
 	}
 }
-public class ClousreLong{
+public class ClosureLong{
 	public value long;
-	public ClousreDouble(v long){
+	public fn ClosureLong(v long){
 		this.value = v; 
 	}
 }
 
-public class ClousreLong{
+
+/*
+public class ClosureObject{
 	public value javalang.Object;
-	public ClousreDouble(v javalang.Object){
+	public fn ClosureObject(v javalang.Object){
 		this.value = v; 
 	}
 }
-
-
-
-
-
-
-
-
-
+*/

@@ -15,13 +15,37 @@ type ClassHighLevel struct {
 	MainClass              *ClassHighLevel
 	InnerClasss            []*ClassHighLevel
 	AccessFlags            uint16
-	//FieldRefs              map[CONSTANT_Fieldref_info_high_level][][]byte
-	//MethodRefs map[CONSTANT_Methodref_info_high_level][][]byte
-	//NameAndTypes map[CONSTANT_NameAndType_info_high_level][][]byte
-	SuperClass string
-	Interfaces []string
-	Fields     map[string]*FiledHighLevel
-	Methods    map[string][]*MethodHighLevel
+	SuperClass             string
+	Interfaces             []string
+	Fields                 map[string]*FiledHighLevel
+	Methods                map[string][]*MethodHighLevel
+}
+
+type CONSTANT_NameAndType_info_high_level struct {
+	Name       string
+	Descriptor string
+}
+
+type CONSTANT_Methodref_info_high_level struct {
+	Class      string
+	Name       string
+	Descriptor string
+}
+
+type CONSTANT_InterfaceMethodref_info_high_level struct {
+	Class      string
+	Name       string
+	Descriptor string
+}
+
+func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {
+	binary.BigEndian.PutUint16(location, c.Class.InsertMethodrefConst(mr))
+}
+
+type CONSTANT_Fieldref_info_high_level struct {
+	Class      string
+	Name       string
+	Descriptor string
 }
 
 /*
@@ -54,33 +78,6 @@ func (c *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
 			c.Methods[v.Name] = []*MethodHighLevel{v}
 		}
 	}
-}
-
-type CONSTANT_NameAndType_info_high_level struct {
-	Name       string
-	Descriptor string
-}
-
-type CONSTANT_Methodref_info_high_level struct {
-	Class      string
-	Name       string
-	Descriptor string
-}
-
-type CONSTANT_InterfaceMethodref_info_high_level struct {
-	Class      string
-	Name       string
-	Descriptor string
-}
-
-func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {
-	binary.BigEndian.PutUint16(location, c.Class.InsertMethodrefConst(mr))
-}
-
-type CONSTANT_Fieldref_info_high_level struct {
-	Class      string
-	Name       string
-	Descriptor string
 }
 
 func (c *ClassHighLevel) InsertInterfaceMethodrefConst(fr CONSTANT_InterfaceMethodref_info_high_level, location []byte) {

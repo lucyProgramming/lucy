@@ -271,7 +271,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		panic("null name")
 	}
 	if name == THIS {
-		return fmt.Errorf("%s '%s' already been token", errMsgPrefix(pos), THIS)
+		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)
 	}
 	if name == "_" {
 		panic("_")

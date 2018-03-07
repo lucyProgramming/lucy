@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	//	"runtime/debug"
 	"strings"
 
 	"github.com/756445638/lucy/src/cmd/compile/ast"
@@ -46,7 +47,7 @@ func (l *LucyCompile) exit() {
 }
 
 func (l *LucyCompile) Init() {
-	path := os.Getenv("LUCYPATH")
+	path := os.Getenv("CLASSPATH")
 	l.lucyPath = strings.Split(path, ":")
 	if len(l.lucyPath) == 0 {
 		fmt.Println("env variable LUCYPATH is not set")
@@ -54,6 +55,11 @@ func (l *LucyCompile) Init() {
 }
 
 func (l *LucyCompile) compile() {
+	//	defer func() {
+	//		if err := recover(); err != nil {
+	//			debug.PrintStack()
+	//		}
+	//	}()
 	l.Init()
 	for _, v := range l.Files {
 		bs, err := ioutil.ReadFile(v)
@@ -66,6 +72,7 @@ func (l *LucyCompile) compile() {
 	}
 	c := ast.ConvertTops2Package{}
 	p, rs, errs := c.ConvertTops2Package(l.Tops)
+	p.FullName = CompileFlags.PackageName
 	l.Errs = append(l.Errs, errs...)
 	for _, v := range rs {
 		l.Errs = append(l.Errs, v.Error())

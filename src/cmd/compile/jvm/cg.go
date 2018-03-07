@@ -32,7 +32,9 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.MakeExpression.MakeClass = m
 	m.mkVars()
 	m.mkEnums()
-	m.mkClass()
+	for _, v := range p.Block.Classes {
+		m.mkClass(v)
+	}
 	m.mkFuncs()
 	m.mkConsts()
 	m.mkInitFunctions()
@@ -159,8 +161,45 @@ func (m *MakeClass) mkInitFunctions() {
 func (m *MakeClass) mkEnums() {
 
 }
-func (m *MakeClass) mkClass() {
 
+func (m *MakeClass) mkClass(c *ast.Class) {
+	class := &cg.ClassHighLevel{}
+	class.Name = c.ClassNameDefinition.Name
+	m.Classes = append(m.Classes, class)
+	class.AccessFlags = c.Access
+
+	class.SuperClass = c.SuperClassNameDefinition.BinaryName
+	class.Fields = make(map[string]*cg.FiledHighLevel)
+	class.Methods = make(map[string][]*cg.MethodHighLevel)
+	for _, v := range c.Fields {
+		f := &cg.FiledHighLevel{}
+		f.Name = v.Name
+		f.AccessFlags = v.AccessFlags
+		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)
+		class.Fields[v.Name] = f
+	}
+	for _, v := range c.Methods {
+		vv := v[0]
+		method := &cg.MethodHighLevel{}
+		method.Name = vv.Func.Name
+		method.AccessFlags = vv.Func.AccessFlags
+		method.Class = class
+		method.Descriptor = m.Descriptor.methodDescriptor(vv.Func)
+		m.buildFunction(class, method, vv.Func)
+		class.AppendMethod(method)
+	}
+	//construction
+	if len(c.Constructors) > 0 {
+		method := &cg.MethodHighLevel{}
+		method.Name = "<init>"
+		method.AccessFlags = c.Constructors[0].Func.AccessFlags
+		method.Class = class
+		method.Descriptor = "()V"
+		m.buildFunction(class, method, c.Constructors[0].Func)
+		class.AppendMethod(method)
+	} else {
+		mkClassDefaultContruction(class)
+	}
 }
 
 func (m *MakeClass) mkFuncs() {

@@ -15,13 +15,13 @@ func (c *Class) OutPut(dest io.Writer) error {
 	}
 	// minorversion
 	bs2 := make([]byte, 2)
-	binary.BigEndian.PutUint16(bs2, uint16(c.minorVersion))
+	binary.BigEndian.PutUint16(bs2, uint16(c.MinorVersion))
 	_, err = dest.Write(bs2)
 	if err != nil {
 		return err
 	}
 	// major version
-	binary.BigEndian.PutUint16(bs2, uint16(c.majorVersion))
+	binary.BigEndian.PutUint16(bs2, uint16(c.MajorVersion))
 	_, err = dest.Write(bs2)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (c *Class) OutPut(dest io.Writer) error {
 	if err != nil {
 		return err
 	}
-	for _, v := range c.constPool {
+	for _, v := range c.ConstPool {
 		if v == nil {
 			continue
 		}

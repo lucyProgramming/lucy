@@ -25,14 +25,22 @@ func (c *Class) consume(m map[int]bool) {
 
 func (c *Class) parseClassName() (string, error) {
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		err := fmt.Errorf("%s on name after class,but %s", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
 		c.parser.errs = append(c.parser.errs, err)
 		return "", err
 	}
 	name := c.parser.token.Data.(string)
 	c.Next()
+	if c.parser.token.Type == lex.TOKEN_DOT {
+		c.Next()
+		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
+			err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+			c.parser.errs = append(c.parser.errs, err)
+		}
+		name += "/" + c.parser.token.Data.(string)
+		c.Next() // skip name identifier
+	}
 	return name, nil
-
 }
 
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
@@ -41,7 +49,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
 	c.Next() // skip class key word
-	c.classDefinition.Name, err = c.parseClassName()
+	c.classDefinition.ClassNameDefinition.Pos = c.parser.mkPos()
+	c.classDefinition.ClassNameDefinition.Name, err = c.parseClassName()
 	if err != nil {
 		return nil, err
 	}
@@ -54,13 +63,14 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	}
 	if c.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
 		c.Next() // skip extends
+		c.classDefinition.SuperClassNameDefinition.Pos = c.parser.mkPos()
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
-			t, err := c.parser.parseType()
-			c.classDefinition.Name = t.Name
+			t, err := c.parseClassName()
+			c.classDefinition.SuperClassNameDefinition.Name = t
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err
@@ -86,20 +96,30 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			token.Type == lex.TOKEN_STATIC {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after (public|private|protected)", c.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after 'public' | 'private' | 'protected'", c.parser.errorMsgPrefix())
+	}
+	validAfterStatic := func(token *lex.Token) error {
+		if token.Type == lex.TOKEN_IDENTIFIER ||
+			token.Type == lex.TOKEN_FUNCTION {
+			return nil
+		}
+		return fmt.Errorf("%s not a valid token after 'static'", c.parser.errorMsgPrefix())
 	}
 	for !c.parser.eof {
 		if len(c.parser.errs) > c.parser.nerr {
 			break
 		}
 		switch c.parser.token.Type {
+		case lex.TOKEN_RC:
+			c.Next()
+			return
 		case lex.TOKEN_SEMICOLON:
 			c.Next()
 			continue
 		case lex.TOKEN_STATIC:
 			c.isStatic = true
 			c.Next()
-			err := validAfterPublic(c.parser.token)
+			err := validAfterStatic(c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				c.Next()
@@ -108,6 +128,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		case lex.TOKEN_PUBLIC:
 			c.accessControlToken = c.parser.token
 			c.Next()
+			err = validAfterPublic(c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				c.Next()
@@ -115,13 +136,19 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		case lex.TOKEN_PROTECTED:
 			c.accessControlToken = c.parser.token
 			c.Next()
+			err = validAfterPublic(c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				c.Next()
 			}
 		case lex.TOKEN_PRIVATE:
 			c.accessControlToken = c.parser.token
-			c.Next()
+			c.Next() // skip private
+			err = validAfterPublic(c.parser.token)
+			if err != nil {
+				c.parser.errs = append(c.parser.errs, err)
+				c.Next()
+			}
 		case lex.TOKEN_IDENTIFIER:
 			err = c.parseFiled()
 			if err != nil {
@@ -137,6 +164,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				c.Next()
 				continue
 			}
+			c.resetProperty()
 		case lex.TOKEN_FUNCTION:
 			f, err := c.parser.Function.parse(false)
 			if err != nil {
@@ -159,18 +187,21 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				m.Func.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
 			if c.accessControlToken == nil {
-				m.Func.AccessFlags |= cg.ACC_METHOD_PRIVATE
-			} else {
 				switch c.accessControlToken.Type {
 				case lex.TOKEN_PRIVATE:
 					m.Func.AccessFlags |= cg.ACC_METHOD_PRIVATE
-				case lex.TOKEN_PUBLIC:
-					m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
 				case lex.TOKEN_PROTECTED:
 					m.Func.AccessFlags |= cg.ACC_METHOD_PROTECTED
+				case lex.TOKEN_PUBLIC:
+					m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
 				}
+			} else {
+				m.Func.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			}
-			if f.Name == c.classDefinition.Name {
+			if c.isStatic {
+				f.AccessFlags |= cg.ACC_METHOD_STATIC
+			}
+			if f.Name == c.classDefinition.ClassNameDefinition.Name {
 				if c.classDefinition.Constructors == nil {
 					c.classDefinition.Constructors = []*ast.ClassMethod{m}
 				} else {
@@ -183,9 +214,6 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
 			}
 			c.resetProperty()
-		case lex.TOKEN_RC:
-			c.Next()
-			return
 		default:
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
 			c.Next()

@@ -8,6 +8,7 @@ import (
 
 func main() {
 	flag.BoolVar(&lc.CompileFlags.OnlyImport, "io", false, "only parse import package")
+	flag.StringVar(&lc.CompileFlags.PackageName, "pn", "", "package name")
 	flag.Parse()
 	lc.Main(flag.Args())
 }

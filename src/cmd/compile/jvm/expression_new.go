@@ -16,7 +16,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(n.Typ.Class.ClassNameDefinition.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxstack = 2
@@ -36,7 +36,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{
-		Class:      n.Typ.Class.Name,
+		Class:      n.Typ.Class.ClassNameDefinition.Name,
 		Name:       n.Construction.Func.Name,
 		Descriptor: n.Construction.Func.Descriptor,
 	}

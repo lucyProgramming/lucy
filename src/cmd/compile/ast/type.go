@@ -348,13 +348,13 @@ func (v *VariableType) typeString_(ret *string) {
 	case VARIABLE_TYPE_STRING:
 		*ret += "string"
 	case VARIABLE_TYPE_OBJECT: // class name
-		*ret += v.Class.Name
+		*ret += v.Class.ClassNameDefinition.Name
 	case VARIABLE_TYPE_MAP:
-		*ret += "map["
+		*ret += "map{"
 		*ret += v.Map.K.TypeString()
 		*ret += " -> "
 		*ret += v.Map.V.TypeString()
-		*ret += "]"
+		*ret += "}"
 	default:
 		panic(1)
 	}

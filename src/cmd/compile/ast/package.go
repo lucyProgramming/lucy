@@ -7,15 +7,32 @@ import (
 )
 
 type Package struct {
+	Name           string //if error,should be multi names ,taken first is ok
+	FullName       string
 	Main           *Function
 	DestPath       string
 	loadedPackages map[string]*Package
 	Block          Block // package always have a default block
 	Files          map[string]*File
-	Name           string //if error,should be multi names ,taken first is ok
-	InitFunctions  []*Function
-	NErros2Stop    int // number of errors should stop compile
-	Errors         []error
+
+	InitFunctions []*Function
+	NErros2Stop   int // number of errors should stop compile
+	Errors        []error
+}
+
+func (p *Package) mkShortName() {
+	if p.FullName == "" {
+		panic("fullname is null string")
+	}
+	if strings.Contains(p.FullName, "/") {
+		t := strings.Split(p.FullName, "/")
+		p.Name = t[len(t)-1]
+		if p.Name == "" {
+			panic("last element is null string")
+		}
+	} else {
+		p.Name = p.FullName
+	}
 }
 
 func (p *Package) mkInitFunctions(bs []*Block) {
@@ -43,6 +60,7 @@ func (p *Package) addBuildFunctions() {
 }
 
 func (p *Package) TypeCheck() []error {
+	p.mkShortName()
 	p.addBuildFunctions()
 	if p.NErros2Stop <= 2 {
 		p.NErros2Stop = 10

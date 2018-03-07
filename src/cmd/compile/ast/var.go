@@ -18,7 +18,7 @@ var (
 	LUCY_ROOT_CLASS     = "lucy/lang/Object"
 	JAVA_ROOT_CLASS     = "java/lang/Object"
 	buildinFunctionsMap = make(map[string]*buildFunction)
-	JvmSlotSizeHandler  func(v *VariableType) uint16
+	JvmSlotSizeHandler  func(v *VariableType) uint16 // implements by outside
 )
 
 type NameWithPos struct {

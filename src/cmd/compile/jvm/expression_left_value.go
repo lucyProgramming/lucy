@@ -146,12 +146,12 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Typ == ast.VARIABLE_TYPE_CLASS {
 			op = []byte{cg.OP_getstatic}
-			classname = index.Expression.VariableType.Class.Name
+			classname = index.Expression.VariableType.Class.ClassNameDefinition.Name
 			name = index.Name
 			descriptor = index.Field.Descriptor
 		} else {
 			maxstack, _ = m.build(class, code, index.Expression, context)
-			classname = index.Expression.VariableType.Class.Name
+			classname = index.Expression.VariableType.Class.ClassNameDefinition.Name
 			name = index.Name
 			descriptor = index.Field.Descriptor
 		}

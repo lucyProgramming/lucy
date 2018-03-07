@@ -38,7 +38,6 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				for kk, t := range v.VariableTypes {
 					currentStack := uint16(1)
 					if k == len(call.Args)-1 && kk == len(v.VariableTypes)-1 {
-
 					} else {
 						code.Codes[code.CodeLength] = cg.OP_dup
 						code.CodeLength++

@@ -53,7 +53,7 @@ func ParseType(name string) (*ast.VariableType, error) {
 	}
 	if strings.HasPrefix(name, "L") {
 		return &ast.VariableType{
-			Typ:  ast.VARIABLE_TYPE_CLASS,
+			Typ:  ast.VARIABLE_TYPE_OBJECT,
 			Name: name[1:],
 		}, nil
 	}

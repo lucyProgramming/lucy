@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	CONSTANT_POOL_MAX_SIZE = 65536
+	CONSTANT_POOL_MAX_SIZE        = 65536
+	CLASS_MAGIC            uint32 = 0xcafebabe
 )
 
 func backPatchIndex(locations [][]byte, index uint16) {

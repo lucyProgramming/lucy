@@ -2,38 +2,61 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
 type Class struct {
-	IsGlobal bool
-	Block    Block
-	Access   uint16
-	Pos      *Pos
-	Name     string
-	Fields   map[string]*ClassField
-	Methods  map[string][]*ClassMethod
-	//SuperClassExpression *Expression // a or a.b
-	SuperClassName string
-	SuperClass     *Class
-	Interfaces     []*Class
-	Constructors   []*ClassMethod // can be nil
-	Signature      *class_json.ClassSignature
-	SouceFile      string
-	Used           bool
-	VariableType   VariableType
+	ClassNameDefinition      ClassNameDefinition
+	SuperClassNameDefinition ClassNameDefinition
+	IsGlobal                 bool
+	Block                    Block
+	Access                   uint16
+	Pos                      *Pos
+	Fields                   map[string]*ClassField
+	Methods                  map[string][]*ClassMethod
+	SuperClass               *Class
+	Interfaces               []*Class
+	Constructors             []*ClassMethod // can be nil
+	Signature                *class_json.ClassSignature
+	SouceFile                string
+	Used                     bool
+	VariableType             VariableType
+}
+
+func (c *Class) resolveName(b *Block) []error {
+	errs := []error{}
+	var err error
+	for _, v := range c.Fields {
+		err = v.Typ.resolve(b)
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			v.Typ.actionNeedBeenDoneWhenDescribeVariable()
+		}
+	}
+	for _, v := range c.Constructors {
+		v.Func.checkParaMeterAndRetuns(&errs)
+	}
+	for _, v := range c.Methods {
+		for _, vv := range v {
+			vv.Func.checkParaMeterAndRetuns(&errs)
+		}
+	}
+	return errs
 }
 
 func (c *Class) check(father *Block) []error {
+	c.Block.inherite(father)
 	errs := make([]error, 0)
+	c.ClassNameDefinition.BinaryName = father.InheritedAttribute.p.FullName + c.ClassNameDefinition.Name
 	err := c.loadSuperClass()
 	if err != nil {
 		errs = append(errs, err)
 	}
 	c.loadInterfaces(&errs)
-	c.Block.inherite((father))
 	c.Block.check() // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
@@ -49,9 +72,11 @@ func (c *Class) check(father *Block) []error {
 		return errs
 	}
 	if len(c.Constructors) > 1 {
-		errs = append(errs, fmt.Errorf("class named '%s' has %d contructor,declare at:", c.Name, len(c.Constructors)))
+		errs = append(errs, fmt.Errorf("%s class named '%s' has %d(more than 1) contructor,declare at:",
+			errMsgPrefix(c.Pos),
+			c.ClassNameDefinition.BinaryName, len(c.Constructors)))
 		for _, v := range c.Constructors {
-			errs = append(errs, fmt.Errorf("%s contructor method", errMsgPrefix(v.Func.Pos)))
+			errs = append(errs, fmt.Errorf("\t %s contructor method...", errMsgPrefix(v.Func.Pos)))
 		}
 	}
 	if father.shouldStop(errs) {
@@ -59,9 +84,11 @@ func (c *Class) check(father *Block) []error {
 	}
 	for _, ms := range c.Methods {
 		if len(ms) > 1 {
-			errs = append(errs, fmt.Errorf("class named '%s' has %d contructor,declare at:", c.Name, len(c.Constructors)))
+			errs = append(errs, fmt.Errorf("%s class named '%s' has %d contructor,declare at:",
+				errMsgPrefix(ms[0].Func.Pos),
+				c.ClassNameDefinition.BinaryName, len(ms)))
 			for _, v := range ms {
-				errs = append(errs, fmt.Errorf("%s contructor method", errMsgPrefix(v.Func.Pos)))
+				errs = append(errs, fmt.Errorf("\t%s contructor method", errMsgPrefix(v.Func.Pos)))
 			}
 		}
 	}
@@ -80,14 +107,14 @@ func (c *Class) isInterface() bool {
 }
 
 func (c *Class) implementInterfaceOf(super *Class) bool {
-	if super.Access&cg.ACC_CLASS_INTERFACE == 0 {
-		panic("not a interface")
-	}
-	for _, v := range c.Interfaces {
-		if v.Name == super.Name {
-			return true
-		}
-	}
+	//	if super.Access&cg.ACC_CLASS_INTERFACE == 0 {
+	//		panic("not a interface")
+	//	}
+	//	for _, v := range c.Interfaces {
+	//		if v.Name == super.Name {
+	//			return true
+	//		}
+	//	}
 	return false
 }
 
@@ -105,30 +132,20 @@ func (c *Class) mkVariableType() {
 
 func (c *Class) checkConstructionFunctions() []error {
 	errs := []error{}
-	if c.Constructors == nil || len(c.Constructors) == 0 {
-		c.Constructors = []*ClassMethod{c.mkDefaultConstructionMethod()}
+	for _, v := range c.Constructors {
+		v.IsConstructionMethod = true
+		if v.IsStatic() {
+			errs = append(errs, fmt.Errorf("%s construction method must not be static", errMsgPrefix(v.Func.Pos)))
+		}
 	}
 	c.checkReloadFunctions(c.Constructors, &errs)
 	return errs
 }
-func (c *Class) mkDefaultConstructionMethod() *ClassMethod {
-	ret := &ClassMethod{}
-	ret.Func = &Function{}
-	ret.Func.AccessFlags = cg.ACC_METHOD_PUBLIC
-	ret.Func.AccessFlags = cg.ACC_METHOD_FINAL
-	ret.Func.Typ = &FunctionType{}
-	ret.Func.Descriptor = "()V"
-	ret.Func.Block = &Block{}
-	ret.Func.Block.Statements = append(ret.Func.Block.Statements, &Statement{
-		Typ:             STATEMENT_TYPE_RETURN,
-		StatementReturn: &StatementReturn{},
-	})
-	return ret
-}
+
 func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 	m := make(map[string][]*ClassMethod)
 	for _, v := range ms {
-		if v.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
+		if v.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 || v.IsConstructionMethod { // bind this
 			if v.Func.Block.Vars == nil {
 				v.Func.Block.Vars = make(map[string]*VariableDefinition)
 			}
@@ -194,55 +211,48 @@ func (c *Class) accessField(name string) (f *ClassField, err error) {
 	return
 }
 func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *ClassMethod, errs []error) {
-	//	errs = []error{}
-	//	cc := c
-	//	matchString := mkSignatureByVariableTypes(args)
-	//	matchString = "(" + matchString + ")"
-	//	for cc.SuperClassName != "" { // java/lang/Object has no super class
-	//		ms, ok := c.Methods[name]
-	//		if ok {
-	//			for _, m := range ms {
-	//				if matchString == m.Func.Descriptor {
-	//					f = m
-	//					return
-	//				}
-	//			}
-	//		}
-	//		if cc.SuperClass == nil { // super class is not loaded
-	//			err := cc.loadSuperClass()
-	//			if err != nil {
-	//				errs = append(errs, fmt.Errorf("%s %s", errMsgPrefix(pos), err.Error()))
-	//				break
-	//			} else {
-	//				cc = cc.SuperClass
-	//			}
-	//		}
-	//	}
-	//	// not found,trying to access father`s method
 	return
 }
 
 func (c *Class) loadSuperClass() error {
-	if c.Name == LUCY_ROOT_CLASS { // root class
-		c.SuperClassName = ""
-		c.SuperClass = nil
-		return nil
+	if c.SuperClassNameDefinition.Name == "" {
+		p, err := c.Block.InheritedAttribute.p.loadPackage("lucy/lang")
+		if err != nil {
+			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
+		}
+		c.SuperClass = p.Block.Classes["Object"]
+		if c.SuperClass == nil {
+			panic("........")
+		}
+	} else {
+		if strings.Contains(c.SuperClassNameDefinition.Name, "/") { //  must like "aa/bb"
+			t := strings.Split(c.SuperClassNameDefinition.Name, "/")
+			f, ok := c.Block.InheritedAttribute.p.Files[c.SuperClassNameDefinition.Pos.Filename]
+			if ok == false {
+				return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
+			}
+			fmt.Println(f.Imports)
+			pname, ok := f.Imports[t[0]]
+			if ok == false {
+				return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
+			}
+			p, err := c.Block.InheritedAttribute.p.loadPackage(pname.Name)
+			if err != nil {
+				return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.SuperClassNameDefinition.Pos), err)
+			}
+			c.SuperClass = p.Block.Classes["Object"]
+			if c.SuperClass == nil {
+				panic("........")
+			}
+		} else { //
+			d := c.Block.searchByName(c.SuperClassNameDefinition.Name)
+			if c, ok := d.(*Class); ok {
+				c.SuperClass = c
+			} else {
+				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.SuperClassNameDefinition.Pos), c.SuperClassNameDefinition.Name)
+			}
+		}
 	}
-	if c.SuperClassName == "" {
-		c.SuperClassName = LUCY_ROOT_CLASS
-	}
-	t := &VariableType{Typ: VARIABLE_TYPE_NAME, Name: c.SuperClassName}
-	err := t.resolve(&c.Block)
-	if err != nil {
-		return err
-	}
-	if t.Typ != VARIABLE_TYPE_CLASS {
-		return fmt.Errorf("superclass is not class,but %s", t.TypeString())
-	}
-	if t.Class.isInterface() {
-		return fmt.Errorf("superclass is interface", t.TypeString())
-	}
-	c.SuperClass = t.Class
 	return nil
 }
 

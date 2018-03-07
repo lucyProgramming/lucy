@@ -1,15 +1,8 @@
 
-
 import "java/lang" as javalang;
 
 
 public class Object extends  javalang.Object{
-
+	
 }
-
-
-
-
-
-
 

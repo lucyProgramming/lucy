@@ -28,6 +28,17 @@ type Function struct {
 	AutoVarForMultiReturn      *AutoVarForMultiReturn
 }
 
+/*
+	resolve parameter and return list name
+*/
+func (f *Function) resolvName() {
+	for _, v := range f.Typ.ParameterList {
+		v.Typ.resolve(f.Block)
+	}
+	for _, v := range f.Typ.ReturnList {
+		v.Typ.resolve(f.Block)
+	}
+}
 func (f *Function) mkAutoVarForMultiReturn() {
 	if f.AutoVarForMultiReturn != nil {
 		return

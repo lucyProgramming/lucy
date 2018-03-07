@@ -51,10 +51,9 @@ func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType
 }
 
 type AutoVarForRangeArray struct {
-	K          uint16
 	Elements   uint16
 	Start, End uint16
-	V          uint16
+	K, V       uint16
 }
 
 func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
@@ -121,7 +120,6 @@ func (s *StatementFor) checkRange() []error {
 			s.StatmentForRangeAttr.ExpressionV = lefts[0]
 		}
 	}
-
 	s.StatmentForRangeAttr.Expression = rangeExpression
 	if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
 		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
@@ -228,7 +226,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 		var t2 *VariableType
 		if modelkv {
-			t2, es = lefts[0].getLeftValue(s.Block)
+			t2, es = lefts[1].getLeftValue(s.Block)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
@@ -257,10 +255,11 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
 				}
 			}
-		} else {
+		} else { // map type
 			if modelkv {
 				if false == t1.Equal(arrayt.Map.K) {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+
 				}
 				if false == t2.Equal(arrayt.Map.V) {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t2.TypeString()))

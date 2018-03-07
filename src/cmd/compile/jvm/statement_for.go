@@ -128,7 +128,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			code.Codes[code.CodeLength] = cg.OP_aaload
 			code.CodeLength++
 			PrimitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
-
 			copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
 		}
 	} else { // for k,v  = range xxx
@@ -171,7 +170,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	//build array expression
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context) // array on stack
-
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
@@ -234,13 +232,14 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength] = cg.OP_iadd
 	code.Codes[code.CodeLength+1] = cg.OP_dup
 	code.CodeLength += 2
-	//check if need to break
+	// load end
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.End)...)
 	if 3 > maxstack {
 		maxstack = 3
 	}
 	/*
 		k + start >= end,break loop,pop index on stack
+		check if need to break
 	*/
 	rangeend := (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)
 	//load elements
@@ -282,18 +281,30 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
 	}
-	// store to v
-	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		copyOP(code,
-			storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ,
-				s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
-	} else {
-		copyOP(code,
-			storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ,
-				s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
-	}
+	// store to v tmp
+	copyOP(code,
+		storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ,
+			s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
+
 	//current stack is 0
-	if s.Condition.Typ == ast.EXPRESSION_TYPE_ASSIGN {
+	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
+		if s.StatmentForRangeAttr.IdentifierV.Var.BeenCaptured {
+			panic("...")
+		}
+		copyOP(code,
+			loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
+		copyOP(code,
+			storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
+		if s.StatmentForRangeAttr.ModelKV {
+			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {
+				panic("...")
+			}
+			copyOP(code,
+				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
+			copyOP(code,
+				storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
+		}
+	} else { // for k,v = range arr
 		// store v
 		//get ops,make ops ready
 		stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,

@@ -18,18 +18,20 @@ const (
 )
 
 type Class struct {
-	dest                     io.Writer
-	magic                    uint32 //0xCAFEBABE
-	minorVersion             uint16
-	majorVersion             uint16
-	constPool                []*ConstPool
-	accessFlag               uint16
-	thisClass                uint16
-	superClass               uint16
-	interfaces               []uint16
-	fields                   []*FieldInfo
-	methods                  []*MethodInfo
-	attributes               []*AttributeInfo
+	dest         io.Writer
+	magic        uint32 //0xCAFEBABE
+	MinorVersion uint16
+	MajorVersion uint16
+	ConstPool    []*ConstPool
+	accessFlag   uint16
+	thisClass    uint16
+	superClass   uint16
+	interfaces   []uint16
+	fields       []*FieldInfo
+	methods      []*MethodInfo
+	attributes   []*AttributeInfo
+
+	// used when compile code
 	Utf8Consts               map[string]*ConstPool
 	IntConsts                map[int32]*ConstPool
 	LongConsts               map[int64]*ConstPool
@@ -47,8 +49,8 @@ func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info
 	if c.InterfaceMethodrefConsts == nil {
 		c.InterfaceMethodrefConsts = make(map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.InterfaceMethodrefConsts[n]; ok {
 		return con.selfindex
@@ -61,7 +63,7 @@ func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info
 		}),
 	}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.InterfaceMethodrefConsts[n] = info
 	return info.selfindex
 }
@@ -70,8 +72,8 @@ func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint1
 	if c.MethodrefConsts == nil {
 		c.MethodrefConsts = make(map[CONSTANT_Methodref_info_high_level]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.MethodrefConsts[n]; ok {
 		return con.selfindex
@@ -84,7 +86,7 @@ func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint1
 		}),
 	}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.MethodrefConsts[n] = info
 	return info.selfindex
 }
@@ -93,8 +95,8 @@ func (c *Class) InsertNameAndConst(n CONSTANT_NameAndType_info_high_level) uint1
 	if c.NameAndTypeConsts == nil {
 		c.NameAndTypeConsts = make(map[CONSTANT_NameAndType_info_high_level]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.NameAndTypeConsts[n]; ok {
 		return con.selfindex
@@ -104,7 +106,7 @@ func (c *Class) InsertNameAndConst(n CONSTANT_NameAndType_info_high_level) uint1
 		descriptor: c.insertUtfConst(n.Descriptor),
 	}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.NameAndTypeConsts[n] = info
 	return info.selfindex
 }
@@ -112,8 +114,8 @@ func (c *Class) InsertFieldRefConst(f CONSTANT_Fieldref_info_high_level) uint16 
 	if c.FieldRefConsts == nil {
 		c.FieldRefConsts = make(map[CONSTANT_Fieldref_info_high_level]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.FieldRefConsts[f]; ok {
 		return con.selfindex
@@ -123,7 +125,7 @@ func (c *Class) InsertFieldRefConst(f CONSTANT_Fieldref_info_high_level) uint16 
 		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{f.Name, f.Descriptor}),
 	}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.FieldRefConsts[f] = info
 	return info.selfindex
 }
@@ -131,15 +133,15 @@ func (c *Class) insertUtfConst(s string) uint16 {
 	if c.Utf8Consts == nil {
 		c.Utf8Consts = make(map[string]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.Utf8Consts[s]; ok {
 		return con.selfindex
 	}
 	info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.Utf8Consts[s] = info
 	return info.selfindex
 }
@@ -148,15 +150,15 @@ func (c *Class) InsertIntConst(i int32) uint16 {
 	if c.IntConsts == nil {
 		c.IntConsts = make(map[int32]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.IntConsts[i]; ok {
 		return con.selfindex
 	}
 	info := (&CONSTANT_Integer_info{i}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.IntConsts[i] = info
 	return info.selfindex
 }
@@ -164,15 +166,15 @@ func (c *Class) InsertLongConst(i int64) uint16 {
 	if c.LongConsts == nil {
 		c.LongConsts = make(map[int64]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.LongConsts[i]; ok {
 		return con.selfindex
 	}
 	info := (&CONSTANT_Long_info{i}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info, nil)
+	c.ConstPool = append(c.ConstPool, info, nil)
 	c.LongConsts[i] = info
 	return info.selfindex
 }
@@ -181,15 +183,15 @@ func (c *Class) InsertFloatConst(f float32) uint16 {
 	if c.FloatConsts == nil {
 		c.FloatConsts = make(map[float32]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.FloatConsts[f]; ok {
 		return con.selfindex
 	}
 	info := (&CONSTANT_Float_info{f}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.FloatConsts[f] = info
 	return info.selfindex
 }
@@ -198,15 +200,15 @@ func (c *Class) InsertDoubleConst(f float64) uint16 {
 	if c.DoubleConsts == nil {
 		c.DoubleConsts = make(map[float64]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.DoubleConsts[f]; ok {
 		return con.selfindex
 	}
 	info := (&CONSTANT_Double_info{f}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info, nil)
+	c.ConstPool = append(c.ConstPool, info, nil)
 	c.DoubleConsts[f] = info
 	return info.selfindex
 }
@@ -215,15 +217,15 @@ func (c *Class) InsertClassConst(name string) uint16 {
 	if c.ClassConsts == nil {
 		c.ClassConsts = make(map[string]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.ClassConsts[name]; ok {
 		return con.selfindex
 	}
 	info := (&CONSTANT_Class_info{c.insertUtfConst(name)}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.ClassConsts[name] = info
 	return info.selfindex
 }
@@ -232,8 +234,8 @@ func (c *Class) InsertStringConst(s string) uint16 {
 	if c.StringConsts == nil {
 		c.StringConsts = make(map[string]*ConstPool)
 	}
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
 	}
 	if con, ok := c.StringConsts[s]; ok {
 		return con.selfindex
@@ -241,7 +243,7 @@ func (c *Class) InsertStringConst(s string) uint16 {
 
 	info := (&CONSTANT_String_info{c.insertUtfConst(s)}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, info)
+	c.ConstPool = append(c.ConstPool, info)
 	c.StringConsts[s] = info
 	return info.selfindex
 }
@@ -252,25 +254,25 @@ func (high *ClassHighLevel) FromHighLevel() *Class {
 }
 
 func (c *Class) fromHighLevel(high *ClassHighLevel) {
-	c.minorVersion = 0
-	c.majorVersion = 49
-	if len(c.constPool) == 0 {
-		c.constPool = []*ConstPool{nil} // jvm const pool index begin at 1
+	c.MinorVersion = 0
+	c.MajorVersion = 49
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}
 	c.accessFlag = high.AccessFlags
 	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
 	binary.BigEndian.PutUint16(thisClassConst.info[0:2], c.insertUtfConst(high.Name))
 	c.thisClass = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, thisClassConst)
+	c.ConstPool = append(c.ConstPool, thisClassConst)
 	superClassConst := (&CONSTANT_Class_info{}).ToConstPool()
 	binary.BigEndian.PutUint16(superClassConst.info[0:2], c.insertUtfConst(high.SuperClass))
 	c.superClass = c.constPoolUint16Length()
-	c.constPool = append(c.constPool, superClassConst)
+	c.ConstPool = append(c.ConstPool, superClassConst)
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{c.insertUtfConst(i)}).ToConstPool()
 		index := c.constPoolUint16Length()
 		c.interfaces = append(c.interfaces, index)
-		c.constPool = append(c.constPool, inter)
+		c.ConstPool = append(c.ConstPool, inter)
 	}
 	for _, f := range high.Fields {
 		field := &FieldInfo{}
@@ -304,10 +306,10 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	return
 }
 func (c *Class) constPoolUint16Length() uint16 {
-	return uint16(len(c.constPool))
+	return uint16(len(c.ConstPool))
 }
 func (c *Class) ifConstPoolOverMaxSize() {
-	if len(c.constPool) > CONSTANT_POOL_MAX_SIZE {
+	if len(c.ConstPool) > CONSTANT_POOL_MAX_SIZE {
 		panic(fmt.Sprintf("const pool max size is:%d", CONSTANT_POOL_MAX_SIZE))
 	}
 }
