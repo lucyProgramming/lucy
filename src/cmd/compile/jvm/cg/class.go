@@ -23,13 +23,13 @@ type Class struct {
 	MinorVersion uint16
 	MajorVersion uint16
 	ConstPool    []*ConstPool
-	accessFlag   uint16
-	thisClass    uint16
-	superClass   uint16
-	interfaces   []uint16
-	fields       []*FieldInfo
-	methods      []*MethodInfo
-	attributes   []*AttributeInfo
+	AccessFlag   uint16
+	ThisClass    uint16
+	SuperClass   uint16
+	Interfaces   []uint16
+	Fields       []*FieldInfo
+	Methods      []*MethodInfo
+	Attributes   []*AttributeInfo
 
 	// used when compile code
 	Utf8Consts               map[string]*ConstPool
@@ -259,19 +259,19 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}
-	c.accessFlag = high.AccessFlags
+	c.AccessFlag = high.AccessFlags
 	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	binary.BigEndian.PutUint16(thisClassConst.info[0:2], c.insertUtfConst(high.Name))
-	c.thisClass = c.constPoolUint16Length()
+	binary.BigEndian.PutUint16(thisClassConst.Info[0:2], c.insertUtfConst(high.Name))
+	c.ThisClass = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, thisClassConst)
 	superClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	binary.BigEndian.PutUint16(superClassConst.info[0:2], c.insertUtfConst(high.SuperClass))
-	c.superClass = c.constPoolUint16Length()
+	binary.BigEndian.PutUint16(superClassConst.Info[0:2], c.insertUtfConst(high.SuperClass))
+	c.SuperClass = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, superClassConst)
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{c.insertUtfConst(i)}).ToConstPool()
 		index := c.constPoolUint16Length()
-		c.interfaces = append(c.interfaces, index)
+		c.Interfaces = append(c.Interfaces, index)
 		c.ConstPool = append(c.ConstPool, inter)
 	}
 	for _, f := range high.Fields {
@@ -285,23 +285,23 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
 		}
 		field.DescriptorIndex = c.insertUtfConst(f.Descriptor)
-		c.fields = append(c.fields, field)
+		c.Fields = append(c.Fields, field)
 	}
 	for _, ms := range high.Methods {
 		for _, m := range ms {
 			info := &MethodInfo{}
 			info.AccessFlags = m.AccessFlags //accessflag
-			info.nameIndex = c.insertUtfConst(m.Name)
-			info.descriptorIndex = c.insertUtfConst(m.Descriptor)
+			info.NameIndex = c.insertUtfConst(m.Name)
+			info.DescriptorIndex = c.insertUtfConst(m.Descriptor)
 			codeinfo := m.Code.ToAttributeInfo(c)
-			binary.BigEndian.PutUint16(codeinfo.nameIndex[0:2], c.insertUtfConst("Code"))
+			codeinfo.NameIndex = c.insertUtfConst("Code")
 			info.Attributes = append(info.Attributes, codeinfo)
-			c.methods = append(c.methods, info)
+			c.Methods = append(c.Methods, info)
 		}
 	}
 
 	//source file
-	c.attributes = append(c.attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
+	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
 	c.ifConstPoolOverMaxSize()
 	return
 }

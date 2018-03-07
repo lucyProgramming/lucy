@@ -10,8 +10,8 @@ type AttributeBootstrapMethods struct {
 
 func (a *AttributeBootstrapMethods) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.info, uint16(len(a.methods)))
+	ret.Info = make([]byte, 2)
+	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.methods)))
 	for _, v := range a.methods {
 		bs := make([]byte, 4+len(v.bootStrapMethodArguments)*2)
 		binary.BigEndian.PutUint16(bs, uint16(v.bootStrapMethodRef))
@@ -19,9 +19,9 @@ func (a *AttributeBootstrapMethods) ToAttributeInfo() *AttributeInfo {
 		for kk, vv := range v.bootStrapMethodArguments {
 			binary.BigEndian.PutUint16(bs[4+kk*2:], uint16(vv))
 		}
-		ret.info = append(ret.info, bs...)
+		ret.Info = append(ret.Info, bs...)
 	}
-	ret.attributeLength = uint32(len(ret.info))
+	ret.attributeLength = uint32(len(ret.Info))
 	return ret
 }
 

@@ -1,9 +1,9 @@
 package cg
 
 type AttributeInfo struct {
-	nameIndex       [2]byte
+	NameIndex       uint16
 	attributeLength uint32
-	info            []byte
+	Info            []byte
 }
 
 type ToAttributeInfo interface {

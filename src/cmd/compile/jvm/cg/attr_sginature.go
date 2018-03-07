@@ -11,9 +11,9 @@ type AttributeSignature struct {
 func (a *AttributeSignature) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.attributeLength = 2
-	binary.BigEndian.PutUint16(ret.nameIndex[0:2], class.insertUtfConst("Signature"))
-	ret.info = make([]byte, 2)
+	ret.NameIndex = class.insertUtfConst("Signature")
+	ret.Info = make([]byte, 2)
 	index := class.insertUtfConst(a.Signature)
-	binary.BigEndian.PutUint16(ret.info, index)
+	binary.BigEndian.PutUint16(ret.Info, index)
 	return ret
 }

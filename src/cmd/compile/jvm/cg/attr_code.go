@@ -23,17 +23,17 @@ type ExceptionTable struct {
 
 func (a *AttributeCode) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.info = make([]byte, 8)
-	binary.BigEndian.PutUint16(ret.info[0:2], a.MaxStack)
-	binary.BigEndian.PutUint16(ret.info[2:4], a.MaxLocals)
-	binary.BigEndian.PutUint32(ret.info[4:8], uint32(a.CodeLength))
-	ret.info = append(ret.info, a.Codes...)
-	ret.info = append(ret.info, a.mkExceptions()...)
+	ret.Info = make([]byte, 8)
+	binary.BigEndian.PutUint16(ret.Info[0:2], a.MaxStack)
+	binary.BigEndian.PutUint16(ret.Info[2:4], a.MaxLocals)
+	binary.BigEndian.PutUint32(ret.Info[4:8], uint32(a.CodeLength))
+	ret.Info = append(ret.Info, a.Codes...)
+	ret.Info = append(ret.Info, a.mkExceptions()...)
 	if info := a.LineNumbers.ToAttributeInfo(class); info != nil {
 		a.attributes = append(a.attributes, info)
 	}
-	ret.info = append(ret.info, a.mkAttributes(class)...)
-	ret.attributeLength = uint32(len(ret.info))
+	ret.Info = append(ret.Info, a.mkAttributes(class)...)
+	ret.attributeLength = uint32(len(ret.Info))
 	return ret
 }
 
@@ -52,13 +52,15 @@ func (a *AttributeCode) mkAttributes(class *Class) []byte {
 	binary.BigEndian.PutUint16(bs, uint16(len(a.attributes)))
 	if len(a.attributes) > 0 {
 		b := make([]byte, 0)
+
 		for _, v := range a.attributes {
 			bb := []byte{}
-			bb = append(bb, v.nameIndex[0:2]...)
+			binary.BigEndian.PutUint16(bs, v.NameIndex)
+			bb = append(bb, bs...)
 			bs4 := make([]byte, 4)
 			binary.BigEndian.PutUint32(bs4, uint32(v.attributeLength))
 			bb = append(bb, bs4...)
-			bb = append(bb, v.info...)
+			bb = append(bb, v.Info...)
 			b = append(b, bb...)
 		}
 		bs = append(bs, b...)

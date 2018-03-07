@@ -13,16 +13,16 @@ func (a *AttributeLineNumber) ToAttributeInfo(class *Class) *AttributeInfo {
 		return nil
 	}
 	ret := &AttributeInfo{}
-	binary.BigEndian.PutUint16(ret.nameIndex[0:2], class.insertUtfConst("LineNumberTable"))
-	ret.info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.info, uint16(len(a.linenumbers)))
+	ret.NameIndex = class.insertUtfConst("LineNumberTable")
+	ret.Info = make([]byte, 2)
+	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.linenumbers)))
 	for _, v := range a.linenumbers {
 		bs4 := make([]byte, 4)
 		binary.BigEndian.PutUint16(bs4[0:2], v.startPc)
 		binary.BigEndian.PutUint16(bs4[2:4], v.lineNumber)
-		ret.info = append(ret.info, bs4...)
+		ret.Info = append(ret.Info, bs4...)
 	}
-	ret.attributeLength = uint32(len(ret.info))
+	ret.attributeLength = uint32(len(ret.Info))
 	return ret
 }
 
