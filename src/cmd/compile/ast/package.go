@@ -21,9 +21,6 @@ type Package struct {
 }
 
 func (p *Package) mkShortName() {
-	if p.FullName == "" {
-		panic("fullname is null string")
-	}
 	if strings.Contains(p.FullName, "/") {
 		t := strings.Split(p.FullName, "/")
 		p.Name = t[len(t)-1]

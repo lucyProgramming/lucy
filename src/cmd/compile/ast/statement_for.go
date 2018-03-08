@@ -91,7 +91,7 @@ func (s *StatementFor) checkRange() []error {
 	if arrayt == nil {
 		return errs
 	}
-	if arrayt.Typ != VARIABLE_TYPE_ARRAY_INSTANCE && arrayt.Typ != VARIABLE_TYPE_MAP {
+	if arrayt.Typ != VARIABLE_TYPE_ARRAY && arrayt.Typ != VARIABLE_TYPE_MAP {
 		errs = append(errs, fmt.Errorf("%s cannot use '%s' for range,only allow 'array' and 'map'", errMsgPrefix(rangeExpression.Pos), arrayt.TypeString()))
 		return errs
 	}
@@ -121,7 +121,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 	}
 	s.StatmentForRangeAttr.Expression = rangeExpression
-	if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+	if arrayt.Typ == VARIABLE_TYPE_ARRAY {
 		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
 		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.function,
 			arrayt.ArrayType)
@@ -157,7 +157,7 @@ func (s *StatementFor) checkRange() []error {
 				} else {
 					vd := &VariableDefinition{}
 					var vt *VariableType
-					if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
 						vt = &VariableType{}
 						vt.Typ = VARIABLE_TYPE_INT
 					} else {
@@ -179,7 +179,7 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 				} else {
 					vd := &VariableDefinition{}
-					if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
 						vd.Typ = arrayt.ArrayType.Clone()
 					} else {
 						vd.Typ = arrayt.Map.V.Clone()
@@ -202,7 +202,7 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 				} else {
 					vd := &VariableDefinition{}
-					if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
 						vd.Typ = arrayt.ArrayType.Clone()
 					} else {
 						vd.Typ = arrayt.Map.V.Clone()
@@ -241,7 +241,7 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv && t2 != nil {
 			lefts[1].VariableType = t2
 		}
-		if arrayt.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+		if arrayt.Typ == VARIABLE_TYPE_ARRAY {
 			if modelkv {
 				if t1.IsInteger() == false {
 					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))

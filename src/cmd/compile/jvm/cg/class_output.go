@@ -2,6 +2,7 @@ package cg
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"io"
 )
@@ -178,12 +179,14 @@ func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
 	bs4 := make([]byte, 4)
 	bs2 := make([]byte, 2)
 	for _, v := range as {
+		fmt.Println("##############", v.NameIndex)
+		fmt.Println(string(c.ConstPool[v.NameIndex].Info[2:]))
 		binary.BigEndian.PutUint16(bs2, v.NameIndex)
 		_, err = c.dest.Write(bs2)
 		if err != nil {
 			return err
 		}
-		binary.BigEndian.PutUint32(bs4, uint32(v.attributeLength))
+		binary.BigEndian.PutUint32(bs4, v.attributeLength)
 		_, err = c.dest.Write(bs4)
 		if err != nil {
 			return err

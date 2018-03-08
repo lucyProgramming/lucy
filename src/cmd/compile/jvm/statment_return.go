@@ -37,7 +37,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_areturn
 		default:
 			panic("......a")
@@ -45,6 +45,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
+
 	//new a array list
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(java_arrylist_class, code.Codes[code.CodeLength+1:code.CodeLength+3])

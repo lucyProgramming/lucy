@@ -34,7 +34,6 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		if k != len(s.ElseIfList)-1 || s.ElseBlock != nil {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 		}
-
 	}
 	if s.ElseBlock != nil {
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))

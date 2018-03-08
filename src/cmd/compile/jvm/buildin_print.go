@@ -27,6 +27,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 3
 		return
 	}
+
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context)
 		backPatchEs(es, code.CodeLength)
@@ -88,7 +89,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",

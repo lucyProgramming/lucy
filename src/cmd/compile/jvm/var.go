@@ -18,6 +18,8 @@ var (
 	java_root_class                         = "java/lang/Object"
 	java_index_out_of_range_exception_class = "java/lang/ArrayIndexOutOfBoundsException"
 	PrimitiveObjectConverter                PrimitiveObjectConvert
+	Descriptor                              Descript
+	SignatureParser                         SignatureParse
 )
 
 func init() {

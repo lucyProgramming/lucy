@@ -229,7 +229,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: "()Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[typ.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

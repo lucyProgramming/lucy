@@ -94,7 +94,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
-	if object.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+	if object.Typ == VARIABLE_TYPE_ARRAY {
 		switch call.Name {
 		case common.ARRAY_METHOD_SIZE,
 			common.ARRAY_METHOD_CAP,

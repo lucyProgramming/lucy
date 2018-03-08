@@ -20,7 +20,6 @@ const (
 
 	VARIABLE_TYPE_STRING
 	VARIABLE_TYPE_OBJECT
-	VARIABLE_TYPE_ARRAY_INSTANCE
 	VARIABLE_TYPE_MAP
 	VARIABLE_TYPE_FUNCTION
 	//function type
@@ -94,7 +93,7 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 		fallthrough
 	case VARIABLE_TYPE_MAP:
 		fallthrough
-	case VARIABLE_TYPE_ARRAY_INSTANCE:
+	case VARIABLE_TYPE_ARRAY:
 		e.Typ = EXPRESSION_TYPE_NULL
 		e.VariableType = v.Clone()
 	default:
@@ -120,7 +119,7 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_DOUBLE ||
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
-		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
+		v.Typ == VARIABLE_TYPE_ARRAY ||
 		v.Typ == VARIABLE_TYPE_MAP ||
 		v.Typ == VARIABLE_TYPE_NULL
 }
@@ -163,7 +162,6 @@ func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
 		return                       // no further need be done
 	}
 	if t.Typ == VARIABLE_TYPE_ARRAY {
-		t.Typ = VARIABLE_TYPE_ARRAY_INSTANCE                 // correct
 		t.ArrayType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
 		return
 	}
@@ -290,7 +288,7 @@ func (t *VariableType) IsNumber() bool {
 
 func (t *VariableType) IsPointer() bool {
 	return t.Typ == VARIABLE_TYPE_OBJECT ||
-		t.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
+		t.Typ == VARIABLE_TYPE_ARRAY ||
 		t.Typ == VARIABLE_TYPE_MAP ||
 		t.Typ == VARIABLE_TYPE_STRING
 
@@ -340,7 +338,7 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret += v.Name
 	case VARIABLE_TYPE_ENUM:
 		*ret += "enum(" + v.Name + ")"
-	case VARIABLE_TYPE_ARRAY, VARIABLE_TYPE_ARRAY_INSTANCE:
+	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
 		v.ArrayType.typeString_(ret)
 	case VARIABLE_TYPE_VOID:

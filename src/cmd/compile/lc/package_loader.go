@@ -1,8 +1,11 @@
 package lc
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"github.com/756445638/lucy/src/cmd/compile/jvm"
+	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -37,13 +40,16 @@ func (*PackageLoader) LoadPackage(name string) (*ast.Package, error) {
 		return nil, fmt.Errorf("package '%v' not found", name)
 	}
 	if len(realpath) > 1 {
-		return nil, fmt.Errorf("not 1 package name '%s' present in $CLASSPATH", name)
+		dirs := ""
+		for _, v := range realpath {
+			dirs += v + " "
+		}
+		return nil, fmt.Errorf("not 1 package name '%s' present in '%s' ", name, dirs)
 	}
 	fis, err := ioutil.ReadDir(realpath[0])
 	if err != nil {
 		return nil, fmt.Errorf(" dir %v failed,err:%v\n", err)
 	}
-
 	classfiles := []os.FileInfo{}
 	for _, v := range fis {
 		if strings.HasSuffix(v.Name(), ".class") {
@@ -57,50 +63,83 @@ func (*PackageLoader) LoadPackage(name string) (*ast.Package, error) {
 }
 
 func (p *PackageLoader) load(realpath string, name string, files []os.FileInfo) (*ast.Package, error) {
-	return nil, fmt.Errorf(".......")
+	for _, f := range files {
+		bs, err := ioutil.ReadFile(filepath.Join(realpath, f.Name()))
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("@@@@@@@@@@@@@@", f.Name())
+		class, err := (&ClassDecoder{}).decode(bs)
+		if err != nil {
+			return nil, err
+		}
+		if strings.HasSuffix(class.SourceFile, ".lucy") {
+			err = p.loadAsLucy(class)
+		} else {
+			err = p.loadAsJava(class)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &p.Package, fmt.Errorf(".......")
 }
 
-//
-//func (p *PackageLoader) loadAsLucy(j *class_json.ClassJson) {
-//	shortname := ""
-//	{
-//		t := strings.Split(j.ThisClass, "/")
-//		shortname = t[len(t)-1]
-//		shortname = strings.Title(shortname)
-//	}
-//	mainclass := shortname == p.mainClassName // if match
-//	if mainclass {
-//		p.loadMainLucy(j)
-//		return
-//	}
-//	//load regular class
-//	c := &ast.Class{} // rebuild the name,trim prefix
-//	{
-//		t := strings.Split(j.ThisClass, "/")
-//		t[len(t)-1] = strings.TrimLeft(t[len(t)-1], p.mainClassName)
-//		c.ClassNameDefinition.Name = strings.Join(t, "/")
-//	}
-//	c.Fields = make(map[string]*ast.ClassField)
-//	for _, v := range j.Fields {
-//		f := &ast.ClassField{}
-//		f.VariableDefinition = *p.loadFieldAsVariableDefination(v)
-//		c.Fields[v.Name] = f
-//	}
-//	c.Methods = make(map[string][]*ast.ClassMethod)
-//	for _, v := range j.Methods {
-//		f := p.loadMethod(v)
-//		m := &ast.ClassMethod{}
-//		m.Func = f
-//		if v.Name == shortname {
-//			c.Constructors = append(c.Constructors, m)
-//			continue
-//		}
-//		if _, ok := c.Methods[v.Name]; !ok {
-//			c.Methods[v.Name] = []*ast.ClassMethod{}
-//		}
-//		c.Methods[v.Name] = append(c.Methods[v.Name], m)
-//	}
-//}
+func (p *PackageLoader) loadAsLucy(c *cg.Class) error {
+	panic("111")
+	return nil
+}
+func (p *PackageLoader) loadAsJava(c *cg.Class) error {
+	//name
+	astClass := &ast.Class{}
+	{
+		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+		astClass.ClassNameDefinition.BinaryName = string(c.ConstPool[nameindex].Info)
+		t := strings.Split(astClass.ClassNameDefinition.BinaryName, "/")
+		astClass.ClassNameDefinition.Name = t[len(t)-1]
+	}
+	{
+		if astClass.ClassNameDefinition.BinaryName != ast.JAVA_ROOT_CLASS {
+			nameindex := binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
+			astClass.SuperClassNameDefinition.BinaryName = string(c.ConstPool[nameindex].Info)
+			t := strings.Split(astClass.SuperClassNameDefinition.BinaryName, "/")
+			astClass.SuperClassNameDefinition.Name = t[len(t)-1]
+		}
+	}
+
+	astClass.Access = c.AccessFlag
+	var err error
+	astClass.Fields = make(map[string]*ast.ClassField)
+	for _, v := range c.Fields {
+		f := &ast.ClassField{}
+		f.Name = string(c.ConstPool[v.NameIndex].Info)
+		f.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		f.Typ, err = jvm.Descriptor.ParseType(f.Descriptor)
+		if err != nil {
+			return err
+		}
+		f.AccessFlags = v.AccessFlags
+		astClass.Fields[f.Name] = f
+	}
+
+	astClass.Methods = make(map[string][]*ast.ClassMethod)
+	for _, v := range c.Methods {
+		m := &ast.ClassMethod{}
+		m.Func = &ast.Function{}
+		m.Func.Name = string(c.ConstPool[v.NameIndex].Info)
+		m.Func.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		if err != nil {
+			return err
+		}
+		if astClass.Methods[m.Func.Name] == nil {
+			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
+		} else {
+			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
+		}
+	}
+	panic(222)
+	return nil
+}
 
 /*
 	main class

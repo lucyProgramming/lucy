@@ -128,7 +128,7 @@ func storeSimpleVarOp(t int, offset uint16) []byte {
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 		switch offset {
 		case 0:
 			return []byte{cg.OP_astore_0}
@@ -225,7 +225,7 @@ func loadSimpleVarOp(t int, offset uint16) []byte {
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 		switch offset {
 		case 0:
 			return []byte{cg.OP_aload_0}

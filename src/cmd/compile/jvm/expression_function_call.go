@@ -19,7 +19,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
 			Name:       call.Func.Name,
-			Descriptor: m.MakeClass.Descriptor.methodDescriptor(call.Func),
+			Descriptor: Descriptor.methodDescriptor(call.Func),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {

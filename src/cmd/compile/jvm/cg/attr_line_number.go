@@ -2,6 +2,7 @@ package cg
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 type AttributeLineNumber struct {
@@ -14,6 +15,7 @@ func (a *AttributeLineNumber) ToAttributeInfo(class *Class) *AttributeInfo {
 	}
 	ret := &AttributeInfo{}
 	ret.NameIndex = class.insertUtfConst("LineNumberTable")
+	fmt.Println("!!!!!!!!!!!!", ret.NameIndex)
 	ret.Info = make([]byte, 2)
 	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.linenumbers)))
 	for _, v := range a.linenumbers {

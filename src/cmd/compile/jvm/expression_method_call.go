@@ -7,7 +7,7 @@ import (
 
 func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY_INSTANCE {
+	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildArrayMethodCall(class, code, e, context)
 	}
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {

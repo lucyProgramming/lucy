@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	if e.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY_INSTANCE {
+	if e.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildNewArray(class, code, e, context)
 	}
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
@@ -121,7 +121,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])

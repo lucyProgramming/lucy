@@ -12,7 +12,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      context.mainclass.Name,
 			Name:       identifier.Name,
-			Descriptor: m.MakeClass.Descriptor.typeDescriptor(identifier.Var.Typ),
+			Descriptor: Descriptor.typeDescriptor(identifier.Var.Typ),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		maxstack = identifier.Var.Typ.JvmSlotSize()

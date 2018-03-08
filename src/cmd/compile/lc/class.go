@@ -17,12 +17,15 @@ func (c *ClassDecoder) parseConstPool() error {
 	for i := 0; i < int(length)-1; i++ {
 		switch c.bs[0] {
 		case cg.CONSTANT_POOL_TAG_Utf8:
-			length := binary.BigEndian.Uint16(c.bs[1:])
 			p := &cg.ConstPool{}
+			length := binary.BigEndian.Uint16(c.bs[1:])
 			p.Tag = c.bs[0]
 			c.bs = c.bs[3:]
 			p.Info = c.bs[:length]
+			c.bs = c.bs[length:]
+			fmt.Println(len(c.ret.ConstPool))
 			c.ret.ConstPool = append(c.ret.ConstPool, p)
+			fmt.Println(string(p.Info))
 		case cg.CONSTANT_POOL_TAG_Integer:
 			fallthrough
 		case cg.CONSTANT_POOL_TAG_Float:
@@ -38,6 +41,7 @@ func (c *ClassDecoder) parseConstPool() error {
 		case cg.CONSTANT_POOL_TAG_NameAndType:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_Long:
@@ -45,6 +49,7 @@ func (c *ClassDecoder) parseConstPool() error {
 		case cg.CONSTANT_POOL_TAG_Double:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
+			p.Info = c.bs[1:9]
 			c.bs = c.bs[9:]
 			c.ret.ConstPool = append(c.ret.ConstPool, p, nil)
 		case cg.CONSTANT_POOL_TAG_Class:
@@ -84,6 +89,7 @@ func (c *ClassDecoder) parseFields() {
 		f.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
 		f.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 		c.bs = c.bs[6:]
+		fmt.Println("!!!!!!!!!!!!", string(c.ret.ConstPool[f.NameIndex].Info))
 		f.Attributes = c.parseAttributes()
 		c.ret.Fields = append(c.ret.Fields, f)
 	}
@@ -113,6 +119,10 @@ func (c *ClassDecoder) parseAttributes() []*cg.AttributeInfo {
 		length := binary.BigEndian.Uint32(c.bs[2:])
 		c.bs = c.bs[6:]
 		a.Info = c.bs[:length]
+		if string(c.ret.ConstPool[a.NameIndex].Info) == cg.CONSTANT_SOURCE_FILE { //sepcial case
+			index := binary.BigEndian.Uint16(a.Info)
+			c.ret.SourceFile = string(c.ret.ConstPool[index].Info)
+		}
 		c.bs = c.bs[length:]
 		ret = append(ret, a)
 	}
@@ -126,16 +136,20 @@ func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
 	}
 	c.bs = c.bs[4:]
 	ret := &cg.Class{}
+	c.ret = ret
 	//version
 	ret.MinorVersion = binary.BigEndian.Uint16(c.bs)
 	ret.MajorVersion = binary.BigEndian.Uint16(c.bs[2:])
 	c.bs = c.bs[4:]
-	c.ret = ret
 	ret.ConstPool = []*cg.ConstPool{nil} // pool start 1
+
 	//const pool
 	if err := c.parseConstPool(); err != nil {
 		return ret, err
 	}
+	//access flag
+	ret.AccessFlag = binary.BigEndian.Uint16(c.bs)
+	c.bs = c.bs[2:]
 	// this class
 	ret.ThisClass = binary.BigEndian.Uint16(c.bs)
 	ret.SuperClass = binary.BigEndian.Uint16(c.bs[2:])
@@ -143,6 +157,8 @@ func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
 	c.parseInterfaces()
 	c.parseFields()
 	c.parserMethods()
-	c.parseAttributes()
+
+	c.ret.Attributes = c.parseAttributes()
+
 	return ret, nil
 }

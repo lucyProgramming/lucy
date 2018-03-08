@@ -10,7 +10,6 @@ import (
 )
 
 type MakeClass struct {
-	Descriptor     *Descriptor
 	p              *ast.Package
 	Classes        []*cg.ClassHighLevel
 	mainclass      *cg.ClassHighLevel
@@ -98,7 +97,7 @@ func (m *MakeClass) mkConsts() {
 		case ast.VARIABLE_TYPE_DOUBLE:
 			f.ConstantValue.Index = m.mainclass.Class.InsertDoubleConst(v.Data.(float64))
 		}
-		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)
+		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		f.Signature = &cg.AttributeSignature{}
 		f.Signature.Signature = f.Descriptor
 		m.mainclass.Fields[k] = f
@@ -109,7 +108,7 @@ func (m *MakeClass) mkVars() {
 		f := &cg.FiledHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
-		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)
+		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
@@ -175,7 +174,7 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 		f := &cg.FiledHighLevel{}
 		f.Name = v.Name
 		f.AccessFlags = v.AccessFlags
-		f.Descriptor = m.Descriptor.typeDescriptor(v.Typ)
+		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		class.Fields[v.Name] = f
 	}
 	for _, v := range c.Methods {
@@ -184,7 +183,7 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 		method.Name = vv.Func.Name
 		method.AccessFlags = vv.Func.AccessFlags
 		method.Class = class
-		method.Descriptor = m.Descriptor.methodDescriptor(vv.Func)
+		method.Descriptor = Descriptor.methodDescriptor(vv.Func)
 		m.buildFunction(class, method, vv.Func)
 		class.AppendMethod(method)
 	}
@@ -211,7 +210,7 @@ func (m *MakeClass) mkFuncs() {
 		method := &cg.MethodHighLevel{}
 		method.Class = m.mainclass
 		method.Name = f.Name
-		method.Descriptor = m.Descriptor.methodDescriptor(f)
+		method.Descriptor = Descriptor.methodDescriptor(f)
 		method.AccessFlags = 0
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {

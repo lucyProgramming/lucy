@@ -18,7 +18,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		if t == nil {
 			return nil
 		}
-		if t.Typ != VARIABLE_TYPE_ARRAY_INSTANCE &&
+		if t.Typ != VARIABLE_TYPE_ARRAY &&
 			VARIABLE_TYPE_OBJECT != t.Typ &&
 			t.Typ != VARIABLE_TYPE_MAP {
 			op := "access"
@@ -35,7 +35,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		return nil
 	}
 	if e.Typ == EXPRESSION_TYPE_INDEX { // index
-		if obj.Typ == VARIABLE_TYPE_ARRAY_INSTANCE {
+		if obj.Typ == VARIABLE_TYPE_ARRAY {
 			ts, es := index.Index.check(block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)

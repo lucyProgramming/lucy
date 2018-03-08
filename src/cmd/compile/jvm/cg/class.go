@@ -30,7 +30,7 @@ type Class struct {
 	Fields       []*FieldInfo
 	Methods      []*MethodInfo
 	Attributes   []*AttributeInfo
-
+	SourceFile   string
 	// used when compile code
 	Utf8Consts               map[string]*ConstPool
 	IntConsts                map[int32]*ConstPool
@@ -294,7 +294,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			info.NameIndex = c.insertUtfConst(m.Name)
 			info.DescriptorIndex = c.insertUtfConst(m.Descriptor)
 			codeinfo := m.Code.ToAttributeInfo(c)
-			codeinfo.NameIndex = c.insertUtfConst("Code")
 			info.Attributes = append(info.Attributes, codeinfo)
 			c.Methods = append(c.Methods, info)
 		}

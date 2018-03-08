@@ -35,7 +35,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			target = identifier.Var.Typ
 			classname = context.mainclass.Name
 			name = identifier.Name
-			descriptor = m.MakeClass.Descriptor.typeDescriptor(identifier.Var.Typ)
+			descriptor = Descriptor.typeDescriptor(identifier.Var.Typ)
 			return
 		}
 		if identifier.Var.BeenCaptured {
@@ -125,7 +125,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		target = identifier.Var.Typ
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY_INSTANCE {
+		if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 			maxstack, _ = m.build(class, code, index.Expression, context)
 			stack, _ := m.build(class, code, index.Index, context)
 			if t := stack + 1; t > maxstack {

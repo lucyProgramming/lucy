@@ -98,7 +98,7 @@ func init() {
 		elementsFieldDescriptor: "[Ljava/lang/Object;",
 		sliceDescriptor:         "(II)Llucy/lang/ArrayObject;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_ARRAY_INSTANCE] = &ArrayMeta{
+	ArrayMetas[ast.VARIABLE_TYPE_ARRAY] = &ArrayMeta{
 		classname:               "lucy/lang/ArrayObject",
 		initFuncDescriptor:      "([Ljava/lang/Object;I)V",
 		getDescriptor:           "(I)Ljava/lang/Object;",

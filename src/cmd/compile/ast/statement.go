@@ -139,10 +139,10 @@ func (s *Statement) check(b *Block) []error { // b is father
 func (s *Statement) checkStatementGoto(b *Block) error {
 	t := b.searchByName(s.StatementGoto.Name)
 	if t == nil {
-		return fmt.Errorf("%s label named '%s' not found", s.StatementGoto.Pos, s.StatementGoto.Name)
+		return fmt.Errorf("%s label named '%s' not found", errMsgPrefix(s.StatementGoto.Pos), s.StatementGoto.Name)
 	}
 	if l, ok := t.(*StatementLable); ok == false {
-		return fmt.Errorf("%s '%s' is not a lable", s.StatementGoto.Pos, s.StatementGoto.Name)
+		return fmt.Errorf("%s '%s' is not a lable", errMsgPrefix(s.StatementGoto.Pos), s.StatementGoto.Name)
 	} else {
 		s.StatementGoto.StatementLable = l
 	}

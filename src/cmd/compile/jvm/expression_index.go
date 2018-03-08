@@ -15,7 +15,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      index.Expression.VariableType.Class.ClassNameDefinition.Name,
 			Name:       index.Name,
-			Descriptor: m.MakeClass.Descriptor.typeDescriptor(e.VariableType),
+			Descriptor: Descriptor.typeDescriptor(e.VariableType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
@@ -28,7 +28,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      index.Expression.VariableType.Class.ClassNameDefinition.Name,
 		Name:       index.Name,
-		Descriptor: m.MakeClass.Descriptor.typeDescriptor(e.VariableType),
+		Descriptor: Descriptor.typeDescriptor(e.VariableType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return

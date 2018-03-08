@@ -47,7 +47,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(e.VariableType.ArrayType.Class.ClassNameDefinition.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -91,7 +91,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 					fallthrough
 				case ast.VARIABLE_TYPE_OBJECT:
 					fallthrough
-				case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+				case ast.VARIABLE_TYPE_ARRAY:
 					code.Codes[code.CodeLength] = cg.OP_aastore
 				}
 				code.CodeLength++
@@ -126,7 +126,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_aastore
 		}
 		code.CodeLength++

@@ -32,7 +32,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 					tt := t.Clone()
 					tt.Pos = e.Pos
 					arr.Typ = &VariableType{}
-					arr.Typ.Typ = VARIABLE_TYPE_ARRAY_INSTANCE
+					arr.Typ.Typ = VARIABLE_TYPE_ARRAY
 					arr.Typ.ArrayType = tt
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s %s cannot inference it`s type,because type named '%s' is not right value valid ", errMsgPrefix(e.Pos), t.TypeString()))

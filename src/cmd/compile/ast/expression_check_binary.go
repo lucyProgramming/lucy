@@ -127,7 +127,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					errMsgPrefix(e.Pos),
 					e.OpName()))
 			}
-		case VARIABLE_TYPE_ARRAY_INSTANCE:
+		case VARIABLE_TYPE_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:
 			if t2.IsPointer() == false && t2.Typ != VARIABLE_TYPE_NULL {

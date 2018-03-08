@@ -5,14 +5,21 @@ import (
 	"io/ioutil"
 	"os"
 	//	"runtime/debug"
-	"strings"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm"
 	"github.com/756445638/lucy/src/cmd/compile/parser"
+	"strings"
 )
 
 func Main(files []string) {
+	if len(files) == 0 {
+		fmt.Println("no file specfied")
+		os.Exit(1)
+	}
+	if CompileFlags.PackageName == "" {
+		fmt.Println("package name not specfied")
+		os.Exit(1)
+	}
 	compiler.NerrsStopCompile = 10
 	compiler.Errs = []error{}
 	compiler.Files = files

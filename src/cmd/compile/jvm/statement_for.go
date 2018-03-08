@@ -274,7 +274,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[s.StatmentForRangeAttr.Expression.VariableType.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_aaload // cast into real type
 		code.Codes[code.CodeLength+1] = cg.OP_checkcast
@@ -367,7 +367,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	if s.StatmentForRangeAttr != nil {
-		if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY_INSTANCE {
+		if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 			return m.buildForRangeStatementForArray(class, code, s, context)
 		} else { // for map
 			return m.buildForRangeStatementForMap(class, code, s, context)

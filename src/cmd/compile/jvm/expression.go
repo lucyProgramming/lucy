@@ -327,7 +327,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_STRING:
 	case ast.VARIABLE_TYPE_OBJECT:
-	case ast.VARIABLE_TYPE_ARRAY_INSTANCE:
+	case ast.VARIABLE_TYPE_ARRAY:
 	}
 	return
 }
