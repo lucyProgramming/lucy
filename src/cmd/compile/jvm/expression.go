@@ -172,6 +172,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildSlice(class, code, e, context)
 	case ast.EXPRESSION_TYPE_ARRAY:
 		maxstack = m.buildArray(class, code, e, context)
+	case ast.EXPRESSION_TYPE_MAP:
+		maxstack = m.buildMapLiteral(class, code, e, context)
 	default:
 		panic(e.OpName())
 	}

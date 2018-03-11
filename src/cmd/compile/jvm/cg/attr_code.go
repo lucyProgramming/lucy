@@ -69,6 +69,7 @@ func (a *AttributeCode) mkAttributes(class *Class) []byte {
 }
 
 func (a *AttributeCode) mkExceptions() []byte {
+
 	bs := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs, uint16(len(a.Exceptions)))
 	if len(a.Exceptions) > 0 {

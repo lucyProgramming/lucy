@@ -2,10 +2,8 @@ package ast
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
+	"strings"
 )
 
 type Class struct {
@@ -20,7 +18,6 @@ type Class struct {
 	SuperClass               *Class
 	Interfaces               []*Class
 	Constructors             []*ClassMethod // can be nil
-	Signature                *class_json.ClassSignature
 	SouceFile                string
 	Used                     bool
 	VariableType             VariableType

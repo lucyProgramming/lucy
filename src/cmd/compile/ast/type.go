@@ -21,6 +21,8 @@ const (
 	VARIABLE_TYPE_STRING
 	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_MAP
+	VARIABLE_TYPE_ARRAY      //[]int
+	VARIABLE_TYPE_JAVA_ARRAY // java array int[]
 	VARIABLE_TYPE_FUNCTION
 	//function type
 	VARIABLE_TYPE_FUNCTION_TYPE
@@ -28,8 +30,8 @@ const (
 	VARIABLE_TYPE_ENUM //enum
 	//class
 	VARIABLE_TYPE_CLASS //
-	VARIABLE_TYPE_ARRAY //[]int
-	VARIABLE_TYPE_NAME  //naming
+
+	VARIABLE_TYPE_NAME //naming
 	VARIABLE_TYPE_VOID
 	VARIABLE_TYPE_NULL
 )
@@ -124,19 +126,22 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_NULL
 }
 
-//func (v *VariableType) typeInferenceAble() bool {
-//	return v.Typ == VARIABLE_TYPE_BOOL ||
-//		v.Typ == VARIABLE_TYPE_BYTE ||
-//		v.Typ == VARIABLE_TYPE_SHORT ||
-//		v.Typ == VARIABLE_TYPE_INT ||
-//		v.Typ == VARIABLE_TYPE_LONG ||
-//		v.Typ == VARIABLE_TYPE_FLOAT ||
-//		v.Typ == VARIABLE_TYPE_DOUBLE ||
-//		v.Typ == VARIABLE_TYPE_STRING ||
-//		v.Typ == VARIABLE_TYPE_OBJECT ||
-//		v.Typ == VARIABLE_TYPE_ARRAY_INSTANCE ||
-//		v.Typ == VARIABLE_TYPE_MAP
-//}
+/*
+	isTyped means can get type from this
+*/
+func (v *VariableType) isTyped() bool {
+	return v.Typ == VARIABLE_TYPE_BOOL ||
+		v.Typ == VARIABLE_TYPE_BYTE ||
+		v.Typ == VARIABLE_TYPE_SHORT ||
+		v.Typ == VARIABLE_TYPE_INT ||
+		v.Typ == VARIABLE_TYPE_LONG ||
+		v.Typ == VARIABLE_TYPE_FLOAT ||
+		v.Typ == VARIABLE_TYPE_DOUBLE ||
+		v.Typ == VARIABLE_TYPE_STRING ||
+		v.Typ == VARIABLE_TYPE_OBJECT ||
+		v.Typ == VARIABLE_TYPE_ARRAY ||
+		v.Typ == VARIABLE_TYPE_MAP
+}
 
 /*
 	clone a type
@@ -270,7 +275,6 @@ func (t *VariableType) TypeCompatible(comp *VariableType, err ...*error) bool {
 	if t.IsNumber() && comp.IsNumber() {
 		return true
 	}
-
 	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
 		return false
 	}
@@ -353,6 +357,8 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret += " -> "
 		*ret += v.Map.V.TypeString()
 		*ret += "}"
+	case VARIABLE_TYPE_JAVA_ARRAY:
+		*ret += v.ArrayType.TypeString() + "[]"
 	default:
 		panic(1)
 	}
@@ -366,6 +372,9 @@ func (v *VariableType) TypeString() string {
 }
 
 func (t1 *VariableType) Equal(t2 *VariableType) bool {
+	if t1 == t2 {
+		return true
+	}
 	if t1.isPrimitive() || t2.isPrimitive() {
 		return t1.Typ == t2.Typ
 	}

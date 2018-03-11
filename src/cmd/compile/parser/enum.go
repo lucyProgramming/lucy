@@ -15,6 +15,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
+
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s enum type have no name", p.errorMsgPrefix())
 		p.errs = append(p.errs, err)

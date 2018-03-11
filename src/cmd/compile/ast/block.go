@@ -6,6 +6,7 @@ import (
 )
 
 type Block struct {
+	Defers                     []*Defer
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool
@@ -20,6 +21,10 @@ type Block struct {
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
 	Vars                       map[string]*VariableDefinition
+}
+
+type Defer struct {
+	Block Block
 }
 
 func (b *Block) shouldStop(errs []error) bool {
@@ -62,8 +67,8 @@ func (b *Block) searchByName(name string) interface{} {
 			return t
 		}
 	}
-	if b.InheritedAttribute.function != nil {
-		v := b.InheritedAttribute.function.ClosureVars.Search(name)
+	if b.InheritedAttribute.Function != nil {
+		v := b.InheritedAttribute.Function.ClosureVars.Search(name)
 		if v != nil {
 			return v
 		}
@@ -74,10 +79,10 @@ func (b *Block) searchByName(name string) interface{} {
 	t := b.Outter.searchByName(name) // search by outter block
 	if t != nil {                    //
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
-			if b.InheritedAttribute.function != nil &&
+			if b.InheritedAttribute.Function != nil &&
 				b.IsFunctionTopBlock &&
-				b.InheritedAttribute.function.IsGlobal == false {
-				b.InheritedAttribute.function.ClosureVars.Insert(v)
+				b.InheritedAttribute.Function.IsGlobal == false {
+				b.InheritedAttribute.Function.ClosureVars.Insert(v)
 			}
 			//cannot search variable from class body
 			if b.InheritedAttribute.class != nil && b.IsClassBlock {
@@ -106,9 +111,10 @@ type InheritedAttribute struct {
 	StatementFor                 *StatementFor // if this statement is in for or not
 	StatementSwitch              *StatementSwitch
 	mostCloseForOrSwitchForBreak interface{}
-	function                     *Function
+	Function                     *Function
 	class                        *Class
 	p                            *Package
+	Defer                        *Defer
 }
 
 type NameWithType struct {
@@ -255,7 +261,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 }
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	fmt.Println("insert to block:", name, pos, d)
-	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.function.isGlobalVariableDefinition { // global var insert into block
+	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
 		b := b.InheritedAttribute.p.Block
 		if _, ok := b.Vars[name]; ok {
 			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,last declared at:\n", errMsgPrefix(pos), name)
@@ -350,8 +356,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
 		t.Typ.actionNeedBeenDoneWhenDescribeVariable()
-		t.LocalValOffset = b.InheritedAttribute.function.Varoffset
-		b.InheritedAttribute.function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
+		t.LocalValOffset = b.InheritedAttribute.Function.Varoffset
+		b.InheritedAttribute.Function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
 		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)

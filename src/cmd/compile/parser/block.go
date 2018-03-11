@@ -21,6 +21,10 @@ func (b *Block) consume(c map[int]bool) {
 
 func (b *Block) parse(block *ast.Block) (err error) {
 	b.Next() // skip {
+	isDefer := false
+	reset := func() {
+		isDefer = false
+	}
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {
 		if len(b.parser.errs) > b.parser.nerr {
@@ -28,17 +32,24 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		}
 		switch b.parser.token.Type {
 		case lex.TOKEN_SEMICOLON:
+			reset()
 			b.Next() // look up next
 			continue
+		case lex.TOKEN_DEFER:
+			isDefer = true
+			b.Next()
 		case lex.TOKEN_RC: // end
 			b.Next()
 			return
 		case lex.TOKEN_IDENTIFIER:
-			b.parseExpressionStatement(block)
+			b.parseExpressionStatement(block, isDefer)
+			reset()
 		case lex.TOKEN_LP:
-			b.parseExpressionStatement(block)
+			b.parseExpressionStatement(block, isDefer)
+			reset()
 		case lex.TOKEN_FUNCTION:
-			b.parseExpressionStatement(block)
+			b.parseExpressionStatement(block, isDefer)
+			reset()
 		case lex.TOKEN_VAR:
 			pos := b.parser.mkPos()
 			b.Next() // skip var key word
@@ -57,6 +68,10 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				},
 			}
 			block.Statements = append(block.Statements, s)
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with expression var has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			}
+			reset()
 		case lex.TOKEN_IF:
 			i, err := b.parseIf()
 			if err != nil {
@@ -68,6 +83,10 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ:         ast.STATEMENT_TYPE_IF,
 				StatementIf: i,
 			})
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with  statment if has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			}
+			reset()
 		case lex.TOKEN_FOR:
 			f, err := b.parseFor()
 			if err != nil {
@@ -79,6 +98,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ:          ast.STATEMENT_TYPE_FOR,
 				StatementFor: f,
 			})
+			reset()
 		case lex.TOKEN_SWITCH:
 			s, err := b.parseSwitch()
 			if err != nil {
@@ -90,7 +110,12 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ:             ast.STATEMENT_TYPE_SWITCH,
 				StatementSwitch: s,
 			})
+			reset()
 		case lex.TOKEN_CONST:
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with const definition has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				reset()
+			}
 			pos := b.parser.mkPos()
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
@@ -136,6 +161,10 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			block.Statements = append(block.Statements, r)
 			b.Next()
 		case lex.TOKEN_RETURN:
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement return has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				reset()
+			}
 			b.Next()
 			r := &ast.StatementReturn{}
 			block.Statements = append(block.Statements, &ast.Statement{
@@ -171,6 +200,10 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Block: newblock,
 			})
 		case lex.TOKEN_SKIP:
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				reset()
+			}
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'skip'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
@@ -179,6 +212,10 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				Typ: ast.STATEMENT_TYPE_SKIP,
 			})
 		case lex.TOKEN_CONTINUE:
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				reset()
+			}
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'continue'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
@@ -230,7 +267,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 	return
 }
 
-func (b *Block) parseExpressionStatement(block *ast.Block) {
+func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 	e, err := b.parser.ExpressionParser.parseExpression()
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
@@ -239,6 +276,9 @@ func (b *Block) parseExpressionStatement(block *ast.Block) {
 		return
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		if isDefer {
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+		}
 		s := &ast.Statement{}
 		s.Typ = ast.STATEMENT_TYPE_LABLE
 		lable := &ast.StatementLable{}
@@ -251,10 +291,23 @@ func (b *Block) parseExpressionStatement(block *ast.Block) {
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression", b.parser.errorMsgPrefix(e.Pos)))
 		}
-		block.Statements = append(block.Statements, &ast.Statement{
-			Typ:        ast.STATEMENT_TYPE_EXPRESSION,
-			Expression: e,
-		})
+		if isDefer {
+			d := &ast.Defer{}
+			d.Block.Statements = []*ast.Statement{&ast.Statement{
+				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
+				Expression: e,
+			}}
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:   ast.STATEMENT_TYPE_DEFER,
+				Defer: d,
+			})
+		} else {
+			block.Statements = append(block.Statements, &ast.Statement{
+				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
+				Expression: e,
+			})
+		}
+
 	}
 }
 

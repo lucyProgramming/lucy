@@ -1,7 +1,5 @@
 package ast
 
-import "github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
-
 type VariableDefinition struct {
 	LocalValOffset      uint16
 	IsGlobal            bool
@@ -13,6 +11,5 @@ type VariableDefinition struct {
 	Pos                 *Pos
 	Expression          *Expression
 	NameWithType
-	Signature  *class_json.FieldSignature
 	Descriptor string
 }

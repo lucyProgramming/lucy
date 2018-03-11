@@ -121,6 +121,12 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			t = []*VariableType{tt}
 		}
 		e.VariableType = tt
+	case EXPRESSION_TYPE_MAP:
+		tt := e.checkMapExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+		}
+		e.VariableType = tt
 	case EXPRESSION_TYPE_COLON_ASSIGN:
 		e.checkColonAssignExpression(block, &errs)
 	case EXPRESSION_TYPE_ASSIGN:
@@ -156,7 +162,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			e.VariableType = t[0]
 		}
 		if len(t) > 1 {
-			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
@@ -165,7 +171,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			e.VariableType = t[0]
 		}
 		if len(t) > 1 {
-			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 
 	case EXPRESSION_TYPE_NOT:

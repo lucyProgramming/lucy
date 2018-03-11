@@ -71,7 +71,7 @@ func (p *Package) TypeCheck() []error {
 			continue
 		}
 		v.Block.inherite(&p.Block)
-		v.Block.InheritedAttribute.function = v
+		v.Block.InheritedAttribute.Function = v
 		v.checkParaMeterAndRetuns(&p.Errors)
 		if p.Block.shouldStop(nil) {
 			return p.Errors

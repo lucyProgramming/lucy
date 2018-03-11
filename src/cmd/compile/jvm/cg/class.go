@@ -298,12 +298,12 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			c.Methods = append(c.Methods, info)
 		}
 	}
-
 	//source file
 	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
 	c.ifConstPoolOverMaxSize()
 	return
 }
+
 func (c *Class) constPoolUint16Length() uint16 {
 	return uint16(len(c.ConstPool))
 }

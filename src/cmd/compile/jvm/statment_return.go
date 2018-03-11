@@ -5,10 +5,19 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context, hasdefer *HasDefer) (maxstack uint16) {
 	if len(s.Function.Typ.ReturnList) == 0 {
-		code.Codes[code.CodeLength] = cg.OP_return
-		code.CodeLength++
+		if hasdefer.has {
+			code.Codes[code.CodeLength] = cg.OP_iconst_1
+			code.CodeLength++
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.Returnd)...)
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			hasdefer.returnExits = append(hasdefer.returnExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_return
+			code.CodeLength++
+		}
 		return
 	}
 	if len(s.Function.Typ.ReturnList) == 1 {

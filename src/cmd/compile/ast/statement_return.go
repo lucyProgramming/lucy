@@ -11,10 +11,10 @@ type StatementReturn struct {
 }
 
 func (s *StatementReturn) check(b *Block) []error {
-	s.Function = b.InheritedAttribute.function
-	if len(b.InheritedAttribute.function.Typ.ReturnList) > 0 && len(s.Expressions) == 0 {
-		s.Expressions = make([]*Expression, len(b.InheritedAttribute.function.Typ.ReturnList))
-		for k, v := range b.InheritedAttribute.function.Typ.ReturnList {
+	s.Function = b.InheritedAttribute.Function
+	if len(b.InheritedAttribute.Function.Typ.ReturnList) > 0 && len(s.Expressions) == 0 {
+		s.Expressions = make([]*Expression, len(b.InheritedAttribute.Function.Typ.ReturnList))
+		for k, v := range b.InheritedAttribute.Function.Typ.ReturnList {
 			identifer := &ExpressionIdentifer{
 				Name: v.Name,
 			}
@@ -30,7 +30,7 @@ func (s *StatementReturn) check(b *Block) []error {
 	errs := make([]error, 0)
 	returndValueTypes := checkExpressions(b, s.Expressions, &errs)
 	pos := s.Expressions[len(s.Expressions)-1].Pos
-	rs := b.InheritedAttribute.function.Typ.ReturnList
+	rs := b.InheritedAttribute.Function.Typ.ReturnList
 	if len(returndValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few arguments to return", errMsgPrefix(pos)))
 	}

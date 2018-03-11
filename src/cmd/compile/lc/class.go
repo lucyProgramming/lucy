@@ -23,9 +23,7 @@ func (c *ClassDecoder) parseConstPool() error {
 			c.bs = c.bs[3:]
 			p.Info = c.bs[:length]
 			c.bs = c.bs[length:]
-			fmt.Println(len(c.ret.ConstPool))
 			c.ret.ConstPool = append(c.ret.ConstPool, p)
-			fmt.Println(string(p.Info))
 		case cg.CONSTANT_POOL_TAG_Integer:
 			fallthrough
 		case cg.CONSTANT_POOL_TAG_Float:
@@ -72,6 +70,7 @@ func (c *ClassDecoder) parseConstPool() error {
 	}
 	return nil
 }
+
 func (c *ClassDecoder) parseInterfaces() {
 	length := binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]

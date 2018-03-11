@@ -123,11 +123,11 @@ func (s *StatementFor) checkRange() []error {
 	s.StatmentForRangeAttr.Expression = rangeExpression
 	if arrayt.Typ == VARIABLE_TYPE_ARRAY {
 		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
-		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.function,
+		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
 			arrayt.ArrayType)
 	} else {
 		s.StatmentForRangeAttr.AutoVarForRangeMap = &AutoVarForRangeMap{}
-		s.StatmentForRangeAttr.AutoVarForRangeMap.mkAutoVarForRange(s.Block.InheritedAttribute.function,
+		s.StatmentForRangeAttr.AutoVarForRangeMap.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
 			arrayt.Map.K, arrayt.Map.V)
 	}
 

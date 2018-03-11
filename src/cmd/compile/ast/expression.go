@@ -75,7 +75,7 @@ const (
 	EXPRESSION_TYPE_LABLE           // end:
 	EXPRESSION_TYPE_RANGE           // for range
 	EXPRESSSION_TYPE_SLICE          // arr[0:2]
-	// 	EXPRESSION_TYPE_ARRAY_VALUES
+	EXPRESSION_TYPE_MAP             // map literal
 )
 
 type ExpressionSlice struct {
@@ -238,6 +238,11 @@ type ExpressionNew struct {
 	Construction *ClassMethod
 }
 
+type ExpressionMap struct {
+	Typ    *VariableType
+	Values []*ExpressionBinary
+}
+
 type ExpressionBinary struct {
 	Left  *Expression
 	Right *Expression
@@ -389,6 +394,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "range"
 	case EXPRESSSION_TYPE_SLICE:
 		return "slice"
+	case EXPRESSION_TYPE_MAP:
+		return "map_literal"
 	}
 	panic("missing type")
 }

@@ -19,6 +19,7 @@ const (
 	STATEMENT_TYPE_SKIP // skip this block
 	STATEMENT_TYPE_LABLE
 	STATEMENT_TYPE_GOTO
+	STATEMENT_TYPE_DEFER
 )
 
 type Statement struct {
@@ -34,6 +35,7 @@ type Statement struct {
 	StatementContinue *StatementContinue
 	StatmentLable     *StatementLable
 	StatementGoto     *StatementGoto
+	Defer             *Defer
 }
 
 type StatementGoto struct {
@@ -76,12 +78,16 @@ func (s *Statement) statementName() string {
 		return "'lable statement'"
 	case STATEMENT_TYPE_GOTO:
 		return "'goto statement'"
+	case STATEMENT_TYPE_DEFER:
+		return "'defer statement'"
+	case STATEMENT_TYPE_BLOCK:
+		return "'block statement'"
 	}
 	return ""
 }
 
 func (s *Statement) check(b *Block) []error { // b is father
-	if b.InheritedAttribute.function.isPackageBlockFunction {
+	if b.InheritedAttribute.Function.isPackageBlockFunction {
 		if s.Typ == STATEMENT_TYPE_SKIP { //special case
 			return nil // 0 length error
 		}
@@ -110,26 +116,42 @@ func (s *Statement) check(b *Block) []error { // b is father
 		if b.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s %s can`t in this scope",
 				errMsgPrefix(s.Pos), s.statementName())}
-		} else {
-			if s.StatementContinue == nil {
-				s.StatementContinue = &StatementContinue{}
-			}
-			if s.StatementContinue.StatementFor == nil {
-				s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
-			}
+		}
+		if b.InheritedAttribute.StatementFor != nil && b.InheritedAttribute.Defer != nil {
+			return []error{fmt.Errorf("%s cannot has 'statement continue' in both 'defer' and 'for'",
+				errMsgPrefix(s.Pos), s.statementName())}
+		}
+		if s.StatementContinue == nil {
+			s.StatementContinue = &StatementContinue{}
+		}
+		if s.StatementContinue.StatementFor == nil {
+			s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
 		}
 	case STATEMENT_TYPE_RETURN:
-		if b.InheritedAttribute.function == nil {
-			return []error{fmt.Errorf("%s %s can`t in this scope",
+		if b.InheritedAttribute.Defer != nil {
+			return []error{fmt.Errorf("%s cannot has statement return in defer",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
 		return s.StatementReturn.check(b)
-	case STATEMENT_TYPE_LABLE:
 	case STATEMENT_TYPE_GOTO:
 		err := s.checkStatementGoto(b)
 		if err != nil {
 			return []error{err}
 		}
+	case STATEMENT_TYPE_DEFER:
+		if b.InheritedAttribute.Function.AutoVarForException == nil {
+			t := &AutoVarForException{}
+			b.InheritedAttribute.Function.AutoVarForException = t
+			t.Offset = b.InheritedAttribute.Function.Varoffset
+			b.InheritedAttribute.Function.Varoffset++
+		}
+		s.Defer.Block.inherite(b)
+		b.Defers = append(b.Defers, s.Defer)
+		return s.Defer.Block.check()
+	case STATEMENT_TYPE_BLOCK:
+		s.Block.inherite(b)
+		return s.Block.check()
+	case STATEMENT_TYPE_LABLE: // nothing to do
 	default:
 		panic("unkown type statement" + s.statementName())
 	}

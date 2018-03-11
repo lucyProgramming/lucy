@@ -2,30 +2,64 @@ package ast
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/class_json"
 )
 
 type Function struct {
-	isGlobalVariableDefinition bool
-	isPackageBlockFunction     bool
-	callchecker                CallChecker // used in build function
-	ClassMethod                *cg.MethodHighLevel
-	IsGlobal                   bool
-	Isbuildin                  bool
-	Used                       bool
-	AccessFlags                uint16 // public private or protected
-	Typ                        *FunctionType
-	ClosureVars                ClosureVars
-	Name                       string // if name is nil string,means no name function
-	Block                      *Block
-	Pos                        *Pos
-	Descriptor                 string
-	Signature                  *class_json.MethodSignature
-	VariableType               VariableType
-	Varoffset                  uint16
-	AutoVarForMultiReturn      *AutoVarForMultiReturn
+	isGlobalVariableDefinition     bool
+	isPackageBlockFunction         bool
+	AutoVarForException            *AutoVarForException
+	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
+	callchecker                    CallChecker // used in build function
+	ClassMethod                    *cg.MethodHighLevel
+	IsGlobal                       bool
+	Isbuildin                      bool
+	Used                           bool
+	AccessFlags                    uint16 // public private or protected
+	Typ                            *FunctionType
+	ClosureVars                    ClosureVars
+	Name                           string // if name is nil string,means no name function
+	Block                          *Block
+	Pos                            *Pos
+	Descriptor                     string
+	VariableType                   VariableType
+	Varoffset                      uint16
+	AutoVarForMultiReturn          *AutoVarForMultiReturn
+}
+
+func (f *Function) HaveNoReturnValue() bool {
+	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_BOOL
+}
+func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
+	if f.AutoVarForReturnBecauseOfDefer != nil {
+		return
+	}
+	t := &AutoVarForReturnBecauseOfDefer{}
+	f.AutoVarForReturnBecauseOfDefer = t
+	t.Returnd = f.Varoffset
+	f.Varoffset++
+	if len(f.Typ.ReturnList) == 0 ||
+		(len(f.Typ.ReturnList) == 1 && f.Typ.ReturnList[0].NameWithType.Typ.Typ == VARIABLE_TYPE_VOID) {
+		return
+	}
+	// >= 1 case
+	if len(f.Typ.ReturnList) == 1 {
+		f.Varoffset = f.Varoffset
+		f.Varoffset = f.Typ.ReturnList[0].Typ.JvmSlotSize()
+	} else {
+		t.ValueOffset = f.Varoffset
+		f.Varoffset++
+	}
+}
+
+type AutoVarForReturnBecauseOfDefer struct {
+	Returnd uint16
+	//Slot        uint16 // 1 or 2
+	ValueOffset uint16
+}
+
+type AutoVarForException struct {
+	Offset uint16
 }
 
 /*
@@ -93,7 +127,7 @@ func (f *Function) checkBlock(errs *[]error) {
 func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Block.inherite(b)
-	f.Block.InheritedAttribute.function = f
+	f.Block.InheritedAttribute.Function = f
 	f.checkParaMeterAndRetuns(&errs)
 	f.checkBlock(&errs)
 	return errs

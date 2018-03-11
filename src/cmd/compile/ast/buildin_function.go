@@ -13,7 +13,7 @@ type buildFunction struct {
 func init() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &buildFunction{
 		checker: func(block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-			block.InheritedAttribute.function.mkAutoVarForMultiReturn()
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		},
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = &buildFunction{

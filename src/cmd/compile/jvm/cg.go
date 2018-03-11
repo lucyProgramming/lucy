@@ -228,22 +228,11 @@ func (m *MakeClass) mkFuncs() {
 	}
 }
 
-func (m *MakeClass) mkClosureFunctionClass() *cg.ClassHighLevel {
-	ret := &cg.ClassHighLevel{}
-	ret.AccessFlags = cg.ACC_CLASS_FINAL
-	return ret
-}
-
-func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context) {
-	var maxstack uint16
-	for _, s := range b.Statements {
-		maxstack = m.buildStatement(class, code, s, context)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
-		}
-	}
-	return
-}
+//func (m *MakeClass) mkClosureFunctionClass() *cg.ClassHighLevel {
+//	ret := &cg.ClassHighLevel{}
+//	ret.AccessFlags = cg.ACC_CLASS_FINAL
+//	return ret
+//}
 
 func (m *MakeClass) mkFuncClassMode(f *ast.Function) *cg.MethodHighLevel {
 	ret := &cg.MethodHighLevel{}
