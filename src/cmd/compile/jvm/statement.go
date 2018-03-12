@@ -5,7 +5,7 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context, hasdefer *HasDefer) (maxstack uint16) {
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context) (maxstack uint16) {
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		var es []*cg.JumpBackPatch
@@ -32,7 +32,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			s.StatementBreak.StatementSwitch.BackPatchs = append(s.StatementBreak.StatementSwitch.BackPatchs, b)
 		}
 	case ast.STATEMENT_TYPE_RETURN:
-		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, hasdefer)
+		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context)
 	case ast.STATEMENT_TYPE_SWITCH:
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context)
 		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)

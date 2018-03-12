@@ -67,7 +67,7 @@ func (p *Package) TypeCheck() []error {
 	p.Errors = append(p.Errors, p.Block.checkConst()...)
 	//
 	for _, v := range p.Block.Funcs {
-		if v.Isbuildin {
+		if v.IsBuildin {
 			continue
 		}
 		v.Block.inherite(&p.Block)
@@ -87,7 +87,7 @@ func (p *Package) TypeCheck() []error {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
 	}
 	for _, v := range p.Block.Funcs {
-		if v.Isbuildin {
+		if v.IsBuildin {
 			continue
 		}
 		v.checkBlock(&p.Errors)

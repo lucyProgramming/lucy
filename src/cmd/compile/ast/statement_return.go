@@ -24,6 +24,7 @@ func (s *StatementReturn) check(b *Block) []error {
 			}
 		}
 	}
+
 	if len(s.Expressions) == 0 {
 		return nil
 	}

@@ -204,7 +204,7 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 func (m *MakeClass) mkFuncs() {
 	ms := make(map[string]*cg.MethodHighLevel)
 	for k, f := range m.p.Block.Funcs { // fisrt round
-		if f.Isbuildin { //
+		if f.IsBuildin { //
 			continue
 		}
 		method := &cg.MethodHighLevel{}
@@ -221,7 +221,7 @@ func (m *MakeClass) mkFuncs() {
 		m.mainclass.AppendMethod(method)
 	}
 	for k, f := range m.p.Block.Funcs { // fisrt round
-		if f.Isbuildin { //
+		if f.IsBuildin { //
 			continue
 		}
 		m.buildFunction(ms[k].Class, ms[k], f)

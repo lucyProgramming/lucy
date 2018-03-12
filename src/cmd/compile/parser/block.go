@@ -297,6 +297,7 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,
 			}}
+			block.Defers = append(block.Defers, d)
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:   ast.STATEMENT_TYPE_DEFER,
 				Defer: d,
@@ -307,7 +308,6 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 				Expression: e,
 			})
 		}
-
 	}
 }
 

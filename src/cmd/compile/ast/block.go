@@ -6,7 +6,10 @@ import (
 )
 
 type Block struct {
+	Codes                      []byte // op codes
+	Compiled                   bool
 	Defers                     []*Defer
+	IsdeferBlock               bool
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool
@@ -249,7 +252,7 @@ func (b *Block) checkConst() []error {
 func (b *Block) checkFunctions() []error {
 	errs := []error{}
 	for _, v := range b.Funcs {
-		if v.Isbuildin {
+		if v.IsBuildin {
 			continue
 		}
 		errs = append(errs, v.check(b)...)

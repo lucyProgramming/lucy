@@ -44,7 +44,7 @@ func checkEnum(enums []*Enum) []error {
 func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDefinition, checker CallChecker) *Function {
 	f := &Function{}
 	f.Name = name
-	f.Isbuildin = true
+	f.IsBuildin = true
 	f.callchecker = checker
 	f.Typ = &FunctionType{}
 	f.Typ.ParameterList = args

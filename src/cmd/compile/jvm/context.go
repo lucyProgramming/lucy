@@ -6,10 +6,13 @@ import (
 )
 
 type Context struct {
-	function          *ast.Function
-	mainclass         *cg.ClassHighLevel
-	currentSoureFile  string
-	currentLineNUmber int
+	function                               *ast.Function
+	mainclass                              *cg.ClassHighLevel
+	currentSoureFile                       string
+	currentLineNUmber                      int
+	Defers                                 []*ast.Defer
+	startPcForException, endPcForException int
+	firstCodeShouldUnderRecover            int
 }
 
 func (c *Context) appendLimeNumberAndSourceFile(pos *ast.Pos, code *cg.AttributeCode, class *cg.ClassHighLevel) {

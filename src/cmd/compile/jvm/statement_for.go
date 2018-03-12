@@ -18,7 +18,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+7] = cg.OP_pop
 	code.CodeLength += 8
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
-
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
 	if 2 > maxstack {
@@ -72,7 +71,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	if 5 > maxstack {
 		maxstack = 5
 	}
-
 	exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)
 	//get object for hashMap
 	code.Codes[code.CodeLength] = cg.OP_aaload

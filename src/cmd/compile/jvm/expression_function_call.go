@@ -10,7 +10,7 @@ maxstack means return value stack size
 */
 func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Func.Isbuildin {
+	if call.Func.IsBuildin {
 		return m.mkBuildinFunctionCall(class, code, e, context)
 	}
 	if call.Func.IsClosureFunction() == false {

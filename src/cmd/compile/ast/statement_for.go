@@ -130,12 +130,12 @@ func (s *StatementFor) checkRange() []error {
 		s.StatmentForRangeAttr.AutoVarForRangeMap.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
 			arrayt.Map.K, arrayt.Map.V)
 	}
-
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
 		if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
 			errs = append(errs, fmt.Errorf("%s not a identifier on left", errMsgPrefix(lefts[0].Pos)))
+			return errs
 		} else {
 			identifier = lefts[0].Data.(*ExpressionIdentifer)
 			pos = lefts[0].Pos
@@ -145,6 +145,8 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv {
 			if lefts[1].Typ != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left", errMsgPrefix(lefts[1].Pos)))
+				return errs
+
 			} else {
 				identifier2 = lefts[1].Data.(*ExpressionIdentifer)
 				pos2 = lefts[1].Pos
@@ -154,6 +156,8 @@ func (s *StatementFor) checkRange() []error {
 			if identifier != nil {
 				if identifier.Name == NO_NAME_IDENTIFIER {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos)))
+					return errs
+
 				} else {
 					vd := &VariableDefinition{}
 					var vt *VariableType
@@ -177,6 +181,8 @@ func (s *StatementFor) checkRange() []error {
 			if identifier2 != nil {
 				if identifier2.Name == NO_NAME_IDENTIFIER {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
+					return errs
+
 				} else {
 					vd := &VariableDefinition{}
 					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
@@ -196,10 +202,13 @@ func (s *StatementFor) checkRange() []error {
 		} else {
 			if identifier != nil && identifier.Name == NO_NAME_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left", errMsgPrefix(lefts[1].Pos)))
+				return errs
+
 			}
 			if identifier != nil {
 				if identifier.Name == NO_NAME_IDENTIFIER {
 					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
+					return errs
 				} else {
 					vd := &VariableDefinition{}
 					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
@@ -219,6 +228,7 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 	}
+
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
 		t1, es := lefts[0].getLeftValue(s.Block)
 		if errsNotEmpty(es) {
@@ -232,10 +242,10 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 		if t1 == nil {
-			goto checkBlock
+			return errs
 		}
 		if modelkv && t2 == nil {
-			goto checkBlock
+			return errs
 		}
 		lefts[0].VariableType = t1
 		if modelkv && t2 != nil {
@@ -245,34 +255,40 @@ func (s *StatementFor) checkRange() []error {
 			if modelkv {
 				if t1.IsInteger() == false {
 					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
+					return errs
 				}
 				if t2.TypeCompatible(arrayt.ArrayType) == false {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+					return errs
 				}
 
 			} else { // v model
 				if t1.TypeCompatible(arrayt.ArrayType) == false {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+					return errs
 				}
 			}
 		} else { // map type
 			if modelkv {
 				if false == t1.Equal(arrayt.Map.K) {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+					return errs
 
 				}
 				if false == t2.Equal(arrayt.Map.V) {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t2.TypeString()))
+					return errs
+
 				}
 			} else {
 				if false == t1.Equal(arrayt.Map.V) {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+					return errs
+
 				}
 			}
 		}
 	}
-
-checkBlock:
 	errs = append(errs, s.Block.check()...)
 	return errs
 }

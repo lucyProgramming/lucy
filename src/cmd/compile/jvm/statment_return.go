@@ -5,28 +5,42 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context, hasdefer *HasDefer) (maxstack uint16) {
+func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context) (maxstack uint16) {
 	if len(s.Function.Typ.ReturnList) == 0 {
-		if hasdefer.has {
-			code.Codes[code.CodeLength] = cg.OP_iconst_1
-			code.CodeLength++
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.Returnd)...)
+		if context.Defers != nil && len(context.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			hasdefer.returnExits = append(hasdefer.returnExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_return
-			code.CodeLength++
+			if 1 > code.MaxStack {
+				code.MaxStack = 1
+			}
+			context.endPcForException = code.CodeLength
+			m.buildDefers(class, code, context.Defers, context)
 		}
+		code.Codes[code.CodeLength] = cg.OP_return
+		code.CodeLength++
 		return
 	}
 	if len(s.Function.Typ.ReturnList) == 1 {
-		if len(s.Expressions) != 1 {
-			panic("this is not happening")
-		}
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.MakeExpression.build(class, code, s.Expressions[0], context)
 		backPatchEs(es, code.CodeLength)
+		// execute defer first
+		if context.Defers != nil && len(context.Defers) > 0 {
+			//return value  is on stack,  store it temp var
+			copyOP(code,
+				storeSimpleVarOp(s.Function.Typ.ReturnList[0].Typ.Typ, context.function.AutoVarForReturnBecauseOfDefer.Offset)...)
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			if 1 > code.MaxStack {
+				code.MaxStack = 1
+			}
+			context.endPcForException = code.CodeLength
+			m.buildDefers(class, code, context.Defers, context)
+			code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
+			//restore the stack
+			copyOP(code,
+				loadSimpleVarOp(s.Function.Typ.ReturnList[0].Typ.Typ, context.function.AutoVarForReturnBecauseOfDefer.Offset)...)
+		}
 		switch s.Function.Typ.ReturnList[0].Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
@@ -46,6 +60,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
+		case ast.VARIABLE_TYPE_MAP:
+			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_areturn
 		default:
@@ -54,7 +70,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
-
 	//new a array list
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(java_arrylist_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -95,8 +110,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 4
 			continue
 		}
-		var variableType *ast.VariableType
-		variableType = v.VariableType
+		variableType := v.VariableType
 		if v.IsCall() {
 			variableType = v.VariableTypes[0]
 		}
@@ -117,6 +131,22 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength+3] = cg.OP_pop
 		code.CodeLength += 4
 		currentStack = 1
+	}
+	if context.Defers != nil && len(context.Defers) > 0 {
+		//return value  is on stack,  store it temp var
+		copyOP(code,
+			storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.Offset)...)
+		code.Codes[code.CodeLength] = cg.OP_aconst_null
+		code.CodeLength++
+		if 1 > code.MaxStack {
+			code.MaxStack = 1
+		}
+		context.endPcForException = code.CodeLength
+		m.buildDefers(class, code, context.Defers, context)
+		code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
+		//restore the stack
+		copyOP(code,
+			loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.Offset)...)
 	}
 	code.Codes[code.CodeLength] = cg.OP_areturn
 	code.CodeLength++

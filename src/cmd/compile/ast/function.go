@@ -13,7 +13,7 @@ type Function struct {
 	callchecker                    CallChecker // used in build function
 	ClassMethod                    *cg.MethodHighLevel
 	IsGlobal                       bool
-	Isbuildin                      bool
+	IsBuildin                      bool
 	Used                           bool
 	AccessFlags                    uint16 // public private or protected
 	Typ                            *FunctionType
@@ -27,35 +27,30 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 }
 
-func (f *Function) HaveNoReturnValue() bool {
-	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_BOOL
-}
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
+	if f.HaveNoReturnValue() {
+		return
+	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		return
 	}
 	t := &AutoVarForReturnBecauseOfDefer{}
 	f.AutoVarForReturnBecauseOfDefer = t
-	t.Returnd = f.Varoffset
-	f.Varoffset++
-	if len(f.Typ.ReturnList) == 0 ||
-		(len(f.Typ.ReturnList) == 1 && f.Typ.ReturnList[0].NameWithType.Typ.Typ == VARIABLE_TYPE_VOID) {
-		return
-	}
-	// >= 1 case
 	if len(f.Typ.ReturnList) == 1 {
-		f.Varoffset = f.Varoffset
-		f.Varoffset = f.Typ.ReturnList[0].Typ.JvmSlotSize()
-	} else {
-		t.ValueOffset = f.Varoffset
+		t.Offset = f.Varoffset
+		f.Varoffset += f.Typ.ReturnList[0].Typ.JvmSlotSize()
+	} else { // > 1
+		t.Offset = f.Varoffset
 		f.Varoffset++
 	}
 }
 
 type AutoVarForReturnBecauseOfDefer struct {
-	Returnd uint16
-	//Slot        uint16 // 1 or 2
-	ValueOffset uint16
+	Offset uint16
+}
+
+func (f *Function) HaveNoReturnValue() bool {
+	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_BOOL
 }
 
 type AutoVarForException struct {

@@ -187,7 +187,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return []*VariableType{t}
 	}
 	call.Func = t.Function
-	if t.Function.Isbuildin {
+	if t.Function.IsBuildin {
 		return e.checkBuildinFunctionCall(block, errs, t.Function, call.Args)
 	} else {
 		return e.checkFunctionCall(block, errs, t.Function, call.Args)
