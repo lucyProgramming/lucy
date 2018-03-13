@@ -7,19 +7,25 @@ import (
 )
 
 func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context) {
+	if b.Defers != nil && len(b.Defers) > 0 { // just for return to use
+		context.firstCodeShouldUnderRecover = code.CodeLength
+		defer func() {
+			context.firstCodeShouldUnderRecover = -1
+		}()
+	}
 	if b.Compiled { // must be  defer block
-		context.startPcForException = code.CodeLength
+		context.firstCodeShouldUnderRecover = code.CodeLength
+		b.StartPc = code.CodeLength
+		b.EncPc = b.StartPc + len(b.Codes)
 		copyOP(code, b.Codes...) // just copy
 		return                   // this block is compiled
 	}
 	b.Compiled = true
 	codeStartAt := code.CodeLength
+	b.StartPc = code.CodeLength
 	defer func() {
 		b.Codes = code.Codes[codeStartAt:code.CodeLength]
 	}()
-	if b.Defers != nil && len(b.Defers) > 0 {
-		context.startPcForException = code.CodeLength
-	}
 	if b.IsdeferBlock {
 		//expect exception on stack
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // this code will make stack is empty
@@ -28,13 +34,13 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		context.Defers = append(context.Defers, b.Defers...)
 	}
 	for _, s := range b.Statements {
-		maxstack := m.buildStatement(class, code, s, context)
+		maxstack := m.buildStatement(class, code, b, s, context)
 		if maxstack > code.MaxStack {
 			code.MaxStack = maxstack
 		}
 	}
 	if len(b.Defers) > 0 {
-		// slice out
+		//slice out
 		context.Defers = context.Defers[0 : len(context.Defers)-len(b.Defers)]
 		//execute form begin to  end , no exceptions,push a null exception for defer to catch
 		if b.IsFunctionTopBlock == false {
@@ -43,28 +49,33 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 		context.endPcForException = code.CodeLength // aconst null must  not have expection,that is ok
 	}
+	b.EncPc = code.CodeLength
 	if b.IsFunctionTopBlock == false {
-		m.buildDefers(class, code, b.Defers, context)
+		context.firstCodeShouldUnderRecover = b.StartPc
+		context.endPcForException = b.EncPc
+		m.buildDefers(class, code, context, b.Defers, true)
 	}
 	return
 }
 
-func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, ds []*ast.Defer, context *Context) {
+func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ds []*ast.Defer, needExceptionTable bool) {
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		// insert exceptions
 		e := &cg.ExceptionTable{}
-		if context.startPcForException > context.endPcForException {
-			panic("starpc bigger than endpc")
+		if needExceptionTable {
+			if context.firstCodeShouldUnderRecover > context.endPcForException {
+				panic("starpc bigger than endpc")
+			}
+			if context.firstCodeShouldUnderRecover != context.endPcForException {
+				e.StartPc = uint16(context.firstCodeShouldUnderRecover)
+				e.Endpc = uint16(context.endPcForException)
+				e.HandlerPc = uint16(code.CodeLength)
+				e.CatchType = class.Class.InsertClassConst("java/lang/Throwable") //runtime
+				code.Exceptions = append(code.Exceptions, e)
+			}
 		}
-		if context.startPcForException != context.endPcForException {
-			e.StartPc = uint16(context.startPcForException)
-			e.Endpc = uint16(context.endPcForException)
-			e.HandlerPc = uint16(code.CodeLength)
-			e.CatchType = class.Class.InsertClassConst("java/lang/Throwable") //runtime
-			code.Exceptions = append(code.Exceptions, e)
-		}
-		context.startPcForException = code.CodeLength
+		context.firstCodeShouldUnderRecover = code.CodeLength
 		m.buildBlock(class, code, &ds[index].Block, context)
 		// load to stack
 		if index == 0 {

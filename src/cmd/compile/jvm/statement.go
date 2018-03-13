@@ -5,7 +5,7 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.Statement, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement, context *Context) (maxstack uint16) {
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		var es []*cg.JumpBackPatch
@@ -21,9 +21,19 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
 		backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
 	case ast.STATEMENT_TYPE_CONTINUE:
+		if b.Defers != nil && len(b.Defers) > 0 {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			m.buildDefers(class, code, context, b.Defers, false)
+		}
 		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
 			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	case ast.STATEMENT_TYPE_BREAK:
+		if b.Defers != nil && len(b.Defers) > 0 {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			m.buildDefers(class, code, context, b.Defers, false)
+		}
 		code.Codes[code.CodeLength] = cg.OP_goto
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
@@ -37,7 +47,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context)
 		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
 	case ast.STATEMENT_TYPE_SKIP: // skip this block
-		panic("no skip")
+		panic("should no be skip")
 	case ast.STATEMENT_TYPE_GOTO:
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 		s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
@@ -45,10 +55,5 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 	}
-
-	return
-}
-
-func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context) (maxstack uint16) {
 	return
 }

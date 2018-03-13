@@ -105,7 +105,7 @@ func (p *Package) loadPackage(name string) (*Package, error) {
 	if t := p.loadedPackages[name]; t != nil {
 		return t, nil
 	}
-	pp, err := PackageLoad.LoadPackage(name)
+	pp, err := PackageLoader.LoadPackage(name)
 	if err != nil {
 		return nil, err
 	}

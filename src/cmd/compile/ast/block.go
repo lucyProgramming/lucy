@@ -6,6 +6,7 @@ import (
 )
 
 type Block struct {
+	StartPc, EncPc             int
 	Codes                      []byte // op codes
 	Compiled                   bool
 	Defers                     []*Defer
@@ -118,6 +119,7 @@ type InheritedAttribute struct {
 	class                        *Class
 	p                            *Package
 	Defer                        *Defer
+	Defers                       []*Defer
 }
 
 type NameWithType struct {

@@ -78,7 +78,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForReturnBecauseOfDefer.Offset)...)
 		}
 	}
-	context.firstCodeShouldUnderRecover = code.CodeLength
+	context.firstCodeShouldUnderRecover = -1
 	m.buildFunctionParameterAndReturnList(class, &method.Code, f.Typ, context)
 	m.buildBlock(class, &method.Code, f.Block, context)
 	return

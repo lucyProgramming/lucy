@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -92,6 +91,13 @@ func (s *Statement) check(b *Block) []error { // b is father
 			return nil // 0 length error
 		}
 	}
+	if b.Defers != nil && len(b.Defers) > 0 {
+		b.InheritedAttribute.Defers = append(b.InheritedAttribute.Defers, b.Defers...)
+		defer func() {
+			b.InheritedAttribute.Defers = b.InheritedAttribute.Defers[0 : len(b.InheritedAttribute.Defers)-len(b.Defers)]
+
+		}()
+	}
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
 		return s.checkStatementExpression(b)
@@ -102,9 +108,14 @@ func (s *Statement) check(b *Block) []error { // b is father
 	case STATEMENT_TYPE_SWITCH:
 		panic("........")
 	case STATEMENT_TYPE_BREAK:
+
 		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName())}
 		} else {
+			if b.InheritedAttribute.StatementFor != nil && b.InheritedAttribute.Defer != nil {
+				return []error{fmt.Errorf("%s cannot has 'break continue' in both 'defer' and 'for'",
+					errMsgPrefix(s.Pos), s.statementName())}
+			}
 			s.StatementBreak = &StatementBreak{}
 			if f, ok := b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
@@ -128,7 +139,9 @@ func (s *Statement) check(b *Block) []error { // b is father
 			s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
 		}
 	case STATEMENT_TYPE_RETURN:
-		b.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
+		if b.InheritedAttribute.Defers != nil && len(b.InheritedAttribute.Defers) > 0 {
+			b.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
+		}
 		if b.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has statement return in defer",
 				errMsgPrefix(s.Pos), s.statementName())}
@@ -186,19 +199,6 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		errs = append(errs, es...)
 	}
 	return errs
-}
-
-type StatementSwitch struct {
-	BackPatchs          []*cg.JumpBackPatch
-	Outter              *Block
-	Condition           *Expression //switch
-	StatmentSwitchCases []*StatmentSwitchCase
-	Default             *Block
-}
-
-type StatmentSwitchCase struct {
-	Match *Expression
-	Block *Block
 }
 
 func (s *StatmentSwitchCase) check() []error {

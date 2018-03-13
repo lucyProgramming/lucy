@@ -4,7 +4,7 @@ import (
 	"regexp"
 )
 
-type PackageLoader interface {
+type PackageLoad interface {
 	LoadPackage(name string) (*Package, error)
 }
 
@@ -14,7 +14,7 @@ var (
 	NO_NAME_IDENTIFIER  = "_"
 	Nodes               *[]*Node
 	packageAliasReg     *regexp.Regexp
-	PackageLoad         PackageLoader
+	PackageLoader       PackageLoad
 	LUCY_ROOT_CLASS     = "lucy/lang/Object"
 	JAVA_ROOT_CLASS     = "java/lang/Object"
 	buildinFunctionsMap = make(map[string]*buildFunction)

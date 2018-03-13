@@ -320,7 +320,7 @@ func (v *VariableType) isPrimitive() bool {
 }
 
 //可读的类型信息
-func (v *VariableType) typeString_(ret *string) {
+func (v *VariableType) typeString(ret *string) {
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		*ret += "bool"
@@ -344,7 +344,7 @@ func (v *VariableType) typeString_(ret *string) {
 		*ret += "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
-		v.ArrayType.typeString_(ret)
+		v.ArrayType.typeString(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret += "void"
 	case VARIABLE_TYPE_STRING:
@@ -367,7 +367,7 @@ func (v *VariableType) typeString_(ret *string) {
 //可读的类型信息
 func (v *VariableType) TypeString() string {
 	t := ""
-	v.typeString_(&t)
+	v.typeString(&t)
 	return t
 }
 

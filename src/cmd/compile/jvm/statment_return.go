@@ -14,7 +14,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				code.MaxStack = 1
 			}
 			context.endPcForException = code.CodeLength
-			m.buildDefers(class, code, context.Defers, context)
+			m.buildDefers(class, code, context, context.Defers, true)
 		}
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
@@ -35,7 +35,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				code.MaxStack = 1
 			}
 			context.endPcForException = code.CodeLength
-			m.buildDefers(class, code, context.Defers, context)
+			m.buildDefers(class, code, context, context.Defers, true)
 			code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
 			//restore the stack
 			copyOP(code,
@@ -142,7 +142,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.MaxStack = 1
 		}
 		context.endPcForException = code.CodeLength
-		m.buildDefers(class, code, context.Defers, context)
+		m.buildDefers(class, code, context, context.Defers, true)
 		code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
 		//restore the stack
 		copyOP(code,

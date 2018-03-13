@@ -116,6 +116,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 8
 		return
 	}
+
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_NULL || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_NULL {
 		var notNullExpression *ast.Expression
 		if bin.Left.VariableType.Typ != ast.VARIABLE_TYPE_NULL {

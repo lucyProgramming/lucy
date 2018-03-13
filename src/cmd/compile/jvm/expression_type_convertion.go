@@ -174,6 +174,9 @@ func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, ta
 }
 
 func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *ast.VariableType) {
+	if typ.Typ == ast.VARIABLE_TYPE_STRING {
+		return
+	}
 	switch typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -219,25 +222,10 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: "(D)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_STRING:
-		return
 	case ast.VARIABLE_TYPE_OBJECT:
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_double_class,
-			Name:       "toString",
-			Descriptor: "()Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[typ.ArrayType.Typ]
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      meta.classname,
-			Name:       "toString",
-			Descriptor: "()Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

@@ -15,5 +15,5 @@ type Flags struct {
 }
 
 func init() {
-	ast.PackageLoad = &PackageLoader{}
+	ast.PackageLoader = &PackageLoader{}
 }

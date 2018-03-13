@@ -41,12 +41,8 @@ func backPatchEs(es []*cg.JumpBackPatch, t int) {
 }
 
 func jumpto(op byte, code *cg.AttributeCode, to int) {
-	code.Codes[code.CodeLength] = op
-	b := &cg.JumpBackPatch{}
-	b.CurrentCodeLength = code.CodeLength
-	b.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+	b := (&cg.JumpBackPatch{}).FromCode(op, code)
 	backPatchEs([]*cg.JumpBackPatch{b}, to)
-	code.CodeLength += 3
 }
 
 /*

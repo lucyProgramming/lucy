@@ -389,6 +389,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		}
 		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
 	} else {
+
 	}
 	m.buildBlock(class, code, s.Block, context)
 	if s.Post != nil {
