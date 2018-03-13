@@ -432,5 +432,44 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 }
 
 func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
+	// skip switch key work
+	pos := b.parser.mkPos()
+	b.Next()
+	condition, err := b.parser.ExpressionParser.parseExpression()
+	if err != nil {
+		b.parser.errs = append(b.parser.errs, err)
+		return nil, err
+	}
+	if b.parser.token.Type != lex.TOKEN_LC {
+		err = fmt.Errorf("%s expect '{',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+		b.parser.errs = append(b.parser.errs, err)
+		return nil, err
+	}
+	b.Next() // skip {  , must be case
+
+	if b.parser.token.Type != lex.TOKEN_CASE {
+		err = fmt.Errorf("%s expect 'case',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+		b.parser.errs = append(b.parser.errs, err)
+		return nil, err
+	}
+	s := &ast.StatementSwitch{}
+	s.Pos = pos
+	s.Condition = condition
+	for b.parser.eof == false && b.parser.token.Type == lex.TOKEN_CASE {
+		// skip case
+		es, err := b.parser.ExpressionParser.parseExpressions()
+		if err != nil {
+			b.parser.errs = append(b.parser.errs, err)
+			return s, err
+		}
+		if b.parser.token.Type != lex.TOKEN_COLON {
+			err = fmt.Errorf("%s expect ':',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+			b.parser.errs = append(b.parser.errs, err)
+			return s, err
+		}
+		b.Next() // skip :
+		s.StatmentSwitchCases = append(s.StatmentSwitchCases)
+	}
+
 	return nil, nil
 }

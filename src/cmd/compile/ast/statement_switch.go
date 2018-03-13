@@ -40,9 +40,14 @@ func (s *StatementSwitch) check(b *Block) []error {
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
+			if t == nil {
+				continue
+			}
+			if conditionType.isPrimitive() && e.IsLiteral() == false {
+				errs = append(errs, fmt.Errorf("%s expression is not a literal value", errMsgPrefix(e.Pos)))
+			}
 			if conditionType.Equal(t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
-
 			}
 		}
 		v.Block.inherite(b)

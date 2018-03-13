@@ -88,7 +88,6 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		return
 	}
-
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL ||
 		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es []*cg.JumpBackPatch
@@ -114,6 +113,72 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+7] = cg.OP_iconst_0
 		}
 		code.CodeLength += 8
+		return
+	}
+	//string compare
+	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
+		maxstack, _ = m.build(class, code, bin.Left, context)
+		stack, _ := m.build(class, code, bin.Right, context)
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_string_class,
+			Name:       "compareTo",
+			Descriptor: "(Ljava/lang/String;)I",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if t := 1 + stack; t > maxstack {
+			maxstack = t
+		}
+		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE {
+			code.Codes[code.CodeLength] = cg.OP_ifgt
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+			if e.Typ == ast.EXPRESSION_TYPE_GT {
+				code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			} else {
+				code.Codes[code.CodeLength+3] = cg.OP_iconst_1
+			}
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+			if e.Typ == ast.EXPRESSION_TYPE_GT {
+				code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			} else {
+				code.Codes[code.CodeLength+7] = cg.OP_iconst_0
+			}
+			code.CodeLength += 8
+		} else if e.Typ == ast.EXPRESSION_TYPE_LT || e.Typ == ast.EXPRESSION_TYPE_GE {
+			code.Codes[code.CodeLength] = cg.OP_iflt
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+			if e.Typ == ast.EXPRESSION_TYPE_LT {
+				code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			} else {
+				code.Codes[code.CodeLength+3] = cg.OP_iconst_1
+			}
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+			if e.Typ == ast.EXPRESSION_TYPE_LT {
+				code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			} else {
+				code.Codes[code.CodeLength+7] = cg.OP_iconst_0
+			}
+			code.CodeLength += 8
+		} else { //   == or !=
+			code.Codes[code.CodeLength] = cg.OP_ifeq
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+			if e.Typ == ast.EXPRESSION_TYPE_EQ {
+				code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			} else {
+				code.Codes[code.CodeLength+3] = cg.OP_iconst_1
+			}
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+			if e.Typ == ast.EXPRESSION_TYPE_EQ {
+				code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			} else {
+				code.Codes[code.CodeLength+7] = cg.OP_iconst_0
+			}
+			code.CodeLength += 8
+		}
+
 		return
 	}
 
