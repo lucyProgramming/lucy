@@ -6,9 +6,6 @@ import (
 )
 
 type Block struct {
-	StartPc, EncPc             int
-	Codes                      []byte // op codes
-	Compiled                   bool
 	Defers                     []*Defer
 	IsdeferBlock               bool
 	isGlobalVariableDefinition bool

@@ -1,6 +1,9 @@
 package ast
 
-import "github.com/756445638/lucy/src/cmd/compile/common"
+import (
+	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/common"
+)
 
 type CallChecker func(block *Block, errs *[]error, args []*VariableType, pos *Pos)
 
@@ -16,8 +19,13 @@ func init() {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		},
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = &buildFunction{
-		checker: oneAnyTypeParameterChecker,
+	b := &buildFunction{}
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = b
+	b.checker = func(block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+		if len(args) > 0 {
+			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect no args",
+				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
+		}
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &buildFunction{
 		checker: oneAnyTypeParameterChecker,

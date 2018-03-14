@@ -2,11 +2,10 @@ package jvm
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"os"
+	"path/filepath"
 )
 
 type MakeClass struct {

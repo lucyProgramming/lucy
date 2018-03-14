@@ -57,7 +57,6 @@ func oneAnyTypeParameterChecker(block *Block, errs *[]error, args []*VariableTyp
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 	}
-
 }
 
 func devisionByZeroErr(pos *Pos) error {

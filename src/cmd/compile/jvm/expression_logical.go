@@ -18,13 +18,10 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 		if 2 > maxstack { // dup increment stack
 			maxstack = 2
 		}
-		code.Codes[code.CodeLength] = cg.OP_ifne // at this point,value is clear,leave 1 on stack
-		exit := &cg.JumpBackPatch{}
-		exit.CurrentCodeLength = code.CodeLength
-		exit.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+		exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_ifne, code) // at this point,value is clear,leave 1 on stack
 		exits = append(exits, exit)
-		code.Codes[code.CodeLength+3] = cg.OP_pop // pop 0
-		code.CodeLength += 4
+		code.Codes[code.CodeLength] = cg.OP_pop // pop 0
+		code.CodeLength++
 		stack, es := m.build(class, code, bin.Right, context)
 		if es != nil {
 			exits = append(exits, es...)
@@ -38,13 +35,10 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 		if 2 > maxstack { // dup increment stack
 			maxstack = 2
 		}
-		code.Codes[code.CodeLength] = cg.OP_ifeq // at this point,value is clear,leave 1 on stack
-		exit := &cg.JumpBackPatch{}
-		exit.CurrentCodeLength = code.CodeLength
-		exit.Bs = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+		exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code) // at this point,value is clear,leave 1 on stack
 		exits = append(exits, exit)
-		code.Codes[code.CodeLength+3] = cg.OP_pop // pop 1
-		code.CodeLength += 4
+		code.Codes[code.CodeLength] = cg.OP_pop // pop 1
+		code.CodeLength++
 		stack, es := m.build(class, code, bin.Right, context)
 		if es != nil {
 			exits = append(exits, es...)

@@ -53,7 +53,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	maxstack = 3
+	maxstack = 4
 	var index int32 = 0
 	for _, v := range arr.Expressions {
 		if v.IsCall() && len(v.VariableTypes) > 1 {
@@ -136,7 +136,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,
-		Name:       specail_method_init,
+		Name:       special_method_init,
 		Descriptor: meta.initFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

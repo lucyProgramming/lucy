@@ -18,7 +18,6 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		maxstack = identifier.Var.Typ.JvmSlotSize()
 		return
 	}
-
 	if identifier.Var.BeenCaptured {
 		panic(1)
 	}
