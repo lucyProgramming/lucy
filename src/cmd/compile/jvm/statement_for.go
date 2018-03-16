@@ -272,6 +272,9 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
+	case ast.VARIABLE_TYPE_MAP:
+		code.Codes[code.CodeLength] = cg.OP_aaload
+		code.CodeLength++
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[s.StatmentForRangeAttr.Expression.VariableType.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_aaload // cast into real type

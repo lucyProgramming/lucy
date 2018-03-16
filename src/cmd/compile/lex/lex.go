@@ -48,7 +48,6 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 		} else {
 			lex.column++
 		}
-
 	}
 	return
 }

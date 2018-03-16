@@ -3,6 +3,7 @@ package jvm
 import (
 	"encoding/binary"
 	"fmt"
+
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
@@ -123,6 +124,8 @@ func storeSimpleVarOp(t int, offset uint16) []byte {
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
+	case ast.VARIABLE_TYPE_MAP:
+		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
 		switch offset {
 		case 0:
@@ -219,6 +222,8 @@ func loadSimpleVarOp(t int, offset uint16) []byte {
 	case ast.VARIABLE_TYPE_STRING:
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
+		fallthrough
+	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
 		switch offset {
@@ -345,137 +350,5 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	}, code.Codes[code.CodeLength+12:code.CodeLength+14])
 	code.Codes[code.CodeLength+14] = cg.OP_athrow
 	code.CodeLength += 15
-	return
-}
-
-func loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
-	if v.BeenCaptured {
-		panic("...")
-	}
-	maxstack = v.Typ.JvmSlotSize()
-	switch v.Typ.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
-	case ast.VARIABLE_TYPE_INT:
-		switch v.LocalValOffset {
-		case 0:
-			code.Codes[code.CodeLength] = cg.OP_iload_0
-			code.CodeLength++
-		case 1:
-			code.Codes[code.CodeLength] = cg.OP_iload_1
-			code.CodeLength++
-		case 2:
-			code.Codes[code.CodeLength] = cg.OP_iload_2
-			code.CodeLength++
-		case 3:
-			code.Codes[code.CodeLength] = cg.OP_iload_3
-			code.CodeLength++
-		default:
-			if v.LocalValOffset > 255 {
-				panic("over 255")
-			}
-			code.Codes[code.CodeLength] = cg.OP_iload
-			code.Codes[code.CodeLength+1] = byte(v.LocalValOffset)
-			code.CodeLength += 2
-		}
-	case ast.VARIABLE_TYPE_LONG:
-		switch v.LocalValOffset {
-		case 0:
-			code.Codes[code.CodeLength] = cg.OP_lload_0
-			code.CodeLength++
-		case 1:
-			code.Codes[code.CodeLength] = cg.OP_lload_1
-			code.CodeLength++
-		case 2:
-			code.Codes[code.CodeLength] = cg.OP_lload_2
-			code.CodeLength++
-		case 3:
-			code.Codes[code.CodeLength] = cg.OP_lload_3
-			code.CodeLength++
-		default:
-			if v.LocalValOffset > 255 {
-				panic("over 255")
-			}
-			code.Codes[code.CodeLength] = cg.OP_lload
-			code.Codes[code.CodeLength+1] = byte(v.LocalValOffset)
-			code.CodeLength += 2
-		}
-	case ast.VARIABLE_TYPE_FLOAT:
-		switch v.LocalValOffset {
-		case 0:
-			code.Codes[code.CodeLength] = cg.OP_fload_0
-			code.CodeLength++
-		case 1:
-			code.Codes[code.CodeLength] = cg.OP_fload_1
-			code.CodeLength++
-		case 2:
-			code.Codes[code.CodeLength] = cg.OP_fload_2
-			code.CodeLength++
-		case 3:
-			code.Codes[code.CodeLength] = cg.OP_fload_3
-			code.CodeLength++
-		default:
-			if v.LocalValOffset > 255 {
-				panic("over 255")
-			}
-			code.Codes[code.CodeLength] = cg.OP_fload
-			code.Codes[code.CodeLength+1] = byte(v.LocalValOffset)
-			code.CodeLength += 2
-		}
-	case ast.VARIABLE_TYPE_DOUBLE:
-		switch v.LocalValOffset {
-		case 0:
-			code.Codes[code.CodeLength] = cg.OP_dload_0
-			code.CodeLength++
-		case 1:
-			code.Codes[code.CodeLength] = cg.OP_dload_1
-			code.CodeLength++
-		case 2:
-			code.Codes[code.CodeLength] = cg.OP_dload_2
-			code.CodeLength++
-		case 3:
-			code.Codes[code.CodeLength] = cg.OP_dload_3
-			code.CodeLength++
-		default:
-			if v.LocalValOffset > 255 {
-				panic("over 255")
-			}
-			code.Codes[code.CodeLength] = cg.OP_dload
-			code.Codes[code.CodeLength+1] = byte(v.LocalValOffset)
-			code.CodeLength += 2
-		}
-	case ast.VARIABLE_TYPE_STRING:
-		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
-		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
-		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY: //[]int
-		switch v.LocalValOffset {
-		case 0:
-			code.Codes[code.CodeLength] = cg.OP_aload_0
-			code.CodeLength++
-		case 1:
-			code.Codes[code.CodeLength] = cg.OP_aload_1
-			code.CodeLength++
-		case 2:
-			code.Codes[code.CodeLength] = cg.OP_aload_2
-			code.CodeLength++
-		case 3:
-			code.Codes[code.CodeLength] = cg.OP_aload_3
-			code.CodeLength++
-		default:
-			if v.LocalValOffset > 255 {
-				panic("over 255")
-			}
-			code.Codes[code.CodeLength] = cg.OP_aload
-			code.Codes[code.CodeLength+1] = byte(v.LocalValOffset)
-			code.CodeLength += 2
-		}
-	}
 	return
 }

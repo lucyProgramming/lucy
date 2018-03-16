@@ -22,13 +22,13 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
 	case ast.STATEMENT_TYPE_CONTINUE:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			m.buildDefers(class, code, context, b.Defers, false)
+			m.buildDefers(class, code, context, b.Defers, false, nil)
 		}
 		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
 			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	case ast.STATEMENT_TYPE_BREAK:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			m.buildDefers(class, code, context, b.Defers, false)
+			m.buildDefers(class, code, context, b.Defers, false, nil)
 		}
 		code.Codes[code.CodeLength] = cg.OP_goto
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
@@ -50,6 +50,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_LABLE:
 		backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
+		s.Defer.StartPc = code.CodeLength
 	}
 	return
 }

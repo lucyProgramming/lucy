@@ -25,7 +25,8 @@ type Block struct {
 }
 
 type Defer struct {
-	Block Block
+	StartPc int
+	Block   Block
 }
 
 func (b *Block) shouldStop(errs []error) bool {

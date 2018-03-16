@@ -36,17 +36,23 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 	}
 	t := &AutoVarForReturnBecauseOfDefer{}
 	f.AutoVarForReturnBecauseOfDefer = t
-	if len(f.Typ.ReturnList) == 1 {
-		t.Offset = f.Varoffset
-		f.Varoffset += f.Typ.ReturnList[0].Typ.JvmSlotSize()
-	} else { // > 1
-		t.Offset = f.Varoffset
+	t.ExceptionIsNotNilWhenEnter = f.Varoffset
+	f.Varoffset++
+	if len(f.Typ.ReturnList) > 1 {
+		t.MultiValueOffset = f.Varoffset
+		f.Varoffset++
+		t.IfReachButton = f.Varoffset
 		f.Varoffset++
 	}
 }
 
 type AutoVarForReturnBecauseOfDefer struct {
-	Offset uint16
+	/*
+		flag is 1 means there is exception,but handled
+	*/
+	ExceptionIsNotNilWhenEnter uint16
+	MultiValueOffset           uint16
+	IfReachButton              uint16
 }
 
 func (f *Function) HaveNoReturnValue() bool {
@@ -132,17 +138,6 @@ func (f *Function) mkLastRetrunStatement() {
 	if len(f.Block.Statements) == 0 ||
 		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN) {
 		s := &StatementReturn{}
-		es := []*Expression{}
-		for _, v := range f.Typ.ReturnList {
-			identifer := &ExpressionIdentifer{}
-			identifer.Name = v.Name
-			es = append(es, &Expression{
-				Typ:  EXPRESSION_TYPE_IDENTIFIER,
-				Data: identifer,
-				Pos:  v.Pos,
-			})
-			fmt.Println("!!!!!!!!!!!1", v.Pos)
-		}
 		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 	}
 }

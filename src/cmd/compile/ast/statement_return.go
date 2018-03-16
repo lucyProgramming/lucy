@@ -12,19 +12,6 @@ type StatementReturn struct {
 
 func (s *StatementReturn) check(b *Block) []error {
 	s.Function = b.InheritedAttribute.Function
-	if len(b.InheritedAttribute.Function.Typ.ReturnList) > 0 && len(s.Expressions) == 0 {
-		s.Expressions = make([]*Expression, len(b.InheritedAttribute.Function.Typ.ReturnList))
-		for k, v := range b.InheritedAttribute.Function.Typ.ReturnList {
-			identifer := &ExpressionIdentifer{
-				Name: v.Name,
-			}
-			s.Expressions[k] = &Expression{
-				Data: identifer,
-				Typ:  EXPRESSION_TYPE_IDENTIFIER,
-			}
-		}
-	}
-
 	if len(s.Expressions) == 0 {
 		return nil
 	}

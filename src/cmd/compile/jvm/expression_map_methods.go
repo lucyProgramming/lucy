@@ -34,6 +34,10 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
+		}
 	case common.MAP_METHOD_REMOVE:
 		currentStack := uint16(1)
 		removeMethodName := "remove"
@@ -120,6 +124,10 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
+		}
 	default:
 		panic("unkown" + call.Name)
 	}

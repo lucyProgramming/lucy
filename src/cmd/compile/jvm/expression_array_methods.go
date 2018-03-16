@@ -22,6 +22,10 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
+		}
 	case common.ARRAY_METHOD_APPEND:
 		maxstack, _ = m.build(class, code, call.Expression, context)
 		meta := ArrayMetas[call.Expression.VariableType.ArrayType.Typ]
@@ -82,6 +86,10 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				Descriptor: appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+		}
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
 		}
 	case common.ARRAY_METHOD_APPEND_ALL:
 		maxstack, _ = m.build(class, code, call.Expression, context)
@@ -170,6 +178,10 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				Descriptor: appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+		}
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
 		}
 	default:
 		panic("unkown method:" + call.Name)

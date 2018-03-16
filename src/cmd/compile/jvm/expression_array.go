@@ -39,6 +39,10 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
 		code.CodeLength += 2
+	case ast.VARIABLE_TYPE_MAP:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -122,6 +126,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			code.Codes[code.CodeLength] = cg.OP_fastore
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_dastore
+		case ast.VARIABLE_TYPE_MAP:
+			fallthrough
 		case ast.VARIABLE_TYPE_STRING:
 			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
