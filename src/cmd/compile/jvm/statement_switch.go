@@ -126,6 +126,5 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
 		m.buildBlock(class, code, s.Default, context)
 	}
-
 	return
 }

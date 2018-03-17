@@ -90,19 +90,20 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/io/PrintStream",
-				Name:       "println",
-				Descriptor: "(Ljava/lang/Object;)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			fallthrough
 		case ast.VARIABLE_TYPE_MAP:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/Object",
+				Name:       "toString",
+				Descriptor: "()Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
 				Name:       "println",
-				Descriptor: "(Ljava/lang/Object;)V",
+				Descriptor: "(Ljava/lang/String;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}

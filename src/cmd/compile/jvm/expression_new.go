@@ -135,9 +135,8 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,
 		Name:       special_method_init,
-		Descriptor: meta.initFuncDescriptor,
+		Descriptor: meta.constructorFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return
-
 }

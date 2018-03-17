@@ -177,7 +177,7 @@ func (e *Expression) IsCall() bool {
 }
 
 func (e *Expression) CallHasReturnValue() bool {
-	if e.Typ != EXPRESSION_TYPE_FUNCTION_CALL && e.Typ != EXPRESSION_TYPE_METHOD_CALL {
+	if e.IsCall() == false {
 		panic("")
 	}
 	return len(e.VariableTypes) >= 1 && e.VariableTypes[0].rightValueValid()

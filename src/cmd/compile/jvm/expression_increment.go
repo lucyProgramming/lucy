@@ -52,15 +52,19 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			code.CodeLength += 3
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.IsIncrement() == false {
+			if e.IsIncrement() == false { // decrement
 				load() // load to stack top
 				maxstack = 1
 			}
 		}
 		return
 	}
+
 	maxstack, remainStack, op, _, classname, fieldname, fieldDescriptor := m.getLeftValue(class, code, ee, context)
-	//left value must can be used as right value,
+
+	/*
+		left value must can be used as right value
+	*/
 	stack, _ := m.build(class, code, ee, context) // load it`s value
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
@@ -115,40 +119,47 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_LONG:
 		if e.IsIncrement() {
-			code.Codes[code.CodeLength] = cg.OP_iconst_m1
+			code.Codes[code.CodeLength] = cg.OP_lconst_1
+			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
+			code.Codes[code.CodeLength+1] = cg.OP_i2l
+			code.CodeLength += 2
 		}
-		code.Codes[code.CodeLength+1] = cg.OP_i2l
 		if t := currentStack + 2; t > maxstack { // last op will change stack
 			maxstack = t
 		}
-		code.Codes[code.CodeLength+2] = cg.OP_ladd
-		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ladd
+		code.CodeLength++
 	case ast.VARIABLE_TYPE_FLOAT:
 		if e.IsIncrement() {
-			code.Codes[code.CodeLength] = cg.OP_iconst_1
+			code.Codes[code.CodeLength] = cg.OP_fconst_1
+			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
+			code.Codes[code.CodeLength+1] = cg.OP_i2f
+			code.CodeLength += 2
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_i2f
 		if t := currentStack + 1; t > maxstack { // last op will change stack
 			maxstack = t
 		}
-		code.Codes[code.CodeLength+2] = cg.OP_fadd
-		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_fadd
+		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
 		if e.IsIncrement() {
-			code.Codes[code.CodeLength] = cg.OP_iconst_1
+			code.Codes[code.CodeLength] = cg.OP_dconst_0
+			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
+			code.Codes[code.CodeLength+1] = cg.OP_i2d
+			code.CodeLength += 2
 		}
-		code.Codes[code.CodeLength+1] = cg.OP_i2d
 		if t := currentStack + 2; t > maxstack { // last op will change stack
 			maxstack = t
 		}
-		code.Codes[code.CodeLength+2] = cg.OP_dadd
-		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_dadd
+		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {

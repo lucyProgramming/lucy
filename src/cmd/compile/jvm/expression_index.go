@@ -13,7 +13,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		maxstack = e.VariableType.JvmSlotSize()
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      index.Expression.VariableType.Class.ClassNameDefinition.Name,
+			Class:      index.Expression.VariableType.Class.ClassNameDefinition.BinaryName,
 			Name:       index.Name,
 			Descriptor: Descriptor.typeDescriptor(e.VariableType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -26,7 +26,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      index.Expression.VariableType.Class.ClassNameDefinition.Name,
+		Class:      index.Expression.VariableType.Class.ClassNameDefinition.BinaryName,
 		Name:       index.Name,
 		Descriptor: Descriptor.typeDescriptor(e.VariableType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -66,7 +66,6 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 6)
 	}
 	code.CodeLength += 7
-
 	switch index.Expression.VariableType.Map.V.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough

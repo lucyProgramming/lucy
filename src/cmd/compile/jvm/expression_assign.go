@@ -152,7 +152,6 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			code.CodeLength++
 		}
 		slice()
-
 	}
 	return
 }

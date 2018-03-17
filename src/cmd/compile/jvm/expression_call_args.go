@@ -9,7 +9,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 	currentStack := uint16(0)
 	for k, e := range args {
 		var variabletype *ast.VariableType
-		if e.Typ == ast.EXPRESSION_TYPE_METHOD_CALL || e.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL && len(e.VariableTypes) > 1 {
+		if e.IsCall() && len(e.VariableTypes) > 1 {
 			stack, _ := m.build(class, code, e, context)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
@@ -20,22 +20,20 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				if parameters[k].Typ.IsNumber() {
-					if parameters[k].Typ.Typ != variabletype.Typ {
-						m.numberTypeConverter(code, variabletype.Typ, parameters[k].Typ.Typ)
-					}
+				if parameters[k].Typ.IsNumber() && parameters[k].Typ.Typ != variabletype.Typ {
+					m.numberTypeConverter(code, variabletype.Typ, parameters[k].Typ.Typ)
 				}
 				currentStack += parameters[k].Typ.JvmSlotSize()
 			}
 			continue
 		}
 		variabletype = e.VariableType
-		if e.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == ast.EXPRESSION_TYPE_METHOD_CALL {
+		if e.IsCall() {
 			variabletype = e.VariableTypes[0]
 		}
-		ms, es := m.build(class, code, e, context)
+		stack, es := m.build(class, code, e, context)
 		backPatchEs(es, code.CodeLength)
-		if t := ms + currentStack; t > maxstack {
+		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
 		if parameters[k].Typ.IsNumber() {

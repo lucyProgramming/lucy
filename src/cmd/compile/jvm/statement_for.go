@@ -87,7 +87,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	} else {
 		PrimitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.V)
 	}
-
 	//store to V
 	copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
 	// store to k,if need

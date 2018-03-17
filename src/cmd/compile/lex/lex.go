@@ -727,8 +727,11 @@ redo:
 	case '\'':
 		token, eof, err = lex.lexString('\'')
 		if err == nil {
-			if t := []byte(token.Data.(string)); len(t) > 0 {
+			if t := []byte(token.Data.(string)); len(t) != 1 {
 				err = fmt.Errorf("expect one char")
+			} else {
+				token.Type = TOKEN_LITERAL_BYTE
+				token.Data = byte([]byte(t)[0])
 			}
 		}
 		return

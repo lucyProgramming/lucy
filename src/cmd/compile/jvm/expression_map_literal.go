@@ -18,8 +18,8 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	defaultValues := e.Data.(*ast.ExpressionMap)
-	for _, v := range defaultValues.Values {
+	values := e.Data.(*ast.ExpressionMap).Values
+	for _, v := range values {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack := uint16(2)
@@ -41,7 +41,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			maxstack = t
 		}
 		variableType = v.Right.VariableType
-		if v.Left.IsCall() {
+		if v.Right.IsCall() {
 			variableType = v.Right.VariableTypes[0]
 		}
 		if variableType.IsPointer() == false {
@@ -58,5 +58,4 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 4
 	}
 	return
-
 }

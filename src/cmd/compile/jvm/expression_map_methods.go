@@ -40,8 +40,16 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		}
 	case common.MAP_METHOD_REMOVE:
 		currentStack := uint16(1)
-		removeMethodName := "remove"
-		removeDescriptor := "(Ljava/lang/Object;)Ljava/lang/Object;"
+		callRemove := func() {
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      java_hashmap_class,
+				Name:       "remove",
+				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.Codes[code.CodeLength+3] = cg.OP_pop
+			code.CodeLength += 4
+		}
 		for k, v := range call.Args {
 			currentStack = 1
 			if v.IsCall() && len(v.VariableTypes) > 0 {
@@ -69,14 +77,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
 					//remove
-					code.Codes[code.CodeLength] = cg.OP_invokevirtual
-					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      java_hashmap_class,
-						Name:       removeMethodName,
-						Descriptor: removeDescriptor,
-					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.Codes[code.CodeLength+3] = cg.OP_pop
-					code.CodeLength += 4
+					callRemove()
 				}
 				continue
 			}
@@ -84,7 +85,8 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			if v.IsCall() {
 				variableType = v.VariableTypes[0]
 			}
-			if k != len(call.Args)-1 { // not last one
+			if k == len(call.Args)-1 {
+			} else { // not last one
 				code.Codes[code.CodeLength] = cg.OP_dup
 				currentStack++
 				if currentStack > maxstack {
@@ -99,14 +101,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 			}
 			//call remove
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_hashmap_class,
-				Name:       removeMethodName,
-				Descriptor: removeDescriptor,
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_pop
-			code.CodeLength += 4
+			callRemove()
 		}
 	case common.MAP_METHOD_REMOVEALL:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

@@ -56,6 +56,8 @@ func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 		return "V"
 	case ast.VARIABLE_TYPE_OBJECT:
 		return "L" + v.Class.ClassNameDefinition.Name + ";"
+	case ast.VARIABLE_TYPE_MAP:
+		return "L" + java_hashmap_class + ";"
 	}
 	panic("unhandle type signature")
 }

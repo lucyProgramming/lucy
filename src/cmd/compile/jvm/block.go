@@ -92,11 +92,9 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 					code.CodeLength += 6
 					//expection that have been handled
 					if len(context.function.Typ.ReturnList) == 1 {
-
 					} else {
 						copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
 					}
-
 					binary.BigEndian.PutUint16(noExceptionExit, uint16(code.CodeLength-noExceptionExitCodeLength)) // exit is here
 				}
 			} else {

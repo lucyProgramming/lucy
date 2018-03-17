@@ -229,7 +229,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_hashmap_class,
+			Class:      "java/lang/Object",
 			Name:       "toString",
 			Descriptor: "()Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

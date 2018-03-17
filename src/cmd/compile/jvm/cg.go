@@ -227,12 +227,6 @@ func (m *MakeClass) mkFuncs() {
 	}
 }
 
-//func (m *MakeClass) mkClosureFunctionClass() *cg.ClassHighLevel {
-//	ret := &cg.ClassHighLevel{}
-//	ret.AccessFlags = cg.ACC_CLASS_FINAL
-//	return ret
-//}
-
 func (m *MakeClass) mkFuncClassMode(f *ast.Function) *cg.MethodHighLevel {
 	ret := &cg.MethodHighLevel{}
 	return ret

@@ -33,12 +33,12 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context)
 		backPatchEs(es, code.CodeLength)
-		code.Codes[code.CodeLength] = cg.OP_ifne                                              // length 1
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], uint16(code.CodeLength+7)) // length 2
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_1                                        // length 1
-		code.Codes[code.CodeLength+4] = cg.OP_goto                                            // length 1
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], uint16(code.CodeLength+4)) // length 2
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_0                                        // length 1
+		code.Codes[code.CodeLength] = cg.OP_ifne
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], uint16(code.CodeLength+7))
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_1
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], uint16(code.CodeLength+4))
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_0
 		code.CodeLength += 8
 	}
 	return
