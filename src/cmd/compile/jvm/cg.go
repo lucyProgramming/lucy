@@ -165,8 +165,8 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 	class.Name = c.ClassNameDefinition.Name
 	m.Classes = append(m.Classes, class)
 	class.AccessFlags = c.Access
-
 	class.SuperClass = c.SuperClassNameDefinition.BinaryName
+	class.Name = c.ClassNameDefinition.BinaryName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range c.Fields {

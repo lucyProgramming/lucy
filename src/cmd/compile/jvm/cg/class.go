@@ -30,7 +30,7 @@ type Class struct {
 	Fields       []*FieldInfo
 	Methods      []*MethodInfo
 	Attributes   []*AttributeInfo
-	SourceFile   string
+	//SourceFile   string
 	// used when compile code
 	Utf8Consts               map[string]*ConstPool
 	IntConsts                map[int32]*ConstPool

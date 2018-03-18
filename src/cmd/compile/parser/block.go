@@ -19,8 +19,14 @@ func (b *Block) consume(c map[int]bool) {
 	b.parser.consume(c)
 }
 
-func (b *Block) parse(block *ast.Block) (err error) {
-	b.Next() // skip {
+func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err error) {
+	if len(endTokens) == 0 {
+		panic("end token is 0")
+	}
+	endTokenM := make(map[int]struct{})
+	for _, v := range endTokens {
+		endTokenM[v] = struct{}{}
+	}
 	isDefer := false
 	reset := func() {
 		isDefer = false
@@ -28,6 +34,12 @@ func (b *Block) parse(block *ast.Block) (err error) {
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {
 		if len(b.parser.errs) > b.parser.nerr {
+			break
+		}
+		if _, ok := endTokenM[b.parser.token.Type]; ok {
+			if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
+				b.Next()
+			}
 			break
 		}
 		switch b.parser.token.Type {
@@ -38,9 +50,6 @@ func (b *Block) parse(block *ast.Block) (err error) {
 		case lex.TOKEN_DEFER:
 			isDefer = true
 			b.Next()
-		case lex.TOKEN_RC: // end
-			b.Next()
-			return
 		case lex.TOKEN_IDENTIFIER:
 			b.parseExpressionStatement(block, isDefer)
 			reset()
@@ -111,6 +120,7 @@ func (b *Block) parse(block *ast.Block) (err error) {
 				StatementSwitch: s,
 			})
 			reset()
+			fmt.Println("1111111111111111")
 		case lex.TOKEN_CONST:
 			if isDefer {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with const definition has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
@@ -190,7 +200,8 @@ func (b *Block) parse(block *ast.Block) (err error) {
 			b.Next()
 		case lex.TOKEN_LC:
 			newblock := &ast.Block{}
-			err = b.parse(newblock)
+			b.Next()
+			err = b.parse(newblock, false, lex.TOKEN_RC)
 			if err != nil {
 				b.consume(untils_rc)
 				b.Next()
@@ -309,167 +320,4 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 			})
 		}
 	}
-}
-
-func (b *Block) parseIf() (i *ast.StatementIF, err error) {
-	b.Next() // skip if
-	if b.parser.eof {
-		err = b.parser.mkUnexpectedEofErr()
-		b.parser.errs = append(b.parser.errs, err)
-		return nil, err
-	}
-	var e *ast.Expression
-	e, err = b.parser.ExpressionParser.parseExpression()
-	if err != nil {
-		b.parser.errs = append(b.parser.errs, err)
-		b.consume(untils_lc)
-		b.Next()
-	}
-	if b.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s missing '{' after a expression,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
-		b.parser.errs = append(b.parser.errs)
-		b.consume(untils_lc) // consume and next
-		b.Next()
-	}
-	i = &ast.StatementIF{}
-	i.Condition = e
-	i.Block = &ast.Block{}
-	err = b.parse(i.Block)
-	if b.parser.token.Type == lex.TOKEN_ELSEIF {
-		es, err := b.parseElseIfList()
-		if err != nil {
-			return i, err
-		}
-		i.ElseIfList = es
-	}
-	if b.parser.token.Type == lex.TOKEN_ELSE {
-		b.Next()
-		if b.parser.token.Type != lex.TOKEN_LC {
-			err = fmt.Errorf("%s missing { after else", b.parser.errorMsgPrefix())
-			return i, err
-		}
-		i.ElseBlock = &ast.Block{}
-		err = b.parse(i.ElseBlock)
-	}
-	return i, err
-}
-
-func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
-	es = []*ast.StatementElseIf{}
-	var e *ast.Expression
-	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && !b.parser.eof {
-		b.Next() // skip elseif token
-		e, err = b.parser.ExpressionParser.parseExpression()
-		if err != nil {
-			b.parser.errs = append(b.parser.errs, err)
-			return es, err
-		}
-		if b.parser.token.Type != lex.TOKEN_LC {
-			err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
-			b.parser.errs = append(b.parser.errs)
-			return es, err
-		}
-		block := &ast.Block{}
-		err = b.parse(block)
-		if err != nil {
-			b.consume(untils_rc)
-			b.Next()
-			continue
-		}
-		es = append(es, &ast.StatementElseIf{
-			Condition: e,
-			Block:     block,
-		})
-	}
-	return es, err
-}
-
-func (b *Block) parseFor() (f *ast.StatementFor, err error) {
-	f = &ast.StatementFor{}
-	f.Pos = b.parser.mkPos()
-	f.Block = &ast.Block{}
-	b.Next()                                 // skip for
-	if b.parser.token.Type != lex.TOKEN_LC { // not {
-		e, err := b.parser.ExpressionParser.parseExpression()
-		if err != nil {
-			b.parser.errs = append(b.parser.errs, err)
-		} else {
-			f.Condition = e
-		}
-	}
-	if b.parser.token.Type == lex.TOKEN_SEMICOLON {
-		b.Next() // skip ;
-		e, err := b.parser.ExpressionParser.parseExpression()
-		if err != nil {
-			b.parser.errs = append(b.parser.errs, err)
-			b.consume(untils_semicolon)
-		} else {
-			f.Init = f.Condition
-			f.Condition = e
-		}
-		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after expression", b.parser.errorMsgPrefix()))
-			b.consume(untils_lc)
-		} else {
-			b.Next()
-			e, err = b.parser.ExpressionParser.parseExpression()
-			if err != nil {
-				b.parser.errs = append(b.parser.errs, err)
-			}
-			f.Post = e
-		}
-	}
-	if b.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s not { after for", b.parser.errorMsgPrefix())
-		b.parser.errs = append(b.parser.errs, err)
-		return
-	}
-	err = b.parse(f.Block)
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
-}
-
-func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
-	// skip switch key work
-	//pos := b.parser.mkPos()
-	//b.Next()
-	//condition, err := b.parser.ExpressionParser.parseExpression()
-	//if err != nil {
-	//	b.parser.errs = append(b.parser.errs, err)
-	//	return nil, err
-	//}
-	//if b.parser.token.Type != lex.TOKEN_LC {
-	//	err = fmt.Errorf("%s expect '{',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
-	//	b.parser.errs = append(b.parser.errs, err)
-	//	return nil, err
-	//}
-	//b.Next() // skip {  , must be case
-	//
-	//if b.parser.token.Type != lex.TOKEN_CASE {
-	//	err = fmt.Errorf("%s expect 'case',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
-	//	b.parser.errs = append(b.parser.errs, err)
-	//	return nil, err
-	//}
-	//s := &ast.StatementSwitch{}
-	//s.Pos = pos
-	//s.Condition = condition
-	//for b.parser.eof == false && b.parser.token.Type == lex.TOKEN_CASE {
-	//	// skip case
-	//	es, err := b.parser.ExpressionParser.parseExpressions()
-	//	if err != nil {
-	//		b.parser.errs = append(b.parser.errs, err)
-	//		return s, err
-	//	}
-	//	if b.parser.token.Type != lex.TOKEN_COLON {
-	//		err = fmt.Errorf("%s expect ':',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
-	//		b.parser.errs = append(b.parser.errs, err)
-	//		return s, err
-	//	}
-	//	b.Next() // skip :
-	//	s.StatmentSwitchCases = append(s.StatmentSwitchCases)
-	//}
-
-	return nil, nil
 }

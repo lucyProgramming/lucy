@@ -213,35 +213,19 @@ func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *Cl
 
 func (c *Class) loadSuperClass() error {
 	if c.SuperClassNameDefinition.Name == "" {
-		p, err := c.Block.InheritedAttribute.p.loadPackage("lucy/lang")
-		if err != nil {
-			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
-		}
-		c.SuperClass = p.Block.Classes["Object"]
-		if c.SuperClass == nil {
-			panic("........")
-		}
+		//class, err := c.Block.InheritedAttribute.p.load("lucy/lang", "Object")
+		//if err != nil {
+		//	return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
+		//}
+		//if _,ok := class.(*Class); ok == false {
+		//	return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
+		//}
+		//c.SuperClass =
+		//if c.SuperClass == nil {
+		//	panic("........")
+		//}
 	} else {
-		if strings.Contains(c.SuperClassNameDefinition.Name, "/") { //  must like "aa/bb"
-			t := strings.Split(c.SuperClassNameDefinition.Name, "/")
-			f, ok := c.Block.InheritedAttribute.p.Files[c.SuperClassNameDefinition.Pos.Filename]
-			if ok == false {
-				return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
-			}
-			fmt.Println(f.Imports)
-			pname, ok := f.Imports[t[0]]
-			if ok == false {
-				return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
-			}
-			p, err := c.Block.InheritedAttribute.p.loadPackage(pname.Name)
-			if err != nil {
-				return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.SuperClassNameDefinition.Pos), err)
-			}
-			c.SuperClass = p.Block.Classes["Object"]
-			if c.SuperClass == nil {
-				panic("........")
-			}
-		} else { //
+		if false == strings.Contains(c.SuperClassNameDefinition.Name, "/") {
 			d := c.Block.searchByName(c.SuperClassNameDefinition.Name)
 			if c, ok := d.(*Class); ok {
 				c.SuperClass = c
@@ -249,6 +233,25 @@ func (c *Class) loadSuperClass() error {
 				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.SuperClassNameDefinition.Pos), c.SuperClassNameDefinition.Name)
 			}
 		}
+		t := strings.Split(c.SuperClassNameDefinition.Name, "/")
+		f, ok := c.Block.InheritedAttribute.p.Files[c.SuperClassNameDefinition.Pos.Filename]
+		if ok == false {
+			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
+		}
+		fmt.Println(f.Imports)
+		pname, ok := f.Imports[t[0]]
+		if ok == false {
+			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
+		}
+		class, err := c.Block.InheritedAttribute.p.load(pname.Name, "Object")
+		if err != nil {
+			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.SuperClassNameDefinition.Pos), err)
+		}
+		if _, ok := class.(*Class); ok == false {
+			return fmt.Errorf("%s %s is not a class", errMsgPrefix(c.SuperClassNameDefinition.Pos), err)
+		}
+		c.SuperClass = class.(*Class)
+		return nil
 	}
 	return nil
 }

@@ -79,6 +79,7 @@ func (c *ClassDecoder) parseInterfaces() {
 		c.bs = c.bs[2:]
 	}
 }
+
 func (c *ClassDecoder) parseFields() {
 	length := binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]
@@ -88,7 +89,6 @@ func (c *ClassDecoder) parseFields() {
 		f.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
 		f.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 		c.bs = c.bs[6:]
-		fmt.Println("!!!!!!!!!!!!", string(c.ret.ConstPool[f.NameIndex].Info))
 		f.Attributes = c.parseAttributes()
 		c.ret.Fields = append(c.ret.Fields, f)
 	}
@@ -118,10 +118,6 @@ func (c *ClassDecoder) parseAttributes() []*cg.AttributeInfo {
 		length := binary.BigEndian.Uint32(c.bs[2:])
 		c.bs = c.bs[6:]
 		a.Info = c.bs[:length]
-		if string(c.ret.ConstPool[a.NameIndex].Info) == cg.CONSTANT_SOURCE_FILE { //sepcial case
-			index := binary.BigEndian.Uint16(a.Info)
-			c.ret.SourceFile = string(c.ret.ConstPool[index].Info)
-		}
 		c.bs = c.bs[length:]
 		ret = append(ret, a)
 	}

@@ -188,7 +188,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		} else {
 			err = fmt.Errorf("wrong format scientific notation")
 		}
-		if lex.isDigit(c) == false && c == '0' {
+		if lex.isDigit(c) == false {
 			lex.ungetchar() //
 			err = fmt.Errorf("wrong format scientific notation")
 		} else {
@@ -197,11 +197,8 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			for eof == false && lex.isDigit(c) {
 				power = append(power, c)
 				c, eof = lex.getchar()
-				if lex.isDigit(c) == false {
-					lex.ungetchar()
-					break
-				}
 			}
+			lex.ungetchar()
 		}
 	} else {
 		lex.ungetchar()
@@ -266,8 +263,8 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			}
 			integerpart = append(integerpart, b...)
 			value := lex.parseInt(integerpart)
-
-			token.Data = value
+			token.Type = TOKEN_LITERAL_INT
+			token.Data = int32(value)
 		} else { // float
 			integerpart = append(integerpart, floatpart[0:p]...)
 			fmt.Println(floatpart[p:], parseFloat(floatpart[p:]))

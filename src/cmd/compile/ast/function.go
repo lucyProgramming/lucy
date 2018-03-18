@@ -51,8 +51,11 @@ type AutoVarForReturnBecauseOfDefer struct {
 		flag is 1 means there is exception,but handled
 	*/
 	ExceptionIsNotNilWhenEnter uint16
-	MultiValueOffset           uint16
-	IfReachButton              uint16
+	/*
+		for multi return value
+	*/
+	MultiValueOffset uint16
+	IfReachButton    uint16
 }
 
 func (f *Function) HaveNoReturnValue() bool {

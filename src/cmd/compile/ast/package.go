@@ -6,18 +6,30 @@ import (
 	"strings"
 )
 
+const (
+	_ = iota
+	PACKAGE_KIND_LUCY
+	PACKAGE_KIND_JAVA
+)
+
 type Package struct {
+	Kind           int
 	Name           string //if error,should be multi names ,taken first is ok
 	FullName       string
 	Main           *Function
 	DestPath       string
 	loadedPackages map[string]*Package
+	loaded         map[string]*LoadedName
 	Block          Block // package always have a default block
 	Files          map[string]*File
+	InitFunctions  []*Function
+	NErros2Stop    int // number of errors should stop compile
+	Errors         []error
+}
 
-	InitFunctions []*Function
-	NErros2Stop   int // number of errors should stop compile
-	Errors        []error
+type LoadedName struct {
+	T   interface{}
+	Err error
 }
 
 func (p *Package) mkShortName() {
@@ -98,19 +110,42 @@ func (p *Package) TypeCheck() []error {
 	return p.Errors
 }
 
-func (p *Package) loadPackage(name string) (*Package, error) {
+func (p *Package) load(pname, name string) (interface{}, error) {
 	if p.loadedPackages == nil {
 		p.loadedPackages = make(map[string]*Package)
 	}
-	if t := p.loadedPackages[name]; t != nil {
-		return t, nil
+	if p.loaded == nil {
+		p.loaded = make(map[string]*LoadedName)
 	}
-	pp, err := PackageLoader.LoadPackage(name)
+	var err error
+	fullname := pname + "/" + name
+	if t, ok := p.loaded[fullname]; ok { // look up in cache
+		return t.T, t.Err
+	}
+
+	if t := p.loadedPackages[pname]; t != nil {
+		if t.Kind == PACKAGE_KIND_LUCY {
+			tt := t.Block.searchByName(name)
+			if tt == nil {
+				err = fmt.Errorf("%s is not found", name)
+			}
+			return tt, nil
+		} else { //java package
+
+		}
+	}
+	if _, ok := p.loadedPackages[pname]; ok == false {
+		p.loadedPackages[pname] = &Package{}
+	}
+	p.loaded[fullname] = &LoadedName{}
+
+	t, err := NameLoader.LoadName(p.loadedPackages[pname], pname, name)
 	if err != nil {
+		p.loaded[fullname].Err = err
 		return nil, err
 	}
-	p.loadedPackages[name] = pp
-	return pp, nil
+	p.loaded[fullname].T = t
+	return t, nil
 
 }
 

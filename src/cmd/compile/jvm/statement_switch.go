@@ -58,6 +58,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
 		}
 		gotoBodyExits := []*cg.JumpBackPatch{}
+		needPop := false
 		for kk, ee := range c.Matches {
 			if ee.IsCall() && len(ee.VariableTypes) > 0 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context)
@@ -74,7 +75,9 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 						} else {
 							code.Codes[code.CodeLength] = cg.OP_dup2
 						}
+						code.CodeLength++
 						currentStack += size
+						needPop = true
 						if currentStack > maxstack {
 							maxstack = currentStack
 						}
@@ -97,6 +100,8 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 				} else {
 					code.Codes[code.CodeLength] = cg.OP_dup2
 				}
+				code.CodeLength++
+				needPop = true
 				currentStack += size
 				if currentStack > maxstack {
 					maxstack = currentStack
@@ -115,6 +120,15 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		// if match goto here
 		backPatchEs(gotoBodyExits, code.CodeLength)
+		//before block,pop off stack
+		if needPop {
+			if size == 1 {
+				code.Codes[code.CodeLength] = cg.OP_pop
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_pop2
+			}
+			code.CodeLength++
+		}
 		//block is here
 		m.buildBlock(class, code, &c.Block, context)
 		if k != len(s.StatmentSwitchCases)-1 || s.Default != nil {

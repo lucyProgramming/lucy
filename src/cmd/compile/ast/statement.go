@@ -106,9 +106,8 @@ func (s *Statement) check(b *Block) []error { // b is father
 	case STATEMENT_TYPE_FOR:
 		return s.StatementFor.check(b)
 	case STATEMENT_TYPE_SWITCH:
-		panic("........")
+		return s.StatementSwitch.check(b)
 	case STATEMENT_TYPE_BREAK:
-
 		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName())}
 		} else {

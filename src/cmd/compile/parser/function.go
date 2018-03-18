@@ -51,6 +51,7 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 	f.AccessFlags |= cg.ACC_METHOD_FINAL
 	f.Block = &ast.Block{}
 	f.Block.IsFunctionTopBlock = true
-	err = p.parser.Block.parse(f.Block)
+	p.Next()
+	err = p.parser.Block.parse(f.Block, false, lex.TOKEN_RC)
 	return f, err
 }

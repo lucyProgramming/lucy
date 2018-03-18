@@ -1,11 +1,9 @@
 package jvm
 
 import (
-	"fmt"
-
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-
 	"bytes"
+	"fmt"
+	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"strings"
 )
 
@@ -126,54 +124,64 @@ func (m *Descript) ParseFunctionType(bs []byte) (*ast.FunctionType, error) {
 	for bs[0] != ')' {
 		switch bs[0] {
 		case 'B':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_BYTE
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'D':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_DOUBLE
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'F':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_FLOAT
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'I':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_INT
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'J':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_LONG
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'S', 'C':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_SHORT
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'Z':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_BOOL
 			t.ParameterList = append(t.ParameterList, vd)
 		case 'L':
+			bs = bs[1:]
 			vd := &ast.VariableDefinition{}
 			vd.Name = fmt.Sprintf("var_%d", i)
 			vd.Typ = &ast.VariableType{}
 			vd.Typ.Typ = ast.VARIABLE_TYPE_OBJECT
-
-			bytes.Index(bs, []byte{';'})
+			vd.Typ.Class = &ast.Class{}
+			index := bytes.Index(bs, []byte{';'})
+			vd.Typ.Class.ClassNameDefinition.BinaryName = string(bs[0:index])
+			bs = bs[index+1:] // because of ;
 		case '[':
 			panic(22)
 		}

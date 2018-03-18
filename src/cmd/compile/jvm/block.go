@@ -56,6 +56,9 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			if index == len(ds)-1 && r != nil && context.function.HaveNoReturnValue() == false {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
+				if 2 > code.MaxStack {
+					code.MaxStack = 2
+				}
 				code.Codes[code.CodeLength] = cg.OP_ifnonnull
 				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 				code.Codes[code.CodeLength+3] = cg.OP_goto
@@ -70,50 +73,69 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 		}
 		m.buildBlock(class, code, &ds[index].Block, context)
 		// load to stack
-		if needExceptionTable {
-			if index == 0 {
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				code.Codes[code.CodeLength] = cg.OP_ifnonnull
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-				code.Codes[code.CodeLength+3] = cg.OP_goto
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
-				code.Codes[code.CodeLength+6] = cg.OP_athrow
-				code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
-				code.CodeLength += 8
-				if r != nil && context.function.HaveNoReturnValue() == false { // last defer
-					copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
-					code.Codes[code.CodeLength] = cg.OP_ifne
-					binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-					code.Codes[code.CodeLength+3] = cg.OP_goto
-					noExceptionExit := code.Codes[code.CodeLength+4 : code.CodeLength+6]
-					noExceptionExitCodeLength := code.CodeLength + 4
-					code.CodeLength += 6
-					//expection that have been handled
-					if len(context.function.Typ.ReturnList) == 1 {
-					} else {
-						copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
-					}
-					binary.BigEndian.PutUint16(noExceptionExit, uint16(code.CodeLength-noExceptionExitCodeLength)) // exit is here
-				}
-			} else {
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				code.Codes[code.CodeLength] = cg.OP_ifnonnull
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-				code.Codes[code.CodeLength+3] = cg.OP_goto
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
-				code.Codes[code.CodeLength+6] = cg.OP_athrow
-				code.CodeLength += 7
-			}
-			endPc = code.CodeLength
-		}
-		index--
 		// this code maxStack is 2
 		if 2 > code.MaxStack {
 			code.MaxStack = 2
 		}
+		if needExceptionTable == false {
+			index--
+			continue
+		}
+		if index != 0 {
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+			code.Codes[code.CodeLength] = cg.OP_ifnonnull
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+			code.Codes[code.CodeLength+3] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
+			code.Codes[code.CodeLength+6] = cg.OP_athrow
+			code.CodeLength += 7
+			endPc = code.CodeLength
+			index--
+			continue
+		}
+		// index is 0,last defer block
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_ifnonnull
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+		code.Codes[code.CodeLength+3] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
+		code.Codes[code.CodeLength+6] = cg.OP_athrow
+		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
+		code.CodeLength += 8
+		if r == nil || context.function.HaveNoReturnValue() || len(r.Expressions) == 0 {
+			endPc = code.CodeLength
+			index--
+			continue
+		}
+		// load if enter defers there is a exception
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
+		code.Codes[code.CodeLength] = cg.OP_ifne
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+		code.Codes[code.CodeLength+3] = cg.OP_goto
+		noExceptionExitCodeLength := code.CodeLength + 3
+		code.CodeLength += 6
+		//expection that have been handled
+		if len(context.function.Typ.ReturnList) == 1 {
+
+			m.buildReturnFromFunctionReturnList(class, code, context)
+		} else {
+			//load when function have multi returns if read to end
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
+			code.Codes[code.CodeLength] = cg.OP_ifeq
+			codeLength := code.CodeLength
+			code.CodeLength += 3
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
+			code.Codes[code.CodeLength] = cg.OP_areturn
+			code.CodeLength++
+			binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 0)
+		}
+		binary.BigEndian.PutUint16(code.Codes[noExceptionExitCodeLength+1:noExceptionExitCodeLength+3], uint16(code.CodeLength-noExceptionExitCodeLength)) // exit is here
+		endPc = code.CodeLength
+		index--
 	}
 }

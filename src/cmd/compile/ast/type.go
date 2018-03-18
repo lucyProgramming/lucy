@@ -187,17 +187,16 @@ func (t *VariableType) resolve(block *Block) error {
 
 func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
-	var err error
 	if !strings.Contains(t.Name, ".") {
 		d = block.searchByName(t.Name)
 		if d == nil {
 			return fmt.Errorf("%s not found", t.Name)
 		}
 	} else { // a.b  in type situation,must be package name
-		d, err = t.resolvePackageName(block)
-		if err != nil {
-			return err
-		}
+		//d, err = t.resolvePackageName(block)
+		//if err != nil {
+		//	return err
+		//}
 	}
 	switch d.(type) {
 	case *VariableDefinition:
@@ -216,27 +215,6 @@ func (t *VariableType) resolveName(block *Block) error {
 		return fmt.Errorf("name %s is not type")
 	}
 	return nil
-}
-
-func (t *VariableType) resolvePackageName(block *Block) (interface{}, error) {
-	accessname := t.Name[0:strings.Index(t.Name, ".")] // package name
-	var f *File
-	var ok bool
-	if f, ok = block.InheritedAttribute.p.Files[t.Pos.Filename]; !ok {
-		return nil, fmt.Errorf("%s package %v not imported", errMsgPrefix(t.Pos), accessname)
-	}
-	if _, ok = f.Imports[accessname]; !ok {
-		return nil, fmt.Errorf("%s package %s is not imported", errMsgPrefix(t.Pos), accessname)
-	}
-	p, err := block.loadPackage(f.Imports[accessname].Name)
-	if err != nil {
-		return nil, err
-	}
-	d := p.Block.searchByName(strings.Trim(t.Name, accessname+"."))
-	if d == nil {
-		err = fmt.Errorf("%s not found", t.Name)
-	}
-	return d, err
 }
 
 /*

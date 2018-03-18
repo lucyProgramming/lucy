@@ -124,7 +124,8 @@ func (p *Parser) Parse() []error {
 			resetProperty()
 		case lex.TOKEN_LC:
 			b := &ast.Block{}
-			err = p.Block.parse(b) // this function will lookup next
+			p.Next()
+			err = p.Block.parse(b, false, lex.TOKEN_RC) // this function will lookup next
 			if err != nil {
 				p.consume(untils_rc)
 				p.Next()

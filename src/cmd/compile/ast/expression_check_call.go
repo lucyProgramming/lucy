@@ -179,7 +179,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return nil
 	}
 	if t.Typ != VARIABLE_TYPE_FUNCTION {
-		*errs = append(*errs, fmt.Errorf("%s %s is not a function", errMsgPrefix(e.Pos), call.Expression.OpName()))
+		*errs = append(*errs, fmt.Errorf("%s %s is not a function,but '%s'", errMsgPrefix(e.Pos), call.Expression.OpName(), t.TypeString()))
 		t = &VariableType{
 			Typ: VARIABLE_TYPE_VOID,
 			Pos: e.Pos,

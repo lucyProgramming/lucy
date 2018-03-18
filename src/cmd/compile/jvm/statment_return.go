@@ -8,7 +8,7 @@ import (
 func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context) (maxstack uint16) {
 	if len(s.Function.Typ.ReturnList) == 0 {
 		if context.Defers != nil && len(context.Defers) > 0 {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.Codes[code.CodeLength] = cg.OP_aconst_null // expect exception on stack
 			code.CodeLength++
 			if 1 > code.MaxStack {
 				code.MaxStack = 1
@@ -19,6 +19,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
+
 	if len(s.Function.Typ.ReturnList) == 1 {
 		var es []*cg.JumpBackPatch
 		if len(s.Expressions) > 0 {
@@ -43,10 +44,11 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			m.buildDefers(class, code, context, context.Defers, true, s)
 			code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
 			//restore the stack
-			if len(s.Expressions) > 0 { //rewrite return value
+			if len(s.Expressions) > 0 { //restore stack
 				m.loadLocalVar(class, code, s.Function.Typ.ReturnList[0])
 			}
 		}
+		// in this case,load local var is not under exception handle,should be ok
 		if len(s.Expressions) == 0 {
 			m.loadLocalVar(class, code, s.Function.Typ.ReturnList[0])
 		}
@@ -79,6 +81,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
+
 	//multi returns
 	if len(s.Expressions) > 0 {
 		//new a array list
@@ -178,7 +181,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 }
 
 func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) (maxstack uint16) {
-	if context.function.HaveNoReturnValue() {
+	if context.function.HaveNoReturnValue() { // when has no return,should not call this function
 		return
 	}
 	if len(context.function.Typ.ReturnList) == 1 {

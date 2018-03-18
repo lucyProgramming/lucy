@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Block struct {
@@ -32,7 +31,9 @@ type Defer struct {
 func (b *Block) shouldStop(errs []error) bool {
 	return (len(b.InheritedAttribute.p.Errors) + len(errs)) >= b.InheritedAttribute.p.NErros2Stop
 }
-
+func (b *Block) SearchByName(name string) interface{} {
+	return b.searchByName(name)
+}
 func (b *Block) searchByName(name string) interface{} {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
@@ -381,19 +382,25 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	return nil
 }
 
-func (b *Block) loadPackage(name string) (*Package, error) {
-	return b.InheritedAttribute.p.loadPackage(name)
+func (b *Block) load(pname string, name string) (interface{}, error) {
+	return b.InheritedAttribute.p.load(pname, name)
 }
-func (b *Block) loadClass(name string) (*Class, error) {
-	pname := name[0:strings.LastIndex(name, "/")]
-	cname := name[strings.LastIndex(name, "/")+1:]
-	p, err := b.loadPackage(pname)
-	if err != nil {
-		return nil, err
-	}
-	c := p.Block.Classes[cname]
-	if c == nil {
-		err = fmt.Errorf("class %s not found", cname)
-	}
-	return c, err
-}
+
+//func (b *Block) loadClass(name string) (*Class, error) {
+//	pname := name[0:strings.LastIndex(name, "/")]
+//	cname := name[strings.LastIndex(name, "/")+1:]
+//	c, err := b.loadPackage(pname)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if c == nil {
+//		err = fmt.Errorf("%s class %s not found", cname)
+//		return nil, err
+//	}
+//	cc, ok := c.(*Class)
+//	if ok == false {
+//		err = fmt.Errorf("%s %s is not a class", cname)
+//		return nil, err
+//	}
+//	return cc, err
+//}
