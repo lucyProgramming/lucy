@@ -49,8 +49,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
 	c.Next() // skip class key word
-	c.classDefinition.ClassNameDefinition.Pos = c.parser.mkPos()
-	c.classDefinition.ClassNameDefinition.Name, err = c.parseClassName()
+	c.classDefinition.Pos = c.parser.mkPos()
+	c.classDefinition.Name, err = c.parseClassName()
 	if err != nil {
 		return nil, err
 	}
@@ -63,14 +63,14 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	}
 	if c.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
 		c.Next() // skip extends
-		c.classDefinition.SuperClassNameDefinition.Pos = c.parser.mkPos()
+		c.classDefinition.Pos = c.parser.mkPos()
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
 			t, err := c.parseClassName()
-			c.classDefinition.SuperClassNameDefinition.Name = t
+			c.classDefinition.Name = t
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err
@@ -201,7 +201,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			if c.isStatic {
 				f.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
-			if f.Name == c.classDefinition.ClassNameDefinition.Name {
+			if f.Name == c.classDefinition.Name {
 				if c.classDefinition.Constructors == nil {
 					c.classDefinition.Constructors = []*ast.ClassMethod{m}
 				} else {

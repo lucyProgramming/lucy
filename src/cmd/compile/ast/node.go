@@ -80,7 +80,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	p.Block.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {
 		v.mkVariableType()
-		p.Block.Classes[v.ClassNameDefinition.Name] = v
+		p.Block.Classes[v.Name] = v
 	}
 	p.Block.Enums = make(map[string]*Enum)
 	p.Block.EnumNames = make(map[string]*EnumName)
@@ -153,10 +153,10 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	}
 	//classes
 	for _, v := range p.Classes {
-		if _, ok := m[v.ClassNameDefinition.Name]; ok {
-			m[v.ClassNameDefinition.Name] = append(m[v.ClassNameDefinition.Name], v)
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
 		} else {
-			m[v.ClassNameDefinition.Name] = []interface{}{v}
+			m[v.Name] = []interface{}{v}
 		}
 	}
 	for k, v := range m {

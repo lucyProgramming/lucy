@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"strings"
 )
 
 type Descript struct {
@@ -53,65 +52,77 @@ func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 	case ast.VARIABLE_TYPE_VOID:
 		return "V"
 	case ast.VARIABLE_TYPE_OBJECT:
-		return "L" + v.Class.ClassNameDefinition.Name + ";"
+		return "L" + v.Class.Name + ";"
 	case ast.VARIABLE_TYPE_MAP:
 		return "L" + java_hashmap_class + ";"
 	}
 	panic("unhandle type signature")
 }
 
-func (m *Descript) ParseType(descritpor string) (*ast.VariableType, error) {
-	switch descritpor {
-	case "V":
-		return &ast.VariableType{
+func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
+	switch bs[0] {
+	case 'V':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_VOID,
 		}, nil
-	case "B":
-		return &ast.VariableType{
+	case 'B':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
 		}, nil
-	case "D":
-		return &ast.VariableType{
+	case 'D':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_DOUBLE,
 		}, nil
-	case "F":
-		return &ast.VariableType{
+	case 'F':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
 		}, nil
-	case "I":
-		return &ast.VariableType{
+	case 'I':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_INT,
 		}, nil
-	case "J":
-		return &ast.VariableType{
+	case 'J':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_LONG,
 		}, nil
-	case "S", "C":
-		return &ast.VariableType{
+	case 'S', 'C':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
 		}, nil
-	case "Z":
-		return &ast.VariableType{
+	case 'Z':
+		bs = bs[1:]
+		return bs, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
 		}, nil
-	default:
-		if strings.HasPrefix(descritpor, "L") {
-			return &ast.VariableType{
-				Typ:  ast.VARIABLE_TYPE_OBJECT,
-				Name: descritpor[1:],
-			}, nil
-		} else if strings.HasPrefix(descritpor, "[") {
-			t, err := m.ParseType(descritpor[1:])
-			if err != nil {
-				return nil, err
-			}
-			return &ast.VariableType{
-				Typ:       ast.VARIABLE_TYPE_ARRAY,
-				ArrayType: t,
-			}, nil
+	case 'L':
+		bs = bs[1:]
+		index := bytes.Index(bs, []byte{';'}) // end token
+		t := &ast.VariableType{}
+		t.Typ = ast.VARIABLE_TYPE_OBJECT
+		t.Class = &ast.Class{}
+		t.Name = string(bs[:index])
+		bs = bs[index+1:]
+		return bs, t, nil
+	case '[':
+		bs = bs[1:]
+		var t *ast.VariableType
+		var err error
+		bs, t, err = m.ParseType(bs)
+		ret := &ast.VariableType{}
+		if err == nil {
+			ret.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+			ret.ArrayType = t
 		}
+		return bs, ret, err
 	}
-	return nil, fmt.Errorf("unkown type:%v", descritpor)
+	return bs, nil, fmt.Errorf("unkown type:%v", string(bs))
 }
 
 func (m *Descript) ParseFunctionType(bs []byte) (*ast.FunctionType, error) {
@@ -121,77 +132,21 @@ func (m *Descript) ParseFunctionType(bs []byte) (*ast.FunctionType, error) {
 	}
 	bs = bs[1:]
 	i := 1
+	var err error
 	for bs[0] != ')' {
-		switch bs[0] {
-		case 'B':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_BYTE
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'D':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_DOUBLE
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'F':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_FLOAT
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'I':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_INT
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'J':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_LONG
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'S', 'C':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_SHORT
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'Z':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_BOOL
-			t.ParameterList = append(t.ParameterList, vd)
-		case 'L':
-			bs = bs[1:]
-			vd := &ast.VariableDefinition{}
-			vd.Name = fmt.Sprintf("var_%d", i)
-			vd.Typ = &ast.VariableType{}
-			vd.Typ.Typ = ast.VARIABLE_TYPE_OBJECT
-			vd.Typ.Class = &ast.Class{}
-			index := bytes.Index(bs, []byte{';'})
-			vd.Typ.Class.ClassNameDefinition.BinaryName = string(bs[0:index])
-			bs = bs[index+1:] // because of ;
-		case '[':
-			panic(22)
+		vd := &ast.VariableDefinition{}
+		vd.Name = fmt.Sprintf("var_%d", i)
+		bs, vd.Typ, err = m.ParseType(bs)
+		if err != nil {
+			return nil, err
 		}
+		t.ParameterList = append(t.ParameterList, vd)
 		i++
 	}
 	bs = bs[1:] // skip )
 	vd := &ast.VariableDefinition{}
 	vd.Name = "return"
-	var err error
-	vd.Typ, err = m.ParseType(string(bs))
+	_, vd.Typ, err = m.ParseType(bs)
 	if err != nil {
 		return t, err
 	}

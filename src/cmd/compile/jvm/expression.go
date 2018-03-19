@@ -332,7 +332,7 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(typ.Class.ClassNameDefinition.BinaryName, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[typ.ArrayType.Typ]

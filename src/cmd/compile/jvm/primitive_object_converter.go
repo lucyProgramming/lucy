@@ -114,7 +114,7 @@ func (PrimitiveObjectConvert) castPointerTypeToRealType(class *cg.ClassHighLevel
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(t.Class.ClassNameDefinition.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Typ]

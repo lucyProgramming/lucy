@@ -162,11 +162,11 @@ func (m *MakeClass) mkEnums() {
 
 func (m *MakeClass) mkClass(c *ast.Class) {
 	class := &cg.ClassHighLevel{}
-	class.Name = c.ClassNameDefinition.Name
+	class.Name = c.Name
 	m.Classes = append(m.Classes, class)
 	class.AccessFlags = c.Access
-	class.SuperClass = c.SuperClassNameDefinition.BinaryName
-	class.Name = c.ClassNameDefinition.BinaryName
+	class.SuperClass = c.SuperClassName
+	class.Name = c.SuperClassName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range c.Fields {

@@ -7,20 +7,21 @@ import (
 )
 
 type Class struct {
-	ClassNameDefinition      ClassNameDefinition
-	SuperClassNameDefinition ClassNameDefinition
-	IsGlobal                 bool
-	Block                    Block
-	Access                   uint16
-	Pos                      *Pos
-	Fields                   map[string]*ClassField
-	Methods                  map[string][]*ClassMethod
-	SuperClass               *Class
-	Interfaces               []*Class
-	Constructors             []*ClassMethod // can be nil
-	SouceFile                string
-	Used                     bool
-	VariableType             VariableType
+	Name               string
+	NameWithOutPackage string
+	IsGlobal           bool
+	Block              Block
+	Access             uint16
+	Pos                *Pos
+	Fields             map[string]*ClassField
+	Methods            map[string][]*ClassMethod
+	SuperClassName     string
+	SuperClass         *Class
+	Interfaces         []*Class
+	Constructors       []*ClassMethod // can be nil
+	SouceFile          string
+	Used               bool
+	VariableType       VariableType
 }
 
 func (c *Class) resolveName(b *Block) []error {
@@ -48,7 +49,6 @@ func (c *Class) resolveName(b *Block) []error {
 func (c *Class) check(father *Block) []error {
 	c.Block.inherite(father)
 	errs := make([]error, 0)
-	c.ClassNameDefinition.BinaryName = father.InheritedAttribute.p.FullName + c.ClassNameDefinition.Name
 	err := c.loadSuperClass()
 	if err != nil {
 		errs = append(errs, err)
@@ -71,7 +71,7 @@ func (c *Class) check(father *Block) []error {
 	if len(c.Constructors) > 1 {
 		errs = append(errs, fmt.Errorf("%s class named '%s' has %d(more than 1) contructor,declare at:",
 			errMsgPrefix(c.Pos),
-			c.ClassNameDefinition.BinaryName, len(c.Constructors)))
+			c.Name, len(c.Constructors)))
 		for _, v := range c.Constructors {
 			errs = append(errs, fmt.Errorf("\t %s contructor method...", errMsgPrefix(v.Func.Pos)))
 		}
@@ -83,7 +83,7 @@ func (c *Class) check(father *Block) []error {
 		if len(ms) > 1 {
 			errs = append(errs, fmt.Errorf("%s class named '%s' has %d contructor,declare at:",
 				errMsgPrefix(ms[0].Func.Pos),
-				c.ClassNameDefinition.BinaryName, len(ms)))
+				c.Name, len(ms)))
 			for _, v := range ms {
 				errs = append(errs, fmt.Errorf("\t%s contructor method", errMsgPrefix(v.Func.Pos)))
 			}
@@ -212,7 +212,7 @@ func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *Cl
 }
 
 func (c *Class) loadSuperClass() error {
-	if c.SuperClassNameDefinition.Name == "" {
+	if c.SuperClassName == "" {
 		//class, err := c.Block.InheritedAttribute.p.load("lucy/lang", "Object")
 		//if err != nil {
 		//	return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
@@ -225,30 +225,29 @@ func (c *Class) loadSuperClass() error {
 		//	panic("........")
 		//}
 	} else {
-		if false == strings.Contains(c.SuperClassNameDefinition.Name, "/") {
-			d := c.Block.searchByName(c.SuperClassNameDefinition.Name)
+		if false == strings.Contains(c.SuperClassName, "/") {
+			d := c.Block.searchByName(c.SuperClassName)
 			if c, ok := d.(*Class); ok {
 				c.SuperClass = c
 			} else {
-				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.SuperClassNameDefinition.Pos), c.SuperClassNameDefinition.Name)
+				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 			}
 		}
-		t := strings.Split(c.SuperClassNameDefinition.Name, "/")
-		f, ok := c.Block.InheritedAttribute.p.Files[c.SuperClassNameDefinition.Pos.Filename]
+		t := strings.Split(c.SuperClassName, "/")
+		f, ok := c.Block.InheritedAttribute.p.Files[t[0]]
 		if ok == false {
-			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
+			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		fmt.Println(f.Imports)
 		pname, ok := f.Imports[t[0]]
 		if ok == false {
-			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.SuperClassNameDefinition.Pos), t[0])
+			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
 		class, err := c.Block.InheritedAttribute.p.load(pname.Name, "Object")
 		if err != nil {
-			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.SuperClassNameDefinition.Pos), err)
+			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
 		}
 		if _, ok := class.(*Class); ok == false {
-			return fmt.Errorf("%s %s is not a class", errMsgPrefix(c.SuperClassNameDefinition.Pos), err)
+			return fmt.Errorf("%s %s is not a class", errMsgPrefix(c.Pos), err)
 		}
 		c.SuperClass = class.(*Class)
 		return nil
