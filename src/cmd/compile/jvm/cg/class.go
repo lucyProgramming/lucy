@@ -32,17 +32,18 @@ type Class struct {
 	Attributes   []*AttributeInfo
 	//SourceFile   string
 	// used when compile code
-	Utf8Consts               map[string]*ConstPool
-	IntConsts                map[int32]*ConstPool
-	LongConsts               map[int64]*ConstPool
-	FloatConsts              map[float32]*ConstPool
-	DoubleConsts             map[float64]*ConstPool
-	ClassConsts              map[string]*ConstPool
-	StringConsts             map[string]*ConstPool
-	FieldRefConsts           map[CONSTANT_Fieldref_info_high_level]*ConstPool
-	NameAndTypeConsts        map[CONSTANT_NameAndType_info_high_level]*ConstPool
-	MethodrefConsts          map[CONSTANT_Methodref_info_high_level]*ConstPool
-	InterfaceMethodrefConsts map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
+	Utf8Consts                 map[string]*ConstPool
+	IntConsts                  map[int32]*ConstPool
+	LongConsts                 map[int64]*ConstPool
+	FloatConsts                map[float32]*ConstPool
+	DoubleConsts               map[float64]*ConstPool
+	ClassConsts                map[string]*ConstPool
+	StringConsts               map[string]*ConstPool
+	FieldRefConsts             map[CONSTANT_Fieldref_info_high_level]*ConstPool
+	NameAndTypeConsts          map[CONSTANT_NameAndType_info_high_level]*ConstPool
+	MethodrefConsts            map[CONSTANT_Methodref_info_high_level]*ConstPool
+	InterfaceMethodrefConsts   map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
+	AttributeLucyLucyMainClass *AttributeLucyLucyMainClass
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
@@ -300,6 +301,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	}
 	//source file
 	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
+	if c.AttributeLucyLucyMainClass != nil {
+		c.Attributes = append(c.Attributes, c.AttributeLucyLucyMainClass.ToAttributeInfo(c))
+	}
 	c.ifConstPoolOverMaxSize()
 	return
 }

@@ -106,7 +106,6 @@ func (PrimitiveObjectConvert) castPointerTypeToRealType(class *cg.ClassHighLevel
 	if t.IsPointer() == false {
 		panic("...")
 	}
-
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_checkcast

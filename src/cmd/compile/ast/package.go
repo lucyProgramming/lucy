@@ -75,7 +75,6 @@ func (p *Package) TypeCheck() []error {
 		p.NErros2Stop = 10
 	}
 	p.Errors = []error{}
-	p.Block.InheritedAttribute.p = p
 	p.Errors = append(p.Errors, p.Block.checkConst()...)
 	//
 	for _, v := range p.Block.Funcs {
@@ -125,7 +124,7 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 
 	if t := p.loadedPackages[pname]; t != nil {
 		if t.Kind == PACKAGE_KIND_LUCY {
-			tt := t.Block.searchByName(name)
+			tt := t.Block.SearchByName(name)
 			if tt == nil {
 				err = fmt.Errorf("%s is not found", name)
 			}

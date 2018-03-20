@@ -57,7 +57,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if t1.IsNumber() && t2.IsNumber() {
 			if t1.Typ != t2.Typ {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
-					errMsgPrefix(bin.Right.Pos),
+					errMsgPrefix(e.Pos),
 					t1.TypeString(),
 					t2.TypeString()))
 			}
@@ -66,6 +66,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		result.Pos = e.Pos
 		return result
 	}
+
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.IsInteger() {
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
@@ -89,6 +90,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Typ == EXPRESSION_TYPE_LT {
 		//number
 		switch t1.Typ {
+		case VARIABLE_TYPE_BOOL:
+			if t2.Typ == VARIABLE_TYPE_BOOL {
+				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
+					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+				}
+			} else {
+				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+			}
 		case VARIABLE_TYPE_BYTE:
 			fallthrough
 		case VARIABLE_TYPE_SHORT:
@@ -107,14 +116,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if t2.Typ != VARIABLE_TYPE_STRING {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
-		case VARIABLE_TYPE_BOOL:
-			if t2.Typ == VARIABLE_TYPE_BOOL {
-				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
-				}
-			} else {
-				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
-			}
 		case VARIABLE_TYPE_NULL:
 			if t2.IsPointer() {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'(non-pointer)",
@@ -130,17 +131,18 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VARIABLE_TYPE_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:
-			if t2.IsPointer() == false && t2.Typ != VARIABLE_TYPE_NULL {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'pointer' and '%s'(non-pointer)",
+			if t1.Equal(t2) == false {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
 					t2.TypeString()))
 			}
 			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ", errMsgPrefix(e.Pos), e.OpName()))
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s' ",
+					errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
 			}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'", errMsgPrefix(e.Pos),
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm('%s') on '%s' and '%s'", errMsgPrefix(e.Pos),
 				e.OpName(),
 				t1.TypeString(),
 				t2.TypeString()))
@@ -156,7 +158,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Typ == EXPRESSION_TYPE_MUL ||
 		e.Typ == EXPRESSION_TYPE_DIV ||
 		e.Typ == EXPRESSION_TYPE_MOD {
+		//check string first
 		if t1.Typ == VARIABLE_TYPE_STRING || t2.Typ == VARIABLE_TYPE_STRING { // string is always ok
+			if e.Typ != EXPRESSION_TYPE_ADD {
+				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+			}
 			result = &VariableType{}
 			result.Typ = VARIABLE_TYPE_STRING
 			result.Pos = e.Pos

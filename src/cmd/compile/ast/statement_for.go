@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 

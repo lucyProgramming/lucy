@@ -93,6 +93,7 @@ func (lc *LucyCompile) compile() {
 	for _, v := range rs {
 		lc.Errs = append(lc.Errs, v.Error())
 	}
+	ast.PackageBeenCompile = p
 	lc.shouldExit()
 	lc.Errs = append(lc.Errs, p.TypeCheck()...)
 	if len(lc.Errs) > 0 {

@@ -6,6 +6,18 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
 )
 
+func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	call := e.Data.(*ast.ExpressionMethodCall)
+	maxstack, _ = m.build(class, code, call.Expression, context)
+	switch call.Name {
+	case common.ARRAY_METHOD_SIZE:
+		code.Codes[code.CodeLength] = cg.OP_arraylength
+		code.CodeLength++
+	default:
+		panic("unkown name:" + call.Name)
+	}
+	return
+}
 func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	switch call.Name {

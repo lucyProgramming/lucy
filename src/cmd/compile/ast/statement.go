@@ -159,7 +159,6 @@ func (s *Statement) check(b *Block) []error { // b is father
 			b.InheritedAttribute.Function.Varoffset++
 		}
 		s.Defer.Block.inherite(b)
-		s.Defer.Block.IsdeferBlock = true
 		return s.Defer.Block.check()
 	case STATEMENT_TYPE_BLOCK:
 		s.Block.inherite(b)
@@ -172,7 +171,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 }
 
 func (s *Statement) checkStatementGoto(b *Block) error {
-	t := b.searchByName(s.StatementGoto.Name)
+	t := b.SearchByName(s.StatementGoto.Name)
 	if t == nil {
 		return fmt.Errorf("%s label named '%s' not found", errMsgPrefix(s.StatementGoto.Pos), s.StatementGoto.Name)
 	}

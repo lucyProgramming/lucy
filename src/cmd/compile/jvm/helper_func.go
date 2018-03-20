@@ -120,6 +120,8 @@ func storeSimpleVarOp(t int, offset uint16) []byte {
 			}
 			return []byte{cg.OP_dstore, byte(offset)}
 		}
+	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		fallthrough
 	case ast.VARIABLE_TYPE_STRING:
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:

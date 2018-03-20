@@ -226,7 +226,7 @@ func (c *Class) loadSuperClass() error {
 		//}
 	} else {
 		if false == strings.Contains(c.SuperClassName, "/") {
-			d := c.Block.searchByName(c.SuperClassName)
+			d := c.Block.SearchByName(c.SuperClassName)
 			if c, ok := d.(*Class); ok {
 				c.SuperClass = c
 			} else {
@@ -234,7 +234,7 @@ func (c *Class) loadSuperClass() error {
 			}
 		}
 		t := strings.Split(c.SuperClassName, "/")
-		f, ok := c.Block.InheritedAttribute.p.Files[t[0]]
+		f, ok := PackageBeenCompile.Files[t[0]]
 		if ok == false {
 			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
@@ -242,7 +242,7 @@ func (c *Class) loadSuperClass() error {
 		if ok == false {
 			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		class, err := c.Block.InheritedAttribute.p.load(pname.Name, "Object")
+		class, err := PackageBeenCompile.load(pname.Name, "Object")
 		if err != nil {
 			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
 		}

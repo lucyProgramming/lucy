@@ -21,6 +21,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.mainclass = mainclass
 	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
+	mainclass.Class.AttributeLucyLucyMainClass = &cg.AttributeLucyLucyMainClass{}
 	if p.Name == "" {
 		p.Name = "test"
 	}
