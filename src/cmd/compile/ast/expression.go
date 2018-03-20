@@ -396,8 +396,10 @@ func (e *Expression) OpName(typ ...int) string {
 		return "slice"
 	case EXPRESSION_TYPE_MAP:
 		return "map_literal"
+	case EXPRESSION_TYPE_CONVERTION_TYPE:
+		return "convertion of type"
 	}
-	panic("missing type")
+	panic("missing")
 }
 
 func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {

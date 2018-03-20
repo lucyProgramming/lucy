@@ -258,22 +258,6 @@ func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, e
 	return ts[0], err
 }
 
-func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
-	c := e.Data.(*ExpressionTypeConvertion)
-	ts, es := c.Expression.check(block)
-	if errsNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
-	t, err := e.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
-	if t == nil {
-		return nil
-	}
-	return nil
-}
-
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := checkRightValuesValid(checkExpressions(block, args, errs), errs)
 	f.callchecker(block, errs, callargsTypes, e.Pos)

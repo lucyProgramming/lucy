@@ -7,28 +7,76 @@ import (
 
 func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	convertion := e.Data.(*ast.ExpressionTypeConvertion)
-	var es []*cg.JumpBackPatch
-	maxstack, es = m.build(class, code, convertion.Expression, context)
+	currentStack := uint16(0)
+	// []byte("aaaaaaaaaaaa")
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
+		currentStack = 2
+		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
+		code.Codes[code.CodeLength] = cg.OP_new
+		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_dup
+		code.CodeLength += 4
+	}
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING {
+		currentStack = 2
+		code.Codes[code.CodeLength] = cg.OP_new
+		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_dup
+		code.CodeLength += 4
+	}
+
+	stack, es := m.build(class, code, convertion.Expression, context)
 	backPatchEs(es, code.CodeLength)
 	if convertion.Typ.IsInteger() {
 		m.numberTypeConverter(code, convertion.Expression.VariableType.Typ, convertion.Typ.Typ)
 		return
 	}
+	maxstack = currentStack + stack
 	//  []byte("hello world")
 	if convertion.Typ.Typ == ast.VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
 		//stack top must be a string
-		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
-		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_string_class,
+			Name:       "getBytes",
+			Descriptor: "()[B",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_dup
-		if 3 > maxstack {
-			maxstack = 3
+		code.CodeLength++
+		if 4 > maxstack { // arraybyteref arraybyteref byte[] byte[]
+			maxstack = 4
 		}
+		code.Codes[code.CodeLength] = cg.OP_arraylength
+		code.CodeLength++
+		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      meta.classname,
+			Name:       special_method_init,
+			Descriptor: meta.constructorFuncDescriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
 	}
 	//  string(['h','e'])
 	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING {
-		//stack top must be a string
-
+		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      meta.classname,
+			Name:       "getJavaArray",
+			Descriptor: meta.getJavaArrayDescriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_string_class,
+			Name:       special_method_init,
+			Descriptor: "([B)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
 	}
 
 	panic("unkown type convertion")

@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/lex"
 )
@@ -34,6 +33,28 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 			ep.parser.Next() //
 			return nil, err
 		}
+		if ep.parser.token.Type == lex.TOKEN_LP {
+			ep.Next() // skip (
+			e, err := ep.parseExpression()
+			if err != nil {
+				return nil, err
+			}
+			if ep.parser.token.Type != lex.TOKEN_RP {
+				return nil, fmt.Errorf("%s '(' and  ')' not match", ep.parser.errorMsgPrefix())
+			}
+			ep.Next() // skip )
+			ret := &ast.Expression{}
+			ret.Pos = pos
+			ret.Typ = ast.EXPRESSION_TYPE_CONVERTION_TYPE
+			data := &ast.ExpressionTypeConvertion{}
+			data.Typ = &ast.VariableType{}
+			data.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
+			data.Typ.Pos = pos
+			data.Typ.ArrayType = t
+			data.Expression = e
+			ret.Data = data
+			return ret, nil
+		}
 	}
 	arr := &ast.ExpressionArrayLiteral{}
 	if t != nil {
@@ -42,12 +63,14 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 		arr.Typ.ArrayType = t
 		arr.Typ.Pos = pos
 	}
+
 	arr.Expressions, err = ep.parseArrayValues()
 	return &ast.Expression{
 		Typ:  ast.EXPRESSION_TYPE_ARRAY,
 		Data: arr,
 		Pos:  pos,
 	}, err
+
 }
 
 //{1,2,3}  {{1,2,3},{456}}
