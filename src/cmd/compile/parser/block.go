@@ -31,6 +31,10 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 	reset := func() {
 		isDefer = false
 	}
+	validAfterDefer := func() bool {
+		return b.parser.token.Type == lex.TOKEN_IDENTIFIER || b.parser.token.Type == lex.TOKEN_LP ||
+			b.parser.token.Type == lex.TOKEN_LC
+	}
 	block.Statements = []*ast.Statement{}
 	for !b.parser.eof {
 		if len(b.parser.errs) > b.parser.nerr {
@@ -50,6 +54,10 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		case lex.TOKEN_DEFER:
 			isDefer = true
 			b.Next()
+			if validAfterDefer() == false {
+				reset()
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not a valid token('%s') after defer", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			}
 		case lex.TOKEN_IDENTIFIER:
 			b.parseExpressionStatement(block, isDefer)
 			reset()
@@ -107,7 +115,6 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				Typ:          ast.STATEMENT_TYPE_FOR,
 				StatementFor: f,
 			})
-			reset()
 		case lex.TOKEN_SWITCH:
 			s, err := b.parseSwitch()
 			if err != nil {
@@ -119,8 +126,6 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				Typ:             ast.STATEMENT_TYPE_SWITCH,
 				StatementSwitch: s,
 			})
-			reset()
-			fmt.Println("1111111111111111")
 		case lex.TOKEN_CONST:
 			if isDefer {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with const definition has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
@@ -199,17 +204,30 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			}
 			b.Next()
 		case lex.TOKEN_LC:
-			newblock := &ast.Block{}
+			newblock := ast.Block{}
 			b.Next()
-			err = b.parse(newblock, false, lex.TOKEN_RC)
+			err = b.parse(&newblock, false, lex.TOKEN_RC)
 			if err != nil {
 				b.consume(untils_rc)
 				b.Next()
 			}
-			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:   ast.STATEMENT_TYPE_BLOCK,
-				Block: newblock,
-			})
+			if isDefer {
+				d := &ast.Defer{
+					Block: newblock,
+				}
+				block.Statements = append(block.Statements, &ast.Statement{
+					Typ:   ast.STATEMENT_TYPE_DEFER,
+					Defer: d,
+				})
+				block.Defers = append(block.Defers, d)
+
+			} else {
+				block.Statements = append(block.Statements, &ast.Statement{
+					Typ:   ast.STATEMENT_TYPE_BLOCK,
+					Block: &newblock,
+				})
+			}
+			reset()
 		case lex.TOKEN_SKIP:
 			if isDefer {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))

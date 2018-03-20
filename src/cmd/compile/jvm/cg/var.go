@@ -10,6 +10,7 @@ const (
 	ATTRIBUTE_NAME_SOURCE_FILE                   = "SourceFile"
 	ATTRIBUTE_NAME_LUCY_ARRAY_DESCRIPTOR         = "LucyArrayDescriptor"
 	ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR        = "LucyMethodDescriptor"
+	ATTRIBUTE_NAME_LUCY_LUCY_MAIN_CLASS          = "LucyMainClass"
 )
 
 func backPatchIndex(locations [][]byte, index uint16) {

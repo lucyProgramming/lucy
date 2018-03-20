@@ -19,6 +19,7 @@ var (
 	JAVA_ROOT_CLASS     = "java/lang/Object"
 	buildinFunctionsMap = make(map[string]*buildFunction)
 	JvmSlotSizeHandler  func(v *VariableType) uint16 // implements by outside
+	PackageBeenCompile  *Package
 )
 
 type NameWithPos struct {

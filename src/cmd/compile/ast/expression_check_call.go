@@ -16,6 +16,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if err != nil {
 		*errs = append(*errs, err)
 	}
+
 	if object.Typ == VARIABLE_TYPE_MAP {
 		switch call.Name {
 		case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
@@ -94,6 +95,24 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
+	if object.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		switch call.Name {
+		case common.ARRAY_METHOD_SIZE:
+			t := &VariableType{}
+			t.Typ = VARIABLE_TYPE_INT
+			t.Pos = e.Pos
+			if len(call.Args) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			return []*VariableType{t}
+		default:
+			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on '%s'",
+				errMsgPrefix(e.Pos), call.Name, object.TypeString()))
+		}
+		return nil
+	}
+
 	if object.Typ == VARIABLE_TYPE_ARRAY {
 		switch call.Name {
 		case common.ARRAY_METHOD_SIZE,

@@ -165,6 +165,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 }
 
 func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
+
 	//build array expression
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context) // array on stack
 	// if null skip
@@ -177,39 +178,56 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.CodeLength += 8
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 
-	//get elements
-	code.Codes[code.CodeLength] = cg.OP_dup //dup top
-	if 2 > maxstack {
-		maxstack = 2
+	if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
+		//get elements
+		code.Codes[code.CodeLength] = cg.OP_dup //dup top
+		if 2 > maxstack {
+			maxstack = 2
+		}
+		meta := ArrayMetas[s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ]
+		code.Codes[code.CodeLength+1] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      meta.classname,
+			Name:       "elements",
+			Descriptor: meta.elementsFieldDescriptor,
+		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
+		code.CodeLength += 4
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, s.StatmentForRangeAttr.AutoVarForRangeArray.Elements)...)
+		//get start
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.Codes[code.CodeLength+1] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      meta.classname,
+			Name:       "start",
+			Descriptor: "I",
+		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
+		code.CodeLength += 4
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
+		//get end
+		code.Codes[code.CodeLength] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      meta.classname,
+			Name:       "end",
+			Descriptor: "I",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.End)...)
+
+	} else { // java_array
+		//get length
+		code.Codes[code.CodeLength] = cg.OP_dup //dup top
+		if 2 > maxstack {
+			maxstack = 2
+		}
+		code.Codes[code.CodeLength+1] = cg.OP_anewarray
+		code.CodeLength += 2
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.End)...)
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, s.StatmentForRangeAttr.AutoVarForRangeArray.Elements)...)
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, s.StatmentForRangeAttr.AutoVarForRangeArray.Elements)...)
 	}
-	meta := ArrayMetas[s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ]
-	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      meta.classname,
-		Name:       "elements",
-		Descriptor: meta.elementsFieldDescriptor,
-	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
-	code.CodeLength += 4
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeArray.Elements)...)
-	//get start
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      meta.classname,
-		Name:       "start",
-		Descriptor: "I",
-	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
-	code.CodeLength += 4
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
-	//get end
-	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      meta.classname,
-		Name:       "end",
-		Descriptor: "I",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.End)...)
+
 	var koffset uint16
 	// k set to 0
 	code.Codes[code.CodeLength] = cg.OP_iconst_0
@@ -220,6 +238,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		koffset = s.StatmentForRangeAttr.AutoVarForRangeArray.K
 	}
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
+
 	loopbeginAt := code.CodeLength
 	// load start
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
@@ -281,7 +300,14 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
 	}
-	// store to v tmp
+	// before store to local v ,cast into real type
+
+	if s.StatmentForRangeAttr.Expression.VariableType.ArrayType.IsPointer() &&
+		s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ != ast.VARIABLE_TYPE_STRING {
+		PrimitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.ArrayType)
+	}
+
+	//store to v tmp
 	copyOP(code,
 		storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ,
 			s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
@@ -367,7 +393,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
 	if s.StatmentForRangeAttr != nil {
-		if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
+		if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY ||
+			s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 			return m.buildForRangeStatementForArray(class, code, s, context)
 		} else { // for map
 			return m.buildForRangeStatementForMap(class, code, s, context)

@@ -158,11 +158,9 @@ func (m *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_i2d
 		code.CodeLength++
-
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_f2d
 		code.CodeLength++
-
 	case ast.VARIABLE_TYPE_DOUBLE:
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2d

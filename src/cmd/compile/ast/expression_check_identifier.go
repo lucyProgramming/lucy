@@ -6,7 +6,7 @@ import (
 
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	identifer := e.Data.(*ExpressionIdentifer)
-	d := block.searchByName(identifer.Name)
+	d := block.SearchByName(identifer.Name)
 	if d == nil {
 		return nil, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifer.Name)
 	}
@@ -56,6 +56,9 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	return nil, nil
 }
 
+/*
+	mk a expression from a const
+*/
 func (e *Expression) fromConst(c *Const) {
 	switch c.Typ.Typ {
 	case VARIABLE_TYPE_BOOL:

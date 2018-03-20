@@ -6,7 +6,6 @@ import (
 
 type Block struct {
 	Defers                     []*Defer
-	IsdeferBlock               bool
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool
@@ -29,12 +28,10 @@ type Defer struct {
 }
 
 func (b *Block) shouldStop(errs []error) bool {
-	return (len(b.InheritedAttribute.p.Errors) + len(errs)) >= b.InheritedAttribute.p.NErros2Stop
+	return (len(PackageBeenCompile.Errors) + len(errs)) >= PackageBeenCompile.NErros2Stop
 }
+
 func (b *Block) SearchByName(name string) interface{} {
-	return b.searchByName(name)
-}
-func (b *Block) searchByName(name string) interface{} {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
 			return t
@@ -79,7 +76,7 @@ func (b *Block) searchByName(name string) interface{} {
 	if b.Outter == nil {
 		return nil
 	}
-	t := b.Outter.searchByName(name) // search by outter block
+	t := b.Outter.SearchByName(name) // search by outter block
 	if t != nil {                    //
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
 			if b.InheritedAttribute.Function != nil &&
@@ -116,7 +113,6 @@ type InheritedAttribute struct {
 	mostCloseForOrSwitchForBreak interface{}
 	Function                     *Function
 	class                        *Class
-	p                            *Package
 	Defer                        *Defer
 	Defers                       []*Defer
 }
@@ -196,7 +192,7 @@ func (b *Block) checkVar(v *VariableDefinition) []error {
 			}
 		}
 		if expressionVariableType != nil && !v.Typ.TypeCompatible(expressionVariableType) {
-			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign %s to %s", errMsgPrefix(v.Pos), v.Typ.TypeString(), expressionVariableType.TypeString())}
+			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign '%s' to '%s'", errMsgPrefix(v.Pos), v.Typ.TypeString(), expressionVariableType.TypeString())}
 		}
 		return nil
 	} else {
@@ -266,7 +262,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	fmt.Println("insert to block:", name, pos, d)
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
-		b := b.InheritedAttribute.p.Block
+		b := PackageBeenCompile.Block
 		if _, ok := b.Vars[name]; ok {
 			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,last declared at:\n", errMsgPrefix(pos), name)
 			errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
@@ -381,26 +377,3 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	}
 	return nil
 }
-
-func (b *Block) load(pname string, name string) (interface{}, error) {
-	return b.InheritedAttribute.p.load(pname, name)
-}
-
-//func (b *Block) loadClass(name string) (*Class, error) {
-//	pname := name[0:strings.LastIndex(name, "/")]
-//	cname := name[strings.LastIndex(name, "/")+1:]
-//	c, err := b.loadPackage(pname)
-//	if err != nil {
-//		return nil, err
-//	}
-//	if c == nil {
-//		err = fmt.Errorf("%s class %s not found", cname)
-//		return nil, err
-//	}
-//	cc, ok := c.(*Class)
-//	if ok == false {
-//		err = fmt.Errorf("%s %s is not a class", cname)
-//		return nil, err
-//	}
-//	return cc, err
-//}

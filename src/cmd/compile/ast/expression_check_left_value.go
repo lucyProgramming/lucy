@@ -9,7 +9,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	switch e.Typ {
 	case EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ExpressionIdentifer)
-		d := block.searchByName(identifier.Name)
+		d := block.SearchByName(identifier.Name)
 		if d == nil {
 			return nil, []error{fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifier.Name)}
 		}
