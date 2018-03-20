@@ -31,7 +31,6 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			},
 		}
 		e.VariableType = t[0]
-
 	case EXPRESSION_TYPE_BYTE:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_BYTE,

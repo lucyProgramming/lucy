@@ -6,7 +6,32 @@ import (
 )
 
 func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	convertion := e.Data.(*ast.ExpressionTypeConvertion)
+	var es []*cg.JumpBackPatch
+	maxstack, es = m.build(class, code, convertion.Expression, context)
+	backPatchEs(es, code.CodeLength)
+	if convertion.Typ.IsInteger() {
+		m.numberTypeConverter(code, convertion.Expression.VariableType.Typ, convertion.Typ.Typ)
+		return
+	}
+	//  []byte("hello world")
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
+		//stack top must be a string
+		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
+		code.Codes[code.CodeLength] = cg.OP_new
+		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength] = cg.OP_dup
+		if 3 > maxstack {
+			maxstack = 3
+		}
+	}
+	//  string(['h','e'])
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING {
+		//stack top must be a string
 
+	}
+
+	panic("unkown type convertion")
 	return
 }
 
