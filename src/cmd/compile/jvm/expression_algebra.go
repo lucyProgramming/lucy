@@ -64,9 +64,35 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
+			switch e.Typ {
+			case ast.EXPRESSION_TYPE_ADD:
+				code.Codes[code.CodeLength] = cg.OP_iadd
+			case ast.EXPRESSION_TYPE_SUB:
+				code.Codes[code.CodeLength] = cg.OP_isub
+			case ast.EXPRESSION_TYPE_MUL:
+				code.Codes[code.CodeLength] = cg.OP_imul
+			case ast.EXPRESSION_TYPE_DIV:
+				code.Codes[code.CodeLength] = cg.OP_idiv
+			case ast.EXPRESSION_TYPE_MOD:
+				code.Codes[code.CodeLength] = cg.OP_irem
+			}
+			code.Codes[code.CodeLength+1] = cg.OP_i2b
+			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
+			switch e.Typ {
+			case ast.EXPRESSION_TYPE_ADD:
+				code.Codes[code.CodeLength] = cg.OP_iadd
+			case ast.EXPRESSION_TYPE_SUB:
+				code.Codes[code.CodeLength] = cg.OP_isub
+			case ast.EXPRESSION_TYPE_MUL:
+				code.Codes[code.CodeLength] = cg.OP_imul
+			case ast.EXPRESSION_TYPE_DIV:
+				code.Codes[code.CodeLength] = cg.OP_idiv
+			case ast.EXPRESSION_TYPE_MOD:
+				code.Codes[code.CodeLength] = cg.OP_irem
+			}
+			code.Codes[code.CodeLength+1] = cg.OP_i2s
+			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_INT:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -80,6 +106,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_irem
 			}
+			code.CodeLength++
 		case ast.VARIABLE_TYPE_FLOAT:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -93,6 +120,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_frem
 			}
+			code.CodeLength++
 		case ast.VARIABLE_TYPE_DOUBLE:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -106,6 +134,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_drem
 			}
+			code.CodeLength++
 		case ast.VARIABLE_TYPE_LONG:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -119,10 +148,11 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_lrem
 			}
+			code.CodeLength++
 		}
-		code.CodeLength++
 		return
 	}
+
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack, _ = m.build(class, code, bin.Left, context)
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
@@ -138,23 +168,36 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
+			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+				code.Codes[code.CodeLength] = cg.OP_ishl
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ishr
+			}
+			code.Codes[code.CodeLength+1] = cg.OP_i2b
+			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
+			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+				code.Codes[code.CodeLength] = cg.OP_ishl
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ishr
+			}
+			code.Codes[code.CodeLength+1] = cg.OP_i2s
+			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_INT:
 			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
 			}
+			code.CodeLength++
 		case ast.VARIABLE_TYPE_LONG:
 			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
 				code.Codes[code.CodeLength] = cg.OP_lshl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lshr
 			}
+			code.CodeLength++
 		}
-		code.CodeLength++
 		return
 	}
 	panic(12)

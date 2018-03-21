@@ -24,14 +24,13 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 	}
-
 	stack, es := m.build(class, code, convertion.Expression, context)
 	backPatchEs(es, code.CodeLength)
-	if convertion.Typ.IsInteger() {
+	maxstack = currentStack + stack
+	if convertion.Typ.IsNumber() {
 		m.numberTypeConverter(code, convertion.Expression.VariableType.Typ, convertion.Typ.Typ)
 		return
 	}
-	maxstack = currentStack + stack
 	//  []byte("hello world")
 	if convertion.Typ.Typ == ast.VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
 		//stack top must be a string

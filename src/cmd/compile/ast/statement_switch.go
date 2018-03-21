@@ -15,7 +15,7 @@ type StatementSwitch struct {
 
 type StatmentSwitchCase struct {
 	Matches []*Expression
-	Block   Block
+	Block   *Block
 }
 
 func (s *StatementSwitch) check(b *Block) []error {
@@ -43,15 +43,17 @@ func (s *StatementSwitch) check(b *Block) []error {
 			if t == nil {
 				continue
 			}
-			if conditionType.isPrimitive() && e.IsLiteral() == false {
+			if conditionType.IsPrimitive() && e.IsLiteral() == false {
 				errs = append(errs, fmt.Errorf("%s expression is not a literal value", errMsgPrefix(e.Pos)))
 			}
 			if conditionType.Equal(t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
 			}
 		}
-		v.Block.inherite(b)
-		errs = append(errs, v.Block.check()...)
+		if v.Block != nil {
+			v.Block.inherite(b)
+			errs = append(errs, v.Block.check()...)
+		}
 	}
 	if s.Default != nil {
 		s.Default.inherite(b)

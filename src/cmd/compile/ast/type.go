@@ -173,7 +173,7 @@ func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
 }
 
 func (t *VariableType) resolve(block *Block) error {
-	if t.isPrimitive() {
+	if t.IsPrimitive() {
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_NAME { //
@@ -291,7 +291,7 @@ func (t *VariableType) IsFloat() bool {
 		t.Typ == VARIABLE_TYPE_DOUBLE
 }
 
-func (v *VariableType) isPrimitive() bool {
+func (v *VariableType) IsPrimitive() bool {
 	return v.IsNumber() ||
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_BOOL
@@ -353,10 +353,10 @@ func (t1 *VariableType) Equal(t2 *VariableType) bool {
 	if t1 == t2 {
 		return true
 	}
-	if t1.isPrimitive() || t2.isPrimitive() {
+	if t1.IsPrimitive() || t2.IsPrimitive() {
 		return t1.Typ == t2.Typ
 	}
-	if t1.IsPointer() && t1.Typ == VARIABLE_TYPE_NULL {
+	if t1.IsPointer() && t2.Typ == VARIABLE_TYPE_NULL {
 		return true
 	}
 	return t1.ArrayType.Equal(t2.ArrayType)

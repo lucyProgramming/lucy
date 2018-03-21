@@ -22,7 +22,7 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
 	}
-	if t.IsInteger() && convertion.Typ.IsInteger() {
+	if t.IsNumber() && convertion.Typ.IsNumber() {
 		tt := convertion.Typ.Clone()
 		tt.Pos = e.Pos
 		return tt

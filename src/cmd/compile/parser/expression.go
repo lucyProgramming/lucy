@@ -49,6 +49,7 @@ func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, er
 	if ep.parser.token.Type != lex.TOKEN_LP {
 		return nil, fmt.Errorf("%s not ( after a type", ep.parser.errorMsgPrefix())
 	}
+	pos := ep.parser.mkPos()
 	ep.Next() // skip (
 	e, err := ep.parseExpression()
 	if err != nil {
@@ -64,5 +65,6 @@ func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, er
 			Typ:        t,
 			Expression: e,
 		},
+		Pos: pos,
 	}, nil
 }

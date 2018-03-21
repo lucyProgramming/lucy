@@ -130,7 +130,9 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength++
 		}
 		//block is here
-		m.buildBlock(class, code, &c.Block, context)
+		if c.Block != nil {
+			m.buildBlock(class, code, c.Block, context)
+		}
 		if k != len(s.StatmentSwitchCases)-1 || s.Default != nil {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}
