@@ -1,5 +1,5 @@
 package command
 
 type RunCommand interface {
-	RunCommand(args []string)
+	RunCommand(command string, args []string)
 }

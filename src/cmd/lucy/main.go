@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/756445638/lucy/src/cmd/lucy/command"
+	"github.com/756445638/lucy/src/cmd/lucy/install_lucy_array"
 	"github.com/756445638/lucy/src/cmd/lucy/run"
 	"os"
 )
@@ -12,6 +13,7 @@ var (
 
 func init() {
 	commands["run"] = &run.Run{}
+	commands["install_lucy_array"] = &install_lucy_array.InstallLucyArray{}
 }
 
 func printUsage() {
@@ -28,5 +30,5 @@ func main() {
 		printUsage()
 		os.Exit(0)
 	}
-	c.RunCommand(os.Args[2:])
+	c.RunCommand(os.Args[1], os.Args[2:])
 }
