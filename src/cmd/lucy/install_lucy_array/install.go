@@ -13,8 +13,9 @@ type InstallLucyArray struct {
 }
 
 type InstallType struct {
-	classname string
-	typename  string
+	classname    string
+	typename     string
+	defaultValue string
 }
 
 var (

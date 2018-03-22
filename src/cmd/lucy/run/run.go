@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/756445638/lucy/src/cmd/common"
+	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type Run struct {
@@ -18,6 +21,7 @@ type Run struct {
 	Package             string
 	command             string
 	// PackageImported     map[string]struct{}
+	compilerAt string
 }
 
 func (r *Run) printUsage() {
@@ -86,12 +90,32 @@ func (r *Run) RunCommand(command string, args []string) {
 		fmt.Printf("no lucy files in %s", filepath.Join(r.MainPackageLucyPath, r.Package))
 		os.Exit(1)
 	}
-	_, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
+	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile")
+	_, meta, err := r.buildPackage(r.MainPackageLucyPath, r.Package)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
 	//
+	if meta.MainClass == "" {
+		fmt.Println("has mo main fn,but package is still compiled")
+		os.Exit(4)
+	}
+	cmd := exec.Command("java", meta.MainClass)
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	err = cmd.Start()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(5)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(6)
+	}
+
 }
 
 /*
@@ -124,13 +148,7 @@ func (r *Run) findPackageIn(packageName string) (string, error) {
 /*
 	check package if need rebuild
 */
-func (r *Run) needCompile(lucypath string, packageName string) (meta *common.PackageMeta, need bool, err error) {
-	if lucypath == "" {
-		lucypath, err = r.findPackageIn(packageName)
-		if err != nil {
-			return
-		}
-	}
+func (r *Run) needCompile(lucypath string, packageName string) (meta *common.PackageMeta, need bool, lucyFiles []string, err error) {
 	need = true
 	_, err = os.Stat(filepath.Join(lucypath, packageName))
 	if err != nil {
@@ -148,12 +166,16 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = nil
 		return
 	}
-	fis, err := ioutil.ReadDir(filepath.Join(lucypath, packageName))
+	fis, err := ioutil.ReadDir(filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
 	if err != nil { // shit happens
 		return
 	}
+	lucyFiles = []string{}
 	fisM := make(map[string]os.FileInfo)
 	for _, v := range fis {
+		if strings.HasSuffix(v.Name(), ".lucy") {
+			lucyFiles = append(lucyFiles, v.Name())
+		}
 		fisM[v.Name()] = v
 		if meta.CompiledFrom == nil {
 			return
@@ -165,7 +187,11 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 			return
 		}
 	}
-	for f, _ := range meta.CompiledFrom {
+	if len(lucyFiles) == 0 {
+		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
+		return
+	}
+	for f := range meta.CompiledFrom {
 		_, ok := fisM[f]
 		if ok == false { // file deleted,missing file
 			return
@@ -175,7 +201,100 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 	return
 }
 
-func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool, err error) {
+func (r *Run) parseImports(files []string) ([]string, error) {
+	args := append([]string{"io"}, files...)
+	cmd := exec.Command(r.compilerAt, args...)
+	cmd.Stderr = os.Stderr
+	bs, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	ret := []string{}
+	err = json.Unmarshal(bs, &ret)
+	return ret, err
+}
+func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool, meta *common.PackageMeta, err error) {
+	if lucypath == "" {
+		lucypath, err = r.findPackageIn(packageName)
+		if err != nil {
+			return
+		}
+	}
+	meta, needBuild, lucyFiles, err := r.needCompile(lucypath, packageName)
+	if err != nil {
+		return
+	}
 
-	return false, nil
+	if needBuild == false { // current package no need to compile,but I need to check dependies
+		need := false
+		for _, v := range meta.Imports {
+			needBuild, _, err = r.buildPackage("", v)
+			if err != nil {
+				return
+			}
+			if needBuild { // means at least one package is rebuild
+				need = true
+			}
+		}
+		needBuild = need
+	}
+	if needBuild == false { // no need actually
+		return
+	}
+	//compile this package really
+	is, err := r.parseImports(lucyFiles)
+	if err != nil {
+		return
+	}
+	for _, i := range is {
+		_, _, err = r.buildPackage("", i) // compile depend
+		if err != nil {
+			return
+		}
+	}
+	// build this package
+	//read  files
+	destDir := filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName)
+	// mkdir all
+	finfo, _ := os.Stat(destDir)
+	if finfo == nil {
+		err = os.MkdirAll(destDir, 0755)
+		if err != nil {
+			return
+		}
+	}
+	// cd to destDir
+	os.Chdir(destDir)
+	args := []string{"-pn", packageName}
+
+	args = append(args, lucyFiles...)
+	cmd := exec.Command(r.compilerAt, args...)
+	cmd.Stderr = os.Stderr
+	bs, err := cmd.Output()
+	if err != nil {
+		fmt.Println(string(bs))
+		return
+	}
+
+	// make maitain.json
+	maintain := &common.PackageMeta{}
+	maintain.CompiledFrom = make(map[string]*common.FileMeta)
+	for _, v := range lucyFiles {
+		var f os.FileInfo
+		f, err = os.Stat(v)
+		if err != nil {
+			return
+		}
+		maintain.CompiledFrom[v] = &common.FileMeta{
+			LastModify: f.ModTime(),
+		}
+	}
+	maintain.CompileTime = time.Now()
+	maintain.Imports = is
+	bs, err = json.Marshal(maintain)
+	if err != nil {
+		return
+	}
+	err = ioutil.WriteFile(filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE), bs, 0644)
+	return
 }
