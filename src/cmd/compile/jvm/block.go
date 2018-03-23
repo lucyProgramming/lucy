@@ -120,8 +120,10 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 		code.CodeLength += 6
 		//expection that have been handled
 		if len(context.function.Typ.ReturnList) == 1 {
-
-			m.buildReturnFromFunctionReturnList(class, code, context)
+			t :=   m.buildReturnFromFunctionReturnList(class, code, context)
+			if t > code.MaxStack {
+				code.MaxStack = t
+			}
 		} else {
 			//load when function have multi returns if read to end
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachButton)...)

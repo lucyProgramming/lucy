@@ -23,7 +23,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	stackneed := maxstack
 	size := uint16(0)
 	for _, v := range n.Args {
-		if v.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL || ast.EXPRESSION_TYPE_METHOD_CALL == v.Typ {
+		if v.IsCall() {
 			panic(1)
 		}
 		size = e.VariableType.JvmSlotSize()
@@ -34,6 +34,8 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 		stackneed += size
 		backPatchEs(es, code.CodeLength)
 	}
+
+
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{
 		Class:      n.Typ.Class.Name,
@@ -74,14 +76,10 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	maxstack += stack
-	code.Codes[code.CodeLength] = cg.OP_dup // dup top
-	code.Codes[code.CodeLength+1] = cg.OP_iconst_2
-	currentStack := uint16(5)
+	currentStack := uint16(4)
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	code.Codes[code.CodeLength+2] = cg.OP_imul
-	code.CodeLength += 3
 	// check stack top if negative
 	currentStack = 4
 	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code) + currentStack; t > maxstack {
@@ -129,8 +127,6 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	default:
 		panic("sssssssssssss")
 	}
-	code.Codes[code.CodeLength] = cg.OP_swap
-	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,

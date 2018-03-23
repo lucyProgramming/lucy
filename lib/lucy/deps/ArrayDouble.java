@@ -20,9 +20,9 @@ public class ArrayDouble   {
 	public int cap(){
          return this.end;
 	}
-	public ArrayDouble(double[] values,int end){
+	public ArrayDouble(double[] values){
 		this.start = 0;
-		this.end = end;
+		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
 	}
@@ -99,6 +99,21 @@ public class ArrayDouble   {
 	    }
 	    s += "]";
 	    return s;
+	}
+	public double[] getJavaArray(){
+		if(this.start == 0 && this.end == this.cap){
+			return this.elements;
+		}
+		int length = this.end - this.start;
+		double[] elements = new double[length];
+		for(int i = 0; i < length; i ++){
+			elements[i] = this.elements[i + this.start];
+		}
+		this.start = 0;
+		this.end = length;
+		this.elements = elements;
+		this.cap = length;
+		return elements;
 	}
 
 }

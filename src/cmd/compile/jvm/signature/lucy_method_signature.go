@@ -5,10 +5,10 @@ import (
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 )
 
-type LucyFunctionSignatureParser struct {
+type LucyMethodSignatureParser struct {
 }
 
-func (LucyFunctionSignatureParser) Parse(bs []byte) (*ast.FunctionType, error) {
+func (LucyMethodSignatureParser) Parse(bs []byte) (*ast.FunctionType, error) {
 	if bs[0] != '(' {
 		return nil, fmt.Errorf("signature dose not beging with '('")
 	}
@@ -68,9 +68,9 @@ func (LucyFunctionSignatureParser) Parse(bs []byte) (*ast.FunctionType, error) {
 		case '[':
 		case 'L':
 		default:
-
 		}
-
 		i++
 	}
+	bs = bs[1:] // skip )
+
 }

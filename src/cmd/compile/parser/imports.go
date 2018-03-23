@@ -24,7 +24,7 @@ func (p *Parser) parseImports() {
 	packagename := p.token.Data.(string)
 	p.Next()
 	if p.token.Type == lex.TOKEN_AS {
-		i := &ast.Imports{}
+		i := &ast.Import{}
 		i.Pos = &ast.Pos{}
 		p.lexPos2AstPos(p.token, i.Pos)
 		i.Name = packagename
@@ -53,7 +53,7 @@ func (p *Parser) parseImports() {
 		p.parseImports()
 		return
 	} else if p.token.Type == lex.TOKEN_SEMICOLON {
-		i := &ast.Imports{}
+		i := &ast.Import{}
 		i.Name = packagename
 		i.Pos = &ast.Pos{}
 		p.lexPos2AstPos(p.token, i.Pos)
@@ -73,9 +73,9 @@ func (p *Parser) parseImports() {
 	}
 }
 
-func (p *Parser) insertImports(im *ast.Imports) {
+func (p *Parser) insertImports(im *ast.Import) {
 	if p.imports == nil {
-		p.imports = make(map[string]*ast.Imports)
+		p.imports = make(map[string]*ast.Import)
 	}
 	access, err := im.GetAccessName()
 	if err != nil {

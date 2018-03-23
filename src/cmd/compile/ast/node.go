@@ -16,7 +16,7 @@ type ConvertTops2Package struct {
 	Enums   []*Enum
 	Vars    []*VariableDefinition
 	Consts  []*Const
-	Import  []*Imports
+	Import  []*Import
 }
 
 func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redeclareErrors []*RedeclareError, errs []error) {
@@ -48,10 +48,10 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		case *Const:
 			t := v.Data.(*Const)
 			c.Consts = append(c.Consts, t)
-		case *Imports:
-			i := v.Data.(*Imports)
+		case *Import :
+			i := v.Data.(*Import)
 			if p.Files[i.Pos.Filename] == nil {
-				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Imports)}
+				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
 			}
 			p.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();

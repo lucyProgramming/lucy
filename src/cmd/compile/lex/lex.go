@@ -292,7 +292,7 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) 
 	bs := []byte{c}
 	c, eof = lex.getchar()
 	for eof == false {
-		if lex.isLetter(c) || c == '_' || lex.isDigit(c) {
+		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {
 			bs = append(bs, c)
 			c, eof = lex.getchar()
 		} else {
@@ -421,12 +421,13 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, eof bool, err error) {
 			bs = append(bs, b)
 			c, eof = lex.getchar()
 		case '0', '1', '2', '3', '4', '5', '7':
+			// first char must be octal
 			b := byte(0)
 			for i := 0; i < 3; i++ {
 				if eof {
 					break
 				}
-				if lex.isOctal(c) == false { // first char must be octal
+				if lex.isOctal(c) == false {
 					lex.ungetchar()
 					break
 				}
@@ -480,7 +481,7 @@ redo:
 	if eof {
 		return
 	}
-	if lex.isLetter(c) || c == '_' {
+	if lex.isLetter(c) || c == '_' || c == '$' {
 		return lex.lexIdentifier(c)
 	}
 	token = &Token{}
@@ -517,11 +518,6 @@ redo:
 		token.Desp = ","
 	case '&':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_AND
-			token.Desp = "&"
-			break
-		}
 		if c == '&' {
 			token.Type = TOKEN_LOGICAL_AND
 			token.Desp = "&&"
@@ -532,11 +528,6 @@ redo:
 		}
 	case '|':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_OR
-			token.Desp = "|"
-			break
-		}
 		if c == '|' {
 			token.Type = TOKEN_LOGICAL_OR
 			token.Desp = "||"
@@ -547,11 +538,6 @@ redo:
 		}
 	case '=':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_ASSIGN
-			token.Desp = "="
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_EQUAL
 			token.Desp = "=="
@@ -562,11 +548,6 @@ redo:
 		}
 	case '!':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_NOT
-			token.Desp = "!"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_NE
 			token.Desp = "!="
@@ -577,11 +558,6 @@ redo:
 		}
 	case '>':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_GT
-			token.Desp = ">"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_GE
 			token.Desp = ">="
@@ -595,11 +571,6 @@ redo:
 		}
 	case '<':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_LT
-			token.Desp = "<"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_LE
 			token.Desp = "<="
@@ -613,11 +584,6 @@ redo:
 		}
 	case '+':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_ADD
-			token.Desp = "+"
-			break
-		}
 		if c == '+' {
 			token.Type = TOKEN_INCREMENT
 			token.Desp = "++"
@@ -631,11 +597,6 @@ redo:
 		}
 	case '-':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_SUB
-			token.Desp = "-"
-			break
-		}
 		if c == '-' {
 			token.Type = TOKEN_DECREMENT
 			token.Desp = "--"
@@ -652,11 +613,6 @@ redo:
 		}
 	case '*':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_MUL
-			token.Desp = "*"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_MUL_ASSIGN
 			token.Desp = "*="
@@ -667,11 +623,6 @@ redo:
 		}
 	case '%':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_MOD
-			token.Desp = "%"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_MOD_ASSIGN
 			token.Desp = "%="
@@ -682,11 +633,6 @@ redo:
 		}
 	case '/':
 		c, eof = lex.getchar()
-		if eof == true {
-			token.Type = TOKEN_DIV
-			token.Desp = "/"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_DIV_ASSIGN
 			token.Desp = "/="
@@ -734,11 +680,6 @@ redo:
 		return
 	case ':':
 		c, eof = lex.getchar()
-		if eof {
-			token.Type = TOKEN_COLON
-			token.Desp = ":"
-			break
-		}
 		if c == '=' {
 			token.Type = TOKEN_COLON_ASSIGN
 			token.Desp = ":= "

@@ -20,9 +20,9 @@ public class ArrayInt   {
 	public int cap(){
          return this.end;
 	}
-	public ArrayInt(int[] values,int end){
+	public ArrayInt(int[] values){
 		this.start = 0;
-		this.end = end;
+		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
 	}
@@ -99,6 +99,21 @@ public class ArrayInt   {
 	    }
 	    s += "]";
 	    return s;
+	}
+	public int[] getJavaArray(){
+		if(this.start == 0 && this.end == this.cap){
+			return this.elements;
+		}
+		int length = this.end - this.start;
+		int[] elements = new int[length];
+		for(int i = 0; i < length; i ++){
+			elements[i] = this.elements[i + this.start];
+		}
+		this.start = 0;
+		this.end = length;
+		this.elements = elements;
+		this.cap = length;
+		return elements;
 	}
 
 }

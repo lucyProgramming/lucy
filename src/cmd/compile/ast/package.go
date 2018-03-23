@@ -150,10 +150,10 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 
 //different for other file
 type File struct {
-	Imports map[string]*Imports // n
+	Imports map[string]*Import // n
 }
 
-type Imports struct {
+type Import  struct {
 	AccessName string
 	Name       string // full name
 	Pos        *Pos
@@ -164,7 +164,7 @@ type Imports struct {
 	import "github.com/lucy" should access by lucy.Println
 	import "github.com/std" as std should access by std.Println
 */
-func (i *Imports) GetAccessName() (string, error) {
+func (i *Import) GetAccessName() (string, error) {
 	if i.AccessName == "_" { //special case _ is a identifer
 		return "", fmt.Errorf("'_' is not legal package name")
 	}

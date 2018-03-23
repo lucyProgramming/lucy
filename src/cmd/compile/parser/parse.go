@@ -28,7 +28,7 @@ type Parser struct {
 	token            *lex.Token
 	eof              bool
 	errs             []error
-	imports          map[string]*ast.Imports
+	imports          map[string]*ast.Import
 	nerr             int
 }
 

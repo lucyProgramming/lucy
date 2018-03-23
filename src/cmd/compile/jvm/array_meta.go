@@ -27,7 +27,7 @@ type ArrayMeta struct {
 func init() {
 	ArrayMetas[ast.VARIABLE_TYPE_BOOL] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayBool",
-		constructorFuncDescriptor: "([ZI)V",
+		constructorFuncDescriptor: "([Z)V",
 		getDescriptor:             "(I)Z",
 		setDescriptor:             "(IZ)V",
 		elementsFieldDescriptor:   "[Z",
@@ -38,7 +38,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_BYTE] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayByte",
-		constructorFuncDescriptor: "([BI)V",
+		constructorFuncDescriptor: "([B)V",
 		getDescriptor:             "(I)B",
 		setDescriptor:             "(IB)V",
 		elementsFieldDescriptor:   "[B",
@@ -49,7 +49,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_SHORT] = &ArrayMeta{
 		classname:                 "lucy/desp/ArrayShort",
-		constructorFuncDescriptor: "([SI)V",
+		constructorFuncDescriptor: "([S)V",
 		getDescriptor:             "(I)S",
 		setDescriptor:             "(IS)V",
 		elementsFieldDescriptor:   "[S",
@@ -60,7 +60,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_INT] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayInt",
-		constructorFuncDescriptor: "([II)V",
+		constructorFuncDescriptor: "([I)V",
 		getDescriptor:             "(I)I",
 		setDescriptor:             "(II)V",
 		elementsFieldDescriptor:   "[I",
@@ -71,7 +71,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_LONG] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayLong",
-		constructorFuncDescriptor: "([JI)V",
+		constructorFuncDescriptor: "([J)V",
 		getDescriptor:             "(I)J",
 		setDescriptor:             "(IJ)V",
 		elementsFieldDescriptor:   "[J",
@@ -82,7 +82,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_FLOAT] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayFloat",
-		constructorFuncDescriptor: "([FI)V",
+		constructorFuncDescriptor: "([F)V",
 		getDescriptor:             "(I)F",
 		setDescriptor:             "(IF)V",
 		elementsFieldDescriptor:   "[F",
@@ -93,7 +93,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_DOUBLE] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayDouble",
-		constructorFuncDescriptor: "([DI)V",
+		constructorFuncDescriptor: "([D)V",
 		getDescriptor:             "(I)D",
 		setDescriptor:             "(ID)V",
 		elementsFieldDescriptor:   "[D",
@@ -104,7 +104,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_STRING] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayString",
-		constructorFuncDescriptor: "([Ljava/lang/String;I)V",
+		constructorFuncDescriptor: "([Ljava/lang/String;)V",
 		getDescriptor:             "(I)Ljava/lang/String;",
 		setDescriptor:             "(ILjava/lang/String;)V",
 		elementsFieldDescriptor:   "[Ljava/lang/String;",
@@ -115,7 +115,7 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_OBJECT] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayObject",
-		constructorFuncDescriptor: "([Ljava/lang/Object;I)V",
+		constructorFuncDescriptor: "([Ljava/lang/Object;)V",
 		getDescriptor:             "(I)Ljava/lang/Object;",
 		setDescriptor:             "(ILjava/lang/Object;)V",
 		elementsFieldDescriptor:   "[Ljava/lang/Object;",

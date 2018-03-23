@@ -172,7 +172,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
 	}
 	if len(s.Expressions) == 0 {
-		m.buildReturnFromFunctionReturnList(class, code, context)
+		t := m.buildReturnFromFunctionReturnList(class, code, context)
+		if t > maxstack {
+			maxstack = t
+		}
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_areturn
 		code.CodeLength++

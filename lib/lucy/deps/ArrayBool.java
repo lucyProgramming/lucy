@@ -20,9 +20,9 @@ public class ArrayBool   {
 	public int cap(){
          return this.end;
 	}
-	public ArrayBool(boolean[] values,int end){
+	public ArrayBool(boolean[] values){
 		this.start = 0;
-		this.end = end;
+		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
 	}
@@ -99,6 +99,21 @@ public class ArrayBool   {
 	    }
 	    s += "]";
 	    return s;
+	}
+	public boolean[] getJavaArray(){
+		if(this.start == 0 && this.end == this.cap){
+			return this.elements;
+		}
+		int length = this.end - this.start;
+		boolean[] elements = new boolean[length];
+		for(int i = 0; i < length; i ++){
+			elements[i] = this.elements[i + this.start];
+		}
+		this.start = 0;
+		this.end = length;
+		this.elements = elements;
+		this.cap = length;
+		return elements;
 	}
 
 }

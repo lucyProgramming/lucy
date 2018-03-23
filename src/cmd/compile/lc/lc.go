@@ -1,6 +1,7 @@
 package lc
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/756445638/lucy/src/cmd/compile/ast"
 	"github.com/756445638/lucy/src/cmd/compile/jvm"
@@ -86,6 +87,18 @@ func (lc *LucyCompile) compile() {
 		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs, CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
 		lc.shouldExit()
 	}
+
+	// parse import only
+	if CompileFlags.OnlyImport {
+		is := make([]string, len(lc.Tops))
+		for k, v := range lc.Tops {
+			is[k] = v.Data.(*ast.Import).Name
+		}
+		bs, _ := json.Marshal(is)
+		fmt.Println(string(bs))
+		return
+	}
+
 	c := ast.ConvertTops2Package{}
 	p, rs, errs := c.ConvertTops2Package(lc.Tops)
 	p.FullName = CompileFlags.PackageName

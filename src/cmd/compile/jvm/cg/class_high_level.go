@@ -58,7 +58,7 @@ func (c *ClassHighLevel) NewFunctionName(prefix string) string {
 			return name
 		}
 	}
-	panic(1)
+	panic("names over flow")
 }
 func (c *ClassHighLevel) InsertStringConst(s string, location []byte) {
 	binary.BigEndian.PutUint16(location, c.Class.InsertStringConst(s))

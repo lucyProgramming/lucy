@@ -5,6 +5,7 @@ import (
 	"github.com/756445638/lucy/src/cmd/lucy/install_lucy_array"
 	"github.com/756445638/lucy/src/cmd/lucy/run"
 	"os"
+	"fmt"
 )
 
 var (
@@ -17,7 +18,9 @@ func init() {
 }
 
 func printUsage() {
-
+	msg := "lucy is a new programing language base on jvm\n"
+	msg += "\t run		run a lucy package"
+	fmt.Println(msg)
 }
 
 func main() {
