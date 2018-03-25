@@ -28,6 +28,7 @@ public class ArrayTTT   {
 		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
+		DEFAULT_INIT
 	}
 	private ArrayTTT(){
 		

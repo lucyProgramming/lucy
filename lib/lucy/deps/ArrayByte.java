@@ -25,6 +25,7 @@ public class ArrayByte   {
 		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
+		
 	}
 	private ArrayByte(){
 		

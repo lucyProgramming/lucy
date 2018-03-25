@@ -25,6 +25,11 @@ public class ArrayString   {
 		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
+		
+		for(int i =0 ;i < this.end;i ++){
+			this.elements[i] = "";
+		}
+	
 	}
 	private ArrayString(){
 		

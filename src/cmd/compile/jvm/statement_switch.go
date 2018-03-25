@@ -2,8 +2,8 @@ package jvm
 
 import (
 	"encoding/binary"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context) (maxstack uint16) {

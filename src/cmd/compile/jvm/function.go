@@ -1,24 +1,34 @@
 package jvm
 
 import (
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, ft *ast.FunctionType, context *Context) {
 	for _, v := range ft.ReturnList {
-		if v.BeenCaptured {
-			panic("111111111")
+		currentStack := uint16(0)
+		if v.BeenCaptured { //create closure object
+			maxstack := closure.createCloureVar(class, code, v)
+			if maxstack > code.MaxStack {
+				code.MaxStack = maxstack
+			}
+			// then load
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			currentStack = 1
 		}
-		maxstack, es := m.MakeExpression.build(class, code, v.Expression, context)
+		stack, es := m.MakeExpression.build(class, code, v.Expression, context)
 		backPatchEs(es, code.CodeLength)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
+		if t := currentStack + stack; t > code.MaxStack {
+			code.MaxStack = t
 		}
 		if v.Typ.IsNumber() && v.Typ.Typ != v.Expression.VariableType.Typ {
 			m.MakeExpression.numberTypeConverter(code, v.Expression.VariableType.Typ, v.Typ.Typ)
 		}
-		copyOP(code, storeSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
+		if t := currentStack + v.Typ.JvmSlotSize(); t > code.MaxStack {
+			code.MaxStack = t
+		}
+		m.storeLocalVar(class, code, v)
 	}
 }
 
@@ -185,8 +195,10 @@ func (m *MakeClass) loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCod
 
 func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
 	if v.BeenCaptured {
-		panic("...")
+		closure.storeLocalCloureVar(class, code, v)
+		return
 	}
+
 	maxstack = v.Typ.JvmSlotSize()
 	switch v.Typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:

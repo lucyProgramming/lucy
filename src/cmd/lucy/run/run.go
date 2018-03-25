@@ -3,7 +3,7 @@ package run
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -78,43 +78,38 @@ func (r *Run) RunCommand(command string, args []string) {
 	} else { // unix style
 		r.classPaths = strings.Split(os.Getenv("CLASSPATH"), ":")
 	}
+	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
 
-	meta, need, lucyFiles, err := r.needCompile(r.MainPackageLucyPath, r.Package)
+	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
 	//
-	if len(lucyFiles) == 0 {
-		fmt.Printf("no lucy files in %s", filepath.Join(r.MainPackageLucyPath, r.Package))
-		os.Exit(1)
-	}
-	if need {
-		r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile")
-		_, meta, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(3)
-		}
-	}
-	//
-	if meta.MainClass == "" {
-		fmt.Println("has mo main fn,but package is still compiled")
-		os.Exit(4)
-	}
-	cmd := exec.Command("java", meta.MainClass)
+	cmd := exec.Command("java", r.Package+"/"+"main")
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	//set CLASSPATHS
-	classpath := r.classPaths
+	classpath := make(map[string]struct{}) // if duplicate
+	for _, v := range r.classPaths {
+		classpath[v] = struct{}{}
+	}
 	for _, v := range r.LucyPaths {
-		classpath = append(classpath, filepath.Join(v, common.DIR_FOR_COMPILED_CLASS))
+		classpath[filepath.Join(v, common.DIR_FOR_COMPILED_CLASS)] = struct{}{}
+	}
+	classPathArray := make([]string, len(classpath))
+	{
+		i := 0
+		for k, _ := range classpath {
+			classPathArray[i] = k
+			i++
+		}
 	}
 	if runtime.GOOS == "windows" {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classpath, ";")))
+		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classPathArray, ";")))
 	} else { // unix style
-		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classpath, ":")))
+		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classPathArray, ":")))
 	}
 	err = cmd.Start()
 	if err != nil {
@@ -134,7 +129,7 @@ func (r *Run) RunCommand(command string, args []string) {
 func (r *Run) findPackageIn(packageName string) (string, error) {
 	pathHavePackage := []string{}
 	for _, v := range r.LucyPaths {
-		dir := filepath.Join(v, r.Package)
+		dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, r.Package)
 		f, err := os.Stat(dir)
 		if err == nil && f.IsDir() {
 			fis, _ := ioutil.ReadDir(dir)
@@ -147,10 +142,10 @@ func (r *Run) findPackageIn(packageName string) (string, error) {
 		}
 	}
 	if len(pathHavePackage) == 0 {
-		return "", fmt.Errorf("package %s not found in $%s", r.Package, common.LUCY_PATH_ENV_KEY)
+		return "", fmt.Errorf("package %s not found in $%s,which lucy path is %v", r.Package, common.LUCY_PATH_ENV_KEY, r.LucyPaths)
 	}
 	if len(pathHavePackage) > 1 {
-		return "", fmt.Errorf("not 1 package named %s in $%s", r.Package, common.LUCY_PATH_ENV_KEY)
+		return "", fmt.Errorf("not 1 package named %s in $%s,which lucy path is %v", r.Package, common.LUCY_PATH_ENV_KEY, r.LucyPaths)
 	}
 	return pathHavePackage[0], nil
 }
@@ -160,6 +155,16 @@ func (r *Run) findPackageIn(packageName string) (string, error) {
 */
 func (r *Run) needCompile(lucypath string, packageName string) (meta *common.PackageMeta, need bool, lucyFiles []string, err error) {
 	need = true
+	sourceFileDir := filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
+	fis, err := ioutil.ReadDir(sourceFileDir)
+	if err != nil { // shit happens
+		return
+	}
+	for _, v := range fis {
+		if strings.HasSuffix(v.Name(), ".lucy") {
+			lucyFiles = append(lucyFiles, filepath.Join(sourceFileDir, v.Name()))
+		}
+	}
 	_, err = os.Stat(filepath.Join(lucypath, packageName))
 	if err != nil {
 		err = nil
@@ -176,16 +181,8 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = nil
 		return
 	}
-	fis, err := ioutil.ReadDir(filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
-	if err != nil { // shit happens
-		return
-	}
-	lucyFiles = []string{}
 	fisM := make(map[string]os.FileInfo)
 	for _, v := range fis {
-		if strings.HasSuffix(v.Name(), ".lucy") {
-			lucyFiles = append(lucyFiles, v.Name())
-		}
 		fisM[v.Name()] = v
 		if meta.CompiledFrom == nil {
 			return
@@ -217,6 +214,7 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
 	if err != nil {
+		fmt.Println(string(bs))
 		return nil, err
 	}
 	is := []string{}
@@ -224,6 +222,7 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println()
 	//only lucy packages
 	return r.javaPackageFilter(is)
 }
@@ -288,9 +287,11 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if needBuild == false { // no need actually
 		return
 	}
+
 	//compile this package really
 	is, err := r.parseImports(lucyFiles)
 	if err != nil {
+
 		return
 	}
 	for _, i := range is {
@@ -313,7 +314,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	// cd to destDir
 	os.Chdir(destDir)
 	args := []string{"-pn", packageName}
-
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
 	cmd.Stderr = os.Stderr
@@ -322,23 +322,22 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		fmt.Println(string(bs))
 		return
 	}
-
 	// make maitain.json
-	maintain := &common.PackageMeta{}
-	maintain.CompiledFrom = make(map[string]*common.FileMeta)
+	meta = &common.PackageMeta{}
+	meta.CompiledFrom = make(map[string]*common.FileMeta)
 	for _, v := range lucyFiles {
 		var f os.FileInfo
 		f, err = os.Stat(v)
 		if err != nil {
 			return
 		}
-		maintain.CompiledFrom[v] = &common.FileMeta{
+		meta.CompiledFrom[v] = &common.FileMeta{
 			LastModify: f.ModTime(),
 		}
 	}
-	maintain.CompileTime = time.Now()
-	maintain.Imports = is
-	bs, err = json.Marshal(maintain)
+	meta.CompileTime = time.Now()
+	meta.Imports = is
+	bs, err = json.MarshalIndent(meta, "", "\t")
 	if err != nil {
 		return
 	}

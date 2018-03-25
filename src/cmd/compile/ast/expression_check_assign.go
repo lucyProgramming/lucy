@@ -4,18 +4,6 @@ import (
 	"fmt"
 )
 
-func (e *Expression) convertColonAssignAndVar2Assign(names []*Expression, values []*Expression) {
-	e.Typ = EXPRESSION_TYPE_ASSIGN
-	bin := &ExpressionBinary{}
-	bin.Left = &Expression{}
-	bin.Left.Typ = EXPRESSION_TYPE_LIST
-	bin.Left.Data = names
-	bin.Right = &Expression{}
-	bin.Right.Typ = EXPRESSION_TYPE_LIST
-	bin.Right.Data = values
-	e.Data = bin
-}
-
 //when no error,convert to assign
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
@@ -40,6 +28,8 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	var err error
 	noNewVaraible := true
+	declareVariableExpression := &ExpressionDeclareVariable{}
+	declareVariableExpression.Values = values
 	for k, v := range names {
 		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'", errMsgPrefix(v.Pos), v.OpName()))
@@ -48,13 +38,16 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		identifier := v.Data.(*ExpressionIdentifer)
 		if identifier.Name == NO_NAME_IDENTIFIER {
+			vd := &VariableDefinition{}
+			vd.Name = identifier.Name
+			declareVariableExpression.Vs = append(declareVariableExpression.Vs, vd)
+			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
 			continue
 		}
 		var variableType *VariableType
 		if k < len(ts) && ts[k] != nil {
 			variableType = ts[k]
 		}
-
 		if variable, ok := block.Vars[identifier.Name]; ok {
 			if variableType != nil {
 				if variable.Typ.TypeCompatible(ts[k]) == false {
@@ -66,6 +59,8 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 				}
 			}
 			identifier.Var = variable
+			declareVariableExpression.Vs = append(declareVariableExpression.Vs, variable)
+			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, true)
 		} else { // should be no error
 			noNewVaraible = false
 			vd := &VariableDefinition{}
@@ -85,7 +80,10 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			if err != nil {
 				*errs = append(*errs, err)
 				noErr = false
+				continue
 			}
+			declareVariableExpression.Vs = append(declareVariableExpression.Vs, vd)
+			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
 		}
 	}
 	if noNewVaraible {
@@ -95,8 +93,8 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	if noErr == false {
 		return
 	}
-	e.convertColonAssignAndVar2Assign(names, values)
-
+	// no error,rewrite data
+	e.Data = declareVariableExpression
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {

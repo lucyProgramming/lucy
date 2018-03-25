@@ -1,8 +1,8 @@
 package jvm
 
 import (
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
@@ -13,16 +13,20 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	loadInt32(class, code, int32(arr.Length ))
+	loadInt32(class, code, int32(arr.Length))
 	switch e.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
+		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
+		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_INT
@@ -86,7 +90,6 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		code.CodeLength++
 	}
-
 	for _, v := range arr.Expressions {
 		if v.IsCall() && len(v.VariableTypes) > 1 {
 			// stack top is array list

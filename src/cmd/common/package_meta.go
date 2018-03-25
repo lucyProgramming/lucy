@@ -9,7 +9,6 @@ type FileMeta struct {
 }
 
 type PackageMeta struct {
-	MainClass    string
 	CompiledFrom map[string]*FileMeta // filename -> meta
 	Imports      []string             //lucy package that imported
 	CompileTime  time.Time

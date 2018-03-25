@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/756445638/lucy/src/cmd/lucy/command"
-	"github.com/756445638/lucy/src/cmd/lucy/install_lucy_array"
-	"github.com/756445638/lucy/src/cmd/lucy/run"
-	"os"
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/command"
+	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array"
+	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/run"
+	"os"
 )
 
 var (

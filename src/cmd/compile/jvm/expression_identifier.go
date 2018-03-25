@@ -1,9 +1,94 @@
 package jvm
 
 import (
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
+
+func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	identifier := e.Data.(*ast.ExpressionIdentifer)
+	cv := context.function.ClosureVars.ClosureVarsExist(identifier.Var)
+	if cv == nil { // this var been captured,is declare in this function
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
+		if 1 > maxstack {
+			maxstack = 1
+		}
+		if t := identifier.Var.Typ.JvmSlotSize(); t > maxstack {
+			maxstack = t
+		}
+		switch identifier.Var.Typ.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			fallthrough
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			meta := closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      meta.className,
+				Name:       meta.fieldName,
+				Descriptor: meta.fieldDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_LONG:
+			meta := closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      meta.className,
+				Name:       meta.fieldName,
+				Descriptor: meta.fieldDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_FLOAT:
+			meta := closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      meta.className,
+				Name:       meta.fieldName,
+				Descriptor: meta.fieldDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_DOUBLE:
+			meta := closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      meta.className,
+				Name:       meta.fieldName,
+				Descriptor: meta.fieldDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_STRING:
+			meta := closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      meta.className,
+				Name:       meta.fieldName,
+				Descriptor: meta.fieldDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_MAP:
+			meta := closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      meta.className,
+				Name:       meta.fieldName,
+				Descriptor: meta.fieldDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_checkcast
+			class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		}
+		return
+	}
+
+	return
+}
 
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
@@ -19,7 +104,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	if identifier.Var.BeenCaptured {
-		panic(1)
+		return m.buildCapturedIdentifer(class, code, e, context)
 	}
 
 	switch identifier.Var.Typ.Typ {

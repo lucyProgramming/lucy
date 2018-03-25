@@ -1,7 +1,7 @@
 package jvm
 
 import (
-	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
 const (

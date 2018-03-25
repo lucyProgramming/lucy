@@ -3,8 +3,8 @@ package jvm
 import (
 	"fmt"
 
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
@@ -153,11 +153,5 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		}
 		slice()
 	}
-	return
-}
-
-// ast will convert colon asssgin to assgin
-func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	panic(1)
 	return
 }

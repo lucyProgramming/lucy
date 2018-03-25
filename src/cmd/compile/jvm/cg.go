@@ -2,8 +2,8 @@ package jvm
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"os"
 	"path/filepath"
 )
@@ -19,13 +19,9 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.p = p
 	mainclass := &cg.ClassHighLevel{}
 	m.mainclass = mainclass
-	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
+	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
-	mainclass.Class.AttributeLucyLucyMainClass = &cg.AttributeLucyLucyMainClass{}
-	if p.Name == "" {
-		p.Name = "test"
-	}
-	mainclass.Name = p.Name
+	mainclass.Name = p.Name + "/main"
 	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
 	mkClassDefaultContruction(m.mainclass)
 	m.MakeExpression.MakeClass = m
@@ -45,7 +41,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 
 func (m *MakeClass) Dump() error {
 	//dump main class
-	f, err := os.OpenFile("test.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -66,6 +62,7 @@ func (m *MakeClass) Dump() error {
 	}
 	return nil
 }
+
 func (m *MakeClass) mkConsts() {
 	for k, v := range m.p.Block.Consts {
 		f := &cg.FiledHighLevel{}

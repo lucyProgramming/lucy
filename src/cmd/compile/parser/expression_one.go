@@ -3,8 +3,8 @@ package parser
 import (
 	"fmt"
 
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/lex"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
 func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
@@ -139,15 +139,15 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		newE.Data = left
 		newE.Pos = ep.parser.mkPos()
 		left = newE
-	case lex.TOKEN_FUNCTION:
-		f, err := ep.parser.Function.parse(false)
-		if err != nil {
-			return nil, err
-		}
-		return &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_FUNCTION,
-			Data: f,
-		}, nil
+	//case lex.TOKEN_FUNCTION:
+	//	f, err := ep.parser.Function.parse(false)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	return &ast.Expression{
+	//		Typ:  ast.EXPRESSION_TYPE_FUNCTION,
+	//		Data: f,
+	//	}, nil
 	case lex.TOKEN_NEW:
 		ep.Next()
 		t, err := ep.parser.parseType()

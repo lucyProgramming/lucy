@@ -234,9 +234,12 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
+	case EXPRESSION_TYPE_LIST:
+		errs = append(errs, fmt.Errorf("%s cannot have expression list at this scope,this may be cause be compiler error,please contact with author", errMsgPrefix(e.Pos)))
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
+
 	return t, errs
 }
 

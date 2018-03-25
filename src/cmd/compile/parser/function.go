@@ -3,9 +3,9 @@ package parser
 import (
 	"fmt"
 
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
-	"github.com/756445638/lucy/src/cmd/compile/lex"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
 type Function struct {

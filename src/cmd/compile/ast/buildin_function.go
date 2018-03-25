@@ -2,7 +2,7 @@ package ast
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
 type CallChecker func(block *Block, errs *[]error, args []*VariableType, pos *Pos)

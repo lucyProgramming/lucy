@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/lex"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
 func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {

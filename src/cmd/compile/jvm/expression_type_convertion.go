@@ -1,8 +1,8 @@
 package jvm
 
 import (
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
@@ -77,8 +77,6 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.CodeLength += 3
 		return
 	}
-
-	panic("unkown type convertion")
 	return
 }
 

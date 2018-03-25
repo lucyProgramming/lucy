@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
-	"github.com/756445638/lucy/src/cmd/compile/lex"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
@@ -73,7 +73,7 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
-			d := &ast.ExpressionDeclareVariable{vs, es}
+			d := &ast.ExpressionDeclareVariable{Vs: vs, Values: es}
 			e := &ast.Expression{
 				Typ:  ast.EXPRESSION_TYPE_VAR,
 				Data: d,
@@ -303,9 +303,9 @@ func (p *Parser) Next() {
 		if tok.Type != lex.TOKEN_CRLF {
 			p.token = tok
 			if p.token.Desp != "" {
-				fmt.Println("#########", p.token.Desp)
+				//fmt.Println("#########", p.token.Desp)
 			} else {
-				fmt.Println("#########", p.token.Data)
+				//fmt.Println("#########", p.token.Data)
 			}
 			break
 		}

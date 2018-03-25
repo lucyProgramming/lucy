@@ -2,8 +2,8 @@ package jvm
 
 import (
 	"encoding/binary"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context) {
@@ -120,7 +120,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 		code.CodeLength += 6
 		//expection that have been handled
 		if len(context.function.Typ.ReturnList) == 1 {
-			t :=   m.buildReturnFromFunctionReturnList(class, code, context)
+			t := m.buildReturnFromFunctionReturnList(class, code, context)
 			if t > code.MaxStack {
 				code.MaxStack = t
 			}

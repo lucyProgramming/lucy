@@ -3,8 +3,8 @@ package parser
 import (
 	"fmt"
 
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/lex"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
 type Block struct {
@@ -80,7 +80,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				Typ: ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: &ast.Expression{
 					Typ:  ast.EXPRESSION_TYPE_VAR,
-					Data: &ast.ExpressionDeclareVariable{vs, es},
+					Data: &ast.ExpressionDeclareVariable{Vs: vs, Values: es},
 					Pos:  pos,
 				},
 			}

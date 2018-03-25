@@ -3,9 +3,9 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm"
-	"github.com/756445638/lucy/src/cmd/compile/parser"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -17,16 +17,17 @@ func Main(files []string) {
 		fmt.Println("no file specfied")
 		os.Exit(1)
 	}
-	if CompileFlags.PackageName == "" {
-		fmt.Println("package name not specfied")
-		os.Exit(1)
+	if CompileFlags.OnlyImport == false {
+		if CompileFlags.PackageName == "" {
+			fmt.Println("package name not specfied")
+			os.Exit(1)
+		}
 	}
 	compiler.NerrsStopCompile = 10
 	compiler.Errs = []error{}
 	compiler.Files = files
 	compiler.Init()
 	compiler.compile()
-
 }
 
 type LucyCompile struct {
@@ -51,7 +52,7 @@ func (lc *LucyCompile) exit() {
 		code = 1
 	}
 	for _, v := range lc.Errs {
-		fmt.Println(v)
+		fmt.Fprintln(os.Stderr, v)
 	}
 	os.Exit(code)
 }
@@ -90,6 +91,9 @@ func (lc *LucyCompile) compile() {
 
 	// parse import only
 	if CompileFlags.OnlyImport {
+		if len(lc.Errs) > 0 {
+			lc.exit()
+		}
 		is := make([]string, len(lc.Tops))
 		for k, v := range lc.Tops {
 			is[k] = v.Data.(*ast.Import).Name

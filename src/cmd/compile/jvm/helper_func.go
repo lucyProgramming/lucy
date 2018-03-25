@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 /*
@@ -15,7 +15,7 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method := &cg.MethodHighLevel{}
 	method.Name = special_method_init
 	method.Descriptor = "()V"
-	method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	length := 5
 	method.Code.Codes = make([]byte, length)
 	method.Code.Codes[0] = cg.OP_aload_0

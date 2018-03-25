@@ -1,10 +1,8 @@
 package jvm
 
 import (
-	//"encoding/binary"
-
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
@@ -34,7 +32,6 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 		stackneed += size
 		backPatchEs(es, code.CodeLength)
 	}
-
 
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{
@@ -118,7 +115,10 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_MAP:
+		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
+		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]

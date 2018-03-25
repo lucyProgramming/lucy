@@ -192,8 +192,9 @@ type ExpressionFunctionCall struct {
 }
 
 type ExpressionDeclareVariable struct {
-	Vs     []*VariableDefinition
-	Values []*Expression
+	Vs             []*VariableDefinition
+	Values         []*Expression
+	IfDeclareBefor []bool
 }
 
 type ExpressionDeclareConsts struct {

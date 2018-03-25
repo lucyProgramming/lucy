@@ -3,7 +3,7 @@ package lc
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type ClassDecoder struct {

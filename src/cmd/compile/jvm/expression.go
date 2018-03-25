@@ -2,8 +2,8 @@ package jvm
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-	"github.com/756445638/lucy/src/cmd/compile/jvm/cg"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type MakeExpression struct {
@@ -173,6 +173,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildArray(class, code, e, context)
 	case ast.EXPRESSION_TYPE_MAP:
 		maxstack = m.buildMapLiteral(class, code, e, context)
+	case ast.EXPRESSION_TYPE_VAR:
+		maxstack = m.buildVar(class, code, e, context)
+
 	default:
 		panic(e.OpName())
 	}

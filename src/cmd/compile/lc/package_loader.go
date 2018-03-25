@@ -2,7 +2,7 @@ package lc
 
 import (
 	"fmt"
-	"github.com/756445638/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"io/ioutil"
 	"os"
 	"path/filepath"

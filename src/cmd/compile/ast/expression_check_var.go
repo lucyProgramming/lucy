@@ -7,8 +7,6 @@ import (
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	vs := e.Data.(*ExpressionDeclareVariable)
 	noErr := true
-	names := []*Expression{}
-	values := []*Expression{}
 	var err error
 	if vs.Values != nil && len(vs.Values) > 0 {
 		valueTypes := checkRightValuesValid(checkExpressions(block, vs.Values, errs), errs)
@@ -48,16 +46,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 					continue
 				}
 			}
-			var nameExpression Expression
-			nameExpression.Typ = EXPRESSION_TYPE_IDENTIFIER
-			nameExpression.Pos = v.Pos
-			identifier := &ExpressionIdentifer{}
-			identifier.Name = v.Name
-			identifier.Var = v
-			nameExpression.Data = identifier
-			names = append(names, &nameExpression)
 		}
-		values = vs.Values
 	} else {
 		for _, v := range vs.Vs {
 			if v.Name == NO_NAME_IDENTIFIER {
@@ -77,19 +66,10 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			values = append(values, v.Typ.mkDefaultValueExpression())
-			var nameExpression Expression
-			nameExpression.Typ = EXPRESSION_TYPE_IDENTIFIER
-			nameExpression.Pos = v.Pos
-			identifier := &ExpressionIdentifer{}
-			identifier.Name = v.Name
-			identifier.Var = v
-			nameExpression.Data = identifier
-			names = append(names, &nameExpression)
+			vs.Values = append(vs.Values, v.Typ.mkDefaultValueExpression())
 		}
 	}
 	if noErr == false {
 		return
 	}
-	e.convertColonAssignAndVar2Assign(names, values)
 }
