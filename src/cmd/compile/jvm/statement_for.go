@@ -302,7 +302,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 	// before store to local v ,cast into real type
 	if s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ == ast.VARIABLE_TYPE_STRING {
-		IfStackTopStringIsNullThenLoad(class, code, "")
+		//IfStackTopStringIsNullThenLoad(class, code, "")
 	} else if s.StatmentForRangeAttr.Expression.VariableType.ArrayType.IsPointer() {
 		PrimitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.ArrayType)
 	}

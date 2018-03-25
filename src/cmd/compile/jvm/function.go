@@ -42,6 +42,29 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 		method.Code.MaxLocals = f.Varoffset // could  new slot when compile
 	}()
+
+	// if function is main
+	if f.Name == ast.MAIN_FUNCTION_NAME {
+		code := &method.Code
+		code.Codes[code.CodeLength] = cg.OP_new
+		meta := ArrayMetas[ast.VARIABLE_TYPE_STRING]
+		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_dup
+		code.CodeLength += 4
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_STRING, 0)...)
+		if 3 > code.MaxStack {
+			code.MaxStack = 3
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      meta.classname,
+			Name:       special_method_init,
+			Descriptor: meta.constructorFuncDescriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+	}
+
 	m.buildFunctionParameterAndReturnList(class, &method.Code, f.Typ, context)
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
@@ -56,7 +79,6 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
 		}
 	}
-
 	m.buildBlock(class, &method.Code, f.Block, context)
 	return
 }

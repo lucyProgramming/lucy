@@ -27,7 +27,9 @@ public class ArrayString   {
 		this.elements = values;
 		
 		for(int i =0 ;i < this.end;i ++){
-			this.elements[i] = "";
+			if(this.elements[i] == null){
+				this.elements[i] = "";
+			}
 		}
 	
 	}

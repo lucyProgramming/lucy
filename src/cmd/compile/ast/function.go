@@ -147,13 +147,22 @@ func (f *Function) mkLastRetrunStatement() {
 
 func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	if f.Name == MAIN_FUNCTION_NAME {
-		if len(f.Typ.ParameterList) > 0 {
-			*errs = append(*errs, fmt.Errorf("%s function main must not taken no parameters ", errMsgPrefix(f.Pos)))
+		errF := func() {
+			*errs = append(*errs, fmt.Errorf("%s function %s expect declared as 'main(args []string)'", errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
 		}
-		if len(f.Typ.ReturnList) > 0 {
-			*errs = append(*errs, fmt.Errorf("%s function main must have no return values ", errMsgPrefix(f.Pos)))
+		if len(f.Typ.ParameterList) != 1 {
+			errF()
+		} else { //
+			if f.Typ.ParameterList[0].Typ.Typ == VARIABLE_TYPE_ARRAY &&
+				f.Typ.ParameterList[0].Typ.ArrayType.Typ == VARIABLE_TYPE_STRING {
+				err := f.Block.insert(f.Typ.ParameterList[0].Name, f.Typ.ParameterList[0].Pos, f.Typ.ParameterList[0])
+				if err != nil {
+					*errs = append(*errs, err)
+				}
+			} else {
+				errF()
+			}
 		}
-		f.Varoffset++
 		return
 	}
 

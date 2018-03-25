@@ -355,17 +355,17 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	return
 }
 
-func IfStackTopStringIsNullThenLoad(class *cg.ClassHighLevel, code *cg.AttributeCode, s string) (incrment uint16) {
-	incrment = 1
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
-	code.Codes[code.CodeLength] = cg.OP_ifnull
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-	code.Codes[code.CodeLength+3] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 7)
-	code.Codes[code.CodeLength+6] = cg.OP_pop
-	code.Codes[code.CodeLength+7] = cg.OP_ldc_w
-	class.InsertStringConst("", code.Codes[code.CodeLength+8:code.CodeLength+10])
-	code.CodeLength += 10
-	return
-}
+//func IfStackTopStringIsNullThenLoad(class *cg.ClassHighLevel, code *cg.AttributeCode, s string) (incrment uint16) {
+//	incrment = 1
+//	code.Codes[code.CodeLength] = cg.OP_dup
+//	code.CodeLength++
+//	code.Codes[code.CodeLength] = cg.OP_ifnull
+//	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+//	code.Codes[code.CodeLength+3] = cg.OP_goto
+//	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 7)
+//	code.Codes[code.CodeLength+6] = cg.OP_pop
+//	code.Codes[code.CodeLength+7] = cg.OP_ldc_w
+//	class.InsertStringConst("", code.Codes[code.CodeLength+8:code.CodeLength+10])
+//	code.CodeLength += 10
+//	return
+//}

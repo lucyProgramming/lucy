@@ -57,14 +57,16 @@ func init() {
 	})
 	d := `
 		for(int i =0 ;i < this.end;i ++){
-			this.elements[i] = "";
+			if(this.elements[i] == null){
+				this.elements[i] = "";
+			}
 		}
 	`
 	installs = append(installs, &InstallType{
-		classname: "ArrayString",
-		typename:  "String",
-		defaultValue: d ,
-		})
+		classname:    "ArrayString",
+		typename:     "String",
+		defaultValue: d,
+	})
 }
 
 func (r *InstallLucyArray) RunCommand(command string, args []string) {
@@ -84,7 +86,7 @@ func (r *InstallLucyArray) RunCommand(command string, args []string) {
 		javafile := v.classname + ".java"
 		t := strings.Replace(array_template, "ArrayTTT", v.classname, -1)
 		t = strings.Replace(t, "TTT", v.typename, -1)
-		t = strings.Replace(t, "DEFAULT_INIT", v.defaultValue , -1)
+		t = strings.Replace(t, "DEFAULT_INIT", v.defaultValue, -1)
 		err := ioutil.WriteFile(javafile, []byte(t), 0644)
 		if err != nil {
 			fmt.Println(err)
