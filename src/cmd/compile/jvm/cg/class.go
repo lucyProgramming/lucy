@@ -278,9 +278,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
 		field.NameIndex = c.insertUtfConst(f.Name)
-		if f.Signature != nil {
-			field.Attributes = append(field.Attributes, f.Signature.ToAttributeInfo(c))
-		}
+		//if f.Signature != nil {
+		//	field.Attributes = append(field.Attributes, f.Signature.ToAttributeInfo(c))
+		//}
 		if f.ConstantValue != nil {
 			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
 		}

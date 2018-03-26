@@ -23,7 +23,6 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		if t.Typ == nil { // in some case,variable defined wrong,could be nil
 			return nil, nil
 		}
-		t.CaptureLevel = 0 //when caputre is done,level reset to zero
 		t.Used = true
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos

@@ -4,15 +4,50 @@ import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"math"
 	"os"
 	"path/filepath"
 )
 
 type MakeClass struct {
 	p              *ast.Package
-	Classes        []*cg.ClassHighLevel
+	Classes        map[string]*cg.ClassHighLevel
 	mainclass      *cg.ClassHighLevel
 	MakeExpression MakeExpression
+}
+
+func (m *MakeClass) newClassName(prefix string) (autoName string) {
+	for i := 0; i < math.MaxInt16; i++ {
+		autoName = fmt.Sprintf("%s_%d", prefix, i)
+		_, ok := m.p.Block.Classes[autoName]
+		if ok {
+			continue
+		}
+		_, ok = m.p.Block.EnumNames[autoName]
+		if ok {
+			continue
+		}
+		_, ok = m.p.Block.Enums[autoName]
+		if ok {
+			continue
+		}
+		return autoName
+	}
+	panic("cannot new class name")
+
+}
+
+func (m *MakeClass) putClass(name string, class *cg.ClassHighLevel) {
+	if name == m.mainclass.Name {
+		panic("cannot have main class`s name")
+	}
+	if m.Classes == nil {
+		m.Classes = make(map[string]*cg.ClassHighLevel)
+	}
+	if _, ok := m.Classes[name]; ok {
+		panic("name:" + name + " already been token")
+	}
+	m.Classes[name] = class
 }
 
 func (m *MakeClass) Make(p *ast.Package) {
@@ -95,8 +130,6 @@ func (m *MakeClass) mkConsts() {
 			f.ConstantValue.Index = m.mainclass.Class.InsertDoubleConst(v.Data.(float64))
 		}
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
-		f.Signature = &cg.AttributeSignature{}
-		f.Signature.Signature = f.Descriptor
 		m.mainclass.Fields[k] = f
 	}
 }
@@ -161,7 +194,8 @@ func (m *MakeClass) mkEnums() {
 func (m *MakeClass) mkClass(c *ast.Class) {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
-	m.Classes = append(m.Classes, class)
+	m.Classes = make(map[string]*cg.ClassHighLevel)
+	m.Classes["main"] = class
 	class.AccessFlags = c.Access
 	class.SuperClass = c.SuperClassName
 	class.Name = c.SuperClassName

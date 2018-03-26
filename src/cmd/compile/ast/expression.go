@@ -74,7 +74,7 @@ const (
 	EXPRESSION_TYPE_CONVERTION_TYPE // []byte(str)
 	EXPRESSION_TYPE_LABLE           // end:
 	EXPRESSION_TYPE_RANGE           // for range
-	EXPRESSSION_TYPE_SLICE          // arr[0:2]
+	EXPRESSION_TYPE_SLICE           // arr[0:2]
 	EXPRESSION_TYPE_MAP             // map literal
 )
 
@@ -393,7 +393,7 @@ func (e *Expression) OpName(typ ...int) string {
 		return "var"
 	case EXPRESSION_TYPE_RANGE:
 		return "range"
-	case EXPRESSSION_TYPE_SLICE:
+	case EXPRESSION_TYPE_SLICE:
 		return "slice"
 	case EXPRESSION_TYPE_MAP:
 		return "map_literal"

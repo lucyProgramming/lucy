@@ -5,5 +5,4 @@ type FiledHighLevel struct {
 	Descriptor    string
 	AccessFlags   uint16
 	ConstantValue *AttributeConstantValue
-	Signature     *AttributeSignature
 }

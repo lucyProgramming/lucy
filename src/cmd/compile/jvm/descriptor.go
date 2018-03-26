@@ -28,6 +28,11 @@ func (m *Descript) methodDescriptor(f *ast.Function) string {
 	return s
 }
 
+func (m *Descript) typeDescriptorWhenVariableIsCaptured(v *ast.VariableType) string {
+
+	return ""
+}
+
 func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 	switch v.Typ {
 	case ast.VARIABLE_TYPE_BOOL:

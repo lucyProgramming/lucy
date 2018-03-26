@@ -153,7 +153,7 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 				Typ:   VARIABLE_TYPE_OBJECT,
 				Class: c,
 			}
-			v.Func.Varoffset = 1 //this function
+			v.Func.VarOffset = 1 //this function
 		}
 		es := v.Func.check(&c.Block)
 		if errsNotEmpty(es) {

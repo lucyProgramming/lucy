@@ -82,7 +82,7 @@ func (b *Block) SearchByName(name string) interface{} {
 			if b.InheritedAttribute.Function != nil &&
 				b.IsFunctionTopBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false {
-				b.InheritedAttribute.Function.ClosureVars.Insert(v)
+				b.InheritedAttribute.Function.ClosureVars.Insert(b.InheritedAttribute.Function, v)
 			}
 			//cannot search variable from class body
 			if b.InheritedAttribute.class != nil && b.IsClassBlock {
@@ -112,10 +112,10 @@ type InheritedAttribute struct {
 	StatementSwitch              *StatementSwitch
 	mostCloseForOrSwitchForBreak interface{}
 	Function                     *Function
-	OutterFunction               *Function
-	class                        *Class
-	Defer                        *Defer
-	Defers                       []*Defer
+	//OutterFunction               *Function
+	class  *Class
+	Defer  *Defer
+	Defers []*Defer
 }
 
 type NameWithType struct {
@@ -357,8 +357,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
 		t.Typ.actionNeedBeenDoneWhenDescribeVariable()
-		t.LocalValOffset = b.InheritedAttribute.Function.Varoffset
-		b.InheritedAttribute.Function.Varoffset += t.NameWithType.Typ.JvmSlotSize()
+		t.LocalValOffset = b.InheritedAttribute.Function.VarOffset
+		b.InheritedAttribute.Function.VarOffset += t.NameWithType.Typ.JvmSlotSize()
+		b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &t.LocalValOffset)
 		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)

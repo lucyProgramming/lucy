@@ -16,7 +16,6 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		switch d.(type) {
 		case *VariableDefinition:
 			t := d.(*VariableDefinition)
-			t.CaptureLevel = 0
 			identifier.Var = t
 			return t.Typ, nil
 		default:

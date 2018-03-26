@@ -155,8 +155,9 @@ func (s *Statement) check(b *Block) []error { // b is father
 		if b.InheritedAttribute.Function.AutoVarForException == nil {
 			t := &AutoVarForException{}
 			b.InheritedAttribute.Function.AutoVarForException = t
-			t.Offset = b.InheritedAttribute.Function.Varoffset
-			b.InheritedAttribute.Function.Varoffset++
+			t.Offset = b.InheritedAttribute.Function.VarOffset
+			b.InheritedAttribute.Function.VarOffset++
+			b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &t.Offset)
 		}
 		s.Defer.Block.inherite(b)
 		return s.Defer.Block.check()
@@ -203,8 +204,9 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 					errs = append(errs, err)
 				}
 				if f.ClosureVars.NotEmpty() {
-					f.Varoffset = b.InheritedAttribute.Function.VarOffSet
-					b.InheritedAttribute.Function.VarOffSet++
+					f.VarOffSetForClosure = b.InheritedAttribute.Function.VarOffset
+					b.InheritedAttribute.Function.VarOffset++
+					b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosure)
 				}
 			}
 			return errs

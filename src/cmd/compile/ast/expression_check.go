@@ -215,14 +215,9 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			t = []*VariableType{tt}
 		}
 		e.VariableType = tt
-	case EXPRESSION_TYPE_FUNCTION:
-		tt := e.checkFunctionExpression(block, &errs)
-		if tt != nil {
-			t = []*VariableType{tt}
-		}
 	case EXPRESSION_TYPE_RANGE:
 		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement", errMsgPrefix(e.Pos)))
-	case EXPRESSSION_TYPE_SLICE:
+	case EXPRESSION_TYPE_SLICE:
 		tt := e.checkSlice(block, &errs)
 		e.VariableType = tt
 		if tt != nil {
@@ -237,19 +232,21 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_FUNCTION:
 		errs = append(errs, fmt.Errorf("%s cannot use function as  a expression", errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_LIST:
-		errs = append(errs, fmt.Errorf("%s cannot have expression list at this scope,this may be cause be compiler error,please contact with author", errMsgPrefix(e.Pos)))
+		errs = append(errs, fmt.Errorf("%s cannot have expression list at this scope,"+
+			"this may be cause be compiler error,please contact with author",
+			errMsgPrefix(e.Pos)))
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
 	return t, errs
 }
 
-func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
-	f := e.Data.(*Function)
-	f.MkVariableType()
-	*errs = append(*errs, f.check(block)...)
-	return &f.VariableType
-}
+//func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
+//	f := e.Data.(*Function)
+//	f.MkVariableType()
+//	*errs = append(*errs, f.check(block)...)
+//	return &f.VariableType
+//}
 
 func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, error) {
 	if len(ts) == 0 {

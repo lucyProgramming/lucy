@@ -6,11 +6,10 @@ import (
 )
 
 type Function struct {
-	VarOffSet                      uint16
+	ClassMethod                    *cg.MethodHighLevel
+	VarOffSetForClosure            uint16
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
-	AutoVarForException            *AutoVarForException
-	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	callchecker                    CallChecker // used in build function
 	IsGlobal                       bool
 	IsBuildin                      bool
@@ -23,9 +22,11 @@ type Function struct {
 	Pos                            *Pos
 	Descriptor                     string
 	VariableType                   VariableType
-	Varoffset                      uint16
+	VarOffset                      uint16
+	AutoVarForException            *AutoVarForException
+	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
-	ClassMethod                    *cg.MethodHighLevel
+	OffsetDestinations             []*uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
@@ -37,13 +38,16 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 	}
 	t := &AutoVarForReturnBecauseOfDefer{}
 	f.AutoVarForReturnBecauseOfDefer = t
-	t.ExceptionIsNotNilWhenEnter = f.Varoffset
-	f.Varoffset++
+	t.ExceptionIsNotNilWhenEnter = f.VarOffset
+	f.VarOffset++
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.ExceptionIsNotNilWhenEnter)
 	if len(f.Typ.ReturnList) > 1 {
-		t.MultiValueOffset = f.Varoffset
-		f.Varoffset++
-		t.IfReachButton = f.Varoffset
-		f.Varoffset++
+		t.MultiValueOffset = f.VarOffset
+		f.OffsetDestinations = append(f.OffsetDestinations, &t.MultiValueOffset)
+		f.VarOffset++
+		t.IfReachButton = f.VarOffset
+		f.VarOffset++
+		f.OffsetDestinations = append(f.OffsetDestinations, &t.IfReachButton)
 	}
 }
 
@@ -83,9 +87,10 @@ func (f *Function) mkAutoVarForMultiReturn() {
 		return
 	}
 	t := &AutoVarForMultiReturn{}
-	t.Offset = f.Varoffset
+	t.Offset = f.VarOffset
 	f.AutoVarForMultiReturn = t
-	f.Varoffset++
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.Offset)
+	f.VarOffset++
 }
 
 type AutoVarForMultiReturn struct {
@@ -166,7 +171,6 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		}
 		return
 	}
-
 	var err error
 	for _, v := range f.Typ.ParameterList {
 		v.IsFunctionParameter = true

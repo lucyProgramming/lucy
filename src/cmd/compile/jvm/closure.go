@@ -37,27 +37,27 @@ func init() {
 		fieldDescriptor: "I",
 	}
 	closure.ClosureObjectMetas[CLOSURE_LONG_CLASS] = &ClosureObjectMeta{
-		className:       "lucy/deps/ClosureInt",
+		className:       "lucy/deps/ClosureLong",
 		fieldName:       "value",
 		fieldDescriptor: "J",
 	}
 	closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS] = &ClosureObjectMeta{
-		className:       "lucy/deps/ClosureInt",
+		className:       "lucy/deps/ClosureFloat",
 		fieldName:       "value",
 		fieldDescriptor: "F",
 	}
 	closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS] = &ClosureObjectMeta{
-		className:       "lucy/deps/ClosureInt",
+		className:       "lucy/deps/ClosureDouble",
 		fieldName:       "value",
 		fieldDescriptor: "D",
 	}
 	closure.ClosureObjectMetas[CLOSURE_STRING_CLASS] = &ClosureObjectMeta{
-		className:       "lucy/deps/ClosureInt",
+		className:       "lucy/deps/ClosureString",
 		fieldName:       "value",
 		fieldDescriptor: "Ljava/lang/String;",
 	}
 	closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS] = &ClosureObjectMeta{
-		className:       "lucy/deps/ClosureInt",
+		className:       "lucy/deps/ClosureObject",
 		fieldName:       "value",
 		fieldDescriptor: "Ljava/lang/Object;",
 	}

@@ -1,28 +1,32 @@
 package ast
 
 type ClosureVars struct {
-	Vars map[*VariableDefinition]*ClosureVar
+	Vars map[*VariableDefinition]struct{}
 }
 
-func (c *ClosureVars) ClosureVarsExist(v *VariableDefinition) (cv *ClosureVar) {
+func (c *ClosureVars) ClosureVarsExist(v *VariableDefinition) bool {
 	if c.Vars == nil {
-		return nil
+		return false
 	}
-	return c.Vars[v]
+	_, ok := c.Vars[v]
+	return ok
 }
 
 func (c *ClosureVars) NotEmpty() bool {
 	return c.Vars != nil && len(c.Vars) > 0
 }
-func (c *ClosureVars) Insert(v *VariableDefinition) {
+func (c *ClosureVars) Insert(f *Function, v *VariableDefinition) {
+	if c.Vars == nil || len(c.Vars) == 0 {
+		for _, v := range f.OffsetDestinations {
+			*v += 1
+		}
+	}
 	if c.Vars == nil {
-		c.Vars = make(map[*VariableDefinition]*ClosureVar)
+		c.Vars = make(map[*VariableDefinition]struct{})
 	}
-	c.Vars[v] = &ClosureVar{
-		Level: v.CaptureLevel,
-	}
+	c.Vars[v] = struct{}{}
 	v.BeenCaptured = true
-	v.CaptureLevel++
+
 }
 
 func (c *ClosureVars) Search(name string) *VariableDefinition {
@@ -35,8 +39,4 @@ func (c *ClosureVars) Search(name string) *VariableDefinition {
 		}
 	}
 	return nil
-}
-
-type ClosureVar struct {
-	Level uint8
 }

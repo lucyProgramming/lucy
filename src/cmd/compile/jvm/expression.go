@@ -167,7 +167,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 		maxstack = m.buildTypeConvertion(class, code, e, context)
 	case ast.EXPRESSION_TYPE_CONST: // const will analyse at ast stage
-	case ast.EXPRESSSION_TYPE_SLICE:
+	case ast.EXPRESSION_TYPE_SLICE:
 		maxstack = m.buildSlice(class, code, e, context)
 	case ast.EXPRESSION_TYPE_ARRAY:
 		maxstack = m.buildArray(class, code, e, context)

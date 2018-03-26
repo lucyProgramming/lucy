@@ -37,16 +37,18 @@ type AutoVarForRangeMap struct {
 }
 
 func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType) {
-	t.MapObject = f.Varoffset
-	t.KeySets = f.Varoffset + 1
-	t.KeySetsK = f.Varoffset + 2
-	t.KeySetsKLength = f.Varoffset + 3
-	f.Varoffset += 4
-
-	t.K = f.Varoffset
-	f.Varoffset += kt.JvmSlotSize()
-	t.V = f.Varoffset
-	f.Varoffset += vt.JvmSlotSize()
+	t.MapObject = f.VarOffset
+	t.KeySets = f.VarOffset + 1
+	t.KeySetsK = f.VarOffset + 2
+	t.KeySetsKLength = f.VarOffset + 3
+	f.VarOffset += 4
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.MapObject, &t.KeySets, &t.KeySetsK, &t.KeySetsKLength)
+	t.K = f.VarOffset
+	f.VarOffset += kt.JvmSlotSize()
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.K)
+	t.V = f.VarOffset
+	f.VarOffset += vt.JvmSlotSize()
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
 }
 
 type AutoVarForRangeArray struct {
@@ -56,13 +58,13 @@ type AutoVarForRangeArray struct {
 }
 
 func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
-	t.K = f.Varoffset
-	t.Elements = f.Varoffset + 1
-	t.Start = f.Varoffset + 2
-	t.End = f.Varoffset + 3
-	f.Varoffset += 4
-	t.V = f.Varoffset
-	f.Varoffset += vt.JvmSlotSize()
+	t.K = f.VarOffset
+	t.Elements = f.VarOffset + 1
+	t.Start = f.VarOffset + 2
+	t.End = f.VarOffset + 3
+	f.VarOffset += 4
+	t.V = f.VarOffset
+	f.VarOffset += vt.JvmSlotSize()
 }
 
 func (s *StatementFor) checkRange() []error {

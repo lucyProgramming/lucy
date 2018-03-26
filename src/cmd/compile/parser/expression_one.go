@@ -285,7 +285,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				}
 				ep.Next() // skip ]
 				newe := &ast.Expression{}
-				newe.Typ = ast.EXPRESSSION_TYPE_SLICE
+				newe.Typ = ast.EXPRESSION_TYPE_SLICE
 				newe.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
@@ -321,7 +321,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				}
 				ep.Next() // skip ]
 				newe := &ast.Expression{}
-				newe.Typ = ast.EXPRESSSION_TYPE_SLICE
+				newe.Typ = ast.EXPRESSION_TYPE_SLICE
 				newe.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice

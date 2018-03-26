@@ -40,7 +40,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	method.Code.CodeLength = 0
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
-		method.Code.MaxLocals = f.Varoffset // could  new slot when compile
+		method.Code.MaxLocals = f.VarOffset // could  new slot when compile
 	}()
 
 	// if function is main
