@@ -109,7 +109,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 						m.numberTypeConverter(code, v.Typ, targets[0].Typ)
 					}
 					if mapDestination { // convert to primitive
-						PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
+						primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 					}
 				} else { // pop fron stack
 					if v.JvmSlotSize() == 1 {
@@ -141,7 +141,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				m.numberTypeConverter(code, variableType.Typ, targets[0].Typ)
 			}
 			if mapDestination { // convert to primitive
-				PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
+				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 			}
 		} else { // pop fron stack
 			if variableType.JvmSlotSize() == 1 {

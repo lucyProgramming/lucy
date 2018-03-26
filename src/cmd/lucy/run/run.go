@@ -98,6 +98,7 @@ func (r *Run) RunCommand(command string, args []string) {
 	for _, v := range r.LucyPaths {
 		classpath[filepath.Join(v, common.DIR_FOR_COMPILED_CLASS)] = struct{}{}
 	}
+	classpath[filepath.Join(r.LucyRoot, "lib")] = struct{}{}
 	classPathArray := make([]string, len(classpath))
 	{
 		i := 0
@@ -111,6 +112,7 @@ func (r *Run) RunCommand(command string, args []string) {
 	} else { // unix style
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classPathArray, ":")))
 	}
+	fmt.Println("!!!!!!!!!", classPathArray)
 	err = cmd.Start()
 	if err != nil {
 		fmt.Println(err)

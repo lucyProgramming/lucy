@@ -44,7 +44,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	if index.Expression.VariableType.Map.K.IsPointer() == false {
-		PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Expression.VariableType.Map.K)
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Expression.VariableType.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -97,9 +97,9 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	nullexit := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 	if index.Expression.VariableType.Map.V.IsPointer() == false {
-		PrimitiveObjectConverter.getFromObject(class, code, index.Expression.VariableType.Map.V)
+		primitiveObjectConverter.getFromObject(class, code, index.Expression.VariableType.Map.V)
 	} else {
-		PrimitiveObjectConverter.castPointerTypeToRealType(class, code, index.Expression.VariableType.Map.V)
+		primitiveObjectConverter.castPointerTypeToRealType(class, code, index.Expression.VariableType.Map.V)
 	}
 	backPatchEs([]*cg.JumpBackPatch{nullexit}, code.CodeLength)
 	return

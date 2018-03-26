@@ -134,7 +134,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				maxstack = t
 			}
 			//convert to object
-			PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
+			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 			// append
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -247,7 +247,7 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 			maxstack = t
 		}
 		if v.Typ.IsPointer() == false {
-			PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, v.Typ)
+			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, v.Typ)
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

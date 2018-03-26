@@ -32,7 +32,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			maxstack = t
 		}
 		if variableType.IsPointer() == false {
-			PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
+			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}
 		currentStack = 3 // stack is ... mapref mapref kref
 		stack, es := m.build(class, code, v.Right, context)
@@ -45,7 +45,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			variableType = v.Right.VariableTypes[0]
 		}
 		if variableType.IsPointer() == false {
-			PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
+			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}
 		// put in hashmap
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

@@ -6,12 +6,12 @@ import (
 )
 
 type Function struct {
+	VarOffSet                      uint16
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
 	AutoVarForException            *AutoVarForException
 	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	callchecker                    CallChecker // used in build function
-	ClassMethod                    *cg.MethodHighLevel
 	IsGlobal                       bool
 	IsBuildin                      bool
 	Used                           bool
@@ -25,6 +25,7 @@ type Function struct {
 	VariableType                   VariableType
 	Varoffset                      uint16
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
+	ClassMethod                    *cg.MethodHighLevel
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {

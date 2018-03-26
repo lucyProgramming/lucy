@@ -16,7 +16,7 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 	if t := 1 + stack; t > maxstack {
 		maxstack = t
 	}
-	PrimitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.VariableType)
+	primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.VariableType)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
 	target = index.Expression.VariableType.Map.V

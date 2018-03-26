@@ -7,7 +7,7 @@ import (
 var (
 	ArrayMetas               = map[int]*ArrayMeta{}
 	ArrayMetasMap            = make(map[string]*ArrayMeta)
-	PrimitiveObjectConverter PrimitiveObjectConvert
+	primitiveObjectConverter PrimitiveObjectConvert
 	Descriptor               Descript
 )
 

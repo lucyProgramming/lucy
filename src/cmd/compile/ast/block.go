@@ -112,6 +112,7 @@ type InheritedAttribute struct {
 	StatementSwitch              *StatementSwitch
 	mostCloseForOrSwitchForBreak interface{}
 	Function                     *Function
+	OutterFunction               *Function
 	class                        *Class
 	Defer                        *Defer
 	Defers                       []*Defer

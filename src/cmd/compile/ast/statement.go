@@ -186,6 +186,29 @@ func (s *Statement) checkStatementGoto(b *Block) error {
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
 	if s.Expression.canBeUsedAsStatementExpression() {
+		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
+			f := s.Expression.Data.(*Function)
+			if f.Name == "" {
+				err := fmt.Errorf("%s function must have a name",
+					errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
+				errs = append(errs, err)
+			}
+			es := f.check(b)
+			if errsNotEmpty(es) {
+				errs = append(errs, es...)
+			}
+			if f.Name != "" {
+				err := b.insert(f.Name, f.Pos, f)
+				if err != nil {
+					errs = append(errs, err)
+				}
+				if f.ClosureVars.NotEmpty() {
+					f.Varoffset = b.InheritedAttribute.Function.VarOffSet
+					b.InheritedAttribute.Function.VarOffSet++
+				}
+			}
+			return errs
+		}
 	} else {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())

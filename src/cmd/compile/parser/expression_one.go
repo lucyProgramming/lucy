@@ -139,15 +139,15 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		newE.Data = left
 		newE.Pos = ep.parser.mkPos()
 		left = newE
-	//case lex.TOKEN_FUNCTION:
-	//	f, err := ep.parser.Function.parse(false)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	return &ast.Expression{
-	//		Typ:  ast.EXPRESSION_TYPE_FUNCTION,
-	//		Data: f,
-	//	}, nil
+	case lex.TOKEN_FUNCTION:
+		f, err := ep.parser.Function.parse(false)
+		if err != nil {
+			return nil, err
+		}
+		return &ast.Expression{
+			Typ:  ast.EXPRESSION_TYPE_FUNCTION,
+			Data: f,
+		}, nil
 	case lex.TOKEN_NEW:
 		ep.Next()
 		t, err := ep.parser.parseType()

@@ -53,9 +53,9 @@ func init() {
 		getDescriptor:             "(I)S",
 		setDescriptor:             "(IS)V",
 		elementsFieldDescriptor:   "[S",
-		sliceDescriptor:           "(II)Llucy/desp/ArrayShort;",
-		appendDescriptor:          "(S)Llucy/desp/ArrayShort;",
-		appendAllDescriptor:       "([S)Llucy/desp/ArrayShort;",
+		sliceDescriptor:           "(II)Llucy/deps/ArrayShort;",
+		appendDescriptor:          "(S)Llucy/deps/ArrayShort;",
+		appendAllDescriptor:       "([S)Llucy/deps/ArrayShort;",
 		getJavaArrayDescriptor:    "()[S",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_INT] = &ArrayMeta{
