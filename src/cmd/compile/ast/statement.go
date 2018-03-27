@@ -193,21 +193,20 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				err := fmt.Errorf("%s function must have a name",
 					errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
 				errs = append(errs, err)
+			} else {
+				err := b.insert(f.Name, f.Pos, f)
+				if err != nil {
+					errs = append(errs, err)
+				}
 			}
 			es := f.check(b)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
-			if f.Name != "" {
-				err := b.insert(f.Name, f.Pos, f)
-				if err != nil {
-					errs = append(errs, err)
-				}
-				if f.ClosureVars.NotEmpty() {
-					f.VarOffSetForClosure = b.InheritedAttribute.Function.VarOffset
-					b.InheritedAttribute.Function.VarOffset++
-					b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosure)
-				}
+			if f.ClosureVars.NotEmpty() {
+				f.VarOffSetForClosure = b.InheritedAttribute.Function.VarOffset
+				b.InheritedAttribute.Function.VarOffset++
+				b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosure)
 			}
 			return errs
 		}

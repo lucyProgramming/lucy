@@ -17,6 +17,9 @@ type MakeClass struct {
 }
 
 func (m *MakeClass) newClassName(prefix string) (autoName string) {
+	if m.p.Block.SearchByName(prefix) == nil {
+		return m.p.Name + "/" + prefix
+	}
 	for i := 0; i < math.MaxInt16; i++ {
 		autoName = fmt.Sprintf("%s_%d", prefix, i)
 		_, ok := m.p.Block.Classes[autoName]
@@ -31,7 +34,7 @@ func (m *MakeClass) newClassName(prefix string) (autoName string) {
 		if ok {
 			continue
 		}
-		return autoName
+		return m.p.Name + "/" + autoName
 	}
 	panic("cannot new class name")
 
@@ -85,8 +88,9 @@ func (m *MakeClass) Dump() error {
 		return err
 	}
 	f.Close()
+
 	for _, c := range m.Classes {
-		f, err = os.OpenFile(filepath.Join(m.p.DestPath, c.Name+".class"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
 			return err
 		}

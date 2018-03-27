@@ -6,6 +6,29 @@ import (
 )
 
 func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
+	identifier := e.Data.(*ast.ExpressionIdentifer)
+	target = identifier.Var.Typ
+	op = []byte{cg.OP_putfield}
+	meta := closure.getMeta(identifier.Var.Typ.Typ)
+	if context.function.ClosureVars.ClosureVarsExist(identifier.Var) { // capture var exits
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		meta := closure.getMeta(identifier.Var.Typ.Typ)
+		code.Codes[code.CodeLength] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      class.Name,
+			Name:       identifier.Name,
+			Descriptor: "L" + meta.className + ";",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+
+	} else {
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
+	}
+	maxstack = 1
+	remainStack = 1
+	classname = meta.className
+	fieldname = meta.fieldName
+	fieldDescriptor = meta.fieldDescriptor
 	return
 }
 

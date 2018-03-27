@@ -20,6 +20,7 @@ func (c *ClosureVars) Insert(f *Function, v *VariableDefinition) {
 		for _, v := range f.OffsetDestinations {
 			*v += 1
 		}
+		f.VarOffset++
 	}
 	if c.Vars == nil {
 		c.Vars = make(map[*VariableDefinition]struct{})

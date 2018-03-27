@@ -65,8 +65,16 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			b.parseExpressionStatement(block, isDefer)
 			reset()
 		case lex.TOKEN_FUNCTION:
-			b.parseExpressionStatement(block, isDefer)
-			reset()
+			f, err := b.parser.Function.parse(false)
+			if err != nil {
+				b.parser.consume(untils_rc_semicolon)
+			}
+			s := &ast.Statement{}
+			s.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			s.Expression = &ast.Expression{}
+			s.Expression.Typ = ast.EXPRESSION_TYPE_FUNCTION
+			s.Expression.Data = f
+			block.Statements = append(block.Statements, s)
 		case lex.TOKEN_VAR:
 			pos := b.parser.mkPos()
 			b.Next() // skip var key word

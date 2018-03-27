@@ -15,7 +15,7 @@ var (
 	Nodes               *[]*Node
 	packageAliasReg     *regexp.Regexp
 	NameLoader          LoadName
-	LUCY_ROOT_CLASS     = "lucy/lang/Object"
+	LUCY_ROOT_CLASS     = "lucy/deps/Object"
 	JAVA_ROOT_CLASS     = "java/lang/Object"
 	buildinFunctionsMap = make(map[string]*buildFunction)
 	JvmSlotSizeHandler  func(v *VariableType) uint16 // implements by outside

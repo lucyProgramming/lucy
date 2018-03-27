@@ -24,7 +24,21 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		code.CodeLength += 3
 	} else {
 		//closure function call
+		//load object
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosure)...)
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      call.Func.ClassMethod.Class.Name,
+			Name:       call.Func.Name,
+			Descriptor: call.Func.ClassMethod.Descriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context)
+		if t := 1 + stack; t > maxstack {
+			maxstack = t
+		}
 	}
+
 	if e.IsStatementExpression {
 		if e.CallHasReturnValue() == false { // nothing to do
 		} else if len(e.VariableTypes) == 1 {

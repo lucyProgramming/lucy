@@ -257,6 +257,7 @@ func (b *Block) checkFunctions() []error {
 	}
 	return errs
 }
+
 func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	return b.insert(name, pos, d)
 }

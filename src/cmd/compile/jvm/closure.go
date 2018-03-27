@@ -63,6 +63,36 @@ func init() {
 	}
 }
 
+func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
+	switch t {
+	case ast.VARIABLE_TYPE_BOOL:
+		fallthrough
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		meta = closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
+	case ast.VARIABLE_TYPE_LONG:
+		meta = closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
+	case ast.VARIABLE_TYPE_FLOAT:
+		meta = closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
+	case ast.VARIABLE_TYPE_DOUBLE:
+		meta = closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
+	case ast.VARIABLE_TYPE_STRING:
+		meta = closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
+	case ast.VARIABLE_TYPE_OBJECT:
+		fallthrough
+	case ast.VARIABLE_TYPE_ARRAY: //[]int
+		fallthrough
+	case ast.VARIABLE_TYPE_JAVA_ARRAY: // java array int[]
+		fallthrough
+	case ast.VARIABLE_TYPE_MAP:
+		meta = closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
+	}
+	return
+}
+
 /*
 	create a closure var on stack
 */

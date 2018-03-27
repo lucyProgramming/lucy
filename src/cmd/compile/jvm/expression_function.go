@@ -1,8 +1,11 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"path/filepath"
+	"strings"
 )
 
 func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
@@ -13,17 +16,24 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		method.Name = function.Name
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		function.ClassMethod = method
+		method.Class = class
+		method.Descriptor = Descriptor.methodDescriptor(function)
 		m.buildFunction(class, method, function)
 		class.AppendMethod(method)
 		return
 
 	}
 	// function have captured vars
-	classname := m.newClassName(function.Name)
+	classname := m.newClassName("closureFunction_" +
+		fmt.Sprintf("%s_%d_", strings.TrimRight(filepath.Base(function.Pos.Filename), ".lucy"), function.Pos.StartLine) +
+		function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = classname
 	closureClass.SuperClass = ast.LUCY_ROOT_CLASS
 	closureClass.AccessFlags = 0
+	closureClass.Class.AttributeClosureClass = &cg.AttributeClosureFunctionClass{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mkClassDefaultContruction(closureClass)
@@ -34,6 +44,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	method.Descriptor = Descriptor.methodDescriptor(function)
 	m.buildFunction(closureClass, method, function)
 	closureClass.AppendMethod(method)
 	//new a object to hold this closure function
@@ -50,17 +61,16 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		Name:       special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-
 	code.CodeLength += 3
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FiledHighLevel)
 	for v, _ := range function.ClosureVars.Vars {
 		filed := &cg.FiledHighLevel{}
-		filed.AccessFlags |= cg.ACC_FIELD_FINAL
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		filed.Name = v.Name
-		filed.Descriptor = Descriptor.typeDescriptorWhenVariableIsCaptured(v.Typ)
+		meta := closure.getMeta(v.Typ.Typ)
+		filed.Descriptor = "L" + meta.className + ";"
 		closureClass.Fields[v.Name] = filed
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
@@ -77,7 +87,6 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 				Descriptor: filed.Descriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-
 		} else { // not exits
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			if 3 > maxstack {
@@ -93,7 +102,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 3
 	}
 	// store  to,wait for call
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffset)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSetForClosure)...)
 	return
 
 }
