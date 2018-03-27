@@ -11,6 +11,8 @@ const (
 	ATTRIBUTE_NAME_LUCY_ARRAY_DESCRIPTOR              = "LucyArrayDescriptor"
 	ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR             = "LucyMethodDescriptor"
 	ATTRIBUTE_NAME_LUCY_CLOSURE_FUNCTION_CLASS        = "LucyClosureFunctionClass"
+	ATTRIBUTE_NAME_LUCY_INNER_STATIC_METHOD           = "LucyInnerStaticMethod"
+	ATTRIBUTE_NAME_CONST_VALUE                        = "ConstantValue"
 )
 
 func backPatchIndex(locations [][]byte, index uint16) {

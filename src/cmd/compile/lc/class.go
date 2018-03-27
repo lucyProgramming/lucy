@@ -80,21 +80,26 @@ func (c *ClassDecoder) parseInterfaces() {
 	}
 }
 
-func (c *ClassDecoder) parseFields() {
+func (c *ClassDecoder) parseFields() (err error) {
 	length := binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]
+
 	for i := uint16(0); i < length; i++ {
 		f := &cg.FieldInfo{}
 		f.AccessFlags = binary.BigEndian.Uint16(c.bs)
 		f.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
 		f.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 		c.bs = c.bs[6:]
-		f.Attributes = c.parseAttributes()
+		f.AttributeGroupedByName, err = c.parseAttributes()
+		if err != nil {
+			return err
+		}
 		c.ret.Fields = append(c.ret.Fields, f)
 	}
+	return nil
 }
 
-func (c *ClassDecoder) parserMethods() {
+func (c *ClassDecoder) parserMethods() (err error) {
 	length := binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]
 	for i := uint16(0); i < length; i++ {
@@ -103,25 +108,37 @@ func (c *ClassDecoder) parserMethods() {
 		m.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
 		m.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 		c.bs = c.bs[6:]
-		m.Attributes = c.parseAttributes()
+		m.AttributeGroupedByName, err = c.parseAttributes()
+		if err != nil {
+			return err
+		}
 		c.ret.Methods = append(c.ret.Methods, m)
 	}
+	return nil
 }
 
-func (c *ClassDecoder) parseAttributes() []*cg.AttributeInfo {
+func (c *ClassDecoder) parseAttributes() (cg.AttributeGroupedByName, error) {
+	ret := make(cg.AttributeGroupedByName)
 	length := binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]
-	ret := []*cg.AttributeInfo{}
 	for i := uint16(0); i < length; i++ {
 		a := &cg.AttributeInfo{}
 		a.NameIndex = binary.BigEndian.Uint16(c.bs)
+		if c.ret.ConstPool[a.NameIndex].Tag != cg.CONSTANT_POOL_TAG_Utf8 {
+			return ret, fmt.Errorf("name index %d is not a utf const", a.NameIndex)
+		}
 		length := binary.BigEndian.Uint32(c.bs[2:])
 		c.bs = c.bs[6:]
 		a.Info = c.bs[:length]
 		c.bs = c.bs[length:]
-		ret = append(ret, a)
+		name := string(c.ret.ConstPool[a.NameIndex].Info)
+		if _, ok := ret[name]; ok {
+			ret[name] = append(ret[name], a)
+		} else {
+			ret[name] = []*cg.AttributeInfo{a}
+		}
 	}
-	return ret
+	return ret, nil
 }
 
 func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
@@ -152,8 +169,7 @@ func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
 	c.parseInterfaces()
 	c.parseFields()
 	c.parserMethods()
-
-	c.ret.Attributes = c.parseAttributes()
-
-	return ret, nil
+	var err error
+	c.ret.AttributeGroupedByName, err = c.parseAttributes()
+	return ret, err
 }

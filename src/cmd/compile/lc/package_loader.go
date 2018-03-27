@@ -3,6 +3,7 @@ package lc
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,21 +14,21 @@ type RealNameLoader struct {
 	Package *ast.Package
 }
 
-func (this *RealNameLoader) LoadName(p *ast.Package, packageName string, name string) (interface{}, error) {
-	this.Package = p
+func (loader *RealNameLoader) LoadName(p *ast.Package, packageName string, name string) (interface{}, error) {
+	loader.Package = p
 	var realpath []string
 	for _, v := range compiler.ClassPath {
 		f, err := os.Stat(filepath.Join(v, packageName))
 		if err == nil && f.IsDir() { // directory is package
 			realpath = append(realpath, filepath.Join(v, packageName))
-			this.Package.Kind = ast.PACKAGE_KIND_JAVA
+			loader.Package.Kind = ast.PACKAGE_KIND_JAVA
 		}
 	}
 	for _, v := range compiler.lucyPath {
 		f, err := os.Stat(filepath.Join(v, "classes", packageName))
 		if err == nil && f.IsDir() { // directory is package
 			realpath = append(realpath, filepath.Join(v, packageName))
-			this.Package.Kind = ast.PACKAGE_KIND_LUCY
+			loader.Package.Kind = ast.PACKAGE_KIND_LUCY
 		}
 	}
 	if len(realpath) == 0 {
@@ -42,7 +43,7 @@ func (this *RealNameLoader) LoadName(p *ast.Package, packageName string, name st
 	}
 	var fis []os.FileInfo
 	var err error
-	if this.Package.Kind == ast.PACKAGE_KIND_LUCY {
+	if loader.Package.Kind == ast.PACKAGE_KIND_LUCY {
 		fis, err = ioutil.ReadDir(realpath[0])
 	} else { //java package
 		var f os.FileInfo
@@ -54,28 +55,47 @@ func (this *RealNameLoader) LoadName(p *ast.Package, packageName string, name st
 	if err != nil {
 		return nil, fmt.Errorf("read dir '%s' failed,err:%v\n", realpath[0], err)
 	}
-	classfiles := []os.FileInfo{}
+	classfiles := make(map[string]os.FileInfo)
 	for _, v := range fis {
 		if strings.HasSuffix(v.Name(), ".class") { // class file is all I need
-			classfiles = append(classfiles, v)
+			classfiles[v.Name()] = v
 		}
 	}
 	if len(classfiles) == 0 {
-		return nil, fmt.Errorf("package '%s' has no class files")
+		return nil, fmt.Errorf("package '%s' has no class files", packageName)
 	}
-	err = (&RealNameLoader{Package: this.Package}).load(realpath[0], name, classfiles)
+	err = (&RealNameLoader{Package: loader.Package}).load(realpath[0], name, classfiles)
 	if err != nil {
 		return nil, err
 	}
-	if this.Package.Kind == ast.PACKAGE_KIND_LUCY {
-		return this.Package.Block.SearchByName(name), nil
+	if loader.Package.Kind == ast.PACKAGE_KIND_LUCY {
+		return loader.Package.Block.SearchByName(name), nil
 	} else {
-		return this.Package.Block.Classes[name], nil
+		return loader.Package.Block.Classes[name], nil
 	}
 
 }
 
-func (p *RealNameLoader) load(realpath string, name string, files []os.FileInfo) error {
+func (loader *RealNameLoader) load(realpath string, name string, files map[string]os.FileInfo) error {
+	if loader.Package.Kind == ast.PACKAGE_KIND_LUCY {
+		if _, ok := files[common.MAIN_CLASS_NAME]; ok == false {
+			return fmt.Errorf("no main class found")
+		}
+		bs, err := ioutil.ReadFile(filepath.Join(realpath, common.MAIN_CLASS_NAME))
+		if err != nil {
+			return err
+		}
+		c, err := (&ClassDecoder{}).decode(bs)
+		if err != nil {
+			return err
+		}
+		err = loader.loadLucyMainClass(loader.Package, c)
+		if err != nil {
+			return err
+		}
+		delete(files, common.MAIN_CLASS_NAME)
+	}
+
 	for _, f := range files {
 		bs, err := ioutil.ReadFile(filepath.Join(realpath, f.Name()))
 		if err != nil {
@@ -85,24 +105,24 @@ func (p *RealNameLoader) load(realpath string, name string, files []os.FileInfo)
 		if err != nil {
 			return err
 		}
-		if p.Package.Kind == ast.PACKAGE_KIND_JAVA {
-			astClass, err := p.loadAsJava(class)
+		if loader.Package.Kind == ast.PACKAGE_KIND_JAVA {
+			astClass, err := loader.loadAsJava(class)
 			if err != nil {
 				return err
 			}
-			if p.Package.Block.Classes == nil {
-				p.Package.Block.Classes = make(map[string]*ast.Class)
+			if loader.Package.Block.Classes == nil {
+				loader.Package.Block.Classes = make(map[string]*ast.Class)
 			}
-			p.Package.Block.Classes[name] = astClass
-			for k, v := range p.Package.Block.Classes {
-				fmt.Println(k, v)
-			}
-
+			loader.Package.Block.Classes[name] = astClass
 		} else {
-			panic("load lucy")
-		}
-		if err != nil {
-			return err
+			astClass, err := loader.loadAsLucy(class)
+			if err != nil {
+				return err
+			}
+			if loader.Package.Block.Classes == nil {
+				loader.Package.Block.Classes = make(map[string]*ast.Class)
+			}
+			loader.Package.Block.Classes[name] = astClass
 		}
 	}
 	return nil

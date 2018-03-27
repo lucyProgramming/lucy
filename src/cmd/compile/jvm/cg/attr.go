@@ -9,3 +9,12 @@ type AttributeInfo struct {
 type ToAttributeInfo interface {
 	ToAttributeInfo() *AttributeInfo
 }
+
+type AttributeGroupedByName map[string][]*AttributeInfo
+
+func (a AttributeGroupedByName) GetByName(name string) []*AttributeInfo {
+	if a == nil {
+		return nil
+	}
+	return a[name]
+}

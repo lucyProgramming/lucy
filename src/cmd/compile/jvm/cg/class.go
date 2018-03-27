@@ -18,20 +18,18 @@ const (
 )
 
 type Class struct {
-	dest         io.Writer
-	magic        uint32 //0xCAFEBABE
-	MinorVersion uint16
-	MajorVersion uint16
-	ConstPool    []*ConstPool
-	AccessFlag   uint16
-	ThisClass    uint16
-	SuperClass   uint16
-	Interfaces   []uint16
-	Fields       []*FieldInfo
-	Methods      []*MethodInfo
-	Attributes   []*AttributeInfo
-	//SourceFile   string
-	// used when compile code
+	dest                     io.Writer
+	magic                    uint32 //0xCAFEBABE
+	MinorVersion             uint16
+	MajorVersion             uint16
+	ConstPool                []*ConstPool
+	AccessFlag               uint16
+	ThisClass                uint16
+	SuperClass               uint16
+	Interfaces               []uint16
+	Fields                   []*FieldInfo
+	Methods                  []*MethodInfo
+	Attributes               []*AttributeInfo
 	Utf8Consts               map[string]*ConstPool
 	IntConsts                map[int32]*ConstPool
 	LongConsts               map[int64]*ConstPool
@@ -43,8 +41,8 @@ type Class struct {
 	NameAndTypeConsts        map[CONSTANT_NameAndType_info_high_level]*ConstPool
 	MethodrefConsts          map[CONSTANT_Methodref_info_high_level]*ConstPool
 	InterfaceMethodrefConsts map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
-
-	AttributeClosureClass *AttributeClosureFunctionClass
+	AttributeClosureClass    *AttributeClosureFunctionClass
+	AttributeGroupedByName   AttributeGroupedByName
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
@@ -280,9 +278,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
 		field.NameIndex = c.insertUtfConst(f.Name)
-		//if f.Signature != nil {
-		//	field.Attributes = append(field.Attributes, f.Signature.ToAttributeInfo(c))
-		//}
 		if f.ConstantValue != nil {
 			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
 		}
@@ -297,6 +292,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			info.DescriptorIndex = c.insertUtfConst(m.Descriptor)
 			codeinfo := m.Code.ToAttributeInfo(c)
 			info.Attributes = append(info.Attributes, codeinfo)
+			if m.AttributeLucyInnerStaticMethod != nil {
+				info.Attributes = append(info.Attributes, m.AttributeLucyInnerStaticMethod.ToAttributeInfo(c))
+			}
 			c.Methods = append(c.Methods, info)
 		}
 	}

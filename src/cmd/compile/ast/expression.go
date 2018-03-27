@@ -78,6 +78,35 @@ const (
 	EXPRESSION_TYPE_MAP             // map literal
 )
 
+/*
+	mk a expression from a const
+*/
+func (e *Expression) fromConst(c *Const) {
+	switch c.Typ.Typ {
+	case VARIABLE_TYPE_BOOL:
+		e.Typ = EXPRESSION_TYPE_BOOL
+		e.Data = c.Data.(bool)
+	case VARIABLE_TYPE_BYTE:
+		e.Typ = EXPRESSION_TYPE_BYTE
+		e.Data = c.Data.(byte)
+	case VARIABLE_TYPE_INT:
+		e.Typ = EXPRESSION_TYPE_INT
+		e.Data = c.Data.(int32)
+	case VARIABLE_TYPE_LONG:
+		e.Typ = EXPRESSION_TYPE_LONG
+		e.Data = c.Data.(int64)
+	case VARIABLE_TYPE_FLOAT:
+		e.Typ = EXPRESSION_TYPE_FLOAT
+		e.Data = c.Data.(float32)
+	case VARIABLE_TYPE_DOUBLE:
+		e.Typ = EXPRESSION_TYPE_DOUBLE
+		e.Data = c.Data.(float64)
+	case VARIABLE_TYPE_STRING:
+		e.Typ = EXPRESSION_TYPE_STRING
+		e.Data = c.Data.(string)
+	}
+}
+
 type ExpressionSlice struct {
 	Expression *Expression
 	Start, End *Expression

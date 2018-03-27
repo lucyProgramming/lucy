@@ -19,3 +19,7 @@ const (
 	BUILD_IN_FUNCTION_CATCH = "catch"
 	BUILD_IN_FUNCTION_PRINT = "print"
 )
+
+const (
+	MAIN_CLASS_NAME = "main.class"
+)
