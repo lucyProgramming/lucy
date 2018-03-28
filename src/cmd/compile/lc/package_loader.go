@@ -119,10 +119,12 @@ func (loader *RealNameLoader) load(realpath string, name string, files map[strin
 			if err != nil {
 				return err
 			}
-			if loader.Package.Block.Classes == nil {
-				loader.Package.Block.Classes = make(map[string]*ast.Class)
+			if astClass != nil {
+				if loader.Package.Block.Classes == nil {
+					loader.Package.Block.Classes = make(map[string]*ast.Class)
+				}
+				loader.Package.Block.Classes[name] = astClass
 			}
-			loader.Package.Block.Classes[name] = astClass
 		}
 	}
 	return nil

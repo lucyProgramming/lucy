@@ -6,10 +6,6 @@ type AttributeInfo struct {
 	Info            []byte
 }
 
-type ToAttributeInfo interface {
-	ToAttributeInfo() *AttributeInfo
-}
-
 type AttributeGroupedByName map[string][]*AttributeInfo
 
 func (a AttributeGroupedByName) GetByName(name string) []*AttributeInfo {

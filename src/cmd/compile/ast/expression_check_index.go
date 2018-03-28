@@ -86,7 +86,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 			errMsgPrefix(e.Pos)))
 		return nil
 	}
-	field, err := obj.Class.accessField(index.Name)
+	field, err := obj.Class.accessField(index.Name, false)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 	} else {
@@ -100,5 +100,4 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	} else {
 		return nil
 	}
-	return nil
 }

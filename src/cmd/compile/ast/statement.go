@@ -203,7 +203,8 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
-			if f.ClosureVars.NotEmpty() {
+			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
+			if f.IsClosureFunction {
 				f.VarOffSetForClosure = b.InheritedAttribute.Function.VarOffset
 				b.InheritedAttribute.Function.VarOffset++
 				b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosure)

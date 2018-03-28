@@ -7,6 +7,7 @@ import (
 )
 
 type Class struct {
+	Checked            bool
 	Name               string
 	NameWithOutPackage string
 	IsGlobal           bool
@@ -47,13 +48,29 @@ func (c *Class) resolveName(b *Block) []error {
 }
 
 func (c *Class) check(father *Block) []error {
-	c.Block.inherite(father)
-	errs := make([]error, 0)
-	err := c.loadSuperClass()
-	if err != nil {
-		errs = append(errs, err)
+	if c.Checked {
+		return nil
 	}
-	c.loadInterfaces(&errs)
+	c.Block.inherite(father)
+	c.Checked = true
+	if c.SuperClassName == "" {
+		c.SuperClassName = LUCY_ROOT_CLASS
+	} else {
+		if strings.Contains(c.SuperClassName, ".") {
+
+		} else {
+			t := father.SearchByName(c.SuperClassName)
+			if t == nil {
+				c.SuperClassName = LUCY_ROOT_CLASS
+
+			} else {
+				if _, ok := t.(*Class); ok == false {
+					c.SuperClassName = LUCY_ROOT_CLASS
+				}
+			}
+		}
+	}
+	errs := make([]error, 0)
 	c.Block.check() // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
@@ -197,18 +214,6 @@ func (c *Class) checkMethods() []error {
 		c.checkReloadFunctions(v, &errs)
 	}
 	return errs
-}
-
-func (c *Class) accessField(name string) (f *ClassField, err error) {
-	if c.Fields[name] == nil {
-		err = fmt.Errorf("field %s not found", name)
-		return
-	}
-	f = c.Fields[name]
-	return
-}
-func (c *Class) accessMethod(name string, pos *Pos, args []*VariableType) (f *ClassMethod, errs []error) {
-	return
 }
 
 func (c *Class) loadSuperClass() error {

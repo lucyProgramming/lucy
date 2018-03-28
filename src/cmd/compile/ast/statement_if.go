@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -21,6 +20,10 @@ func (s *StatementIF) check(father *Block) []error {
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
+	if s.Condition.canbeUsedAsCondition() == false {
+		errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
+			errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
+	}
 	if conditionType != nil {
 		if conditionType.Typ != VARIABLE_TYPE_BOOL {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
@@ -31,6 +34,10 @@ func (s *StatementIF) check(father *Block) []error {
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		for _, v := range s.ElseIfList {
 			v.Block.inherite(father)
+			if v.Condition.canbeUsedAsCondition() == false {
+				errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
+					errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
+			}
 			conditionType, es := v.Block.checkExpression(v.Condition)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)

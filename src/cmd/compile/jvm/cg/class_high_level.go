@@ -52,6 +52,9 @@ type CONSTANT_Fieldref_info_high_level struct {
 	new a method name,mksure it does exists before
 */
 func (c *ClassHighLevel) NewFunctionName(prefix string) string {
+	if c.Methods == nil && c.Methods[prefix] == nil {
+		return prefix
+	}
 	for i := 0; i < math.MaxInt16; i++ {
 		name := prefix + fmt.Sprintf("%d", i)
 		if _, ok := c.Methods[name]; ok == false {

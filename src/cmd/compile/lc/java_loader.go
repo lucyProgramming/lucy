@@ -5,7 +5,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"strings"
 )
 
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
@@ -14,15 +13,9 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	{
 		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
 		astClass.Name = string(c.ConstPool[nameindex].Info)
-		t := strings.Split(astClass.Name, "/")
-		astClass.Name = t[len(t)-1]
-	}
-	{
 		if astClass.Name != ast.JAVA_ROOT_CLASS {
-			nameindex := binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
-			astClass.Name = string(c.ConstPool[nameindex].Info)
-			t := strings.Split(astClass.Name, "/")
-			astClass.Name = t[len(t)-1]
+			nameindex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
+			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
 	astClass.Access = c.AccessFlag
@@ -47,10 +40,14 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-		if astClass.Methods[m.Func.Name] == nil {
-			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
+		if m.Func.Name == "<init>" {
+			astClass.Constructors = append(astClass.Constructors, m)
 		} else {
-			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
+			if astClass.Methods[m.Func.Name] == nil {
+				astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
+			} else {
+				astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
+			}
 		}
 	}
 	return astClass, nil

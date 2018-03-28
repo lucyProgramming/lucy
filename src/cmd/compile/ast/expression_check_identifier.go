@@ -55,11 +55,11 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	return nil, nil
 }
 
-func (e *Expression) isThisIdentifierExpression() (b bool) {
+func (e *Expression) isThisIdentifierExpression() (is bool) {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return
 	}
 	t := e.Data.(*ExpressionIdentifer)
-	b = (t.Name == THIS)
+	is = (t.Name == THIS)
 	return
 }

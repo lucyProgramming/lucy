@@ -96,6 +96,12 @@ func (b *Block) SearchByName(name string) interface{} {
 				return l
 			}
 		}
+		// if it is a function
+		if f, ok := t.(*Function); ok && f.IsGlobal == false {
+			if b.IsFunctionTopBlock {
+				b.InheritedAttribute.Function.ClosureVars.InsertFunction(f)
+			}
+		}
 	}
 	return t
 }

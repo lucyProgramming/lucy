@@ -34,10 +34,14 @@ func (m *MakeClass) newClassName(prefix string) (autoName string) {
 		if ok {
 			continue
 		}
-		return m.p.Name + "/" + autoName
+		autoName = m.p.Name + "/" + autoName
+		_, ok = m.Classes[autoName]
+		if ok {
+			continue
+		}
+		return autoName
 	}
 	panic("cannot new class name")
-
 }
 
 func (m *MakeClass) putClass(name string, class *cg.ClassHighLevel) {

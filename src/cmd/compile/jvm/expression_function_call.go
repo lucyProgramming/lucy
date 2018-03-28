@@ -6,14 +6,14 @@ import (
 )
 
 /*
-maxstack means return value stack size
+	maxstack means return value stack size
 */
 func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Func.IsBuildin {
 		return m.mkBuildinFunctionCall(class, code, e, context)
 	}
-	if call.Func.IsClosureFunction() == false {
+	if call.Func.IsClosureFunction == false {
 		maxstack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -25,7 +25,22 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	} else {
 		//closure function call
 		//load object
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosure)...)
+		if _, ok := context.function.ClosureVars.Funcs[call.Func]; ok {
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      class.Name,
+				Name:       call.Func.Name,
+				Descriptor: "L" + call.Func.ClassMethod.Class.Name + ";",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else {
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosure)...)
+		}
+		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context)
+		if t := 1 + stack; t > maxstack {
+			maxstack = t
+		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
@@ -33,10 +48,6 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 			Descriptor: call.Func.ClassMethod.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context)
-		if t := 1 + stack; t > maxstack {
-			maxstack = t
-		}
 	}
 
 	if e.IsStatementExpression {

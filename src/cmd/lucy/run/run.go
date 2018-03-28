@@ -313,8 +313,19 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 			return
 		}
 	}
+	//before compile delete old class and maintain.json
+	{
+		fis, _ := ioutil.ReadDir(destDir)
+		for _, f := range fis {
+			if strings.HasPrefix(f.Name(), ".class") || f.Name() == common.LUCY_MAINTAIN_FILE {
+				os.Remove(filepath.Join(destDir, f.Name()))
+			}
+		}
+	}
+
 	// cd to destDir
 	os.Chdir(destDir)
+
 	args := []string{"-pn", packageName}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)

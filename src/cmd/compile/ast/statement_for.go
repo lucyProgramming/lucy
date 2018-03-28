@@ -312,6 +312,10 @@ func (s *StatementFor) check(block *Block) []error {
 		}
 	}
 	if s.Condition != nil {
+		if s.Condition.canbeUsedAsCondition() == false {
+			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
+				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
+		}
 		t, es := s.Block.checkExpression(s.Condition)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)

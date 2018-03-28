@@ -10,7 +10,7 @@ import (
 
 func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	function := e.Data.(*ast.Function)
-	if function.ClosureVars.NotEmpty() == false {
+	if function.IsClosureFunction == false {
 		function.Name = class.NewFunctionName(function.Name) // new a function name
 		method := &cg.MethodHighLevel{}
 		method.Name = function.Name
@@ -24,8 +24,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		m.buildFunction(class, method, function)
 		class.AppendMethod(method)
 		return
-
 	}
+
 	// function have captured vars
 	classname := m.newClassName("closureFunction_" +
 		fmt.Sprintf("%s_%d_", strings.TrimRight(filepath.Base(function.Pos.Filename), ".lucy"), function.Pos.StartLine) +
@@ -40,17 +40,16 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	mkClassDefaultContruction(closureClass)
 	m.putClass(classname, closureClass)
 
-	// build function
 	method := &cg.MethodHighLevel{}
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	method.Descriptor = Descriptor.methodDescriptor(function)
-	m.buildFunction(closureClass, method, function)
-	closureClass.AppendMethod(method)
-	//new a object to hold this closure function
 	method.Class = closureClass
 	function.ClassMethod = method
+
+	closureClass.AppendMethod(method)
+	//new a object to hold this closure function
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -63,8 +62,14 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.CodeLength++
+	// store  to,wait for call
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSetForClosure)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FiledHighLevel)
+	total := len(function.ClosureVars.Vars) + len(function.ClosureVars.Funcs)
+	i := 0
 	for v, _ := range function.ClosureVars.Vars {
 		filed := &cg.FiledHighLevel{}
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
@@ -73,8 +78,10 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		meta := closure.getMeta(v.Typ.Typ)
 		filed.Descriptor = "L" + meta.className + ";"
 		closureClass.Fields[v.Name] = filed
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
+		if i != total-1 {
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+		}
 		if context.function.ClosureVars.ClosureVarsExist(v) {
 			// I Know class at 0 offset
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
@@ -101,9 +108,50 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			Descriptor: filed.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		i++
 	}
-	// store  to,wait for call
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSetForClosure)...)
+	for v, _ := range function.ClosureVars.Funcs {
+		filed := &cg.FiledHighLevel{}
+		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
+		filed.Name = v.Name
+		filed.Descriptor = "L" + v.ClassMethod.Class.Name + ";"
+		closureClass.Fields[v.Name] = filed
+		if i != total-1 {
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+		}
+		if context.function.ClosureVars.ClosureFunctionExist(v) {
+			// I Know class at 0 offset
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			if 3 > maxstack {
+				maxstack = 3
+			}
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      class.Name,
+				Name:       v.Name,
+				Descriptor: filed.Descriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else { // not exits
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.VarOffSetForClosure)...)
+			if 3 > maxstack {
+				maxstack = 3
+			}
+		}
+		code.Codes[code.CodeLength] = cg.OP_putfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      classname,
+			Name:       v.Name,
+			Descriptor: filed.Descriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		i++
+	}
+
+	// build function
+	m.buildFunction(closureClass, method, function)
 	return
 
 }

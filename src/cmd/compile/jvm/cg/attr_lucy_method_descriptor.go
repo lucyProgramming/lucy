@@ -2,11 +2,11 @@ package cg
 
 import "encoding/binary"
 
-type AttributeMethodDescritor struct {
+type AttributeLucyMethodDescritor struct {
 	Descriptor string
 }
 
-func (a *AttributeMethodDescritor) ToAttributeInfo(class *Class) *AttributeInfo {
+func (a *AttributeLucyMethodDescritor) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.NameIndex = class.insertUtfConst(ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR)
 	ret.Info = make([]byte, 2)

@@ -6,6 +6,7 @@ import (
 )
 
 type Function struct {
+	IsClosureFunction              bool
 	ClassMethod                    *cg.MethodHighLevel
 	VarOffSetForClosure            uint16
 	isGlobalVariableDefinition     bool
@@ -16,7 +17,7 @@ type Function struct {
 	Used                           bool
 	AccessFlags                    uint16 // public private or protected
 	Typ                            *FunctionType
-	ClosureVars                    ClosureVars
+	ClosureVars                    Closure
 	Name                           string // if name is nil string,means no name function
 	Block                          *Block
 	Pos                            *Pos
@@ -97,10 +98,6 @@ type AutoVarForMultiReturn struct {
 	Offset uint16
 }
 
-func (f *Function) IsClosureFunction() bool {
-	return f.ClosureVars.NotEmpty()
-}
-
 func (f *Function) readableMsg() string {
 	s := "fn" + f.Name + "("
 	for k, v := range f.Typ.ParameterList {
@@ -130,8 +127,10 @@ func (f *Function) MkVariableType() {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	f.mkLastRetrunStatement()
-	*errs = append(*errs, f.Block.check()...)
+	if f.Typ != nil {
+		f.mkLastRetrunStatement()
+		*errs = append(*errs, f.Block.check()...)
+	}
 }
 
 func (f *Function) check(b *Block) []error {
@@ -171,47 +170,50 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		}
 		return
 	}
-	var err error
-	for _, v := range f.Typ.ParameterList {
-		v.IsFunctionParameter = true
-		err = v.Typ.resolve(f.Block)
-		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
-		}
-		err = f.Block.insert(v.Name, v.Pos, v)
-		if err != nil {
-			*errs = append(*errs, err)
-			continue
-		}
-
-	}
-	//handler return
-	for _, v := range f.Typ.ReturnList {
-		err = v.Typ.resolve(f.Block)
-		if err != nil {
-			*errs = append(*errs, err)
-		}
-		err = f.Block.insert(v.Name, v.Pos, v)
-		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
-		}
-		if v.Expression == nil {
-			v.Expression = v.Typ.mkDefaultValueExpression()
-		} else {
-			ts, es := v.Expression.check(f.Block)
-			if errsNotEmpty(es) {
-				*errs = append(*errs, es...)
+	if f.Typ != nil {
+		var err error
+		for _, v := range f.Typ.ParameterList {
+			v.IsFunctionParameter = true
+			err = v.Typ.resolve(f.Block)
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 			}
-			t, err := v.Expression.mustBeOneValueContext(ts)
+			err = f.Block.insert(v.Name, v.Pos, v)
+			if err != nil {
+				*errs = append(*errs, err)
+				continue
+			}
+
+		}
+		//handler return
+		for _, v := range f.Typ.ReturnList {
+			err = v.Typ.resolve(f.Block)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			err = f.Block.insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 			}
-			if t.TypeCompatible(v.Typ) == false {
-				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString())
-				*errs = append(*errs, err)
+			if v.Expression == nil {
+				v.Expression = v.Typ.mkDefaultValueExpression()
+			} else {
+				ts, es := v.Expression.check(f.Block)
+				if errsNotEmpty(es) {
+					*errs = append(*errs, es...)
+				}
+				t, err := v.Expression.mustBeOneValueContext(ts)
+				if err != nil {
+					*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+				}
+				if t.TypeCompatible(v.Typ) == false {
+					err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString())
+					*errs = append(*errs, err)
+				}
 			}
 		}
 	}
+
 }
 
 type FunctionType struct {

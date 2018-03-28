@@ -119,6 +119,23 @@ func (e *Expression) IsLiteral() bool {
 		e.IsNumber()
 }
 
+/*
+	valid for condition
+*/
+func (e *Expression) canbeUsedAsCondition() bool {
+	return e.Typ == EXPRESSION_TYPE_EQ ||
+		e.Typ == EXPRESSION_TYPE_NE ||
+		e.Typ == EXPRESSION_TYPE_GE ||
+		e.Typ == EXPRESSION_TYPE_GT ||
+		e.Typ == EXPRESSION_TYPE_LE ||
+		e.Typ == EXPRESSION_TYPE_LT ||
+		e.Typ == EXPRESSION_TYPE_BOOL ||
+		e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
+		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
+		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
+		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
+		e.Typ == EXPRESSION_TYPE_NOT
+}
 func (e *Expression) canBeUsedAsStatementExpression() bool {
 	return e.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_ASSIGN ||
