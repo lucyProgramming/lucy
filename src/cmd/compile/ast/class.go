@@ -7,6 +7,7 @@ import (
 )
 
 type Class struct {
+	Package            *Package
 	Checked            bool
 	Name               string
 	NameWithOutPackage string
@@ -22,7 +23,6 @@ type Class struct {
 	Constructors       []*ClassMethod // can be nil
 	SouceFile          string
 	Used               bool
-	VariableType       VariableType
 }
 
 func (c *Class) resolveName(b *Block) []error {
@@ -32,8 +32,6 @@ func (c *Class) resolveName(b *Block) []error {
 		err = v.Typ.resolve(b)
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			v.Typ.actionNeedBeenDoneWhenDescribeVariable()
 		}
 	}
 	for _, v := range c.Constructors {
@@ -53,6 +51,7 @@ func (c *Class) check(father *Block) []error {
 	}
 	c.Block.inherite(father)
 	c.Checked = true
+	//super class name
 	if c.SuperClassName == "" {
 		c.SuperClassName = LUCY_ROOT_CLASS
 	} else {
@@ -70,6 +69,8 @@ func (c *Class) check(father *Block) []error {
 			}
 		}
 	}
+	c.Name = PackageBeenCompile.Name + "/" + c.Name // binary name
+	c.Package = PackageBeenCompile
 	errs := make([]error, 0)
 	c.Block.check() // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
@@ -139,11 +140,6 @@ func (c *Class) instanceOf(super *Class) bool {
 	return false
 }
 
-func (c *Class) mkVariableType() {
-	c.VariableType.Typ = VARIABLE_TYPE_CLASS
-	c.VariableType.Class = c
-}
-
 func (c *Class) checkConstructionFunctions() []error {
 	errs := []error{}
 	for _, v := range c.Constructors {
@@ -202,7 +198,7 @@ func (c *Class) checkFields() []error {
 }
 
 func (c *Class) checkField(f *ClassField, errs *[]error) {
-	err := c.VariableType.resolve(&c.Block)
+	err := f.Typ.resolve(&c.Block)
 	if err != nil {
 		*errs = append(*errs, err)
 	}

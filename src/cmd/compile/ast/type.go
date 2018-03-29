@@ -158,19 +158,19 @@ func (t *VariableType) Clone() *VariableType {
 /*
 	when typ is VARIABLE_TYPE_CLASS ,convert to object assoiate with class
 */
-func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
-	if t == nil { // in some case identifier is insert into block,but typ is still wrong
-		return
-	}
-	if t.Typ == VARIABLE_TYPE_CLASS {
-		t.Typ = VARIABLE_TYPE_OBJECT // correct
-		return                       // no further need be done
-	}
-	if t.Typ == VARIABLE_TYPE_ARRAY {
-		t.ArrayType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
-		return
-	}
-}
+//func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
+//	if t == nil { // in some case identifier is insert into block,but typ is still wrong
+//		return
+//	}
+//	if t.Typ == VARIABLE_TYPE_CLASS {
+//		t.Typ = VARIABLE_TYPE_OBJECT // correct
+//		return                       // no further need be done
+//	}
+//	if t.Typ == VARIABLE_TYPE_ARRAY {
+//		t.ArrayType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
+//		return
+//	}
+//}
 
 func (t *VariableType) resolve(block *Block) error {
 	if t.IsPrimitive() {
@@ -187,7 +187,7 @@ func (t *VariableType) resolve(block *Block) error {
 
 func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
-	if !strings.Contains(t.Name, ".") {
+	if strings.Contains(t.Name, ".") == false {
 		d = block.SearchByName(t.Name)
 		if d == nil {
 			return fmt.Errorf("%s not found", t.Name)
@@ -206,7 +206,8 @@ func (t *VariableType) resolveName(block *Block) error {
 	case *Const:
 		return fmt.Errorf("%s name %s is a const,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Class:
-		*t = d.(*Class).VariableType
+		t.Typ = VARIABLE_TYPE_OBJECT
+		t.Class = d.(*Class)
 		return nil
 	case *Enum:
 		*t = d.(*Enum).VariableType

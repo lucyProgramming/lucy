@@ -143,9 +143,6 @@ func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-/*
-	create a closure var on stack
-*/
 func (closure *Closure) storeLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) {
 	var meta *ClosureObjectMeta
 	switch v.Typ.Typ {

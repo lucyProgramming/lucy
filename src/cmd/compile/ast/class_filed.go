@@ -6,6 +6,7 @@ import (
 
 type ClassField struct {
 	VariableDefinition
+	LoadFromOutSide bool
 }
 
 func (f *ClassField) isStatic() bool {

@@ -24,6 +24,7 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 		}
 		code.CodeLength++
 	}
+	return
 }
 func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall, context *Context) (maxstack uint16) {
 	maxstack, _ = m.build(class, code, call.Args[0], context)

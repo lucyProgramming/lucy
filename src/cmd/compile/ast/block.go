@@ -118,10 +118,9 @@ type InheritedAttribute struct {
 	StatementSwitch              *StatementSwitch
 	mostCloseForOrSwitchForBreak interface{}
 	Function                     *Function
-	//OutterFunction               *Function
-	class  *Class
-	Defer  *Defer
-	Defers []*Defer
+	class                        *Class
+	Defer                        *Defer
+	Defers                       []*Defer
 }
 
 type NameWithType struct {
@@ -277,7 +276,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 			return fmt.Errorf(errmsg)
 		}
 		b.Vars[name] = v
-		v.Typ.actionNeedBeenDoneWhenDescribeVariable()
 		v.IsGlobal = true // it`s global
 		return nil
 	}
@@ -363,7 +361,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		t.Typ.actionNeedBeenDoneWhenDescribeVariable()
 		t.LocalValOffset = b.InheritedAttribute.Function.VarOffset
 		b.InheritedAttribute.Function.VarOffset += t.NameWithType.Typ.JvmSlotSize()
 		b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &t.LocalValOffset)

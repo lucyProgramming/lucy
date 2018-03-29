@@ -57,7 +57,6 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	if arr.Typ == nil {
 		return nil
 	}
-	arr.Typ.actionNeedBeenDoneWhenDescribeVariable()
 	tt := arr.Typ.Clone()
 	tt.Pos = e.Pos
 	return tt

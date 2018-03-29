@@ -108,7 +108,10 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 		t.Typ = ast.VARIABLE_TYPE_OBJECT
 		t.Class = &ast.Class{}
 		t.Name = string(bs[:index])
-		bs = bs[index+1:]
+		bs = bs[index+1:] // skip ;
+		if t.Name == java_string_class {
+			t.Typ = ast.VARIABLE_TYPE_STRING
+		}
 		return bs, t, nil
 	case '[':
 		bs = bs[1:]

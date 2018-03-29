@@ -312,20 +312,37 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.StatmentForRangeAttr.IdentifierV.Var.BeenCaptured {
-			panic("...")
-		}
-		copyOP(code,
-			loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
-		copyOP(code,
-			storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
-		if s.StatmentForRangeAttr.ModelKV {
-			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {
-				panic("...")
+			stack := closure.createCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+			if stack > maxstack {
+				maxstack = stack
 			}
 			copyOP(code,
-				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
+				loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
 			copyOP(code,
-				storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
+				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
+			closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+		} else {
+			copyOP(code,
+				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
+			copyOP(code,
+				storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
+
+		}
+		if s.StatmentForRangeAttr.ModelKV {
+			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {
+				stack := closure.createCloureVar(class, code, s.StatmentForRangeAttr.IdentifierK.Var)
+				if stack > maxstack {
+					maxstack = stack
+				}
+				copyOP(code,
+					loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
+				closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierK.Var)
+			} else {
+				copyOP(code,
+					loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
+				copyOP(code,
+					storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
+			}
 		}
 	} else { // for k,v = range arr
 		// store v

@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -165,18 +164,31 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
-	f, es := object.Class.accessMethod(call.Name, e.Pos, args)
-	if errsNotEmpty(es) {
-		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err))
-	} else {
-		if !call.Expression.isThisIdentifierExpression() {
-			*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
-		}
+	ms, err := object.Class.accessMethod(call.Name, args)
+	if err != nil {
+		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 	}
-	if f == nil {
+	if ms == nil {
 		return nil
 	}
-	return args
+	if len(ms) == 1 {
+		if false == call.Expression.isThisIdentifierExpression() &&
+			ms[0].IsPublic() == false {
+			*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
+		}
+		call.Method = ms[0]
+		return ms[0].Func.Typ.ReturnList.retTypes(e.Pos)
+	} else if len(ms) > 1 {
+		errmsg := fmt.Sprintf("%s method named '%s' have no suitable match,but we have methods:\n",
+			errMsgPrefix(e.Pos), call.Name)
+		for _, m := range ms {
+			errmsg += "\t" + m.Func.readableMsg() + "\n"
+		}
+		*errs = append(*errs, fmt.Errorf(errmsg))
+	} else { // == 0
+		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
+	}
+	return nil
 }
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {

@@ -29,9 +29,18 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
+		f.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		f.LoadFromOutSide = true
 		_, f.Typ, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
+		}
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
+			index := binary.BigEndian.Uint64(t[0].Info)
+			_, f.Typ, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
+			if err != nil {
+				return nil, err
+			}
 		}
 		f.AccessFlags = v.AccessFlags
 		astClass.Fields[f.Name] = f
@@ -44,6 +53,15 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m.Func.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
+		}
+		m.LoadFromOutSide = true
+		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
+			index := binary.BigEndian.Uint64(t[0].Info)
+			err = jvm.LucyMethodSignatureParser.Deocde(c.ConstPool[index].Info, m.Func)
+			if err != nil {
+				return nil, err
+			}
 		}
 		if m.Func.Name == "<init>" {
 			astClass.Constructors = append(astClass.Constructors, m)

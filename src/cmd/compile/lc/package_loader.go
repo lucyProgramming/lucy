@@ -114,6 +114,7 @@ func (loader *RealNameLoader) load(realpath string, name string, files map[strin
 				loader.Package.Block.Classes = make(map[string]*ast.Class)
 			}
 			loader.Package.Block.Classes[name] = astClass
+			astClass.Package = loader.Package
 		} else {
 			astClass, err := loader.loadAsLucy(class)
 			if err != nil {
@@ -125,6 +126,7 @@ func (loader *RealNameLoader) load(realpath string, name string, files map[strin
 				}
 				loader.Package.Block.Classes[name] = astClass
 			}
+			astClass.Package = loader.Package
 		}
 	}
 	return nil

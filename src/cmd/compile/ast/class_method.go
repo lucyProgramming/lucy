@@ -7,6 +7,7 @@ import (
 type ClassMethod struct {
 	Func                 *Function
 	IsConstructionMethod bool
+	LoadFromOutSide      bool
 }
 
 func (m *ClassMethod) IsPublic() bool {

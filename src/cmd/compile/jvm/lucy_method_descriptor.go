@@ -7,74 +7,6 @@ import (
 type LucyMethodSignatureParse struct {
 }
 
-func (LucyMethodSignatureParse) Parse(bs []byte) (*ast.FunctionType, error) {
-	return nil, nil
-	//if bs[0] != '(' {
-	//	return nil, fmt.Errorf("signature dose not beging with '('")
-	//}
-	//bs = bs[1:]
-	//ret := &ast.FunctionType{}
-	//i := 1
-	//for bs[0] != ')' {
-	//	switch bs[0] {
-	//	case 'B':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_BYTE
-	//		bs = bs[1:]
-	//	case 'C':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_SHORT
-	//		bs = bs[1:]
-	//	case 'D':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_DOUBLE
-	//		bs = bs[1:]
-	//	case 'F':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_FLOAT
-	//		bs = bs[1:]
-	//	case 'I':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_INT
-	//		bs = bs[1:]
-	//	case 'J':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_LONG
-	//		bs = bs[1:]
-	//	case 'S':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_SHORT
-	//		bs = bs[1:]
-	//	case 'Z':
-	//		vd := &ast.VariableDefinition{}
-	//		vd.Name = fmt.Sprintf("var_%d", i)
-	//		vd.Typ = &ast.VariableType{}
-	//		vd.Typ.Typ = ast.VARIABLE_TYPE_BOOL
-	//		bs = bs[1:]
-	//	case '[':
-	//	case 'L':
-	//	default:
-	//	}
-	//	i++
-	//}
-	//bs = bs[1:] // skip )
-
-}
-
 func (LucyMethodSignatureParse) Need(functionType *ast.FunctionType) bool {
 	for _, v := range functionType.ParameterList {
 		if LucyFieldSignatureParser.Need(v.Typ) {
@@ -87,4 +19,40 @@ func (LucyMethodSignatureParse) Need(functionType *ast.FunctionType) bool {
 		}
 	}
 	return false
+}
+
+func (LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor string) {
+	descriptor = "("
+	for _, v := range f.Typ.ParameterList {
+		descriptor += LucyFieldSignatureParser.Encode(v.Typ)
+	}
+	descriptor += ")"
+	if f.HaveNoReturnValue() {
+		descriptor += "V"
+	} else {
+		for _, v := range f.Typ.ParameterList {
+			descriptor += LucyFieldSignatureParser.Encode(v.Typ)
+		}
+	}
+	return descriptor
+}
+
+//rewrite types
+func (LucyMethodSignatureParse) Deocde(bs []byte, f *ast.Function) error {
+	bs = bs[1:] // skip (
+	var err error
+	for i := 0; i < len(f.Typ.ParameterList); i++ {
+		bs, f.Typ.ParameterList[i].Typ, err = LucyFieldSignatureParser.Decode(bs)
+		if err != nil {
+			return err
+		}
+	}
+	bs = bs[1:] // skip )
+	for i := 0; i < len(f.Typ.ReturnList); i++ {
+		bs, f.Typ.ReturnList[i].Typ, err = LucyFieldSignatureParser.Decode(bs)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

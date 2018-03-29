@@ -62,9 +62,11 @@ func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) 
 	t.Elements = f.VarOffset + 1
 	t.Start = f.VarOffset + 2
 	t.End = f.VarOffset + 3
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.K, &t.Elements, &t.Start, &t.End)
 	f.VarOffset += 4
 	t.V = f.VarOffset
 	f.VarOffset += vt.JvmSlotSize()
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
 }
 
 func (s *StatementFor) checkRange() []error {

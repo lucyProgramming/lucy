@@ -23,6 +23,8 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	astClass.Fields = make(map[string]*ast.ClassField)
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
+		f.LoadFromOutSide = true
+		f.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		_, f.Typ, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
@@ -35,7 +37,9 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	for _, v := range c.Methods {
 		m := &ast.ClassMethod{}
 		m.Func = &ast.Function{}
+		m.LoadFromOutSide = true
 		m.Func.Name = string(c.ConstPool[v.NameIndex].Info)
+		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		m.Func.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err

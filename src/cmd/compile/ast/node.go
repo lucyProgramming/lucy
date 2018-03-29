@@ -48,7 +48,7 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		case *Const:
 			t := v.Data.(*Const)
 			c.Consts = append(c.Consts, t)
-		case *Import :
+		case *Import:
 			i := v.Data.(*Import)
 			if p.Files[i.Pos.Filename] == nil {
 				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
@@ -79,7 +79,6 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 	}
 	p.Block.Classes = make(map[string]*Class)
 	for _, v := range c.Classes {
-		v.mkVariableType()
 		p.Block.Classes[v.Name] = v
 	}
 	p.Block.Enums = make(map[string]*Enum)

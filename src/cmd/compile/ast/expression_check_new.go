@@ -18,7 +18,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		return e.checkNewArrayExpression(block, no, errs)
 	}
 	// new object
-	if no.Typ.Typ != VARIABLE_TYPE_CLASS {
+	if no.Typ.Typ != VARIABLE_TYPE_OBJECT {
 		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'", errMsgPrefix(e.Pos), no.Typ.TypeString()))
 		return nil
 	}
@@ -43,14 +43,12 @@ func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew, 
 	if len(newMap.Args) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s new map expect no arguments", errMsgPrefix(newMap.Args[0].Pos)))
 	}
-	newMap.Typ.actionNeedBeenDoneWhenDescribeVariable()
 	tt := newMap.Typ.Clone()
 	tt.Pos = e.Pos
 	return tt
 }
 
 func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew, errs *[]error) *VariableType {
-	newArray.Typ.actionNeedBeenDoneWhenDescribeVariable()
 	ret := newArray.Typ.Clone() // clone the type
 	ret.Pos = e.Pos
 	if len(newArray.Args) > 1 { // 0 and 1 is accpect
