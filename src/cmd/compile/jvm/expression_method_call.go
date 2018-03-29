@@ -13,12 +13,15 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildMapMethodCall(class, code, e, context)
 	}
+	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+		return m.buildJavaArrayMethodCall(class, code, e, context)
+	}
 	if call.Method.IsStatic() {
 		maxstack = m.buildCallArgs(class, code, call.Args, nil, context)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Method.Func.ClassMethod.Class.Name,
-			Name:       call.Name,
+			Method:     call.Name,
 			Descriptor: call.Method.Func.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -32,7 +35,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      call.Method.Func.ClassMethod.Class.Name,
-		Name:       call.Name,
+		Method:     call.Name,
 		Descriptor: call.Method.Func.Descriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

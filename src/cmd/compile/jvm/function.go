@@ -58,7 +58,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.classname,
-			Name:       special_method_init,
+			Method:     special_method_init,
 			Descriptor: meta.constructorFuncDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -85,7 +85,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 
 func (m *MakeClass) loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
 	if v.BeenCaptured {
-		panic("...")
+		return closure.loadLocalCloureVar(class, code, v)
 	}
 	maxstack = v.Typ.JvmSlotSize()
 	switch v.Typ.Typ {
@@ -220,7 +220,6 @@ func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		closure.storeLocalCloureVar(class, code, v)
 		return
 	}
-
 	maxstack = v.Typ.JvmSlotSize()
 	switch v.Typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
@@ -341,7 +340,7 @@ func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			if v.LocalValOffset > 255 {
 				panic("over 255")
 			}
-			code.Codes[code.CodeLength] = cg.OP_aload
+			code.Codes[code.CodeLength] = cg.OP_astore
 			code.Codes[code.CodeLength+1] = byte(v.LocalValOffset)
 			code.CodeLength += 2
 		}

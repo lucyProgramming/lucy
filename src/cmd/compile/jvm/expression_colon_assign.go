@@ -61,21 +61,21 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
-		if variables[0].Name != ast.NO_NAME_IDENTIFIER {
-			if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
-				m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
-			}
-			m.MakeClass.storeLocalVar(class, code, variables[0])
-			if variables[0].BeenCaptured {
-				currentStack -= 1
-			}
-		} else {
+		if variables[0].Name == ast.NO_NAME_IDENTIFIER {
 			if variableType.JvmSlotSize() == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 				code.CodeLength++
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 				code.CodeLength++
+			}
+		} else {
+			if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
+				m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
+			}
+			m.MakeClass.storeLocalVar(class, code, variables[0])
+			if variables[0].BeenCaptured {
+				currentStack -= 1
 			}
 		}
 		variables = variables[1:]

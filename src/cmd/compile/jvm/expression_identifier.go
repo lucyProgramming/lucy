@@ -12,6 +12,14 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	} else {
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		meta := closure.getMeta(identifier.Var.Typ.Typ)
+		code.Codes[code.CodeLength] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      class.Name,
+			Field:      identifier.Var.Name,
+			Descriptor: "L" + meta.className + ";",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	}
 	if 1 > maxstack {
 		maxstack = 1
@@ -19,74 +27,7 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 	if t := identifier.Var.Typ.JvmSlotSize(); t > maxstack {
 		maxstack = t
 	}
-	switch identifier.Var.Typ.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
-	case ast.VARIABLE_TYPE_INT:
-		meta := closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Name:       meta.fieldName,
-			Descriptor: meta.fieldDescriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_LONG:
-		meta := closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Name:       meta.fieldName,
-			Descriptor: meta.fieldDescriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_FLOAT:
-		meta := closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Name:       meta.fieldName,
-			Descriptor: meta.fieldDescriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_DOUBLE:
-		meta := closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Name:       meta.fieldName,
-			Descriptor: meta.fieldDescriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_STRING:
-		meta := closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Name:       meta.fieldName,
-			Descriptor: meta.fieldDescriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_MAP:
-		meta := closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Name:       meta.fieldName,
-			Descriptor: meta.fieldDescriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_OBJECT:
-	case ast.VARIABLE_TYPE_ARRAY:
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
-	}
+	closure.unPack(class, code, identifier.Var.Typ)
 	return
 }
 
@@ -96,7 +37,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      context.mainclass.Name,
-			Name:       identifier.Name,
+			Field:      identifier.Name,
 			Descriptor: Descriptor.typeDescriptor(identifier.Var.Typ),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -106,7 +47,6 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 	if identifier.Var.BeenCaptured {
 		return m.buildCapturedIdentifer(class, code, e, context)
 	}
-
 	switch identifier.Var.Typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -216,7 +156,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
 			code.CodeLength += 2
 		} else {
-			panic("local object var out of range")
+			panic("local object var out of range,max 255")
 		}
 		maxstack = 1
 	}

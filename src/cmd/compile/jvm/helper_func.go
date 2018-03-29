@@ -22,7 +22,7 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Code.Codes[1] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      class.SuperClass,
-		Name:       special_method_init,
+		Method:     special_method_init,
 		Descriptor: "()V",
 	}, method.Code.Codes[2:4])
 	method.Code.Codes[4] = cg.OP_return
@@ -268,13 +268,13 @@ func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byt
 		if ops[0] == cg.OP_putstatic || ops[0] == cg.OP_putfield {
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      classname,
-				Name:       name,
+				Field:      name,
 				Descriptor: descriptor,
 			}, code.Codes[code.CodeLength:code.CodeLength+2])
 		} else if ops[0] == cg.OP_invokevirtual {
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      classname,
-				Name:       name,
+				Method:     name,
 				Descriptor: descriptor,
 			}, code.Codes[code.CodeLength:code.CodeLength+2])
 		} else {
@@ -347,25 +347,10 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	code.Codes[code.CodeLength+11] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_index_out_of_range_exception_class,
-		Name:       special_method_init,
+		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+12:code.CodeLength+14])
 	code.Codes[code.CodeLength+14] = cg.OP_athrow
 	code.CodeLength += 15
 	return
 }
-
-//func IfStackTopStringIsNullThenLoad(class *cg.ClassHighLevel, code *cg.AttributeCode, s string) (incrment uint16) {
-//	incrment = 1
-//	code.Codes[code.CodeLength] = cg.OP_dup
-//	code.CodeLength++
-//	code.Codes[code.CodeLength] = cg.OP_ifnull
-//	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-//	code.Codes[code.CodeLength+3] = cg.OP_goto
-//	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 7)
-//	code.Codes[code.CodeLength+6] = cg.OP_pop
-//	code.Codes[code.CodeLength+7] = cg.OP_ldc_w
-//	class.InsertStringConst("", code.Codes[code.CodeLength+8:code.CodeLength+10])
-//	code.CodeLength += 10
-//	return
-//}

@@ -28,13 +28,13 @@ type CONSTANT_NameAndType_info_high_level struct {
 
 type CONSTANT_Methodref_info_high_level struct {
 	Class      string
-	Name       string
+	Method     string
 	Descriptor string
 }
 
 type CONSTANT_InterfaceMethodref_info_high_level struct {
 	Class      string
-	Name       string
+	Method     string
 	Descriptor string
 }
 
@@ -44,7 +44,7 @@ func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_le
 
 type CONSTANT_Fieldref_info_high_level struct {
 	Class      string
-	Name       string
+	Field      string
 	Descriptor string
 }
 
@@ -52,7 +52,7 @@ type CONSTANT_Fieldref_info_high_level struct {
 	new a method name,mksure it does exists before
 */
 func (c *ClassHighLevel) NewFunctionName(prefix string) string {
-	if c.Methods == nil && c.Methods[prefix] == nil {
+	if c.Methods == nil || c.Methods[prefix] == nil {
 		return prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {

@@ -27,14 +27,14 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_hashmap_class,
-		Name:       "keySet",
+		Method:     "keySet",
 		Descriptor: "()Ljava/util/Set;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokeinterface
 	class.InsertInterfaceMethodrefConst(cg.CONSTANT_InterfaceMethodref_info_high_level{
 		Class:      "java/util/Set",
-		Name:       "toArray",
+		Method:     "toArray",
 		Descriptor: "()[Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = 1
@@ -78,7 +78,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_hashmap_class,
-		Name:       "get",
+		Method:     "get",
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -108,30 +108,41 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	//store v in real v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.StatmentForRangeAttr.IdentifierV.Var.BeenCaptured {
-			panic(1)
+			closure.createCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+			// load to stack
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
+			copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
+			closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+		} else {
+			// load v
+			copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
+			copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
 		}
-		// load v
-		copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
-		copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
 		if s.StatmentForRangeAttr.ModelKV {
 			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {
-				panic(1)
+				closure.createCloureVar(class, code, s.StatmentForRangeAttr.IdentifierK.Var)
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
+				// load k sets
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
+				// load k
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
+				code.Codes[code.CodeLength] = cg.OP_aaload
+				code.CodeLength++
+				primitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
+				closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+			} else {
+				// load k sets
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
+				// load k
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
+				code.Codes[code.CodeLength] = cg.OP_aaload
+				code.CodeLength++
+				primitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
+				copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
 			}
-			//
-			// load k sets
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
-			// load k
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
-			code.Codes[code.CodeLength] = cg.OP_aaload
-			code.CodeLength++
-			primitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
-			copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
 		}
 	} else { // for k,v  = range xxx
 		// store v
-		if s.StatmentForRangeAttr.ExpressionV == nil {
-			panic("1111111")
-		}
 		stack, remainStack, op, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class, code, s.StatmentForRangeAttr.ExpressionV, context)
 		if stack > maxstack { // this means  current stack is 0
 			maxstack = stack
@@ -188,7 +199,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      meta.classname,
-			Name:       "elements",
+			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
@@ -198,7 +209,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      meta.classname,
-			Name:       "start",
+			Field:      "start",
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
@@ -207,7 +218,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      meta.classname,
-			Name:       "end",
+			Field:      "end",
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -267,41 +278,28 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
 		code.Codes[code.CodeLength] = cg.OP_baload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_SHORT:
 		code.Codes[code.CodeLength] = cg.OP_saload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_iaload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_laload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_faload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_daload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_aaload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_aaload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_aaload
-		code.CodeLength++
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[s.StatmentForRangeAttr.Expression.VariableType.ArrayType.ArrayType.Typ]
-		code.Codes[code.CodeLength] = cg.OP_aaload // cast into real type
-		code.Codes[code.CodeLength+1] = cg.OP_checkcast
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+2:code.CodeLength+4])
-		code.CodeLength += 4
+		code.Codes[code.CodeLength] = cg.OP_aaload
 	}
+	code.CodeLength++
 	// before store to local v ,cast into real type
 	if s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ == ast.VARIABLE_TYPE_STRING {
-		//IfStackTopStringIsNullThenLoad(class, code, "")
 	} else if s.StatmentForRangeAttr.Expression.VariableType.ArrayType.IsPointer() {
 		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.ArrayType)
 	}

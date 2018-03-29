@@ -317,12 +317,15 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	{
 		fis, _ := ioutil.ReadDir(destDir)
 		for _, f := range fis {
-			if strings.HasPrefix(f.Name(), ".class") || f.Name() == common.LUCY_MAINTAIN_FILE {
-				os.Remove(filepath.Join(destDir, f.Name()))
+			if strings.HasSuffix(f.Name(), ".class") || f.Name() == common.LUCY_MAINTAIN_FILE {
+				file := filepath.Join(destDir, f.Name())
+				err := os.Remove(file)
+				if err != nil {
+					fmt.Printf("delete old compiled file[%s] failed,err:%v\n", file, err)
+				}
 			}
 		}
 	}
-
 	// cd to destDir
 	os.Chdir(destDir)
 

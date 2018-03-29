@@ -14,15 +14,18 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
+		if slice.Start.VariableType.Typ == ast.VARIABLE_TYPE_LONG {
+			m.numberTypeConverter(code, ast.VARIABLE_TYPE_LONG, ast.VARIABLE_TYPE_INT)
+		}
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
-		if 2 > maxstack {
-			maxstack = 2
-		}
 	}
 	if slice.End != nil {
 		stack, _ := m.build(class, code, slice.End, context)
+		if slice.End.VariableType.Typ == ast.VARIABLE_TYPE_LONG {
+			m.numberTypeConverter(code, ast.VARIABLE_TYPE_LONG, ast.VARIABLE_TYPE_INT)
+		}
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -38,7 +41,7 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,
-		Name:       "slice",
+		Method:     "slice",
 		Descriptor: meta.sliceDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

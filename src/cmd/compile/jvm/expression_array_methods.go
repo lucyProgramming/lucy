@@ -13,8 +13,6 @@ func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code
 	case common.ARRAY_METHOD_SIZE:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
-	default:
-		panic("unkown name:" + call.Name)
 	}
 	return
 }
@@ -30,7 +28,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.classname,
-			Name:       call.Name,
+			Method:     call.Name,
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -71,7 +69,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 						Class:      meta.classname,
-						Name:       appendName,
+						Method:     appendName,
 						Descriptor: meta.appendDescriptor,
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
@@ -94,7 +92,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      meta.classname,
-				Name:       appendName,
+				Method:     appendName,
 				Descriptor: appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -136,7 +134,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 						Class:      java_arrylist_class,
-						Name:       "get",
+						Method:     "get",
 						Descriptor: "(I)Ljava/lang/Object;",
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
@@ -148,14 +146,14 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					code.Codes[code.CodeLength] = cg.OP_getfield
 					class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 						Class:      meta.classname,
-						Name:       "elements",
+						Field:      "elements",
 						Descriptor: meta.elementsFieldDescriptor,
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 						Class:      meta.classname,
-						Name:       appendName,
+						Method:     appendName,
 						Descriptor: appendDescriptor,
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
@@ -179,14 +177,14 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      meta.classname,
-				Name:       "elements",
+				Field:      "elements",
 				Descriptor: meta.elementsFieldDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      meta.classname,
-				Name:       appendName,
+				Method:     appendName,
 				Descriptor: appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -195,8 +193,6 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++
 		}
-	default:
-		panic("unkown method:" + call.Name)
 	}
 	return
 }

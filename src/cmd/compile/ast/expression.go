@@ -122,7 +122,7 @@ func (e *Expression) IsLiteral() bool {
 /*
 	valid for condition
 */
-func (e *Expression) canbeUsedAsCondition() bool {
+func (e *Expression) isBool() bool {
 	return e.Typ == EXPRESSION_TYPE_EQ ||
 		e.Typ == EXPRESSION_TYPE_NE ||
 		e.Typ == EXPRESSION_TYPE_GE ||

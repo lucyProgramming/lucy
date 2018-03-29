@@ -314,8 +314,6 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += "float"
 	case VARIABLE_TYPE_DOUBLE:
 		*ret += "double"
-	case VARIABLE_TYPE_FUNCTION:
-		*ret += "function(" + v.Function.Name + ")"
 	case VARIABLE_TYPE_CLASS:
 		*ret += v.Name
 	case VARIABLE_TYPE_ENUM:

@@ -7,7 +7,7 @@ import (
 var (
 	ArrayMetas                = map[int]*ArrayMeta{}
 	ArrayMetasMap             = make(map[string]*ArrayMeta)
-	primitiveObjectConverter  PrimitiveObjectConvert
+	primitiveObjectConverter  PrimitiveObjectConverter
 	Descriptor                Descript
 	LucyMethodSignatureParser LucyMethodSignatureParse
 	LucyFieldSignatureParser  LucyFieldSignatureParse

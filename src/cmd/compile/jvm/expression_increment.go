@@ -60,7 +60,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		return
 	}
 
-	maxstack, remainStack, op, _, classname, fieldname, fieldDescriptor := m.getLeftValue(class, code, ee, context)
+	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context)
 
 	/*
 		left value must can be used as right value
@@ -161,6 +161,9 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_dadd
 		code.CodeLength++
 	}
+	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.VariableType)
+	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
 			currentStack += m.controlStack2FitAssign(code, op, classname, e.VariableType)
@@ -170,14 +173,9 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		}
 	}
 	//copy op
-	copyOP(code, op...)
-	if classname != "" {
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      classname,
-			Name:       fieldname,
-			Descriptor: fieldDescriptor,
-		}, code.Codes[code.CodeLength:code.CodeLength+2])
-		code.CodeLength += 2
+	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
+		primitiveObjectConverter.getFromObject(class, code, e.VariableType)
 	}
 	return
 }

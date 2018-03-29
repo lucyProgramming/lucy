@@ -237,6 +237,11 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
+	case lex.TOKEN_LC:
+		left, err = ep.parseMapExprssion(false)
+		if err != nil {
+			return left, err
+		}
 	default:
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err

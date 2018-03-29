@@ -32,11 +32,10 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 		stackneed += size
 		backPatchEs(es, code.CodeLength)
 	}
-
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	methodref := cg.CONSTANT_Methodref_info_high_level{
 		Class:      n.Typ.Class.Name,
-		Name:       n.Construction.Func.Name,
+		Method:     n.Construction.Func.Name,
 		Descriptor: n.Construction.Func.Descriptor,
 	}
 	class.InsertMethodRefConst(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -52,7 +51,7 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_hashmap_class,
-		Name:       special_method_init,
+		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -130,7 +129,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,
-		Name:       special_method_init,
+		Method:     special_method_init,
 		Descriptor: meta.constructorFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

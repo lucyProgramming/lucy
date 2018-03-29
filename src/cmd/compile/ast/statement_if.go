@@ -20,7 +20,7 @@ func (s *StatementIF) check(father *Block) []error {
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	if s.Condition.canbeUsedAsCondition() == false {
+	if s.Condition.isBool() == false {
 		errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 			errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 	}
@@ -34,7 +34,7 @@ func (s *StatementIF) check(father *Block) []error {
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		for _, v := range s.ElseIfList {
 			v.Block.inherite(father)
-			if v.Condition.canbeUsedAsCondition() == false {
+			if v.Condition.isBool() == false {
 				errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 					errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
 			}

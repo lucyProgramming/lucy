@@ -30,7 +30,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
-			Name:       name,
+			Method:     name,
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
@@ -44,7 +44,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      java_hashmap_class,
-				Name:       "remove",
+				Method:     "remove",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_pop
@@ -72,7 +72,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 						Class:      java_arrylist_class,
-						Name:       "get",
+						Method:     "get",
 						Descriptor: "(I)Ljava/lang/Object;",
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
@@ -107,7 +107,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
-			Name:       "clear",
+			Method:     "clear",
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -115,7 +115,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
-			Name:       "size",
+			Method:     "size",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -123,8 +123,6 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++
 		}
-	default:
-		panic("unkown" + call.Name)
 	}
 	return
 }

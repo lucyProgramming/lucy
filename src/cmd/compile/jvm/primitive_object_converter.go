@@ -5,10 +5,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type PrimitiveObjectConvert struct {
+type PrimitiveObjectConverter struct {
 }
 
-func (PrimitiveObjectConvert) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -23,7 +23,7 @@ func (PrimitiveObjectConvert) getFromObject(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_integer_class,
-			Name:       "intValue",
+			Method:     "intValue",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	case ast.VARIABLE_TYPE_LONG:
@@ -33,7 +33,7 @@ func (PrimitiveObjectConvert) getFromObject(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_long_class,
-			Name:       "longValue",
+			Method:     "longValue",
 			Descriptor: "()J",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	case ast.VARIABLE_TYPE_FLOAT:
@@ -43,7 +43,7 @@ func (PrimitiveObjectConvert) getFromObject(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_float_class,
-			Name:       "floatValue",
+			Method:     "floatValue",
 			Descriptor: "()F",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	case ast.VARIABLE_TYPE_DOUBLE:
@@ -53,14 +53,14 @@ func (PrimitiveObjectConvert) getFromObject(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_double_class,
-			Name:       "doubleValue",
+			Method:     "doubleValue",
 			Descriptor: "()D",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
 	code.CodeLength += 3
 }
 
-func (PrimitiveObjectConvert) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -72,7 +72,7 @@ func (PrimitiveObjectConvert) putPrimitiveInObjectStaticWay(class *cg.ClassHighL
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_integer_class,
-			Name:       "valueOf",
+			Method:     "valueOf",
 			Descriptor: "(I)Ljava/lang/Integer;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -80,7 +80,7 @@ func (PrimitiveObjectConvert) putPrimitiveInObjectStaticWay(class *cg.ClassHighL
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_float_class,
-			Name:       "valueOf",
+			Method:     "valueOf",
 			Descriptor: "(F)Ljava/lang/Float;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -88,7 +88,7 @@ func (PrimitiveObjectConvert) putPrimitiveInObjectStaticWay(class *cg.ClassHighL
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_double_class,
-			Name:       "valueOf",
+			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/Double;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -96,13 +96,13 @@ func (PrimitiveObjectConvert) putPrimitiveInObjectStaticWay(class *cg.ClassHighL
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_long_class,
-			Name:       "valueOf",
+			Method:     "valueOf",
 			Descriptor: "(J)Ljava/lang/Long;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 }
-func (PrimitiveObjectConvert) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (PrimitiveObjectConverter) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	if t.IsPointer() == false {
 		panic("...")
 	}
@@ -112,9 +112,11 @@ func (PrimitiveObjectConvert) castPointerTypeToRealType(class *cg.ClassHighLevel
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		if t.Class.Name != ast.JAVA_ROOT_CLASS {
+			code.Codes[code.CodeLength] = cg.OP_checkcast
+			class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_checkcast

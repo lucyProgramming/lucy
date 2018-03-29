@@ -58,7 +58,7 @@ func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info
 	info := (&CONSTANT_InterfaceMethodref_info{
 		classIndex: c.InsertClassConst(n.Class),
 		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{
-			Name:       n.Name,
+			Name:       n.Method,
 			Descriptor: n.Descriptor,
 		}),
 	}).ToConstPool()
@@ -81,7 +81,7 @@ func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint1
 	info := (&CONSTANT_Methodref_info{
 		classIndex: c.InsertClassConst(n.Class),
 		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{
-			Name:       n.Name,
+			Name:       n.Method,
 			Descriptor: n.Descriptor,
 		}),
 	}).ToConstPool()
@@ -122,7 +122,7 @@ func (c *Class) InsertFieldRefConst(f CONSTANT_Fieldref_info_high_level) uint16 
 	}
 	info := (&CONSTANT_Fieldref_info{
 		classIndex:       c.InsertClassConst(f.Class),
-		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{f.Name, f.Descriptor}),
+		nameAndTypeIndex: c.InsertNameAndConst(CONSTANT_NameAndType_info_high_level{f.Field, f.Descriptor}),
 	}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)

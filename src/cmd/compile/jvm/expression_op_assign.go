@@ -7,7 +7,7 @@ import (
 
 func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack, remainStack, op, _, classname, fieldname, fieldDescriptor := m.getLeftValue(class, code, bin.Left, context)
+	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -15,7 +15,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
-		Name:       special_method_init,
+		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -31,7 +31,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
-		Name:       `append`,
+		Method:     `append`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -45,7 +45,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
-		Name:       `append`,
+		Method:     `append`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -53,7 +53,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",
-		Name:       `toString`,
+		Method:     `toString`,
 		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -62,18 +62,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
 	}
 	//copy op
-	for _, v := range op {
-		code.Codes[code.CodeLength] = v
-		code.CodeLength++
-	}
-	if classname != "" { // must be put field static or not
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      classname,
-			Name:       fieldname,
-			Descriptor: fieldDescriptor,
-		}, code.Codes[code.CodeLength:code.CodeLength+2])
-		code.CodeLength += 2
-	}
+	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	return
 
 }
@@ -82,36 +71,9 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 		return m.buildStrPlusAssign(class, code, e, context)
 	}
+
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context)
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
-		switch e.VariableType.Typ {
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			code.Codes[code.CodeLength] = cg.OP_new
-			class.InsertClassConst(java_integer_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_dup
-			code.CodeLength += 4
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_new
-			class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_dup
-			code.CodeLength += 4
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_new
-			class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_dup
-			code.CodeLength += 4
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_new
-			class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_dup
-			code.CodeLength += 4
-		}
-		remainStack += 2
-	}
+
 	//left value must can be used as right value,
 	stack, _ := m.build(class, code, bin.Left, context) // load it`s value
 	if t := stack + remainStack; t > maxstack {
@@ -249,6 +211,9 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength++
 		}
 	}
+	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.VariableType)
+	}
 	currentStack -= bin.Left.VariableType.JvmSlotSize() // stack reduce
 	if e.IsStatementExpression == false {
 		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
@@ -256,47 +221,10 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			maxstack = currentStack
 		}
 	}
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
-		switch e.VariableType.Typ {
-		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_integer_class,
-				Name:       special_method_init,
-				Descriptor: "(I)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_LONG:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_long_class,
-				Name:       special_method_init,
-				Descriptor: "(J)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_FLOAT:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_float_class,
-				Name:       special_method_init,
-				Descriptor: "(F)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_DOUBLE:
-			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_double_class,
-				Name:       special_method_init,
-				Descriptor: "(D)V",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		}
-	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
+		primitiveObjectConverter.getFromObject(class, code, e.VariableType)
+	}
 	return
 }

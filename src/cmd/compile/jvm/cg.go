@@ -182,7 +182,7 @@ func (m *MakeClass) mkInitFunctions() {
 		codes[codelength] = cg.OP_invokestatic
 		m.mainclass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      m.mainclass.Name,
-			Name:       v.Name,
+			Method:     v.Name,
 			Descriptor: "()V",
 		}, codes[codelength+1:codelength+3])
 		codelength += 3

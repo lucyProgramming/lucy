@@ -1,0 +1,12 @@
+
+public class Mutex {
+	public lock(){
+		monitorEnter(this);
+	}
+	public unLock(){
+		monitorExit(this);
+	}
+}
+
+
+

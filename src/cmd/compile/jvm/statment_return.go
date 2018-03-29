@@ -93,7 +93,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_arrylist_class,
-			Name:       special_method_init,
+			Method:     special_method_init,
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -117,7 +117,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				code.Codes[code.CodeLength] = cg.OP_invokevirtual
 				class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 					Class:      java_arrylist_class,
-					Name:       "addAll",
+					Method:     "addAll",
 					Descriptor: "(Ljava/util/Collection;)Z",
 				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.Codes[code.CodeLength+3] = cg.OP_pop
@@ -139,7 +139,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      java_arrylist_class,
-				Name:       "add",
+				Method:     "add",
 				Descriptor: "(Ljava/lang/Object;)Z",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_pop
@@ -229,7 +229,7 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_arrylist_class,
-		Name:       special_method_init,
+		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -252,7 +252,7 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_arrylist_class,
-			Name:       "add",
+			Method:     "add",
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_pop

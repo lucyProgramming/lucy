@@ -122,7 +122,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_string_class,
-			Name:       "compareTo",
+			Method:     "compareTo",
 			Descriptor: "(Ljava/lang/String;)I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -178,7 +178,6 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			}
 			code.CodeLength += 8
 		}
-
 		return
 	}
 

@@ -16,7 +16,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, 
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,
-			Name:       identifier.Name,
+			Field:      identifier.Name,
 			Descriptor: "L" + meta.className + ";",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
