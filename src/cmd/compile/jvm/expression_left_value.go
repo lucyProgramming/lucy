@@ -164,22 +164,23 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		} else { // map
 			return m.getMapLeftValue(class, code, e, context)
 		}
-
 	case ast.EXPRESSION_TYPE_DOT:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.Typ == ast.VARIABLE_TYPE_CLASS {
-			op = []byte{cg.OP_getstatic}
-			classname = index.Expression.VariableType.Class.Name
-			name = index.Name
+		classname = index.Expression.VariableType.Class.Name
+		target = index.Field.VariableDefinition.Typ
+		name = index.Name
+		if index.Field.LoadFromOutSide {
 			descriptor = index.Field.Descriptor
 		} else {
-			maxstack, _ = m.build(class, code, index.Expression, context)
-			classname = index.Expression.VariableType.Class.Name
-			name = index.Name
-			descriptor = index.Field.Descriptor
+			descriptor = Descriptor.typeDescriptor(target)
 		}
-	default:
-		panic("unkown type ")
+		if index.Field.IsStatic() {
+			op = []byte{cg.OP_putstatic}
+		} else {
+			op = []byte{cg.OP_putfield}
+			maxstack, _ = m.build(class, code, index.Expression, context)
+			remainStack = 1
+		}
 	}
 	return
 }

@@ -32,6 +32,9 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 }
 
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+	if e.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
+		return
+	}
 	identifier := e.Data.(*ast.ExpressionIdentifer)
 	if identifier.Var.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
@@ -48,6 +51,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		return m.buildCapturedIdentifer(class, code, e, context)
 	}
 	switch identifier.Var.Typ.Typ {
+
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:

@@ -24,8 +24,7 @@ const (
 	VARIABLE_TYPE_ARRAY      //[]int
 	VARIABLE_TYPE_JAVA_ARRAY // java array int[]
 	VARIABLE_TYPE_FUNCTION
-	//function type
-	VARIABLE_TYPE_FUNCTION_TYPE
+
 	//enum
 	VARIABLE_TYPE_ENUM //enum
 	//class
@@ -200,11 +199,11 @@ func (t *VariableType) resolveName(block *Block) error {
 	}
 	switch d.(type) {
 	case *VariableDefinition:
-		return fmt.Errorf("%s name %s is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
+		return fmt.Errorf("%s name '%s' is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Function:
-		return fmt.Errorf("%s name %s is a function,not a type", errMsgPrefix(t.Pos), t.Name)
+		return fmt.Errorf("%s name '%s' is a function,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Const:
-		return fmt.Errorf("%s name %s is a const,not a type", errMsgPrefix(t.Pos), t.Name)
+		return fmt.Errorf("%s name '%s' is a const,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Class:
 		t.Typ = VARIABLE_TYPE_OBJECT
 		t.Class = d.(*Class)
@@ -212,8 +211,13 @@ func (t *VariableType) resolveName(block *Block) error {
 	case *Enum:
 		*t = d.(*Enum).VariableType
 		return nil
+	case *VariableType:
+		tt := d.(*VariableType).Clone()
+		tt.Pos = t.Pos
+		*t = *tt
+		return nil
 	default:
-		return fmt.Errorf("name %s is not type")
+		return fmt.Errorf("name '%s' is not type")
 	}
 	return nil
 }
@@ -260,10 +264,6 @@ func (t *VariableType) TypeCompatible(comp *VariableType, err ...*error) bool {
 	return comp.Class.instanceOf(t.Class)
 }
 
-/*
-	check const if valid
-	number
-*/
 func (t *VariableType) IsNumber() bool {
 	return t.IsInteger() || t.IsFloat()
 
@@ -316,7 +316,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_DOUBLE:
 		*ret += "double"
 	case VARIABLE_TYPE_CLASS:
-		*ret += v.Name
+		*ret += v.Class.Name
 	case VARIABLE_TYPE_ENUM:
 		*ret += "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
@@ -327,7 +327,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_STRING:
 		*ret += "string"
 	case VARIABLE_TYPE_OBJECT: // class name
-		*ret += v.Class.Name
+		*ret += "object@" + v.Class.Name
 	case VARIABLE_TYPE_MAP:
 		*ret += "map{"
 		*ret += v.Map.K.TypeString()
@@ -336,8 +336,6 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += "}"
 	case VARIABLE_TYPE_JAVA_ARRAY:
 		*ret += v.ArrayType.TypeString() + "[]"
-	default:
-		panic(1)
 	}
 }
 
@@ -348,6 +346,9 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
+/*
+	t2 can be cast to t1
+*/
 func (t1 *VariableType) Equal(t2 *VariableType) bool {
 	if t1 == t2 {
 		return true

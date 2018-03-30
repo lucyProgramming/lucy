@@ -183,10 +183,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			m := &ast.ClassMethod{}
 			m.Func = f
-			if c.isStatic {
-				m.Func.AccessFlags |= cg.ACC_METHOD_STATIC
-			}
-			if c.accessControlToken == nil {
+			f.AccessFlags = 0
+			if c.accessControlToken != nil {
 				switch c.accessControlToken.Type {
 				case lex.TOKEN_PRIVATE:
 					m.Func.AccessFlags |= cg.ACC_METHOD_PRIVATE

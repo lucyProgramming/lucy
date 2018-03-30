@@ -4,7 +4,7 @@ func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error
 	if c.Fields != nil && c.Fields[name] != nil {
 		f = c.Fields[name]
 		if fromSub {
-			if f.isPublic() == false && f.isProtected() == false {
+			if f.IsPublic() == false && f.IsProtected() == false {
 				return nil, nil
 			}
 		}

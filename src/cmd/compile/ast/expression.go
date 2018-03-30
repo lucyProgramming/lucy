@@ -107,6 +107,12 @@ func (e *Expression) fromConst(c *Const) {
 	}
 }
 
+type ExpressionTypeAlias struct {
+	Name string
+	Typ  *VariableType
+	Pos  *Pos
+}
+
 type ExpressionSlice struct {
 	Expression *Expression
 	Start, End *Expression

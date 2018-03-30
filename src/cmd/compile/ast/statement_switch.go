@@ -65,6 +65,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 			var floatValue float32
 			var doubleValue float64
 			var stringValue string
+			valueValid := false
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {
 					switch e.Typ {
@@ -81,6 +82,38 @@ func (s *StatementSwitch) check(b *Block) []error {
 					case EXPRESSION_TYPE_STRING:
 						stringValue = e.Data.(string)
 					}
+					valueValid = true
+				} else if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
+					identifier := e.Data.(*ExpressionIdentifer)
+					t := b.SearchByName(identifier.Name)
+					if t == nil {
+						errs = append(errs, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifier))
+						continue
+					} else {
+						if tt, ok := t.(*Const); ok == false {
+							errs = append(errs, fmt.Errorf("%s identifier is not a const", errMsgPrefix(e.Pos), identifier))
+							continue
+						} else {
+							if conditionType.Equal(tt.Typ) {
+								e.fromConst(tt)
+								switch e.Typ {
+								case EXPRESSION_TYPE_BYTE:
+									byteValue = e.Data.(byte)
+								case EXPRESSION_TYPE_INT:
+									int32Vavlue = e.Data.(int32)
+								case EXPRESSION_TYPE_LONG:
+									int64Value = e.Data.(int64)
+								case EXPRESSION_TYPE_FLOAT:
+									floatValue = e.Data.(float32)
+								case EXPRESSION_TYPE_DOUBLE:
+									doubleValue = e.Data.(float64)
+								case EXPRESSION_TYPE_STRING:
+									stringValue = e.Data.(string)
+								}
+								valueValid = true
+							}
+						}
+					}
 				} else {
 					errs = append(errs, fmt.Errorf("%s expression is not a literal value", errMsgPrefix(e.Pos)))
 					continue
@@ -96,7 +129,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 				return errmsg
 			}
 
-			if conditionType.IsPrimitive() {
+			if valueValid {
 				switch conditionType.Typ {
 				case VARIABLE_TYPE_BYTE:
 					if first, ok := byteMap[byteValue]; ok {

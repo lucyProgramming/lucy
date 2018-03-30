@@ -12,6 +12,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
 	}
+	// new class
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -33,12 +34,19 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 		backPatchEs(es, code.CodeLength)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	methodref := cg.CONSTANT_Methodref_info_high_level{
-		Class:      n.Typ.Class.Name,
-		Method:     n.Construction.Func.Name,
-		Descriptor: n.Construction.Func.Descriptor,
+	if n.Construction == nil {
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      n.Typ.Class.Name,
+			Method:     special_method_init,
+			Descriptor: "()V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	} else {
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      n.Typ.Class.Name,
+			Method:     special_method_init,
+			Descriptor: n.Construction.Func.Descriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
-	class.InsertMethodRefConst(methodref, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return
 }
@@ -72,12 +80,10 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	maxstack += stack
-	currentStack := uint16(4)
+	currentStack := uint16(3)
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	// check stack top if negative
-	currentStack = 4
 	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code) + currentStack; t > maxstack {
 		maxstack = t
 	}
@@ -115,16 +121,18 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_MAP:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(e.VariableType.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	default:
-		panic("sssssssssssss")
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

@@ -94,6 +94,8 @@ func (m *MakeClass) Dump() error {
 	f.Close()
 
 	for _, c := range m.Classes {
+		fmt.Println("!!!!!!!!!!!!!!!", c.Name)
+
 		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
 			return err
@@ -206,7 +208,6 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 	m.Classes["main"] = class
 	class.AccessFlags = c.Access
 	class.SuperClass = c.SuperClassName
-	class.Name = c.SuperClassName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range c.Fields {

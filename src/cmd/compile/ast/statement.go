@@ -208,6 +208,12 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				f.VarOffSetForClosure = b.InheritedAttribute.Function.VarOffset
 				b.InheritedAttribute.Function.VarOffset++
 				b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosure)
+				if f.ClosureVars.Vars == nil || len(f.ClosureVars.Vars) == 0 { // capture because of closure function
+					for _, v := range f.OffsetDestinations {
+						*v += 1
+					}
+					f.VarOffset++
+				}
 			}
 			return errs
 		}

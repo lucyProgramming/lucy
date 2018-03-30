@@ -20,7 +20,8 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		}
 		if t.Typ != VARIABLE_TYPE_ARRAY &&
 			VARIABLE_TYPE_OBJECT != t.Typ &&
-			t.Typ != VARIABLE_TYPE_MAP {
+			t.Typ != VARIABLE_TYPE_MAP &&
+			t.Typ != VARIABLE_TYPE_CLASS {
 			op := "access"
 			if e.Typ == EXPRESSION_TYPE_INDEX {
 				op = "index"
@@ -78,6 +79,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	}
 	// dot
 	if obj.Typ != VARIABLE_TYPE_OBJECT && obj.Typ != VARIABLE_TYPE_CLASS {
+		panic(11)
 		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'", errMsgPrefix(e.Pos), index.Name, obj.TypeString()))
 		return nil
 	}
@@ -90,13 +92,16 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 	} else {
-		if !index.Expression.isThisIdentifierExpression() && !field.isPublic() {
+		if !index.Expression.isThisIdentifierExpression() && !field.IsPublic() {
 			*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos),
 				index.Name))
 		}
 	}
 	if field != nil {
-		return field.Typ
+		t := field.Typ.Clone()
+		t.Pos = e.Pos
+		index.Field = field
+		return t
 	} else {
 		return nil
 	}

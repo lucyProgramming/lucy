@@ -16,6 +16,7 @@ type Block struct {
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
 	Lables                     map[string]*StatementLable
+	Types                      map[string]*VariableType
 	Outter                     *Block //for closure,capture variables
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
@@ -64,6 +65,11 @@ func (b *Block) SearchByName(name string) interface{} {
 	}
 	if b.EnumNames != nil {
 		if t, ok := b.EnumNames[name]; ok {
+			return t
+		}
+	}
+	if b.Types != nil {
+		if t, ok := b.Types[name]; ok {
 			return t
 		}
 	}
@@ -198,7 +204,8 @@ func (b *Block) checkVar(v *VariableDefinition) []error {
 			}
 		}
 		if expressionVariableType != nil && !v.Typ.TypeCompatible(expressionVariableType) {
-			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign '%s' to '%s'", errMsgPrefix(v.Pos), v.Typ.TypeString(), expressionVariableType.TypeString())}
+			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign '%s' to '%s'",
+				errMsgPrefix(v.Pos), v.Name, v.Typ.TypeString(), expressionVariableType.TypeString())}
 		}
 		return nil
 	} else {
@@ -224,7 +231,7 @@ func (b *Block) checkConst() []error {
 		}
 		is, t, value, err := v.Expression.getConstValue()
 		if err != nil {
-			errs = append(errs, fmt.Errorf("%s const '%v' defined wrong", errMsgPrefix(v.Pos), v.Name, err))
+			errs = append(errs, fmt.Errorf("%s const '%v' defined wrong,err:%v", errMsgPrefix(v.Pos), v.Name, err))
 			continue
 		}
 		if is == false {
@@ -344,6 +351,15 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
 		return fmt.Errorf(errmsg)
 	}
+
+	if b.Types == nil {
+		b.Types = make(map[string]*VariableType)
+	}
+	if t, ok := b.Lables[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as type,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(t.Pos))
+		return fmt.Errorf(errmsg)
+	}
 	switch d.(type) {
 	case *Class:
 		b.Classes[name] = d.(*Class)
@@ -378,6 +394,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.EnumNames[name] = d.(*EnumName)
 	case *StatementLable:
 		b.Lables[name] = d.(*StatementLable)
+	case *VariableType:
+		b.Types[name] = d.(*VariableType)
 	default:
 		panic("????????")
 	}

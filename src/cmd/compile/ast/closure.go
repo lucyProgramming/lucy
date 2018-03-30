@@ -51,12 +51,6 @@ func (c *Closure) NotEmpty(f *Function) bool {
 }
 
 func (c *Closure) Insert(f *Function, v *VariableDefinition) {
-	if c.Vars == nil || len(c.Vars) == 0 {
-		for _, v := range f.OffsetDestinations {
-			*v += 1
-		}
-		f.VarOffset++
-	}
 	if c.Vars == nil {
 		c.Vars = make(map[*VariableDefinition]struct{})
 	}

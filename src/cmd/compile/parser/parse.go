@@ -342,6 +342,29 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 	pos.StartLine = t.StartLine
 	pos.StartColumn = t.StartColumn
 }
+
+func (p *Parser) parseTypeaAlias() (*ast.ExpressionTypeAlias, error) {
+	p.Next() // skip type key word
+	if p.token.Type != lex.TOKEN_IDENTIFIER {
+		err := fmt.Errorf("%s expect identifer,but %s", p.errorMsgPrefix(), p.token.Desp)
+		p.errs = append(p.errs, err)
+		return nil, err
+	}
+	ret := &ast.ExpressionTypeAlias{}
+	ret.Pos = p.mkPos()
+	ret.Name = p.token.Data.(string)
+	p.Next() // skip identifier
+	if p.token.Type != lex.TOKEN_ASSIGN {
+		err := fmt.Errorf("%s expect '=',but %s", p.errorMsgPrefix(), p.token.Desp)
+		p.errs = append(p.errs, err)
+		return nil, err
+	}
+	p.Next() // skip =
+	var err error
+	ret.Typ, err = p.parseType()
+	return ret, err
+}
+
 func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
 	names, err := p.parseNameList()
 	if err != nil {

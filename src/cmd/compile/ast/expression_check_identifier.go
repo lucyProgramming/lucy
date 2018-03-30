@@ -49,6 +49,12 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		tt.Pos = e.Pos
 		identifer.EnumName = t
 		return tt, nil
+	case *Class:
+		t := &VariableType{}
+		t.Typ = VARIABLE_TYPE_CLASS
+		e.Pos = e.Pos
+		t.Class = d.(*Class)
+		return t, nil
 	default:
 		return nil, fmt.Errorf("%s identifier '%s' is not a expression", errMsgPrefix(e.Pos), identifer.Name)
 	}

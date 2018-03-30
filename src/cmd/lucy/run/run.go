@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
+
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -112,7 +113,7 @@ func (r *Run) RunCommand(command string, args []string) {
 	} else { // unix style
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classPathArray, ":")))
 	}
-	fmt.Println("!!!!!!!!!", classPathArray)
+	fmt.Println("CLASSPATH:", classPathArray)
 	err = cmd.Start()
 	if err != nil {
 		fmt.Println(err)
@@ -167,12 +168,12 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 			lucyFiles = append(lucyFiles, filepath.Join(sourceFileDir, v.Name()))
 		}
 	}
-	_, err = os.Stat(filepath.Join(lucypath, packageName))
-	if err != nil {
-		err = nil
+	if len(lucyFiles) == 0 {
+		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
 		return
 	}
-	bs, err := ioutil.ReadFile(filepath.Join(lucypath, "class", packageName, common.LUCY_MAINTAIN_FILE))
+	destDir := filepath.Join(lucypath, "class", packageName)
+	bs, err := ioutil.ReadFile(filepath.Join(destDir, common.LUCY_MAINTAIN_FILE))
 	if err != nil { // maintain file is missing
 		err = nil
 		return
@@ -183,26 +184,38 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = nil
 		return
 	}
-	fisM := make(map[string]os.FileInfo)
+	fism := make(map[string]os.FileInfo)
 	for _, v := range fis {
-		fisM[v.Name()] = v
+		fism[v.Name()] = v
 		if meta.CompiledFrom == nil {
 			return
 		}
 		if _, ok := meta.CompiledFrom[v.Name()]; ok == false { // new file
 			return
 		}
-		if v.ModTime().After(meta.CompiledFrom[v.Name()].LastModify) { // modifyed
+		if v.ModTime().After(meta.CompiledFrom[v.Name()].LastModify) { // modified
 			return
 		}
 	}
-	if len(lucyFiles) == 0 {
-		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
-		return
-	}
+	// file missing
 	for f := range meta.CompiledFrom {
-		_, ok := fisM[f]
-		if ok == false { // file deleted,missing file
+		_, ok := fism[f]
+		if ok == false {
+			return
+		}
+	}
+
+	// if class file is missing
+	fis, err = ioutil.ReadDir(destDir)
+	fism = make(map[string]os.FileInfo)
+	for _, v := range fis {
+		if strings.HasSuffix(v.Name(), ".class") {
+			fism[v.Name()] = v
+		}
+	}
+	for _, v := range meta.Classes {
+		_, ok := fism[v]
+		if ok == false {
 			return
 		}
 	}
@@ -211,7 +224,7 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 }
 
 func (r *Run) parseImports(files []string) ([]string, error) {
-	args := append([]string{"-io"}, files...)
+	args := append([]string{"-only-import"}, files...)
 	cmd := exec.Command(r.compilerAt, args...)
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
@@ -273,6 +286,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if err != nil {
 		return
 	}
+	fmt.Println("!!!!!!!!!!!!!", needBuild)
 	if needBuild == false { // current package no need to compile,but I need to check dependies
 		need := false
 		for _, v := range meta.Imports {
@@ -293,7 +307,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	//compile this package really
 	is, err := r.parseImports(lucyFiles)
 	if err != nil {
-
 		return
 	}
 	for _, i := range is {
@@ -329,7 +342,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	// cd to destDir
 	os.Chdir(destDir)
 
-	args := []string{"-pn", packageName}
+	args := []string{"-package-name", packageName}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
 	cmd.Stderr = os.Stderr
@@ -347,16 +360,28 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		if err != nil {
 			return
 		}
-		meta.CompiledFrom[v] = &common.FileMeta{
+		meta.CompiledFrom[filepath.Base(v)] = &common.FileMeta{
 			LastModify: f.ModTime(),
 		}
 	}
 	meta.CompileTime = time.Now()
 	meta.Imports = is
+	//
+	fis, err := ioutil.ReadDir(destDir)
+	if err != nil {
+		return
+	}
+	for _, v := range fis {
+		if strings.HasSuffix(v.Name(), ".class") {
+			meta.Classes = append(meta.Classes, v.Name())
+		}
+	}
+
 	bs, err = json.MarshalIndent(meta, "", "\t")
 	if err != nil {
 		return
 	}
+
 	err = ioutil.WriteFile(filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE), bs, 0644)
 	return
 }
