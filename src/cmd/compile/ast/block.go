@@ -32,6 +32,16 @@ func (b *Block) shouldStop(errs []error) bool {
 	return (len(PackageBeenCompile.Errors) + len(errs)) >= PackageBeenCompile.NErros2Stop
 }
 
+func (b *Block) searchType(name string) *VariableType {
+	for b != nil {
+		if b.Types != nil && b.Types[name] != nil {
+			return b.Types[name]
+		}
+		b = b.Outter
+	}
+	return nil
+}
+
 func (b *Block) SearchByName(name string) interface{} {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
@@ -65,11 +75,6 @@ func (b *Block) SearchByName(name string) interface{} {
 	}
 	if b.EnumNames != nil {
 		if t, ok := b.EnumNames[name]; ok {
-			return t
-		}
-	}
-	if b.Types != nil {
-		if t, ok := b.Types[name]; ok {
 			return t
 		}
 	}
@@ -351,14 +356,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
 		return fmt.Errorf(errmsg)
 	}
-
 	if b.Types == nil {
 		b.Types = make(map[string]*VariableType)
-	}
-	if t, ok := b.Lables[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as type,last declared at:", errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(t.Pos))
-		return fmt.Errorf(errmsg)
 	}
 	switch d.(type) {
 	case *Class:
@@ -395,6 +394,11 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *StatementLable:
 		b.Lables[name] = d.(*StatementLable)
 	case *VariableType:
+		if l, ok := b.Types[name]; ok {
+			errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,last declared at:", errMsgPrefix(pos), name)
+			errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
+			return fmt.Errorf(errmsg)
+		}
 		b.Types[name] = d.(*VariableType)
 	default:
 		panic("????????")

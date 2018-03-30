@@ -49,15 +49,9 @@ func (s *StatementSwitch) check(b *Block) []error {
 	}
 	doubleMap := []doubleExist{}
 	stringMap := make(map[string]*Pos)
+
 	for _, v := range s.StatmentSwitchCases {
 		for _, e := range v.Matches {
-			t, es := b.checkExpression(e)
-			if errsNotEmpty(es) {
-				errs = append(errs, es...)
-			}
-			if t == nil {
-				continue
-			}
 			var byteValue byte
 			var shortValue int16
 			var int32Vavlue int32
@@ -66,22 +60,25 @@ func (s *StatementSwitch) check(b *Block) []error {
 			var doubleValue float64
 			var stringValue string
 			valueValid := false
+			valueFromExpression := func() {
+				switch e.Typ {
+				case EXPRESSION_TYPE_BYTE:
+					byteValue = e.Data.(byte)
+				case EXPRESSION_TYPE_INT:
+					int32Vavlue = e.Data.(int32)
+				case EXPRESSION_TYPE_LONG:
+					int64Value = e.Data.(int64)
+				case EXPRESSION_TYPE_FLOAT:
+					floatValue = e.Data.(float32)
+				case EXPRESSION_TYPE_DOUBLE:
+					doubleValue = e.Data.(float64)
+				case EXPRESSION_TYPE_STRING:
+					stringValue = e.Data.(string)
+				}
+			}
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {
-					switch e.Typ {
-					case EXPRESSION_TYPE_BYTE:
-						byteValue = e.Data.(byte)
-					case EXPRESSION_TYPE_INT:
-						int32Vavlue = e.Data.(int32)
-					case EXPRESSION_TYPE_LONG:
-						int64Value = e.Data.(int64)
-					case EXPRESSION_TYPE_FLOAT:
-						floatValue = e.Data.(float32)
-					case EXPRESSION_TYPE_DOUBLE:
-						doubleValue = e.Data.(float64)
-					case EXPRESSION_TYPE_STRING:
-						stringValue = e.Data.(string)
-					}
+					valueFromExpression()
 					valueValid = true
 				} else if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
 					identifier := e.Data.(*ExpressionIdentifer)
@@ -96,39 +93,46 @@ func (s *StatementSwitch) check(b *Block) []error {
 						} else {
 							if conditionType.Equal(tt.Typ) {
 								e.fromConst(tt)
-								switch e.Typ {
-								case EXPRESSION_TYPE_BYTE:
-									byteValue = e.Data.(byte)
-								case EXPRESSION_TYPE_INT:
-									int32Vavlue = e.Data.(int32)
-								case EXPRESSION_TYPE_LONG:
-									int64Value = e.Data.(int64)
-								case EXPRESSION_TYPE_FLOAT:
-									floatValue = e.Data.(float32)
-								case EXPRESSION_TYPE_DOUBLE:
-									doubleValue = e.Data.(float64)
-								case EXPRESSION_TYPE_STRING:
-									stringValue = e.Data.(string)
-								}
+								valueFromExpression()
 								valueValid = true
 							}
 						}
+					}
+				} else if e.Typ == EXPRESSION_TYPE_DOT {
+					index := e.Data.(*ExpressionIndex)
+					if index.Expression.Typ != EXPRESSION_TYPE_IDENTIFIER {
+						errs = append(errs, fmt.Errorf("%s expect a package name", errMsgPrefix(e.Pos)))
+						continue
+					}
+					identiferName := index.Expression.Data.(*ExpressionIdentifer).Name
+					packageName := PackageBeenCompile.getImport(e.Pos.Filename, identiferName)
+					if packageName == "" {
+						errs = append(errs, fmt.Errorf("%s package %s not found", errMsgPrefix(e.Pos), identiferName))
+						continue
+					}
+					i, err := PackageBeenCompile.load(packageName, index.Name)
+					if err != nil {
+						errs = append(errs, fmt.Errorf("%s load failed,err:%v", errMsgPrefix(e.Pos), err))
+						continue
+					}
+					if c, ok := i.(*Const); ok == false {
+						errs = append(errs, fmt.Errorf("%s not a const expression ", errMsgPrefix(e.Pos)))
+						continue
+					} else {
+						e.fromConst(c)
+						valueFromExpression()
+						valueValid = true
 					}
 				} else {
 					errs = append(errs, fmt.Errorf("%s expression is not a literal value", errMsgPrefix(e.Pos)))
 					continue
 				}
 			}
-			if conditionType.Equal(t) == false {
-				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
-				continue
-			}
 			errMsg := func(first *Pos) string {
 				errmsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
 				errmsg += fmt.Sprintf("%s", errMsgPrefix(first))
 				return errmsg
 			}
-
 			if valueValid {
 				switch conditionType.Typ {
 				case VARIABLE_TYPE_BYTE:

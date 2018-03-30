@@ -22,7 +22,6 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
-
 	astClass.Access = c.AccessFlag
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
@@ -147,6 +146,5 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 		}
 		p.Block.Funcs[function.Name] = function
 	}
-
 	return nil
 }

@@ -27,6 +27,16 @@ type Package struct {
 	Errors         []error
 }
 
+func (p *Package) getImport(file string, i string) string {
+	if p.Files == nil {
+		return ""
+	}
+	if p.Files[file] == nil {
+		return ""
+	}
+	return p.Files[file].Imports[i].Name
+}
+
 type LoadedName struct {
 	T   interface{}
 	Err error
@@ -124,11 +134,7 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 
 	if t := p.loadedPackages[pname]; t != nil {
 		if t.Kind == PACKAGE_KIND_LUCY {
-			tt := t.Block.SearchByName(name)
-			if tt == nil {
-				err = fmt.Errorf("%s is not found", name)
-			}
-			return tt, nil
+
 		} else { //java package
 
 		}
@@ -137,7 +143,6 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 		p.loadedPackages[pname] = &Package{}
 	}
 	p.loaded[fullname] = &LoadedName{}
-
 	t, err := NameLoader.LoadName(p.loadedPackages[pname], pname, name)
 	if err != nil {
 		p.loaded[fullname].Err = err
@@ -145,7 +150,6 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 	}
 	p.loaded[fullname].T = t
 	return t, nil
-
 }
 
 //different for other file
@@ -153,7 +157,7 @@ type File struct {
 	Imports map[string]*Import // n
 }
 
-type Import  struct {
+type Import struct {
 	AccessName string
 	Name       string // full name
 	Pos        *Pos

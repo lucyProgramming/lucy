@@ -19,7 +19,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
-
 	if len(s.Function.Typ.ReturnList) == 1 {
 		var es []*cg.JumpBackPatch
 		if len(s.Expressions) > 0 {

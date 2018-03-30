@@ -2,6 +2,7 @@ package lc
 
 import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"path/filepath"
 )
 
 var (
@@ -16,4 +17,9 @@ type Flags struct {
 
 func init() {
 	ast.NameLoader = &RealNameLoader{}
+}
+
+func classShortName(binaryName string) (shortName string) {
+	shortName = filepath.Base(binaryName)
+	return
 }

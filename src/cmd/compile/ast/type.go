@@ -187,7 +187,7 @@ func (t *VariableType) resolve(block *Block) error {
 func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
 	if strings.Contains(t.Name, ".") == false {
-		d = block.SearchByName(t.Name)
+		d = block.searchType(t.Name)
 		if d == nil {
 			return fmt.Errorf("%s not found", t.Name)
 		}

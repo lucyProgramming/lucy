@@ -39,9 +39,6 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 		tt := t.Clone()
 		tt.Pos = e.Pos
 		return tt
-	} else {
-		panic(1)
-		return nil
 	}
 }
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {
