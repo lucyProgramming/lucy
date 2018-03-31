@@ -282,6 +282,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
 		}
 		field.DescriptorIndex = c.insertUtfConst(f.Descriptor)
+		if f.AttributeLucyFieldDescritor != nil {
+			field.Attributes = append(field.Attributes, f.AttributeLucyFieldDescritor.ToAttributeInfo(c))
+		}
 		c.Fields = append(c.Fields, field)
 	}
 	for _, ms := range high.Methods {
@@ -294,6 +297,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			info.Attributes = append(info.Attributes, codeinfo)
 			if m.AttributeLucyInnerStaticMethod != nil {
 				info.Attributes = append(info.Attributes, m.AttributeLucyInnerStaticMethod.ToAttributeInfo(c))
+			}
+			if m.AttributeLucyMethodDescritor != nil {
+				info.Attributes = append(info.Attributes, m.AttributeLucyMethodDescritor.ToAttributeInfo(c))
 			}
 			c.Methods = append(c.Methods, info)
 		}

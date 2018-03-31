@@ -76,6 +76,7 @@ const (
 	EXPRESSION_TYPE_RANGE           // for range
 	EXPRESSION_TYPE_SLICE           // arr[0:2]
 	EXPRESSION_TYPE_MAP             // map literal
+	EXPRESSION_TYPE_TYPE_ALIAS
 )
 
 /*
@@ -158,7 +159,8 @@ func (e *Expression) canBeUsedAsStatementExpression() bool {
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
 		e.Typ == EXPRESSION_TYPE_VAR ||
-		e.Typ == EXPRESSION_TYPE_CONST
+		e.Typ == EXPRESSION_TYPE_CONST ||
+		e.Typ == EXPRESSION_TYPE_TYPE_ALIAS
 }
 
 /*
@@ -451,6 +453,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "map_literal"
 	case EXPRESSION_TYPE_CONVERTION_TYPE:
 		return "convertion of type"
+	case EXPRESSION_TYPE_TYPE_ALIAS:
+		return "type alias"
 	}
 	panic("missing")
 }

@@ -12,5 +12,6 @@ func (a *AttributeLucyMethodDescritor) ToAttributeInfo(class *Class) *AttributeI
 	ret.Info = make([]byte, 2)
 	ret.attributeLength = 2
 	binary.BigEndian.PutUint16(ret.Info, class.insertUtfConst(a.Descriptor))
+
 	return ret
 }

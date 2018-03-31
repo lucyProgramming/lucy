@@ -122,16 +122,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		case ast.VARIABLE_TYPE_MAP:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Object",
-				Method:     "toString",
-				Descriptor: "()Ljava/lang/String;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
-				Descriptor: "(Ljava/lang/String;)V",
+				Descriptor: "(Ljava/lang/Object;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
@@ -186,6 +179,11 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 					maxstack = t
 				}
 				m.stackTop2String(class, code, tt)
+				if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
+					if t := 2 + currentStack; t > maxstack {
+						maxstack = t
+					}
+				}
 				app(k < len(call.Args)-1 || kk < len(v.VariableTypes)-1)
 			}
 			continue

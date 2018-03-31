@@ -152,6 +152,10 @@ func (m *MakeClass) mkVars() {
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
+		if LucyFieldSignatureParser.Need(v.Typ) {
+			f.AttributeLucyFieldDescritor = &cg.AttributeLucyFieldDescritor{}
+			f.AttributeLucyFieldDescritor.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
+		}
 		f.Name = v.Name
 		m.mainclass.Fields[k] = f
 	}
@@ -255,6 +259,10 @@ func (m *MakeClass) mkFuncs() {
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		}
+		if LucyMethodSignatureParser.Need(f.Typ) {
+			method.AttributeLucyMethodDescritor = &cg.AttributeLucyMethodDescritor{}
+			method.AttributeLucyMethodDescritor.Descriptor = LucyMethodSignatureParser.Encode(f)
 		}
 		ms[k] = method
 		f.ClassMethod = method

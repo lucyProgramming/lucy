@@ -76,6 +76,19 @@ func (s *StatementSwitch) check(b *Block) []error {
 					stringValue = e.Data.(string)
 				}
 			}
+			t, es := b.checkExpression(e)
+			if es != nil {
+				errs = append(errs, es...)
+				continue
+			}
+			if t == nil {
+				continue
+			}
+			if conditionType.Equal(t) == false {
+				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
+				continue
+			}
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {
 					valueFromExpression()

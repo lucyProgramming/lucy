@@ -187,15 +187,16 @@ func (t *VariableType) resolve(block *Block) error {
 func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
 	if strings.Contains(t.Name, ".") == false {
-		d = block.searchType(t.Name)
-		if d == nil {
-			return fmt.Errorf("%s not found", t.Name)
-		}
+		d = block.SearchByName(t.Name)
 	} else { // a.b  in type situation,must be package name
 		//d, err = t.resolvePackageName(block)
 		//if err != nil {
 		//	return err
 		//}
+	}
+
+	if d == nil {
+		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
 	switch d.(type) {
 	case *VariableDefinition:
@@ -212,6 +213,7 @@ func (t *VariableType) resolveName(block *Block) error {
 		*t = d.(*Enum).VariableType
 		return nil
 	case *VariableType:
+		fmt.Println("!!!!!!!!!!!!!!!", d.(*VariableType) == nil)
 		tt := d.(*VariableType).Clone()
 		tt.Pos = t.Pos
 		*t = *tt

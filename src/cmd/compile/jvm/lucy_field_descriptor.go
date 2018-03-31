@@ -35,6 +35,7 @@ func (l *LucyFieldSignatureParse) Encode(variableType *ast.VariableType) (d stri
 	if variableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		d = "]"
 		d += l.Encode(variableType.ArrayType)
+		return d
 	}
 	return Descriptor.typeDescriptor(variableType)
 }

@@ -186,6 +186,22 @@ func (s *Statement) checkStatementGoto(b *Block) error {
 
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
+	//
+	if s.Expression.Typ == EXPRESSION_TYPE_TYPE_ALIAS {
+		t := s.Expression.Data.(*ExpressionTypeAlias)
+		err := t.Typ.resolve(b)
+
+		if err != nil {
+			return []error{err}
+		}
+
+		err = b.insert(t.Name, t.Pos, t.Typ)
+		if err != nil {
+			return []error{err}
+		}
+		return nil
+	}
+
 	if s.Expression.canBeUsedAsStatementExpression() {
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)

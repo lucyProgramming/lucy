@@ -40,6 +40,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 		tt.Pos = e.Pos
 		return tt
 	}
+	return nil
 }
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {
 	ee := e.Data.(*Expression)

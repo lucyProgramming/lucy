@@ -56,7 +56,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		if identifier.Var.IsGlobal {
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Var.Typ
-			classname = context.mainclass.Name
+			classname = m.MakeClass.mainclass.Name
 			name = identifier.Name
 			descriptor = Descriptor.typeDescriptor(identifier.Var.Typ)
 			return

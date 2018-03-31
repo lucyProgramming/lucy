@@ -18,6 +18,9 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		maxstack = t
 	}
 	m.stackTop2String(class, code, e.Left.GetTheOnlyOneVariableType())
+	if t := currenStack + stack + e.Left.VariableType.JvmSlotSize(); t > maxstack {
+		maxstack = t
+	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/StringBuilder",

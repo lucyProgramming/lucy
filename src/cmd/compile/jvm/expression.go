@@ -16,6 +16,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
 	switch e.Typ {
+	case ast.EXPRESSION_TYPE_TYPE_ALIAS:
+		return // handled at ast stage
 	case ast.EXPRESSION_TYPE_NULL:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -424,58 +426,5 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 			return
 		}
 	}
-	panic(111111111)
 	return
 }
-
-///*
-//	stack is ... objectref value
-//*/
-//func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
-//	switch t.Typ {
-//	case ast.VARIABLE_TYPE_BOOL:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      "java/lang/Boolean",
-//			Name:       special_method_init,
-//			Descriptor: "(Z)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_BYTE:
-//		fallthrough
-//	case ast.VARIABLE_TYPE_SHORT:
-//		fallthrough
-//	case ast.VARIABLE_TYPE_INT:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_integer_class,
-//			Name:       special_method_init,
-//			Descriptor: "(I)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_LONG:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_long_class,
-//			Name:       special_method_init,
-//			Descriptor: "(J)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_FLOAT:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_float_class,
-//			Name:       special_method_init,
-//			Descriptor: "(F)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_DOUBLE:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_double_class,
-//			Name:       special_method_init,
-//			Descriptor: "(D)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	}
-//}

@@ -78,6 +78,11 @@ func (b *Block) SearchByName(name string) interface{} {
 			return t
 		}
 	}
+	if b.Types != nil {
+		if t, ok := b.Types[name]; ok {
+			return t
+		}
+	}
 	if b.InheritedAttribute.Function != nil {
 		v := b.InheritedAttribute.Function.ClosureVars.Search(name)
 		if v != nil {
@@ -359,6 +364,11 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if b.Types == nil {
 		b.Types = make(map[string]*VariableType)
 	}
+	if t, ok := b.Types[name]; ok {
+		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,last declared at:", errMsgPrefix(pos), name)
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(t.Pos))
+		return fmt.Errorf(errmsg)
+	}
 	switch d.(type) {
 	case *Class:
 		b.Classes[name] = d.(*Class)
@@ -394,11 +404,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *StatementLable:
 		b.Lables[name] = d.(*StatementLable)
 	case *VariableType:
-		if l, ok := b.Types[name]; ok {
-			errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,last declared at:", errMsgPrefix(pos), name)
-			errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
-			return fmt.Errorf(errmsg)
-		}
 		b.Types[name] = d.(*VariableType)
 	default:
 		panic("????????")
