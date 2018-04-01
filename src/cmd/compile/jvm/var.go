@@ -11,6 +11,7 @@ var (
 	Descriptor                Descript
 	LucyMethodSignatureParser LucyMethodSignatureParse
 	LucyFieldSignatureParser  LucyFieldSignatureParse
+	LucyTypeAliasParser       LucyTypeAliasParse
 )
 
 const (

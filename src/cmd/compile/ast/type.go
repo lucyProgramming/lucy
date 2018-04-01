@@ -187,16 +187,18 @@ func (t *VariableType) resolve(block *Block) error {
 func (t *VariableType) resolveName(block *Block) error {
 	var d interface{}
 	if strings.Contains(t.Name, ".") == false {
-		d = block.searchType(t.Name)
-		if d == nil {
-			return fmt.Errorf("%s not found", t.Name)
-		}
+		d = block.SearchByName(t.Name)
 	} else { // a.b  in type situation,must be package name
 		//d, err = t.resolvePackageName(block)
 		//if err != nil {
 		//	return err
 		//}
 	}
+	panic(d)
+	if d == nil {
+		return fmt.Errorf("%s not found", t.Name)
+	}
+
 	switch d.(type) {
 	case *VariableDefinition:
 		return fmt.Errorf("%s name '%s' is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
@@ -208,16 +210,16 @@ func (t *VariableType) resolveName(block *Block) error {
 		t.Typ = VARIABLE_TYPE_OBJECT
 		t.Class = d.(*Class)
 		return nil
-	case *Enum:
-		*t = d.(*Enum).VariableType
-		return nil
+	//case *Enum:
+	//	*t = d.(*Enum).VariableType
+	//	return nil
 	case *VariableType:
 		tt := d.(*VariableType).Clone()
 		tt.Pos = t.Pos
 		*t = *tt
 		return nil
 	default:
-		return fmt.Errorf("name '%s' is not type")
+		return fmt.Errorf("name '%s' is not type", t.Name)
 	}
 	return nil
 }

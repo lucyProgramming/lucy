@@ -22,7 +22,6 @@ type Function struct {
 	Block                          *Block
 	Pos                            *Pos
 	Descriptor                     string
-	VariableType                   VariableType
 	VarOffset                      uint16
 	AutoVarForException            *AutoVarForException
 	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
@@ -121,10 +120,10 @@ func (f *Function) readableMsg() string {
 	return s
 }
 
-func (f *Function) MkVariableType() {
-	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
-	f.VariableType.Function = f
-}
+//func (f *Function) MkVariableType() {
+//	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
+//	f.VariableType.Function = f
+//}
 
 func (f *Function) checkBlock(errs *[]error) {
 	if f.Typ != nil {

@@ -14,9 +14,10 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	case *Function:
 		f := d.(*Function)
 		f.Used = true
-		tt := f.VariableType.Clone()
+		tt := &VariableType{}
+		tt.Typ = VARIABLE_TYPE_FUNCTION
 		tt.Pos = e.Pos
-		identifer.Func = f
+		tt.Function = f
 		return tt, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
@@ -35,20 +36,20 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
 		return tt, nil
-	case *Enum:
-		t := d.(*Enum)
-		t.Used = true
-		tt := t.VariableType.Clone()
-		tt.Pos = e.Pos
-		identifer.Enum = t
-		return tt, nil
-	case *EnumName:
-		t := d.(*EnumName)
-		t.Enum.Used = true
-		tt := t.Enum.VariableType.Clone()
-		tt.Pos = e.Pos
-		identifer.EnumName = t
-		return tt, nil
+	//case *Enum:
+	//	t := d.(*Enum)
+	//	t.Used = true
+	//	tt := t.VariableType.Clone()
+	//	tt.Pos = e.Pos
+	//	identifer.Enum = t
+	//	return tt, nil
+	//case *EnumName:
+	//	t := d.(*EnumName)
+	//	t.Enum.Used = true
+	//	tt := t.Enum.VariableType.Clone()
+	//	tt.Pos = e.Pos
+	//	identifer.EnumName = t
+	//	return tt, nil
 	case *Class:
 		t := &VariableType{}
 		t.Typ = VARIABLE_TYPE_CLASS

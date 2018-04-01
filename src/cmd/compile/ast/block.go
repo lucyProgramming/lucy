@@ -32,15 +32,15 @@ func (b *Block) shouldStop(errs []error) bool {
 	return (len(PackageBeenCompile.Errors) + len(errs)) >= PackageBeenCompile.NErros2Stop
 }
 
-func (b *Block) searchType(name string) *VariableType {
-	for b != nil {
-		if b.Types != nil && b.Types[name] != nil {
-			return b.Types[name]
-		}
-		b = b.Outter
-	}
-	return nil
-}
+//func (b *Block) searchType(name string) *VariableType {
+//	for b != nil {
+//		if b.Types != nil && b.Types[name] != nil {
+//			return b.Types[name]
+//		}
+//		b = b.Outter
+//	}
+//	return nil
+//}
 
 func (b *Block) SearchByName(name string) interface{} {
 	if b.Funcs != nil {
@@ -364,7 +364,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Classes[name] = d.(*Class)
 	case *Function:
 		t := d.(*Function)
-		t.MkVariableType()
+
 		if buildinFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
 		}

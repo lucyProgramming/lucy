@@ -43,6 +43,7 @@ type Class struct {
 	InterfaceMethodrefConsts map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
 	AttributeClosureClass    *AttributeClosureFunctionClass
 	AttributeGroupedByName   AttributeGroupedByName
+	TypeAlias                []*AttributeLucyTypeAlias
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
@@ -302,6 +303,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
 	if c.AttributeClosureClass != nil {
 		c.Attributes = append(c.Attributes, c.AttributeClosureClass.ToAttributeInfo(c))
+	}
+	for _, v := range c.TypeAlias {
+		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
 	}
 	c.ifConstPoolOverMaxSize()
 	return

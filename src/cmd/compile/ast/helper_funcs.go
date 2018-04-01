@@ -41,7 +41,6 @@ func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDe
 	f.Typ = &FunctionType{}
 	f.Typ.ParameterList = args
 	f.Typ.ReturnList = rs
-	f.MkVariableType()
 	f.IsGlobal = true
 	return f
 }

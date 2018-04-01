@@ -117,7 +117,6 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
-			f.MkVariableType()
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: f,
 			})
@@ -201,6 +200,17 @@ func (p *Parser) Parse() []error {
 			p.Next()
 			p.validAfterPublic()
 			continue
+		case lex.TOKEN_TYPE:
+			a, err := p.parseTypeaAlias()
+			if err != nil {
+				p.consume(untils_semicolon)
+				p.Next()
+				resetProperty()
+				continue
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: a,
+			})
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except", p.errorMsgPrefix(), p.token.Desp))
 			p.consume(untils_semicolon)

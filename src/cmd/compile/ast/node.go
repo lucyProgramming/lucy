@@ -9,88 +9,99 @@ type Node struct {
 //type Tops []*Node //语法树顶层结构
 
 type ConvertTops2Package struct {
-	Name    []string //package name
-	Blocks  []*Block
-	Funcs   []*Function
-	Classes []*Class
-	Enums   []*Enum
-	Vars    []*VariableDefinition
-	Consts  []*Const
-	Import  []*Import
+	Name      []string //package name
+	Blocks    []*Block
+	Funcs     []*Function
+	Classes   []*Class
+	Enums     []*Enum
+	Vars      []*VariableDefinition
+	Consts    []*Const
+	Import    []*Import
+	TypeAlias []*ExpressionTypeAlias
 }
 
-func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redeclareErrors []*RedeclareError, errs []error) {
+func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (Pack *Package, redeclareErrors []*RedeclareError, errs []error) {
 	errs = make([]error, 0)
-	p = &Package{}
-	p.Files = make(map[string]*File)
-	c.Name = []string{}
-	c.Blocks = []*Block{}
-	c.Funcs = make([]*Function, 0)
-	c.Classes = make([]*Class, 0)
-	c.Enums = make([]*Enum, 0)
-	c.Vars = make([]*VariableDefinition, 0)
-	c.Consts = make([]*Const, 0)
+	Pack = &Package{}
+	Pack.Files = make(map[string]*File)
+	convertor.Name = []string{}
+	convertor.Blocks = []*Block{}
+	convertor.Funcs = make([]*Function, 0)
+	convertor.Classes = make([]*Class, 0)
+	convertor.Enums = make([]*Enum, 0)
+	convertor.Vars = make([]*VariableDefinition, 0)
+	convertor.Consts = make([]*Const, 0)
 	expressions := []*Expression{}
 	for _, v := range t {
 		switch v.Data.(type) {
 		case *Block:
 			t := v.Data.(*Block)
-			c.Blocks = append(c.Blocks, t)
+			convertor.Blocks = append(convertor.Blocks, t)
 		case *Function:
 			t := v.Data.(*Function)
-			c.Funcs = append(c.Funcs, t)
+			convertor.Funcs = append(convertor.Funcs, t)
 		case *Enum:
 			t := v.Data.(*Enum)
-			c.Enums = append(c.Enums, t)
+			convertor.Enums = append(convertor.Enums, t)
 		case *Class:
 			t := v.Data.(*Class)
-			c.Classes = append(c.Classes, t)
+			convertor.Classes = append(convertor.Classes, t)
 		case *Const:
 			t := v.Data.(*Const)
-			c.Consts = append(c.Consts, t)
+			convertor.Consts = append(convertor.Consts, t)
 		case *Import:
 			i := v.Data.(*Import)
-			if p.Files[i.Pos.Filename] == nil {
-				p.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
+			if Pack.Files[i.Pos.Filename] == nil {
+				Pack.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
 			}
-			p.Files[i.Pos.Filename].Imports[i.AccessName] = i
+			Pack.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
 			expressions = append(expressions, t)
+		case *ExpressionTypeAlias:
+			t := v.Data.(*ExpressionTypeAlias)
+			convertor.TypeAlias = append(convertor.TypeAlias, t)
 		default:
 			panic("tops have unkown type")
 		}
 	}
-	errs = append(errs, checkEnum(c.Enums)...)
-	redeclareErrors = c.redeclareErrors()
-	p.Block.Consts = make(map[string]*Const)
-	for _, v := range c.Consts {
-		p.Block.insert(v.Name, v.Pos, v)
+
+	errs = append(errs, checkEnum(convertor.Enums)...)
+	redeclareErrors = convertor.redeclareErrors()
+	Pack.Block.Consts = make(map[string]*Const)
+	for _, v := range convertor.Consts {
+		Pack.Block.insert(v.Name, v.Pos, v)
 	}
-	p.Block.Vars = make(map[string]*VariableDefinition)
-	p.Block.Funcs = make(map[string]*Function)
-	for _, v := range c.Funcs {
-		v.MkVariableType()
-		err := p.Block.insert(v.Name, v.Pos, v)
+	Pack.Block.Vars = make(map[string]*VariableDefinition)
+	Pack.Block.Funcs = make(map[string]*Function)
+	for _, v := range convertor.Funcs {
+		err := Pack.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
 		v.IsGlobal = true
 	}
-	p.Block.Classes = make(map[string]*Class)
-	for _, v := range c.Classes {
-		p.Block.Classes[v.Name] = v
+	Pack.Block.Classes = make(map[string]*Class)
+	for _, v := range convertor.Classes {
+		Pack.Block.Classes[v.Name] = v
 	}
-	p.Block.Enums = make(map[string]*Enum)
-	p.Block.EnumNames = make(map[string]*EnumName)
-	for _, v := range c.Enums {
-		v.mkVariableType()
-		p.Block.Enums[v.Name] = v
+	Pack.Block.Enums = make(map[string]*Enum)
+	Pack.Block.EnumNames = make(map[string]*EnumName)
+	for _, v := range convertor.Enums {
+		Pack.Block.Enums[v.Name] = v
 		for _, vv := range v.Names {
-			p.Block.EnumNames[vv.Name] = vv
+			Pack.Block.EnumNames[vv.Name] = vv
 		}
 	}
-
+	//after class inserted,then resolve type
+	for _, v := range convertor.TypeAlias {
+		err := v.Typ.resolve(&Pack.Block)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		Pack.Block.Types[v.Name] = v.Typ
+	}
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))
 		for k, v := range expressions {
@@ -102,17 +113,17 @@ func (c *ConvertTops2Package) ConvertTops2Package(t []*Node) (p *Package, redecl
 		b := &Block{}
 		b.Statements = s
 		b.isGlobalVariableDefinition = true
-		c.Blocks = append([]*Block{b}, c.Blocks...)
+		convertor.Blocks = append([]*Block{b}, convertor.Blocks...)
 	}
-	p.mkInitFunctions(c.Blocks)
+	Pack.mkInitFunctions(convertor.Blocks)
 	return
 }
 
-func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
+func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	ret := []*RedeclareError{}
 	m := make(map[string][]interface{})
 	//eums
-	for _, v := range p.Enums {
+	for _, v := range convertor.Enums {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -127,7 +138,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//const
-	for _, v := range p.Consts {
+	for _, v := range convertor.Consts {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -135,7 +146,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//vars
-	for _, v := range p.Vars {
+	for _, v := range convertor.Vars {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -143,7 +154,7 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//funcs
-	for _, v := range p.Funcs {
+	for _, v := range convertor.Funcs {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -151,15 +162,24 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//classes
-	for _, v := range p.Classes {
+	for _, v := range convertor.Classes {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
 			m[v.Name] = []interface{}{v}
 		}
 	}
+	// type alias
+	for _, v := range convertor.TypeAlias {
+		if _, ok := m[v.Name]; ok {
+			m[v.Name] = append(m[v.Name], v)
+		} else {
+			m[v.Name] = []interface{}{v}
+		}
+	}
+
 	for k, v := range m {
-		if len(v) == 1 { //very good
+		if len(v) == 1 || len(v) == 0 { //very good  , 0 looks impossible
 			continue
 		}
 		r := &RedeclareError{}
@@ -183,8 +203,10 @@ func (p *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				t := vv.(*Class)
 				r.Pos = append(r.Pos, t.Pos)
 				r.Type = "class"
-			case *ExpressionDeclareVariable:
-				panic("1")
+			case *ExpressionTypeAlias:
+				t := vv.(*ExpressionTypeAlias)
+				r.Pos = append(r.Pos, t.Pos)
+				r.Type = "type alias"
 			default:
 				panic("make error")
 			}
