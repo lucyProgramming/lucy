@@ -7,6 +7,7 @@ import (
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	identifer := e.Data.(*ExpressionIdentifer)
 	d := block.SearchByName(identifer.Name)
+	fmt.Println("$$$$$$$$$$$$", identifer.Name)
 	if d == nil {
 		return nil, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifer.Name)
 	}

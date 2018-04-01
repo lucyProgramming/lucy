@@ -248,13 +248,6 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 	return t, errs
 }
 
-//func (e *Expression) checkFunctionExpression(block *Block, errs *[]error) *VariableType {
-//	f := e.Data.(*Function)
-//	f.MkVariableType()
-//	*errs = append(*errs, f.check(block)...)
-//	return &f.VariableType
-//}
-
 func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, error) {
 	if len(ts) == 0 {
 		return nil, nil // no-type,no error

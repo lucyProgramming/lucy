@@ -73,8 +73,8 @@ func (b *Block) SearchByName(name string) interface{} {
 			return t
 		}
 	}
-	// seach closure
-	{
+	// search closure
+	if b.InheritedAttribute.Function != nil {
 		v := b.InheritedAttribute.Function.ClosureVars.Search(name)
 		if v != nil {
 			return v
@@ -233,6 +233,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	return b.insert(name, pos, d)
 }
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
+	fmt.Println("!!!!!!!!!!!!!!", name, pos, d)
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
 		b := PackageBeenCompile.Block
 		if _, ok := b.Vars[name]; ok {

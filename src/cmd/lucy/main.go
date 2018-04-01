@@ -18,7 +18,7 @@ func init() {
 }
 
 func printUsage() {
-	msg := "lucy is a new programing language base on jvm\n"
+	msg := "lucy is a new programing language based on jvm\n"
 	msg += "\t run		run a lucy package"
 	fmt.Println(msg)
 }

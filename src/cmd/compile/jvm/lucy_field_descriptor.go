@@ -6,24 +6,8 @@ type LucyFieldSignatureParse struct {
 }
 
 func (l *LucyFieldSignatureParse) Need(variableType *ast.VariableType) bool {
-	// map need descriptor
-	if variableType.Typ == ast.VARIABLE_TYPE_MAP {
-		return true
-	}
-	if variableType.Typ != ast.VARIABLE_TYPE_ARRAY {
-		return false
-	}
-	if variableType.ArrayType.Typ == ast.VARIABLE_TYPE_BOOL ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_SHORT ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_INT ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_LONG ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_FLOAT ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_DOUBLE ||
-		variableType.ArrayType.Typ == ast.VARIABLE_TYPE_STRING {
-		return false
-	}
-	return true
+	return variableType.Typ == ast.VARIABLE_TYPE_MAP ||
+		variableType.Typ == ast.VARIABLE_TYPE_ARRAY
 }
 func (l *LucyFieldSignatureParse) Encode(variableType *ast.VariableType) (d string) {
 	if variableType.Typ == ast.VARIABLE_TYPE_MAP {
