@@ -300,7 +300,7 @@ func (s *StatementFor) check(block *Block) []error {
 	s.Block.InheritedAttribute.StatementFor = s
 	s.Block.InheritedAttribute.mostCloseForOrSwitchForBreak = s
 	errs := []error{}
-	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canbeUsedAsForRange() { // for k,v := range arr
+	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canbeUsedForRange() { // for k,v := range arr
 		return s.checkRange()
 	}
 	if s.Init != nil {

@@ -5,7 +5,7 @@ import (
 )
 
 type AttributeSourceFile struct {
-	s string
+	file string
 }
 
 func (a *AttributeSourceFile) ToAttributeInfo(class *Class) *AttributeInfo {
@@ -13,6 +13,6 @@ func (a *AttributeSourceFile) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret.NameIndex = class.insertUtfConst(ATTRIBUTE_NAME_SOURCE_FILE)
 	ret.attributeLength = 2
 	ret.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.Info, class.insertUtfConst(a.s))
+	binary.BigEndian.PutUint16(ret.Info, class.insertUtfConst(a.file))
 	return ret
 }

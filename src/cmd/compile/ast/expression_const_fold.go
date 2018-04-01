@@ -379,7 +379,8 @@ func (e *Expression) numberTypeFold(typ int, value1, value2 interface{}) (value 
 				value = value1.(float32) / value2.(float32)
 			}
 		case EXPRESSION_TYPE_MOD:
-			return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(typ), e.OpName(typ))
+			return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
+				errMsgPrefix(e.Pos), e.OpName(), e.OpName(typ), e.OpName(typ))
 		}
 		return
 	case EXPRESSION_TYPE_LONG:

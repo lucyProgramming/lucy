@@ -151,7 +151,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if context.Defers != nil && len(context.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(s.Expressions) > 0 {
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.Function.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.Function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 			//reach end
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 			code.CodeLength++
@@ -183,7 +183,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 }
 
 func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) (maxstack uint16) {
-	if context.function.HaveNoReturnValue() { // when has no return,should not call this function
+	if context.function.NoReturnValue() { // when has no return,should not call this function
 		return
 	}
 	if len(context.function.Typ.ReturnList) == 1 {

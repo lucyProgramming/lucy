@@ -4,16 +4,12 @@ import (
 	"fmt"
 )
 
-func notFoundError(pos *Pos, typ, name string) error {
-	return fmt.Errorf("%s %s named %s not found", errMsgPrefix(pos), typ, name)
-}
-
 func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
-func errsNotEmpty(errs []error) bool {
-	return errs != nil && len(errs) > 0
+func errsNotEmpty(es []error) bool {
+	return es != nil && len(es) > 0
 }
 func checkEnum(enums []*Enum) []error {
 	ret := make([]error, 0)

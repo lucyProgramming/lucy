@@ -52,10 +52,12 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	ret := newArray.Typ.Clone() // clone the type
 	ret.Pos = e.Pos
 	if len(newArray.Args) > 1 { // 0 and 1 is accpect
-		*errs = append(*errs, fmt.Errorf("%s new array must have one int argument"))
+		*errs = append(*errs,
+			fmt.Errorf("%s new array must have one int argument",
+				errMsgPrefix(newArray.Args[0].Pos)))
 		newArray.Args = []*Expression{} // reset to 0,continue to analyse
 	}
-	if len(newArray.Args) == 0 {
+	if len(newArray.Args) == 0 { // 0 is default
 		ee := &Expression{}
 		ee.Typ = EXPRESSION_TYPE_INT
 		ee.Data = int32(0)

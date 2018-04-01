@@ -50,7 +50,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				}
 				m.buildStoreArrayListAutoVar(code, context)
 				for kk, t := range v.VariableTypes {
-					currentStack := uint16(1)
+					currentStack = uint16(1)
 					if k == len(call.Args)-1 && kk == len(v.VariableTypes)-1 {
 					} else {
 						code.Codes[code.CodeLength] = cg.OP_dup

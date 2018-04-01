@@ -97,8 +97,6 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 	case VARIABLE_TYPE_ARRAY:
 		e.Typ = EXPRESSION_TYPE_NULL
 		e.VariableType = v.Clone()
-	default:
-		panic("....")
 	}
 	return &e
 }
@@ -154,32 +152,20 @@ func (t *VariableType) Clone() *VariableType {
 	return ret
 }
 
-/*
-	when typ is VARIABLE_TYPE_CLASS ,convert to object assoiate with class
-*/
-//func (t *VariableType) actionNeedBeenDoneWhenDescribeVariable() {
-//	if t == nil { // in some case identifier is insert into block,but typ is still wrong
-//		return
-//	}
-//	if t.Typ == VARIABLE_TYPE_CLASS {
-//		t.Typ = VARIABLE_TYPE_OBJECT // correct
-//		return                       // no further need be done
-//	}
-//	if t.Typ == VARIABLE_TYPE_ARRAY {
-//		t.ArrayType.actionNeedBeenDoneWhenDescribeVariable() // recursive do action
-//		return
-//	}
-//}
-
 func (t *VariableType) resolve(block *Block) error {
-	if t.IsPrimitive() {
-		return nil
-	}
 	if t.Typ == VARIABLE_TYPE_NAME { //
 		return t.resolveName(block)
 	}
 	if t.Typ == VARIABLE_TYPE_ARRAY {
 		return t.ArrayType.resolve(block)
+	}
+	if t.Typ == VARIABLE_TYPE_MAP {
+		var err error
+		err = t.Map.K.resolve(block)
+		if err != nil {
+			return err
+		}
+		return t.Map.V.resolve(block)
 	}
 	return nil
 }
@@ -189,16 +175,17 @@ func (t *VariableType) resolveName(block *Block) error {
 	if strings.Contains(t.Name, ".") == false {
 		d = block.SearchByName(t.Name)
 	} else { // a.b  in type situation,must be package name
-		//d, err = t.resolvePackageName(block)
-		//if err != nil {
-		//	return err
-		//}
+		//
+		t := strings.Split(t.Name, ".")
+		var err error
+		d, err = PackageBeenCompile.load(t[0], t[1]) // let`s load
+		if err != nil {
+			return err
+		}
 	}
-	panic(d)
 	if d == nil {
-		return fmt.Errorf("%s not found", t.Name)
+		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
-
 	switch d.(type) {
 	case *VariableDefinition:
 		return fmt.Errorf("%s name '%s' is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
@@ -276,7 +263,6 @@ func (t *VariableType) IsPointer() bool {
 		t.Typ == VARIABLE_TYPE_ARRAY ||
 		t.Typ == VARIABLE_TYPE_MAP ||
 		t.Typ == VARIABLE_TYPE_STRING
-
 }
 
 func (t *VariableType) IsInteger() bool {

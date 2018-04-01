@@ -15,13 +15,11 @@ func (e *Expression) checkConstExpression(block *Block, errs *[]error) {
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
-		if !is {
-			*errs = append(*errs, fmt.Errorf("%s const %v is not defined by const value", errMsgPrefix(v.Pos), v.Name))
-		}
 		if is == false {
+			*errs = append(*errs, fmt.Errorf("%s const %v is not defined by const value", errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
-		v.Data = value
+		v.Value = value
 		v.Expression.Typ = typ
 		v.Expression.Data = value
 		tt, _ := v.Expression.check(block)

@@ -32,7 +32,8 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 			Pos: e.Pos,
 		}
 		return t
-	} else if e.Typ == EXPRESSION_TYPE_NEGATIVE {
+	}
+	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
 		if t.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'", errMsgPrefix(e.Pos), t.TypeString()))
 		}

@@ -10,7 +10,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, 
 	target = identifier.Var.Typ
 	op = []byte{cg.OP_putfield}
 	meta := closure.getMeta(identifier.Var.Typ.Typ)
-	if context.function.ClosureVars.ClosureVarsExist(identifier.Var) { // capture var exits
+	if context.function.ClosureVars.ClosureVariableExist(identifier.Var) { // capture var exits
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 		meta := closure.getMeta(identifier.Var.Typ.Typ)
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -56,7 +56,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		if identifier.Var.IsGlobal {
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Var.Typ
-			classname = context.mainclass.Name
+			classname = m.MakeClass.mainclass.Name
 			name = identifier.Name
 			descriptor = Descriptor.typeDescriptor(identifier.Var.Typ)
 			return

@@ -103,7 +103,7 @@ func (r *Run) RunCommand(command string, args []string) {
 	classPathArray := make([]string, len(classpath))
 	{
 		i := 0
-		for k, _ := range classpath {
+		for k := range classpath {
 			classPathArray[i] = k
 			i++
 		}

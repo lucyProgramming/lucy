@@ -35,7 +35,6 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
 	context.function = f
-	context.mainclass = m.mainclass
 	method.Code.Codes = make([]byte, 65536)
 	method.Code.CodeLength = 0
 	defer func() {
@@ -76,7 +75,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
 			method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
 			method.Code.CodeLength++
-			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
+			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 		}
 	}
 	m.buildBlock(class, &method.Code, f.Block, context)

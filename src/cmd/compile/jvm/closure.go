@@ -94,7 +94,7 @@ func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
 }
 
 /*
-	create a closure var on stack
+	create a closure var ,store on local var offset
 */
 func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
 	maxstack = 2
@@ -116,7 +116,6 @@ func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.Attri
 		meta = closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
 	case ast.VARIABLE_TYPE_STRING:
 		meta = closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
-
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY: //[]int
@@ -125,7 +124,6 @@ func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.Attri
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		meta = closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
-
 	}
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])

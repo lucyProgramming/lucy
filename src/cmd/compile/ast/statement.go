@@ -60,27 +60,27 @@ type StatementBreak struct {
 func (s *Statement) statementName() string {
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
-		return "'expression statement'"
+		return "expression statement"
 	case STATEMENT_TYPE_IF:
-		return "'if statement'"
+		return "if statement"
 	case STATEMENT_TYPE_FOR:
-		return "'for statement'"
+		return "for statement"
 	case STATEMENT_TYPE_CONTINUE:
-		return "'continue statement'"
+		return "continue statement"
 	case STATEMENT_TYPE_BREAK:
-		return "'break statement'"
+		return "break statement"
 	case STATEMENT_TYPE_SWITCH:
-		return "'switch statement'"
+		return "switch statement"
 	case STATEMENT_TYPE_SKIP:
-		return "'skip statement'"
+		return "skip statement"
 	case STATEMENT_TYPE_LABLE:
-		return "'lable statement'"
+		return "lable statement"
 	case STATEMENT_TYPE_GOTO:
-		return "'goto statement'"
+		return "goto statement"
 	case STATEMENT_TYPE_DEFER:
-		return "'defer statement'"
+		return "defer statement"
 	case STATEMENT_TYPE_BLOCK:
-		return "'block statement'"
+		return "block statement"
 	}
 	return ""
 }
@@ -88,14 +88,14 @@ func (s *Statement) statementName() string {
 func (s *Statement) check(b *Block) []error { // b is father
 	if b.InheritedAttribute.Function.isPackageBlockFunction {
 		if s.Typ == STATEMENT_TYPE_SKIP { //special case
-			return nil // 0 length error
+			s.Typ = STATEMENT_TYPE_RETURN // convert to return
+			return nil                    // 0 length error
 		}
 	}
 	if b.Defers != nil && len(b.Defers) > 0 {
 		b.InheritedAttribute.Defers = append(b.InheritedAttribute.Defers, b.Defers...)
 		defer func() {
 			b.InheritedAttribute.Defers = b.InheritedAttribute.Defers[0 : len(b.InheritedAttribute.Defers)-len(b.Defers)]
-
 		}()
 	}
 	switch s.Typ {
@@ -109,10 +109,10 @@ func (s *Statement) check(b *Block) []error { // b is father
 		return s.StatementSwitch.check(b)
 	case STATEMENT_TYPE_BREAK:
 		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
-			return []error{fmt.Errorf("%s %s can`t in this scope", errMsgPrefix(s.Pos), s.statementName())}
+			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.statementName())}
 		} else {
 			if b.InheritedAttribute.StatementFor != nil && b.InheritedAttribute.Defer != nil {
-				return []error{fmt.Errorf("%s cannot has 'break continue' in both 'defer' and 'for'",
+				return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
 					errMsgPrefix(s.Pos), s.statementName())}
 			}
 			s.StatementBreak = &StatementBreak{}
@@ -124,17 +124,17 @@ func (s *Statement) check(b *Block) []error { // b is father
 		}
 	case STATEMENT_TYPE_CONTINUE:
 		if b.InheritedAttribute.StatementFor == nil {
-			return []error{fmt.Errorf("%s %s can`t in this scope",
+			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
 		if b.InheritedAttribute.StatementFor != nil && b.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has 'statement continue' in both 'defer' and 'for'",
+			return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
 		if s.StatementContinue == nil {
 			s.StatementContinue = &StatementContinue{}
 		}
-		if s.StatementContinue.StatementFor == nil {
+		if s.StatementContinue.StatementFor == nil { // for
 			s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
 		}
 	case STATEMENT_TYPE_RETURN:
@@ -142,7 +142,7 @@ func (s *Statement) check(b *Block) []error { // b is father
 			b.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
 		}
 		if b.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has statement return in defer",
+			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
 		return s.StatementReturn.check(b)
@@ -165,9 +165,8 @@ func (s *Statement) check(b *Block) []error { // b is father
 		s.Block.inherite(b)
 		return s.Block.check()
 	case STATEMENT_TYPE_LABLE: // nothing to do
-	default:
-		panic("unkown type statement" + s.statementName())
 	}
+
 	return nil
 }
 
@@ -186,6 +185,22 @@ func (s *Statement) checkStatementGoto(b *Block) error {
 
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
+	//
+	if s.Expression.Typ == EXPRESSION_TYPE_TYPE_ALIAS {
+		t := s.Expression.Data.(*ExpressionTypeAlias)
+		err := t.Typ.resolve(b)
+
+		if err != nil {
+			return []error{err}
+		}
+
+		err = b.insert(t.Name, t.Pos, t.Typ)
+		if err != nil {
+			return []error{err}
+		}
+		return nil
+	}
+
 	if s.Expression.canBeUsedAsStatementExpression() {
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)

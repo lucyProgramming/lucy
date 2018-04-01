@@ -30,7 +30,7 @@ type Function struct {
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
-	if f.HaveNoReturnValue() {
+	if f.NoReturnValue() {
 		return
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
@@ -45,9 +45,9 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 		t.MultiValueOffset = f.VarOffset
 		f.OffsetDestinations = append(f.OffsetDestinations, &t.MultiValueOffset)
 		f.VarOffset++
-		t.IfReachButton = f.VarOffset
+		t.IfReachBotton = f.VarOffset
 		f.VarOffset++
-		f.OffsetDestinations = append(f.OffsetDestinations, &t.IfReachButton)
+		f.OffsetDestinations = append(f.OffsetDestinations, &t.IfReachBotton)
 	}
 }
 
@@ -60,10 +60,10 @@ type AutoVarForReturnBecauseOfDefer struct {
 		for multi return value
 	*/
 	MultiValueOffset uint16
-	IfReachButton    uint16
+	IfReachBotton    uint16
 }
 
-func (f *Function) HaveNoReturnValue() bool {
+func (f *Function) NoReturnValue() bool {
 	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_BOOL
 }
 
@@ -71,17 +71,27 @@ type AutoVarForException struct {
 	Offset uint16
 }
 
-/*
-	resolve parameter and return list name
-*/
-func (f *Function) resolvName() {
-	for _, v := range f.Typ.ParameterList {
-		v.Typ.resolve(f.Block)
-	}
-	for _, v := range f.Typ.ReturnList {
-		v.Typ.resolve(f.Block)
-	}
-}
+//
+///*
+//	resolve parameter and return list name
+//*/
+//func (f *Function) resolveName() (errs []error) {
+//	var err error
+//	for _, v := range f.Typ.ParameterList {
+//		err = v.Typ.resolve(f.Block)
+//		if err != nil {
+//			errs = append(errs, err)
+//		}
+//	}
+//	for _, v := range f.Typ.ReturnList {
+//		err = v.Typ.resolve(f.Block)
+//		if err != nil {
+//			errs = append(errs, err)
+//		}
+//	}
+//	return errs
+//}
+
 func (f *Function) mkAutoVarForMultiReturn() {
 	if f.AutoVarForMultiReturn != nil {
 		return
@@ -98,14 +108,14 @@ type AutoVarForMultiReturn struct {
 }
 
 func (f *Function) readableMsg() string {
-	s := "fn" + f.Name + "("
+	s := "fn " + f.Name + " ("
 	for k, v := range f.Typ.ParameterList {
 		s += v.Name + " " + v.Typ.TypeString()
 		if k != len(f.Typ.ParameterList)-1 {
 			s += ","
 		}
 	}
-	s += ")"
+	s += ") "
 	if len(f.Typ.ReturnList) > 0 {
 		s += "->"
 		s += "("
@@ -119,11 +129,6 @@ func (f *Function) readableMsg() string {
 	}
 	return s
 }
-
-//func (f *Function) MkVariableType() {
-//	f.VariableType.Typ = VARIABLE_TYPE_FUNCTION
-//	f.VariableType.Function = f
-//}
 
 func (f *Function) checkBlock(errs *[]error) {
 	if f.Typ != nil {

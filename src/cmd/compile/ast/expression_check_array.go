@@ -4,7 +4,9 @@ import (
 	"fmt"
 )
 
-//in array type must eqaul
+/*
+	in array type must eqaul
+*/
 func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	arr := e.Data.(*ExpressionArrayLiteral)
 	if arr.Typ == nil && (arr.Expressions == nil || len(arr.Expressions) == 0) {
@@ -37,7 +39,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 					arr.Typ.Typ = VARIABLE_TYPE_ARRAY
 					arr.Typ.ArrayType = tt
 				} else {
-					*errs = append(*errs, fmt.Errorf("%s %s cannot inference it`s type,because type named '%s' is not right value valid ",
+					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,because type named '%s' is not right value valid ",
 						errMsgPrefix(e.Pos), t.TypeString()))
 				}
 			}

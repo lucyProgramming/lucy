@@ -41,7 +41,7 @@ func (m *MakeClass) newClassName(prefix string) (autoName string) {
 		}
 		return autoName
 	}
-	panic("cannot new class name")
+	panic("new class name overflow")
 }
 
 func (m *MakeClass) putClass(name string, class *cg.ClassHighLevel) {
@@ -67,45 +67,20 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
 	mkClassDefaultContruction(m.mainclass)
 	m.MakeExpression.MakeClass = m
+	m.Classes = make(map[string]*cg.ClassHighLevel)
 	m.mkVars()
 	m.mkEnums()
 	for _, v := range p.Block.Classes {
-		m.mkClass(v)
+		m.Classes[v.Name] = m.mkClass(v)
 	}
 	m.mkFuncs()
 	m.mkConsts()
+	m.mkTypes()
 	m.mkInitFunctions()
 	err := m.Dump()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
 	}
-}
-
-func (m *MakeClass) Dump() error {
-	//dump main class
-	f, err := os.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	if err := m.mainclass.FromHighLevel().OutPut(f); err != nil {
-		f.Close()
-		return err
-	}
-	f.Close()
-
-	for _, c := range m.Classes {
-		fmt.Println("!!!!!!!!!!!!!!!", c.Name)
-
-		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		if err != nil {
-			return err
-		}
-		if err = c.FromHighLevel().OutPut(f); err != nil {
-			f.Close()
-			return err
-		}
-	}
-	return nil
 }
 
 func (m *MakeClass) mkConsts() {
@@ -121,28 +96,38 @@ func (m *MakeClass) mkConsts() {
 		f.ConstantValue = &cg.AttributeConstantValue{}
 		switch v.Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
-			if v.Data.(bool) {
+			if v.Value.(bool) {
 				f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(1)
 			} else {
 				f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(0)
 			}
 		case ast.VARIABLE_TYPE_BYTE:
-			fallthrough
+			f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(int32(v.Value.(byte)))
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
 		case ast.VARIABLE_TYPE_INT:
-			f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(v.Data.(int32))
+			f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(v.Value.(int32))
 		case ast.VARIABLE_TYPE_LONG:
-			f.ConstantValue.Index = m.mainclass.Class.InsertLongConst(v.Data.(int64))
+			f.ConstantValue.Index = m.mainclass.Class.InsertLongConst(v.Value.(int64))
 		case ast.VARIABLE_TYPE_FLOAT:
-			f.ConstantValue.Index = m.mainclass.Class.InsertFloatConst(v.Data.(float32))
+			f.ConstantValue.Index = m.mainclass.Class.InsertFloatConst(v.Value.(float32))
 		case ast.VARIABLE_TYPE_DOUBLE:
-			f.ConstantValue.Index = m.mainclass.Class.InsertDoubleConst(v.Data.(float64))
+			f.ConstantValue.Index = m.mainclass.Class.InsertDoubleConst(v.Value.(float64))
+		case ast.VARIABLE_TYPE_STRING:
+			f.ConstantValue.Index = m.mainclass.Class.InsertStringConst(v.Value.(string))
 		}
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		m.mainclass.Fields[k] = f
 	}
 }
+func (m *MakeClass) mkTypes() {
+	for name, v := range m.p.Block.Types {
+		t := &cg.AttributeLucyTypeAlias{}
+		t.Alias = LucyTypeAliasParser.Encode(name, v)
+		m.mainclass.Class.TypeAlias = append(m.mainclass.Class.TypeAlias, t)
+	}
+}
+
 func (m *MakeClass) mkVars() {
 	for k, v := range m.p.Block.Vars {
 		f := &cg.FiledHighLevel{}
@@ -151,6 +136,10 @@ func (m *MakeClass) mkVars() {
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		}
+		if LucyFieldSignatureParser.Need(v.Typ) {
+			f.AttributeLucyFieldDescritor = &cg.AttributeLucyFieldDescritor{}
+			f.AttributeLucyFieldDescritor.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
 		}
 		f.Name = v.Name
 		m.mainclass.Fields[k] = f
@@ -201,11 +190,9 @@ func (m *MakeClass) mkEnums() {
 
 }
 
-func (m *MakeClass) mkClass(c *ast.Class) {
+func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
-	m.Classes = make(map[string]*cg.ClassHighLevel)
-	m.Classes["main"] = class
 	class.AccessFlags = c.Access
 	class.SuperClass = c.SuperClassName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
@@ -215,6 +202,11 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 		f.Name = v.Name
 		f.AccessFlags = v.AccessFlags
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
+		if LucyFieldSignatureParser.Need(v.Typ) {
+			t := &cg.AttributeLucyFieldDescritor{}
+			t.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
+			f.AttributeLucyFieldDescritor = t
+		}
 		class.Fields[v.Name] = f
 	}
 	for _, v := range c.Methods {
@@ -225,6 +217,11 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(vv.Func)
 		m.buildFunction(class, method, vv.Func)
+		if LucyMethodSignatureParser.Need(vv.Func.Typ) {
+			t := &cg.AttributeLucyMethodDescritor{}
+			t.Descriptor = LucyMethodSignatureParser.Encode(vv.Func)
+			method.AttributeLucyMethodDescritor = t
+		}
 		class.AppendMethod(method)
 	}
 	//construction
@@ -239,6 +236,7 @@ func (m *MakeClass) mkClass(c *ast.Class) {
 	} else {
 		mkClassDefaultContruction(class)
 	}
+	return class
 }
 
 func (m *MakeClass) mkFuncs() {
@@ -256,6 +254,10 @@ func (m *MakeClass) mkFuncs() {
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 		}
+		if LucyMethodSignatureParser.Need(f.Typ) {
+			method.AttributeLucyMethodDescritor = &cg.AttributeLucyMethodDescritor{}
+			method.AttributeLucyMethodDescritor.Descriptor = LucyMethodSignatureParser.Encode(f)
+		}
 		ms[k] = method
 		f.ClassMethod = method
 		m.mainclass.AppendMethod(method)
@@ -268,7 +270,27 @@ func (m *MakeClass) mkFuncs() {
 	}
 }
 
-func (m *MakeClass) mkFuncClassMode(f *ast.Function) *cg.MethodHighLevel {
-	ret := &cg.MethodHighLevel{}
-	return ret
+func (m *MakeClass) Dump() error {
+	//dump main class
+	f, err := os.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	if err := m.mainclass.FromHighLevel().OutPut(f); err != nil {
+		f.Close()
+		return err
+	}
+	f.Close()
+
+	for _, c := range m.Classes {
+		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		if err != nil {
+			return err
+		}
+		if err = c.FromHighLevel().OutPut(f); err != nil {
+			f.Close()
+			return err
+		}
+	}
+	return nil
 }

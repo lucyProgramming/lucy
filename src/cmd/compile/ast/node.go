@@ -2,11 +2,8 @@ package ast
 
 //代表语法数的一个节点
 type Node struct {
-	//Pos  Pos
-	Data interface{} //class defination or varialbe Defination
+	Data interface{}
 }
-
-//type Tops []*Node //语法树顶层结构
 
 type ConvertTops2Package struct {
 	Name      []string //package name

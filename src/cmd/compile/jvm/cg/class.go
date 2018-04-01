@@ -241,7 +241,6 @@ func (c *Class) InsertStringConst(s string) uint16 {
 	if con, ok := c.StringConsts[s]; ok {
 		return con.selfindex
 	}
-
 	info := (&CONSTANT_String_info{c.insertUtfConst(s)}).ToConstPool()
 	info.selfindex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
@@ -283,6 +282,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
 		}
 		field.DescriptorIndex = c.insertUtfConst(f.Descriptor)
+		if f.AttributeLucyFieldDescritor != nil {
+			field.Attributes = append(field.Attributes, f.AttributeLucyFieldDescritor.ToAttributeInfo(c))
+		}
 		c.Fields = append(c.Fields, field)
 	}
 	for _, ms := range high.Methods {
@@ -295,6 +297,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			info.Attributes = append(info.Attributes, codeinfo)
 			if m.AttributeLucyInnerStaticMethod != nil {
 				info.Attributes = append(info.Attributes, m.AttributeLucyInnerStaticMethod.ToAttributeInfo(c))
+			}
+			if m.AttributeLucyMethodDescritor != nil {
+				info.Attributes = append(info.Attributes, m.AttributeLucyMethodDescritor.ToAttributeInfo(c))
 			}
 			c.Methods = append(c.Methods, info)
 		}

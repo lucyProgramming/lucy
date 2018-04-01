@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-//when no error,convert to assign
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
 	var names []*Expression

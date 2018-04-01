@@ -6,13 +6,13 @@ import (
 
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *VariableType) {
 	bin := e.Data.(*ExpressionBinary)
-	ts1, err1 := bin.Left.check(block)
-	ts2, err2 := bin.Right.check(block)
-	if errsNotEmpty(err1) {
-		*errs = append(*errs, err1...)
+	ts1, es := bin.Left.check(block)
+	if errsNotEmpty(es) {
+		*errs = append(*errs, es...)
 	}
-	if errsNotEmpty(err2) {
-		*errs = append(*errs, err2...)
+	ts2, es := bin.Right.check(block)
+	if errsNotEmpty(es) {
+		*errs = append(*errs, es...)
 	}
 	var err error
 	t1, err := e.mustBeOneValueContext(ts1)
@@ -23,9 +23,17 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-	bin.Left.VariableType = t1
-	bin.Right.VariableType = t2
 	if t1 == nil || t2 == nil {
+		if t1 != nil {
+			tt := t1.Clone()
+			tt.Pos = e.Pos
+			return tt
+		}
+		if t2 != nil {
+			tt := t2.Clone()
+			tt.Pos = e.Pos
+			return tt
+		}
 		return nil
 	}
 	// &&  ||
@@ -55,7 +63,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(bin.Right.Pos)))
 		}
 		if t1.IsNumber() && t2.IsNumber() {
-			if t1.Typ != t2.Typ {
+			if t1.Typ != t2.Typ { //force to equal
 				*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
 					t1.TypeString(),
@@ -179,6 +187,5 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		result.Typ = t1.NumberTypeConvertRule(t2)
 		return result
 	}
-	panic("missing check" + e.OpName())
 	return nil
 }

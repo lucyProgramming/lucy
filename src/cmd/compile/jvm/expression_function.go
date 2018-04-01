@@ -82,7 +82,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 		}
-		if context.function.ClosureVars.ClosureVarsExist(v) {
+		if context.function.ClosureVars.ClosureVariableExist(v) {
 			// I Know class at 0 offset
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxstack {

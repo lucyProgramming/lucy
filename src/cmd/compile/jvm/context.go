@@ -7,7 +7,6 @@ import (
 
 type Context struct {
 	function          *ast.Function
-	mainclass         *cg.ClassHighLevel
 	currentSoureFile  string
 	currentLineNUmber int
 	Defers            []*ast.Defer

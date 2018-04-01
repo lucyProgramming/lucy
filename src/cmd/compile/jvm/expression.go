@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -11,11 +10,12 @@ type MakeExpression struct {
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
-	fmt.Println(e.OpName())
 	if e.IsCompileAutoExpression == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
 	switch e.Typ {
+	case ast.EXPRESSION_TYPE_TYPE_ALIAS:
+		return // handled at ast stage
 	case ast.EXPRESSION_TYPE_NULL:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -31,7 +31,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_BYTE:
 		e.Data = int32(e.Data.(byte))
 		fallthrough
-	case ast.EXPRESSION_TYPE_INT:
+	case ast.EXPRESSION_TYPE_INT, ast.EXPRESSION_TYPE_SHORT:
 		loadInt32(class, code, e.Data.(int32))
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_LONG:
@@ -175,7 +175,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildMapLiteral(class, code, e, context)
 	case ast.EXPRESSION_TYPE_VAR:
 		maxstack = m.buildVar(class, code, e, context)
-
 	default:
 		panic(e.OpName())
 	}
@@ -274,78 +273,12 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		Descriptor: "(I)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	switch typ.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
-	case ast.VARIABLE_TYPE_INT:
-		//cast to real object
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(java_integer_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_integer_class,
-			Method:     "intValue",
-			Descriptor: "()I",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_LONG:
-		//cast to real object
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_long_class,
-			Method:     "longValue",
-			Descriptor: "()J",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_FLOAT:
-		//cast to real object
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_float_class,
-			Method:     "floatValue",
-			Descriptor: "()F",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_DOUBLE:
-		//cast to real object
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst("java/lang/Double", code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_double_class,
-			Method:     "doubleValue",
-			Descriptor: "()D",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_STRING:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst("java/lang/String", code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_OBJECT:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[typ.ArrayType.Typ]
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_MAP:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+
+	if typ.IsPointer() == false {
+		primitiveObjectConverter.getFromObject(class, code, typ)
+	} else if typ.Typ == ast.EXPRESSION_TYPE_STRING { // string nothing
+	} else {
+		primitiveObjectConverter.castPointerTypeToRealType(class, code, typ)
 	}
 	return
 }
@@ -424,58 +357,5 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 			return
 		}
 	}
-	panic(111111111)
 	return
 }
-
-///*
-//	stack is ... objectref value
-//*/
-//func (m *MakeExpression) pack2Object(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
-//	switch t.Typ {
-//	case ast.VARIABLE_TYPE_BOOL:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      "java/lang/Boolean",
-//			Name:       special_method_init,
-//			Descriptor: "(Z)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_BYTE:
-//		fallthrough
-//	case ast.VARIABLE_TYPE_SHORT:
-//		fallthrough
-//	case ast.VARIABLE_TYPE_INT:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_integer_class,
-//			Name:       special_method_init,
-//			Descriptor: "(I)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_LONG:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_long_class,
-//			Name:       special_method_init,
-//			Descriptor: "(J)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_FLOAT:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_float_class,
-//			Name:       special_method_init,
-//			Descriptor: "(F)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	case ast.VARIABLE_TYPE_DOUBLE:
-//		code.Codes[code.CodeLength] = cg.OP_invokespecial
-//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-//			Class:      java_double_class,
-//			Name:       special_method_init,
-//			Descriptor: "(D)V",
-//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-//		code.CodeLength += 3
-//	}
-//}

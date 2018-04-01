@@ -49,7 +49,6 @@ func (s *StatementSwitch) check(b *Block) []error {
 	}
 	doubleMap := []doubleExist{}
 	stringMap := make(map[string]*Pos)
-
 	for _, v := range s.StatmentSwitchCases {
 		for _, e := range v.Matches {
 			var byteValue byte
@@ -75,6 +74,19 @@ func (s *StatementSwitch) check(b *Block) []error {
 				case EXPRESSION_TYPE_STRING:
 					stringValue = e.Data.(string)
 				}
+			}
+			t, es := b.checkExpression(e)
+			if es != nil {
+				errs = append(errs, es...)
+				continue
+			}
+			if t == nil {
+				continue
+			}
+			if conditionType.Equal(t) == false {
+				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
+				continue
 			}
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {

@@ -95,21 +95,21 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
 			switch cos.Typ.Typ {
 			case ast.VARIABLE_TYPE_BOOL:
-				cos.Data = binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info) != 0
+				cos.Value = binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info) != 0
 			case ast.VARIABLE_TYPE_BYTE:
-				cos.Data = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_SHORT:
-				cos.Data = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_INT:
-				cos.Data = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_LONG:
-				cos.Data = int64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
+				cos.Value = int64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_FLOAT:
-				cos.Data = float32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+				cos.Value = float32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_DOUBLE:
-				cos.Data = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
+				cos.Value = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_STRING:
-				cos.Data = string(c.ConstPool[valueIndex].Info)
+				cos.Value = string(c.ConstPool[valueIndex].Info)
 			}
 			if loader.Package.Block.Consts == nil {
 				loader.Package.Block.Consts = make(map[string]*ast.Const)
@@ -145,6 +145,19 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			p.Block.Funcs = make(map[string]*ast.Function)
 		}
 		p.Block.Funcs[function.Name] = function
+	}
+
+	// load type alias
+	if loader.Package.Block.Types == nil {
+		loader.Package.Block.Types = make(map[string]*ast.VariableType)
+	}
+	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
+		index := binary.BigEndian.Uint64(v.Info)
+		name, typ, err := jvm.LucyTypeAliasParser.Decode(c.ConstPool[index].Info)
+		if err != nil {
+			return err
+		}
+		loader.Package.Block.Types[name] = typ
 	}
 	return nil
 }

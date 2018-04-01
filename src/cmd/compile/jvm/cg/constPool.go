@@ -88,6 +88,9 @@ type CONSTANT_Long_info struct {
 	value int64
 }
 
+/*
+	big endian
+*/
 func (c *CONSTANT_Long_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = CONSTANT_POOL_TAG_Long

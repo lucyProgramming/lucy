@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"strings"
 )
 
 type ClassHighLevel struct {
@@ -49,7 +48,7 @@ type CONSTANT_Fieldref_info_high_level struct {
 }
 
 /*
-	new a method name,mksure it does exists before
+	new a method name,make sure it does exists before
 */
 func (c *ClassHighLevel) NewFunctionName(prefix string) string {
 	if c.Methods == nil || c.Methods[prefix] == nil {
@@ -106,13 +105,20 @@ func (c *ClassHighLevel) InsertFloatConst(f float32, location []byte) {
 func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 	binary.BigEndian.PutUint16(location, c.Class.InsertDoubleConst(d))
 }
+
+/*
+	source files
+*/
 func (c *ClassHighLevel) getSourceFile() string {
 	s := ""
+	last := len(c.SourceFiles) - 1
+	i := 0
 	for f, _ := range c.SourceFiles {
-		s += f + " "
-	}
-	if s != "" {
-		s = strings.TrimRight(s, " ")
+		s += f
+		if i != last {
+			s += "\n"
+		}
+		i++
 	}
 	return s
 }

@@ -354,3 +354,13 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	code.CodeLength += 15
 	return
 }
+
+func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) {
+	code.Codes[code.CodeLength] = cg.OP_putstatic
+	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		Class:      mainClass.Name,
+		Field:      v.Name,
+		Descriptor: Descriptor.typeDescriptor(v.Typ),
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+}

@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"encoding/binary"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -295,14 +296,24 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_ARRAY:
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_ifnonnull
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 10)
+		code.Codes[code.CodeLength+3] = cg.OP_pop
+		code.Codes[code.CodeLength+4] = cg.OP_ldc_w
+		class.InsertStringConst("null", code.Codes[code.CodeLength+5:code.CodeLength+7])
+		code.Codes[code.CodeLength+7] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+8:code.CodeLength+10], 6)
+		code.Codes[code.CodeLength+10] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Object",
 			Method:     "toString",
 			Descriptor: "()Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		}, code.Codes[code.CodeLength+11:code.CodeLength+13])
+		code.CodeLength += 13
 	default:
 		panic(1111111111)
 	}
+
 }

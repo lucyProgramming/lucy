@@ -2,5 +2,5 @@ package ast
 
 type Const struct {
 	VariableDefinition
-	Data interface{}
+	Value interface{} // value base on type
 }

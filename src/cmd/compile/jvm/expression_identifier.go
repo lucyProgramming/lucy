@@ -7,7 +7,7 @@ import (
 
 func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
-	captured := context.function.ClosureVars.ClosureVarsExist(identifier.Var)
+	captured := context.function.ClosureVars.ClosureVariableExist(identifier.Var)
 	if captured == false {
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	} else {
@@ -39,7 +39,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 	if identifier.Var.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      context.mainclass.Name,
+			Class:      m.MakeClass.mainclass.Name,
 			Field:      identifier.Name,
 			Descriptor: Descriptor.typeDescriptor(identifier.Var.Typ),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

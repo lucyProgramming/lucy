@@ -53,7 +53,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			e.CatchType = class.Class.InsertClassConst("java/lang/Throwable") //runtime
 			code.Exceptions = append(code.Exceptions, e)
 			startPc = code.CodeLength
-			if index == len(ds)-1 && r != nil && context.function.HaveNoReturnValue() == false {
+			if index == len(ds)-1 && r != nil && context.function.NoReturnValue() == false {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				if 2 > code.MaxStack {
@@ -106,13 +106,14 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 		code.Codes[code.CodeLength+6] = cg.OP_athrow
 		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
 		code.CodeLength += 8
-		if r == nil || context.function.HaveNoReturnValue() || len(r.Expressions) == 0 {
+		if r == nil || context.function.NoReturnValue() || len(r.Expressions) == 0 {
 			endPc = code.CodeLength
 			index--
 			continue
 		}
 		// load if enter defers there is a exception
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT,
+			context.function.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
 		code.Codes[code.CodeLength] = cg.OP_ifne
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 		code.Codes[code.CodeLength+3] = cg.OP_goto
@@ -126,7 +127,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			}
 		} else {
 			//load when function have multi returns if read to end
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachButton)...)
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 			code.Codes[code.CodeLength] = cg.OP_ifeq
 			codeLength := code.CodeLength
 			code.CodeLength += 3

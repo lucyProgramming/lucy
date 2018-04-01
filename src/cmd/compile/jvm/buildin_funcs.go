@@ -26,6 +26,7 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 	}
 	return
 }
+
 func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall, context *Context) (maxstack uint16) {
 	maxstack, _ = m.build(class, code, call.Args[0], context)
 	code.Codes[code.CodeLength] = cg.OP_athrow
@@ -122,16 +123,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		case ast.VARIABLE_TYPE_MAP:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/Object",
-				Method:     "toString",
-				Descriptor: "()Ljava/lang/String;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
-				Descriptor: "(Ljava/lang/String;)V",
+				Descriptor: "(Ljava/lang/Object;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
@@ -151,7 +145,8 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	code.CodeLength += 3
 	maxstack = 3
 	currentStack := uint16(2)
-	app := func(appendBlankSpace bool) {
+	app := func(isLast bool) {
+		//
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/StringBuilder",
@@ -159,7 +154,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if appendBlankSpace {
+		if isLast == false {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
 			class.InsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -186,7 +181,12 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 					maxstack = t
 				}
 				m.stackTop2String(class, code, tt)
-				app(k < len(call.Args)-1 || kk < len(v.VariableTypes)-1)
+				if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
+					if t := 2 + currentStack; t > maxstack {
+						maxstack = t
+					}
+				}
+				app(k == len(call.Args)-1 && kk == len(v.VariableTypes)-1)
 			}
 			continue
 		}
@@ -200,7 +200,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			maxstack = t
 		}
 		m.stackTop2String(class, code, variableType)
-		app(k < len(call.Args)-1)
+		app(k == len(call.Args)-1)
 	}
 	// tostring
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -221,7 +221,8 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 func (m *MakeExpression) mkBuildinRecover(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	if e.IsStatementExpression { // first level statement
+	if e.IsStatementExpression { // statement call
+		maxstack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)

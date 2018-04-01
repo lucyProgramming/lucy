@@ -11,7 +11,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		identifier := e.Data.(*ExpressionIdentifer)
 		d := block.SearchByName(identifier.Name)
 		if d == nil {
-			return nil, []error{fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifier.Name)}
+			return nil, []error{fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifier.Name)}
 		}
 		switch d.(type) {
 		case *VariableDefinition:
@@ -19,7 +19,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 			identifier.Var = t
 			return t.Typ, nil
 		default:
-			errs = append(errs, fmt.Errorf("%s identifier %s is not variable",
+			errs = append(errs, fmt.Errorf("%s identifier '%s' is not variable",
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil, []error{}
 		}
@@ -28,7 +28,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	case EXPRESSION_TYPE_DOT:
 		return e.checkIndexExpression(block, &errs), errs
 	default:
-		errs = append(errs, fmt.Errorf("%s %s cannot be used as left value",
+		errs = append(errs, fmt.Errorf("%s '%s' cannot be used as left value",
 			errMsgPrefix(e.Pos),
 			e.OpName()))
 		return nil, errs

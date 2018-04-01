@@ -12,6 +12,7 @@ const (
 	EXPRESSION_TYPE_BOOL
 	// int types
 	EXPRESSION_TYPE_BYTE
+	EXPRESSION_TYPE_SHORT
 	EXPRESSION_TYPE_INT
 	EXPRESSION_TYPE_LONG
 	EXPRESSION_TYPE_FLOAT
@@ -76,7 +77,18 @@ const (
 	EXPRESSION_TYPE_RANGE           // for range
 	EXPRESSION_TYPE_SLICE           // arr[0:2]
 	EXPRESSION_TYPE_MAP             // map literal
+	EXPRESSION_TYPE_TYPE_ALIAS
 )
+
+type Expression struct {
+	IsCompileAutoExpression bool
+	VariableType            *VariableType   //
+	VariableTypes           []*VariableType // functioncall or methodcall can with multi results
+	Pos                     *Pos
+	Typ                     int
+	Data                    interface{}
+	IsStatementExpression   bool
+}
 
 /*
 	mk a expression from a const
@@ -85,25 +97,28 @@ func (e *Expression) fromConst(c *Const) {
 	switch c.Typ.Typ {
 	case VARIABLE_TYPE_BOOL:
 		e.Typ = EXPRESSION_TYPE_BOOL
-		e.Data = c.Data.(bool)
+		e.Data = c.Value.(bool)
 	case VARIABLE_TYPE_BYTE:
 		e.Typ = EXPRESSION_TYPE_BYTE
-		e.Data = c.Data.(byte)
+		e.Data = c.Value.(byte)
+	case VARIABLE_TYPE_SHORT:
+		e.Typ = EXPRESSION_TYPE_SHORT
+		e.Data = c.Value.(int32)
 	case VARIABLE_TYPE_INT:
 		e.Typ = EXPRESSION_TYPE_INT
-		e.Data = c.Data.(int32)
+		e.Data = c.Value.(int32)
 	case VARIABLE_TYPE_LONG:
 		e.Typ = EXPRESSION_TYPE_LONG
-		e.Data = c.Data.(int64)
+		e.Data = c.Value.(int64)
 	case VARIABLE_TYPE_FLOAT:
 		e.Typ = EXPRESSION_TYPE_FLOAT
-		e.Data = c.Data.(float32)
+		e.Data = c.Value.(float32)
 	case VARIABLE_TYPE_DOUBLE:
 		e.Typ = EXPRESSION_TYPE_DOUBLE
-		e.Data = c.Data.(float64)
+		e.Data = c.Value.(float64)
 	case VARIABLE_TYPE_STRING:
 		e.Typ = EXPRESSION_TYPE_STRING
-		e.Data = c.Data.(string)
+		e.Data = c.Value.(string)
 	}
 }
 
@@ -158,7 +173,8 @@ func (e *Expression) canBeUsedAsStatementExpression() bool {
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
 		e.Typ == EXPRESSION_TYPE_VAR ||
-		e.Typ == EXPRESSION_TYPE_CONST
+		e.Typ == EXPRESSION_TYPE_CONST ||
+		e.Typ == EXPRESSION_TYPE_TYPE_ALIAS
 }
 
 /*
@@ -199,7 +215,7 @@ func (e *Expression) HaveOnlyOneValue() bool {
 	}
 	return true
 }
-func (e *Expression) canbeUsedAsForRange() bool {
+func (e *Expression) canbeUsedForRange() bool {
 	if e.Typ != EXPRESSION_TYPE_ASSIGN && e.Typ != EXPRESSION_TYPE_COLON_ASSIGN {
 		return false
 	}
@@ -212,16 +228,6 @@ func (e *Expression) canbeUsedAsForRange() bool {
 		return len(t) > 0 && t[0].Typ == EXPRESSION_TYPE_RANGE
 	}
 	return false
-}
-
-type Expression struct {
-	IsCompileAutoExpression bool
-	VariableType            *VariableType   //
-	VariableTypes           []*VariableType // functioncall or methodcall can with multi results
-	Pos                     *Pos
-	Typ                     int
-	Data                    interface{}
-	IsStatementExpression   bool
 }
 
 func (e *Expression) IsCall() bool {
@@ -246,7 +252,7 @@ type ExpressionFunctionCall struct {
 type ExpressionDeclareVariable struct {
 	Vs             []*VariableDefinition
 	Values         []*Expression
-	IfDeclareBefor []bool
+	IfDeclareBefor []bool // used for colon assign
 }
 
 type ExpressionDeclareConsts struct {
@@ -307,38 +313,6 @@ type ExpressionArrayLiteral struct {
 	Length      int
 }
 
-/*
-	literal value to float64
-*/
-func (e *Expression) literalValue2Float64() int64 {
-	switch e.Typ {
-	case EXPRESSION_TYPE_BYTE:
-		return int64(e.Data.(byte))
-	case EXPRESSION_TYPE_INT:
-		return e.Data.(int64)
-	case EXPRESSION_TYPE_FLOAT:
-		return int64(e.Data.(float64))
-	default:
-		panic("unhandle convert to int64")
-	}
-}
-
-/*
-	literal value to float64
-*/
-func (e *Expression) literalValue2Int64() float64 {
-	switch e.Typ {
-	case EXPRESSION_TYPE_BYTE:
-		return float64(e.Data.(byte))
-	case EXPRESSION_TYPE_INT:
-		return float64(e.Data.(int64))
-	case EXPRESSION_TYPE_FLOAT:
-		return e.Data.(float64)
-	default:
-		panic("unhandle convert to float64")
-	}
-}
-
 func (e *Expression) OpName(typ ...int) string {
 	t := e.Typ
 	if len(typ) > 0 {
@@ -346,7 +320,7 @@ func (e *Expression) OpName(typ ...int) string {
 	}
 	switch t {
 	case EXPRESSION_TYPE_BOOL:
-		return "bool_expression"
+		return "bool_literal"
 	case EXPRESSION_TYPE_BYTE:
 		return "byte_literal"
 	case EXPRESSION_TYPE_INT:
@@ -362,13 +336,13 @@ func (e *Expression) OpName(typ ...int) string {
 	case EXPRESSION_TYPE_ARRAY:
 		return "array_literal"
 	case EXPRESSION_TYPE_LOGICAL_OR:
-		return "||"
+		return "logical or expression"
 	case EXPRESSION_TYPE_LOGICAL_AND:
-		return "&&"
+		return "logical and expression"
 	case EXPRESSION_TYPE_OR:
 		return "|"
 	case EXPRESSION_TYPE_AND:
-		return "&&"
+		return "&"
 	case EXPRESSION_TYPE_LEFT_SHIFT:
 		return "<<"
 	case EXPRESSION_TYPE_RIGHT_SHIFT:
@@ -451,6 +425,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "map_literal"
 	case EXPRESSION_TYPE_CONVERTION_TYPE:
 		return "convertion of type"
+	case EXPRESSION_TYPE_TYPE_ALIAS:
+		return "type alias"
 	}
 	panic("missing")
 }
@@ -462,3 +438,35 @@ func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, 
 }
 
 type getBinaryExpressionHandler func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)
+
+/*
+	literal value to float64
+*/
+//func (e *Expression) literalValue2Float64() int64 {
+//	switch e.Typ {
+//	case EXPRESSION_TYPE_BYTE:
+//		return int64(e.Data.(byte))
+//	case EXPRESSION_TYPE_INT:
+//		return e.Data.(int64)
+//	case EXPRESSION_TYPE_FLOAT:
+//		return int64(e.Data.(float64))
+//	default:
+//		panic("unhandle convert to int64")
+//	}
+//}
+
+/*
+	literal value to float64
+*/
+//func (e *Expression) literalValue2Int64() float64 {
+//	switch e.Typ {
+//	case EXPRESSION_TYPE_BYTE:
+//		return float64(e.Data.(byte))
+//	case EXPRESSION_TYPE_INT:
+//		return float64(e.Data.(int64))
+//	case EXPRESSION_TYPE_FLOAT:
+//		return e.Data.(float64)
+//	default:
+//		panic("unhandle convert to float64")
+//	}
+//}

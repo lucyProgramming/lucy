@@ -15,7 +15,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-
 	if object.Typ == VARIABLE_TYPE_MAP {
 		switch call.Name {
 		case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
@@ -23,13 +22,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_BOOL
 			if len(call.Args) == 0 || len(call.Args) > 1 {
-				*errs = append(*errs, fmt.Errorf("%s call expect one argument", errMsgPrefix(e.Pos), call.Name))
+				*errs = append(*errs, fmt.Errorf("%s call '%s' expect one argument", errMsgPrefix(e.Pos), call.Name))
 				return []*VariableType{ret}
 			}
-			matchkey := true
-			if call.Name == common.MAP_METHOD_VALUE_EXISTS {
-				matchkey = false
-			}
+			matchkey := call.Name == common.MAP_METHOD_KEY_EXISTS
 			ts, es := call.Args[0].check(block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
@@ -56,7 +52,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret.Typ = VARIABLE_TYPE_VOID
 			if len(call.Args) == 0 {
 				*errs = append(*errs, fmt.Errorf("%s remove expect at last on argement",
-					errMsgPrefix(e.Pos), e.Pos))
+					errMsgPrefix(e.Pos)))
 			}
 			for _, v := range call.Args {
 				ts, es := v.check(block)
@@ -77,7 +73,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret.Typ = VARIABLE_TYPE_VOID
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s removeAll expect no arguments",
-					errMsgPrefix(e.Pos), e.Pos))
+					errMsgPrefix(e.Pos)))
 			}
 			return []*VariableType{ret}
 		case common.MAP_METHOD_SIZE:
@@ -85,7 +81,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_INT
 			if len(call.Args) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s too many argument to call size'", errMsgPrefix(e.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s too many argument to call '%s''", errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{ret}
 		default:
@@ -101,7 +97,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			t.Typ = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
 			if len(call.Args) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
+				*errs = append(*errs, fmt.Errorf("%s method '%s' expect no arguments",
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{t}
@@ -115,9 +111,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if object.Typ == VARIABLE_TYPE_ARRAY {
 		switch call.Name {
 		case common.ARRAY_METHOD_SIZE,
-			common.ARRAY_METHOD_CAP,
-			common.ARRAY_METHOD_START,
-			common.ARRAY_METHOD_END:
+			common.ARRAY_METHOD_CAP,   //for debug,remove when time is right
+			common.ARRAY_METHOD_START, //for debug,remove when time is right
+			common.ARRAY_METHOD_END:   //for debug,remove when time is right
 			t := &VariableType{}
 			t.Typ = VARIABLE_TYPE_INT
 			t.Pos = e.Pos

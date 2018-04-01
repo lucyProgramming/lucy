@@ -7,7 +7,7 @@ import (
 type LucyMethodSignatureParse struct {
 }
 
-func (LucyMethodSignatureParse) Need(functionType *ast.FunctionType) bool {
+func (parser *LucyMethodSignatureParse) Need(functionType *ast.FunctionType) bool {
 	for _, v := range functionType.ParameterList {
 		if LucyFieldSignatureParser.Need(v.Typ) {
 			return true
@@ -21,13 +21,13 @@ func (LucyMethodSignatureParse) Need(functionType *ast.FunctionType) bool {
 	return false
 }
 
-func (LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor string) {
+func (parser *LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor string) {
 	descriptor = "("
 	for _, v := range f.Typ.ParameterList {
 		descriptor += LucyFieldSignatureParser.Encode(v.Typ)
 	}
 	descriptor += ")"
-	if f.HaveNoReturnValue() {
+	if f.NoReturnValue() {
 		descriptor += "V"
 	} else {
 		for _, v := range f.Typ.ParameterList {
@@ -38,7 +38,7 @@ func (LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor string) {
 }
 
 //rewrite types
-func (LucyMethodSignatureParse) Deocde(bs []byte, f *ast.Function) error {
+func (parser *LucyMethodSignatureParse) Deocde(bs []byte, f *ast.Function) error {
 	bs = bs[1:] // skip (
 	var err error
 	for i := 0; i < len(f.Typ.ParameterList); i++ {

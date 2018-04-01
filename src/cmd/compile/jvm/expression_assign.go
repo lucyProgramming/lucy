@@ -1,14 +1,11 @@
 package jvm
 
 import (
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	//
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
@@ -21,14 +18,23 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	if target.IsNumber() && target.Typ != right.VariableType.Typ {
 		m.numberTypeConverter(code, right.VariableType.Typ, target.Typ)
 	}
-	currentStack := remainStack + target.JvmSlotSize()
-	if currentStack > maxstack {
-		maxstack = currentStack
+	if t := remainStack + target.JvmSlotSize(); t > maxstack {
+		maxstack = t
+	}
+	var currentStack uint16
+	if classname == java_hashmap_class {
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, target)
+		currentStack = remainStack + 1 // ... vobjref
+	} else {
+		currentStack = remainStack + target.JvmSlotSize()
 	}
 	if t := currentStack + m.controlStack2FitAssign(code, op, classname, target); t > maxstack {
 		maxstack = t
 	}
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	if classname == java_hashmap_class {
+		primitiveObjectConverter.getFromObject(class, code, target)
+	}
 	return
 }
 
@@ -68,7 +74,6 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		}
 		index--
 	}
-	fmt.Println(noDestinations)
 	//
 	rights := bin.Right.Data.([]*ast.Expression)
 	slice := func() {
@@ -76,7 +81,8 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		if noDestinations[0] == false {
 			copyOPLeftValue(class, code, ops[0], classnames[0], names[0], descriptors[0])
 		}
-		targets = targets[1:] // slice
+		//let`s slice
+		targets = targets[1:]
 		ops = ops[1:]
 		classnames = classnames[1:]
 		names = names[1:]
@@ -96,7 +102,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			}
 			m.buildStoreArrayListAutoVar(code, context) // store it into local
 			for k, v := range v.VariableTypes {         // unpack
-				mapDestination := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
+				needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
 				stack = m.unPackArraylist(class, code, k, v, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
@@ -108,7 +114,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 					if targets[0].IsNumber() && targets[0].Typ != v.Typ { // value is number 2
 						m.numberTypeConverter(code, v.Typ, targets[0].Typ)
 					}
-					if mapDestination { // convert to primitive
+					if needPutInObject { // convert to primitive
 						primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 					}
 				} else { // pop fron stack
@@ -123,7 +129,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			}
 			continue
 		}
-		mapDestination := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
+		needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
 		stack, es := m.build(class, code, v, context)
 		backPatchEs(es, code.CodeLength) // true or false need to backpatch
 		if t := currentStack + stack; t > maxstack {
@@ -140,7 +146,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			if targets[0].IsNumber() && targets[0].Typ != variableType.Typ { // value is number 2
 				m.numberTypeConverter(code, variableType.Typ, targets[0].Typ)
 			}
-			if mapDestination { // convert to primitive
+			if needPutInObject { // convert to primitive
 				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 			}
 		} else { // pop fron stack

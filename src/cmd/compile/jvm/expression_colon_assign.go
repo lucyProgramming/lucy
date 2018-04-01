@@ -44,9 +44,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				if tt.IsNumber() && tt.Typ != variables[0].Typ.Typ {
 					m.numberTypeConverter(code, tt.Typ, variables[0].Typ.Typ)
 				}
-				m.MakeClass.storeLocalVar(class, code, variables[0])
-				if variables[0].BeenCaptured {
-					currentStack -= 1
+				if variables[0].IsGlobal {
+					storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
+				} else {
+					m.MakeClass.storeLocalVar(class, code, variables[0])
+					if variables[0].BeenCaptured {
+						currentStack -= 1
+					}
 				}
 				variables = variables[1:]
 			}
@@ -73,9 +77,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
 				m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
 			}
-			m.MakeClass.storeLocalVar(class, code, variables[0])
-			if variables[0].BeenCaptured {
-				currentStack -= 1
+			if variables[0].IsGlobal {
+				storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
+			} else {
+				m.MakeClass.storeLocalVar(class, code, variables[0])
+				if variables[0].BeenCaptured {
+					currentStack -= 1
+				}
 			}
 		}
 		variables = variables[1:]

@@ -38,6 +38,13 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		},
 		}
 		e.VariableType = t[0]
+	case EXPRESSION_TYPE_SHORT:
+		t = []*VariableType{{
+			Typ: VARIABLE_TYPE_SHORT,
+			Pos: e.Pos,
+		},
+		}
+		e.VariableType = t[0]
 	case EXPRESSION_TYPE_INT:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_INT,

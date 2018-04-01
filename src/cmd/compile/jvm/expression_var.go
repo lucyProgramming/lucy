@@ -39,9 +39,13 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 				if tt.IsNumber() && tt.Typ != variables[0].Typ.Typ {
 					m.numberTypeConverter(code, tt.Typ, variables[0].Typ.Typ)
 				}
-				m.MakeClass.storeLocalVar(class, code, variables[0])
-				if variables[0].BeenCaptured {
-					currentStack -= 1
+				if variables[0].IsGlobal {
+					storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
+				} else {
+					m.MakeClass.storeLocalVar(class, code, variables[0])
+					if variables[0].BeenCaptured {
+						currentStack -= 1
+					}
 				}
 				variables = variables[1:]
 			}
@@ -59,10 +63,15 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
 			m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
 		}
-		m.MakeClass.storeLocalVar(class, code, variables[0])
-		if variables[0].BeenCaptured {
-			currentStack -= 1
+		if variables[0].IsGlobal {
+			storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
+		} else {
+			m.MakeClass.storeLocalVar(class, code, variables[0])
+			if variables[0].BeenCaptured {
+				currentStack -= 1
+			}
 		}
+
 		variables = variables[1:]
 	}
 

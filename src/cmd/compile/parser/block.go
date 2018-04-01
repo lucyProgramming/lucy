@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -20,9 +19,6 @@ func (b *Block) consume(c map[int]bool) {
 }
 
 func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err error) {
-	if len(endTokens) == 0 {
-		panic("end token is 0")
-	}
 	endTokenM := make(map[int]struct{})
 	for _, v := range endTokens {
 		endTokenM[v] = struct{}{}
@@ -295,6 +291,24 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolog after goto statement", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			}
 			b.Next()
+		case lex.TOKEN_TYPE:
+			alias, err := b.parser.parseTypeaAlias()
+			if err != nil {
+				b.consume(untils_semicolon)
+				b.Next()
+				continue
+			}
+			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon", b.parser.errorMsgPrefix()))
+			}
+			s := &ast.Statement{}
+			s.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			s.Expression = &ast.Expression{}
+			s.Expression.Typ = ast.EXPRESSION_TYPE_TYPE_ALIAS
+			s.Expression.Data = alias
+			block.Statements = append(block.Statements, s)
+			b.Next()
+
 		default:
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			b.consume(untils_rc_semicolon)

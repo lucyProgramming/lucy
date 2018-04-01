@@ -13,10 +13,6 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	}
 	var mapk *VariableType
 	var mapv *VariableType
-	if m.Typ != nil {
-		mapk = m.Typ.Map.K
-		mapv = m.Typ.Map.V
-	}
 	noType := m.Typ == nil
 	if noType && len(m.Values) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type ", errMsgPrefix(e.Pos)))
@@ -40,18 +36,16 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			*errs = append(*errs, err)
 		}
 		if ktype != nil {
-			rightValueValid := true
-			if false == ktype.rightValueValid() {
+			rightValueValid := ktype.rightValueValid()
+			if false == rightValueValid {
 				*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
-				rightValueValid = false
 			}
 			if noType && k == 0 {
 				if ktype.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k", errMsgPrefix(v.Left.Pos)))
 				} else {
 					if noType && k == 0 {
-						m.Typ.Map.K = ktype.Clone()
-						m.Typ.Map.K.Pos = e.Pos
+						m.Typ.Map.K = ktype
 						mapk = m.Typ.Map.K
 					}
 				}
@@ -62,7 +56,6 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 						ktype.TypeString(), mapk.TypeString()))
 				}
 			}
-
 		}
 		// map v
 		vtypes, es := v.Right.check(block)
@@ -85,8 +78,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v", errMsgPrefix(v.Left.Pos)))
 			} else {
 				if noType && k == 0 {
-					m.Typ.Map.V = vtype.Clone()
-					m.Typ.Map.V.Pos = e.Pos
+					m.Typ.Map.V = vtype
 					mapv = m.Typ.Map.V
 				}
 			}

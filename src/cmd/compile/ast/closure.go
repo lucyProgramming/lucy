@@ -5,7 +5,7 @@ type Closure struct {
 	Funcs map[*Function]struct{}
 }
 
-func (c *Closure) ClosureVarsExist(v *VariableDefinition) bool {
+func (c *Closure) ClosureVariableExist(v *VariableDefinition) bool {
 	if c.Vars == nil {
 		return false
 	}
@@ -36,21 +36,18 @@ func (c *Closure) NotEmpty(f *Function) bool {
 		fff()
 		return true
 	}
-	if c.Funcs == nil {
+	if c.Funcs == nil || len(c.Funcs) > 0 {
 		return false
 	}
 	fff()
-	if len(c.Funcs) > 0 {
-		for _, t := range f.OffsetDestinations {
-			*t += 1
-		}
-		f.VarOffset++
-		return true
+	for _, t := range f.OffsetDestinations {
+		*t += 1
 	}
-	return false
+	f.VarOffset++
+	return true
 }
 
-func (c *Closure) Insert(f *Function, v *VariableDefinition) {
+func (c *Closure) Insert(v *VariableDefinition) {
 	if c.Vars == nil {
 		c.Vars = make(map[*VariableDefinition]struct{})
 	}
@@ -65,14 +62,17 @@ func (c *Closure) InsertFunction(f *Function) {
 	c.Funcs[f] = struct{}{}
 }
 
-func (c *Closure) Search(name string) *VariableDefinition {
-	if c.Vars == nil {
-		return nil
-	}
+func (c *Closure) Search(name string) interface{} {
 	for v, _ := range c.Vars {
 		if v.Name == name {
 			return v
 		}
 	}
+	for v, _ := range c.Funcs {
+		if v.Name == name {
+			return v
+		}
+	}
+
 	return nil
 }
