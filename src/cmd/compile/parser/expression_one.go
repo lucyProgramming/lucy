@@ -41,6 +41,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
+	case lex.TOKEN_LITERAL_SHORT:
+		left = &ast.Expression{
+			Typ:  ast.EXPRESSION_TYPE_SHORT,
+			Data: ep.parser.token.Data,
+			Pos:  ep.parser.mkPos(),
+		}
+		ep.Next()
 	case lex.TOKEN_LITERAL_INT:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_INT,

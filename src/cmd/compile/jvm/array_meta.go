@@ -48,7 +48,7 @@ func init() {
 		getJavaArrayDescriptor:    "()[B",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_SHORT] = &ArrayMeta{
-		classname:                 "lucy/desp/ArrayShort",
+		classname:                 "lucy/deps/ArrayShort",
 		constructorFuncDescriptor: "([S)V",
 		getDescriptor:             "(I)S",
 		setDescriptor:             "(IS)V",

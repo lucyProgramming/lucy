@@ -121,22 +121,12 @@ func (c *Class) isInterface() bool {
 	return c.Access&cg.ACC_CLASS_INTERFACE != 0
 }
 
-func (c *Class) implementInterfaceOf(super *Class) bool {
-	//	if super.Access&cg.ACC_CLASS_INTERFACE == 0 {
-	//		panic("not a interface")
-	//	}
-	//	for _, v := range c.Interfaces {
-	//		if v.Name == super.Name {
-	//			return true
-	//		}
-	//	}
+func (c *Class) implemented(superclass string) bool {
+
 	return false
 }
 
-func (c *Class) instanceOf(super *Class) bool {
-	if super.Access&cg.ACC_CLASS_INTERFACE != 0 {
-		return c.implementInterfaceOf(super)
-	}
+func (c *Class) haveSuper(superclass string) bool {
 	return false
 }
 

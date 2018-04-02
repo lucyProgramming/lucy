@@ -1,7 +1,6 @@
 
-	
-
 package lucy.deps;
+
 public class ArrayInt   {
 	public int start;
 	public int end; // not include

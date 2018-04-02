@@ -161,11 +161,15 @@ func (t *VariableType) resolve(block *Block) error {
 	}
 	if t.Typ == VARIABLE_TYPE_MAP {
 		var err error
-		err = t.Map.K.resolve(block)
-		if err != nil {
-			return err
+		if t.Map.K != nil {
+			err = t.Map.K.resolve(block)
+			if err != nil {
+				return err
+			}
 		}
-		return t.Map.V.resolve(block)
+		if t.Map.V != nil {
+			return t.Map.V.resolve(block)
+		}
 	}
 	return nil
 }
@@ -238,19 +242,6 @@ func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
 		return VARIABLE_TYPE_SHORT
 	}
 	return VARIABLE_TYPE_BYTE
-}
-
-func (t *VariableType) TypeCompatible(comp *VariableType, err ...*error) bool {
-	if t.Equal(comp) {
-		return true
-	}
-	if t.IsNumber() && comp.IsNumber() {
-		return true
-	}
-	if t.Typ != VARIABLE_TYPE_OBJECT || comp.Typ != VARIABLE_TYPE_OBJECT {
-		return false
-	}
-	return comp.Class.instanceOf(t.Class)
 }
 
 func (t *VariableType) IsNumber() bool {
@@ -334,18 +325,41 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
+func (t *VariableType) TypeCompatible(comp *VariableType) bool {
+	if t.Equal(comp) {
+		return true
+	}
+	if t.IsNumber() && comp.IsNumber() {
+		return true
+	}
+	return false
+}
+
 /*
 	t2 can be cast to t1
 */
 func (t1 *VariableType) Equal(t2 *VariableType) bool {
-	if t1 == t2 {
+	if t1 == t2 { // this is not happening
 		return true
 	}
 	if t1.IsPrimitive() || t2.IsPrimitive() {
 		return t1.Typ == t2.Typ
 	}
-	if t1.IsPointer() && t2.Typ == VARIABLE_TYPE_NULL {
+	if (t1.IsPointer() && t1.Typ != VARIABLE_TYPE_STRING) && t2.Typ == VARIABLE_TYPE_NULL {
 		return true
 	}
-	return t1.ArrayType.Equal(t2.ArrayType)
+	if t1.Typ == VARIABLE_TYPE_ARRAY && t2.Typ == VARIABLE_TYPE_ARRAY {
+		return t1.ArrayType.Equal(t2.ArrayType)
+	}
+	if t1.Typ == VARIABLE_TYPE_MAP && t2.Typ == VARIABLE_TYPE_MAP {
+		return t1.Map.K.Equal(t1.Map.K) && t1.Map.V.Equal(t1.Map.V)
+	}
+	if t1.Typ == VARIABLE_TYPE_OBJECT && t2.Typ == VARIABLE_TYPE_OBJECT { // object
+		if t1.Class.isInterface() {
+			return t2.Class.implemented(t1.Class.Name)
+		} else { // class
+			return t2.Class.haveSuper(t1.Class.Name)
+		}
+	}
+	return false
 }

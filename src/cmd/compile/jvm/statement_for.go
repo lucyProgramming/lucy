@@ -168,10 +168,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
 
 	// pop 3
-	code.Codes[code.CodeLength] = cg.OP_pop
-	code.Codes[code.CodeLength+1] = cg.OP_pop
-	code.Codes[code.CodeLength+2] = cg.OP_pop
-	code.CodeLength += 3
+	copyOP(code, []byte{cg.OP_pop, cg.OP_pop, cg.OP_pop}...)
 	return
 }
 
@@ -326,7 +323,6 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
 			copyOP(code,
 				storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
-
 		}
 		if s.StatmentForRangeAttr.ModelKV {
 			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {

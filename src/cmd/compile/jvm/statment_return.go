@@ -74,8 +74,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_areturn
-		default:
-			panic("......a")
 		}
 		code.CodeLength++
 		return
@@ -212,8 +210,6 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_areturn
-		default:
-			panic("......a")
 		}
 		code.CodeLength++
 		return

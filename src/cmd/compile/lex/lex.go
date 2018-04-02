@@ -2,6 +2,7 @@ package lex
 
 import (
 	"fmt"
+	"math"
 )
 
 func New(bs []byte) *LucyLexer {
@@ -99,7 +100,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	integerpart := []byte{c}
 	ishex := false
 	isOctal := false
-	if c == '0' {
+	if c == '0' { // enter when first char is '0'
 		c, eof = lex.getchar()
 		if c == 'x' || c == 'X' {
 			ishex = true
@@ -115,7 +116,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		if ishex {
 			ok = lex.isHex(c)
 		} else if isOctal {
-			if lex.isDigit(c) == true && lex.isOctal(c) == false {
+			if lex.isDigit(c) == true && lex.isOctal(c) == false { // integer but not octal
 				err = fmt.Errorf("octal number cannot be '8' and '9'")
 			}
 			ok = lex.isDigit(c)
@@ -132,8 +133,8 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	c, eof = lex.getchar()
 	floatpart := []byte{}
-	isfloat := false
-	if c == '.' && eof == false { // float numbers
+	isfloat := false // float or double
+	if c == '.' {    // float numbers
 		isfloat = true
 		c, eof = lex.getchar()
 		for eof == false {
@@ -156,18 +157,19 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	isdouble := false
 	islong := false
+	isShort := false
 	c, eof = lex.getchar()
-	if c == 'l' || c == 'f' || c == 'd' {
-		if c == 'd' {
-			isdouble = true
-		}
-		if c == 'l' {
-			islong = true
-		}
+	if c == 'l' || c == 'L' {
+		islong = true
+	} else if c == 'f' || c == 'F' {
+		isfloat = true
+	} else if c == 's' || c == 'S' {
+		isShort = true
+	} else if c == 'd' || c == 'D' {
+		isdouble = true
 	} else {
 		lex.ungetchar()
 	}
-
 	isScientificNotation := false
 	power := []byte{}
 	powerPositive := true
@@ -239,6 +241,12 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			if islong {
 				token.Type = TOKEN_LITERAL_LONG
 				token.Data = value
+			} else if isShort {
+				token.Type = TOKEN_LITERAL_SHORT
+				token.Data = int32(value)
+				if int32(value) > math.MaxInt16 {
+					err = fmt.Errorf("max short int is %v", math.MaxInt16)
+				}
 			} else {
 				token.Type = TOKEN_LITERAL_INT
 				token.Data = int32(value)
