@@ -165,7 +165,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			return m.getMapLeftValue(class, code, e, context)
 		}
 	case ast.EXPRESSION_TYPE_DOT:
-		index := e.Data.(*ast.ExpressionIndex)
+		index := e.Data.(*ast.ExpressionDot)
 		classname = index.Expression.VariableType.Class.Name
 		target = index.Field.VariableDefinition.Typ
 		name = index.Name

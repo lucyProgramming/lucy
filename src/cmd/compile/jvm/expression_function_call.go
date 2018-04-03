@@ -66,7 +66,6 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	}
 
 	if e.CallHasReturnValue() == false { // nothing
-
 	} else if len(e.VariableTypes) == 1 {
 		if t := e.VariableTypes[0].JvmSlotSize(); t > maxstack {
 			maxstack = t

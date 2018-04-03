@@ -76,6 +76,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 }
 
 func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) error {
+	var err error
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
@@ -92,25 +93,15 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			cos.Name = name
 			cos.AccessFlags = f.AccessFlags
 			cos.Typ = typ
-			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
-			switch cos.Typ.Typ {
-			case ast.VARIABLE_TYPE_BOOL:
-				cos.Value = binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info) != 0
-			case ast.VARIABLE_TYPE_BYTE:
-				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_SHORT:
-				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_INT:
-				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_LONG:
-				cos.Value = int64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_FLOAT:
-				cos.Value = float32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_DOUBLE:
-				cos.Value = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_STRING:
-				cos.Value = string(c.ConstPool[valueIndex].Info)
+			_, cos.Typ, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+			if err != nil {
+				return err
 			}
+			cos.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
+			//cos.Field = &ast.ClassField{}
+			//cos.Field.Name = cos.Name
+			//cos.Field.Descriptor = cos.Descriptor
+			//cos.Field.LoadFromOutSide = true
 			if loader.Package.Block.Consts == nil {
 				loader.Package.Block.Consts = make(map[string]*ast.Const)
 			}
@@ -120,14 +111,19 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			vd := &ast.VariableDefinition{}
 			vd.Name = name
 			vd.AccessFlags = f.AccessFlags
+			vd.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
 			vd.Typ = typ
+			vd.IsGlobal = true
+			//vd.Field = &ast.ClassField{}
+			//vd.Field.Name = vd.Name
+			//vd.Field.LoadFromOutSide = true
+			//vd.Field.Descriptor = vd.Descriptor
 			if loader.Package.Block.Vars == nil {
 				loader.Package.Block.Vars = make(map[string]*ast.VariableDefinition)
 			}
 			loader.Package.Block.Vars[name] = vd
 		}
 	}
-	var err error
 	for _, m := range c.Methods {
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_INNER_STATIC_METHOD); t != nil && len(t) > 0 {
 			//innsert static method cannot called from outside

@@ -366,7 +366,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			newe := &ast.Expression{}
 			newe.Pos = pos
 			newe.Typ = ast.EXPRESSION_TYPE_DOT
-			index := &ast.ExpressionIndex{}
+			index := &ast.ExpressionDot{}
 			index.Expression = left
 			index.Name = ep.parser.token.Data.(string)
 			newe.Data = index

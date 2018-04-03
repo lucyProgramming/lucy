@@ -5,6 +5,7 @@ import (
 )
 
 type ClassField struct {
+	Class *Class
 	VariableDefinition
 	LoadFromOutSide bool
 }

@@ -279,10 +279,12 @@ type ExpressionIdentifer struct {
 type ExpressionIndex struct {
 	Expression *Expression
 	Index      *Expression
+}
+type ExpressionDot struct {
+	Expression *Expression
 	Name       string
 	Field      *ClassField
 }
-
 type ExpressionMethodCall struct {
 	Expression *Expression
 	Args       CallArgs

@@ -14,6 +14,20 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
+		if f.IsGlobal {
+			i, should := shouldAccessFromImports(identifer.Name, e.Pos, f.Pos)
+			if should {
+				p, err := PackageBeenCompile.loadPackage(i.Name)
+				if err != nil {
+					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+				}
+				tt := &VariableType{}
+				tt.Pos = e.Pos
+				tt.Typ = VARIABLE_TYPE_PACKAGE
+				tt.Package = p
+				return tt, nil
+			}
+		}
 		f.Used = true
 		tt := &VariableType{}
 		tt.Typ = VARIABLE_TYPE_FUNCTION
@@ -22,9 +36,21 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		if t.Typ == nil { // in some case,variable defined wrong,could be nil
-			return nil, nil
+		if t.IsGlobal {
+			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
+			if should {
+				p, err := PackageBeenCompile.loadPackage(i.Name)
+				if err != nil {
+					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+				}
+				tt := &VariableType{}
+				tt.Pos = e.Pos
+				tt.Typ = VARIABLE_TYPE_PACKAGE
+				tt.Package = p
+				return tt, nil
+			}
 		}
+
 		t.Used = true
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
@@ -32,30 +58,45 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *Const:
 		t := d.(*Const)
+		if t.IsGlobal {
+			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
+			if should {
+				p, err := PackageBeenCompile.loadPackage(i.Name)
+				if err != nil {
+					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+				}
+				tt := &VariableType{}
+				tt.Pos = e.Pos
+				tt.Typ = VARIABLE_TYPE_PACKAGE
+				tt.Package = p
+				return tt, nil
+			}
+		}
 		t.Used = true
 		e.fromConst(t)
 		tt := t.Typ.Clone()
 		tt.Pos = e.Pos
 		return tt, nil
-	//case *Enum:
-	//	t := d.(*Enum)
-	//	t.Used = true
-	//	tt := t.VariableType.Clone()
-	//	tt.Pos = e.Pos
-	//	identifer.Enum = t
-	//	return tt, nil
-	//case *EnumName:
-	//	t := d.(*EnumName)
-	//	t.Enum.Used = true
-	//	tt := t.Enum.VariableType.Clone()
-	//	tt.Pos = e.Pos
-	//	identifer.EnumName = t
-	//	return tt, nil
 	case *Class:
+		c := d.(*Class)
+		if c.IsGlobal {
+			i, should := shouldAccessFromImports(identifer.Name, e.Pos, c.Pos)
+			if should {
+				p, err := PackageBeenCompile.loadPackage(i.Name)
+				if err != nil {
+					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+				}
+				tt := &VariableType{}
+				tt.Pos = e.Pos
+				tt.Typ = VARIABLE_TYPE_PACKAGE
+				tt.Package = p
+				return tt, nil
+			}
+		}
 		t := &VariableType{}
 		t.Typ = VARIABLE_TYPE_CLASS
 		e.Pos = e.Pos
-		t.Class = d.(*Class)
+		t.Class = c
 		return t, nil
 	default:
 		return nil, fmt.Errorf("%s identifier '%s' is not a expression", errMsgPrefix(e.Pos), identifer.Name)
@@ -63,11 +104,9 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	return nil, nil
 }
 
-func (e *Expression) isThisIdentifierExpression() (is bool) {
+func (e *Expression) isThisIdentifierExpression() bool {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
-		return
+		return false
 	}
-	t := e.Data.(*ExpressionIdentifer)
-	is = (t.Name == THIS)
-	return
+	return e.Data.(*ExpressionIdentifer).Name == THIS
 }

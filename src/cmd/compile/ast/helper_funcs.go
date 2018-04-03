@@ -83,3 +83,20 @@ func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableTy
 	}
 	return ret
 }
+
+/*
+	when access from global,should check if access from package
+*/
+func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) {
+	if from.Filename == have.Filename {
+		i := PackageBeenCompile.getImport(from.Filename, name)
+		if i == nil {
+			return nil, false
+		} else {
+			return i, i.Pos.StartLine < have.StartLine
+		}
+	}
+	// different file
+	i := PackageBeenCompile.getImport(from.Filename, name)
+	return i, i != nil
+}

@@ -33,6 +33,7 @@ const (
 	VARIABLE_TYPE_NAME //naming
 	VARIABLE_TYPE_VOID
 	VARIABLE_TYPE_NULL
+	VARIABLE_TYPE_PACKAGE //
 )
 
 type VariableType struct {
@@ -46,6 +47,7 @@ type VariableType struct {
 	Enum      *Enum
 	Function  *Function
 	Map       *Map
+	Package   *Package
 }
 
 type Map struct {

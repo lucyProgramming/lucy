@@ -27,14 +27,14 @@ type Package struct {
 	Errors         []error
 }
 
-func (p *Package) getImport(file string, i string) string {
+func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
-		return ""
+		return nil
 	}
-	if p.Files[file] == nil {
-		return ""
+	if _, ok := p.Files[file]; ok == false {
+		return nil
 	}
-	return p.Files[file].Imports[i].Name
+	return p.Files[file].Imports[accessName]
 }
 
 type LoadedName struct {
@@ -130,7 +130,6 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 	if t, ok := p.loaded[fullname]; ok { // look up in cache
 		return t.T, t.Err
 	}
-
 	if t := p.loadedPackages[pname]; t != nil {
 		if t.Kind == PACKAGE_KIND_LUCY {
 
@@ -149,6 +148,9 @@ func (p *Package) load(pname, name string) (interface{}, error) {
 	}
 	p.loaded[fullname].T = t
 	return t, nil
+}
+func (p *Package) loadPackage(pname string) (*Package, error) {
+	return nil, nil
 }
 
 //different for other file

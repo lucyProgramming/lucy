@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	index := e.Data.(*ast.ExpressionIndex)
+	index := e.Data.(*ast.ExpressionDot)
 	if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
 		maxstack = e.VariableType.JvmSlotSize()
 		code.Codes[code.CodeLength] = cg.OP_getstatic
