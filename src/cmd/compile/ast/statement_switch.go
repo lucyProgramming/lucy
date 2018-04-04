@@ -122,7 +122,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 						errs = append(errs, fmt.Errorf("%s package %s not found", errMsgPrefix(e.Pos), identiferName))
 						continue
 					}
-					i, err := PackageBeenCompile.load(packageName.Name, index.Name)
+					i, err := PackageBeenCompile.load(packageName.Name)
 					if err != nil {
 						errs = append(errs, fmt.Errorf("%s load failed,err:%v", errMsgPrefix(e.Pos), err))
 						continue

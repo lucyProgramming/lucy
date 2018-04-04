@@ -7,6 +7,7 @@ import (
 )
 
 type Class struct {
+	IsJava             bool // java compiled class
 	Package            *Package
 	Checked            bool
 	Name               string
@@ -121,12 +122,27 @@ func (c *Class) isInterface() bool {
 	return c.Access&cg.ACC_CLASS_INTERFACE != 0
 }
 
-func (c *Class) implemented(superclass string) bool {
-
-	return false
+func (c *Class) haveSuper(superclassName string) (error, bool) {
+	if c.Name == superclassName {
+		return nil, true
+	}
+	if c.SuperClassName == "" {
+		c.SuperClassName = LUCY_ROOT_CLASS
+	}
+	superClass, err := PackageBeenCompile.load(c.SuperClassName)
+	if err != nil {
+		return err, false
+	}
+	if cc, ok := superClass.(*Class); ok == false {
+		return fmt.Errorf("super class named %s is not a class", c.SuperClassName), false
+	} else {
+		c.SuperClass = cc
+	}
+	return c.SuperClass.haveSuper(superclassName)
 }
 
-func (c *Class) haveSuper(superclass string) bool {
+//
+func (c *Class) implemented(superclass string) bool {
 	return false
 }
 
@@ -233,7 +249,7 @@ func (c *Class) loadSuperClass() error {
 		if ok == false {
 			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		class, err := PackageBeenCompile.load(pname.Name, "Object")
+		class, err := PackageBeenCompile.load(pname.Name)
 		if err != nil {
 			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
 		}

@@ -18,6 +18,7 @@ type ClassHighLevel struct {
 	Interfaces             []string
 	Fields                 map[string]*FiledHighLevel
 	Methods                map[string][]*MethodHighLevel
+	TriggerCLinit          *MethodHighLevel
 }
 
 type CONSTANT_NameAndType_info_high_level struct {
@@ -60,7 +61,7 @@ func (c *ClassHighLevel) NewFunctionName(prefix string) string {
 			return name
 		}
 	}
-	panic("names over flow")
+	panic("names over flow") // this is not happening
 }
 func (c *ClassHighLevel) InsertStringConst(s string, location []byte) {
 	binary.BigEndian.PutUint16(location, c.Class.InsertStringConst(s))

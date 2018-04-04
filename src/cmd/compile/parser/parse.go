@@ -44,6 +44,9 @@ func (p *Parser) Parse() []error {
 	p.scanner = lex.New(p.bs)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
+	if p.eof {
+		return nil
+	}
 	p.parseImports() // next is called
 	if p.eof {
 		return p.errs

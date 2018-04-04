@@ -14,7 +14,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
-		if f.IsGlobal {
+		if f.IsGlobal && f.IsBuildin == false {
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, f.Pos)
 			if should {
 				p, err := PackageBeenCompile.loadPackage(i.Name)

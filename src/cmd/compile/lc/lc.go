@@ -47,10 +47,7 @@ func (lc *LucyCompile) shouldExit() {
 }
 
 func (lc *LucyCompile) exit() {
-	code := 0
-	if len(lc.Errs) > 0 {
-		code = 1
-	}
+	code := len(lc.Errs)
 	for _, v := range lc.Errs {
 		fmt.Fprintln(os.Stderr, v)
 	}
@@ -73,11 +70,6 @@ func (lc *LucyCompile) Init() {
 }
 
 func (lc *LucyCompile) compile() {
-	//	defer func() {
-	//		if err := recover(); err != nil {
-	//			debug.PrintStack()
-	//		}
-	//	}()
 
 	for _, v := range lc.Files {
 		bs, err := ioutil.ReadFile(v)

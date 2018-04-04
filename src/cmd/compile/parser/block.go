@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -93,6 +94,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with expression var has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			}
 			reset()
+
 		case lex.TOKEN_IF:
 			i, err := b.parseIf()
 			if err != nil {

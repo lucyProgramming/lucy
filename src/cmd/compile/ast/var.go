@@ -5,7 +5,7 @@ import (
 )
 
 type LoadName interface {
-	LoadName(p *Package, packageName, name string) (interface{}, error)
+	LoadName(resouceName string) (interface{}, error)
 }
 
 var (

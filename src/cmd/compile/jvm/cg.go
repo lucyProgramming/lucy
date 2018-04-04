@@ -70,13 +70,13 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.Classes = make(map[string]*cg.ClassHighLevel)
 	m.mkVars()
 	m.mkEnums()
+	m.mkInitFunctions()
 	for _, v := range p.Block.Classes {
 		m.Classes[v.Name] = m.mkClass(v)
 	}
 	m.mkFuncs()
 	m.mkConsts()
 	m.mkTypes()
-	m.mkInitFunctions()
 	err := m.Dump()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
@@ -147,6 +147,9 @@ func (m *MakeClass) mkVars() {
 }
 
 func (m *MakeClass) mkInitFunctions() {
+	if len(m.p.InitFunctions) == 0 {
+		return
+	}
 	ms := []*cg.MethodHighLevel{}
 	for _, v := range m.p.InitFunctions {
 		method := &cg.MethodHighLevel{}
@@ -159,9 +162,6 @@ func (m *MakeClass) mkInitFunctions() {
 		method.Descriptor = "()V"
 		m.buildFunction(m.mainclass, method, v)
 		m.mainclass.AppendMethod(method)
-	}
-	if len(ms) == 0 {
-		return
 	}
 	method := &cg.MethodHighLevel{}
 	method.AccessFlags |= cg.ACC_METHOD_STATIC
@@ -184,6 +184,19 @@ func (m *MakeClass) mkInitFunctions() {
 	method.Code.Codes = codes
 	method.Code.CodeLength = codelength
 	m.mainclass.AppendMethod(method)
+
+	// trigger init
+	trigger := &cg.MethodHighLevel{}
+	trigger.Name = m.mainclass.NewFunctionName("triggerClinit")
+	trigger.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
+	trigger.AccessFlags |= cg.ACC_METHOD_STATIC
+	trigger.Descriptor = "()V"
+	trigger.Code.Codes = make([]byte, 1)
+	trigger.Code.Codes[0] = cg.OP_return
+	trigger.Code.CodeLength = 1
+	m.mainclass.AppendMethod(trigger)
+	m.mainclass.TriggerCLinit = trigger
 }
 
 func (m *MakeClass) mkEnums() {
@@ -193,10 +206,32 @@ func (m *MakeClass) mkEnums() {
 func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
+	class.SourceFiles = make(map[string]struct{})
+	class.SourceFiles[c.Pos.Filename] = struct{}{}
 	class.AccessFlags = c.Access
 	class.SuperClass = c.SuperClassName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
+	if m.mainclass.TriggerCLinit != nil {
+		method := &cg.MethodHighLevel{}
+		method.Name = "<clinit>"
+		method.Descriptor = "()V"
+		method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
+		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		method.Code.Codes = make([]byte, 4)
+		code := &method.Code
+		code.Codes[0] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      m.mainclass.Name,
+			Method:     m.mainclass.TriggerCLinit.Name,
+			Descriptor: m.mainclass.TriggerCLinit.Descriptor,
+		}, code.Codes[1:3])
+		code.Codes[3] = cg.OP_return
+		code.CodeLength = 4
+		class.AppendMethod(method)
+	}
+
 	for _, v := range c.Fields {
 		f := &cg.FiledHighLevel{}
 		f.Name = v.Name

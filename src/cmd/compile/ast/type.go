@@ -182,12 +182,12 @@ func (t *VariableType) resolveName(block *Block) error {
 		d = block.SearchByName(t.Name)
 	} else { // a.b  in type situation,must be package name
 		//
-		t := strings.Split(t.Name, ".")
-		var err error
-		d, err = PackageBeenCompile.load(t[0], t[1]) // let`s load
-		if err != nil {
-			return err
-		}
+		//t := strings.Split(t.Name, ".")
+		//var err error
+		//d, err = PackageBeenCompile.load(t[0], t[1]) // let`s load
+		//if err != nil {
+		//	return err
+		//}
 	}
 	if d == nil {
 		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
@@ -360,7 +360,8 @@ func (t1 *VariableType) Equal(t2 *VariableType) bool {
 		if t1.Class.isInterface() {
 			return t2.Class.implemented(t1.Class.Name)
 		} else { // class
-			return t2.Class.haveSuper(t1.Class.Name)
+			_, e := t2.Class.haveSuper(t1.Class.Name)
+			return e
 		}
 	}
 	return false
