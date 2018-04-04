@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context) (maxstack uint16) {
-	if len(s.Function.Typ.ReturnList) == 0 {
+	if len(context.function.Typ.ReturnList) == 0 {
 		if context.Defers != nil && len(context.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null // expect exception on stack
 			code.CodeLength++
@@ -19,13 +19,13 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
-	if len(s.Function.Typ.ReturnList) == 1 {
+	if len(context.function.Typ.ReturnList) == 1 {
 		var es []*cg.JumpBackPatch
 		if len(s.Expressions) > 0 {
 			maxstack, es = m.MakeExpression.build(class, code, s.Expressions[0], context)
 			backPatchEs(es, code.CodeLength)
-			if s.Expressions[0].VariableType.IsNumber() && s.Expressions[0].VariableType.Typ != s.Function.Typ.ReturnList[0].Typ.Typ {
-				m.MakeExpression.numberTypeConverter(code, s.Expressions[0].VariableType.Typ, s.Function.Typ.ReturnList[0].Typ.Typ)
+			if s.Expressions[0].VariableType.IsNumber() && s.Expressions[0].VariableType.Typ != context.function.Typ.ReturnList[0].Typ.Typ {
+				m.MakeExpression.numberTypeConverter(code, s.Expressions[0].VariableType.Typ, context.function.Typ.ReturnList[0].Typ.Typ)
 			}
 		} else { // load return parameter
 		}
@@ -33,7 +33,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if context.Defers != nil && len(context.Defers) > 0 {
 			//return value  is on stack,  store it temp var
 			if len(s.Expressions) > 0 { //rewrite return value
-				m.storeLocalVar(class, code, s.Function.Typ.ReturnList[0])
+				m.storeLocalVar(class, code, context.function.Typ.ReturnList[0])
 			}
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
@@ -41,17 +41,17 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				code.MaxStack = 1
 			}
 			m.buildDefers(class, code, context, context.Defers, true, s)
-			code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
+			code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 			//restore the stack
 			if len(s.Expressions) > 0 { //restore stack
-				m.loadLocalVar(class, code, s.Function.Typ.ReturnList[0])
+				m.loadLocalVar(class, code, context.function.Typ.ReturnList[0])
 			}
 		}
 		// in this case,load local var is not under exception handle,should be ok
 		if len(s.Expressions) == 0 {
-			m.loadLocalVar(class, code, s.Function.Typ.ReturnList[0])
+			m.loadLocalVar(class, code, context.function.Typ.ReturnList[0])
 		}
-		switch s.Function.Typ.ReturnList[0].Typ.Typ {
+		switch context.function.Typ.ReturnList[0].Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -149,7 +149,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if context.Defers != nil && len(context.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(s.Expressions) > 0 {
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.Function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 			//reach end
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 			code.CodeLength++
@@ -163,7 +163,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.MaxStack = t
 		}
 		m.buildDefers(class, code, context, context.Defers, true, s)
-		code.MaxStack += s.Function.Typ.ReturnList[0].Typ.JvmSlotSize()
+		code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 		//restore the stack
 		copyOP(code,
 			loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)

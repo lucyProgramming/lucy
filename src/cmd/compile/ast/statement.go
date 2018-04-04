@@ -86,12 +86,7 @@ func (s *Statement) statementName() string {
 }
 
 func (s *Statement) check(b *Block) []error { // b is father
-	if b.InheritedAttribute.Function.isPackageBlockFunction {
-		if s.Typ == STATEMENT_TYPE_SKIP { //special case
-			s.Typ = STATEMENT_TYPE_RETURN // convert to return
-			return nil                    // 0 length error
-		}
-	}
+
 	if b.Defers != nil && len(b.Defers) > 0 {
 		b.InheritedAttribute.Defers = append(b.InheritedAttribute.Defers, b.Defers...)
 		defer func() {
@@ -165,6 +160,11 @@ func (s *Statement) check(b *Block) []error { // b is father
 		s.Block.inherite(b)
 		return s.Block.check()
 	case STATEMENT_TYPE_LABLE: // nothing to do
+	case STATEMENT_TYPE_SKIP:
+		if b.InheritedAttribute.Function.isPackageBlockFunction == false {
+			return []error{fmt.Errorf("cannot have '%s' at this scope", s.statementName())}
+		}
+		return nil
 	}
 
 	return nil

@@ -34,6 +34,9 @@ func (c *Clean) RunCommand(command string, args []string) {
 		}
 	}
 	for _, v := range c.lucypaths {
+		if v == "" {
+			continue
+		}
 		if filepath.IsAbs(v) == false {
 			fmt.Printf("path '%s' is not absolute\n", v)
 			return
@@ -44,10 +47,14 @@ func (c *Clean) RunCommand(command string, args []string) {
 		return
 	}
 	for _, v := range c.lucypaths {
+		fmt.Println("clean:", v)
 		c.cleanPath(filepath.Join(v, common.DIR_FOR_COMPILED_CLASS))
 	}
 }
 
+/*
+	don`t delete directory,incase directory have some other files
+*/
 func (c *Clean) cleanPath(path string) {
 	fis, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -70,10 +77,7 @@ func (c *Clean) cleanPath(path string) {
 		return
 	}
 	for _, v := range meta.Classes {
-		err = os.Remove(filepath.Join(path, v))
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		os.Remove(filepath.Join(path, v))
 	}
+	os.Remove(filepath.Join(path, common.LUCY_MAINTAIN_FILE))
 }

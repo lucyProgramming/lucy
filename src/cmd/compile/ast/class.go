@@ -7,7 +7,8 @@ import (
 )
 
 type Class struct {
-	IsJava             bool // java compiled class
+	Pos                *Pos
+	IsJava             bool // compiled from java source file
 	Package            *Package
 	Checked            bool
 	Name               string
@@ -15,7 +16,6 @@ type Class struct {
 	IsGlobal           bool
 	Block              Block
 	Access             uint16
-	Pos                *Pos
 	Fields             map[string]*ClassField
 	Methods            map[string][]*ClassMethod
 	SuperClassName     string
@@ -114,10 +114,6 @@ func (c *Class) check(father *Block) []error {
 	return errs
 }
 
-func (c *Class) loadInterfaces(errs *[]error) {
-
-}
-
 func (c *Class) isInterface() bool {
 	return c.Access&cg.ACC_CLASS_INTERFACE != 0
 }
@@ -143,6 +139,8 @@ func (c *Class) haveSuper(superclassName string) (error, bool) {
 
 //
 func (c *Class) implemented(superclass string) bool {
+	if c.Interfaces
+
 	return false
 }
 

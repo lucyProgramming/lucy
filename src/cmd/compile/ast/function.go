@@ -148,7 +148,7 @@ func (f *Function) check(b *Block) []error {
 
 func (f *Function) mkLastRetrunStatement() {
 	if len(f.Block.Statements) == 0 ||
-		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN) {
+		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN && f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_SKIP) {
 		s := &StatementReturn{}
 		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 	}
@@ -156,11 +156,11 @@ func (f *Function) mkLastRetrunStatement() {
 
 func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	if f.Name == MAIN_FUNCTION_NAME {
-		errF := func() {
+		errFunc := func() {
 			*errs = append(*errs, fmt.Errorf("%s function %s expect declared as 'main(args []string)'", errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
 		}
 		if len(f.Typ.ParameterList) != 1 {
-			errF()
+			errFunc()
 		} else { //
 			if f.Typ.ParameterList[0].Typ.Typ == VARIABLE_TYPE_ARRAY &&
 				f.Typ.ParameterList[0].Typ.ArrayType.Typ == VARIABLE_TYPE_STRING {
@@ -169,7 +169,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 					*errs = append(*errs, err)
 				}
 			} else {
-				errF()
+				errFunc()
 			}
 		}
 		return
@@ -187,7 +187,6 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				*errs = append(*errs, err)
 				continue
 			}
-
 		}
 		//handler return
 		for _, v := range f.Typ.ReturnList {
@@ -217,7 +216,6 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			}
 		}
 	}
-
 }
 
 type FunctionType struct {

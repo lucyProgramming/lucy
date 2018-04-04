@@ -66,6 +66,7 @@ func (r *Run) RunCommand(command string, args []string) {
 		}
 		lucypaths = append(lucypaths, v)
 	}
+	lucypaths = append(lucypaths, r.LucyRoot)
 	r.LucyPaths = lucypaths
 	var err error
 	r.MainPackageLucyPath, err = r.findPackageIn(r.Package)

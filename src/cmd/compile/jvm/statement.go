@@ -46,7 +46,8 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context)
 		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
 	case ast.STATEMENT_TYPE_SKIP: // skip this block
-		panic("should no be skip")
+		code.Codes[code.CodeLength] = cg.OP_return
+		code.CodeLength++
 	case ast.STATEMENT_TYPE_GOTO:
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 		s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
@@ -54,6 +55,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
+
 	}
 	return
 }
