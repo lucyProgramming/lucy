@@ -2,37 +2,9 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
-
-func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	index := e.Data.(*ast.ExpressionDot)
-	if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
-		maxstack = e.VariableType.JvmSlotSize()
-		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      index.Expression.VariableType.Class.Name,
-			Field:      index.Name,
-			Descriptor: Descriptor.typeDescriptor(e.VariableType),
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		return
-	}
-	maxstack, _ = m.build(class, code, index.Expression, context)
-	if t := e.VariableType.JvmSlotSize(); t > maxstack {
-		maxstack = t
-	}
-	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      index.Expression.VariableType.Class.Name,
-		Field:      index.Name,
-		Descriptor: Descriptor.typeDescriptor(e.VariableType),
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
-}
 
 func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	index := e.Data.(*ast.ExpressionIndex)

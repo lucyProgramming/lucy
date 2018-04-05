@@ -27,7 +27,7 @@ func (p *Parser) parseImports() {
 		i := &ast.Import{}
 		i.Pos = &ast.Pos{}
 		p.lexPos2AstPos(p.token, i.Pos)
-		i.Name = packagename
+		i.Resource = packagename
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			p.consume(untils_semicolon)
@@ -54,7 +54,7 @@ func (p *Parser) parseImports() {
 		return
 	} else if p.token.Type == lex.TOKEN_SEMICOLON {
 		i := &ast.Import{}
-		i.Name = packagename
+		i.Resource = packagename
 		i.Pos = &ast.Pos{}
 		p.lexPos2AstPos(p.token, i.Pos)
 		*p.tops = append(*p.tops, &ast.Node{

@@ -22,7 +22,7 @@ func init() {
 }
 
 func printUsage() {
-	msg := `lucy is a new programing language based on jvm
+	msg := `lucy is a new programing language build on jvm
 	run                    run a lucy package
 	version                print version
 	clean                  clean compiled files

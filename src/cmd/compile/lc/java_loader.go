@@ -22,7 +22,7 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
-	astClass.Access = c.AccessFlag
+	astClass.AccessFlags = c.AccessFlag
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
 	for _, v := range c.Fields {

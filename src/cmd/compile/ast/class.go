@@ -15,7 +15,7 @@ type Class struct {
 	NameWithOutPackage string
 	IsGlobal           bool
 	Block              Block
-	Access             uint16
+	AccessFlags        uint16
 	Fields             map[string]*ClassField
 	Methods            map[string][]*ClassMethod
 	SuperClassName     string
@@ -115,7 +115,7 @@ func (c *Class) check(father *Block) []error {
 }
 
 func (c *Class) isInterface() bool {
-	return c.Access&cg.ACC_CLASS_INTERFACE != 0
+	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
 
 func (c *Class) haveSuper(superclassName string) (error, bool) {
@@ -137,9 +137,8 @@ func (c *Class) haveSuper(superclassName string) (error, bool) {
 	return c.SuperClass.haveSuper(superclassName)
 }
 
-//
 func (c *Class) implemented(superclass string) bool {
-	if c.Interfaces
+	//if c.Interfaces
 
 	return false
 }
@@ -247,7 +246,7 @@ func (c *Class) loadSuperClass() error {
 		if ok == false {
 			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		class, err := PackageBeenCompile.load(pname.Name)
+		class, err := PackageBeenCompile.load(pname.Resource)
 		if err != nil {
 			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
 		}

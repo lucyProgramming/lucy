@@ -189,9 +189,13 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		}
 		e.VariableType = tt
 	case EXPRESSION_TYPE_INDEX:
-		fallthrough
-	case EXPRESSION_TYPE_DOT:
 		tt := e.checkIndexExpression(block, &errs)
+		if tt != nil {
+			t = []*VariableType{tt}
+			e.VariableType = tt
+		}
+	case EXPRESSION_TYPE_DOT:
+		tt := e.checkDotExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
 			e.VariableType = tt

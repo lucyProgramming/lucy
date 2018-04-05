@@ -149,9 +149,9 @@ func (p *Parser) Parse() []error {
 				Data: c,
 			})
 			if ispublic {
-				c.Access |= cg.ACC_FIELD_PUBLIC
+				c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			} else {
-				c.Access |= cg.ACC_FIELD_PRIVATE
+				c.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
 			resetProperty()
 		case lex.TOKEN_PUBLIC:
@@ -224,7 +224,11 @@ func (p *Parser) Parse() []error {
 }
 
 func (p *Parser) validAfterPublic() {
-	if p.token.Type == lex.TOKEN_FUNCTION || p.token.Type == lex.TOKEN_CLASS || p.token.Type == lex.TOKEN_ENUM || p.token.Type == lex.TOKEN_IDENTIFIER {
+	if p.token.Type == lex.TOKEN_FUNCTION ||
+		p.token.Type == lex.TOKEN_CLASS ||
+		p.token.Type == lex.TOKEN_ENUM ||
+		p.token.Type == lex.TOKEN_IDENTIFIER ||
+		p.token.Type == lex.TOKEN_CONST {
 		return
 	}
 	var err error

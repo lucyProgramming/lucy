@@ -9,7 +9,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 	currentStack := uint16(0)
 	for k, e := range args {
 		var variabletype *ast.VariableType
-		if e.IsCall() && len(e.VariableTypes) > 1 {
+		if e.MayHaveMultiValue() && len(e.VariableTypes) > 1 {
 			stack, _ := m.build(class, code, e, context)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
@@ -28,7 +28,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			continue
 		}
 		variabletype = e.VariableType
-		if e.IsCall() {
+		if e.MayHaveMultiValue() {
 			variabletype = e.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, e, context)

@@ -88,16 +88,15 @@ func (lc *LucyCompile) compile() {
 		}
 		is := make([]string, len(lc.Tops))
 		for k, v := range lc.Tops {
-			is[k] = v.Data.(*ast.Import).Name
+			is[k] = v.Data.(*ast.Import).Resource
 		}
 		bs, _ := json.Marshal(is)
 		fmt.Println(string(bs))
 		return
 	}
-
 	c := ast.ConvertTops2Package{}
 	p, rs, errs := c.ConvertTops2Package(lc.Tops)
-	p.FullName = CompileFlags.PackageName
+	p.Name = CompileFlags.PackageName
 	lc.Errs = append(lc.Errs, errs...)
 	for _, v := range rs {
 		lc.Errs = append(lc.Errs, v.Error())

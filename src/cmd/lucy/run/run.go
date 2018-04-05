@@ -24,14 +24,10 @@ type Run struct {
 	classPaths          []string
 }
 
-func (r *Run) printUsage() {
-	fmt.Printf("%s    run a lucy package\n", r.command)
-}
-
 func (r *Run) RunCommand(command string, args []string) {
 	r.command = command
 	if len(args) != 1 {
-		r.printUsage()
+		fmt.Println("no package to run")
 		os.Exit(0)
 	}
 	r.Package = args[0]
@@ -81,7 +77,17 @@ func (r *Run) RunCommand(command string, args []string) {
 		r.classPaths = strings.Split(os.Getenv("CLASSPATH"), ":")
 	}
 	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
-
+	{
+		t := r.compilerAt
+		if runtime.GOOS == "windows" {
+			t += ".exe"
+		}
+		_, e := os.Stat(t)
+		if e != nil {
+			fmt.Println("compiler not found")
+			return
+		}
+	}
 	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
 	if err != nil {
 		fmt.Println(err)
@@ -133,7 +139,7 @@ func (r *Run) RunCommand(command string, args []string) {
 func (r *Run) findPackageIn(packageName string) (string, error) {
 	pathHavePackage := []string{}
 	for _, v := range r.LucyPaths {
-		dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, r.Package)
+		dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
 		f, err := os.Stat(dir)
 		if err == nil && f.IsDir() {
 			fis, _ := ioutil.ReadDir(dir)
@@ -145,11 +151,20 @@ func (r *Run) findPackageIn(packageName string) (string, error) {
 			}
 		}
 	}
+	formatLucyPath := func() string {
+		s := ""
+		for _, v := range r.LucyPaths {
+			s += "\t" + v + "\n"
+		}
+		return s
+	}
 	if len(pathHavePackage) == 0 {
-		return "", fmt.Errorf("package %s not found in $%s,which lucy path is %v", r.Package, common.LUCY_PATH_ENV_KEY, r.LucyPaths)
+		return "", fmt.Errorf("package '%s' not found in $%s,which lucy path are:\n%s",
+			packageName, common.LUCY_PATH_ENV_KEY, formatLucyPath())
 	}
 	if len(pathHavePackage) > 1 {
-		return "", fmt.Errorf("not 1 package named %s in $%s,which lucy path is %v", r.Package, common.LUCY_PATH_ENV_KEY, r.LucyPaths)
+		return "", fmt.Errorf("not 1 package named '%s' in $%s,which lucy path are:\n",
+			packageName, common.LUCY_PATH_ENV_KEY, formatLucyPath())
 	}
 	return pathHavePackage[0], nil
 }
@@ -164,9 +179,11 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 	if err != nil { // shit happens
 		return
 	}
+	fism := make(map[string]os.FileInfo)
 	for _, v := range fis {
 		if strings.HasSuffix(v.Name(), ".lucy") {
 			lucyFiles = append(lucyFiles, filepath.Join(sourceFileDir, v.Name()))
+			fism[v.Name()] = v
 		}
 	}
 	if len(lucyFiles) == 0 {
@@ -185,9 +202,7 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = nil
 		return
 	}
-	fism := make(map[string]os.FileInfo)
-	for _, v := range fis {
-		fism[v.Name()] = v
+	for _, v := range fism {
 		if meta.CompiledFrom == nil {
 			return
 		}
@@ -205,7 +220,6 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 			return
 		}
 	}
-
 	// if class file is missing
 	fis, err = ioutil.ReadDir(destDir)
 	fism = make(map[string]os.FileInfo)
@@ -287,7 +301,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if err != nil {
 		return
 	}
-	fmt.Println("!!!!!!!!!!!!!", needBuild)
 	if needBuild == false { // current package no need to compile,but I need to check dependies
 		need := false
 		for _, v := range meta.Imports {
@@ -304,7 +317,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if needBuild == false { // no need actually
 		return
 	}
-
 	//compile this package really
 	is, err := r.parseImports(lucyFiles)
 	if err != nil {
@@ -316,6 +328,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 			return
 		}
 	}
+	fmt.Println("compiling.... ", packageName) // compile this package
 	// build this package
 	//read  files
 	destDir := filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName)
@@ -342,7 +355,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	}
 	// cd to destDir
 	os.Chdir(destDir)
-
 	args := []string{"-package-name", packageName}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
@@ -367,6 +379,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	}
 	meta.CompileTime = time.Now()
 	meta.Imports = is
+	fmt.Println("#############", is)
 	//
 	fis, err := ioutil.ReadDir(destDir)
 	if err != nil {

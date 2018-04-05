@@ -327,14 +327,11 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
-func (t *VariableType) TypeCompatible(comp *VariableType) bool {
-	if t.Equal(comp) {
+func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
+	if t.Equal(t2) {
 		return true
 	}
-	if t.IsNumber() && comp.IsNumber() {
-		return true
-	}
-	return false
+	return t.IsNumber() && t2.IsNumber()
 }
 
 /*

@@ -22,7 +22,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
-	astClass.Access = c.AccessFlag
+	astClass.AccessFlags = c.AccessFlag
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
 	for _, v := range c.Fields {
@@ -97,7 +97,26 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			if err != nil {
 				return err
 			}
-			cos.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
+			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
+			switch cos.Typ.Typ {
+			case ast.VARIABLE_TYPE_BOOL:
+				cos.Value = binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info) != 0
+			case ast.VARIABLE_TYPE_BYTE:
+				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+			case ast.VARIABLE_TYPE_SHORT:
+				fallthrough
+			case ast.VARIABLE_TYPE_INT:
+				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+			case ast.VARIABLE_TYPE_LONG:
+				cos.Value = int64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
+			case ast.VARIABLE_TYPE_FLOAT:
+				cos.Value = float32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+			case ast.VARIABLE_TYPE_DOUBLE:
+				cos.Value = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
+			case ast.VARIABLE_TYPE_STRING:
+				valueIndex = binary.BigEndian.Uint16(c.ConstPool[valueIndex].Info) // const_string_info
+				cos.Value = string(c.ConstPool[valueIndex].Info)                   // utf 8
+			}
 			if pack.Block.Consts == nil {
 				pack.Block.Consts = make(map[string]*ast.Const)
 			}
@@ -116,9 +135,14 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			pack.Block.Vars[name] = vd
 		}
 	}
+
 	for _, m := range c.Methods {
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_INNER_STATIC_METHOD); t != nil && len(t) > 0 {
-			//innsert static method cannot called from outside
+			//inner static method cannot called from outside
+			continue
+		}
+		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT); t != nil && len(t) > 0 {
+			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
 			continue
 		}
 		function := &ast.Function{}

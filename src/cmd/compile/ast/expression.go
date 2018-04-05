@@ -230,14 +230,11 @@ func (e *Expression) canbeUsedForRange() bool {
 	return false
 }
 
-func (e *Expression) IsCall() bool {
+func (e *Expression) MayHaveMultiValue() bool {
 	return e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL
 }
 
 func (e *Expression) CallHasReturnValue() bool {
-	if e.IsCall() == false {
-		panic("")
-	}
 	return len(e.VariableTypes) >= 1 && e.VariableTypes[0].rightValueValid()
 }
 
@@ -281,9 +278,10 @@ type ExpressionIndex struct {
 	Index      *Expression
 }
 type ExpressionDot struct {
-	Expression *Expression
-	Name       string
-	Field      *ClassField
+	Expression                *Expression
+	Name                      string
+	Field                     *ClassField
+	PackageVariableDefinition *VariableDefinition
 }
 type ExpressionMethodCall struct {
 	Expression *Expression

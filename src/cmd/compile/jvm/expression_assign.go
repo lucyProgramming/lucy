@@ -91,7 +91,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		noDestinations = noDestinations[1:]
 	}
 	for _, v := range rights {
-		if v.IsCall() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
 			stack, _ := m.build(class, code, v, context)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
@@ -136,7 +136,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			maxstack = t
 		}
 		variableType := v.VariableType
-		if v.IsCall() {
+		if v.MayHaveMultiValue() {
 			variableType = v.VariableTypes[0]
 		}
 		if noDestinations[0] == false {

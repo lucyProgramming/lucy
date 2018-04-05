@@ -103,7 +103,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if currentStack > maxstack {
 				maxstack = maxstack
 			}
-			if v.IsCall() && len(v.VariableTypes) > 1 {
+			if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
 				if currentStack > maxstack {
 					maxstack = maxstack
 				} // make the call
@@ -122,7 +122,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				continue
 			}
 			variableType := v.VariableType
-			if v.IsCall() {
+			if v.MayHaveMultiValue() {
 				variableType = v.VariableTypes[0]
 			}
 			stack, es := m.MakeExpression.build(class, code, v, context)

@@ -12,7 +12,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 	switch call.Name {
 	case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
 		variableType := call.Args[0].VariableType
-		if call.Args[0].IsCall() {
+		if call.Args[0].MayHaveMultiValue() {
 			variableType = call.Args[0].VariableTypes[0]
 		}
 		stack, _ := m.build(class, code, call.Args[0], context)
@@ -52,7 +52,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		}
 		for k, v := range call.Args {
 			currentStack = 1
-			if v.IsCall() && len(v.VariableTypes) > 0 {
+			if v.MayHaveMultiValue() && len(v.VariableTypes) > 0 {
 				stack, _ := m.build(class, code, v, context)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
@@ -82,7 +82,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				continue
 			}
 			variableType := v.VariableType
-			if v.IsCall() {
+			if v.MayHaveMultiValue() {
 				variableType = v.VariableTypes[0]
 			}
 			if k == len(call.Args)-1 {

@@ -60,7 +60,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		gotoBodyExits := []*cg.JumpBackPatch{}
 		needPop := false
 		for kk, ee := range c.Matches {
-			if ee.IsCall() && len(ee.VariableTypes) > 0 {
+			if ee.MayHaveMultiValue() && len(ee.VariableTypes) > 0 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
