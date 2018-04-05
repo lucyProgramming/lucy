@@ -326,9 +326,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		if buildinFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
 		}
-		//if name == MAIN_FUNCTION_NAME {
-		//	return fmt.Errorf("%s '%s' is not available", errMsgPrefix(pos), MAIN_FUNCTION_NAME)
-		//}
 		b.Funcs[name] = t
 	case *Const:
 		b.Consts[name] = d.(*Const)
@@ -358,34 +355,3 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	}
 	return nil
 }
-
-//func (b *Block) checkVar(v *VariableDefinition) []error {
-//	if v.Expression == nil && v.Typ == nil {
-//		panic(1)
-//	}
-//	var err error
-//	var expressionVariableType *VariableType
-//	if v.Expression != nil {
-//		var es []error
-//		expressionVariableType, es = b.checkExpression(v.Expression)
-//		if err != nil {
-//			return es
-//		}
-//	}
-//	if v.Typ != nil { //means variable typed by assignment
-//		err = v.Typ.resolve(b)
-//		if err != nil {
-//			if err != nil {
-//				return []error{fmt.Errorf("%s err", errMsgPrefix(v.Pos))}
-//			}
-//		}
-//		if expressionVariableType != nil && !v.Typ.TypeCompatible(expressionVariableType) {
-//			return []error{fmt.Errorf("%s variable %s defined wrong,cannot assign '%s' to '%s'",
-//				errMsgPrefix(v.Pos), v.Name, v.Typ.TypeString(), expressionVariableType.TypeString())}
-//		}
-//		return nil
-//	} else {
-//		v.Typ = expressionVariableType
-//	}
-//	return nil
-//}

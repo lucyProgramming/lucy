@@ -27,6 +27,7 @@ type Package struct {
 	Errors                       []error
 }
 
+
 func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
 		return nil
@@ -41,18 +42,6 @@ type LoadedResouces struct {
 	T   interface{}
 	Err error
 }
-
-//func (p *Package) mkShortName() {
-//	if strings.Contains(p.FullName, "/") {
-//		t := strings.Split(p.FullName, "/")
-//		p.Name = t[len(t)-1]
-//		if p.Name == "" {
-//			panic("last element is null string")
-//		}
-//	} else {
-//		p.Name = p.FullName
-//	}
-//}
 
 func (p *Package) mkInitFunctions(bs []*Block) {
 	p.InitFunctions = make([]*Function, len(bs))
