@@ -26,13 +26,13 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 				code.Codes[code.CodeLength] = cg.OP_iload_3
 				code.CodeLength++
 			default:
+				if t.Var.LocalValOffset > 255 {
+					panic("over 255")
+				}
 				code.Codes[code.CodeLength] = cg.OP_iload
 				code.Codes[code.CodeLength+1] = byte(t.Var.LocalValOffset)
 				code.CodeLength += 2
 			}
-		}
-		if t.Var.LocalValOffset > 255 {
-			panic("over 255")
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.IsIncrement() {
