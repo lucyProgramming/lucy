@@ -62,6 +62,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass := &cg.ClassHighLevel{}
 	m.mainclass = mainclass
 	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
+	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
 	mainclass.Name = p.Name + "/main"
 	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
@@ -69,14 +70,13 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.MakeExpression.MakeClass = m
 	m.Classes = make(map[string]*cg.ClassHighLevel)
 	m.mkVars()
-	m.mkEnums()
+	m.mkFuncs()
+	m.mkInitFunctions()
 	for _, v := range p.Block.Classes {
 		m.Classes[v.Name] = m.mkClass(v)
 	}
-	m.mkFuncs()
 	m.mkConsts()
 	m.mkTypes()
-	m.mkInitFunctions()
 	err := m.Dump()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
@@ -147,10 +147,23 @@ func (m *MakeClass) mkVars() {
 }
 
 func (m *MakeClass) mkInitFunctions() {
-	ms := []*cg.MethodHighLevel{}
+	if len(m.p.InitFunctions) == 0 {
+		needTrigger := false
+		for _, v := range m.p.LoadedPackages {
+			fmt.Println("@@@@@@@@@@", v.Name, v.TriggerPackageInitMethodName)
+			if v.TriggerPackageInitMethodName != "" {
+				needTrigger = true
+				break
+			}
+		}
+		if needTrigger == false {
+			return
+		}
+	}
+	blockMethods := []*cg.MethodHighLevel{}
 	for _, v := range m.p.InitFunctions {
 		method := &cg.MethodHighLevel{}
-		ms = append(ms, method)
+		blockMethods = append(blockMethods, method)
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
@@ -160,16 +173,25 @@ func (m *MakeClass) mkInitFunctions() {
 		m.buildFunction(m.mainclass, method, v)
 		m.mainclass.AppendMethod(method)
 	}
-	if len(ms) == 0 {
-		return
-	}
 	method := &cg.MethodHighLevel{}
 	method.AccessFlags |= cg.ACC_METHOD_STATIC
 	method.Name = "<clinit>"
 	method.Descriptor = "()V"
 	codes := make([]byte, 65536)
 	codelength := int(0)
-	for _, v := range ms {
+	for _, v := range m.p.LoadedPackages {
+		if v.TriggerPackageInitMethodName == "" {
+			continue
+		}
+		codes[codelength] = cg.OP_invokestatic
+		m.mainclass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      v.Name + "/main", // main class
+			Method:     v.TriggerPackageInitMethodName,
+			Descriptor: "()V",
+		}, codes[codelength+1:codelength+3])
+		codelength += 3
+	}
+	for _, v := range blockMethods {
 		codes[codelength] = cg.OP_invokestatic
 		m.mainclass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      m.mainclass.Name,
@@ -184,16 +206,28 @@ func (m *MakeClass) mkInitFunctions() {
 	method.Code.Codes = codes
 	method.Code.CodeLength = codelength
 	m.mainclass.AppendMethod(method)
-}
 
-func (m *MakeClass) mkEnums() {
-
+	// trigger init
+	trigger := &cg.MethodHighLevel{}
+	trigger.Name = m.mainclass.NewFunctionName("triggerPackageInit")
+	trigger.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
+	trigger.AccessFlags |= cg.ACC_METHOD_STATIC
+	trigger.Descriptor = "()V"
+	trigger.Code.Codes = make([]byte, 1)
+	trigger.Code.Codes[0] = cg.OP_return
+	trigger.Code.CodeLength = 1
+	trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
+	m.mainclass.AppendMethod(trigger)
+	m.mainclass.TriggerCLinit = trigger
 }
 
 func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
-	class.AccessFlags = c.Access
+	class.SourceFiles = make(map[string]struct{})
+	class.SourceFiles[c.Pos.Filename] = struct{}{}
+	class.AccessFlags = c.AccessFlags
 	class.SuperClass = c.SuperClassName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)

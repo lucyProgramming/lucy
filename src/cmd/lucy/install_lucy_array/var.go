@@ -2,9 +2,8 @@ package install_lucy_array
 
 var (
 	array_template = `
-	
-
 package lucy.deps;
+IMPORTS
 public class ArrayTTT   {
 	public int start;
 	public int end; // not include

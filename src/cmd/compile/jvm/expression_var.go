@@ -25,7 +25,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 	//
 	variables := vs.Vs
 	for _, v := range vs.Values {
-		if v.IsCall() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
 			stack, _ := m.build(class, code, v, context)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
@@ -52,7 +52,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			continue
 		}
 		variableType := v.VariableType
-		if v.IsCall() {
+		if v.MayHaveMultiValue() {
 			variableType = v.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, v, context)

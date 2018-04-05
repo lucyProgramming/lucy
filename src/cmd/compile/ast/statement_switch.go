@@ -111,18 +111,18 @@ func (s *StatementSwitch) check(b *Block) []error {
 						}
 					}
 				} else if e.Typ == EXPRESSION_TYPE_DOT {
-					index := e.Data.(*ExpressionIndex)
+					index := e.Data.(*ExpressionDot)
 					if index.Expression.Typ != EXPRESSION_TYPE_IDENTIFIER {
 						errs = append(errs, fmt.Errorf("%s expect a package name", errMsgPrefix(e.Pos)))
 						continue
 					}
 					identiferName := index.Expression.Data.(*ExpressionIdentifer).Name
 					packageName := PackageBeenCompile.getImport(e.Pos.Filename, identiferName)
-					if packageName == "" {
+					if packageName == nil {
 						errs = append(errs, fmt.Errorf("%s package %s not found", errMsgPrefix(e.Pos), identiferName))
 						continue
 					}
-					i, err := PackageBeenCompile.load(packageName, index.Name)
+					i, err := PackageBeenCompile.load(packageName.Resource)
 					if err != nil {
 						errs = append(errs, fmt.Errorf("%s load failed,err:%v", errMsgPrefix(e.Pos), err))
 						continue

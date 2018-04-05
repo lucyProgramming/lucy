@@ -26,7 +26,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 	case EXPRESSION_TYPE_INDEX:
 		return e.checkIndexExpression(block, &errs), errs
 	case EXPRESSION_TYPE_DOT:
-		return e.checkIndexExpression(block, &errs), errs
+		return e.checkDotExpression(block, &errs), errs
 	default:
 		errs = append(errs, fmt.Errorf("%s '%s' cannot be used as left value",
 			errMsgPrefix(e.Pos),

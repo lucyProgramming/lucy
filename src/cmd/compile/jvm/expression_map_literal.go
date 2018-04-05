@@ -24,7 +24,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		currentStack := uint16(2)
 		variableType := v.Left.VariableType
-		if v.Left.IsCall() {
+		if v.Left.MayHaveMultiValue() {
 			variableType = v.Left.VariableTypes[0]
 		}
 		stack, _ := m.build(class, code, v.Left, context)
@@ -41,7 +41,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			maxstack = t
 		}
 		variableType = v.Right.VariableType
-		if v.Right.IsCall() {
+		if v.Right.MayHaveMultiValue() {
 			variableType = v.Right.VariableTypes[0]
 		}
 		if variableType.IsPointer() == false {

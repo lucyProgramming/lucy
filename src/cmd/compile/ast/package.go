@@ -13,46 +13,46 @@ const (
 )
 
 type Package struct {
-	Kind           int
-	Name           string //if error,should be multi names ,taken first is ok
-	FullName       string
-	Main           *Function
-	DestPath       string
-	loadedPackages map[string]*Package
-	loaded         map[string]*LoadedName
-	Block          Block // package always have a default block
-	Files          map[string]*File
-	InitFunctions  []*Function
-	NErros2Stop    int // number of errors should stop compile
-	Errors         []error
+	TriggerPackageInitMethodName string
+	Kind                         int
+	Name                         string
+	Main                         *Function
+	DestPath                     string
+	LoadedPackages               map[string]*Package
+	loaded                       map[string]*LoadedResouces
+	Block                        Block // package always have a default block
+	Files                        map[string]*File
+	InitFunctions                []*Function
+	NErros2Stop                  int // number of errors should stop compile
+	Errors                       []error
 }
 
-func (p *Package) getImport(file string, i string) string {
+func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
-		return ""
+		return nil
 	}
-	if p.Files[file] == nil {
-		return ""
+	if _, ok := p.Files[file]; ok == false {
+		return nil
 	}
-	return p.Files[file].Imports[i].Name
+	return p.Files[file].Imports[accessName]
 }
 
-type LoadedName struct {
+type LoadedResouces struct {
 	T   interface{}
 	Err error
 }
 
-func (p *Package) mkShortName() {
-	if strings.Contains(p.FullName, "/") {
-		t := strings.Split(p.FullName, "/")
-		p.Name = t[len(t)-1]
-		if p.Name == "" {
-			panic("last element is null string")
-		}
-	} else {
-		p.Name = p.FullName
-	}
-}
+//func (p *Package) mkShortName() {
+//	if strings.Contains(p.FullName, "/") {
+//		t := strings.Split(p.FullName, "/")
+//		p.Name = t[len(t)-1]
+//		if p.Name == "" {
+//			panic("last element is null string")
+//		}
+//	} else {
+//		p.Name = p.FullName
+//	}
+//}
 
 func (p *Package) mkInitFunctions(bs []*Block) {
 	p.InitFunctions = make([]*Function, len(bs))
@@ -78,7 +78,6 @@ func (p *Package) addBuildFunctions() {
 }
 
 func (p *Package) TypeCheck() []error {
-	p.mkShortName()
 	p.addBuildFunctions()
 	if p.NErros2Stop <= 2 {
 		p.NErros2Stop = 10
@@ -118,37 +117,38 @@ func (p *Package) TypeCheck() []error {
 	return p.Errors
 }
 
-func (p *Package) load(pname, name string) (interface{}, error) {
-	if p.loadedPackages == nil {
-		p.loadedPackages = make(map[string]*Package)
-	}
-	if p.loaded == nil {
-		p.loaded = make(map[string]*LoadedName)
-	}
-	var err error
-	fullname := pname + "/" + name
-	if t, ok := p.loaded[fullname]; ok { // look up in cache
-		return t.T, t.Err
-	}
-
-	if t := p.loadedPackages[pname]; t != nil {
-		if t.Kind == PACKAGE_KIND_LUCY {
-
-		} else { //java package
-
+func (p *Package) load(resource string) (interface{}, error) {
+	if p.loaded != nil {
+		t, ok := p.loaded[resource]
+		if ok {
+			return t.T, t.Err
 		}
 	}
-	if _, ok := p.loadedPackages[pname]; ok == false {
-		p.loadedPackages[pname] = &Package{}
+	if p.loaded == nil {
+		p.loaded = make(map[string]*LoadedResouces)
 	}
-	p.loaded[fullname] = &LoadedName{}
-	t, err := NameLoader.LoadName(p.loadedPackages[pname], pname, name)
-	if err != nil {
-		p.loaded[fullname].Err = err
-		return nil, err
+	p.loaded[resource] = &LoadedResouces{}
+	var pp *Package
+
+	pp, t, err := NameLoader.LoadName(resource)
+	if pp != nil {
+		if PackageBeenCompile.LoadedPackages == nil {
+			PackageBeenCompile.LoadedPackages = make(map[string]*Package)
+		}
+		PackageBeenCompile.LoadedPackages[pp.Name] = pp
 	}
-	p.loaded[fullname].T = t
-	return t, nil
+	p.loaded[resource] = &LoadedResouces{}
+	p.loaded[resource].T = t
+	p.loaded[resource].Err = err
+	if p.loaded[resource].T != nil {
+		if tp, ok := p.loaded[resource].T.(*Package); ok && tp != nil && tp != pp {
+			if PackageBeenCompile.LoadedPackages == nil {
+				PackageBeenCompile.LoadedPackages = make(map[string]*Package)
+			}
+			PackageBeenCompile.LoadedPackages[tp.Name] = tp
+		}
+	}
+	return p.loaded[resource].T, p.loaded[resource].Err
 }
 
 //different for other file
@@ -158,7 +158,7 @@ type File struct {
 
 type Import struct {
 	AccessName string
-	Name       string // full name
+	Resource   string // full name
 	Pos        *Pos
 	Used       bool
 }
@@ -174,8 +174,8 @@ func (i *Import) GetAccessName() (string, error) {
 	if i.AccessName != "" {
 		return i.AccessName, nil
 	}
-	name := i.Name
-	if strings.Contains(i.Name, "/") {
+	name := i.Resource
+	if strings.Contains(i.Resource, "/") {
 		name = name[strings.LastIndex(name, "/")+1:]
 		if name == "" {
 			return "", fmt.Errorf("no last element after/")

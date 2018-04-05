@@ -1,7 +1,8 @@
 
-	
-
 package lucy.deps;
+
+		import java.lang.Object;
+
 public class ArrayObject   {
 	public int start;
 	public int end; // not include

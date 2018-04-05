@@ -22,7 +22,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
-	astClass.Access = c.AccessFlag
+	astClass.AccessFlags = c.AccessFlag
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
 	for _, v := range c.Fields {
@@ -75,7 +75,8 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	return astClass, nil
 }
 
-func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) error {
+func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
+	var err error
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
@@ -92,6 +93,10 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			cos.Name = name
 			cos.AccessFlags = f.AccessFlags
 			cos.Typ = typ
+			_, cos.Typ, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+			if err != nil {
+				return err
+			}
 			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
 			switch cos.Typ.Typ {
 			case ast.VARIABLE_TYPE_BOOL:
@@ -99,7 +104,7 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			case ast.VARIABLE_TYPE_BYTE:
 				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_SHORT:
-				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
+				fallthrough
 			case ast.VARIABLE_TYPE_INT:
 				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_LONG:
@@ -109,28 +114,35 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			case ast.VARIABLE_TYPE_DOUBLE:
 				cos.Value = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
 			case ast.VARIABLE_TYPE_STRING:
-				cos.Value = string(c.ConstPool[valueIndex].Info)
+				valueIndex = binary.BigEndian.Uint16(c.ConstPool[valueIndex].Info) // const_string_info
+				cos.Value = string(c.ConstPool[valueIndex].Info)                   // utf 8
 			}
-			if loader.Package.Block.Consts == nil {
-				loader.Package.Block.Consts = make(map[string]*ast.Const)
+			if pack.Block.Consts == nil {
+				pack.Block.Consts = make(map[string]*ast.Const)
 			}
-			loader.Package.Block.Consts[name] = cos
+			pack.Block.Consts[name] = cos
 		} else {
 			//global vars
 			vd := &ast.VariableDefinition{}
 			vd.Name = name
 			vd.AccessFlags = f.AccessFlags
+			vd.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
 			vd.Typ = typ
-			if loader.Package.Block.Vars == nil {
-				loader.Package.Block.Vars = make(map[string]*ast.VariableDefinition)
+			vd.IsGlobal = true
+			if pack.Block.Vars == nil {
+				pack.Block.Vars = make(map[string]*ast.VariableDefinition)
 			}
-			loader.Package.Block.Vars[name] = vd
+			pack.Block.Vars[name] = vd
 		}
 	}
-	var err error
+
 	for _, m := range c.Methods {
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_INNER_STATIC_METHOD); t != nil && len(t) > 0 {
-			//innsert static method cannot called from outside
+			//inner static method cannot called from outside
+			continue
+		}
+		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT); t != nil && len(t) > 0 {
+			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
 			continue
 		}
 		function := &ast.Function{}
@@ -141,15 +153,14 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 			return err
 		}
 		function.IsGlobal = true
-		if p.Block.Funcs == nil {
-			p.Block.Funcs = make(map[string]*ast.Function)
+		if pack.Block.Funcs == nil {
+			pack.Block.Funcs = make(map[string]*ast.Function)
 		}
-		p.Block.Funcs[function.Name] = function
+		pack.Block.Funcs[function.Name] = function
 	}
 
-	// load type alias
-	if loader.Package.Block.Types == nil {
-		loader.Package.Block.Types = make(map[string]*ast.VariableType)
+	if pack.Block.Types == nil {
+		pack.Block.Types = make(map[string]*ast.VariableType)
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
 		index := binary.BigEndian.Uint64(v.Info)
@@ -157,7 +168,7 @@ func (loader *RealNameLoader) loadLucyMainClass(p *ast.Package, c *cg.Class) err
 		if err != nil {
 			return err
 		}
-		loader.Package.Block.Types[name] = typ
+		pack.Block.Types[name] = typ
 	}
 	return nil
 }

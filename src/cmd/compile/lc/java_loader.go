@@ -2,6 +2,7 @@ package lc
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
@@ -9,6 +10,9 @@ import (
 
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
+	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
+		return nil, fmt.Errorf("lucy does not support typed parameter current stage")
+	}
 	astClass := &ast.Class{}
 	{
 		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
@@ -18,7 +22,7 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
-	astClass.Access = c.AccessFlag
+	astClass.AccessFlags = c.AccessFlag
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
 	for _, v := range c.Fields {

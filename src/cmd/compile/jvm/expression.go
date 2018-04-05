@@ -327,24 +327,14 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
 		} else {
 			increment = 2
-			code.Codes[code.CodeLength] = cg.OP_dup_x2
+			code.Codes[code.CodeLength] = cg.OP_dup2_x1
 		}
 		code.CodeLength++
 		return
 	}
 	if op[0] == cg.OP_invokevirtual { // array or map
-		if ArrayMetasMap[(classname)] != nil { // stack is arrayref index
-			if stackTopType.JvmSlotSize() == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup2_x1
-				code.CodeLength++
-			} else {
-				increment = 2
-				code.Codes[code.CodeLength] = cg.OP_dup2_x2
-				code.CodeLength++
-			}
-			return
-		} else if classname == java_hashmap_class { // stack is mapref kref vref
+		if ArrayMetasMap[classname] != nil || classname == java_hashmap_class {
+			// stack is arrayref index or mapref kref which are all category 1 type
 			if stackTopType.JvmSlotSize() == 1 {
 				increment = 1
 				code.Codes[code.CodeLength] = cg.OP_dup_x2

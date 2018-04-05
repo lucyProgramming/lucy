@@ -301,6 +301,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			if m.AttributeLucyMethodDescritor != nil {
 				info.Attributes = append(info.Attributes, m.AttributeLucyMethodDescritor.ToAttributeInfo(c))
 			}
+			if m.AttributeLucyTriggerPackageInitMethod != nil {
+				info.Attributes = append(info.Attributes, m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(c))
+			}
 			c.Methods = append(c.Methods, info)
 		}
 	}

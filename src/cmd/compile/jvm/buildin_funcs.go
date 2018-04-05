@@ -169,7 +169,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	}
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
-		if v.IsCall() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
 			stack := m.buildFunctionCall(class, code, v, context)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
@@ -191,7 +191,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			continue
 		}
 		variableType = v.VariableType
-		if v.IsCall() {
+		if v.MayHaveMultiValue() {
 			variableType = v.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, v, context)

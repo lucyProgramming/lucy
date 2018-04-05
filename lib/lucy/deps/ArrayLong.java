@@ -1,7 +1,6 @@
 
-	
-
 package lucy.deps;
+
 public class ArrayLong   {
 	public int start;
 	public int end; // not include

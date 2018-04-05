@@ -5,13 +5,13 @@ import (
 )
 
 type StatementReturn struct {
-	Function    *Function
+	//Function    *Function
 	Pos         *Pos // use some time
 	Expressions []*Expression
 }
 
 func (s *StatementReturn) check(b *Block) []error {
-	s.Function = b.InheritedAttribute.Function
+	//s.Function = b.InheritedAttribute.Function
 	if len(s.Expressions) == 0 {
 		return nil
 	}

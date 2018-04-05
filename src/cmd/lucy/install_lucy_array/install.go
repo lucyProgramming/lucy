@@ -16,6 +16,7 @@ type InstallType struct {
 	classname    string
 	typename     string
 	defaultValue string
+	imports      string
 }
 
 var (
@@ -54,6 +55,9 @@ func init() {
 	installs = append(installs, &InstallType{
 		classname: "ArrayObject",
 		typename:  "Object",
+		imports: `
+		import java.lang.Object;
+`,
 	})
 	d := `
 		for(int i =0 ;i < this.end;i ++){
@@ -87,6 +91,7 @@ func (r *InstallLucyArray) RunCommand(command string, args []string) {
 		t := strings.Replace(array_template, "ArrayTTT", v.classname, -1)
 		t = strings.Replace(t, "TTT", v.typename, -1)
 		t = strings.Replace(t, "DEFAULT_INIT", v.defaultValue, -1)
+		t = strings.Replace(t, "IMPORTS", v.imports, -1)
 		err := ioutil.WriteFile(javafile, []byte(t), 0644)
 		if err != nil {
 			fmt.Println(err)

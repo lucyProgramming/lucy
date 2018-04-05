@@ -18,21 +18,8 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	maxstack = 2
-	stackneed := maxstack
-	size := uint16(0)
-	for _, v := range n.Args {
-		if v.IsCall() {
-			panic(1)
-		}
-		size = e.VariableType.JvmSlotSize()
-		stack, es := m.build(class, code, v, context)
-		if stackneed+stack > maxstack {
-			maxstack = stackneed + stack
-		}
-		stackneed += size
-		backPatchEs(es, code.CodeLength)
-	}
+	maxstack = m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context)
+	maxstack += 2 //
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

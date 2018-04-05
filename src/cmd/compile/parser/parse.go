@@ -44,6 +44,9 @@ func (p *Parser) Parse() []error {
 	p.scanner = lex.New(p.bs)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
+	if p.eof {
+		return nil
+	}
 	p.parseImports() // next is called
 	if p.eof {
 		return p.errs
@@ -146,9 +149,9 @@ func (p *Parser) Parse() []error {
 				Data: c,
 			})
 			if ispublic {
-				c.Access |= cg.ACC_FIELD_PUBLIC
+				c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			} else {
-				c.Access |= cg.ACC_FIELD_PRIVATE
+				c.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
 			resetProperty()
 		case lex.TOKEN_PUBLIC:
@@ -221,7 +224,11 @@ func (p *Parser) Parse() []error {
 }
 
 func (p *Parser) validAfterPublic() {
-	if p.token.Type == lex.TOKEN_FUNCTION || p.token.Type == lex.TOKEN_CLASS || p.token.Type == lex.TOKEN_ENUM || p.token.Type == lex.TOKEN_IDENTIFIER {
+	if p.token.Type == lex.TOKEN_FUNCTION ||
+		p.token.Type == lex.TOKEN_CLASS ||
+		p.token.Type == lex.TOKEN_ENUM ||
+		p.token.Type == lex.TOKEN_IDENTIFIER ||
+		p.token.Type == lex.TOKEN_CONST {
 		return
 	}
 	var err error
@@ -305,10 +312,12 @@ func (p *Parser) Next() {
 		tok, p.eof, err = p.scanner.Next()
 		if err != nil {
 			p.errs = append(p.errs, fmt.Errorf("%s %s", p.errorMsgPrefix(), err.Error()))
-			continue
 		}
 		if p.eof {
 			break
+		}
+		if tok == nil {
+			continue
 		}
 		if tok.Type != lex.TOKEN_CRLF {
 			p.token = tok

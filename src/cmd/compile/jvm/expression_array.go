@@ -91,7 +91,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 	}
 	for _, v := range arr.Expressions {
-		if v.IsCall() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
 			// stack top is array list
 			stack, es := m.build(class, code, v, context)
 			backPatchEs(es, code.CodeLength)

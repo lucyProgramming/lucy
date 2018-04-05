@@ -7,14 +7,15 @@ import (
 )
 
 type Class struct {
+	Pos                *Pos
+	IsJava             bool // compiled from java source file
 	Package            *Package
 	Checked            bool
 	Name               string
 	NameWithOutPackage string
 	IsGlobal           bool
 	Block              Block
-	Access             uint16
-	Pos                *Pos
+	AccessFlags        uint16
 	Fields             map[string]*ClassField
 	Methods            map[string][]*ClassMethod
 	SuperClassName     string
@@ -113,30 +114,32 @@ func (c *Class) check(father *Block) []error {
 	return errs
 }
 
-func (c *Class) loadInterfaces(errs *[]error) {
-
-}
-
 func (c *Class) isInterface() bool {
-	return c.Access&cg.ACC_CLASS_INTERFACE != 0
+	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
 
-func (c *Class) implementInterfaceOf(super *Class) bool {
-	//	if super.Access&cg.ACC_CLASS_INTERFACE == 0 {
-	//		panic("not a interface")
-	//	}
-	//	for _, v := range c.Interfaces {
-	//		if v.Name == super.Name {
-	//			return true
-	//		}
-	//	}
-	return false
-}
-
-func (c *Class) instanceOf(super *Class) bool {
-	if super.Access&cg.ACC_CLASS_INTERFACE != 0 {
-		return c.implementInterfaceOf(super)
+func (c *Class) haveSuper(superclassName string) (error, bool) {
+	if c.Name == superclassName {
+		return nil, true
 	}
+	if c.SuperClassName == "" {
+		c.SuperClassName = LUCY_ROOT_CLASS
+	}
+	superClass, err := PackageBeenCompile.load(c.SuperClassName)
+	if err != nil {
+		return err, false
+	}
+	if cc, ok := superClass.(*Class); ok == false {
+		return fmt.Errorf("super class named %s is not a class", c.SuperClassName), false
+	} else {
+		c.SuperClass = cc
+	}
+	return c.SuperClass.haveSuper(superclassName)
+}
+
+func (c *Class) implemented(superclass string) bool {
+	//if c.Interfaces
+
 	return false
 }
 
@@ -243,7 +246,7 @@ func (c *Class) loadSuperClass() error {
 		if ok == false {
 			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		class, err := PackageBeenCompile.load(pname.Name, "Object")
+		class, err := PackageBeenCompile.load(pname.Resource)
 		if err != nil {
 			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
 		}
