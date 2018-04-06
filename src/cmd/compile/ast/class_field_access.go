@@ -1,14 +1,17 @@
 package ast
 
+import "fmt"
+
 func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error) {
+	fmt.Println("11", c.Name, c.Methods, fromSub, c.Fields)
 	if c.Fields != nil && nil != c.Fields[name] {
-		if fromSub { // private field
-			if c.Fields[name].IsPrivate() {
-				return nil, nil
-			}
+		if fromSub && c.Fields[name].IsPrivate() { // private field
 		} else {
 			return c.Fields[name], nil
 		}
+	}
+	if c.Name == JAVA_ROOT_CLASS { // root class
+		return nil, fmt.Errorf("field '%s' not found", name)
 	}
 	err = c.loadSuperClass()
 	if err != nil {

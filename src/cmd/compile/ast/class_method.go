@@ -15,7 +15,7 @@ func (m *ClassMethod) IsPublic() bool {
 }
 
 func (m *ClassMethod) IsStatic() bool {
-	return (m.Func.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0
+	return (m.Func.AccessFlags & cg.ACC_METHOD_STATIC) != 0
 }
 
 func (m *ClassMethod) IsPrivate() bool {

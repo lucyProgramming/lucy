@@ -1,6 +1,8 @@
 package jvm
 
-import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+import (
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+)
 
 type LucyFieldSignatureParse struct {
 }
@@ -33,11 +35,12 @@ func (l *LucyFieldSignatureParse) Decode(bs []byte) ([]byte, *ast.VariableType, 
 			return bs, nil, err
 		}
 		var vt *ast.VariableType
-		bs, vt, err = Descriptor.ParseType(bs)
+		bs, vt, err = l.Decode(bs)
 		if err != nil {
 			return bs, nil, err
 		}
 		m := &ast.VariableType{}
+		m.Typ = ast.VARIABLE_TYPE_MAP
 		m.Map = &ast.Map{}
 		m.Map.K = kt
 		m.Map.V = vt
@@ -47,7 +50,7 @@ func (l *LucyFieldSignatureParse) Decode(bs []byte) ([]byte, *ast.VariableType, 
 		bs = bs[1:]
 		a := &ast.VariableType{}
 		a.Typ = ast.VARIABLE_TYPE_ARRAY
-		bs, a.ArrayType, err = Descriptor.ParseType(bs)
+		bs, a.ArrayType, err = l.Decode(bs)
 		return bs, a, err
 	}
 	return Descriptor.ParseType(bs)

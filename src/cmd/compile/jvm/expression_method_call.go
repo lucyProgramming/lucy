@@ -34,7 +34,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      call.Method.Func.ClassMethod.Class.Name,
+		Class:      call.ClassName,
 		Method:     call.Name,
 		Descriptor: call.Method.Func.Descriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

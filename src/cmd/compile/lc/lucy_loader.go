@@ -54,6 +54,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
+		m.Func.AccessFlags = v.AccessFlags
 		m.LoadFromOutSide = true
 		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
@@ -160,7 +161,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		pack.Block.Types = make(map[string]*ast.VariableType)
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
-		index := binary.BigEndian.Uint64(v.Info)
+		index := binary.BigEndian.Uint16(v.Info)
 		name, typ, err := jvm.LucyTypeAliasParser.Decode(c.ConstPool[index].Info)
 		if err != nil {
 			return err

@@ -277,47 +277,19 @@ func (c *Class) checkMethods() []error {
 }
 
 func (c *Class) loadSuperClass() error {
-	if c.SuperClassName == "" {
-		//class, err := c.Block.InheritedAttribute.p.load("lucy/lang", "Object")
-		//if err != nil {
-		//	return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
-		//}
-		//if _,ok := class.(*Class); ok == false {
-		//	return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
-		//}
-		//c.SuperClass =
-		//if c.SuperClass == nil {
-		//	panic("........")
-		//}
-	} else {
-		if false == strings.Contains(c.SuperClassName, "/") {
-			d := c.Block.SearchByName(c.SuperClassName)
-			if c, ok := d.(*Class); ok {
-				c.SuperClass = c
-			} else {
-				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
-			}
-		}
-		t := strings.Split(c.SuperClassName, "/")
-		f, ok := PackageBeenCompile.Files[t[0]]
-		if ok == false {
-			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
-		}
-		pname, ok := f.Imports[t[0]]
-		if ok == false {
-			return fmt.Errorf("%s package named '%s' not imported", errMsgPrefix(c.Pos), t[0])
-		}
-		class, err := PackageBeenCompile.load(pname.Resource)
-		if err != nil {
-			return fmt.Errorf("%s load super failed err:%v", errMsgPrefix(c.Pos), err)
-		}
-		if _, ok := class.(*Class); ok == false {
-			return fmt.Errorf("%s %s is not a class", errMsgPrefix(c.Pos), err)
-		}
-		c.SuperClass = class.(*Class)
+	if c.SuperClass != nil {
 		return nil
 	}
-	return nil
+	d, err := PackageBeenCompile.load(c.SuperClassName)
+	if err != nil {
+		return err
+	}
+	if class, ok := d.(*Class); ok && ok && class != nil {
+		c.SuperClass = class
+		return nil
+	} else {
+		return fmt.Errorf("'%s' is not a class", c.SuperClassName)
+	}
 }
 
 func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, err error) {

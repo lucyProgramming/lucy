@@ -90,6 +90,8 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
+	}
+	for _, v := range p.Block.Classes {
 		es := v.checkPhase1(&p.Block)
 		if errsNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)

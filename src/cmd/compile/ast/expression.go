@@ -78,6 +78,7 @@ const (
 	EXPRESSION_TYPE_SLICE           // arr[0:2]
 	EXPRESSION_TYPE_MAP             // map literal
 	EXPRESSION_TYPE_TYPE_ALIAS
+	EXPRESSION_TYPE_TYPE_ASSERT
 )
 
 type Expression struct {
@@ -90,6 +91,8 @@ type Expression struct {
 	Data                    interface{}
 	IsStatementExpression   bool
 }
+
+type ExpressionTypeAssert ExpressionTypeConvertion
 
 /*
 	mk a expression from a const
@@ -285,6 +288,7 @@ type ExpressionDot struct {
 	PackageVariableDefinition *VariableDefinition
 }
 type ExpressionMethodCall struct {
+	ClassName  string //
 	Expression *Expression
 	Args       CallArgs
 	Name       string
@@ -439,35 +443,3 @@ func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, 
 }
 
 type getBinaryExpressionHandler func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)
-
-/*
-	literal value to float64
-*/
-//func (e *Expression) literalValue2Float64() int64 {
-//	switch e.Typ {
-//	case EXPRESSION_TYPE_BYTE:
-//		return int64(e.Data.(byte))
-//	case EXPRESSION_TYPE_INT:
-//		return e.Data.(int64)
-//	case EXPRESSION_TYPE_FLOAT:
-//		return int64(e.Data.(float64))
-//	default:
-//		panic("unhandle convert to int64")
-//	}
-//}
-
-/*
-	literal value to float64
-*/
-//func (e *Expression) literalValue2Int64() float64 {
-//	switch e.Typ {
-//	case EXPRESSION_TYPE_BYTE:
-//		return float64(e.Data.(byte))
-//	case EXPRESSION_TYPE_INT:
-//		return float64(e.Data.(int64))
-//	case EXPRESSION_TYPE_FLOAT:
-//		return e.Data.(float64)
-//	default:
-//		panic("unhandle convert to float64")
-//	}
-//}

@@ -389,6 +389,8 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += "}"
 	case VARIABLE_TYPE_JAVA_ARRAY:
 		*ret += v.ArrayType.TypeString() + "[]"
+	default:
+		panic(v.Typ)
 	}
 }
 
@@ -400,10 +402,7 @@ func (v *VariableType) TypeString() string {
 }
 
 func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
-	if t.Equal(t2) {
-		return true
-	}
-	return t.IsNumber() && t2.IsNumber()
+	return t.Equal(t2)
 }
 
 /*

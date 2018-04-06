@@ -179,7 +179,15 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if len(t) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
-
+	case EXPRESSION_TYPE_TYPE_ASSERT:
+		t = e.checkTypeAssert(block, &errs)
+		e.VariableTypes = t
+		if len(t) == 1 {
+			e.VariableType = t[0]
+		}
+		if len(t) > 1 {
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
+		}
 	case EXPRESSION_TYPE_NOT:
 		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:
@@ -246,6 +254,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		errs = append(errs, fmt.Errorf("%s cannot have expression list at this scope,"+
 			"this may be cause be compiler error,please contact with author",
 			errMsgPrefix(e.Pos)))
+
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}
