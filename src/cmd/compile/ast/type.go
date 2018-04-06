@@ -183,7 +183,24 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		if nil == i {
 			return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), packageAndName[0])
 		}
-		return PackageBeenCompile.load(i.Resource + "/" + packageAndName[1])
+		p, err := PackageBeenCompile.load(i.Resource)
+		if err != nil {
+			return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
+		}
+		if pp, ok := p.(*Package); ok == false && pp != nil {
+			return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
+		} else {
+			if pp.Block.SearchByName(packageAndName[1]) == nil {
+				return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), packageAndName[1])
+			}
+			if pp.Block.Types != nil && pp.Block.Types[packageAndName[1]] != nil {
+				return pp.Block.Types[packageAndName[1]], nil
+			}
+			if pp.Block.Classes != nil && pp.Block.Classes[packageAndName[1]] != nil {
+				return pp.Block.Classes[packageAndName[1]], nil
+			}
+			return nil, fmt.Errorf("%s '%s' is not a type", errMsgPrefix(t.Pos), packageAndName[1])
+		}
 	}
 	return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), t.Name)
 }
@@ -199,18 +216,22 @@ func (t *VariableType) mkTypeFromInterface(d interface{}) error {
 	//case *Package:
 	//	return fmt.Errorf("%s name '%s' is a package,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Class:
-		t.Typ = VARIABLE_TYPE_OBJECT
-		t.Class = d.(*Class)
-		return nil
+		dd := d.(*Class)
+		if t != nil {
+			t.Typ = VARIABLE_TYPE_OBJECT
+			t.Class = dd
+			return nil
+		}
 	case *VariableType:
-		tt := d.(*VariableType).Clone()
-		tt.Pos = t.Pos
-		*t = *tt
-		return nil
-
-	default:
-		return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(t.Pos), t.Name)
+		dd := d.(*VariableType)
+		if dd != nil {
+			tt := dd.Clone()
+			tt.Pos = t.Pos
+			*t = *tt
+			return nil
+		}
 	}
+	return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(t.Pos), t.Name)
 }
 
 func (t *VariableType) resolveName(block *Block) error {
