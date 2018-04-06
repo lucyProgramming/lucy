@@ -23,15 +23,11 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		return nil
 	}
 	args := checkExpressions(block, no.Args, errs)
-	f, accessable, err := no.Typ.Class.matchContructionFunction(args)
+	constructor, err := no.Typ.Class.matchContructionFunction(args)
 	if err != nil {
 		*errs = append(*errs, err)
-	} else {
-		if !accessable {
-			*errs = append(*errs, fmt.Errorf("%s construction method is private", errMsgPrefix(e.Pos)))
-		}
 	}
-	no.Construction = f
+	no.Construction = constructor
 	ret := &VariableType{}
 	*ret = *no.Typ
 	ret.Typ = VARIABLE_TYPE_OBJECT

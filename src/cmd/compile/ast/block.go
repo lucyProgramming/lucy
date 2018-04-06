@@ -28,10 +28,34 @@ type Defer struct {
 	Block   Block
 }
 
-func (b *Block) shouldStop(errs []error) bool {
-	return (len(PackageBeenCompile.Errors) + len(errs)) >= PackageBeenCompile.NErros2Stop
+func (b *Block) searchClass(name string) *Class {
+	for b != nil {
+		if b.Classes != nil {
+			c, ok := b.Classes[name]
+			if ok {
+				return c
+			}
+		}
+		b = b.Outter
+	}
+	return nil
+}
+func (b *Block) searchType(name string) *VariableType {
+	for b != nil {
+		if b.Types != nil {
+			c, ok := b.Types[name]
+			if ok {
+				return c
+			}
+		}
+		b = b.Outter
+	}
+	return nil
 }
 
+/*
+	search any thing
+*/
 func (b *Block) SearchByName(name string) interface{} {
 	if b.Funcs != nil {
 		if t, ok := b.Funcs[name]; ok {
@@ -133,20 +157,20 @@ type InheritedAttribute struct {
 func (b *Block) check() []error {
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
-	if b.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	errs = append(errs, b.checkFunctions()...)
-	if b.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	errs = append(errs, b.checkClass()...)
-	if b.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	for _, s := range b.Statements {
 		errs = append(errs, s.check(b)...)
-		if b.shouldStop(errs) {
+		if PackageBeenCompile.shouldStop(errs) {
 			return errs
 		}
 	}
@@ -233,7 +257,6 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	return b.insert(name, pos, d)
 }
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
-	fmt.Println("!!!!!!!!!!!!!!", name, pos, d)
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
 		b := PackageBeenCompile.Block
 		if _, ok := b.Vars[name]; ok {

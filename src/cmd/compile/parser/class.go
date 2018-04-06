@@ -70,7 +70,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			c.consume(untils_lc) //
 		} else {
 			t, err := c.parseClassName()
-			c.classDefinition.Name = t
+			c.classDefinition.SuperClassName = t
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err

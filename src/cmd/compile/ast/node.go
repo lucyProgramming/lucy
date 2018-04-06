@@ -176,34 +176,35 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	}
 
 	for k, v := range m {
-		if len(v) == 1 || len(v) == 0 { //very good  , 0 looks impossible
+		if len(v) == 1 || len(v) == 0 { //very good  , 0 looks is impossible
 			continue
 		}
 		r := &RedeclareError{}
 		r.Name = k
-		r.Pos = make([]*Pos, 0)
-		for _, vv := range v {
+		r.Poses = make([]*Pos, len(v))
+		r.Types = make([]string, len(v))
+		for kk, vv := range v {
 			switch vv.(type) {
 			case *Const:
 				t := vv.(*Const)
-				r.Pos = append(r.Pos, t.Pos)
-				r.Type = "const"
+				r.Poses[kk] = t.Pos
+				r.Types[kk] = "const"
 			case *Enum:
 				t := vv.(*EnumName)
-				r.Pos = append(r.Pos, t.Pos)
-				r.Type = "enum"
+				r.Poses[kk] = t.Pos
+				r.Types[kk] = "enum"
 			case *Function:
 				t := vv.(*Function)
-				r.Pos = append(r.Pos, t.Pos)
-				r.Type = "function"
+				r.Poses[kk] = t.Pos
+				r.Types[kk] = "function"
 			case *Class:
 				t := vv.(*Class)
-				r.Pos = append(r.Pos, t.Pos)
-				r.Type = "class"
+				r.Poses[kk] = t.Pos
+				r.Types[kk] = "class"
 			case *ExpressionTypeAlias:
 				t := vv.(*ExpressionTypeAlias)
-				r.Pos = append(r.Pos, t.Pos)
-				r.Type = "type alias"
+				r.Poses[kk] = t.Pos
+				r.Types[kk] = "type alias"
 			default:
 				panic("make error")
 			}

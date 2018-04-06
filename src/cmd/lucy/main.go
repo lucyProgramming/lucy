@@ -26,7 +26,7 @@ func printUsage() {
 	run                    run a lucy package
 	version                print version
 	clean                  clean compiled files
-	pack                   make jar package`
+	pack                   make jar`
 	fmt.Println(msg)
 }
 

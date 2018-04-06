@@ -9,8 +9,6 @@ import (
 type Class struct {
 	Pos                *Pos
 	IsJava             bool // compiled from java source file
-	Package            *Package
-	Checked            bool
 	Name               string
 	NameWithOutPackage string
 	IsGlobal           bool
@@ -24,6 +22,7 @@ type Class struct {
 	Constructors       []*ClassMethod // can be nil
 	SouceFile          string
 	Used               bool
+	LoadFromOutSide    bool
 }
 
 func (c *Class) resolveName(b *Block) []error {
@@ -36,55 +35,110 @@ func (c *Class) resolveName(b *Block) []error {
 		}
 	}
 	for _, v := range c.Constructors {
-		v.Func.checkParaMeterAndRetuns(&errs)
+		for _, vv := range v.Func.Typ.ParameterList {
+			err := vv.Typ.resolve(b)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+		for _, vv := range v.Func.Typ.ReturnList {
+			err := vv.Typ.resolve(b)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
-			vv.Func.checkParaMeterAndRetuns(&errs)
+			for _, vvv := range vv.Func.Typ.ParameterList {
+				err := vvv.Typ.resolve(b)
+				if err != nil {
+					errs = append(errs, err)
+				}
+			}
+			for _, vvv := range vv.Func.Typ.ReturnList {
+				err := vvv.Typ.resolve(b)
+				if err != nil {
+					errs = append(errs, err)
+				}
+			}
 		}
 	}
 	return errs
 }
 
-func (c *Class) check(father *Block) []error {
-	if c.Checked {
+func (c *Class) resolveFather(block *Block) error {
+	if c.SuperClass != nil {
 		return nil
 	}
-	c.Block.inherite(father)
-	c.Checked = true
-	//super class name
-	if c.SuperClassName == "" {
-		c.SuperClassName = LUCY_ROOT_CLASS
-	} else {
-		if strings.Contains(c.SuperClassName, ".") {
-
-		} else {
-			t := father.SearchByName(c.SuperClassName)
-			if t == nil {
-				c.SuperClassName = LUCY_ROOT_CLASS
-
-			} else {
-				if _, ok := t.(*Class); ok == false {
-					c.SuperClassName = LUCY_ROOT_CLASS
-				}
-			}
+	defer func() {
+		if c.SuperClassName == "" {
+			c.SuperClassName = LUCY_ROOT_CLASS
 		}
+	}()
+	if c.SuperClassName == "" {
+		return nil
 	}
-	c.Name = PackageBeenCompile.Name + "/" + c.Name // binary name
-	c.Package = PackageBeenCompile
-	errs := make([]error, 0)
+	if strings.Contains(c.SuperClassName, ".") {
+		t := strings.Split(c.SuperClassName, ".")
+		i := PackageBeenCompile.getImport(c.Pos.Filename, t[0])
+		if i == nil {
+			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
+		}
+		superClass, err := PackageBeenCompile.load(i.Resource + "/" + t[1])
+		if err != nil {
+			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
+		}
+		if _, ok := superClass.(*Class); ok {
+			return fmt.Errorf("%s   '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+		} else {
+			t := superClass.(*Class)
+			c.SuperClassName = t.Name
+			c.SuperClass = t
+		}
+	} else {
+		variableType := VariableType{}
+		variableType.Typ = VARIABLE_TYPE_NAME // naming
+		variableType.Name = c.SuperClassName
+		variableType.Pos = c.Pos
+		err := variableType.resolve(block)
+		if err != nil {
+			return err
+		}
+		if variableType.Typ != VARIABLE_TYPE_OBJECT {
+			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+		}
+		c.SuperClassName = variableType.Class.Name
+		c.SuperClass = variableType.Class
+	}
+	return nil
+}
+
+func (c *Class) checkPhase1(father *Block) []error {
+	c.Block.inherite(father)
+	c.Block.InheritedAttribute.class = c
+	errs := c.resolveName(father)
+	err := c.resolveFather(father)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return errs
+}
+
+func (c *Class) checkPhase2(father *Block) []error {
+	errs := []error{}
 	c.Block.check() // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
-	if father.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	errs = append(errs, c.checkConstructionFunctions()...)
-	if father.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	errs = append(errs, c.checkMethods()...)
-	if father.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	if len(c.Constructors) > 1 {
@@ -95,7 +149,7 @@ func (c *Class) check(father *Block) []error {
 			errs = append(errs, fmt.Errorf("\t %s contructor method...", errMsgPrefix(v.Func.Pos)))
 		}
 	}
-	if father.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	for _, ms := range c.Methods {
@@ -108,8 +162,16 @@ func (c *Class) check(father *Block) []error {
 			}
 		}
 	}
-	if father.shouldStop(errs) {
+	if PackageBeenCompile.shouldStop(errs) {
 		return errs
+	}
+	return errs
+}
+func (c *Class) check(father *Block) []error {
+	errs := c.checkPhase1(father)
+	es := c.checkPhase2(father)
+	if errsNotEmpty(es) {
+		errs = append(errs, es...)
 	}
 	return errs
 }
@@ -139,7 +201,6 @@ func (c *Class) haveSuper(superclassName string) (error, bool) {
 
 func (c *Class) implemented(superclass string) bool {
 	//if c.Interfaces
-
 	return false
 }
 
@@ -259,17 +320,10 @@ func (c *Class) loadSuperClass() error {
 	return nil
 }
 
-func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, accessable bool, err error) {
-	if len(c.Constructors) == 0 && len(args) == 0 {
-		return nil, true, nil
-	}
-	f, err = c.reloadMethod(c.Constructors, args)
-	if (f.Func.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0 {
-		accessable = true
-	}
-	return
-}
-
-func (c *Class) reloadMethod(ms []*ClassMethod, args []*VariableType) (f *ClassMethod, err error) {
+func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, err error) {
+	//if len(c.Constructors) == 0 && len(args) == 0 { // match default null constructor
+	//	return nil, nil
+	//}
+	//f, err = c.reloadMethod(c.Constructors, args)
 	return
 }

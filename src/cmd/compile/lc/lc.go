@@ -70,7 +70,6 @@ func (lc *LucyCompile) Init() {
 }
 
 func (lc *LucyCompile) compile() {
-
 	for _, v := range lc.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
@@ -80,7 +79,6 @@ func (lc *LucyCompile) compile() {
 		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs, CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
 		lc.shouldExit()
 	}
-
 	// parse import only
 	if CompileFlags.OnlyImport {
 		if len(lc.Errs) > 0 {

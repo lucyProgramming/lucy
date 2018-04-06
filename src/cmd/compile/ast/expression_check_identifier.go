@@ -9,9 +9,11 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	d := block.SearchByName(identifer.Name)
 	if d == nil {
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifer.Name)
-		d, err = PackageBeenCompile.load(i.Resource)
-		if err != nil {
-			return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+		if i != nil {
+			d, err = PackageBeenCompile.load(i.Resource)
+			if err != nil {
+				return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+			}
 		}
 	}
 	if d == nil {

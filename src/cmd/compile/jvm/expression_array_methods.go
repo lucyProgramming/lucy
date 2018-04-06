@@ -16,6 +16,7 @@ func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code
 	}
 	return
 }
+
 func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	switch call.Name {

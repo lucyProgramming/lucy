@@ -23,8 +23,10 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		}
 	}
 	astClass.AccessFlags = c.AccessFlag
+	astClass.IsJava = true // class compiled from java
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
+	astClass.LoadFromOutSide = true
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
 		f.LoadFromOutSide = true

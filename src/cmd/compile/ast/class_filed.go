@@ -20,3 +20,6 @@ func (f *ClassField) IsPublic() bool {
 func (f *ClassField) IsProtected() bool {
 	return (f.AccessFlags & cg.ACC_FIELD_PROTECTED) != 0
 }
+func (f *ClassField) IsPrivate() bool {
+	return (f.AccessFlags & cg.ACC_FIELD_PRIVATE) != 0
+}

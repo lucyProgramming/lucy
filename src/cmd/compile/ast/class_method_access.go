@@ -6,7 +6,7 @@ import "fmt"
 	access method lucy style
 */
 func (c *Class) accessMethod(name string, args []*VariableType) (ms []*ClassMethod, err error) {
-	if c.Package.Kind == PACKAGE_KIND_JAVA {
+	if c.IsJava {
 		return c.accessMethodAsJava(name, args)
 	}
 	if len(c.Methods[name]) > 0 {

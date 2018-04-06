@@ -100,3 +100,32 @@ func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) 
 	}
 	return i, have.StartLine < from.StartLine
 }
+
+///*
+//	get pos from
+//*/
+//func getPos(e interface{}) *Pos {
+//	if e == nil {
+//		return nil
+//	}
+//	switch e.(type) {
+//	case *Const:
+//		return e.(*Const).Pos
+//	case *VariableDefinition:
+//		return e.(*VariableDefinition).Pos
+//	case *VariableType:
+//		return e.(*VariableType).Pos
+//	case *Function:
+//		return e.(*Function).Pos
+//	case *Class:
+//		return e.(*Class).Pos
+//	}
+//	return nil
+//}
+
+func moreClose(from, more, less *Pos) bool {
+	if from.Filename == more.Filename && from.Filename != less.Filename {
+		return true
+	}
+	return more.StartLine < less.StartLine
+}

@@ -23,6 +23,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		}
 	}
 	astClass.AccessFlags = c.AccessFlag
+	astClass.LoadFromOutSide = true
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
 	for _, v := range c.Fields {
@@ -62,14 +63,10 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 				return nil, err
 			}
 		}
-		if m.Func.Name == "<init>" {
-			astClass.Constructors = append(astClass.Constructors, m)
+		if astClass.Methods[m.Func.Name] == nil {
+			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
 		} else {
-			if astClass.Methods[m.Func.Name] == nil {
-				astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
-			} else {
-				astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
-			}
+			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
 		}
 	}
 	return astClass, nil

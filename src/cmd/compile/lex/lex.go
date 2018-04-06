@@ -45,7 +45,7 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 		lex.lastcolumn = lex.column
 		lex.lastline = lex.line
 		if c == '\t' {
-			lex.column += 8 // TODO:: 4 OR 8
+			lex.column += 4 // TODO:: 4 OR 8
 		} else {
 			lex.column++
 		}

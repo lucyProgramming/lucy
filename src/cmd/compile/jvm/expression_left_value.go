@@ -165,21 +165,31 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 			return m.getMapLeftValue(class, code, e, context)
 		}
 	case ast.EXPRESSION_TYPE_DOT:
-		index := e.Data.(*ast.ExpressionDot)
-		classname = index.Expression.VariableType.Class.Name
-		target = index.Field.VariableDefinition.Typ
-		name = index.Name
-		if index.Field.LoadFromOutSide {
-			descriptor = index.Field.Descriptor
-		} else {
-			descriptor = Descriptor.typeDescriptor(target)
-		}
-		if index.Field.IsStatic() {
+		dot := e.Data.(*ast.ExpressionDot)
+		if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
+			target = dot.PackageVariableDefinition.Typ
+			classname = dot.Expression.VariableType.Package.Name + "/main"
+			name = dot.PackageVariableDefinition.Name
+			descriptor = dot.PackageVariableDefinition.Descriptor
+			maxstack = 0
+			remainStack = 0
 		} else {
-			op = []byte{cg.OP_putfield}
-			maxstack, _ = m.build(class, code, index.Expression, context)
-			remainStack = 1
+			classname = dot.Expression.VariableType.Class.Name
+			target = dot.Field.VariableDefinition.Typ
+			name = dot.Name
+			if dot.Field.LoadFromOutSide {
+				descriptor = dot.Field.Descriptor
+			} else {
+				descriptor = Descriptor.typeDescriptor(target)
+			}
+			if dot.Field.IsStatic() {
+				op = []byte{cg.OP_putstatic}
+			} else {
+				op = []byte{cg.OP_putfield}
+				maxstack, _ = m.build(class, code, dot.Expression, context)
+				remainStack = 1
+			}
 		}
 	}
 	return

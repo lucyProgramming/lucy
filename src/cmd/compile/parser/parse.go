@@ -93,6 +93,7 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
+			e.IsPublic = ispublic
 			p.validStatementEnding(e.Pos)
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: e,

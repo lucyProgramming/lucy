@@ -27,7 +27,6 @@ type Package struct {
 	Errors                       []error
 }
 
-
 func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
 		return nil
@@ -56,6 +55,10 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 	}
 }
 
+func (p *Package) shouldStop(errs []error) bool {
+	return (len(p.Errors) + len(errs)) >= p.NErros2Stop
+}
+
 func (p *Package) addBuildFunctions() {
 	if p.Block.Funcs == nil {
 		p.Block.Funcs = make(map[string]*Function)
@@ -81,25 +84,44 @@ func (p *Package) TypeCheck() []error {
 		v.Block.inherite(&p.Block)
 		v.Block.InheritedAttribute.Function = v
 		v.checkParaMeterAndRetuns(&p.Errors)
-		if p.Block.shouldStop(nil) {
+		if p.shouldStop(nil) {
+			return p.Errors
+		}
+	}
+	for _, v := range p.Block.Classes {
+		v.Name = p.Name + "/" + v.Name
+		es := v.checkPhase1(&p.Block)
+		if errsNotEmpty(es) {
+			p.Errors = append(p.Errors, es...)
+		}
+		if p.shouldStop(nil) {
 			return p.Errors
 		}
 	}
 	for _, v := range p.InitFunctions {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
-		if p.Block.shouldStop(nil) {
+		if p.shouldStop(nil) {
+			return p.Errors
+		}
+
+	}
+
+	for _, v := range p.Block.Classes {
+		es := v.checkPhase2(&p.Block)
+		if errsNotEmpty(es) {
+			p.Errors = append(p.Errors, es...)
+		}
+		if p.shouldStop(nil) {
 			return p.Errors
 		}
 	}
-	for _, v := range p.Block.Classes {
-		p.Errors = append(p.Errors, v.check(&p.Block)...)
-	}
+
 	for _, v := range p.Block.Funcs {
 		if v.IsBuildin {
 			continue
 		}
 		v.checkBlock(&p.Errors)
-		if p.Block.shouldStop(nil) {
+		if PackageBeenCompile.shouldStop(nil) {
 			return p.Errors
 		}
 	}
@@ -118,7 +140,6 @@ func (p *Package) load(resource string) (interface{}, error) {
 	}
 	p.loaded[resource] = &LoadedResouces{}
 	var pp *Package
-
 	pp, t, err := NameLoader.LoadName(resource)
 	if pp != nil {
 		if PackageBeenCompile.LoadedPackages == nil {
@@ -179,15 +200,29 @@ func (i *Import) GetAccessName() (string, error) {
 }
 
 type RedeclareError struct {
-	Name string
-	Pos  []*Pos
-	Type string //varialbe or function
+	Name  string
+	Poses []*Pos
+	Types []string //varialbe or function
 }
 
 func (r *RedeclareError) Error() error {
-	s := fmt.Sprintf("%s:%s redeclare")
-	for _, v := range r.Pos {
-		s += fmt.Sprintf("\t%s", errMsgPrefix(v))
+	var firstPos *Pos
+	for _, v := range r.Poses {
+		if firstPos == nil {
+			firstPos = v
+			continue
+		}
+		if v.StartLine < firstPos.StartLine {
+			firstPos = v
+		}
+	}
+	s := fmt.Sprintf("%s name named '%s' defined multi times,which are:\n",
+		errMsgPrefix(firstPos), r.Name)
+	for k, v := range r.Poses {
+		if v == firstPos {
+			continue
+		}
+		s += fmt.Sprintf("\t%s '%s' named '%s'\n", errMsgPrefix(v), r.Types[k], r.Name)
 	}
 	return errors.New(s)
 }

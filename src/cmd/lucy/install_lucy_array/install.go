@@ -12,6 +12,10 @@ import (
 type InstallLucyArray struct {
 }
 
+func (i *InstallLucyArray) Help(command string) {
+
+}
+
 type InstallType struct {
 	classname    string
 	typename     string

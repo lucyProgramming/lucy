@@ -82,16 +82,21 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		for _, v := range realpaths {
 			switch v.kind {
 			case RESOUCE_KIND_JAVA_CLASS:
-				errMsg += fmt.Sprintf("\t %s is a java class\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a java class\n", v.realpath)
 			case RESOUCE_KIND_JAVA_PACKAGE:
-				errMsg += fmt.Sprintf("\t %s is a java package\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a java package\n", v.realpath)
 			case RESOUCE_KIND_LUCY_CLASS:
-				errMsg += fmt.Sprintf("\t %s is a lucy class\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a lucy class\n", v.realpath)
 			case RESOUCE_KIND_LUCY_PACKAGE:
-				errMsg += fmt.Sprintf("\t %s is a lucy package\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a lucy package\n", v.realpath)
 			}
 		}
 		return nil, nil, fmt.Errorf(errMsg)
+	}
+	if realpaths[0].kind == RESOUCE_KIND_LUCY_CLASS {
+		if filepath.Base(realpaths[0].realpath) == mainClassName {
+			return nil, nil, fmt.Errorf("%s is special class for global variable and ...", mainClassName)
+		}
 	}
 
 	if realpaths[0].kind == RESOUCE_KIND_JAVA_CLASS {
@@ -124,7 +129,7 @@ func (loader *RealNameLoader) loadLucyPackage(r *Resource) (*ast.Package, error)
 			fisM[v.Name()] = v
 		}
 	}
-	mainClassName := "main.class"
+
 	_, ok := fisM[mainClassName]
 	if ok == false {
 		return nil, fmt.Errorf("main class not found")

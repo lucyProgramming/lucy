@@ -15,6 +15,10 @@ type Clean struct {
 	lucypaths []string
 }
 
+func (c *Clean) Help(command string) {
+
+}
+
 func (c *Clean) RunCommand(command string, args []string) {
 	if os.Getenv(common.LUCY_PATH_ENV_KEY) == "" {
 		fmt.Printf("env variable  '%s' not set\n", common.LUCY_PATH_ENV_KEY)

@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
@@ -25,6 +26,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			len(names)))
 		noErr = false
 	}
+
 	var err error
 	noNewVaraible := true
 	declareVariableExpression := &ExpressionDeclareVariable{}
@@ -83,6 +85,9 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 			declareVariableExpression.Vs = append(declareVariableExpression.Vs, vd)
 			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
+			if e.IsPublic { // only use when is is global
+				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
+			}
 		}
 	}
 	if noNewVaraible {

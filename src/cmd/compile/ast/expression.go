@@ -81,6 +81,7 @@ const (
 )
 
 type Expression struct {
+	IsPublic                bool
 	IsCompileAutoExpression bool
 	VariableType            *VariableType   //
 	VariableTypes           []*VariableType // functioncall or methodcall can with multi results

@@ -37,6 +37,7 @@ const (
 )
 
 type VariableType struct {
+	Resolved  bool
 	Pos       *Pos
 	Typ       int
 	Name      string
@@ -129,17 +130,7 @@ func (v *VariableType) rightValueValid() bool {
 	isTyped means can get type from this
 */
 func (v *VariableType) isTyped() bool {
-	return v.Typ == VARIABLE_TYPE_BOOL ||
-		v.Typ == VARIABLE_TYPE_BYTE ||
-		v.Typ == VARIABLE_TYPE_SHORT ||
-		v.Typ == VARIABLE_TYPE_INT ||
-		v.Typ == VARIABLE_TYPE_LONG ||
-		v.Typ == VARIABLE_TYPE_FLOAT ||
-		v.Typ == VARIABLE_TYPE_DOUBLE ||
-		v.Typ == VARIABLE_TYPE_STRING ||
-		v.Typ == VARIABLE_TYPE_OBJECT ||
-		v.Typ == VARIABLE_TYPE_ARRAY ||
-		v.Typ == VARIABLE_TYPE_MAP
+	return v.rightValueValid() && v.Typ != VARIABLE_TYPE_NULL
 }
 
 /*
@@ -155,6 +146,10 @@ func (t *VariableType) Clone() *VariableType {
 }
 
 func (t *VariableType) resolve(block *Block) error {
+	if t.Resolved {
+		return nil
+	}
+	t.Resolved = true
 	if t.Typ == VARIABLE_TYPE_NAME { //
 		return t.resolveName(block)
 	}
@@ -176,45 +171,101 @@ func (t *VariableType) resolve(block *Block) error {
 	return nil
 }
 
-func (t *VariableType) resolveName(block *Block) error {
-	var d interface{}
+func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 	if strings.Contains(t.Name, ".") == false {
-		d = block.SearchByName(t.Name)
-	} else { // a.b  in type situation,must be package name
-		//
-		//t := strings.Split(t.Name, ".")
-		//var err error
-		//d, err = PackageBeenCompile.load(t[0], t[1]) // let`s load
-		//if err != nil {
-		//	return err
-		//}
+		i := PackageBeenCompile.getImport(t.Pos.Filename, t.Name)
+		if i != nil {
+			return PackageBeenCompile.load(i.Resource)
+		}
+	} else {
+		packageAndName := strings.Split(t.Name, ".")
+		i := PackageBeenCompile.getImport(t.Pos.Filename, packageAndName[0])
+		if nil == i {
+			return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), packageAndName[0])
+		}
+		return PackageBeenCompile.load(i.Resource + "/" + packageAndName[1])
 	}
-	if d == nil {
-		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
-	}
+	return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), t.Name)
+}
+
+func (t *VariableType) mkTypeFromInterface(d interface{}) error {
 	switch d.(type) {
-	case *VariableDefinition:
-		return fmt.Errorf("%s name '%s' is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
-	case *Function:
-		return fmt.Errorf("%s name '%s' is a function,not a type", errMsgPrefix(t.Pos), t.Name)
-	case *Const:
-		return fmt.Errorf("%s name '%s' is a const,not a type", errMsgPrefix(t.Pos), t.Name)
+	//case *VariableDefinition:
+	//	return fmt.Errorf("%s name '%s' is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
+	//case *Function:
+	//	return fmt.Errorf("%s name '%s' is a function,not a type", errMsgPrefix(t.Pos), t.Name)
+	//case *Const:
+	//	return fmt.Errorf("%s name '%s' is a const,not a type", errMsgPrefix(t.Pos), t.Name)
+	//case *Package:
+	//	return fmt.Errorf("%s name '%s' is a package,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Class:
 		t.Typ = VARIABLE_TYPE_OBJECT
 		t.Class = d.(*Class)
 		return nil
-	//case *Enum:
-	//	*t = d.(*Enum).VariableType
-	//	return nil
 	case *VariableType:
 		tt := d.(*VariableType).Clone()
 		tt.Pos = t.Pos
 		*t = *tt
 		return nil
+
 	default:
-		return fmt.Errorf("name '%s' is not type", t.Name)
+		return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(t.Pos), t.Name)
 	}
-	return nil
+}
+
+func (t *VariableType) resolveName(block *Block) error {
+	var err error
+	var d interface{}
+	if strings.Contains(t.Name, ".") == false {
+		variableT := block.searchType(t.Name)
+		var classT *Class
+		useClassT := false
+		if variableT != nil {
+			classT := block.searchClass(t.Name)
+			if classT != nil { // d2 is not nil
+				if moreClose(t.Pos, classT.Pos, variableT.Pos) {
+					useClassT = true
+				}
+			}
+		} else {
+			classT = block.searchClass(t.Name)
+			useClassT = true
+		}
+		loadFromImport := (classT == nil && variableT == nil)
+		if loadFromImport == false {
+			if useClassT {
+				if classT != nil {
+					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, classT.Pos)
+				}
+			} else {
+				if variableT != nil {
+					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, variableT.Pos)
+				}
+			}
+
+		}
+		if loadFromImport {
+			d, err = t.resolveNameFromImport()
+			if err != nil {
+				return err
+			}
+		} else {
+			if useClassT {
+				d = classT
+			} else {
+				d = variableT
+			}
+		}
+	} else { // a.b  in type situation,must be package name
+		d, err = t.resolveNameFromImport()
+		if err != nil {
+			return err
+		}
+	}
+	if d == nil {
+		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
+	}
+	return t.mkTypeFromInterface(d)
 }
 
 /*
