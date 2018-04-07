@@ -56,7 +56,6 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 3
 		return
 	}
-
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context)
 		backPatchEs(es, code.CodeLength)
@@ -170,7 +169,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
 		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
-			stack := m.buildFunctionCall(class, code, v, context)
+			stack, _ := m.build(class, code, v, context)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}

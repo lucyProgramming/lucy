@@ -9,6 +9,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	err := no.Typ.resolve(block)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+		fmt.Println(err)
 		return nil
 	}
 	if no.Typ.Typ == VARIABLE_TYPE_MAP {
