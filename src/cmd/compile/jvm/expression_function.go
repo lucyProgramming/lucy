@@ -1,11 +1,8 @@
 package jvm
 
 import (
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"path/filepath"
-	"strings"
 )
 
 func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
@@ -27,9 +24,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	}
 
 	// function have captured vars
-	classname := m.newClassName("closureFunction_" +
-		fmt.Sprintf("%s_%d_", strings.TrimRight(filepath.Base(function.Pos.Filename), ".lucy"), function.Pos.StartLine) +
-		function.Name)
+	classname := m.newClassName("closureFunction_" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = classname
 	closureClass.SuperClass = ast.LUCY_ROOT_CLASS

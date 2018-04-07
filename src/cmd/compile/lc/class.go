@@ -11,10 +11,43 @@ type ClassDecoder struct {
 	ret *cg.Class
 }
 
-func (c *ClassDecoder) parseConstPool() error {
-	length := binary.BigEndian.Uint16(c.bs)
+func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
+	c.bs = bs
+	if binary.BigEndian.Uint32(bs) != cg.CLASS_MAGIC {
+		return nil, fmt.Errorf("magic number is not right")
+	}
+	c.bs = c.bs[4:]
+	ret := &cg.Class{}
+	c.ret = ret
+	//version
+	ret.MinorVersion = binary.BigEndian.Uint16(c.bs)
+	ret.MajorVersion = binary.BigEndian.Uint16(c.bs[2:])
+	c.bs = c.bs[4:]
+	ret.ConstPool = []*cg.ConstPool{nil} // pool start 1
+
+	//const pool
+	if err := c.parseConstPool(); err != nil {
+		return ret, err
+	}
+	//access flag
+	ret.AccessFlag = binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]
-	for i := 0; i < int(length)-1; i++ {
+	// this class
+	ret.ThisClass = binary.BigEndian.Uint16(c.bs)
+	ret.SuperClass = binary.BigEndian.Uint16(c.bs[2:])
+	c.bs = c.bs[4:]
+	c.parseInterfaces()
+	c.parseFields()
+	c.parserMethods()
+	var err error
+	c.ret.AttributeGroupedByName, err = c.parseAttributes()
+	return ret, err
+}
+
+func (c *ClassDecoder) parseConstPool() error {
+	length := binary.BigEndian.Uint16(c.bs) - 1
+	c.bs = c.bs[2:]
+	for i := 0; i < int(length); i++ {
 		switch c.bs[0] {
 		case cg.CONSTANT_POOL_TAG_Utf8:
 			p := &cg.ConstPool{}
@@ -25,35 +58,73 @@ func (c *ClassDecoder) parseConstPool() error {
 			c.bs = c.bs[length:]
 			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_Integer:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
+			c.bs = c.bs[5:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_Float:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
+			c.bs = c.bs[5:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_Fieldref:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
+			c.bs = c.bs[5:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_Methodref:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
+			c.bs = c.bs[5:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_InterfaceMethodref:
-			fallthrough
-		case cg.CONSTANT_POOL_TAG_InvokeDynamic:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
+			c.bs = c.bs[5:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_NameAndType:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.ret.ConstPool = append(c.ret.ConstPool, p)
+		case cg.CONSTANT_POOL_TAG_InvokeDynamic:
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:5]
+			c.bs = c.bs[5:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_Long:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:9]
+			c.bs = c.bs[9:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p, nil)
+			i++ // incrment twices
 		case cg.CONSTANT_POOL_TAG_Double:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:9]
 			c.bs = c.bs[9:]
 			c.ret.ConstPool = append(c.ret.ConstPool, p, nil)
+			i++ // incrment twices
 		case cg.CONSTANT_POOL_TAG_Class:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:3]
+			c.bs = c.bs[3:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_String:
-			fallthrough
+			p := &cg.ConstPool{}
+			p.Tag = c.bs[0]
+			p.Info = c.bs[1:3]
+			c.bs = c.bs[3:]
+			c.ret.ConstPool = append(c.ret.ConstPool, p)
 		case cg.CONSTANT_POOL_TAG_MethodType:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
@@ -83,7 +154,6 @@ func (c *ClassDecoder) parseInterfaces() {
 func (c *ClassDecoder) parseFields() (err error) {
 	length := binary.BigEndian.Uint16(c.bs)
 	c.bs = c.bs[2:]
-
 	for i := uint16(0); i < length; i++ {
 		f := &cg.FieldInfo{}
 		f.AccessFlags = binary.BigEndian.Uint16(c.bs)
@@ -139,37 +209,4 @@ func (c *ClassDecoder) parseAttributes() (cg.AttributeGroupedByName, error) {
 		}
 	}
 	return ret, nil
-}
-
-func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
-	c.bs = bs
-	if binary.BigEndian.Uint32(bs) != cg.CLASS_MAGIC {
-		return nil, fmt.Errorf("magic number is not right")
-	}
-	c.bs = c.bs[4:]
-	ret := &cg.Class{}
-	c.ret = ret
-	//version
-	ret.MinorVersion = binary.BigEndian.Uint16(c.bs)
-	ret.MajorVersion = binary.BigEndian.Uint16(c.bs[2:])
-	c.bs = c.bs[4:]
-	ret.ConstPool = []*cg.ConstPool{nil} // pool start 1
-
-	//const pool
-	if err := c.parseConstPool(); err != nil {
-		return ret, err
-	}
-	//access flag
-	ret.AccessFlag = binary.BigEndian.Uint16(c.bs)
-	c.bs = c.bs[2:]
-	// this class
-	ret.ThisClass = binary.BigEndian.Uint16(c.bs)
-	ret.SuperClass = binary.BigEndian.Uint16(c.bs[2:])
-	c.bs = c.bs[4:]
-	c.parseInterfaces()
-	c.parseFields()
-	c.parserMethods()
-	var err error
-	c.ret.AttributeGroupedByName, err = c.parseAttributes()
-	return ret, err
 }

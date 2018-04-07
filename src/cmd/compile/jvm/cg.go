@@ -150,7 +150,6 @@ func (m *MakeClass) mkInitFunctions() {
 	if len(m.p.InitFunctions) == 0 {
 		needTrigger := false
 		for _, v := range m.p.LoadedPackages {
-			fmt.Println("@@@@@@@@@@", v.Name, v.TriggerPackageInitMethodName)
 			if v.TriggerPackageInitMethodName != "" {
 				needTrigger = true
 				break

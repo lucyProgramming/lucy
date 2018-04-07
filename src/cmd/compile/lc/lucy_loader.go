@@ -75,6 +75,8 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 
 func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
+	mainClassName := &cg.ClassHighLevel{}
+	mainClassName.Name = pack.Name + "/main"
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
@@ -146,17 +148,20 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		function := &ast.Function{}
 		function.Name = string(c.ConstPool[m.NameIndex].Info)
 		function.AccessFlags = m.AccessFlags
+		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
 		function.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
 			return err
 		}
+		function.ClassMethod = &cg.MethodHighLevel{}
+		function.ClassMethod.Name = function.Name
+		function.ClassMethod.Class = mainClassName
 		function.IsGlobal = true
 		if pack.Block.Funcs == nil {
 			pack.Block.Funcs = make(map[string]*ast.Function)
 		}
 		pack.Block.Funcs[function.Name] = function
 	}
-
 	if pack.Block.Types == nil {
 		pack.Block.Types = make(map[string]*ast.VariableType)
 	}

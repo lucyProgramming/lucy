@@ -2,16 +2,22 @@ package lc
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+type NotSupportTypeSignatureError struct {
+}
+
+func (e *NotSupportTypeSignatureError) Error() string {
+	return "not support typed parameter"
+}
+
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
 	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
-		return nil, fmt.Errorf("lucy does not support typed parameter current stage")
+		return nil, &NotSupportTypeSignatureError{}
 	}
 	astClass := &ast.Class{}
 	{

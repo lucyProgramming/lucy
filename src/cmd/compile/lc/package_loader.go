@@ -98,7 +98,6 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 			return nil, nil, fmt.Errorf("%s is special class for global variable and ...", mainClassName)
 		}
 	}
-
 	if realpaths[0].kind == RESOUCE_KIND_JAVA_CLASS {
 		class, err := loader.loadClass(realpaths[0])
 		return nil, class, err
@@ -180,14 +179,19 @@ func (loader *RealNameLoader) loadJavaPackage(r *Resource) (*ast.Package, error)
 	for _, v := range fis {
 		var rr Resource
 		rr.kind = RESOUCE_KIND_JAVA_CLASS
-		if strings.HasSuffix(v.Name(), ".class") {
-			rr.realpath = filepath.Join(r.realpath, v.Name())
+		if strings.HasSuffix(v.Name(), ".class") == false || strings.Contains(v.Name(), "$") {
+			continue
 		}
+		rr.realpath = filepath.Join(r.realpath, v.Name())
 		class, err := loader.loadClass(&rr)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(*NotSupportTypeSignatureError); ok == false {
+				return nil, err
+			}
 		}
-		ret.Block.Classes[filepath.Base(class.Name)] = class
+		if class != nil {
+			ret.Block.Classes[filepath.Base(class.Name)] = class
+		}
 	}
 	return ret, nil
 }

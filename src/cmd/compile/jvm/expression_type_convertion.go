@@ -78,6 +78,11 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.CodeLength += 3
 		return
 	}
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_OBJECT {
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(convertion.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	}
 	return
 }
 
@@ -102,8 +107,6 @@ func (m *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
 		code.Codes[code.CodeLength] = cg.OP_l2i
 		code.Codes[code.CodeLength+1] = cg.OP_l2i
 		code.CodeLength += 2
-	default:
-		panic("~~~~~~~~~~~~")
 	}
 }
 
@@ -126,8 +129,6 @@ func (m *MakeExpression) stackTop2Short(code *cg.AttributeCode, typ int) {
 		code.Codes[code.CodeLength] = cg.OP_l2i
 		code.Codes[code.CodeLength+1] = cg.OP_i2s
 		code.CodeLength += 2
-	default:
-		panic("~~~~~~~~~~~~")
 	}
 }
 
@@ -145,8 +146,6 @@ func (m *MakeExpression) stackTop2Int(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2i
 		code.CodeLength++
-	default:
-		panic("~~~~~~~~~~~~")
 	}
 }
 
@@ -166,8 +165,6 @@ func (m *MakeExpression) stackTop2Float(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2f
 		code.CodeLength++
-	default:
-		panic("~~~~~~~~~~~~")
 	}
 }
 
@@ -180,18 +177,14 @@ func (m *MakeExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_i2l
 		code.CodeLength++
-
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_f2l
 		code.CodeLength++
-
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_d2l
 		code.CodeLength++
-
 	case ast.VARIABLE_TYPE_LONG:
-	default:
-		panic("~~~~~~~~~~~~")
+
 	}
 }
 
@@ -211,9 +204,6 @@ func (m *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2d
 		code.CodeLength++
-
-	default:
-		panic("~~~~~~~~~~~~")
 	}
 }
 
@@ -237,8 +227,6 @@ func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, ta
 		m.stackTop2Float(code, typ)
 	case ast.VARIABLE_TYPE_DOUBLE:
 		m.stackTop2Double(code, typ)
-	default:
-		panic(1)
 	}
 }
 
@@ -293,7 +281,7 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VARIABLE_TYPE_ARRAY, ast.VARIABLE_TYPE_JAVA_ARRAY:
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_dup
@@ -312,8 +300,6 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: "()Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+11:code.CodeLength+13])
 		code.CodeLength += 13
-	default:
-		panic(1111111111)
 	}
 
 }
