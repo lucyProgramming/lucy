@@ -148,7 +148,7 @@ func (m *Descript) ParseFunctionType(bs []byte) (*ast.FunctionType, error) {
 	}
 	bs = bs[1:] // skip )
 	vd := &ast.VariableDefinition{}
-	vd.Name = "return"
+	vd.Name = "returnValue"
 	_, vd.Typ, err = m.ParseType(bs)
 	if err != nil {
 		return t, err

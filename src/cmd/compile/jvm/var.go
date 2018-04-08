@@ -5,13 +5,14 @@ import (
 )
 
 var (
-	ArrayMetas                = map[int]*ArrayMeta{}
-	ArrayMetasMap             = make(map[string]*ArrayMeta)
-	primitiveObjectConverter  PrimitiveObjectConverter
-	Descriptor                Descript
-	LucyMethodSignatureParser LucyMethodSignatureParse
-	LucyFieldSignatureParser  LucyFieldSignatureParse
-	LucyTypeAliasParser       LucyTypeAliasParse
+	ArrayMetas                 = map[int]*ArrayMeta{}
+	ArrayMetasMap              = make(map[string]*ArrayMeta)
+	primitiveObjectConverter   PrimitiveObjectConverter
+	Descriptor                 Descript
+	LucyMethodSignatureParser  LucyMethodSignatureParse
+	LucyFieldSignatureParser   LucyFieldSignatureParse
+	LucyTypeAliasParser        LucyTypeAliasParse
+	FunctionDefaultValueParser FunctionDefaultValueParse
 )
 
 const (

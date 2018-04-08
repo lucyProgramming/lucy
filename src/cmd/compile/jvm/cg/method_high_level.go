@@ -9,4 +9,5 @@ type MethodHighLevel struct {
 	AttributeLucyInnerStaticMethod        *AttributeLucyInnerStaticMethod
 	AttributeLucyMethodDescritor          *AttributeLucyMethodDescritor
 	AttributeLucyTriggerPackageInitMethod *AttributeLucyTriggerPackageInitMethod
+	AttributeDefaultParameters            *AttributeDefaultParameters
 }

@@ -63,7 +63,9 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		code.CodeLength += 3
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 	}
-
+	if f.HaveDefaultValue {
+		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
+	}
 	m.buildFunctionParameterAndReturnList(class, &method.Code, f.Typ, context)
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0

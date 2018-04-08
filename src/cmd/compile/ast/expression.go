@@ -159,7 +159,8 @@ func (e *Expression) isBool() bool {
 		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
 		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
 		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Typ == EXPRESSION_TYPE_NOT
+		e.Typ == EXPRESSION_TYPE_NOT ||
+		e.Typ == EXPRESSION_TYPE_IDENTIFIER
 }
 func (e *Expression) canBeUsedAsStatementExpression() bool {
 	return e.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||

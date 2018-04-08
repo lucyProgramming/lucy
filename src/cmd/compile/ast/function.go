@@ -6,6 +6,8 @@ import (
 )
 
 type Function struct {
+	HaveDefaultValue               bool
+	DefaultValueStartAt            int
 	IsClosureFunction              bool
 	ClassMethod                    *cg.MethodHighLevel
 	VarOffSetForClosure            uint16
@@ -71,27 +73,6 @@ type AutoVarForException struct {
 	Offset uint16
 }
 
-//
-///*
-//	resolve parameter and return list name
-//*/
-//func (f *Function) resolveName() (errs []error) {
-//	var err error
-//	for _, v := range f.Typ.ParameterList {
-//		err = v.Typ.resolve(f.Block)
-//		if err != nil {
-//			errs = append(errs, err)
-//		}
-//	}
-//	for _, v := range f.Typ.ReturnList {
-//		err = v.Typ.resolve(f.Block)
-//		if err != nil {
-//			errs = append(errs, err)
-//		}
-//	}
-//	return errs
-//}
-
 func (f *Function) mkAutoVarForMultiReturn() {
 	if f.AutoVarForMultiReturn != nil {
 		return
@@ -117,15 +98,14 @@ func (f *Function) readableMsg() string {
 	}
 	s += ") "
 	if len(f.Typ.ReturnList) > 0 {
-		s += "->"
-		s += "("
+		s += "-> ( "
 		for k, v := range f.Typ.ReturnList {
-			s += v.Name + " " + v.Typ.TypeString() + ","
+			s += v.Name + " " + v.Typ.TypeString()
 			if k != len(f.Typ.ReturnList)-1 {
 				s += ","
 			}
 		}
-		s += ")"
+		s += " )"
 	}
 	return s
 }
@@ -176,7 +156,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	}
 	if f.Typ != nil {
 		var err error
-		for _, v := range f.Typ.ParameterList {
+		for k, v := range f.Typ.ParameterList {
 			v.IsFunctionParameter = true
 			err = v.Typ.resolve(f.Block)
 			if err != nil {
@@ -186,6 +166,35 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			if err != nil {
 				*errs = append(*errs, err)
 				continue
+			}
+			if f.HaveDefaultValue && v.Expression == nil {
+				*errs = append(*errs, fmt.Errorf("%s expect default value", errMsgPrefix(v.Pos)))
+				continue
+			}
+			if v.Expression != nil {
+				if f.HaveDefaultValue == false {
+					f.DefaultValueStartAt = k
+				}
+				f.HaveDefaultValue = true
+				ts, es := v.Expression.check(f.Block)
+				if errsNotEmpty(es) {
+					*errs = append(*errs, es...)
+				}
+				t, err := v.Expression.mustBeOneValueContext(ts)
+				if err != nil {
+					*errs = append(*errs, err)
+				}
+				if t != nil {
+					if v.Typ.Equal(t) == false {
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+							errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
+						continue
+					}
+				}
+				if v.Expression.IsLiteral() == false {
+					*errs = append(*errs, fmt.Errorf("%s default value must be literal",
+						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
+				}
 			}
 		}
 		//handler return

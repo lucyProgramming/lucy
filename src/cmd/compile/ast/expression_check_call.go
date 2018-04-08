@@ -217,29 +217,27 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	call.ClassName = object.Class.Name
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
-	ms, err := object.Class.accessMethod(call.Name, args)
+	ms, matched, err := object.Class.accessMethod(call.Name, args, false)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 	}
-	if ms == nil {
-		return nil
-	}
-	if len(ms) == 1 {
+	if matched {
 		if false == call.Expression.isThisIdentifierExpression() &&
 			ms[0].IsPublic() == false {
 			*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
 		}
 		call.Method = ms[0]
 		return ms[0].Func.Typ.ReturnList.retTypes(e.Pos)
-	} else if len(ms) > 1 {
-		errmsg := fmt.Sprintf("%s method named '%s' have no suitable match,but we have methods:\n",
+	}
+	if ms == nil || len(ms) == 0 {
+		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
+	} else {
+		errmsg := fmt.Sprintf("%s method named '%s' have no suitable match,methods that have the same name:\n",
 			errMsgPrefix(e.Pos), call.Name)
 		for _, m := range ms {
 			errmsg += "\t" + m.Func.readableMsg() + "\n"
 		}
 		*errs = append(*errs, fmt.Errorf(errmsg))
-	} else { // == 0
-		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
 	}
 	return nil
 }

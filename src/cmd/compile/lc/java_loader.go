@@ -52,6 +52,7 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		m.LoadFromOutSide = true
 		m.Func.Name = string(c.ConstPool[v.NameIndex].Info)
 		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		m.Func.AccessFlags = v.AccessFlags
 		m.Func.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
