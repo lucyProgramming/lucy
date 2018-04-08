@@ -105,8 +105,8 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 }
 
 func (v *VariableType) JvmSlotSize() uint16 {
-	if v.rightValueValid() == false {
-		panic("right value invalid")
+	if v.Typ == VARIABLE_TYPE_VOID {
+		return 0
 	}
 	return JvmSlotSizeHandler(v)
 }

@@ -360,19 +360,40 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if ep.parser.token.Type == lex.TOKEN_DOT {
 			pos := ep.parser.mkPos()
 			ep.parser.Next() // skip .
-			if ep.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				return nil, fmt.Errorf("%s not identifier after dot", ep.parser.errorMsgPrefix())
+			if ep.parser.token.Type == lex.TOKEN_IDENTIFIER {
+				newe := &ast.Expression{}
+				newe.Pos = pos
+				newe.Typ = ast.EXPRESSION_TYPE_DOT
+				index := &ast.ExpressionDot{}
+				index.Expression = left
+				index.Name = ep.parser.token.Data.(string)
+				newe.Data = index
+				left = newe
+				ep.Next()
+				continue
+			} else if ep.parser.token.Type == lex.TOKEN_LP {
+				//
+				ep.Next() // skip (
+				typ, err := ep.parser.parseType()
+				if err != nil {
+					return nil, err
+				}
+				if ep.parser.token.Type != lex.TOKEN_RP {
+					return nil, fmt.Errorf("%s '(' and ')' not match", ep.parser.errorMsgPrefix())
+				}
+				ep.Next() // skip  )
+				newe := &ast.Expression{}
+				newe.Pos = pos
+				newe.Typ = ast.EXPRESSION_TYPE_TYPE_ASSERT
+				typeAssert := &ast.ExpressionTypeAssert{}
+				typeAssert.Typ = typ
+				typeAssert.Expression = left
+				newe.Data = typeAssert
+				left = newe
+				continue
+			} else {
+				return nil, fmt.Errorf("%s expect  'identifier' or '('", ep.parser.errorMsgPrefix())
 			}
-			newe := &ast.Expression{}
-			newe.Pos = pos
-			newe.Typ = ast.EXPRESSION_TYPE_DOT
-			index := &ast.ExpressionDot{}
-			index.Expression = left
-			index.Name = ep.parser.token.Data.(string)
-			newe.Data = index
-			left = newe
-			ep.Next()
-			continue
 		}
 		if ep.parser.token.Type == lex.TOKEN_LP {
 			newe, err := ep.parseCallExpression(left)

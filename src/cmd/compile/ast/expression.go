@@ -207,14 +207,14 @@ func (e *Expression) GetTheOnlyOneVariableType() *VariableType {
 	if e.HaveOnlyOneValue() == false {
 		panic("...")
 	}
-	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL {
+	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL || e.Typ == EXPRESSION_TYPE_TYPE_ASSERT {
 		return e.VariableTypes[0]
 	}
 	return e.VariableType
 }
 
 func (e *Expression) HaveOnlyOneValue() bool {
-	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL {
+	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL || e.Typ == EXPRESSION_TYPE_TYPE_ASSERT {
 		return len(e.VariableTypes) == 1
 	}
 	return true
@@ -235,7 +235,9 @@ func (e *Expression) canbeUsedForRange() bool {
 }
 
 func (e *Expression) MayHaveMultiValue() bool {
-	return e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL
+	return e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
+		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
+		e.Typ == EXPRESSION_TYPE_TYPE_ASSERT
 }
 
 func (e *Expression) CallHasReturnValue() bool {
