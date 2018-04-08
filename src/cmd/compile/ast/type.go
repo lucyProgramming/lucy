@@ -177,32 +177,32 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		if i != nil {
 			return PackageBeenCompile.load(i.Resource)
 		}
-	} else {
-		packageAndName := strings.Split(t.Name, ".")
-		i := PackageBeenCompile.getImport(t.Pos.Filename, packageAndName[0])
-		if nil == i {
-			return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), packageAndName[0])
-		}
-		p, err := PackageBeenCompile.load(i.Resource)
-		if err != nil {
-			return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
-		}
-		if pp, ok := p.(*Package); ok == false && pp != nil {
-			return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
-		} else {
-			if pp.Block.SearchByName(packageAndName[1]) == nil {
-				return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), packageAndName[1])
-			}
-			if pp.Block.Types != nil && pp.Block.Types[packageAndName[1]] != nil {
-				return pp.Block.Types[packageAndName[1]], nil
-			}
-			if pp.Block.Classes != nil && pp.Block.Classes[packageAndName[1]] != nil {
-				return pp.Block.Classes[packageAndName[1]], nil
-			}
-			return nil, fmt.Errorf("%s '%s' is not a type", errMsgPrefix(t.Pos), packageAndName[1])
-		}
+		return nil, fmt.Errorf("%s class '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
-	return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), t.Name)
+	packageAndName := strings.Split(t.Name, ".")
+	i := PackageBeenCompile.getImport(t.Pos.Filename, packageAndName[0])
+	if nil == i {
+		return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), packageAndName[0])
+	}
+	p, err := PackageBeenCompile.load(i.Resource)
+	if err != nil {
+		return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
+	}
+	if pp, ok := p.(*Package); ok == false && pp != nil {
+		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
+	} else {
+		if pp.Block.SearchByName(packageAndName[1]) == nil {
+			return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), packageAndName[1])
+		}
+		if pp.Block.Types != nil && pp.Block.Types[packageAndName[1]] != nil {
+			return pp.Block.Types[packageAndName[1]], nil
+		}
+		if pp.Block.Classes != nil && pp.Block.Classes[packageAndName[1]] != nil {
+			return pp.Block.Classes[packageAndName[1]], nil
+		}
+		return nil, fmt.Errorf("%s '%s' is not a type", errMsgPrefix(t.Pos), packageAndName[1])
+	}
+
 }
 
 func (t *VariableType) mkTypeFromInterface(d interface{}) error {

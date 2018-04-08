@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"encoding/binary"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -39,5 +40,35 @@ func (fd *FunctionDefaultValueParse) Encode(class *cg.ClassHighLevel, f *ast.Fun
 }
 
 func (fd *FunctionDefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.AttributeDefaultParameters) {
-
+	for i := uint16(0); i < uint16(len(dp.Consts)); i++ {
+		v := f.Typ.ParameterList[dp.Start+i]
+		v.Expression = &ast.Expression{}
+		switch v.Typ.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_BOOL
+			v.Expression.Data = int32(binary.BigEndian.Uint32(class.ConstPool[dp.Consts[i]].Info)) != 0
+		case ast.VARIABLE_TYPE_BYTE:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_BYTE
+			v.Expression.Data = byte(binary.BigEndian.Uint32(class.ConstPool[dp.Consts[i]].Info))
+		case ast.VARIABLE_TYPE_SHORT:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_SHORT
+			v.Expression.Data = int32(binary.BigEndian.Uint32(class.ConstPool[dp.Consts[i]].Info))
+		case ast.VARIABLE_TYPE_INT:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_INT
+			v.Expression.Data = int32(binary.BigEndian.Uint32(class.ConstPool[dp.Consts[i]].Info))
+		case ast.VARIABLE_TYPE_LONG:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_LONG
+			v.Expression.Data = int64(binary.BigEndian.Uint64(class.ConstPool[dp.Consts[i]].Info))
+		case ast.VARIABLE_TYPE_FLOAT:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_FLOAT
+			v.Expression.Data = float32(binary.BigEndian.Uint32(class.ConstPool[dp.Consts[i]].Info))
+		case ast.VARIABLE_TYPE_DOUBLE:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_DOUBLE
+			v.Expression.Data = float64(binary.BigEndian.Uint32(class.ConstPool[dp.Consts[i]].Info))
+		case ast.VARIABLE_TYPE_STRING:
+			v.Expression.Typ = ast.EXPRESSION_TYPE_STRING
+			utf8Index := binary.BigEndian.Uint16(class.ConstPool[dp.Consts[i]].Info)
+			v.Expression.Data = string(class.ConstPool[utf8Index].Info)
+		}
+	}
 }

@@ -89,9 +89,9 @@ type AutoVarForMultiReturn struct {
 }
 
 func (f *Function) readableMsg() string {
-	s := "fn " + f.Name + " ("
+	s := "fn " + f.Name + "("
 	for k, v := range f.Typ.ParameterList {
-		s += v.Name + " " + v.Typ.TypeString()
+		s += v.Typ.TypeString()
 		if k != len(f.Typ.ParameterList)-1 {
 			s += ","
 		}
@@ -100,13 +100,25 @@ func (f *Function) readableMsg() string {
 	if len(f.Typ.ReturnList) > 0 {
 		s += "-> ( "
 		for k, v := range f.Typ.ReturnList {
-			s += v.Name + " " + v.Typ.TypeString()
+			s += v.Typ.TypeString()
 			if k != len(f.Typ.ReturnList)-1 {
 				s += ","
 			}
 		}
 		s += " )"
 	}
+	return s
+}
+
+func (f *Function) badParameterMsg(args []*VariableType) string {
+	s := "fn " + f.Name + "("
+	for k, v := range args {
+		s += v.TypeString()
+		if k != len(args)-1 {
+			s += ","
+		}
+	}
+	s += ")"
 	return s
 }
 
@@ -193,7 +205,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				}
 				if v.Expression.IsLiteral() == false {
 					*errs = append(*errs, fmt.Errorf("%s default value must be literal",
-						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
+						errMsgPrefix(v.Expression.Pos)))
 				}
 			}
 		}
@@ -225,27 +237,4 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			}
 		}
 	}
-}
-
-type FunctionType struct {
-	ParameterList ParameterList
-	ReturnList    ReturnList
-}
-
-type ParameterList []*VariableDefinition
-type ReturnList []*VariableDefinition
-
-func (r ReturnList) retTypes(pos *Pos) []*VariableType {
-	if r == nil || len(r) == 0 {
-		t := &VariableType{}
-		t.Typ = VARIABLE_TYPE_VOID // means no return;
-		t.Pos = pos
-		return []*VariableType{t}
-	}
-	ret := make([]*VariableType, len(r))
-	for k, v := range r {
-		ret[k] = v.Typ.Clone()
-		ret[k].Pos = pos
-	}
-	return ret
 }
