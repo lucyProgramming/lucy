@@ -1,9 +1,6 @@
 package ast
 
-import "fmt"
-
 func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error) {
-	fmt.Println("11", c.Name, c.Methods, fromSub, c.Fields)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].IsPrivate() { // private field
 		} else {

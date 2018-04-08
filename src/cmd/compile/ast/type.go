@@ -389,6 +389,8 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += "}"
 	case VARIABLE_TYPE_JAVA_ARRAY:
 		*ret += v.ArrayType.TypeString() + "[]"
+	case VARIABLE_TYPE_PACKAGE:
+		*ret = v.Package.Name
 	default:
 		panic(v.Typ)
 	}

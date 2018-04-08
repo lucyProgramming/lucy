@@ -21,7 +21,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 	// dot
 	if t.Typ != VARIABLE_TYPE_OBJECT && t.Typ != VARIABLE_TYPE_CLASS &&
 		t.Typ != VARIABLE_TYPE_PACKAGE {
-		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'", errMsgPrefix(e.Pos), dot.Name, t.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'", errMsgPrefix(e.Pos), dot.Name, t.TypeString()))
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
