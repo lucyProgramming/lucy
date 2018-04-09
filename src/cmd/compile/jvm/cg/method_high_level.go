@@ -1,6 +1,7 @@
 package cg
 
 type MethodHighLevel struct {
+	IsConstruction                        bool
 	Class                                 *ClassHighLevel
 	Name                                  string
 	Descriptor                            string

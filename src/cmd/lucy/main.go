@@ -7,6 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/command"
 	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array"
 	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/run"
+	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/test"
 	"os"
 	"runtime"
 )
@@ -19,6 +20,7 @@ func init() {
 	commands["run"] = &run.Run{}
 	commands["install_lucy_array"] = &install_lucy_array.InstallLucyArray{}
 	commands["clean"] = &clean.Clean{}
+	commands["test "] = &test.Test{}
 }
 
 func printUsage() {

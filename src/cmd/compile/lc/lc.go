@@ -69,6 +69,41 @@ func (lc *LucyCompile) Init() {
 	}
 }
 
+func (lc *LucyCompile) parseImports() {
+	if len(lc.Errs) > 0 {
+		lc.exit()
+	}
+	is := make([]string, len(lc.Tops))
+	for k, v := range lc.Tops {
+		is[k] = v.Data.(*ast.Import).Resource
+	}
+	bs, _ := json.Marshal(is)
+	fmt.Println(string(bs))
+	//nameLoader := &RealNameLoader{}
+	//packageNames := make(map[string]struct{})
+	//for _, v := range is {
+	//	p, c, err := nameLoader.LoadName(v)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		os.Exit(1)
+	//	}
+	//	if p != nil {
+	//		packageNames[p.Name] = struct{}{}
+	//	}
+	//	if pp, ok := c.(*ast.Package); ok && pp != nil {
+	//		packageNames[pp.Name] = struct{}{}
+	//	}
+	//}
+	//is = make([]string, len(packageNames))
+	//i := 0
+	//for name, _ := range packageNames {
+	//	is[i] = name
+	//	i++
+	//}
+	//bs, _ := json.Marshal(is)
+	//fmt.Println(string(bs))
+}
+
 func (lc *LucyCompile) compile() {
 	for _, v := range lc.Files {
 		bs, err := ioutil.ReadFile(v)
@@ -81,15 +116,7 @@ func (lc *LucyCompile) compile() {
 	}
 	// parse import only
 	if CompileFlags.OnlyImport {
-		if len(lc.Errs) > 0 {
-			lc.exit()
-		}
-		is := make([]string, len(lc.Tops))
-		for k, v := range lc.Tops {
-			is[k] = v.Data.(*ast.Import).Resource
-		}
-		bs, _ := json.Marshal(is)
-		fmt.Println(string(bs))
+		lc.parseImports()
 		return
 	}
 	c := ast.ConvertTops2Package{}

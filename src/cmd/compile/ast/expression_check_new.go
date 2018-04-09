@@ -29,13 +29,15 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	}
 	args := checkExpressions(block, no.Args, errs)
 	ms, matched, err := no.Typ.Class.matchContructionFunction(args, &no.Args)
+	if err != nil {
+		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		return ret
+	}
 	if matched {
 		no.Construction = ms[0]
 		return ret
 	}
-	if err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s  'construction' not found", errMsgPrefix(e.Pos)))
 	} else {

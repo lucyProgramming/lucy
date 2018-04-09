@@ -41,6 +41,16 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 		method.Code.MaxLocals = f.VarOffset // could  new slot when compile
 	}()
+	if method.IsConstruction {
+		method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
+		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      class.SuperClass,
+			Method:     special_method_init,
+			Descriptor: "()V",
+		}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
+		method.Code.CodeLength += 4
+	}
 
 	// if function is main
 	if f.Name == ast.MAIN_FUNCTION_NAME {

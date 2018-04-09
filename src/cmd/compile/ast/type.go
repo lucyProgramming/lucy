@@ -428,10 +428,11 @@ func (t1 *VariableType) Equal(t2 *VariableType) bool {
 	}
 	if t1.Typ == VARIABLE_TYPE_OBJECT && t2.Typ == VARIABLE_TYPE_OBJECT { // object
 		if t1.Class.isInterface() {
-			return t2.Class.implemented(t1.Class.Name)
+			i, _ := t2.Class.implemented(t1.Class.Name)
+			return i
 		} else { // class
-			_, e := t2.Class.haveSuper(t1.Class.Name)
-			return e
+			has, _ := t2.Class.haveSuper(t1.Class.Name)
+			return has
 		}
 	}
 	return false

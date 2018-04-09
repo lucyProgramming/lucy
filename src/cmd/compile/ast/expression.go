@@ -291,7 +291,7 @@ type ExpressionDot struct {
 	PackageVariableDefinition *VariableDefinition
 }
 type ExpressionMethodCall struct {
-	ClassName  string //
+	Class      *Class //
 	Expression *Expression
 	Args       CallArgs
 	Name       string

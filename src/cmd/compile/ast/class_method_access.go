@@ -16,10 +16,13 @@ func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallAr
 				return nil, false, fmt.Errorf("method '%s' not found", name)
 			}
 		}
+		if len(args) > len(m.Func.Typ.ParameterList) {
+			return nil, false, fmt.Errorf("too many paramaters to call method '%s'", m.Func.Name)
+		}
 		if len(args) < len(m.Func.Typ.ParameterList) {
 			if m.Func.HaveDefaultValue {
 				if len(args) < m.Func.DefaultValueStartAt {
-					return nil, false, fmt.Errorf("too few paramaters to call method '%s'", m.Func.Name)
+					return []*ClassMethod{m}, false, fmt.Errorf("too few paramaters to call method '%s'", m.Func.Name)
 				}
 				for i := len(args); i < len(m.Func.Typ.ParameterList); i++ {
 					*callArgs = append(*callArgs, m.Func.Typ.ParameterList[i].Expression)

@@ -263,7 +263,8 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		method.Name = "<init>"
 		method.AccessFlags = c.Constructors[0].Func.AccessFlags
 		method.Class = class
-		method.Descriptor = "()V"
+		method.Descriptor = Descriptor.methodDescriptor(c.Constructors[0].Func)
+		method.IsConstruction = true
 		m.buildFunction(class, method, c.Constructors[0].Func)
 		class.AppendMethod(method)
 	} else {

@@ -69,7 +69,6 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 			})
 		}
 	}
-
 	if len(realpaths) == 0 {
 		return nil, nil, fmt.Errorf("resource '%v' not found", resouceName)
 	}
@@ -102,13 +101,14 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		class, err := loader.loadClass(realpaths[0])
 		return nil, class, err
 	} else if realpaths[0].kind == RESOUCE_KIND_LUCY_CLASS {
+		fmt.Println(realpaths[0].realpath)
 		name := filepath.Base(realpaths[0].realpath)
 		name = strings.TrimRight(name, ".class")
-		realpaths[0].name = name
+		realpaths[0].name = filepath.Dir(resouceName)
 		realpaths[0].kind = RESOUCE_KIND_LUCY_PACKAGE
 		realpaths[0].realpath = filepath.Dir(realpaths[0].realpath)
 		p, err := loader.loadLucyPackage(realpaths[0])
-		return nil, p.Block.SearchByName(name), err
+		return p, p.Block.SearchByName(name), err
 	} else if realpaths[0].kind == RESOUCE_KIND_JAVA_PACKAGE {
 		p, err := loader.loadJavaPackage(realpaths[0])
 		return nil, p, err

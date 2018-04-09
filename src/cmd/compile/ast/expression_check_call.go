@@ -214,7 +214,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'", errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
-	call.ClassName = object.Class.Name
+	call.Class = object.Class
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
 	ms, matched, err := object.Class.accessMethod(call.Name, args, &call.Args, false)

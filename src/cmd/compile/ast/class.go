@@ -18,6 +18,7 @@ type Class struct {
 	Methods            map[string][]*ClassMethod
 	SuperClassName     string
 	SuperClass         *Class
+	InterfacesName     []*NameWithPos
 	Interfaces         []*Class
 	Constructors       []*ClassMethod // can be nil
 	SouceFile          string
@@ -180,28 +181,28 @@ func (c *Class) isInterface() bool {
 	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
 
-func (c *Class) haveSuper(superclassName string) (error, bool) {
+func (c *Class) haveSuper(superclassName string) (bool, error) {
 	if c.Name == superclassName {
-		return nil, true
+		return true, nil
 	}
-	if c.SuperClassName == "" {
-		c.SuperClassName = LUCY_ROOT_CLASS
-	}
-	superClass, err := PackageBeenCompile.load(c.SuperClassName)
+	err := c.loadSuperClass()
 	if err != nil {
-		return err, false
-	}
-	if cc, ok := superClass.(*Class); ok == false {
-		return fmt.Errorf("super class named %s is not a class", c.SuperClassName), false
-	} else {
-		c.SuperClass = cc
+		return false, err
 	}
 	return c.SuperClass.haveSuper(superclassName)
 }
 
-func (c *Class) implemented(superclass string) bool {
-	//if c.Interfaces
-	return false
+func (c *Class) implemented(inter string) (bool, error) {
+	for _, v := range c.InterfacesName {
+		if v.Name == inter {
+			return true, nil
+		}
+	}
+	err := c.loadSuperClass()
+	if err != nil {
+		return false, err
+	}
+	return c.SuperClass.implemented(inter)
 }
 
 func (c *Class) checkConstructionFunctions() []error {
@@ -247,7 +248,7 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 			continue
 		}
 		for _, vv := range v {
-			err := fmt.Errorf("%s %s redeclared", errMsgPrefix(vv.Func.Pos))
+			err := fmt.Errorf("%s %s redeclared", errMsgPrefix(vv.Func.Pos), vv.Func.Name)
 			*errs = append(*errs, err)
 		}
 	}

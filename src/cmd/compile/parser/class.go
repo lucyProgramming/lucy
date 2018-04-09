@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -43,6 +42,21 @@ func (c *Class) parseClassName() (string, error) {
 	return name, nil
 }
 
+func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
+	ret := []*ast.NameWithPos{}
+	for {
+		pos := c.parser.mkPos()
+		name, err := c.parseClassName()
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, &ast.NameWithPos{
+			Name: name,
+			Pos:  pos,
+		})
+	}
+	return ret, nil
+}
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	c.resetProperty()
 	defer c.resetProperty()
@@ -78,9 +92,9 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		}
 	}
 	if c.parser.token.Type == lex.TOKEN_IMPLEMENTS {
-		c.Next() // skip implements
-		for c.parser.token.Type != lex.TOKEN_LC {
-			c.Next() // skip all until  {
+		c.classDefinition.InterfacesName, err = c.parseInterfaces()
+		if err != nil {
+			c.consume(untils_lc)
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
