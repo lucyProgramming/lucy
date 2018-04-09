@@ -18,21 +18,29 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	if no.Typ.Typ == VARIABLE_TYPE_ARRAY {
 		return e.checkNewArrayExpression(block, no, errs)
 	}
-	// new object
-	if no.Typ.Typ != VARIABLE_TYPE_OBJECT {
-		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'", errMsgPrefix(e.Pos), no.Typ.TypeString()))
-		return nil
-	}
-	args := checkExpressions(block, no.Args, errs)
-	constructor, err := no.Typ.Class.matchContructionFunction(args)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
-	no.Construction = constructor
 	ret := &VariableType{}
 	*ret = *no.Typ
 	ret.Typ = VARIABLE_TYPE_OBJECT
 	ret.Pos = e.Pos
+	// new object
+	if no.Typ.Typ != VARIABLE_TYPE_OBJECT {
+		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'", errMsgPrefix(e.Pos), no.Typ.TypeString()))
+		return ret
+	}
+	args := checkExpressions(block, no.Args, errs)
+	ms, matched, err := no.Typ.Class.matchContructionFunction(args, &no.Args)
+	if matched {
+		no.Construction = ms[0]
+		return ret
+	}
+	if err != nil {
+		*errs = append(*errs, err)
+	}
+	if len(ms) == 0 {
+		*errs = append(*errs, fmt.Errorf("%s  'construction' not found", errMsgPrefix(e.Pos)))
+	} else {
+		*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
+	}
 	return ret
 }
 

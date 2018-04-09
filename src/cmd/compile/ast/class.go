@@ -291,11 +291,3 @@ func (c *Class) loadSuperClass() error {
 		return fmt.Errorf("'%s' is not a class", c.SuperClassName)
 	}
 }
-
-func (c *Class) matchContructionFunction(args []*VariableType) (f *ClassMethod, err error) {
-	//if len(c.Constructors) == 0 && len(args) == 0 { // match default null constructor
-	//	return nil, nil
-	//}
-	//f, err = c.reloadMethod(c.Constructors, args)
-	return
-}

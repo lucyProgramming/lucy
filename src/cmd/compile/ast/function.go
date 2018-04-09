@@ -66,7 +66,7 @@ type AutoVarForReturnBecauseOfDefer struct {
 }
 
 func (f *Function) NoReturnValue() bool {
-	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_BOOL
+	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_VOID
 }
 
 type AutoVarForException struct {
@@ -88,8 +88,14 @@ type AutoVarForMultiReturn struct {
 	Offset uint16
 }
 
-func (f *Function) readableMsg() string {
-	s := "fn " + f.Name + "("
+func (f *Function) readableMsg(name ...string) string {
+	var s string
+	if len(name) > 0 {
+		s = "fn " + name[0] + "("
+	} else {
+		s = "fn " + f.Name + "("
+	}
+
 	for k, v := range f.Typ.ParameterList {
 		s += v.Typ.TypeString()
 		if k != len(f.Typ.ParameterList)-1 {
@@ -97,7 +103,7 @@ func (f *Function) readableMsg() string {
 		}
 	}
 	s += ") "
-	if len(f.Typ.ReturnList) > 0 {
+	if len(f.Typ.ReturnList) > 0 && f.NoReturnValue() == false {
 		s += "-> ( "
 		for k, v := range f.Typ.ReturnList {
 			s += v.Typ.TypeString()
@@ -110,8 +116,8 @@ func (f *Function) readableMsg() string {
 	return s
 }
 
-func (f *Function) badParameterMsg(args []*VariableType) string {
-	s := "fn " + f.Name + "("
+func (f *Function) badParameterMsg(name string, args []*VariableType) string {
+	s := "fn " + name + "("
 	for k, v := range args {
 		s += v.TypeString()
 		if k != len(args)-1 {

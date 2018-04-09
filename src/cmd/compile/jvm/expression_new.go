@@ -12,7 +12,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
 	}
-	// new class
+	//new class
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])

@@ -11,7 +11,7 @@ type NotSupportTypeSignatureError struct {
 }
 
 func (e *NotSupportTypeSignatureError) Error() string {
-	return "not support typed parameter"
+	return "lucy does not support typed parameter currently"
 }
 
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
@@ -57,15 +57,12 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-		if m.Func.Name == "<init>" {
-			astClass.Constructors = append(astClass.Constructors, m)
+		if astClass.Methods[m.Func.Name] == nil {
+			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
 		} else {
-			if astClass.Methods[m.Func.Name] == nil {
-				astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
-			} else {
-				astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
-			}
+			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
 		}
+
 	}
 	return astClass, nil
 }

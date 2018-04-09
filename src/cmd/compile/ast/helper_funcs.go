@@ -106,3 +106,14 @@ func moreClose(from, more, less *Pos) bool {
 	}
 	return more.StartLine < less.StartLine
 }
+
+func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableType) error {
+	errmsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
+		errMsgPrefix(pos), name)
+	errmsg += "\t want " + ms[0].Func.badParameterMsg(name, want) + "\n"
+	for _, m := range ms {
+		errmsg += "\t have " + m.Func.readableMsg(name) + "\n"
+	}
+	return fmt.Errorf(errmsg)
+	//*errs = append(*errs, fmt.Errorf(errmsg))
+}

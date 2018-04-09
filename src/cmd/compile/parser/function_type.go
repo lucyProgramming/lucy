@@ -17,7 +17,7 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 	}
 	p.Next()                          // skip (
 	if p.token.Type != lex.TOKEN_RP { // not (
-		t.ParameterList, err = p.parseTypedNames()
+		t.ParameterList, err = p.parseReturnLists()
 		if err != nil {
 			return nil, err
 		}

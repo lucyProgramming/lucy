@@ -30,7 +30,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			functionCall.Func = f
 			functionCall.Args = call.Args
 			e.Data = functionCall
-			return e.checkFunctionCall(block, errs, f, functionCall.Args)
+			return e.checkFunctionCall(block, errs, f, &functionCall.Args)
 		} else if object.Package.Block.Classes != nil && object.Package.Block.Classes[call.Name] != nil {
 			//object cast
 			class := object.Package.Block.Classes[call.Name]
@@ -217,7 +217,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	call.ClassName = object.Class.Name
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
-	ms, matched, err := object.Class.accessMethod(call.Name, args, false)
+	ms, matched, err := object.Class.accessMethod(call.Name, args, &call.Args, false)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 	}
@@ -232,12 +232,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if ms == nil || len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
 	} else {
-		errmsg := fmt.Sprintf("%s method named '%s' have no suitable match,methods that have the same name:\n",
-			errMsgPrefix(e.Pos), call.Name)
-		for _, m := range ms {
-			errmsg += "\t" + m.Func.readableMsg() + "\n"
-		}
-		*errs = append(*errs, fmt.Errorf(errmsg))
+		*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))
 	}
 	return nil
 }
