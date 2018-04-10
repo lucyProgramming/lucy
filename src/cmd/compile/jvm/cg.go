@@ -242,7 +242,10 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		class.Fields[v.Name] = f
 	}
-	for _, v := range c.Methods {
+	for k, v := range c.Methods {
+		if k == filepath.Base(c.Name) {
+			continue
+		}
 		vv := v[0]
 		method := &cg.MethodHighLevel{}
 		method.Name = vv.Func.Name
@@ -257,18 +260,23 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		class.AppendMethod(method)
 	}
-	//construction
-	if len(c.Constructors) > 0 {
-		method := &cg.MethodHighLevel{}
-		method.Name = "<init>"
-		method.AccessFlags = c.Constructors[0].Func.AccessFlags
-		method.Class = class
-		method.Descriptor = Descriptor.methodDescriptor(c.Constructors[0].Func)
-		method.IsConstruction = true
-		m.buildFunction(class, method, c.Constructors[0].Func)
-		class.AppendMethod(method)
-	} else {
-		mkClassDefaultContruction(class)
+	{
+		//construction
+		if t := c.Methods[filepath.Base(c.Name)]; t != nil && len(t) > 0 {
+			method := &cg.MethodHighLevel{}
+			method.Name = "<init>"
+			method.AccessFlags = t[0].Func.AccessFlags
+			method.Class = class
+			method.Descriptor = Descriptor.methodDescriptor(t[0].Func)
+			method.IsConstruction = true
+			m.buildFunction(class, method, t[0].Func)
+			class.AppendMethod(method)
+			if len(t[0].Func.Typ.ParameterList) > 0 {
+				mkClassDefaultContruction(class)
+			}
+		} else {
+			mkClassDefaultContruction(class)
+		}
 	}
 	return class
 }

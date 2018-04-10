@@ -30,10 +30,16 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
+		d := ""
+		if n.Typ.Class.LoadFromOutSide {
+			d = n.Construction.Func.Descriptor
+		} else {
+			d = Descriptor.methodDescriptor(n.Construction.Func)
+		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      n.Typ.Class.Name,
 			Method:     special_method_init,
-			Descriptor: n.Construction.Func.Descriptor,
+			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
 	code.CodeLength += 3

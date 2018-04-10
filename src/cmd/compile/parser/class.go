@@ -213,18 +213,12 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			if c.isStatic {
 				f.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
-			if f.Name == c.classDefinition.Name {
-				if c.classDefinition.Constructors == nil {
-					c.classDefinition.Constructors = []*ast.ClassMethod{m}
-				} else {
-					c.classDefinition.Constructors = append(c.classDefinition.Constructors, m)
-				}
-			} else {
-				if c.classDefinition.Methods == nil {
-					c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
-				}
-				c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
+
+			if c.classDefinition.Methods == nil {
+				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
 			}
+			c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
+
 			c.resetProperty()
 		default:
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))

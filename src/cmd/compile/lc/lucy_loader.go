@@ -6,6 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"path/filepath"
 )
 
 func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
@@ -63,6 +64,14 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			if err != nil {
 				return nil, err
 			}
+		}
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS); t != nil && len(t) > 0 {
+			dp := &cg.AttributeDefaultParameters{}
+			dp.FromBs(t[0].Info)
+			jvm.FunctionDefaultValueParser.Decode(c, m.Func, dp)
+		}
+		if m.Func.Name == "<init>" {
+			m.Func.Name = filepath.Base(astClass.Name)
 		}
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}

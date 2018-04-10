@@ -20,7 +20,6 @@ type Class struct {
 	SuperClass         *Class
 	InterfacesName     []*NameWithPos
 	Interfaces         []*Class
-	Constructors       []*ClassMethod // can be nil
 	SouceFile          string
 	Used               bool
 	LoadFromOutSide    bool
@@ -35,20 +34,20 @@ func (c *Class) resolveName(b *Block) []error {
 			errs = append(errs, err)
 		}
 	}
-	for _, v := range c.Constructors {
-		for _, vv := range v.Func.Typ.ParameterList {
-			err := vv.Typ.resolve(b)
-			if err != nil {
-				errs = append(errs, err)
-			}
-		}
-		for _, vv := range v.Func.Typ.ReturnList {
-			err := vv.Typ.resolve(b)
-			if err != nil {
-				errs = append(errs, err)
-			}
-		}
-	}
+	//for _, v := range c.Constructors {
+	//	for _, vv := range v.Func.Typ.ParameterList {
+	//		err := vv.Typ.resolve(b)
+	//		if err != nil {
+	//			errs = append(errs, err)
+	//		}
+	//	}
+	//	for _, vv := range v.Func.Typ.ReturnList {
+	//		err := vv.Typ.resolve(b)
+	//		if err != nil {
+	//			errs = append(errs, err)
+	//		}
+	//	}
+	//}
 	for _, v := range c.Methods {
 		for _, vv := range v {
 			for _, vvv := range vv.Func.Typ.ParameterList {
@@ -134,7 +133,7 @@ func (c *Class) checkPhase2(father *Block) []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	errs = append(errs, c.checkConstructionFunctions()...)
+	//errs = append(errs, c.checkConstructionFunctions()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
@@ -142,14 +141,14 @@ func (c *Class) checkPhase2(father *Block) []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	if len(c.Constructors) > 1 {
-		errs = append(errs, fmt.Errorf("%s class named '%s' has %d(more than 1) contructor,declare at:",
-			errMsgPrefix(c.Pos),
-			c.Name, len(c.Constructors)))
-		for _, v := range c.Constructors {
-			errs = append(errs, fmt.Errorf("\t %s contructor method...", errMsgPrefix(v.Func.Pos)))
-		}
-	}
+	//if len(c.Constructors) > 1 {
+	//	errs = append(errs, fmt.Errorf("%s class named '%s' has %d(more than 1) contructor,declare at:",
+	//		errMsgPrefix(c.Pos),
+	//		c.Name, len(c.Constructors)))
+	//	for _, v := range c.Constructors {
+	//		errs = append(errs, fmt.Errorf("\t %s contructor method...", errMsgPrefix(v.Func.Pos)))
+	//	}
+	//}
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
@@ -203,18 +202,6 @@ func (c *Class) implemented(inter string) (bool, error) {
 		return false, err
 	}
 	return c.SuperClass.implemented(inter)
-}
-
-func (c *Class) checkConstructionFunctions() []error {
-	errs := []error{}
-	for _, v := range c.Constructors {
-		v.IsConstructionMethod = true
-		if v.IsStatic() {
-			errs = append(errs, fmt.Errorf("%s construction method must not be static", errMsgPrefix(v.Func.Pos)))
-		}
-	}
-	c.checkReloadFunctions(c.Constructors, &errs)
-	return errs
 }
 
 func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {

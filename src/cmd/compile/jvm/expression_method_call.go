@@ -21,7 +21,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		d = Descriptor.methodDescriptor(call.Method.Func)
 	}
 	if call.Method.IsStatic() {
-		maxstack = m.buildCallArgs(class, code, call.Args, nil, context)
+		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Method.Func.ClassMethod.Class.Name,
@@ -32,10 +32,11 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 	maxstack, _ = m.build(class, code, call.Expression, context)
-	stack := m.buildCallArgs(class, code, call.Args, nil, context)
+	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context)
 	if t := stack + 1; t > maxstack {
 		maxstack = t
 	}
+
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      call.Class.Name,
