@@ -5,6 +5,7 @@ const (
 	CLASS_MAGIC                    uint32 = 0xcafebabe
 	ATTRIBUTE_NAME_SOURCE_FILE            = "SourceFile"
 	ATTRIBUTE_NAME_CONST_VALUE            = "ConstantValue"
+	ATTRIBUTE_NAME_STACK_MAP              = "StackMapTable"
 	ATTRIBUTE_NAME_LUCY_TYPE_ALIAS        = "LucyTypeAlias"
 	ATTRIBUTE_NAME_SIGNATURE              = "Signature"
 	// lucy attribute

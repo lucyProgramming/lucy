@@ -14,11 +14,16 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	codelength := code.CodeLength
 	falseExit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
+	var stackMapState StackMapStateLocalsNumber
+	stackMapState.FromContext(context)
 	m.buildBlock(class, code, s.Block, context)
 	if len(s.ElseIfList) > 0 || s.ElseBlock != nil {
 		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	}
 	for k, v := range s.ElseIfList {
+		// ifeq will goto there
+		context.method.AttributeStackMap.StackMaps = append(context.method.AttributeStackMap.StackMaps, context.MakeStackMap(&stackMapState, code.CodeLength))
+		stackMapState.FromContext(context)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context)
 		backPatchEs(es, code.CodeLength)
@@ -35,11 +40,17 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		}
 	}
 	if s.ElseBlock != nil {
+		context.method.AttributeStackMap.StackMaps = append(context.method.AttributeStackMap.StackMaps,
+			context.MakeStackMap(&stackMapState, code.CodeLength))
+		stackMapState.FromContext(context)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		falseExit = nil
 		m.buildBlock(class, code, s.ElseBlock, context)
 	}
 	if falseExit != nil {
+		context.method.AttributeStackMap.StackMaps = append(context.method.AttributeStackMap.StackMaps,
+			context.MakeStackMap(&stackMapState, code.CodeLength))
+		stackMapState.FromContext(context)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 	}
 	return

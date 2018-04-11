@@ -35,12 +35,13 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
 	context.function = f
+	context.method = method
 	method.Code.Codes = make([]byte, 65536)
 	method.Code.CodeLength = 0
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
-		method.Code.MaxLocals = f.VarOffset // could  new slot when compile
 	}()
+	method.Code.MaxLocals = f.VarOffset // could  new slot when compile
 	if method.IsConstruction {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
 		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
