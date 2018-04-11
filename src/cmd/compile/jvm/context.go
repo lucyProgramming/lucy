@@ -39,7 +39,7 @@ func (c *Context) appendLimeNumberAndSourceFile(pos *ast.Pos, code *cg.Attribute
 func (context *Context) MakeStackMap(last *StackMapStateLocalsNumber, offset int) cg.StackMap {
 	var delta uint16
 	if context.StackMapDelta == 0 {
-		delta = 21 // uint16(offset)
+		delta = uint16(offset)
 	} else {
 		delta = uint16(offset - context.StackMapDelta - 1)
 	}

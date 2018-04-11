@@ -255,7 +255,7 @@ func (high *ClassHighLevel) FromHighLevel() *Class {
 
 func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.MinorVersion = 0
-	c.MajorVersion = 52
+	c.MajorVersion = 50
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}

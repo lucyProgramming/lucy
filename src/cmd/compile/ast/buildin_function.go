@@ -15,9 +15,7 @@ type buildFunction struct {
 
 func init() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &buildFunction{
-		checker: func(block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		},
+		checker: func(block *Block, errs *[]error, args []*VariableType, pos *Pos) {},
 	}
 	b := &buildFunction{}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = b
