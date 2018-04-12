@@ -46,6 +46,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 					if variables[0].BeenCaptured {
 						currentStack -= 1
 					}
+					m.MakeClass.appendLocalVar(class, code, variables[0], context)
 				}
 				variables = variables[1:]
 			}
@@ -70,6 +71,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			if variables[0].BeenCaptured {
 				currentStack -= 1
 			}
+			m.MakeClass.appendLocalVar(class, code, variables[0], context)
 		}
 
 		variables = variables[1:]

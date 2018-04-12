@@ -11,6 +11,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	maxstack, es = m.MakeExpression.build(class, code, s.Condition, context)
 	backPatchEs(es, code.CodeLength)
 	code.Codes[code.CodeLength] = cg.OP_ifeq
+	context.Stacks = context.Stacks[0 : len(context.Stacks)-1] // should be 0
 	codelength := code.CodeLength
 	falseExit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
@@ -22,7 +23,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	}
 	for k, v := range s.ElseIfList {
 		// ifeq will goto there
-		context.method.AttributeStackMap.StackMaps = append(context.method.AttributeStackMap.StackMaps, context.MakeStackMap(&stackMapState, code.CodeLength))
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(&stackMapState, code.CodeLength))
 		stackMapState.FromContext(context)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context)
@@ -31,6 +32,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 			maxstack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_ifeq
+		context.Stacks = context.Stacks[0 : len(context.Stacks)-1] // should be 0
 		codelength = code.CodeLength
 		falseExit = code.Codes[code.CodeLength+1 : code.CodeLength+3]
 		code.CodeLength += 3
@@ -40,7 +42,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		}
 	}
 	if s.ElseBlock != nil {
-		context.method.AttributeStackMap.StackMaps = append(context.method.AttributeStackMap.StackMaps,
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 			context.MakeStackMap(&stackMapState, code.CodeLength))
 		stackMapState.FromContext(context)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
@@ -48,9 +50,8 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		m.buildBlock(class, code, s.ElseBlock, context)
 	}
 	if falseExit != nil {
-		context.method.AttributeStackMap.StackMaps = append(context.method.AttributeStackMap.StackMaps,
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 			context.MakeStackMap(&stackMapState, code.CodeLength))
-		stackMapState.FromContext(context)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 	}
 	return

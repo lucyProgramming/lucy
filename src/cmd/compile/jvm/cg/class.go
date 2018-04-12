@@ -255,7 +255,7 @@ func (high *ClassHighLevel) FromHighLevel() *Class {
 
 func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	c.MinorVersion = 0
-	c.MajorVersion = 50
+	c.MajorVersion = 51
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}
@@ -306,12 +306,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			}
 			if m.AttributeDefaultParameters != nil {
 				info.Attributes = append(info.Attributes, m.AttributeDefaultParameters.ToAttributeInfo(c))
-			}
-			{
-				t := m.AttributeStackMap.ToAttributeInfo(c)
-				if t != nil {
-					info.Attributes = append(info.Attributes, t)
-				}
 			}
 			c.Methods = append(c.Methods, info)
 		}

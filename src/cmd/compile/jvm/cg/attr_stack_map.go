@@ -1,6 +1,8 @@
 package cg
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 type AttributeStackMap struct {
 	StackMaps []StackMap
@@ -40,7 +42,8 @@ type StackMap_same_locals_1_stack_item_frame struct {
 
 func (s *StackMap_same_locals_1_stack_item_frame) ToBytes() []byte {
 	bs := []byte{s.FrameType}
-	return append(bs, s.Stack.ToBytes()...)
+	bs = append(bs, s.Stack.ToBytes()...)
+	return bs
 }
 
 type StackMap_same_locals_1_stack_item_frame_extended struct {
@@ -150,6 +153,7 @@ func (s *StackMap_verification_type_info) ToBytes() []byte {
 	case *StackMap_Top_variable_info:
 		return []byte{0}
 	case *StackMap_Integer_variable_info:
+
 		return []byte{1}
 	case *StackMap_Float_variable_info:
 		return []byte{2}

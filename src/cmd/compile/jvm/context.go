@@ -56,7 +56,7 @@ func (context *Context) MakeStackMap(last *StackMapStateLocalsNumber, offset int
 	if len(context.Locals) == last.Locals && len(context.Stacks) == 1 { // 1 stack or 1 stack extended
 		if delta <= 64 {
 			return &cg.StackMap_same_locals_1_stack_item_frame{
-				FrameType: byte(delta),
+				FrameType: byte(delta + 64),
 				Stack:     context.Stacks[0],
 			}
 		} else {
@@ -73,15 +73,57 @@ func (context *Context) MakeStackMap(last *StackMapStateLocalsNumber, offset int
 			appendFrame := &cg.StackMap_append_frame{}
 			appendFrame.FrameType = byte(num + 251)
 			appendFrame.Delta = delta
-			appendFrame.Locals = context.Locals[last.Locals:][:] // make copy
+			appendFrame.Locals = make([]*cg.StackMap_verification_type_info, len(context.Locals[last.Locals:]))
+			copy(appendFrame.Locals, context.Locals[last.Locals:])
 			return appendFrame
 		}
-
 	}
 	// full frame
 	fullFrame := &cg.StackMap_full_frame{}
 	fullFrame.FrameType = 255
-	fullFrame.Locals = context.Locals[:] // make copy
-	fullFrame.Stacks = context.Stacks[:] // make copy
+	fullFrame.Delta = delta
+	fullFrame.Locals = make([]*cg.StackMap_verification_type_info, len(context.Locals))
+	copy(fullFrame.Locals, context.Locals)
+	fullFrame.Stacks = make([]*cg.StackMap_verification_type_info, len(context.Stacks))
+	copy(fullFrame.Stacks, context.Stacks)
 	return fullFrame
+}
+func (context *Context) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel, t *ast.VariableType, classname ...string) (ret *cg.StackMap_verification_type_info) {
+	ret = &cg.StackMap_verification_type_info{}
+	switch t.Typ {
+	case ast.VARIABLE_TYPE_BOOL:
+		fallthrough
+	case ast.VARIABLE_TYPE_BYTE:
+		fallthrough
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		ret.T = &cg.StackMap_Integer_variable_info{}
+	case ast.VARIABLE_TYPE_LONG:
+		ret.T = &cg.StackMap_Long_variable_info{}
+	case ast.VARIABLE_TYPE_FLOAT:
+		ret.T = &cg.StackMap_Float_variable_info{}
+	case ast.VARIABLE_TYPE_DOUBLE:
+		ret.T = &cg.StackMap_Double_variable_info{}
+	case ast.VARIABLE_TYPE_NULL:
+		ret.T = &cg.StackMap_Null_variable_info{}
+	case ast.VARIABLE_TYPE_STRING:
+		ret.T = &cg.StackMap_Object_variable_info{
+			Index: class.Class.InsertClassConst(java_string_class),
+		}
+	case ast.VARIABLE_TYPE_OBJECT:
+		ret.T = &cg.StackMap_Object_variable_info{
+			Index: class.Class.InsertClassConst(classname[0]),
+		}
+	case ast.VARIABLE_TYPE_MAP:
+		ret.T = &cg.StackMap_Object_variable_info{
+			Index: class.Class.InsertClassConst(java_hashmap_class),
+		}
+	case ast.VARIABLE_TYPE_ARRAY:
+		meta := ArrayMetas[t.ArrayType.Typ]
+		ret.T = &cg.StackMap_Object_variable_info{
+			Index: class.Class.InsertClassConst(meta.classname),
+		}
+	}
+	return ret
 }

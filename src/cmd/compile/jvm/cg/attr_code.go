@@ -5,13 +5,14 @@ import (
 )
 
 type AttributeCode struct {
-	MaxStack    uint16
-	MaxLocals   uint16
-	CodeLength  int
-	Codes       []byte
-	LineNumbers AttributeLineNumber
-	Exceptions  []*ExceptionTable
-	attributes  []*AttributeInfo
+	MaxStack          uint16
+	MaxLocals         uint16
+	CodeLength        int
+	Codes             []byte
+	LineNumbers       AttributeLineNumber
+	Exceptions        []*ExceptionTable
+	attributes        []*AttributeInfo
+	AttributeStackMap AttributeStackMap
 }
 
 type ExceptionTable struct {
@@ -31,6 +32,9 @@ func (a *AttributeCode) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret.Info = append(ret.Info, a.Codes...)
 	ret.Info = append(ret.Info, a.mkExceptions()...)
 	if info := a.LineNumbers.ToAttributeInfo(class); info != nil {
+		a.attributes = append(a.attributes, info)
+	}
+	if info := a.AttributeStackMap.ToAttributeInfo(class); info != nil {
 		a.attributes = append(a.attributes, info)
 	}
 	ret.Info = append(ret.Info, a.mkAttributes(class)...)

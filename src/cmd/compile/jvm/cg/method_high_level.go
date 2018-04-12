@@ -11,5 +11,4 @@ type MethodHighLevel struct {
 	AttributeLucyMethodDescritor          *AttributeLucyMethodDescritor
 	AttributeLucyTriggerPackageInitMethod *AttributeLucyTriggerPackageInitMethod
 	AttributeDefaultParameters            *AttributeDefaultParameters
-	AttributeStackMap                     AttributeStackMap
 }

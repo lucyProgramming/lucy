@@ -51,6 +51,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 					if variables[0].BeenCaptured {
 						currentStack -= 1
 					}
+					m.MakeClass.appendLocalVar(class, code, variables[0], context)
 				}
 				variables = variables[1:]
 			}
@@ -84,6 +85,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				if variables[0].BeenCaptured {
 					currentStack -= 1
 				}
+				m.MakeClass.appendLocalVar(class, code, variables[0], context)
 			}
 		}
 		variables = variables[1:]

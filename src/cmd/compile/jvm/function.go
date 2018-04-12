@@ -1,12 +1,37 @@
 package jvm
 
 import (
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+func (m *MakeClass) appendLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition, context *Context) {
+	if v.BeenCaptured { // capture
+		context.Locals = append(context.Locals,
+			context.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}, closure.getMeta(v.Typ.Typ).className))
+	} else {
+		context.Locals = append(context.Locals, context.newStackMapVerificationTypeInfo(class, v.Typ))
+	}
+
+}
 func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, ft *ast.FunctionType, context *Context) {
+	for _, v := range ft.ParameterList { // insert into locals
+		if v.BeenCaptured { // capture
+			maxstack := closure.createCloureVar(class, code, v)
+			if maxstack > code.MaxStack {
+				code.MaxStack = maxstack
+			}
+			// then load
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOP(code, loadSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
+			if t := 2 + v.Typ.JvmSlotSize(); t > maxstack {
+				code.MaxStack = t
+			}
+			m.storeLocalVar(class, code, v)
+		}
+		m.appendLocalVar(class, code, v, context)
+	}
+
 	for _, v := range ft.ReturnList {
 		currentStack := uint16(0)
 		if v.BeenCaptured { //create closure object
@@ -30,6 +55,7 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			code.MaxStack = t
 		}
 		m.storeLocalVar(class, code, v)
+		m.appendLocalVar(class, code, v, context)
 	}
 }
 

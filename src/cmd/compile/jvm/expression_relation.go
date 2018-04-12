@@ -37,6 +37,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength] = cg.OP_dcmpl
 		}
 		code.CodeLength++
+		state := &StackMapStateLocalsNumber{}
+		state.FromContext(context)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_BOOL,
+		}))
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
 		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE { // > and <=
 			code.Codes[code.CodeLength] = cg.OP_ifgt
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
@@ -98,6 +105,14 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
+		state := &StackMapStateLocalsNumber{}
+		state.FromContext(context)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_BOOL,
+		}))
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
+
 		code.Codes[code.CodeLength] = cg.OP_if_icmpeq
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
@@ -129,6 +144,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
+		state := &StackMapStateLocalsNumber{}
+		state.FromContext(context)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_BOOL,
+		}))
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
 		if e.Typ == ast.EXPRESSION_TYPE_GT || e.Typ == ast.EXPRESSION_TYPE_LE {
 			code.Codes[code.CodeLength] = cg.OP_ifgt
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
@@ -194,6 +216,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		} else { // ne
 			code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		}
+		state := &StackMapStateLocalsNumber{}
+		state.FromContext(context)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_BOOL,
+		}))
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
 		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
 		code.Codes[code.CodeLength+4] = cg.OP_goto
@@ -211,6 +240,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if t := stack + 1; t > maxstack {
 			maxstack = t
 		}
+		state := &StackMapStateLocalsNumber{}
+		state.FromContext(context)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_BOOL,
+		}))
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
 		} else { // ne
