@@ -67,14 +67,17 @@ func (context *Context) MakeStackMap(last *StackMapStateLocalsNumber, offset int
 			}
 		}
 	}
-	if len(context.Locals) > last.Locals && len(context.Stacks) == 0 { // append frame
+	if len(context.Locals) < last.Locals && len(context.Stacks) == 0 { // append frame
 		num := len(context.Locals) - last.Locals
 		if num <= 4 {
 			appendFrame := &cg.StackMap_append_frame{}
 			appendFrame.FrameType = byte(num + 251)
 			appendFrame.Delta = delta
 			appendFrame.Locals = make([]*cg.StackMap_verification_type_info, len(context.Locals[last.Locals:]))
-			copy(appendFrame.Locals, context.Locals[last.Locals:])
+			for k, _ := range appendFrame.Locals {
+				appendFrame.Locals[k] = &cg.StackMap_verification_type_info{}
+				appendFrame.Locals[k].T = &cg.StackMap_Top_variable_info{}
+			}
 			return appendFrame
 		}
 	}
@@ -88,8 +91,8 @@ func (context *Context) MakeStackMap(last *StackMapStateLocalsNumber, offset int
 	copy(fullFrame.Stacks, context.Stacks)
 	return fullFrame
 }
-func (context *Context) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel, t *ast.VariableType, classname ...string) (ret *cg.StackMap_verification_type_info) {
-	ret = &cg.StackMap_verification_type_info{}
+func (context *Context) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel, t *ast.VariableType, classname ...string) (ret []*cg.StackMap_verification_type_info) {
+	ret = []*cg.StackMap_verification_type_info{}
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -98,30 +101,52 @@ func (context *Context) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
-		ret.T = &cg.StackMap_Integer_variable_info{}
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Integer_variable_info{}
 	case ast.VARIABLE_TYPE_LONG:
-		ret.T = &cg.StackMap_Long_variable_info{}
+		ret = make([]*cg.StackMap_verification_type_info, 2)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[1] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Long_variable_info{}
+		ret[1].T = &cg.StackMap_Top_variable_info{}
 	case ast.VARIABLE_TYPE_FLOAT:
-		ret.T = &cg.StackMap_Float_variable_info{}
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Float_variable_info{}
 	case ast.VARIABLE_TYPE_DOUBLE:
-		ret.T = &cg.StackMap_Double_variable_info{}
+		ret = make([]*cg.StackMap_verification_type_info, 2)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[1] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Double_variable_info{}
+		ret[1].T = &cg.StackMap_Top_variable_info{}
 	case ast.VARIABLE_TYPE_NULL:
-		ret.T = &cg.StackMap_Null_variable_info{}
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Null_variable_info{}
 	case ast.VARIABLE_TYPE_STRING:
-		ret.T = &cg.StackMap_Object_variable_info{
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(java_string_class),
 		}
 	case ast.VARIABLE_TYPE_OBJECT:
-		ret.T = &cg.StackMap_Object_variable_info{
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(classname[0]),
 		}
 	case ast.VARIABLE_TYPE_MAP:
-		ret.T = &cg.StackMap_Object_variable_info{
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(java_hashmap_class),
 		}
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Typ]
-		ret.T = &cg.StackMap_Object_variable_info{
+		ret = make([]*cg.StackMap_verification_type_info, 1)
+		ret[0] = &cg.StackMap_verification_type_info{}
+		ret[0].T = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(meta.classname),
 		}
 	}

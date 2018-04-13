@@ -8,9 +8,10 @@ import (
 func (m *MakeClass) appendLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition, context *Context) {
 	if v.BeenCaptured { // capture
 		context.Locals = append(context.Locals,
-			context.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}, closure.getMeta(v.Typ.Typ).className))
+			context.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT},
+				closure.getMeta(v.Typ.Typ).className)...)
 	} else {
-		context.Locals = append(context.Locals, context.newStackMapVerificationTypeInfo(class, v.Typ))
+		context.Locals = append(context.Locals, context.newStackMapVerificationTypeInfo(class, v.Typ)...)
 	}
 
 }

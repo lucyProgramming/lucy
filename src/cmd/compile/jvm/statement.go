@@ -15,11 +15,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context)
 		backPatchEs(es, code.CodeLength)
 	case ast.STATEMENT_TYPE_IF:
-		var stackMapState StackMapStateLocalsNumber
-		stackMapState.FromContext(context)
+		//var stackMapState StackMapStateLocalsNumber
+		//stackMapState.FromContext(context)
 		maxstack = m.buildIfStatement(class, code, s.StatementIf, context)
 		backPatchEs(s.StatementIf.BackPatchs, code.CodeLength)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(&stackMapState, code.CodeLength))
+		//code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(&stackMapState, code.CodeLength))
 	case ast.STATEMENT_TYPE_BLOCK:
 		m.buildBlock(class, code, s.Block, context)
 	case ast.STATEMENT_TYPE_FOR:

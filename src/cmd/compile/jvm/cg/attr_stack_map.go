@@ -173,7 +173,7 @@ func (s *StackMap_verification_type_info) ToBytes() []byte {
 	case *StackMap_Uninitialized_variable_info:
 		bs := make([]byte, 3)
 		bs[0] = 8
-		binary.BigEndian.PutUint16(bs[1:], s.T.(*StackMap_Object_variable_info).Index)
+		binary.BigEndian.PutUint16(bs[1:], s.T.(*StackMap_Uninitialized_variable_info).Index)
 		return bs
 	default:
 	}
