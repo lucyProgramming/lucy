@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context, state *StackMapState) (maxstack uint16) {
 	// if equal,leave 0 on stack
 	switchCompare := func(t *ast.VariableType) {
 		switch t.Typ {
@@ -48,7 +48,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 8
 		}
 	}
-	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context)
+	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context, nil)
 	//value is on stack
 	var exit *cg.JumpBackPatch
 	size := s.Condition.VariableType.JvmSlotSize()
@@ -61,7 +61,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		needPop := false
 		for kk, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.VariableTypes) > 0 {
-				stack, _ := m.MakeExpression.build(class, code, ee, context)
+				stack, _ := m.MakeExpression.build(class, code, ee, context, nil)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -107,7 +107,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					maxstack = currentStack
 				}
 			}
-			stack, _ := m.MakeExpression.build(class, code, ee, context)
+			stack, _ := m.MakeExpression.build(class, code, ee, context, nil)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -131,7 +131,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		//block is here
 		if c.Block != nil {
-			m.buildBlock(class, code, c.Block, context)
+			m.buildBlock(class, code, c.Block, context, state)
 		}
 		if k != len(s.StatmentSwitchCases)-1 || s.Default != nil {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
@@ -140,7 +140,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	// build default
 	if s.Default != nil {
 		backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
-		m.buildBlock(class, code, s.Default, context)
+		m.buildBlock(class, code, s.Default, context, state)
 	}
 	return
 }

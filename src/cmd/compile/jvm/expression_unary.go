@@ -7,10 +7,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
 		var es []*cg.JumpBackPatch
-		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context)
+		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context, state)
 		backPatchEs(es, code.CodeLength)
 		switch e.VariableType.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -31,7 +31,7 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_NOT {
 		var es []*cg.JumpBackPatch
-		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context)
+		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context, nil)
 		backPatchEs(es, code.CodeLength)
 		code.Codes[code.CodeLength] = cg.OP_ifne
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], uint16(code.CodeLength+7))

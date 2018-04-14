@@ -8,14 +8,14 @@ import (
 
 func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = m.build(class, code, call.Expression, context)
+	maxstack, _ = m.build(class, code, call.Expression, context, nil)
 	switch call.Name {
 	case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
 		variableType := call.Args[0].VariableType
 		if call.Args[0].MayHaveMultiValue() {
 			variableType = call.Args[0].VariableTypes[0]
 		}
-		stack, _ := m.build(class, code, call.Args[0], context)
+		stack, _ := m.build(class, code, call.Args[0], context, nil)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -53,7 +53,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		for k, v := range call.Args {
 			currentStack = 1
 			if v.MayHaveMultiValue() && len(v.VariableTypes) > 0 {
-				stack, _ := m.build(class, code, v, context)
+				stack, _ := m.build(class, code, v, context, nil)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -93,7 +93,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					maxstack = currentStack
 				}
 			}
-			stack, _ := m.build(class, code, v, context)
+			stack, _ := m.build(class, code, v, context, nil)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}

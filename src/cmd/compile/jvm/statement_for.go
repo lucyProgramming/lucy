@@ -7,8 +7,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
-	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context) // map instance on stack
+func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
+	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, nil) // map instance on stack
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
@@ -143,7 +143,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	} else { // for k,v  = range xxx
 		// store v
-		stack, remainStack, op, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class, code, s.StatmentForRangeAttr.ExpressionV, context)
+		stack, remainStack, op, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class, code, s.StatmentForRangeAttr.ExpressionV, context, state)
 		if stack > maxstack { // this means  current stack is 0
 			maxstack = stack
 		}
@@ -155,7 +155,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
 	}
 	// build block
-	m.buildBlock(class, code, s.Block, context)
+	m.buildBlock(class, code, s.Block, context, state)
 	s.ContinueOPOffset = code.CodeLength
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK > 255 {
@@ -172,10 +172,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	return
 }
 
-func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
-
+func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	//build array expression
-	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context) // array on stack
+	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, nil) // array on stack
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
@@ -344,7 +343,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		// store v
 		//get ops,make ops ready
 		stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
-			code, s.StatmentForRangeAttr.ExpressionV, context)
+			code, s.StatmentForRangeAttr.ExpressionV, context, state)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -364,7 +363,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		if s.StatmentForRangeAttr.ModelKV { // set to k
 			stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
-				code, s.StatmentForRangeAttr.ExpressionK, context)
+				code, s.StatmentForRangeAttr.ExpressionK, context, state)
 			if stack > maxstack {
 				maxstack = stack
 			}
@@ -382,7 +381,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 
 	// build block
-	m.buildBlock(class, code, s.Block, context)
+	m.buildBlock(class, code, s.Block, context, state)
 	//innc k
 	s.ContinueOPOffset = code.CodeLength
 	code.Codes[code.CodeLength] = cg.OP_iinc
@@ -401,18 +400,18 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	return
 }
 
-func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	if s.StatmentForRangeAttr != nil {
 		if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY ||
 			s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
-			return m.buildForRangeStatementForArray(class, code, s, context)
+			return m.buildForRangeStatementForArray(class, code, s, context, state)
 		} else { // for map
-			return m.buildForRangeStatementForMap(class, code, s, context)
+			return m.buildForRangeStatementForMap(class, code, s, context, state)
 		}
 	}
 	//init
 	if s.Init != nil {
-		stack, _ := m.MakeExpression.build(class, code, s.Init, context)
+		stack, _ := m.MakeExpression.build(class, code, s.Init, context, nil)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -421,7 +420,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	s.ContinueOPOffset = loopBeginAt
 	//condition
 	if s.Condition != nil {
-		stack, es := m.MakeExpression.build(class, code, s.Condition, context)
+		stack, es := m.MakeExpression.build(class, code, s.Condition, context, state)
 		backPatchEs(es, code.CodeLength)
 		if stack > maxstack {
 			maxstack = stack
@@ -430,10 +429,10 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	} else {
 
 	}
-	m.buildBlock(class, code, s.Block, context)
+	m.buildBlock(class, code, s.Block, context, state)
 	if s.Post != nil {
 		s.ContinueOPOffset = code.CodeLength
-		stack, _ := m.MakeExpression.build(class, code, s.Post, context)
+		stack, _ := m.MakeExpression.build(class, code, s.Post, context, nil)
 		if stack > maxstack {
 			maxstack = stack
 		}

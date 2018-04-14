@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildNewArray(class, code, e, context)
 	}
@@ -20,7 +20,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.CodeLength += 4
 	maxstack = 2
 	if n.Args != nil && len(n.Args) > 0 {
-		maxstack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context)
+		maxstack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {
@@ -70,7 +70,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	code.CodeLength += 4
 	maxstack = 2
 	// call init
-	stack, _ := m.build(class, code, n.Args[0], context) // must be a interger
+	stack, _ := m.build(class, code, n.Args[0], context, nil) // must be a interger
 	if t := 2 + stack; t > maxstack {
 		maxstack = t
 	}

@@ -56,6 +56,8 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "doubleValue",
 			Descriptor: "()D",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	default:
+		panic(1)
 	}
 	code.CodeLength += 3
 }

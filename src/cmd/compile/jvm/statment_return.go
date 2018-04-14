@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementReturn, context *Context, state *StackMapState) (maxstack uint16) {
 	if len(context.function.Typ.ReturnList) == 0 {
 		if context.Defers != nil && len(context.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null // expect exception on stack
@@ -13,7 +13,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if 1 > code.MaxStack {
 				code.MaxStack = 1
 			}
-			m.buildDefers(class, code, context, context.Defers, true, s)
+			m.buildDefers(class, code, state, context, context.Defers, true, s)
 		}
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
@@ -22,7 +22,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if len(context.function.Typ.ReturnList) == 1 {
 		var es []*cg.JumpBackPatch
 		if len(s.Expressions) > 0 {
-			maxstack, es = m.MakeExpression.build(class, code, s.Expressions[0], context)
+			maxstack, es = m.MakeExpression.build(class, code, s.Expressions[0], context, state)
 			backPatchEs(es, code.CodeLength)
 			if s.Expressions[0].VariableType.IsNumber() && s.Expressions[0].VariableType.Typ != context.function.Typ.ReturnList[0].Typ.Typ {
 				m.MakeExpression.numberTypeConverter(code, s.Expressions[0].VariableType.Typ, context.function.Typ.ReturnList[0].Typ.Typ)
@@ -40,7 +40,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if 1 > code.MaxStack {
 				code.MaxStack = 1
 			}
-			m.buildDefers(class, code, context, context.Defers, true, s)
+			m.buildDefers(class, code, state, context, context.Defers, true, s)
 			code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 			//restore the stack
 			if len(s.Expressions) > 0 { //restore stack
@@ -107,7 +107,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				if currentStack > maxstack {
 					maxstack = maxstack
 				} // make the call
-				stack, _ := m.MakeExpression.build(class, code, v, context)
+				stack, _ := m.MakeExpression.build(class, code, v, context, nil)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -125,7 +125,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if v.MayHaveMultiValue() {
 				variableType = v.VariableTypes[0]
 			}
-			stack, es := m.MakeExpression.build(class, code, v, context)
+			stack, es := m.MakeExpression.build(class, code, v, context, state)
 			backPatchEs(es, code.CodeLength)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
@@ -162,7 +162,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if t := uint16(1); t > code.MaxStack {
 			code.MaxStack = t
 		}
-		m.buildDefers(class, code, context, context.Defers, true, s)
+		m.buildDefers(class, code, state, context, context.Defers, true, s)
 		code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 		//restore the stack
 		copyOP(code,

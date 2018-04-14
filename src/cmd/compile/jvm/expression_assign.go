@@ -5,12 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxstack, remainStack, op, target, classname, name, descriptor := m.getLeftValue(class, code, left, context)
-	stack, es := m.build(class, code, right, context)
+	maxstack, remainStack, op, target, classname, name, descriptor := m.getLeftValue(class, code, left, context, state)
+	stack, es := m.build(class, code, right, context, state)
 	backPatchEs(es, code.CodeLength)
 	if t := remainStack + stack; t > maxstack {
 		maxstack = t
@@ -39,9 +39,9 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 }
 
 // a,b,c = 122,fdfd2232,"hello";
-func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	if e.IsStatementExpression == false {
-		return m.buildExpressionAssign(class, code, e, context)
+		return m.buildExpressionAssign(class, code, e, context, state)
 	}
 	bin := e.Data.(*ast.ExpressionBinary)
 	lefts := bin.Left.Data.([]*ast.Expression)
@@ -60,7 +60,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			lefts[index].Data.(*ast.ExpressionIdentifer).Name == ast.NO_NAME_IDENTIFIER {
 			noDestinations[index] = true
 		} else {
-			stack, remainstack, op, target, classname, name, descriptor := m.getLeftValue(class, code, lefts[index], context)
+			stack, remainstack, op, target, classname, name, descriptor := m.getLeftValue(class, code, lefts[index], context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -92,7 +92,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	}
 	for _, v := range rights {
 		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
-			stack, _ := m.build(class, code, v, context)
+			stack, _ := m.build(class, code, v, context, nil)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -130,7 +130,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			continue
 		}
 		needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
-		stack, es := m.build(class, code, v, context)
+		stack, es := m.build(class, code, v, context, state)
 		backPatchEs(es, code.CodeLength) // true or false need to backpatch
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t

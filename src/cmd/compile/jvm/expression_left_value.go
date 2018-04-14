@@ -34,8 +34,8 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, 
 
 func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxstack, _ = m.build(class, code, index.Expression, context)
-	stack, _ := m.build(class, code, index.Index, context)
+	maxstack, _ = m.build(class, code, index.Expression, context, nil)
+	stack, _ := m.build(class, code, index.Index, context, nil)
 	if t := 1 + stack; t > maxstack {
 		maxstack = t
 	}
@@ -49,7 +49,7 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 	return
 }
 
-func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
+func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifer)
@@ -149,8 +149,8 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
-			maxstack, _ = m.build(class, code, index.Expression, context)
-			stack, _ := m.build(class, code, index.Index, context)
+			maxstack, _ = m.build(class, code, index.Expression, context, nil)
+			stack, _ := m.build(class, code, index.Index, context, nil)
 			if t := stack + 1; t > maxstack {
 				maxstack = t
 			}
@@ -187,7 +187,7 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 				op = []byte{cg.OP_putstatic}
 			} else {
 				op = []byte{cg.OP_putfield}
-				maxstack, _ = m.build(class, code, dot.Expression, context)
+				maxstack, _ = m.build(class, code, dot.Expression, context, nil)
 				remainStack = 1
 			}
 		}

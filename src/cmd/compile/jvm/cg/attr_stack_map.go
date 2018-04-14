@@ -115,7 +115,7 @@ func (s *StackMap_full_frame) ToBytes() []byte {
 		bs = append(bs, v.ToBytes()...)
 	}
 	bs2 := make([]byte, 2)
-	binary.BigEndian.PutUint16(bs[3:], uint16(len(s.Stacks)))
+	binary.BigEndian.PutUint16(bs2, uint16(len(s.Stacks)))
 	bs = append(bs, bs2...)
 	for _, v := range s.Stacks {
 		bs = append(bs, v.ToBytes()...)

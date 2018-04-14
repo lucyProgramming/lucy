@@ -25,8 +25,8 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 	}
-	stack, es := m.build(class, code, convertion.Expression, context)
-	backPatchEs(es, code.CodeLength)
+	stack, _ := m.build(class, code, convertion.Expression, context, nil)
+	//backPatchEs(es, code.CodeLength)
 	maxstack = currentStack + stack
 	if convertion.Typ.IsNumber() {
 		m.numberTypeConverter(code, convertion.Expression.VariableType.Typ, convertion.Typ.Typ)

@@ -5,12 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode, args []*ast.Expression, parameters ast.ParameterList, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode, args []*ast.Expression, parameters ast.ParameterList, context *Context, state *StackMapState) (maxstack uint16) {
 	currentStack := uint16(0)
 	for k, e := range args {
 		var variabletype *ast.VariableType
 		if e.MayHaveMultiValue() && len(e.VariableTypes) > 1 {
-			stack, _ := m.build(class, code, e, context)
+			stack, _ := m.build(class, code, e, context, nil)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -31,7 +31,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 		if e.MayHaveMultiValue() {
 			variabletype = e.VariableTypes[0]
 		}
-		stack, es := m.build(class, code, e, context)
+		stack, es := m.build(class, code, e, context, state)
 		backPatchEs(es, code.CodeLength)
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t

@@ -17,6 +17,7 @@ var (
 	NameLoader          LoadName
 	LUCY_ROOT_CLASS     = "lucy/deps/Object"
 	JAVA_ROOT_CLASS     = "java/lang/Object"
+	SUPER_FIELD_NAME    = "super"
 	buildinFunctionsMap = make(map[string]*buildFunction)
 	JvmSlotSizeHandler  func(v *VariableType) uint16 // implements by outside
 	PackageBeenCompile  *Package

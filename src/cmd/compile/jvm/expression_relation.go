@@ -7,11 +7,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	if bin.Left.VariableType.IsNumber() { // in this case ,right must be a number type
 		maxstack = 4
-		stack, _ := m.build(class, code, bin.Left, context)
+		stack, _ := m.build(class, code, bin.Left, context, nil)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -19,7 +19,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if target != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
 		}
-		stack, _ = m.build(class, code, bin.Right, context)
+		stack, _ = m.build(class, code, bin.Right, context, nil)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -37,10 +37,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength] = cg.OP_dcmpl
 		}
 		code.CodeLength++
-		state := &StackMapStateLocalsNumber{}
-		state.FromContext(context)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
-		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		})...)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
@@ -98,17 +96,15 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL ||
 		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es []*cg.JumpBackPatch
-		maxstack, es = m.build(class, code, bin.Left, context)
+		maxstack, es = m.build(class, code, bin.Left, context, state)
 		backPatchEs(es, code.CodeLength)
-		stack, es := m.build(class, code, bin.Right, context)
+		stack, es := m.build(class, code, bin.Right, context, state)
 		backPatchEs(es, code.CodeLength)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
-		state := &StackMapStateLocalsNumber{}
-		state.FromContext(context)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
-		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		})...)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
@@ -132,8 +128,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	}
 	//string compare
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
-		maxstack, _ = m.build(class, code, bin.Left, context)
-		stack, _ := m.build(class, code, bin.Right, context)
+		maxstack, _ = m.build(class, code, bin.Left, context, nil)
+		stack, _ := m.build(class, code, bin.Right, context, nil)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_string_class,
@@ -144,10 +140,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
-		state := &StackMapStateLocalsNumber{}
-		state.FromContext(context)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
-		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		})...)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
@@ -210,16 +204,14 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		} else {
 			notNullExpression = bin.Right
 		}
-		maxstack, _ = m.build(class, code, notNullExpression, context)
+		maxstack, _ = m.build(class, code, notNullExpression, context, nil)
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 		} else { // ne
 			code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		}
-		state := &StackMapStateLocalsNumber{}
-		state.FromContext(context)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
-		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		})...)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))
@@ -232,18 +224,16 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	if bin.Left.VariableType.IsPointer() && bin.Right.VariableType.IsPointer() { //
-		stack, _ := m.build(class, code, bin.Left, context)
+		stack, _ := m.build(class, code, bin.Left, context, nil)
 		if stack > maxstack {
 			maxstack = stack
 		}
-		stack, _ = m.build(class, code, bin.Right, context)
+		stack, _ = m.build(class, code, bin.Right, context, nil)
 		if t := stack + 1; t > maxstack {
 			maxstack = t
 		}
-		state := &StackMapStateLocalsNumber{}
-		state.FromContext(context)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
-		context.Stacks = append(context.Stacks, context.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		})...)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+8))

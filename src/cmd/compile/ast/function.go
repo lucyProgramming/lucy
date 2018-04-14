@@ -170,6 +170,8 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				errFunc()
 			}
 		}
+		f.Typ.ParameterList[0].LocalValOffset = 1
+		f.VarOffset = 2 //
 		return
 	}
 	if f.Typ != nil {

@@ -7,10 +7,10 @@ import (
 
 func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	slice := e.Data.(*ast.ExpressionSlice)
-	maxstack, _ = m.build(class, code, slice.Expression, context)
+	maxstack, _ = m.build(class, code, slice.Expression, context, nil)
 	// build start
 	if slice.Start != nil {
-		stack, _ := m.build(class, code, slice.Start, context)
+		stack, _ := m.build(class, code, slice.Start, context, nil)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -22,7 +22,7 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 	}
 	if slice.End != nil {
-		stack, _ := m.build(class, code, slice.End, context)
+		stack, _ := m.build(class, code, slice.End, context, nil)
 		if slice.End.VariableType.Typ == ast.VARIABLE_TYPE_LONG {
 			m.numberTypeConverter(code, ast.VARIABLE_TYPE_LONG, ast.VARIABLE_TYPE_INT)
 		}

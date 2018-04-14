@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	ee := e.Data.(*ast.Expression)
 	if t := ee.Data.(*ast.ExpressionIdentifer); ee.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
 		t.Var.BeenCaptured == false &&
@@ -60,12 +60,12 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		return
 	}
 
-	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context)
+	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context, state)
 
 	/*
 		left value must can be used as right value
 	*/
-	stack, _ := m.build(class, code, ee, context) // load it`s value
+	stack, _ := m.build(class, code, ee, context, nil) // load it`s value
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}

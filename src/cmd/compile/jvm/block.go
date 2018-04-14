@@ -2,20 +2,27 @@ package jvm
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context) {
-	if b.Defers != nil && len(b.Defers) > 0 { // just for return to use
-	}
+func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
 	if len(b.Defers) > 0 { // should be more defers when compile
 		context.Defers = append(context.Defers, b.Defers...)
 	}
+	context.block = b
+	if b.IsFunctionTopBlock == false {
+		b.LastStackMapLocalVars = make([]*cg.StackMap_verification_type_info, len(b.Outter.LastStackMapLocalVars))
+		copy(b.LastStackMapLocalVars, b.Outter.LastStackMapLocalVars)
+	}
 	for _, s := range b.Statements {
-		maxstack := m.buildStatement(class, code, b, s, context)
+		maxstack := m.buildStatement(class, code, b, s, context, state)
 		if maxstack > code.MaxStack {
 			code.MaxStack = maxstack
+		}
+		if len(state.Stacks) > 0 {
+			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 	}
 	if len(b.Defers) > 0 {
@@ -28,12 +35,12 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 	}
 	if b.IsFunctionTopBlock == false {
-		m.buildDefers(class, code, context, b.Defers, true, nil)
+		m.buildDefers(class, code, state, context, b.Defers, true, nil)
 	}
 	return
 }
 
-func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ds []*ast.Defer, needExceptionTable bool, r *ast.StatementReturn) {
+func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState, context *Context, ds []*ast.Defer, needExceptionTable bool, r *ast.StatementReturn) {
 	if len(ds) == 0 {
 		return
 	}
@@ -71,7 +78,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			//expect exception on stack
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // this code will make stack is empty
 		}
-		m.buildBlock(class, code, &ds[index].Block, context)
+		m.buildBlock(class, code, &ds[index].Block, context, state)
 		// load to stack
 		// this code maxStack is 2
 		if 2 > code.MaxStack {

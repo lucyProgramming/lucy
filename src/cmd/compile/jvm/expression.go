@@ -9,7 +9,7 @@ type MakeExpression struct {
 	MakeClass *MakeClass
 }
 
-func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
+func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.JumpBackPatch) {
 	if e.IsCompileAutoExpression == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
@@ -85,7 +85,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LOGICAL_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_LOGICAL_AND:
-		maxstack, exits = m.buildLogical(class, code, e, context)
+		maxstack, exits = m.buildLogical(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_AND:
@@ -103,12 +103,12 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD:
-		maxstack = m.buildArithmetic(class, code, e, context)
+		maxstack = m.buildArithmetic(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
-		maxstack = m.buildAssign(class, code, e, context)
+		maxstack = m.buildAssign(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
-		maxstack = m.buildColonAssign(class, code, e, context)
+		maxstack = m.buildColonAssign(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -119,7 +119,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV_ASSIGN:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD_ASSIGN:
-		maxstack = m.buildOpAssign(class, code, e, context)
+		maxstack = m.buildOpAssign(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_EQ:
 		fallthrough
@@ -132,18 +132,18 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_LT:
-		maxstack = m.buildRelations(class, code, e, context)
+		maxstack = m.buildRelations(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
-		maxstack = m.buildIndex(class, code, e, context)
+		maxstack = m.buildIndex(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_DOT:
 		maxstack = m.buildDot(class, code, e, context)
 
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:
-		maxstack = m.buildMethodCall(class, code, e, context)
+		maxstack = m.buildMethodCall(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_FUNCTION_CALL:
-		maxstack = m.buildFunctionCall(class, code, e, context)
+		maxstack = m.buildFunctionCall(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_INCREMENT:
 		fallthrough
@@ -152,17 +152,17 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_PRE_INCREMENT:
 		fallthrough
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
-		maxstack = m.buildSelfIncrement(class, code, e, context)
+		maxstack = m.buildSelfIncrement(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NOT:
-		maxstack = m.buildUnary(class, code, e, context)
+		maxstack = m.buildUnary(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		maxstack = m.buildIdentifer(class, code, e, context)
 	case ast.EXPRESSION_TYPE_NEW:
-		maxstack = m.buildNew(class, code, e, context)
+		maxstack = m.buildNew(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_FUNCTION:
 	case ast.EXPRESSION_TYPE_CONVERTION_TYPE: // []byte(str)
 		maxstack = m.buildTypeConvertion(class, code, e, context)
@@ -170,11 +170,11 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_SLICE:
 		maxstack = m.buildSlice(class, code, e, context)
 	case ast.EXPRESSION_TYPE_ARRAY:
-		maxstack = m.buildArray(class, code, e, context)
+		maxstack = m.buildArray(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_MAP:
 		maxstack = m.buildMapLiteral(class, code, e, context)
 	case ast.EXPRESSION_TYPE_VAR:
-		maxstack = m.buildVar(class, code, e, context)
+		maxstack = m.buildVar(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TYPE_ASSERT:
 		maxstack = m.buildTypeAssert(class, code, e, context)
 	default:

@@ -1,39 +1,35 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"os"
 )
 
-func (m *MakeClass) appendLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition, context *Context) {
+func (m *MakeClass) appendLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition, state *StackMapState) {
 	if v.BeenCaptured { // capture
-		context.Locals = append(context.Locals,
-			context.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT},
-				closure.getMeta(v.Typ.Typ).className)...)
+		t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}
+		t.Class = &ast.Class{}
+		t.Class.Name = closure.getMeta(v.Typ.Typ).className
+		state.Locals = append(state.Locals,
+			state.newStackMapVerificationTypeInfo(class, t)...)
 	} else {
-		context.Locals = append(context.Locals, context.newStackMapVerificationTypeInfo(class, v.Typ)...)
+		state.Locals = append(state.Locals, state.newStackMapVerificationTypeInfo(class, v.Typ)...)
 	}
-
 }
-func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, ft *ast.FunctionType, context *Context) {
-	for _, v := range ft.ParameterList { // insert into locals
+func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) {
+	for _, v := range f.Typ.ParameterList { // insert into locals
 		if v.BeenCaptured { // capture
-			maxstack := closure.createCloureVar(class, code, v)
-			if maxstack > code.MaxStack {
-				code.MaxStack = maxstack
-			}
-			// then load
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-			copyOP(code, loadSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
-			if t := 2 + v.Typ.JvmSlotSize(); t > maxstack {
-				code.MaxStack = t
-			}
-			m.storeLocalVar(class, code, v)
+			//because of stack map,capture parameter not allow
+			fmt.Println(fmt.Sprintf("%s capture parameter not allow", ast.ErrMsgPrefix(v.Pos)))
+			os.Exit(1)
 		}
-		m.appendLocalVar(class, code, v, context)
+		if f.Name != ast.MAIN_FUNCTION_NAME {
+			m.appendLocalVar(class, code, v, state)
+		}
 	}
-
-	for _, v := range ft.ReturnList {
+	for _, v := range f.Typ.ReturnList {
 		currentStack := uint16(0)
 		if v.BeenCaptured { //create closure object
 			maxstack := closure.createCloureVar(class, code, v)
@@ -44,7 +40,7 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
 		}
-		stack, es := m.MakeExpression.build(class, code, v.Expression, context)
+		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
 		backPatchEs(es, code.CodeLength)
 		if t := currentStack + stack; t > code.MaxStack {
 			code.MaxStack = t
@@ -56,7 +52,7 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			code.MaxStack = t
 		}
 		m.storeLocalVar(class, code, v)
-		m.appendLocalVar(class, code, v, context)
+		m.appendLocalVar(class, code, v, state)
 	}
 }
 
@@ -79,8 +75,9 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			Descriptor: "()V",
 		}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
 		method.Code.CodeLength += 4
+		method.Code.MaxStack = 1
 	}
-
+	state := &StackMapState{}
 	// if function is main
 	if f.Name == ast.MAIN_FUNCTION_NAME {
 		code := &method.Code
@@ -100,12 +97,24 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			Descriptor: meta.constructorFuncDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 1)...)
+		{
+			t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_JAVA_ARRAY}
+			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
+			state.Locals = append(state.Locals,
+				state.newStackMapVerificationTypeInfo(class, t)...)
+			t = &ast.VariableType{Typ: ast.VARIABLE_TYPE_ARRAY}
+			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
+			state.Locals = append(state.Locals,
+				state.newStackMapVerificationTypeInfo(class, t)...)
+		}
+
 	}
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
-	m.buildFunctionParameterAndReturnList(class, &method.Code, f.Typ, context)
+	m.buildFunctionParameterAndReturnList(class, &method.Code, f, context, state)
+
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
 		method.Code.CodeLength++
@@ -119,7 +128,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 		}
 	}
-	m.buildBlock(class, &method.Code, f.Block, context)
+	m.buildBlock(class, &method.Code, f.Block, context, state)
 	return
 }
 

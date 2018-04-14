@@ -37,7 +37,6 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		no.Construction = ms[0]
 		return ret
 	}
-
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s  'construction' not found", errMsgPrefix(e.Pos)))
 	} else {

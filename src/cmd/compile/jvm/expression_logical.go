@@ -5,10 +5,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16, exits []*cg.JumpBackPatch) {
+func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.JumpBackPatch) {
 	exits = []*cg.JumpBackPatch{}
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack, es := m.build(class, code, bin.Left, context)
+	maxstack, es := m.build(class, code, bin.Left, context, state)
 	if es != nil {
 		exits = append(exits, es...)
 	}
@@ -22,7 +22,7 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 		exits = append(exits, exit)
 		code.Codes[code.CodeLength] = cg.OP_pop // pop 0
 		code.CodeLength++
-		stack, es := m.build(class, code, bin.Right, context)
+		stack, es := m.build(class, code, bin.Right, context, state)
 		if es != nil {
 			exits = append(exits, es...)
 		}
@@ -39,7 +39,7 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 		exits = append(exits, exit)
 		code.Codes[code.CodeLength] = cg.OP_pop // pop 1
 		code.CodeLength++
-		stack, es := m.build(class, code, bin.Right, context)
+		stack, es := m.build(class, code, bin.Right, context, state)
 		if es != nil {
 			exits = append(exits, es...)
 		}

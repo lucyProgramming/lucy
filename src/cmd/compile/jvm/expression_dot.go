@@ -17,6 +17,15 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		}
 		return
 	}
+	if dot.Name == ast.SUPER_FIELD_NAME {
+		if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_OBJECT {
+			maxstack, _ = m.build(class, code, dot.Expression, context, nil)
+			code.Codes[code.CodeLength] = cg.OP_checkcast
+			class.InsertClassConst(e.VariableType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+		return
+	}
 	if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
 		maxstack = e.VariableType.JvmSlotSize()
 		code.Codes[code.CodeLength] = cg.OP_getstatic
@@ -28,7 +37,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		code.CodeLength += 3
 		return
 	}
-	maxstack, _ = m.build(class, code, dot.Expression, context)
+	maxstack, _ = m.build(class, code, dot.Expression, context, nil)
 	if t := e.VariableType.JvmSlotSize(); t > maxstack {
 		maxstack = t
 	}

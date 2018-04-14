@@ -92,6 +92,11 @@ type Expression struct {
 	IsStatementExpression   bool
 }
 
+func (e *Expression) IsLogical() bool {
+	return e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
+		e.Typ == EXPRESSION_TYPE_LOGICAL_OR
+}
+
 type ExpressionTypeAssert ExpressionTypeConvertion
 
 /*

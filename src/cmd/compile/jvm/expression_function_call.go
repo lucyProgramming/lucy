@@ -8,13 +8,13 @@ import (
 /*
 	maxstack means return value stack size
 */
-func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Func.IsBuildin {
-		return m.mkBuildinFunctionCall(class, code, e, context)
+		return m.mkBuildinFunctionCall(class, code, e, context, state)
 	}
 	if call.Func.IsClosureFunction == false {
-		maxstack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context)
+		maxstack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
@@ -37,7 +37,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		} else {
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosure)...)
 		}
-		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context)
+		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}

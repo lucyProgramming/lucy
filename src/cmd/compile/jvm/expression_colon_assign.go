@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	//first round
 	index := len(vs.Vs) - 1
@@ -21,6 +21,14 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			}
 			// load to stack
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
+			{
+				t := &ast.VariableType{}
+				t.Typ = ast.VARIABLE_TYPE_OBJECT
+				t.Class = &ast.Class{}
+				t.Class.Name = closure.getMeta(vs.Vs[index].Typ.Typ).className
+				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
+			}
+
 			currentStack += 1
 		}
 		index--
@@ -28,7 +36,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	variables := vs.Vs
 	for _, v := range vs.Values {
 		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
-			stack, _ := m.build(class, code, v, context)
+			stack, _ := m.build(class, code, v, context, nil)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
@@ -51,7 +59,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 					if variables[0].BeenCaptured {
 						currentStack -= 1
 					}
-					m.MakeClass.appendLocalVar(class, code, variables[0], context)
+					m.MakeClass.appendLocalVar(class, code, variables[0], state)
 				}
 				variables = variables[1:]
 			}
@@ -61,8 +69,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		if v.MayHaveMultiValue() {
 			variableType = v.VariableTypes[0]
 		}
-		stack, es := m.build(class, code, v, context)
-		backPatchEs(es, code.CodeLength)
+		stack, es := m.build(class, code, v, context, state)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength) //
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+				context.MakeStackMap(state, code.CodeLength))
+		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
@@ -70,24 +83,46 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if variableType.JvmSlotSize() == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 				code.CodeLength++
+				state.popStack(1)
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 				code.CodeLength++
+				state.popStack(2)
+			}
+			variables = variables[1:]
+			continue
+		}
+		if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
+			m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
+		}
+		if variables[0].IsGlobal {
+			storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
+			if variableType.JvmSlotSize() == 1 {
+				state.popStack(1)
+			} else {
+				state.popStack(2)
 			}
 		} else {
-			if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
-				m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
+			m.MakeClass.storeLocalVar(class, code, variables[0])
+			if variables[0].BeenCaptured {
+				currentStack -= 1
 			}
-			if variables[0].IsGlobal {
-				storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
-			} else {
-				m.MakeClass.storeLocalVar(class, code, variables[0])
+			m.MakeClass.appendLocalVar(class, code, variables[0], state)
+			if variableType.JvmSlotSize() == 1 {
 				if variables[0].BeenCaptured {
-					currentStack -= 1
+					state.popStack(2)
+				} else {
+					state.popStack(1)
 				}
-				m.MakeClass.appendLocalVar(class, code, variables[0], context)
+			} else {
+				if variables[0].BeenCaptured {
+					state.popStack(3)
+				} else {
+					state.popStack(2)
+				}
 			}
 		}
+
 		variables = variables[1:]
 	}
 	return

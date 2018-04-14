@@ -5,9 +5,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context)
+	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -23,10 +23,15 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		maxstack = t
 	}
 	currentStack := remainStack + 1 //
-	stack, _ := m.build(class, code, bin.Left, context)
+	stack, es := m.build(class, code, bin.Left, context, state)
+	backPatchEs(es, code.CodeLength)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
+	if t := currentStack + stack; t > maxstack {
+		maxstack = t
+	}
+	m.stackTop2String(class, code, bin.Right.VariableType) //conver to string
 	//append origin string
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -35,7 +40,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, es := m.build(class, code, bin.Right, context)
+	stack, es = m.build(class, code, bin.Right, context, state)
 	backPatchEs(es, code.CodeLength)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
@@ -71,16 +76,16 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	return
 
 }
-func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
-		return m.buildStrPlusAssign(class, code, e, context)
+		return m.buildStrPlusAssign(class, code, e, context, state)
 	}
 
-	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context)
+	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 
 	//left value must can be used as right value,
-	stack, _ := m.build(class, code, bin.Left, context) // load it`s value
+	stack, _ := m.build(class, code, bin.Left, context, nil) // load it`s value
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}
@@ -88,7 +93,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	stack, _ = m.build(class, code, bin.Right, context)
+	stack, _ = m.build(class, code, bin.Right, context, nil)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}

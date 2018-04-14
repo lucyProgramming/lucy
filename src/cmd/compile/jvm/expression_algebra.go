@@ -5,12 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		maxstack, _ = m.build(class, code, bin.Left, context)
+		maxstack, _ = m.build(class, code, bin.Left, context, nil)
 		size := bin.Left.VariableType.JvmSlotSize()
-		stack, _ := m.build(class, code, bin.Right, context)
+		stack, _ := m.build(class, code, bin.Right, context, nil)
 		if t := stack + size; t > maxstack {
 			maxstack = t
 		}
@@ -44,10 +44,10 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
 		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
-			return m.buildStrCat(class, code, bin, context)
+			return m.buildStrCat(class, code, bin, context, state)
 		}
 		maxstack = 4
-		stack, _ := m.build(class, code, bin.Left, context)
+		stack, _ := m.build(class, code, bin.Left, context, nil)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -55,7 +55,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, e.VariableType.Typ)
 		}
-		stack, _ = m.build(class, code, bin.Right, context)
+		stack, _ = m.build(class, code, bin.Right, context, nil)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -154,12 +154,12 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}
 
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
-		maxstack, _ = m.build(class, code, bin.Left, context)
+		maxstack, _ = m.build(class, code, bin.Left, context, nil)
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
 		size := e.VariableType.JvmSlotSize()
-		stack, _ := m.build(class, code, bin.Right, context)
+		stack, _ := m.build(class, code, bin.Right, context, nil)
 		if t := stack + size; t > maxstack {
 			maxstack = t
 		}

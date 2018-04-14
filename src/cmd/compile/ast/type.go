@@ -207,14 +207,6 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 
 func (t *VariableType) mkTypeFromInterface(d interface{}) error {
 	switch d.(type) {
-	//case *VariableDefinition:
-	//	return fmt.Errorf("%s name '%s' is a variable,not a type", errMsgPrefix(t.Pos), t.Name)
-	//case *Function:
-	//	return fmt.Errorf("%s name '%s' is a function,not a type", errMsgPrefix(t.Pos), t.Name)
-	//case *Const:
-	//	return fmt.Errorf("%s name '%s' is a const,not a type", errMsgPrefix(t.Pos), t.Name)
-	//case *Package:
-	//	return fmt.Errorf("%s name '%s' is a package,not a type", errMsgPrefix(t.Pos), t.Name)
 	case *Class:
 		dd := d.(*Class)
 		if t != nil {
@@ -369,7 +361,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_DOUBLE:
 		*ret += "double"
 	case VARIABLE_TYPE_CLASS:
-		*ret += v.Class.Name
+		*ret += fmt.Sprintf("class named %s", v.Class.Name)
 	case VARIABLE_TYPE_ENUM:
 		*ret += "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:

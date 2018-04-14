@@ -1,8 +1,6 @@
 public class test{
 
-
-
-
+	
 	public void sayhai(int i){
 		String s = "123";
 		boolean f = true;
@@ -11,6 +9,7 @@ public class test{
 			String xxx2 = "456";
 			boolean dd = false;
 			boolean gg = true;
+			String[] ss = new String[10];
 			boolean zz = dd && gg;
 		}
 		boolean x = false;

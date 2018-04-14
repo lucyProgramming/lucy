@@ -29,25 +29,15 @@ func (c *Class) resolveName(b *Block) []error {
 	errs := []error{}
 	var err error
 	for _, v := range c.Fields {
+		if v.Name == SUPER_FIELD_NAME {
+			errs = append(errs, fmt.Errorf("%s super is special for access 'super'",
+				errMsgPrefix(v.Pos)))
+		}
 		err = v.Typ.resolve(b)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
-	//for _, v := range c.Constructors {
-	//	for _, vv := range v.Func.Typ.ParameterList {
-	//		err := vv.Typ.resolve(b)
-	//		if err != nil {
-	//			errs = append(errs, err)
-	//		}
-	//	}
-	//	for _, vv := range v.Func.Typ.ReturnList {
-	//		err := vv.Typ.resolve(b)
-	//		if err != nil {
-	//			errs = append(errs, err)
-	//		}
-	//	}
-	//}
 	for _, v := range c.Methods {
 		for _, vv := range v {
 			for _, vvv := range vv.Func.Typ.ParameterList {
@@ -141,14 +131,6 @@ func (c *Class) checkPhase2(father *Block) []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	//if len(c.Constructors) > 1 {
-	//	errs = append(errs, fmt.Errorf("%s class named '%s' has %d(more than 1) contructor,declare at:",
-	//		errMsgPrefix(c.Pos),
-	//		c.Name, len(c.Constructors)))
-	//	for _, v := range c.Constructors {
-	//		errs = append(errs, fmt.Errorf("\t %s contructor method...", errMsgPrefix(v.Func.Pos)))
-	//	}
-	//}
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}

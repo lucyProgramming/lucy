@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"path/filepath"
 )
 
 func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *VariableType) {
@@ -83,23 +84,69 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, err)
 			return nil
 		}
-	} else { // class or object
+	} else if t.Typ == VARIABLE_TYPE_OBJECT { // object
+		if dot.Name == SUPER_FIELD_NAME {
+			if t.Class.Name == JAVA_ROOT_CLASS {
+				*errs = append(*errs, fmt.Errorf("%s '%s' is root class", errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
+				return t
+			}
+			err = t.Class.loadSuperClass()
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+				return t
+			}
+			t := t.Clone()
+			t.Pos = e.Pos
+			t.Class = t.Class.SuperClass
+			return t
+		}
 		field, err := t.Class.accessField(dot.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
-		} else {
-			if !dot.Expression.isThisIdentifierExpression() && !field.IsPublic() {
-				*errs = append(*errs, fmt.Errorf("%s field %s is private", errMsgPrefix(e.Pos),
-					dot.Name))
-			}
 		}
 		if field != nil {
+			if !dot.Expression.isThisIdentifierExpression() && !field.IsPublic() {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is private", errMsgPrefix(e.Pos),
+					dot.Name))
+			}
+			if field.IsStatic() {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,should access by className(%s)", errMsgPrefix(e.Pos),
+					dot.Name, filepath.Base(t.Class.Name)))
+			}
 			t := field.Typ.Clone()
 			t.Pos = e.Pos
 			dot.Field = field
 			return t
-		} else {
-			return nil
+		}
+	} else { // class
+		if dot.Name == SUPER_FIELD_NAME {
+			if t.Class.Name == JAVA_ROOT_CLASS {
+				*errs = append(*errs, fmt.Errorf("%s '%s' is root class", errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
+				return t
+			}
+			err = t.Class.loadSuperClass()
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+				return t
+			}
+			t := t.Clone()
+			t.Pos = e.Pos
+			t.Class = t.Class.SuperClass
+			return t
+		}
+		field, err := t.Class.accessField(dot.Name, false)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+		}
+		if field != nil {
+			if field.IsStatic() == false {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by objectref", errMsgPrefix(e.Pos),
+					dot.Name))
+			}
+			t := field.Typ.Clone()
+			t.Pos = e.Pos
+			dot.Field = field
+			return t
 		}
 	}
 	return nil

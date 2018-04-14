@@ -5,36 +5,37 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement, context *Context, state *StackMapState) (maxstack uint16) {
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
 			return m.buildFunctionExpression(class, code, s.Expression, context)
 		}
 		var es []*cg.JumpBackPatch
-		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context)
+		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
 		backPatchEs(es, code.CodeLength)
 	case ast.STATEMENT_TYPE_IF:
-		//var stackMapState StackMapStateLocalsNumber
-		//stackMapState.FromContext(context)
-		maxstack = m.buildIfStatement(class, code, s.StatementIf, context)
-		backPatchEs(s.StatementIf.BackPatchs, code.CodeLength)
-		//code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(&stackMapState, code.CodeLength))
+		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, state)
+		if len(s.StatementIf.BackPatchs) > 0 {
+			backPatchEs(s.StatementIf.BackPatchs, code.CodeLength)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+				context.MakeStackMap(state, code.CodeLength)) // state is nerver change
+		}
 	case ast.STATEMENT_TYPE_BLOCK:
-		m.buildBlock(class, code, s.Block, context)
+		m.buildBlock(class, code, s.Block, context, state)
 	case ast.STATEMENT_TYPE_FOR:
-		maxstack = m.buildForStatement(class, code, s.StatementFor, context)
+		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
 		backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
 		backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
 	case ast.STATEMENT_TYPE_CONTINUE:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			m.buildDefers(class, code, context, b.Defers, false, nil)
+			m.buildDefers(class, code, state, context, b.Defers, false, nil)
 		}
 		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
 			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	case ast.STATEMENT_TYPE_BREAK:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			m.buildDefers(class, code, context, b.Defers, false, nil)
+			m.buildDefers(class, code, state, context, b.Defers, false, nil)
 		}
 		code.Codes[code.CodeLength] = cg.OP_goto
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
@@ -44,9 +45,9 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			s.StatementBreak.StatementSwitch.BackPatchs = append(s.StatementBreak.StatementSwitch.BackPatchs, b)
 		}
 	case ast.STATEMENT_TYPE_RETURN:
-		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context)
+		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
 	case ast.STATEMENT_TYPE_SWITCH:
-		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context)
+		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
 	case ast.STATEMENT_TYPE_SKIP: // skip this block
 		code.Codes[code.CodeLength] = cg.OP_return

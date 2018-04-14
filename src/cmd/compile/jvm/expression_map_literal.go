@@ -27,7 +27,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		if v.Left.MayHaveMultiValue() {
 			variableType = v.Left.VariableTypes[0]
 		}
-		stack, _ := m.build(class, code, v.Left, context)
+		stack, _ := m.build(class, code, v.Left, context, nil)
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
@@ -35,7 +35,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}
 		currentStack = 3 // stack is ... mapref mapref kref
-		stack, es := m.build(class, code, v.Right, context)
+		stack, es := m.build(class, code, v.Right, context, nil)
 		backPatchEs(es, code.CodeLength)
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t

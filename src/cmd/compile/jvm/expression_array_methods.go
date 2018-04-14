@@ -6,9 +6,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = m.build(class, code, call.Expression, context)
+	maxstack, _ = m.build(class, code, call.Expression, context, state)
 	switch call.Name {
 	case common.ARRAY_METHOD_SIZE:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -17,14 +17,14 @@ func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code
 	return
 }
 
-func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	switch call.Name {
 	case common.ARRAY_METHOD_CAP,
 		common.ARRAY_METHOD_SIZE,
 		common.ARRAY_METHOD_START,
 		common.ARRAY_METHOD_END:
-		maxstack, _ = m.build(class, code, call.Expression, context)
+		maxstack, _ = m.build(class, code, call.Expression, context, nil)
 		meta := ArrayMetas[call.Expression.VariableType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -38,14 +38,14 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			code.CodeLength++
 		}
 	case common.ARRAY_METHOD_APPEND:
-		maxstack, _ = m.build(class, code, call.Expression, context)
+		maxstack, _ = m.build(class, code, call.Expression, context, state)
 		meta := ArrayMetas[call.Expression.VariableType.ArrayType.Typ]
 		for k, v := range call.Args {
 			currentStack := uint16(1)
 			appendName := "append"
 			appendDescriptor := meta.appendDescriptor
 			if v.MayHaveMultiValue() && len(v.VariableTypes) > 0 {
-				stack, _ := m.build(class, code, v, context)
+				stack, _ := m.build(class, code, v, context, nil)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -85,7 +85,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					maxstack = currentStack
 				}
 			}
-			stack, es := m.build(class, code, v, context)
+			stack, es := m.build(class, code, v, context, state)
 			backPatchEs(es, code.CodeLength)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
@@ -103,14 +103,14 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			code.CodeLength++
 		}
 	case common.ARRAY_METHOD_APPEND_ALL:
-		maxstack, _ = m.build(class, code, call.Expression, context)
+		maxstack, _ = m.build(class, code, call.Expression, context, nil)
 		meta := ArrayMetas[call.Expression.VariableType.ArrayType.Typ]
 		for k, v := range call.Args {
 			currentStack := uint16(1)
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
 			if v.MayHaveMultiValue() && len(v.VariableTypes) > 0 {
-				stack, _ := m.build(class, code, v, context)
+				stack, _ := m.build(class, code, v, context, nil)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -169,7 +169,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					maxstack = currentStack
 				}
 			}
-			stack, es := m.build(class, code, v, context)
+			stack, es := m.build(class, code, v, context, state)
 			backPatchEs(es, code.CodeLength)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t

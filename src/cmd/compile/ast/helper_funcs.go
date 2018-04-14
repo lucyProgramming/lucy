@@ -7,7 +7,9 @@ import (
 func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
-
+func ErrMsgPrefix(pos *Pos) string {
+	return errMsgPrefix(pos)
+}
 func errsNotEmpty(es []error) bool {
 	return es != nil && len(es) > 0
 }

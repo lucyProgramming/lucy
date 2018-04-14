@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	arr := e.Data.(*ast.ExpressionArrayLiteral)
 	//	new array ,
 	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
@@ -13,6 +13,26 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
+
+	{
+		t := &cg.StackMap_verification_type_info{}
+		tt := &cg.StackMap_Uninitialized_variable_info{}
+		tt.Index = uint16(code.CodeLength - 4)
+		t.T = tt
+		state.Stacks = append(state.Stacks, t)
+		state.Stacks = append(state.Stacks, t)
+	}
+	{
+		t := &ast.VariableType{}
+		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+		t.ArrayType = e.VariableType.ArrayType
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+	}
+	defer func() {
+		state.popStack(5)
+	}()
 	loadInt32(class, code, int32(arr.Length))
 	switch e.VariableType.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
@@ -90,11 +110,11 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		code.CodeLength++
 	}
+
 	for _, v := range arr.Expressions {
 		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
 			// stack top is array list
-			stack, es := m.build(class, code, v, context)
-			backPatchEs(es, code.CodeLength)
+			stack, _ := m.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxstack {
 				maxstack = t
 			}
@@ -115,8 +135,14 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		loadInt32(class, code, index) // load index
-		stack, es := m.build(class, code, v, context)
-		backPatchEs(es, code.CodeLength)
+		stack, es := m.build(class, code, v, context, state)
+		if len(es) > 0 {
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
+			backPatchEs(es, code.CodeLength)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+				context.MakeStackMap(state, code.CodeLength))
+			state.popStack(1) // must be a logical expression
+		}
 		if t := 5 + stack; t > maxstack {
 			maxstack = t
 		}

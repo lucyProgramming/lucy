@@ -5,23 +5,23 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
-		return m.buildArrayMethodCall(class, code, e, context)
+		return m.buildArrayMethodCall(class, code, e, context, state)
 	}
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildMapMethodCall(class, code, e, context)
 	}
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
-		return m.buildJavaArrayMethodCall(class, code, e, context)
+		return m.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
 	d := call.Method.Func.Descriptor
 	if call.Class.LoadFromOutSide == false {
 		d = Descriptor.methodDescriptor(call.Method.Func)
 	}
 	if call.Method.IsStatic() {
-		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context)
+		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Method.Func.ClassMethod.Class.Name,
@@ -31,8 +31,8 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 		return
 	}
-	maxstack, _ = m.build(class, code, call.Expression, context)
-	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context)
+	maxstack, _ = m.build(class, code, call.Expression, context, nil)
+	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 	if t := stack + 1; t > maxstack {
 		maxstack = t
 	}
