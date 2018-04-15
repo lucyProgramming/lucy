@@ -19,14 +19,21 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		if len(s.StatementIf.BackPatchs) > 0 {
 			backPatchEs(s.StatementIf.BackPatchs, code.CodeLength)
 			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength)) // state is nerver change
+				context.MakeStackMap(state, code.CodeLength))
 		}
 	case ast.STATEMENT_TYPE_BLOCK:
 		m.buildBlock(class, code, s.Block, context, state)
 	case ast.STATEMENT_TYPE_FOR:
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
-		backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
-		backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
+		if len(s.StatementFor.BackPatchs) > 0 {
+			backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+				context.MakeStackMap(state, code.CodeLength))
+		}
+		if len(s.StatementFor.ContinueBackPatchs) > 0 {
+			backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
+		}
+
 	case ast.STATEMENT_TYPE_CONTINUE:
 		if b.Defers != nil && len(b.Defers) > 0 {
 			m.buildDefers(class, code, state, context, b.Defers, false, nil)

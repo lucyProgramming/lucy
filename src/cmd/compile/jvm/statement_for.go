@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
-	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, nil) // map instance on stack
+	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, state) // map instance on stack
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
@@ -174,7 +174,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 
 func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	//build array expression
-	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, nil) // array on stack
+	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, state) // array on stack
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
@@ -182,6 +182,11 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength+4] = cg.OP_goto
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 7) //goto for
 	code.Codes[code.CodeLength+7] = cg.OP_pop
+	state.Stacks = append(state.Stacks,
+		state.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.Expression.VariableType)...)
+	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+11))
+	state.popStack(1)
 	code.CodeLength += 8
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 
@@ -244,8 +249,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		koffset = s.StatmentForRangeAttr.AutoVarForRangeArray.K
 	}
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
-
 	loopbeginAt := code.CodeLength
+	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, loopbeginAt))
 	// load start
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
 	// load k
@@ -395,6 +400,9 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	jumpto(cg.OP_goto, code, loopbeginAt)
 	backPatchEs([]*cg.JumpBackPatch{rangeend}, code.CodeLength) // jump to here
 	//pop index on stack
+	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+	state.popStack(1)
 	code.Codes[code.CodeLength] = cg.OP_pop
 	code.CodeLength++
 	return

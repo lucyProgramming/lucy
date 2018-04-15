@@ -40,7 +40,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 	case common.ARRAY_METHOD_APPEND:
 		maxstack, _ = m.build(class, code, call.Expression, context, state)
 		meta := ArrayMetas[call.Expression.VariableType.ArrayType.Typ]
-		for k, v := range call.Args {
+		for _, v := range call.Args {
 			currentStack := uint16(1)
 			appendName := "append"
 			appendDescriptor := meta.appendDescriptor
@@ -51,16 +51,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				}
 				m.buildStoreArrayListAutoVar(code, context)
 				for kk, t := range v.VariableTypes {
-					currentStack = uint16(1)
-					if k == len(call.Args)-1 && kk == len(v.VariableTypes)-1 {
-					} else {
-						code.Codes[code.CodeLength] = cg.OP_dup
-						code.CodeLength++
-						currentStack++
-						if currentStack > maxstack {
-							maxstack = currentStack
-						}
-					}
+					currentStack = 1
 					if t := m.unPackArraylist(class, code, kk, t, context) + currentStack; t > maxstack {
 						maxstack = t
 					}
@@ -76,14 +67,6 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					code.CodeLength += 3
 				}
 				continue
-			}
-			if k != len(call.Args)-1 {
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				currentStack++
-				if currentStack > maxstack {
-					maxstack = currentStack
-				}
 			}
 			stack, es := m.build(class, code, v, context, state)
 			backPatchEs(es, code.CodeLength)

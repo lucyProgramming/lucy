@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -36,6 +37,7 @@ func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos, code *cg.Att
 }
 
 func (context *Context) MakeStackMap(state *StackMapState, offset int) cg.StackMap {
+	fmt.Println("offset:", offset)
 	var delta uint16
 	if context.StackMapDelta == 0 {
 		delta = uint16(offset)
