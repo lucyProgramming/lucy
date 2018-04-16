@@ -11,9 +11,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
 			return m.buildFunctionExpression(class, code, s.Expression, context)
 		}
-		var es []*cg.JumpBackPatch
 		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
-		backPatchEs(es, code.CodeLength)
 	case ast.STATEMENT_TYPE_IF:
 		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.BackPatchs) > 0 {
@@ -21,8 +19,8 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 				context.MakeStackMap(state, code.CodeLength))
 		}
-	case ast.STATEMENT_TYPE_BLOCK:
-		m.buildBlock(class, code, s.Block, context, state)
+	case ast.STATEMENT_TYPE_BLOCK: //new
+		m.buildBlock(class, code, s.Block, context, (&StackMapState{}).FromLast(state))
 	case ast.STATEMENT_TYPE_FOR:
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.BackPatchs) > 0 {
@@ -31,9 +29,9 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 				context.MakeStackMap(state, code.CodeLength))
 		}
 		if len(s.StatementFor.ContinueBackPatchs) > 0 {
+			// stack map is solved
 			backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
 		}
-
 	case ast.STATEMENT_TYPE_CONTINUE:
 		if b.Defers != nil && len(b.Defers) > 0 {
 			m.buildDefers(class, code, state, context, b.Defers, false, nil)
@@ -63,7 +61,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 		s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
 	case ast.STATEMENT_TYPE_LABLE:
-		backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
+		if len(s.StatmentLable.BackPatches) > 0 {
+			backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+				context.MakeStackMap(state, code.CodeLength))
+		}
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
 

@@ -127,6 +127,16 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 		}
 	}
+	if f.AutoVarForException != nil {
+		method.Code.Codes[method.Code.CodeLength] = cg.OP_aconst_null
+		method.Code.CodeLength++
+		copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
+		t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}
+		t.Class = &ast.Class{}
+		t.Class.Name = java_throwable_class
+		state.Locals = append(state.Locals,
+			state.newStackMapVerificationTypeInfo(class, t)...)
+	}
 	m.buildBlock(class, &method.Code, f.Block, context, state)
 	return
 }

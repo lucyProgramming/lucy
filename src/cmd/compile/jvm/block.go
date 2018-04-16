@@ -47,12 +47,21 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		// insert exceptions
-		e := &cg.ExceptionTable{}
 		if needExceptionTable {
+			{
+				t := &ast.VariableType{}
+				t.Typ = ast.VARIABLE_TYPE_OBJECT
+				t.Class = &ast.Class{}
+				t.Class.Name = "java/lang/Throwable"
+				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
+			}
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			state.popStack(1)
+			e := &cg.ExceptionTable{}
 			e.StartPc = uint16(startPc)
 			e.Endpc = uint16(endPc)
 			e.HandlerPc = uint16(code.CodeLength)
-			e.CatchType = class.Class.InsertClassConst("java/lang/Throwable") //runtime
+			e.CatchType = class.Class.InsertClassConst(java_throwable_class) //runtime
 			code.Exceptions = append(code.Exceptions, e)
 			startPc = code.CodeLength
 			if index == len(ds)-1 && r != nil && context.function.NoReturnValue() == false {
@@ -73,7 +82,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			//expect exception on stack
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // this code will make stack is empty
 		}
-		m.buildBlock(class, code, &ds[index].Block, context, state)
+		m.buildBlock(class, code, &ds[index].Block, context, (&StackMapState{}).FromLast(state))
 		// load to stack
 		// this code maxStack is 2
 		if 2 > code.MaxStack {
@@ -104,7 +113,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 		code.Codes[code.CodeLength+3] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4) // goto pop
 		code.Codes[code.CodeLength+6] = cg.OP_athrow
 		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
 		code.CodeLength += 8

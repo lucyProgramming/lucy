@@ -28,8 +28,8 @@ func (s *StackMapState) sliceOutLocals(pop int) {
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
 	copy(s.Locals, last.Locals)
-	s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
-	copy(s.Stacks, last.Stacks)
+	//s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
+	//copy(s.Stacks, last.Stacks)
 	return s
 }
 
