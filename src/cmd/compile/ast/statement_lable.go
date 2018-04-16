@@ -24,7 +24,7 @@ func (s *StatementLable) Ready(from *Pos) error {
 	if len(ss) == 0 {
 		return nil
 	}
-	errmsg := fmt.Sprintf("%s cannot jump over variable definition:", errMsgPrefix(from))
+	errmsg := fmt.Sprintf("%s cannot jump over variable definition:\n", errMsgPrefix(from))
 	for _, v := range ss {
 		errmsg += fmt.Sprintf("\t%s constains variable definition", errMsgPrefix(v.Pos))
 	}
