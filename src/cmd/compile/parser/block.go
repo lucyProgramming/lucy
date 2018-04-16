@@ -338,7 +338,9 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		s.StatmentLable = lable
 		lable.Pos = e.Pos
 		lable.Name = e.Data.(*ast.ExpressionIdentifer).Name
+		lable.StatementsOffset = len(block.Statements)
 		block.Statements = append(block.Statements, s)
+		lable.Block = block
 		block.Insert(lable.Name, e.Pos, lable)
 	} else {
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {

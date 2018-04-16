@@ -1,11 +1,15 @@
 package jvm
 
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+import (
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+)
 
 type StackMapState struct {
-	Locals []*cg.StackMap_verification_type_info
-	Stacks []*cg.StackMap_verification_type_info
+	//block      *ast.Block
+	Locals     []*cg.StackMap_verification_type_info
+	LastLocals []*cg.StackMap_verification_type_info
+	Stacks     []*cg.StackMap_verification_type_info
 }
 
 func (s *StackMapState) popStack(pop int) {
@@ -15,6 +19,12 @@ func (s *StackMapState) popStack(pop int) {
 	s.Stacks = s.Stacks[:len(s.Stacks)-pop]
 }
 
+func (s *StackMapState) sliceOutLocals(pop int) {
+	if pop <= 0 {
+		panic("negative pop")
+	}
+	s.Locals = s.Locals[:len(s.Locals)-pop]
+}
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
 	copy(s.Locals, last.Locals)

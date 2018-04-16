@@ -11,11 +11,6 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	if len(b.Defers) > 0 { // should be more defers when compile
 		context.Defers = append(context.Defers, b.Defers...)
 	}
-	context.block = b
-	if b.IsFunctionTopBlock == false {
-		b.LastStackMapLocalVars = make([]*cg.StackMap_verification_type_info, len(b.Outter.LastStackMapLocalVars))
-		copy(b.LastStackMapLocalVars, b.Outter.LastStackMapLocalVars)
-	}
 	for _, s := range b.Statements {
 		maxstack := m.buildStatement(class, code, b, s, context, state)
 		if maxstack > code.MaxStack {

@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -175,6 +174,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	//build array expression
 	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, state) // array on stack
+
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
@@ -189,7 +189,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	state.popStack(1)
 	code.CodeLength += 8
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
-
+	forState := (&StackMapState{}).FromLast(state)
 	if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		//get elements
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -205,6 +205,10 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, s.StatmentForRangeAttr.AutoVarForRangeArray.Elements)...)
+		{
+			_, t, _ := Descriptor.ParseType([]byte(meta.elementsFieldDescriptor))
+			forState.Locals = append(forState.Locals, forState.newStackMapVerificationTypeInfo(class, t)...)
+		}
 		//get start
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
@@ -215,6 +219,11 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
+		{
+			forState.Locals = append(forState.Locals,
+				forState.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		}
+
 		//get end
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -224,6 +233,10 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.End)...)
+		{
+			forState.Locals = append(forState.Locals,
+				forState.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		}
 	} else { // java_array
 		//get length
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -239,22 +252,21 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, s.StatmentForRangeAttr.AutoVarForRangeArray.Elements)...)
 	}
 
-	var koffset uint16
 	// k set to 0
 	code.Codes[code.CodeLength] = cg.OP_iconst_0
 	code.CodeLength++
-	if s.StatmentForRangeAttr.ModelKV && s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		koffset = s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset
-	} else {
-		koffset = s.StatmentForRangeAttr.AutoVarForRangeArray.K
+
+	{
+		forState.Locals = append(forState.Locals,
+			forState.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 	}
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
 	loopbeginAt := code.CodeLength
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, loopbeginAt))
+	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(forState, loopbeginAt))
 	// load start
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
 	// load k
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
+	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
 	// mk index
 	code.Codes[code.CodeLength] = cg.OP_iadd
 	code.Codes[code.CodeLength+1] = cg.OP_dup
@@ -304,7 +316,6 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	} else if s.StatmentForRangeAttr.Expression.VariableType.ArrayType.IsPointer() {
 		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.ArrayType)
 	}
-
 	//store to v tmp
 	copyOP(code,
 		storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ,
@@ -323,6 +334,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
 			closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
 		} else {
+			forState.Locals = append(forState.Locals,
+				forState.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 			copyOP(code,
 				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ, s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
 			copyOP(code,
@@ -376,7 +389,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 				maxstack = t
 			}
 			// load k
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, koffset)...)
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
 			m.MakeExpression.numberTypeConverter(code, ast.VARIABLE_TYPE_INT, target.Typ)
 			if t := target.JvmSlotSize() + remainStack; t > maxstack {
 				maxstack = t
@@ -386,20 +399,21 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 
 	// build block
-	m.buildBlock(class, code, s.Block, context, state)
+	m.buildBlock(class, code, s.Block, context, forState)
 	//innc k
 	s.ContinueOPOffset = code.CodeLength
 	code.Codes[code.CodeLength] = cg.OP_iinc
-	if koffset > 255 {
+	if s.StatmentForRangeAttr.AutoVarForRangeArray.K > 255 {
 		panic("over 255")
 	}
-	code.Codes[code.CodeLength+1] = byte(koffset)
+	code.Codes[code.CodeLength+1] = byte(s.StatmentForRangeAttr.AutoVarForRangeArray.K)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 	//goto begin
 	jumpto(cg.OP_goto, code, loopbeginAt)
 	backPatchEs([]*cg.JumpBackPatch{rangeend}, code.CodeLength) // jump to here
 	//pop index on stack
+
 	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
 	state.popStack(1)

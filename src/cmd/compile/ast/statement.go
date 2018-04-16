@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 const (
@@ -22,6 +21,7 @@ const (
 )
 
 type Statement struct {
+	Checked           bool
 	Pos               *Pos
 	Typ               int
 	StatementIf       *StatementIF
@@ -35,26 +35,6 @@ type Statement struct {
 	StatmentLable     *StatementLable
 	StatementGoto     *StatementGoto
 	Defer             *Defer
-}
-
-type StatementGoto struct {
-	Name           string
-	Pos            *Pos
-	StatementLable *StatementLable
-}
-
-type StatementLable struct {
-	Name        string
-	Pos         *Pos
-	BackPatches []*cg.JumpBackPatch
-}
-
-type StatementContinue struct {
-	StatementFor *StatementFor
-}
-type StatementBreak struct {
-	StatementFor    *StatementFor
-	StatementSwitch *StatementSwitch
 }
 
 func (s *Statement) statementName() string {
@@ -85,8 +65,15 @@ func (s *Statement) statementName() string {
 	return ""
 }
 
-func (s *Statement) check(b *Block) []error { // b is father
+func (s *Statement) isVariableDefinition() bool {
+	return s.Typ == STATEMENT_TYPE_EXPRESSION &&
+		(s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Typ == EXPRESSION_TYPE_VAR)
+}
 
+func (s *Statement) check(b *Block) []error { // b is father
+	defer func() {
+		s.Checked = true
+	}()
 	if b.Defers != nil && len(b.Defers) > 0 {
 		b.InheritedAttribute.Defers = append(b.InheritedAttribute.Defers, b.Defers...)
 		defer func() {
@@ -170,19 +157,6 @@ func (s *Statement) check(b *Block) []error { // b is father
 	return nil
 }
 
-func (s *Statement) checkStatementGoto(b *Block) error {
-	t := b.SearchByName(s.StatementGoto.Name)
-	if t == nil {
-		return fmt.Errorf("%s label named '%s' not found", errMsgPrefix(s.StatementGoto.Pos), s.StatementGoto.Name)
-	}
-	if l, ok := t.(*StatementLable); ok == false {
-		return fmt.Errorf("%s '%s' is not a lable", errMsgPrefix(s.StatementGoto.Pos), s.StatementGoto.Name)
-	} else {
-		s.StatementGoto.StatementLable = l
-	}
-	return nil
-}
-
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
 	//
@@ -236,10 +210,5 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	return errs
-}
-
-func (s *StatmentSwitchCase) check() []error {
-	errs := []error{}
 	return errs
 }

@@ -58,10 +58,10 @@ type AutoVarForRangeArray struct {
 }
 
 func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
-	t.K = f.VarOffset
-	t.Elements = f.VarOffset + 1
-	t.Start = f.VarOffset + 2
-	t.End = f.VarOffset + 3
+	t.Elements = f.VarOffset
+	t.Start = f.VarOffset + 1
+	t.End = f.VarOffset + 2
+	t.K = f.VarOffset + 3
 	f.OffsetDestinations = append(f.OffsetDestinations, &t.K, &t.Elements, &t.Start, &t.End)
 	f.VarOffset += 4
 	t.V = f.VarOffset

@@ -101,7 +101,7 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 	case 'Z':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_SHORT,
+			Typ: ast.VARIABLE_TYPE_BOOL,
 		}, nil
 	case 'L':
 		bs = bs[1:]

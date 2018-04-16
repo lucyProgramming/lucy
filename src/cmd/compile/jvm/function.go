@@ -114,7 +114,6 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
 	m.buildFunctionParameterAndReturnList(class, &method.Code, f, context, state)
-
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
 		method.Code.CodeLength++

@@ -2,11 +2,9 @@ package ast
 
 import (
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Block struct {
-	LastStackMapLocalVars      []*cg.StackMap_verification_type_info
 	Defers                     []*Defer
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
