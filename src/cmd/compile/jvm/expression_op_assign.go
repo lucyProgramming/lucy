@@ -31,7 +31,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	m.stackTop2String(class, code, bin.Right.VariableType) //conver to string
+	m.stackTop2String(class, code, bin.Right.VariableType, context, state) //conver to string
 	//append origin string
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -45,7 +45,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	m.stackTop2String(class, code, bin.Right.VariableType) //conver to string
+	m.stackTop2String(class, code, bin.Right.VariableType, context, state) //conver to string
 	if bin.Right.VariableType.IsPointer() && bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_STRING {
 		if t := 2 + currentStack; t > maxstack {
 			maxstack = t

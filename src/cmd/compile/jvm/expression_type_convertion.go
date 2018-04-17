@@ -230,7 +230,7 @@ func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, ta
 	}
 }
 
-func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *ast.VariableType) {
+func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *ast.VariableType, context *Context, state *StackMapState) {
 	if typ.Typ == ast.VARIABLE_TYPE_STRING {
 		return
 	}
@@ -281,11 +281,21 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY, ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VARIABLE_TYPE_ARRAY:
+		fallthrough
+	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
+		{
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, typ)...)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+10))
+			state.popStack(1)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING})...)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+13))
+			state.popStack(1)
+		}
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 10)
 		code.Codes[code.CodeLength+3] = cg.OP_pop

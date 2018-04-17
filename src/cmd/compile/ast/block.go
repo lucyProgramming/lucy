@@ -121,7 +121,7 @@ func (b *Block) SearchByName(name string) interface{} {
 			}
 		}
 		if l, ok := t.(*StatementLable); ok {
-			if b.IsFunctionTopBlock { // search lable from outside out allow
+			if b.IsFunctionTopBlock { // search lable from outside out not allow
 				return nil
 			} else {
 				return l

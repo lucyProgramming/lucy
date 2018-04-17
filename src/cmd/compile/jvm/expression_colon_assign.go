@@ -36,7 +36,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	variables := vs.Vs
 	for _, v := range vs.Values {
 		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
-			stack, _ := m.build(class, code, v, context, nil)
+			stack, _ := m.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}

@@ -114,30 +114,36 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
 	m.buildFunctionParameterAndReturnList(class, &method.Code, f, context, state)
+	if t := m.buildFunctionAutoVar(class, &method.Code, f, context, state); t > method.Code.MaxStack {
+		method.Code.MaxStack = t
+	}
+	m.buildBlock(class, &method.Code, f.Block, context, state)
+	return
+}
+func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
 	if f.AutoVarForReturnBecauseOfDefer != nil {
-		method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
-		method.Code.CodeLength++
-		copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
 		if len(f.Typ.ReturnList) > 1 {
-			method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
-			method.Code.CodeLength++
-			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
-			method.Code.Codes[method.Code.CodeLength] = cg.OP_iconst_0
-			method.Code.CodeLength++
-			copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
+			code.Codes[code.CodeLength] = cg.OP_iconst_0
+			code.CodeLength++
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
+			code.Codes[code.CodeLength] = cg.OP_iconst_0
+			code.CodeLength++
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 		}
 	}
 	if f.AutoVarForException != nil {
-		method.Code.Codes[method.Code.CodeLength] = cg.OP_aconst_null
-		method.Code.CodeLength++
-		copyOP(&method.Code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
+		code.Codes[code.CodeLength] = cg.OP_aconst_null
+		code.CodeLength++
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
 		t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}
 		t.Class = &ast.Class{}
 		t.Class.Name = java_throwable_class
 		state.Locals = append(state.Locals,
 			state.newStackMapVerificationTypeInfo(class, t)...)
 	}
-	m.buildBlock(class, &method.Code, f.Block, context, state)
 	return
 }
 

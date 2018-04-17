@@ -173,7 +173,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}
-				m.stackTop2String(class, code, tt)
+				m.stackTop2String(class, code, tt, context, state)
 				if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
 					if t := 2 + currentStack; t > maxstack {
 						maxstack = t
@@ -188,17 +188,18 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			variableType = v.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, v, context, state)
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, variableType)...)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
 			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 				context.MakeStackMap(state, code.CodeLength))
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, variableType)...)
+			state.popStack(1)
 		}
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
-		m.stackTop2String(class, code, variableType)
+		m.stackTop2String(class, code, variableType, context, state)
 		app(k == len(call.Args)-1)
 	}
 	// tostring

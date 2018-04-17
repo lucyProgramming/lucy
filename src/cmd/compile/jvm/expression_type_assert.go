@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
 	maxstack, _ = m.build(class, code, assert.Expression, context, nil)
 	code.Codes[code.CodeLength] = cg.OP_dup
@@ -18,6 +18,17 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.CodeLength++
 	if 3 > maxstack {
 		maxstack = 3
+	}
+
+	{
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
+		state.popStack(2)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.VariableType)...)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+11))
+		state.popStack(2)
 	}
 	code.Codes[code.CodeLength] = cg.OP_ifeq
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
