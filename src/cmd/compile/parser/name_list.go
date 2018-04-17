@@ -28,7 +28,8 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		pos := p.mkPos() // more
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			err = fmt.Errorf("%s not identifier after a comma,but %s ", p.errorMsgPrefix(pos), p.token.Desp)
+			err = fmt.Errorf("%s not 'identifier' after a comma,but '%'s ",
+				p.errorMsgPrefix(pos), p.token.Desp)
 			p.errs = append(p.errs, err)
 			return names, err
 		}

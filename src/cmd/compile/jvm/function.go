@@ -18,7 +18,7 @@ func (m *MakeClass) appendLocalVar(class *cg.ClassHighLevel, code *cg.AttributeC
 		state.Locals = append(state.Locals, state.newStackMapVerificationTypeInfo(class, v.Typ)...)
 	}
 }
-func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) {
+func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
 	for _, v := range f.Typ.ParameterList { // insert into locals
 		if v.BeenCaptured { // capture
 			//because of stack map,capture parameter not allow
@@ -32,9 +32,9 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 	for _, v := range f.Typ.ReturnList {
 		currentStack := uint16(0)
 		if v.BeenCaptured { //create closure object
-			maxstack := closure.createCloureVar(class, code, v)
-			if maxstack > code.MaxStack {
-				code.MaxStack = maxstack
+			stack := closure.createCloureVar(class, code, v)
+			if stack > maxstack {
+				maxstack = stack
 			}
 			// then load
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
@@ -42,18 +42,19 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		}
 		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
 		backPatchEs(es, code.CodeLength)
-		if t := currentStack + stack; t > code.MaxStack {
-			code.MaxStack = t
+		if t := currentStack + stack; t > maxstack {
+			maxstack = t
 		}
 		if v.Typ.IsNumber() && v.Typ.Typ != v.Expression.VariableType.Typ {
 			m.MakeExpression.numberTypeConverter(code, v.Expression.VariableType.Typ, v.Typ.Typ)
 		}
-		if t := currentStack + v.Typ.JvmSlotSize(); t > code.MaxStack {
-			code.MaxStack = t
+		if t := currentStack + v.Typ.JvmSlotSize(); t > maxstack {
+			maxstack = t
 		}
 		m.storeLocalVar(class, code, v)
 		m.appendLocalVar(class, code, v, state)
 	}
+	return
 }
 
 func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function) {
@@ -113,7 +114,9 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
-	m.buildFunctionParameterAndReturnList(class, &method.Code, f, context, state)
+	if t := m.buildFunctionParameterAndReturnList(class, &method.Code, f, context, state); t > method.Code.MaxStack {
+		method.Code.MaxStack = t
+	}
 	if t := m.buildFunctionAutoVar(class, &method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
@@ -121,28 +124,41 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	return
 }
 func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
-	if f.AutoVarForReturnBecauseOfDefer != nil {
-		code.Codes[code.CodeLength] = cg.OP_iconst_0
-		code.CodeLength++
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
-		if len(f.Typ.ReturnList) > 1 {
+	for _, v := range f.AutoVars {
+		switch v.(type) {
+		case *ast.AutoVarForException:
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
+			maxstack = 1
+			state.Locals = append(state.Locals,
+				state.newStackMapVerificationTypeInfo(class,
+					state.newObjectVariableType(java_throwable_class))...)
+
+		case *ast.AutoVarForReturnBecauseOfDefer:
 			code.Codes[code.CodeLength] = cg.OP_iconst_0
 			code.CodeLength++
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
-			code.Codes[code.CodeLength] = cg.OP_iconst_0
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
+				f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
+			state.Locals = append(state.Locals,
+				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+			if len(f.Typ.ReturnList) > 1 {
+				code.Codes[code.CodeLength] = cg.OP_iconst_0
+				code.CodeLength++
+				copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
+					f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
+				state.Locals = append(state.Locals,
+					state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+			}
+			maxstack = 1
+		case *ast.AutoVarForMultiReturn:
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
+			maxstack = 1
+			state.Locals = append(state.Locals,
+				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_arrylist_class))...)
 		}
-	}
-	if f.AutoVarForException != nil {
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
-		t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}
-		t.Class = &ast.Class{}
-		t.Class.Name = java_throwable_class
-		state.Locals = append(state.Locals,
-			state.newStackMapVerificationTypeInfo(class, t)...)
 	}
 	return
 }

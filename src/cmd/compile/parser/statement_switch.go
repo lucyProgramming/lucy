@@ -9,7 +9,7 @@ import (
 func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 	pos := b.parser.mkPos()
 	b.Next() // skip switch key word
-	condition, err := b.parser.ExpressionParser.parseExpression()
+	condition, err := b.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
 		return nil, err

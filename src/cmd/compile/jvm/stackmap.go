@@ -6,10 +6,17 @@ import (
 )
 
 type StackMapState struct {
-	//block      *ast.Block
 	Locals     []*cg.StackMap_verification_type_info
 	LastLocals []*cg.StackMap_verification_type_info
 	Stacks     []*cg.StackMap_verification_type_info
+}
+
+func (s *StackMapState) newObjectVariableType(name string) *ast.VariableType {
+	ret := &ast.VariableType{}
+	ret.Typ = ast.VARIABLE_TYPE_OBJECT
+	ret.Class = &ast.Class{}
+	ret.Class.Name = name
+	return ret
 }
 
 func (s *StackMapState) popStack(pop int) {
@@ -28,8 +35,8 @@ func (s *StackMapState) sliceOutLocals(pop int) {
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
 	copy(s.Locals, last.Locals)
-	//s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
-	//copy(s.Stacks, last.Stacks)
+	s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
+	copy(s.Stacks, last.Stacks)
 	return s
 }
 

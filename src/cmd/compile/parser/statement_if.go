@@ -14,7 +14,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		return nil, err
 	}
 	var e *ast.Expression
-	e, err = b.parser.ExpressionParser.parseExpression()
+	e, err = b.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
 		b.consume(untils_lc)
@@ -56,7 +56,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 	var e *ast.Expression
 	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && !b.parser.eof {
 		b.Next() // skip elseif token
-		e, err = b.parser.ExpressionParser.parseExpression()
+		e, err = b.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 			return es, err

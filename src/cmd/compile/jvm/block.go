@@ -142,7 +142,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			code.Codes[code.CodeLength] = cg.OP_ifeq
 			codeLength := code.CodeLength
 			code.CodeLength += 3
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForMultiReturn.Offset)...)
 			code.Codes[code.CodeLength] = cg.OP_areturn
 			code.CodeLength++
 			binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))

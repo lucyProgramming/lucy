@@ -11,7 +11,8 @@ func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
-	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_AND || ep.parser.token.Type == lex.TOKEN_LOGICAL_OR) && !ep.parser.eof {
+	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_AND ||
+		ep.parser.token.Type == lex.TOKEN_LOGICAL_OR) && !ep.parser.eof {
 		typ := ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
@@ -140,7 +141,8 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_LEFT_SHIFT || ep.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) && !ep.parser.eof {
+	for (ep.parser.token.Type == lex.TOKEN_LEFT_SHIFT ||
+		ep.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) && !ep.parser.eof {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
@@ -202,7 +204,9 @@ func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_MUL || ep.parser.token.Type == lex.TOKEN_DIV || ep.parser.token.Type == lex.TOKEN_MOD) && !ep.parser.eof {
+	for (ep.parser.token.Type == lex.TOKEN_MUL ||
+		ep.parser.token.Type == lex.TOKEN_DIV ||
+		ep.parser.token.Type == lex.TOKEN_MOD) && !ep.parser.eof {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()

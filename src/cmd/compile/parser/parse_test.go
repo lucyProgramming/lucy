@@ -1,43 +1,44 @@
 package parser
 
-import (
-	"fmt"
-	"testing"
-
-	"github.com/756445638/lucy/src/cmd/compile/ast"
-)
-
-var str = `
-
-	package main
-
-import "java/io";
-
-
-{
-    c := 123;
-    dd := add1();
-}
-
-fn add1(){
-}
-
-fn add()->(xx int){
-   xx = 1;
-}
-
-`
-
-func Test_parse(t *testing.T) {
-	nodes := []*ast.Node{}
-	errs := Parse(&nodes, "demo.lucy", []byte(str), false, 10)
-	for _, v := range errs {
-		fmt.Println(v)
-	}
-	for _, v := range nodes {
-		fmt.Println(v.Data)
-	}
-}
+//
+//import (
+//	"fmt"
+//	"testing"
+//
+//	"github.com/756445638/lucy/src/cmd/compile/ast"
+//)
+//
+//var str = `
+//
+//	package main
+//
+//import "java/io";
+//
+//
+//{
+//    c := 123;
+//    dd := add1();
+//}
+//
+//fn add1(){
+//}
+//
+//fn add()->(xx int){
+//   xx = 1;
+//}
+//
+//`
+//
+//func Test_parse(t *testing.T) {
+//	nodes := []*ast.Node{}
+//	errs := Parse(&nodes, "demo.lucy", []byte(str), false, 10)
+//	for _, v := range errs {
+//		fmt.Println(v)
+//	}
+//	for _, v := range nodes {
+//		fmt.Println(v.Data)
+//	}
+//}
 
 //var str = `
 

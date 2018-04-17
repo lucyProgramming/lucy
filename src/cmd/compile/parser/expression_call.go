@@ -45,7 +45,8 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 		result.Data = call
 		result.Pos = ep.parser.mkPos()
 	} else {
-		return nil, fmt.Errorf("%s can`t make call on '%s'", ep.parser.errorMsgPrefix())
+		return nil, fmt.Errorf("%s can`t make call on '%s'",
+			ep.parser.errorMsgPrefix(), e.OpName())
 	}
 	ep.Next() // skip )
 	result.Pos = pos

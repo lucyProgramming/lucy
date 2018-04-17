@@ -24,6 +24,7 @@ var (
 func (p *Parser) unexpectedErr() {
 	p.errs = append(p.errs, p.mkUnexpectedEofErr())
 }
+
 func (p *Parser) mkUnexpectedEofErr() error {
 	return fmt.Errorf("%s unexpected EOF", p.errorMsgPrefix())
 }

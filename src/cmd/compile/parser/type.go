@@ -92,7 +92,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		pos := p.mkPos()
 		p.Next() // skip map key word
 		if p.token.Type != lex.TOKEN_LC {
-			return nil, fmt.Errorf("%s expect '{',but '%s'", p.errorMsgPrefix(), p.token.Desp)
+			return nil, fmt.Errorf("%s expect '{',but '%s'",
+				p.errorMsgPrefix(), p.token.Desp)
 		}
 		p.Next() // skip [
 		k, err := p.parseType()
@@ -100,7 +101,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, err
 		}
 		if p.token.Type != lex.TOKEN_ARROW {
-			return nil, fmt.Errorf("%s expect '->',but '%s'", p.errorMsgPrefix(), p.token.Desp)
+			return nil, fmt.Errorf("%s expect '->',but '%s'",
+				p.errorMsgPrefix(), p.token.Desp)
 		}
 		p.Next() // skip ->
 		v, err := p.parseType()
@@ -108,7 +110,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, err
 		}
 		if p.token.Type != lex.TOKEN_RC {
-			return nil, fmt.Errorf("%s expect '}',but '%s'", p.errorMsgPrefix(), p.token.Desp)
+			return nil, fmt.Errorf("%s expect '}',but '%s'",
+				p.errorMsgPrefix(), p.token.Desp)
 		}
 		p.Next()
 		m := &ast.Map{
@@ -121,7 +124,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Pos: pos,
 		}, nil
 	}
-	err = fmt.Errorf("%s unkown type,begining token is '%s'", p.errorMsgPrefix(), p.token.Desp)
+	err = fmt.Errorf("%s unkown type,begining token is '%s'",
+		p.errorMsgPrefix(), p.token.Desp)
 	p.errs = append(p.errs, err)
 	return nil, err
 }

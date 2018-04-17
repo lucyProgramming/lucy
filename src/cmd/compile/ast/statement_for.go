@@ -36,19 +36,21 @@ type AutoVarForRangeMap struct {
 	K, V                     uint16
 }
 
-func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType) {
-	t.MapObject = f.VarOffset
+func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType, modekv bool) {
+	t.KeySetsKLength = f.VarOffset
 	t.KeySets = f.VarOffset + 1
-	t.KeySetsK = f.VarOffset + 2
-	t.KeySetsKLength = f.VarOffset + 3
+	t.MapObject = f.VarOffset + 2
+	t.KeySetsK = f.VarOffset + 3
 	f.VarOffset += 4
 	f.OffsetDestinations = append(f.OffsetDestinations, &t.MapObject, &t.KeySets, &t.KeySetsK, &t.KeySetsKLength)
-	t.K = f.VarOffset
-	f.VarOffset += kt.JvmSlotSize()
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.K)
 	t.V = f.VarOffset
 	f.VarOffset += vt.JvmSlotSize()
 	f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
+	if modekv {
+		t.K = f.VarOffset
+		f.VarOffset += kt.JvmSlotSize()
+		f.OffsetDestinations = append(f.OffsetDestinations, &t.K)
+	}
 }
 
 type AutoVarForRangeArray struct {
@@ -87,18 +89,20 @@ func (s *StatementFor) checkRange() []error {
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	arrayt, err := rangeExpression.mustBeOneValueContext(ts)
+	rangeOn, err := rangeExpression.mustBeOneValueContext(ts)
 	if err != nil {
 		errs = append(errs, err)
 	}
-	if arrayt == nil {
+	if rangeOn == nil {
 		return errs
 	}
-	if arrayt.Typ != VARIABLE_TYPE_ARRAY && arrayt.Typ != VARIABLE_TYPE_MAP {
-		errs = append(errs, fmt.Errorf("%s cannot use '%s' for range,only allow 'array' and 'map'", errMsgPrefix(rangeExpression.Pos), arrayt.TypeString()))
+	if rangeOn.Typ != VARIABLE_TYPE_ARRAY &&
+		rangeOn.Typ != VARIABLE_TYPE_JAVA_ARRAY &&
+		rangeOn.Typ != VARIABLE_TYPE_MAP {
+		errs = append(errs, fmt.Errorf("%s cannot have range on '%s'", errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
-	rangeExpression.VariableType = arrayt
+	rangeExpression.VariableType = rangeOn
 	var lefts []*Expression
 	if bin.Left.Typ == EXPRESSION_TYPE_LIST {
 		lefts = bin.Left.Data.([]*Expression)
@@ -124,14 +128,14 @@ func (s *StatementFor) checkRange() []error {
 		}
 	}
 	s.StatmentForRangeAttr.Expression = rangeExpression
-	if arrayt.Typ == VARIABLE_TYPE_ARRAY {
+	if rangeOn.Typ == VARIABLE_TYPE_ARRAY {
 		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
 		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
-			arrayt.ArrayType)
+			rangeOn.ArrayType)
 	} else {
 		s.StatmentForRangeAttr.AutoVarForRangeMap = &AutoVarForRangeMap{}
 		s.StatmentForRangeAttr.AutoVarForRangeMap.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
-			arrayt.Map.K, arrayt.Map.V)
+			rangeOn.Map.K, rangeOn.Map.V, modelkv)
 	}
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
@@ -156,20 +160,41 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 		if modelkv {
-			if identifier != nil {
-				if identifier.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos)))
+			if identifier2 != nil { // alloc v first
+				if identifier2.Name == NO_NAME_IDENTIFIER {
+					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
 					return errs
 
 				} else {
 					vd := &VariableDefinition{}
+					if rangeOn.Typ == VARIABLE_TYPE_ARRAY {
+						vd.Typ = rangeOn.ArrayType.Clone()
+					} else {
+						vd.Typ = rangeOn.Map.V.Clone()
+					}
+					vd.Pos = pos2
+					err = s.Block.insert(identifier2.Name, s.Condition.Pos, vd)
+					if err != nil {
+						errs = append(errs, err)
+					}
+					identifier2.Var = vd
+					s.StatmentForRangeAttr.IdentifierV = identifier2
+				}
+			}
+
+			if identifier != nil {
+				if identifier.Name == NO_NAME_IDENTIFIER {
+					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos)))
+					return errs
+				} else {
+					vd := &VariableDefinition{}
 					var vt *VariableType
-					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
+					if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 						vt = &VariableType{}
 						vt.Typ = VARIABLE_TYPE_INT
 					} else {
-						vt = arrayt.Map.K.Clone()
-						vt.Pos = arrayt.Pos
+						vt = rangeOn.Map.K.Clone()
+						vt.Pos = rangeOn.Pos
 					}
 					vd.Typ = vt
 					vd.Pos = pos
@@ -179,27 +204,6 @@ func (s *StatementFor) checkRange() []error {
 					}
 					identifier.Var = vd
 					s.StatmentForRangeAttr.IdentifierK = identifier
-				}
-			}
-			if identifier2 != nil {
-				if identifier2.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
-					return errs
-
-				} else {
-					vd := &VariableDefinition{}
-					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
-						vd.Typ = arrayt.ArrayType.Clone()
-					} else {
-						vd.Typ = arrayt.Map.V.Clone()
-					}
-					vd.Pos = pos2
-					err = s.Block.insert(identifier2.Name, s.Condition.Pos, vd)
-					if err != nil {
-						errs = append(errs, err)
-					}
-					identifier2.Var = vd
-					s.StatmentForRangeAttr.IdentifierV = identifier2
 				}
 			}
 		} else {
@@ -214,10 +218,10 @@ func (s *StatementFor) checkRange() []error {
 					return errs
 				} else {
 					vd := &VariableDefinition{}
-					if arrayt.Typ == VARIABLE_TYPE_ARRAY {
-						vd.Typ = arrayt.ArrayType.Clone()
+					if rangeOn.Typ == VARIABLE_TYPE_ARRAY {
+						vd.Typ = rangeOn.ArrayType.Clone()
 					} else {
-						vd.Typ = arrayt.Map.V.Clone()
+						vd.Typ = rangeOn.Map.V.Clone()
 					}
 					vd.Typ.Pos = pos2
 					vd.Pos = pos2
@@ -254,38 +258,43 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv && t2 != nil {
 			lefts[1].VariableType = t2
 		}
-		if arrayt.Typ == VARIABLE_TYPE_ARRAY {
+		if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 			if modelkv {
 				if t1.IsInteger() == false {
 					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
 					return errs
 				}
-				if t2.TypeCompatible(arrayt.ArrayType) == false {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+				if t2.TypeCompatible(rangeOn.ArrayType) == false {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
+						errMsgPrefix(lefts[1].Pos), rangeOn.ArrayType.TypeString(), t2.TypeString()))
 					return errs
 				}
 
 			} else { // v model
-				if t1.TypeCompatible(arrayt.ArrayType) == false {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.ArrayType.TypeString(), t2.TypeString()))
+				if t1.TypeCompatible(rangeOn.ArrayType) == false {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
+						errMsgPrefix(lefts[1].Pos), rangeOn.ArrayType.TypeString(), t2.TypeString()))
 					return errs
 				}
 			}
 		} else { // map type
 			if modelkv {
-				if false == t1.Equal(arrayt.Map.K) {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+				if false == t1.Equal(rangeOn.Map.K) {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
+						errMsgPrefix(lefts[1].Pos), rangeOn.Map.K.TypeString(), t1.TypeString()))
 					return errs
 
 				}
-				if false == t2.Equal(arrayt.Map.V) {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t2.TypeString()))
+				if false == t2.Equal(rangeOn.Map.V) {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
+						errMsgPrefix(lefts[1].Pos), rangeOn.Map.K.TypeString(), t2.TypeString()))
 					return errs
 
 				}
 			} else {
-				if false == t1.Equal(arrayt.Map.V) {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(lefts[1].Pos), arrayt.Map.K.TypeString(), t1.TypeString()))
+				if false == t1.Equal(rangeOn.Map.V) {
+					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
+						errMsgPrefix(lefts[1].Pos), rangeOn.Map.K.TypeString(), t1.TypeString()))
 					return errs
 
 				}

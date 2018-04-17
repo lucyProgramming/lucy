@@ -87,7 +87,7 @@ func (p *Parser) Parse() []error {
 			})
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			e, err := p.ExpressionParser.parseExpression()
+			e, err := p.ExpressionParser.parseExpression(true)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()

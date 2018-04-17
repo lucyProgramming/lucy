@@ -35,7 +35,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 		}
 		if ep.parser.token.Type == lex.TOKEN_LP {
 			ep.Next() // skip (
-			e, err := ep.parseExpression()
+			e, err := ep.parseExpression(false)
 			if err != nil {
 				return nil, err
 			}
@@ -92,7 +92,7 @@ func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 			arre.Data = data
 			es = append(es, arre)
 		} else {
-			e, err := ep.parseExpression()
+			e, err := ep.parseExpression(false)
 			if e != nil {
 				if e.Typ == ast.EXPRESSION_TYPE_LIST {
 					es = append(es, e.Data.([]*ast.Expression)...)

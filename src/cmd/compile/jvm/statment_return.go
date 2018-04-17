@@ -149,13 +149,14 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if context.Defers != nil && len(context.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(s.Expressions) > 0 {
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForMultiReturn.Offset)...)
 			//reach end
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 			code.CodeLength++
 			//return value  is on stack,  store it temp var
 			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
+
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -166,7 +167,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 		//restore the stack
 		copyOP(code,
-			loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.MultiValueOffset)...)
+			loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForMultiReturn.Offset)...)
 	}
 	if len(s.Expressions) == 0 {
 		t := m.buildReturnFromFunctionReturnList(class, code, context)

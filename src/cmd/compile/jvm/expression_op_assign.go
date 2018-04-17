@@ -23,11 +23,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		maxstack = t
 	}
 	currentStack := remainStack + 1 //
-	stack, es := m.build(class, code, bin.Left, context, state)
-	backPatchEs(es, code.CodeLength)
-	if t := currentStack + stack; t > maxstack {
-		maxstack = t
-	}
+	stack, _ := m.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
@@ -40,8 +36,16 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, es = m.build(class, code, bin.Right, context, state)
-	backPatchEs(es, code.CodeLength)
+	stack, es := m.build(class, code, bin.Right, context, state)
+	if len(es) > 0 {
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType("java/lang/StringBuilder"))...)
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, bin.Right.VariableType)...) /// must be bool
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+			context.MakeStackMap(state, code.CodeLength))
+		backPatchEs(es, code.CodeLength)
+	}
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
@@ -67,7 +71,6 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-
 	if e.IsStatementExpression == false {
 		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
 	}

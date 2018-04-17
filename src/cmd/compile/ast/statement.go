@@ -120,9 +120,6 @@ func (s *Statement) check(b *Block) []error { // b is father
 			s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
 		}
 	case STATEMENT_TYPE_RETURN:
-		if b.InheritedAttribute.Defers != nil && len(b.InheritedAttribute.Defers) > 0 {
-			b.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
-		}
 		if b.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.statementName())}
@@ -134,13 +131,6 @@ func (s *Statement) check(b *Block) []error { // b is father
 			return []error{err}
 		}
 	case STATEMENT_TYPE_DEFER:
-		if b.InheritedAttribute.Function.AutoVarForException == nil {
-			t := &AutoVarForException{}
-			b.InheritedAttribute.Function.AutoVarForException = t
-			t.Offset = b.InheritedAttribute.Function.VarOffset
-			b.InheritedAttribute.Function.VarOffset++
-			b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &t.Offset)
-		}
 		s.Defer.Block.inherite(b)
 		return s.Defer.Block.check()
 	case STATEMENT_TYPE_BLOCK:

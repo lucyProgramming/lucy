@@ -94,12 +94,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		if ep.parser.eof {
 			return nil, ep.parser.mkUnexpectedEofErr()
 		}
-		left, err = ep.parseExpression()
+		left, err = ep.parseExpression(false)
 		if err != nil {
 			return nil, err
 		}
 		if ep.parser.token.Type != lex.TOKEN_RP {
-			return nil, fmt.Errorf("%s ( and ) not matched, but %s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+			return nil, fmt.Errorf("%s ( and ) not matched, but %s",
+				ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		}
 		ep.Next()
 	case lex.TOKEN_INCREMENT:
@@ -230,7 +231,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_RANGE:
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e, err := ep.parseExpression()
+		e, err := ep.parseExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -250,7 +251,8 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			return left, err
 		}
 	default:
-		err = fmt.Errorf("%s unkown begining of a expression, token:%s", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		err = fmt.Errorf("%s unkown begining of a expression, token:%s",
+			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
 	if ep.parser.token.Type == lex.TOKEN_COLON && left.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {
@@ -259,10 +261,14 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		return left, nil // lable here
 	}
 
-	for ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT ||
-		ep.parser.token.Type == lex.TOKEN_LP || ep.parser.token.Type == lex.TOKEN_LB ||
+	for ep.parser.token.Type == lex.TOKEN_INCREMENT ||
+		ep.parser.token.Type == lex.TOKEN_DECREMENT ||
+		ep.parser.token.Type == lex.TOKEN_LP ||
+		ep.parser.token.Type == lex.TOKEN_LB ||
 		ep.parser.token.Type == lex.TOKEN_DOT {
-		if ep.parser.token.Type == lex.TOKEN_INCREMENT || ep.parser.token.Type == lex.TOKEN_DECREMENT { //  ++ or --
+		// ++ or --
+		if ep.parser.token.Type == lex.TOKEN_INCREMENT ||
+			ep.parser.token.Type == lex.TOKEN_DECREMENT { //  ++ or --
 			newe := &ast.Expression{}
 			if ep.parser.token.Type == lex.TOKEN_INCREMENT {
 				newe.Typ = ast.EXPRESSION_TYPE_INCREMENT
@@ -280,6 +286,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			ep.Next()
 			continue
 		}
+		// [
 		if ep.parser.token.Type == lex.TOKEN_LB {
 			pos := ep.parser.mkPos()
 			ep.Next()                                    // skip [
@@ -287,7 +294,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				ep.Next() // skip :
 				var end *ast.Expression
 				if ep.parser.token.Type != lex.TOKEN_RB {
-					end, err = ep.parseExpression()
+					end, err = ep.parseExpression(false)
 					if err != nil {
 						return nil, err
 					}
@@ -306,7 +313,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				left = newe
 				continue
 			}
-			e, err := ep.parseExpression()
+			e, err := ep.parseExpression(false)
 			if err != nil {
 				return nil, err
 			}
@@ -323,7 +330,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				}
 				var end *ast.Expression
 				if ep.parser.token.Type != lex.TOKEN_RB {
-					end, err = ep.parseExpression()
+					end, err = ep.parseExpression(false)
 					if err != nil {
 						return nil, err
 					}
@@ -357,6 +364,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			ep.Next()
 			continue
 		}
+		// aaa.xxxx
 		if ep.parser.token.Type == lex.TOKEN_DOT {
 			pos := ep.parser.mkPos()
 			ep.parser.Next() // skip .
@@ -395,6 +403,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				return nil, fmt.Errorf("%s expect  'identifier' or '('", ep.parser.errorMsgPrefix())
 			}
 		}
+		//  aa ()
 		if ep.parser.token.Type == lex.TOKEN_LP {
 			newe, err := ep.parseCallExpression(left)
 			if err != nil {

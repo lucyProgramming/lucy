@@ -74,7 +74,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 			p.errs = append(p.errs, err)
 			return nil, err
 		}
-		initExpression, err = p.ExpressionParser.parseExpression()
+		initExpression, err = p.ExpressionParser.parseExpression(true)
 		if err != nil {
 			p.errs = append(p.errs, err)
 			return nil, err

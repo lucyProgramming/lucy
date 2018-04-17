@@ -28,7 +28,16 @@ type Function struct {
 	AutoVarForException            *AutoVarForException
 	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
+	AutoVars                       []interface{}
 	OffsetDestinations             []*uint16
+}
+
+type AutoVarForReturnBecauseOfDefer struct {
+	/*
+		flag is 1 means there is exception,but handled
+	*/
+	ExceptionIsNotNilWhenEnter uint16
+	IfReachBotton              uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
@@ -44,25 +53,14 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 	f.VarOffset++
 	f.OffsetDestinations = append(f.OffsetDestinations, &t.ExceptionIsNotNilWhenEnter)
 	if len(f.Typ.ReturnList) > 1 {
-		t.MultiValueOffset = f.VarOffset
-		f.OffsetDestinations = append(f.OffsetDestinations, &t.MultiValueOffset)
-		f.VarOffset++
+		//t.MultiValueOffset = f.VarOffset
+		//f.OffsetDestinations = append(f.OffsetDestinations, &t.MultiValueOffset)
+		//f.VarOffset++
 		t.IfReachBotton = f.VarOffset
 		f.VarOffset++
 		f.OffsetDestinations = append(f.OffsetDestinations, &t.IfReachBotton)
 	}
-}
-
-type AutoVarForReturnBecauseOfDefer struct {
-	/*
-		flag is 1 means there is exception,but handled
-	*/
-	ExceptionIsNotNilWhenEnter uint16
-	/*
-		for multi return value
-	*/
-	MultiValueOffset uint16
-	IfReachBotton    uint16
+	f.AutoVars = append(f.AutoVars, t)
 }
 
 func (f *Function) NoReturnValue() bool {
@@ -71,6 +69,18 @@ func (f *Function) NoReturnValue() bool {
 
 type AutoVarForException struct {
 	Offset uint16
+}
+
+func (f *Function) mkAutoVarForException() {
+	if f.AutoVarForException != nil {
+		return
+	}
+	t := &AutoVarForException{}
+	f.AutoVarForException = t
+	t.Offset = f.VarOffset
+	f.VarOffset++
+	f.OffsetDestinations = append(f.OffsetDestinations, &t.Offset)
+	f.AutoVars = append(f.AutoVars, t)
 }
 
 func (f *Function) mkAutoVarForMultiReturn() {
@@ -82,6 +92,7 @@ func (f *Function) mkAutoVarForMultiReturn() {
 	f.AutoVarForMultiReturn = t
 	f.OffsetDestinations = append(f.OffsetDestinations, &t.Offset)
 	f.VarOffset++
+	f.AutoVars = append(f.AutoVars, t)
 }
 
 type AutoVarForMultiReturn struct {
@@ -129,6 +140,9 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
+	f.mkAutoVarForMultiReturn()
+	f.mkAutoVarForException()
+	f.MkAutoVarForReturnBecauseOfDefer()
 	if f.Typ != nil {
 		f.mkLastRetrunStatement()
 		*errs = append(*errs, f.Block.check()...)
