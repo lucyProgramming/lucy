@@ -59,9 +59,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		}
 		return
 	}
-
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context, state)
-
 	/*
 		left value must can be used as right value
 	*/

@@ -77,15 +77,15 @@ public class ArrayBool   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public ArrayBool append(boolean[] es){
-		if(this.end + es.length < this.cap){
+	public ArrayBool append(ArrayBool es){
+		if(this.end + es.size() < this.cap){
 		}else {
-			this.expand((this.cap + es.length) * 2);
+			this.expand((this.cap + es.size()) * 2);
 		}
-		for(int i = 0;i < es.length;i++){
-			this.elements[this.end + i] = es[i];
+		for(int i = this.end;i < es.size();i++){
+			this.elements[this.end + i] = es.get(i);
 		}
-		this.end += es.length;
+		this.end += es.size();
 		return this;
 	}
 	public String toString(){

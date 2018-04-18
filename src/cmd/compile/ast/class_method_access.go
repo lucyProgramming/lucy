@@ -20,26 +20,30 @@ func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallAr
 			}
 		}
 		if len(args) > len(m.Func.Typ.ParameterList) {
-			return nil, false, fmt.Errorf("too many paramaters to call method '%s'", m.Func.Name)
+			errmsg := fmt.Sprintf("too many paramaters to call function '%s':\n", name)
+			errmsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(name, args))
+			errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
+			return nil, false, fmt.Errorf(errmsg)
 		}
 		if len(args) < len(m.Func.Typ.ParameterList) {
-			if m.Func.HaveDefaultValue == false {
-				if len(args) < len(m.Func.Typ.ParameterList) {
-					return nil, false, fmt.Errorf("too few paramaters to call method '%s'", m.Func.Name)
+			if m.Func.HaveDefaultValue && len(args) >= m.Func.DefaultValueStartAt {
+				for i := len(args); i < len(m.Func.Typ.ParameterList); i++ {
+					*callArgs = append(*callArgs, m.Func.Typ.ParameterList[i].Expression)
 				}
-			}
-			if len(args) < m.Func.DefaultValueStartAt {
-				return []*ClassMethod{m}, false, fmt.Errorf("too few paramaters to call method '%s'", m.Func.Name)
-			}
-			for i := len(args); i < len(m.Func.Typ.ParameterList); i++ {
-				*callArgs = append(*callArgs, m.Func.Typ.ParameterList[i].Expression)
+			} else { // no default value
+				errmsg := fmt.Sprintf("too few paramaters to call function '%s'\n", name)
+				errmsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(m.Func.Name, args))
+				errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
+				return nil, false, fmt.Errorf(errmsg)
 			}
 		}
 		for k, v := range m.Func.Typ.ParameterList {
-			if k < len(args) { //args passed
+			if k < len(args) {
 				if !v.Typ.TypeCompatible(args[k]) {
-					return nil, false, fmt.Errorf("type '%s' is not compatible with '%s'",
-						v.Typ.TypeString(), args[k].TypeString())
+					errmsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Typ.TypeString())
+					errmsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(m.Func.Name, args))
+					errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
+					return nil, false, fmt.Errorf(errmsg)
 				}
 			}
 		}

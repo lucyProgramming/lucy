@@ -32,6 +32,9 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 	maxstack, _ = m.build(class, code, call.Expression, context, nil)
+	// object ref
+	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Expression.VariableType)...)
+	defer state.popStack(1)
 	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 	if t := stack + 1; t > maxstack {
 		maxstack = t

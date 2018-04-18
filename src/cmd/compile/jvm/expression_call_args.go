@@ -7,8 +7,12 @@ import (
 
 func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode, args []*ast.Expression, parameters ast.ParameterList, context *Context, state *StackMapState) (maxstack uint16) {
 	currentStack := uint16(0)
-	for k, e := range args {
-		var variabletype *ast.VariableType
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength) // let`s pop
+	}()
+	parameterIndex := 0
+	for _, e := range args {
 		if e.MayHaveMultiValue() && len(e.VariableTypes) > 1 {
 			stack, _ := m.build(class, code, e, context, nil)
 			if t := currentStack + stack; t > maxstack {
@@ -20,28 +24,35 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				if parameters[k].Typ.IsNumber() && parameters[k].Typ.Typ != variabletype.Typ {
-					m.numberTypeConverter(code, variabletype.Typ, parameters[k].Typ.Typ)
+				if parameters[parameterIndex].Typ.IsNumber() && parameters[parameterIndex].Typ.Typ != t.Typ {
+					m.numberTypeConverter(code, t.Typ, parameters[k].Typ.Typ)
 				}
-				currentStack += parameters[k].Typ.JvmSlotSize()
+				currentStack += t.JvmSlotSize()
+				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
+				parameterIndex++
 			}
 			continue
 		}
-		variabletype = e.VariableType
+		variableType := e.VariableType
 		if e.MayHaveMultiValue() {
-			variabletype = e.VariableTypes[0]
+			variableType = e.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, e, context, state)
-		backPatchEs(es, code.CodeLength)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
-		if parameters[k].Typ.IsNumber() {
-			if parameters[k].Typ.Typ != variabletype.Typ {
-				m.numberTypeConverter(code, variabletype.Typ, parameters[k].Typ.Typ)
+		if parameters[parameterIndex].Typ.IsNumber() {
+			if parameters[parameterIndex].Typ.Typ != variableType.Typ {
+				m.numberTypeConverter(code, variableType.Typ, parameters[parameterIndex].Typ.Typ)
 			}
 		}
-		currentStack += parameters[k].Typ.JvmSlotSize()
+		currentStack += parameters[parameterIndex].Typ.JvmSlotSize()
+		parameterIndex++
 	}
 	return
 }

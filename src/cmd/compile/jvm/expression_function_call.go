@@ -35,7 +35,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosure)...)
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosureFunction)...)
 		}
 		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
 		if t := 1 + stack; t > maxstack {

@@ -40,10 +40,12 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	}()
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Args[0].VariableType)...)
+
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Args[0].VariableType)...)
 			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			state.popStack(1)
 		}
 		if t := 1 + stack; t > maxstack {
 			maxstack = t

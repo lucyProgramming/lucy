@@ -84,11 +84,9 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
 		return m.buildStrPlusAssign(class, code, e, context, state)
 	}
-
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
-
 	//left value must can be used as right value,
-	stack, _ := m.build(class, code, bin.Left, context, nil) // load it`s value
+	stack, _ := m.build(class, code, bin.Left, context, state) // load it`s value
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}
@@ -96,7 +94,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	stack, _ = m.build(class, code, bin.Right, context, nil)
+	stack, _ = m.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
@@ -131,7 +129,6 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
 		}
-
 	case ast.VARIABLE_TYPE_SHORT:
 		if e.Typ == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
@@ -224,7 +221,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength++
 		}
 	}
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
+	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map destination
 		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.VariableType)
 	}
 	currentStack -= bin.Left.VariableType.JvmSlotSize() // stack reduce
@@ -236,7 +233,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
+	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map destination
 		primitiveObjectConverter.getFromObject(class, code, e.VariableType)
 	}
 	return

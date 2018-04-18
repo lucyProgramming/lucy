@@ -20,7 +20,7 @@ func (s *StackMapState) newObjectVariableType(name string) *ast.VariableType {
 }
 
 func (s *StackMapState) popStack(pop int) {
-	if pop <= 0 {
+	if pop < 0 {
 		panic("negative pop")
 	}
 	s.Stacks = s.Stacks[:len(s.Stacks)-pop]

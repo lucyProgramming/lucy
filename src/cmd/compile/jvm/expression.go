@@ -10,7 +10,7 @@ type MakeExpression struct {
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.JumpBackPatch) {
-	if e.IsCompileAutoExpression == false {
+	if e.IsCompileDefaultValueExpression == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
 	switch e.Typ {
@@ -137,7 +137,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_INDEX:
 		maxstack = m.buildIndex(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_DOT:
-		maxstack = m.buildDot(class, code, e, context)
+		maxstack = m.buildDot(class, code, e, context, state)
 
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:

@@ -82,14 +82,14 @@ const (
 )
 
 type Expression struct {
-	IsPublic                bool
-	IsCompileAutoExpression bool
-	VariableType            *VariableType   //
-	VariableTypes           []*VariableType // functioncall or methodcall can with multi results
-	Pos                     *Pos
-	Typ                     int
-	Data                    interface{}
-	IsStatementExpression   bool
+	IsPublic                        bool
+	IsCompileDefaultValueExpression bool
+	VariableType                    *VariableType   //
+	VariableTypes                   []*VariableType // functioncall or methodcall can with multi results
+	Pos                             *Pos
+	Typ                             int
+	Data                            interface{}
+	IsStatementExpression           bool
 }
 
 func (e *Expression) IsLogical() bool {
@@ -333,19 +333,19 @@ func (e *Expression) OpName(typ ...int) string {
 	}
 	switch t {
 	case EXPRESSION_TYPE_BOOL:
-		return "bool_literal"
+		return fmt.Sprintf("%v", e.Data)
 	case EXPRESSION_TYPE_BYTE:
-		return "byte_literal"
+		return fmt.Sprintf("%v", e.Data)
 	case EXPRESSION_TYPE_INT:
-		return "int_literal"
+		return fmt.Sprintf("%v", e.Data)
 	case EXPRESSION_TYPE_LONG:
-		return "long_literal"
+		return fmt.Sprintf("%v", e.Data)
 	case EXPRESSION_TYPE_FLOAT:
-		return "float_literal"
+		return fmt.Sprintf("%v", e.Data)
 	case EXPRESSION_TYPE_DOUBLE:
-		return "double_literal"
+		return fmt.Sprintf("%v", e.Data)
 	case EXPRESSION_TYPE_STRING:
-		return "string_literal"
+		return fmt.Sprintf("\"%v\"", e.Data)
 	case EXPRESSION_TYPE_ARRAY:
 		return "array_literal"
 	case EXPRESSION_TYPE_LOGICAL_OR:
@@ -417,7 +417,7 @@ func (e *Expression) OpName(typ ...int) string {
 	case EXPRESSION_TYPE_NOT:
 		return "not"
 	case EXPRESSION_TYPE_IDENTIFIER:
-		return fmt.Sprintf("identifier(%s)", e.Data.(*ExpressionIdentifer).Name)
+		return fmt.Sprintf("identifier('%s')", e.Data.(*ExpressionIdentifer).Name)
 	case EXPRESSION_TYPE_NULL:
 		return "null"
 	case EXPRESSION_TYPE_NEW:

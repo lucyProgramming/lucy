@@ -18,6 +18,8 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			}
 			// load to stack
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className))...)
 			currentStack += 1
 		}
 		index--

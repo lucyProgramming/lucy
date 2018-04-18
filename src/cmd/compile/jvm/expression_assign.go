@@ -9,9 +9,19 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	maxstack, remainStack, op, target, classname, name, descriptor := m.getLeftValue(class, code, left, context, state)
 	stack, es := m.build(class, code, right, context, state)
-	backPatchEs(es, code.CodeLength)
+	if len(es) > 0 {
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, right.VariableType)...)
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+			context.MakeStackMap(state, code.CodeLength))
+		backPatchEs(es, code.CodeLength)
+	}
 	if t := remainStack + stack; t > maxstack {
 		maxstack = t
 	}
@@ -53,6 +63,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	descriptors := make([]string, len(lefts))
 	remainstacks := make([]uint16, len(lefts))
 	noDestinations := make([]bool, len(lefts))
+	stackHeights := make([]int, len(lefts))
 	// put left value one the stack
 	index := len(lefts) - 1
 	for index >= 0 { //
@@ -60,6 +71,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			lefts[index].Data.(*ast.ExpressionIdentifer).Name == ast.NO_NAME_IDENTIFIER {
 			noDestinations[index] = true
 		} else {
+			h := len(state.Stacks)
 			stack, remainstack, op, target, classname, name, descriptor := m.getLeftValue(class, code, lefts[index], context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
@@ -70,6 +82,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			names[index] = name
 			descriptors[index] = descriptor
 			remainstacks[index] = remainstack
+			stackHeights[index] = len(state.Stacks) - h
 			currentStack += remainstack
 		}
 		index--
@@ -89,6 +102,8 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		descriptors = descriptors[1:]
 		remainstacks = remainstacks[1:]
 		noDestinations = noDestinations[1:]
+		state.popStack(stackHeights[0])
+		stackHeights = stackHeights[1:]
 	}
 	for _, v := range rights {
 		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
@@ -129,15 +144,20 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			}
 			continue
 		}
-		needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
-		stack, es := m.build(class, code, v, context, state)
-		backPatchEs(es, code.CodeLength) // true or false need to backpatch
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
-		}
 		variableType := v.VariableType
 		if v.MayHaveMultiValue() {
 			variableType = v.VariableTypes[0]
+		}
+		needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
+		stack, es := m.build(class, code, v, context, state)
+		if len(es) > 0 {
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, variableType)...)
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			state.popStack(1)                // must be interger
+			backPatchEs(es, code.CodeLength) // true or false need to backpatch
+		}
+		if t := currentStack + stack; t > maxstack {
+			maxstack = t
 		}
 		if noDestinations[0] == false {
 			if t := currentStack + targets[0].JvmSlotSize(); t > maxstack { // incase int convert to double or long

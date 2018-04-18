@@ -104,6 +104,7 @@ func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHig
 		code.CodeLength += 3
 	}
 }
+
 func (PrimitiveObjectConverter) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	if t.IsPointer() == false {
 		panic("...")

@@ -58,7 +58,7 @@ type Map struct {
 
 func (v *VariableType) mkDefaultValueExpression() *Expression {
 	var e Expression
-	e.IsCompileAutoExpression = true
+	e.IsCompileDefaultValueExpression = true
 	e.Pos = v.Pos
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:

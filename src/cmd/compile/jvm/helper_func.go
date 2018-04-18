@@ -331,10 +331,18 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	}
 }
 
-func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode) (increment uint16) {
+func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) (increment uint16) {
 	increment = 1
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
+	{
+
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+			context.MakeStackMap(state, code.CodeLength+6))
+
+		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+			context.MakeStackMap(state, code.CodeLength+15))
+	}
 	code.Codes[code.CodeLength] = cg.OP_iflt
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 	code.Codes[code.CodeLength+3] = cg.OP_goto

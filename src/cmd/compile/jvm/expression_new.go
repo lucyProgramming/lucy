@@ -7,7 +7,7 @@ import (
 
 func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
-		return m.buildNewArray(class, code, e, context)
+		return m.buildNewArray(class, code, e, context, state)
 	}
 	if e.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
@@ -60,7 +60,7 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	return
 }
-func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
@@ -69,17 +69,28 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxstack = 2
+	{
+		t := &cg.StackMap_verification_type_info{}
+		unInit := &cg.StackMap_Uninitialized_variable_info{}
+		unInit.Index = uint16(code.CodeLength - 4)
+		t.T = unInit
+		state.Stacks = append(state.Stacks, t, t) // 2 for dup
+		defer state.popStack(2)
+	}
 	// call init
-	stack, _ := m.build(class, code, n.Args[0], context, nil) // must be a interger
+	stack, _ := m.build(class, code, n.Args[0], context, nil) // must be a integer
 	if t := 2 + stack; t > maxstack {
 		maxstack = t
 	}
+	state.Stacks = append(state.Stacks,
+		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+	defer state.popStack(1)
 	maxstack += stack
 	currentStack := uint16(3)
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code) + currentStack; t > maxstack {
+	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code, context, state) + currentStack; t > maxstack {
 		maxstack = t
 	}
 	switch e.VariableType.ArrayType.Typ {

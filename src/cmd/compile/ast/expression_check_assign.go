@@ -26,7 +26,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			len(names)))
 		noErr = false
 	}
-
 	var err error
 	noNewVaraible := true
 	declareVariableExpression := &ExpressionDeclareVariable{}

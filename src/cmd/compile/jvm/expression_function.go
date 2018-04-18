@@ -60,7 +60,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	// store  to,wait for call
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSetForClosure)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSetForClosureFunction)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FiledHighLevel)
 	total := len(function.ClosureVars.Vars) + len(function.ClosureVars.Funcs)
@@ -130,7 +130,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.VarOffSetForClosure)...)
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.VarOffSetForClosureFunction)...)
 			if 3 > maxstack {
 				maxstack = 3
 			}
@@ -144,7 +144,6 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 3
 		i++
 	}
-
 	// build function
 	m.buildFunction(closureClass, method, function)
 	return

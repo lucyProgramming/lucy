@@ -220,6 +220,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	ms, matched, err := object.Class.accessMethod(call.Name, args, &call.Args, false)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		return nil
 	}
 	if matched {
 		if false == call.Expression.isThisIdentifierExpression() &&

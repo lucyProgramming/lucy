@@ -21,14 +21,8 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			}
 			// load to stack
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
-			{
-				t := &ast.VariableType{}
-				t.Typ = ast.VARIABLE_TYPE_OBJECT
-				t.Class = &ast.Class{}
-				t.Class.Name = closure.getMeta(vs.Vs[index].Typ.Typ).className
-				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
-			}
-
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className))...)
 			currentStack += 1
 		}
 		index--

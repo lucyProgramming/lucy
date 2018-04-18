@@ -35,7 +35,7 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 		if 2 > maxstack { // dup increment stack
 			maxstack = 2
 		}
-		exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code) // at this point,value is clear,leave 1 on stack
+		exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code) // at this point,value is clear,leave 0 on stack
 		exits = append(exits, exit)
 		code.Codes[code.CodeLength] = cg.OP_pop // pop 1
 		code.CodeLength++

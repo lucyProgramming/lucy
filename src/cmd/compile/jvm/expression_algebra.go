@@ -7,10 +7,15 @@ import (
 
 func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
-		maxstack, _ = m.build(class, code, bin.Left, context, nil)
+		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		size := bin.Left.VariableType.JvmSlotSize()
-		stack, _ := m.build(class, code, bin.Right, context, nil)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.VariableType)...)
+		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {
 			maxstack = t
 		}
@@ -47,15 +52,16 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			return m.buildStrCat(class, code, bin, context, state)
 		}
 		maxstack = 4
-		stack, _ := m.build(class, code, bin.Left, context, nil)
+		stack, _ := m.build(class, code, bin.Left, context, state)
 		if stack > maxstack {
 			maxstack = stack
 		}
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.VariableType)...)
 		//number type,no doubt
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, e.VariableType.Typ)
 		}
-		stack, _ = m.build(class, code, bin.Right, context, nil)
+		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -154,12 +160,13 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}
 
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
-		maxstack, _ = m.build(class, code, bin.Left, context, nil)
+		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.VariableType)...)
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
 		size := e.VariableType.JvmSlotSize()
-		stack, _ := m.build(class, code, bin.Right, context, nil)
+		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {
 			maxstack = t
 		}

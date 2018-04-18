@@ -20,9 +20,11 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 		return nil
 	}
 	// dot
-	if t.Typ != VARIABLE_TYPE_OBJECT && t.Typ != VARIABLE_TYPE_CLASS &&
+	if t.Typ != VARIABLE_TYPE_OBJECT &&
+		t.Typ != VARIABLE_TYPE_CLASS &&
 		t.Typ != VARIABLE_TYPE_PACKAGE {
-		*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'", errMsgPrefix(e.Pos), dot.Name, t.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
+			errMsgPrefix(e.Pos), dot.Name, t.TypeString()))
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
@@ -76,7 +78,8 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			dot.PackageVariableDefinition = t
 			return tt
 		case *VariableType:
-			err = fmt.Errorf("%s name '%s' is a type,not a expression", errMsgPrefix(e.Pos), dot.Name)
+			err = fmt.Errorf("%s name '%s' is a type,not a expression",
+				errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
 		default:
@@ -87,7 +90,8 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 	} else if t.Typ == VARIABLE_TYPE_OBJECT { // object
 		if dot.Name == SUPER_FIELD_NAME {
 			if t.Class.Name == JAVA_ROOT_CLASS {
-				*errs = append(*errs, fmt.Errorf("%s '%s' is root class", errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
+				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
+					errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
 				return t
 			}
 			err = t.Class.loadSuperClass()
@@ -110,7 +114,8 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 					dot.Name))
 			}
 			if field.IsStatic() {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,should access by className(%s)", errMsgPrefix(e.Pos),
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,should access by className(%s)",
+					errMsgPrefix(e.Pos),
 					dot.Name, filepath.Base(t.Class.Name)))
 			}
 			t := field.Typ.Clone()
@@ -140,7 +145,8 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 		}
 		if field != nil {
 			if field.IsStatic() == false {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by objectref", errMsgPrefix(e.Pos),
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by objectref",
+					errMsgPrefix(e.Pos),
 					dot.Name))
 			}
 			t := field.Typ.Clone()

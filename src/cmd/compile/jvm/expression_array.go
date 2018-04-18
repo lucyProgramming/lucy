@@ -137,8 +137,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		loadInt32(class, code, index) // load index
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
 			backPatchEs(es, code.CodeLength)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
 			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 				context.MakeStackMap(state, code.CodeLength))
 			state.popStack(1) // must be a logical expression

@@ -10,7 +10,7 @@ type Function struct {
 	DefaultValueStartAt            int
 	IsClosureFunction              bool
 	ClassMethod                    *cg.MethodHighLevel
-	VarOffSetForClosure            uint16
+	VarOffSetForClosureFunction    uint16
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
 	callchecker                    CallChecker // used in build function
@@ -53,9 +53,6 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 	f.VarOffset++
 	f.OffsetDestinations = append(f.OffsetDestinations, &t.ExceptionIsNotNilWhenEnter)
 	if len(f.Typ.ReturnList) > 1 {
-		//t.MultiValueOffset = f.VarOffset
-		//f.OffsetDestinations = append(f.OffsetDestinations, &t.MultiValueOffset)
-		//f.VarOffset++
 		t.IfReachBotton = f.VarOffset
 		f.VarOffset++
 		f.OffsetDestinations = append(f.OffsetDestinations, &t.IfReachBotton)
@@ -106,9 +103,13 @@ func (f *Function) readableMsg(name ...string) string {
 	} else {
 		s = "fn " + f.Name + "("
 	}
-
 	for k, v := range f.Typ.ParameterList {
+		s += " "
 		s += v.Typ.TypeString()
+		if v.Expression != nil {
+			s += " = " + v.Expression.OpName()
+		}
+		s += " "
 		if k != len(f.Typ.ParameterList)-1 {
 			s += ","
 		}
@@ -130,7 +131,7 @@ func (f *Function) readableMsg(name ...string) string {
 func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 	s := "fn " + name + "("
 	for k, v := range args {
-		s += v.TypeString()
+		s += " " + v.TypeString() + " "
 		if k != len(args)-1 {
 			s += ","
 		}
@@ -160,7 +161,8 @@ func (f *Function) check(b *Block) []error {
 
 func (f *Function) mkLastRetrunStatement() {
 	if len(f.Block.Statements) == 0 ||
-		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN && f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_SKIP) {
+		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN &&
+			f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_SKIP) {
 		s := &StatementReturn{}
 		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
 	}
@@ -169,7 +171,8 @@ func (f *Function) mkLastRetrunStatement() {
 func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	if f.Name == MAIN_FUNCTION_NAME {
 		errFunc := func() {
-			*errs = append(*errs, fmt.Errorf("%s function %s expect declared as 'main(args []string)'", errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
+			*errs = append(*errs, fmt.Errorf("%s function %s expect declared as 'main(args []string)'",
+				errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
 		}
 		if len(f.Typ.ParameterList) != 1 {
 			errFunc()
@@ -253,7 +256,8 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 					*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 				}
 				if t.TypeCompatible(v.Typ) == false {
-					err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString())
+					err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+						t.TypeString(), v.Typ.TypeString())
 					*errs = append(*errs, err)
 				}
 			}

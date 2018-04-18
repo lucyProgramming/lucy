@@ -184,9 +184,9 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			}
 			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
 			if f.IsClosureFunction {
-				f.VarOffSetForClosure = b.InheritedAttribute.Function.VarOffset
+				f.VarOffSetForClosureFunction = b.InheritedAttribute.Function.VarOffset
 				b.InheritedAttribute.Function.VarOffset++
-				b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosure)
+				b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosureFunction)
 			}
 			return errs
 		}
