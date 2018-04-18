@@ -14,7 +14,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 	parameterIndex := 0
 	for _, e := range args {
 		if e.MayHaveMultiValue() && len(e.VariableTypes) > 1 {
-			stack, _ := m.build(class, code, e, context, nil)
+			stack, _ := m.build(class, code, e, context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -38,10 +38,12 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			variableType = e.VariableTypes[0]
 		}
 		stack, es := m.build(class, code, e, context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
 		if len(es) > 0 {
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 			backPatchEs(es, code.CodeLength)
 			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			state.popStack(1)
 		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
@@ -52,6 +54,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			}
 		}
 		currentStack += parameters[parameterIndex].Typ.JvmSlotSize()
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
 		parameterIndex++
 	}
 	return

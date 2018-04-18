@@ -57,10 +57,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	// & |
 	if e.Typ == EXPRESSION_TYPE_OR || EXPRESSION_TYPE_AND == e.Typ {
 		if !t1.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(bin.Left.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a number expression",
+				errMsgPrefix(bin.Left.Pos)))
 		}
 		if !t2.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s not a number expression", errMsgPrefix(bin.Right.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a number expression",
+				errMsgPrefix(bin.Right.Pos)))
 		}
 		if t1.IsNumber() && t2.IsNumber() {
 			if t1.Typ != t2.Typ { //force to equal
@@ -143,14 +145,17 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
+					t1.TypeString(),
 					t2.TypeString()))
-			}
-			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s' ",
-					errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
+			} else {
+				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
+					*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s' ",
+						errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
+				}
 			}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm('%s') on '%s' and '%s'", errMsgPrefix(e.Pos),
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm('%s') on '%s' and '%s'",
+				errMsgPrefix(e.Pos),
 				e.OpName(),
 				t1.TypeString(),
 				t2.TypeString()))

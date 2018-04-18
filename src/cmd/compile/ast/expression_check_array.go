@@ -10,7 +10,8 @@ import (
 func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	arr := e.Data.(*ExpressionArrayLiteral)
 	if arr.Typ == nil && (arr.Expressions == nil || len(arr.Expressions) == 0) {
-		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression,cannot inference it`s type ",
+		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression,"+
+			"cannot inference it`s type ",
 			errMsgPrefix(e.Pos)))
 		return nil
 	}
@@ -39,7 +40,8 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 					arr.Typ.Typ = VARIABLE_TYPE_ARRAY
 					arr.Typ.ArrayType = tt
 				} else {
-					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,because type named '%s' is not right value valid ",
+					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,"+
+						"because type named '%s' is not right value valid ",
 						errMsgPrefix(e.Pos), t.TypeString()))
 				}
 			}

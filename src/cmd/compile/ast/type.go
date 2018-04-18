@@ -396,6 +396,12 @@ func (v *VariableType) TypeString() string {
 }
 
 func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
+	if t.IsInteger() && t2.IsInteger() {
+		return true
+	}
+	if t.IsFloat() && t2.IsFloat() {
+		return true
+	}
 	return t.Equal(t2)
 }
 

@@ -8,7 +8,7 @@ import (
 
 func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
-	maxstack, _ = m.build(class, code, assert.Expression, context, nil)
+	maxstack, _ = m.build(class, code, assert.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof

@@ -25,17 +25,19 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 	}
 	if e.Typ == EXPRESSION_TYPE_NOT {
 		if t.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(t.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
+				errMsgPrefix(t.Pos)))
 		}
 		t := &VariableType{
-			Typ: EXPRESSION_TYPE_BOOL,
+			Typ: VARIABLE_TYPE_BOOL,
 			Pos: e.Pos,
 		}
 		return t
 	}
 	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
 		if t.IsNumber() == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'", errMsgPrefix(e.Pos), t.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'",
+				errMsgPrefix(e.Pos), t.TypeString()))
 		}
 		tt := t.Clone()
 		tt.Pos = e.Pos

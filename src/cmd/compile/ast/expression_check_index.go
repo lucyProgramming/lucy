@@ -18,7 +18,8 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		return nil
 	}
 	if t.Typ != VARIABLE_TYPE_ARRAY && t.Typ != VARIABLE_TYPE_MAP {
-		*errs = append(*errs, fmt.Errorf("%s cannot have 'index' on '%s'", errMsgPrefix(e.Pos), t.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot have 'index' on '%s'",
+			errMsgPrefix(e.Pos), t.TypeString()))
 		return nil
 	}
 	// array

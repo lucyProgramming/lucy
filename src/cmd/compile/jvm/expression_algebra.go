@@ -56,11 +56,11 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if stack > maxstack {
 			maxstack = stack
 		}
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.VariableType)...)
 		//number type,no doubt
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.VariableType.Typ, e.VariableType.Typ)
 		}
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.VariableType)...)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
@@ -165,6 +165,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if e.VariableType.Typ != bin.Left.VariableType.Typ {
 			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
 		}
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.VariableType)...)
 		size := e.VariableType.JvmSlotSize()
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {

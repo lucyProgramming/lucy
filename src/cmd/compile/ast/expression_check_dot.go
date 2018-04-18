@@ -126,7 +126,8 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 	} else { // class
 		if dot.Name == SUPER_FIELD_NAME {
 			if t.Class.Name == JAVA_ROOT_CLASS {
-				*errs = append(*errs, fmt.Errorf("%s '%s' is root class", errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
+				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
+					errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
 				return t
 			}
 			err = t.Class.loadSuperClass()

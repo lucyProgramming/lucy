@@ -5,12 +5,19 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	slice := e.Data.(*ast.ExpressionSlice)
-	maxstack, _ = m.build(class, code, slice.Expression, context, nil)
+	maxstack, _ = m.build(class, code, slice.Expression, context, state)
+	meta := ArrayMetas[slice.Expression.VariableType.ArrayType.Typ]
+	state.Stacks = append(state.Stacks,
+		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(meta.classname))...)
 	// build start
 	if slice.Start != nil {
-		stack, _ := m.build(class, code, slice.Start, context, nil)
+		stack, _ := m.build(class, code, slice.Start, context, state)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -21,8 +28,10 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
 	}
+	state.Stacks = append(state.Stacks,
+		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 	if slice.End != nil {
-		stack, _ := m.build(class, code, slice.End, context, nil)
+		stack, _ := m.build(class, code, slice.End, context, state)
 		if slice.End.VariableType.Typ == ast.VARIABLE_TYPE_LONG {
 			m.numberTypeConverter(code, ast.VARIABLE_TYPE_LONG, ast.VARIABLE_TYPE_INT)
 		}
@@ -36,7 +45,6 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 			maxstack = 3
 		}
 	}
-	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,

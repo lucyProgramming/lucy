@@ -101,7 +101,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
 			if v.MayHaveMultiValue() && len(v.VariableTypes) > 0 {
-				stack, _ := m.build(class, code, v, context, nil)
+				stack, _ := m.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}

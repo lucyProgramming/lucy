@@ -81,7 +81,8 @@ func (s *StatementFor) checkRange() []error {
 	} else if bin.Right.Typ == EXPRESSION_TYPE_LIST {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
-			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right", errMsgPrefix(t[1].Pos)))
+			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right",
+				errMsgPrefix(t[1].Pos)))
 		}
 		rangeExpression = t[0].Data.(*Expression)
 	}
@@ -99,7 +100,8 @@ func (s *StatementFor) checkRange() []error {
 	if rangeOn.Typ != VARIABLE_TYPE_ARRAY &&
 		rangeOn.Typ != VARIABLE_TYPE_JAVA_ARRAY &&
 		rangeOn.Typ != VARIABLE_TYPE_MAP {
-		errs = append(errs, fmt.Errorf("%s cannot have range on '%s'", errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
+		errs = append(errs, fmt.Errorf("%s cannot have range on '%s'",
+			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
 	rangeExpression.VariableType = rangeOn
@@ -110,7 +112,8 @@ func (s *StatementFor) checkRange() []error {
 		lefts = []*Expression{bin.Left}
 	}
 	if len(lefts) > 2 {
-		errs = append(errs, fmt.Errorf("%s cannot have more than 2 expressions on the left", errMsgPrefix(lefts[2].Pos)))
+		errs = append(errs, fmt.Errorf("%s cannot have more than 2 expressions on the left",
+			errMsgPrefix(lefts[2].Pos)))
 		lefts = lefts[:2]
 	}
 	modelkv := false
@@ -141,7 +144,8 @@ func (s *StatementFor) checkRange() []error {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
 		if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
-			errs = append(errs, fmt.Errorf("%s not a identifier on left", errMsgPrefix(lefts[0].Pos)))
+			errs = append(errs, fmt.Errorf("%s not a identifier on left",
+				errMsgPrefix(lefts[0].Pos)))
 			return errs
 		} else {
 			identifier = lefts[0].Data.(*ExpressionIdentifer)
@@ -151,7 +155,8 @@ func (s *StatementFor) checkRange() []error {
 		var pos2 *Pos
 		if modelkv {
 			if lefts[1].Typ != EXPRESSION_TYPE_IDENTIFIER {
-				errs = append(errs, fmt.Errorf("%s not a identifier on left", errMsgPrefix(lefts[1].Pos)))
+				errs = append(errs, fmt.Errorf("%s not a identifier on left",
+					errMsgPrefix(lefts[1].Pos)))
 				return errs
 
 			} else {
@@ -162,7 +167,8 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv {
 			if identifier2 != nil { // alloc v first
 				if identifier2.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
+					errs = append(errs, fmt.Errorf("%s not a valid name one left",
+						errMsgPrefix(pos2)))
 					return errs
 
 				} else {
@@ -184,12 +190,14 @@ func (s *StatementFor) checkRange() []error {
 
 			if identifier != nil {
 				if identifier.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos)))
+					errs = append(errs, fmt.Errorf("%s not a valid name one left",
+						errMsgPrefix(pos)))
 					return errs
 				} else {
 					vd := &VariableDefinition{}
 					var vt *VariableType
-					if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+					if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
+						rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 						vt = &VariableType{}
 						vt.Typ = VARIABLE_TYPE_INT
 					} else {
@@ -208,13 +216,15 @@ func (s *StatementFor) checkRange() []error {
 			}
 		} else {
 			if identifier != nil && identifier.Name == NO_NAME_IDENTIFIER {
-				errs = append(errs, fmt.Errorf("%s not a identifier on left", errMsgPrefix(lefts[1].Pos)))
+				errs = append(errs, fmt.Errorf("%s not a identifier on left",
+					errMsgPrefix(lefts[1].Pos)))
 				return errs
 
 			}
 			if identifier != nil {
 				if identifier.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left", errMsgPrefix(pos2)))
+					errs = append(errs, fmt.Errorf("%s not a valid name one left",
+						errMsgPrefix(pos2)))
 					return errs
 				} else {
 					vd := &VariableDefinition{}

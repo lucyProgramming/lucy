@@ -11,7 +11,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		return m.buildArrayMethodCall(class, code, e, context, state)
 	}
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
-		return m.buildMapMethodCall(class, code, e, context)
+		return m.buildMapMethodCall(class, code, e, context, state)
 	}
 	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		return m.buildJavaArrayMethodCall(class, code, e, context, state)

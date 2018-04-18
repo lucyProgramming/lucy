@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	convertion := e.Data.(*ast.ExpressionTypeConvertion)
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
@@ -25,8 +25,7 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 	}
-	stack, _ := m.build(class, code, convertion.Expression, context, nil)
-	//backPatchEs(es, code.CodeLength)
+	stack, _ := m.build(class, code, convertion.Expression, context, state)
 	maxstack = currentStack + stack
 	if convertion.Typ.IsNumber() {
 		m.numberTypeConverter(code, convertion.Expression.VariableType.Typ, convertion.Typ.Typ)

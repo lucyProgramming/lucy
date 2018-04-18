@@ -209,16 +209,19 @@ func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
 	for _, v := range b.Consts {
 		if v.Expression == nil {
-			errs = append(errs, fmt.Errorf("%s const %v has no initiation value", errMsgPrefix(v.Pos), v.Name))
+			errs = append(errs, fmt.Errorf("%s const %v has no initiation value",
+				errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
 		is, t, value, err := v.Expression.getConstValue()
 		if err != nil {
-			errs = append(errs, fmt.Errorf("%s const '%v' defined wrong,err:%v", errMsgPrefix(v.Pos), v.Name, err))
+			errs = append(errs, fmt.Errorf("%s const '%v' defined wrong,err:%v",
+				errMsgPrefix(v.Pos), v.Name, err))
 			continue
 		}
 		if is == false {
-			errs = append(errs, fmt.Errorf("%s const %s is not a const value", errMsgPrefix(v.Pos), v.Name))
+			errs = append(errs, fmt.Errorf("%s const %s is not a const value",
+				errMsgPrefix(v.Pos), v.Name))
 			continue
 		}
 		v.Value = value
@@ -234,7 +237,8 @@ func (b *Block) checkConst() []error {
 				continue
 			}
 			if !v.Typ.Equal(ts[0]) {
-				errs = append(errs, fmt.Errorf("%s cannot assign %s %s", errMsgPrefix(v.Pos), v.Typ.TypeString(), ts[0].TypeString()))
+				errs = append(errs, fmt.Errorf("%s cannot assign %s %s",
+					errMsgPrefix(v.Pos), v.Typ.TypeString(), ts[0].TypeString()))
 				continue
 			}
 		}
@@ -260,7 +264,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
 		b := PackageBeenCompile.Block
 		if _, ok := b.Vars[name]; ok {
-			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n", errMsgPrefix(pos), name)
+			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
+				errMsgPrefix(pos), name)
 			errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
 			return fmt.Errorf(errmsg)
 		}
@@ -281,7 +286,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Vars = make(map[string]*VariableDefinition)
 	}
 	if v, ok := b.Vars[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -289,7 +295,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Classes = make(map[string]*Class)
 	}
 	if c, ok := b.Classes[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -297,7 +304,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Funcs = make(map[string]*Function)
 	}
 	if f, ok := b.Funcs[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(f.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -305,7 +313,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts = make(map[string]*Const)
 	}
 	if c, ok := b.Consts[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -313,7 +322,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Enums = make(map[string]*Enum)
 	}
 	if e, ok := b.Enums[name]; ok {
-		errmsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(e.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -321,7 +331,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.EnumNames = make(map[string]*EnumName)
 	}
 	if en, ok := b.EnumNames[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -329,7 +340,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Lables = make(map[string]*StatementLable)
 	}
 	if l, ok := b.Lables[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -337,7 +349,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Types = make(map[string]*VariableType)
 	}
 	if t, ok := b.Types[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:", errMsgPrefix(pos), name)
+		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("%s", errMsgPrefix(t.Pos))
 		return fmt.Errorf(errmsg)
 	}
@@ -347,7 +360,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *Function:
 		t := d.(*Function)
 		if buildinFunctionsMap[t.Name] != nil {
-			return fmt.Errorf("%s function named '%s' is buildin", errMsgPrefix(pos), name)
+			return fmt.Errorf("%s function named '%s' is buildin",
+				errMsgPrefix(pos), name)
 		}
 		b.Funcs[name] = t
 	case *Const:
@@ -356,7 +370,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		t := d.(*VariableDefinition)
 		t.LocalValOffset = b.InheritedAttribute.Function.VarOffset
 		b.InheritedAttribute.Function.VarOffset += t.Typ.JvmSlotSize()
-		b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &t.LocalValOffset)
+		b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations,
+			&t.LocalValOffset)
 		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)

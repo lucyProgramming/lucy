@@ -12,7 +12,8 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		identifier := e.Data.(*ExpressionIdentifer)
 		d := block.SearchByName(identifier.Name)
 		if d == nil {
-			return nil, []error{fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifier.Name)}
+			return nil, []error{fmt.Errorf("%s '%s' not found",
+				errMsgPrefix(e.Pos), identifier.Name)}
 		}
 		switch d.(type) {
 		case *VariableDefinition:
@@ -79,15 +80,18 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 		} else if t.Typ == VARIABLE_TYPE_PACKAGE {
 			variable := t.Package.Block.SearchByName(dot.Name)
 			if nil == variable {
-				errs = append(errs, fmt.Errorf("%s '%s.%s' not found", errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+				errs = append(errs, fmt.Errorf("%s '%s.%s' not found",
+					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil, errs
 			}
 			if vd, ok := variable.(*VariableDefinition); ok == false {
-				errs = append(errs, fmt.Errorf("%s '%s.%s' is not varible", errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+				errs = append(errs, fmt.Errorf("%s '%s.%s' is not varible",
+					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil, errs
 			} else {
 				if vd.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
-					errs = append(errs, fmt.Errorf("%s '%s.%s' is private", errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+					errs = append(errs, fmt.Errorf("%s '%s.%s' is private",
+						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				}
 				dot.PackageVariableDefinition = vd
 				tt := vd.Typ.Clone()

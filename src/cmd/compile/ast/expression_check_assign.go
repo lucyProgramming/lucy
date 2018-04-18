@@ -32,7 +32,8 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	declareVariableExpression.Values = values
 	for k, v := range names {
 		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
-			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'", errMsgPrefix(v.Pos), v.OpName()))
+			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'",
+				errMsgPrefix(v.Pos), v.OpName()))
 			noErr = false
 			continue
 		}
@@ -197,7 +198,8 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		}
 	}
 	if noAssign {
-		*errs = append(*errs, fmt.Errorf("%s no assign able expression on the left", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s no assign able expression on the left",
+			errMsgPrefix(e.Pos)))
 		return nil
 	}
 	if len(leftTypes) == 0 {

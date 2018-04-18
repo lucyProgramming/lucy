@@ -3,7 +3,6 @@ package jvm
 import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"golang.org/x/net/bpf"
 )
 
 func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
@@ -25,7 +24,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 	code.CodeLength += 3
 	values := e.Data.(*ast.ExpressionMap).Values
 	{
-		t := state.newStackMapVerificationTypeInfo(state.newObjectVariableType(java_hashmap_class))
+		t := state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_hashmap_class))
 		state.Stacks = append(state.Stacks, t...)
 		state.Stacks = append(state.Stacks, t...)
 	}
@@ -44,9 +43,10 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		if variableType.IsPointer() == false {
 			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}
-
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_root_class))...)
 		currentStack = 3 // stack is ... mapref mapref kref
-		stack, es := m.build(class, code, v.Right, context, nil)
+		stack, es := m.build(class, code, v.Right, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
 			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Right.VariableType)...)
@@ -54,6 +54,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 				context.MakeStackMap(state, code.CodeLength))
 			state.popStack(1)
 		}
+		state.popStack(1) // @46
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}

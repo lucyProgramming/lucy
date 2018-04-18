@@ -6,16 +6,23 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = m.build(class, code, call.Expression, context, nil)
+	maxstack, _ = m.build(class, code, call.Expression, context, state)
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
+	hashMapVerifyType := state.newObjectVariableType(java_hashmap_class)
+	state.Stacks = append(state.Stacks,
+		state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
 	switch call.Name {
-	case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
+	case common.MAP_METHOD_KEY_EXISTS:
 		variableType := call.Args[0].VariableType
 		if call.Args[0].MayHaveMultiValue() {
 			variableType = call.Args[0].VariableTypes[0]
 		}
-		stack, _ := m.build(class, code, call.Args[0], context, nil)
+		stack, _ := m.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -24,13 +31,9 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		code.CodeLength++
-		name := "containsKey"
-		if call.Name != common.MAP_METHOD_KEY_EXISTS {
-			name = "containsValue"
-		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
-			Method:     name,
+			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
@@ -52,8 +55,8 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		}
 		for k, v := range call.Args {
 			currentStack = 1
-			if v.MayHaveMultiValue() && len(v.VariableTypes) > 0 {
-				stack, _ := m.build(class, code, v, context, nil)
+			if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
+				stack, _ := m.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -65,6 +68,8 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 						code.Codes[code.CodeLength] = cg.OP_dup
 						code.CodeLength++
 						currentStack++
+						state.Stacks = append(state.Stacks,
+							state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
 					}
 					//load
 					m.buildLoadArrayListAutoVar(code, context)
@@ -78,6 +83,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					code.CodeLength += 3
 					//remove
 					callRemove()
+					state.popStack(1)
 				}
 				continue
 			}
@@ -92,8 +98,10 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				if currentStack > maxstack {
 					maxstack = currentStack
 				}
+				state.Stacks = append(state.Stacks,
+					state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
 			}
-			stack, _ := m.build(class, code, v, context, nil)
+			stack, _ := m.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
@@ -102,6 +110,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			}
 			//call remove
 			callRemove()
+			state.popStack(1)
 		}
 	case common.MAP_METHOD_REMOVEALL:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

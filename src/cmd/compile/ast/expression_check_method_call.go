@@ -62,7 +62,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				return ret
 			}
 			if t.IsPrimitive() {
-				*errs = append(*errs, fmt.Errorf("%s expression is primitive,cannot be cast to another type", errMsgPrefix(e.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s expression is primitive,cannot be cast to another type",
+					errMsgPrefix(e.Pos)))
 			}
 			return ret
 		} else {
@@ -73,12 +74,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	if object.Typ == VARIABLE_TYPE_MAP {
 		switch call.Name {
-		case common.MAP_METHOD_KEY_EXISTS, common.MAP_METHOD_VALUE_EXISTS:
+		case common.MAP_METHOD_KEY_EXISTS:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_BOOL
 			if len(call.Args) == 0 || len(call.Args) > 1 {
-				*errs = append(*errs, fmt.Errorf("%s call '%s' expect one argument", errMsgPrefix(e.Pos), call.Name))
+				*errs = append(*errs, fmt.Errorf("%s call '%s' expect one argument",
+					errMsgPrefix(e.Pos), call.Name))
 				return []*VariableType{ret}
 			}
 			matchkey := call.Name == common.MAP_METHOD_KEY_EXISTS
@@ -137,7 +139,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_INT
 			if len(call.Args) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s too many argument to call '%s''", errMsgPrefix(e.Pos), call.Name))
+				*errs = append(*errs, fmt.Errorf("%s too many argument to call '%s''",
+					errMsgPrefix(e.Pos), call.Name))
 			}
 			return []*VariableType{ret}
 		default:
@@ -211,7 +214,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if object.Typ != VARIABLE_TYPE_OBJECT && object.Typ != VARIABLE_TYPE_CLASS {
-		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'", errMsgPrefix(e.Pos), call.Name, object.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
+			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
 	call.Class = object.Class
