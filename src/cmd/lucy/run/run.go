@@ -448,6 +448,9 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		return
 	}
 
-	err = ioutil.WriteFile(filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE), bs, 0644)
+	err = ioutil.WriteFile(
+		filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
+		bs,
+		0644)
 	return
 }

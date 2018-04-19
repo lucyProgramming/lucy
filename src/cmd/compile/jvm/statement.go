@@ -19,27 +19,34 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_BLOCK: //new
-		m.buildBlock(class, code, s.Block, context, (&StackMapState{}).FromLast(state))
+		ss := (&StackMapState{}).FromLast(state)
+		m.buildBlock(class, code, s.Block, context, ss)
+		state.addTop(ss)
 	case ast.STATEMENT_TYPE_FOR:
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.BackPatchs) > 0 {
 			backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
-
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		if len(s.StatementFor.ContinueBackPatchs) > 0 {
-			// stack map is solved
+			// stack map is already maked
 			backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			m.buildDefers(class, code, state, context, b.Defers, false, nil)
+			stack := m.buildDefers(class, code, state, context, b.Defers, false, nil)
+			if stack > code.MaxStack {
+				code.MaxStack = stack
+			}
 		}
 		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
 			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	case ast.STATEMENT_TYPE_BREAK:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			m.buildDefers(class, code, state, context, b.Defers, false, nil)
+			stack := m.buildDefers(class, code, state, context, b.Defers, false, nil)
+			if stack > code.MaxStack {
+				code.MaxStack = stack
+			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_goto
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
@@ -62,12 +69,10 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_LABLE:
 		if len(s.StatmentLable.BackPatches) > 0 {
 			backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
-
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
-
 	}
 	return
 }

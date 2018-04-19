@@ -24,6 +24,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+7] = cg.OP_pop
 	code.CodeLength += 8
 	forState := (&StackMapState{}).FromLast(state)
+	defer func() {
+		state.addTop(forState)
+	}()
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup

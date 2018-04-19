@@ -64,7 +64,7 @@ func (p *Package) addBuildFunctions() {
 		p.Block.Funcs = make(map[string]*Function)
 	}
 	for k, f := range buildinFunctionsMap {
-		ff := mkBuildinFunction(k, f.args, f.returns, f.checker)
+		ff := mkBuildinFunction(k, f.args, f.returnList, f.checker)
 		p.Block.Funcs[k] = ff
 	}
 }

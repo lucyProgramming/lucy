@@ -48,7 +48,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 8
 		}
 	}
-	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context, nil)
+	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.JumpBackPatch
 	size := s.Condition.VariableType.JvmSlotSize()
@@ -61,7 +61,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		needPop := false
 		for kk, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.VariableTypes) > 0 {
-				stack, _ := m.MakeExpression.build(class, code, ee, context, nil)
+				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
@@ -107,7 +107,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					maxstack = currentStack
 				}
 			}
-			stack, _ := m.MakeExpression.build(class, code, ee, context, nil)
+			stack, _ := m.MakeExpression.build(class, code, ee, context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}

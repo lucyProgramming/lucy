@@ -43,7 +43,7 @@ func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDe
 	return f
 }
 
-func oneAnyTypeParameterChecker(block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+func oneAnyTypeParameterChecker(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 	}

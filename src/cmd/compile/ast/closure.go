@@ -73,6 +73,5 @@ func (c *Closure) Search(name string) interface{} {
 			return v
 		}
 	}
-
 	return nil
 }

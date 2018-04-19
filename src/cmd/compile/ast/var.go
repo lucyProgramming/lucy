@@ -8,16 +8,21 @@ type LoadName interface {
 	LoadName(resouceName string) (*Package, interface{}, error)
 }
 
+const (
+	MAIN_FUNCTION_NAME      = "main"
+	THIS                    = "this"
+	NO_NAME_IDENTIFIER      = "_"
+	LUCY_ROOT_CLASS         = "lucy/deps/Object"
+	JAVA_ROOT_CLASS         = "java/lang/Object"
+	DEFAULT_EXCEPTION_CLASS = "java/lang/Exception"
+	JAVA_THROWABLE_CLASS    = "java/lang/Throwable"
+	SUPER_FIELD_NAME        = "super"
+)
+
 var (
-	MAIN_FUNCTION_NAME  = "main"
-	THIS                = "this"
-	NO_NAME_IDENTIFIER  = "_"
 	Nodes               *[]*Node
 	packageAliasReg     *regexp.Regexp
 	NameLoader          LoadName
-	LUCY_ROOT_CLASS     = "lucy/deps/Object"
-	JAVA_ROOT_CLASS     = "java/lang/Object"
-	SUPER_FIELD_NAME    = "super"
 	buildinFunctionsMap = make(map[string]*buildFunction)
 	JvmSlotSizeHandler  func(v *VariableType) uint16 // implements by outside
 	PackageBeenCompile  *Package

@@ -23,11 +23,6 @@ type Block struct {
 	Vars                       map[string]*VariableDefinition
 }
 
-type Defer struct {
-	StartPc int
-	Block   Block
-}
-
 func (b *Block) searchClass(name string) *Class {
 	for b != nil {
 		if b.Classes != nil {

@@ -11,13 +11,13 @@ type StackMapState struct {
 	Stacks     []*cg.StackMap_verification_type_info
 }
 
-func (s *StackMapState) addTop(skip *StackMapState) {
-	length := len(skip.Locals) - len(s.Locals)
+func (s *StackMapState) addTop(absent *StackMapState) {
+	length := len(absent.Locals) - len(s.Locals)
 	oldLength := len(s.Locals)
 	t := &cg.StackMap_verification_type_info{}
 	t.T = &cg.StackMap_Top_variable_info{}
 	for i := 0; i < length; i++ {
-		tt := skip.Locals[i+oldLength].T
+		tt := absent.Locals[i+oldLength].T
 		_, ok1 := tt.(*cg.StackMap_Double_variable_info)
 		_, ok2 := tt.(*cg.StackMap_Long_variable_info)
 		if ok1 || ok2 {

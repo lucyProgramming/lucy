@@ -14,24 +14,27 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			return m.buildForRangeStatementForMap(class, code, s, context, state)
 		}
 	}
+	forState := (&StackMapState{}).FromLast(state)
+	defer func() {
+		state.addTop(forState)
+	}()
 	//init
 	if s.Init != nil {
-		stack, _ := m.MakeExpression.build(class, code, s.Init, context, state)
+		stack, _ := m.MakeExpression.build(class, code, s.Init, context, forState)
 		if stack > maxstack {
 			maxstack = stack
 		}
 	}
-	forState := (&StackMapState{}).FromLast(state)
 	loopBeginAt := code.CodeLength
 	s.ContinueOPOffset = code.CodeLength
-	context.MakeStackMap(code, state, code.CodeLength)
+	context.MakeStackMap(code, forState, code.CodeLength)
 	//condition
 	if s.Condition != nil {
-		stack, es := m.MakeExpression.build(class, code, s.Condition, context, state)
+		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			forState.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
-			context.MakeStackMap(code, state, code.CodeLength)
+			forState.Stacks = append(forState.Stacks, forState.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
+			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}
 		if stack > maxstack {
@@ -41,11 +44,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	} else {
 
 	}
-	if s.Condition != nil {
-		m.buildBlock(class, code, s.Block, context, forState)
-	} else {
-		m.buildBlock(class, code, s.Block, context, state)
-	}
+	m.buildBlock(class, code, s.Block, context, forState)
 	if s.Post != nil {
 		s.ContinueOPOffset = code.CodeLength
 		//stack is here

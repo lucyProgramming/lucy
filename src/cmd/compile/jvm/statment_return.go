@@ -13,7 +13,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if 1 > code.MaxStack {
 				code.MaxStack = 1
 			}
-			m.buildDefers(class, code, state, context, context.Defers, true, s)
+			stack := m.buildDefers(class, code, state, context, context.Defers, true, s)
+			if stack > code.MaxStack {
+				code.MaxStack = stack
+			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
@@ -40,7 +43,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if 1 > code.MaxStack {
 				code.MaxStack = 1
 			}
-			m.buildDefers(class, code, state, context, context.Defers, true, s)
+			stack := m.buildDefers(class, code, state, context, context.Defers, true, s)
+			if stack > code.MaxStack {
+				code.MaxStack = stack
+			}
 			code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 			//restore the stack
 			if len(s.Expressions) > 0 { //restore stack
@@ -163,7 +169,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if t := uint16(1); t > code.MaxStack {
 			code.MaxStack = t
 		}
-		m.buildDefers(class, code, state, context, context.Defers, true, s)
+		stack := m.buildDefers(class, code, state, context, context.Defers, true, s)
+		if stack > code.MaxStack {
+			code.MaxStack = stack
+		}
 		code.MaxStack += context.function.Typ.ReturnList[0].Typ.JvmSlotSize()
 		//restore the stack
 		copyOP(code,

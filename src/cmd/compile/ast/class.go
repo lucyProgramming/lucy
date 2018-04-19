@@ -124,10 +124,6 @@ func (c *Class) checkPhase2(father *Block) []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	//errs = append(errs, c.checkConstructionFunctions()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
 	for _, ms := range c.Methods {
 		if len(ms) > 1 {
 			errmsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
@@ -140,9 +136,6 @@ func (c *Class) checkPhase2(father *Block) []error {
 		}
 	}
 	errs = append(errs, c.checkMethods()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
@@ -215,12 +208,6 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 
 func (c *Class) checkFields() []error {
 	errs := []error{}
-	for _, v := range c.Fields {
-		err := v.Typ.resolve(&c.Block)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
 	return errs
 }
 

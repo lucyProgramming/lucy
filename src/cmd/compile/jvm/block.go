@@ -30,40 +30,36 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 	}
 	if b.IsFunctionTopBlock == false {
-		m.buildDefers(class, code, state, context, b.Defers, true, nil)
+		stack := m.buildDefers(class, code, state, context, b.Defers, true, nil)
+		if stack > code.MaxStack {
+			code.MaxStack = stack
+		}
 	}
 	return
 }
 
-func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState, context *Context, ds []*ast.Defer, needExceptionTable bool, r *ast.StatementReturn) {
+func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState, context *Context, ds []*ast.Defer, needExceptionTable bool, r *ast.StatementReturn) (maxstack uint16) {
 	if len(ds) == 0 {
 		return
-	}
-	var endPc, startPc int
-	if needExceptionTable {
-		endPc = code.CodeLength
-		startPc = ds[len(ds)-1].StartPc
 	}
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		// insert exceptions
 		if needExceptionTable {
-			{
-				t := &ast.VariableType{}
-				t.Typ = ast.VARIABLE_TYPE_OBJECT
-				t.Class = &ast.Class{}
-				t.Class.Name = "java/lang/Throwable"
-				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
-			}
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_throwable_class))...)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 			e := &cg.ExceptionTable{}
-			e.StartPc = uint16(startPc)
-			e.Endpc = uint16(endPc)
+			e.StartPc = uint16(ds[index].StartPc)
+			e.Endpc = uint16(code.CodeLength)
 			e.HandlerPc = uint16(code.CodeLength)
-			e.CatchType = class.Class.InsertClassConst(java_throwable_class) //runtime
+			if ds[index].ExceptionClass == nil {
+				e.CatchType = class.Class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS)
+			} else {
+				e.CatchType = class.Class.InsertClassConst(ds[index].ExceptionClass.Name) // custom class
+			}
 			code.Exceptions = append(code.Exceptions, e)
-			startPc = code.CodeLength
 			if index == len(ds)-1 && r != nil && context.function.NoReturnValue() == false {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
@@ -80,14 +76,11 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 				copyOP(code, op...)
 			}
 			//expect exception on stack
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // this code will make stack is empty
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
+				context.function.AutoVarForException.Offset)...) // this code will make stack is empty
 		}
 		m.buildBlock(class, code, &ds[index].Block, context, (&StackMapState{}).FromLast(state))
-		// load to stack
-		// this code maxStack is 2
-		if 2 > code.MaxStack {
-			code.MaxStack = 2
-		}
+		//
 		if needExceptionTable == false {
 			index--
 			continue
@@ -102,7 +95,6 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
 			code.Codes[code.CodeLength+6] = cg.OP_athrow
 			code.CodeLength += 7
-			endPc = code.CodeLength
 			index--
 			continue
 		}
@@ -118,7 +110,6 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
 		code.CodeLength += 8
 		if r == nil || context.function.NoReturnValue() || len(r.Expressions) == 0 {
-			endPc = code.CodeLength
 			index--
 			continue
 		}
@@ -149,7 +140,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 0)
 		}
 		binary.BigEndian.PutUint16(code.Codes[noExceptionExitCodeLength+1:noExceptionExitCodeLength+3], uint16(code.CodeLength-noExceptionExitCodeLength)) // exit is here
-		endPc = code.CodeLength
 		index--
 	}
+	return
 }
