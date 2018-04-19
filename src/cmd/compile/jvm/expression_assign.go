@@ -18,8 +18,8 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	if len(es) > 0 {
 		state.Stacks = append(state.Stacks,
 			state.newStackMapVerificationTypeInfo(class, right.VariableType)...)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength))
+
+		context.MakeStackMap(code, state, code.CodeLength)
 		backPatchEs(es, code.CodeLength)
 	}
 	if t := remainStack + stack; t > maxstack {
@@ -152,7 +152,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, variableType)...)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)                // must be interger
 			backPatchEs(es, code.CodeLength) // true or false need to backpatch
 		}

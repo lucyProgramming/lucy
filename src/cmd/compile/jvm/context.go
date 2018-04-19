@@ -15,7 +15,10 @@ type Context struct {
 	StackMapDelta     int
 }
 
-func (context *Context) MakeStackMap(state *StackMapState, offset int) cg.StackMap {
+func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
+	if context.StackMapDelta == offset {
+		return
+	}
 	var delta uint16
 	if context.StackMapDelta == 0 {
 		delta = uint16(offset)
@@ -40,7 +43,8 @@ func (context *Context) MakeStackMap(state *StackMapState, offset int) cg.StackM
 				for i := len(state.LastLocals); i < num; i++ {
 					appendFrame.Locals[i-len(state.LastLocals)] = state.Locals[i]
 				}
-				return appendFrame
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, appendFrame)
+				return
 			}
 			// full frame
 			fullFrame := &cg.StackMap_full_frame{}
@@ -50,29 +54,33 @@ func (context *Context) MakeStackMap(state *StackMapState, offset int) cg.StackM
 			copy(fullFrame.Locals, state.Locals)
 			fullFrame.Stacks = make([]*cg.StackMap_verification_type_info, len(state.Stacks))
 			copy(fullFrame.Stacks, state.Stacks)
-			return fullFrame
+			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
+			return
 		}
 
 		if len(state.Locals) == len(state.LastLocals) && len(state.Stacks) == 0 { // same frame or same frame extended
 			if delta <= 63 {
-				return &cg.StackMap_same_frame{FrameType: byte(delta)}
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_frame{FrameType: byte(delta)})
+
 			} else {
-				return &cg.StackMap_same_frame_extended{FrameType: 251, Delta: delta}
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_frame_extended{FrameType: 251, Delta: delta})
 			}
+			return
 		}
 		if len(state.LastLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
 			if delta <= 64 {
-				return &cg.StackMap_same_locals_1_stack_item_frame{
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_locals_1_stack_item_frame{
 					FrameType: byte(delta + 64),
 					Stack:     state.Stacks[0],
-				}
+				})
 			} else {
-				return &cg.StackMap_same_locals_1_stack_item_frame_extended{
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_locals_1_stack_item_frame_extended{
 					FrameType: 247,
 					Delta:     delta,
 					Stack:     state.Stacks[0],
-				}
+				})
 			}
+			return
 		}
 		if len(state.LastLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
 			num := len(state.Locals) - len(state.LastLocals)
@@ -82,7 +90,8 @@ func (context *Context) MakeStackMap(state *StackMapState, offset int) cg.StackM
 				appendFrame.Delta = delta
 				appendFrame.Locals = make([]*cg.StackMap_verification_type_info, num)
 				copy(appendFrame.Locals, state.Locals[len(state.Locals)-num:])
-				return appendFrame
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, appendFrame)
+				return
 			}
 		}
 	}
@@ -94,7 +103,8 @@ func (context *Context) MakeStackMap(state *StackMapState, offset int) cg.StackM
 	copy(fullFrame.Locals, state.Locals)
 	fullFrame.Stacks = make([]*cg.StackMap_verification_type_info, len(state.Stacks))
 	copy(fullFrame.Stacks, state.Stacks)
-	return fullFrame
+	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
+	return
 }
 
 func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos, code *cg.AttributeCode, class *cg.ClassHighLevel) {

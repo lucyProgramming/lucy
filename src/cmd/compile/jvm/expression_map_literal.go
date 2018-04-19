@@ -50,8 +50,8 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
 			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Right.VariableType)...)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		state.popStack(1) // @46

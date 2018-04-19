@@ -23,7 +23,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 			tt.Pos = e.Pos
 			return tt, nil
 		default:
-			errs = append(errs, fmt.Errorf("%s identifier '%s' is not variable",
+			errs = append(errs, fmt.Errorf("%s identifier named '%s' is not variable",
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil, []error{}
 		}
@@ -58,10 +58,11 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 					errs = append(errs, fmt.Errorf("%s field '%s' is private",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
+				tt := field.Typ.Clone()
+				tt.Pos = e.Pos
+				return tt, errs
 			}
-			tt := field.Typ.Clone()
-			tt.Pos = e.Pos
-			return tt, errs
+			return nil, errs
 		} else if t.Typ == VARIABLE_TYPE_CLASS {
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
@@ -73,10 +74,11 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 					errs = append(errs, fmt.Errorf("%s field '%s' is not static,should access by instance",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
+				tt := field.Typ.Clone()
+				tt.Pos = e.Pos
+				return tt, errs
 			}
-			tt := field.Typ.Clone()
-			tt.Pos = e.Pos
-			return tt, errs
+			return nil, errs
 		} else if t.Typ == VARIABLE_TYPE_PACKAGE {
 			variable := t.Package.Block.SearchByName(dot.Name)
 			if nil == variable {

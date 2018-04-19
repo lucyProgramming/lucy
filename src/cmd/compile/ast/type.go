@@ -361,7 +361,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_DOUBLE:
 		*ret += "double"
 	case VARIABLE_TYPE_CLASS:
-		*ret += fmt.Sprintf("class named %s", v.Class.Name)
+		*ret += fmt.Sprintf("class(%s)", v.Class.Name)
 	case VARIABLE_TYPE_ENUM:
 		*ret += "enum(" + v.Name + ")"
 	case VARIABLE_TYPE_ARRAY:

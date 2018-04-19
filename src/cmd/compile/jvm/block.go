@@ -55,7 +55,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 				t.Class.Name = "java/lang/Throwable"
 				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
 			}
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 			e := &cg.ExceptionTable{}
 			e.StartPc = uint16(startPc)

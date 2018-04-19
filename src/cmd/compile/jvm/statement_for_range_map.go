@@ -12,10 +12,8 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	{
 		state.Stacks = append(state.Stacks,
 			state.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.Expression.VariableType)...)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength+7))
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength+11))
+		context.MakeStackMap(code, state, code.CodeLength+7)
+		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(1) // pop
 	}
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -79,7 +77,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 
 	//continue offset start from here
 	loopBeginsAt := code.CodeLength
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(forState, code.CodeLength))
+	context.MakeStackMap(code, forState, code.CodeLength)
 	// load  map object
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.MapObject)...)
 	// load k sets
@@ -230,7 +228,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		t.ArrayType = state.newObjectVariableType(java_root_class)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(3)
 	}
 

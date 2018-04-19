@@ -44,7 +44,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
 			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Args[0].VariableType)...)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		if t := 1 + stack; t > maxstack {
@@ -192,8 +192,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.Stacks = append(state.Stacks,
 				state.newStackMapVerificationTypeInfo(class, variableType)...)
 			state.popStack(1)

@@ -36,15 +36,12 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.VariableType)...)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		state.popStack(1)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength+7))
+		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.VariableType)...)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength+8))
+		context.MakeStackMap(code, state, code.CodeLength+8)
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_ifne
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], uint16(7))

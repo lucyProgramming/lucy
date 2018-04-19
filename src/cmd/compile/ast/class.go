@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"errors"
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"strings"
@@ -127,22 +128,20 @@ func (c *Class) checkPhase2(father *Block) []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
+	for _, ms := range c.Methods {
+		if len(ms) > 1 {
+			errmsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
+				errMsgPrefix(ms[0].Func.Pos),
+				ms[0].Func.Name, len(ms))
+			for _, v := range ms {
+				errmsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Func.Pos))
+			}
+			errs = append(errs, errors.New(errmsg))
+		}
+	}
 	errs = append(errs, c.checkMethods()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
-	}
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	for _, ms := range c.Methods {
-		if len(ms) > 1 {
-			errs = append(errs, fmt.Errorf("%s class named '%s' has %d contructor,declare at:",
-				errMsgPrefix(ms[0].Func.Pos),
-				c.Name, len(ms)))
-			for _, v := range ms {
-				errs = append(errs, fmt.Errorf("\t%s contructor method", errMsgPrefix(v.Func.Pos)))
-			}
-		}
 	}
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
@@ -212,30 +211,17 @@ func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
 			m[v.Func.Descriptor] = append(m[v.Func.Descriptor], v)
 		}
 	}
-	for _, v := range m {
-		if len(v) == 1 {
-			continue
-		}
-		for _, vv := range v {
-			err := fmt.Errorf("%s %s redeclared", errMsgPrefix(vv.Func.Pos), vv.Func.Name)
-			*errs = append(*errs, err)
-		}
-	}
 }
 
 func (c *Class) checkFields() []error {
 	errs := []error{}
 	for _, v := range c.Fields {
-		c.checkField(v, &errs)
+		err := v.Typ.resolve(&c.Block)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 	return errs
-}
-
-func (c *Class) checkField(f *ClassField, errs *[]error) {
-	err := f.Typ.resolve(&c.Block)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
 }
 
 func (c *Class) checkMethods() []error {

@@ -42,7 +42,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			state.Stacks = append(state.Stacks,
 				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 			backPatchEs(es, code.CodeLength)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		if t := stack + currentStack; t > maxstack {

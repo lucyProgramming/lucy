@@ -76,7 +76,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			t.Class = &ast.Class{}
 			t.Class.Name = java_root_class
 			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
@@ -84,13 +84,13 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		{
 			state.popStack(1) // pop java_root_class ref
 			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.VariableType)...)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 	}
-
 	return
 }
+
 func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	index := e.Data.(*ast.ExpressionIndex)
 	if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {

@@ -75,8 +75,8 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			if len(es) > 0 {
 				backPatchEs(es, code.CodeLength)
 				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
-				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-					context.MakeStackMap(state, code.CodeLength))
+
+				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1) // must be a logical expression
 			}
 			if t := stack + currentStack; t > maxstack {

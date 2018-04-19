@@ -153,7 +153,6 @@ func (s *StackMap_verification_type_info) ToBytes() []byte {
 	case *StackMap_Top_variable_info:
 		return []byte{0}
 	case *StackMap_Integer_variable_info:
-
 		return []byte{1}
 	case *StackMap_Float_variable_info:
 		return []byte{2}

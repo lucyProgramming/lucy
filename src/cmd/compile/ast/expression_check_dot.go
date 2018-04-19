@@ -145,6 +145,11 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
+			if field.IsPublic() == false && t.Class != block.InheritedAttribute.class {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public",
+					errMsgPrefix(e.Pos),
+					dot.Name))
+			}
 			if field.IsStatic() == false {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by objectref",
 					errMsgPrefix(e.Pos),

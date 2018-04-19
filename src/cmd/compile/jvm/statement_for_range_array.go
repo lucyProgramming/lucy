@@ -19,12 +19,15 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength+7] = cg.OP_pop
 	state.Stacks = append(state.Stacks,
 		state.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.Expression.VariableType)...)
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+7))
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength+11))
+	context.MakeStackMap(code, state, code.CodeLength+7)
+	context.MakeStackMap(code, state, code.CodeLength+11)
 	state.popStack(1)
 	code.CodeLength += 8
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	forState := (&StackMapState{}).FromLast(state)
+	defer func() {
+		state.addTop(forState)
+	}()
 	if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		//get elements
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -101,7 +104,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.K)...)
 	loopbeginAt := code.CodeLength
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(forState, loopbeginAt))
+	context.MakeStackMap(code, forState, loopbeginAt)
 	// load start
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeArray.Start)...)
 	// load k
@@ -159,6 +162,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	copyOP(code,
 		storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.ArrayType.Typ,
 			s.StatmentForRangeAttr.AutoVarForRangeArray.V)...)
+	forState.Locals = append(forState.Locals,
+		forState.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.IdentifierV.Var.Typ)...)
 
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
@@ -272,7 +277,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	//pop index on stack
 
 	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, context.MakeStackMap(state, code.CodeLength))
+	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
 	code.Codes[code.CodeLength] = cg.OP_pop
 	code.CodeLength++

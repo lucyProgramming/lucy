@@ -14,29 +14,25 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			return m.buildForRangeStatementForMap(class, code, s, context, state)
 		}
 	}
-	forState := (&StackMapState{}).FromLast(state)
 	//init
 	if s.Init != nil {
-		stack, _ := m.MakeExpression.build(class, code, s.Init, context, forState)
+		stack, _ := m.MakeExpression.build(class, code, s.Init, context, state)
 		if stack > maxstack {
 			maxstack = stack
 		}
 	}
+	forState := (&StackMapState{}).FromLast(state)
 	loopBeginAt := code.CodeLength
 	s.ContinueOPOffset = code.CodeLength
-	//stack is here
-	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-		context.MakeStackMap(forState, code.CodeLength))
-
+	context.MakeStackMap(code, state, code.CodeLength)
 	//condition
 	if s.Condition != nil {
-		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
+		stack, es := m.MakeExpression.build(class, code, s.Condition, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			forState.Stacks = append(forState.Stacks, forState.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(forState, code.CodeLength))
-			forState.popStack(1) // must be bool
+			forState.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
+			context.MakeStackMap(code, state, code.CodeLength)
+			forState.popStack(1) // must be bool expression
 		}
 		if stack > maxstack {
 			maxstack = stack
@@ -45,13 +41,16 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	} else {
 
 	}
-	m.buildBlock(class, code, s.Block, context, forState)
+	if s.Condition != nil {
+		m.buildBlock(class, code, s.Block, context, forState)
+	} else {
+		m.buildBlock(class, code, s.Block, context, state)
+	}
 	if s.Post != nil {
 		s.ContinueOPOffset = code.CodeLength
 		//stack is here
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(forState, code.CodeLength))
-		stack, _ := m.MakeExpression.build(class, code, s.Post, context, nil)
+		context.MakeStackMap(code, forState, code.CodeLength)
+		stack, _ := m.MakeExpression.build(class, code, s.Post, context, forState)
 		if stack > maxstack {
 			maxstack = stack
 		}

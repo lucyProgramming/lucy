@@ -16,8 +16,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.BackPatchs) > 0 {
 			backPatchEs(s.StatementIf.BackPatchs, code.CodeLength)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_BLOCK: //new
 		m.buildBlock(class, code, s.Block, context, (&StackMapState{}).FromLast(state))
@@ -25,8 +24,8 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.BackPatchs) > 0 {
 			backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		if len(s.StatementFor.ContinueBackPatchs) > 0 {
 			// stack map is solved
@@ -63,8 +62,8 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_LABLE:
 		if len(s.StatmentLable.BackPatches) > 0 {
 			backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength

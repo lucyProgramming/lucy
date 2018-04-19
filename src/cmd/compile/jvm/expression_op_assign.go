@@ -42,8 +42,8 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType("java/lang/StringBuilder"))...)
 		state.Stacks = append(state.Stacks,
 			state.newStackMapVerificationTypeInfo(class, bin.Right.VariableType)...) /// must be bool
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength))
+
+		context.MakeStackMap(code, state, code.CodeLength)
 		backPatchEs(es, code.CodeLength)
 	}
 	if t := currentStack + stack; t > maxstack {

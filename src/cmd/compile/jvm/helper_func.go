@@ -337,11 +337,8 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	code.CodeLength++
 	{
 
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength+6))
-
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-			context.MakeStackMap(state, code.CodeLength+15))
+		context.MakeStackMap(code, state, code.CodeLength+6)
+		context.MakeStackMap(code, state, code.CodeLength+15)
 	}
 	code.Codes[code.CodeLength] = cg.OP_iflt
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)

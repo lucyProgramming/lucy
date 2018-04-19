@@ -62,8 +62,8 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-				context.MakeStackMap(state, code.CodeLength))
+
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
@@ -93,7 +93,6 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 				}
 			}
 		}
-
 		variables = variables[1:]
 	}
 

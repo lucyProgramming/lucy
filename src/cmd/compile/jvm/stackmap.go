@@ -11,6 +11,24 @@ type StackMapState struct {
 	Stacks     []*cg.StackMap_verification_type_info
 }
 
+func (s *StackMapState) addTop(skip *StackMapState) {
+	length := len(skip.Locals) - len(s.Locals)
+	oldLength := len(s.Locals)
+	t := &cg.StackMap_verification_type_info{}
+	t.T = &cg.StackMap_Top_variable_info{}
+	for i := 0; i < length; i++ {
+		tt := skip.Locals[i+oldLength].T
+		_, ok1 := tt.(*cg.StackMap_Double_variable_info)
+		_, ok2 := tt.(*cg.StackMap_Long_variable_info)
+		if ok1 || ok2 {
+			s.Locals = append(s.Locals, t, t)
+		} else {
+			s.Locals = append(s.Locals, t)
+		}
+
+	}
+}
+
 func (s *StackMapState) newObjectVariableType(name string) *ast.VariableType {
 	ret := &ast.VariableType{}
 	ret.Typ = ast.VARIABLE_TYPE_OBJECT
@@ -54,21 +72,17 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 		ret[0] = &cg.StackMap_verification_type_info{}
 		ret[0].T = &cg.StackMap_Integer_variable_info{}
 	case ast.VARIABLE_TYPE_LONG:
-		ret = make([]*cg.StackMap_verification_type_info, 2)
+		ret = make([]*cg.StackMap_verification_type_info, 1)
 		ret[0] = &cg.StackMap_verification_type_info{}
-		ret[1] = &cg.StackMap_verification_type_info{}
 		ret[0].T = &cg.StackMap_Long_variable_info{}
-		ret[1].T = &cg.StackMap_Top_variable_info{}
 	case ast.VARIABLE_TYPE_FLOAT:
 		ret = make([]*cg.StackMap_verification_type_info, 1)
 		ret[0] = &cg.StackMap_verification_type_info{}
 		ret[0].T = &cg.StackMap_Float_variable_info{}
 	case ast.VARIABLE_TYPE_DOUBLE:
-		ret = make([]*cg.StackMap_verification_type_info, 2)
+		ret = make([]*cg.StackMap_verification_type_info, 1)
 		ret[0] = &cg.StackMap_verification_type_info{}
-		ret[1] = &cg.StackMap_verification_type_info{}
 		ret[0].T = &cg.StackMap_Double_variable_info{}
-		ret[1].T = &cg.StackMap_Top_variable_info{}
 	case ast.VARIABLE_TYPE_NULL:
 		ret = make([]*cg.StackMap_verification_type_info, 1)
 		ret[0] = &cg.StackMap_verification_type_info{}
