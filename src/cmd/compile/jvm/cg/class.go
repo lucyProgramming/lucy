@@ -248,7 +248,7 @@ func (c *Class) InsertStringConst(s string) uint16 {
 	return info.selfindex
 }
 
-func (high *ClassHighLevel) FromHighLevel() *Class {
+func (high *ClassHighLevel) ToLow() *Class {
 	high.Class.fromHighLevel(high)
 	return &high.Class
 }
@@ -293,8 +293,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			info.AccessFlags = m.AccessFlags //accessflag
 			info.NameIndex = c.insertUtfConst(m.Name)
 			info.DescriptorIndex = c.insertUtfConst(m.Descriptor)
-			codeinfo := m.Code.ToAttributeInfo(c)
-			info.Attributes = append(info.Attributes, codeinfo)
+			if high.AccessFlags&ACC_CLASS_INTERFACE == 0 {
+				info.Attributes = append(info.Attributes, m.Code.ToAttributeInfo(c))
+			}
 			if m.AttributeLucyInnerStaticMethod != nil {
 				info.Attributes = append(info.Attributes, m.AttributeLucyInnerStaticMethod.ToAttributeInfo(c))
 			}

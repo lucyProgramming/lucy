@@ -3,7 +3,6 @@ package parser
 import (
 	"bytes"
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -22,6 +21,7 @@ type Parser struct {
 	Function         *Function
 	Class            *Class
 	Block            *Block
+	Interface        *Interface
 	scanner          *lex.LucyLexer
 	filename         string
 	lastToken        *lex.Token
@@ -38,6 +38,8 @@ func (p *Parser) Parse() []error {
 	p.Function.parser = p
 	p.Class = &Class{}
 	p.Class.parser = p
+	p.Interface = &Interface{}
+	p.Interface.parser = p
 	p.Block = &Block{}
 	p.Block.parser = p
 	p.errs = []error{}
@@ -150,9 +152,23 @@ func (p *Parser) Parse() []error {
 				Data: c,
 			})
 			if ispublic {
-				c.AccessFlags |= cg.ACC_FIELD_PUBLIC
-			} else {
-				c.AccessFlags |= cg.ACC_FIELD_PRIVATE
+				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
+			}
+			resetProperty()
+		case lex.TOKEN_INTERFACE:
+			c, err := p.Interface.parse()
+			if err != nil {
+				p.errs = append(p.errs, err)
+				p.consume(untils_rc)
+				p.Next()
+				resetProperty()
+				continue
+			}
+			*p.tops = append(*p.tops, &ast.Node{
+				Data: c,
+			})
+			if ispublic {
+				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			resetProperty()
 		case lex.TOKEN_PUBLIC:
@@ -170,7 +186,8 @@ func (p *Parser) Parse() []error {
 				continue
 			}
 			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
-				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s", p.errorMsgPrefix(), p.token.Desp))
+				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s",
+					p.errorMsgPrefix(), p.token.Desp))
 				p.Next()
 				p.consume(untils_semicolon)
 				resetProperty()
@@ -229,6 +246,7 @@ func (p *Parser) validAfterPublic() {
 		p.token.Type == lex.TOKEN_CLASS ||
 		p.token.Type == lex.TOKEN_ENUM ||
 		p.token.Type == lex.TOKEN_IDENTIFIER ||
+		p.token.Type == lex.TOKEN_INTERFACE ||
 		p.token.Type == lex.TOKEN_CONST {
 		return
 	}

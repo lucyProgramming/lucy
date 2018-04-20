@@ -372,7 +372,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_STRING:
 		*ret += "string"
 	case VARIABLE_TYPE_OBJECT: // class name
-		*ret += "object@" + v.Class.Name
+		*ret += "object@(" + v.Class.Name + ")"
 	case VARIABLE_TYPE_MAP:
 		*ret += "map{"
 		*ret += v.Map.K.TypeString()
@@ -396,12 +396,12 @@ func (v *VariableType) TypeString() string {
 }
 
 func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
-	if t.IsInteger() && t2.IsInteger() {
-		return true
-	}
-	if t.IsFloat() && t2.IsFloat() {
-		return true
-	}
+	// if t.IsInteger() && t2.IsInteger() {
+	// 	return true
+	// }
+	// if t.IsFloat() && t2.IsFloat() {
+	// 	return true
+	// }
 	return t.Equal(t2)
 }
 
@@ -425,7 +425,7 @@ func (t1 *VariableType) Equal(t2 *VariableType) bool {
 		return t1.Map.K.Equal(t1.Map.K) && t1.Map.V.Equal(t1.Map.V)
 	}
 	if t1.Typ == VARIABLE_TYPE_OBJECT && t2.Typ == VARIABLE_TYPE_OBJECT { // object
-		if t1.Class.isInterface() {
+		if t1.Class.IsInterface() {
 			i, _ := t2.Class.implemented(t1.Class.Name)
 			return i
 		} else { // class

@@ -368,3 +368,13 @@ func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 }
+
+func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
+	var b byte
+	b = 1
+
+	for _, v := range ft.ParameterList {
+		b += byte(v.Typ.JvmSlotSize())
+	}
+	return b
+}

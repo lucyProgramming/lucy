@@ -39,13 +39,24 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	if t := stack + 1; t > maxstack {
 		maxstack = t
 	}
-
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      call.Class.Name,
-		Method:     call.Name,
-		Descriptor: d,
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
+	if call.Class.IsInterface() {
+		code.Codes[code.CodeLength] = cg.OP_invokeinterface
+		class.InsertInterfaceMethodrefConst(cg.CONSTANT_InterfaceMethodref_info_high_level{
+			Class:      call.Class.Name,
+			Method:     call.Name,
+			Descriptor: d,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = interfaceMethodArgsCount(call.Method.Func.Typ)
+		code.Codes[code.CodeLength+4] = 0
+		code.CodeLength += 5
+	} else {
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      call.Class.Name,
+			Method:     call.Name,
+			Descriptor: d,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	}
 	return
 }

@@ -230,6 +230,10 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 	class.SuperClass = c.SuperClassName
 	class.Fields = make(map[string]*cg.FiledHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
+	for _, v := range c.Interfaces {
+		class.Interfaces = append(class.Interfaces, v.Name)
+	}
+
 	for _, v := range c.Fields {
 		f := &cg.FiledHighLevel{}
 		f.Name = v.Name
@@ -243,24 +247,30 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		class.Fields[v.Name] = f
 	}
 	for k, v := range c.Methods {
-		if k == filepath.Base(c.Name) {
+		if k == filepath.Base(c.Name) && c.IsInterface() == false {
 			continue
 		}
 		vv := v[0]
 		method := &cg.MethodHighLevel{}
 		method.Name = vv.Func.Name
 		method.AccessFlags = vv.Func.AccessFlags
+		if c.IsInterface() {
+			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+			method.AccessFlags |= cg.ACC_METHOD_ABSTRACT
+		}
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(vv.Func)
-		m.buildFunction(class, method, vv.Func)
 		if LucyMethodSignatureParser.Need(vv.Func.Typ) {
 			t := &cg.AttributeLucyMethodDescritor{}
 			t.Descriptor = LucyMethodSignatureParser.Encode(vv.Func)
 			method.AttributeLucyMethodDescritor = t
 		}
+		if c.IsInterface() == false {
+			m.buildFunction(class, method, vv.Func)
+		}
 		class.AppendMethod(method)
 	}
-	{
+	if c.IsInterface() == false {
 		//construction
 		if t := c.Methods[filepath.Base(c.Name)]; t != nil && len(t) > 0 {
 			method := &cg.MethodHighLevel{}
@@ -318,7 +328,7 @@ func (m *MakeClass) Dump() error {
 	if err != nil {
 		return err
 	}
-	if err := m.mainclass.FromHighLevel().OutPut(f); err != nil {
+	if err := m.mainclass.ToLow().OutPut(f); err != nil {
 		f.Close()
 		return err
 	}
@@ -329,7 +339,7 @@ func (m *MakeClass) Dump() error {
 		if err != nil {
 			return err
 		}
-		if err = c.FromHighLevel().OutPut(f); err != nil {
+		if err = c.ToLow().OutPut(f); err != nil {
 			f.Close()
 			return err
 		}

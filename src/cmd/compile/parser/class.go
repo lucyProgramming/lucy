@@ -44,7 +44,7 @@ func (c *Class) parseClassName() (string, error) {
 
 func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
 	ret := []*ast.NameWithPos{}
-	for {
+	for c.parser.eof == false {
 		pos := c.parser.mkPos()
 		name, err := c.parseClassName()
 		if err != nil {
@@ -54,6 +54,11 @@ func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
 			Name: name,
 			Pos:  pos,
 		})
+		if c.parser.token.Type == lex.TOKEN_COMMA {
+			c.Next()
+		} else {
+			break
+		}
 	}
 	return ret, nil
 }
@@ -92,7 +97,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		}
 	}
 	if c.parser.token.Type == lex.TOKEN_IMPLEMENTS {
-		c.classDefinition.InterfacesName, err = c.parseInterfaces()
+		c.Next() // skip key word
+		c.classDefinition.InterfaceNames, err = c.parseInterfaces()
 		if err != nil {
 			c.consume(untils_lc)
 		}

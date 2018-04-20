@@ -114,7 +114,7 @@ func (f *Function) readableMsg(name ...string) string {
 			s += ","
 		}
 	}
-	s += ") "
+	s += ")"
 	if len(f.Typ.ReturnList) > 0 && f.NoReturnValue() == false {
 		s += "-> ( "
 		for k, v := range f.Typ.ReturnList {

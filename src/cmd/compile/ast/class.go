@@ -19,7 +19,7 @@ type Class struct {
 	Methods            map[string][]*ClassMethod
 	SuperClassName     string
 	SuperClass         *Class
-	InterfacesName     []*NameWithPos
+	InterfaceNames     []*NameWithPos
 	Interfaces         []*Class
 	SouceFile          string
 	Used               bool
@@ -104,6 +104,55 @@ func (c *Class) resolveFather(block *Block) error {
 	}
 	return nil
 }
+func (c *Class) resolveInterfaces(block *Block) []error {
+	errs := []error{}
+	for _, i := range c.InterfaceNames {
+		t := &VariableType{}
+		t.Typ = VARIABLE_TYPE_NAME
+		t.Pos = i.Pos
+		t.Name = i.Name
+		err := t.resolve(block)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		if t.Typ != VARIABLE_TYPE_OBJECT {
+			errs = append(errs, fmt.Errorf("%s '%s' is not a class", errMsgPrefix(i.Pos), i.Name))
+			continue
+		}
+		c.Interfaces = append(c.Interfaces, t.Class)
+	}
+	return errs
+}
+
+func (c *Class) suitableForInterfaces() []error {
+	errs := []error{}
+	for _, i := range c.Interfaces {
+		errs = append(errs, c.suitableForInterface(i)...)
+	}
+	return errs
+}
+func (c *Class) suitableForInterface(inter *Class) []error {
+	errs := []error{}
+	for name, v := range inter.Methods {
+		m := v[0]
+		args := make([]*VariableType, len(m.Func.Typ.ParameterList))
+		for k, v := range m.Func.Typ.ParameterList {
+			args[k] = v.Typ
+		}
+		_, match, _ := c.accessMethod(name, args, nil, false)
+		if match == false {
+			err := fmt.Errorf("%s class named '%s' does not implement '%s',missing method '%s'",
+				errMsgPrefix(c.Pos), c.Name, inter.Name, m.Func.readableMsg())
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return errs
+}
 
 func (c *Class) checkPhase1(father *Block) []error {
 	c.Block.inherite(father)
@@ -113,6 +162,10 @@ func (c *Class) checkPhase1(father *Block) []error {
 	if err != nil {
 		errs = append(errs, err)
 	}
+	es := c.resolveInterfaces(father)
+	errs = append(errs, es...)
+	es = c.suitableForInterfaces()
+	errs = append(errs, es...)
 	return errs
 }
 
@@ -150,7 +203,7 @@ func (c *Class) check(father *Block) []error {
 	return errs
 }
 
-func (c *Class) isInterface() bool {
+func (c *Class) IsInterface() bool {
 	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
 
@@ -166,7 +219,7 @@ func (c *Class) haveSuper(superclassName string) (bool, error) {
 }
 
 func (c *Class) implemented(inter string) (bool, error) {
-	for _, v := range c.InterfacesName {
+	for _, v := range c.Interfaces {
 		if v.Name == inter {
 			return true, nil
 		}
@@ -178,34 +231,6 @@ func (c *Class) implemented(inter string) (bool, error) {
 	return c.SuperClass.implemented(inter)
 }
 
-func (c *Class) checkReloadFunctions(ms []*ClassMethod, errs *[]error) {
-	m := make(map[string][]*ClassMethod)
-	for _, v := range ms {
-		if v.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 || v.IsConstructionMethod { // bind this
-			if v.Func.Block.Vars == nil {
-				v.Func.Block.Vars = make(map[string]*VariableDefinition)
-			}
-			v.Func.Block.Vars[THIS] = &VariableDefinition{}
-			v.Func.Block.Vars[THIS].Name = THIS
-			v.Func.Block.Vars[THIS].Pos = v.Func.Pos
-			v.Func.Block.Vars[THIS].Typ = &VariableType{
-				Typ:   VARIABLE_TYPE_OBJECT,
-				Class: c,
-			}
-			v.Func.VarOffset = 1 //this function
-		}
-		es := v.Func.check(&c.Block)
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
-		if m[v.Func.Descriptor] == nil {
-			m[v.Func.Descriptor] = []*ClassMethod{v}
-		} else {
-			m[v.Func.Descriptor] = append(m[v.Func.Descriptor], v)
-		}
-	}
-}
-
 func (c *Class) checkFields() []error {
 	errs := []error{}
 	return errs
@@ -213,8 +238,29 @@ func (c *Class) checkFields() []error {
 
 func (c *Class) checkMethods() []error {
 	errs := []error{}
+	if c.IsInterface() {
+		return errs
+	}
 	for _, v := range c.Methods {
-		c.checkReloadFunctions(v, &errs)
+		for _, vv := range v {
+			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
+				if vv.Func.Block.Vars == nil {
+					vv.Func.Block.Vars = make(map[string]*VariableDefinition)
+				}
+				vv.Func.Block.Vars[THIS] = &VariableDefinition{}
+				vv.Func.Block.Vars[THIS].Name = THIS
+				vv.Func.Block.Vars[THIS].Pos = vv.Func.Pos
+				vv.Func.Block.Vars[THIS].Typ = &VariableType{
+					Typ:   VARIABLE_TYPE_OBJECT,
+					Class: c,
+				}
+				vv.Func.VarOffset = 1 //this function
+			}
+			es := vv.Func.check(&c.Block)
+			if errsNotEmpty(es) {
+				errs = append(errs, es...)
+			}
+		}
 	}
 	return errs
 }

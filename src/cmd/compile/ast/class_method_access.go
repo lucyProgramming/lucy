@@ -26,7 +26,7 @@ func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallAr
 			return nil, false, fmt.Errorf(errmsg)
 		}
 		if len(args) < len(m.Func.Typ.ParameterList) {
-			if m.Func.HaveDefaultValue && len(args) >= m.Func.DefaultValueStartAt {
+			if m.Func.HaveDefaultValue && len(args) >= m.Func.DefaultValueStartAt && callArgs != nil {
 				for i := len(args); i < len(m.Func.Typ.ParameterList); i++ {
 					*callArgs = append(*callArgs, m.Func.Typ.ParameterList[i].Expression)
 				}

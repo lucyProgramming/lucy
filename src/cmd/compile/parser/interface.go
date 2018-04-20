@@ -43,17 +43,17 @@ func (c *Interface) parseClassName() (string, error) {
 }
 
 func (c *Interface) parse() (classDefinition *ast.Class, err error) {
+	c.Next() // skip interface key word
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
-	c.Next() // skip interface key word
 	c.classDefinition.Pos = c.parser.mkPos()
+	c.classDefinition.Block.IsClassBlock = true
+	c.classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
+	c.classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	c.classDefinition.Name, err = c.parseClassName()
 	if err != nil {
 		return nil, err
 	}
-	c.classDefinition.Pos = c.parser.mkPos()
-	c.classDefinition.Block.IsClassBlock = true
-	c.classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
 	if c.parser.eof {
 		err = c.parser.mkUnexpectedEofErr()
 		c.parser.errs = append(c.parser.errs, err)
@@ -80,7 +80,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
-
+	c.Next()
 	for !c.parser.eof {
 		if len(c.parser.errs) > c.parser.nerr {
 			break
@@ -102,6 +102,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 				continue
 			}
 			name = c.parser.token.Data.(string)
+			c.Next() // skip name
 			functionType, err := c.parser.parseFunctionType()
 			if err != nil {
 				c.consume(untils_rc)
@@ -115,6 +116,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 			m.Func = &ast.Function{}
 			m.Func.Name = name
 			m.Func.Typ = functionType
+			m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			if c.classDefinition.Methods == nil {
 				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
 			}
