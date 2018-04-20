@@ -15,6 +15,7 @@ func mkClassDefaultContruction(class *cg.ClassHighLevel) {
 	method.Name = special_method_init
 	method.Descriptor = "()V"
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	method.Code = &cg.AttributeCode{}
 	length := 5
 	method.Code.Codes = make([]byte, length)
 	method.Code.Codes[0] = cg.OP_aload_0
@@ -335,11 +336,8 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	increment = 1
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
-	{
-
-		context.MakeStackMap(code, state, code.CodeLength+6)
-		context.MakeStackMap(code, state, code.CodeLength+15)
-	}
+	context.MakeStackMap(code, state, code.CodeLength+6)
+	context.MakeStackMap(code, state, code.CodeLength+15)
 	code.Codes[code.CodeLength] = cg.OP_iflt
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 	code.Codes[code.CodeLength+3] = cg.OP_goto

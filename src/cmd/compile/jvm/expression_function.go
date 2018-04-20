@@ -18,6 +18,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		method.Class = class
 		method.AttributeLucyInnerStaticMethod = &cg.AttributeLucyInnerStaticMethod{}
 		method.Descriptor = Descriptor.methodDescriptor(function)
+		method.Code = &cg.AttributeCode{}
+
 		m.buildFunction(class, method, function)
 		class.AppendMethod(method)
 		return
@@ -144,6 +146,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 3
 		i++
 	}
+	method.Code = &cg.AttributeCode{}
 	// build function
 	m.buildFunction(closureClass, method, function)
 	return

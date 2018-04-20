@@ -81,7 +81,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	state := &StackMapState{}
 	// if function is main
 	if f.Name == ast.MAIN_FUNCTION_NAME {
-		code := &method.Code
+		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
 		meta := ArrayMetas[ast.VARIABLE_TYPE_STRING]
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -114,13 +114,13 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
-	if t := m.buildFunctionParameterAndReturnList(class, &method.Code, f, context, state); t > method.Code.MaxStack {
+	if t := m.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
-	if t := m.buildFunctionAutoVar(class, &method.Code, f, context, state); t > method.Code.MaxStack {
+	if t := m.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
-	m.buildBlock(class, &method.Code, f.Block, context, state)
+	m.buildBlock(class, method.Code, f.Block, context, state)
 	return
 }
 func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {

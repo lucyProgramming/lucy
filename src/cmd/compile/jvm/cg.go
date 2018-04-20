@@ -169,6 +169,7 @@ func (m *MakeClass) mkInitFunctions() {
 		method.Name = m.mainclass.NewFunctionName("block")
 		method.Class = m.mainclass
 		method.Descriptor = "()V"
+		method.Code = &cg.AttributeCode{}
 		m.buildFunction(m.mainclass, method, v)
 		m.mainclass.AppendMethod(method)
 	}
@@ -178,6 +179,7 @@ func (m *MakeClass) mkInitFunctions() {
 	method.Descriptor = "()V"
 	codes := make([]byte, 65536)
 	codelength := int(0)
+	method.Code = &cg.AttributeCode{}
 	for _, v := range m.p.LoadedPackages {
 		if v.TriggerPackageInitMethodName == "" {
 			continue
@@ -266,6 +268,7 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 			method.AttributeLucyMethodDescritor = t
 		}
 		if c.IsInterface() == false {
+			method.Code = &cg.AttributeCode{}
 			m.buildFunction(class, method, vv.Func)
 		}
 		class.AppendMethod(method)
@@ -279,6 +282,7 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Class = class
 			method.Descriptor = Descriptor.methodDescriptor(t[0].Func)
 			method.IsConstruction = true
+			method.Code = &cg.AttributeCode{}
 			m.buildFunction(class, method, t[0].Func)
 			class.AppendMethod(method)
 			if len(t[0].Func.Typ.ParameterList) > 0 {
@@ -312,6 +316,7 @@ func (m *MakeClass) mkFuncs() {
 		}
 		ms[k] = method
 		f.ClassMethod = method
+		method.Code = &cg.AttributeCode{}
 		m.mainclass.AppendMethod(method)
 	}
 	for k, f := range m.p.Block.Funcs { // fisrt round

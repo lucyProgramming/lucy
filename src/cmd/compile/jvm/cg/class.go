@@ -293,7 +293,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			info.AccessFlags = m.AccessFlags //accessflag
 			info.NameIndex = c.insertUtfConst(m.Name)
 			info.DescriptorIndex = c.insertUtfConst(m.Descriptor)
-			if high.AccessFlags&ACC_CLASS_INTERFACE == 0 {
+			if m.Code != nil {
 				info.Attributes = append(info.Attributes, m.Code.ToAttributeInfo(c))
 			}
 			if m.AttributeLucyInnerStaticMethod != nil {

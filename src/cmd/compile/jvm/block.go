@@ -63,8 +63,8 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			if index == len(ds)-1 && r != nil && context.function.NoReturnValue() == false {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
-				if 2 > code.MaxStack {
-					code.MaxStack = 2
+				if 2 > maxstack {
+					maxstack = 2
 				}
 				code.Codes[code.CodeLength] = cg.OP_ifnonnull
 				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
@@ -79,6 +79,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
 				context.function.AutoVarForException.Offset)...) // this code will make stack is empty
 		}
+
 		m.buildBlock(class, code, &ds[index].Block, context, (&StackMapState{}).FromLast(state))
 		//
 		if needExceptionTable == false {
