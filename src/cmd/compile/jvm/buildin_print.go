@@ -102,6 +102,8 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 				Descriptor: "(Ljava/lang/String;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:

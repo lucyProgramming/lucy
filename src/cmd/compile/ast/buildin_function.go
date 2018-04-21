@@ -23,7 +23,6 @@ func registerBuildinFunctions() {
 	}
 	catchBuildFunction := &buildFunction{}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = catchBuildFunction
-
 	{
 		catchBuildFunction.returnList = make([]*VariableDefinition, 1)
 		catchBuildFunction.returnList[0] = &VariableDefinition{}
@@ -32,7 +31,6 @@ func registerBuildinFunctions() {
 		catchBuildFunction.returnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
 		//class is going to make value by checker
 	}
-
 	catchBuildFunction.checker = func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",

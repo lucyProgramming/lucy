@@ -127,14 +127,15 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		t.Pos = e.Pos
 		t.Class = c
 		return t, nil
-	case (*Package):
+	case *Package:
 		t := &VariableType{}
 		t.Pos = e.Pos
 		t.Typ = VARIABLE_TYPE_PACKAGE
 		t.Package = d.(*Package)
 		return t, nil
 	default:
-		return nil, fmt.Errorf("%s identifier named '%s' is not a expression", errMsgPrefix(e.Pos), identifer.Name)
+		return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
+			errMsgPrefix(e.Pos), identifer.Name)
 	}
 	return nil, nil
 }

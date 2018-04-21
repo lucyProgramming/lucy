@@ -370,7 +370,6 @@ func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code
 func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
 	var b byte
 	b = 1
-
 	for _, v := range ft.ParameterList {
 		b += byte(jvmSize(v.Typ))
 	}

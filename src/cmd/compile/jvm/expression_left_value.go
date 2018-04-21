@@ -183,8 +183,45 @@ func (m *MakeExpression) getLeftValue(
 			op = []byte{cg.OP_invokevirtual}
 		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
 			return m.getMapLeftValue(class, code, e, context, state)
-		} else {
-			panic("....")
+		} else { // java array
+			maxstack, _ = m.build(class, code, index.Expression, context, state)
+			stack, _ := m.build(class, code, index.Index, context, state)
+			if t := stack + 1; t > maxstack {
+				maxstack = t
+			}
+			target = e.Value
+			remainStack = 2 // [objectref ,index]
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, index.Expression.Value)...)
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+			switch e.Value.Typ {
+			case ast.VARIABLE_TYPE_BOOL:
+				fallthrough
+			case ast.VARIABLE_TYPE_BYTE:
+				fallthrough
+			case ast.VARIABLE_TYPE_SHORT:
+				fallthrough
+			case ast.VARIABLE_TYPE_INT:
+				op = []byte{cg.OP_iastore}
+			case ast.VARIABLE_TYPE_LONG:
+				op = []byte{cg.OP_lastore}
+			case ast.VARIABLE_TYPE_FLOAT:
+				op = []byte{cg.OP_fastore}
+			case ast.VARIABLE_TYPE_DOUBLE:
+				op = []byte{cg.OP_dastore}
+			case ast.VARIABLE_TYPE_STRING:
+				fallthrough
+			case ast.VARIABLE_TYPE_OBJECT:
+				fallthrough
+			case ast.VARIABLE_TYPE_MAP:
+				fallthrough
+			case ast.VARIABLE_TYPE_ARRAY:
+				fallthrough
+			case ast.VARIABLE_TYPE_JAVA_ARRAY:
+				op = []byte{cg.OP_aastore}
+			}
+			return
 		}
 	case ast.EXPRESSION_TYPE_DOT:
 		dot := e.Data.(*ast.ExpressionDot)

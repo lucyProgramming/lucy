@@ -111,7 +111,7 @@ func (m *MakeClass) loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCod
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY: //[]int
+	case ast.VARIABLE_TYPE_ARRAY, ast.VARIABLE_TYPE_JAVA_ARRAY: //[]int
 		switch v.LocalValOffset {
 		case 0:
 			code.Codes[code.CodeLength] = cg.OP_aload_0
@@ -244,7 +244,7 @@ func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY: //[]int
+	case ast.VARIABLE_TYPE_ARRAY, ast.VARIABLE_TYPE_JAVA_ARRAY: //[]int
 		switch v.LocalValOffset {
 		case 0:
 			code.Codes[code.CodeLength] = cg.OP_astore_0

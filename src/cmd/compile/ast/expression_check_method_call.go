@@ -208,6 +208,30 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			t := object.Clone()
 			t.Pos = e.Pos
 			return []*VariableType{t}
+		case common.ARRAY_METHOD_TO_JAVA:
+			if len(call.Args) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s '%s' expect no arguments",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			if object.ArrayType.IsPrimitive() {
+				tt := object.Clone()
+				tt.Typ = VARIABLE_TYPE_JAVA_ARRAY
+				return []*VariableType{tt}
+			} else {
+				c, err := PackageBeenCompile.load(JAVA_ROOT_CLASS)
+				if err != nil {
+					*errs = append(*errs, fmt.Errorf("%s %v",
+						errMsgPrefix(e.Pos), err))
+					return nil
+				}
+				tt := &VariableType{}
+				tt.Pos = e.Pos
+				tt.Typ = VARIABLE_TYPE_JAVA_ARRAY
+				tt.ArrayType = &VariableType{}
+				tt.ArrayType.Typ = VARIABLE_TYPE_OBJECT
+				tt.ArrayType.Class = c.(*Class)
+				return []*VariableType{tt}
+			}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}

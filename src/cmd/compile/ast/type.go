@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	//primitive type
 	_ = iota
 	//value types
 	VARIABLE_TYPE_BOOL
@@ -17,23 +16,23 @@ const (
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_DOUBLE
 	//ref types
-	VARIABLE_TYPE_NULL
+
 	VARIABLE_TYPE_STRING
 	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_MAP
-	VARIABLE_TYPE_ARRAY      //[]int
-	VARIABLE_TYPE_JAVA_ARRAY // java array int[]
+	VARIABLE_TYPE_ARRAY
+	VARIABLE_TYPE_JAVA_ARRAY
 	VARIABLE_TYPE_FUNCTION
 
-	//enum
-	VARIABLE_TYPE_ENUM //enum
-	//class
-	VARIABLE_TYPE_CLASS //
+	VARIABLE_TYPE_ENUM
 
-	VARIABLE_TYPE_NAME //naming
+	VARIABLE_TYPE_CLASS
+
+	VARIABLE_TYPE_NAME
 	VARIABLE_TYPE_VOID
 
-	VARIABLE_TYPE_PACKAGE //
+	VARIABLE_TYPE_PACKAGE
+	VARIABLE_TYPE_NULL
 )
 
 type VariableType struct {
@@ -169,7 +168,7 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		if i != nil {
 			return PackageBeenCompile.load(i.Resource)
 		}
-		return nil, fmt.Errorf("%s class '%s' not found", errMsgPrefix(t.Pos), t.Name)
+		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
 	packageAndName := strings.Split(t.Name, ".")
 	i := PackageBeenCompile.getImport(t.Pos.Filename, packageAndName[0])
@@ -311,7 +310,8 @@ func (t *VariableType) IsPointer() bool {
 	return t.Typ == VARIABLE_TYPE_OBJECT ||
 		t.Typ == VARIABLE_TYPE_ARRAY ||
 		t.Typ == VARIABLE_TYPE_MAP ||
-		t.Typ == VARIABLE_TYPE_STRING
+		t.Typ == VARIABLE_TYPE_STRING ||
+		t.Typ == VARIABLE_TYPE_JAVA_ARRAY
 }
 
 func (t *VariableType) IsInteger() bool {
@@ -375,6 +375,8 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += v.ArrayType.TypeString() + "[]"
 	case VARIABLE_TYPE_PACKAGE:
 		*ret = v.Package.Name
+	case VARIABLE_TYPE_NULL:
+		*ret = "null"
 	default:
 		panic(v.Typ)
 	}

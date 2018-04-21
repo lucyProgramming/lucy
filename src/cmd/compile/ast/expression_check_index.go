@@ -17,13 +17,13 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	if t == nil {
 		return nil
 	}
-	if t.Typ != VARIABLE_TYPE_ARRAY && t.Typ != VARIABLE_TYPE_MAP {
+	if t.Typ != VARIABLE_TYPE_ARRAY && t.Typ != VARIABLE_TYPE_MAP && t.Typ != VARIABLE_TYPE_JAVA_ARRAY {
 		*errs = append(*errs, fmt.Errorf("%s cannot have 'index' on '%s'",
 			errMsgPrefix(e.Pos), t.TypeString()))
 		return nil
 	}
 	// array
-	if t.Typ == VARIABLE_TYPE_ARRAY {
+	if t.Typ == VARIABLE_TYPE_ARRAY || t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 		ts, es := index.Index.check(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)

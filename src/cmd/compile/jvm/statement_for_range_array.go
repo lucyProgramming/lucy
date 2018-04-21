@@ -101,7 +101,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Start)...)
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
 
 	}
 

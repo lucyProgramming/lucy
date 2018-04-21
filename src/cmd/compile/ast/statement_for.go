@@ -121,7 +121,7 @@ func (s *StatementFor) checkRange() []error {
 
 				} else {
 					vd := &VariableDefinition{}
-					if rangeOn.Typ == VARIABLE_TYPE_ARRAY {
+					if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 						vd.Typ = rangeOn.ArrayType.Clone()
 					} else {
 						vd.Typ = rangeOn.Map.V.Clone()
@@ -176,7 +176,7 @@ func (s *StatementFor) checkRange() []error {
 					return errs
 				} else {
 					vd := &VariableDefinition{}
-					if rangeOn.Typ == VARIABLE_TYPE_ARRAY {
+					if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 						vd.Typ = rangeOn.ArrayType.Clone()
 					} else {
 						vd.Typ = rangeOn.Map.V.Clone()
