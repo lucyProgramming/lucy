@@ -8,7 +8,7 @@ import (
 func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	arr := e.Data.(*ast.ExpressionArrayLiteral)
 	//	new array ,
-	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
+	meta := ArrayMetas[e.Value.ArrayType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -25,7 +25,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	{
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
-		t.ArrayType = e.VariableType.ArrayType
+		t.ArrayType = e.Value.ArrayType
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
@@ -34,7 +34,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		state.popStack(5)
 	}()
 	loadInt32(class, code, int32(arr.Length))
-	switch e.VariableType.ArrayType.Typ {
+	switch e.Value.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -73,10 +73,10 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(e.VariableType.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(e.Value.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
+		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -84,7 +84,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	maxstack = 4
 	var index int32 = 0
 	store := func() {
-		switch e.VariableType.ArrayType.Typ {
+		switch e.Value.ArrayType.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -112,14 +112,14 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 
 	for _, v := range arr.Expressions {
-		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			// stack top is array list
 			stack, _ := m.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxstack {
 				maxstack = t
 			}
 			m.buildStoreArrayListAutoVar(code, context)
-			for k, t := range v.VariableTypes {
+			for k, t := range v.Values {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				loadInt32(class, code, index) // load index
@@ -138,7 +138,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value)...)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // must be a logical expression
 		}

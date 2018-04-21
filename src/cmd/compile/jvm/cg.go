@@ -65,7 +65,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
 	mainclass.Name = p.Name + "/main"
-	mainclass.Fields = make(map[string]*cg.FiledHighLevel)
+	mainclass.Fields = make(map[string]*cg.FieldHighLevel)
 	mkClassDefaultContruction(m.mainclass)
 	m.MakeExpression.MakeClass = m
 	m.Classes = make(map[string]*cg.ClassHighLevel)
@@ -75,6 +75,9 @@ func (m *MakeClass) Make(p *ast.Package) {
 	for _, v := range p.Block.Classes {
 		m.Classes[v.Name] = m.mkClass(v)
 	}
+	for _, v := range p.Block.Enums {
+		m.Classes[v.Name] = m.mkEnum(v)
+	}
 	m.mkConsts()
 	m.mkTypes()
 	err := m.Dump()
@@ -83,9 +86,34 @@ func (m *MakeClass) Make(p *ast.Package) {
 	}
 }
 
+func (m *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
+	class := &cg.ClassHighLevel{}
+	class.Name = e.Name
+	class.SourceFiles = make(map[string]struct{})
+	class.SourceFiles[e.Pos.Filename] = struct{}{}
+	class.AccessFlags = e.AccessFlags
+	class.SuperClass = ast.JAVA_ROOT_CLASS
+	class.Fields = make(map[string]*cg.FieldHighLevel)
+	class.Class.AttributeLucyEnum = &cg.AttributeLucyEnum{}
+	for _, v := range e.Names {
+		field := &cg.FieldHighLevel{}
+		if e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0 {
+			field.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		} else {
+			field.AccessFlags |= cg.ACC_FIELD_PRIVATE
+		}
+		field.Name = v.Name
+		field.Descriptor = "I"
+		field.ConstantValue = &cg.AttributeConstantValue{}
+		field.ConstantValue.Index = class.Class.InsertIntConst(v.Value)
+		class.Fields[v.Name] = field
+	}
+	return class
+}
+
 func (m *MakeClass) mkConsts() {
 	for k, v := range m.p.Block.Consts {
-		f := &cg.FiledHighLevel{}
+		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.AccessFlags |= cg.ACC_FIELD_FINAL
@@ -130,7 +158,7 @@ func (m *MakeClass) mkTypes() {
 
 func (m *MakeClass) mkVars() {
 	for k, v := range m.p.Block.Vars {
-		f := &cg.FiledHighLevel{}
+		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
@@ -230,14 +258,14 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 	class.SourceFiles[c.Pos.Filename] = struct{}{}
 	class.AccessFlags = c.AccessFlags
 	class.SuperClass = c.SuperClassName
-	class.Fields = make(map[string]*cg.FiledHighLevel)
+	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range c.Interfaces {
 		class.Interfaces = append(class.Interfaces, v.Name)
 	}
 
 	for _, v := range c.Fields {
-		f := &cg.FiledHighLevel{}
+		f := &cg.FieldHighLevel{}
 		f.Name = v.Name
 		f.AccessFlags = v.AccessFlags
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)

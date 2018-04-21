@@ -13,13 +13,13 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 	}()
 	parameterIndex := 0
 	for _, e := range args {
-		if e.MayHaveMultiValue() && len(e.VariableTypes) > 1 {
+		if e.MayHaveMultiValue() && len(e.Values) > 1 {
 			stack, _ := m.build(class, code, e, context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
 			m.buildStoreArrayListAutoVar(code, context)
-			for k, t := range e.VariableTypes {
+			for k, t := range e.Values {
 				stack = m.unPackArraylist(class, code, k, t, context)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
@@ -27,15 +27,15 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 				if parameters[parameterIndex].Typ.IsNumber() && parameters[parameterIndex].Typ.Typ != t.Typ {
 					m.numberTypeConverter(code, t.Typ, parameters[k].Typ.Typ)
 				}
-				currentStack += t.JvmSlotSize()
+				currentStack += jvmSize(t)
 				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
 				parameterIndex++
 			}
 			continue
 		}
-		variableType := e.VariableType
+		variableType := e.Value
 		if e.MayHaveMultiValue() {
-			variableType = e.VariableTypes[0]
+			variableType = e.Values[0]
 		}
 		stack, es := m.build(class, code, e, context, state)
 		if len(es) > 0 {
@@ -53,8 +53,9 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 				m.numberTypeConverter(code, variableType.Typ, parameters[parameterIndex].Typ.Typ)
 			}
 		}
-		currentStack += parameters[parameterIndex].Typ.JvmSlotSize()
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
+		currentStack += jvmSize(parameters[parameterIndex].Typ)
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ)...)
 		parameterIndex++
 	}
 	return

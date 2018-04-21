@@ -24,7 +24,6 @@ var (
 	packageAliasReg     *regexp.Regexp
 	NameLoader          LoadName
 	buildinFunctionsMap = make(map[string]*buildFunction)
-	JvmSlotSizeHandler  func(v *VariableType) uint16 // implements by outside
 	PackageBeenCompile  *Package
 )
 

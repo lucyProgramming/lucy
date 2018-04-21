@@ -84,8 +84,8 @@ const (
 type Expression struct {
 	IsPublic                        bool
 	IsCompileDefaultValueExpression bool
-	VariableType                    *VariableType   //
-	VariableTypes                   []*VariableType // functioncall or methodcall can with multi results
+	Value                           *VariableType   //
+	Values                          []*VariableType // functioncall or methodcall can with multi results
 	Pos                             *Pos
 	Typ                             int
 	Data                            interface{}
@@ -215,15 +215,15 @@ func (e *Expression) GetTheOnlyOneVariableType() *VariableType {
 	}
 	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
 		e.Typ == EXPRESSION_TYPE_TYPE_ASSERT {
-		return e.VariableTypes[0]
+		return e.Values[0]
 	}
-	return e.VariableType
+	return e.Value
 }
 
 func (e *Expression) HaveOnlyOneValue() bool {
 	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
 		e.Typ == EXPRESSION_TYPE_TYPE_ASSERT {
-		return len(e.VariableTypes) == 1
+		return len(e.Values) == 1
 	}
 	return true
 }
@@ -249,7 +249,7 @@ func (e *Expression) MayHaveMultiValue() bool {
 }
 
 func (e *Expression) CallHasReturnValue() bool {
-	return len(e.VariableTypes) >= 1 && e.VariableTypes[0].rightValueValid()
+	return len(e.Values) >= 1 && e.Values[0].RightValueValid()
 }
 
 type CallArgs []*Expression // f(1,2)　调用参数列表

@@ -16,8 +16,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	currentStack = 2 // mapref kref
-	if index.Expression.VariableType.Map.K.IsPointer() == false {
-		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Expression.VariableType.Map.K)
+	if index.Expression.Value.Map.K.IsPointer() == false {
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Expression.Value.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -26,8 +26,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if index.Expression.VariableType.Map.V.IsPointer() {
-		primitiveObjectConverter.castPointerTypeToRealType(class, code, index.Expression.VariableType.Map.V)
+	if index.Expression.Value.Map.V.IsPointer() {
+		primitiveObjectConverter.castPointerTypeToRealType(class, code, index.Expression.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
 		code.CodeLength++
@@ -37,7 +37,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		codeLength := code.CodeLength
 		code.CodeLength += 3
-		switch index.Expression.VariableType.Map.V.Typ {
+		switch index.Expression.Value.Map.V.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -80,10 +80,10 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
-		primitiveObjectConverter.getFromObject(class, code, index.Expression.VariableType.Map.V)
+		primitiveObjectConverter.getFromObject(class, code, index.Expression.Value.Map.V)
 		{
 			state.popStack(1) // pop java_root_class ref
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.VariableType)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.Value)...)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
@@ -93,7 +93,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 
 func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	index := e.Data.(*ast.ExpressionIndex)
-	if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
+	if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildMapIndex(class, code, e, context, state)
 	}
 	maxstack, _ = m.build(class, code, index.Expression, context, nil)
@@ -101,7 +101,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 	if t := stack + 1; t > maxstack {
 		maxstack = t
 	}
-	meta := ArrayMetas[e.VariableType.Typ]
+	meta := ArrayMetas[e.Value.Typ]
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.classname,
@@ -109,8 +109,8 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		Descriptor: meta.getDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if e.VariableType.IsPointer() && e.VariableType.Typ != ast.VARIABLE_TYPE_STRING {
-		primitiveObjectConverter.castPointerTypeToRealType(class, code, e.VariableType)
+	if e.Value.IsPointer() && e.Value.Typ != ast.VARIABLE_TYPE_STRING {
+		primitiveObjectConverter.castPointerTypeToRealType(class, code, e.Value)
 	}
 	return
 }

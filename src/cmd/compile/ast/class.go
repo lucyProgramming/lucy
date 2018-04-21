@@ -26,6 +26,56 @@ type Class struct {
 	LoadFromOutSide    bool
 }
 
+func (c *Class) check(father *Block) []error {
+	errs := c.checkPhase1(father)
+	es := c.checkPhase2(father)
+	if errsNotEmpty(es) {
+		errs = append(errs, es...)
+	}
+	return errs
+}
+
+func (c *Class) checkPhase1(father *Block) []error {
+	c.Block.inherite(father)
+	c.Block.InheritedAttribute.class = c
+	errs := c.resolveName(father)
+	err := c.resolveFather(father)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	es := c.resolveInterfaces(father)
+	errs = append(errs, es...)
+	es = c.suitableForInterfaces()
+	errs = append(errs, es...)
+	return errs
+}
+
+func (c *Class) checkPhase2(father *Block) []error {
+	errs := []error{}
+	c.Block.check() // check innerclass mainly
+	c.Block.InheritedAttribute.class = c
+	errs = append(errs, c.checkFields()...)
+	if PackageBeenCompile.shouldStop(errs) {
+		return errs
+	}
+	for _, ms := range c.Methods {
+		if len(ms) > 1 {
+			errmsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
+				errMsgPrefix(ms[0].Func.Pos),
+				ms[0].Func.Name, len(ms))
+			for _, v := range ms {
+				errmsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Func.Pos))
+			}
+			errs = append(errs, errors.New(errmsg))
+		}
+	}
+	errs = append(errs, c.checkMethods()...)
+	if PackageBeenCompile.shouldStop(errs) {
+		return errs
+	}
+	return errs
+}
+
 func (c *Class) resolveName(b *Block) []error {
 	errs := []error{}
 	var err error
@@ -80,10 +130,10 @@ func (c *Class) resolveFather(block *Block) error {
 		if err != nil {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}
-		if _, ok := superClass.(*Class); ok {
-			return fmt.Errorf("%s   '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+		if ss, ok := superClass.(*Class); ok == false || ss == nil {
+			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		} else {
-			t := superClass.(*Class)
+			t := ss
 			c.SuperClassName = t.Name
 			c.SuperClass = t
 		}
@@ -154,55 +204,6 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 	return errs
 }
 
-func (c *Class) checkPhase1(father *Block) []error {
-	c.Block.inherite(father)
-	c.Block.InheritedAttribute.class = c
-	errs := c.resolveName(father)
-	err := c.resolveFather(father)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	es := c.resolveInterfaces(father)
-	errs = append(errs, es...)
-	es = c.suitableForInterfaces()
-	errs = append(errs, es...)
-	return errs
-}
-
-func (c *Class) checkPhase2(father *Block) []error {
-	errs := []error{}
-	c.Block.check() // check innerclass mainly
-	c.Block.InheritedAttribute.class = c
-	errs = append(errs, c.checkFields()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	for _, ms := range c.Methods {
-		if len(ms) > 1 {
-			errmsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
-				errMsgPrefix(ms[0].Func.Pos),
-				ms[0].Func.Name, len(ms))
-			for _, v := range ms {
-				errmsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Func.Pos))
-			}
-			errs = append(errs, errors.New(errmsg))
-		}
-	}
-	errs = append(errs, c.checkMethods()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	return errs
-}
-func (c *Class) check(father *Block) []error {
-	errs := c.checkPhase1(father)
-	es := c.checkPhase2(father)
-	if errsNotEmpty(es) {
-		errs = append(errs, es...)
-	}
-	return errs
-}
-
 func (c *Class) IsInterface() bool {
 	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
@@ -254,7 +255,6 @@ func (c *Class) checkMethods() []error {
 					Typ:   VARIABLE_TYPE_OBJECT,
 					Class: c,
 				}
-				vv.Func.VarOffset = 1 //this function
 			}
 			es := vv.Func.check(&c.Block)
 			if errsNotEmpty(es) {

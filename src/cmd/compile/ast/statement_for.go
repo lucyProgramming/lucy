@@ -6,69 +6,26 @@ import (
 )
 
 type StatementFor struct {
-	StatmentForRangeAttr *StatmentForRangeAttr
-	Num                  int
-	BackPatchs           []*cg.JumpBackPatch
-	ContinueBackPatchs   []*cg.JumpBackPatch
-	ContinueOPOffset     int
-	Pos                  *Pos
-	Init                 *Expression
-	Condition            *Expression
-	Post                 *Expression
-	Block                *Block
+	RangeAttr          *StatmentForRangeAttr
+	Num                int
+	BackPatchs         []*cg.JumpBackPatch
+	ContinueBackPatchs []*cg.JumpBackPatch
+	ContinueOPOffset   int
+	Pos                *Pos
+	Init               *Expression
+	Condition          *Expression
+	Post               *Expression
+	Block              *Block
 }
 
 type StatmentForRangeAttr struct {
-	ModelKV              bool
-	IdentifierK          *ExpressionIdentifer
-	IdentifierV          *ExpressionIdentifer
-	ExpressionK          *Expression
-	ExpressionV          *Expression
-	Expression           *Expression
-	Typ                  int
-	AutoVarForRangeArray *AutoVarForRangeArray
-	AutoVarForRangeMap   *AutoVarForRangeMap
-}
-type AutoVarForRangeMap struct {
-	MapObject                uint16
-	KeySets                  uint16
-	KeySetsK, KeySetsKLength uint16
-	K, V                     uint16
-}
-
-func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType, modekv bool) {
-	t.KeySetsKLength = f.VarOffset
-	t.KeySets = f.VarOffset + 1
-	t.MapObject = f.VarOffset + 2
-	t.KeySetsK = f.VarOffset + 3
-	f.VarOffset += 4
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.MapObject, &t.KeySets, &t.KeySetsK, &t.KeySetsKLength)
-	t.V = f.VarOffset
-	f.VarOffset += vt.JvmSlotSize()
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
-	if modekv {
-		t.K = f.VarOffset
-		f.VarOffset += kt.JvmSlotSize()
-		f.OffsetDestinations = append(f.OffsetDestinations, &t.K)
-	}
-}
-
-type AutoVarForRangeArray struct {
-	Elements   uint16
-	Start, End uint16
-	K, V       uint16
-}
-
-func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
-	t.Elements = f.VarOffset
-	t.Start = f.VarOffset + 1
-	t.End = f.VarOffset + 2
-	t.K = f.VarOffset + 3
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.K, &t.Elements, &t.Start, &t.End)
-	f.VarOffset += 4
-	t.V = f.VarOffset
-	f.VarOffset += vt.JvmSlotSize()
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
+	ModelKV     bool
+	IdentifierK *ExpressionIdentifer
+	IdentifierV *ExpressionIdentifer
+	ExpressionK *Expression
+	ExpressionV *Expression
+	Expression  *Expression
+	Typ         int
 }
 
 func (s *StatementFor) checkRange() []error {
@@ -104,7 +61,7 @@ func (s *StatementFor) checkRange() []error {
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
-	rangeExpression.VariableType = rangeOn
+	rangeExpression.Value = rangeOn
 	var lefts []*Expression
 	if bin.Left.Typ == EXPRESSION_TYPE_LIST {
 		lefts = bin.Left.Data.([]*Expression)
@@ -120,26 +77,17 @@ func (s *StatementFor) checkRange() []error {
 	if len(lefts) == 2 {
 		modelkv = true
 	}
-	s.StatmentForRangeAttr = &StatmentForRangeAttr{}
-	s.StatmentForRangeAttr.ModelKV = modelkv
+	s.RangeAttr = &StatmentForRangeAttr{}
+	s.RangeAttr.ModelKV = modelkv
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
 		if modelkv {
-			s.StatmentForRangeAttr.ExpressionK = lefts[0]
-			s.StatmentForRangeAttr.ExpressionV = lefts[1]
+			s.RangeAttr.ExpressionK = lefts[0]
+			s.RangeAttr.ExpressionV = lefts[1]
 		} else {
-			s.StatmentForRangeAttr.ExpressionV = lefts[0]
+			s.RangeAttr.ExpressionV = lefts[0]
 		}
 	}
-	s.StatmentForRangeAttr.Expression = rangeExpression
-	if rangeOn.Typ == VARIABLE_TYPE_ARRAY {
-		s.StatmentForRangeAttr.AutoVarForRangeArray = &AutoVarForRangeArray{}
-		s.StatmentForRangeAttr.AutoVarForRangeArray.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
-			rangeOn.ArrayType)
-	} else {
-		s.StatmentForRangeAttr.AutoVarForRangeMap = &AutoVarForRangeMap{}
-		s.StatmentForRangeAttr.AutoVarForRangeMap.mkAutoVarForRange(s.Block.InheritedAttribute.Function,
-			rangeOn.Map.K, rangeOn.Map.V, modelkv)
-	}
+	s.RangeAttr.Expression = rangeExpression
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
@@ -184,7 +132,7 @@ func (s *StatementFor) checkRange() []error {
 						errs = append(errs, err)
 					}
 					identifier2.Var = vd
-					s.StatmentForRangeAttr.IdentifierV = identifier2
+					s.RangeAttr.IdentifierV = identifier2
 				}
 			}
 
@@ -211,7 +159,7 @@ func (s *StatementFor) checkRange() []error {
 						errs = append(errs, err)
 					}
 					identifier.Var = vd
-					s.StatmentForRangeAttr.IdentifierK = identifier
+					s.RangeAttr.IdentifierK = identifier
 				}
 			}
 		} else {
@@ -240,7 +188,7 @@ func (s *StatementFor) checkRange() []error {
 						errs = append(errs, err)
 					}
 					identifier.Var = vd
-					s.StatmentForRangeAttr.IdentifierV = identifier
+					s.RangeAttr.IdentifierV = identifier
 				}
 			}
 		}
@@ -264,9 +212,9 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv && t2 == nil {
 			return errs
 		}
-		lefts[0].VariableType = t1
+		lefts[0].Value = t1
 		if modelkv && t2 != nil {
-			lefts[1].VariableType = t2
+			lefts[1].Value = t2
 		}
 		if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 			if modelkv {
@@ -364,3 +312,31 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	return errs
 }
+
+//func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType, modekv bool) {
+//	//t.KeySetsKLength = f.VarOffset
+//	//t.KeySets = f.VarOffset + 1
+//	//t.MapObject = f.VarOffset + 2
+//	//t.KeySetsK = f.VarOffset + 3
+//	//f.VarOffset += 4
+//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.MapObject, &t.KeySets, &t.KeySetsK, &t.KeySetsKLength)
+//	//t.V = f.VarOffset
+//	//f.VarOffset += vt.JvmSlotSize()
+//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
+//	//if modekv {
+//	//	t.K = f.VarOffset
+//	//	f.VarOffset += kt.JvmSlotSize()
+//	//	f.OffsetDestinations = append(f.OffsetDestinations, &t.K)
+//	//}
+//}
+//func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
+//	//t.Elements = f.VarOffset
+//	//t.Start = f.VarOffset + 1
+//	//t.End = f.VarOffset + 2
+//	//t.K = f.VarOffset + 3
+//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.K, &t.Elements, &t.Start, &t.End)
+//	//f.VarOffset += 4
+//	//t.V = f.VarOffset
+//	//f.VarOffset += vt.JvmSlotSize()
+//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
+//}

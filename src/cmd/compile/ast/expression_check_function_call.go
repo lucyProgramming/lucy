@@ -13,11 +13,6 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, err)
 	}
 	if t == nil {
-		*errs = append(*errs, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), call.Expression.OpName()))
-		t = &VariableType{
-			Typ: VARIABLE_TYPE_VOID,
-			Pos: e.Pos,
-		}
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_CLASS { // cast type

@@ -6,11 +6,11 @@ import (
 )
 
 type Function struct {
-	HaveDefaultValue               bool
-	DefaultValueStartAt            int
-	IsClosureFunction              bool
-	ClassMethod                    *cg.MethodHighLevel
-	VarOffSetForClosureFunction    uint16
+	HaveDefaultValue    bool
+	DefaultValueStartAt int
+	IsClosureFunction   bool
+	ClassMethod         *cg.MethodHighLevel
+
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
 	callchecker                    CallChecker // used in build function
@@ -24,12 +24,10 @@ type Function struct {
 	Block                          *Block
 	Pos                            *Pos
 	Descriptor                     string
-	VarOffset                      uint16
 	AutoVarForException            *AutoVarForException
 	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
-	AutoVars                       []interface{}
-	OffsetDestinations             []*uint16
+	VarOffSet                      uint16 // for closure
 }
 
 type AutoVarForReturnBecauseOfDefer struct {
@@ -38,6 +36,7 @@ type AutoVarForReturnBecauseOfDefer struct {
 	*/
 	ExceptionIsNotNilWhenEnter uint16
 	IfReachBotton              uint16
+	ForArrayList               uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
@@ -49,19 +48,11 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 	}
 	t := &AutoVarForReturnBecauseOfDefer{}
 	f.AutoVarForReturnBecauseOfDefer = t
-	t.ExceptionIsNotNilWhenEnter = f.VarOffset
-	f.VarOffset++
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.ExceptionIsNotNilWhenEnter)
-	if len(f.Typ.ReturnList) > 1 {
-		t.IfReachBotton = f.VarOffset
-		f.VarOffset++
-		f.OffsetDestinations = append(f.OffsetDestinations, &t.IfReachBotton)
-	}
-	f.AutoVars = append(f.AutoVars, t)
 }
 
 func (f *Function) NoReturnValue() bool {
-	return len(f.Typ.ReturnList) == 0 || f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_VOID
+	return len(f.Typ.ReturnList) == 0 ||
+		f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_VOID
 }
 
 type AutoVarForException struct {
@@ -74,10 +65,6 @@ func (f *Function) mkAutoVarForException() {
 	}
 	t := &AutoVarForException{}
 	f.AutoVarForException = t
-	t.Offset = f.VarOffset
-	f.VarOffset++
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.Offset)
-	f.AutoVars = append(f.AutoVars, t)
 }
 
 func (f *Function) mkAutoVarForMultiReturn() {
@@ -85,11 +72,7 @@ func (f *Function) mkAutoVarForMultiReturn() {
 		return
 	}
 	t := &AutoVarForMultiReturn{}
-	t.Offset = f.VarOffset
 	f.AutoVarForMultiReturn = t
-	f.OffsetDestinations = append(f.OffsetDestinations, &t.Offset)
-	f.VarOffset++
-	f.AutoVars = append(f.AutoVars, t)
 }
 
 type AutoVarForMultiReturn struct {
@@ -141,9 +124,6 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	f.mkAutoVarForMultiReturn()
-	f.mkAutoVarForException()
-	f.MkAutoVarForReturnBecauseOfDefer()
 	if f.Typ != nil {
 		f.mkLastRetrunStatement()
 		*errs = append(*errs, f.Block.check()...)
@@ -188,7 +168,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			}
 		}
 		f.Typ.ParameterList[0].LocalValOffset = 1
-		f.VarOffset = 2 //
+		//f.VarOffset = 2 //
 		return
 	}
 	if f.Typ != nil {

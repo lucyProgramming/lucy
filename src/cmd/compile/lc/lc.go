@@ -47,7 +47,10 @@ func (lc *LucyCompile) shouldExit() {
 }
 
 func (lc *LucyCompile) exit() {
-	code := len(lc.Errs)
+	code := 0
+	if len(lc.Errs) > 0 {
+		code = 2
+	}
 	for _, v := range lc.Errs {
 		fmt.Fprintln(os.Stderr, v)
 	}

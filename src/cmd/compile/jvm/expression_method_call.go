@@ -5,15 +5,16 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
+	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildArrayMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
+	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildMapMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		return m.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
 	d := call.Method.Func.Descriptor
@@ -31,9 +32,9 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 		return
 	}
-	maxstack, _ = m.build(class, code, call.Expression, context, nil)
+	maxstack, _ = m.build(class, code, call.Expression, context, state)
 	// object ref
-	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Expression.VariableType)...)
+	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Expression.Value)...)
 	defer state.popStack(1)
 	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 	if t := stack + 1; t > maxstack {

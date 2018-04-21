@@ -40,10 +40,6 @@ func (c *Closure) NotEmpty(f *Function) bool {
 		return false
 	}
 	fff()
-	for _, t := range f.OffsetDestinations {
-		*t += 1
-	}
-	f.VarOffset++
 	return true
 }
 

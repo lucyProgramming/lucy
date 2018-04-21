@@ -13,13 +13,13 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	}()
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
-		size := bin.Left.VariableType.JvmSlotSize()
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.VariableType)...)
+		size := jvmSize(bin.Left.Value)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {
 			maxstack = t
 		}
-		switch e.VariableType.Typ {
+		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -48,7 +48,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_MUL || e.Typ == ast.EXPRESSION_TYPE_DIV ||
 		e.Typ == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
-		if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
+		if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING || bin.Right.Value.Typ == ast.VARIABLE_TYPE_STRING {
 			return m.buildStrCat(class, code, bin, context, state)
 		}
 		maxstack = 4
@@ -57,18 +57,18 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			maxstack = stack
 		}
 		//number type,no doubt
-		if e.VariableType.Typ != bin.Left.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Left.VariableType.Typ, e.VariableType.Typ)
+		if e.Value.Typ != bin.Left.Value.Typ {
+			m.numberTypeConverter(code, bin.Left.Value.Typ, e.Value.Typ)
 		}
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.Value)...)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}
-		if e.VariableType.Typ != bin.Right.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Right.VariableType.Typ, e.VariableType.Typ)
+		if e.Value.Typ != bin.Right.Value.Typ {
+			m.numberTypeConverter(code, bin.Right.Value.Typ, e.Value.Typ)
 		}
-		switch e.VariableType.Typ {
+		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -161,20 +161,20 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.VariableType)...)
-		if e.VariableType.Typ != bin.Left.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Left.Typ, e.VariableType.Typ)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
+		if e.Value.Typ != bin.Left.Value.Typ {
+			m.numberTypeConverter(code, bin.Left.Typ, e.Value.Typ)
 		}
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.VariableType)...)
-		size := e.VariableType.JvmSlotSize()
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.Value)...)
+		size := jvmSize(e.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {
 			maxstack = t
 		}
-		if e.VariableType.Typ != bin.Right.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Right.Typ, e.VariableType.Typ)
+		if e.Value.Typ != bin.Right.Value.Typ {
+			m.numberTypeConverter(code, bin.Right.Typ, e.Value.Typ)
 		}
-		switch e.VariableType.Typ {
+		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
 				code.Codes[code.CodeLength] = cg.OP_ishl

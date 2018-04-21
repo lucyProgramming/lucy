@@ -36,7 +36,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			*errs = append(*errs, err)
 		}
 		if ktype != nil {
-			rightValueValid := ktype.rightValueValid()
+			rightValueValid := ktype.RightValueValid()
 			if false == rightValueValid {
 				*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
 			}
@@ -69,7 +69,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 		if vtype == nil {
 			continue
 		}
-		if false == ktype.rightValueValid() {
+		if false == ktype.RightValueValid() {
 			*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
 			continue
 		}

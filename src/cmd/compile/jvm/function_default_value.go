@@ -21,19 +21,25 @@ func (fd *FunctionDefaultValueParse) Encode(class *cg.ClassHighLevel, f *ast.Fun
 				ret.Consts = append(ret.Consts, class.Class.InsertIntConst(0))
 			}
 		case ast.EXPRESSION_TYPE_BYTE:
-			ret.Consts = append(ret.Consts, class.Class.InsertIntConst(int32(f.Typ.ParameterList[i].Expression.Data.(byte))))
+			ret.Consts = append(ret.Consts, class.Class.InsertIntConst(
+				int32(f.Typ.ParameterList[i].Expression.Data.(byte))))
 		case ast.EXPRESSION_TYPE_SHORT:
 			fallthrough
 		case ast.EXPRESSION_TYPE_INT:
-			ret.Consts = append(ret.Consts, class.Class.InsertIntConst(f.Typ.ParameterList[i].Expression.Data.(int32)))
+			ret.Consts = append(ret.Consts, class.Class.InsertIntConst(
+				f.Typ.ParameterList[i].Expression.Data.(int32)))
 		case ast.EXPRESSION_TYPE_LONG:
-			ret.Consts = append(ret.Consts, class.Class.InsertLongConst(f.Typ.ParameterList[i].Expression.Data.(int64)))
+			ret.Consts = append(ret.Consts, class.Class.InsertLongConst(
+				f.Typ.ParameterList[i].Expression.Data.(int64)))
 		case ast.EXPRESSION_TYPE_FLOAT:
-			ret.Consts = append(ret.Consts, class.Class.InsertFloatConst(f.Typ.ParameterList[i].Expression.Data.(float32)))
+			ret.Consts = append(ret.Consts, class.Class.InsertFloatConst(
+				f.Typ.ParameterList[i].Expression.Data.(float32)))
 		case ast.EXPRESSION_TYPE_DOUBLE:
-			ret.Consts = append(ret.Consts, class.Class.InsertDoubleConst(f.Typ.ParameterList[i].Expression.Data.(float64)))
+			ret.Consts = append(ret.Consts, class.Class.InsertDoubleConst(
+				f.Typ.ParameterList[i].Expression.Data.(float64)))
 		case ast.EXPRESSION_TYPE_STRING:
-			ret.Consts = append(ret.Consts, class.Class.InsertStringConst(f.Typ.ParameterList[i].Expression.Data.(string)))
+			ret.Consts = append(ret.Consts, class.Class.InsertStringConst(
+				f.Typ.ParameterList[i].Expression.Data.(string)))
 		}
 	}
 	return ret
@@ -43,7 +49,7 @@ func (fd *FunctionDefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp
 	for i := uint16(0); i < uint16(len(dp.Consts)); i++ {
 		v := f.Typ.ParameterList[dp.Start+i]
 		v.Expression = &ast.Expression{}
-		v.Expression.VariableType = v.Typ
+		v.Expression.Value = v.Typ
 		switch v.Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			v.Expression.Typ = ast.EXPRESSION_TYPE_BOOL

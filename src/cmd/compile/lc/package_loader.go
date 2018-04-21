@@ -3,6 +3,7 @@ package lc
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -98,7 +99,7 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		}
 	}
 	if realpaths[0].kind == RESOUCE_KIND_JAVA_CLASS {
-		class, err := loader.loadClass(realpaths[0])
+		class, err := loader.loadClass(nil, realpaths[0])
 		return nil, class, err
 	} else if realpaths[0].kind == RESOUCE_KIND_LUCY_CLASS {
 		fmt.Println(realpaths[0].realpath)
@@ -183,7 +184,7 @@ func (loader *RealNameLoader) loadJavaPackage(r *Resource) (*ast.Package, error)
 			continue
 		}
 		rr.realpath = filepath.Join(r.realpath, v.Name())
-		class, err := loader.loadClass(&rr)
+		class, err := loader.loadClass(ret, &rr)
 		if err != nil {
 			if _, ok := err.(*NotSupportTypeSignatureError); ok == false {
 				return nil, err
@@ -196,14 +197,18 @@ func (loader *RealNameLoader) loadJavaPackage(r *Resource) (*ast.Package, error)
 	return ret, nil
 }
 
-func (loader *RealNameLoader) loadClass(r *Resource) (*ast.Class, error) {
+func (loader *RealNameLoader) loadClass(p *ast.Package, r *Resource) (*ast.Class, error) {
 	bs, err := ioutil.ReadFile(r.realpath)
 	if err != nil {
 		return nil, err
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
 	if r.kind == RESOUCE_KIND_LUCY_CLASS {
-		return loader.loadAsLucy(c)
+		if t := c.AttributeGroupedByName[cg.ATTRIBUTE_NAME_LUCY_ENUM]; t != nil && len(t) > 0 {
+			return nil, loader.loadLucyEnum(p, c)
+		} else {
+			return loader.loadAsLucy(c)
+		}
 	}
 	return loader.loadAsJava(c)
 }

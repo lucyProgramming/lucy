@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
+	context *Context, state *StackMapState) (maxstack uint16) {
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
@@ -34,18 +35,24 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			stack := m.buildDefers(class, code, state, context, b.Defers, false, nil)
-			if stack > code.MaxStack {
-				code.MaxStack = stack
+			index := len(b.Defers) - 1
+			for index >= 0 {
+				ss := (&StackMapState{}).FromLast(state)
+				m.buildBlock(class, code, &b.Defers[index].Block, context, state)
+				index--
+				state.addTop(ss)
 			}
 		}
 		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
 			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	case ast.STATEMENT_TYPE_BREAK:
 		if b.Defers != nil && len(b.Defers) > 0 {
-			stack := m.buildDefers(class, code, state, context, b.Defers, false, nil)
-			if stack > code.MaxStack {
-				code.MaxStack = stack
+			index := len(b.Defers) - 1
+			for index >= 0 {
+				ss := (&StackMapState{}).FromLast(state)
+				m.buildBlock(class, code, &b.Defers[index].Block, context, state)
+				index--
+				state.addTop(ss)
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_goto
@@ -73,6 +80,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		}
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
+		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
 	}
 	return
 }

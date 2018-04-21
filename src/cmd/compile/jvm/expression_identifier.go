@@ -24,7 +24,7 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 	if 1 > maxstack {
 		maxstack = 1
 	}
-	if t := identifier.Var.Typ.JvmSlotSize(); t > maxstack {
+	if t := jvmSize(identifier.Var.Typ); t > maxstack {
 		maxstack = t
 	}
 	closure.unPack(class, code, identifier.Var.Typ)
@@ -32,7 +32,7 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 }
 
 func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	if e.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
+	if e.Value.Typ == ast.VARIABLE_TYPE_CLASS {
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifer)
@@ -44,7 +44,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			Descriptor: Descriptor.typeDescriptor(identifier.Var.Typ),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = identifier.Var.Typ.JvmSlotSize()
+		maxstack = jvmSize(identifier.Var.Typ)
 		return
 	}
 	if identifier.Var.BeenCaptured {

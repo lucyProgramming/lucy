@@ -70,46 +70,46 @@ func (s *Statement) isVariableDefinition() bool {
 		(s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Typ == EXPRESSION_TYPE_VAR)
 }
 
-func (s *Statement) check(b *Block) []error { // b is father
+func (s *Statement) check(block *Block) []error { // b is father
 	defer func() {
 		s.Checked = true
 	}()
-	if b.Defers != nil && len(b.Defers) > 0 {
-		b.InheritedAttribute.Defers = append(b.InheritedAttribute.Defers, b.Defers...)
+	if block.Defers != nil && len(block.Defers) > 0 {
+		block.InheritedAttribute.Defers = append(block.InheritedAttribute.Defers, block.Defers...)
 		defer func() {
-			b.InheritedAttribute.Defers = b.InheritedAttribute.Defers[0 : len(b.InheritedAttribute.Defers)-len(b.Defers)]
+			block.InheritedAttribute.Defers = block.InheritedAttribute.Defers[0 : len(block.InheritedAttribute.Defers)-len(block.Defers)]
 		}()
 	}
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
-		return s.checkStatementExpression(b)
+		return s.checkStatementExpression(block)
 	case STATEMENT_TYPE_IF:
-		return s.StatementIf.check(b)
+		return s.StatementIf.check(block)
 	case STATEMENT_TYPE_FOR:
-		return s.StatementFor.check(b)
+		return s.StatementFor.check(block)
 	case STATEMENT_TYPE_SWITCH:
-		return s.StatementSwitch.check(b)
+		return s.StatementSwitch.check(block)
 	case STATEMENT_TYPE_BREAK:
-		if b.InheritedAttribute.StatementFor == nil && b.InheritedAttribute.StatementSwitch == nil {
+		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.statementName())}
 		} else {
-			if b.InheritedAttribute.StatementFor != nil && b.InheritedAttribute.Defer != nil {
+			if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
 				return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
 					errMsgPrefix(s.Pos), s.statementName())}
 			}
 			s.StatementBreak = &StatementBreak{}
-			if f, ok := b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
+			if f, ok := block.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
 			} else {
-				s.StatementBreak.StatementSwitch = b.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementSwitch)
+				s.StatementBreak.StatementSwitch = block.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementSwitch)
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
-		if b.InheritedAttribute.StatementFor == nil {
+		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
-		if b.InheritedAttribute.StatementFor != nil && b.InheritedAttribute.Defer != nil {
+		if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
@@ -117,33 +117,37 @@ func (s *Statement) check(b *Block) []error { // b is father
 			s.StatementContinue = &StatementContinue{}
 		}
 		if s.StatementContinue.StatementFor == nil { // for
-			s.StatementContinue.StatementFor = b.InheritedAttribute.StatementFor
+			s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
 		}
 	case STATEMENT_TYPE_RETURN:
-		if b.InheritedAttribute.Defer != nil {
+		if block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.statementName())}
 		}
-		return s.StatementReturn.check(b)
+		if len(block.Defers) > 0 {
+			block.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
+		}
+		return s.StatementReturn.check(block)
 	case STATEMENT_TYPE_GOTO:
-		err := s.checkStatementGoto(b)
+		err := s.checkStatementGoto(block)
 		if err != nil {
 			return []error{err}
 		}
 	case STATEMENT_TYPE_DEFER:
-		s.Defer.Block.inherite(b)
+		block.InheritedAttribute.Function.mkAutoVarForException()
+		s.Defer.Block.inherite(block)
+		s.Defer.Block.InheritedAttribute.Defer = s.Defer
 		return s.Defer.Block.check()
 	case STATEMENT_TYPE_BLOCK:
-		s.Block.inherite(b)
+		s.Block.inherite(block)
 		return s.Block.check()
 	case STATEMENT_TYPE_LABLE: // nothing to do
 	case STATEMENT_TYPE_SKIP:
-		if b.InheritedAttribute.Function.isPackageBlockFunction == false {
+		if block.InheritedAttribute.Function.isPackageBlockFunction == false {
 			return []error{fmt.Errorf("cannot have '%s' at this scope", s.statementName())}
 		}
 		return nil
 	}
-
 	return nil
 }
 
@@ -164,13 +168,12 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		}
 		return nil
 	}
-
 	if s.Expression.canBeUsedAsStatementExpression() {
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)
 			if f.Name == "" {
 				err := fmt.Errorf("%s function must have a name",
-					errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
+					errMsgPrefix(s.Expression.Pos))
 				errs = append(errs, err)
 			} else {
 				err := b.insert(f.Name, f.Pos, f)
@@ -183,11 +186,6 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				errs = append(errs, es...)
 			}
 			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
-			if f.IsClosureFunction {
-				f.VarOffSetForClosureFunction = b.InheritedAttribute.Function.VarOffset
-				b.InheritedAttribute.Function.VarOffset++
-				b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations, &f.VarOffSetForClosureFunction)
-			}
 			return errs
 		}
 	} else {

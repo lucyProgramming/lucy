@@ -32,7 +32,8 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		return nil, err
 	}
 	if p.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s enum type have no '{' after it`s name defined,but %s", p.errorMsgPrefix(), p.token.Desp)
+		err = fmt.Errorf("%s enum type have no '{' after it`s name defined,but '%s'",
+			p.errorMsgPrefix(), p.token.Desp)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -45,9 +46,9 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
 	e.NamesMap = make(map[string]*ast.EnumName)
-	if p.token.Type == lex.TOKEN_RC {
-		return e, nil
-	}
+	//if p.token.Type == lex.TOKEN_RC {
+	//	return e, nil
+	//}
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s no enum names defined after {", p.errorMsgPrefix())
@@ -74,7 +75,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 			p.errs = append(p.errs, err)
 			return nil, err
 		}
-		initExpression, err = p.ExpressionParser.parseExpression(true)
+		initExpression, err = p.ExpressionParser.parseExpression(false)
 		if err != nil {
 			p.errs = append(p.errs, err)
 			return nil, err
@@ -89,7 +90,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		names = append(names, ns...)
 	}
 	if p.token.Type != lex.TOKEN_RC {
-		err = fmt.Errorf("%s unexcept token(%s) after a enum name", p.token.Desp)
+		err = fmt.Errorf("%s expect '}',but '%s'", p.token.Desp, p.token.Desp)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -102,14 +103,15 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		t.Enum = e
 		e.Names = append(e.Names, t)
 		if e.NamesMap[v.Name] != nil {
-			p.errs = append(p.errs, fmt.Errorf("%s enumname %s already declared", p.errorMsgPrefix(v.Pos)))
+			p.errs = append(p.errs, fmt.Errorf("%s enumname %s already declared",
+				p.errorMsgPrefix(v.Pos), v.Name))
 		} else {
 			e.NamesMap[v.Name] = t
 		}
 	}
-	e.Access = 0
+	e.AccessFlags = 0
 	if ispublic {
-		e.Access |= cg.ACC_CLASS_PUBLIC
+		e.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	}
 	return e, err
 }

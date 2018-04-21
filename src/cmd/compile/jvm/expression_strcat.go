@@ -5,7 +5,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+//TODO:: stack maps
+
 func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary, context *Context, state *StackMapState) (maxstack uint16) {
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -13,12 +19,15 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	maxstack = 2 // current stack is 2
 	currenStack := maxstack
 	stack, es := m.build(class, code, e.Left, context, state)
-	backPatchEs(es, code.CodeLength)
+	if len(es) > 0 {
+
+		backPatchEs(es, code.CodeLength)
+	}
 	if t := currenStack + stack; t > maxstack {
 		maxstack = t
 	}
 	m.stackTop2String(class, code, e.Left.GetTheOnlyOneVariableType(), context, state)
-	if t := currenStack + stack + e.Left.VariableType.JvmSlotSize(); t > maxstack {
+	if t := currenStack + stack + jvmSize(e.Left.Value); t > maxstack {
 		maxstack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial

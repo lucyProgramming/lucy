@@ -1,6 +1,6 @@
 package cg
 
-type FiledHighLevel struct {
+type FieldHighLevel struct {
 	Name                        string
 	Descriptor                  string
 	AccessFlags                 uint16

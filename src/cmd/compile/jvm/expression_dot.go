@@ -5,11 +5,11 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	dot := e.Data.(*ast.ExpressionDot)
-	if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_PACKAGE {
+	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 		if dot.PackageVariableDefinition != nil {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      dot.Expression.VariableType.Package.Name + "/main",
+				Class:      dot.Expression.Value.Package.Name + "/main",
 				Field:      dot.PackageVariableDefinition.Name,
 				Descriptor: dot.PackageVariableDefinition.Descriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -18,21 +18,21 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		return
 	}
 	if dot.Name == ast.SUPER_FIELD_NAME {
-		if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_OBJECT {
+		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_OBJECT {
 			maxstack, _ = m.build(class, code, dot.Expression, context, nil)
 			code.Codes[code.CodeLength] = cg.OP_checkcast
-			class.InsertClassConst(e.VariableType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(e.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		return
 	}
-	if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_CLASS {
-		maxstack = e.VariableType.JvmSlotSize()
+	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_CLASS {
+		maxstack = jvmSize(e.Value)
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      dot.Expression.VariableType.Class.Name,
+			Class:      dot.Expression.Value.Class.Name,
 			Field:      dot.Name,
-			Descriptor: Descriptor.typeDescriptor(e.VariableType),
+			Descriptor: Descriptor.typeDescriptor(e.Value),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
@@ -40,14 +40,14 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	stackLength := len(state.Stacks)
 	maxstack, _ = m.build(class, code, dot.Expression, context, state)
 	state.popStack(len(state.Stacks) - stackLength)
-	if t := e.VariableType.JvmSlotSize(); t > maxstack {
+	if t := jvmSize(e.Value); t > maxstack {
 		maxstack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      dot.Expression.VariableType.Class.Name,
+		Class:      dot.Expression.Value.Class.Name,
 		Field:      dot.Name,
-		Descriptor: Descriptor.typeDescriptor(e.VariableType),
+		Descriptor: Descriptor.typeDescriptor(e.Value),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return

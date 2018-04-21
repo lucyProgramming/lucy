@@ -67,19 +67,19 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}
-	currentStack := ee.VariableType.JvmSlotSize() + remainStack
+	currentStack := jvmSize(ee.Value) + remainStack
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
-			currentStack += m.controlStack2FitAssign(code, op, classname, e.VariableType)
+			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
 			if currentStack > maxstack {
 				maxstack = currentStack
 			}
 		}
 	}
-	switch e.VariableType.Typ {
+	switch e.Value.Typ {
 	case ast.VARIABLE_TYPE_BYTE:
 		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
@@ -159,12 +159,12 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_dadd
 		code.CodeLength++
 	}
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
-		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.VariableType)
+	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
-			currentStack += m.controlStack2FitAssign(code, op, classname, e.VariableType)
+			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
 			if currentStack > maxstack {
 				maxstack = currentStack
 			}
@@ -172,8 +172,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map detination
-		primitiveObjectConverter.getFromObject(class, code, e.VariableType)
+	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
+		primitiveObjectConverter.getFromObject(class, code, e.Value)
 	}
 	return
 }

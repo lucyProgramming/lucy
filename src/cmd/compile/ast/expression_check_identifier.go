@@ -17,7 +17,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		}
 	}
 	if d == nil {
-		return nil, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifer.Name)
+		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifer.Name)
 	}
 	switch d.(type) {
 	case *Function:
@@ -124,7 +124,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		}
 		t := &VariableType{}
 		t.Typ = VARIABLE_TYPE_CLASS
-		e.Pos = e.Pos
+		t.Pos = e.Pos
 		t.Class = c
 		return t, nil
 	case (*Package):

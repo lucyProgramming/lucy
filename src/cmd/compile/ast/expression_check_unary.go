@@ -48,7 +48,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {
 	ee := e.Data.(*Expression)
 	t, es := ee.getLeftValue(block)
-	ee.VariableType = t
+	ee.Value = t
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}

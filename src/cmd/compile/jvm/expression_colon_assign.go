@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	//first round
 	index := len(vs.Vs) - 1
@@ -29,13 +30,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	}
 	variables := vs.Vs
 	for _, v := range vs.Values {
-		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			stack, _ := m.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
 			m.buildStoreArrayListAutoVar(code, context)
-			for kk, tt := range v.VariableTypes {
+			for kk, tt := range v.Values {
 				if variables[0].Name == ast.NO_NAME_IDENTIFIER {
 					continue
 				}
@@ -49,32 +50,31 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				if variables[0].IsGlobal {
 					storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
 				} else {
+					variables[0].LocalValOffset = state.appendLocals(class, code, variables[0].Typ)
 					m.MakeClass.storeLocalVar(class, code, variables[0])
 					if variables[0].BeenCaptured {
 						currentStack -= 1
 					}
-					m.MakeClass.appendLocalVar(class, code, variables[0], state)
 				}
 				variables = variables[1:]
 			}
 			continue
 		}
-		variableType := v.VariableType
+		variableType := v.Value
 		if v.MayHaveMultiValue() {
-			variableType = v.VariableTypes[0]
+			variableType = v.Values[0]
 		}
 		stack, es := m.build(class, code, v, context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value)...)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength) //
-
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
 		if variables[0].Name == ast.NO_NAME_IDENTIFIER {
-			if variableType.JvmSlotSize() == 1 {
+			if jvmSize(variableType) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 				code.CodeLength++
 				state.popStack(1)
@@ -91,18 +91,18 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		if variables[0].IsGlobal {
 			storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
-			if variableType.JvmSlotSize() == 1 {
+			if jvmSize(variableType) == 1 {
 				state.popStack(1)
 			} else {
 				state.popStack(2)
 			}
 		} else {
+			variables[0].LocalValOffset = state.appendLocals(class, code, variables[0].Typ)
 			m.MakeClass.storeLocalVar(class, code, variables[0])
 			if variables[0].BeenCaptured {
 				currentStack -= 1
 			}
-			m.MakeClass.appendLocalVar(class, code, variables[0], state)
-			if variableType.JvmSlotSize() == 1 {
+			if jvmSize(variableType) == 1 {
 				if variables[0].BeenCaptured {
 					state.popStack(2)
 				} else {

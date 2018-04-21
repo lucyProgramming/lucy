@@ -7,21 +7,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	if bin.Left.VariableType.IsNumber() { // in this case ,right must be a number type
+	if bin.Left.Value.IsNumber() { // in this case ,right must be a number type
 		maxstack = 4
 		stack, _ := m.build(class, code, bin.Left, context, state)
 		if stack > maxstack {
 			maxstack = stack
 		}
-		target := bin.Left.VariableType.NumberTypeConvertRule(bin.Right.VariableType)
-		if target != bin.Left.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Left.VariableType.Typ, target)
+		target := bin.Left.Value.NumberTypeConvertRule(bin.Right.Value)
+		if target != bin.Left.Value.Typ {
+			m.numberTypeConverter(code, bin.Left.Value.Typ, target)
 		}
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: target})...)
 		stack, _ = m.build(class, code, bin.Right, context, state)
@@ -29,8 +30,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			maxstack = t
 		}
 		state.popStack(1)
-		if target != bin.Right.VariableType.Typ {
-			m.numberTypeConverter(code, bin.Right.VariableType.Typ, target)
+		if target != bin.Right.Value.Typ {
+			m.numberTypeConverter(code, bin.Right.Value.Typ, target)
 		}
 		switch target {
 		case ast.VARIABLE_TYPE_INT:
@@ -99,13 +100,21 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		return
 	}
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_BOOL ||
-		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
+	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_BOOL ||
+		bin.Right.Value.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.build(class, code, bin.Left, context, state)
-		backPatchEs(es, code.CodeLength)
+		if len(es) > 0 {
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
+			context.MakeStackMap(code, state, code.CodeLength)
+			backPatchEs(es, code.CodeLength)
+		}
 		stack, es := m.build(class, code, bin.Right, context, state)
-		backPatchEs(es, code.CodeLength)
+		if len(es) > 0 {
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
+			context.MakeStackMap(code, state, code.CodeLength)
+			backPatchEs(es, code.CodeLength)
+		}
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -133,10 +142,10 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	//string compare
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING ||
-		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
-		maxstack, _ = m.build(class, code, bin.Left, context, nil)
-		stack, _ := m.build(class, code, bin.Right, context, nil)
+	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING ||
+		bin.Right.Value.Typ == ast.VARIABLE_TYPE_STRING {
+		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		stack, _ := m.build(class, code, bin.Right, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_string_class,
@@ -204,15 +213,15 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_NULL ||
-		bin.Right.VariableType.Typ == ast.VARIABLE_TYPE_NULL {
+	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_NULL ||
+		bin.Right.Value.Typ == ast.VARIABLE_TYPE_NULL {
 		var notNullExpression *ast.Expression
-		if bin.Left.VariableType.Typ != ast.VARIABLE_TYPE_NULL {
+		if bin.Left.Value.Typ != ast.VARIABLE_TYPE_NULL {
 			notNullExpression = bin.Left
 		} else {
 			notNullExpression = bin.Right
 		}
-		maxstack, _ = m.build(class, code, notNullExpression, context, nil)
+		maxstack, _ = m.build(class, code, notNullExpression, context, state)
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 		} else { // ne
@@ -231,12 +240,12 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 8
 		return
 	}
-	if bin.Left.VariableType.IsPointer() && bin.Right.VariableType.IsPointer() { //
-		stack, _ := m.build(class, code, bin.Left, context, nil)
+	if bin.Left.Value.IsPointer() && bin.Right.Value.IsPointer() { //
+		stack, _ := m.build(class, code, bin.Left, context, state)
 		if stack > maxstack {
 			maxstack = stack
 		}
-		stack, _ = m.build(class, code, bin.Right, context, nil)
+		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := stack + 1; t > maxstack {
 			maxstack = t
 		}

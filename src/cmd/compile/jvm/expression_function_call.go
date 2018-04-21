@@ -8,7 +8,8 @@ import (
 /*
 	maxstack means return value stack size
 */
-func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Func.IsBuildin {
 		return m.mkBuildinFunctionCall(class, code, e, context, state)
@@ -35,7 +36,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSetForClosureFunction)...)
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSet)...)
 		}
 		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
 		if t := 1 + stack; t > maxstack {
@@ -52,8 +53,8 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 
 	if e.IsStatementExpression {
 		if e.CallHasReturnValue() == false { // nothing to do
-		} else if len(e.VariableTypes) == 1 {
-			if 2 == e.VariableTypes[0].JvmSlotSize() {
+		} else if len(e.Values) == 1 {
+			if 2 == jvmSize(e.Values[0]) {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop
@@ -66,8 +67,8 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	}
 
 	if e.CallHasReturnValue() == false { // nothing
-	} else if len(e.VariableTypes) == 1 {
-		if t := e.VariableTypes[0].JvmSlotSize(); t > maxstack {
+	} else if len(e.Values) == 1 {
+		if t := jvmSize(e.Values[0]); t > maxstack {
 			maxstack = t
 		}
 	} else { // > 1

@@ -33,7 +33,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 				if t.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,because type is null",
 						errMsgPrefix(e.Pos)))
-				} else if t.rightValueValid() {
+				} else if t.RightValueValid() {
 					tt := t.Clone()
 					tt.Pos = e.Pos
 					arr.Typ = &VariableType{}

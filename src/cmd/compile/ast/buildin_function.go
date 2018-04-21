@@ -35,8 +35,13 @@ func registerBuildinFunctions() {
 
 	catchBuildFunction.checker = func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil {
-			*errs = append(*errs, fmt.Errorf("%s this build function only allow in defer block",
-				errMsgPrefix(pos)))
+			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
+				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
+			return
+		}
+		if block.IsFunctionTopBlock == false {
+			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only can be use in function top level block",
+				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
 			return
 		}
 		if len(args) > 1 {
@@ -44,21 +49,26 @@ func registerBuildinFunctions() {
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
 			return
 		}
-		if len(args) == 0 && block.InheritedAttribute.Defer.ExceptionClass != nil {
+		if len(args) == 0 {
 			// make default exception class
 			// load java/lang/Exception this is default exception level to catch
-			_, c, err := NameLoader.LoadName(DEFAULT_EXCEPTION_CLASS)
-			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s  load exception class failed,err:%v",
-					errMsgPrefix(pos), err))
+			if block.InheritedAttribute.Defer.ExceptionClass == nil {
+				_, c, err := NameLoader.LoadName(DEFAULT_EXCEPTION_CLASS)
+				if err != nil {
+					*errs = append(*errs, fmt.Errorf("%s  load exception class failed,err:%v",
+						errMsgPrefix(pos), err))
+					return
+				}
+				returnList[0].Typ.Class = c.(*Class)
+				err = block.InheritedAttribute.Defer.registerExceptionClass(c.(*Class))
+				if err != nil {
+					*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
+				}
+				return
+			} else {
+				returnList[0].Typ.Class = block.InheritedAttribute.Defer.ExceptionClass
 				return
 			}
-			returnList[0].Typ.Class = c.(*Class)
-			err = block.InheritedAttribute.Defer.registerExceptionClass(c.(*Class))
-			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
-			}
-			return
 		}
 		if args[0].Typ != VARIABLE_TYPE_CLASS {
 			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect class",

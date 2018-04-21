@@ -6,7 +6,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
 	maxstack, _ = m.build(class, code, assert.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
@@ -21,12 +22,12 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	}
 
 	{
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.Value)...)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.Value)...)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(2)
 	}

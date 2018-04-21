@@ -22,7 +22,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 				Pos: e.Pos,
 			},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_BOOL:
 		t = []*VariableType{
 			{
@@ -30,62 +30,62 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 				Pos: e.Pos,
 			},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_BYTE:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_BYTE,
 			Pos: e.Pos,
 		},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_SHORT:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_SHORT,
 			Pos: e.Pos,
 		},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_INT:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_INT,
 			Pos: e.Pos,
 		},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_FLOAT:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_FLOAT,
 			Pos: e.Pos,
 		},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_DOUBLE:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_DOUBLE,
 			Pos: e.Pos,
 		},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_LONG:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_LONG,
 			Pos: e.Pos,
 		},
 		}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_STRING:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_STRING,
 			Pos: e.Pos,
 		}}
-		e.VariableType = t[0]
+		e.Value = t[0]
 	case EXPRESSION_TYPE_IDENTIFIER:
 		tt, err := e.checkIdentiferExpression(block)
 		if err != nil {
 			errs = append(errs, err)
 		}
 		if tt != nil {
-			e.VariableType = tt
+			e.Value = tt
 			t = []*VariableType{tt}
 		}
 		//binaries
@@ -126,13 +126,13 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-		e.VariableType = tt
+		e.Value = tt
 	case EXPRESSION_TYPE_MAP:
 		tt := e.checkMapExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-		e.VariableType = tt
+		e.Value = tt
 	case EXPRESSION_TYPE_COLON_ASSIGN:
 		e.checkColonAssignExpression(block, &errs)
 	case EXPRESSION_TYPE_ASSIGN:
@@ -140,7 +140,7 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-		e.VariableType = tt
+		e.Value = tt
 	case EXPRESSION_TYPE_INCREMENT:
 		fallthrough
 	case EXPRESSION_TYPE_DECREMENT:
@@ -152,32 +152,41 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-		e.VariableType = tt
+		e.Value = tt
 	case EXPRESSION_TYPE_CONST:
 		e.checkConstExpression(block, &errs)
-		e.VariableType = mkVoidType(e.Pos)
-		t = []*VariableType{e.VariableType}
+		e.Value = mkVoidType(e.Pos)
+		t = []*VariableType{e.Value}
 	case EXPRESSION_TYPE_VAR:
 		e.checkVarExpression(block, &errs)
-		e.VariableType = mkVoidType(e.Pos)
-		t = []*VariableType{e.VariableType}
+		e.Value = mkVoidType(e.Pos)
+		t = []*VariableType{e.Value}
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		t = e.checkFunctionCallExpression(block, &errs)
-		e.VariableTypes = t
+		e.Values = t
 		if len(t) == 1 {
-			e.VariableType = t[0]
+			e.Value = t[0]
+		}
+		if len(t) > 1 {
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t = e.checkMethodCallExpression(block, &errs)
-		e.VariableTypes = t
+		e.Values = t
 		if len(t) == 1 {
-			e.VariableType = t[0]
+			e.Value = t[0]
+		}
+		if len(t) > 1 {
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_TYPE_ASSERT:
 		t = e.checkTypeAssert(block, &errs)
-		e.VariableTypes = t
+		e.Values = t
 		if len(t) == 1 {
-			e.VariableType = t[0]
+			e.Value = t[0]
+		}
+		if len(t) > 1 {
+			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_NOT:
 		fallthrough
@@ -186,30 +195,30 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-		e.VariableType = tt
+		e.Value = tt
 	case EXPRESSION_TYPE_INDEX:
 		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
-			e.VariableType = tt
+			e.Value = tt
 		}
 	case EXPRESSION_TYPE_DOT:
 		tt := e.checkDotExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
-			e.VariableType = tt
+			e.Value = tt
 		}
 	case EXPRESSION_TYPE_CONVERTION_TYPE:
 		tt := e.checkTypeConvertionExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
-			e.VariableType = tt
+			e.Value = tt
 		}
 	case EXPRESSION_TYPE_NEW:
 		tt := e.checkNewExpression(block, &errs)
 		if tt != nil {
 			t = []*VariableType{tt}
-			e.VariableType = tt
+			e.Value = tt
 		}
 	case EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -224,18 +233,18 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
-		e.VariableType = tt
+		e.Value = tt
 	case EXPRESSION_TYPE_RANGE:
 		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement", errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_SLICE:
 		tt := e.checkSlice(block, &errs)
-		e.VariableType = tt
+		e.Value = tt
 		if tt != nil {
 			t = []*VariableType{tt}
 		}
 	case EXPRESSION_TYPE_ARRAY:
 		tt := e.checkArray(block, &errs)
-		e.VariableType = tt
+		e.Value = tt
 		if tt != nil {
 			t = []*VariableType{tt}
 		}

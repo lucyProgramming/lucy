@@ -6,7 +6,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	convertion := e.Data.(*ast.ExpressionTypeConvertion)
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
@@ -28,7 +29,7 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 	stack, _ := m.build(class, code, convertion.Expression, context, state)
 	maxstack = currentStack + stack
 	if convertion.Typ.IsNumber() {
-		m.numberTypeConverter(code, convertion.Expression.VariableType.Typ, convertion.Typ.Typ)
+		m.numberTypeConverter(code, convertion.Expression.Value.Typ, convertion.Typ.Typ)
 		return
 	}
 	//  []byte("hello world")

@@ -64,54 +64,47 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 	case VARIABLE_TYPE_BOOL:
 		e.Typ = EXPRESSION_TYPE_BOOL
 		e.Data = false
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_BYTE:
 		e.Typ = EXPRESSION_TYPE_BYTE
 		e.Data = byte(0)
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_SHORT:
 		e.Typ = EXPRESSION_TYPE_INT
 		e.Data = int32(0)
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_INT:
 		e.Typ = EXPRESSION_TYPE_INT
 		e.Data = int32(0)
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_LONG:
 		e.Typ = EXPRESSION_TYPE_LONG
 		e.Data = int64(0)
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_FLOAT:
 		e.Typ = EXPRESSION_TYPE_FLOAT
 		e.Data = float32(0)
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_DOUBLE:
 		e.Typ = EXPRESSION_TYPE_DOUBLE
 		e.Data = float64(0)
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_STRING:
 		e.Typ = EXPRESSION_TYPE_STRING
 		e.Data = ""
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	case VARIABLE_TYPE_OBJECT:
 		fallthrough
 	case VARIABLE_TYPE_MAP:
 		fallthrough
 	case VARIABLE_TYPE_ARRAY:
 		e.Typ = EXPRESSION_TYPE_NULL
-		e.VariableType = v.Clone()
+		e.Value = v.Clone()
 	}
 	return &e
 }
 
-func (v *VariableType) JvmSlotSize() uint16 {
-	if v.Typ == VARIABLE_TYPE_VOID {
-		return 0
-	}
-	return JvmSlotSizeHandler(v)
-}
-
-func (v *VariableType) rightValueValid() bool {
+func (v *VariableType) RightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||
 		v.Typ == VARIABLE_TYPE_BYTE ||
 		v.Typ == VARIABLE_TYPE_SHORT ||
@@ -123,25 +116,24 @@ func (v *VariableType) rightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_OBJECT ||
 		v.Typ == VARIABLE_TYPE_ARRAY ||
 		v.Typ == VARIABLE_TYPE_MAP ||
-		v.Typ == VARIABLE_TYPE_NULL
+		v.Typ == VARIABLE_TYPE_NULL ||
+		v.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
+		v.Typ == VARIABLE_TYPE_CLASS
 }
 
 /*
 	isTyped means can get type from this
 */
 func (v *VariableType) isTyped() bool {
-	return v.rightValueValid() && v.Typ != VARIABLE_TYPE_NULL
+	return v.RightValueValid() && v.Typ != VARIABLE_TYPE_NULL
 }
 
 /*
-	clone a type
+	shallow clone
 */
 func (t *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
 	*ret = *t
-	if ret.Typ == VARIABLE_TYPE_ARRAY {
-		ret.ArrayType = t.ArrayType.Clone()
-	}
 	return ret
 }
 

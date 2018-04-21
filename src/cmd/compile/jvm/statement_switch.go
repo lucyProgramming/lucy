@@ -51,7 +51,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.JumpBackPatch
-	size := s.Condition.VariableType.JvmSlotSize()
+	size := jvmSize(s.Condition.Value)
 	currentStack := size
 	for k, c := range s.StatmentSwitchCases {
 		if exit != nil {
@@ -60,15 +60,15 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		gotoBodyExits := []*cg.JumpBackPatch{}
 		needPop := false
 		for kk, ee := range c.Matches {
-			if ee.MayHaveMultiValue() && len(ee.VariableTypes) > 0 {
+			if ee.MayHaveMultiValue() && len(ee.Values) > 0 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
 				m.MakeExpression.buildStoreArrayListAutoVar(code, context)
-				for kkk, ttt := range ee.VariableTypes {
+				for kkk, ttt := range ee.Values {
 					currentStack = size
-					if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 && kkk == len(ee.VariableTypes)-1 {
+					if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 && kkk == len(ee.Values)-1 {
 					} else {
 						if size == 1 {
 							code.Codes[code.CodeLength] = cg.OP_dup
@@ -86,7 +86,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					if t := stack + currentStack; t > maxstack {
 						maxstack = t
 					}
-					switchCompare(s.Condition.VariableType)
+					switchCompare(s.Condition.Value)
 					gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 				}
 				continue
@@ -111,7 +111,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
-			switchCompare(s.Condition.VariableType)
+			switchCompare(s.Condition.Value)
 			gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match

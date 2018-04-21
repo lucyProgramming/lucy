@@ -5,8 +5,16 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+/*
+	s := "123";
+	s += "456";
+*/
 func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -27,7 +35,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	m.stackTop2String(class, code, bin.Right.VariableType, context, state) //conver to string
+	m.stackTop2String(class, code, bin.Right.Value, context, state) //conver to string
 	//append origin string
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -36,21 +44,12 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, es := m.build(class, code, bin.Right, context, state)
-	if len(es) > 0 {
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType("java/lang/StringBuilder"))...)
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, bin.Right.VariableType)...) /// must be bool
-
-		context.MakeStackMap(code, state, code.CodeLength)
-		backPatchEs(es, code.CodeLength)
-	}
+	stack, _ = m.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	m.stackTop2String(class, code, bin.Right.VariableType, context, state) //conver to string
-	if bin.Right.VariableType.IsPointer() && bin.Right.VariableType.Typ != ast.VARIABLE_TYPE_STRING {
+	m.stackTop2String(class, code, bin.Right.Value, context, state) //conver to string
+	if bin.Right.Value.IsPointer() && bin.Right.Value.Typ != ast.VARIABLE_TYPE_STRING {
 		if t := 2 + currentStack; t > maxstack {
 			maxstack = t
 		}
@@ -72,7 +71,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
+		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.Value)
 	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
@@ -81,7 +80,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 }
 func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	if bin.Left.VariableType.Typ == ast.VARIABLE_TYPE_STRING {
+	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING {
 		return m.buildStrPlusAssign(class, code, e, context, state)
 	}
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
@@ -90,7 +89,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}
-	currentStack := bin.Left.VariableType.JvmSlotSize() + remainStack // incase int -> long
+	currentStack := jvmSize(bin.Left.Value) + remainStack // incase int -> long
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
@@ -99,14 +98,14 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	//convert stack top to same type
-	if bin.Left.VariableType.Typ != bin.Right.VariableType.Typ {
-		m.numberTypeConverter(code, bin.Right.VariableType.Typ, bin.Left.VariableType.Typ)
+	if bin.Left.Value.Typ != bin.Right.Value.Typ {
+		m.numberTypeConverter(code, bin.Right.Value.Typ, bin.Left.Value.Typ)
 	}
-	currentStack += bin.Left.VariableType.JvmSlotSize()
+	currentStack += jvmSize(bin.Left.Value)
 	if currentStack > maxstack {
 		maxstack = currentStack // incase int->double
 	}
-	switch bin.Left.VariableType.Typ {
+	switch bin.Left.Value.Typ {
 	case ast.VARIABLE_TYPE_BYTE:
 		if e.Typ == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
@@ -221,20 +220,20 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength++
 		}
 	}
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map destination
-		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.VariableType)
+	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
+		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
 	}
-	currentStack -= bin.Left.VariableType.JvmSlotSize() // stack reduce
+	currentStack -= jvmSize(bin.Left.Value) // stack reduce
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.VariableType)
+		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.Value)
 		if currentStack > maxstack {
 			maxstack = currentStack
 		}
 	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
-	if classname == java_hashmap_class && e.VariableType.IsPointer() == false { // map destination
-		primitiveObjectConverter.getFromObject(class, code, e.VariableType)
+	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
+		primitiveObjectConverter.getFromObject(class, code, e.Value)
 	}
 	return
 }

@@ -187,7 +187,7 @@ func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
 	}
 	if len(ts) > 0 {
 		t = ts[0]
-		e.VariableType = t
+		e.Value = t
 	}
 	return
 }
@@ -363,10 +363,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Consts[name] = d.(*Const)
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		t.LocalValOffset = b.InheritedAttribute.Function.VarOffset
-		b.InheritedAttribute.Function.VarOffset += t.Typ.JvmSlotSize()
-		b.InheritedAttribute.Function.OffsetDestinations = append(b.InheritedAttribute.Function.OffsetDestinations,
-			&t.LocalValOffset)
 		b.Vars[name] = t
 	case *Enum:
 		e := d.(*Enum)

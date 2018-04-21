@@ -13,7 +13,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	if len(es) > 0 {
 		backPatchEs(es, code.CodeLength)
 		IfState.Stacks = append(IfState.Stacks,
-			IfState.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
+			IfState.newStackMapVerificationTypeInfo(class, s.Condition.Value)...)
 		context.MakeStackMap(code, IfState, code.CodeLength)
 		IfState.popStack(1) // must be bool expression
 	}
@@ -33,7 +33,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
 			elseIfState.Stacks = append(elseIfState.Stacks,
-				IfState.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
+				IfState.newStackMapVerificationTypeInfo(class, s.Condition.Value)...)
 			backPatchEs(es, code.CodeLength)
 			elseIfState.popStack(1)
 		}

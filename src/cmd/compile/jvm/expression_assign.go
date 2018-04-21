@@ -17,18 +17,17 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	stack, es := m.build(class, code, right, context, state)
 	if len(es) > 0 {
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, right.VariableType)...)
-
+			state.newStackMapVerificationTypeInfo(class, right.Value)...)
 		context.MakeStackMap(code, state, code.CodeLength)
 		backPatchEs(es, code.CodeLength)
 	}
 	if t := remainStack + stack; t > maxstack {
 		maxstack = t
 	}
-	if target.IsNumber() && target.Typ != right.VariableType.Typ {
-		m.numberTypeConverter(code, right.VariableType.Typ, target.Typ)
+	if target.IsNumber() && target.Typ != right.Value.Typ {
+		m.numberTypeConverter(code, right.Value.Typ, target.Typ)
 	}
-	if t := remainStack + target.JvmSlotSize(); t > maxstack {
+	if t := remainStack + jvmSize(target); t > maxstack {
 		maxstack = t
 	}
 	var currentStack uint16
@@ -36,7 +35,7 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, target)
 		currentStack = remainStack + 1 // ... vobjref
 	} else {
-		currentStack = remainStack + target.JvmSlotSize()
+		currentStack = remainStack + jvmSize(target)
 	}
 	if t := currentStack + m.controlStack2FitAssign(code, op, classname, target); t > maxstack {
 		maxstack = t
@@ -106,8 +105,8 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		stackHeights = stackHeights[1:]
 	}
 	for _, v := range rights {
-		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
-			stack, _ := m.build(class, code, v, context, nil)
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+			stack, _ := m.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -116,14 +115,14 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				maxstack = t
 			}
 			m.buildStoreArrayListAutoVar(code, context) // store it into local
-			for k, v := range v.VariableTypes {         // unpack
+			for k, v := range v.Values {                // unpack
 				needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
 				stack = m.unPackArraylist(class, code, k, v, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}
 				if noDestinations[0] == false {
-					if t := currentStack + targets[0].JvmSlotSize(); t > maxstack { // incase int convert to double or long
+					if t := currentStack + jvmSize(targets[0]); t > maxstack { // incase int convert to double or long
 						maxstack = t
 					}
 					if targets[0].IsNumber() && targets[0].Typ != v.Typ { // value is number 2
@@ -133,7 +132,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 						primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 					}
 				} else { // pop fron stack
-					if v.JvmSlotSize() == 1 {
+					if jvmSize(v) == 1 {
 						code.Codes[code.CodeLength] = cg.OP_pop
 					} else {
 						code.Codes[code.CodeLength] = cg.OP_pop2
@@ -144,9 +143,9 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			}
 			continue
 		}
-		variableType := v.VariableType
+		variableType := v.Value
 		if v.MayHaveMultiValue() {
-			variableType = v.VariableTypes[0]
+			variableType = v.Values[0]
 		}
 		needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
 		stack, es := m.build(class, code, v, context, state)
@@ -160,7 +159,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			maxstack = t
 		}
 		if noDestinations[0] == false {
-			if t := currentStack + targets[0].JvmSlotSize(); t > maxstack { // incase int convert to double or long
+			if t := currentStack + jvmSize(targets[0]); t > maxstack { // incase int convert to double or long
 				maxstack = t
 			}
 			if targets[0].IsNumber() && targets[0].Typ != variableType.Typ { // value is number 2
@@ -170,7 +169,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 			}
 		} else { // pop fron stack
-			if variableType.JvmSlotSize() == 1 {
+			if jvmSize(variableType) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2

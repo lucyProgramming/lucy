@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -32,9 +33,9 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack := uint16(2)
-		variableType := v.Left.VariableType
+		variableType := v.Left.Value
 		if v.Left.MayHaveMultiValue() {
-			variableType = v.Left.VariableTypes[0]
+			variableType = v.Left.Values[0]
 		}
 		stack, _ := m.build(class, code, v.Left, context, state)
 		if t := currentStack + stack; t > maxstack {
@@ -49,19 +50,15 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		stack, es := m.build(class, code, v.Right, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Right.VariableType)...)
-
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Right.Value)...)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		state.popStack(1) // @46
+		state.popStack(1) // @46 line
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
-		variableType = v.Right.VariableType
-		if v.Right.MayHaveMultiValue() {
-			variableType = v.Right.VariableTypes[0]
-		}
+		variableType = v.Right.Value
 		if variableType.IsPointer() == false {
 			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}

@@ -40,10 +40,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	}()
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context, state)
-
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Args[0].VariableType)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Args[0].Value)...)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
@@ -164,13 +163,13 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
-		if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			stack, _ := m.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
 			m.buildStoreArrayListAutoVar(code, context)
-			for kk, tt := range v.VariableTypes {
+			for kk, tt := range v.Values {
 				stack = m.unPackArraylist(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
@@ -181,13 +180,13 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 						maxstack = t
 					}
 				}
-				app(k == len(call.Args)-1 && kk == len(v.VariableTypes)-1) // last and last
+				app(k == len(call.Args)-1 && kk == len(v.Values)-1) // last and last
 			}
 			continue
 		}
-		variableType = v.VariableType
+		variableType = v.Value
 		if v.MayHaveMultiValue() {
-			variableType = v.VariableTypes[0]
+			variableType = v.Values[0]
 		}
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {

@@ -6,12 +6,19 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+type AutoVarForRangeMap struct {
+	MapObject        uint16
+	KeySets          uint16
+	KeySetsK, Length uint16
+	K, V             uint16
+}
+
 func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
-	maxstack, _ = m.MakeExpression.build(class, code, s.StatmentForRangeAttr.Expression, context, state) // map instance on stack
+	maxstack, _ = m.MakeExpression.build(class, code, s.RangeAttr.Expression, context, state) // map instance on stack
 	// if null skip
 	{
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.Expression.VariableType)...)
+			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value)...)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(1) // pop
@@ -27,6 +34,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	defer func() {
 		state.addTop(forState)
 	}()
+
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
@@ -56,41 +64,41 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	if 3 > maxstack {
 		maxstack = 3
 	}
-	code.Codes[code.CodeLength] = cg.OP_arraylength
-	code.CodeLength++
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsKLength)...)
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.MapObject)...)
-	// k set to 0
-	code.Codes[code.CodeLength] = cg.OP_iconst_0
-	code.CodeLength++
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
+	var autoVar AutoVarForRangeMap
 	{
-		forState.Locals = append(forState.Locals,
-			forState.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		autoVar.Length = forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = forState.newObjectVariableType(java_root_class)
 		forState.Locals = append(forState.Locals, forState.newStackMapVerificationTypeInfo(class, t)...)
-		t2 := forState.newObjectVariableType(java_hashmap_class)
-		forState.Locals = append(forState.Locals, forState.newStackMapVerificationTypeInfo(class, t2)...)
-		forState.Locals = append(forState.Locals,
-			forState.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		autoVar.KeySets = forState.appendLocals(class, code, t)
+		autoVar.MapObject = forState.appendLocals(class, code, forState.newObjectVariableType(java_hashmap_class))
+		autoVar.KeySetsK = forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+
 	}
+	code.Codes[code.CodeLength] = cg.OP_arraylength
+	code.CodeLength++
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
+	// k set to 0
+	code.Codes[code.CodeLength] = cg.OP_iconst_0
+	code.CodeLength++
+	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 
 	//continue offset start from here
 	loopBeginsAt := code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	// load  map object
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.MapObject)...)
+	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
 	// load k sets
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
+	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 	// load k
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
+	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	// load length
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsKLength)...)
+	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
 	if 5 > maxstack {
 		maxstack = 5
 	}
@@ -105,65 +113,68 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if s.StatmentForRangeAttr.Expression.VariableType.Map.V.IsPointer() == false {
-		primitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.V)
+	if s.RangeAttr.Expression.Value.Map.V.IsPointer() == false {
+		primitiveObjectConverter.getFromObject(class, code, s.RangeAttr.Expression.Value.Map.V)
 	} else {
-		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.V)
+		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.Expression.Value.Map.V)
 	}
 	//store to V
-	copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
-	forState.Locals = append(forState.Locals, state.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.Expression.VariableType.Map.V)...)
+	copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ, autoVar.V)...)
+	forState.Locals = append(forState.Locals,
+		state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value.Map.V)...)
 	// store to k,if need
-	if s.StatmentForRangeAttr.ModelKV {
+	if s.RangeAttr.ModelKV {
 		// load k sets
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySets)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 		// load k
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)...)
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
-		if s.StatmentForRangeAttr.Expression.VariableType.Map.K.IsPointer() == false {
-			primitiveObjectConverter.getFromObject(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
+		if s.RangeAttr.Expression.Value.Map.K.IsPointer() == false {
+			primitiveObjectConverter.getFromObject(class, code, s.RangeAttr.Expression.Value.Map.K)
 		} else {
-			primitiveObjectConverter.castPointerTypeToRealType(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
+			primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.Expression.Value.Map.K)
 		}
-		copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.K)...)
-		forState.Locals = append(forState.Locals, state.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.Expression.VariableType.Map.K)...)
+		copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ, autoVar.K)...)
+		forState.Locals = append(forState.Locals,
+			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value.Map.K)...)
 	}
 	// store k and v into user defined variable
 	//store v in real v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.StatmentForRangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var)
 			// load to stack
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
-			copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ,
-				s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
-			closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
+				s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+			copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
+				autoVar.V)...)
+			closure.storeLocalCloureVar(class, code, s.RangeAttr.IdentifierV.Var)
 			{
 				t := &ast.VariableType{}
 				t.Typ = ast.VARIABLE_TYPE_OBJECT
 				t.Class = &ast.Class{}
-				t.Class.Name = closure.getMeta(s.StatmentForRangeAttr.IdentifierV.Var.Typ.Typ).className
+				t.Class.Name = closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className
 				forState.Locals = append(forState.Locals,
 					forState.newStackMapVerificationTypeInfo(class, t)...)
 			}
 		} else {
 			// load v
-			copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ,
-				s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
-			copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ,
-				s.StatmentForRangeAttr.IdentifierV.Var.LocalValOffset)...)
+			copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
+				autoVar.V)...)
+			copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
+				s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 			forState.Locals = append(forState.Locals,
-				forState.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.IdentifierV.Var.Typ)...)
+				forState.newStackMapVerificationTypeInfo(class, s.RangeAttr.IdentifierV.Var.Typ)...)
 		}
-		if s.StatmentForRangeAttr.ModelKV {
-			if s.StatmentForRangeAttr.IdentifierK.Var.BeenCaptured {
-				closure.createCloureVar(class, code, s.StatmentForRangeAttr.IdentifierK.Var)
-				copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.IdentifierK.Var.Typ.Typ,
-					s.StatmentForRangeAttr.AutoVarForRangeMap.K)...)
-				copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ,
-					s.StatmentForRangeAttr.AutoVarForRangeMap.K)...)
-				closure.storeLocalCloureVar(class, code, s.StatmentForRangeAttr.IdentifierV.Var)
+		if s.RangeAttr.ModelKV {
+			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
+				closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var)
+				copyOP(code, loadSimpleVarOp(s.RangeAttr.IdentifierK.Var.Typ.Typ,
+					autoVar.K)...)
+				copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
+					autoVar.K)...)
+				closure.storeLocalCloureVar(class, code, s.RangeAttr.IdentifierV.Var)
 				{
 					t := &ast.VariableType{}
 					t.Typ = ast.VARIABLE_TYPE_OBJECT
@@ -173,39 +184,42 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 						forState.newStackMapVerificationTypeInfo(class, t)...)
 				}
 			} else {
-				copyOP(code, loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ,
-					s.StatmentForRangeAttr.AutoVarForRangeMap.K)...)
-				copyOP(code, storeSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ,
-					s.StatmentForRangeAttr.IdentifierK.Var.LocalValOffset)...)
+				copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
+					autoVar.K)...)
+				copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
+					s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 				forState.Locals = append(forState.Locals,
-					forState.newStackMapVerificationTypeInfo(class, s.StatmentForRangeAttr.IdentifierK.Var.Typ)...)
+					forState.newStackMapVerificationTypeInfo(class, s.RangeAttr.IdentifierK.Var.Typ)...)
 			}
 		}
 	} else { // for k,v  = range xxx
 		// store v
-		stack, remainStack, op, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class, code, s.StatmentForRangeAttr.ExpressionV, context, state)
+		stack, remainStack, op, _, classname, name, descriptor :=
+			m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionV, context, state)
 		if stack > maxstack { // this means  current stack is 0
 			maxstack = stack
 		}
 		copyOP(code,
-			loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.V.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.V)...)
-		if t := remainStack + s.StatmentForRangeAttr.Expression.VariableType.Map.V.JvmSlotSize(); t > maxstack {
+			loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ, autoVar.V)...)
+		if t := remainStack + jvmSize(s.RangeAttr.Expression.Value.Map.V); t > maxstack {
 			maxstack = t
 		}
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
-		if s.StatmentForRangeAttr.ModelKV {
-			stack, remainStack, op, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class, code, s.StatmentForRangeAttr.ExpressionK, context, state)
+		if s.RangeAttr.ModelKV {
+			stack, remainStack, op, _, classname, name, descriptor :=
+				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, state)
 			if stack > maxstack { // this means  current stack is 0
 				maxstack = stack
 			}
 			copyOP(code,
-				loadSimpleVarOp(s.StatmentForRangeAttr.Expression.VariableType.Map.K.Typ, s.StatmentForRangeAttr.AutoVarForRangeMap.K)...)
-			if t := remainStack + s.StatmentForRangeAttr.Expression.VariableType.Map.K.JvmSlotSize(); t > maxstack {
+				loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ, autoVar.K)...)
+			if t := remainStack + jvmSize(s.RangeAttr.Expression.Value.Map.K); t > maxstack {
 				maxstack = t
 			}
 			if classname == java_hashmap_class {
 				// put in object
-				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, s.StatmentForRangeAttr.Expression.VariableType.Map.K)
+				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code,
+					s.RangeAttr.Expression.Value.Map.K)
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)
 		}
@@ -214,10 +228,10 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	m.buildBlock(class, code, s.Block, context, forState)
 	s.ContinueOPOffset = code.CodeLength
 	code.Codes[code.CodeLength] = cg.OP_iinc
-	if s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK > 255 {
+	if autoVar.KeySetsK > 255 {
 		panic("over 255")
 	}
-	code.Codes[code.CodeLength+1] = byte(s.StatmentForRangeAttr.AutoVarForRangeMap.KeySetsK)
+	code.Codes[code.CodeLength+1] = byte(autoVar.KeySetsK)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 	jumpto(cg.OP_goto, code, loopBeginsAt)
@@ -225,12 +239,14 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 
 	{
 		// object ref
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_hashmap_class))...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class,
+			state.newObjectVariableType(java_hashmap_class))...)
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = state.newObjectVariableType(java_root_class)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class,
+			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(3)
 	}

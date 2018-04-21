@@ -16,7 +16,7 @@ type ClassHighLevel struct {
 	AccessFlags            uint16
 	SuperClass             string
 	Interfaces             []string
-	Fields                 map[string]*FiledHighLevel
+	Fields                 map[string]*FieldHighLevel
 	Methods                map[string][]*MethodHighLevel
 	TriggerCLinit          *MethodHighLevel
 }

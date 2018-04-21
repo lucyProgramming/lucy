@@ -15,4 +15,5 @@ const (
 	ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT   = "LucyTriggerPackageInitMethod"
 	ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS     = "LucyDefaultParameters"
 	ATTRIBUTE_NAME_LUCY_TYPE_ALIAS             = "LucyTypeAlias"
+	ATTRIBUTE_NAME_LUCY_ENUM                   = "LucyEnum"
 )

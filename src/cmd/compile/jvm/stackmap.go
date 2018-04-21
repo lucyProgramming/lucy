@@ -1,14 +1,21 @@
 package jvm
 
-import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type StackMapState struct {
 	Locals     []*cg.StackMap_verification_type_info
 	LastLocals []*cg.StackMap_verification_type_info
 	Stacks     []*cg.StackMap_verification_type_info
+}
+
+func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) (varOffset uint16) {
+	varOffset = code.MaxLocals
+	s.Locals = append(s.Locals, s.newStackMapVerificationTypeInfo(class, v)...)
+	code.MaxLocals += jvmSize(v)
+	return
 }
 
 func (s *StackMapState) addTop(absent *StackMapState) {

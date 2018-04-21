@@ -6,7 +6,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxstack, _ = m.build(class, code, call.Expression, context, state)
 	stackLength := len(state.Stacks)
@@ -18,10 +19,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
 	switch call.Name {
 	case common.MAP_METHOD_KEY_EXISTS:
-		variableType := call.Args[0].VariableType
-		if call.Args[0].MayHaveMultiValue() {
-			variableType = call.Args[0].VariableTypes[0]
-		}
+		variableType := call.Args[0].Value
 		stack, _ := m.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
@@ -55,15 +53,15 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 		}
 		for k, v := range call.Args {
 			currentStack = 1
-			if v.MayHaveMultiValue() && len(v.VariableTypes) > 1 {
+			if v.MayHaveMultiValue() && len(v.Values) > 1 {
 				stack, _ := m.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
 				m.buildStoreArrayListAutoVar(code, context) // store to temp
-				for kk, _ := range v.VariableTypes {
+				for kk, _ := range v.Values {
 					currentStack = 1
-					if k == len(call.Args)-1 && kk == len(v.VariableTypes)-1 {
+					if k == len(call.Args)-1 && kk == len(v.Values)-1 {
 					} else {
 						code.Codes[code.CodeLength] = cg.OP_dup
 						code.CodeLength++
@@ -87,10 +85,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				}
 				continue
 			}
-			variableType := v.VariableType
-			if v.MayHaveMultiValue() {
-				variableType = v.VariableTypes[0]
-			}
+			variableType := v.Value
 			if k == len(call.Args)-1 {
 			} else { // not last one
 				code.Codes[code.CodeLength] = cg.OP_dup

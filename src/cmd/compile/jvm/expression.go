@@ -313,7 +313,7 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		op[0] == cg.OP_astore_2 || //将栈顶引用型数值存入第三个局部变量
 		op[0] == cg.OP_astore_3 ||
 		op[0] == cg.OP_putstatic { //为指定的类的静态域赋值。
-		if stackTopType.JvmSlotSize() == 1 {
+		if jvmSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
 		} else {
@@ -324,7 +324,7 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		return
 	}
 	if op[0] == cg.OP_putfield {
-		if stackTopType.JvmSlotSize() == 1 {
+		if jvmSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
 		} else {
@@ -337,7 +337,7 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 	if op[0] == cg.OP_invokevirtual { // array or map
 		if ArrayMetasMap[classname] != nil || classname == java_hashmap_class {
 			// stack is arrayref index or mapref kref which are all category 1 type
-			if stackTopType.JvmSlotSize() == 1 {
+			if jvmSize(stackTopType) == 1 {
 				increment = 1
 				code.Codes[code.CodeLength] = cg.OP_dup_x2
 				code.CodeLength++

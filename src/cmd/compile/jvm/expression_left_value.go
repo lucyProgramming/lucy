@@ -5,7 +5,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
+func (m *MakeExpression) getCaptureIdentiferLeftValue(
+	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context, state *StackMapState) (
+	maxstack, remainStack uint16, op []byte,
+	target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
 	target = identifier.Var.Typ
 	op = []byte{cg.OP_putfield}
@@ -32,7 +36,11 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(class *cg.ClassHighLevel, 
 	return
 }
 
-func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
+func (m *MakeExpression) getMapLeftValue(
+	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context, state *StackMapState) (
+	maxstack, remainStack uint16, op []byte,
+	target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxstack, _ = m.build(class, code, index.Expression, context, nil)
 	stack, _ := m.build(class, code, index.Index, context, nil)
@@ -43,17 +51,21 @@ func (m *MakeExpression) getMapLeftValue(class *cg.ClassHighLevel, code *cg.Attr
 		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_hashmap_class))...)
 	state.Stacks = append(state.Stacks,
 		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_root_class))...)
-	primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.VariableType)
+	primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.Value)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
-	target = index.Expression.VariableType.Map.V
+	target = index.Expression.Value.Map.V
 	classname = java_hashmap_class
 	name = "put"
 	descriptor = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
 	return
 }
 
-func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack, remainStack uint16, op []byte, target *ast.VariableType, classname, name, descriptor string) {
+func (m *MakeExpression) getLeftValue(
+	class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (
+	maxstack, remainStack uint16, op []byte,
+	target *ast.VariableType, classname, name, descriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifer)
@@ -152,40 +164,40 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 		target = identifier.Var.Typ
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
-			maxstack, _ = m.build(class, code, index.Expression, context, nil)
-			stack, _ := m.build(class, code, index.Index, context, nil)
+		if index.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
+			maxstack, _ = m.build(class, code, index.Expression, context, state)
+			stack, _ := m.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxstack {
 				maxstack = t
 			}
-			meta := ArrayMetas[e.VariableType.Typ]
+			meta := ArrayMetas[e.Value.Typ]
 			classname = meta.classname
 			name = "set"
 			descriptor = meta.setDescriptor
-			target = e.VariableType
+			target = e.Value
 			remainStack = 2 // [objectref ,index]
 			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, index.Expression.VariableType)...)
+				state.newStackMapVerificationTypeInfo(class, index.Expression.Value)...)
 			state.Stacks = append(state.Stacks,
 				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
 			op = []byte{cg.OP_invokevirtual}
-		} else if index.Expression.VariableType.Typ == ast.VARIABLE_TYPE_MAP { // map
+		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
 			return m.getMapLeftValue(class, code, e, context, state)
 		} else {
 			panic("....")
 		}
 	case ast.EXPRESSION_TYPE_DOT:
 		dot := e.Data.(*ast.ExpressionDot)
-		if dot.Expression.VariableType.Typ == ast.VARIABLE_TYPE_PACKAGE {
+		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
 			target = dot.PackageVariableDefinition.Typ
-			classname = dot.Expression.VariableType.Package.Name + "/main"
+			classname = dot.Expression.Value.Package.Name + "/main"
 			name = dot.PackageVariableDefinition.Name
 			descriptor = dot.PackageVariableDefinition.Descriptor
 			maxstack = 0
 			remainStack = 0
 		} else {
-			classname = dot.Expression.VariableType.Class.Name
+			classname = dot.Expression.Value.Class.Name
 			target = dot.Field.VariableDefinition.Typ
 			name = dot.Name
 			if dot.Field.LoadFromOutSide {
@@ -197,9 +209,9 @@ func (m *MakeExpression) getLeftValue(class *cg.ClassHighLevel, code *cg.Attribu
 				op = []byte{cg.OP_putstatic}
 			} else {
 				op = []byte{cg.OP_putfield}
-				maxstack, _ = m.build(class, code, dot.Expression, context, nil)
+				maxstack, _ = m.build(class, code, dot.Expression, context, state)
 				remainStack = 1
-				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, dot.Expression.VariableType)...)
+				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, dot.Expression.Value)...)
 			}
 		}
 	}

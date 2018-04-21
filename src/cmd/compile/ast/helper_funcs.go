@@ -13,19 +13,16 @@ func ErrMsgPrefix(pos *Pos) string {
 func errsNotEmpty(es []error) bool {
 	return es != nil && len(es) > 0
 }
+
 func checkEnum(enums []*Enum) []error {
 	ret := make([]error, 0)
 	for _, v := range enums {
 		if len(v.Names) == 0 {
 			continue
 		}
-		is, typ, value, err := v.Init.getConstValue()
-		if err != nil || is == false || typ != EXPRESSION_TYPE_INT {
-			ret = append(ret, fmt.Errorf("enum type must inited by integer"))
-			continue
-		}
-		for k, vv := range v.Names {
-			vv.Value = int64(k) + value.(int64)
+		err := v.check()
+		if err != nil {
+			ret = append(ret, err)
 		}
 	}
 	return ret
@@ -77,8 +74,9 @@ func mkVoidType(pos *Pos) *VariableType {
 func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
 	ret = []*VariableType{}
 	for _, v := range ts {
-		if !v.rightValueValid() {
-			*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value", errMsgPrefix(v.Pos), v.TypeString()))
+		if !v.RightValueValid() {
+			*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value",
+				errMsgPrefix(v.Pos), v.TypeString()))
 			continue
 		}
 		ret = append(ret, v)
@@ -117,5 +115,4 @@ func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableT
 		errmsg += "\t have " + m.Func.readableMsg(name) + "\n"
 	}
 	return fmt.Errorf(errmsg)
-	//*errs = append(*errs, fmt.Errorf(errmsg))
 }

@@ -81,7 +81,33 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	}
 	return astClass, nil
 }
-
+func (loader *RealNameLoader) loadLucyEnum(pack *ast.Package, c *cg.Class) error {
+	e := &ast.Enum{}
+	{
+		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+		e.Name = string(c.ConstPool[nameindex].Info)
+	}
+	e.AccessFlags = c.AccessFlag
+	if pack.Block.Enums == nil {
+		pack.Block.Enums = make(map[string]*ast.Enum)
+	}
+	pack.Block.Enums[filepath.Base(e.Name)] = e
+	if pack.Block.EnumNames == nil {
+		pack.Block.EnumNames = make(map[string]*ast.EnumName)
+	}
+	e.NamesMap = make(map[string]*ast.EnumName)
+	for _, v := range c.Fields {
+		en := &ast.EnumName{}
+		name := string(c.ConstPool[v.NameIndex].Info)
+		en.Name = name
+		en.Enum = e
+		constValue := v.AttributeGroupedByName[cg.ATTRIBUTE_NAME_CONST_VALUE][0] // must have this attribute
+		en.Value = int32(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
+		e.NamesMap[name] = en
+		pack.Block.EnumNames[name] = en
+	}
+	return nil
+}
 func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}

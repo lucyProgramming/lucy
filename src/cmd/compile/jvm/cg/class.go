@@ -44,6 +44,7 @@ type Class struct {
 	AttributeClosureClass    *AttributeClosureFunctionClass
 	AttributeGroupedByName   AttributeGroupedByName
 	TypeAlias                []*AttributeLucyTypeAlias
+	AttributeLucyEnum        *AttributeLucyEnum
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
@@ -318,6 +319,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	}
 	for _, v := range c.TypeAlias {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
+	}
+	if c.AttributeLucyEnum != nil {
+		c.Attributes = append(c.Attributes, c.AttributeLucyEnum.ToAttributeInfo(c))
 	}
 	c.ifConstPoolOverMaxSize()
 	return

@@ -7,12 +7,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+
 	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
-		var es []*cg.JumpBackPatch
-		maxstack, es = m.build(class, code, e.Data.(*ast.Expression), context, state)
-		backPatchEs(es, code.CodeLength)
-		switch e.VariableType.Typ {
+		maxstack, _ = m.build(class, code, e.Data.(*ast.Expression), context, state)
+		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -33,14 +33,14 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.build(class, code, ee, context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value)...)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		state.popStack(1)
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.VariableType)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value)...)
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_ifne

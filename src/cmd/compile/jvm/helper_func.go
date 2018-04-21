@@ -372,7 +372,18 @@ func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
 	b = 1
 
 	for _, v := range ft.ParameterList {
-		b += byte(v.Typ.JvmSlotSize())
+		b += byte(jvmSize(v.Typ))
 	}
 	return b
+}
+
+func jvmSize(v *ast.VariableType) uint16 {
+	if v.RightValueValid() == false {
+		panic("right value is not valid," + v.TypeString())
+	}
+	if v.Typ == ast.VARIABLE_TYPE_DOUBLE || ast.VARIABLE_TYPE_LONG == v.Typ {
+		return 2
+	} else {
+		return 1
+	}
 }

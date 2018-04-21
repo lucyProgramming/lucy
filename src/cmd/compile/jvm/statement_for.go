@@ -6,9 +6,9 @@ import (
 )
 
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
-	if s.StatmentForRangeAttr != nil {
-		if s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY ||
-			s.StatmentForRangeAttr.Expression.VariableType.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+	if s.RangeAttr != nil {
+		if s.RangeAttr.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY ||
+			s.RangeAttr.Expression.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 			return m.buildForRangeStatementForArray(class, code, s, context, state)
 		} else { // for map
 			return m.buildForRangeStatementForMap(class, code, s, context, state)
@@ -33,7 +33,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			forState.Stacks = append(forState.Stacks, forState.newStackMapVerificationTypeInfo(class, s.Condition.VariableType)...)
+			forState.Stacks = append(forState.Stacks, forState.newStackMapVerificationTypeInfo(class, s.Condition.Value)...)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}

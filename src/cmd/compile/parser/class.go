@@ -33,10 +33,11 @@ func (c *Class) parseClassName() (string, error) {
 	if c.parser.token.Type == lex.TOKEN_DOT {
 		c.Next()
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-			err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+			err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(),
+				c.parser.token.Desp)
 			c.parser.errs = append(c.parser.errs, err)
 		}
-		name += "/" + c.parser.token.Data.(string)
+		name += "." + c.parser.token.Data.(string)
 		c.Next() // skip name identifier
 	}
 	return name, nil

@@ -5,11 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	if e.VariableType.Typ == ast.VARIABLE_TYPE_ARRAY {
+func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	if e.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildNewArray(class, code, e, context, state)
 	}
-	if e.VariableType.Typ == ast.VARIABLE_TYPE_MAP {
+	if e.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
 	}
 	//new class
@@ -63,7 +64,7 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
-	meta := ArrayMetas[e.VariableType.ArrayType.Typ]
+	meta := ArrayMetas[e.Value.ArrayType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -93,7 +94,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code, context, state) + currentStack; t > maxstack {
 		maxstack = t
 	}
-	switch e.VariableType.ArrayType.Typ {
+	switch e.Value.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -132,11 +133,11 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(e.VariableType.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(e.Value.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		meta := ArrayMetas[e.VariableType.ArrayType.ArrayType.Typ]
+		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}

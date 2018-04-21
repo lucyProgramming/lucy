@@ -28,14 +28,14 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		t, err := e.mustBeOneValueContext(ts)
+		indexType, err := e.mustBeOneValueContext(ts)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
-		if t != nil {
-			if !t.IsInteger() {
+		if indexType != nil {
+			if !indexType.IsInteger() {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
-					errMsgPrefix(e.Pos), t.TypeString()))
+					errMsgPrefix(e.Pos), indexType.TypeString()))
 			}
 		}
 		tt := t.ArrayType.Clone()
