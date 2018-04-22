@@ -74,6 +74,8 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		ret = make([]*cg.StackMap_verification_type_info, 1)
 		ret[0] = &cg.StackMap_verification_type_info{}

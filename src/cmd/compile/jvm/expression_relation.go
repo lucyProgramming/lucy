@@ -245,6 +245,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if stack > maxstack {
 			maxstack = stack
 		}
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := stack + 1; t > maxstack {
 			maxstack = t
@@ -267,5 +269,42 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 8
 		return
 	}
+
+	// enum
+	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_ENUM {
+		stack, _ := m.build(class, code, bin.Left, context, state)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
+		stack, _ = m.build(class, code, bin.Right, context, state)
+		if t := stack + 1; t > maxstack {
+			maxstack = t
+		}
+		state.popStack(1) //
+		context.MakeStackMap(code, state, code.CodeLength+7)
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		context.MakeStackMap(code, state, code.CodeLength+8) //result on stack
+		code.Codes[code.CodeLength] = cg.OP_if_icmpeq
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+		if e.Typ == ast.EXPRESSION_TYPE_EQ {
+			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		} else {
+			code.Codes[code.CodeLength+3] = cg.OP_iconst_1
+		}
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+		if e.Typ == ast.EXPRESSION_TYPE_EQ {
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		} else {
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_0
+		}
+		code.CodeLength += 8
+		return
+	}
+
+	panic(bin.Left.Value.TypeString())
 	return
 }

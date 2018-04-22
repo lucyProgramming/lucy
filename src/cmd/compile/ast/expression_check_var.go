@@ -36,8 +36,8 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			if k < len(valueTypes) {
-				if valueTypes[k].TypeCompatible(vs.Vs[k].Typ) == false {
+			if k < len(valueTypes) && valueTypes[k] != nil {
+				if vs.Vs[k].Typ.TypeCompatible(valueTypes[k]) == false {
 					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 						errMsgPrefix(valueTypes[k].Pos),
 						valueTypes[k].TypeString(),

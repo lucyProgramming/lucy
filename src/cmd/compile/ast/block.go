@@ -23,24 +23,22 @@ type Block struct {
 	Vars                       map[string]*VariableDefinition
 }
 
-func (b *Block) searchClass(name string) *Class {
-	for b != nil {
-		if b.Classes != nil {
-			c, ok := b.Classes[name]
-			if ok {
-				return c
-			}
-		}
-		b = b.Outter
-	}
-	return nil
-}
-func (b *Block) searchType(name string) *VariableType {
+func (b *Block) searchType(name string) interface{} {
 	for b != nil {
 		if b.Types != nil {
-			c, ok := b.Types[name]
+			var t interface{} = nil
+			var ok bool
+			t, ok = b.Types[name]
 			if ok {
-				return c
+				return t
+			}
+			t, ok = b.Classes[name]
+			if ok {
+				return t
+			}
+			t, ok = b.Enums[name]
+			if ok {
+				return t
 			}
 		}
 		b = b.Outter
@@ -367,7 +365,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *Enum:
 		e := d.(*Enum)
 		b.Enums[name] = e
-		for _, v := range e.Names {
+		for _, v := range e.Enums {
 			err := b.insert(v.Name, v.Pos, v)
 			if err != nil {
 				return err

@@ -6,7 +6,6 @@ import (
 )
 
 //TODO:: stack maps
-
 func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary, context *Context, state *StackMapState) (maxstack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -20,7 +19,6 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	currenStack := maxstack
 	stack, es := m.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
-
 		backPatchEs(es, code.CodeLength)
 	}
 	if t := currenStack + stack; t > maxstack {

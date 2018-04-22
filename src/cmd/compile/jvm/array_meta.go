@@ -129,4 +129,5 @@ func init() {
 	for _, v := range ArrayMetas {
 		ArrayMetasMap[v.classname] = v
 	}
+	ArrayMetas[ast.VARIABLE_TYPE_ENUM] = ArrayMetas[ast.VARIABLE_TYPE_INT]
 }

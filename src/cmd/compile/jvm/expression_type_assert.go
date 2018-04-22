@@ -20,7 +20,6 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	if 3 > maxstack {
 		maxstack = 3
 	}
-
 	{
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, assert.Expression.Value)...)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)

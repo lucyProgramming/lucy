@@ -247,6 +247,8 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

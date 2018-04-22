@@ -13,8 +13,8 @@ type Enum struct {
 	AccessFlags uint16
 	Name        string
 	Pos         *Pos
-	Names       []*EnumName
-	NamesMap    map[string]*EnumName //easy to access by name
+	Enums       []*EnumName
+	EnumsMap    map[string]*EnumName //easy to access by name
 	Init        *Expression          //should be a int expression
 	Used        bool
 }
@@ -30,7 +30,7 @@ func (e *Enum) check() error {
 	if err != nil || is == false || typ != EXPRESSION_TYPE_INT {
 		return fmt.Errorf("%s enum type must inited by integer", errMsgPrefix(e.Pos))
 	}
-	for k, v := range e.Names {
+	for k, v := range e.Enums {
 		v.Value = int32(k) + value.(int32)
 	}
 	return nil

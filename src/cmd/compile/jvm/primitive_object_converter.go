@@ -16,6 +16,8 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -69,6 +71,8 @@ func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHig
 	case ast.VARIABLE_TYPE_BYTE:
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

@@ -14,6 +14,8 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
+		case ast.VARIABLE_TYPE_ENUM:
+			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_isub
 			code.CodeLength++

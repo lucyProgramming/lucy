@@ -95,7 +95,7 @@ func (loader *RealNameLoader) loadLucyEnum(pack *ast.Package, c *cg.Class) error
 	if pack.Block.EnumNames == nil {
 		pack.Block.EnumNames = make(map[string]*ast.EnumName)
 	}
-	e.NamesMap = make(map[string]*ast.EnumName)
+	//	e.NamesMap = make(map[string]*ast.EnumName)
 	for _, v := range c.Fields {
 		en := &ast.EnumName{}
 		name := string(c.ConstPool[v.NameIndex].Info)
@@ -103,7 +103,7 @@ func (loader *RealNameLoader) loadLucyEnum(pack *ast.Package, c *cg.Class) error
 		en.Enum = e
 		constValue := v.AttributeGroupedByName[cg.ATTRIBUTE_NAME_CONST_VALUE][0] // must have this attribute
 		en.Value = int32(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
-		e.NamesMap[name] = en
+		//e.NamesMap[name] = en
 		pack.Block.EnumNames[name] = en
 	}
 	return nil

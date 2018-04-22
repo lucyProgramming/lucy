@@ -62,6 +62,8 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
+		case ast.VARIABLE_TYPE_ENUM:
+			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

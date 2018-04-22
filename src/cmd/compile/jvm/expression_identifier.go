@@ -36,6 +36,11 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifer)
+	if e.Value.Typ == ast.VARIABLE_TYPE_ENUM && identifier.Var == nil { // not a var
+		loadInt32(class, code, identifier.EnumName.Value)
+		return
+	}
+
 	if identifier.Var.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -57,6 +62,8 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 	case ast.VARIABLE_TYPE_BYTE:
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		if identifier.Var.LocalValOffset == 0 {

@@ -36,7 +36,7 @@ func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 		return "B"
 	case ast.VARIABLE_TYPE_SHORT:
 		return "S"
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VARIABLE_TYPE_INT, ast.VARIABLE_TYPE_ENUM:
 		return "I"
 	case ast.VARIABLE_TYPE_LONG:
 		return "J"

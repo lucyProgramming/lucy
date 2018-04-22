@@ -45,7 +45,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	e = &ast.Enum{}
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
-	e.NamesMap = make(map[string]*ast.EnumName)
+	//e.NamesMap = make(map[string]*ast.EnumName)
 	//if p.token.Type == lex.TOKEN_RC {
 	//	return e, nil
 	//}
@@ -101,13 +101,13 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		t.Name = v.Name
 		t.Pos = v.Pos
 		t.Enum = e
-		e.Names = append(e.Names, t)
-		if e.NamesMap[v.Name] != nil {
-			p.errs = append(p.errs, fmt.Errorf("%s enumname %s already declared",
-				p.errorMsgPrefix(v.Pos), v.Name))
-		} else {
-			e.NamesMap[v.Name] = t
-		}
+		e.Enums = append(e.Enums, t)
+		//if e.NamesMap[v.Name] != nil {
+		//	p.errs = append(p.errs, fmt.Errorf("%s enumname %s already declared",
+		//		p.errorMsgPrefix(v.Pos), v.Name))
+		//} else {
+		//	e.NamesMap[v.Name] = t
+		//}
 	}
 	e.AccessFlags = 0
 	if ispublic {

@@ -127,17 +127,45 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		t.Pos = e.Pos
 		t.Class = c
 		return t, nil
+	case *EnumName:
+		e := d.(*EnumName)
+		{
+			i, should := shouldAccessFromImports(identifer.Name, e.Pos, e.Pos)
+			if should {
+				p, err := PackageBeenCompile.load(i.Resource)
+				if err != nil {
+					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+				}
+				tt := &VariableType{}
+				tt.Pos = e.Pos
+				if pp, ok := p.(*Package); ok {
+					tt.Package = pp
+					tt.Typ = VARIABLE_TYPE_PACKAGE
+				} else {
+					tt.Class = p.(*Class)
+					tt.Typ = VARIABLE_TYPE_OBJECT
+				}
+				return tt, nil
+			}
+		}
+		if e != nil {
+			t := &VariableType{}
+			t.Pos = e.Pos
+			t.Typ = VARIABLE_TYPE_ENUM
+			t.EnumName = e
+			t.Enum = e.Enum
+			identifer.EnumName = e
+			return t, nil
+		}
 	case *Package:
 		t := &VariableType{}
 		t.Pos = e.Pos
 		t.Typ = VARIABLE_TYPE_PACKAGE
 		t.Package = d.(*Package)
 		return t, nil
-	default:
-		return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
-			errMsgPrefix(e.Pos), identifer.Name)
 	}
-	return nil, nil
+	return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
+		errMsgPrefix(e.Pos), identifer.Name)
 }
 
 func (e *Expression) isThisIdentifierExpression() bool {

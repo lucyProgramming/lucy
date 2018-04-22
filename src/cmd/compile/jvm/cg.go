@@ -95,7 +95,7 @@ func (m *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	class.SuperClass = ast.JAVA_ROOT_CLASS
 	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Class.AttributeLucyEnum = &cg.AttributeLucyEnum{}
-	for _, v := range e.Names {
+	for _, v := range e.Enums {
 		field := &cg.FieldHighLevel{}
 		if e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0 {
 			field.AccessFlags |= cg.ACC_FIELD_PUBLIC

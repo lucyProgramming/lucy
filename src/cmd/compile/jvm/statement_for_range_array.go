@@ -141,6 +141,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		code.Codes[code.CodeLength] = cg.OP_baload
 	case ast.VARIABLE_TYPE_SHORT:
 		code.Codes[code.CodeLength] = cg.OP_saload
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_iaload
 	case ast.VARIABLE_TYPE_LONG:

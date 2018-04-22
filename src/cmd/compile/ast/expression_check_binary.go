@@ -108,6 +108,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			} else {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
+		case VARIABLE_TYPE_ENUM:
+			if t1.Equal(t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+			}
 		case VARIABLE_TYPE_BYTE:
 			fallthrough
 		case VARIABLE_TYPE_SHORT:
@@ -138,6 +142,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					errMsgPrefix(e.Pos),
 					e.OpName()))
 			}
+		case VARIABLE_TYPE_JAVA_ARRAY:
+			fallthrough
 		case VARIABLE_TYPE_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:

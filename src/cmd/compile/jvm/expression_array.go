@@ -47,6 +47,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
 		code.CodeLength += 2
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_INT
@@ -91,6 +93,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			code.Codes[code.CodeLength] = cg.OP_bastore
 		case ast.VARIABLE_TYPE_SHORT:
 			code.Codes[code.CodeLength] = cg.OP_sastore
+		case ast.VARIABLE_TYPE_ENUM:
+			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_iastore
 		case ast.VARIABLE_TYPE_LONG:

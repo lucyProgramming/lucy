@@ -23,7 +23,6 @@ const (
 	VARIABLE_TYPE_ARRAY
 	VARIABLE_TYPE_JAVA_ARRAY
 	VARIABLE_TYPE_FUNCTION
-
 	VARIABLE_TYPE_ENUM
 
 	VARIABLE_TYPE_CLASS
@@ -45,6 +44,7 @@ type VariableType struct {
 	Var       *VariableDefinition
 	Class     *Class
 	Enum      *Enum
+	EnumName  *EnumName
 	Function  *Function
 	Map       *Map
 	Package   *Package
@@ -99,6 +99,10 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 	case VARIABLE_TYPE_ARRAY:
 		e.Typ = EXPRESSION_TYPE_NULL
 		e.Value = v.Clone()
+	case VARIABLE_TYPE_ENUM:
+		e.Typ = EXPRESSION_TYPE_INT
+		e.Value = v.Clone()
+		e.Data = v.Enum.Enums[0].Value
 	}
 	return &e
 }
@@ -117,7 +121,7 @@ func (v *VariableType) RightValueValid() bool {
 		v.Typ == VARIABLE_TYPE_MAP ||
 		v.Typ == VARIABLE_TYPE_NULL ||
 		v.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
-		v.Typ == VARIABLE_TYPE_CLASS
+		v.Typ == VARIABLE_TYPE_ENUM
 }
 
 /*
@@ -213,6 +217,13 @@ func (t *VariableType) mkTypeFromInterface(d interface{}) error {
 			*t = *tt
 			return nil
 		}
+	case *Enum:
+		dd := d.(*Enum)
+		if dd != nil {
+			t.Typ = VARIABLE_TYPE_ENUM
+			t.Enum = dd
+			return nil
+		}
 	}
 	return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(t.Pos), t.Name)
 }
@@ -221,43 +232,22 @@ func (t *VariableType) resolveName(block *Block) error {
 	var err error
 	var d interface{}
 	if strings.Contains(t.Name, ".") == false {
-		variableT := block.searchType(t.Name)
-		var classT *Class
-		useClassT := false
-		if variableT != nil {
-			classT := block.searchClass(t.Name)
-			if classT != nil { // d2 is not nil
-				if moreClose(t.Pos, classT.Pos, variableT.Pos) {
-					useClassT = true
-				}
+		d = block.searchType(t.Name)
+		loadFromImport := (d == nil)
+		if loadFromImport == false { // d is not nil
+			switch d.(type) {
+			case *Class:
+				_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, d.(*Class).Pos)
+			case *VariableType:
+				_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, d.(*VariableType).Pos)
+			case *Enum:
+				_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, d.(*Enum).Pos)
 			}
-		} else {
-			classT = block.searchClass(t.Name)
-			useClassT = true
-		}
-		loadFromImport := (classT == nil && variableT == nil)
-		if loadFromImport == false {
-			if useClassT {
-				if classT != nil {
-					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, classT.Pos)
-				}
-			} else {
-				if variableT != nil {
-					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, variableT.Pos)
-				}
-			}
-
 		}
 		if loadFromImport {
 			d, err = t.resolveNameFromImport()
 			if err != nil {
 				return err
-			}
-		} else {
-			if useClassT {
-				d = classT
-			} else {
-				d = variableT
 			}
 		}
 	} else { // a.b  in type situation,must be package name
@@ -269,6 +259,7 @@ func (t *VariableType) resolveName(block *Block) error {
 	if d == nil {
 		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
+
 	return t.mkTypeFromInterface(d)
 }
 
@@ -355,7 +346,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_CLASS:
 		*ret += fmt.Sprintf("class(%s)", v.Class.Name)
 	case VARIABLE_TYPE_ENUM:
-		*ret += "enum(" + v.Name + ")"
+		*ret += "enum(" + v.Enum.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
 		v.ArrayType.typeString(ret)
@@ -402,28 +393,31 @@ func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
 /*
 	t2 can be cast to t1
 */
-func (t1 *VariableType) Equal(t2 *VariableType) bool {
-	if t1 == t2 { // this is not happening
+func (v *VariableType) Equal(assignMent *VariableType) bool {
+	if v == assignMent { // this is not happening
 		return true
 	}
-	if t1.IsPrimitive() || t2.IsPrimitive() {
-		return t1.Typ == t2.Typ
+	if v.IsPrimitive() && assignMent.IsPrimitive() {
+		return v.Typ == assignMent.Typ
 	}
-	if (t1.IsPointer() && t1.Typ != VARIABLE_TYPE_STRING) && t2.Typ == VARIABLE_TYPE_NULL {
+	if (v.IsPointer() && v.Typ != VARIABLE_TYPE_STRING) && assignMent.Typ == VARIABLE_TYPE_NULL {
 		return true
 	}
-	if t1.Typ == VARIABLE_TYPE_ARRAY && t2.Typ == VARIABLE_TYPE_ARRAY {
-		return t1.ArrayType.Equal(t2.ArrayType)
+	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
+		return v.ArrayType.Equal(assignMent.ArrayType)
 	}
-	if t1.Typ == VARIABLE_TYPE_MAP && t2.Typ == VARIABLE_TYPE_MAP {
-		return t1.Map.K.Equal(t1.Map.K) && t1.Map.V.Equal(t1.Map.V)
+	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
+		return v.Enum.Name == assignMent.Enum.Name
 	}
-	if t1.Typ == VARIABLE_TYPE_OBJECT && t2.Typ == VARIABLE_TYPE_OBJECT { // object
-		if t1.Class.IsInterface() {
-			i, _ := t2.Class.implemented(t1.Class.Name)
+	if v.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
+		return v.Map.K.Equal(assignMent.Map.K) && v.Map.V.Equal(assignMent.Map.V)
+	}
+	if v.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
+		if v.Class.IsInterface() {
+			i, _ := assignMent.Class.implemented(v.Class.Name)
 			return i
 		} else { // class
-			has, _ := t2.Class.haveSuper(t1.Class.Name)
+			has, _ := assignMent.Class.haveSuper(v.Class.Name)
 			return has
 		}
 	}

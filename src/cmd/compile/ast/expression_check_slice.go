@@ -17,7 +17,8 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 			*errs = append(*errs, err)
 		}
 		if startT != nil && startT.IsInteger() == false {
-			*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'", errMsgPrefix(slice.Start.Pos), startT.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
+				errMsgPrefix(slice.Start.Pos), startT.TypeString()))
 		}
 	}
 	//end
@@ -31,7 +32,8 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 			*errs = append(*errs, err)
 		}
 		if endT != nil && endT.IsInteger() == false {
-			*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'", errMsgPrefix(slice.End.Pos), endT.TypeString()))
+			*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'",
+				errMsgPrefix(slice.End.Pos), endT.TypeString()))
 		}
 	}
 	ts, es := slice.Expression.check(block)
@@ -46,7 +48,8 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 		return nil
 	}
 	if t.Typ != VARIABLE_TYPE_ARRAY {
-		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'", errMsgPrefix(slice.Expression.Pos), t.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
+			errMsgPrefix(slice.Expression.Pos), t.TypeString()))
 	}
 	tt := t.Clone()
 	tt.Pos = e.Pos

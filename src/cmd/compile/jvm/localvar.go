@@ -17,6 +17,8 @@ func (m *MakeClass) loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCod
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		switch v.LocalValOffset {
 		case 0:
@@ -149,6 +151,8 @@ func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 	case ast.VARIABLE_TYPE_BYTE:
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		switch v.LocalValOffset {

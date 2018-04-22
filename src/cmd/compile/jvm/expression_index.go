@@ -44,6 +44,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
+		case ast.VARIABLE_TYPE_ENUM:
+			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_iconst_0

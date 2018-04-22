@@ -86,7 +86,7 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (Pack *Pack
 	Pack.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range convertor.Enums {
 		Pack.Block.Enums[v.Name] = v
-		for _, vv := range v.Names {
+		for _, vv := range v.Enums {
 			Pack.Block.EnumNames[vv.Name] = vv
 		}
 	}
@@ -126,7 +126,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		} else {
 			m[v.Name] = []interface{}{v}
 		}
-		for _, vv := range v.Names {
+		for _, vv := range v.Enums {
 			if _, ok := m[vv.Name]; ok {
 				m[vv.Name] = append(m[vv.Name], vv)
 			} else {

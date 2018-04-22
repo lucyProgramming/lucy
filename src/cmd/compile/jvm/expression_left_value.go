@@ -90,6 +90,8 @@ func (m *MakeExpression) getLeftValue(
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
+		case ast.VARIABLE_TYPE_ENUM:
+			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			if identifier.Var.LocalValOffset == 0 {
 				op = []byte{cg.OP_istore_0}
@@ -201,6 +203,8 @@ func (m *MakeExpression) getLeftValue(
 			case ast.VARIABLE_TYPE_BYTE:
 				fallthrough
 			case ast.VARIABLE_TYPE_SHORT:
+				fallthrough
+			case ast.VARIABLE_TYPE_ENUM:
 				fallthrough
 			case ast.VARIABLE_TYPE_INT:
 				op = []byte{cg.OP_iastore}

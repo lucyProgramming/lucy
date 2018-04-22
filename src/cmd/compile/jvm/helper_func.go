@@ -56,6 +56,8 @@ func storeSimpleVarOp(t int, offset uint16) []byte {
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
 		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		switch offset {
 		case 0:
@@ -156,6 +158,8 @@ func loadSimpleVarOp(t int, offset uint16) []byte {
 	case ast.VARIABLE_TYPE_BYTE:
 		fallthrough
 	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		switch offset {
@@ -321,7 +325,7 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 			code.CodeLength += 2
 		} else if -32768 <= value && 32767 >= value {
 			code.Codes[code.CodeLength] = cg.OP_sipush
-			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
+			code.Codes[code.CodeLength+1] = byte(value >> 24)
 			code.Codes[code.CodeLength+2] = byte(value)
 			code.CodeLength += 3
 		} else {

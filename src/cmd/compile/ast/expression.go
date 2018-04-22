@@ -81,6 +81,124 @@ const (
 	EXPRESSION_TYPE_TYPE_ASSERT
 )
 
+func (e *Expression) OpName(typ ...int) string {
+	t := e.Typ
+	if len(typ) > 0 {
+		t = typ[0]
+	}
+	switch t {
+	case EXPRESSION_TYPE_BOOL:
+		return fmt.Sprintf("%v", e.Data)
+	case EXPRESSION_TYPE_BYTE:
+		return fmt.Sprintf("%v", e.Data)
+	case EXPRESSION_TYPE_INT:
+		return fmt.Sprintf("%v", e.Data)
+	case EXPRESSION_TYPE_LONG:
+		return fmt.Sprintf("%v", e.Data)
+	case EXPRESSION_TYPE_FLOAT:
+		return fmt.Sprintf("%v", e.Data)
+	case EXPRESSION_TYPE_DOUBLE:
+		return fmt.Sprintf("%v", e.Data)
+	case EXPRESSION_TYPE_STRING:
+		return fmt.Sprintf("\"%v\"", e.Data)
+	case EXPRESSION_TYPE_ARRAY:
+		return "array_literal"
+	case EXPRESSION_TYPE_LOGICAL_OR:
+		return "logical or expression"
+	case EXPRESSION_TYPE_LOGICAL_AND:
+		return "logical and expression"
+	case EXPRESSION_TYPE_OR:
+		return "|"
+	case EXPRESSION_TYPE_AND:
+		return "&"
+	case EXPRESSION_TYPE_LEFT_SHIFT:
+		return "<<"
+	case EXPRESSION_TYPE_RIGHT_SHIFT:
+		return ">>"
+	case EXPRESSION_TYPE_ASSIGN:
+		return "="
+	case EXPRESSION_TYPE_COLON_ASSIGN:
+		return ":="
+	case EXPRESSION_TYPE_PLUS_ASSIGN:
+		return "+="
+	case EXPRESSION_TYPE_MINUS_ASSIGN:
+		return "-="
+	case EXPRESSION_TYPE_MUL_ASSIGN:
+		return "*="
+	case EXPRESSION_TYPE_DIV_ASSIGN:
+		return "/="
+	case EXPRESSION_TYPE_MOD_ASSIGN:
+		return "%="
+	case EXPRESSION_TYPE_EQ:
+		return "=="
+	case EXPRESSION_TYPE_NE:
+		return "!="
+	case EXPRESSION_TYPE_GE:
+		return ">="
+	case EXPRESSION_TYPE_GT:
+		return ">"
+	case EXPRESSION_TYPE_LE:
+		return "<="
+	case EXPRESSION_TYPE_LT:
+		return "<"
+	case EXPRESSION_TYPE_ADD:
+		return "+"
+	case EXPRESSION_TYPE_SUB:
+		return "-"
+	case EXPRESSION_TYPE_MUL:
+		return "*"
+	case EXPRESSION_TYPE_DIV:
+		return "/"
+	case EXPRESSION_TYPE_MOD:
+		return "%"
+	case EXPRESSION_TYPE_INDEX: // a["b"]
+		return "[]"
+	case EXPRESSION_TYPE_DOT: //a.b
+		return "."
+	case EXPRESSION_TYPE_METHOD_CALL:
+		return "method_call"
+	case EXPRESSION_TYPE_FUNCTION_CALL:
+		return "function_call"
+	case EXPRESSION_TYPE_INCREMENT:
+		return "++"
+	case EXPRESSION_TYPE_DECREMENT:
+		return "--"
+	case EXPRESSION_TYPE_PRE_INCREMENT:
+		return "++"
+	case EXPRESSION_TYPE_PRE_DECREMENT:
+		return "--"
+	case EXPRESSION_TYPE_NEGATIVE:
+		return "nagative"
+	case EXPRESSION_TYPE_NOT:
+		return "not"
+	case EXPRESSION_TYPE_IDENTIFIER:
+		return fmt.Sprintf("identifier('%s')", e.Data.(*ExpressionIdentifer).Name)
+	case EXPRESSION_TYPE_NULL:
+		return "null"
+	case EXPRESSION_TYPE_NEW:
+		return "new"
+	case EXPRESSION_TYPE_LIST:
+		return "expression_list"
+	case EXPRESSION_TYPE_FUNCTION:
+		return "function_literal"
+	case EXPRESSION_TYPE_CONST:
+		return "const"
+	case EXPRESSION_TYPE_VAR:
+		return "var"
+	case EXPRESSION_TYPE_RANGE:
+		return "range"
+	case EXPRESSION_TYPE_SLICE:
+		return "slice"
+	case EXPRESSION_TYPE_MAP:
+		return "map_literal"
+	case EXPRESSION_TYPE_CONVERTION_TYPE:
+		return "convertion of type"
+	case EXPRESSION_TYPE_TYPE_ALIAS:
+		return "type alias"
+	}
+	panic(fmt.Sprint("missing:%d", t))
+}
+
 type Expression struct {
 	IsPublic                        bool
 	IsCompileDefaultValueExpression bool
@@ -277,14 +395,11 @@ type ExpressionTypeConvertion struct {
 }
 
 type ExpressionIdentifer struct {
-	Name string
-	Var  *VariableDefinition
-	Func *Function
-	//enumas
-	Enum     *Enum
+	Name     string
+	Var      *VariableDefinition
+	Func     *Function
 	EnumName *EnumName
-	//class
-	Class *Class
+	Class    *Class
 }
 
 type ExpressionIndex struct {
@@ -326,124 +441,6 @@ type ExpressionArrayLiteral struct {
 	Typ         *VariableType
 	Expressions []*Expression
 	Length      int
-}
-
-func (e *Expression) OpName(typ ...int) string {
-	t := e.Typ
-	if len(typ) > 0 {
-		t = typ[0]
-	}
-	switch t {
-	case EXPRESSION_TYPE_BOOL:
-		return fmt.Sprintf("%v", e.Data)
-	case EXPRESSION_TYPE_BYTE:
-		return fmt.Sprintf("%v", e.Data)
-	case EXPRESSION_TYPE_INT:
-		return fmt.Sprintf("%v", e.Data)
-	case EXPRESSION_TYPE_LONG:
-		return fmt.Sprintf("%v", e.Data)
-	case EXPRESSION_TYPE_FLOAT:
-		return fmt.Sprintf("%v", e.Data)
-	case EXPRESSION_TYPE_DOUBLE:
-		return fmt.Sprintf("%v", e.Data)
-	case EXPRESSION_TYPE_STRING:
-		return fmt.Sprintf("\"%v\"", e.Data)
-	case EXPRESSION_TYPE_ARRAY:
-		return "array_literal"
-	case EXPRESSION_TYPE_LOGICAL_OR:
-		return "logical or expression"
-	case EXPRESSION_TYPE_LOGICAL_AND:
-		return "logical and expression"
-	case EXPRESSION_TYPE_OR:
-		return "|"
-	case EXPRESSION_TYPE_AND:
-		return "&"
-	case EXPRESSION_TYPE_LEFT_SHIFT:
-		return "<<"
-	case EXPRESSION_TYPE_RIGHT_SHIFT:
-		return ">>"
-	case EXPRESSION_TYPE_ASSIGN:
-		return "="
-	case EXPRESSION_TYPE_COLON_ASSIGN:
-		return ":="
-	case EXPRESSION_TYPE_PLUS_ASSIGN:
-		return "+="
-	case EXPRESSION_TYPE_MINUS_ASSIGN:
-		return "-="
-	case EXPRESSION_TYPE_MUL_ASSIGN:
-		return "*="
-	case EXPRESSION_TYPE_DIV_ASSIGN:
-		return "/="
-	case EXPRESSION_TYPE_MOD_ASSIGN:
-		return "%="
-	case EXPRESSION_TYPE_EQ:
-		return "=="
-	case EXPRESSION_TYPE_NE:
-		return "!="
-	case EXPRESSION_TYPE_GE:
-		return ">="
-	case EXPRESSION_TYPE_GT:
-		return ">"
-	case EXPRESSION_TYPE_LE:
-		return "<="
-	case EXPRESSION_TYPE_LT:
-		return "<"
-	case EXPRESSION_TYPE_ADD:
-		return "+"
-	case EXPRESSION_TYPE_SUB:
-		return "-"
-	case EXPRESSION_TYPE_MUL:
-		return "*"
-	case EXPRESSION_TYPE_DIV:
-		return "/"
-	case EXPRESSION_TYPE_MOD:
-		return "%"
-	case EXPRESSION_TYPE_INDEX: // a["b"]
-		return "[]"
-	case EXPRESSION_TYPE_DOT: //a.b
-		return "."
-	case EXPRESSION_TYPE_METHOD_CALL:
-		return "method_call"
-	case EXPRESSION_TYPE_FUNCTION_CALL:
-		return "function_call"
-	case EXPRESSION_TYPE_INCREMENT:
-		return "++"
-	case EXPRESSION_TYPE_DECREMENT:
-		return "--"
-	case EXPRESSION_TYPE_PRE_INCREMENT:
-		return "++"
-	case EXPRESSION_TYPE_PRE_DECREMENT:
-		return "--"
-	case EXPRESSION_TYPE_NEGATIVE:
-		return "nagative"
-	case EXPRESSION_TYPE_NOT:
-		return "not"
-	case EXPRESSION_TYPE_IDENTIFIER:
-		return fmt.Sprintf("identifier('%s')", e.Data.(*ExpressionIdentifer).Name)
-	case EXPRESSION_TYPE_NULL:
-		return "null"
-	case EXPRESSION_TYPE_NEW:
-		return "new"
-	case EXPRESSION_TYPE_LIST:
-		return "expression_list"
-	case EXPRESSION_TYPE_FUNCTION:
-		return "function_literal"
-	case EXPRESSION_TYPE_CONST:
-		return "const"
-	case EXPRESSION_TYPE_VAR:
-		return "var"
-	case EXPRESSION_TYPE_RANGE:
-		return "range"
-	case EXPRESSION_TYPE_SLICE:
-		return "slice"
-	case EXPRESSION_TYPE_MAP:
-		return "map_literal"
-	case EXPRESSION_TYPE_CONVERTION_TYPE:
-		return "convertion of type"
-	case EXPRESSION_TYPE_TYPE_ALIAS:
-		return "type alias"
-	}
-	panic("missing")
 }
 
 func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {

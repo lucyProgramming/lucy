@@ -17,7 +17,7 @@ func errsNotEmpty(es []error) bool {
 func checkEnum(enums []*Enum) []error {
 	ret := make([]error, 0)
 	for _, v := range enums {
-		if len(v.Names) == 0 {
+		if len(v.Enums) == 0 {
 			continue
 		}
 		err := v.check()

@@ -69,7 +69,7 @@ func registerBuildinFunctions() {
 			}
 		}
 		if args[0].Typ != VARIABLE_TYPE_CLASS {
-			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect class",
+			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect a object ref argument",
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
 			return
 		}
