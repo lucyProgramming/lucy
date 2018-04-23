@@ -29,6 +29,9 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 			arr.Length += len(ts)
 		}
 		for _, t := range ts {
+			if t == nil {
+				continue
+			}
 			if notyp && arr.Typ == nil {
 				if t.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,because type is null",

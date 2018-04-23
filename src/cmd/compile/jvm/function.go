@@ -74,7 +74,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
 	state := &StackMapState{}
-	if method.IsConstruction {
+	if method.IsConstruction { // construction method
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
 		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -85,9 +85,8 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		method.Code.CodeLength += 4
 		method.Code.MaxStack = 1
 		method.Code.MaxLocals = 1
-	}
-	// if function is main
-	if f.Name == ast.MAIN_FUNCTION_NAME {
+		state.appendLocals(class, method.Code, state.newObjectVariableType(class.Name))
+	} else if f.Name == ast.MAIN_FUNCTION_NAME { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
 		meta := ArrayMetas[ast.VARIABLE_TYPE_STRING]
@@ -107,14 +106,21 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		code.CodeLength += 3
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 1)...)
 		{
+			// String[] java style
 			t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_JAVA_ARRAY}
 			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
 			state.appendLocals(class, code, t)
+			// []string lucy style
 			t = &ast.VariableType{Typ: ast.VARIABLE_TYPE_ARRAY}
 			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
 			state.appendLocals(class, code, t)
 		}
+		f.Typ.ParameterList[0].LocalValOffset = 1 // main(args []string) args offset is 1
+	} else if method.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // instance method
+		state.appendLocals(class, method.Code,
+			state.newObjectVariableType(class.Name))
 	}
+
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
@@ -137,12 +143,12 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 		maxstack = 1
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
-		code.Codes[code.CodeLength] = cg.OP_iconst_0
-		code.CodeLength++
-		f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter =
-			state.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
-			f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
+		//code.Codes[code.CodeLength] = cg.OP_iconst_0
+		//code.CodeLength++
+		//f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter =
+		//	state.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+		//copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
+		//	f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
 		if len(f.Typ.ReturnList) > 1 {
 			//if reach botton
 			code.Codes[code.CodeLength] = cg.OP_iconst_0

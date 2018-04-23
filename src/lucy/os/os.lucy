@@ -1,6 +1,6 @@
 
 import "java/lang/System";
-
+import "java/io/File";
 
 
 
@@ -30,6 +30,66 @@ public fn genEnvs()->
 		envs[string(v)] = string(es.get(v));
 	}
 }
+
+
+/*
+	get current working directory
+*/
+public fn getCwd()->(d string = System.getProperty("user.dir")){
+	
+}
+
+/*
+	get current user
+*/
+public fn getUser()->(r string = System.getProperty("user.name")){
+	
+}
+
+/*
+	exit program
+*/
+
+public fn exit(code int){
+	System.exit(code);
+}
+
+/*
+	run gc
+*/
+
+public fn gc(code int){
+	System.gc();
+}
+
+
+/*
+	change working directory to
+*/
+public fn chCwd(to string){
+	System.setProperty("user.dir",to);
+}
+
+/*
+	create directory
+*/
+public fn mkDir(path string)->(ok bool){
+	f := new File(path);
+	ok = f.mkdirs();
+}
+
+/*
+	delete a directory
+	ok means if delete is ok
+*/
+
+public fn removeDir(path string)->(ok bool){
+	f := new File(path);
+	ok = f.delete();
+}
+
+
+
 
 
 
