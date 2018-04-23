@@ -33,6 +33,12 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 		tt.Pos = e.Pos
 		return tt
 	}
+	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
+		t.Typ == VARIABLE_TYPE_OBJECT {
+		tt := convertion.Typ.Clone()
+		tt.Pos = e.Pos
+		return tt
+	}
 	if convertion.Typ.Typ == VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
 		t.Typ == VARIABLE_TYPE_STRING {
 		tt := convertion.Typ.Clone()

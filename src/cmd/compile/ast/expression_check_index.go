@@ -51,6 +51,9 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	if err != nil {
 		*errs = append(*errs, err)
 	}
+	if indexT == nil {
+		return nil
+	}
 	if t != nil {
 		if t.Map.K.Equal(indexT) == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",

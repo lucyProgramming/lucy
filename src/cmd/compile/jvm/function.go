@@ -73,6 +73,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	defer func() {
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
+	state := &StackMapState{}
 	if method.IsConstruction {
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
 		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
@@ -83,8 +84,8 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
 		method.Code.CodeLength += 4
 		method.Code.MaxStack = 1
+		method.Code.MaxLocals = 1
 	}
-	state := &StackMapState{}
 	// if function is main
 	if f.Name == ast.MAIN_FUNCTION_NAME {
 		code := method.Code

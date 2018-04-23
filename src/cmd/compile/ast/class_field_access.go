@@ -5,6 +5,10 @@ import (
 )
 
 func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error) {
+	err = c.loadSelf()
+	if err != nil {
+		return nil, err
+	}
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].IsPrivate() { // private field
 		} else {

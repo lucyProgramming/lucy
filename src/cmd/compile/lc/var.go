@@ -8,6 +8,7 @@ import (
 var (
 	CompileFlags Flags
 	compiler     LucyCompile
+	loader       RealNameLoader
 )
 
 type Flags struct {
@@ -16,7 +17,7 @@ type Flags struct {
 }
 
 func init() {
-	ast.NameLoader = &RealNameLoader{}
+	ast.NameLoader = &loader
 }
 
 func classShortName(binaryName string) (shortName string) {

@@ -59,6 +59,8 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Variable
 		}
 		if ts != nil {
 			ret = append(ret, ts...)
+		} else {
+			ret = append(ret, nil)
 		}
 	}
 	return ret

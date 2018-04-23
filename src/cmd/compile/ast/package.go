@@ -135,6 +135,9 @@ func (p *Package) TypeCheck() []error {
 }
 
 func (p *Package) load(resource string) (interface{}, error) {
+	if resource == "" {
+		panic("null string")
+	}
 	if p.loaded != nil {
 		t, ok := p.loaded[resource]
 		if ok {

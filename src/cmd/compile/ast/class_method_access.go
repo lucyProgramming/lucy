@@ -9,6 +9,11 @@ import (
 	access method lucy style
 */
 func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallArgs, fromsub bool) (ms []*ClassMethod, matched bool, err error) {
+	err = c.loadSelf()
+	if err != nil {
+		return nil, false, err
+	}
+
 	if c.IsJava {
 		return c.accessMethodAsJava(name, args, false)
 	}
@@ -68,9 +73,11 @@ func (c *Class) accessMethodAsJava(name string, args []*VariableType, fromsub bo
 			continue
 		}
 		noError := true
+
 		for kk, vv := range v.Func.Typ.ParameterList {
 			if vv.Typ.Equal(args[kk]) == false {
 				noError = false
+				ms = append(ms, v)
 				break
 			}
 		}

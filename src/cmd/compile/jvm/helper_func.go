@@ -337,6 +337,7 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 }
 
 func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) (increment uint16) {
+
 	increment = 1
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++

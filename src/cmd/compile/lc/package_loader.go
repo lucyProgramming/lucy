@@ -28,6 +28,10 @@ type Resource struct {
 }
 
 func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interface{}, error) {
+	fmt.Println("load:", resouceName)
+	//if resouceName == "java/lang/CharSequence" {
+	//	panic(1)
+	//}
 	var realpaths []*Resource
 	for _, v := range compiler.lucyPath {
 		p := filepath.Join(v, "class", resouceName)

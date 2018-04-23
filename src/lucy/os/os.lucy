@@ -1,0 +1,46 @@
+
+import "java/lang/System";
+
+
+
+
+
+/*
+	get env by k
+*/
+public fn genEnv(k string)->
+(v string)
+{
+	v = System.getenv(k);
+}
+
+
+
+/*
+	all envs
+*/
+public fn genEnvs()->
+(
+	envs map{string -> string} = new map{string -> string}()
+)
+{
+	es := System.getenv();	
+	ks := es.keySet().toArray();
+	for v := range ks {
+		envs[string(v)] = string(es.get(v));
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

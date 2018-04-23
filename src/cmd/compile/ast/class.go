@@ -8,6 +8,7 @@ import (
 )
 
 type Class struct {
+	NotImportedYet     bool // not imported
 	Pos                *Pos
 	IsJava             bool // compiled from java source file
 	Name               string
@@ -26,6 +27,17 @@ type Class struct {
 	LoadFromOutSide    bool
 }
 
+func (c *Class) loadSelf() error {
+	if c.NotImportedYet == false {
+		return nil
+	}
+	cc, err := PackageBeenCompile.load(c.Name)
+	if err != nil {
+		return err
+	}
+	*c = *(cc.(*Class))
+	return nil
+}
 func (c *Class) check(father *Block) []error {
 	errs := c.checkPhase1(father)
 	es := c.checkPhase2(father)
@@ -209,10 +221,14 @@ func (c *Class) IsInterface() bool {
 }
 
 func (c *Class) haveSuper(superclassName string) (bool, error) {
+	err := c.loadSelf()
+	if err != nil {
+		return false, err
+	}
 	if c.Name == superclassName {
 		return true, nil
 	}
-	err := c.loadSuperClass()
+	err = c.loadSuperClass()
 	if err != nil {
 		return false, err
 	}
@@ -220,12 +236,16 @@ func (c *Class) haveSuper(superclassName string) (bool, error) {
 }
 
 func (c *Class) implemented(inter string) (bool, error) {
+	err := c.loadSelf()
+	if err != nil {
+		return false, err
+	}
 	for _, v := range c.Interfaces {
 		if v.Name == inter {
 			return true, nil
 		}
 	}
-	err := c.loadSuperClass()
+	err = c.loadSuperClass()
 	if err != nil {
 		return false, err
 	}
@@ -266,6 +286,7 @@ func (c *Class) checkMethods() []error {
 }
 
 func (c *Class) loadSuperClass() error {
+	fmt.Println(c.Name)
 	if c.SuperClass != nil {
 		return nil
 	}

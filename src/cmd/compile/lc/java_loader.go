@@ -16,9 +16,9 @@ func (e *NotSupportTypeSignatureError) Error() string {
 
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
-	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
-		return nil, &NotSupportTypeSignatureError{}
-	}
+	//if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
+	//	return nil, &NotSupportTypeSignatureError{}
+	//}
 	astClass := &ast.Class{}
 	{
 		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
@@ -36,13 +36,13 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
 		f.LoadFromOutSide = true
+		f.AccessFlags = v.AccessFlags
 		f.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		_, f.Typ, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
-		f.AccessFlags = v.AccessFlags
 		astClass.Fields[f.Name] = f
 	}
 	astClass.Methods = make(map[string][]*ast.ClassMethod)

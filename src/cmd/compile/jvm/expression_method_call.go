@@ -25,7 +25,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Method.Func.ClassMethod.Class.Name,
+			Class:      call.Class.Name,
 			Method:     call.Name,
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

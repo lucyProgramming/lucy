@@ -189,7 +189,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		if v == nil { // get left value error or "_"
 			continue
 		}
-		if k < len(valueTypes) {
+		if k < len(valueTypes) && valueTypes[k] != nil {
 			if !leftTypes[k].TypeCompatible(valueTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 					errMsgPrefix(e.Pos),

@@ -19,7 +19,10 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 	}
-	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING {
+
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING &&
+		convertion.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY &&
+		convertion.Expression.Value.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -60,7 +63,9 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		return
 	}
 	//  string(['h','e'])
-	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING {
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING &&
+		convertion.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY &&
+		convertion.Expression.Value.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
 		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -75,6 +80,14 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 			Method:     special_method_init,
 			Descriptor: "([B)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
+	}
+	//  string(['h','e'])
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING &&
+		convertion.Expression.Value.Typ == ast.VARIABLE_TYPE_OBJECT {
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
 	}
