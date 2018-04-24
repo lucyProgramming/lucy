@@ -9,9 +9,9 @@ import "java/lang/System";
 	get env by k
 */
 public fn genEnv(k string)->
-(v string)
+(v string = System.getenv(k))
 {
-	v = System.getenv(k);
+
 }
 
 
