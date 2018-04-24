@@ -1,0 +1,19 @@
+import "lucy/os";
+
+
+fn main(args []string){
+	// get class path
+
+	print("classpath is " , os.getEnv("CLASSPATH"));
+
+	envs := os.getEnvs();
+
+	for k,v := range envs{
+		print(k ,"=" , v);
+	}
+}
+
+
+
+
+

@@ -198,11 +198,17 @@ func (e *Expression) getConstValue() (is bool, Typ int, Value interface{}, err e
 			switch typ1 {
 			case EXPRESSION_TYPE_BYTE:
 				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
-					Value = value1.(byte) << uint64(value2.(int64))
+					Value = value1.(byte) << uint64(value2.(byte))
 				} else {
-					Value = value1.(byte) >> uint64(value2.(int64))
+					Value = value1.(byte) >> uint64(value2.(byte))
 				}
 			case EXPRESSION_TYPE_INT:
+				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+					Value = value1.(int32) << uint64(value2.(int32))
+				} else {
+					Value = value1.(int32) >> uint64(value2.(int32))
+				}
+			case EXPRESSION_TYPE_LONG:
 				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
 					Value = value1.(int64) << uint64(value2.(int64))
 				} else {
@@ -421,11 +427,13 @@ func (e *Expression) numberTypeFold(typ int, value1, value2 interface{}) (value 
 				value = value1.(float64) / value2.(float64)
 			}
 		case EXPRESSION_TYPE_MOD:
-			return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(typ), e.OpName(typ))
+			return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
+				errMsgPrefix(e.Pos), e.OpName(), e.OpName(typ), e.OpName(typ))
 		}
 		return
 	}
-	return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'", errMsgPrefix(e.Pos), e.OpName(typ), e.OpName(typ))
+	return nil, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
+		errMsgPrefix(e.Pos), e.OpName(), e.OpName(typ), e.OpName(typ))
 }
 
 func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b bool, err error) {
@@ -436,7 +444,8 @@ func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b boo
 		} else if e.Typ == EXPRESSION_TYPE_NE {
 			b = value1.(bool) != value2.(bool)
 		} else {
-			return false, fmt.Errorf("%s cannot apply '%s' on 'bool' and 'bool'", errMsgPrefix(e.Pos), e.OpName(typ))
+			return false, fmt.Errorf("%s cannot apply '%s' on 'bool' and 'bool'",
+				errMsgPrefix(e.Pos), e.OpName(typ))
 		}
 		return
 	case EXPRESSION_TYPE_BYTE:

@@ -1,0 +1,31 @@
+
+import "lucy/os";
+import "java/lang/Exception";
+
+
+const testFile = "./123.txt";
+
+
+const content = `
+	lucy is a very easy to use language!!!!!!!!!!
+
+`;
+
+
+fn testWriteFile(){
+	os.File.writeFile(testFile,[]byte(content));
+	if string(os.File.readFile(testFile)) != content{
+		print("read or write error");
+		os.exit(2);
+	}
+}
+
+
+
+
+fn main(args []string){
+	testWriteFile();
+
+}
+
+

@@ -44,7 +44,7 @@ func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallAr
 		}
 		for k, v := range m.Func.Typ.ParameterList {
 			if k < len(args) {
-				if !v.Typ.TypeCompatible(args[k]) {
+				if args[k] != nil && !v.Typ.TypeCompatible(args[k]) {
 					errmsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Typ.TypeString())
 					errmsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(m.Func.Name, args))
 					errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
@@ -75,7 +75,7 @@ func (c *Class) accessMethodAsJava(name string, args []*VariableType, fromsub bo
 		noError := true
 
 		for kk, vv := range v.Func.Typ.ParameterList {
-			if vv.Typ.Equal(args[kk]) == false {
+			if args[kk] != nil && vv.Typ.Equal(args[kk]) == false {
 				noError = false
 				ms = append(ms, v)
 				break
@@ -102,6 +102,7 @@ func (c *Class) accessMethodAsJava(name string, args []*VariableType, fromsub bo
 	return append(ms, ms_...), false, nil // methods have the same name
 }
 
-func (c *Class) matchContructionFunction(args []*VariableType, callArgs *CallArgs) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) matchContructionFunction(args []*VariableType,
+	callArgs *CallArgs) (ms []*ClassMethod, matched bool, err error) {
 	return c.accessMethod(filepath.Base(c.Name), args, callArgs, false)
 }

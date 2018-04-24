@@ -1,0 +1,59 @@
+import "java/io";
+
+
+
+type FileModel = int;
+
+
+
+public class File  {
+	filepath string;
+	reader io.FileInputStream;
+	writer io.FileOutputStream;
+
+	public fn File(filepath string){
+		this.reader = new io.FileInputStream(new io.File(this.filepath));
+	}
+
+	public fn read(bs []byte)->(n int){
+		n = this.reader.read(bs.toJavaArray()); 
+	}
+
+
+	
+	public fn close(){
+		if this.reader != null {
+			this.reader.close();
+		}
+		if this.writer != null {
+			this.writer.close();
+		}
+	}
+
+
+	static fn readFile(filepath string)->(bs []byte){
+		reader := new io.FileInputStream(new io.File(filepath));
+		defer reader.close();
+		b := new []byte(1 << 10);
+		var n int;
+		for n != -1 {
+			n = reader.read(b.toJavaArray());
+			if n != -1 {
+				bs.appendAll(b[0:n]);
+			}
+		}
+	}
+
+	static fn writeFile( filepath string ,bs []byte){
+		writer := new io.FileOutputStream(new io.File(filepath));
+		defer writer.close();
+		writer.write(bs.toJavaArray());
+	}
+	
+	
+
+
+
+
+
+}

@@ -92,6 +92,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			if err != nil {
 				*errs = append(*errs, err)
 			}
+			if t == nil {
+				return []*VariableType{ret}
+			}
 			if matchkey {
 				if false == object.Map.K.Equal(t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
@@ -118,6 +121,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					*errs = append(*errs, es...)
 				}
 				for _, t := range ts {
+					if t == nil {
+						continue
+					}
 					if object.Map.K.Equal(t) == false {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))

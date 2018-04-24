@@ -6,20 +6,20 @@ import (
 	"strings"
 )
 
-const (
-	_ = iota
-	PACKAGE_KIND_LUCY
-	PACKAGE_KIND_JAVA
-)
+//const (
+//	_ = iota
+//	PACKAGE_KIND_LUCY
+//	PACKAGE_KIND_JAVA
+//)
 
 type Package struct {
+	//Kind                         int
 	TriggerPackageInitMethodName string
-	Kind                         int
 	Name                         string
 	Main                         *Function
 	DestPath                     string
 	LoadedPackages               map[string]*Package
-	loaded                       map[string]*LoadedResouces
+	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block
 	Files                        map[string]*File
 	InitFunctions                []*Function
@@ -138,36 +138,37 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if resource == "" {
 		panic("null string")
 	}
-	if p.loaded != nil {
-		t, ok := p.loaded[resource]
-		if ok {
-			return t.T, t.Err
-		}
+	if p.loadedClasses == nil {
+		p.loadedClasses = make(map[string]*Class)
 	}
-	if p.loaded == nil {
-		p.loaded = make(map[string]*LoadedResouces)
+	if p.LoadedPackages == nil {
+		p.LoadedPackages = make(map[string]*Package)
 	}
-	p.loaded[resource] = &LoadedResouces{}
+	if t, ok := p.loadedClasses[resource]; ok {
+		return t, nil
+	}
+	if t, ok := p.LoadedPackages[resource]; ok {
+		return t, nil
+	}
 	var pp *Package
 	pp, t, err := NameLoader.LoadName(resource)
 	if pp != nil {
-		if PackageBeenCompile.LoadedPackages == nil {
-			PackageBeenCompile.LoadedPackages = make(map[string]*Package)
-		}
-		PackageBeenCompile.LoadedPackages[pp.Name] = pp
+		PackageBeenCompile.LoadedPackages[resource] = pp
+		p.mkClassCache(pp)
 	}
-	p.loaded[resource] = &LoadedResouces{}
-	p.loaded[resource].T = t
-	p.loaded[resource].Err = err
-	if p.loaded[resource].T != nil {
-		if tp, ok := p.loaded[resource].T.(*Package); ok && tp != nil && tp != pp {
-			if PackageBeenCompile.LoadedPackages == nil {
-				PackageBeenCompile.LoadedPackages = make(map[string]*Package)
-			}
-			PackageBeenCompile.LoadedPackages[tp.Name] = tp
-		}
+	if pp, ok := t.(*Package); ok && pp != nil {
+		PackageBeenCompile.LoadedPackages[resource] = pp
+		p.mkClassCache(pp)
 	}
-	return p.loaded[resource].T, p.loaded[resource].Err
+	if c, ok := t.(*Class); ok && c != nil {
+		PackageBeenCompile.loadedClasses[resource] = c
+	}
+	return t, err
+}
+func (p *Package) mkClassCache(load *Package) {
+	for _, v := range load.Block.Classes {
+		p.loadedClasses[v.Name] = v // binary name
+	}
 }
 
 //different for other file

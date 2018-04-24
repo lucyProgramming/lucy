@@ -39,14 +39,16 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 		return ret
 	}
 	if len(ms) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s  'construction' not found", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s  'construction' not found",
+			errMsgPrefix(e.Pos)))
 	} else {
 		*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
 	}
 	return ret
 }
 
-func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew, errs *[]error) *VariableType {
+func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
+	errs *[]error) *VariableType {
 	if len(newMap.Args) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s new map expect no arguments",
 			errMsgPrefix(newMap.Args[0].Pos)))
@@ -56,7 +58,8 @@ func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew, 
 	return tt
 }
 
-func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew, errs *[]error) *VariableType {
+func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew,
+	errs *[]error) *VariableType {
 	ret := newArray.Typ.Clone() // clone the type
 	ret.Pos = e.Pos
 	if len(newArray.Args) > 1 { // 0 and 1 is accpect

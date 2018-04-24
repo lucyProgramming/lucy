@@ -394,18 +394,22 @@ func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
 	t2 can be cast to t1
 */
 func (v *VariableType) Equal(assignMent *VariableType) bool {
-	if v == assignMent { // this is not happening
+	if v == assignMent {
 		return true
 	}
 	if v.IsPrimitive() && assignMent.IsPrimitive() {
 		return v.Typ == assignMent.Typ
 	}
-	if (v.IsPointer() && v.Typ != VARIABLE_TYPE_STRING) && assignMent.Typ == VARIABLE_TYPE_NULL {
+	if v.IsPointer() && assignMent.Typ == VARIABLE_TYPE_NULL {
 		return true
 	}
 	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
 		return v.ArrayType.Equal(assignMent.ArrayType)
 	}
+	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return v.ArrayType.Equal(assignMent.ArrayType)
+	}
+
 	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
 		return v.Enum.Name == assignMent.Enum.Name
 	}

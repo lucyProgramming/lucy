@@ -1,0 +1,8 @@
+
+
+
+import "lucy/os";
+
+fn main(args []string){
+	print("working directory:" , os.getCwd());
+}

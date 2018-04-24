@@ -114,7 +114,8 @@ func (lc *LucyCompile) compile() {
 			lc.Errs = append(lc.Errs, err)
 			continue
 		}
-		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs, CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
+		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs,
+			CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
 		lc.shouldExit()
 	}
 	// parse import only

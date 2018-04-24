@@ -26,7 +26,7 @@ func (s *StatementReturn) check(b *Block) []error {
 		errs = append(errs, fmt.Errorf("%s too many arguments to return", errMsgPrefix(pos)))
 	}
 	for k, v := range rs {
-		if k < len(returndValueTypes) {
+		if k < len(returndValueTypes) && returndValueTypes[k] != nil {
 			if !v.Typ.TypeCompatible(returndValueTypes[k]) {
 				errs = append(errs, fmt.Errorf("%s cannot use %s as %s to return",
 					errMsgPrefix(returndValueTypes[k].Pos),

@@ -34,15 +34,12 @@ type AutoVarForReturnBecauseOfDefer struct {
 	/*
 		flag is 1 means there is exception,but handled
 	*/
-	ExceptionIsNotNilWhenEnter uint16
-	IfReachBotton              uint16
-	ForArrayList               uint16
+	//ExceptionIsNotNilWhenEnter uint16
+	IfReachBotton uint16
+	ForArrayList  uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
-	if f.NoReturnValue() {
-		return
-	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		return
 	}
@@ -230,10 +227,12 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				ts, es := v.Expression.check(f.Block)
 				if errsNotEmpty(es) {
 					*errs = append(*errs, es...)
+					continue
 				}
 				t, err := v.Expression.mustBeOneValueContext(ts)
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+					continue
 				}
 				if t.TypeCompatible(v.Typ) == false {
 					err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
