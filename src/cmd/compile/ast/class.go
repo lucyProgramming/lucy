@@ -282,7 +282,12 @@ func (c *Class) checkMethods() []error {
 					Class: c,
 				}
 			}
-			c.Block.InheritedAttribute.IsConstruction = (name == CONSTRUCTION_METHOD_NAME)
+			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
+			c.Block.InheritedAttribute.IsConstruction = isConstruction
+			if isConstruction && vv.Func.NoReturnValue() == false {
+				errs = append(errs, fmt.Errorf("%s construction method expect on argument",
+					errMsgPrefix(vv.Func.Typ.ParameterList[0].Pos)))
+			}
 			es := vv.Func.check(&c.Block)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)

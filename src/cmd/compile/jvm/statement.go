@@ -10,7 +10,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
-			return m.buildFunctionExpression(class, code, s.Expression, context)
+			return m.buildFunctionExpression(class, code, s.Expression, context, state)
 		}
 		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
 	case ast.STATEMENT_TYPE_IF:

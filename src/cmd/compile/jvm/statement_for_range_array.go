@@ -24,7 +24,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 7) //goto for
 	code.Codes[code.CodeLength+7] = cg.OP_pop
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value)...)
+		state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value))
 	context.MakeStackMap(code, state, code.CodeLength+7)
 	context.MakeStackMap(code, state, code.CodeLength+11)
 	state.popStack(1)
@@ -275,7 +275,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	//pop index on stack
 
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
 	code.Codes[code.CodeLength] = cg.OP_pop

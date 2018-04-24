@@ -60,25 +60,29 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 
 		if len(state.Locals) == len(state.LastLocals) && len(state.Stacks) == 0 { // same frame or same frame extended
 			if delta <= 63 {
-				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_frame{FrameType: byte(delta)})
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+					&cg.StackMap_same_frame{FrameType: byte(delta)})
 
 			} else {
-				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_frame_extended{FrameType: 251, Delta: delta})
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+					&cg.StackMap_same_frame_extended{FrameType: 251, Delta: delta})
 			}
 			return
 		}
 		if len(state.LastLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
 			if delta <= 64 {
-				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_locals_1_stack_item_frame{
-					FrameType: byte(delta + 64),
-					Stack:     state.Stacks[0],
-				})
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+					&cg.StackMap_same_locals_1_stack_item_frame{
+						FrameType: byte(delta + 64),
+						Stack:     state.Stacks[0],
+					})
 			} else {
-				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, &cg.StackMap_same_locals_1_stack_item_frame_extended{
-					FrameType: 247,
-					Delta:     delta,
-					Stack:     state.Stacks[0],
-				})
+				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+					&cg.StackMap_same_locals_1_stack_item_frame_extended{
+						FrameType: 247,
+						Delta:     delta,
+						Stack:     state.Stacks[0],
+					})
 			}
 			return
 		}
@@ -107,7 +111,8 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	return
 }
 
-func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos, code *cg.AttributeCode, class *cg.ClassHighLevel) {
+func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos,
+	code *cg.AttributeCode, class *cg.ClassHighLevel) {
 	if pos == nil {
 		return
 	}

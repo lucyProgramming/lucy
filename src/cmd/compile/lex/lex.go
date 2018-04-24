@@ -158,6 +158,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	isdouble := false
 	islong := false
 	isShort := false
+	isByte := false
 	c, eof = lex.getchar()
 	if c == 'l' || c == 'L' {
 		islong = true
@@ -167,6 +168,8 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		isShort = true
 	} else if c == 'd' || c == 'D' {
 		isdouble = true
+	} else if c == 'b' || c == 'B' {
+		isByte = true
 	} else {
 		lex.ungetchar()
 	}
@@ -241,11 +244,17 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			if islong {
 				token.Type = TOKEN_LITERAL_LONG
 				token.Data = value
+			} else if isByte {
+				token.Type = TOKEN_LITERAL_BYTE
+				token.Data = byte(value)
+				if int32(value) > math.MaxUint8 {
+					err = fmt.Errorf("max byte is %v", math.MaxUint8)
+				}
 			} else if isShort {
 				token.Type = TOKEN_LITERAL_SHORT
 				token.Data = int32(value)
 				if int32(value) > math.MaxInt16 {
-					err = fmt.Errorf("max short int is %v", math.MaxInt16)
+					err = fmt.Errorf("max short is %v", math.MaxInt16)
 				}
 			} else {
 				token.Type = TOKEN_LITERAL_INT

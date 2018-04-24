@@ -17,7 +17,7 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	stack, es := m.build(class, code, right, context, state)
 	if len(es) > 0 {
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, right.Value)...)
+			state.newStackMapVerificationTypeInfo(class, right.Value))
 		context.MakeStackMap(code, state, code.CodeLength)
 		backPatchEs(es, code.CodeLength)
 	}
@@ -150,7 +150,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, variableType)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, variableType))
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)                // must be interger
 			backPatchEs(es, code.CodeLength) // true or false need to backpatch

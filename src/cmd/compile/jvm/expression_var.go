@@ -13,15 +13,19 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 	currentStack := uint16(0)
 	for index >= 0 {
 		if vs.Vs[index].BeenCaptured {
+			t := state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className)
+			vs.Vs[index].LocalValOffset = state.appendLocals(class, code, t)
 			stack := closure.createCloureVar(class, code, vs.Vs[index])
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, t))
 			// load to stack
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
-			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className))...)
 			currentStack += 1
+		} else {
+			vs.Vs[index].LocalValOffset = state.appendLocals(class, code, vs.Vs[index].Typ)
 		}
 		index--
 	}
@@ -45,9 +49,9 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 				if variables[0].IsGlobal {
 					storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
 				} else {
-					variables[0].LocalValOffset = state.appendLocals(class, code, variables[0].Typ)
 					m.MakeClass.storeLocalVar(class, code, variables[0])
 					if variables[0].BeenCaptured {
+						state.popStack(1) // pop closure object
 						currentStack -= 1
 					}
 				}
@@ -57,10 +61,11 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		}
 		variableType := v.Value
 		stack, es := m.build(class, code, v, context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value)...)
 		if len(es) > 0 {
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value))
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
 		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
@@ -70,29 +75,11 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		}
 		if variables[0].IsGlobal {
 			storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
-			if jvmSize(variableType) == 1 {
-				state.popStack(1)
-			} else {
-				state.popStack(2)
-			}
 		} else {
-			variables[0].LocalValOffset = state.appendLocals(class, code, variables[0].Typ)
 			m.MakeClass.storeLocalVar(class, code, variables[0])
 			if variables[0].BeenCaptured {
+				state.popStack(1)
 				currentStack -= 1
-			}
-			if jvmSize(variableType) == 1 {
-				if variables[0].BeenCaptured {
-					state.popStack(2)
-				} else {
-					state.popStack(1)
-				}
-			} else {
-				if variables[0].BeenCaptured {
-					state.popStack(3)
-				} else {
-					state.popStack(2)
-				}
 			}
 		}
 		variables = variables[1:]

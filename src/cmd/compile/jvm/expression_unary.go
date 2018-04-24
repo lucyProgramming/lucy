@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -33,14 +32,15 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.build(class, code, ee, context, state)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value)...)
 		if len(es) > 0 {
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value))
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
 		}
-		state.popStack(1)
+
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value))
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_ifne

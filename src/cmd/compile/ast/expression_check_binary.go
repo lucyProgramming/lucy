@@ -77,7 +77,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		return result
 	}
 
-	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
+	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT ||
+		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
 		if !t1.IsInteger() {
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
 				errMsgPrefix(bin.Left.Pos),
@@ -132,7 +133,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			}
 		case VARIABLE_TYPE_NULL:
 			if t2.IsPointer() {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'(non-pointer)",
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
 					t2.TypeString()))

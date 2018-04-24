@@ -74,7 +74,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		t := &cg.StackMap_verification_type_info{}
 		unInit := &cg.StackMap_Uninitialized_variable_info{}
 		unInit.Index = uint16(code.CodeLength - 4)
-		t.T = unInit
+		t.PayLoad = unInit
 		state.Stacks = append(state.Stacks, t, t) // 2 for dup
 		defer state.popStack(2)
 	}
@@ -84,7 +84,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		maxstack = t
 	}
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
 	defer state.popStack(1)
 	maxstack += stack
 	currentStack := uint16(3)

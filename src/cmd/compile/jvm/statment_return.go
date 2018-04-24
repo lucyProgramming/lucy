@@ -31,7 +31,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if len(es) > 0 {
 				backPatchEs(es, code.CodeLength)
 				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, statementReturn.Expressions[0].Value)...)
+					state.newStackMapVerificationTypeInfo(class, statementReturn.Expressions[0].Value))
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1)
 			}
@@ -115,8 +115,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		{
 			t := state.newStackMapVerificationTypeInfo(class,
 				state.newObjectVariableType(java_arrylist_class))
-			state.Stacks = append(state.Stacks, t...)
-			state.Stacks = append(state.Stacks, t...)
+			state.Stacks = append(state.Stacks, t)
+			state.Stacks = append(state.Stacks, t)
 			defer func() {
 				state.popStack(2)
 			}()
@@ -154,7 +154,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			stack, es := m.MakeExpression.build(class, code, v, context, state)
 			if len(es) > 0 {
 				backPatchEs(es, code.CodeLength)
-				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value)...)
+				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value))
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1) // must be bool expression
 			}
@@ -305,7 +305,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 	for index >= 0 { // build defer,cannot have return statement is defer
 		state := ds[index].StackMapState.(*StackMapState)
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_throwable_class))...)
+			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_throwable_class)))
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}
 		e.StartPc = uint16(ds[index].StartPc)
@@ -328,7 +328,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_throwable_class))...)
+			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_throwable_class)))
 		context.MakeStackMap(code, state, code.CodeLength+6)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(1)

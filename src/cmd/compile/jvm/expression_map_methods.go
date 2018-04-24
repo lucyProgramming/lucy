@@ -16,7 +16,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 	}()
 	hashMapVerifyType := state.newObjectVariableType(java_hashmap_class)
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
+		state.newStackMapVerificationTypeInfo(class, hashMapVerifyType))
 	switch call.Name {
 	case common.MAP_METHOD_KEY_EXISTS:
 		variableType := call.Args[0].Value
@@ -61,13 +61,12 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				m.buildStoreArrayListAutoVar(code, context) // store to temp
 				for kk, _ := range v.Values {
 					currentStack = 1
-					if k == len(call.Args)-1 && kk == len(v.Values)-1 {
-					} else {
+					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
 						code.Codes[code.CodeLength] = cg.OP_dup
 						code.CodeLength++
 						currentStack++
 						state.Stacks = append(state.Stacks,
-							state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
+							state.newStackMapVerificationTypeInfo(class, hashMapVerifyType))
 					}
 					//load
 					m.buildLoadArrayListAutoVar(code, context)
@@ -86,15 +85,14 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				continue
 			}
 			variableType := v.Value
-			if k == len(call.Args)-1 {
-			} else { // not last one
+			if k != len(call.Args)-1 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				currentStack++
 				if currentStack > maxstack {
 					maxstack = currentStack
 				}
 				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, hashMapVerifyType)...)
+					state.newStackMapVerificationTypeInfo(class, hashMapVerifyType))
 			}
 			stack, _ := m.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxstack {

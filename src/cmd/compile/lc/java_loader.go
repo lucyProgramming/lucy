@@ -16,9 +16,9 @@ func (e *NotSupportTypeSignatureError) Error() string {
 
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
-	//if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
-	//	return nil, &NotSupportTypeSignatureError{}
-	//}
+	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
+		//TODO:: support signature???
+	}
 	astClass := &ast.Class{}
 	{
 		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)

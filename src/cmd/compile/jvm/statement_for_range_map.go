@@ -18,7 +18,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	// if null skip
 	{
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value)...)
+			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value))
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(1) // pop
@@ -154,7 +154,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 				t.Class = &ast.Class{}
 				t.Class.Name = closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className
 				forState.Locals = append(forState.Locals,
-					forState.newStackMapVerificationTypeInfo(class, t)...)
+					forState.newStackMapVerificationTypeInfo(class, t))
 			}
 		} else {
 			// load v
@@ -179,7 +179,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 					t.Class = &ast.Class{}
 					t.Class.Name = closure.getMeta(ast.VARIABLE_TYPE_INT).className
 					forState.Locals = append(forState.Locals,
-						forState.newStackMapVerificationTypeInfo(class, t)...)
+						forState.newStackMapVerificationTypeInfo(class, t))
 				}
 			} else {
 				copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
@@ -238,13 +238,13 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	{
 		// object ref
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class,
-			state.newObjectVariableType(java_hashmap_class))...)
+			state.newObjectVariableType(java_hashmap_class)))
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = state.newObjectVariableType(java_root_class)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class,
-			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(3)
 	}

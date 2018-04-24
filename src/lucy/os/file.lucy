@@ -50,6 +50,7 @@ public class File extends io.File {
 	}
 
 	public static fn readFile(filepath string)->(bs []byte){
+		bs = new []byte(0);
 		reader := new io.FileInputStream(new io.File(filepath));
 		defer reader.close();
 		b := new []byte(1 << 10);

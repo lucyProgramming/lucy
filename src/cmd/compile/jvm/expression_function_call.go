@@ -52,7 +52,8 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	}
 
 	if e.IsStatementExpression {
-		if e.CallHasReturnValue() == false { // nothing to do
+		if e.CallHasReturnValue() == false {
+			// nothing to do
 		} else if len(e.Values) == 1 {
 			if 2 == jvmSize(e.Values[0]) {
 				code.Codes[code.CodeLength] = cg.OP_pop2

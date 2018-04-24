@@ -145,11 +145,11 @@ type StackMap_Uninitialized_variable_info struct {
 }
 
 type StackMap_verification_type_info struct {
-	T interface{}
+	PayLoad interface{}
 }
 
 func (s *StackMap_verification_type_info) ToBytes() []byte {
-	switch s.T.(type) {
+	switch s.PayLoad.(type) {
 	case *StackMap_Top_variable_info:
 		return []byte{0}
 	case *StackMap_Integer_variable_info:
@@ -167,12 +167,12 @@ func (s *StackMap_verification_type_info) ToBytes() []byte {
 	case *StackMap_Object_variable_info:
 		bs := make([]byte, 3)
 		bs[0] = 7
-		binary.BigEndian.PutUint16(bs[1:], s.T.(*StackMap_Object_variable_info).Index)
+		binary.BigEndian.PutUint16(bs[1:], s.PayLoad.(*StackMap_Object_variable_info).Index)
 		return bs
 	case *StackMap_Uninitialized_variable_info:
 		bs := make([]byte, 3)
 		bs[0] = 8
-		binary.BigEndian.PutUint16(bs[1:], s.T.(*StackMap_Uninitialized_variable_info).Index)
+		binary.BigEndian.PutUint16(bs[1:], s.PayLoad.(*StackMap_Uninitialized_variable_info).Index)
 		return bs
 	default:
 	}

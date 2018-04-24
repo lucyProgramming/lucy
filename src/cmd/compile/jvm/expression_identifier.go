@@ -27,7 +27,9 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 	if t := jvmSize(identifier.Var.Typ); t > maxstack {
 		maxstack = t
 	}
-	closure.unPack(class, code, identifier.Var.Typ)
+	if t := closure.unPack(class, code, identifier.Var.Typ); t > maxstack {
+		maxstack = t
+	}
 	return
 }
 

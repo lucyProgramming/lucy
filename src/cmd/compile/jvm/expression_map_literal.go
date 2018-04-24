@@ -26,8 +26,8 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 	values := e.Data.(*ast.ExpressionMap).Values
 	{
 		t := state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_hashmap_class))
-		state.Stacks = append(state.Stacks, t...)
-		state.Stacks = append(state.Stacks, t...)
+		state.Stacks = append(state.Stacks, t)
+		state.Stacks = append(state.Stacks, t)
 	}
 	for _, v := range values {
 		code.Codes[code.CodeLength] = cg.OP_dup
@@ -45,12 +45,12 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_root_class))...)
+			state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_root_class)))
 		currentStack = 3 // stack is ... mapref mapref kref
 		stack, es := m.build(class, code, v.Right, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Right.Value)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Right.Value))
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}

@@ -3,7 +3,8 @@ package jvm
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
-func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	dot := e.Data.(*ast.ExpressionDot)
 	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 		if dot.PackageVariableDefinition != nil {
@@ -17,6 +18,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		}
 		return
 	}
+	// check cast to super class
 	if dot.Name == ast.SUPER_FIELD_NAME {
 		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_OBJECT {
 			maxstack, _ = m.build(class, code, dot.Expression, context, nil)
@@ -37,9 +39,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		code.CodeLength += 3
 		return
 	}
-	stackLength := len(state.Stacks)
 	maxstack, _ = m.build(class, code, dot.Expression, context, state)
-	state.popStack(len(state.Stacks) - stackLength)
 	if t := jvmSize(e.Value); t > maxstack {
 		maxstack = t
 	}

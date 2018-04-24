@@ -27,7 +27,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	}
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(meta.className))...)
+		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(meta.className)))
 	maxstack = 1
 	remainStack = 1
 	classname = meta.className
@@ -48,9 +48,9 @@ func (m *MakeExpression) getMapLeftValue(
 		maxstack = t
 	}
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_hashmap_class))...)
+		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_hashmap_class)))
 	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_root_class))...)
+		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(java_root_class)))
 	primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.Value)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
@@ -179,9 +179,9 @@ func (m *MakeExpression) getLeftValue(
 			target = e.Value
 			remainStack = 2 // [objectref ,index]
 			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, index.Expression.Value)...)
+				state.newStackMapVerificationTypeInfo(class, index.Expression.Value))
 			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
 			op = []byte{cg.OP_invokevirtual}
 		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
 			return m.getMapLeftValue(class, code, e, context, state)
@@ -194,9 +194,9 @@ func (m *MakeExpression) getLeftValue(
 			target = e.Value
 			remainStack = 2 // [objectref ,index]
 			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, index.Expression.Value)...)
+				state.newStackMapVerificationTypeInfo(class, index.Expression.Value))
 			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
 			switch e.Value.Typ {
 			case ast.VARIABLE_TYPE_BOOL:
 				fallthrough
@@ -252,7 +252,8 @@ func (m *MakeExpression) getLeftValue(
 				op = []byte{cg.OP_putfield}
 				maxstack, _ = m.build(class, code, dot.Expression, context, state)
 				remainStack = 1
-				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, dot.Expression.Value)...)
+				state.Stacks = append(state.Stacks,
+					state.newStackMapVerificationTypeInfo(class, dot.Expression.Value))
 			}
 		}
 	}

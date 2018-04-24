@@ -43,9 +43,10 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			length := len(state.Stacks)
 			if v.BeenCaptured {
 				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))...)
+					state.newStackMapVerificationTypeInfo(class,
+						state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className)))
 			}
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Typ)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Typ))
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(len(state.Stacks) - length)
 			backPatchEs(es, code.CodeLength)
@@ -149,12 +150,6 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 		maxstack = 1
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
-		//code.Codes[code.CodeLength] = cg.OP_iconst_0
-		//code.CodeLength++
-		//f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter =
-		//	state.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-		//copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
-		//	f.AutoVarForReturnBecauseOfDefer.ExceptionIsNotNilWhenEnter)...)
 		if len(f.Typ.ReturnList) > 1 {
 			//if reach botton
 			code.Codes[code.CodeLength] = cg.OP_iconst_0

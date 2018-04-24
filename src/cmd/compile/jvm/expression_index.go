@@ -7,11 +7,16 @@ import (
 )
 
 func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	maxstack, _ = m.build(class, code, index.Expression, context, nil)
+	maxstack, _ = m.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
-	stack, _ := m.build(class, code, index.Index, context, nil)
+	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, index.Expression.Value))
+	stack, _ := m.build(class, code, index.Index, context, state)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
@@ -77,7 +82,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			t.Typ = ast.VARIABLE_TYPE_OBJECT
 			t.Class = &ast.Class{}
 			t.Class.Name = java_root_class
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 
@@ -85,7 +90,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		primitiveObjectConverter.getFromObject(class, code, index.Expression.Value.Map.V)
 		{
 			state.popStack(1) // pop java_root_class ref
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.Value)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, e.Value))
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))

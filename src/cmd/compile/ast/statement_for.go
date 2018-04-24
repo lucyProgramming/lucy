@@ -312,31 +312,3 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	return errs
 }
-
-//func (t *AutoVarForRangeMap) mkAutoVarForRange(f *Function, kt, vt *VariableType, modekv bool) {
-//	//t.KeySetsKLength = f.VarOffset
-//	//t.KeySets = f.VarOffset + 1
-//	//t.MapObject = f.VarOffset + 2
-//	//t.KeySetsK = f.VarOffset + 3
-//	//f.VarOffset += 4
-//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.MapObject, &t.KeySets, &t.KeySetsK, &t.KeySetsKLength)
-//	//t.V = f.VarOffset
-//	//f.VarOffset += vt.JvmSlotSize()
-//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
-//	//if modekv {
-//	//	t.K = f.VarOffset
-//	//	f.VarOffset += kt.JvmSlotSize()
-//	//	f.OffsetDestinations = append(f.OffsetDestinations, &t.K)
-//	//}
-//}
-//func (t *AutoVarForRangeArray) mkAutoVarForRange(f *Function, vt *VariableType) {
-//	//t.Elements = f.VarOffset
-//	//t.Start = f.VarOffset + 1
-//	//t.End = f.VarOffset + 2
-//	//t.K = f.VarOffset + 3
-//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.K, &t.Elements, &t.Start, &t.End)
-//	//f.VarOffset += 4
-//	//t.V = f.VarOffset
-//	//f.VarOffset += vt.JvmSlotSize()
-//	//f.OffsetDestinations = append(f.OffsetDestinations, &t.V)
-//}

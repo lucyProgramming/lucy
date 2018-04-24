@@ -300,10 +300,12 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		{
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, typ)...)
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, typ))
 			context.MakeStackMap(code, state, code.CodeLength+10)
 			state.popStack(1)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING})...)
+			state.Stacks = append(state.Stacks,
+				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}))
 			context.MakeStackMap(code, state, code.CodeLength+13)
 			state.popStack(1)
 		}

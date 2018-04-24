@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	function := e.Data.(*ast.Function)
 	if function.IsClosureFunction == false {
 		function.Name = class.NewFunctionName(function.Name) // new a function name
@@ -19,7 +20,6 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		method.AttributeLucyInnerStaticMethod = &cg.AttributeLucyInnerStaticMethod{}
 		method.Descriptor = Descriptor.methodDescriptor(function)
 		method.Code = &cg.AttributeCode{}
-
 		m.buildFunction(class, method, function)
 		class.AppendMethod(method)
 		return
@@ -62,6 +62,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	// store  to,wait for call
+	function.VarOffSet = state.appendLocals(class, code, state.newObjectVariableType(classname))
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)

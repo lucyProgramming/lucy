@@ -18,7 +18,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		t := &cg.StackMap_verification_type_info{}
 		tt := &cg.StackMap_Uninitialized_variable_info{}
 		tt.Index = uint16(code.CodeLength - 4)
-		t.T = tt
+		t.PayLoad = tt
 		state.Stacks = append(state.Stacks, t)
 		state.Stacks = append(state.Stacks, t)
 	}
@@ -26,9 +26,9 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = e.Value.ArrayType
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t)...)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})...)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
 	}
 	defer func() {
 		state.popStack(5)
@@ -142,7 +142,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value)...)
+			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value))
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // must be a logical expression
 		}
