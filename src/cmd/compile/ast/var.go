@@ -9,14 +9,15 @@ type LoadName interface {
 }
 
 const (
-	MAIN_FUNCTION_NAME      = "main"
-	THIS                    = "this"
-	NO_NAME_IDENTIFIER      = "_"
-	LUCY_ROOT_CLASS         = "lucy/deps/Object"
-	JAVA_ROOT_CLASS         = "java/lang/Object"
-	DEFAULT_EXCEPTION_CLASS = "java/lang/Exception"
-	JAVA_THROWABLE_CLASS    = "java/lang/Throwable"
-	SUPER_FIELD_NAME        = "super"
+	MAIN_FUNCTION_NAME       = "main"
+	THIS                     = "this"
+	NO_NAME_IDENTIFIER       = "_"
+	LUCY_ROOT_CLASS          = "lucy/deps/Object"
+	JAVA_ROOT_CLASS          = "java/lang/Object"
+	DEFAULT_EXCEPTION_CLASS  = "java/lang/Exception"
+	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
+	SUPER_FIELD_NAME         = "super"
+	CONSTRUCTION_METHOD_NAME = "<init>"
 )
 
 var (

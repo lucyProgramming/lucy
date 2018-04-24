@@ -228,6 +228,9 @@ func (c *Class) haveSuper(superclassName string) (bool, error) {
 	if c.Name == superclassName {
 		return true, nil
 	}
+	if c.Name == JAVA_ROOT_CLASS {
+		return false, nil
+	}
 	err = c.loadSuperClass()
 	if err != nil {
 		return false, err
@@ -244,6 +247,9 @@ func (c *Class) implemented(inter string) (bool, error) {
 		if v.Name == inter {
 			return true, nil
 		}
+	}
+	if c.Name == JAVA_ROOT_CLASS {
+		return false, nil
 	}
 	err = c.loadSuperClass()
 	if err != nil {
@@ -262,7 +268,7 @@ func (c *Class) checkMethods() []error {
 	if c.IsInterface() {
 		return errs
 	}
-	for _, v := range c.Methods {
+	for name, v := range c.Methods {
 		for _, vv := range v {
 			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
 				if vv.Func.Block.Vars == nil {
@@ -276,6 +282,7 @@ func (c *Class) checkMethods() []error {
 					Class: c,
 				}
 			}
+			c.Block.InheritedAttribute.IsConstruction = (name == CONSTRUCTION_METHOD_NAME)
 			es := vv.Func.check(&c.Block)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
@@ -286,7 +293,6 @@ func (c *Class) checkMethods() []error {
 }
 
 func (c *Class) loadSuperClass() error {
-	fmt.Println(c.Name)
 	if c.SuperClass != nil {
 		return nil
 	}

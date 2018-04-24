@@ -40,6 +40,17 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	if t := stack + 1; t > maxstack {
 		maxstack = t
 	}
+	if call.Name == ast.CONSTRUCTION_METHOD_NAME {
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      call.Class.Name,
+			Method:     call.Name,
+			Descriptor: d,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
+	}
+
 	if call.Class.IsInterface() {
 		code.Codes[code.CodeLength] = cg.OP_invokeinterface
 		class.InsertInterfaceMethodrefConst(cg.CONSTANT_InterfaceMethodref_info_high_level{

@@ -127,7 +127,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
-			if t2.Typ != VARIABLE_TYPE_STRING {
+			if t2.Typ != VARIABLE_TYPE_STRING && t2.Typ != VARIABLE_TYPE_NULL {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
@@ -160,7 +160,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				}
 			}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm('%s') on '%s' and '%s'",
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),
 				t1.TypeString(),
@@ -187,15 +187,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			result.Pos = e.Pos
 			return result
 		}
-		if t1.IsNumber() == false || t2.IsNumber() == false {
+		if t1.Equal(t2) == false {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
-			result = t1.Clone()
-			result.Pos = e.Pos
-			return result
 		}
-		result = &VariableType{}
+		result = t1.Clone()
 		result.Pos = e.Pos
-		result.Typ = t1.NumberTypeConvertRule(t2)
 		return result
 	}
 	return nil

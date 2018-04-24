@@ -19,7 +19,6 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 	}
-
 	if b.IsFunctionTopBlock == false && len(b.Defers) > 0 {
 		index := len(b.Defers) - 1
 		for index >= 0 {

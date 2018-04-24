@@ -77,7 +77,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		case lex.TOKEN_VAR:
 			pos := b.parser.mkPos()
 			b.Next() // skip var key word
-			vs, es, _, err := b.parser.parseConstDefinition()
+			vs, es, _, err := b.parser.parseConstDefinition(true)
 			if err != nil {
 				b.consume(untils_semicolon)
 				b.Next()
@@ -151,7 +151,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				b.Next()
 				continue
 			}
-			vs, es, typ, err := b.parser.parseConstDefinition()
+			vs, es, typ, err := b.parser.parseConstDefinition(false)
 			if err != nil {
 				b.consume(untils_rc_semicolon)
 				b.Next()

@@ -30,7 +30,7 @@ func (parser *LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor stri
 	if f.NoReturnValue() {
 		descriptor += "V"
 	} else {
-		for _, v := range f.Typ.ParameterList {
+		for _, v := range f.Typ.ReturnList {
 			descriptor += LucyFieldSignatureParser.Encode(v.Typ)
 		}
 	}

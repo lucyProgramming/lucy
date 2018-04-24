@@ -138,6 +138,8 @@ func (b *Block) inherite(father *Block) {
 }
 
 type InheritedAttribute struct {
+	StatementOffset              int
+	IsConstruction               bool
 	StatementFor                 *StatementFor // if this statement is in for or not
 	StatementSwitch              *StatementSwitch
 	mostCloseForOrSwitchForBreak interface{}
@@ -161,7 +163,8 @@ func (b *Block) check() []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	for _, s := range b.Statements {
+	for k, s := range b.Statements {
+		b.InheritedAttribute.StatementOffset = k
 		errs = append(errs, s.check(b)...)
 		if PackageBeenCompile.shouldStop(errs) {
 			return errs

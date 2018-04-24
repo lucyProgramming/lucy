@@ -75,16 +75,18 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 	}()
 	state := &StackMapState{}
 	if method.IsConstruction { // construction method
-		method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
-		method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      class.SuperClass,
-			Method:     special_method_init,
-			Descriptor: "()V",
-		}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
-		method.Code.CodeLength += 4
-		method.Code.MaxStack = 1
-		method.Code.MaxLocals = 1
+		if f.ConstructionMethodCalledByUser == false {
+			method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
+			method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      class.SuperClass,
+				Method:     special_method_init,
+				Descriptor: "()V",
+			}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
+			method.Code.CodeLength += 4
+			method.Code.MaxStack = 1
+			method.Code.MaxLocals = 1
+		}
 		state.appendLocals(class, method.Code, state.newObjectVariableType(class.Name))
 	} else if f.Name == ast.MAIN_FUNCTION_NAME { // main function
 		code := method.Code
@@ -120,7 +122,11 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		state.appendLocals(class, method.Code,
 			state.newObjectVariableType(class.Name))
 	}
-
+	if LucyMethodSignatureParser.Need(f.Typ) {
+		d := &cg.AttributeLucyMethodDescritor{}
+		d.Descriptor = LucyMethodSignatureParser.Encode(f)
+		method.AttributeLucyMethodDescritor = d
+	}
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}

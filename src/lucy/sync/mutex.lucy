@@ -1,9 +1,9 @@
 
 public class Mutex {
-	public lock(){
+	public fn lock(){
 		monitorEnter(this);
 	}
-	public unLock(){
+	public fn unLock(){
 		monitorExit(this);
 	}
 }

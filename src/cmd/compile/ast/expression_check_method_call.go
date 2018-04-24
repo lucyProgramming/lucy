@@ -248,6 +248,54 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
+	if call.Name == SUPER_FIELD_NAME {
+		if block.InheritedAttribute.IsConstruction == false ||
+			block.IsFunctionTopBlock == false ||
+			block.InheritedAttribute.StatementOffset != 0 {
+			*errs = append(*errs, fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
+				errMsgPrefix(e.Pos)))
+			return nil
+		}
+		if object.Typ != VARIABLE_TYPE_OBJECT {
+			*errs = append(*errs, fmt.Errorf("%s cannot call father`s constuction on '%s'",
+				errMsgPrefix(e.Pos), object.TypeString()))
+			return nil
+		}
+		if call.Expression.isThisIdentifierExpression() == false {
+			*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use this",
+				errMsgPrefix(e.Pos)))
+			return nil
+		}
+		err := object.Class.loadSuperClass()
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+			return nil
+		}
+		args := checkExpressions(block, call.Args, errs)
+		args = checkRightValuesValid(args, errs)
+		ms, matched, err := object.Class.SuperClass.matchContructionFunction(args, &call.Args)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		} else {
+			if matched {
+				call.Name = "<init>"
+				block.InheritedAttribute.Function.ConstructionMethodCalledByUser = true
+				call.Method = ms[0]
+				call.Class = object.Class.SuperClass
+				ret := []*VariableType{&VariableType{}}
+				ret[0].Typ = VARIABLE_TYPE_VOID
+				ret[0].Pos = e.Pos
+				return ret
+			}
+			if len(ms) == 0 {
+				*errs = append(*errs, fmt.Errorf("%s  'construction' not found",
+					errMsgPrefix(e.Pos)))
+			} else {
+				*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
+			}
+		}
+		return nil
+	}
 	call.Class = object.Class
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)

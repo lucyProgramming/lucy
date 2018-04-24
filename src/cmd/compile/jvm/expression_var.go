@@ -70,6 +70,11 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		}
 		if variables[0].IsGlobal {
 			storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
+			if jvmSize(variableType) == 1 {
+				state.popStack(1)
+			} else {
+				state.popStack(2)
+			}
 		} else {
 			variables[0].LocalValOffset = state.appendLocals(class, code, variables[0].Typ)
 			m.MakeClass.storeLocalVar(class, code, variables[0])

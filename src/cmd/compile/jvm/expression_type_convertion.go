@@ -45,13 +45,9 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 			Descriptor: "()[B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
-		if 4 > maxstack { // arraybyteref arraybyteref byte[] byte[]
-			maxstack = 4
+		if 3 > maxstack { // arraybyteref arraybyteref byte[]
+			maxstack = 3
 		}
-		code.Codes[code.CodeLength] = cg.OP_arraylength
-		code.CodeLength++
 		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

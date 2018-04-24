@@ -224,8 +224,10 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			if c.classDefinition.Methods == nil {
 				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
 			}
+			if f.Name == c.classDefinition.Name {
+				f.Name = ast.CONSTRUCTION_METHOD_NAME
+			}
 			c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
-
 			c.resetProperty()
 		default:
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
@@ -241,7 +243,7 @@ func (c *Class) resetProperty() {
 }
 
 func (c *Class) parseConst() error {
-	vs, es, typ, err := c.parser.parseConstDefinition()
+	vs, es, typ, err := c.parser.parseConstDefinition(false)
 	if err != nil {
 		return err
 	}

@@ -243,6 +243,7 @@ func (m *MakeClass) mkInitFunctions() {
 	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
 	trigger.AccessFlags |= cg.ACC_METHOD_STATIC
 	trigger.Descriptor = "()V"
+	trigger.Code = &cg.AttributeCode{}
 	trigger.Code.Codes = make([]byte, 1)
 	trigger.Code.Codes[0] = cg.OP_return
 	trigger.Code.CodeLength = 1
@@ -277,7 +278,7 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		class.Fields[v.Name] = f
 	}
 	for k, v := range c.Methods {
-		if k == filepath.Base(c.Name) && c.IsInterface() == false {
+		if k == ast.CONSTRUCTION_METHOD_NAME && c.IsInterface() == false {
 			continue
 		}
 		vv := v[0]
@@ -290,11 +291,6 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(vv.Func)
-		if LucyMethodSignatureParser.Need(vv.Func.Typ) {
-			t := &cg.AttributeLucyMethodDescritor{}
-			t.Descriptor = LucyMethodSignatureParser.Encode(vv.Func)
-			method.AttributeLucyMethodDescritor = t
-		}
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
 			m.buildFunction(class, method, vv.Func)
@@ -303,7 +299,7 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 	}
 	if c.IsInterface() == false {
 		//construction
-		if t := c.Methods[filepath.Base(c.Name)]; t != nil && len(t) > 0 {
+		if t := c.Methods[ast.CONSTRUCTION_METHOD_NAME]; t != nil && len(t) > 0 {
 			method := &cg.MethodHighLevel{}
 			method.Name = "<init>"
 			method.AccessFlags = t[0].Func.AccessFlags
@@ -337,10 +333,6 @@ func (m *MakeClass) mkFuncs() {
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-		}
-		if LucyMethodSignatureParser.Need(f.Typ) {
-			method.AttributeLucyMethodDescritor = &cg.AttributeLucyMethodDescritor{}
-			method.AttributeLucyMethodDescritor.Descriptor = LucyMethodSignatureParser.Encode(f)
 		}
 		ms[k] = method
 		f.ClassMethod = method

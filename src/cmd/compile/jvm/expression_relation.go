@@ -24,16 +24,20 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if target != bin.Left.Value.Typ {
 			m.numberTypeConverter(code, bin.Left.Value.Typ, target)
 		}
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: target})...)
+		state.Stacks = append(state.Stacks,
+			state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: target})...)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}
-		state.popStack(1)
 		if target != bin.Right.Value.Typ {
 			m.numberTypeConverter(code, bin.Right.Value.Typ, target)
 		}
 		switch target {
+		case ast.VARIABLE_TYPE_BYTE:
+			fallthrough
+		case ast.VARIABLE_TYPE_SHORT:
+			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_isub
 		case ast.VARIABLE_TYPE_LONG:
@@ -44,6 +48,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength] = cg.OP_dcmpl
 		}
 		code.CodeLength++
+		state.popStack(1)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
@@ -103,18 +108,19 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_BOOL ||
 		bin.Right.Value.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es []*cg.JumpBackPatch
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
 		maxstack, es = m.build(class, code, bin.Left, context, state)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
 			context.MakeStackMap(code, state, code.CodeLength)
 			backPatchEs(es, code.CodeLength)
 		}
 		stack, es := m.build(class, code, bin.Right, context, state)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value)...)
 			context.MakeStackMap(code, state, code.CodeLength)
 			backPatchEs(es, code.CodeLength)
 		}
+		state.popStack(2) // 2 bool value
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
@@ -141,6 +147,34 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 8
 		return
 	}
+	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_NULL ||
+		bin.Right.Value.Typ == ast.VARIABLE_TYPE_NULL {
+		var notNullExpression *ast.Expression
+		if bin.Left.Value.Typ != ast.VARIABLE_TYPE_NULL {
+			notNullExpression = bin.Left
+		} else {
+			notNullExpression = bin.Right
+		}
+		maxstack, _ = m.build(class, code, notNullExpression, context, state)
+		if e.Typ == ast.EXPRESSION_TYPE_EQ {
+			code.Codes[code.CodeLength] = cg.OP_ifnull
+		} else { // ne
+			code.Codes[code.CodeLength] = cg.OP_ifnonnull
+		}
+		context.MakeStackMap(code, state, code.CodeLength+7)
+		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_BOOL,
+		})...)
+		context.MakeStackMap(code, state, code.CodeLength+8)
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		code.CodeLength += 8
+		return
+	}
+
 	//string compare
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING ||
 		bin.Right.Value.Typ == ast.VARIABLE_TYPE_STRING {
@@ -213,33 +247,6 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 
-	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_NULL ||
-		bin.Right.Value.Typ == ast.VARIABLE_TYPE_NULL {
-		var notNullExpression *ast.Expression
-		if bin.Left.Value.Typ != ast.VARIABLE_TYPE_NULL {
-			notNullExpression = bin.Left
-		} else {
-			notNullExpression = bin.Right
-		}
-		maxstack, _ = m.build(class, code, notNullExpression, context, state)
-		if e.Typ == ast.EXPRESSION_TYPE_EQ {
-			code.Codes[code.CodeLength] = cg.OP_ifnull
-		} else { // ne
-			code.Codes[code.CodeLength] = cg.OP_ifnonnull
-		}
-		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_BOOL,
-		})...)
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
-		return
-	}
 	if bin.Left.Value.IsPointer() && bin.Right.Value.IsPointer() { //
 		stack, _ := m.build(class, code, bin.Left, context, state)
 		if stack > maxstack {

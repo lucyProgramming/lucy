@@ -5,7 +5,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"path/filepath"
 )
 
 type NotSupportTypeSignatureError struct {
@@ -58,9 +57,7 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-		if m.Func.Name == "<init>" {
-			m.Func.Name = filepath.Base(astClass.Name)
-		}
+
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
 		} else {

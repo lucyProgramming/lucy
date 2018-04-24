@@ -72,7 +72,7 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_VAR:
 			pos := p.mkPos()
 			p.Next() // skip var key word
-			vs, es, _, err := p.parseConstDefinition()
+			vs, es, _, err := p.parseConstDefinition(true)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -178,7 +178,7 @@ func (p *Parser) Parse() []error {
 			continue
 		case lex.TOKEN_CONST:
 			p.Next() // skip const key word
-			vs, es, typ, err := p.parseConstDefinition()
+			vs, es, typ, err := p.parseConstDefinition(false)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -279,14 +279,14 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseConstDefinition() ([]*ast.VariableDefinition, []*ast.Expression, int, error) {
+func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition, []*ast.Expression, int, error) {
 	names, err := p.parseNameList()
 	if err != nil {
 		return nil, nil, 0, err
 	}
 	var variableType *ast.VariableType
 	//trying to parse type
-	if p.isValidTypeBegin() {
+	if p.isValidTypeBegin() || needType {
 		variableType, err = p.parseType()
 		if err != nil {
 			p.errs = append(p.errs, err)

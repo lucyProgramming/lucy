@@ -70,7 +70,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = forState.newObjectVariableType(java_root_class)
-		forState.Locals = append(forState.Locals, forState.newStackMapVerificationTypeInfo(class, t)...)
 		autoVar.KeySets = forState.appendLocals(class, code, t)
 		autoVar.MapObject = forState.appendLocals(class, code, forState.newObjectVariableType(java_hashmap_class))
 		autoVar.KeySetsK = forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
@@ -118,10 +117,10 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	} else {
 		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.Expression.Value.Map.V)
 	}
+	autoVar.V = forState.appendLocals(class, code, s.RangeAttr.Expression.Value.Map.V)
 	//store to V
 	copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ, autoVar.V)...)
-	forState.Locals = append(forState.Locals,
-		state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value.Map.V)...)
+
 	// store to k,if need
 	if s.RangeAttr.ModelKV {
 		// load k sets
@@ -135,9 +134,8 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		} else {
 			primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.Expression.Value.Map.K)
 		}
+		autoVar.K = forState.appendLocals(class, code, s.RangeAttr.Expression.Value.Map.K)
 		copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ, autoVar.K)...)
-		forState.Locals = append(forState.Locals,
-			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.Expression.Value.Map.K)...)
 	}
 	// store k and v into user defined variable
 	//store v in real v
@@ -162,10 +160,10 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			// load v
 			copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
 				autoVar.V)...)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = forState.appendLocals(class, code, s.RangeAttr.Expression.Value.Map.V)
 			copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
 				s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.Locals = append(forState.Locals,
-				forState.newStackMapVerificationTypeInfo(class, s.RangeAttr.IdentifierV.Var.Typ)...)
+
 		}
 		if s.RangeAttr.ModelKV {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
@@ -186,10 +184,10 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			} else {
 				copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
 					autoVar.K)...)
+				s.RangeAttr.IdentifierK.Var.LocalValOffset = forState.appendLocals(class, code, s.RangeAttr.Expression.Value.Map.K)
 				copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
 					s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
-				forState.Locals = append(forState.Locals,
-					forState.newStackMapVerificationTypeInfo(class, s.RangeAttr.IdentifierK.Var.Typ)...)
+
 			}
 		}
 	} else { // for k,v  = range xxx

@@ -1,25 +1,44 @@
 import "java/io";
+import "lucy/lang";
 
 
 
-type FileModel = int;
+var fileModelIsEmptyError lang.Error = new lang.Error("file model is empty");
+var createFileFailError lang.Error = new lang.Error("create file failed");
 
 
-
-public class File  {
-	filepath string;
+public class File extends io.File {
 	reader io.FileInputStream;
 	writer io.FileOutputStream;
 
-	public fn File(filepath string){
-		this.reader = new io.FileInputStream(new io.File(this.filepath));
+	public fn File(filepath string,model string = "r"){
+		this.super(filepath);
+		if model == null || model == ""{
+			panic(fileModelIsEmptyError);
+		}
+		isCreate := false;
+		for k,v := range []byte(model){
+			if v == 'r' && this.reader == null{
+				this.reader = new io.FileInputStream(this);
+			}
+			if v == 'w' && this.writer == null{
+				this.writer = new io.FileOutputStream(this);
+			}
+			if v == 'c'{
+				isCreate = true;
+			}
+		}
+		if isCreate &&  this.exists() == false{
+			if false == this.createNewFile(){
+				panic(createFileFailError);
+			}
+		}
 	}
+
 
 	public fn read(bs []byte)->(n int){
 		n = this.reader.read(bs.toJavaArray()); 
 	}
-
-
 	
 	public fn close(){
 		if this.reader != null {
@@ -30,8 +49,7 @@ public class File  {
 		}
 	}
 
-
-	static fn readFile(filepath string)->(bs []byte){
+	public static fn readFile(filepath string)->(bs []byte){
 		reader := new io.FileInputStream(new io.File(filepath));
 		defer reader.close();
 		b := new []byte(1 << 10);
@@ -44,7 +62,7 @@ public class File  {
 		}
 	}
 
-	static fn writeFile( filepath string ,bs []byte){
+	public static fn writeFile( filepath string ,bs []byte){
 		writer := new io.FileOutputStream(new io.File(filepath));
 		defer writer.close();
 		writer.write(bs.toJavaArray());
@@ -52,8 +70,27 @@ public class File  {
 	
 	
 
+	/*
+	create directory
+	*/
+	public static fn mkDir(path string)->(ok bool){
+		f := new io.File(path);
+		ok = f.mkdirs();
+	}
 
+	/*
+		delete a directory
+		ok means if delete is ok
+	*/
+	public static fn removeDir(path string)->(ok bool){
+		f := new io.File(path);
+		ok = f.delete();
+	}
+	
 
-
+	public fn listDir()->(fis []File){
+		
+	}
+	
 
 }

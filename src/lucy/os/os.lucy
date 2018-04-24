@@ -1,6 +1,5 @@
 
 import "java/lang/System";
-import "java/io/File";
 
 
 
@@ -9,7 +8,9 @@ import "java/io/File";
 	get env by k
 */
 public fn genEnv(k string)->
-(v string = System.getenv(k))
+(
+	v string = System.getenv(k)
+)
 {
 
 }
@@ -19,7 +20,7 @@ public fn genEnv(k string)->
 /*
 	all envs
 */
-public fn genEnvs()->
+public fn getEnvs()->
 (
 	envs map{string -> string} = new map{string -> string}()
 )
@@ -37,6 +38,14 @@ public fn genEnvs()->
 */
 public fn getCwd()->(d string = System.getProperty("user.dir")){
 	
+}
+
+
+/*
+	change working directory to
+*/
+public fn chCwd(to string){
+	System.setProperty("user.dir",to);
 }
 
 /*
@@ -58,35 +67,13 @@ public fn exit(code int){
 	run gc
 */
 
-public fn gc(code int){
+public fn gc(){
 	System.gc();
 }
 
 
-/*
-	change working directory to
-*/
-public fn chCwd(to string){
-	System.setProperty("user.dir",to);
-}
 
-/*
-	create directory
-*/
-public fn mkDir(path string)->(ok bool){
-	f := new File(path);
-	ok = f.mkdirs();
-}
 
-/*
-	delete a directory
-	ok means if delete is ok
-*/
-
-public fn removeDir(path string)->(ok bool){
-	f := new File(path);
-	ok = f.delete();
-}
 
 
 

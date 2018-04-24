@@ -37,7 +37,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			return nil, err
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
-			index := binary.BigEndian.Uint64(t[0].Info)
+			index := binary.BigEndian.Uint16(t[0].Info)
 			_, f.Typ, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
 			if err != nil {
 				return nil, err
@@ -59,7 +59,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m.LoadFromOutSide = true
 		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
-			index := binary.BigEndian.Uint64(t[0].Info)
+			index := binary.BigEndian.Uint16(t[0].Info)
 			err = jvm.LucyMethodSignatureParser.Deocde(c.ConstPool[index].Info, m.Func)
 			if err != nil {
 				return nil, err
@@ -69,9 +69,6 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBs(t[0].Info)
 			jvm.FunctionDefaultValueParser.Decode(c, m.Func, dp)
-		}
-		if m.Func.Name == "<init>" {
-			m.Func.Name = filepath.Base(astClass.Name)
 		}
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
@@ -168,6 +165,13 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 				pack.Block.Vars = make(map[string]*ast.VariableDefinition)
 			}
 			pack.Block.Vars[name] = vd
+			if t := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
+				index := binary.BigEndian.Uint16(t[0].Info)
+				_, vd.Typ, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
@@ -187,6 +191,13 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		function.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
 			return err
+		}
+		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
+			index := binary.BigEndian.Uint16(t[0].Info)
+			err = jvm.LucyMethodSignatureParser.Deocde(c.ConstPool[index].Info, function)
+			if err != nil {
+				return err
+			}
 		}
 		function.ClassMethod = &cg.MethodHighLevel{}
 		function.ClassMethod.Name = function.Name

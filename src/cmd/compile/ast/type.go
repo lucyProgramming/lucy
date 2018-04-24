@@ -141,6 +141,9 @@ func (t *VariableType) Clone() *VariableType {
 }
 
 func (t *VariableType) resolve(block *Block) error {
+	if t == nil {
+		return nil
+	}
 	if t.Resolved {
 		return nil
 	}

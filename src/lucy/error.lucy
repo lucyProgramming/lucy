@@ -1,7 +1,0 @@
-import "java/lang/Exception";
-
-
-public class Error extends Exception{
-	
-
-}
