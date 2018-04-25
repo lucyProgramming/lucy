@@ -46,6 +46,7 @@ func (fd *FunctionDefaultValueParse) Encode(class *cg.ClassHighLevel, f *ast.Fun
 }
 
 func (fd *FunctionDefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.AttributeDefaultParameters) {
+	f.DefaultValueStartAt = int(dp.Start)
 	for i := uint16(0); i < uint16(len(dp.Consts)); i++ {
 		v := f.Typ.ParameterList[dp.Start+i]
 		v.Expression = &ast.Expression{}

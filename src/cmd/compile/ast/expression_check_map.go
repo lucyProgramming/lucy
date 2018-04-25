@@ -70,12 +70,14 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			continue
 		}
 		if false == ktype.RightValueValid() {
-			*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s k is not right value valid",
+				errMsgPrefix(v.Left.Pos)))
 			continue
 		}
 		if noType && k == 0 {
 			if vtype.isTyped() == false {
-				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v", errMsgPrefix(v.Left.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
+					errMsgPrefix(v.Left.Pos)))
 			} else {
 				if noType && k == 0 {
 					m.Typ.Map.V = vtype
@@ -85,7 +87,8 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 		}
 		if mapv != nil {
 			if mapv.Equal(vtype) == false {
-				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(v.Right.Pos),
+				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					errMsgPrefix(v.Right.Pos),
 					vtype.TypeString(), mapv.TypeString()))
 			}
 		}
