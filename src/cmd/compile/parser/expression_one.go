@@ -54,6 +54,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
+
 		ep.Next()
 	case lex.TOKEN_LITERAL_LONG:
 		left = &ast.Expression{

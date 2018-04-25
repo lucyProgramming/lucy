@@ -117,7 +117,7 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 			code.CodeLength += 2
 		} else if -32768 <= value && 32767 >= value {
 			code.Codes[code.CodeLength] = cg.OP_sipush
-			code.Codes[code.CodeLength+1] = byte(value >> 24)
+			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
 			code.Codes[code.CodeLength+2] = byte(value)
 			code.CodeLength += 3
 		} else {

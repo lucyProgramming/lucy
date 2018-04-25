@@ -12,27 +12,45 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	index := len(vs.Vs) - 1
 	currentStack := uint16(0)
 	for index >= 0 {
+		if vs.Vs[index].Name == ast.NO_NAME_IDENTIFIER {
+			index--
+			continue
+		}
 		//this variable not been captured,also not declared here
 		if vs.Vs[index].BeenCaptured {
 			t := state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className)
 			if vs.IfDeclareBefor[index] == false {
-				vs.Vs[index].LocalValOffset = state.appendLocals(class, code, t)
-				stack := closure.createCloureVar(class, code, vs.Vs[index])
+				vs.Vs[index].LocalValOffset = code.MaxLocals
+				code.MaxLocals += 1
+				stack := closure.createCloureVar(class, code, vs.Vs[index].Typ)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				state.Stacks = append(state.Stacks,
+					state.newStackMapVerificationTypeInfo(class, t))
+				state.Stacks = append(state.Stacks,
+					state.newStackMapVerificationTypeInfo(class, t))
+				currentStack += 2
+			} else {
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
+				state.Stacks = append(state.Stacks,
+					state.newStackMapVerificationTypeInfo(class, t))
+				currentStack += 1
 			}
-			// load to stack
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
-			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, t))
-			currentStack += 1
 		} else {
-			vs.Vs[index].LocalValOffset = state.appendLocals(class, code, vs.Vs[index].Typ)
+			vs.Vs[index].LocalValOffset = code.MaxLocals
+			code.MaxLocals += jvmSize(vs.Vs[index].Typ)
 		}
 		index--
 	}
 	variables := vs.Vs
+	ifcreateBefore := vs.IfDeclareBefor
+	slice := func() {
+		variables = variables[1:]
+		ifcreateBefore = ifcreateBefore[1:]
+	}
 	for _, v := range vs.Values {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			stack, _ := m.build(class, code, v, context, state)
@@ -42,7 +60,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			m.buildStoreArrayListAutoVar(code, context)
 			for kk, tt := range v.Values {
 				if variables[0].Name == ast.NO_NAME_IDENTIFIER {
-					variables = variables[1:] // slice out
+					slice()
 					continue
 				}
 				stack = m.unPackArraylist(class, code, kk, tt, context)
@@ -57,11 +75,21 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				} else {
 					m.MakeClass.storeLocalVar(class, code, variables[0])
 					if variables[0].BeenCaptured {
-						state.popStack(1) // pop closure object
-						currentStack -= 1
+						if ifcreateBefore[0] {
+							state.popStack(1)
+							currentStack -= 1
+						} else {
+							copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, variables[0].LocalValOffset)...)
+							state.popStack(2)
+							currentStack -= 2
+						}
+						state.appendLocals(class,
+							state.newObjectVariableType(closure.getMeta(variables[0].Typ.Typ).className))
+					} else {
+						state.appendLocals(class, variables[0].Typ)
 					}
 				}
-				variables = variables[1:]
+				slice()
 			}
 			continue
 		}
@@ -81,7 +109,12 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			maxstack = t
 		}
 		if variables[0].Name == ast.NO_NAME_IDENTIFIER {
-			variables = variables[1:]
+			slice()
+			if jvmSize(variableType) == 1 {
+				code.Codes[code.CodeLength] = cg.OP_pop
+			} else { // 2
+				code.Codes[code.CodeLength] = cg.OP_pop2
+			}
 			continue
 		}
 		if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
@@ -92,11 +125,21 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		} else {
 			m.MakeClass.storeLocalVar(class, code, variables[0])
 			if variables[0].BeenCaptured {
-				state.popStack(1)
-				currentStack -= 1
+				if ifcreateBefore[0] {
+					state.popStack(1)
+					currentStack -= 1
+				} else {
+					copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, variables[0].LocalValOffset)...)
+					state.popStack(2)
+					currentStack -= 2
+				}
+				state.appendLocals(class,
+					state.newObjectVariableType(closure.getMeta(variables[0].Typ.Typ).className))
+			} else {
+				state.appendLocals(class, variables[0].Typ)
 			}
 		}
-		variables = variables[1:]
+		slice()
 	}
 	return
 }

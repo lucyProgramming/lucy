@@ -45,12 +45,14 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 		},
 		}
 		e.Value = t[0]
+
 	case EXPRESSION_TYPE_INT:
 		t = []*VariableType{{
 			Typ: VARIABLE_TYPE_INT,
 			Pos: e.Pos,
 		},
 		}
+
 		e.Value = t[0]
 	case EXPRESSION_TYPE_FLOAT:
 		t = []*VariableType{{

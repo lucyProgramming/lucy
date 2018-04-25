@@ -5,38 +5,37 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) appendLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	v *ast.VariableDefinition, state *StackMapState) {
-	if v.BeenCaptured { // capture
-		t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_OBJECT}
-		t.Class = &ast.Class{}
-		t.Class.Name = closure.getMeta(v.Typ.Typ).className
-		v.LocalValOffset = state.appendLocals(class, code, t)
-	} else {
-		v.LocalValOffset = state.appendLocals(class, code, v.Typ)
-	}
-}
 func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
 	for _, v := range f.Typ.ParameterList { // insert into locals
 		if v.BeenCaptured { // capture
 			//because of stack map,capture parameter not allow
 			panic("...")
-		}
-		if f.Name != ast.MAIN_FUNCTION_NAME {
-			m.appendLocalVar(class, code, v, state)
+		} else {
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals += jvmSize(v.Typ)
+			state.appendLocals(class, v.Typ)
 		}
 	}
 	for _, v := range f.Typ.ReturnList {
 		currentStack := uint16(0)
-		m.appendLocalVar(class, code, v, state)
 		if v.BeenCaptured { //create closure object
-			stack := closure.createCloureVar(class, code, v)
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			stack := closure.createCloureVar(class, code, v.Typ)
 			if stack > maxstack {
 				maxstack = stack
 			}
 			// then load
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+			if 2 > maxstack {
+				maxstack = 2
+			}
+			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
+		} else {
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals += jvmSize(v.Typ)
 		}
 		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
@@ -61,6 +60,11 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			maxstack = t
 		}
 		m.storeLocalVar(class, code, v)
+		if v.BeenCaptured {
+			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
+		} else {
+			state.appendLocals(class, v.Typ)
+		}
 	}
 	return
 }
@@ -86,9 +90,9 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
 			method.Code.CodeLength += 4
 			method.Code.MaxStack = 1
-			method.Code.MaxLocals = 1
 		}
-		state.appendLocals(class, method.Code, state.newObjectVariableType(class.Name))
+		method.Code.MaxLocals = 1
+		state.appendLocals(class, state.newObjectVariableType(class.Name))
 	} else if f.Name == ast.MAIN_FUNCTION_NAME { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -112,16 +116,12 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			// String[] java style
 			t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_JAVA_ARRAY}
 			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
-			state.appendLocals(class, code, t)
-			// []string lucy style
-			t = &ast.VariableType{Typ: ast.VARIABLE_TYPE_ARRAY}
-			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
-			state.appendLocals(class, code, t)
+			state.appendLocals(class, t)
 		}
-		f.Typ.ParameterList[0].LocalValOffset = 1 // main(args []string) args offset is 1
+		method.Code.MaxLocals = 1
 	} else if method.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // instance method
-		state.appendLocals(class, method.Code,
-			state.newObjectVariableType(class.Name))
+		method.Code.MaxLocals = 1
+		state.appendLocals(class, state.newObjectVariableType(class.Name))
 	}
 	if LucyMethodSignatureParser.Need(f.Typ) {
 		d := &cg.AttributeLucyMethodDescritor{}
@@ -144,9 +144,11 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 	if f.AutoVarForException != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		f.AutoVarForException.Offset = state.appendLocals(class, code,
-			state.newObjectVariableType(java_throwable_class))
+		f.AutoVarForException.Offset = code.MaxLocals
+		code.MaxLocals++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
+		state.appendLocals(class,
+			state.newObjectVariableType(java_throwable_class))
 		maxstack = 1
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
@@ -154,26 +156,28 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 			//if reach botton
 			code.Codes[code.CodeLength] = cg.OP_iconst_0
 			code.CodeLength++
-			f.AutoVarForReturnBecauseOfDefer.IfReachBotton =
-				state.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+			f.AutoVarForReturnBecauseOfDefer.IfReachBotton = code.MaxLocals
+			code.MaxLocals++
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
 				f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
-
+			state.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			f.AutoVarForReturnBecauseOfDefer.ForArrayList =
-				state.appendLocals(class, code, state.newObjectVariableType(java_arrylist_class))
+			f.AutoVarForReturnBecauseOfDefer.ForArrayList = code.MaxLocals
+			code.MaxLocals++
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
 				f.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+			state.appendLocals(class, state.newObjectVariableType(java_arrylist_class))
 		}
 		maxstack = 1
 	}
 	if f.AutoVarForMultiReturn != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		f.AutoVarForMultiReturn.Offset =
-			state.appendLocals(class, code, state.newObjectVariableType(java_arrylist_class))
+		f.AutoVarForMultiReturn.Offset = code.MaxLocals
+		code.MaxLocals++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
+		state.appendLocals(class, state.newObjectVariableType(java_arrylist_class))
 		maxstack = 1
 	}
 

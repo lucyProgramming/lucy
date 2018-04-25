@@ -3,18 +3,20 @@ import "lucy/lang";
 
 
 
-var fileModelIsEmptyError lang.Error = new lang.Error("file model is empty");
-var createFileFailError lang.Error = new lang.Error("create file failed");
+fileModelIsEmptyErr := new lang.Error("file model is empty");
+createFileFailErr := new lang.Error("create file failed");
+var fileNotExistsErr lang.Error = new lang.Error("file not exists");
+var notAFile lang.Error = new lang.Error("file is not a regular file");
 
 
 public class File extends io.File {
 	reader io.FileInputStream;
 	writer io.FileOutputStream;
 
-	public fn File(filepath string,model string = "r"){
+	public fn File(filepath string ,model string = "r"){
 		this.super(filepath);
 		if model == null || model == ""{
-			panic(fileModelIsEmptyError);
+			panic(fileModelIsEmptyErr);
 		}
 		isCreate := false;
 		for k,v := range []byte(model){
@@ -30,7 +32,7 @@ public class File extends io.File {
 		}
 		if isCreate &&  this.exists() == false{
 			if false == this.createNewFile(){
-				panic(createFileFailError);
+				panic(createFileFailErr);
 			}
 		}
 	}
@@ -49,9 +51,10 @@ public class File extends io.File {
 		}
 	}
 
-	public static fn readFile(filepath string)->(bs []byte){
+	public static fn readFile(filepath string)->(bs []byte,err lang.Error){
+		file := new File(filepath);
 		bs = new []byte(0);
-		reader := new io.FileInputStream(new io.File(filepath));
+		reader := new io.FileInputStream(file);
 		defer reader.close();
 		b := new []byte(1 << 10);
 		var n int;
@@ -62,7 +65,7 @@ public class File extends io.File {
 			}
 		}
 	}
-
+	
 	public static fn writeFile( filepath string ,bs []byte){
 		writer := new io.FileOutputStream(new io.File(filepath));
 		defer writer.close();
@@ -70,7 +73,6 @@ public class File extends io.File {
 	}
 	
 	
-
 	/*
 	create directory
 	*/

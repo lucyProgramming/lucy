@@ -79,7 +79,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		defer state.popStack(2)
 	}
 	// call init
-	stack, _ := m.build(class, code, n.Args[0], context, nil) // must be a integer
+	stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
 	if t := 2 + stack; t > maxstack {
 		maxstack = t
 	}

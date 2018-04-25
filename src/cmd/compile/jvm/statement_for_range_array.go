@@ -40,19 +40,26 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		if s.RangeAttr.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 			meta := ArrayMetas[s.RangeAttr.Expression.Value.ArrayType.Typ]
 			_, t, _ := Descriptor.ParseType([]byte(meta.elementsFieldDescriptor))
-			autoVar.Elements = forState.appendLocals(class, code, t)
-
+			autoVar.Elements = code.MaxLocals
+			code.MaxLocals++
+			forState.appendLocals(class, t)
 		} else {
-			autoVar.Elements = forState.appendLocals(class, code, s.RangeAttr.Expression.Value)
-
+			autoVar.Elements = code.MaxLocals
+			code.MaxLocals++
+			forState.appendLocals(class, s.RangeAttr.Expression.Value)
 		}
 		// start
-		autoVar.Start = forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+		autoVar.Start = code.MaxLocals
+		code.MaxLocals++
+		forState.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		//end
-		autoVar.End = forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+		autoVar.End = code.MaxLocals
+		code.MaxLocals++
+		forState.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		// K
-		autoVar.K = forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-
+		autoVar.K = code.MaxLocals
+		code.MaxLocals++
+		forState.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 	}
 
 	if s.RangeAttr.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
@@ -167,54 +174,40 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.Expression.Value.ArrayType)
 	}
 	// v
-	autoVar.V =
-		forState.appendLocals(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+	autoVar.V = code.MaxLocals
+	code.MaxLocals += jvmSize(s.RangeAttr.IdentifierV.Var.Typ)
 	//store to v tmp
 	copyOP(code,
 		storeSimpleVarOp(s.RangeAttr.Expression.Value.ArrayType.Typ,
 			autoVar.V)...)
+
+	forState.appendLocals(class, s.RangeAttr.IdentifierV.Var.Typ)
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			stack := closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var)
-			if stack > maxstack {
-				maxstack = stack
-			}
-			copyOP(code,
-				loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.Expression.Value.ArrayType.Typ, autoVar.V)...)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset =
-				forState.appendLocals(class, code, state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
-			closure.storeLocalCloureVar(class, code, s.RangeAttr.IdentifierV.Var)
+			panic(11)
 		} else {
+
 			copyOP(code,
 				loadSimpleVarOp(s.RangeAttr.Expression.Value.ArrayType.Typ, autoVar.V)...)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset =
-				forState.appendLocals(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals += jvmSize(s.RangeAttr.IdentifierV.Var.Typ)
 			copyOP(code,
 				storeSimpleVarOp(s.RangeAttr.Expression.Value.ArrayType.Typ, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+			forState.appendLocals(class, s.RangeAttr.IdentifierV.Var.Typ)
 		}
 		if s.RangeAttr.ModelKV {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				stack := closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var)
-				if stack > maxstack {
-					maxstack = stack
-				}
-				s.RangeAttr.IdentifierK.Var.LocalValOffset =
-					forState.appendLocals(class, code, forState.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
-				copyOP(code,
-					loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-				closure.storeLocalCloureVar(class, code, s.RangeAttr.IdentifierK.Var)
-
+				panic(11)
 			} else {
 				copyOP(code,
 					loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-				s.RangeAttr.IdentifierK.Var.LocalValOffset =
-					forState.appendLocals(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+				s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
+				code.MaxLocals++
 				copyOP(code,
 					storeSimpleVarOp(s.RangeAttr.Expression.Value.ArrayType.Typ,
 						s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+				forState.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			}
 		}
 	} else { // for k,v = range arr

@@ -62,7 +62,9 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	// store  to,wait for call
-	function.VarOffSet = state.appendLocals(class, code, state.newObjectVariableType(classname))
+	function.VarOffSet = code.MaxLocals
+	code.MaxLocals++
+	state.appendLocals(class, state.newObjectVariableType(classname))
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)

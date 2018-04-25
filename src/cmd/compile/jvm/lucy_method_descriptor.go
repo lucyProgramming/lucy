@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
@@ -17,6 +18,9 @@ func (parser *LucyMethodSignatureParse) Need(functionType *ast.FunctionType) boo
 		if LucyFieldSignatureParser.Need(v.Typ) {
 			return true
 		}
+	}
+	if len(functionType.ReturnList) > 1 {
+		return true
 	}
 	return false
 }
@@ -48,11 +52,20 @@ func (parser *LucyMethodSignatureParse) Deocde(bs []byte, f *ast.Function) error
 		}
 	}
 	bs = bs[1:] // skip )
-	for i := 0; i < len(f.Typ.ReturnList); i++ {
-		bs, f.Typ.ReturnList[i].Typ, err = LucyFieldSignatureParser.Decode(bs)
+	f.Typ.ReturnList = []*ast.VariableDefinition{}
+	i := 1
+	for len(bs) > 0 {
+		var t *ast.VariableType
+		bs, t, err = LucyFieldSignatureParser.Decode(bs)
 		if err != nil {
 			return err
 		}
+		vd := &ast.VariableDefinition{}
+		vd.Name = fmt.Sprintf("returnValue%d", i)
+		vd.Typ = t
+		f.Typ.ReturnList = append(f.Typ.ReturnList, vd)
+		i++
 	}
+
 	return nil
 }

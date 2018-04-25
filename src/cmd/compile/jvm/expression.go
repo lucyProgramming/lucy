@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -32,6 +33,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		e.Data = int32(e.Data.(byte))
 		fallthrough
 	case ast.EXPRESSION_TYPE_INT, ast.EXPRESSION_TYPE_SHORT:
+		fmt.Println(e.Data)
 		loadInt32(class, code, e.Data.(int32))
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_LONG:
@@ -174,7 +176,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_MAP:
 		maxstack = m.buildMapLiteral(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_VAR:
-		maxstack = m.buildVar(class, code, e, context, state)
+		maxstack = m.buildColonAssign(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TYPE_ASSERT:
 		maxstack = m.buildTypeAssert(class, code, e, context, state)
 	default:

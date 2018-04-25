@@ -58,8 +58,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "doubleValue",
 			Descriptor: "()D",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	default:
-		panic(1)
+
 	}
 	code.CodeLength += 3
 }
@@ -132,6 +131,10 @@ func (PrimitiveObjectConverter) castPointerTypeToRealType(class *cg.ClassHighLev
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 }

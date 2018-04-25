@@ -96,12 +96,12 @@ func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
 }
 
 /*
-	create a closure var ,store on local var offset
+	create a closure var, inited and leave on stack
 */
-func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
+func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) (maxstack uint16) {
 	maxstack = 2
 	var meta *ClosureObjectMeta
-	switch v.Typ.Typ {
+	switch v.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -140,8 +140,6 @@ func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.Attri
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	//there is a object on stack for holds closureVar
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 	return
 }
 

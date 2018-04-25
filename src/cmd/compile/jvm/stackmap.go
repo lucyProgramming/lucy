@@ -11,12 +11,9 @@ type StackMapState struct {
 	Stacks     []*cg.StackMap_verification_type_info
 }
 
-func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) (varOffset uint16) {
-	varOffset = code.MaxLocals
+func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.VariableType) {
 	s.Locals = append(s.Locals,
 		s.newStackMapVerificationTypeInfo(class, v))
-	code.MaxLocals += jvmSize(v)
-	return
 }
 
 func (s *StackMapState) addTop(absent *StackMapState) {
@@ -33,7 +30,6 @@ func (s *StackMapState) addTop(absent *StackMapState) {
 		} else {
 			s.Locals = append(s.Locals, t)
 		}
-
 	}
 }
 
@@ -51,14 +47,9 @@ func (s *StackMapState) popStack(pop int) {
 	}
 	s.Stacks = s.Stacks[:len(s.Stacks)-pop]
 }
-
-//func (s *StackMapState) sliceOutLocals(pop int) {
-//	if pop <= 0 {
-//		panic("negative pop")
-//	}
-//	s.Locals = s.Locals[:len(s.Locals)-pop]
-//}
-
+func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType) {
+	s.Stacks = append(s.Stacks, s.newStackMapVerificationTypeInfo(class, v))
+}
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
 	copy(s.Locals, last.Locals)
