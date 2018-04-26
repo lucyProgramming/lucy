@@ -21,17 +21,15 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 		maxstack = 3
 	}
 	{
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, assert.Expression.Value))
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
+
+		state.pushStack(class, assert.Expression.Value)
+		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, assert.Expression.Value))
+		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, assert.Expression.Value)
 		context.MakeStackMap(code, state, code.CodeLength+11)
+
 		state.popStack(2)
 	}
 	code.Codes[code.CodeLength] = cg.OP_ifeq

@@ -83,8 +83,8 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := 2 + stack; t > maxstack {
 		maxstack = t
 	}
-	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
+
+	state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 	defer state.popStack(1)
 	maxstack += stack
 	currentStack := uint16(3)

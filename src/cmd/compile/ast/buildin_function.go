@@ -5,33 +5,31 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
-type CallChecker func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos)
-
-type buildFunction struct {
-	args       []*VariableDefinition
-	returnList []*VariableDefinition
-	checker    CallChecker
-}
-
 func init() {
 	registerBuildinFunctions()
 }
 
 func registerBuildinFunctions() {
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &buildFunction{
-		checker: func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {},
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
+		callChecker: func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {},
+		IsBuildin:   true,
+		Typ:         &FunctionType{},
+		Name:        common.BUILD_IN_FUNCTION_PRINT,
 	}
-	catchBuildFunction := &buildFunction{}
+	catchBuildFunction := &Function{}
+	catchBuildFunction.Typ = &FunctionType{}
+	catchBuildFunction.IsBuildin = true
+	catchBuildFunction.Name = common.BUILD_IN_FUNCTION_CATCH
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = catchBuildFunction
 	{
-		catchBuildFunction.returnList = make([]*VariableDefinition, 1)
-		catchBuildFunction.returnList[0] = &VariableDefinition{}
-		catchBuildFunction.returnList[0].Name = "retrunValue"
-		catchBuildFunction.returnList[0].Typ = &VariableType{}
-		catchBuildFunction.returnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
+		catchBuildFunction.Typ.ReturnList = make([]*VariableDefinition, 1)
+		catchBuildFunction.Typ.ReturnList[0] = &VariableDefinition{}
+		catchBuildFunction.Typ.ReturnList[0].Name = "retrunValue"
+		catchBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
+		catchBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
 		//class is going to make value by checker
 	}
-	catchBuildFunction.checker = func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+	catchBuildFunction.callChecker = func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
@@ -83,14 +81,23 @@ func registerBuildinFunctions() {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 		}
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &buildFunction{
-		checker: oneAnyTypeParameterChecker,
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
+		callChecker: oneAnyTypeParameterChecker,
+		IsBuildin:   true,
+		Typ:         &FunctionType{},
+		Name:        common.BUILD_IN_FUNCTION_PANIC,
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &buildFunction{
-		checker: monitorChecker,
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
+		callChecker: monitorChecker,
+		IsBuildin:   true,
+		Typ:         &FunctionType{},
+		Name:        common.BUILD_IN_FUNCTION_MONITORENTER,
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &buildFunction{
-		checker: monitorChecker,
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
+		callChecker: monitorChecker,
+		IsBuildin:   true,
+		Typ:         &FunctionType{},
+		Name:        common.BUILD_IN_FUNCTION_MONITOREXIT,
 	}
 }
 

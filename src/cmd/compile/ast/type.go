@@ -48,6 +48,7 @@ type VariableType struct {
 	Function  *Function
 	Map       *Map
 	Package   *Package
+	Alias     string
 }
 
 type Map struct {
@@ -235,16 +236,29 @@ func (t *VariableType) resolveName(block *Block) error {
 	var err error
 	var d interface{}
 	if strings.Contains(t.Name, ".") == false {
-		d = block.searchType(t.Name)
+		d = block.SearchByName(t.Name)
 		loadFromImport := (d == nil)
 		if loadFromImport == false { // d is not nil
 			switch d.(type) {
 			case *Class:
-				_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, d.(*Class).Pos)
+				if t := d.(*Class); t == nil {
+					loadFromImport = true
+				} else {
+					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
+				}
 			case *VariableType:
-				_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, d.(*VariableType).Pos)
+				if t := d.(*VariableType); t == nil {
+					loadFromImport = true
+				} else {
+					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
+				}
 			case *Enum:
-				_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, d.(*Enum).Pos)
+				if t := d.(*Enum); t == nil {
+					loadFromImport = true
+				} else {
+					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
+				}
+
 			}
 		}
 		if loadFromImport {
@@ -331,6 +345,10 @@ func (v *VariableType) IsPrimitive() bool {
 
 //可读的类型信息
 func (v *VariableType) typeString(ret *string) {
+	if v.Alias != "" {
+		*ret += v.Alias
+		return
+	}
 	switch v.Typ {
 	case VARIABLE_TYPE_BOOL:
 		*ret += "bool"

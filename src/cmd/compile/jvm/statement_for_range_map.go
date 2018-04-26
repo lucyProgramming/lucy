@@ -225,14 +225,14 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 
 	{
 		// object ref
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class,
-			state.newObjectVariableType(java_hashmap_class)))
+		state.pushStack(class,
+			state.newObjectVariableType(java_hashmap_class))
 		t := &ast.VariableType{}
 		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = state.newObjectVariableType(java_root_class)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class,
-			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
+		state.pushStack(class, t)
+		state.pushStack(class,
+			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(3)
 	}

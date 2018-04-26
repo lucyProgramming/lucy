@@ -41,11 +41,10 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		if len(es) > 0 {
 			length := len(state.Stacks)
 			if v.BeenCaptured {
-				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class,
-						state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className)))
+				state.pushStack(class,
+					state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
 			}
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Typ))
+			state.pushStack(class, v.Typ)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(len(state.Stacks) - length)
 			backPatchEs(es, code.CodeLength)

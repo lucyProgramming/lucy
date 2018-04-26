@@ -217,7 +217,9 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		if err != nil {
 			return err
 		}
+		typ.Alias = name
 		pack.Block.Types[name] = typ
+
 	}
 	return nil
 }

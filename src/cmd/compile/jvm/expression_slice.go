@@ -14,8 +14,7 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 	slice := e.Data.(*ast.ExpressionSlice)
 	maxstack, _ = m.build(class, code, slice.Expression, context, state)
 	meta := ArrayMetas[slice.Expression.Value.ArrayType.Typ]
-	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(meta.classname)))
+	state.pushStack(class, state.newObjectVariableType(meta.classname))
 	// build start
 	if slice.Start != nil {
 		stack, _ := m.build(class, code, slice.Start, context, state)
@@ -29,8 +28,7 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
 	}
-	state.Stacks = append(state.Stacks,
-		state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT}))
+	state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 	if slice.End != nil {
 		stack, _ := m.build(class, code, slice.End, context, state)
 		if slice.End.Value.Typ == ast.VARIABLE_TYPE_LONG {

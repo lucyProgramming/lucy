@@ -34,7 +34,6 @@ func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallAr
 						*callArgs = append(*callArgs, m.Func.Typ.ParameterList[i].Expression)
 					}
 				} else { // no default value
-					fmt.Println("!!!!!!!!!!!!!!!!", len(args), len(*callArgs), m.Func.DefaultValueStartAt, m.Func.readableMsg())
 					errmsg := fmt.Sprintf("too few paramaters to call function '%s'\n", name)
 					errmsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(m.Func.Name, args))
 					errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())

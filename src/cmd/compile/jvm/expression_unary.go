@@ -33,14 +33,15 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.build(class, code, ee, context, state)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value))
+
+			state.pushStack(class, ee.Value)
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, ee.Value))
+		state.pushStack(class, ee.Value)
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_ifne

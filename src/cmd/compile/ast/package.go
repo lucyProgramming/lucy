@@ -6,14 +6,7 @@ import (
 	"strings"
 )
 
-//const (
-//	_ = iota
-//	PACKAGE_KIND_LUCY
-//	PACKAGE_KIND_JAVA
-//)
-
 type Package struct {
-	//Kind                         int
 	TriggerPackageInitMethodName string
 	Name                         string
 	Main                         *Function
@@ -25,6 +18,18 @@ type Package struct {
 	InitFunctions                []*Function
 	NErros2Stop                  int // number of errors should stop compile
 	Errors                       []error
+}
+
+func (p *Package) loadBuildinPackage() error {
+	if p.Name == BUILDIN_PACKAGE {
+		return nil
+	}
+	pp, err := p.load(BUILDIN_PACKAGE)
+	if err != nil {
+		return nil
+	}
+	lucyLangBuildinPackage = pp.(*Package)
+	return nil
 }
 
 func (p *Package) getImport(file string, accessName string) *Import {
@@ -59,18 +64,7 @@ func (p *Package) shouldStop(errs []error) bool {
 	return (len(p.Errors) + len(errs)) >= p.NErros2Stop
 }
 
-func (p *Package) addBuildFunctions() {
-	if p.Block.Funcs == nil {
-		p.Block.Funcs = make(map[string]*Function)
-	}
-	for k, f := range buildinFunctionsMap {
-		ff := mkBuildinFunction(k, f.args, f.returnList, f.checker)
-		p.Block.Funcs[k] = ff
-	}
-}
-
 func (p *Package) TypeCheck() []error {
-	p.addBuildFunctions()
 	if p.NErros2Stop <= 2 {
 		p.NErros2Stop = 10
 	}
@@ -94,7 +88,6 @@ func (p *Package) TypeCheck() []error {
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
 	}
-
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase1(&p.Block)
 		if errsNotEmpty(es) {

@@ -13,7 +13,7 @@ type Function struct {
 	ClassMethod                    *cg.MethodHighLevel
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
-	callchecker                    CallChecker // used in build function
+	callChecker                    CallChecker // used in build function
 	IsGlobal                       bool
 	IsBuildin                      bool
 	Used                           bool
@@ -29,6 +29,7 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
 }
+type CallChecker func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos)
 
 type AutoVarForReturnBecauseOfDefer struct {
 	/*

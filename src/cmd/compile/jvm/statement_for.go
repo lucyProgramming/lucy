@@ -33,8 +33,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			forState.Stacks = append(forState.Stacks,
-				forState.newStackMapVerificationTypeInfo(class, s.Condition.Value))
+			state.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}

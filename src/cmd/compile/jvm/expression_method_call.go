@@ -30,14 +30,20 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		if t := m.valueJvmSize(e); t > maxstack {
+			maxstack = t
+		}
 		return
 	}
 	maxstack, _ = m.build(class, code, call.Expression, context, state)
 	// object ref
-	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Expression.Value))
+	state.pushStack(class, call.Expression.Value)
 	defer state.popStack(1)
 	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 	if t := stack + 1; t > maxstack {
+		maxstack = t
+	}
+	if t := m.valueJvmSize(e); t > maxstack {
 		maxstack = t
 	}
 	if call.Name == ast.CONSTRUCTION_METHOD_NAME {

@@ -18,14 +18,16 @@ const (
 	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
 	SUPER_FIELD_NAME         = "super"
 	CONSTRUCTION_METHOD_NAME = "<init>"
+	BUILDIN_PACKAGE          = "lucy/lang"
 )
 
 var (
-	Nodes               *[]*Node
-	packageAliasReg     *regexp.Regexp
-	NameLoader          LoadName
-	buildinFunctionsMap = make(map[string]*buildFunction)
-	PackageBeenCompile  *Package
+	Nodes                  *[]*Node
+	packageAliasReg        *regexp.Regexp
+	NameLoader             LoadName
+	PackageBeenCompile     Package
+	buildinFunctionsMap    = make(map[string]*Function)
+	lucyLangBuildinPackage *Package
 )
 
 type NameWithPos struct {

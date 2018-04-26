@@ -1,5 +1,10 @@
 package ast
 
+import (
+	"fmt"
+	"os"
+)
+
 //代表语法数的一个节点
 type Node struct {
 	Data interface{}
@@ -17,10 +22,15 @@ type ConvertTops2Package struct {
 	TypeAlias []*ExpressionTypeAlias
 }
 
-func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (Pack *Package, redeclareErrors []*RedeclareError, errs []error) {
+func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareErrors []*RedeclareError, errs []error) {
+	//
+	if err := PackageBeenCompile.loadBuildinPackage(); err != nil {
+		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
+		os.Exit(1)
+	}
+
 	errs = make([]error, 0)
-	Pack = &Package{}
-	Pack.Files = make(map[string]*File)
+	PackageBeenCompile.Files = make(map[string]*File)
 	convertor.Name = []string{}
 	convertor.Blocks = []*Block{}
 	convertor.Funcs = make([]*Function, 0)
@@ -48,10 +58,10 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (Pack *Pack
 			convertor.Consts = append(convertor.Consts, t)
 		case *Import:
 			i := v.Data.(*Import)
-			if Pack.Files[i.Pos.Filename] == nil {
-				Pack.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
+			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
+				PackageBeenCompile.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
 			}
-			Pack.Files[i.Pos.Filename].Imports[i.AccessName] = i
+			PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
 			expressions = append(expressions, t)
@@ -62,42 +72,45 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (Pack *Pack
 			panic("tops have unkown type")
 		}
 	}
-
 	errs = append(errs, checkEnum(convertor.Enums)...)
 	redeclareErrors = convertor.redeclareErrors()
-	Pack.Block.Consts = make(map[string]*Const)
+	PackageBeenCompile.Block.Consts = make(map[string]*Const)
 	for _, v := range convertor.Consts {
-		Pack.Block.insert(v.Name, v.Pos, v)
+		PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 	}
-	Pack.Block.Vars = make(map[string]*VariableDefinition)
-	Pack.Block.Funcs = make(map[string]*Function)
+	PackageBeenCompile.Block.Vars = make(map[string]*VariableDefinition)
+	PackageBeenCompile.Block.Funcs = make(map[string]*Function)
 	for _, v := range convertor.Funcs {
-		err := Pack.Block.insert(v.Name, v.Pos, v)
+		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
 		v.IsGlobal = true
 	}
-	Pack.Block.Classes = make(map[string]*Class)
+	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range convertor.Classes {
-		Pack.Block.Classes[v.Name] = v
+		PackageBeenCompile.Block.Classes[v.Name] = v
 	}
-	Pack.Block.Enums = make(map[string]*Enum)
-	Pack.Block.EnumNames = make(map[string]*EnumName)
+	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
+	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range convertor.Enums {
-		Pack.Block.Enums[v.Name] = v
+		PackageBeenCompile.Block.Enums[v.Name] = v
 		for _, vv := range v.Enums {
-			Pack.Block.EnumNames[vv.Name] = vv
+			PackageBeenCompile.Block.EnumNames[vv.Name] = vv
 		}
 	}
 	//after class inserted,then resolve type
 	for _, v := range convertor.TypeAlias {
-		err := v.Typ.resolve(&Pack.Block)
+		err := v.Typ.resolve(&PackageBeenCompile.Block)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
-		Pack.Block.Types[v.Name] = v.Typ
+		if PackageBeenCompile.Block.Types == nil {
+			PackageBeenCompile.Block.Types = make(map[string]*VariableType)
+		}
+		v.Typ.Alias = v.Name
+		PackageBeenCompile.Block.Types[v.Name] = v.Typ
 	}
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))
@@ -112,7 +125,7 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (Pack *Pack
 		b.isGlobalVariableDefinition = true
 		convertor.Blocks = append([]*Block{b}, convertor.Blocks...)
 	}
-	Pack.mkInitFunctions(convertor.Blocks)
+	PackageBeenCompile.mkInitFunctions(convertor.Blocks)
 	return
 }
 

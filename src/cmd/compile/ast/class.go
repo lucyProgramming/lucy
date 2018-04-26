@@ -103,6 +103,8 @@ func (c *Class) resolveName(b *Block) []error {
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
+			vv.Func.Block.inherite(&c.Block)
+			vv.Func.Block.InheritedAttribute.Function = vv.Func
 			vv.Func.checkParaMeterAndRetuns(&errs)
 		}
 	}
@@ -272,17 +274,13 @@ func (c *Class) checkMethods() []error {
 				}
 			}
 			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
-			c.Block.InheritedAttribute.IsConstruction = isConstruction
 			if isConstruction && vv.Func.NoReturnValue() == false {
 				errs = append(errs, fmt.Errorf("%s construction method expect no return",
 					errMsgPrefix(vv.Func.Typ.ParameterList[0].Pos)))
 			}
-			vv.Func.Block.inherite(&c.Block)
-			vv.Func.Block.InheritedAttribute.Function = vv.Func
-			es := vv.Func.Block.check()
-			if errsNotEmpty(es) {
-				errs = append(errs, es...)
-			}
+			vv.Func.Block.InheritedAttribute.IsConstruction = isConstruction
+			vv.Func.checkBlock(&errs)
+
 		}
 	}
 	return errs

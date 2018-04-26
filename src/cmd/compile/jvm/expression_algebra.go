@@ -14,7 +14,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		size := jvmSize(bin.Left.Value)
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, bin.Left.Value))
+		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {
 			maxstack = t
@@ -61,8 +61,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if e.Value.Typ != bin.Left.Value.Typ {
 			m.numberTypeConverter(code, bin.Left.Value.Typ, e.Value.Typ)
 		}
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, e.Value))
+		state.pushStack(class, e.Value)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := jvmSize(e.Value) + stack; t > maxstack {
 			maxstack = t
@@ -166,8 +165,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 
 	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, bin.Left.Value))
+		state.pushStack(class, bin.Left.Value)
 		size := jvmSize(e.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + size; t > maxstack {

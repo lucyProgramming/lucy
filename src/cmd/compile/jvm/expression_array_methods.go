@@ -26,7 +26,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 	defer func() {
 		state.popStack(len(state.Stacks) - length) // ref type
 	}()
-	state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Expression.Value))
+	state.pushStack(class, call.Expression.Value)
 	switch call.Name {
 	case common.ARRAY_METHOD_CAP,
 		common.ARRAY_METHOD_SIZE,
@@ -77,7 +77,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			stack, es := m.build(class, code, v, context, state)
 			if len(es) > 0 {
 				backPatchEs(es, code.CodeLength)
-				state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, v.Value))
+				state.pushStack(class, v.Value)
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1) // must be a logical expression
 			}

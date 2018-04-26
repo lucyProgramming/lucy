@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -33,7 +32,6 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		e.Data = int32(e.Data.(byte))
 		fallthrough
 	case ast.EXPRESSION_TYPE_INT, ast.EXPRESSION_TYPE_SHORT:
-		fmt.Println(e.Data)
 		loadInt32(class, code, e.Data.(int32))
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_LONG:
@@ -277,10 +275,8 @@ func (m *MakeExpression) unPackArraylist(class *cg.ClassHighLevel, code *cg.Attr
 		Descriptor: "(I)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-
 	if typ.IsPointer() == false {
 		primitiveObjectConverter.getFromObject(class, code, typ)
-	} else if typ.Typ == ast.EXPRESSION_TYPE_STRING { // string nothing
 	} else {
 		primitiveObjectConverter.castPointerTypeToRealType(class, code, typ)
 	}
@@ -352,4 +348,14 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		}
 	}
 	return
+}
+
+func (m *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
+	if len(e.Values) > 1 {
+		return 1
+	}
+	if e.Value.RightValueValid() == false {
+		return 0
+	}
+	return jvmSize(e.Value)
 }

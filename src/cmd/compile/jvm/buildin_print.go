@@ -32,7 +32,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		t.Typ = ast.VARIABLE_TYPE_OBJECT
 		t.Class = &ast.Class{}
 		t.Class.Name = "java/io/PrintStream"
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
+		state.pushStack(class, t)
 	}
 	defer func() {
 		// print have no return value,stack is empty
@@ -42,7 +42,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		stack, es := m.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, call.Args[0].Value))
+			state.pushStack(class, call.Args[0].Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
@@ -162,7 +162,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		t.Typ = ast.VARIABLE_TYPE_OBJECT
 		t.Class = &ast.Class{}
 		t.Class.Name = "java/lang/StringBuilder"
-		state.Stacks = append(state.Stacks, state.newStackMapVerificationTypeInfo(class, t))
+		state.pushStack(class, t)
 	}
 
 	for k, v := range call.Args {
@@ -196,8 +196,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
-			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, variableType))
+			state.pushStack(class, variableType)
 			state.popStack(1)
 		}
 		if t := currentStack + stack; t > maxstack {

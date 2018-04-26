@@ -3,28 +3,21 @@ import "lucy/lang";
 
 
 
-fileModelIsEmptyErr := new lang.Error("file model is empty");
-createFileFailErr := new lang.Error("create file failed");
-var fileNotExistsErr lang.Error = new lang.Error("file not exists");
-var notAFile lang.Error = new lang.Error("file is not a regular file");
-
-
 public class File extends io.File {
 	reader io.FileInputStream;
 	writer io.FileOutputStream;
-
-	public fn File(filepath string ,model string = "r"){
+	
+	public fn File(filepath string ,model string = ""){
 		this.super(filepath);
-		if model == null || model == ""{
-			panic(fileModelIsEmptyErr);
-		}
 		isCreate := false;
+		isRead  := false;
+		isWrite := false;
 		for k,v := range []byte(model){
-			if v == 'r' && this.reader == null{
-				this.reader = new io.FileInputStream(this);
+			if v == 'r' {
+				isRead = true;
 			}
-			if v == 'w' && this.writer == null{
-				this.writer = new io.FileOutputStream(this);
+			if v == 'w' {
+				isWrite = true;
 			}
 			if v == 'c'{
 				isCreate = true;
@@ -32,14 +25,24 @@ public class File extends io.File {
 		}
 		if isCreate &&  this.exists() == false{
 			if false == this.createNewFile(){
-				panic(createFileFailErr);
+				panic(new error("create file faild"));
 			}
+		}
+		if isRead {
+			this.reader = new io.FileInputStream(this);
+		}
+		if isWrite {
+			this.writer = new io.FileOutputStream(this);
 		}
 	}
 
 
 	public fn read(bs []byte)->(n int){
 		n = this.reader.read(bs.toJavaArray()); 
+	}
+
+	public fn write(bs []byte) {
+		this.writer.write(bs.toJavaArray()); 
 	}
 	
 	public fn close(){
@@ -51,7 +54,7 @@ public class File extends io.File {
 		}
 	}
 
-	public static fn readFile(filepath string)->(bs []byte,err lang.Error){
+	public static fn readFile(filepath string)->(bs []byte,err error){
 		file := new File(filepath);
 		bs = new []byte(0);
 		reader := new io.FileInputStream(file);
@@ -90,10 +93,21 @@ public class File extends io.File {
 		ok = f.delete();
 	}
 	
-
-	public fn listDir()->(fis []File){
-		
+	public static fn listDir(directory string)->(fis []File,err error){
+		f := new File(directory);
+		if false == f.isDirectory() && f.exists(){
+			err = new error("file is not directory");
+			return ;
+		}
+		if f.exists() == false {
+			err = new error("file not exists");
+			return ;
+		}
+		names := f.list();
+		fis = new []File(names.size());
+		for k,v := range names{
+			fis[k] = new File(directory + io.File.pathSeparator + v);
+		}
 	}
 	
-
 }

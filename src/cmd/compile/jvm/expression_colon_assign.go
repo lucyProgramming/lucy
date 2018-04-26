@@ -9,6 +9,22 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	//first round
+
+	for k, v := range vs.Vs {
+		if v.Name == ast.NO_NAME_IDENTIFIER {
+			continue
+		}
+		//this variable not been captured,also not declared here
+		if v.BeenCaptured {
+			if vs.IfDeclareBefor[k] == false {
+				v.LocalValOffset = code.MaxLocals
+				code.MaxLocals += 1
+			}
+		} else {
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals += jvmSize(v.Typ)
+		}
+	}
 	index := len(vs.Vs) - 1
 	currentStack := uint16(0)
 	for index >= 0 {
@@ -20,28 +36,20 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		if vs.Vs[index].BeenCaptured {
 			t := state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className)
 			if vs.IfDeclareBefor[index] == false {
-				vs.Vs[index].LocalValOffset = code.MaxLocals
-				code.MaxLocals += 1
 				stack := closure.createCloureVar(class, code, vs.Vs[index].Typ)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
-				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, t))
-				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, t))
+				state.pushStack(class, t)
+				state.pushStack(class, t)
 				currentStack += 2
 			} else {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, vs.Vs[index].LocalValOffset)...)
-				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, t))
+				state.pushStack(class, t)
 				currentStack += 1
 			}
-		} else {
-			vs.Vs[index].LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(vs.Vs[index].Typ)
 		}
 		index--
 	}

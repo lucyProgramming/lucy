@@ -28,8 +28,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 					m.numberTypeConverter(code, t.Typ, parameters[k].Typ.Typ)
 				}
 				currentStack += jvmSize(t)
-				state.Stacks = append(state.Stacks,
-					state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ))
+				state.pushStack(class, parameters[parameterIndex].Typ)
 				parameterIndex++
 			}
 			continue
@@ -40,8 +39,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 		stack, es := m.build(class, code, e, context, state)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL}))
+			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -55,8 +53,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			}
 		}
 		currentStack += jvmSize(parameters[parameterIndex].Typ)
-		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, parameters[parameterIndex].Typ))
+		state.pushStack(class, parameters[parameterIndex].Typ)
 		parameterIndex++
 	}
 	return

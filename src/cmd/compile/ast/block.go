@@ -23,29 +23,6 @@ type Block struct {
 	Vars                       map[string]*VariableDefinition
 }
 
-func (b *Block) searchType(name string) interface{} {
-	for b != nil {
-		if b.Types != nil {
-			var t interface{} = nil
-			var ok bool
-			t, ok = b.Types[name]
-			if ok {
-				return t
-			}
-			t, ok = b.Classes[name]
-			if ok {
-				return t
-			}
-			t, ok = b.Enums[name]
-			if ok {
-				return t
-			}
-		}
-		b = b.Outter
-	}
-	return nil
-}
-
 /*
 	search any thing
 */
@@ -98,7 +75,7 @@ func (b *Block) SearchByName(name string) interface{} {
 		}
 	}
 	if b.Outter == nil {
-		return nil
+		return searchBuildIns(name)
 	}
 	t := b.Outter.SearchByName(name) // search by outter block
 	if t != nil {                    //
@@ -276,7 +253,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)
 	}
 	if name == "_" {
-		panic("_")
+		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)

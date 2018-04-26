@@ -28,18 +28,6 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func mkBuildinFunction(name string, args []*VariableDefinition, rs []*VariableDefinition, checker CallChecker) *Function {
-	f := &Function{}
-	f.Name = name
-	f.IsBuildin = true
-	f.callchecker = checker
-	f.Typ = &FunctionType{}
-	f.Typ.ParameterList = args
-	f.Typ.ReturnList = rs
-	f.IsGlobal = true
-	return f
-}
-
 func oneAnyTypeParameterChecker(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
@@ -93,6 +81,9 @@ func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableTy
 	when access from global,should check if access from package
 */
 func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) {
+	if have == nil { // incase build in types
+		return nil, false
+	}
 	// different file
 	if from.Filename != have.Filename {
 		i := PackageBeenCompile.getImport(from.Filename, name)
@@ -120,4 +111,40 @@ func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableT
 		errmsg += "\t have " + m.Func.readableMsg(name) + "\n"
 	}
 	return fmt.Errorf(errmsg)
+}
+
+func searchBuildIns(name string) interface{} {
+	var t interface{}
+	var ok bool
+	if lucyLangBuildinPackage != nil {
+		t, ok = lucyLangBuildinPackage.Block.Types[name]
+		if ok {
+			return t
+		}
+		t, ok = lucyLangBuildinPackage.Block.Classes[name]
+		if ok {
+			return t
+		}
+		t, ok = lucyLangBuildinPackage.Block.Vars[name]
+		if ok {
+			return t
+		}
+		t, ok = lucyLangBuildinPackage.Block.Consts[name]
+		if ok {
+			return t
+		}
+	}
+	t, ok = buildinFunctionsMap[name]
+	if ok {
+		return t
+	}
+	return nil
+}
+
+func existInBuildIn(name string) bool {
+	if t := lucyLangBuildinPackage.Block.SearchByName(name); t != nil {
+		return true
+	}
+	_, ok2 := buildinFunctionsMap[name]
+	return ok2
 }
