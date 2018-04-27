@@ -26,7 +26,7 @@ func (p *Package) loadBuildinPackage() error {
 	}
 	pp, err := p.load(BUILDIN_PACKAGE)
 	if err != nil {
-		return nil
+		return err
 	}
 	lucyLangBuildinPackage = pp.(*Package)
 	return nil
