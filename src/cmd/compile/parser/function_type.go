@@ -8,8 +8,8 @@ import (
 )
 
 //(a,b int)->(total int)
-func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
-	t = &ast.FunctionType{}
+func (p *Parser) parseFunctionType() (t ast.FunctionType, err error) {
+	t = ast.FunctionType{}
 	if p.token.Type != lex.TOKEN_LP {
 		err = fmt.Errorf("%s fn declared wrong,missing (,but '%s'", p.errorMsgPrefix(), p.token.Desp)
 		p.errs = append(p.errs, err)
@@ -19,7 +19,7 @@ func (p *Parser) parseFunctionType() (t *ast.FunctionType, err error) {
 	if p.token.Type != lex.TOKEN_RP { // not (
 		t.ParameterList, err = p.parseReturnLists()
 		if err != nil {
-			return nil, err
+			return t, err
 		}
 	}
 	if p.token.Type != lex.TOKEN_RP { // not )

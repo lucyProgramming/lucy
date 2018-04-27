@@ -373,6 +373,7 @@ func (e *Expression) CallHasReturnValue() bool {
 type CallArgs []*Expression // f(1,2)　调用参数列表
 
 type ExpressionFunctionCall struct {
+	Meta       interface{}
 	Expression *Expression
 	Args       CallArgs
 	Func       *Function

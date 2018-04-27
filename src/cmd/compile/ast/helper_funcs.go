@@ -28,7 +28,7 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func oneAnyTypeParameterChecker(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+func oneAnyTypeParameterChecker(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 	}

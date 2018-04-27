@@ -18,7 +18,7 @@ type Function struct {
 	IsBuildin                      bool
 	Used                           bool
 	AccessFlags                    uint16 // public private or protected
-	Typ                            *FunctionType
+	Typ                            FunctionType
 	ClosureVars                    Closure
 	Name                           string // if name is nil string,means no name function
 	Block                          *Block
@@ -29,7 +29,7 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
 }
-type CallChecker func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos)
+type CallChecker func(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos)
 
 type AutoVarForReturnBecauseOfDefer struct {
 	ForArrayList uint16
@@ -117,10 +117,10 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	if f.Typ != nil {
-		f.mkLastRetrunStatement()
-		*errs = append(*errs, f.Block.check()...)
-	}
+	//if f.Typ != nil {
+	f.mkLastRetrunStatement()
+	*errs = append(*errs, f.Block.check()...)
+	//}
 }
 
 func (f *Function) check(b *Block) []error {
@@ -164,78 +164,77 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		//f.VarOffset = 2 //
 		return
 	}
-	if f.Typ != nil {
-		var err error
-		for k, v := range f.Typ.ParameterList {
-			v.IsFunctionParameter = true
-			err = v.Typ.resolve(f.Block)
-			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
-			}
-			err = f.Block.insert(v.Name, v.Pos, v)
-			if err != nil {
-				*errs = append(*errs, err)
-				continue
-			}
-			if f.HaveDefaultValue && v.Expression == nil {
-				*errs = append(*errs, fmt.Errorf("%s expect default value", errMsgPrefix(v.Pos)))
-				continue
-			}
-			if v.Expression != nil {
-				if f.HaveDefaultValue == false {
-					f.DefaultValueStartAt = k
-				}
-				f.HaveDefaultValue = true
-				ts, es := v.Expression.check(f.Block)
-				if errsNotEmpty(es) {
-					*errs = append(*errs, es...)
-				}
-				t, err := v.Expression.mustBeOneValueContext(ts)
-				if err != nil {
-					*errs = append(*errs, err)
-				}
-				if t != nil {
-					if v.Typ.Equal(t) == false {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
-						continue
-					}
-				}
-				if v.Expression.IsLiteral() == false {
-					*errs = append(*errs, fmt.Errorf("%s default value must be literal",
-						errMsgPrefix(v.Expression.Pos)))
-				}
-			}
+	var err error
+	for k, v := range f.Typ.ParameterList {
+		v.IsFunctionParameter = true
+		err = v.Typ.resolve(f.Block)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
-		//handler return
-		for _, v := range f.Typ.ReturnList {
-			err = v.Typ.resolve(f.Block)
+		err = f.Block.insert(v.Name, v.Pos, v)
+		if err != nil {
+			*errs = append(*errs, err)
+			continue
+		}
+		if f.HaveDefaultValue && v.Expression == nil {
+			*errs = append(*errs, fmt.Errorf("%s expect default value", errMsgPrefix(v.Pos)))
+			continue
+		}
+		if v.Expression != nil {
+			if f.HaveDefaultValue == false {
+				f.DefaultValueStartAt = k
+			}
+			f.HaveDefaultValue = true
+			ts, es := v.Expression.check(f.Block)
+			if errsNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			t, err := v.Expression.mustBeOneValueContext(ts)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			err = f.Block.insert(v.Name, v.Pos, v)
-			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+			if t != nil {
+				if v.Typ.Equal(t) == false {
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
+					continue
+				}
 			}
-			if v.Expression == nil {
-				v.Expression = v.Typ.mkDefaultValueExpression()
-			} else {
-				ts, es := v.Expression.check(f.Block)
-				if errsNotEmpty(es) {
-					*errs = append(*errs, es...)
-					continue
-				}
-				t, err := v.Expression.mustBeOneValueContext(ts)
-				if err != nil {
-					*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
-					continue
-				}
-				if t.TypeCompatible(v.Typ) == false {
-					err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
-						t.TypeString(), v.Typ.TypeString())
-					*errs = append(*errs, err)
-				}
+			if v.Expression.IsLiteral() == false {
+				*errs = append(*errs, fmt.Errorf("%s default value must be literal",
+					errMsgPrefix(v.Expression.Pos)))
 			}
 		}
 	}
+	//handler return
+	for _, v := range f.Typ.ReturnList {
+		err = v.Typ.resolve(f.Block)
+		if err != nil {
+			*errs = append(*errs, err)
+		}
+		err = f.Block.insert(v.Name, v.Pos, v)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+		}
+		if v.Expression == nil {
+			v.Expression = v.Typ.mkDefaultValueExpression()
+		} else {
+			ts, es := v.Expression.check(f.Block)
+			if errsNotEmpty(es) {
+				*errs = append(*errs, es...)
+				continue
+			}
+			t, err := v.Expression.mustBeOneValueContext(ts)
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+				continue
+			}
+			if t.TypeCompatible(v.Typ) == false {
+				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+					t.TypeString(), v.Typ.TypeString())
+				*errs = append(*errs, err)
+			}
+		}
+	}
+
 }

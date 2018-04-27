@@ -11,11 +11,38 @@ type PrimitiveObjectConverter struct {
 func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
-		fallthrough
+		c := "java/lang/Boolean"
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      c,
+			Method:     "booleanValue",
+			Descriptor: "()Z",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
+		c := "java/lang/Byte"
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      c,
+			Method:     "byteValue",
+			Descriptor: "()B",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
+		c := "java/lang/Short"
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      c,
+			Method:     "shortValue",
+			Descriptor: "()S",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
@@ -66,11 +93,29 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Boolean",
+			Method:     "valueOf",
+			Descriptor: "(Z)Ljava/lang/Boolean;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_BYTE:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Byte",
+			Method:     "valueOf",
+			Descriptor: "(B)Ljava/lang/Byte;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_SHORT:
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Short",
+			Method:     "valueOf",
+			Descriptor: "(S)Ljava/lang/Short;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:

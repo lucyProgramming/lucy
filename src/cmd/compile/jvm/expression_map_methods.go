@@ -57,7 +57,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				m.buildStoreArrayListAutoVar(code, context) // store to temp
+				arrayListPacker.buildStoreArrayListAutoVar(code, context) // store to temp
 				for kk, _ := range v.Values {
 					currentStack = 1
 					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
@@ -67,7 +67,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 						state.pushStack(class, hashMapVerifyType)
 					}
 					//load
-					m.buildLoadArrayListAutoVar(code, context)
+					arrayListPacker.buildLoadArrayListAutoVar(code, context)
 					loadInt32(class, code, int32(kk))
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

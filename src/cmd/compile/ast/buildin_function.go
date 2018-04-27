@@ -11,13 +11,12 @@ func init() {
 
 func registerBuildinFunctions() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
-		callChecker: func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {},
-		IsBuildin:   true,
-		Typ:         &FunctionType{},
-		Name:        common.BUILD_IN_FUNCTION_PRINT,
+		callChecker: func(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+		},
+		IsBuildin: true,
+		Name:      common.BUILD_IN_FUNCTION_PRINT,
 	}
 	catchBuildFunction := &Function{}
-	catchBuildFunction.Typ = &FunctionType{}
 	catchBuildFunction.IsBuildin = true
 	catchBuildFunction.Name = common.BUILD_IN_FUNCTION_CATCH
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = catchBuildFunction
@@ -29,7 +28,7 @@ func registerBuildinFunctions() {
 		catchBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
 		//class is going to make value by checker
 	}
-	catchBuildFunction.callChecker = func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+	catchBuildFunction.callChecker = func(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil ||
 			block.InheritedAttribute.Defer.allowCatch == false {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
@@ -80,24 +79,25 @@ func registerBuildinFunctions() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
 		callChecker: oneAnyTypeParameterChecker,
 		IsBuildin:   true,
-		Typ:         &FunctionType{},
 		Name:        common.BUILD_IN_FUNCTION_PANIC,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
 		callChecker: monitorChecker,
 		IsBuildin:   true,
-		Typ:         &FunctionType{},
 		Name:        common.BUILD_IN_FUNCTION_MONITORENTER,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
 		callChecker: monitorChecker,
 		IsBuildin:   true,
-		Typ:         &FunctionType{},
 		Name:        common.BUILD_IN_FUNCTION_MONITOREXIT,
 	}
+	// sprintf
+	sprintfBuildFunction := &Function{}
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_SPRINTF] = sprintfBuildFunction
+	sprintfBuildFunction.Name = common.BUILD_IN_FUNCTION_SPRINTF
 }
 
-func monitorChecker(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+func monitorChecker(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 		return

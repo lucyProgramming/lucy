@@ -8,7 +8,7 @@ import (
 /*
 	unction printf
 */
-func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	//code.Codes[code.CodeLength] = cg.OP_getstatic
 	//class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 	//	Class:      "java/lang/System",

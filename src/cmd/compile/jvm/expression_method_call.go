@@ -64,7 +64,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 			Method:     call.Name,
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = interfaceMethodArgsCount(call.Method.Func.Typ)
+		code.Codes[code.CodeLength+3] = interfaceMethodArgsCount(&call.Method.Func.Typ)
 		code.Codes[code.CodeLength+4] = 0
 		code.CodeLength += 5
 	} else {

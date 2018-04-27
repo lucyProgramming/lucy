@@ -113,10 +113,10 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			if t := 1 + currentStack; t > maxstack {
 				maxstack = t
 			}
-			m.buildStoreArrayListAutoVar(code, context) // store it into local
-			for k, v := range v.Values {                // unpack
+			arrayListPacker.buildStoreArrayListAutoVar(code, context) // store it into local
+			for k, v := range v.Values {                              // unpack
 				needPutInObject := (classnames[0] == java_hashmap_class && targets[0].IsPointer() == false)
-				stack = m.unPackArraylist(class, code, k, v, context)
+				stack = arrayListPacker.unPack(class, code, k, v, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}

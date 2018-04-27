@@ -67,7 +67,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				m.MakeExpression.buildStoreArrayListAutoVar(code, context)
+				arrayListPacker.buildStoreArrayListAutoVar(code, context)
 				for kkk, ttt := range ee.Values {
 					currentStack = size
 					if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 && kkk == len(ee.Values)-1 {
@@ -84,7 +84,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 							maxstack = currentStack
 						}
 					}
-					stack = m.MakeExpression.unPackArraylist(class, code, kkk, ttt, context)
+					stack = arrayListPacker.unPack(class, code, kkk, ttt, context)
 					if t := stack + currentStack; t > maxstack {
 						maxstack = t
 					}

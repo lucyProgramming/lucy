@@ -65,13 +65,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
-			m.buildStoreArrayListAutoVar(code, context)
+			arrayListPacker.buildStoreArrayListAutoVar(code, context)
 			for kk, tt := range v.Values {
 				if variables[0].Name == ast.NO_NAME_IDENTIFIER {
 					slice()
 					continue
 				}
-				stack = m.unPackArraylist(class, code, kk, tt, context)
+				stack = arrayListPacker.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}

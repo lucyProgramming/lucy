@@ -386,10 +386,13 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_JAVA_ARRAY:
 		*ret += v.ArrayType.TypeString() + "[]"
 	case VARIABLE_TYPE_PACKAGE:
-		*ret = v.Package.Name
+		*ret += v.Package.Name
 	case VARIABLE_TYPE_NULL:
-		*ret = "null"
+		*ret += "null"
+	case VARIABLE_TYPE_NAME:
+		*ret += v.Name // resove wrong, but typeString is ok to return
 	default:
+		//fmt.Println(VARIABLE_TYPE_CLASS)
 		panic(v.Typ)
 	}
 }

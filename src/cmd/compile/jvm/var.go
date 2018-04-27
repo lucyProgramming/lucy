@@ -10,6 +10,7 @@ var (
 	LucyTypeAliasParser        LucyTypeAliasParse
 	FunctionDefaultValueParser FunctionDefaultValueParse
 	java_throwable_class       = "java/lang/Throwable"
+	arrayListPacker            ArrayListPacker
 )
 
 const (

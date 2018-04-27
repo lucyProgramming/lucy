@@ -131,10 +131,10 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 	return bs, nil, fmt.Errorf("unkown type:%v", string(bs))
 }
 
-func (m *Descript) ParseFunctionType(bs []byte) (*ast.FunctionType, error) {
-	t := &ast.FunctionType{}
+func (m *Descript) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
+	t := ast.FunctionType{}
 	if bs[0] != '(' {
-		return nil, fmt.Errorf("function descriptor does not start with '('")
+		return t, fmt.Errorf("function descriptor does not start with '('")
 	}
 	bs = bs[1:]
 	i := 1
@@ -144,7 +144,7 @@ func (m *Descript) ParseFunctionType(bs []byte) (*ast.FunctionType, error) {
 		vd.Name = fmt.Sprintf("var_%d", i)
 		bs, vd.Typ, err = m.ParseType(bs)
 		if err != nil {
-			return nil, err
+			return t, err
 		}
 		t.ParameterList = append(t.ParameterList, vd)
 		i++

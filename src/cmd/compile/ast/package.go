@@ -54,7 +54,6 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 		f := &Function{}
 		f.Block = b
 		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition
-		f.Typ = &FunctionType{}
 		p.InitFunctions[k] = f
 		f.Used = true
 		f.isPackageBlockFunction = true
