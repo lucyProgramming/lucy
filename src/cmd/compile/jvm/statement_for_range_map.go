@@ -211,8 +211,11 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	}
 	// build block
+	continueState := (&StackMapState{}).FromLast(forState)
 	m.buildBlock(class, code, s.Block, context, forState)
 	s.ContinueOPOffset = code.CodeLength
+	continueState.addTop(forState)
+	context.MakeStackMap(code, continueState, code.CodeLength)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.KeySetsK > 255 {
 		panic("over 255")

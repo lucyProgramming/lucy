@@ -14,7 +14,7 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 	case common.BUILD_IN_FUNCTION_PANIC:
 		return m.mkBuildinPanic(class, code, call, context, state)
 	case common.BUILD_IN_FUNCTION_CATCH:
-		return m.mkBuildinRecover(class, code, e, context)
+		return m.mkBuildinCatch(class, code, e, context)
 	case common.BUILD_IN_FUNCTION_MONITORENTER, common.BUILD_IN_FUNCTION_MONITOREXIT:
 		maxstack, _ = m.build(class, code, call.Args[0], context, state)
 		if call.Func.Name == common.BUILD_IN_FUNCTION_MONITORENTER {
@@ -58,7 +58,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildinRecover(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinCatch(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	if e.IsStatementExpression { // statement call
 		maxstack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -73,5 +73,13 @@ func (m *MakeExpression) mkBuildinRecover(class *cg.ClassHighLevel, code *cg.Att
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // load
+	//check cast
+	code.Codes[code.CodeLength] = cg.OP_checkcast
+	if context.Defer.ExceptionClass != nil {
+		class.InsertClassConst(context.Defer.ExceptionClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	} else {
+		class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	}
+	code.CodeLength += 3
 	return
 }

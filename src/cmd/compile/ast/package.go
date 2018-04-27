@@ -50,6 +50,7 @@ type LoadedResouces struct {
 func (p *Package) mkInitFunctions(bs []*Block) {
 	p.InitFunctions = make([]*Function, len(bs))
 	for k, b := range bs {
+		b.IsFunctionTopBlock = true
 		f := &Function{}
 		f.Block = b
 		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition

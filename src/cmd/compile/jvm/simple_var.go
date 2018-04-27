@@ -209,6 +209,6 @@ func loadSimpleVarOp(t int, offset uint16) []byte {
 			return []byte{cg.OP_aload, byte(offset)}
 		}
 	default:
-		panic("...")
+		panic(fmt.Sprintf("typ:%d", t))
 	}
 }

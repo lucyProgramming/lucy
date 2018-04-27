@@ -30,13 +30,9 @@ func registerBuildinFunctions() {
 		//class is going to make value by checker
 	}
 	catchBuildFunction.callChecker = func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
-		if block.InheritedAttribute.Defer == nil {
+		if block.InheritedAttribute.Defer == nil ||
+			block.InheritedAttribute.Defer.allowCatch == false {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
-				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
-			return
-		}
-		if block.IsFunctionTopBlock == false {
-			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only can be use in function top level block",
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
 			return
 		}

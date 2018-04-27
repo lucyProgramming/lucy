@@ -10,8 +10,8 @@ type StatementLable struct {
 	Block            *Block
 	StatementsOffset int
 	Name             string
-	Pos              *Pos
 	BackPatches      []*cg.JumpBackPatch
+	Statement        *Statement
 }
 
 func (s *StatementLable) Ready(from *Pos) error {

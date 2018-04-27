@@ -137,7 +137,11 @@ func (s *Statement) check(block *Block) []error { // b is father
 		block.InheritedAttribute.Function.mkAutoVarForException()
 		s.Defer.Block.inherite(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		return s.Defer.Block.check()
+		s.Defer.allowCatch = block.IsFunctionTopBlock
+		es := s.Defer.Block.check()
+		s.Defer.Block.InheritedAttribute.Defers = nil
+		block.Defers = append(block.Defers, s.Defer)
+		return es
 	case STATEMENT_TYPE_BLOCK:
 		s.Block.inherite(block)
 		return s.Block.check()

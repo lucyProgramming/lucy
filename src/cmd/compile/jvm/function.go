@@ -152,14 +152,6 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		if len(f.Typ.ReturnList) > 1 {
-			//if reach botton
-			code.Codes[code.CodeLength] = cg.OP_iconst_0
-			code.CodeLength++
-			f.AutoVarForReturnBecauseOfDefer.IfReachBotton = code.MaxLocals
-			code.MaxLocals++
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
-				f.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
-			state.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
 			f.AutoVarForReturnBecauseOfDefer.ForArrayList = code.MaxLocals

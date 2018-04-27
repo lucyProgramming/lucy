@@ -315,7 +315,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if l, ok := b.Lables[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Pos))
+		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Statement.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Types == nil {

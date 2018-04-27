@@ -3,6 +3,7 @@ package ast
 import "fmt"
 
 type Defer struct {
+	allowCatch     bool
 	StartPc        int
 	StackMapState  interface{} // *jvm.StackMapState
 	Block          Block
@@ -11,7 +12,8 @@ type Defer struct {
 
 func (d *Defer) registerExceptionClass(c *Class) error {
 	if d.ExceptionClass != nil {
-		return fmt.Errorf("exception class already registed as '%s'", d.ExceptionClass.Name)
+		return fmt.Errorf("exception class already registed as '%s'",
+			d.ExceptionClass.Name)
 	}
 	d.ExceptionClass = c
 	return nil

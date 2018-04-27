@@ -11,11 +11,12 @@ type Context struct {
 	function          *ast.Function
 	currentSoureFile  string
 	currentLineNUmber int
-	Defers            []*ast.Defer
 	StackMapDelta     int
+	Defer             *ast.Defer
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
+	//fmt.Println("offset:", offset)
 	if context.StackMapDelta == offset {
 		return
 	}

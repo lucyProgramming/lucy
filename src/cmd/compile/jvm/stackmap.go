@@ -58,7 +58,8 @@ func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	return s
 }
 
-func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel, t *ast.VariableType) (ret *cg.StackMap_verification_type_info) {
+func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel,
+	t *ast.VariableType) (ret *cg.StackMap_verification_type_info) {
 	ret = &cg.StackMap_verification_type_info{}
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:

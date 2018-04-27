@@ -2,13 +2,9 @@
 import "java/lang/Exception";
 
 
-type error  = Error;
+type error  = Exception;
 
 
 
-public class Error extends Exception{
-	public fn Error(errMsg string){
-		this.super(errMsg);
-	}
-	
-}
+
+ 

@@ -5,13 +5,21 @@ import (
 )
 
 type StatementReturn struct {
-	//Function    *Function
-	Pos         *Pos // use some time
+	Defers      []*Defer
 	Expressions []*Expression
+}
+
+func (s *StatementReturn) mkDefers(b *Block) {
+	if b.IsFunctionTopBlock == false { // not top block
+		s.mkDefers(b.Outter)
+	}
+	s.Defers = append(s.Defers, b.Defers...)
 }
 
 func (s *StatementReturn) check(b *Block) []error {
 	//s.Function = b.InheritedAttribute.Function
+	s.mkDefers(b)
+
 	if len(s.Expressions) == 0 {
 		return nil
 	}

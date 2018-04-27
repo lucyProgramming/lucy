@@ -9,13 +9,13 @@ import (
 func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxstack uint16) {
 	if context.function.NoReturnValue() { // no return value
-		if context.Defers != nil && len(context.Defers) > 0 {
+		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null // expect exception on stack
 			code.CodeLength++
 			if 1 > maxstack {
 				maxstack = 1
 			}
-			stack := m.buildDefersForReturn(class, code, context, context.Defers, statementReturn)
+			stack := m.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxstack {
 				maxstack = stack
 			}
@@ -42,7 +42,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		} else { // load return parameter
 		}
 		// execute defer first
-		if len(context.Defers) > 0 {
+		if len(statementReturn.Defers) > 0 {
 			//return value  is on stack,  store it temp var
 			if len(statementReturn.Expressions) > 0 { //rewrite return value
 				m.storeLocalVar(class, code, context.function.Typ.ReturnList[0])
@@ -52,7 +52,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if 1 > maxstack {
 				maxstack = 1
 			}
-			stack := m.buildDefersForReturn(class, code, context, context.Defers, statementReturn)
+			stack := m.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxstack {
 				maxstack = stack
 			}
@@ -175,18 +175,11 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	} else {
 		//nothing to do
 	}
-	if context.Defers != nil && len(context.Defers) > 0 {
+	if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
 				context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
-			//reach end
-			code.Codes[code.CodeLength] = cg.OP_iconst_1
-			code.CodeLength++
-			//return value  is on stack,  store it temp var
-			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
-					context.function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
 
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -194,7 +187,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if 1 > maxstack {
 			maxstack = 1
 		}
-		stack := m.buildDefersForReturn(class, code, context, context.Defers, statementReturn)
+		stack := m.buildDefersForReturn(class, code, context, state, statementReturn)
 		if stack > maxstack {
 			maxstack = stack
 		}
@@ -295,24 +288,25 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 	return
 }
 
-func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ds []*ast.Defer,
+func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ss *StackMapState,
 	statementReturn *ast.StatementReturn) (maxstack uint16) {
-	if len(ds) == 0 {
+	if len(statementReturn.Defers) == 0 {
 		return
 	}
-	index := len(ds) - 1
+	index := len(statementReturn.Defers) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
-		state := ds[index].StackMapState.(*StackMapState)
+		state := statementReturn.Defers[index].StackMapState.(*StackMapState)
+		state.addTop(ss)
 		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}
-		e.StartPc = uint16(ds[index].StartPc)
+		e.StartPc = uint16(statementReturn.Defers[index].StartPc)
 		e.Endpc = uint16(code.CodeLength)
 		e.HandlerPc = uint16(code.CodeLength)
-		if ds[index].ExceptionClass == nil {
+		if statementReturn.Defers[index].ExceptionClass == nil {
 			e.CatchType = class.Class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS)
 		} else {
-			e.CatchType = class.Class.InsertClassConst(ds[index].ExceptionClass.Name) // custom class
+			e.CatchType = class.Class.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom class
 		}
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
@@ -320,7 +314,9 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 			context.function.AutoVarForException.Offset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
-		m.buildBlock(class, code, &ds[index].Block, context, state)
+		context.Defer = statementReturn.Defers[index]
+		m.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
+		context.Defer = nil
 		//if need throw
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
@@ -329,7 +325,6 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		context.MakeStackMap(code, state, code.CodeLength+6)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(1)
-
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 		code.Codes[code.CodeLength+3] = cg.OP_goto
@@ -342,35 +337,27 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 			continue
 		}
 		//expection that have been handled
-		if len(context.function.Typ.ReturnList) == 1 {
-			if len(statementReturn.Expressions) > 0 {
+		if len(statementReturn.Expressions) > 0 {
+			if len(context.function.Typ.ReturnList) == 1 {
 				t := m.buildReturnFromFunctionReturnList(class, code, context)
 				if t > code.MaxStack {
 					code.MaxStack = t
 				}
-			}
-		} else {
-			if len(statementReturn.Expressions) > 0 {
+			} else {
 				//load when function have multi returns if read to end
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, context.function.AutoVarForReturnBecauseOfDefer.IfReachBotton)...)
-				code.Codes[code.CodeLength] = cg.OP_ifeq
-				codeLength := code.CodeLength
-				code.CodeLength += 3
-				copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
-				code.Codes[code.CodeLength] = cg.OP_areturn
-				code.CodeLength++
-				binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 0)
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+				code.Codes[code.CodeLength] = cg.OP_ifnull
+				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+				code.Codes[code.CodeLength+3] = cg.OP_goto
+				length := code.CodeLength + 3
+				code.CodeLength += 6
+				context.MakeStackMap(code, state, code.CodeLength)
+				m.buildReturnFromFunctionReturnList(class, code, context)
+				context.MakeStackMap(code, state, code.CodeLength)
+				binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
 			}
-			//else {
-			//	stack := m.buildReturnFromFunctionReturnList(class, code, context)
-			//	if stack > maxstack {
-			//		maxstack = stack
-			//	}
-			//}
 		}
 		index--
-
 	}
 	return
 }

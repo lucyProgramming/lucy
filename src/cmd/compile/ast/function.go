@@ -32,12 +32,7 @@ type Function struct {
 type CallChecker func(block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos)
 
 type AutoVarForReturnBecauseOfDefer struct {
-	/*
-		flag is 1 means there is exception,but handled
-	*/
-	//ExceptionIsNotNilWhenEnter uint16
-	IfReachBotton uint16
-	ForArrayList  uint16
+	ForArrayList uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {

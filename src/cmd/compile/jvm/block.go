@@ -7,9 +7,6 @@ import (
 )
 
 func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
-	if len(b.Defers) > 0 { // should be more defers when compile
-		context.Defers = append(context.Defers, b.Defers...)
-	}
 	for _, s := range b.Statements {
 		maxstack := m.buildStatement(class, code, b, s, context, state)
 		if maxstack > code.MaxStack {

@@ -249,11 +249,13 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 			copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		}
 	}
-
+	continueState := (&StackMapState{}).FromLast(forState)
 	// build block
 	m.buildBlock(class, code, s.Block, context, forState)
 	//innc k
 	s.ContinueOPOffset = code.CodeLength
+	continueState.addTop(forState)
+	context.MakeStackMap(code, continueState, code.CodeLength)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.K > 255 {
 		panic("over 255")
