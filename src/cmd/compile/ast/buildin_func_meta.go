@@ -1,14 +1,16 @@
 package ast
 
-type BuildinPrintMeta struct {
-	FirstParameterIsStream bool
+type BuildinFunctionPrintMeta struct {
+	Stream *Expression
 }
 
-type BuildinPrintfMeta struct {
-	BuildinPrintMeta
+type BuildinFunctionPrintfMeta struct {
+	BuildinFunctionPrintMeta
+	Format     *Expression
 	ArgsLength int
 }
 
-type BuildinSprintMeta struct {
+type BuildinFunctionSprintfMeta struct {
+	Format     *Expression
 	ArgsLength int
 }

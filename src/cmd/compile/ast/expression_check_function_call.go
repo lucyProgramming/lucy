@@ -21,7 +21,8 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		ret[0].Typ = VARIABLE_TYPE_OBJECT
 		ret[0].Class = t.Class
 		if len(call.Args) != 1 {
-			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
+				errMsgPrefix(e.Pos)))
 			return ret
 		}
 		e.Typ = EXPRESSION_TYPE_CONVERTION_TYPE

@@ -9,8 +9,8 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 	context *Context, state *StackMapState) (maxstack uint16) {
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxstack, _ = m.build(class, code, call.Args[0], context, state)
-	meta := call.Meta.(*ast.BuildinSprintMeta)
+	meta := call.Meta.(*ast.BuildinFunctionSprintfMeta)
+	maxstack, _ = m.build(class, code, meta.Format, context, state)
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("[Ljava/lang/Object;", code.Codes[code.CodeLength+1:code.CodeLength+3])

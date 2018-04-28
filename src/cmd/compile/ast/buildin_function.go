@@ -95,6 +95,18 @@ func registerBuildinFunctions() {
 	sprintfBuildFunction := &Function{}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_SPRINTF] = sprintfBuildFunction
 	sprintfBuildFunction.Name = common.BUILD_IN_FUNCTION_SPRINTF
+	sprintfBuildFunction.IsBuildin = true
+	{
+		sprintfBuildFunction.Typ.ReturnList = make([]*VariableDefinition, 1)
+		sprintfBuildFunction.Typ.ReturnList[0] = &VariableDefinition{}
+		sprintfBuildFunction.Typ.ReturnList[0].Name = "retrunValue"
+		sprintfBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
+		sprintfBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_STRING
+	}
+	sprintfBuildFunction.callChecker = func(e *ExpressionFunctionCall, block *Block, errs *[]error,
+		args []*VariableType, returnList ReturnList, pos *Pos) {
+
+	}
 }
 
 func monitorChecker(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {

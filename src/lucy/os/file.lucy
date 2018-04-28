@@ -101,7 +101,6 @@ public class File extends io.File {
 			err = new error("file not exists");
 			return ;
 		}
-		defer x := 100;
 		names := f.list();
 		fis = new []File(names.size());
 		for k,v := range names{
