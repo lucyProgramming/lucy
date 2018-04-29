@@ -7,8 +7,8 @@ import (
 
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	if s.RangeAttr != nil {
-		if s.RangeAttr.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY ||
-			s.RangeAttr.Expression.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+		if s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_ARRAY ||
+			s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 			return m.buildForRangeStatementForArray(class, code, s, context, state)
 		} else { // for map
 			return m.buildForRangeStatementForMap(class, code, s, context, state)

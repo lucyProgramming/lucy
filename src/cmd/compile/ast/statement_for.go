@@ -24,7 +24,7 @@ type StatmentForRangeAttr struct {
 	IdentifierV *ExpressionIdentifer
 	ExpressionK *Expression
 	ExpressionV *Expression
-	Expression  *Expression
+	RangeOn     *Expression
 	Typ         int
 }
 
@@ -87,7 +87,7 @@ func (s *StatementFor) checkRange() []error {
 			s.RangeAttr.ExpressionV = lefts[0]
 		}
 	}
-	s.RangeAttr.Expression = rangeExpression
+	s.RangeAttr.RangeOn = rangeExpression
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
