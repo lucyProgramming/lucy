@@ -30,7 +30,8 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
 		find := t.Package.Block.SearchByName(dot.Name)
 		if find == nil {
-			err = fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), dot.Name)
+			fmt.Println(t.Package.Block.Vars)
+			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
 		}
@@ -42,7 +43,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			tt.Function = f
 			tt.Pos = e.Pos
 			if (f.AccessFlags & cg.ACC_METHOD_PUBLIC) == 0 {
-				err = fmt.Errorf("%s function is not public", errMsgPrefix(e.Pos))
+				err = fmt.Errorf("%s function '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			return tt
@@ -52,7 +53,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			tt := t.Typ.Clone()
 			tt.Pos = e.Pos
 			if t.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
-				err = fmt.Errorf("%s function is not public", errMsgPrefix(e.Pos))
+				err = fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			return tt
@@ -63,7 +64,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			tt.Typ = VARIABLE_TYPE_CLASS
 			tt.Class = t
 			if (t.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
-				err = fmt.Errorf("%s class is not public", errMsgPrefix(e.Pos))
+				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			return tt
@@ -72,7 +73,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			tt := t.Typ.Clone()
 			tt.Pos = e.Pos
 			if (t.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
-				err = fmt.Errorf("%s variable is not public", errMsgPrefix(e.Pos))
+				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			dot.PackageVariableDefinition = t
@@ -83,7 +84,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, err)
 			return nil
 		default:
-			err = fmt.Errorf("%s name is not a expression", errMsgPrefix(e.Pos), dot.Name)
+			err = fmt.Errorf("%s name '%s' is not a expression", errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
 		}

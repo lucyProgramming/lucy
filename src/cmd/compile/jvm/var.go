@@ -11,6 +11,7 @@ var (
 	FunctionDefaultValueParser FunctionDefaultValueParse
 	java_throwable_class       = "java/lang/Throwable"
 	arrayListPacker            ArrayListPacker
+	java_print_stream_class    = "java/io/PrintStream"
 )
 
 const (

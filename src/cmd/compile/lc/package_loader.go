@@ -41,7 +41,7 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		}
 		p = filepath.Join(v, "class", resouceName+".class")
 		f, err = os.Stat(p)
-		if err == nil && f.IsDir() == false { // directory is package
+		if err == nil && f.IsDir() == false { // class file
 			realpaths = append(realpaths, &Resource{
 				kind:     RESOUCE_KIND_LUCY_CLASS,
 				realpath: p,
@@ -73,29 +73,34 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 	if len(realpaths) == 0 {
 		return nil, nil, fmt.Errorf("resource '%v' not found", resouceName)
 	}
-	realpathMap := make(map[string]*Resource)
+	realpathMap := make(map[string][]*Resource)
 	for _, v := range realpaths {
-		realpathMap[v.realpath] = v
+		_, ok := realpathMap[v.realpath]
+		if ok {
+			realpathMap[v.realpath] = append(realpathMap[v.realpath], v)
+		} else {
+			realpathMap[v.realpath] = []*Resource{v}
+		}
 	}
 	if len(realpathMap) > 1 {
 		errMsg := "not 1 resource named '" + resouceName + "' present:\n"
-		for _, v := range realpaths {
-			switch v.kind {
+		for _, v := range realpathMap {
+			switch v[0].kind {
 			case RESOUCE_KIND_JAVA_CLASS:
-				errMsg += fmt.Sprintf("\t '%s' is a java class\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a java class\n", v[0].realpath)
 			case RESOUCE_KIND_JAVA_PACKAGE:
-				errMsg += fmt.Sprintf("\t '%s' is a java package\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a java package\n", v[0].realpath)
 			case RESOUCE_KIND_LUCY_CLASS:
-				errMsg += fmt.Sprintf("\t '%s' is a lucy class\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a lucy class\n", v[0].realpath)
 			case RESOUCE_KIND_LUCY_PACKAGE:
-				errMsg += fmt.Sprintf("\t '%s' is a lucy package\n", v.realpath)
+				errMsg += fmt.Sprintf("\t '%s' is a lucy package\n", v[0].realpath)
 			}
 		}
 		return nil, nil, fmt.Errorf(errMsg)
 	}
 	if realpaths[0].kind == RESOUCE_KIND_LUCY_CLASS {
 		if filepath.Base(realpaths[0].realpath) == mainClassName {
-			return nil, nil, fmt.Errorf("%s is special class for global variable and ...", mainClassName)
+			return nil, nil, fmt.Errorf("%s is special class for global variable and other things", mainClassName)
 		}
 	}
 	if realpaths[0].kind == RESOUCE_KIND_JAVA_CLASS {

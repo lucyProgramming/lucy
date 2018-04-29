@@ -127,6 +127,7 @@ func (s *StatementFor) checkRange() []error {
 						vd.Typ = rangeOn.Map.V.Clone()
 					}
 					vd.Pos = pos2
+					vd.Name = identifier2.Name
 					err = s.Block.insert(identifier2.Name, s.Condition.Pos, vd)
 					if err != nil {
 						errs = append(errs, err)
@@ -152,6 +153,7 @@ func (s *StatementFor) checkRange() []error {
 						vt = rangeOn.Map.K.Clone()
 						vt.Pos = rangeOn.Pos
 					}
+					vd.Name = identifier.Name
 					vd.Typ = vt
 					vd.Pos = pos
 					err = s.Block.insert(identifier.Name, pos, vd)
@@ -181,6 +183,7 @@ func (s *StatementFor) checkRange() []error {
 					} else {
 						vd.Typ = rangeOn.Map.V.Clone()
 					}
+					vd.Name = identifier.Name
 					vd.Typ.Pos = pos2
 					vd.Pos = pos2
 					err = s.Block.insert(identifier.Name, s.Condition.Pos, vd)

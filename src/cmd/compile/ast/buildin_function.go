@@ -11,7 +11,25 @@ func init() {
 
 func registerBuildinFunctions() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
-		callChecker: func(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+		buildChecker: func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+			meta := &BuildinFunctionPrintfMeta{}
+			e.Meta = meta
+			if len(args) == 0 {
+				return // not error
+			}
+
+			if args[0].Typ == VARIABLE_TYPE_OBJECT {
+				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
+				if have {
+					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+					if err != nil {
+						*errs = append(*errs, err)
+					} else {
+						meta.Stream = e.Args[0]
+						e.Args = e.Args[1:]
+					}
+				}
+			}
 		},
 		IsBuildin: true,
 		Name:      common.BUILD_IN_FUNCTION_PRINT,
@@ -28,7 +46,7 @@ func registerBuildinFunctions() {
 		catchBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
 		//class is going to make value by checker
 	}
-	catchBuildFunction.callChecker = func(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+	catchBuildFunction.buildChecker = func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil ||
 			block.InheritedAttribute.Defer.allowCatch == false {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
@@ -50,14 +68,14 @@ func registerBuildinFunctions() {
 						errMsgPrefix(pos), err))
 					return
 				}
-				returnList[0].Typ.Class = c.(*Class)
+				ft.ReturnList[0].Typ.Class = c.(*Class)
 				err = block.InheritedAttribute.Defer.registerExceptionClass(c.(*Class))
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 				}
 				return
 			} else {
-				returnList[0].Typ.Class = block.InheritedAttribute.Defer.ExceptionClass
+				ft.ReturnList[0].Typ.Class = block.InheritedAttribute.Defer.ExceptionClass
 				return
 			}
 		}
@@ -77,19 +95,19 @@ func registerBuildinFunctions() {
 		}
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
-		callChecker: oneAnyTypeParameterChecker,
-		IsBuildin:   true,
-		Name:        common.BUILD_IN_FUNCTION_PANIC,
+		buildChecker: oneAnyTypeParameterChecker,
+		IsBuildin:    true,
+		Name:         common.BUILD_IN_FUNCTION_PANIC,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
-		callChecker: monitorChecker,
-		IsBuildin:   true,
-		Name:        common.BUILD_IN_FUNCTION_MONITORENTER,
+		buildChecker: monitorChecker,
+		IsBuildin:    true,
+		Name:         common.BUILD_IN_FUNCTION_MONITORENTER,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
-		callChecker: monitorChecker,
-		IsBuildin:   true,
-		Name:        common.BUILD_IN_FUNCTION_MONITOREXIT,
+		buildChecker: monitorChecker,
+		IsBuildin:    true,
+		Name:         common.BUILD_IN_FUNCTION_MONITOREXIT,
 	}
 	// sprintf
 	sprintfBuildFunction := &Function{}
@@ -103,13 +121,84 @@ func registerBuildinFunctions() {
 		sprintfBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
 		sprintfBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_STRING
 	}
-	sprintfBuildFunction.callChecker = func(e *ExpressionFunctionCall, block *Block, errs *[]error,
-		args []*VariableType, returnList ReturnList, pos *Pos) {
-
+	sprintfBuildFunction.buildChecker = func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error,
+		args []*VariableType, pos *Pos) {
+		if len(args) == 0 {
+			err := fmt.Errorf("%s '%s' expect one argument at lease",
+				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_SPRINTF)
+			*errs = append(*errs, err)
+			return
+		}
+		if args[0].Typ != VARIABLE_TYPE_STRING {
+			err := fmt.Errorf("%s '%s' first argument must be string",
+				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_SPRINTF)
+			*errs = append(*errs, err)
+			return
+		}
+		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+		if err != nil {
+			*errs = append(*errs, err)
+			return
+		}
+		meta := &BuildinFunctionSprintfMeta{}
+		e.Meta = meta
+		meta.Format = e.Args[0]
+		meta.ArgsLength = len(args) - 1
+		e.Args = e.Args[1:]
+	}
+	// printf
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
+		buildChecker: func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+			meta := &BuildinFunctionPrintfMeta{}
+			e.Meta = meta
+			if len(args) == 0 {
+				err := fmt.Errorf("%s '%s' expect one argument at least",
+					errMsgPrefix(pos), common.BUILD_IN_FUNCTION_PRINTF)
+				*errs = append(*errs, err)
+				return
+			}
+			if args[0].Typ == VARIABLE_TYPE_OBJECT {
+				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
+				if have {
+					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+					if err != nil {
+						*errs = append(*errs, err)
+						return
+					} else {
+						meta.Stream = e.Args[0]
+						e.Args = e.Args[1:]
+						args = args[1:]
+					}
+				}
+			}
+			if len(args) == 0 {
+				err := fmt.Errorf("%s missing format argument",
+					errMsgPrefix(pos))
+				*errs = append(*errs, err)
+				return
+			}
+			if args[0].Typ != VARIABLE_TYPE_STRING {
+				err := fmt.Errorf("%s format must be string",
+					errMsgPrefix(pos))
+				*errs = append(*errs, err)
+				return
+			}
+			_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+			if err != nil {
+				*errs = append(*errs, err)
+				return
+			}
+			meta.Format = e.Args[0]
+			e.Args = e.Args[1:]
+			meta.ArgsLength = len(args)
+		},
+		IsBuildin: true,
+		Name:      common.BUILD_IN_FUNCTION_PRINTF,
 	}
 }
 
-func monitorChecker(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+func monitorChecker(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 		return

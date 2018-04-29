@@ -8,8 +8,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	no := e.Data.(*ExpressionNew)
 	err := no.Typ.resolve(block)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
-		fmt.Println(err)
+		*errs = append(*errs, err)
 		return nil
 	}
 	if no.Typ.Typ == VARIABLE_TYPE_MAP {

@@ -9,14 +9,19 @@ import (
 	function print
 */
 func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall, context *Context, state *StackMapState) (maxstack uint16) {
-	code.Codes[code.CodeLength] = cg.OP_getstatic
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      "java/lang/System",
-		Field:      "out",
-		Descriptor: "Ljava/io/PrintStream;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	maxstack = 1
+	meta := call.Meta.(*ast.BuildinFunctionPrintfMeta)
+	if meta.Stream == nil {
+		code.Codes[code.CodeLength] = cg.OP_getstatic
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      "java/lang/System",
+			Field:      "out",
+			Descriptor: "Ljava/io/PrintStream;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		maxstack = 1
+	} else { // get stream from args
+		maxstack, _ = m.build(class, code, meta.Stream, context, state)
+	}
 	if len(call.Args) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -27,13 +32,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 3
 		return
 	}
-	{
-		t := &ast.VariableType{}
-		t.Typ = ast.VARIABLE_TYPE_OBJECT
-		t.Class = &ast.Class{}
-		t.Class.Name = "java/io/PrintStream"
-		state.pushStack(class, t)
-	}
+
+	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
+
 	defer func() {
 		// print have no return value,stack is empty
 		state.Stacks = []*cg.StackMap_verification_type_info{}

@@ -160,7 +160,7 @@ func (m *MakeClass) mkVars() {
 	for k, v := range m.p.Block.Vars {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
-		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
+		//f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC

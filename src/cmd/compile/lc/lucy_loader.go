@@ -109,6 +109,8 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
+	pack.Block.Vars = make(map[string]*ast.VariableDefinition)
+	pack.Block.Consts = make(map[string]*ast.Const)
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
@@ -149,21 +151,16 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 				valueIndex = binary.BigEndian.Uint16(c.ConstPool[valueIndex].Info) // const_string_info
 				cos.Value = string(c.ConstPool[valueIndex].Info)                   // utf 8
 			}
-			if pack.Block.Consts == nil {
-				pack.Block.Consts = make(map[string]*ast.Const)
-			}
 			pack.Block.Consts[name] = cos
 		} else {
 			//global vars
 			vd := &ast.VariableDefinition{}
 			vd.Name = name
+
 			vd.AccessFlags = f.AccessFlags
 			vd.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
 			vd.Typ = typ
 			vd.IsGlobal = true
-			if pack.Block.Vars == nil {
-				pack.Block.Vars = make(map[string]*ast.VariableDefinition)
-			}
 			pack.Block.Vars[name] = vd
 			if t := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
 				index := binary.BigEndian.Uint16(t[0].Info)
@@ -211,6 +208,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 	if pack.Block.Types == nil {
 		pack.Block.Types = make(map[string]*ast.VariableType)
 	}
+
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
 		index := binary.BigEndian.Uint16(v.Info)
 		name, typ, err := jvm.LucyTypeAliasParser.Decode(c.ConstPool[index].Info)

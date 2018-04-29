@@ -28,7 +28,7 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func oneAnyTypeParameterChecker(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos) {
+func oneAnyTypeParameterChecker(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 	}
@@ -116,6 +116,10 @@ func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableT
 func searchBuildIns(name string) interface{} {
 	var t interface{}
 	var ok bool
+	t, ok = buildinFunctionsMap[name]
+	if ok {
+		return t
+	}
 	if lucyLangBuildinPackage != nil {
 		t, ok = lucyLangBuildinPackage.Block.Types[name]
 		if ok {
@@ -133,10 +137,6 @@ func searchBuildIns(name string) interface{} {
 		if ok {
 			return t
 		}
-	}
-	t, ok = buildinFunctionsMap[name]
-	if ok {
-		return t
 	}
 	return nil
 }

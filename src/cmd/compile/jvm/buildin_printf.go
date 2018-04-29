@@ -1,140 +1,109 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 /*
-	unction printf
+	function printf
 */
 func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	//code.Codes[code.CodeLength] = cg.OP_getstatic
-	//class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-	//	Class:      "java/lang/System",
-	//	Field:      "out",
-	//	Descriptor: "Ljava/io/PrintStream;",
-	//}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//code.CodeLength += 3
-	//maxstack = 1
-	//{
-	//	t := &ast.VariableType{}
-	//	t.Typ = ast.VARIABLE_TYPE_OBJECT
-	//	t.Class = &ast.Class{}
-	//	t.Class.Name = "java/io/PrintStream"
-	//	state.pushStack(class, t)
-	//}
-	//defer func() {
-	//	// print have no return value,stack is empty
-	//	state.Stacks = []*cg.StackMap_verification_type_info{}
-	//}()
-	//// must be string
-	//if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
-	//	stack, _ := m.build(class, code, call.Args[0], context, state)
-	//	if t := 1 + stack; t > maxstack {
-	//		maxstack = t
-	//	}
-	//	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	//	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//		Class: "java/io/PrintStream",
-	//	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//	return
-	//}
-	//
-	//code.Codes[code.CodeLength] = cg.OP_invokespecial
-	//class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//	Class:      "java/lang/StringBuilder",
-	//	Method:     special_method_init,
-	//	Descriptor: "()V",
-	//}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//code.CodeLength += 3
-	//maxstack = 3
-	//currentStack := uint16(2)
-	//app := func(isLast bool) {
-	//	//
-	//	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	//	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//		Class:      "java/lang/StringBuilder",
-	//		Method:     "append",
-	//		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
-	//	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//	code.CodeLength += 3
-	//	if isLast == false {
-	//		code.Codes[code.CodeLength] = cg.OP_ldc_w
-	//		class.InsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      "java/lang/StringBuilder",
-	//			Method:     "append",
-	//			Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	}
-	//}
-	//{
-	//	t := &ast.VariableType{}
-	//	t.Typ = ast.VARIABLE_TYPE_OBJECT
-	//	t.Class = &ast.Class{}
-	//	t.Class.Name = "java/lang/StringBuilder"
-	//	state.pushStack(class, t)
-	//}
-	//
-	//for k, v := range call.Args {
-	//	var variableType *ast.VariableType
-	//	if v.MayHaveMultiValue() && len(v.Values) > 1 {
-	//		stack, _ := m.build(class, code, v, context, state)
-	//		if t := stack + currentStack; t > maxstack {
-	//			maxstack = t
-	//		}
-	//		m.buildStoreArrayListAutoVar(code, context)
-	//		for kk, tt := range v.Values {
-	//			stack = m.unPackArraylist(class, code, kk, tt, context)
-	//			if t := stack + currentStack; t > maxstack {
-	//				maxstack = t
-	//			}
-	//			m.stackTop2String(class, code, tt, context, state)
-	//			if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
-	//				if t := 2 + currentStack; t > maxstack {
-	//					maxstack = t
-	//				}
-	//			}
-	//			app(k == len(call.Args)-1 && kk == len(v.Values)-1) // last and last
-	//		}
-	//		continue
-	//	}
-	//	variableType = v.Value
-	//	if v.MayHaveMultiValue() {
-	//		variableType = v.Values[0]
-	//	}
-	//	stack, es := m.build(class, code, v, context, state)
-	//	if len(es) > 0 {
-	//		backPatchEs(es, code.CodeLength)
-	//		context.MakeStackMap(code, state, code.CodeLength)
-	//		state.pushStack(class, variableType)
-	//		state.popStack(1)
-	//	}
-	//	if t := currentStack + stack; t > maxstack {
-	//		maxstack = t
-	//	}
-	//	m.stackTop2String(class, code, variableType, context, state)
-	//	app(k == len(call.Args)-1)
-	//}
-	//// tostring
-	//code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	//class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//	Class:      "java/lang/StringBuilder",
-	//	Method:     "toString",
-	//	Descriptor: "()Ljava/lang/String;",
-	//}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//code.CodeLength += 3
-	//// call println
-	//code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	//class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//	Class:      "java/io/PrintStream",
-	//	Method:     "println",
-	//	Descriptor: "(Ljava/lang/String;)V",
-	//}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//code.CodeLength += 3
+	fmt.Println(state.Stacks)
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
+	call := e.Data.(*ast.ExpressionFunctionCall)
+	meta := call.Meta.(*ast.BuildinFunctionPrintfMeta)
+	if meta.Stream == nil {
+		code.Codes[code.CodeLength] = cg.OP_getstatic
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      "java/lang/System",
+			Field:      "out",
+			Descriptor: "Ljava/io/PrintStream;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		maxstack = 1
+	} else { // get stream from args
+		maxstack, _ = m.build(class, code, meta.Stream, context, state)
+	}
+	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
+	stack, _ := m.build(class, code, meta.Format, context, state)
+	if t := 1 + stack; t > maxstack {
+		maxstack = t
+	}
+	loadInt32(class, code, int32(meta.ArgsLength))
+	code.Codes[code.CodeLength] = cg.OP_anewarray
+	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	currentStack := uint16(3)
+	if currentStack > maxstack {
+		maxstack = currentStack
+	}
+	state.pushStack(class, state.newObjectVariableType(java_string_class))
+	objectArray := &ast.VariableType{}
+	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
+	state.pushStack(class, objectArray)
+	index := int32(0)
+	for _, v := range call.Args {
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+			currentStack = 3
+			stack, _ := m.build(class, code, v, context, state)
+			if t := currentStack + stack; t > maxstack {
+				maxstack = t
+			}
+			// store in temp var
+			arrayListPacker.buildStoreArrayListAutoVar(code, context)
+			for kk, _ := range v.Values {
+				currentStack = 3
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				loadInt32(class, code, index)
+				currentStack += 2
+				stack = arrayListPacker.unPackObject(class, code, kk, context)
+				if t := currentStack + stack; t > maxstack {
+					maxstack = t
+				}
+				code.Codes[code.CodeLength] = cg.OP_aastore
+				code.CodeLength++
+				index++
+			}
+			continue
+		}
+		currentStack = 3
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		loadInt32(class, code, index)
+		currentStack += 2
+		stack, es := m.build(class, code, v, context, state)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
+			state.pushStack(class, objectArray)
+			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+			state.pushStack(class, v.Value)
+			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(3) // bool value
+		}
+		if t := currentStack + stack; t > maxstack {
+			maxstack = t
+		}
+		if v.Value.IsPointer() == false {
+			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, v.Value)
+		}
+		code.Codes[code.CodeLength] = cg.OP_aastore
+		code.CodeLength++
+		index++
+	}
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      java_print_stream_class,
+		Method:     "printf",
+		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;",
+	},
+		code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength+3] = cg.OP_pop
+	code.CodeLength += 4
 	return
 }

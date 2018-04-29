@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -125,7 +126,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	} else {
 		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.Expression.Value.Map.V)
 	}
-	autoVar.V = code.MaxStack
+	autoVar.V = code.MaxLocals
 	code.MaxLocals += jvmSize(s.RangeAttr.Expression.Value.Map.V)
 	//store to V
 	copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ, autoVar.V)...)
@@ -152,7 +153,21 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	//store v in real v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			panic("111")
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+			copyOP(code,
+				loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ, autoVar.V)...)
+			if t := 2 + jvmSize(s.RangeAttr.Expression.Value.Map.V); t > maxstack {
+				maxstack = t
+			}
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
+			copyOP(code,
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+			forState.appendLocals(class,
+				state.newObjectVariableType(closure.getMeta(s.RangeAttr.Expression.Value.Map.V.Typ).className))
 		} else {
 			// load v
 			copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
@@ -162,11 +177,24 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			copyOP(code, storeSimpleVarOp(s.RangeAttr.Expression.Value.Map.V.Typ,
 				s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 			forState.appendLocals(class, s.RangeAttr.Expression.Value.Map.V)
-
 		}
 		if s.RangeAttr.ModelKV {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				panic("111")
+				closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				copyOP(code,
+					loadSimpleVarOp(s.RangeAttr.IdentifierK.Var.Typ.Typ, autoVar.K)...)
+				if t := 2 + jvmSize(s.RangeAttr.IdentifierK.Var.Typ); t > maxstack {
+					maxstack = t
+				}
+				s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
+				code.MaxLocals++
+				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
+				copyOP(code,
+					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+				forState.appendLocals(class,
+					state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierK.Var.Typ.Typ).className))
 			} else {
 				copyOP(code, loadSimpleVarOp(s.RangeAttr.Expression.Value.Map.K.Typ,
 					autoVar.K)...)
@@ -180,8 +208,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	} else { // for k,v  = range xxx
 		// store v
+		stackLength := len(forState.Stacks)
 		stack, remainStack, op, _, classname, name, descriptor :=
-			m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionV, context, state)
+			m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionV, context, forState)
 		if stack > maxstack { // this means  current stack is 0
 			maxstack = stack
 		}
@@ -191,9 +220,12 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			maxstack = t
 		}
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
+		fmt.Println(forState.Stacks)
+		forState.popStack(len(forState.Stacks) - stackLength)
 		if s.RangeAttr.ModelKV {
+			stackLength := len(forState.Stacks)
 			stack, remainStack, op, _, classname, name, descriptor :=
-				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, state)
+				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, forState)
 			if stack > maxstack { // this means  current stack is 0
 				maxstack = stack
 			}
@@ -208,6 +240,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 					s.RangeAttr.Expression.Value.Map.K)
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)
+			forState.popStack(len(forState.Stacks) - stackLength)
 		}
 	}
 	// build block

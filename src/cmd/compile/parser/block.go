@@ -20,6 +20,7 @@ func (b *Block) consume(c map[int]bool) {
 }
 
 func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err error) {
+	block.Pos = b.parser.mkPos()
 	endTokenM := make(map[int]struct{})
 	for _, v := range endTokens {
 		endTokenM[v] = struct{}{}
@@ -41,6 +42,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
 				b.Next()
 			}
+			block.EndPos = b.parser.mkPos()
 			break
 		}
 		switch b.parser.token.Type {
@@ -53,7 +55,8 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			b.Next()
 			if validAfterDefer() == false {
 				reset()
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not a valid token('%s') after defer", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not a valid token('%s') after defer",
+					b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			}
 		case lex.TOKEN_IDENTIFIER:
 			b.parseExpressionStatement(block, isDefer)
@@ -90,13 +93,15 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 					Data: &ast.ExpressionDeclareVariable{Vs: vs, Values: es},
 					Pos:  pos,
 				},
+				Pos: pos,
 			}
 			block.Statements = append(block.Statements, s)
 			if isDefer {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with expression var has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s defer mixup with expression var not allow",
+						b.parser.errorMsgPrefix()))
 			}
 			reset()
-
 		case lex.TOKEN_IF:
 			i, err := b.parseIf()
 			if err != nil {
@@ -109,7 +114,9 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				StatementIf: i,
 			})
 			if isDefer {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with  statment if has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s defer mixup with  statment if not allow",
+						b.parser.errorMsgPrefix()))
 			}
 			reset()
 		case lex.TOKEN_FOR:
@@ -140,13 +147,17 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			})
 		case lex.TOKEN_CONST:
 			if isDefer {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with const definition has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s defer mixup with const definition not allow",
+						b.parser.errorMsgPrefix()))
 				reset()
 			}
 			pos := b.parser.mkPos()
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing identifier after const,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s missing identifier after const,but '%s'",
+						b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
@@ -159,15 +170,19 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			}
 			if typ != lex.TOKEN_ASSIGN {
 				b.parser.errs = append(b.parser.errs,
-					fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’", b.parser.errorMsgPrefix(vs[0].Pos)))
+					fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’",
+						b.parser.errorMsgPrefix(vs[0].Pos)))
 			}
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after const declaration", b.parser.errorMsgPrefix()))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s missing semicolon after const declaration",
+						b.parser.errorMsgPrefix()))
 				b.consume(untils_rc_semicolon)
 			}
 			if len(vs) != len(es) {
 				b.parser.errs = append(b.parser.errs,
-					fmt.Errorf("%s cannot assign %d values to %d destination", b.parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
+					fmt.Errorf("%s cannot assign %d values to %d destination",
+						b.parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
 			}
 			r := &ast.Statement{}
 			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
@@ -190,8 +205,9 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		case lex.TOKEN_RETURN:
 			pos := b.parser.mkPos()
 			if isDefer {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement return has no meaning",
-					b.parser.errorMsgPrefix()))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s defer mixup with statement return not allow",
+						b.parser.errorMsgPrefix()))
 				reset()
 			}
 			b.Next()
@@ -214,7 +230,9 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			}
 			r.Expressions = es
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  no ‘;’after return statement, but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s  no semicolon after return statement, but %s",
+						b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				continue
 			}
 			b.Next()
@@ -246,8 +264,9 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		case lex.TOKEN_SKIP:
 			pos := b.parser.mkPos()
 			if isDefer {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning",
-					b.parser.errorMsgPrefix()))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s defer mixup with statement not allow",
+						b.parser.errorMsgPrefix()))
 				reset()
 			}
 			b.Next()
@@ -262,7 +281,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		case lex.TOKEN_CONTINUE:
 			pos := b.parser.mkPos()
 			if isDefer {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning",
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement not allow",
 					b.parser.errorMsgPrefix()))
 				reset()
 			}
@@ -280,9 +299,15 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			})
 		case lex.TOKEN_BREAK:
 			pos := b.parser.mkPos()
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement 'break' not allow",
+					b.parser.errorMsgPrefix()))
+				reset()
+			}
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'break'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'break'",
+					b.parser.errorMsgPrefix()))
 			} else {
 				b.Next()
 			}
@@ -293,9 +318,16 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			})
 		case lex.TOKEN_GOTO:
 			pos := b.parser.mkPos()
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement 'goto' not allow",
+					b.parser.errorMsgPrefix()))
+				reset()
+			}
 			b.Next() // skip goto key word
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing identifier after goto statement", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s  missing identifier after goto statement, but '%s'",
+						b.parser.errorMsgPrefix(), b.parser.token.Desp))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
@@ -309,11 +341,18 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			})
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON { // incase forget
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolog after goto statement", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s  missing semicolon after goto statement,but '%s'",
+						b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			}
 			b.Next()
 		case lex.TOKEN_TYPE:
 			pos := b.parser.mkPos()
+			if isDefer {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement 'type' not allow",
+					b.parser.errorMsgPrefix()))
+				reset()
+			}
 			alias, err := b.parser.parseTypeaAlias()
 			if err != nil {
 				b.consume(untils_semicolon)

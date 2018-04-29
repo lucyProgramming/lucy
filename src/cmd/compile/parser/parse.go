@@ -80,9 +80,10 @@ func (p *Parser) Parse() []error {
 			}
 			d := &ast.ExpressionDeclareVariable{Vs: vs, Values: es}
 			e := &ast.Expression{
-				Typ:  ast.EXPRESSION_TYPE_VAR,
-				Data: d,
-				Pos:  pos,
+				Typ:      ast.EXPRESSION_TYPE_VAR,
+				Data:     d,
+				Pos:      pos,
+				IsPublic: ispublic,
 			}
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: e,
@@ -247,7 +248,9 @@ func (p *Parser) validAfterPublic() {
 		p.token.Type == lex.TOKEN_ENUM ||
 		p.token.Type == lex.TOKEN_IDENTIFIER ||
 		p.token.Type == lex.TOKEN_INTERFACE ||
-		p.token.Type == lex.TOKEN_CONST {
+		p.token.Type == lex.TOKEN_CONST ||
+		p.token.Type == lex.TOKEN_VAR {
+
 		return
 	}
 	var err error

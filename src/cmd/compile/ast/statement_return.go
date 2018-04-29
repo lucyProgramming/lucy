@@ -36,7 +36,7 @@ func (s *StatementReturn) check(b *Block) []error {
 	for k, v := range rs {
 		if k < len(returndValueTypes) && returndValueTypes[k] != nil {
 			if !v.Typ.TypeCompatible(returndValueTypes[k]) {
-				errs = append(errs, fmt.Errorf("%s cannot use %s as %s to return",
+				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s' to return",
 					errMsgPrefix(returndValueTypes[k].Pos),
 					returndValueTypes[k].TypeString(),
 					v.Typ.TypeString()))

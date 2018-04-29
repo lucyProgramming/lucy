@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -51,7 +52,10 @@ func (lc *LucyCompile) exit() {
 	if len(lc.Errs) > 0 {
 		code = 2
 	}
-	for _, v := range lc.Errs {
+	// sort error
+	es := Errors(lc.Errs)
+	sort.Sort(es)
+	for _, v := range es {
 		fmt.Fprintln(os.Stderr, v)
 	}
 	os.Exit(code)

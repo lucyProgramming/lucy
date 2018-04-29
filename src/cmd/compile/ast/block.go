@@ -10,6 +10,7 @@ type Block struct {
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool
 	Pos                        *Pos
+	EndPos                     *Pos
 	Consts                     map[string]*Const
 	Funcs                      map[string]*Function
 	Classes                    map[string]*Class

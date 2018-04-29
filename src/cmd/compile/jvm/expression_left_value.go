@@ -26,7 +26,6 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 	} else {
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	}
-
 	state.pushStack(class, state.newObjectVariableType(meta.className))
 	maxstack = 1
 	remainStack = 1

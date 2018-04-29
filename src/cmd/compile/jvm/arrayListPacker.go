@@ -105,7 +105,7 @@ func (a *ArrayListPacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCod
 	return
 }
 
-func (a *ArrayListPacker) unPackPObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (a *ArrayListPacker) unPackObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	k int, context *Context) (maxstack uint16) {
 	maxstack = 2
 	a.buildLoadArrayListAutoVar(code, context) // local array list on stack

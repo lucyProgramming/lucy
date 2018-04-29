@@ -13,6 +13,9 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			code.MaxStack = maxstack
 		}
 		if len(state.Stacks) > 0 {
+			for _, v := range state.Stacks {
+				fmt.Println(v.PayLoad)
+			}
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 	}

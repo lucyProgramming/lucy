@@ -200,7 +200,7 @@ func (e *Expression) OpName(typ ...int) string {
 }
 
 type Expression struct {
-	IsPublic                        bool
+	IsPublic                        bool // only for global var definition
 	IsCompileDefaultValueExpression bool
 	Value                           *VariableType   //
 	Values                          []*VariableType // functioncall or methodcall can with multi results

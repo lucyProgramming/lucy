@@ -1,14 +1,12 @@
 import "java/io";
 import "java/lang/System";
 
-var stdin io.InputStream;
-var stdout io.PrintStream;
-var stderr io.PrintStream;
+public var stdin io.InputStream = System.in;
+public var stdout io.PrintStream = System.out;
+public var stderr io.PrintStream = System.err;
 
 
-{
-	stdin = System.in;
-	stdout = System.out;
-	stderr = System.err;
-}
+
+
+
 

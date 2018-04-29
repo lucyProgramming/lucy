@@ -1,12 +1,15 @@
 package jvm
 
 import (
+	//"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxstack uint16) {
+	//fmt.Println(s.StatementName())
+	//	fmt.Printf("compile:%s %v\n", s.Pos.Filename, s.Pos.StartLine)
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {

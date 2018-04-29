@@ -13,7 +13,7 @@ type Function struct {
 	ClassMethod                    *cg.MethodHighLevel
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
-	callChecker                    CallChecker // used in build function
+	buildChecker                   buildFunctionChecker // used in build function
 	IsGlobal                       bool
 	IsBuildin                      bool
 	Used                           bool
@@ -29,7 +29,10 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
 }
-type CallChecker func(e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, returnList ReturnList, pos *Pos)
+type CallChecker func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	args []*VariableType, pos *Pos)
+
+type buildFunctionChecker = CallChecker
 
 type AutoVarForReturnBecauseOfDefer struct {
 	ForArrayList uint16
@@ -117,10 +120,8 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	//if f.Typ != nil {
 	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.check()...)
-	//}
 }
 
 func (f *Function) check(b *Block) []error {
@@ -137,7 +138,11 @@ func (f *Function) mkLastRetrunStatement() {
 		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN &&
 			f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_SKIP) {
 		s := &StatementReturn{}
-		f.Block.Statements = append(f.Block.Statements, &Statement{Typ: STATEMENT_TYPE_RETURN, StatementReturn: s})
+		f.Block.Statements = append(f.Block.Statements, &Statement{
+			Typ:             STATEMENT_TYPE_RETURN,
+			StatementReturn: s,
+			Pos:             f.Block.EndPos,
+		})
 	}
 }
 

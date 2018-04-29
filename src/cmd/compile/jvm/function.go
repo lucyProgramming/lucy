@@ -7,14 +7,29 @@ import (
 
 func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
 	for _, v := range f.Typ.ParameterList { // insert into locals
-		if v.BeenCaptured { // capture
-			//because of stack map,capture parameter not allow
-			panic("...")
-		} else {
-			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(v.Typ)
-			state.appendLocals(class, v.Typ)
+		v.LocalValOffset = code.MaxLocals
+		code.MaxLocals += jvmSize(v.Typ)
+		state.appendLocals(class, v.Typ)
+	}
+	for _, v := range f.Typ.ParameterList {
+		if v.BeenCaptured == false { // capture
+			continue
 		}
+		stack := closure.createCloureVar(class, code, v.Typ)
+		if stack > maxstack {
+			maxstack = stack
+		}
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		copyOP(code, loadSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
+		if t := 2 + jvmSize(v.Typ); t > maxstack {
+			maxstack = t
+		}
+		m.storeLocalVar(class, code, v)
+		v.LocalValOffset = code.MaxLocals
+		code.MaxLocals++
+		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
 	}
 	for _, v := range f.Typ.ReturnList {
 		currentStack := uint16(0)

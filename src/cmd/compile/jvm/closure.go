@@ -98,7 +98,8 @@ func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
 /*
 	create a closure var, inited and leave on stack
 */
-func (closure *Closure) createCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) (maxstack uint16) {
+func (closure *Closure) createCloureVar(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, v *ast.VariableType) (maxstack uint16) {
 	maxstack = 2
 	var meta *ClosureObjectMeta
 	switch v.Typ {

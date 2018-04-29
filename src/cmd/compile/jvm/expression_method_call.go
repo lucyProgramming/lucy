@@ -21,6 +21,24 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	if call.Class.LoadFromOutSide == false {
 		d = Descriptor.methodDescriptor(call.Method.Func)
 	}
+	pop := func() {
+		if e.IsStatementExpression {
+			if call.Method.Func.NoReturnValue() == false {
+				if len(e.Values) == 1 {
+					if jvmSize(e.Values[0]) == 1 {
+						code.Codes[code.CodeLength] = cg.OP_pop
+						code.CodeLength++
+					} else {
+						code.Codes[code.CodeLength] = cg.OP_pop2
+						code.CodeLength++
+					}
+				} else {
+					code.Codes[code.CodeLength] = cg.OP_pop
+					code.CodeLength++
+				}
+			}
+		}
+	}
 	if call.Method.IsStatic() {
 		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -33,6 +51,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		if t := m.valueJvmSize(e); t > maxstack {
 			maxstack = t
 		}
+		pop()
 		return
 	}
 	maxstack, _ = m.build(class, code, call.Expression, context, state)
@@ -56,7 +75,6 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 3
 		return
 	}
-
 	if call.Class.IsInterface() {
 		code.Codes[code.CodeLength] = cg.OP_invokeinterface
 		class.InsertInterfaceMethodrefConst(cg.CONSTANT_InterfaceMethodref_info_high_level{
@@ -76,5 +94,6 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
+	pop()
 	return
 }

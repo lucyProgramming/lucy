@@ -37,7 +37,7 @@ type Statement struct {
 	Defer             *Defer
 }
 
-func (s *Statement) statementName() string {
+func (s *Statement) StatementName() string {
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
 		return "expression statement"
@@ -61,6 +61,10 @@ func (s *Statement) statementName() string {
 		return "defer statement"
 	case STATEMENT_TYPE_BLOCK:
 		return "block statement"
+	case STATEMENT_TYPE_RETURN:
+		return "return statement"
+	default:
+		panic(11)
 	}
 	return ""
 }
@@ -91,11 +95,11 @@ func (s *Statement) check(block *Block) []error { // b is father
 		return s.StatementSwitch.check(block)
 	case STATEMENT_TYPE_BREAK:
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
-			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.statementName())}
+			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
 		} else {
 			if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
 				return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
-					errMsgPrefix(s.Pos), s.statementName())}
+					errMsgPrefix(s.Pos), s.StatementName())}
 			}
 			s.StatementBreak = &StatementBreak{}
 			if f, ok := block.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
@@ -107,11 +111,11 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_CONTINUE:
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
-				errMsgPrefix(s.Pos), s.statementName())}
+				errMsgPrefix(s.Pos), s.StatementName())}
 		}
 		if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
-				errMsgPrefix(s.Pos), s.statementName())}
+				errMsgPrefix(s.Pos), s.StatementName())}
 		}
 		if s.StatementContinue == nil {
 			s.StatementContinue = &StatementContinue{}
@@ -122,7 +126,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_RETURN:
 		if block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
-				errMsgPrefix(s.Pos), s.statementName())}
+				errMsgPrefix(s.Pos), s.StatementName())}
 		}
 		if len(block.Defers) > 0 {
 			block.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
@@ -148,7 +152,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_LABLE: // nothing to do
 	case STATEMENT_TYPE_SKIP:
 		if block.InheritedAttribute.Function.isPackageBlockFunction == false {
-			return []error{fmt.Errorf("cannot have '%s' at this scope", s.statementName())}
+			return []error{fmt.Errorf("cannot have '%s' at this scope", s.StatementName())}
 		}
 		return nil
 	}

@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
@@ -48,6 +49,9 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 					continue
 				}
 			}
+			if e.IsPublic {
+				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
+			}
 		}
 	} else {
 		for _, v := range vs.Vs {
@@ -70,6 +74,9 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				continue
 			}
 			vs.Values = append(vs.Values, v.Typ.mkDefaultValueExpression())
+			if e.IsPublic {
+				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
+			}
 		}
 	}
 	if noErr == false {
