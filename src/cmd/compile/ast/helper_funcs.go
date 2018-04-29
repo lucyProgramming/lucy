@@ -28,7 +28,7 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func oneAnyTypeParameterChecker(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 	}
@@ -64,7 +64,7 @@ func mkVoidType(pos *Pos) *VariableType {
 func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
 	ret = []*VariableType{}
 	for _, v := range ts {
-		if v == nil {
+		if v == nil { // avoid null pointer
 			continue
 		}
 		if !v.RightValueValid() {

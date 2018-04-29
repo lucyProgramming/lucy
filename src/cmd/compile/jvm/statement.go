@@ -70,6 +70,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_SWITCH:
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.STATEMENT_TYPE_SKIP: // skip this block
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++

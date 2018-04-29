@@ -20,7 +20,7 @@ func init() {
 	commands["run"] = &run.Run{}
 	commands["install_lucy_array"] = &install_lucy_array.InstallLucyArray{}
 	commands["clean"] = &clean.Clean{}
-	commands["test "] = &test.Test{}
+	commands["test"] = &test.Test{}
 }
 
 func printUsage() {
@@ -28,7 +28,8 @@ func printUsage() {
 	run                    run a lucy package
 	version                print version
 	clean                  clean compiled files
-	pack                   make jar`
+	pack                   make jar
+	test                   test a package`
 	fmt.Println(msg)
 }
 
@@ -46,6 +47,5 @@ func main() {
 		printUsage()
 		os.Exit(0)
 	}
-
 	c.RunCommand(os.Args[1], os.Args[2:])
 }

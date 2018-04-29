@@ -6,7 +6,7 @@ import "java/lang/System";
 /*
 	get env by k
 */
-public fn genEnv(k string)->
+public fn getEnv(k string)->
 (
 	v string = System.getenv(k)
 )

@@ -11,7 +11,7 @@ func init() {
 
 func registerBuildinFunctions() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
-		buildChecker: func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
 			e.Meta = meta
 			if len(args) == 0 {
@@ -46,7 +46,7 @@ func registerBuildinFunctions() {
 		catchBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
 		//class is going to make value by checker
 	}
-	catchBuildFunction.buildChecker = func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+	catchBuildFunction.buildChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil ||
 			block.InheritedAttribute.Defer.allowCatch == false {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
@@ -68,14 +68,14 @@ func registerBuildinFunctions() {
 						errMsgPrefix(pos), err))
 					return
 				}
-				ft.ReturnList[0].Typ.Class = c.(*Class)
+				ft.Typ.ReturnList[0].Typ.Class = c.(*Class)
 				err = block.InheritedAttribute.Defer.registerExceptionClass(c.(*Class))
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 				}
 				return
 			} else {
-				ft.ReturnList[0].Typ.Class = block.InheritedAttribute.Defer.ExceptionClass
+				ft.Typ.ReturnList[0].Typ.Class = block.InheritedAttribute.Defer.ExceptionClass
 				return
 			}
 		}
@@ -121,7 +121,7 @@ func registerBuildinFunctions() {
 		sprintfBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
 		sprintfBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_STRING
 	}
-	sprintfBuildFunction.buildChecker = func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	sprintfBuildFunction.buildChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*VariableType, pos *Pos) {
 		if len(args) == 0 {
 			err := fmt.Errorf("%s '%s' expect one argument at lease",
@@ -148,7 +148,7 @@ func registerBuildinFunctions() {
 	}
 	// printf
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
-		buildChecker: func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
 			e.Meta = meta
 			if len(args) == 0 {
@@ -197,7 +197,7 @@ func registerBuildinFunctions() {
 	}
 }
 
-func monitorChecker(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error,
+func monitorChecker(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 	args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))

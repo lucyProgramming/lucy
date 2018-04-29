@@ -29,7 +29,7 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
 }
-type CallChecker func(ft *FunctionType, e *ExpressionFunctionCall, block *Block, errs *[]error,
+type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 	args []*VariableType, pos *Pos)
 
 type buildFunctionChecker = CallChecker

@@ -2,7 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
-	"fmt"
+	//"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -220,7 +220,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			maxstack = t
 		}
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
-		fmt.Println(forState.Stacks)
 		forState.popStack(len(forState.Stacks) - stackLength)
 		if s.RangeAttr.ModelKV {
 			stackLength := len(forState.Stacks)

@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -21,6 +22,10 @@ const (
 	include
 */
 func GetLucyPaths() ([]string, error) {
+	root, err := GetLucyRoot()
+	if err != nil {
+		return nil, err
+	}
 	lp := os.Getenv(LUCY_PATH_ENV_KEY)
 	if lp == "" {
 		return nil, fmt.Errorf("env variable %s not set", LUCY_PATH_ENV_KEY)
@@ -43,6 +48,17 @@ func GetLucyPaths() ([]string, error) {
 		}
 		lucypaths = append(lucypaths, v)
 	}
+	lucypaths = append(lucypaths, root)
+	lucypathMap := make(map[string]struct{})
+	for _, v := range lucypaths {
+		lucypathMap[v] = struct{}{}
+	}
+	lucypaths = make([]string, len(lucypathMap))
+	i := 0
+	for k, _ := range lucypathMap {
+		lucypaths[i] = k
+		i++
+	}
 	return lucypaths, nil
 }
 
@@ -59,6 +75,26 @@ func GetLucyRoot() (string, error) {
 }
 
 func FindLucyPackageDirectory(packageName string, paths []string) []string {
+	ret := []string{}
+	for _, v := range paths {
+		f, err := os.Stat(filepath.Join(v, DIR_FOR_LUCY_SOURCE_FILES, packageName))
+		if err == nil && f.IsDir() {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
 
-	return nil
+func SourceFileExist(path string) bool {
+	f, _ := os.Stat(path)
+	if f == nil || f.IsDir() == false {
+		return false
+	}
+	fis, _ := ioutil.ReadDir(path)
+	for _, f := range fis {
+		if strings.HasSuffix(f.Name(), ".lucy") {
+			return true
+		}
+	}
+	return false
 }

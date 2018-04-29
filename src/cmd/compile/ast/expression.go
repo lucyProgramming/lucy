@@ -202,18 +202,18 @@ func (e *Expression) OpName(typ ...int) string {
 type Expression struct {
 	IsPublic                        bool // only for global var definition
 	IsCompileDefaultValueExpression bool
-	Value                           *VariableType   //
-	Values                          []*VariableType // functioncall or methodcall can with multi results
+	Value                           *VariableType
+	Values                          []*VariableType
 	Pos                             *Pos
 	Typ                             int
 	Data                            interface{}
 	IsStatementExpression           bool
 }
 
-func (e *Expression) IsLogical() bool {
-	return e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
-		e.Typ == EXPRESSION_TYPE_LOGICAL_OR
-}
+//func (e *Expression) IsLogical() bool {
+//	return e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
+//		e.Typ == EXPRESSION_TYPE_LOGICAL_OR
+//}
 
 type ExpressionTypeAssert ExpressionTypeConvertion
 

@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -10,7 +9,6 @@ import (
 	function printf
 */
 func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	fmt.Println(state.Stacks)
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)

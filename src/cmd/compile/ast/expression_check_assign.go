@@ -71,7 +71,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
 			vd.Typ = variableType
-			if vd.Typ == nil { // still cannot have type,new fake int type
+			if vd.Typ == nil { // still cannot have type,we can have a void,that`s ok
 				vd.Typ = &VariableType{}
 				vd.Typ.Typ = VARIABLE_TYPE_VOID
 				vd.Typ.Pos = v.Pos

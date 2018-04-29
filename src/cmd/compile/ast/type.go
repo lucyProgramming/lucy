@@ -391,8 +391,10 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += "null"
 	case VARIABLE_TYPE_NAME:
 		*ret += v.Name // resove wrong, but typeString is ok to return
+	case VARIABLE_TYPE_FUNCTION:
+		*ret += v.Function.readableMsg()
 	default:
-		//fmt.Println(VARIABLE_TYPE_CLASS)
+		fmt.Println(VARIABLE_TYPE_JAVA_ARRAY)
 		panic(v.Typ)
 	}
 }

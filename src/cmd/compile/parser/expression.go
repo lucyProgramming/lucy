@@ -72,6 +72,7 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 		}
 	}
 	mkBinayExpression := func(typ int, multi bool) (*ast.Expression, error) {
+		pos := ep.parser.mkPos()
 		ep.Next() // skip = :=
 		if ep.parser.eof {
 			return nil, ep.parser.mkUnexpectedEofErr()
@@ -81,7 +82,7 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 		bin := &ast.ExpressionBinary{}
 		result.Data = bin
 		bin.Left = left
-		result.Pos = ep.parser.mkPos()
+		result.Pos = pos
 		if multi {
 			es, err := ep.parseExpressions()
 			if err != nil {

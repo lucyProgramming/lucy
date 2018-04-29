@@ -8,7 +8,7 @@ import (
 
 func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context, state *StackMapState) (maxstack uint16) {
 	// if equal,leave 0 on stack
-	switchCompare := func(t *ast.VariableType) {
+	compare := func(t *ast.VariableType) {
 		switch t.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
@@ -58,11 +58,14 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	for k, c := range s.StatmentSwitchCases {
 		if exit != nil {
 			backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+			state.pushStack(class, s.Condition.Value)
+			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
 		}
 		gotoBodyExits := []*cg.JumpBackPatch{}
 		needPop := false
 		for kk, ee := range c.Matches {
-			if ee.MayHaveMultiValue() && len(ee.Values) > 0 {
+			if ee.MayHaveMultiValue() && len(ee.Values) > 1 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
@@ -88,7 +91,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					if t := stack + currentStack; t > maxstack {
 						maxstack = t
 					}
-					switchCompare(s.Condition.Value)
+					compare(s.Condition.Value)
 					gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 				}
 				continue
@@ -113,7 +116,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
-			switchCompare(s.Condition.Value)
+			compare(s.Condition.Value)
 			gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
@@ -124,6 +127,10 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		backPatchEs(gotoBodyExits, code.CodeLength)
 		//before block,pop off stack
 		if needPop {
+			state.pushStack(class, s.Condition.Value)
+		}
+		context.MakeStackMap(code, state, code.CodeLength)
+		if needPop {
 			if size == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
@@ -131,9 +138,14 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			}
 			code.CodeLength++
 		}
+		if needPop {
+			state.popStack(1)
+		}
 		//block is here
 		if c.Block != nil {
-			m.buildBlock(class, code, c.Block, context, state)
+			ss := (&StackMapState{}).FromLast(state)
+			m.buildBlock(class, code, c.Block, context, ss)
+			state.addTop(ss)
 		}
 		if k != len(s.StatmentSwitchCases)-1 || s.Default != nil {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
@@ -141,8 +153,13 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	// build default
 	if s.Default != nil {
+		context.MakeStackMap(code, state, code.CodeLength)
 		backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
-		m.buildBlock(class, code, s.Default, context, state)
+		if s.Default != nil {
+			ss := (&StackMapState{}).FromLast(state)
+			m.buildBlock(class, code, s.Default, context, ss)
+			state.addTop(ss)
+		}
 	}
 	return
 }

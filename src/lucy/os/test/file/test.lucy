@@ -14,7 +14,8 @@ const content = `
 
 fn testWriteFile(){
 	os.File.writeFile(testFile,[]byte(content));
-	if string(os.File.readFile(testFile)) != content{
+	bs,_  := os.File.readFile(testFile);
+	if string(bs) != content{
 		print("read or write error");
 		os.exit(2);
 	}
