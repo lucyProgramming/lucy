@@ -9,7 +9,7 @@ type AttributeDefaultParameters struct {
 	Consts []uint16
 }
 
-func (a *AttributeDefaultParameters) FromBs(bs []byte) {
+func (a *AttributeDefaultParameters) FromBytes(bs []byte) {
 	a.Start = binary.BigEndian.Uint16(bs)
 	bs = bs[2:]
 	for len(bs) > 0 {
@@ -23,7 +23,7 @@ func (a *AttributeDefaultParameters) ToAttributeInfo(class *Class) *AttributeInf
 		return nil
 	}
 	info := &AttributeInfo{}
-	info.NameIndex = class.insertUtfConst(ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS)
+	info.NameIndex = class.insertUtf8Const(ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS)
 	info.attributeLength = uint32(2 * (1 + len(a.Consts)))
 	info.Info = make([]byte, info.attributeLength)
 	binary.BigEndian.PutUint16(info.Info, a.Start)

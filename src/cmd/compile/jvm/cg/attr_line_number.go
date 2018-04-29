@@ -5,18 +5,18 @@ import (
 )
 
 type AttributeLineNumber struct {
-	linenumbers []*AttributeLinePc
+	lineNumbers []*AttributeLinePc
 }
 
 func (a *AttributeLineNumber) ToAttributeInfo(class *Class) *AttributeInfo {
-	if a == nil || len(a.linenumbers) == 0 {
+	if a == nil || len(a.lineNumbers) == 0 {
 		return nil
 	}
 	ret := &AttributeInfo{}
-	ret.NameIndex = class.insertUtfConst("LineNumberTable")
+	ret.NameIndex = class.insertUtf8Const("LineNumberTable")
 	ret.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.linenumbers)))
-	for _, v := range a.linenumbers {
+	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.lineNumbers)))
+	for _, v := range a.lineNumbers {
 		bs4 := make([]byte, 4)
 		binary.BigEndian.PutUint16(bs4[0:2], v.startPc)
 		binary.BigEndian.PutUint16(bs4[2:4], v.lineNumber)

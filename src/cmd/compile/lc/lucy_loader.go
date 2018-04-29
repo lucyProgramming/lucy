@@ -67,7 +67,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS); t != nil && len(t) > 0 {
 			dp := &cg.AttributeDefaultParameters{}
-			dp.FromBs(t[0].Info)
+			dp.FromBytes(t[0].Info)
 			jvm.FunctionDefaultValueParser.Decode(c, m.Func, dp)
 		}
 		if astClass.Methods[m.Func.Name] == nil {

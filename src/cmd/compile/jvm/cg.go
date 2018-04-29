@@ -166,7 +166,7 @@ func (m *MakeClass) mkVars() {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		if LucyFieldSignatureParser.Need(v.Typ) {
-			f.AttributeLucyFieldDescritor = &cg.AttributeLucyFieldDescritor{}
+			f.AttributeLucyFieldDescritor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescritor.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
 		}
 		f.Name = v.Name
@@ -271,7 +271,7 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		f.AccessFlags = v.AccessFlags
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		if LucyFieldSignatureParser.Need(v.Typ) {
-			t := &cg.AttributeLucyFieldDescritor{}
+			t := &cg.AttributeLucyFieldDescriptor{}
 			t.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
 			f.AttributeLucyFieldDescritor = t
 		}
@@ -358,7 +358,6 @@ func (m *MakeClass) Dump() error {
 		return err
 	}
 	f.Close()
-
 	for _, c := range m.Classes {
 		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
@@ -367,6 +366,8 @@ func (m *MakeClass) Dump() error {
 		if err = c.ToLow().OutPut(f); err != nil {
 			f.Close()
 			return err
+		} else {
+			f.Close()
 		}
 	}
 	return nil

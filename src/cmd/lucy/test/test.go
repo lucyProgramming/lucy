@@ -84,6 +84,7 @@ func (test *Test) testDir(dir string, prefix string) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		cmd.Dir = path
 		err := cmd.Start()
 		if err != nil {
 			fmt.Printf("fatal error start run process failed,err:%v\n", err)

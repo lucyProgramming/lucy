@@ -21,31 +21,8 @@ type ClassHighLevel struct {
 	TriggerCLinit          *MethodHighLevel
 }
 
-type CONSTANT_NameAndType_info_high_level struct {
-	Name       string
-	Descriptor string
-}
-
-type CONSTANT_Methodref_info_high_level struct {
-	Class      string
-	Method     string
-	Descriptor string
-}
-
-type CONSTANT_InterfaceMethodref_info_high_level struct {
-	Class      string
-	Method     string
-	Descriptor string
-}
-
 func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {
 	binary.BigEndian.PutUint16(location, c.Class.InsertMethodrefConst(mr))
-}
-
-type CONSTANT_Fieldref_info_high_level struct {
-	Class      string
-	Field      string
-	Descriptor string
 }
 
 /*

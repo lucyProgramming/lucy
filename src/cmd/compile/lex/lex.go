@@ -53,7 +53,8 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 	return
 }
 func (lex *LucyLexer) isLetter(c byte) bool {
-	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+	return ('a' <= c && c <= 'z') ||
+		('A' <= c && c <= 'Z')
 }
 func (lex *LucyLexer) isDigit(c byte) bool {
 	return '0' <= c && c <= '9'
@@ -62,7 +63,9 @@ func (lex *LucyLexer) isOctal(c byte) bool {
 	return '0' <= c && c <= '7'
 }
 func (lex *LucyLexer) isHex(c byte) bool {
-	return '0' <= c && c <= '9' || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
+	return '0' <= c && c <= '9' ||
+		('a' <= c && c <= 'f') ||
+		('A' <= c && c <= 'F')
 }
 
 func (lex *LucyLexer) hexbyte2Byte(c byte) byte {

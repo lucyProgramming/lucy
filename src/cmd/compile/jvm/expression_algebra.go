@@ -44,8 +44,10 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_ADD || e.Typ == ast.EXPRESSION_TYPE_SUB ||
-		e.Typ == ast.EXPRESSION_TYPE_MUL || e.Typ == ast.EXPRESSION_TYPE_DIV ||
+	if e.Typ == ast.EXPRESSION_TYPE_ADD ||
+		e.Typ == ast.EXPRESSION_TYPE_SUB ||
+		e.Typ == ast.EXPRESSION_TYPE_MUL ||
+		e.Typ == ast.EXPRESSION_TYPE_DIV ||
 		e.Typ == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
 		if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING ||
@@ -163,7 +165,8 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 
-	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
+	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT ||
+		e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		size := jvmSize(e.Value)

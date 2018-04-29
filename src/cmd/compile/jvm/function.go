@@ -138,7 +138,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 		state.appendLocals(class, state.newObjectVariableType(class.Name))
 	}
 	if LucyMethodSignatureParser.Need(&f.Typ) {
-		d := &cg.AttributeLucyMethodDescritor{}
+		d := &cg.AttributeLucyMethodDescriptor{}
 		d.Descriptor = LucyMethodSignatureParser.Encode(f)
 		method.AttributeLucyMethodDescritor = d
 	}

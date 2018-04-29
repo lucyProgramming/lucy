@@ -8,7 +8,7 @@ type MethodHighLevel struct {
 	AccessFlags                           uint16
 	Code                                  *AttributeCode
 	AttributeLucyInnerStaticMethod        *AttributeLucyInnerStaticMethod
-	AttributeLucyMethodDescritor          *AttributeLucyMethodDescritor
+	AttributeLucyMethodDescritor          *AttributeLucyMethodDescriptor
 	AttributeLucyTriggerPackageInitMethod *AttributeLucyTriggerPackageInitMethod
 	AttributeDefaultParameters            *AttributeDefaultParameters
 }

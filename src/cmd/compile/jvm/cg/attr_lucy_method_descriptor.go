@@ -2,15 +2,15 @@ package cg
 
 import "encoding/binary"
 
-type AttributeLucyMethodDescritor struct {
+type AttributeLucyMethodDescriptor struct {
 	Descriptor string
 }
 
-func (a *AttributeLucyMethodDescritor) ToAttributeInfo(class *Class) *AttributeInfo {
+func (a *AttributeLucyMethodDescriptor) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.NameIndex = class.insertUtfConst(ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR)
+	ret.NameIndex = class.insertUtf8Const(ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR)
 	ret.Info = make([]byte, 2)
 	ret.attributeLength = 2
-	binary.BigEndian.PutUint16(ret.Info, class.insertUtfConst(a.Descriptor))
+	binary.BigEndian.PutUint16(ret.Info, class.insertUtf8Const(a.Descriptor))
 	return ret
 }

@@ -27,7 +27,6 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 		return m.mkBuildinPrintf(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_SPRINTF:
 		return m.mkBuildinSprintf(class, code, e, context, state)
-
 	default:
 		panic("unkown buildin function:" + call.Func.Name)
 	}
