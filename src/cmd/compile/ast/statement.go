@@ -78,12 +78,6 @@ func (s *Statement) check(block *Block) []error { // b is father
 	defer func() {
 		s.Checked = true
 	}()
-	if block.Defers != nil && len(block.Defers) > 0 {
-		block.InheritedAttribute.Defers = append(block.InheritedAttribute.Defers, block.Defers...)
-		defer func() {
-			block.InheritedAttribute.Defers = block.InheritedAttribute.Defers[0 : len(block.InheritedAttribute.Defers)-len(block.Defers)]
-		}()
-	}
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
 		return s.checkStatementExpression(block)
@@ -102,10 +96,10 @@ func (s *Statement) check(block *Block) []error { // b is father
 					errMsgPrefix(s.Pos), s.StatementName())}
 			}
 			s.StatementBreak = &StatementBreak{}
-			if f, ok := block.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementFor); ok {
+			if f, ok := block.InheritedAttribute.mostCloseIsForOrSwitch.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
 			} else {
-				s.StatementBreak.StatementSwitch = block.InheritedAttribute.mostCloseForOrSwitchForBreak.(*StatementSwitch)
+				s.StatementBreak.StatementSwitch = block.InheritedAttribute.mostCloseIsForOrSwitch.(*StatementSwitch)
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
@@ -128,10 +122,11 @@ func (s *Statement) check(block *Block) []error { // b is father
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.StatementName())}
 		}
-		if len(block.Defers) > 0 {
+		es := s.StatementReturn.check(block)
+		if len(s.StatementReturn.Defers) > 0 {
 			block.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
 		}
-		return s.StatementReturn.check(block)
+		return es
 	case STATEMENT_TYPE_GOTO:
 		err := s.checkStatementGoto(block)
 		if err != nil {
@@ -143,7 +138,6 @@ func (s *Statement) check(block *Block) []error { // b is father
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
 		s.Defer.allowCatch = block.IsFunctionTopBlock
 		es := s.Defer.Block.check()
-		s.Defer.Block.InheritedAttribute.Defers = nil
 		block.Defers = append(block.Defers, s.Defer)
 		return es
 	case STATEMENT_TYPE_BLOCK:
@@ -162,14 +156,12 @@ func (s *Statement) check(block *Block) []error { // b is father
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
 	//
-	if s.Expression.Typ == EXPRESSION_TYPE_TYPE_ALIAS {
+	if s.Expression.Typ == EXPRESSION_TYPE_TYPE_ALIAS { // special case
 		t := s.Expression.Data.(*ExpressionTypeAlias)
 		err := t.Typ.resolve(b)
-
 		if err != nil {
 			return []error{err}
 		}
-
 		err = b.insert(t.Name, t.Pos, t.Typ)
 		if err != nil {
 			return []error{err}
@@ -202,7 +194,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		errs = append(errs, err)
 	}
 	s.Expression.IsStatementExpression = true
-	_, es := b.checkExpression_(s.Expression)
+	_, es := b.checkExpression(s.Expression)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}

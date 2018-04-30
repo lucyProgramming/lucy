@@ -8,7 +8,8 @@ import (
 /*
 	function print
 */
-func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.Meta.(*ast.BuildinFunctionPrintfMeta)
 	if meta.Stream == nil {
 		code.Codes[code.CodeLength] = cg.OP_getstatic
@@ -50,7 +51,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
-		switch call.Args[0].GetTheOnlyOneVariableType().Typ {
+		switch call.Args[0].Value.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

@@ -7,12 +7,12 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	dot := e.Data.(*ast.ExpressionDot)
 	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
-		if dot.PackageVariableDefinition != nil {
+		if dot.PackageVariable != nil {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      dot.Expression.Value.Package.Name + "/main",
-				Field:      dot.PackageVariableDefinition.Name,
-				Descriptor: dot.PackageVariableDefinition.Descriptor,
+				Field:      dot.PackageVariable.Name,
+				Descriptor: dot.PackageVariable.Descriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}

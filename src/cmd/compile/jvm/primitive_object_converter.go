@@ -5,10 +5,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type PrimitiveObjectConverter struct {
+type TypeConverter struct {
 }
 
-func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		c := "java/lang/Boolean"
@@ -96,7 +96,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 
 }
 
-func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -159,7 +159,7 @@ func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHig
 	}
 }
 
-func (PrimitiveObjectConverter) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverter) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	if t.IsPointer() == false {
 		panic("...")
 	}

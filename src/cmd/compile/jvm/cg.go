@@ -63,12 +63,15 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.mainclass = mainclass
 	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
+	mainclass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
 	mainclass.Name = p.Name + "/main"
 	mainclass.Fields = make(map[string]*cg.FieldHighLevel)
 	mkClassDefaultContruction(m.mainclass)
 	m.MakeExpression.MakeClass = m
 	m.Classes = make(map[string]*cg.ClassHighLevel)
+	m.mkConsts()
+	m.mkTypes()
 	m.mkVars()
 	m.mkFuncs()
 	m.mkInitFunctions()
@@ -78,8 +81,6 @@ func (m *MakeClass) Make(p *ast.Package) {
 	for _, v := range p.Block.Enums {
 		m.Classes[v.Name] = m.mkEnum(v)
 	}
-	m.mkConsts()
-	m.mkTypes()
 	err := m.Dump()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))

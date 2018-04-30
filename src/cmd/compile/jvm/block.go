@@ -24,8 +24,8 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		for index >= 0 {
 			ss := (&StackMapState{}).FromLast(state)
 			m.buildBlock(class, code, &b.Defers[index].Block, context, state)
-			index--
 			state.addTop(ss)
+			index--
 		}
 	}
 	return

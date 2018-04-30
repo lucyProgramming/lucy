@@ -221,7 +221,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 	}
 	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
-		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
+		typeConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
 	}
 	currentStack -= jvmSize(bin.Left.Value) // stack reduce
 	if e.IsStatementExpression == false {
@@ -233,7 +233,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
-		primitiveObjectConverter.getFromObject(class, code, e.Value)
+		typeConverter.getFromObject(class, code, e.Value)
 	}
 	return
 }

@@ -10,16 +10,16 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	switch call.Func.Name {
 	case common.BUILD_IN_FUNCTION_PRINT:
-		return m.mkBuildinPrint(class, code, call, context, state)
+		return m.mkBuildinPrint(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_PANIC:
-		return m.mkBuildinPanic(class, code, call, context, state)
+		return m.mkBuildinPanic(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_CATCH:
 		return m.mkBuildinCatch(class, code, e, context)
 	case common.BUILD_IN_FUNCTION_MONITORENTER, common.BUILD_IN_FUNCTION_MONITOREXIT:
 		maxstack, _ = m.build(class, code, call.Args[0], context, state)
 		if call.Func.Name == common.BUILD_IN_FUNCTION_MONITORENTER {
 			code.Codes[code.CodeLength] = cg.OP_monitorenter
-		} else {
+		} else { // monitor enter on exit
 			code.Codes[code.CodeLength] = cg.OP_monitorexit
 		}
 		code.CodeLength++
@@ -33,8 +33,9 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 	return
 }
 
-func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, call *ast.ExpressionFunctionCall,
+func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxstack uint16) {
+	call := e.Data.(*ast.ExpressionFunctionCall)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(java_throwable_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup

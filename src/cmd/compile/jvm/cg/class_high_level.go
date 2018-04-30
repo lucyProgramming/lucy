@@ -12,13 +12,13 @@ type ClassHighLevel struct {
 	Name                   string
 	IsClosureFunctionClass bool
 	MainClass              *ClassHighLevel
-	InnerClasss            []*ClassHighLevel
 	AccessFlags            uint16
 	SuperClass             string
 	Interfaces             []string
 	Fields                 map[string]*FieldHighLevel
 	Methods                map[string][]*MethodHighLevel
 	TriggerCLinit          *MethodHighLevel
+	//InnerClasss            []*ClassHighLevel
 }
 
 func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {
@@ -50,7 +50,7 @@ func (c *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
 	}
 	for _, v := range ms {
 		if v.Name == "" {
-			panic(1)
+			panic("null name")
 		}
 		if _, ok := c.Methods[v.Name]; ok {
 			c.Methods[v.Name] = append(c.Methods[v.Name], v)

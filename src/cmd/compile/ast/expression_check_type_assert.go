@@ -30,7 +30,7 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*VariableTyp
 		return nil
 	}
 	if assert.Typ.Typ != VARIABLE_TYPE_OBJECT {
-		*errs = append(*errs, fmt.Errorf("%s type is not a class", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s type is not a object", errMsgPrefix(e.Pos)))
 		return nil
 	}
 	ret := make([]*VariableType, 2)

@@ -7,9 +7,10 @@ import (
 func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
-func ErrMsgPrefix(pos *Pos) string {
-	return errMsgPrefix(pos)
-}
+
+//func ErrMsgPrefix(pos *Pos) string {
+//	return errMsgPrefix(pos)
+//}
 func errsNotEmpty(es []error) bool {
 	return es != nil && len(es) > 0
 }
@@ -28,7 +29,8 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall,
+	block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 	}
@@ -81,7 +83,7 @@ func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableTy
 	when access from global,should check if access from package
 */
 func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) {
-	if have == nil { // incase build in types
+	if have == nil { // incase buildin types
 		return nil, false
 	}
 	// different file
@@ -96,19 +98,12 @@ func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) 
 	return i, have.StartLine < from.StartLine
 }
 
-func moreClose(from, more, less *Pos) bool {
-	if from.Filename == more.Filename && from.Filename != less.Filename {
-		return true
-	}
-	return more.StartLine < less.StartLine
-}
-
 func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableType) error {
 	errmsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
-	errmsg += "\t want " + ms[0].Func.badParameterMsg(name, want) + "\n"
+	errmsg += "\twant " + ms[0].Func.badParameterMsg(name, want) + "\n"
 	for _, m := range ms {
-		errmsg += "\t have " + m.Func.readableMsg(name) + "\n"
+		errmsg += "\thave " + m.Func.readableMsg(name) + "\n"
 	}
 	return fmt.Errorf(errmsg)
 }
@@ -137,14 +132,10 @@ func searchBuildIns(name string) interface{} {
 		if ok {
 			return t
 		}
+		t, ok = lucyLangBuildinPackage.Block.Enums[name]
+		if ok {
+			return t
+		}
 	}
 	return nil
-}
-
-func existInBuildIn(name string) bool {
-	if t := lucyLangBuildinPackage.Block.SearchByName(name); t != nil {
-		return true
-	}
-	_, ok2 := buildinFunctionsMap[name]
-	return ok2
 }

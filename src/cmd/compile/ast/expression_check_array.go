@@ -10,15 +10,18 @@ import (
 func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	arr := e.Data.(*ExpressionArrayLiteral)
 	if arr.Typ == nil && (arr.Expressions == nil || len(arr.Expressions) == 0) {
-		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression,"+
-			"cannot inference it`s type ",
+		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression, cannot inference it`s type ",
 			errMsgPrefix(e.Pos)))
 		return nil
 	}
 	notyp := true
 	if arr.Typ != nil {
 		notyp = false
-		arr.Typ.resolve(block)
+		err := arr.Typ.resolve(block)
+		if err != nil {
+			*errs = append(*errs, err)
+			return nil
+		}
 	}
 	for _, v := range arr.Expressions {
 		ts, es := v.check(block)
@@ -34,14 +37,15 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 			}
 			if notyp && arr.Typ == nil {
 				if t.isTyped() == false {
-					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,because type is null",
-						errMsgPrefix(e.Pos)))
+					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,type=%s",
+						errMsgPrefix(e.Pos), t.TypeString()))
 				} else if t.RightValueValid() {
 					tt := t.Clone()
 					tt.Pos = e.Pos
 					arr.Typ = &VariableType{}
 					arr.Typ.Typ = VARIABLE_TYPE_ARRAY
 					arr.Typ.ArrayType = tt
+					arr.Typ.Pos = e.Pos
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,"+
 						"because type named '%s' is not right value valid ",

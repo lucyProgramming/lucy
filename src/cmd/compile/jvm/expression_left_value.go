@@ -48,7 +48,7 @@ func (m *MakeExpression) getMapLeftValue(
 	}
 	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
-	primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.Value)
+	typeConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.Value)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
 	target = index.Expression.Value.Map.V
@@ -224,10 +224,10 @@ func (m *MakeExpression) getLeftValue(
 		dot := e.Data.(*ast.ExpressionDot)
 		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
-			target = dot.PackageVariableDefinition.Typ
+			target = dot.PackageVariable.Typ
 			classname = dot.Expression.Value.Package.Name + "/main"
-			name = dot.PackageVariableDefinition.Name
-			descriptor = dot.PackageVariableDefinition.Descriptor
+			name = dot.PackageVariable.Name
+			descriptor = dot.PackageVariable.Descriptor
 			maxstack = 0
 			remainStack = 0
 		} else {

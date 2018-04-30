@@ -25,7 +25,6 @@ type StatmentForRangeAttr struct {
 	ExpressionK *Expression
 	ExpressionV *Expression
 	RangeOn     *Expression
-	Typ         int
 }
 
 func (s *StatementFor) checkRange() []error {
@@ -268,7 +267,7 @@ func (s *StatementFor) checkRange() []error {
 func (s *StatementFor) check(block *Block) []error {
 	s.Block.inherite(block)
 	s.Block.InheritedAttribute.StatementFor = s
-	s.Block.InheritedAttribute.mostCloseForOrSwitchForBreak = s
+	s.Block.InheritedAttribute.mostCloseIsForOrSwitch = s
 	errs := []error{}
 	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canbeUsedForRange() { // for k,v := range arr
 		return s.checkRange()

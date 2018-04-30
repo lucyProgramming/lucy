@@ -270,7 +270,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		primitiveObjectConverter.castPointerTypeToRealType(class, code, v)
+		typeConverter.castPointerTypeToRealType(class, code, v)
 		maxstack = 1
 	}
 	return

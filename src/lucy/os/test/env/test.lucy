@@ -6,6 +6,7 @@ fn main(args []string){
 
 	print("classpath is " , os.getEnv("CLASSPATH"));
 	envs := os.getEnvs();
+	print(envs);
 	for k,v := range envs{
 		print(k ,"=" , v);
 	}

@@ -56,7 +56,7 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Vari
 		return nil
 	}
 	if !t.IsNumber() {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply ++ or -- on '%s'",
+		*errs = append(*errs, fmt.Errorf("%s cannot apply '++' or '--' on '%s'",
 			errMsgPrefix(ee.Pos), t.TypeString()))
 		return nil
 	}

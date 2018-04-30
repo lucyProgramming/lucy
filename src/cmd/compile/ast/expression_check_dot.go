@@ -76,7 +76,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
-			dot.PackageVariableDefinition = t
+			dot.PackageVariable = t
 			return tt
 		case *VariableType:
 			err = fmt.Errorf("%s name '%s' is a type,not a expression",
@@ -110,7 +110,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
-			if !dot.Expression.isThisIdentifierExpression() && !field.IsPublic() {
+			if !dot.Expression.isThis() && !field.IsPublic() {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is private", errMsgPrefix(e.Pos),
 					dot.Name))
 			}

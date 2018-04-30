@@ -24,17 +24,18 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		*errs = append(*errs, err)
 	}
 	if t1 == nil || t2 == nil {
+		var tt *VariableType
 		if t1 != nil {
-			tt := t1.Clone()
+			tt = t1.Clone()
 			tt.Pos = e.Pos
 			return tt
 		}
 		if t2 != nil {
-			tt := t2.Clone()
+			tt = t2.Clone()
 			tt.Pos = e.Pos
 			return tt
 		}
-		return nil
+		return tt
 	}
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR || EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
@@ -124,7 +125,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VARIABLE_TYPE_LONG:
 			fallthrough
 		case VARIABLE_TYPE_DOUBLE:
-			if !t2.IsNumber() {
+			if t1.Equal(t2) == false {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
@@ -132,33 +133,23 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
-			if t2.IsPointer() {
+			if t2.IsPointer() == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
 					t2.TypeString()))
-			}
-			if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and 'pointer' ",
-					errMsgPrefix(e.Pos),
-					e.OpName()))
 			}
 		case VARIABLE_TYPE_JAVA_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:
-			if t1.Equal(t2) == false {
+			if t1.Equal(t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
 					t1.TypeString(),
 					t2.TypeString()))
-			} else {
-				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-					*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s' ",
-						errMsgPrefix(e.Pos), e.OpName(), t1.TypeString(), t2.TypeString()))
-				}
 			}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",

@@ -90,10 +90,7 @@ func (c *Class) OutPut(dest io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if len(c.Attributes) > 0 {
-		return c.writeAttributeInfo(c.Attributes)
-	}
-	return nil
+	return c.writeAttributeInfo(c.Attributes)
 }
 
 func (c *Class) writeMethods() error {
@@ -162,17 +159,18 @@ func (c *Class) writeFields() error {
 		if err != nil {
 			return err
 		}
-		if len(v.Attributes) > 0 {
-			err = c.writeAttributeInfo(v.Attributes)
-			if err != nil {
-				return err
-			}
+		err = c.writeAttributeInfo(v.Attributes)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
+	if len(as) == 0 {
+		return nil
+	}
 	var err error
 	bs4 := make([]byte, 4)
 	bs2 := make([]byte, 2)

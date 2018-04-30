@@ -61,7 +61,8 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	return
 }
-func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context, state *StackMapState) (maxstack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.Value.ArrayType.Typ]

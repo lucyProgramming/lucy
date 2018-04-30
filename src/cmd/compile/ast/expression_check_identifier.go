@@ -6,10 +6,12 @@ import (
 
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	identifer := e.Data.(*ExpressionIdentifer)
+	fromImport := false
 	d := block.SearchByName(identifer.Name)
 	if d == nil {
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifer.Name)
 		if i != nil {
+			fromImport = true
 			d, err = PackageBeenCompile.load(i.Resource)
 			if err != nil {
 				return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
@@ -22,7 +24,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
-		if f.IsGlobal && f.IsBuildin == false {
+		if fromImport == false && f.IsGlobal && f.IsBuildin == false { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, f.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Resource)
@@ -50,7 +52,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		if t.IsGlobal {
+		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Resource)
@@ -77,7 +79,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *Const:
 		t := d.(*Const)
-		if t.IsGlobal {
+		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Resource)
@@ -103,7 +105,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return tt, nil
 	case *Class:
 		c := d.(*Class)
-		if c.IsGlobal {
+		if fromImport == false && c.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, c.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Resource)
@@ -129,7 +131,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		return t, nil
 	case *EnumName:
 		e := d.(*EnumName)
-		{
+		if fromImport == false { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, e.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Resource)
@@ -168,7 +170,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		errMsgPrefix(e.Pos), identifer.Name)
 }
 
-func (e *Expression) isThisIdentifierExpression() bool {
+func (e *Expression) isThis() bool {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return false
 	}

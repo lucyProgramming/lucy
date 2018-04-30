@@ -148,7 +148,8 @@ func registerBuildinFunctions() {
 	}
 	// printf
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
-		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+			args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
 			e.Meta = meta
 			if len(args) == 0 {
@@ -197,7 +198,7 @@ func registerBuildinFunctions() {
 	}
 }
 
-func monitorChecker(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 	args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))

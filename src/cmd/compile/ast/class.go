@@ -200,9 +200,6 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 			errs = append(errs, err)
 		}
 	}
-	if len(errs) > 0 {
-		return errs
-	}
 
 	return errs
 }
@@ -275,7 +272,7 @@ func (c *Class) checkMethods() []error {
 			}
 			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
 			if isConstruction && vv.Func.NoReturnValue() == false {
-				errs = append(errs, fmt.Errorf("%s construction method expect no return",
+				errs = append(errs, fmt.Errorf("%s construction method expect no return values",
 					errMsgPrefix(vv.Func.Typ.ParameterList[0].Pos)))
 			}
 			vv.Func.Block.InheritedAttribute.IsConstruction = isConstruction

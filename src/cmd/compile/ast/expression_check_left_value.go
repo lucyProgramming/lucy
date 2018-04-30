@@ -54,7 +54,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 						errMsgPrefix(e.Pos), dot.Name))
 				}
 				// not this and private
-				if dot.Expression.isThisIdentifierExpression() == false && field.IsPrivate() {
+				if dot.Expression.isThis() == false && field.IsPrivate() {
 					errs = append(errs, fmt.Errorf("%s field '%s' is private",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
@@ -95,7 +95,7 @@ func (e *Expression) getLeftValue(block *Block) (t *VariableType, errs []error) 
 					errs = append(errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				}
-				dot.PackageVariableDefinition = vd
+				dot.PackageVariable = vd
 				tt := vd.Typ.Clone()
 				tt.Pos = e.Pos
 				return tt, errs

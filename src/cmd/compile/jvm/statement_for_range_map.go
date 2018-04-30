@@ -122,9 +122,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if s.RangeAttr.RangeOn.Value.Map.V.IsPointer() == false {
-		primitiveObjectConverter.getFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+		typeConverter.getFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.V)
 	} else {
-		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+		typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.V)
 	}
 	autoVar.V = code.MaxLocals
 	code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
@@ -140,9 +140,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
 		if s.RangeAttr.RangeOn.Value.Map.K.IsPointer() == false {
-			primitiveObjectConverter.getFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.K)
+			typeConverter.getFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.K)
 		} else {
-			primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.K)
+			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.K)
 		}
 		autoVar.K = code.MaxLocals
 		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.K)
@@ -235,7 +235,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			}
 			if classname == java_hashmap_class {
 				// put in object
-				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code,
+				typeConverter.putPrimitiveInObjectStaticWay(class, code,
 					s.RangeAttr.RangeOn.Value.Map.K)
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)

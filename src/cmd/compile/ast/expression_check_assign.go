@@ -121,14 +121,14 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	}
 	//number
 	if t1.IsNumber() {
-		if !t2.IsNumber() {
+		if t1.Equal(t2) == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on number and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),
 				t2.TypeString()))
 		}
 	} else if t1.Typ == VARIABLE_TYPE_STRING {
-		if t2.Typ != VARIABLE_TYPE_STRING {
+		if t2.Typ != VARIABLE_TYPE_STRING || (e.Typ != EXPRESSION_TYPE_PLUS_ASSIGN) {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),

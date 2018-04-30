@@ -31,7 +31,7 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	}
 	var currentStack uint16
 	if classname == java_hashmap_class {
-		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, target)
+		typeConverter.putPrimitiveInObjectStaticWay(class, code, target)
 		currentStack = remainStack + 1 // ... vobjref
 	} else {
 		currentStack = remainStack + jvmSize(target)
@@ -41,7 +41,7 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	}
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	if classname == java_hashmap_class {
-		primitiveObjectConverter.getFromObject(class, code, target)
+		typeConverter.getFromObject(class, code, target)
 	}
 	return
 }
@@ -128,7 +128,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 						m.numberTypeConverter(code, v.Typ, targets[0].Typ)
 					}
 					if needPutInObject { // convert to primitive
-						primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
+						typeConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 					}
 				} else { // pop fron stack
 					if jvmSize(v) == 1 {
@@ -165,7 +165,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				m.numberTypeConverter(code, variableType.Typ, targets[0].Typ)
 			}
 			if needPutInObject { // convert to primitive
-				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
+				typeConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
 			}
 		} else { // pop fron stack
 			if jvmSize(variableType) == 1 {
@@ -176,6 +176,73 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 			code.CodeLength++
 		}
 		slice()
+	}
+	return
+}
+
+func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string, stackTopType *ast.VariableType) (increment uint16) {
+	// no object after value,just dup top
+	if op[0] == cg.OP_istore || // 将栈顶 int 型数值存入指定局部变量。
+		op[0] == cg.OP_lstore || //将栈顶 long 型数值存入指定局部变量。
+		op[0] == cg.OP_fstore || //将栈顶 float 型数值存入指定局部变量。
+		op[0] == cg.OP_dstore || //将栈顶 double 型数值存入指定局部变量。
+		op[0] == cg.OP_astore || // 将栈顶引用型数值存入指定局部变量。
+		op[0] == cg.OP_istore_0 || //将栈顶 int 型数值存入第一个局部变量。
+		op[0] == cg.OP_istore_1 || // 将栈顶 int 型数值存入第二个局部变量。
+		op[0] == cg.OP_istore_2 || //将栈顶 int 型数值存入第三个局部变量。
+		op[0] == cg.OP_istore_3 || // 将栈顶 int 型数值存入第四个局部变量。
+		op[0] == cg.OP_lstore_0 || //将栈顶 long 型数值存入第一个局部变量。
+		op[0] == cg.OP_lstore_1 || // 将栈顶 long 型数值存入第二个局部变量。
+		op[0] == cg.OP_lstore_2 || //将栈顶 long 型数值存入第三个局部变量。
+		op[0] == cg.OP_lstore_3 || // 将栈顶 long 型数值存入第四个局部变量。
+		op[0] == cg.OP_fstore_0 || //将栈顶 float 型数值存入第一个局部变量。
+		op[0] == cg.OP_fstore_1 || //将栈顶 float 型数值存入第二个局部变量。
+		op[0] == cg.OP_fstore_2 || //将栈顶 float 型数值存入第三个局部变量。
+		op[0] == cg.OP_fstore_3 || //将栈顶 float 型数值存入第四个局部变量。
+		op[0] == cg.OP_dstore_0 || //将栈顶 double 型数值存入第一个局部变量。
+		op[0] == cg.OP_dstore_1 || //将栈顶 double 型数值存入第二个局部变量。
+		op[0] == cg.OP_dstore_2 || // 将栈顶 double 型数值存入第三个局部变量。
+		op[0] == cg.OP_dstore_3 || //将栈顶 double 型数值存入第四个局部变量。
+		op[0] == cg.OP_astore_0 || //将栈顶引用型数值存入第一个局部变量。
+		op[0] == cg.OP_astore_1 || ///将栈顶引用型数值存入第二个局部变量。
+		op[0] == cg.OP_astore_2 || //将栈顶引用型数值存入第三个局部变量
+		op[0] == cg.OP_astore_3 ||
+		op[0] == cg.OP_putstatic { //为指定的类的静态域赋值。
+		if jvmSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_dup2
+			increment = 2
+		}
+		code.CodeLength++
+		return
+	}
+	if op[0] == cg.OP_putfield {
+		if jvmSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup_x1
+		} else {
+			increment = 2
+			code.Codes[code.CodeLength] = cg.OP_dup2_x1
+		}
+		code.CodeLength++
+		return
+	}
+	if op[0] == cg.OP_invokevirtual { // array or map
+		if ArrayMetasMap[classname] != nil || classname == java_hashmap_class {
+			// stack is arrayref index or mapref kref which are all category 1 type
+			if jvmSize(stackTopType) == 1 {
+				increment = 1
+				code.Codes[code.CodeLength] = cg.OP_dup_x2
+				code.CodeLength++
+			} else {
+				increment = 2
+				code.Codes[code.CodeLength] = cg.OP_dup2_x2
+				code.CodeLength++
+			}
+			return
+		}
 	}
 	return
 }

@@ -104,9 +104,9 @@ func (e *Expression) OpName(typ ...int) string {
 	case EXPRESSION_TYPE_ARRAY:
 		return "array_literal"
 	case EXPRESSION_TYPE_LOGICAL_OR:
-		return "logical or expression"
+		return "&&"
 	case EXPRESSION_TYPE_LOGICAL_AND:
-		return "logical and expression"
+		return "||"
 	case EXPRESSION_TYPE_OR:
 		return "|"
 	case EXPRESSION_TYPE_AND:
@@ -172,7 +172,7 @@ func (e *Expression) OpName(typ ...int) string {
 	case EXPRESSION_TYPE_NOT:
 		return "not"
 	case EXPRESSION_TYPE_IDENTIFIER:
-		return fmt.Sprintf("identifier('%s')", e.Data.(*ExpressionIdentifer).Name)
+		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifer).Name)
 	case EXPRESSION_TYPE_NULL:
 		return "null"
 	case EXPRESSION_TYPE_NEW:
@@ -209,11 +209,6 @@ type Expression struct {
 	Data                            interface{}
 	IsStatementExpression           bool
 }
-
-//func (e *Expression) IsLogical() bool {
-//	return e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
-//		e.Typ == EXPRESSION_TYPE_LOGICAL_OR
-//}
 
 type ExpressionTypeAssert ExpressionTypeConvertion
 
@@ -283,7 +278,9 @@ func (e *Expression) isBool() bool {
 		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
 		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
 		e.Typ == EXPRESSION_TYPE_NOT ||
-		e.Typ == EXPRESSION_TYPE_IDENTIFIER
+		e.Typ == EXPRESSION_TYPE_IDENTIFIER ||
+		e.Typ == EXPRESSION_TYPE_DOT ||
+		e.Typ == EXPRESSION_TYPE_INDEX
 }
 func (e *Expression) canBeUsedAsStatementExpression() bool {
 	return e.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
@@ -301,8 +298,7 @@ func (e *Expression) canBeUsedAsStatementExpression() bool {
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
 		e.Typ == EXPRESSION_TYPE_VAR ||
-		e.Typ == EXPRESSION_TYPE_CONST ||
-		e.Typ == EXPRESSION_TYPE_TYPE_ALIAS
+		e.Typ == EXPRESSION_TYPE_CONST
 }
 
 /*
@@ -314,6 +310,7 @@ func (e *Expression) IsNumber(typ ...int) bool {
 		t = typ[0]
 	}
 	return t == EXPRESSION_TYPE_BYTE ||
+		t == EXPRESSION_TYPE_SHORT ||
 		t == EXPRESSION_TYPE_INT ||
 		t == EXPRESSION_TYPE_FLOAT ||
 		t == EXPRESSION_TYPE_LONG ||
@@ -323,19 +320,8 @@ func (e *Expression) IsNumber(typ ...int) bool {
 /*
 	check this expression is increment or decrement
 */
-func (e *Expression) IsIncrement() bool {
+func (e *Expression) IsSelfIncrement() bool {
 	return e.Typ == EXPRESSION_TYPE_INCREMENT || e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
-}
-
-func (e *Expression) GetTheOnlyOneVariableType() *VariableType {
-	if e.HaveOnlyOneValue() == false {
-		panic("...")
-	}
-	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Typ == EXPRESSION_TYPE_TYPE_ASSERT {
-		return e.Values[0]
-	}
-	return e.Value
 }
 
 func (e *Expression) HaveOnlyOneValue() bool {
@@ -408,10 +394,10 @@ type ExpressionIndex struct {
 	Index      *Expression
 }
 type ExpressionDot struct {
-	Expression                *Expression
-	Name                      string
-	Field                     *ClassField
-	PackageVariableDefinition *VariableDefinition
+	Expression      *Expression
+	Name            string
+	Field           *ClassField
+	PackageVariable *VariableDefinition
 }
 type ExpressionMethodCall struct {
 	Class      *Class //

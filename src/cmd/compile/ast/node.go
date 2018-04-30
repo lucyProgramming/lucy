@@ -89,14 +89,17 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range convertor.Classes {
-		PackageBeenCompile.Block.Classes[v.Name] = v
+		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range convertor.Enums {
-		PackageBeenCompile.Block.Enums[v.Name] = v
-		for _, vv := range v.Enums {
-			PackageBeenCompile.Block.EnumNames[vv.Name] = vv
+		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
+		if err != nil {
+			errs = append(errs, err)
 		}
 	}
 	//after class inserted,then resolve type

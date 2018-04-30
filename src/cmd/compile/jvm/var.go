@@ -3,7 +3,7 @@ package jvm
 var (
 	ArrayMetas                 = map[int]*ArrayMeta{}
 	ArrayMetasMap              = make(map[string]*ArrayMeta)
-	primitiveObjectConverter   PrimitiveObjectConverter
+	typeConverter              TypeConverter
 	Descriptor                 Descript
 	LucyMethodSignatureParser  LucyMethodSignatureParse
 	LucyFieldSignatureParser   LucyFieldSignatureParse
@@ -25,4 +25,5 @@ const (
 	java_double_class                       = "java/lang/Double"
 	java_long_class                         = "java/lang/Long"
 	java_index_out_of_range_exception_class = "java/lang/ArrayIndexOutOfBoundsException"
+	java_string_builder_class               = "java/lang/StringBuilder"
 )

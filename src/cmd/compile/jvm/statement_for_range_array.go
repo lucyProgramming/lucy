@@ -170,7 +170,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	// before store to local v ,cast into real type
 	if s.RangeAttr.RangeOn.Value.ArrayType.Typ == ast.VARIABLE_TYPE_STRING {
 	} else if s.RangeAttr.RangeOn.Value.ArrayType.IsPointer() {
-		primitiveObjectConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.ArrayType)
+		typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.ArrayType)
 	}
 	// v
 	autoVar.V = code.MaxLocals

@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
@@ -14,6 +15,10 @@ func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code
 	case common.ARRAY_METHOD_SIZE:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
+		}
 	}
 	return
 }
@@ -22,6 +27,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxstack, _ = m.build(class, code, call.Expression, context, state)
+	fmt.Println("!!!!!!!!!!!!!", state == nil)
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length) // ref type

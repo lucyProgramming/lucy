@@ -81,10 +81,9 @@ func (b *Block) SearchByName(name string) interface{} {
 	t := b.Outter.SearchByName(name) // search by outter block
 	if t != nil {                    //
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
-			if b.InheritedAttribute.Function != nil &&
-				b.IsFunctionTopBlock &&
+			if b.IsFunctionTopBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false {
-				b.InheritedAttribute.Function.ClosureVars.Insert(v)
+				b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
 			}
 			//cannot search variable from class body
 			if b.InheritedAttribute.class != nil && b.IsClassBlock {
@@ -116,15 +115,15 @@ func (b *Block) inherite(father *Block) {
 }
 
 type InheritedAttribute struct {
-	StatementOffset              int
-	IsConstruction               bool
-	StatementFor                 *StatementFor // if this statement is in for or not
-	StatementSwitch              *StatementSwitch
-	mostCloseForOrSwitchForBreak interface{}
-	Function                     *Function
-	class                        *Class
-	Defer                        *Defer
-	Defers                       []*Defer
+	StatementOffset        int
+	IsConstruction         bool
+	StatementFor           *StatementFor // if this statement is in for or not
+	StatementSwitch        *StatementSwitch
+	mostCloseIsForOrSwitch interface{}
+	Function               *Function
+	class                  *Class
+	Defer                  *Defer
+	//Defers                 []*Defer
 }
 
 func (b *Block) check() []error {
@@ -256,6 +255,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == "_" {
 		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
+
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}
@@ -330,8 +330,14 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	}
 	switch d.(type) {
 	case *Class:
+		if t := searchBuildIns(name); t != nil {
+			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		}
 		b.Classes[name] = d.(*Class)
 	case *Function:
+		if t := searchBuildIns(name); t != nil {
+			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		}
 		t := d.(*Function)
 		if buildinFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
@@ -344,6 +350,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		t := d.(*VariableDefinition)
 		b.Vars[name] = t
 	case *Enum:
+		if t := searchBuildIns(name); t != nil {
+			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		}
 		e := d.(*Enum)
 		b.Enums[name] = e
 		for _, v := range e.Enums {
@@ -357,6 +366,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *StatementLable:
 		b.Lables[name] = d.(*StatementLable)
 	case *VariableType:
+		if t := searchBuildIns(name); t != nil {
+			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		}
 		b.Types[name] = d.(*VariableType)
 	default:
 		panic("????????")

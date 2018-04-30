@@ -42,8 +42,7 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		return
 	}
-	t := &AutoVarForReturnBecauseOfDefer{}
-	f.AutoVarForReturnBecauseOfDefer = t
+	f.AutoVarForReturnBecauseOfDefer = &AutoVarForReturnBecauseOfDefer{}
 }
 
 func (f *Function) NoReturnValue() bool {
@@ -59,16 +58,14 @@ func (f *Function) mkAutoVarForException() {
 	if f.AutoVarForException != nil {
 		return
 	}
-	t := &AutoVarForException{}
-	f.AutoVarForException = t
+	f.AutoVarForException = &AutoVarForException{}
 }
 
 func (f *Function) mkAutoVarForMultiReturn() {
 	if f.AutoVarForMultiReturn != nil {
 		return
 	}
-	t := &AutoVarForMultiReturn{}
-	f.AutoVarForMultiReturn = t
+	f.AutoVarForMultiReturn = &AutoVarForMultiReturn{}
 }
 
 type AutoVarForMultiReturn struct {
@@ -83,7 +80,7 @@ func (f *Function) readableMsg(name ...string) string {
 		s = "fn " + f.Name + "("
 	}
 	for k, v := range f.Typ.ParameterList {
-		s += " "
+		s += " " + v.Name + " "
 		s += v.Typ.TypeString()
 		if v.Expression != nil {
 			s += " = " + v.Expression.OpName()
@@ -95,8 +92,9 @@ func (f *Function) readableMsg(name ...string) string {
 	}
 	s += ")"
 	if len(f.Typ.ReturnList) > 0 && f.NoReturnValue() == false {
-		s += "-> ( "
+		s += "->( "
 		for k, v := range f.Typ.ReturnList {
+			s += " " + v.Name + " "
 			s += v.Typ.TypeString()
 			if k != len(f.Typ.ReturnList)-1 {
 				s += ","
@@ -107,6 +105,9 @@ func (f *Function) readableMsg(name ...string) string {
 	return s
 }
 
+/*
+	no need return list
+*/
 func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 	s := "fn " + name + "("
 	for k, v := range args {
@@ -149,7 +150,7 @@ func (f *Function) mkLastRetrunStatement() {
 func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	if f.Name == MAIN_FUNCTION_NAME {
 		errFunc := func() {
-			*errs = append(*errs, fmt.Errorf("%s function %s expect declared as 'main(args []string)'",
+			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
 				errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
 		}
 		if len(f.Typ.ParameterList) != 1 {
@@ -171,7 +172,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	}
 	var err error
 	for k, v := range f.Typ.ParameterList {
-		v.IsFunctionParameter = true
+		//v.IsFunctionParameter = true
 		err = v.Typ.resolve(f.Block)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))

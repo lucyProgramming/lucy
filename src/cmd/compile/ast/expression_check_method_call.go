@@ -261,7 +261,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				errMsgPrefix(e.Pos), object.TypeString()))
 			return nil
 		}
-		if call.Expression.isThisIdentifierExpression() == false {
+		if call.Expression.isThis() == false {
 			*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use this",
 				errMsgPrefix(e.Pos)))
 			return nil
@@ -305,12 +305,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if matched {
-		if false == call.Expression.isThisIdentifierExpression() &&
+		if false == call.Expression.isThis() &&
 			ms[0].IsPublic() == false {
 			*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
 		}
 		call.Method = ms[0]
-		return ms[0].Func.Typ.ReturnList.retTypes(e.Pos)
+		return ms[0].Func.Typ.retTypes(e.Pos)
 	}
 	if ms == nil || len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))

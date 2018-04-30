@@ -4,11 +4,11 @@ import "fmt"
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
 	call := e.Data.(*ExpressionFunctionCall)
-	tt, es := call.Expression.check(block)
+	ts, es := call.Expression.check(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := e.mustBeOneValueContext(tt)
+	t, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -70,14 +70,14 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		errmsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
 		*errs = append(*errs, fmt.Errorf(errmsg))
 	}
-	ret := f.Typ.ReturnList.retTypes(e.Pos)
+	ret := f.Typ.retTypes(e.Pos)
 	if len(callargsTypes) < len(f.Typ.ParameterList) {
 		if f.HaveDefaultValue && len(callargsTypes) >= f.DefaultValueStartAt {
 			for i := len(callargsTypes); i < len(f.Typ.ParameterList); i++ {
 				*args = append(*args, f.Typ.ParameterList[i].Expression)
 			}
 		} else { // no default value
-			errmsg := fmt.Sprintf("%s too few paramaters to call function %s\n", errMsgPrefix(e.Pos), f.Name)
+			errmsg := fmt.Sprintf("%s too few paramaters to call function '%s'\n", errMsgPrefix(e.Pos), f.Name)
 			errmsg += fmt.Sprintf("\thave %s\n", f.badParameterMsg(f.Name, callargsTypes))
 			errmsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
 			*errs = append(*errs, fmt.Errorf(errmsg))

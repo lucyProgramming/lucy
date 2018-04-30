@@ -16,7 +16,7 @@ func (e *Expression) checkConstExpression(block *Block, errs *[]error) {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
 		if is == false {
-			*errs = append(*errs, fmt.Errorf("%s const %v is not defined by const value",
+			*errs = append(*errs, fmt.Errorf("%s const named '%s' is not defined by const value",
 				errMsgPrefix(v.Pos), v.Name))
 			continue
 		}

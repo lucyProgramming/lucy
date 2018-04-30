@@ -24,7 +24,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			maxstack = t
 		}
 		if variableType.IsPointer() == false {
-			primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
+			typeConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		code.CodeLength++
@@ -96,7 +96,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				maxstack = t
 			}
 			if variableType.IsPointer() == false {
-				primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
+				typeConverter.putPrimitiveInObjectStaticWay(class, code, variableType)
 			}
 			//call remove
 			callRemove()

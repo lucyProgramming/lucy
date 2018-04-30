@@ -35,7 +35,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			}
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.IsIncrement() {
+			if e.IsSelfIncrement() {
 				load() // load to stack top
 				maxstack = 1
 			}
@@ -52,7 +52,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			code.CodeLength += 3
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.IsIncrement() == false { // decrement
+			if e.IsSelfIncrement() == false { // decrement
 				load() // load to stack top
 				maxstack = 1
 			}
@@ -81,7 +81,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	}
 	switch e.Value.Typ {
 	case ast.VARIABLE_TYPE_BYTE:
-		if e.IsIncrement() {
+		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -93,7 +93,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength+2] = cg.OP_i2b
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_SHORT:
-		if e.IsIncrement() {
+		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -105,7 +105,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength+2] = cg.OP_i2s
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_INT:
-		if e.IsIncrement() {
+		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -116,7 +116,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_LONG:
-		if e.IsIncrement() {
+		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_lconst_1
 			code.CodeLength++
 		} else {
@@ -130,7 +130,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_ladd
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_FLOAT:
-		if e.IsIncrement() {
+		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_fconst_1
 			code.CodeLength++
 		} else {
@@ -145,7 +145,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_fadd
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
-		if e.IsIncrement() {
+		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_dconst_0
 			code.CodeLength++
 		} else {
@@ -160,7 +160,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength++
 	}
 	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
-		primitiveObjectConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
+		typeConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
@@ -173,7 +173,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
-		primitiveObjectConverter.getFromObject(class, code, e.Value)
+		typeConverter.getFromObject(class, code, e.Value)
 	}
 	return
 }

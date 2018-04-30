@@ -95,7 +95,7 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
 				p.errorMsgPrefix(), p.token.Desp)
 		}
-		p.Next() // skip [
+		p.Next() // skip {
 		k, err := p.parseType()
 		if err != nil {
 			return nil, err
