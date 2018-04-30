@@ -17,6 +17,7 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 4
 	maxstack = 2 // current stack is 2
 	currenStack := maxstack
+
 	stack, es := m.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
 		backPatchEs(es, code.CodeLength)

@@ -86,7 +86,6 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
 	context.function = f
-	context.method = method
 	method.Code.Codes = make([]byte, 65536)
 	method.Code.CodeLength = 0
 	defer func() {

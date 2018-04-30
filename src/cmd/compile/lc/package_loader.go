@@ -29,7 +29,7 @@ type Resource struct {
 
 func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interface{}, error) {
 	var realpaths []*Resource
-	for _, v := range compiler.lucyPath {
+	for _, v := range compiler.lucyPaths {
 		p := filepath.Join(v, "class", resouceName)
 		f, err := os.Stat(p)
 		if err == nil && f.IsDir() { // directory is package
@@ -50,7 +50,7 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		}
 	}
 
-	for _, v := range compiler.ClassPath {
+	for _, v := range compiler.ClassPaths {
 		p := filepath.Join(v, resouceName)
 		f, err := os.Stat(p)
 		if err == nil && f.IsDir() { // directory is package

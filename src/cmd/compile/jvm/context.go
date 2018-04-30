@@ -6,34 +6,33 @@ import (
 )
 
 type Context struct {
-	lastStackMapState *StackMapState
-	method            *cg.MethodHighLevel
-	function          *ast.Function
-	currentSoureFile  string
-	currentLineNUmber int
-	StackMapDelta     int
-	Defer             *ast.Defer
+	lastStackMapState  *StackMapState
+	function           *ast.Function
+	currentSoureFile   string
+	currentLineNUmber  int
+	LastStackMapOffset int
+	Defer              *ast.Defer
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
 	//fmt.Println("offset:", offset)
-	if context.StackMapDelta == offset {
+	if context.LastStackMapOffset == offset {
 		return
 	}
 	var delta uint16
-	if context.StackMapDelta == 0 {
+	if context.LastStackMapOffset == 0 {
 		delta = uint16(offset)
 	} else {
-		delta = uint16(offset - context.StackMapDelta - 1)
+		delta = uint16(offset - context.LastStackMapOffset - 1)
 	}
 	defer func() {
-		context.StackMapDelta = offset // rewrite
+		context.LastStackMapOffset = offset // rewrite
 		context.lastStackMapState = state
 		state.LastLocals = make([]*cg.StackMap_verification_type_info, len(state.Locals))
 		copy(state.LastLocals, state.Locals)
 	}()
 	if context.lastStackMapState != nil && context.lastStackMapState == state {
-		if context.StackMapDelta == 0 { // first one
+		if context.LastStackMapOffset == 0 { // first one
 			if len(state.Stacks) == 0 && len(state.Locals)-len(state.LastLocals) <= 3 {
 				// append frame
 				num := len(state.Stacks) - len(state.LastLocals)

@@ -43,7 +43,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 		t := &cg.StackMap_verification_type_info{}
 		tt := &cg.StackMap_Uninitialized_variable_info{}
 		tt.Index = uint16(code.CodeLength - 4)
-		t.PayLoad = tt
+		t.Verify = tt
 		state.Stacks = append(state.Stacks, t)
 		state.Stacks = append(state.Stacks, t)
 		defer state.popStack(2)

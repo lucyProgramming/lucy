@@ -41,8 +41,8 @@ func (m *MakeExpression) getMapLeftValue(
 	maxstack, remainStack uint16, op []byte,
 	target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxstack, _ = m.build(class, code, index.Expression, context, nil)
-	stack, _ := m.build(class, code, index.Index, context, nil)
+	maxstack, _ = m.build(class, code, index.Expression, context, state)
+	stack, _ := m.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxstack {
 		maxstack = t
 	}

@@ -20,9 +20,9 @@ func (s *StackMapState) addTop(absent *StackMapState) {
 	length := len(absent.Locals) - len(s.Locals)
 	oldLength := len(s.Locals)
 	t := &cg.StackMap_verification_type_info{}
-	t.PayLoad = &cg.StackMap_Top_variable_info{}
+	t.Verify = &cg.StackMap_Top_variable_info{}
 	for i := 0; i < length; i++ {
-		tt := absent.Locals[i+oldLength].PayLoad
+		tt := absent.Locals[i+oldLength].Verify
 		_, ok1 := tt.(*cg.StackMap_Double_variable_info)
 		_, ok2 := tt.(*cg.StackMap_Long_variable_info)
 		if ok1 || ok2 {
@@ -53,8 +53,8 @@ func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType)
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
 	copy(s.Locals, last.Locals)
-	s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
-	copy(s.Stacks, last.Stacks)
+	//s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
+	//copy(s.Stacks, last.Stacks)
 	return s
 }
 
@@ -71,35 +71,35 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
-		ret.PayLoad = &cg.StackMap_Integer_variable_info{}
+		ret.Verify = &cg.StackMap_Integer_variable_info{}
 	case ast.VARIABLE_TYPE_LONG:
-		ret.PayLoad = &cg.StackMap_Long_variable_info{}
+		ret.Verify = &cg.StackMap_Long_variable_info{}
 	case ast.VARIABLE_TYPE_FLOAT:
-		ret.PayLoad = &cg.StackMap_Float_variable_info{}
+		ret.Verify = &cg.StackMap_Float_variable_info{}
 	case ast.VARIABLE_TYPE_DOUBLE:
-		ret.PayLoad = &cg.StackMap_Double_variable_info{}
+		ret.Verify = &cg.StackMap_Double_variable_info{}
 	case ast.VARIABLE_TYPE_NULL:
-		ret.PayLoad = &cg.StackMap_Null_variable_info{}
+		ret.Verify = &cg.StackMap_Null_variable_info{}
 	case ast.VARIABLE_TYPE_STRING:
-		ret.PayLoad = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(java_string_class),
 		}
 	case ast.VARIABLE_TYPE_OBJECT:
-		ret.PayLoad = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(t.Class.Name),
 		}
 	case ast.VARIABLE_TYPE_MAP:
-		ret.PayLoad = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(java_hashmap_class),
 		}
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Typ]
-		ret.PayLoad = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(meta.classname),
 		}
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		d := Descriptor.typeDescriptor(t)
-		ret.PayLoad = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(d),
 		}
 	}

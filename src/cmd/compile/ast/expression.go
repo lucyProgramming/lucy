@@ -444,10 +444,12 @@ type ExpressionArrayLiteral struct {
 	Length      int
 }
 
-func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error, is2 bool, typ2 int, value2 interface{}, err2 error) {
+func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error,
+	is2 bool, typ2 int, value2 interface{}, err2 error) {
+
 	is1, typ1, value1, err1 = binary.Left.getConstValue()
 	is2, typ2, value2, err2 = binary.Right.getConstValue()
 	return
 }
 
-type getBinaryExpressionHandler func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)
+type binaryConstFolder func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)

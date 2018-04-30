@@ -57,13 +57,11 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
 		} else {
 			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
 		}
-
 	}
 	return astClass, nil
 }

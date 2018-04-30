@@ -74,7 +74,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		t := &cg.StackMap_verification_type_info{}
 		unInit := &cg.StackMap_Uninitialized_variable_info{}
 		unInit.Index = uint16(code.CodeLength - 4)
-		t.PayLoad = unInit
+		t.Verify = unInit
 		state.Stacks = append(state.Stacks, t, t) // 2 for dup
 		defer state.popStack(2)
 	}

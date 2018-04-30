@@ -21,6 +21,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "booleanValue",
 			Descriptor: "()Z",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_BYTE:
 		c := "java/lang/Byte"
 		code.Codes[code.CodeLength] = cg.OP_checkcast
@@ -32,6 +33,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "byteValue",
 			Descriptor: "()B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_SHORT:
 		c := "java/lang/Short"
 		code.Codes[code.CodeLength] = cg.OP_checkcast
@@ -43,6 +45,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "shortValue",
 			Descriptor: "()S",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
@@ -55,6 +58,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "intValue",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_long_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -65,6 +69,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "longValue",
 			Descriptor: "()J",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_float_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -75,6 +80,7 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "floatValue",
 			Descriptor: "()F",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -85,9 +91,9 @@ func (PrimitiveObjectConverter) getFromObject(class *cg.ClassHighLevel, code *cg
 			Method:     "doubleValue",
 			Descriptor: "()D",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-
+		code.CodeLength += 3
 	}
-	code.CodeLength += 3
+
 }
 
 func (PrimitiveObjectConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {

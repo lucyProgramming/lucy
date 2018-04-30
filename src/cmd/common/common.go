@@ -18,6 +18,15 @@ const (
 	DIR_FOR_LUCY_SOURCE_FILES = "src"
 )
 
+func GetClassPaths() []string {
+	lp := os.Getenv("CLASSPATH")
+	if runtime.GOOS == "windows" {
+		return strings.Split(lp, ";")
+	} else {
+		return strings.Split(lp, ":")
+	}
+}
+
 /*
 	include
 */

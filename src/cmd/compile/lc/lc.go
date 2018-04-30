@@ -3,14 +3,13 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"sort"
-	"strings"
 )
 
 func Main(files []string) {
@@ -36,8 +35,8 @@ type LucyCompile struct {
 	Files            []string
 	Errs             []error
 	NerrsStopCompile int
-	lucyPath         []string
-	ClassPath        []string
+	lucyPaths        []string
+	ClassPaths       []string
 	Maker            jvm.MakeClass
 }
 
@@ -53,7 +52,7 @@ func (lc *LucyCompile) exit() {
 		code = 2
 	}
 	// sort error
-	es := Errors(lc.Errs)
+	es := SortErrs(lc.Errs)
 	sort.Sort(es)
 	for _, v := range es {
 		fmt.Fprintln(os.Stderr, v)
@@ -62,17 +61,12 @@ func (lc *LucyCompile) exit() {
 }
 
 func (lc *LucyCompile) Init() {
-	path := os.Getenv("CLASSPATH")
-	if runtime.GOOS == "windows" {
-		lc.ClassPath = strings.Split(path, ";") // windows style
-	} else {
-		lc.ClassPath = strings.Split(path, ":")
-	}
-	path = os.Getenv("LUCYPATH")
-	if runtime.GOOS == "windows" {
-		lc.lucyPath = strings.Split(path, ";") // windows style
-	} else {
-		lc.lucyPath = strings.Split(path, ":")
+	lc.ClassPaths = common.GetClassPaths()
+	var err error
+	lc.lucyPaths, err = common.GetLucyPaths()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(3)
 	}
 }
 

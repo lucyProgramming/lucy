@@ -2,7 +2,6 @@ package lc
 
 import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"path/filepath"
 )
 
 var (
@@ -20,10 +19,10 @@ func init() {
 	ast.NameLoader = &loader
 }
 
-func classShortName(binaryName string) (shortName string) {
-	shortName = filepath.Base(binaryName)
-	return
-}
+//func classShortName(binaryName string) (shortName string) {
+//	shortName = filepath.Base(binaryName)
+//	return
+//}
 
 const (
 	mainClassName = "main.class"
