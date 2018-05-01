@@ -7,10 +7,10 @@ import (
 
 type StatementSwitch struct {
 	Pos                 *Pos
-	BackPatchs          []*cg.JumpBackPatch
 	Condition           *Expression //switch
 	StatmentSwitchCases []*StatmentSwitchCase
 	Default             *Block
+	BackPatchs          []*cg.JumpBackPatch
 }
 
 type StatmentSwitchCase struct {
@@ -28,11 +28,13 @@ func (s *StatementSwitch) check(b *Block) []error {
 		return errs
 	}
 	if conditionType.Typ == VARIABLE_TYPE_BOOL {
-		errs = append(errs, fmt.Errorf("%s bool not allow for switch", errMsgPrefix(conditionType.Pos)))
+		errs = append(errs, fmt.Errorf("%s bool expression not allow for switch",
+			errMsgPrefix(conditionType.Pos)))
 		return errs
 	}
 	if len(s.StatmentSwitchCases) == 0 {
-		errs = append(errs, fmt.Errorf("%s switch statement has no cases", errMsgPrefix(s.Pos)))
+		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
+			errMsgPrefix(s.Pos)))
 	}
 	byteMap := make(map[byte]*Pos)
 	shortMap := make(map[int16]*Pos)
@@ -49,6 +51,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 	}
 	doubleMap := []doubleExist{}
 	stringMap := make(map[string]*Pos)
+	enumNamesMap := make(map[string]*Pos)
 	for _, v := range s.StatmentSwitchCases {
 		for _, e := range v.Matches {
 			var byteValue byte
@@ -58,6 +61,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 			var floatValue float32
 			var doubleValue float64
 			var stringValue string
+			var enumName string
 			valueValid := false
 			valueFromExpression := func() {
 				switch e.Typ {
@@ -76,9 +80,8 @@ func (s *StatementSwitch) check(b *Block) []error {
 				}
 			}
 			t, es := b.checkExpression(e)
-			if es != nil {
+			if errsNotEmpty(es) {
 				errs = append(errs, es...)
-				continue
 			}
 			if t == nil {
 				continue
@@ -88,61 +91,23 @@ func (s *StatementSwitch) check(b *Block) []error {
 					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
 				continue
 			}
+			if conditionType.Typ == VARIABLE_TYPE_ENUM {
+				enumName = t.EnumName.Name
+				valueValid = true
+			}
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {
 					valueFromExpression()
 					valueValid = true
-				} else if e.Typ == EXPRESSION_TYPE_IDENTIFIER {
-					identifier := e.Data.(*ExpressionIdentifer)
-					t := b.SearchByName(identifier.Name)
-					if t == nil {
-						errs = append(errs, fmt.Errorf("%s %s not found", errMsgPrefix(e.Pos), identifier))
-						continue
-					} else {
-						if tt, ok := t.(*Const); ok == false {
-							errs = append(errs, fmt.Errorf("%s identifier is not a const", errMsgPrefix(e.Pos), identifier))
-							continue
-						} else {
-							if conditionType.Equal(tt.Typ) {
-								e.fromConst(tt)
-								valueFromExpression()
-								valueValid = true
-							}
-						}
-					}
-				} else if e.Typ == EXPRESSION_TYPE_DOT {
-					index := e.Data.(*ExpressionDot)
-					if index.Expression.Typ != EXPRESSION_TYPE_IDENTIFIER {
-						errs = append(errs, fmt.Errorf("%s expect a package name", errMsgPrefix(e.Pos)))
-						continue
-					}
-					identiferName := index.Expression.Data.(*ExpressionIdentifer).Name
-					packageName := PackageBeenCompile.getImport(e.Pos.Filename, identiferName)
-					if packageName == nil {
-						errs = append(errs, fmt.Errorf("%s package %s not found", errMsgPrefix(e.Pos), identiferName))
-						continue
-					}
-					i, err := PackageBeenCompile.load(packageName.Resource)
-					if err != nil {
-						errs = append(errs, fmt.Errorf("%s load failed,err:%v", errMsgPrefix(e.Pos), err))
-						continue
-					}
-					if c, ok := i.(*Const); ok == false {
-						errs = append(errs, fmt.Errorf("%s not a const expression ", errMsgPrefix(e.Pos)))
-						continue
-					} else {
-						e.fromConst(c)
-						valueFromExpression()
-						valueValid = true
-					}
 				} else {
 					errs = append(errs, fmt.Errorf("%s expression is not a literal value", errMsgPrefix(e.Pos)))
 					continue
 				}
 			}
+
 			errMsg := func(first *Pos) string {
 				errmsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
-				errmsg += fmt.Sprintf("%s", errMsgPrefix(first))
+				errmsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
 				return errmsg
 			}
 			if valueValid {
@@ -150,24 +115,28 @@ func (s *StatementSwitch) check(b *Block) []error {
 				case VARIABLE_TYPE_BYTE:
 					if first, ok := byteMap[byteValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						byteMap[byteValue] = e.Pos
 					}
 				case VARIABLE_TYPE_SHORT:
 					if first, ok := shortMap[shortValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						shortMap[shortValue] = e.Pos
 					}
 				case VARIABLE_TYPE_INT:
 					if first, ok := int32Map[int32Vavlue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						int32Map[int32Vavlue] = e.Pos
 					}
 				case VARIABLE_TYPE_LONG:
 					if first, ok := int64Map[int64Value]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						int64Map[int64Value] = e.Pos
 					}
@@ -183,6 +152,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					}
 					if found {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						floatMap = append(floatMap, floatExist{value: floatValue, pos: e.Pos})
 					}
@@ -198,14 +168,23 @@ func (s *StatementSwitch) check(b *Block) []error {
 					}
 					if found {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						doubleMap = append(doubleMap, doubleExist{value: doubleValue, pos: e.Pos})
 					}
 				case VARIABLE_TYPE_STRING:
 					if first, ok := stringMap[stringValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
 					} else {
 						stringMap[stringValue] = e.Pos
+					}
+				case VARIABLE_TYPE_ENUM:
+					if first, ok := enumNamesMap[enumName]; ok {
+						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
+					} else {
+						enumNamesMap[enumName] = e.Pos
 					}
 				}
 			}

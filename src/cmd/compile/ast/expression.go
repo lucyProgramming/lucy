@@ -193,6 +193,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "map_literal"
 	case EXPRESSION_TYPE_CONVERTION_TYPE:
 		return "convertion of type"
+	case EXPRESSION_TYPE_TYPE_ASSERT:
+		return "type assert"
 	case EXPRESSION_TYPE_TYPE_ALIAS:
 		return "type alias"
 	}
@@ -393,6 +395,7 @@ type ExpressionDot struct {
 	Name            string
 	Field           *ClassField
 	PackageVariable *VariableDefinition
+	EnumName        *EnumName
 }
 type ExpressionMethodCall struct {
 	Class      *Class //

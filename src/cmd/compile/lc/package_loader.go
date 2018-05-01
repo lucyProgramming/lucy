@@ -163,6 +163,13 @@ func (loader *RealNameLoader) loadLucyPackage(r *Resource) (*ast.Package, error)
 		if err != nil {
 			return nil, fmt.Errorf("decode class failed,err:%v", err)
 		}
+		if len(c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_ENUM)) > 0 {
+			err = loader.loadLucyEnum(p, c)
+			if err != nil {
+				return nil, err
+			}
+			continue
+		}
 		class, err := loader.loadAsLucy(c)
 		if err != nil {
 			return nil, fmt.Errorf("decode class failed,err:%v", err)
@@ -209,6 +216,7 @@ func (loader *RealNameLoader) loadClass(p *ast.Package, r *Resource) (*ast.Class
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
 	if r.kind == RESOUCE_KIND_LUCY_CLASS {
+
 		if t := c.AttributeGroupedByName[cg.ATTRIBUTE_NAME_LUCY_ENUM]; t != nil && len(t) > 0 {
 			return nil, loader.loadLucyEnum(p, c)
 		} else {

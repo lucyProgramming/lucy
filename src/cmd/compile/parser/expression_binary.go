@@ -6,8 +6,8 @@ import (
 )
 
 // && ||
-func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
-	e, err := ep.parseBitANDORExpression()
+func (ep *ExpressionParser) parseLogicalExpression(statementLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseBitANDORExpression(statementLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
 		typ := ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseBitANDORExpression()
+		e2, err := ep.parseBitANDORExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -37,8 +37,8 @@ func (ep *ExpressionParser) parseLogicalExpression() (*ast.Expression, error) {
 }
 
 // & |
-func (ep *ExpressionParser) parseBitANDORExpression() (*ast.Expression, error) {
-	e, err := ep.parseEqualExpression()
+func (ep *ExpressionParser) parseBitANDORExpression(statementLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseEqualExpression(statementLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (ep *ExpressionParser) parseBitANDORExpression() (*ast.Expression, error) {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseEqualExpression()
+		e2, err := ep.parseEqualExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -68,8 +68,8 @@ func (ep *ExpressionParser) parseBitANDORExpression() (*ast.Expression, error) {
 }
 
 // == and !=
-func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
-	e, err := ep.parseRelationExpression()
+func (ep *ExpressionParser) parseEqualExpression(statementLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseRelationExpression(statementLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseRelationExpression()
+		e2, err := ep.parseRelationExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -99,8 +99,8 @@ func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
 }
 
 // > < >= <=
-func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
-	e, err := ep.parseShiftExpression()
+func (ep *ExpressionParser) parseRelationExpression(statementLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseShiftExpression(statementLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseShiftExpression()
+		e2, err := ep.parseShiftExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -135,8 +135,8 @@ func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
 }
 
 // << >>
-func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
-	e, err := ep.parseAddExpression()
+func (ep *ExpressionParser) parseShiftExpression(statmentLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseAddExpression(statmentLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseAddExpression()
+		e2, err := ep.parseAddExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -167,8 +167,8 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 }
 
 // + -
-func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
-	e, err := ep.parseMulExpression()
+func (ep *ExpressionParser) parseAddExpression(statemenLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseMulExpression(statemenLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseMulExpression()
+		e2, err := ep.parseMulExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -198,8 +198,8 @@ func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
 }
 
 // */ %
-func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
-	e, err := ep.parseOneExpression()
+func (ep *ExpressionParser) parseMulExpression(statementLevel bool) (*ast.Expression, error) {
+	e, err := ep.parseOneExpression(statementLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseOneExpression()
+		e2, err := ep.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}

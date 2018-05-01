@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expression, error) {
 	if ep.parser.eof {
 		return nil, ep.parser.mkUnexpectedEofErr()
 	}
@@ -108,7 +108,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		ep.Next() // skip ++
 		newE := &ast.Expression{}
 		newE.Pos = ep.parser.mkPos()
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -118,7 +118,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_DECREMENT:
 		ep.Next() // skip --
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -129,7 +129,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_NOT:
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +140,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	case lex.TOKEN_SUB:
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}
@@ -256,7 +256,9 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
-	if ep.parser.token.Type == lex.TOKEN_COLON && left.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {
+	if ep.parser.token.Type == lex.TOKEN_COLON &&
+		left.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
+		statementLevel {
 		left.Typ = ast.EXPRESSION_TYPE_LABLE
 		ep.Next()
 		return left, nil // lable here
@@ -325,9 +327,6 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 				}
 				if ep.parser.token.Type == lex.TOKEN_COLON {
 					ep.parser.Next() // skip :
-				}
-				if e.Typ == ast.EXPRESSION_TYPE_LABLE {
-					e.Typ = ast.EXPRESSION_TYPE_IDENTIFIER // corrent to identifier
 				}
 				var end *ast.Expression
 				if ep.parser.token.Type != lex.TOKEN_RB {

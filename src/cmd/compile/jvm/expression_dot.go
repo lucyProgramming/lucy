@@ -7,6 +7,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	dot := e.Data.(*ast.ExpressionDot)
 	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
+		maxstack = jvmSize(e.Value)
 		if dot.PackageVariable != nil {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -15,6 +16,9 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 				Descriptor: dot.PackageVariable.Descriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+		}
+		if dot.EnumName != nil {
+			loadInt32(class, code, dot.EnumName.Value)
 		}
 		return
 	}

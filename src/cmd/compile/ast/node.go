@@ -221,6 +221,10 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				t := vv.(*ExpressionTypeAlias)
 				r.Poses[kk] = t.Pos
 				r.Types[kk] = "type alias"
+			case *EnumName:
+				t := vv.(*EnumName)
+				r.Poses[kk] = t.Pos
+				r.Types[kk] = "enum name"
 			default:
 				panic("make error")
 			}

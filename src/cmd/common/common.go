@@ -28,7 +28,7 @@ func GetClassPaths() []string {
 }
 
 /*
-	include
+	include lucy root
 */
 func GetLucyPaths() ([]string, error) {
 	root, err := GetLucyRoot()

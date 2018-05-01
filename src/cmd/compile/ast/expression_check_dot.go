@@ -23,14 +23,13 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 	if t.Typ != VARIABLE_TYPE_OBJECT &&
 		t.Typ != VARIABLE_TYPE_CLASS &&
 		t.Typ != VARIABLE_TYPE_PACKAGE {
-		*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
+		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'",
 			errMsgPrefix(e.Pos), dot.Name, t.TypeString()))
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
 		find := t.Package.Block.SearchByName(dot.Name)
 		if find == nil {
-			fmt.Println(t.Package.Block.Vars)
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
@@ -77,6 +76,19 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 				*errs = append(*errs, err)
 			}
 			dot.PackageVariable = t
+			return tt
+		case *EnumName:
+			t := find.(*EnumName)
+			if (t.Enum.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
+				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
+				*errs = append(*errs, err)
+			}
+			tt := &VariableType{}
+			tt.Pos = e.Pos
+			tt.Enum = t.Enum
+			tt.EnumName = t
+			tt.Typ = VARIABLE_TYPE_ENUM
+			dot.EnumName = t
 			return tt
 		case *VariableType:
 			err = fmt.Errorf("%s name '%s' is a type,not a expression",

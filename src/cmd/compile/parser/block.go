@@ -40,10 +40,10 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			break
 		}
 		if _, ok := endTokenM[b.parser.token.Type]; ok {
-			//if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
-			b.Next()
-			//}
 			block.EndPos = b.parser.mkPos()
+			if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
+				b.Next() // if switch ,don`t read next token
+			}
 			break
 		}
 		switch b.parser.token.Type {

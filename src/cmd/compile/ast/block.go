@@ -123,7 +123,6 @@ type InheritedAttribute struct {
 	Function               *Function
 	class                  *Class
 	Defer                  *Defer
-	//Defers                 []*Defer
 }
 
 func (b *Block) check() []error {
@@ -165,7 +164,6 @@ func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
 	}
 	if len(ts) > 0 {
 		t = ts[0]
-		e.Value = t
 	}
 	return
 }
@@ -340,6 +338,9 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 			}
 		}
 	case *EnumName:
+		if t := searchBuildIns(name); t != nil {
+			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		}
 		b.EnumNames[name] = d.(*EnumName)
 	case *StatementLable:
 		b.Lables[name] = d.(*StatementLable)

@@ -14,8 +14,7 @@ type Enum struct {
 	Name        string
 	Pos         *Pos
 	Enums       []*EnumName
-	EnumsMap    map[string]*EnumName //easy to access by name
-	Init        *Expression          //should be a int expression
+	Init        *Expression //should be a int expression
 	Used        bool
 }
 

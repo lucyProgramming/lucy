@@ -209,22 +209,8 @@ type RedeclareError struct {
 }
 
 func (r *RedeclareError) Error() error {
-	var firstPos *Pos
-	for _, v := range r.Poses {
-		if firstPos == nil {
-			firstPos = v
-			continue
-		}
-		if v.StartLine < firstPos.StartLine {
-			firstPos = v
-		}
-	}
-	s := fmt.Sprintf("%s name named '%s' defined multi times,which are:\n",
-		errMsgPrefix(firstPos), r.Name)
+	s := fmt.Sprintf("name '%s' defined  multi times,which are:\n", r.Name)
 	for k, v := range r.Poses {
-		if v == firstPos {
-			continue
-		}
 		s += fmt.Sprintf("\t%s '%s' named '%s'\n", errMsgPrefix(v), r.Types[k], r.Name)
 	}
 	return errors.New(s)

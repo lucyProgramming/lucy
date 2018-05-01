@@ -190,16 +190,11 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 	if pp, ok := p.(*Package); ok == false && pp != nil {
 		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
 	} else {
-		if pp.Block.SearchByName(packageAndName[1]) == nil {
-			return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), packageAndName[1])
+		d = pp.Block.SearchByName(packageAndName[1])
+		if d == nil {
+			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos))
 		}
-		if pp.Block.Types != nil && pp.Block.Types[packageAndName[1]] != nil {
-			return pp.Block.Types[packageAndName[1]], nil
-		}
-		if pp.Block.Classes != nil && pp.Block.Classes[packageAndName[1]] != nil {
-			return pp.Block.Classes[packageAndName[1]], nil
-		}
-		return nil, fmt.Errorf("%s '%s' is not a type", errMsgPrefix(t.Pos), packageAndName[1])
+		return d, err
 	}
 
 }

@@ -36,28 +36,32 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_throwable_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	{
-		t := &cg.StackMap_verification_type_info{}
-		tt := &cg.StackMap_Uninitialized_variable_info{}
-		tt.Index = uint16(code.CodeLength - 4)
-		t.Verify = tt
-		state.Stacks = append(state.Stacks, t)
-		state.Stacks = append(state.Stacks, t)
-		defer state.popStack(2)
+	if call.Args[0].Typ != ast.EXPRESSION_TYPE_NEW { // not new expression
+		code.Codes[code.CodeLength] = cg.OP_new
+		class.InsertClassConst(java_throwable_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_dup
+		code.CodeLength += 4
+		{
+			t := &cg.StackMap_verification_type_info{}
+			tt := &cg.StackMap_Uninitialized_variable_info{}
+			tt.Index = uint16(code.CodeLength - 4)
+			t.Verify = tt
+			state.Stacks = append(state.Stacks, t)
+			state.Stacks = append(state.Stacks, t)
+			defer state.popStack(2)
+		}
+		stack, _ := m.build(class, code, call.Args[0], context, state)
+		maxstack = 2 + stack
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_throwable_class,
+			Method:     special_method_init,
+			Descriptor: "(Ljava/lang/Throwable;)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	} else {
+		maxstack, _ = m.build(class, code, call.Args[0], context, state)
 	}
-	stack, _ := m.build(class, code, call.Args[0], context, state)
-	maxstack = 2 + stack
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_throwable_class,
-		Method:     special_method_init,
-		Descriptor: "(Ljava/lang/Throwable;)V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
 	return

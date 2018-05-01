@@ -38,7 +38,7 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 
 //parse assign expression
 func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression, error) {
-	left, err := ep.parseLogicalExpression() //
+	left, err := ep.parseLogicalExpression(statemenLevel) //
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +46,8 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 		return left, nil
 	}
 	for ep.parser.token.Type == lex.TOKEN_COMMA && statemenLevel { // read more
-		ep.Next()                                 //  skip comma
-		left2, err := ep.parseLogicalExpression() //
+		ep.Next()                                      //  skip comma
+		left2, err := ep.parseLogicalExpression(false) //
 		if err != nil {
 			return nil, err
 		}
