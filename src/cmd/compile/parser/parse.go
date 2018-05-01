@@ -200,6 +200,11 @@ func (p *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
+			if len(vs) != len(es) {
+				p.errs = append(p.errs,
+					fmt.Errorf("%s cannot assign %d values to %d destinations",
+						p.errorMsgPrefix(p.mkPos()), len(es), len(vs)))
+			}
 			for k, v := range vs {
 				if k < len(es) {
 					c := &ast.Const{}
@@ -453,57 +458,10 @@ func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 	}
 	return vs, nil
 }
+func (p *Parser) unexpectedErr() {
+	p.errs = append(p.errs, p.mkUnexpectedEofErr())
+}
 
-////var a,b,c int,char,bool  | var a,b,c int = 123;
-//func (p *Parser) parseVarDefinition(ispublic ...bool) (vs []*ast.VariableDefinition, expressions []*ast.Expression, err error) {
-//	p.Next()
-//	if p.eof {
-//		err = p.mkUnexpectedEofErr()
-//		p.errs = append(p.errs, err)
-//		return
-//	}
-//	names, err := p.parseNameList()
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//	if p.eof {
-//		err = p.mkUnexpectedEofErr()
-//		p.errs = append(p.errs, err)
-//		return
-//	}
-//	t, err := p.parseType()
-//	if t == nil {
-//		err = fmt.Errorf("%s no variable type found or defined wrong", p.errorMsgPrefix())
-//		p.errs = append(p.errs, err)
-//		return nil, nil, err
-//	}
-//	//value , no default value definition
-//	if lex.TOKEN_ASSIGN == p.token.Type {
-//		//assign
-//		p.Next() // skip =
-//		expressions, err = p.ExpressionParser.parseExpressions()
-//		if err != nil {
-//			p.errs = append(p.errs, err)
-//		}
-//	}
-//	if p.token.Type != lex.TOKEN_SEMICOLON {
-//		err = fmt.Errorf("%s not a \";\" after a variable declare ", p.errorMsgPrefix())
-//		p.errs = append(p.errs, err)
-//		return
-//	}
-//	p.Next() // look next
-//	vs = make([]*ast.VariableDefinition, len(names))
-//	for k, v := range names {
-//		vd := &ast.VariableDefinition{}
-//		vd.Name = v.Name
-//		vd.Typ = t.Clone()
-//		if len(ispublic) > 0 && ispublic[0] {
-//			vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
-//		} else {
-//			vd.AccessFlags |= cg.ACC_FIELD_PRIVATE
-//		}
-//		vd.Pos = v.Pos
-//		vs[k] = vd
-//	}
-//	return
-//}
+func (p *Parser) mkUnexpectedEofErr() error {
+	return fmt.Errorf("%s unexpected EOF", p.errorMsgPrefix())
+}

@@ -235,7 +235,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			}
 			if classname == java_hashmap_class {
 				// put in object
-				typeConverter.putPrimitiveInObjectStaticWay(class, code,
+				typeConverter.putPrimitiveInObject(class, code,
 					s.RangeAttr.RangeOn.Value.Map.K)
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)

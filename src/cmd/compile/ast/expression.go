@@ -371,11 +371,6 @@ type ExpressionDeclareVariable struct {
 	IfDeclareBefor []bool // used for colon assign
 }
 
-type ExpressionDeclareConsts struct {
-	Consts      []*Const
-	Expressions []*Expression
-}
-
 type ExpressionTypeConvertion struct {
 	Typ        *VariableType
 	Expression *Expression

@@ -24,7 +24,8 @@ func (c *Class) consume(m map[int]bool) {
 
 func (c *Class) parseClassName() (string, error) {
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err := fmt.Errorf("%s expect class`s name,but '%s'",
+			c.parser.errorMsgPrefix(), c.parser.token.Desp)
 		c.parser.errs = append(c.parser.errs, err)
 		return "", err
 	}
@@ -64,18 +65,16 @@ func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
 	return ret, nil
 }
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
-	c.resetProperty()
 	defer c.resetProperty()
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
 	c.Next() // skip class key word
 	c.classDefinition.Pos = c.parser.mkPos()
 	c.classDefinition.Name, err = c.parseClassName()
+	c.classDefinition.Block.IsClassBlock = true
 	if err != nil {
 		return nil, err
 	}
-	c.classDefinition.Pos = c.parser.mkPos()
-	c.classDefinition.Block.IsClassBlock = true
 	if c.parser.eof {
 		err = c.parser.mkUnexpectedEofErr()
 		c.parser.errs = append(c.parser.errs, err)
@@ -111,13 +110,13 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	}
 	c.Next() // skip {
 	c.resetProperty()
-	validAfterPublic := func(token *lex.Token) error {
+	validAfterPublic := func(keyWord string, token *lex.Token) error {
 		if token.Type == lex.TOKEN_IDENTIFIER ||
 			token.Type == lex.TOKEN_FUNCTION ||
 			token.Type == lex.TOKEN_STATIC {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'public' | 'private' | 'protected'", c.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after '%s'", c.parser.errorMsgPrefix(), keyWord)
 	}
 	validAfterStatic := func(token *lex.Token) error {
 		if token.Type == lex.TOKEN_IDENTIFIER ||
@@ -143,32 +142,28 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			err := validAfterStatic(c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
-				c.Next()
 			}
 		//access private
 		case lex.TOKEN_PUBLIC:
 			c.accessControlToken = c.parser.token
 			c.Next()
-			err = validAfterPublic(c.parser.token)
+			err = validAfterPublic("public", c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
-				c.Next()
 			}
 		case lex.TOKEN_PROTECTED:
 			c.accessControlToken = c.parser.token
 			c.Next()
-			err = validAfterPublic(c.parser.token)
+			err = validAfterPublic("protected", c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
-				c.Next()
 			}
 		case lex.TOKEN_PRIVATE:
 			c.accessControlToken = c.parser.token
 			c.Next() // skip private
-			err = validAfterPublic(c.parser.token)
+			err = validAfterPublic("private", c.parser.token)
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
-				c.Next()
 			}
 		case lex.TOKEN_IDENTIFIER:
 			err = c.parseFiled()
@@ -243,14 +238,22 @@ func (c *Class) resetProperty() {
 }
 
 func (c *Class) parseConst() error {
+	pos := c.parser.mkPos()
 	vs, es, typ, err := c.parser.parseConstDefinition(false)
 	if err != nil {
 		return err
 	}
 	if typ != lex.TOKEN_ASSIGN {
 		c.parser.errs = append(c.parser.errs,
-			fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’", c.parser.errorMsgPrefix(vs[0].Pos)))
+			fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’",
+				c.parser.errorMsgPrefix(vs[0].Pos)))
 	}
+	if len(vs) != len(es) {
+		c.parser.errs = append(c.parser.errs,
+			fmt.Errorf("%s cannot assign %d values to %d destinations",
+				c.parser.errorMsgPrefix(pos), len(es), len(vs)))
+	}
+
 	if c.classDefinition.Block.Consts == nil {
 		c.classDefinition.Block.Consts = make(map[string]*ast.Const)
 	}
@@ -303,10 +306,10 @@ func (c *Class) parseFiled() error {
 			switch c.accessControlToken.Type {
 			case lex.TOKEN_PUBLIC:
 				f.AccessFlags |= cg.ACC_FIELD_PUBLIC
-			case lex.TOKEN_PRIVATE:
-				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			case lex.TOKEN_PROTECTED:
 				f.AccessFlags |= cg.ACC_FIELD_PROTECTED
+			default: // private case
+				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
 		}
 		c.classDefinition.Fields[v.Name] = f

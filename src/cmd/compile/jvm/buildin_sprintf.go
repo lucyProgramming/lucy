@@ -71,7 +71,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 			maxstack = t
 		}
 		if v.Value.IsPointer() == false {
-			typeConverter.putPrimitiveInObjectStaticWay(class, code, v.Value)
+			typeConverter.putPrimitiveInObject(class, code, v.Value)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++

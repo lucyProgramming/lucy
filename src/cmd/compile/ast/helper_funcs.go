@@ -139,3 +139,33 @@ func searchBuildIns(name string) interface{} {
 	}
 	return nil
 }
+
+func checkConst(block *Block, c *Const) error {
+	if c.Typ != nil {
+		c.mkDefaultValue()
+	}
+	if c.Expression == nil {
+		return fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
+	}
+	is, typ, value, err := c.Expression.getConstValue()
+	if err != nil {
+		return err
+	}
+	if is == false {
+		return fmt.Errorf("%s const named '%s' is not defined by const value",
+			errMsgPrefix(c.Pos), c.Name)
+	}
+	c.Value = value
+	c.Expression.Typ = typ
+	c.Expression.Data = value
+	tt, _ := c.Expression.check(block)
+	if c.Typ != nil {
+		if c.Typ.Equal(tt[0]) == false {
+			return fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
+				errMsgPrefix(c.Pos), c.Typ.TypeString(), tt[0].TypeString())
+		}
+	} else { // means use old typec
+		c.Typ = tt[0]
+	}
+	return nil
+}

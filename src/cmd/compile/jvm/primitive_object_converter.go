@@ -96,7 +96,7 @@ func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeC
 
 }
 
-func (TypeConverter) putPrimitiveInObjectStaticWay(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverter) putPrimitiveInObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

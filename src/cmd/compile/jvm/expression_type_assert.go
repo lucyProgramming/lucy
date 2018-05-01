@@ -77,7 +77,7 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	typeConverter.putPrimitiveInObjectStaticWay(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
+	typeConverter.putPrimitiveInObject(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_arrylist_class,

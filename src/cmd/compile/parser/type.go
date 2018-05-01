@@ -140,8 +140,9 @@ func (p *Parser) isValidTypeBegin() bool {
 		p.token.Type == lex.TOKEN_DOUBLE ||
 		p.token.Type == lex.TOKEN_LONG ||
 		p.token.Type == lex.TOKEN_STRING ||
-		p.token.Type == lex.TOKEN_IDENTIFIER ||
-		p.token.Type == lex.TOKEN_MAP
+		p.token.Type == lex.TOKEN_MAP ||
+		p.token.Type == lex.TOKEN_IDENTIFIER
+
 }
 func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
 	name := p.token.Data.(string)

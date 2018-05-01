@@ -38,6 +38,8 @@ func (e SortErrs) parseColumn(s string) int {
 	for _, v := range []byte(s) {
 		if v >= '0' && v <= '9' {
 			ret = ret*10 + int((v - '0'))
+		} else {
+			break
 		}
 	}
 	return ret

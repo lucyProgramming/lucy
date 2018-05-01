@@ -31,7 +31,7 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	}
 	var currentStack uint16
 	if classname == java_hashmap_class {
-		typeConverter.putPrimitiveInObjectStaticWay(class, code, target)
+		typeConverter.putPrimitiveInObject(class, code, target)
 		currentStack = remainStack + 1 // ... vobjref
 	} else {
 		currentStack = remainStack + jvmSize(target)
@@ -128,7 +128,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 						m.numberTypeConverter(code, v.Typ, targets[0].Typ)
 					}
 					if needPutInObject { // convert to primitive
-						typeConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
+						typeConverter.putPrimitiveInObject(class, code, targets[0])
 					}
 				} else { // pop fron stack
 					if jvmSize(v) == 1 {
@@ -165,7 +165,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 				m.numberTypeConverter(code, variableType.Typ, targets[0].Typ)
 			}
 			if needPutInObject { // convert to primitive
-				typeConverter.putPrimitiveInObjectStaticWay(class, code, targets[0])
+				typeConverter.putPrimitiveInObject(class, code, targets[0])
 			}
 		} else { // pop fron stack
 			if jvmSize(variableType) == 1 {

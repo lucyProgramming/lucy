@@ -180,40 +180,18 @@ func (b *Block) checkClass() []error {
 
 func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
-	for _, v := range b.Consts {
-		if v.Expression == nil {
-			errs = append(errs, fmt.Errorf("%s const %v has no initiation value",
-				errMsgPrefix(v.Pos), v.Name))
+	for _, c := range b.Consts {
+		if c.Name == NO_NAME_IDENTIFIER {
+			err := fmt.Errorf("%s '%s' is not a valid name",
+				errMsgPrefix(c.Pos), c.Name)
+			errs = append(errs, err)
+			delete(b.Consts, c.Name)
 			continue
 		}
-		is, t, value, err := v.Expression.getConstValue()
+		err := checkConst(b, c)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("%s const '%v' defined wrong,err:%v",
-				errMsgPrefix(v.Pos), v.Name, err))
-			continue
-		}
-		if is == false {
-			errs = append(errs, fmt.Errorf("%s const %s is not a const value",
-				errMsgPrefix(v.Pos), v.Name))
-			continue
-		}
-		v.Value = value
-		v.Expression.Typ = t
-		v.Expression.Data = value
-		ts, _ := v.Expression.check(b)
-		if v.Typ == nil {
-			v.Typ = ts[0]
-		} else {
-			err = v.Typ.resolve(b)
-			if err != nil {
-				errs = append(errs, err)
-				continue
-			}
-			if !v.Typ.Equal(ts[0]) {
-				errs = append(errs, fmt.Errorf("%s cannot assign %s %s",
-					errMsgPrefix(v.Pos), v.Typ.TypeString(), ts[0].TypeString()))
-				continue
-			}
+			errs = append(errs, err)
+			delete(b.Consts, c.Name)
 		}
 	}
 	return errs

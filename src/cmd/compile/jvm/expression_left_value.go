@@ -48,7 +48,7 @@ func (m *MakeExpression) getMapLeftValue(
 	}
 	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
-	typeConverter.putPrimitiveInObjectStaticWay(class, code, index.Index.Value)
+	typeConverter.putPrimitiveInObject(class, code, index.Index.Value)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
 	target = index.Expression.Value.Map.V

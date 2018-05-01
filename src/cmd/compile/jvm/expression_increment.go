@@ -160,7 +160,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength++
 	}
 	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
-		typeConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
+		typeConverter.putPrimitiveInObject(class, code, e.Value)
 	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {

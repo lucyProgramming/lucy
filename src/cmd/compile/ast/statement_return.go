@@ -13,7 +13,9 @@ func (s *StatementReturn) mkDefers(b *Block) {
 	if b.IsFunctionTopBlock == false { // not top block
 		s.mkDefers(b.Outter)
 	}
-	s.Defers = append(s.Defers, b.Defers...)
+	if b.Defers != nil {
+		s.Defers = append(s.Defers, b.Defers...)
+	}
 }
 
 func (s *StatementReturn) check(b *Block) []error {

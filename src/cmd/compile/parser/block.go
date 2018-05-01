@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -30,18 +29,20 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		isDefer = false
 	}
 	validAfterDefer := func() bool {
-		return b.parser.token.Type == lex.TOKEN_IDENTIFIER || b.parser.token.Type == lex.TOKEN_LP ||
+		return b.parser.token.Type == lex.TOKEN_IDENTIFIER ||
+			b.parser.token.Type == lex.TOKEN_LP ||
 			b.parser.token.Type == lex.TOKEN_LC
 	}
 	block.Statements = []*ast.Statement{}
-	for !b.parser.eof {
+	for false == b.parser.eof {
 		if len(b.parser.errs) > b.parser.nerr {
+			block.EndPos = b.parser.mkPos()
 			break
 		}
 		if _, ok := endTokenM[b.parser.token.Type]; ok {
-			if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
-				b.Next()
-			}
+			//if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
+			b.Next()
+			//}
 			block.EndPos = b.parser.mkPos()
 			break
 		}
@@ -54,9 +55,9 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			isDefer = true
 			b.Next()
 			if validAfterDefer() == false {
-				reset()
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not a valid token('%s') after defer",
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not a valid token '%s' after defer",
 					b.parser.errorMsgPrefix(), b.parser.token.Desp))
+				reset()
 			}
 		case lex.TOKEN_IDENTIFIER:
 			b.parseExpressionStatement(block, isDefer)
@@ -103,6 +104,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			}
 			reset()
 		case lex.TOKEN_IF:
+			pos := b.parser.mkPos()
 			i, err := b.parseIf()
 			if err != nil {
 				b.consume(untils_rc)
@@ -112,6 +114,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:         ast.STATEMENT_TYPE_IF,
 				StatementIf: i,
+				Pos:         pos,
 			})
 			if isDefer {
 				b.parser.errs = append(b.parser.errs,
@@ -181,24 +184,25 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			}
 			if len(vs) != len(es) {
 				b.parser.errs = append(b.parser.errs,
-					fmt.Errorf("%s cannot assign %d values to %d destination",
+					fmt.Errorf("%s cannot assign '%d' values to '%d' destination",
 						b.parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
 			}
-			r := &ast.Statement{}
-			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
 			cs := make([]*ast.Const, len(vs))
 			for k, v := range vs {
 				c := &ast.Const{}
 				c.VariableDefinition = *v
 				cs[k] = c
+				if k < len(es) {
+					cs[k].Expression = es[k] // assignment
+				}
 			}
+			r := &ast.Statement{}
+			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			r.Pos = pos
 			r.Expression = &ast.Expression{
-				Typ: ast.EXPRESSION_TYPE_CONST,
-				Data: &ast.ExpressionDeclareConsts{
-					Consts:      cs,
-					Expressions: es,
-				},
-				Pos: pos,
+				Typ:  ast.EXPRESSION_TYPE_CONST,
+				Data: cs,
+				Pos:  pos,
 			}
 			block.Statements = append(block.Statements, r)
 			b.Next()
@@ -237,6 +241,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			}
 			b.Next()
 		case lex.TOKEN_LC:
+			pos := b.parser.mkPos()
 			newblock := ast.Block{}
 			b.Next()
 			err = b.parse(&newblock, false, lex.TOKEN_RC)
@@ -251,13 +256,13 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				block.Statements = append(block.Statements, &ast.Statement{
 					Typ:   ast.STATEMENT_TYPE_DEFER,
 					Defer: d,
+					Pos:   pos,
 				})
-				//block.Defers = append(block.Defers, d)
-
 			} else {
 				block.Statements = append(block.Statements, &ast.Statement{
 					Typ:   ast.STATEMENT_TYPE_BLOCK,
 					Block: &newblock,
+					Pos:   pos,
 				})
 			}
 			reset()
@@ -390,7 +395,8 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
 		if isDefer {
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement skip has no meaning", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement lable has no meaning",
+				b.parser.errorMsgPrefix()))
 		}
 		s := &ast.Statement{}
 		s.Pos = pos
@@ -402,10 +408,11 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		lable.StatementsOffset = len(block.Statements)
 		block.Statements = append(block.Statements, s)
 		lable.Block = block
-		block.Insert(lable.Name, e.Pos, lable)
+		block.Insert(lable.Name, e.Pos, lable) // insert first,so this label can be found before it is checked
 	} else {
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression", b.parser.errorMsgPrefix(e.Pos)))
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression",
+				b.parser.errorMsgPrefix(e.Pos)))
 		}
 		if isDefer {
 			d := &ast.Defer{}
@@ -414,7 +421,6 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 				Expression: e,
 				Pos:        pos,
 			}}
-			//block.Defers = append(block.Defers, d)
 			block.Statements = append(block.Statements, &ast.Statement{
 				Typ:   ast.STATEMENT_TYPE_DEFER,
 				Defer: d,

@@ -8,23 +8,22 @@ import (
 )
 
 type Class struct {
-	NotImportedYet     bool // not imported
-	Pos                *Pos
-	IsJava             bool // compiled from java source file
-	Name               string
-	NameWithOutPackage string
-	IsGlobal           bool
-	Block              Block
-	AccessFlags        uint16
-	Fields             map[string]*ClassField
-	Methods            map[string][]*ClassMethod
-	SuperClassName     string
-	SuperClass         *Class
-	InterfaceNames     []*NameWithPos
-	Interfaces         []*Class
-	SouceFile          string
-	Used               bool
-	LoadFromOutSide    bool
+	NotImportedYet  bool // not imported
+	Name            string
+	Pos             *Pos
+	IsJava          bool // compiled from java source file
+	IsGlobal        bool
+	Block           Block
+	AccessFlags     uint16
+	Fields          map[string]*ClassField
+	Methods         map[string][]*ClassMethod
+	SuperClassName  string
+	SuperClass      *Class
+	InterfaceNames  []*NameWithPos
+	Interfaces      []*Class
+	SouceFile       string
+	Used            bool
+	LoadFromOutSide bool
 }
 
 func (c *Class) loadSelf() error {
@@ -49,13 +48,17 @@ func (c *Class) check(father *Block) []error {
 
 func (c *Class) checkPhase1(father *Block) []error {
 	c.Block.inherite(father)
+	errs := c.Block.checkConst()
 	c.Block.InheritedAttribute.class = c
-	errs := c.resolveName(father)
+	es := c.resolveName(father)
+	if errsNotEmpty(es) {
+		errs = append(errs, es...)
+	}
 	err := c.resolveFather(father)
 	if err != nil {
 		errs = append(errs, err)
 	}
-	es := c.resolveInterfaces(father)
+	es = c.resolveInterfaces(father)
 	errs = append(errs, es...)
 	es = c.suitableForInterfaces()
 	errs = append(errs, es...)
@@ -64,7 +67,6 @@ func (c *Class) checkPhase1(father *Block) []error {
 
 func (c *Class) checkPhase2(father *Block) []error {
 	errs := []error{}
-	c.Block.check() // check innerclass mainly
 	c.Block.InheritedAttribute.class = c
 	errs = append(errs, c.checkFields()...)
 	if PackageBeenCompile.shouldStop(errs) {

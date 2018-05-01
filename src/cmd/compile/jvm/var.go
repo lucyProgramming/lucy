@@ -15,8 +15,8 @@ var (
 )
 
 const (
-	java_arrylist_class                     = "java/util/ArrayList"
 	special_method_init                     = "<init>"
+	java_arrylist_class                     = "java/util/ArrayList"
 	java_string_class                       = "java/lang/String"
 	java_root_class                         = "java/lang/Object"
 	java_hashmap_class                      = "java/util/HashMap"

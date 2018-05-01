@@ -221,7 +221,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 	}
 	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
-		typeConverter.putPrimitiveInObjectStaticWay(class, code, e.Value)
+		typeConverter.putPrimitiveInObject(class, code, e.Value)
 	}
 	currentStack -= jvmSize(bin.Left.Value) // stack reduce
 	if e.IsStatementExpression == false {

@@ -22,7 +22,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	currentStack = 2 // mapref kref
 	if index.Expression.Value.Map.K.IsPointer() == false {
-		typeConverter.putPrimitiveInObjectStaticWay(class, code, index.Expression.Value.Map.K)
+		typeConverter.putPrimitiveInObject(class, code, index.Expression.Value.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

@@ -5,6 +5,9 @@ import (
 )
 
 func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
+	if e == nil {
+		return nil, []error{}
+	}
 	is, typ, data, err := e.getConstValue()
 	if err != nil {
 		return nil, []error{err}
@@ -155,10 +158,8 @@ func (e *Expression) check(block *Block) (t []*VariableType, errs []error) {
 			t = []*VariableType{tt}
 		}
 		e.Value = tt
-	case EXPRESSION_TYPE_CONST:
-		e.checkConstExpression(block, &errs)
-		e.Value = mkVoidType(e.Pos)
-		t = []*VariableType{e.Value}
+	case EXPRESSION_TYPE_CONST: // no return value
+		errs = e.checkConst(block)
 	case EXPRESSION_TYPE_VAR:
 		e.checkVarExpression(block, &errs)
 		e.Value = mkVoidType(e.Pos)

@@ -79,7 +79,6 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.CodeLength += 3
 		return
 	}
-	//  string(['h','e'])
 	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING &&
 		convertion.Expression.Value.Typ == ast.VARIABLE_TYPE_OBJECT {
 		code.Codes[code.CodeLength] = cg.OP_checkcast
