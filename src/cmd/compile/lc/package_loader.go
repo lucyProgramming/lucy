@@ -114,6 +114,12 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		realpaths[0].kind = RESOUCE_KIND_LUCY_PACKAGE
 		realpaths[0].realpath = filepath.Dir(realpaths[0].realpath)
 		p, err := loader.loadLucyPackage(realpaths[0])
+		if t := p.Block.SearchByName(name); t != nil {
+			if tt, ok := t.(*ast.Enum); ok && tt != nil {
+				//make it correct
+				return p, nil, fmt.Errorf("enum should load by package")
+			}
+		}
 		return p, p.Block.SearchByName(name), err
 	} else if realpaths[0].kind == RESOUCE_KIND_JAVA_PACKAGE {
 		p, err := loader.loadJavaPackage(realpaths[0])
@@ -134,7 +140,6 @@ func (loader *RealNameLoader) loadLucyPackage(r *Resource) (*ast.Package, error)
 			fisM[v.Name()] = v
 		}
 	}
-
 	_, ok := fisM[mainClassName]
 	if ok == false {
 		return nil, fmt.Errorf("main class not found")

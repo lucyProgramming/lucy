@@ -180,8 +180,13 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
 			continue
 		}
+		name := string(c.ConstPool[m.NameIndex].Info)
+		if name == ast.MAIN_FUNCTION_NAME {
+			// this is main function
+			continue
+		}
 		function := &ast.Function{}
-		function.Name = string(c.ConstPool[m.NameIndex].Info)
+		function.Name = name
 		function.AccessFlags = m.AccessFlags
 		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
 		function.Typ, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
@@ -202,12 +207,11 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		if pack.Block.Funcs == nil {
 			pack.Block.Funcs = make(map[string]*ast.Function)
 		}
-		pack.Block.Funcs[function.Name] = function
+		pack.Block.Funcs[name] = function
 	}
 	if pack.Block.Types == nil {
 		pack.Block.Types = make(map[string]*ast.VariableType)
 	}
-
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
 		index := binary.BigEndian.Uint16(v.Info)
 		name, typ, err := jvm.LucyTypeAliasParser.Decode(c.ConstPool[index].Info)
@@ -216,7 +220,6 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		}
 		typ.Alias = name
 		pack.Block.Types[name] = typ
-
 	}
 	return nil
 }

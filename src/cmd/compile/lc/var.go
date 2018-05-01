@@ -19,11 +19,6 @@ func init() {
 	ast.NameLoader = &loader
 }
 
-//func classShortName(binaryName string) (shortName string) {
-//	shortName = filepath.Base(binaryName)
-//	return
-//}
-
 const (
 	mainClassName = "main.class"
 )
