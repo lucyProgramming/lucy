@@ -23,9 +23,6 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	if t := remainStack + stack; t > maxstack {
 		maxstack = t
 	}
-	if target.IsNumber() && target.Typ != right.Value.Typ {
-		m.numberTypeConverter(code, right.Value.Typ, target.Typ)
-	}
 	currentStack := remainStack + jvmSize(target)
 	currentStack += m.controlStack2FitAssign(code, op, classname, target)
 	if currentStack > maxstack {
@@ -116,9 +113,6 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 					if t := currentStack + jvmSize(targets[0]); t > maxstack { // incase int convert to double or long
 						maxstack = t
 					}
-					if targets[0].IsNumber() && targets[0].Typ != v.Typ { // value is number 2
-						m.numberTypeConverter(code, v.Typ, targets[0].Typ)
-					}
 					if needPutInObject { // convert to primitive
 						typeConverter.putPrimitiveInObject(class, code, targets[0])
 					}
@@ -152,9 +146,6 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		if noDestinations[0] == false {
 			if t := currentStack + jvmSize(targets[0]); t > maxstack { // incase int convert to double or long
 				maxstack = t
-			}
-			if targets[0].IsNumber() && targets[0].Typ != variableType.Typ { // value is number 2
-				m.numberTypeConverter(code, variableType.Typ, targets[0].Typ)
 			}
 			if needPutInObject { // convert to primitive
 				typeConverter.putPrimitiveInObject(class, code, targets[0])

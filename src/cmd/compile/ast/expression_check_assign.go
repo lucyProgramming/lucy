@@ -120,27 +120,45 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		return
 	}
 	//number
-	if t1.IsNumber() {
-		if t1.Equal(t2) == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on number and '%s'",
-				errMsgPrefix(e.Pos),
-				e.OpName(),
-				t2.TypeString()))
-		}
-	} else if t1.Typ == VARIABLE_TYPE_STRING {
+	ret := t1.Clone()
+	ret.Pos = e.Pos
+	if t1.Typ == VARIABLE_TYPE_STRING {
 		if t2.Typ != VARIABLE_TYPE_STRING || (e.Typ != EXPRESSION_TYPE_PLUS_ASSIGN) {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),
 				t2.TypeString()))
 		}
-	} else {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-			errMsgPrefix(e.Pos),
-			e.OpName(),
-			t1.TypeString(),
-			t2.TypeString()))
+		return ret
 	}
+	if e.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
+		if t1.IsNumber() && t1.Equal(t2) {
+			return ret
+		}
+	}
+	if e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_XOR_ASSIGN {
+		if t1.IsInteger() && t1.Equal(t2) {
+			return ret
+		}
+	}
+	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+		if t1.IsInteger() && t2.IsInteger() && t2.Typ != VARIABLE_TYPE_LONG {
+			return ret
+		}
+	}
+	*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
+		errMsgPrefix(e.Pos),
+		e.OpName(),
+		t1.TypeString(),
+		t2.TypeString()))
+
 	tt := t1.Clone()
 	tt.Pos = e.Pos
 	return tt

@@ -48,9 +48,9 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 	}
 	stack, _ := m.build(class, code, convertion.Expression, context, state)
 	maxstack = currentStack + stack
-	if convertion.Typ.IsNumber() {
+	if e.Value.IsNumber() {
 		m.numberTypeConverter(code, convertion.Expression.Value.Typ, convertion.Typ.Typ)
-		if t := jvmSize(e.Value); t > maxstack {
+		if t := jvmSize(convertion.Typ); t > maxstack {
 			maxstack = t
 		}
 		return

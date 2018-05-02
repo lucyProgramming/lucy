@@ -38,7 +38,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		return tt
 	}
 	// &&  ||
-	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR || EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
+	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
+		EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
 		if t1.Typ != VARIABLE_TYPE_BOOL {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
 				errMsgPrefix(bin.Left.Pos),
@@ -56,7 +57,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		return result
 	}
 	// & |
-	if e.Typ == EXPRESSION_TYPE_OR || EXPRESSION_TYPE_AND == e.Typ {
+	if e.Typ == EXPRESSION_TYPE_OR ||
+		EXPRESSION_TYPE_AND == e.Typ ||
+		EXPRESSION_TYPE_XOR == e.Typ {
 		if !t1.IsNumber() {
 			*errs = append(*errs, fmt.Errorf("%s not a number expression",
 				errMsgPrefix(bin.Left.Pos)))
@@ -67,8 +70,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		if t1.IsNumber() && t2.IsNumber() {
 			if t1.Typ != t2.Typ { //force to equal
-				*errs = append(*errs, fmt.Errorf("%s cannot apply '&' or '|' on '%s' and '%s'",
-					errMsgPrefix(e.Pos),
+				*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
+					errMsgPrefix(e.Pos), e.OpName(),
 					t1.TypeString(),
 					t2.TypeString()))
 			}

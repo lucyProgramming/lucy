@@ -118,6 +118,21 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 	case lex.TOKEN_MOD_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
+	case lex.TOKEN_LEFT_SHIFT_ASSIGN:
+		mustBeOneExpression()
+		return mkBinayExpression(ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN, false)
+	case lex.TOKEN_RIGHT_SHIFT_ASSIGN:
+		mustBeOneExpression()
+		return mkBinayExpression(ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN, false)
+	case lex.TOKEN_AND_ASSIGN:
+		mustBeOneExpression()
+		return mkBinayExpression(ast.EXPRESSION_TYPE_AND_ASSIGN, false)
+	case lex.TOKEN_OR_ASSIGN:
+		mustBeOneExpression()
+		return mkBinayExpression(ast.EXPRESSION_TYPE_OR_ASSIGN, false)
+	case lex.TOKEN_XOR_ASSIGN:
+		mustBeOneExpression()
+		return mkBinayExpression(ast.EXPRESSION_TYPE_XOR_ASSIGN, false)
 	}
 	return left, nil
 }

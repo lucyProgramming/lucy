@@ -49,7 +49,7 @@ func (ep *ExpressionParser) parseBitANDORExpression(statementLevel bool) (*ast.E
 		return e, nil
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_AND || ep.parser.token.Type == lex.TOKEN_OR) && !ep.parser.eof {
+	for (ep.parser.token.Type == lex.TOKEN_AND || ep.parser.token.Type == lex.TOKEN_OR || ep.parser.token.Type == lex.TOKEN_XOR) && !ep.parser.eof {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
@@ -61,8 +61,10 @@ func (ep *ExpressionParser) parseBitANDORExpression(statementLevel bool) (*ast.E
 		newe.Pos = pos
 		if typ == lex.TOKEN_AND {
 			newe.Typ = ast.EXPRESSION_TYPE_AND
-		} else {
+		} else if typ == lex.TOKEN_OR {
 			newe.Typ = ast.EXPRESSION_TYPE_OR
+		} else {
+			newe.Typ = ast.EXPRESSION_TYPE_XOR
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e

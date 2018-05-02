@@ -67,9 +67,6 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
-		if v.Typ.IsNumber() && v.Typ.Typ != v.Expression.Value.Typ {
-			m.MakeExpression.numberTypeConverter(code, v.Expression.Value.Typ, v.Typ.Typ)
-		}
 		if t := currentStack + jvmSize(v.Typ); t > maxstack {
 			maxstack = t
 		}

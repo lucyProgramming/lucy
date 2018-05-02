@@ -21,17 +21,10 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			maxstack = stack
 		}
 		target := bin.Left.Value.NumberTypeConvertRule(bin.Right.Value)
-		if target != bin.Left.Value.Typ {
-			m.numberTypeConverter(code, bin.Left.Value.Typ, target)
-		}
-
 		state.pushStack(class, &ast.VariableType{Typ: target})
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
-		}
-		if target != bin.Right.Value.Typ {
-			m.numberTypeConverter(code, bin.Right.Value.Typ, target)
 		}
 		switch target {
 		case ast.VARIABLE_TYPE_BYTE:

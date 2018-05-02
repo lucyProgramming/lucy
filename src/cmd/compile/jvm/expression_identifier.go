@@ -38,7 +38,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifer)
-	if e.Value.Typ == ast.VARIABLE_TYPE_ENUM { // not a var
+	if e.Value.Typ == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxstack = 1
 		return

@@ -75,9 +75,6 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}
-				if tt.IsNumber() && tt.Typ != variables[0].Typ.Typ {
-					m.numberTypeConverter(code, tt.Typ, variables[0].Typ.Typ)
-				}
 				if variables[0].IsGlobal {
 					storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])
 				} else {
@@ -124,9 +121,6 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				code.Codes[code.CodeLength] = cg.OP_pop2
 			}
 			continue
-		}
-		if variableType.IsNumber() && variableType.Typ != variables[0].Typ.Typ {
-			m.numberTypeConverter(code, variableType.Typ, variables[0].Typ.Typ)
 		}
 		if variables[0].IsGlobal {
 			storeGlobalVar(class, m.MakeClass.mainclass, code, variables[0])

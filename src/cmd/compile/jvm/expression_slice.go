@@ -21,9 +21,6 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 		if t := 1 + stack; t > maxstack {
 			maxstack = t
 		}
-		if slice.Start.Value.Typ == ast.VARIABLE_TYPE_LONG {
-			m.numberTypeConverter(code, ast.VARIABLE_TYPE_LONG, ast.VARIABLE_TYPE_INT)
-		}
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
@@ -31,9 +28,6 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 	state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 	if slice.End != nil {
 		stack, _ := m.build(class, code, slice.End, context, state)
-		if slice.End.Value.Typ == ast.VARIABLE_TYPE_LONG {
-			m.numberTypeConverter(code, ast.VARIABLE_TYPE_LONG, ast.VARIABLE_TYPE_INT)
-		}
 		if t := 2 + stack; t > maxstack {
 			maxstack = t
 		}

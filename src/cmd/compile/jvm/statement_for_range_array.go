@@ -251,10 +251,6 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.ArrayType); t > maxstack {
 			maxstack = t
 		}
-		//convert to suitable type
-		if target.IsInteger() && target.Typ != s.RangeAttr.RangeOn.Value.ArrayType.Typ {
-			m.MakeExpression.numberTypeConverter(code, s.RangeAttr.RangeOn.Value.ArrayType.Typ, target.Typ)
-		}
 		if t := remainStack + jvmSize(target); t > maxstack {
 			maxstack = t
 		}
@@ -262,7 +258,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		forState.popStack(len(forState.Stacks) - stackLength)
 		if s.RangeAttr.ModelKV { // set to k
 			stackLength := len(forState.Stacks)
-			stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
+			stack, remainStack, ops, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
 				code, s.RangeAttr.ExpressionK, context, forState)
 			if stack > maxstack {
 				maxstack = stack
@@ -272,10 +268,6 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 			}
 			// load k
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-			m.MakeExpression.numberTypeConverter(code, ast.VARIABLE_TYPE_INT, target.Typ)
-			if t := jvmSize(target) + remainStack; t > maxstack {
-				maxstack = t
-			}
 			copyOPLeftValue(class, code, ops, classname, name, descriptor)
 			forState.popStack(len(forState.Stacks) - stackLength)
 		}

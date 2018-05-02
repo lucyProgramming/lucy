@@ -23,6 +23,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
+		//context.MakeStackMap(code, state, code.CodeLength)
 		return
 	}
 	if len(context.function.Typ.ReturnList) == 1 {
@@ -35,11 +36,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1)
 			}
-			if statementReturn.Expressions[0].Value.IsNumber() &&
-				statementReturn.Expressions[0].Value.Typ != context.function.Typ.ReturnList[0].Typ.Typ {
-				m.MakeExpression.numberTypeConverter(code,
-					statementReturn.Expressions[0].Value.Typ, context.function.Typ.ReturnList[0].Typ.Typ)
-			}
+
 		} else { // load return parameter
 		}
 		// execute defer first

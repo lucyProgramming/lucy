@@ -102,6 +102,8 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		fallthrough
 	case EXPRESSION_TYPE_AND:
 		fallthrough
+	case EXPRESSION_TYPE_XOR:
+		fallthrough
 	case EXPRESSION_TYPE_LEFT_SHIFT:
 		fallthrough
 	case EXPRESSION_TYPE_RIGHT_SHIFT:
@@ -236,6 +238,16 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_DIV_ASSIGN:
 		fallthrough
 	case EXPRESSION_TYPE_MOD_ASSIGN:
+		fallthrough
+	case EXPRESSION_TYPE_AND_ASSIGN:
+		fallthrough
+	case EXPRESSION_TYPE_OR_ASSIGN:
+		fallthrough
+	case EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN:
+		fallthrough
+	case EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN:
+		fallthrough
+	case EXPRESSION_TYPE_XOR_ASSIGN:
 		tt := e.checkOpAssignExpression(block, &errs)
 		if tt != nil {
 			Types = []*VariableType{tt}

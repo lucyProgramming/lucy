@@ -11,7 +11,9 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	if e.Typ == ast.EXPRESSION_TYPE_OR || e.Typ == ast.EXPRESSION_TYPE_AND {
+	if e.Typ == ast.EXPRESSION_TYPE_OR ||
+		e.Typ == ast.EXPRESSION_TYPE_AND ||
+		e.Typ == ast.EXPRESSION_TYPE_XOR {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		size := jvmSize(bin.Left.Value)
 		state.pushStack(class, bin.Left.Value)
@@ -29,16 +31,20 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_FLOAT:
 			if e.Typ == ast.EXPRESSION_TYPE_AND {
 				code.Codes[code.CodeLength] = cg.OP_iand
-			} else {
+			} else if e.Typ == ast.EXPRESSION_TYPE_OR {
 				code.Codes[code.CodeLength] = cg.OP_ior
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ixor
 			}
 		case ast.VARIABLE_TYPE_DOUBLE:
 			fallthrough
 		case ast.VARIABLE_TYPE_LONG:
 			if e.Typ == ast.EXPRESSION_TYPE_AND {
 				code.Codes[code.CodeLength] = cg.OP_land
-			} else {
+			} else if e.Typ == ast.EXPRESSION_TYPE_OR {
 				code.Codes[code.CodeLength] = cg.OP_lor
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_lxor
 			}
 		}
 		code.CodeLength++
@@ -59,17 +65,10 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		if stack > maxstack {
 			maxstack = stack
 		}
-		//number type,no doubt
-		if e.Value.Typ != bin.Left.Value.Typ {
-			m.numberTypeConverter(code, bin.Left.Value.Typ, e.Value.Typ)
-		}
 		state.pushStack(class, e.Value)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := jvmSize(e.Value) + stack; t > maxstack {
 			maxstack = t
-		}
-		if e.Value.Typ != bin.Right.Value.Typ {
-			m.numberTypeConverter(code, bin.Right.Value.Typ, e.Value.Typ)
 		}
 		if t := 2 * jvmSize(e.Value); t > maxstack {
 			maxstack = t
@@ -173,9 +172,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
-		}
-		if e.Value.Typ != bin.Right.Value.Typ {
-			m.numberTypeConverter(code, bin.Right.Typ, e.Value.Typ)
 		}
 		if t := 2 * jvmSize(bin.Left.Value); t > maxstack {
 			maxstack = t

@@ -26,9 +26,9 @@ const (
 	//
 	EXPRESSION_TYPE_OR
 	EXPRESSION_TYPE_AND
+	EXPRESSION_TYPE_XOR
 	EXPRESSION_TYPE_LEFT_SHIFT
 	EXPRESSION_TYPE_RIGHT_SHIFT
-	EXPRESSION_TYPE_XOR
 	EXPRESSION_TYPE_ADD
 	EXPRESSION_TYPE_SUB
 	EXPRESSION_TYPE_MUL
@@ -43,6 +43,11 @@ const (
 	EXPRESSION_TYPE_MUL_ASSIGN
 	EXPRESSION_TYPE_DIV_ASSIGN
 	EXPRESSION_TYPE_MOD_ASSIGN
+	EXPRESSION_TYPE_AND_ASSIGN
+	EXPRESSION_TYPE_OR_ASSIGN
+	EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN
+	EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN
+	EXPRESSION_TYPE_XOR_ASSIGN
 	//
 	EXPRESSION_TYPE_EQ
 	EXPRESSION_TYPE_NE
@@ -112,6 +117,8 @@ func (e *Expression) OpName(typ ...int) string {
 		return "|"
 	case EXPRESSION_TYPE_AND:
 		return "&"
+	case EXPRESSION_TYPE_XOR:
+		return "^"
 	case EXPRESSION_TYPE_LEFT_SHIFT:
 		return "<<"
 	case EXPRESSION_TYPE_RIGHT_SHIFT:
@@ -130,6 +137,16 @@ func (e *Expression) OpName(typ ...int) string {
 		return "/="
 	case EXPRESSION_TYPE_MOD_ASSIGN:
 		return "%="
+	case EXPRESSION_TYPE_AND_ASSIGN:
+		return "&="
+	case EXPRESSION_TYPE_OR_ASSIGN:
+		return "|="
+	case EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN:
+		return "<<="
+	case EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN:
+		return ">>="
+	case EXPRESSION_TYPE_XOR_ASSIGN:
+		return "^="
 	case EXPRESSION_TYPE_EQ:
 		return "=="
 	case EXPRESSION_TYPE_NE:
@@ -203,14 +220,23 @@ func (e *Expression) OpName(typ ...int) string {
 }
 
 type Expression struct {
-	IsPublic                        bool // only for global var definition
-	IsCompileDefaultValueExpression bool
-	Value                           *VariableType
-	Values                          []*VariableType
-	Pos                             *Pos
-	Typ                             int
-	Data                            interface{}
-	IsStatementExpression           bool
+	IsPublic              bool // only for global var definition
+	IsCompileAuto         bool // compile auto expression
+	Value                 *VariableType
+	Values                []*VariableType
+	Pos                   *Pos
+	Typ                   int
+	Data                  interface{}
+	IsStatementExpression bool
+}
+
+func (e *Expression) ConvertTo(t *VariableType) {
+	c := &ExpressionTypeConvertion{}
+	c.Expression = &Expression{}
+	*c.Expression = *e
+	c.Typ = t
+	e.Typ = EXPRESSION_TYPE_CONVERTION_TYPE
+	e.IsCompileAuto = true
 }
 
 type ExpressionTypeAssert ExpressionTypeConvertion
@@ -296,6 +322,11 @@ func (e *Expression) canBeUsedAsStatemen() bool {
 		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_XOR_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_INCREMENT ||
 		e.Typ == EXPRESSION_TYPE_DECREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||

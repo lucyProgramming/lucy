@@ -11,7 +11,7 @@ type MakeExpression struct {
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.JumpBackPatch) {
-	if e.IsCompileDefaultValueExpression == false {
+	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
 	switch e.Typ {
@@ -93,6 +93,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		fallthrough
 	case ast.EXPRESSION_TYPE_AND:
 		fallthrough
+	case ast.EXPRESSION_TYPE_XOR:
+		fallthrough
 	case ast.EXPRESSION_TYPE_LEFT_SHIFT:
 		fallthrough
 	case ast.EXPRESSION_TYPE_RIGHT_SHIFT:
@@ -122,6 +124,16 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV_ASSIGN:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD_ASSIGN:
+		fallthrough
+	case ast.EXPRESSION_TYPE_AND_ASSIGN:
+		fallthrough
+	case ast.EXPRESSION_TYPE_OR_ASSIGN:
+		fallthrough
+	case ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN:
+		fallthrough
+	case ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN:
+		fallthrough
+	case ast.EXPRESSION_TYPE_XOR_ASSIGN:
 		maxstack = m.buildOpAssign(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_EQ:

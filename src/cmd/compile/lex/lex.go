@@ -326,36 +326,6 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) 
 	if t, ok := keywordMap[identifier]; ok {
 		token.Type = t
 		token.Desp = identifier
-		//		if identifier == "else" {
-		//			c, eof = lex.getchar()
-		//			for (c == ' ' || c == '\t') && eof == false { // skip some charactor
-		//				c, eof = lex.getchar()
-		//			}
-		//			if eof == false {
-		//				if c == 'i' {
-		//					c, eof = lex.getchar()
-		//					if eof == false {
-		//						if c == 'f' {
-		//							c, eof = lex.getchar()
-		//							if eof == false && lex.isLetter(c) {
-		//								token.Type = TOKEN_ELSEIF
-		//								token.Desp = "elseif"
-		//								lex.ungetchar()
-		//							} else {
-		//								lex.ungetchar()
-		//								lex.ungetchar()
-		//								lex.ungetchar()
-		//							}
-		//						} else {
-		//							lex.ungetchar()
-		//							lex.ungetchar()
-		//						}
-		//					}
-		//				} else {
-		//					lex.ungetchar()
-		//				}
-		//			}
-		//		}
 	} else {
 		token.Type = TOKEN_IDENTIFIER
 		token.Data = identifier
@@ -541,6 +511,9 @@ redo:
 		if c == '&' {
 			token.Type = TOKEN_LOGICAL_AND
 			token.Desp = "&&"
+		} else if c == '=' {
+			token.Type = TOKEN_AND_ASSIGN
+			token.Desp = "&="
 		} else {
 			lex.ungetchar()
 			token.Type = TOKEN_AND
@@ -551,6 +524,9 @@ redo:
 		if c == '|' {
 			token.Type = TOKEN_LOGICAL_OR
 			token.Desp = "||"
+		} else if c == '=' {
+			token.Type = TOKEN_OR_ASSIGN
+			token.Desp = "|="
 		} else {
 			lex.ungetchar()
 			token.Type = TOKEN_OR
@@ -582,8 +558,15 @@ redo:
 			token.Type = TOKEN_GE
 			token.Desp = ">="
 		} else if c == '>' {
-			token.Type = TOKEN_RIGHT_SHIFT
-			token.Desp = ">>"
+			c, eof = lex.getchar()
+			if c == '=' {
+				token.Type = TOKEN_RIGHT_SHIFT_ASSIGN
+				token.Desp = ">>="
+			} else {
+				lex.ungetchar()
+				token.Type = TOKEN_RIGHT_SHIFT
+				token.Desp = ">>"
+			}
 		} else {
 			lex.ungetchar()
 			token.Type = TOKEN_GT
@@ -595,17 +578,33 @@ redo:
 			token.Type = TOKEN_LE
 			token.Desp = "<="
 		} else if c == '<' {
-			token.Type = TOKEN_LEFT_SHIFT
-			token.Desp = "<<"
+			c, eof = lex.getchar()
+			if c == '=' {
+				token.Type = TOKEN_LEFT_SHIFT_ASSIGN
+				token.Desp = "<<="
+			} else {
+				lex.ungetchar()
+				token.Type = TOKEN_LEFT_SHIFT
+				token.Desp = "<<"
+			}
 		} else {
 			lex.ungetchar()
 			token.Type = TOKEN_LT
 			token.Desp = "<"
 		}
 	case '^':
-		token.Type = TOKEN_XOR
+		c, eof = lex.getchar()
+		if c == '=' {
+			token.Type = TOKEN_XOR_ASSIGN
+			token.Desp = "^="
+		} else {
+			lex.ungetchar()
+			token.Type = TOKEN_XOR
+			token.Desp = "^"
+		}
+	case '~':
+		token.Type = TOKEN_BITWISE_COMPLEMENT
 		token.Desp = "^"
-
 	case '+':
 		c, eof = lex.getchar()
 		if c == '+' {
@@ -721,3 +720,34 @@ redo:
 	token.EndColumn = lex.column
 	return
 }
+
+//		if identifier == "else" {
+//			c, eof = lex.getchar()
+//			for (c == ' ' || c == '\t') && eof == false { // skip some charactor
+//				c, eof = lex.getchar()
+//			}
+//			if eof == false {
+//				if c == 'i' {
+//					c, eof = lex.getchar()
+//					if eof == false {
+//						if c == 'f' {
+//							c, eof = lex.getchar()
+//							if eof == false && lex.isLetter(c) {
+//								token.Type = TOKEN_ELSEIF
+//								token.Desp = "elseif"
+//								lex.ungetchar()
+//							} else {
+//								lex.ungetchar()
+//								lex.ungetchar()
+//								lex.ungetchar()
+//							}
+//						} else {
+//							lex.ungetchar()
+//							lex.ungetchar()
+//						}
+//					}
+//				} else {
+//					lex.ungetchar()
+//				}
+//			}
+//		}

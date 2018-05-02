@@ -97,10 +97,6 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	//convert stack top to same type
-	if bin.Left.Value.Typ != bin.Right.Value.Typ {
-		m.numberTypeConverter(code, bin.Right.Value.Typ, bin.Left.Value.Typ)
-	}
 	currentStack += jvmSize(bin.Right.Value)
 	if currentStack > maxstack {
 		maxstack = currentStack // incase int->double
@@ -121,12 +117,26 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength += 2
 		} else if e.Typ == ast.EXPRESSION_TYPE_DIV_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_idiv
-			code.Codes[code.CodeLength+1] = cg.OP_i2b
-			code.CodeLength += 2
+			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_irem
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_AND_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_iand
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ior
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
+		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ishr
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ixor
+			code.CodeLength++
 		}
 	case ast.VARIABLE_TYPE_SHORT:
 		if e.Typ == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
@@ -143,12 +153,26 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength += 2
 		} else if e.Typ == ast.EXPRESSION_TYPE_DIV_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_idiv
-			code.Codes[code.CodeLength+1] = cg.OP_i2s
-			code.CodeLength += 2
+			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_irem
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_AND_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_iand
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ior
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
+		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ishr
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ixor
+			code.CodeLength++
 		}
 
 	case ast.VARIABLE_TYPE_INT:
@@ -167,6 +191,21 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		} else if e.Typ == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_irem
 			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_AND_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_iand
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ior
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ishl
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ishr
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_ixor
+			code.CodeLength++
 		}
 	case ast.VARIABLE_TYPE_LONG:
 		if e.Typ == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
@@ -182,7 +221,22 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.Codes[code.CodeLength] = cg.OP_ldiv
 			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_MOD_ASSIGN {
-			code.Codes[code.CodeLength] = cg.OP_frem
+			code.Codes[code.CodeLength] = cg.OP_lrem
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_AND_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_land
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_lor
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_lshl
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_lshr
+			code.CodeLength++
+		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+			code.Codes[code.CodeLength] = cg.OP_lxor
 			code.CodeLength++
 		}
 	case ast.VARIABLE_TYPE_FLOAT:

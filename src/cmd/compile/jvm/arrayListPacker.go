@@ -55,5 +55,6 @@ func (a *ArrayListPacker) unPackObject(class *cg.ClassHighLevel, code *cg.Attrib
 		Method:     "get",
 		Descriptor: "(I)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
 	return
 }

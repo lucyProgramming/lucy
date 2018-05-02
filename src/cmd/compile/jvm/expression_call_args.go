@@ -24,18 +24,11 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				if parameters[parameterIndex].Typ.IsNumber() && parameters[parameterIndex].Typ.Typ != t.Typ {
-					m.numberTypeConverter(code, t.Typ, parameters[k].Typ.Typ)
-				}
 				currentStack += jvmSize(t)
 				state.pushStack(class, parameters[parameterIndex].Typ)
 				parameterIndex++
 			}
 			continue
-		}
-		variableType := e.Value
-		if e.MayHaveMultiValue() {
-			variableType = e.Values[0]
 		}
 		stack, es := m.build(class, code, e, context, state)
 		if len(es) > 0 {
@@ -46,11 +39,6 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 		if t := stack + currentStack; t > maxstack {
 			maxstack = t
-		}
-		if parameters[parameterIndex].Typ.IsNumber() {
-			if parameters[parameterIndex].Typ.Typ != variableType.Typ {
-				m.numberTypeConverter(code, variableType.Typ, parameters[parameterIndex].Typ.Typ)
-			}
 		}
 		currentStack += jvmSize(parameters[parameterIndex].Typ)
 		state.pushStack(class, parameters[parameterIndex].Typ)
