@@ -602,6 +602,10 @@ redo:
 			token.Type = TOKEN_LT
 			token.Desp = "<"
 		}
+	case '^':
+		token.Type = TOKEN_XOR
+		token.Desp = "^"
+
 	case '+':
 		c, eof = lex.getchar()
 		if c == '+' {
@@ -708,6 +712,7 @@ redo:
 			token.Desp = ":"
 			lex.ungetchar()
 		}
+
 	default:
 		err = fmt.Errorf("unkown beginning of token:%d", c)
 		return

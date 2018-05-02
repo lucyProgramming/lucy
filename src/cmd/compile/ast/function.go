@@ -32,7 +32,7 @@ type Function struct {
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 	args []*VariableType, pos *Pos)
 
-type buildFunctionChecker = CallChecker
+type buildFunctionChecker CallChecker
 
 type AutoVarForReturnBecauseOfDefer struct {
 	ForArrayList uint16

@@ -28,6 +28,7 @@ const (
 	EXPRESSION_TYPE_AND
 	EXPRESSION_TYPE_LEFT_SHIFT
 	EXPRESSION_TYPE_RIGHT_SHIFT
+	EXPRESSION_TYPE_XOR
 	EXPRESSION_TYPE_ADD
 	EXPRESSION_TYPE_SUB
 	EXPRESSION_TYPE_MUL
@@ -284,7 +285,7 @@ func (e *Expression) isBool() bool {
 		e.Typ == EXPRESSION_TYPE_DOT ||
 		e.Typ == EXPRESSION_TYPE_INDEX
 }
-func (e *Expression) canBeUsedAsStatementExpression() bool {
+func (e *Expression) canBeUsedAsStatemen() bool {
 	return e.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
@@ -323,16 +324,21 @@ func (e *Expression) IsNumber(typ ...int) bool {
 	check this expression is increment or decrement
 */
 func (e *Expression) IsSelfIncrement() bool {
-	return e.Typ == EXPRESSION_TYPE_INCREMENT || e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
+	return e.Typ == EXPRESSION_TYPE_INCREMENT ||
+		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
 }
 
 func (e *Expression) HaveOnlyOneValue() bool {
-	if e.Typ == EXPRESSION_TYPE_FUNCTION_CALL || e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Typ == EXPRESSION_TYPE_TYPE_ASSERT {
+	if e.MayHaveMultiValue() {
 		return len(e.Values) == 1
 	}
 	return true
 }
+
+/*
+	k,v := range arr
+	k,v = range arr
+*/
 func (e *Expression) canbeUsedForRange() bool {
 	if e.Typ != EXPRESSION_TYPE_ASSIGN && e.Typ != EXPRESSION_TYPE_COLON_ASSIGN {
 		return false

@@ -3,13 +3,14 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"sort"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
-	"io/ioutil"
-	"os"
-	"sort"
 )
 
 func Main(files []string) {
@@ -80,29 +81,6 @@ func (lc *LucyCompile) parseImports() {
 	}
 	bs, _ := json.Marshal(is)
 	fmt.Println(string(bs))
-	//nameLoader := &RealNameLoader{}
-	//packageNames := make(map[string]struct{})
-	//for _, v := range is {
-	//	p, c, err := nameLoader.LoadName(v)
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		os.Exit(1)
-	//	}
-	//	if p != nil {
-	//		packageNames[p.Name] = struct{}{}
-	//	}
-	//	if pp, ok := c.(*ast.Package); ok && pp != nil {
-	//		packageNames[pp.Name] = struct{}{}
-	//	}
-	//}
-	//is = make([]string, len(packageNames))
-	//i := 0
-	//for name, _ := range packageNames {
-	//	is[i] = name
-	//	i++
-	//}
-	//bs, _ := json.Marshal(is)
-	//fmt.Println(string(bs))
 }
 
 func (lc *LucyCompile) compile() {

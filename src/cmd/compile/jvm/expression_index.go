@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -20,6 +21,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
+
 	currentStack = 2 // mapref kref
 	if index.Expression.Value.Map.K.IsPointer() == false {
 		typeConverter.putPrimitiveInObject(class, code, index.Expression.Value.Map.K)
@@ -31,6 +33,7 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	state.popStack(1)
 	if index.Expression.Value.Map.V.IsPointer() {
 		typeConverter.castPointerTypeToRealType(class, code, index.Expression.Value.Map.V)
 	} else {
@@ -78,22 +81,21 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 		code.CodeLength += 3
 		// no null goto here
 		{
-			t := &ast.VariableType{}
-			t.Typ = ast.VARIABLE_TYPE_OBJECT
-			t.Class = &ast.Class{}
-			t.Class.Name = java_root_class
-			state.pushStack(class, t)
+			state.pushStack(class, state.newObjectVariableType(java_root_class))
 			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1) // pop java_root_class ref
 		}
 
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
+
 		typeConverter.getFromObject(class, code, index.Expression.Value.Map.V)
+
+		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 		{
-			state.popStack(1) // pop java_root_class ref
 			state.pushStack(class, e.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
 		}
-		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 	}
 	return
 }

@@ -169,9 +169,9 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		size := jvmSize(e.Value)
+		currentStack := jvmSize(bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := stack + size; t > maxstack {
+		if t := stack + currentStack; t > maxstack {
 			maxstack = t
 		}
 		if e.Value.Typ != bin.Right.Value.Typ {

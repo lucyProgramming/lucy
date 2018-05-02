@@ -2,10 +2,8 @@ package run
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -13,6 +11,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 )
 
 type Run struct {
@@ -62,17 +62,17 @@ func (r *Run) RunCommand(command string, args []string) {
 		fmt.Println(err)
 		os.Exit(2)
 	}
-	r.MainPackageLucyPath, err = r.findPackageIn(r.Package)
+	founds := r.findPackageIn(r.Package)
+
+	err = r.foundError(r.Package, founds)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
+	r.MainPackageLucyPath = founds[0]
+
 	//
-	if runtime.GOOS == "windows" {
-		r.classPaths = strings.Split(os.Getenv("CLASSPATH"), ";")
-	} else { // unix style
-		r.classPaths = strings.Split(os.Getenv("CLASSPATH"), ":")
-	}
+	r.classPaths = common.GetClassPaths()
 	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
 	{
 		t := r.compilerAt
@@ -85,6 +85,7 @@ func (r *Run) RunCommand(command string, args []string) {
 			return
 		}
 	}
+
 	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
 	if err != nil {
 		fmt.Println(err)
@@ -133,7 +134,7 @@ func (r *Run) RunCommand(command string, args []string) {
 /*
 	find package in which directory
 */
-func (r *Run) findPackageIn(packageName string, classModel ...*bool) (string, error) {
+func (r *Run) findPackageIn(packageName string) []string {
 	pathHavePackage := []string{}
 	for _, v := range r.LucyPaths {
 		dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
@@ -142,39 +143,7 @@ func (r *Run) findPackageIn(packageName string, classModel ...*bool) (string, er
 			pathHavePackage = append(pathHavePackage, v)
 		}
 	}
-	formatLucyPath := func(paths []string) string {
-		s := ""
-		for _, v := range paths {
-			s += "\t" + v + "\n"
-		}
-		return s
-	}
-	// maybe import class
-	//if len(pathHavePackage) == 0 {
-	//
-	//	p, err := r.findPackageIn(filepath.Dir(packageName))
-	//	if err != nil {
-	//		return "", err
-	//	}
-	//	pathHavePackage = []string{p}
-	//	if len(classModel) != 0 {
-	//		*classModel[0] = true
-	//	}
-	//}
-
-	if len(pathHavePackage) == 0 {
-		errmsg := fmt.Sprintf("package '%s' not found in $%s,which lucy path are:\n",
-			packageName, common.LUCY_PATH_ENV_KEY)
-		errmsg += formatLucyPath(r.LucyPaths)
-		return "", errors.New(errmsg)
-	}
-	if len(pathHavePackage) > 1 {
-		errmsg := fmt.Sprintf("not 1 package named '%s' in $%s,which are:\n",
-			packageName, common.LUCY_PATH_ENV_KEY)
-		errmsg += formatLucyPath(pathHavePackage)
-		return "", errors.New(errmsg)
-	}
-	return pathHavePackage[0], nil
+	return pathHavePackage
 }
 
 /*
@@ -210,6 +179,7 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = nil
 		return
 	}
+	// new or add
 	for _, v := range fism {
 		if meta.CompiledFrom == nil {
 			return
@@ -267,9 +237,6 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	return is, err
 }
 
-/*
-	pick out java package,java package cannot be build by 'lucy',
-*/
 func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) {
 	existInClassPath := func(name string) (found []string) {
 		for _, v := range r.classPaths {
@@ -316,17 +283,25 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 	return
 }
 
+func (r *Run) foundError(packageName string, founds []string) error {
+	if len(founds) == 0 {
+		return fmt.Errorf("package '%s' not found")
+	}
+	if len(founds) > 1 {
+
+	}
+	return nil
+}
 func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool, meta *common.PackageMeta, err error) {
 	if lucypath == "" {
-		var classModel bool
-		lucypath, err = r.findPackageIn(packageName, &classModel)
+		founds := r.findPackageIn(packageName)
+		err = r.foundError(packageName, founds)
 		if err != nil {
-			return
+			return false, nil, err
 		}
-		if classModel {
-			packageName = filepath.Dir(packageName) // rewrite
-		}
+		lucypath = founds[0]
 	}
+
 	meta, needBuild, lucyFiles, err := r.needCompile(lucypath, packageName)
 	if err != nil {
 		err = fmt.Errorf("check if not compile,err:%v", err)

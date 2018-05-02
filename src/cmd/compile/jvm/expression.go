@@ -30,8 +30,10 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		code.CodeLength++
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_BYTE:
-		e.Data = int32(e.Data.(byte))
-		fallthrough
+		code.Codes[code.CodeLength] = cg.OP_sipush
+		code.Codes[code.CodeLength+1] = e.Data.(byte)
+		code.CodeLength += 2
+		maxstack = 1
 	case ast.EXPRESSION_TYPE_INT, ast.EXPRESSION_TYPE_SHORT:
 		loadInt32(class, code, e.Data.(int32))
 		maxstack = 1

@@ -6,7 +6,6 @@ import (
 )
 
 /*
-	s := "123";
 	s += "456";
 */
 func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
@@ -22,7 +21,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
+		Class:      java_string_builder_class,
 		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -30,16 +29,17 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	if t := remainStack + 2; t > maxstack {
 		maxstack = t
 	}
+	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
 	currentStack := remainStack + 1 //
 	stack, _ := m.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-	m.stackTop2String(class, code, bin.Right.Value, context, state) //conver to string
+	m.stackTop2String(class, code, bin.Left.Value, context, state) //conver to string
 	//append origin string
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
+		Class:      java_string_builder_class,
 		Method:     `append`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -57,7 +57,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	//append right
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
+		Class:      java_string_builder_class,
 		Method:     `append`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -65,7 +65,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	// tostring
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
+		Class:      java_string_builder_class,
 		Method:     `toString`,
 		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -101,7 +101,7 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if bin.Left.Value.Typ != bin.Right.Value.Typ {
 		m.numberTypeConverter(code, bin.Right.Value.Typ, bin.Left.Value.Typ)
 	}
-	currentStack += jvmSize(bin.Left.Value)
+	currentStack += jvmSize(bin.Right.Value)
 	if currentStack > maxstack {
 		maxstack = currentStack // incase int->double
 	}
@@ -220,20 +220,16 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength++
 		}
 	}
-	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
-		typeConverter.putPrimitiveInObject(class, code, e.Value)
-	}
-	currentStack -= jvmSize(bin.Left.Value) // stack reduce
 	if e.IsStatementExpression == false {
 		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.Value)
 		if currentStack > maxstack {
 			maxstack = currentStack
 		}
 	}
+	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
+		typeConverter.putPrimitiveInObject(class, code, e.Value)
+	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
-	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
-		typeConverter.getFromObject(class, code, e.Value)
-	}
 	return
 }

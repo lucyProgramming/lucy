@@ -255,7 +255,6 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		if stack > maxstack {
 			maxstack = stack
 		}
-
 		state.pushStack(class, bin.Left.Value)
 		stack, _ = m.build(class, code, bin.Right, context, state)
 		if t := stack + 1; t > maxstack {

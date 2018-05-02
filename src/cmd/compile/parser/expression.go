@@ -67,7 +67,8 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 			es := left.Data.([]*ast.Expression)
 			left = es[0]
 			if len(es) > 1 {
-				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s expect one left value", ep.parser.errorMsgPrefix(es[1].Pos)))
+				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s expect one expression on left",
+					ep.parser.errorMsgPrefix(es[1].Pos)))
 			}
 		}
 	}
@@ -138,7 +139,7 @@ func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, er
 	if ep.parser.token.Type != lex.TOKEN_RP {
 		return nil, fmt.Errorf("%s '(' and ')' not match", ep.parser.errorMsgPrefix())
 	}
-	ep.Next() // skip ) for next process
+	ep.Next() // skip )
 	return &ast.Expression{
 		Typ: ast.EXPRESSION_TYPE_CONVERTION_TYPE,
 		Data: &ast.ExpressionTypeConvertion{

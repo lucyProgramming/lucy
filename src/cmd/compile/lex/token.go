@@ -32,6 +32,7 @@ const (
 	TOKEN_OR             // |
 	TOKEN_LEFT_SHIFT     // <<
 	TOKEN_RIGHT_SHIFT    // >>
+	TOKEN_XOR            // ^
 	TOKEN_ASSIGN         //=
 	TOKEN_EQUAL          //== or ==
 	TOKEN_NE             // !=

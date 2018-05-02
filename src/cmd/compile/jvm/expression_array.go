@@ -6,6 +6,10 @@ import (
 )
 
 func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
 	arr := e.Data.(*ast.ExpressionArrayLiteral)
 	//	new array ,
 	meta := ArrayMetas[e.Value.ArrayType.Typ]
@@ -22,17 +26,12 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		state.Stacks = append(state.Stacks, t)
 		state.Stacks = append(state.Stacks, t)
 	}
-	{
-		t := &ast.VariableType{}
-		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
-		t.ArrayType = e.Value.ArrayType
-		state.pushStack(class, t)
-		state.pushStack(class, t)
-		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-	}
-	defer func() {
-		state.popStack(5)
-	}()
+
+	arrayObject := &ast.VariableType{}
+	arrayObject.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+	arrayObject.ArrayType = e.Value.ArrayType
+	state.pushStack(class, arrayObject)
+
 	loadInt32(class, code, int32(arr.Length))
 	switch e.Value.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
@@ -139,6 +138,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		loadInt32(class, code, index) // load index
+		state.pushStack(class, arrayObject)
+		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
@@ -146,6 +147,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // must be a logical expression
 		}
+		state.popStack(2)
 		if t := 5 + stack; t > maxstack {
 			maxstack = t
 		}

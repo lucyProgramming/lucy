@@ -187,7 +187,7 @@ func (b *Block) checkConst() []error {
 			continue
 		}
 		err := checkConst(b, c)
-		if err != nil {
+		if err != nil && c.Typ == nil {
 			errs = append(errs, err)
 			delete(b.Consts, c.Name)
 		}

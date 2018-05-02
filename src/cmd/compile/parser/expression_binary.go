@@ -11,6 +11,9 @@ func (ep *ExpressionParser) parseLogicalExpression(statementLevel bool) (*ast.Ex
 	if err != nil {
 		return nil, err
 	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
+	}
 	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_AND ||
 		ep.parser.token.Type == lex.TOKEN_LOGICAL_OR) && !ep.parser.eof {
 		typ := ep.parser.token.Type
@@ -41,6 +44,9 @@ func (ep *ExpressionParser) parseBitANDORExpression(statementLevel bool) (*ast.E
 	e, err := ep.parseEqualExpression(statementLevel)
 	if err != nil {
 		return nil, err
+	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
 	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_AND || ep.parser.token.Type == lex.TOKEN_OR) && !ep.parser.eof {
@@ -73,6 +79,9 @@ func (ep *ExpressionParser) parseEqualExpression(statementLevel bool) (*ast.Expr
 	if err != nil {
 		return nil, err
 	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
+	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_EQUAL || ep.parser.token.Type == lex.TOKEN_NE) && !ep.parser.eof {
 		typ = ep.parser.token.Type
@@ -103,6 +112,9 @@ func (ep *ExpressionParser) parseRelationExpression(statementLevel bool) (*ast.E
 	e, err := ep.parseShiftExpression(statementLevel)
 	if err != nil {
 		return nil, err
+	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
 	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_GT || ep.parser.token.Type == lex.TOKEN_GE ||
@@ -140,6 +152,9 @@ func (ep *ExpressionParser) parseShiftExpression(statmentLevel bool) (*ast.Expre
 	if err != nil {
 		return nil, err
 	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
+	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_LEFT_SHIFT ||
 		ep.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) && !ep.parser.eof {
@@ -172,6 +187,9 @@ func (ep *ExpressionParser) parseAddExpression(statemenLevel bool) (*ast.Express
 	if err != nil {
 		return nil, err
 	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
+	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_ADD || ep.parser.token.Type == lex.TOKEN_SUB) && !ep.parser.eof {
 		typ = ep.parser.token.Type
@@ -202,6 +220,9 @@ func (ep *ExpressionParser) parseMulExpression(statementLevel bool) (*ast.Expres
 	e, err := ep.parseOneExpression(statementLevel)
 	if err != nil {
 		return nil, err
+	}
+	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+		return e, nil
 	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_MUL ||

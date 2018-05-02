@@ -42,8 +42,10 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	objectArray := &ast.VariableType{}
+	objectArray.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
 	state.pushStack(class, objectArray)
+
 	index := int32(0)
 	for _, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
@@ -75,15 +77,16 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		loadInt32(class, code, index)
 		currentStack += 2
+		state.pushStack(class, objectArray)
+		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.pushStack(class, objectArray)
-			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			state.pushStack(class, v.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(3) // bool value
+			state.popStack(1) // bool value
 		}
+		state.popStack(2)
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}

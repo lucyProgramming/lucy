@@ -3,6 +3,7 @@ package jvm
 import (
 	"bytes"
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
@@ -18,7 +19,7 @@ func (m *Descript) methodDescriptor(f *ast.Function) string {
 		s += m.typeDescriptor(v.Typ)
 	}
 	s += ")"
-	if len(f.Typ.ReturnList) == 0 {
+	if f.NoReturnValue() {
 		s += "V"
 	} else if len(f.Typ.ReturnList) == 1 {
 		s += m.typeDescriptor(f.Typ.ReturnList[0].Typ)

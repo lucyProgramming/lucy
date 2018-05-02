@@ -2,24 +2,36 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
 	convertion := e.Data.(*ast.ExpressionTypeConvertion)
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
-	if convertion.Typ.Typ == ast.VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
+	if convertion.Typ.Typ == ast.VARIABLE_TYPE_ARRAY &&
+		convertion.Typ.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
 		currentStack = 2
 		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
+		t := &cg.StackMap_verification_type_info{}
+		t.Verify = &cg.StackMap_Uninitialized_variable_info{
+			Index: uint16(code.CodeLength),
+		}
+		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
-	}
 
+	}
+	// string([]byte{97,97})
 	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING &&
 		convertion.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY &&
 		convertion.Expression.Value.ArrayType.Typ == ast.VARIABLE_TYPE_BYTE {
@@ -27,12 +39,20 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
+		t := &cg.StackMap_verification_type_info{}
+		t.Verify = &cg.StackMap_Uninitialized_variable_info{
+			Index: uint16(code.CodeLength),
+		}
+		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
 	}
 	stack, _ := m.build(class, code, convertion.Expression, context, state)
 	maxstack = currentStack + stack
 	if convertion.Typ.IsNumber() {
 		m.numberTypeConverter(code, convertion.Expression.Value.Typ, convertion.Typ.Typ)
+		if t := jvmSize(e.Value); t > maxstack {
+			maxstack = t
+		}
 		return
 	}
 	//  []byte("hello world")

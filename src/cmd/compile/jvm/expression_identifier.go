@@ -38,8 +38,9 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifer)
-	if e.Value.Typ == ast.VARIABLE_TYPE_ENUM && identifier.Var == nil { // not a var
+	if e.Value.Typ == ast.VARIABLE_TYPE_ENUM { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
+		maxstack = 1
 		return
 	}
 
@@ -85,7 +86,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
 			code.CodeLength += 2
 		} else {
-			panic("local int var out of range")
+			panic("over 255")
 		}
 		maxstack = 1
 	case ast.VARIABLE_TYPE_FLOAT:
@@ -106,7 +107,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
 			code.CodeLength += 2
 		} else {
-			panic("local float var out of range")
+			panic("over 255")
 		}
 		maxstack = 1
 	case ast.VARIABLE_TYPE_DOUBLE:
@@ -127,7 +128,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
 			code.CodeLength += 2
 		} else {
-			panic("local double var out of range")
+			panic("over 255")
 		}
 		maxstack = 2
 	case ast.VARIABLE_TYPE_LONG:
@@ -148,7 +149,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
 			code.CodeLength += 2
 		} else {
-			panic("local double var out of range")
+			panic("over 255")
 		}
 		maxstack = 2
 	default: // object types
@@ -169,7 +170,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 			code.Codes[code.CodeLength+1] = byte(identifier.Var.LocalValOffset)
 			code.CodeLength += 2
 		} else {
-			panic("local object var out of range,max 255")
+			panic("over 255")
 		}
 		maxstack = 1
 	}

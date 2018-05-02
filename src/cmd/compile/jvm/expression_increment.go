@@ -7,36 +7,18 @@ import (
 
 func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	ee := e.Data.(*ast.Expression)
-	if t := ee.Data.(*ast.ExpressionIdentifer); ee.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
+	// identifer  and not captured and type`s int
+	if t, ok := ee.Data.(*ast.ExpressionIdentifer); ee.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
+		ok &&
 		t.Var.BeenCaptured == false &&
 		t.Var.Typ.Typ == ast.VARIABLE_TYPE_INT {
-		// identifer  and not captured and type`s int
-		load := func() {
-			switch t.Var.LocalValOffset {
-			case 0:
-				code.Codes[code.CodeLength] = cg.OP_iload_0
-				code.CodeLength++
-			case 1:
-				code.Codes[code.CodeLength] = cg.OP_iload_1
-				code.CodeLength++
-			case 2:
-				code.Codes[code.CodeLength] = cg.OP_iload_2
-				code.CodeLength++
-			case 3:
-				code.Codes[code.CodeLength] = cg.OP_iload_3
-				code.CodeLength++
-			default:
-				if t.Var.LocalValOffset > 255 {
-					panic("over 255")
-				}
-				code.Codes[code.CodeLength] = cg.OP_iload
-				code.Codes[code.CodeLength+1] = byte(t.Var.LocalValOffset)
-				code.CodeLength += 2
-			}
+
+		if t.Var.LocalValOffset > 255 { // earlly check
+			panic("over 255")
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.IsSelfIncrement() {
-				load() // load to stack top
+			if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
 				maxstack = 1
 			}
 		}
@@ -52,18 +34,22 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			code.CodeLength += 3
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.IsSelfIncrement() == false { // decrement
-				load() // load to stack top
+			if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT { // decrement
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
 				maxstack = 1
 			}
 		}
 		return
 	}
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context, state)
 	/*
 		left value must can be used as right value
 	*/
-	stack, _ := m.build(class, code, ee, context, nil) // load it`s value
+	stack, _ := m.build(class, code, ee, context, state) // load it`s value
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}
@@ -159,9 +145,6 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.Codes[code.CodeLength] = cg.OP_dadd
 		code.CodeLength++
 	}
-	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
-		typeConverter.putPrimitiveInObject(class, code, e.Value)
-	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
 			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
@@ -170,10 +153,10 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			}
 		}
 	}
+	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
+		typeConverter.putPrimitiveInObject(class, code, e.Value)
+	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
-	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
-		typeConverter.getFromObject(class, code, e.Value)
-	}
 	return
 }

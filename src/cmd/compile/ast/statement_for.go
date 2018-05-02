@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -274,7 +275,7 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	if s.Init != nil {
 		s.Init.IsStatementExpression = true
-		if s.Init.canBeUsedAsStatementExpression() == false {
+		if s.Init.canBeUsedAsStatemen() == false {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Init.Pos)))
 		}
 		_, es := s.Block.checkExpression(s.Init)
@@ -300,7 +301,7 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	if s.Post != nil {
 		s.Post.IsStatementExpression = true
-		if s.Post.canBeUsedAsStatementExpression() == false {
+		if s.Post.canBeUsedAsStatemen() == false {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Post.Pos)))
 		}
 		_, es := s.Block.checkExpression(s.Post)

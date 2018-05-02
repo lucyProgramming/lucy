@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -74,6 +75,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 				for kkk, ttt := range ee.Values {
 					currentStack = size
 					if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 && kkk == len(ee.Values)-1 {
+						//nothing
 					} else {
 						if size == 1 {
 							code.Codes[code.CodeLength] = cg.OP_dup
@@ -99,6 +101,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			currentStack = size
 			// mk stack ready
 			if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 { // last one
+				//nothing
 			} else { // not the last one,dup the stack
 				if size == 1 {
 					code.Codes[code.CodeLength] = cg.OP_dup

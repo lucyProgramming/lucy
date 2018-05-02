@@ -6,13 +6,13 @@ import (
 )
 
 func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	bin := e.Data.(*ast.ExpressionBinary)
-	left := bin.Left.Data.([]*ast.Expression)[0]
-	right := bin.Right.Data.([]*ast.Expression)[0]
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
+	bin := e.Data.(*ast.ExpressionBinary)
+	left := bin.Left.Data.([]*ast.Expression)[0]
+	right := bin.Right.Data.([]*ast.Expression)[0]
 	maxstack, remainStack, op, target, classname, name, descriptor := m.getLeftValue(class, code, left, context, state)
 	stack, es := m.build(class, code, right, context, state)
 	if len(es) > 0 {
@@ -26,23 +26,15 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	if target.IsNumber() && target.Typ != right.Value.Typ {
 		m.numberTypeConverter(code, right.Value.Typ, target.Typ)
 	}
-	if t := remainStack + jvmSize(target); t > maxstack {
-		maxstack = t
+	currentStack := remainStack + jvmSize(target)
+	currentStack += m.controlStack2FitAssign(code, op, classname, target)
+	if currentStack > maxstack {
+		maxstack = currentStack
 	}
-	var currentStack uint16
-	if classname == java_hashmap_class {
+	if classname == java_hashmap_class && e.Value.IsPointer() == false {
 		typeConverter.putPrimitiveInObject(class, code, target)
-		currentStack = remainStack + 1 // ... vobjref
-	} else {
-		currentStack = remainStack + jvmSize(target)
-	}
-	if t := currentStack + m.controlStack2FitAssign(code, op, classname, target); t > maxstack {
-		maxstack = t
 	}
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
-	if classname == java_hashmap_class {
-		typeConverter.getFromObject(class, code, target)
-	}
 	return
 }
 
@@ -244,5 +236,6 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 			return
 		}
 	}
+	panic("other case")
 	return
 }

@@ -34,12 +34,13 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 
-	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
-
+	length := len(state.Stacks)
 	defer func() {
 		// print have no return value,stack is empty
-		state.Stacks = []*cg.StackMap_verification_type_info{}
+		state.popStack(len(state.Stacks) - length)
 	}()
+
+	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
@@ -125,18 +126,19 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	}
 
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(java_string_builder_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
+		Class:      java_string_builder_class,
 		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxstack = 3
 	currentStack := uint16(2)
+	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
 	app := func(isLast bool) {
 		//
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -159,14 +161,6 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			code.CodeLength += 3
 		}
 	}
-	{
-		t := &ast.VariableType{}
-		t.Typ = ast.VARIABLE_TYPE_OBJECT
-		t.Class = &ast.Class{}
-		t.Class.Name = "java/lang/StringBuilder"
-		state.pushStack(class, t)
-	}
-
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
@@ -197,8 +191,8 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			context.MakeStackMap(code, state, code.CodeLength)
 			state.pushStack(class, variableType)
+			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		if t := currentStack + stack; t > maxstack {

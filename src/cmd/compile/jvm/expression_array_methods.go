@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
@@ -25,13 +24,12 @@ func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code
 
 func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = m.build(class, code, call.Expression, context, state)
-	fmt.Println("!!!!!!!!!!!!!", state == nil)
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length) // ref type
 	}()
+	call := e.Data.(*ast.ExpressionMethodCall)
+	maxstack, _ = m.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.Value)
 	switch call.Name {
 	case common.ARRAY_METHOD_CAP,

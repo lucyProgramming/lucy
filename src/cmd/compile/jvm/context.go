@@ -7,10 +7,10 @@ import (
 
 type Context struct {
 	lastStackMapState  *StackMapState
+	LastStackMapOffset int
 	function           *ast.Function
 	currentSoureFile   string
 	currentLineNUmber  int
-	LastStackMapOffset int
 	Defer              *ast.Defer
 }
 
