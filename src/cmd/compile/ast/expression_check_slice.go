@@ -20,6 +20,9 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 			*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
 				errMsgPrefix(slice.Start.Pos), startT.TypeString()))
 		}
+		if startT != nil && startT.Typ == VARIABLE_TYPE_LONG {
+			slice.Start.ConvertToNumber(VARIABLE_TYPE_INT)
+		}
 	}
 	//end
 	if slice.End != nil {
@@ -34,6 +37,9 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 		if endT != nil && endT.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'",
 				errMsgPrefix(slice.End.Pos), endT.TypeString()))
+		}
+		if endT != nil && endT.Typ == VARIABLE_TYPE_LONG {
+			slice.End.ConvertToNumber(VARIABLE_TYPE_INT)
 		}
 	}
 	ts, es := slice.Expression.check(block)

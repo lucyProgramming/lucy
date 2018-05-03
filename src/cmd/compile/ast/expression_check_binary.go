@@ -92,7 +92,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
 				errMsgPrefix(bin.Right.Pos),
 				t2.TypeString()))
+		} else { // integer
+			if t2.Typ == VARIABLE_TYPE_LONG {
+				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
+			}
 		}
+
 		result = t1.Clone()
 		result.Pos = e.Pos
 		return result

@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	//"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
@@ -75,13 +76,16 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
 	case ast.STATEMENT_TYPE_GOTO:
+		fmt.Println("!!!!!!!!!!!", s.StatementGoto.StatementLable.OffsetGenerated)
 		if s.StatementGoto.StatementLable.OffsetGenerated {
 			jumpto(cg.OP_goto, code, s.StatementGoto.StatementLable.Offset)
 		} else {
 			b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 			s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
 		}
+		fmt.Println("!!!!!!!!!!!!", s.StatementGoto.StatementLable)
 	case ast.STATEMENT_TYPE_LABLE:
+		fmt.Println("!!!!!!!!!!!!", s.StatmentLable)
 		s.StatmentLable.OffsetGenerated = true
 		s.StatmentLable.Offset = code.CodeLength
 		if len(s.StatmentLable.BackPatches) > 0 {

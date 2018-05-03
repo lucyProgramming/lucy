@@ -23,7 +23,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	m.buildBlock(class, code, s.Block, context, IfState)
 	if len(s.ElseIfList) > 0 || s.ElseBlock != nil {
-		if s.Block.DeadEnd == false {
+		if s.Block.DeadEnding == false {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 		}
 	}
@@ -47,7 +47,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		code.CodeLength += 3
 		m.buildBlock(class, code, v.Block, context, elseIfState)
 		if k != len(s.ElseIfList)-1 || s.ElseBlock != nil {
-			if v.Block.DeadEnd == false {
+			if v.Block.DeadEnding == false {
 				s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 			}
 		}

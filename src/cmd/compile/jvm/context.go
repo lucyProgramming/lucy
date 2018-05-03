@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -18,8 +16,8 @@ type Context struct {
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
-
 	if context.LastStackMapOffset == offset && context.LastStackMapOffsetSetted {
+		// avoid 0 == 0
 		return
 	}
 	var delta uint16
@@ -88,7 +86,6 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	fullFrame.Stacks = make([]*cg.StackMap_verification_type_info, len(state.Stacks))
 	copy(fullFrame.Stacks, state.Stacks)
 	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
-	fmt.Println("offset:", offset, state.Locals, state.Stacks, fullFrame)
 	return
 }
 

@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	if s.RangeAttr != nil {
 		if s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_ARRAY ||
 			s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
@@ -50,7 +51,11 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
+		jumpto(cg.OP_goto, code, loopBeginAt)
+	} else {
+		if s.Block.DeadEnding == false { //will execute to here
+			jumpto(cg.OP_goto, code, loopBeginAt)
+		}
 	}
-	jumpto(cg.OP_goto, code, loopBeginAt)
 	return
 }

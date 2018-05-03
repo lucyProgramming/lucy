@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -149,7 +150,10 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	}
 	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
-		if t1.IsInteger() && t2.IsInteger() && t2.Typ != VARIABLE_TYPE_LONG {
+		if t1.IsInteger() && t2.IsInteger() {
+			if t2.Typ == VARIABLE_TYPE_LONG {
+				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
+			}
 			return ret
 		}
 	}

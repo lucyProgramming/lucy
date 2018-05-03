@@ -5,7 +5,7 @@ import (
 )
 
 type Block struct {
-	DeadEnd                    bool
+	DeadEnding                 bool
 	Defers                     []*Defer
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool

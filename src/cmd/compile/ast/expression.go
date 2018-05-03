@@ -87,24 +87,22 @@ const (
 	EXPRESSION_TYPE_TYPE_ASSERT
 )
 
-func (e *Expression) OpName(typ ...int) string {
-	t := e.Typ
-	if len(typ) > 0 {
-		t = typ[0]
-	}
-	switch t {
+func (e *Expression) OpName() string {
+	switch e.Typ {
 	case EXPRESSION_TYPE_BOOL:
-		return fmt.Sprintf("%v", e.Data)
+		return fmt.Sprintf("%v", e.Data.(bool))
 	case EXPRESSION_TYPE_BYTE:
-		return fmt.Sprintf("%v", e.Data)
+		return fmt.Sprintf("%v", e.Data.(byte))
+	case EXPRESSION_TYPE_SHORT:
+		return fmt.Sprintf("%vs", e.Data.(int32))
 	case EXPRESSION_TYPE_INT:
-		return fmt.Sprintf("%v", e.Data)
+		return fmt.Sprintf("%v", e.Data.(int32))
 	case EXPRESSION_TYPE_LONG:
-		return fmt.Sprintf("%v", e.Data)
+		return fmt.Sprintf("%vL", e.Data.(int64))
 	case EXPRESSION_TYPE_FLOAT:
-		return fmt.Sprintf("%v", e.Data)
+		return fmt.Sprintf("%vf", e.Data.(float32))
 	case EXPRESSION_TYPE_DOUBLE:
-		return fmt.Sprintf("%v", e.Data)
+		return fmt.Sprintf("%vd", e.Data.(float64))
 	case EXPRESSION_TYPE_STRING:
 		return fmt.Sprintf("\"%v\"", e.Data)
 	case EXPRESSION_TYPE_ARRAY:
@@ -216,7 +214,7 @@ func (e *Expression) OpName(typ ...int) string {
 	case EXPRESSION_TYPE_TYPE_ALIAS:
 		return "type alias"
 	}
-	panic(fmt.Sprint("missing:%d", t))
+	panic(fmt.Sprint("missing:%d", e.Typ))
 }
 
 type Expression struct {
@@ -233,10 +231,17 @@ type Expression struct {
 func (e *Expression) ConvertTo(t *VariableType) {
 	c := &ExpressionTypeConvertion{}
 	c.Expression = &Expression{}
-	*c.Expression = *e
+	*c.Expression = *e // copy
 	c.Typ = t
 	e.Typ = EXPRESSION_TYPE_CHECK_CAST
 	e.IsCompileAuto = true
+	e.Data = c
+}
+func (e *Expression) ConvertToNumber(typ int) {
+	e.ConvertTo(&VariableType{
+		Pos: e.Pos,
+		Typ: typ,
+	})
 }
 
 type ExpressionTypeAssert ExpressionTypeConvertion
@@ -473,4 +478,4 @@ func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, 
 	return
 }
 
-type binaryConstFolder func(is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)
+type binaryConstFolder func(bin *ExpressionBinary, is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)

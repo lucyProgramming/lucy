@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -64,7 +65,7 @@ func registerBuildinFunctions() {
 			if block.InheritedAttribute.Defer.ExceptionClass == nil {
 				_, c, err := NameLoader.LoadName(DEFAULT_EXCEPTION_CLASS)
 				if err != nil {
-					*errs = append(*errs, fmt.Errorf("%s  load exception class failed,err:%v",
+					*errs = append(*errs, fmt.Errorf("%s load exception class failed,err:%v",
 						errMsgPrefix(pos), err))
 					return
 				}
