@@ -30,7 +30,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		code.CodeLength++
 		maxstack = 1
 	case ast.EXPRESSION_TYPE_BYTE:
-		code.Codes[code.CodeLength] = cg.OP_sipush
+		code.Codes[code.CodeLength] = cg.OP_bipush
 		code.Codes[code.CodeLength+1] = e.Data.(byte)
 		code.CodeLength += 2
 		maxstack = 1

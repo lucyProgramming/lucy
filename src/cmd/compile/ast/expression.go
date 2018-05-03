@@ -45,9 +45,9 @@ const (
 	EXPRESSION_TYPE_MOD_ASSIGN
 	EXPRESSION_TYPE_AND_ASSIGN
 	EXPRESSION_TYPE_OR_ASSIGN
+	EXPRESSION_TYPE_XOR_ASSIGN
 	EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN
 	EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN
-	EXPRESSION_TYPE_XOR_ASSIGN
 	//
 	EXPRESSION_TYPE_EQ
 	EXPRESSION_TYPE_NE
@@ -108,9 +108,9 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_ARRAY:
 		return "array_literal"
 	case EXPRESSION_TYPE_LOGICAL_OR:
-		return "&&"
-	case EXPRESSION_TYPE_LOGICAL_AND:
 		return "||"
+	case EXPRESSION_TYPE_LOGICAL_AND:
+		return "&&"
 	case EXPRESSION_TYPE_OR:
 		return "|"
 	case EXPRESSION_TYPE_AND:
@@ -214,7 +214,7 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_TYPE_ALIAS:
 		return "type alias"
 	}
-	panic(fmt.Sprint("missing:%d", e.Typ))
+	panic(fmt.Sprintf("missing:%d", e.Typ))
 }
 
 type Expression struct {
@@ -228,6 +228,22 @@ type Expression struct {
 	IsStatementExpression bool
 }
 
+func (e *Expression) getByteValue() byte {
+	if e.isInteger() == false {
+		panic("not integer")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return e.Data.(byte)
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return byte(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return byte(e.Data.(int64))
+	}
+	return 0
+}
 func (e *Expression) ConvertTo(t *VariableType) {
 	c := &ExpressionTypeConvertion{}
 	c.Expression = &Expression{}
@@ -293,7 +309,7 @@ func (e *Expression) IsLiteral() bool {
 	return e.Typ == EXPRESSION_TYPE_NULL ||
 		e.Typ == EXPRESSION_TYPE_BOOL ||
 		e.Typ == EXPRESSION_TYPE_STRING ||
-		e.IsNumber()
+		e.isNumber()
 }
 
 /*
@@ -329,9 +345,9 @@ func (e *Expression) canBeUsedAsStatemen() bool {
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_XOR_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_XOR_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_INCREMENT ||
 		e.Typ == EXPRESSION_TYPE_DECREMENT ||
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
@@ -343,17 +359,19 @@ func (e *Expression) canBeUsedAsStatemen() bool {
 /*
 	take one argument
 */
-func (e *Expression) IsNumber(typ ...int) bool {
-	t := e.Typ
-	if len(typ) > 0 {
-		t = typ[0]
-	}
-	return t == EXPRESSION_TYPE_BYTE ||
-		t == EXPRESSION_TYPE_SHORT ||
-		t == EXPRESSION_TYPE_INT ||
-		t == EXPRESSION_TYPE_FLOAT ||
-		t == EXPRESSION_TYPE_LONG ||
-		t == EXPRESSION_TYPE_DOUBLE
+func (e *Expression) isNumber() bool {
+	return e.isInteger() || e.isFloat()
+}
+
+func (e *Expression) isInteger() bool {
+	return e.Typ == EXPRESSION_TYPE_BYTE ||
+		e.Typ == EXPRESSION_TYPE_SHORT ||
+		e.Typ == EXPRESSION_TYPE_INT ||
+		e.Typ == EXPRESSION_TYPE_LONG
+}
+func (e *Expression) isFloat() bool {
+	return e.Typ == EXPRESSION_TYPE_FLOAT ||
+		e.Typ == EXPRESSION_TYPE_DOUBLE
 }
 
 /*
@@ -403,10 +421,10 @@ func (e *Expression) CallHasReturnValue() bool {
 type CallArgs []*Expression // f(1,2)　调用参数列表
 
 type ExpressionFunctionCall struct {
-	Meta       interface{}
-	Expression *Expression
-	Args       CallArgs
-	Func       *Function
+	BuildinFunctionMeta interface{}
+	Expression          *Expression
+	Args                CallArgs
+	Func                *Function
 }
 
 type ExpressionDeclareVariable struct {
@@ -436,8 +454,8 @@ type ExpressionDot struct {
 	Expression      *Expression
 	Name            string
 	Field           *ClassField
-	PackageVariable *VariableDefinition
-	EnumName        *EnumName
+	PackageVariable *VariableDefinition // expression is package
+	EnumName        *EnumName           // expression is package
 }
 type ExpressionMethodCall struct {
 	Class      *Class //
@@ -469,13 +487,3 @@ type ExpressionArrayLiteral struct {
 	Expressions []*Expression
 	Length      int
 }
-
-func (binary *ExpressionBinary) getBinaryConstExpression() (is1 bool, typ1 int, value1 interface{}, err1 error,
-	is2 bool, typ2 int, value2 interface{}, err2 error) {
-
-	is1, typ1, value1, err1 = binary.Left.getConstValue()
-	is2, typ2, value2, err2 = binary.Right.getConstValue()
-	return
-}
-
-type binaryConstFolder func(bin *ExpressionBinary, is1 bool, typ1 int, value1 interface{}, is2 bool, typ2 int, value2 interface{}) (is bool, Typ int, Value interface{}, err error)

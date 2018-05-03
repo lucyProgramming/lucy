@@ -6,11 +6,11 @@ import (
 )
 
 type Function struct {
+	ClassMethod                    *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser bool
 	HaveDefaultValue               bool
 	DefaultValueStartAt            int
 	IsClosureFunction              bool
-	ClassMethod                    *cg.MethodHighLevel
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
 	buildChecker                   buildFunctionChecker // used in build function

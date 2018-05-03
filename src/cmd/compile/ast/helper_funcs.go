@@ -8,9 +8,6 @@ func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
-//func ErrMsgPrefix(pos *Pos) string {
-//	return errMsgPrefix(pos)
-//}
 func errsNotEmpty(es []error) bool {
 	return es != nil && len(es) > 0
 }
@@ -147,7 +144,7 @@ func checkConst(block *Block, c *Const) error {
 	if c.Expression == nil {
 		return fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
 	}
-	is, typ, value, err := c.Expression.getConstValue()
+	is, err := c.Expression.getConstValue()
 	if err != nil {
 		return err
 	}
@@ -155,9 +152,7 @@ func checkConst(block *Block, c *Const) error {
 		return fmt.Errorf("%s const named '%s' is not defined by const value",
 			errMsgPrefix(c.Pos), c.Name)
 	}
-	c.Value = value
-	c.Expression.Typ = typ
-	c.Expression.Data = value
+	c.Value = c.Expression.Data
 	tt, _ := c.Expression.check(block)
 	if c.Typ != nil {
 		if c.Typ.Equal(tt[0]) == false {

@@ -23,14 +23,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		tt := &cg.StackMap_Uninitialized_variable_info{}
 		tt.Index = uint16(code.CodeLength - 4)
 		t.Verify = tt
-		state.Stacks = append(state.Stacks, t)
-		state.Stacks = append(state.Stacks, t)
+		state.Stacks = append(state.Stacks, t, t)
 	}
-
-	arrayObject := &ast.VariableType{}
-	arrayObject.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
-	arrayObject.ArrayType = e.Value.ArrayType
-	state.pushStack(class, arrayObject)
 
 	loadInt32(class, code, int32(arr.Length))
 	switch e.Value.ArrayType.Typ {
@@ -82,8 +76,13 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
+	arrayObject := &ast.VariableType{}
+	arrayObject.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+	arrayObject.ArrayType = e.Value.ArrayType
+	state.pushStack(class, arrayObject)
+
 	maxstack = 4
-	var index int32 = 0
+
 	store := func() {
 		switch e.Value.ArrayType.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
@@ -113,7 +112,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		code.CodeLength++
 	}
-
+	var index int32 = 0
 	for _, v := range arr.Expressions {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			// stack top is array list

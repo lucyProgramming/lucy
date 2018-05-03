@@ -14,7 +14,7 @@ func registerBuildinFunctions() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
 		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
-			e.Meta = meta
+			e.BuildinFunctionMeta = meta
 			if len(args) == 0 {
 				return // not error
 			}
@@ -142,7 +142,7 @@ func registerBuildinFunctions() {
 			return
 		}
 		meta := &BuildinFunctionSprintfMeta{}
-		e.Meta = meta
+		e.BuildinFunctionMeta = meta
 		meta.Format = e.Args[0]
 		meta.ArgsLength = len(args) - 1
 		e.Args = e.Args[1:]
@@ -152,7 +152,7 @@ func registerBuildinFunctions() {
 		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
-			e.Meta = meta
+			e.BuildinFunctionMeta = meta
 			if len(args) == 0 {
 				err := fmt.Errorf("%s '%s' expect one argument at least",
 					errMsgPrefix(pos), common.BUILD_IN_FUNCTION_PRINTF)

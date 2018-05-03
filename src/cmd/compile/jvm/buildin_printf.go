@@ -14,7 +14,7 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 		state.popStack(len(state.Stacks) - length)
 	}()
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	meta := call.Meta.(*ast.BuildinFunctionPrintfMeta)
+	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionPrintfMeta)
 	if meta.Stream == nil {
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

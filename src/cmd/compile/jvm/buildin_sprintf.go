@@ -13,7 +13,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 	}()
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	meta := call.Meta.(*ast.BuildinFunctionSprintfMeta)
+	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionSprintfMeta)
 	maxstack, _ = m.build(class, code, meta.Format, context, state)
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray

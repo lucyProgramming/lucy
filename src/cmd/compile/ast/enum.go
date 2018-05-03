@@ -25,12 +25,13 @@ func (e *Enum) check() error {
 		e.Init.Data = int32(0)
 		e.Pos = e.Pos
 	}
-	is, typ, value, err := e.Init.getConstValue()
-	if err != nil || is == false || typ != EXPRESSION_TYPE_INT {
+	is, err := e.Init.getConstValue()
+	if err != nil || is == false || e.Init.Typ != EXPRESSION_TYPE_INT {
 		return fmt.Errorf("%s enum type must inited by integer", errMsgPrefix(e.Pos))
 	}
+	initV := e.Init.Data.(int32)
 	for k, v := range e.Enums {
-		v.Value = int32(k) + value.(int32)
+		v.Value = int32(k) + initV
 	}
 	return nil
 }

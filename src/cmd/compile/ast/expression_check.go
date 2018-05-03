@@ -8,14 +8,11 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 	if e == nil {
 		return nil, []error{}
 	}
-	is, typ, data, err := e.getConstValue()
+	_, err := e.getConstValue()
 	if err != nil {
 		return nil, []error{err}
 	}
-	if is {
-		e.Typ = typ
-		e.Data = data
-	}
+
 	errs = []error{}
 	switch e.Typ {
 	case EXPRESSION_TYPE_NULL:
@@ -270,10 +267,11 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 	case EXPRESSION_TYPE_FUNCTION:
 		errs = append(errs, fmt.Errorf("%s cannot use function as  a expression", errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_LIST:
-		errs = append(errs, fmt.Errorf("%s cannot have expression list at this scope,"+
+		fallthrough
+	case EXPRESSION_TYPE_LABLE:
+		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 			"this may be cause be compiler error,please contact with author",
-			errMsgPrefix(e.Pos)))
-
+			errMsgPrefix(e.Pos), e.OpName()))
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
 	}

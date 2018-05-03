@@ -78,32 +78,45 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_iadd
+				code.Codes[code.CodeLength+1] = cg.OP_i2b
+				code.CodeLength += 2
 			case ast.EXPRESSION_TYPE_SUB:
 				code.Codes[code.CodeLength] = cg.OP_isub
+				code.Codes[code.CodeLength+1] = cg.OP_i2b
+				code.CodeLength += 2
 			case ast.EXPRESSION_TYPE_MUL:
 				code.Codes[code.CodeLength] = cg.OP_imul
+				code.Codes[code.CodeLength+1] = cg.OP_i2b
+				code.CodeLength += 2
 			case ast.EXPRESSION_TYPE_DIV:
 				code.Codes[code.CodeLength] = cg.OP_idiv
+				code.CodeLength++
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_irem
+				code.CodeLength++
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_i2b
-			code.CodeLength += 2
+
 		case ast.VARIABLE_TYPE_SHORT:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_iadd
+				code.Codes[code.CodeLength+1] = cg.OP_i2s
+				code.CodeLength += 2
 			case ast.EXPRESSION_TYPE_SUB:
 				code.Codes[code.CodeLength] = cg.OP_isub
+				code.Codes[code.CodeLength+1] = cg.OP_i2s
+				code.CodeLength += 2
 			case ast.EXPRESSION_TYPE_MUL:
 				code.Codes[code.CodeLength] = cg.OP_imul
+				code.Codes[code.CodeLength+1] = cg.OP_i2s
+				code.CodeLength += 2
 			case ast.EXPRESSION_TYPE_DIV:
 				code.Codes[code.CodeLength] = cg.OP_idiv
+				code.CodeLength++
 			case ast.EXPRESSION_TYPE_MOD:
 				code.Codes[code.CodeLength] = cg.OP_irem
+				code.CodeLength++
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_i2s
-			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_INT:
 			switch e.Typ {
 			case ast.EXPRESSION_TYPE_ADD:

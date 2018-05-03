@@ -187,9 +187,22 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			result.Pos = e.Pos
 			return result
 		}
-		if t1.Equal(t2) == false {
+		if t1.IsNumber() && t2.IsNumber() {
+			if t1.Equal(t2) == false {
+				if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
+					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+				} else {
+					if bin.Left.IsLiteral() {
+						bin.Left.ConvertToNumber(t2.Typ)
+					} else {
+						bin.Right.ConvertToNumber(t1.Typ)
+					}
+				}
+			}
+		} else {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
+
 		result = t1.Clone()
 		result.Pos = e.Pos
 		return result
