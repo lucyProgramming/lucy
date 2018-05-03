@@ -217,7 +217,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 			e.Value = tt
 		}
-	case EXPRESSION_TYPE_CONVERTION_TYPE:
+	case EXPRESSION_TYPE_CHECK_CAST:
 		tt := e.checkTypeConvertionExpression(block, &errs)
 		if tt != nil {
 			Types = []*VariableType{tt}

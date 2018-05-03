@@ -3,10 +3,13 @@ package ast
 import (
 	"errors"
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type StatementLable struct {
+	OffsetGenerated  bool
+	Offset           int
 	Block            *Block
 	StatementsOffset int
 	Name             string

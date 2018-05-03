@@ -273,6 +273,14 @@ func (s *StatementFor) check(block *Block) []error {
 	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canbeUsedForRange() { // for k,v := range arr
 		return s.checkRange()
 	}
+	defer func() { // make sure condition is not null
+		if s.Condition == nil {
+			s.Condition = &Expression{}
+			s.Condition.Typ = EXPRESSION_TYPE_BOOL
+			s.Condition.Data = true
+			s.Condition.Pos = s.Pos
+		}
+	}()
 	if s.Init != nil {
 		s.Init.IsStatementExpression = true
 		if s.Init.canBeUsedAsStatemen() == false {

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -45,7 +46,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 			ep.Next() // skip )
 			ret := &ast.Expression{}
 			ret.Pos = pos
-			ret.Typ = ast.EXPRESSION_TYPE_CONVERTION_TYPE
+			ret.Typ = ast.EXPRESSION_TYPE_CHECK_CAST
 			data := &ast.ExpressionTypeConvertion{}
 			data.Typ = &ast.VariableType{}
 			data.Typ.Typ = ast.VARIABLE_TYPE_ARRAY

@@ -25,7 +25,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 				errMsgPrefix(e.Pos)))
 			return ret
 		}
-		e.Typ = EXPRESSION_TYPE_CONVERTION_TYPE
+		e.Typ = EXPRESSION_TYPE_CHECK_CAST
 		convertType := &ExpressionTypeConvertion{}
 		convertType.Expression = call.Args[0]
 		convertType.Typ = ret[0]

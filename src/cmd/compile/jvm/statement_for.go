@@ -29,21 +29,18 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	s.ContinueOPOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	//condition
-	if s.Condition != nil {
-		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
-		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
-			state.pushStack(class, s.Condition.Value)
-			context.MakeStackMap(code, forState, code.CodeLength)
-			forState.popStack(1) // must be bool expression
-		}
-		if stack > maxstack {
-			maxstack = stack
-		}
-		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
-	} else {
-
+	stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
+	if len(es) > 0 {
+		backPatchEs(es, code.CodeLength)
+		state.pushStack(class, s.Condition.Value)
+		context.MakeStackMap(code, forState, code.CodeLength)
+		forState.popStack(1) // must be bool expression
 	}
+	if stack > maxstack {
+		maxstack = stack
+	}
+	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
+
 	m.buildBlock(class, code, s.Block, context, forState)
 	if s.Post != nil {
 		s.ContinueOPOffset = code.CodeLength

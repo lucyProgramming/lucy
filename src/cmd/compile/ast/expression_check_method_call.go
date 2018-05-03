@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -39,7 +40,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret[0].Typ = VARIABLE_TYPE_OBJECT
 			ret[0].Pos = e.Pos
 			ret[0].Class = class
-			e.Typ = EXPRESSION_TYPE_CONVERTION_TYPE
+			e.Typ = EXPRESSION_TYPE_CHECK_CAST
 			typeConvertion := &ExpressionTypeConvertion{}
 			typeConvertion.Typ = ret[0]
 			if len(call.Args) >= 1 {

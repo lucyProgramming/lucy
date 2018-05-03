@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -22,7 +23,9 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	m.buildBlock(class, code, s.Block, context, IfState)
 	if len(s.ElseIfList) > 0 || s.ElseBlock != nil {
-		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+		if s.Block.DeadEnd == false {
+			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+		}
 	}
 	state.addTop(IfState)
 	for k, v := range s.ElseIfList {
@@ -44,7 +47,9 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		code.CodeLength += 3
 		m.buildBlock(class, code, v.Block, context, elseIfState)
 		if k != len(s.ElseIfList)-1 || s.ElseBlock != nil {
-			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+			if v.Block.DeadEnd == false {
+				s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+			}
 		}
 		// when done
 		state.addTop(elseIfState)

@@ -78,11 +78,11 @@ const (
 	EXPRESSION_TYPE_FUNCTION
 	EXPRESSION_TYPE_VAR
 	EXPRESSION_TYPE_CONST
-	EXPRESSION_TYPE_CONVERTION_TYPE // []byte(str)
-	EXPRESSION_TYPE_LABLE           // end:
-	EXPRESSION_TYPE_RANGE           // for range
-	EXPRESSION_TYPE_SLICE           // arr[0:2]
-	EXPRESSION_TYPE_MAP             // map literal
+	EXPRESSION_TYPE_CHECK_CAST // []byte(str)
+	EXPRESSION_TYPE_LABLE      // end:
+	EXPRESSION_TYPE_RANGE      // for range
+	EXPRESSION_TYPE_SLICE      // arr[0:2]
+	EXPRESSION_TYPE_MAP        // map literal
 	EXPRESSION_TYPE_TYPE_ALIAS
 	EXPRESSION_TYPE_TYPE_ASSERT
 )
@@ -209,7 +209,7 @@ func (e *Expression) OpName(typ ...int) string {
 		return "slice"
 	case EXPRESSION_TYPE_MAP:
 		return "map_literal"
-	case EXPRESSION_TYPE_CONVERTION_TYPE:
+	case EXPRESSION_TYPE_CHECK_CAST:
 		return "convertion of type"
 	case EXPRESSION_TYPE_TYPE_ASSERT:
 		return "type assert"
@@ -235,7 +235,7 @@ func (e *Expression) ConvertTo(t *VariableType) {
 	c.Expression = &Expression{}
 	*c.Expression = *e
 	c.Typ = t
-	e.Typ = EXPRESSION_TYPE_CONVERTION_TYPE
+	e.Typ = EXPRESSION_TYPE_CHECK_CAST
 	e.IsCompileAuto = true
 }
 

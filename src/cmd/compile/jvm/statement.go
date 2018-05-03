@@ -75,13 +75,19 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
 	case ast.STATEMENT_TYPE_GOTO:
-		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
-		s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
+		if s.StatementGoto.StatementLable.OffsetGenerated {
+			jumpto(cg.OP_goto, code, s.StatementGoto.StatementLable.Offset)
+		} else {
+			b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
+			s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
+		}
 	case ast.STATEMENT_TYPE_LABLE:
+		s.StatmentLable.OffsetGenerated = true
+		s.StatmentLable.Offset = code.CodeLength
 		if len(s.StatmentLable.BackPatches) > 0 {
 			backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
-			context.MakeStackMap(code, state, code.CodeLength)
 		}
+		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)

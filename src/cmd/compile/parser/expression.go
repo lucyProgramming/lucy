@@ -156,7 +156,7 @@ func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, er
 	}
 	ep.Next() // skip )
 	return &ast.Expression{
-		Typ: ast.EXPRESSION_TYPE_CONVERTION_TYPE,
+		Typ: ast.EXPRESSION_TYPE_CHECK_CAST,
 		Data: &ast.ExpressionTypeConvertion{
 			Typ:        t,
 			Expression: e,
