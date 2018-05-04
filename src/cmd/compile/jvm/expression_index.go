@@ -34,7 +34,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.popStack(1)
-	if index.Expression.Value.Map.V.IsPointer() {
+	if index.Expression.Value.Map.V.IsPointer() &&
+		index.Expression.Value.Map.V.Typ != ast.VARIABLE_TYPE_STRING {
 		typeConverter.castPointerTypeToRealType(class, code, index.Expression.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack

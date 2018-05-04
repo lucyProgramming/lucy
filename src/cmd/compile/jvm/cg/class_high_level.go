@@ -72,6 +72,7 @@ func (c *ClassHighLevel) InsertClassConst(classname string, location []byte) {
 func (c *ClassHighLevel) InsertIntConst(i int32, location []byte) {
 	binary.BigEndian.PutUint16(location, c.Class.InsertIntConst(i))
 }
+
 func (c *ClassHighLevel) InsertLongConst(i int64, location []byte) {
 	binary.BigEndian.PutUint16(location, c.Class.InsertLongConst(i))
 }

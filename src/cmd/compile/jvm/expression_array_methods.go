@@ -59,7 +59,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				arrayListPacker.buildStoreArrayListAutoVar(code, context)
+				arrayListPacker.storeArrayListAutoVar(code, context)
 				for kk, t := range v.Values {
 					currentStack = 1
 					if t := arrayListPacker.unPack(class, code, kk, t, context) + currentStack; t > maxstack {
@@ -111,7 +111,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				arrayListPacker.buildStoreArrayListAutoVar(code, context)
+				arrayListPacker.storeArrayListAutoVar(code, context)
 				for kk, _ := range v.Values {
 					currentStack := uint16(1)
 					arrayListPacker.buildLoadArrayListAutoVar(code, context)

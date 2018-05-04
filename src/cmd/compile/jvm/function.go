@@ -54,6 +54,7 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		}
 		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
 			length := len(state.Stacks)
 			if v.BeenCaptured {
 				state.pushStack(class,
@@ -62,12 +63,8 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			state.pushStack(class, v.Typ)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(len(state.Stacks) - length)
-			backPatchEs(es, code.CodeLength)
 		}
 		if t := currentStack + stack; t > maxstack {
-			maxstack = t
-		}
-		if t := currentStack + jvmSize(v.Typ); t > maxstack {
 			maxstack = t
 		}
 		m.storeLocalVar(class, code, v)

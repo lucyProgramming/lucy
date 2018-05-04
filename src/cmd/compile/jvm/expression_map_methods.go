@@ -57,7 +57,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				arrayListPacker.buildStoreArrayListAutoVar(code, context) // store to temp
+				arrayListPacker.storeArrayListAutoVar(code, context) // store to temp
 				for kk, _ := range v.Values {
 					currentStack = 1
 					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
@@ -78,7 +78,9 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					code.CodeLength += 3
 					//remove
 					callRemove()
-					state.popStack(1)
+					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
+						state.popStack(1)
+					}
 				}
 				continue
 			}
@@ -100,7 +102,10 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			}
 			//call remove
 			callRemove()
-			state.popStack(1)
+			if k != len(call.Args)-1 {
+				state.popStack(1)
+			}
+
 		}
 	case common.MAP_METHOD_REMOVEALL:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

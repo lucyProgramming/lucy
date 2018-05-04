@@ -224,3 +224,152 @@ func (e *Expression) getConstValue() (is bool, err error) {
 	}
 	return
 }
+
+func (e *Expression) getByteValue() byte {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return e.Data.(byte)
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return byte(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return byte(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return byte(e.Data.(float32))
+	case EXPRESSION_TYPE_DOUBLE:
+		return byte(e.Data.(float64))
+	}
+	return 0
+}
+func (e *Expression) getShortValue() int32 {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return int32(e.Data.(byte))
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return int32(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return int32(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return int32(e.Data.(float32))
+	case EXPRESSION_TYPE_DOUBLE:
+		return int32(e.Data.(float64))
+	}
+	return 0
+}
+func (e *Expression) getIntValue() int32 {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return int32(e.Data.(byte))
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return int32(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return int32(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return int32(e.Data.(float32))
+	case EXPRESSION_TYPE_DOUBLE:
+		return int32(e.Data.(float64))
+	}
+	return 0
+}
+
+func (e *Expression) getLongValue() int64 {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return int64(e.Data.(byte))
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return int64(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return int64(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return int64(e.Data.(float32))
+	case EXPRESSION_TYPE_DOUBLE:
+		return int64(e.Data.(float64))
+	}
+	return 0
+}
+func (e *Expression) getFloatValue() float32 {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return float32(e.Data.(byte))
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return float32(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return float32(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return float32(e.Data.(float32))
+	case EXPRESSION_TYPE_DOUBLE:
+		return float32(e.Data.(float64))
+	}
+	return 0
+}
+
+func (e *Expression) getDoubleValue() float64 {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Typ {
+	case EXPRESSION_TYPE_BYTE:
+		return float64(e.Data.(byte))
+	case EXPRESSION_TYPE_SHORT:
+		fallthrough
+	case EXPRESSION_TYPE_INT:
+		return float64(e.Data.(int32))
+	case EXPRESSION_TYPE_LONG:
+		return float64(e.Data.(int64))
+	case EXPRESSION_TYPE_FLOAT:
+		return float64(e.Data.(float32))
+	case EXPRESSION_TYPE_DOUBLE:
+		return float64(e.Data.(float64))
+	}
+	return 0
+}
+
+func (e *Expression) convertNumberLiteralTo(t int) {
+	if e.isNumber() == false {
+		panic("...")
+	}
+	switch t {
+	case VARIABLE_TYPE_BYTE:
+		e.Data = e.getByteValue()
+		e.Typ = EXPRESSION_TYPE_BYTE
+	case VARIABLE_TYPE_SHORT:
+		e.Data = e.getShortValue()
+		e.Typ = EXPRESSION_TYPE_SHORT
+	case VARIABLE_TYPE_INT:
+		e.Data = e.getIntValue()
+		e.Typ = EXPRESSION_TYPE_INT
+	case VARIABLE_TYPE_LONG:
+		e.Data = e.getLongValue()
+		e.Typ = EXPRESSION_TYPE_LONG
+	case VARIABLE_TYPE_FLOAT:
+		e.Data = e.getFloatValue()
+		e.Typ = EXPRESSION_TYPE_FLOAT
+	case VARIABLE_TYPE_DOUBLE:
+		e.Data = e.getDoubleValue()
+		e.Typ = EXPRESSION_TYPE_DOUBLE
+	}
+}

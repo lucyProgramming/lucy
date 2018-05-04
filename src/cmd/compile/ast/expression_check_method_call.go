@@ -308,7 +308,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if matched {
 		if false == call.Expression.isThis() &&
 			ms[0].IsPublic() == false {
-			*errs = append(*errs, fmt.Errorf("%s method  %s is not public", errMsgPrefix(e.Pos), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 		}
 		call.Method = ms[0]
 		return ms[0].Func.Typ.retTypes(e.Pos)

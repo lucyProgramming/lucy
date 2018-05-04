@@ -15,11 +15,12 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			continue
 		}
 		//this variable not been captured,also not declared here
+		if vs.IfDeclareBefor[k] {
+			continue
+		}
 		if v.BeenCaptured {
-			if vs.IfDeclareBefor[k] == false {
-				v.LocalValOffset = code.MaxLocals
-				code.MaxLocals += 1
-			}
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals += 1
 		} else {
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals += jvmSize(v.Typ)
@@ -65,7 +66,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
-			arrayListPacker.buildStoreArrayListAutoVar(code, context)
+			arrayListPacker.storeArrayListAutoVar(code, context)
 			for kk, tt := range v.Values {
 				if variables[0].Name == ast.NO_NAME_IDENTIFIER {
 					slice()
@@ -98,15 +99,10 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			}
 			continue
 		}
-		variableType := v.Value
-		if v.MayHaveMultiValue() {
-			variableType = v.Values[0]
-		}
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
-			state.Stacks = append(state.Stacks,
-				state.newStackMapVerificationTypeInfo(class, v.Value))
-			backPatchEs(es, code.CodeLength) //
+			backPatchEs(es, code.CodeLength)
+			state.pushStack(class, v.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // must be bool expression
 		}
@@ -115,7 +111,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		if variables[0].Name == ast.NO_NAME_IDENTIFIER {
 			slice()
-			if jvmSize(variableType) == 1 {
+			if jvmSize(v.Value) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else { // 2
 				code.Codes[code.CodeLength] = cg.OP_pop2

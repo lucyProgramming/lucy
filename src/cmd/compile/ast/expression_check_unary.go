@@ -43,6 +43,15 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 		tt.Pos = e.Pos
 		return tt
 	}
+	if e.Typ == EXPRESSION_TYPE_BITWISE_ {
+		if t.IsInteger() == false {
+			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
+				errMsgPrefix(e.Pos), t.TypeString()))
+		}
+		tt := t.Clone()
+		tt.Pos = e.Pos
+		return tt
+	}
 	return nil
 }
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {

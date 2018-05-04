@@ -213,10 +213,10 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
 		b := PackageBeenCompile.Block
-		if _, ok := b.Vars[name]; ok {
+		if vv, ok := b.Vars[name]; ok {
 			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
 				errMsgPrefix(pos), name)
-			errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
+			errmsg += fmt.Sprintf("\t%s", errMsgPrefix(vv.Pos))
 			return fmt.Errorf(errmsg)
 		}
 		b.Vars[name] = v

@@ -30,7 +30,7 @@ func (l *LucyFieldSignatureParse) Decode(bs []byte) ([]byte, *ast.VariableType, 
 	if bs[0] == 'm' {
 		bs = bs[1:]
 		var kt *ast.VariableType
-		bs, kt, err = Descriptor.ParseType(bs)
+		bs, kt, err = l.Decode(bs)
 		if err != nil {
 			return bs, nil, err
 		}

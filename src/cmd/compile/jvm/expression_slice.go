@@ -16,27 +16,14 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 	meta := ArrayMetas[slice.Expression.Value.ArrayType.Typ]
 	state.pushStack(class, state.newObjectVariableType(meta.classname))
 	// build start
-	if slice.Start != nil {
-		stack, _ := m.build(class, code, slice.Start, context, state)
-		if t := 1 + stack; t > maxstack {
-			maxstack = t
-		}
-	} else {
-		code.Codes[code.CodeLength] = cg.OP_iconst_0
-		code.CodeLength++
+	stack, _ := m.build(class, code, slice.Start, context, state)
+	if t := 1 + stack; t > maxstack {
+		maxstack = t
 	}
 	state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-	if slice.End != nil {
-		stack, _ := m.build(class, code, slice.End, context, state)
-		if t := 2 + stack; t > maxstack {
-			maxstack = t
-		}
-	} else {
-		code.Codes[code.CodeLength] = cg.OP_iconst_m1
-		code.CodeLength++
-		if 3 > maxstack { // stack top ->  ...arrayref start end
-			maxstack = 3
-		}
+	stack, _ = m.build(class, code, slice.End, context, state)
+	if t := 2 + stack; t > maxstack {
+		maxstack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

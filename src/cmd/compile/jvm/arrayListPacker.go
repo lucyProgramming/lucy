@@ -18,7 +18,7 @@ func (a *ArrayListPacker) buildLoadArrayListAutoVar(code *cg.AttributeCode, cont
 /*
 	stack is 1
 */
-func (a *ArrayListPacker) buildStoreArrayListAutoVar(code *cg.AttributeCode, context *Context) {
+func (a *ArrayListPacker) storeArrayListAutoVar(code *cg.AttributeCode, context *Context) {
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
 		context.function.AutoVarForMultiReturn.Offset)...)
 

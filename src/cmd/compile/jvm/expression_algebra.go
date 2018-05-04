@@ -15,10 +15,10 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_AND ||
 		e.Typ == ast.EXPRESSION_TYPE_XOR {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
-		size := jvmSize(bin.Left.Value)
+
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := stack + size; t > maxstack {
+		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
 			maxstack = t
 		}
 		switch e.Value.Typ {
@@ -60,17 +60,10 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			bin.Right.Value.Typ == ast.VARIABLE_TYPE_STRING {
 			return m.buildStrCat(class, code, bin, context, state)
 		}
-		maxstack = 4
-		stack, _ := m.build(class, code, bin.Left, context, state)
-		if stack > maxstack {
-			maxstack = stack
-		}
+		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.Value)
-		stack, _ = m.build(class, code, bin.Right, context, state)
-		if t := jvmSize(e.Value) + stack; t > maxstack {
-			maxstack = t
-		}
-		if t := 2 * jvmSize(e.Value); t > maxstack {
+		stack, _ := m.build(class, code, bin.Right, context, state)
+		if t := jvmSize(bin.Left.Value) + stack; t > maxstack {
 			maxstack = t
 		}
 		switch e.Value.Typ {
@@ -181,12 +174,8 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		currentStack := jvmSize(bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := stack + currentStack; t > maxstack {
-			maxstack = t
-		}
-		if t := 2 * jvmSize(bin.Left.Value); t > maxstack {
+		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
 			maxstack = t
 		}
 		switch e.Value.Typ {

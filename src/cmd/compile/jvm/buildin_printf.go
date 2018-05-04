@@ -32,6 +32,7 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 	if t := 1 + stack; t > maxstack {
 		maxstack = t
 	}
+	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -40,7 +41,6 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	objectArray := &ast.VariableType{}
 	objectArray.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
@@ -55,7 +55,7 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 				maxstack = t
 			}
 			// store in temp var
-			arrayListPacker.buildStoreArrayListAutoVar(code, context)
+			arrayListPacker.storeArrayListAutoVar(code, context)
 			for kk, _ := range v.Values {
 				currentStack = 3
 				code.Codes[code.CodeLength] = cg.OP_dup

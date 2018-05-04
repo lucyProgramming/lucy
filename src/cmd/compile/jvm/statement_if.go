@@ -34,8 +34,9 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		elseIfState := (&StackMapState{}).FromLast(state)
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
-			elseIfState.pushStack(class, s.Condition.Value)
 			backPatchEs(es, code.CodeLength)
+			elseIfState.pushStack(class, s.Condition.Value)
+			context.MakeStackMap(code, elseIfState, code.CodeLength)
 			elseIfState.popStack(1)
 		}
 		if stack > maxstack {

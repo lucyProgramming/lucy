@@ -389,7 +389,6 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_FUNCTION:
 		*ret += v.Function.readableMsg()
 	default:
-		fmt.Println(VARIABLE_TYPE_JAVA_ARRAY)
 		panic(v.Typ)
 	}
 }

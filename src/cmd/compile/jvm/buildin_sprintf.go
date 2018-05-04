@@ -15,6 +15,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionSprintfMeta)
 	maxstack, _ = m.build(class, code, meta.Format, context, state)
+	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -23,7 +24,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 	if currentStack > maxstack {
 		maxstack = currentStack
 	}
-	state.pushStack(class, state.newObjectVariableType(java_string_class))
+
 	objectArray := &ast.VariableType{}
 	objectArray.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
 	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
@@ -37,7 +38,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 				maxstack = t
 			}
 			// store in temp var
-			arrayListPacker.buildStoreArrayListAutoVar(code, context)
+			arrayListPacker.storeArrayListAutoVar(code, context)
 			for kk, _ := range v.Values {
 				currentStack = 2
 				code.Codes[code.CodeLength] = cg.OP_dup

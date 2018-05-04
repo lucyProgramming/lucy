@@ -15,18 +15,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	if bin.Left.Value.IsNumber() { // in this case ,right must be a number type
-		maxstack = 4
-		stack, _ := m.build(class, code, bin.Left, context, state)
-		if stack > maxstack {
-			maxstack = stack
-		}
-		target := bin.Left.Value.NumberTypeConvertRule(bin.Right.Value)
-		state.pushStack(class, &ast.VariableType{Typ: target})
-		stack, _ = m.build(class, code, bin.Right, context, state)
-		if t := 2 + stack; t > maxstack {
+		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		state.pushStack(class, bin.Left.Value)
+		stack, _ := m.build(class, code, bin.Right, context, state)
+		if t := jvmSize(bin.Left.Value) + stack; t > maxstack {
 			maxstack = t
 		}
-		switch target {
+		switch bin.Left.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -102,28 +97,27 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_BOOL ||
 		bin.Right.Value.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es []*cg.JumpBackPatch
-		state.pushStack(class, bin.Left.Value)
 		maxstack, es = m.build(class, code, bin.Left, context, state)
+		state.pushStack(class, bin.Left.Value)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
 			backPatchEs(es, code.CodeLength)
 		}
 		stack, es := m.build(class, code, bin.Right, context, state)
-		state.pushStack(class, bin.Left.Value)
+		state.pushStack(class, bin.Right.Value)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
 			backPatchEs(es, code.CodeLength)
 		}
-		state.popStack(2) // 2 bool value
-		if t := 1 + stack; t > maxstack {
+		if t := jvmSize(bin.Left.Value) + stack; t > maxstack {
 			maxstack = t
 		}
+		state.popStack(2) // 2 bool value
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-
 		code.Codes[code.CodeLength] = cg.OP_if_icmpeq
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
@@ -281,7 +275,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		state.pushStack(class, bin.Left.Value)
 		stack, _ = m.build(class, code, bin.Right, context, state)
-		if t := stack + 1; t > maxstack {
+		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
 			maxstack = t
 		}
 		state.popStack(1) //

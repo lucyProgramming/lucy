@@ -10,6 +10,7 @@ import (
 func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context, state *StackMapState) (maxstack uint16) {
 	// if equal,leave 0 on stack
 	compare := func(t *ast.VariableType) {
+		state.popStack(2)
 		switch t.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
@@ -42,6 +43,13 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_MAP:
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
+
+			context.MakeStackMap(code, state, code.CodeLength+7)
+			state.pushStack(class, &ast.VariableType{
+				Typ: ast.VARIABLE_TYPE_BOOL,
+			})
+			context.MakeStackMap(code, state, code.CodeLength+8)
+			state.popStack(1)
 			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
 			code.Codes[code.CodeLength+3] = cg.OP_iconst_1
@@ -57,43 +65,38 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	size := jvmSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
+	defer state.popStack(1)
 	for k, c := range s.StatmentSwitchCases {
 		if exit != nil {
 			backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
-			state.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
 		}
 		gotoBodyExits := []*cg.JumpBackPatch{}
-		needPop := false
-		for kk, ee := range c.Matches {
+		for _, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.Values) > 1 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				arrayListPacker.buildStoreArrayListAutoVar(code, context)
+				arrayListPacker.storeArrayListAutoVar(code, context)
 				for kkk, ttt := range ee.Values {
 					currentStack = size
-					if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 && kkk == len(ee.Values)-1 {
-						//nothing
+					if size == 1 {
+						code.Codes[code.CodeLength] = cg.OP_dup
 					} else {
-						if size == 1 {
-							code.Codes[code.CodeLength] = cg.OP_dup
-						} else {
-							code.Codes[code.CodeLength] = cg.OP_dup2
-						}
-						code.CodeLength++
-						currentStack += size
-						needPop = true
-						if currentStack > maxstack {
-							maxstack = currentStack
-						}
+						code.Codes[code.CodeLength] = cg.OP_dup2
+					}
+					code.CodeLength++
+					state.pushStack(class, s.Condition.Value)
+					currentStack += size
+					if currentStack > maxstack {
+						maxstack = currentStack
 					}
 					stack = arrayListPacker.unPack(class, code, kkk, ttt, context)
 					if t := stack + currentStack; t > maxstack {
 						maxstack = t
 					}
+					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
 					gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 				}
@@ -101,25 +104,19 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			}
 			currentStack = size
 			// mk stack ready
-			if k == len(s.StatmentSwitchCases)-1 && kk == len(c.Matches)-1 { // last one
-				//nothing
-			} else { // not the last one,dup the stack
-				if size == 1 {
-					code.Codes[code.CodeLength] = cg.OP_dup
-				} else {
-					code.Codes[code.CodeLength] = cg.OP_dup2
-				}
-				code.CodeLength++
-				needPop = true
-				currentStack += size
-				if currentStack > maxstack {
-					maxstack = currentStack
-				}
+			if size == 1 {
+				code.Codes[code.CodeLength] = cg.OP_dup
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_dup2
 			}
+			code.CodeLength++
+			currentStack += size
+			state.pushStack(class, s.Condition.Value)
 			stack, _ := m.MakeExpression.build(class, code, ee, context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
+			state.pushStack(class, s.Condition.Value)
 			compare(s.Condition.Value)
 			gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
@@ -131,14 +128,12 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		backPatchEs(gotoBodyExits, code.CodeLength)
 		//before block,pop off stack
 		context.MakeStackMap(code, state, code.CodeLength)
-		if needPop {
-			if size == 1 {
-				code.Codes[code.CodeLength] = cg.OP_pop
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_pop2
-			}
-			code.CodeLength++
+		if size == 1 {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop2
 		}
+		code.CodeLength++
 
 		//block is here
 		if c.Block != nil {
@@ -153,16 +148,28 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			}
 		}
 	}
-	state.popStack(1)
 	// build default
 	if s.Default != nil {
-		context.MakeStackMap(code, state, code.CodeLength)
 		backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
+		if size == 1 {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop2
+		}
+		code.CodeLength++
 		if s.Default != nil {
 			ss := (&StackMapState{}).FromLast(state)
 			m.buildBlock(class, code, s.Default, context, ss)
 			state.addTop(ss)
 		}
+	} else {
+		if size == 1 {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop2
+		}
+		code.CodeLength++
 	}
 	return
 }

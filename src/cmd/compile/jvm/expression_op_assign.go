@@ -9,11 +9,11 @@ import (
 	s += "456";
 */
 func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
+	bin := e.Data.(*ast.ExpressionBinary)
 	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -49,11 +49,6 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		maxstack = t
 	}
 	m.stackTop2String(class, code, bin.Right.Value, context, state) //conver to string
-	if bin.Right.Value.IsPointer() && bin.Right.Value.Typ != ast.VARIABLE_TYPE_STRING {
-		if t := 2 + currentStack; t > maxstack {
-			maxstack = t
-		}
-	}
 	//append right
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -79,6 +74,10 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 
 }
 func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
 	bin := e.Data.(*ast.ExpressionBinary)
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING {
 		return m.buildStrPlusAssign(class, code, e, context, state)
@@ -89,17 +88,11 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := stack + remainStack; t > maxstack {
 		maxstack = t
 	}
-	currentStack := jvmSize(bin.Left.Value) + remainStack // incase int -> long
-	if currentStack > maxstack {
-		maxstack = currentStack
-	}
+	state.pushStack(class, e.Value)
+	currentStack := jvmSize(e.Value) + remainStack // incase int -> long
 	stack, _ = m.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
-	}
-	currentStack += jvmSize(bin.Right.Value)
-	if currentStack > maxstack {
-		maxstack = currentStack // incase int->double
 	}
 	switch bin.Left.Value.Typ {
 	case ast.VARIABLE_TYPE_BYTE:

@@ -137,6 +137,17 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 		newE.Data = left
 		newE.Pos = ep.parser.mkPos()
 		left = newE
+	case lex.TOKEN_BITWISE_COMPLEMENT:
+		ep.Next()
+		newE := &ast.Expression{}
+		left, err = ep.parseOneExpression(false)
+		if err != nil {
+			return nil, err
+		}
+		newE.Typ = ast.EXPRESSION_TYPE_BITWISE_
+		newE.Data = left
+		newE.Pos = ep.parser.mkPos()
+		left = newE
 	case lex.TOKEN_SUB:
 		ep.Next()
 		newE := &ast.Expression{}

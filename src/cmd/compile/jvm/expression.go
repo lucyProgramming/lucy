@@ -169,6 +169,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
 		maxstack = m.buildSelfIncrement(class, code, e, context, state)
 	//
+	case ast.EXPRESSION_TYPE_BITWISE_:
+		fallthrough
 	case ast.EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NOT:

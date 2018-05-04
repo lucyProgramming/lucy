@@ -133,7 +133,20 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VARIABLE_TYPE_LONG:
 			fallthrough
 		case VARIABLE_TYPE_DOUBLE:
-			if t1.Equal(t2) == false {
+			if (t1.IsInteger() && t2.IsInteger()) ||
+				(t1.IsFloat() && t2.IsFloat()) {
+				if t1.Equal(t2) == false {
+					if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
+						*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+					} else {
+						if bin.Left.IsLiteral() {
+							bin.Left.ConvertToNumber(t2.Typ)
+						} else {
+							bin.Right.ConvertToNumber(t1.Typ)
+						}
+					}
+				}
+			} else {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
@@ -187,7 +200,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			result.Pos = e.Pos
 			return result
 		}
-		if t1.IsNumber() && t2.IsNumber() {
+		if (t1.IsInteger() && t2.IsInteger()) ||
+			(t1.IsFloat() && t2.IsFloat()) {
 			if t1.Equal(t2) == false {
 				if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
 					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))

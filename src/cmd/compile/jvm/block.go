@@ -13,7 +13,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		if deadend == true && s.Typ == ast.STATEMENT_TYPE_LABLE {
 			jumpForwards := len(s.StatmentLable.BackPatches) > 0 // jump forward
 			deadend = !jumpForwards
-			//continue compile block from here
+			//continue compile block from this lable statment
 		}
 		if deadend {
 			continue

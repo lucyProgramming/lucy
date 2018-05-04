@@ -18,7 +18,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
-			arrayListPacker.buildStoreArrayListAutoVar(code, context)
+			arrayListPacker.storeArrayListAutoVar(code, context)
 			for k, t := range e.Values {
 				stack = arrayListPacker.unPack(class, code, k, t, context)
 				if t := currentStack + stack; t > maxstack {

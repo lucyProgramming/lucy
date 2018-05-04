@@ -326,6 +326,13 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) 
 	if t, ok := keywordMap[identifier]; ok {
 		token.Type = t
 		token.Desp = identifier
+		if token.Type == TOKEN_ELSE {
+			is := lex.tryLexElseIf()
+			if is {
+				token.Type = TOKEN_ELSEIF
+				token.Desp = "else if"
+			}
+		}
 	} else {
 		token.Type = TOKEN_IDENTIFIER
 		token.Data = identifier
@@ -333,6 +340,35 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) 
 	}
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
+	return
+}
+
+func (lex *LucyLexer) tryLexElseIf() (is bool) {
+	c, eof := lex.getchar()
+	for (c == ' ' || c == '\t' || c == '\r') && eof == false {
+		c, eof = lex.getchar()
+	}
+	if eof {
+		return
+	}
+	if c != 'i' {
+		lex.ungetchar()
+		return
+	}
+	c, eof = lex.getchar()
+	if c != 'f' {
+		lex.ungetchar()
+		lex.ungetchar()
+		return
+	}
+	c, eof = lex.getchar()
+	if c != ' ' && c != '\t' && c != '\r' { // white list
+		lex.ungetchar()
+		lex.ungetchar()
+		lex.ungetchar()
+		return
+	}
+	is = true
 	return
 }
 
@@ -604,7 +640,7 @@ redo:
 		}
 	case '~':
 		token.Type = TOKEN_BITWISE_COMPLEMENT
-		token.Desp = "^"
+		token.Desp = "~"
 	case '+':
 		c, eof = lex.getchar()
 		if c == '+' {

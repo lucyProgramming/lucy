@@ -71,6 +71,7 @@ const (
 	//
 	EXPRESSION_TYPE_NEGATIVE
 	EXPRESSION_TYPE_NOT
+	EXPRESSION_TYPE_BITWISE_
 	//
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NEW
@@ -168,13 +169,16 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_MOD:
 		return "%"
 	case EXPRESSION_TYPE_INDEX: // a["b"]
-		return "[]"
+		t := e.Data.(*ExpressionIndex)
+		return fmt.Sprintf("%s[%s]", t.Expression.OpName(), t.Index.OpName())
 	case EXPRESSION_TYPE_DOT: //a.b
-		return "."
+		t := e.Data.(*ExpressionDot)
+		return fmt.Sprintf("%s.%s", t.Expression.OpName(), t.Name)
 	case EXPRESSION_TYPE_METHOD_CALL:
 		return "method_call"
 	case EXPRESSION_TYPE_FUNCTION_CALL:
-		return "function_call"
+		t := e.Data.(*ExpressionFunctionCall)
+		return fmt.Sprintf("function_call(%s)", t.Expression.OpName())
 	case EXPRESSION_TYPE_INCREMENT:
 		return "++"
 	case EXPRESSION_TYPE_DECREMENT:
@@ -184,9 +188,11 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_PRE_DECREMENT:
 		return "--"
 	case EXPRESSION_TYPE_NEGATIVE:
-		return "nagative"
+		return "nagative(-)"
 	case EXPRESSION_TYPE_NOT:
-		return "not"
+		return "not(!)"
+	case EXPRESSION_TYPE_BITWISE_:
+		return "~"
 	case EXPRESSION_TYPE_IDENTIFIER:
 		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifer).Name)
 	case EXPRESSION_TYPE_NULL:
@@ -228,36 +234,26 @@ type Expression struct {
 	IsStatementExpression bool
 }
 
-func (e *Expression) getByteValue() byte {
-	if e.isInteger() == false {
-		panic("not integer")
-	}
-	switch e.Typ {
-	case EXPRESSION_TYPE_BYTE:
-		return e.Data.(byte)
-	case EXPRESSION_TYPE_SHORT:
-		fallthrough
-	case EXPRESSION_TYPE_INT:
-		return byte(e.Data.(int32))
-	case EXPRESSION_TYPE_LONG:
-		return byte(e.Data.(int64))
-	}
-	return 0
-}
 func (e *Expression) ConvertTo(t *VariableType) {
 	c := &ExpressionTypeConvertion{}
 	c.Expression = &Expression{}
 	*c.Expression = *e // copy
 	c.Typ = t
+	e.Value = t
 	e.Typ = EXPRESSION_TYPE_CHECK_CAST
 	e.IsCompileAuto = true
 	e.Data = c
 }
 func (e *Expression) ConvertToNumber(typ int) {
-	e.ConvertTo(&VariableType{
-		Pos: e.Pos,
-		Typ: typ,
-	})
+	if e.IsLiteral() {
+		e.convertNumberLiteralTo(typ)
+	} else {
+		e.ConvertTo(&VariableType{
+			Pos: e.Pos,
+			Typ: typ,
+		})
+	}
+
 }
 
 type ExpressionTypeAssert ExpressionTypeConvertion

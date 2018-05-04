@@ -120,7 +120,6 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	if t1 == nil || t2 == nil {
 		return
 	}
-	//number
 	ret := t1.Clone()
 	ret.Pos = e.Pos
 	if t1.Typ == VARIABLE_TYPE_STRING {
@@ -132,12 +131,25 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		}
 		return ret
 	}
+	//number
 	if e.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
-		if t1.IsNumber() && t1.Equal(t2) {
+		if t1.IsNumber() && t2.IsNumber() {
+			if t1.Equal(t2) == false {
+				if t1.IsInteger() && t2.IsInteger() {
+					bin.Right.ConvertToNumber(t1.Typ)
+					return ret
+				}
+				if t1.IsFloat() && t2.IsFloat() {
+					bin.Right.ConvertToNumber(t1.Typ)
+					return ret
+				}
+				goto end
+
+			}
 			return ret
 		}
 	}
@@ -157,15 +169,14 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 			return ret
 		}
 	}
+end:
 	*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 		errMsgPrefix(e.Pos),
 		e.OpName(),
 		t1.TypeString(),
 		t2.TypeString()))
 
-	tt := t1.Clone()
-	tt.Pos = e.Pos
-	return tt
+	return ret
 }
 
 func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *VariableType {

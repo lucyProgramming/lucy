@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -22,7 +23,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	}
 	if b.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
-		b.parser.errs = append(b.parser.errs)
+		b.parser.errs = append(b.parser.errs, err)
 		b.consume(untils_lc) // consume and next
 		b.Next()
 	}
@@ -41,7 +42,8 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	if b.parser.token.Type == lex.TOKEN_ELSE {
 		b.Next()
 		if b.parser.token.Type != lex.TOKEN_LC {
-			err = fmt.Errorf("%s missing { after else", b.parser.errorMsgPrefix())
+			err = fmt.Errorf("%s missing '{' after else", b.parser.errorMsgPrefix())
+			b.parser.errs = append(b.parser.errs, err)
 			return i, err
 		}
 		i.ElseBlock = &ast.Block{}

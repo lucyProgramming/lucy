@@ -42,13 +42,15 @@ func (m *MakeExpression) getMapLeftValue(
 	target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxstack, _ = m.build(class, code, index.Expression, context, state)
+	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
 	stack, _ := m.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxstack {
 		maxstack = t
 	}
-	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
+	if index.Index.Value.IsPointer() == false {
+		typeConverter.putPrimitiveInObject(class, code, index.Index.Value)
+	}
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
-	typeConverter.putPrimitiveInObject(class, code, index.Index.Value)
 	remainStack = 2
 	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
 	target = index.Expression.Value.Map.V
@@ -78,7 +80,7 @@ func (m *MakeExpression) getLeftValue(
 			return m.getCaptureIdentiferLeftValue(class, code, e, context, state)
 		}
 		if identifier.Name == ast.NO_NAME_IDENTIFIER {
-			return //
+			panic("this is not happening")
 		}
 		switch identifier.Var.Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
@@ -101,7 +103,7 @@ func (m *MakeExpression) getLeftValue(
 			} else if identifier.Var.LocalValOffset <= 255 {
 				op = []byte{cg.OP_istore, byte(identifier.Var.LocalValOffset)}
 			} else {
-				panic("local int var offset > 255")
+				panic("over 255")
 			}
 		case ast.VARIABLE_TYPE_FLOAT:
 			if identifier.Var.LocalValOffset == 0 {
@@ -115,7 +117,7 @@ func (m *MakeExpression) getLeftValue(
 			} else if identifier.Var.LocalValOffset <= 255 {
 				op = []byte{cg.OP_fstore, byte(identifier.Var.LocalValOffset)}
 			} else {
-				panic("local float var out of range")
+				panic("over 255")
 			}
 		case ast.VARIABLE_TYPE_DOUBLE:
 			if identifier.Var.LocalValOffset == 0 {
@@ -129,7 +131,7 @@ func (m *MakeExpression) getLeftValue(
 			} else if identifier.Var.LocalValOffset <= 255 {
 				op = []byte{cg.OP_dstore, byte(identifier.Var.LocalValOffset)}
 			} else {
-				panic("local float var out of range")
+				panic("over 255")
 			}
 		case ast.VARIABLE_TYPE_LONG:
 			if identifier.Var.LocalValOffset == 0 {
@@ -143,7 +145,7 @@ func (m *MakeExpression) getLeftValue(
 			} else if identifier.Var.LocalValOffset <= 255 {
 				op = []byte{cg.OP_lstore, byte(identifier.Var.LocalValOffset)}
 			} else {
-				panic("local float var out of range")
+				panic("over 255")
 			}
 		default: // must be a object type
 			if identifier.Var.LocalValOffset == 0 {
@@ -157,7 +159,7 @@ func (m *MakeExpression) getLeftValue(
 			} else if identifier.Var.LocalValOffset <= 255 {
 				op = []byte{cg.OP_astore, byte(identifier.Var.LocalValOffset)}
 			} else {
-				panic("local float var out of range")
+				panic("over 255")
 			}
 		}
 		target = identifier.Var.Typ
@@ -165,30 +167,30 @@ func (m *MakeExpression) getLeftValue(
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 			maxstack, _ = m.build(class, code, index.Expression, context, state)
+			state.pushStack(class, index.Expression.Value)
 			stack, _ := m.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxstack {
 				maxstack = t
 			}
+			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			meta := ArrayMetas[e.Value.Typ]
 			classname = meta.classname
 			name = "set"
 			descriptor = meta.setDescriptor
 			target = e.Value
 			remainStack = 2 // [objectref ,index]
-			state.pushStack(class, index.Expression.Value)
-			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			op = []byte{cg.OP_invokevirtual}
 		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
 			return m.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
 			maxstack, _ = m.build(class, code, index.Expression, context, state)
+			state.pushStack(class, index.Expression.Value)
 			stack, _ := m.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxstack {
 				maxstack = t
 			}
 			target = e.Value
 			remainStack = 2 // [objectref ,index]
-			state.pushStack(class, index.Expression.Value)
 			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			switch e.Value.Typ {
 			case ast.VARIABLE_TYPE_BOOL:
