@@ -7,7 +7,8 @@ import (
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(name string, args []*VariableType, callArgs *CallArgs, fromsub bool) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessMethod(name string, args []*VariableType,
+	callArgs *CallArgs, fromsub bool) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {
 		return nil, false, err

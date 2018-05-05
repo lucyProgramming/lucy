@@ -33,7 +33,6 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 3
 		return
 	}
-
 	length := len(state.Stacks)
 	defer func() {
 		// print have no return value,stack is empty

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	_ = iota
+	_ = iota // start with 1
 	//null
 	EXPRESSION_TYPE_NULL
 	// bool
@@ -175,7 +175,8 @@ func (e *Expression) OpName() string {
 		t := e.Data.(*ExpressionDot)
 		return fmt.Sprintf("%s.%s", t.Expression.OpName(), t.Name)
 	case EXPRESSION_TYPE_METHOD_CALL:
-		return "method_call"
+		t := e.Data.(*ExpressionMethodCall)
+		return fmt.Sprintf("%s.%s()", t.Expression.OpName(), t.Name)
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		t := e.Data.(*ExpressionFunctionCall)
 		return fmt.Sprintf("function_call(%s)", t.Expression.OpName())
@@ -188,7 +189,7 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_PRE_DECREMENT:
 		return "--"
 	case EXPRESSION_TYPE_NEGATIVE:
-		return "nagative(-)"
+		return "negative(-)"
 	case EXPRESSION_TYPE_NOT:
 		return "not(!)"
 	case EXPRESSION_TYPE_BITWISE_:
@@ -244,6 +245,7 @@ func (e *Expression) ConvertTo(t *VariableType) {
 	e.IsCompileAuto = true
 	e.Data = c
 }
+
 func (e *Expression) ConvertToNumber(typ int) {
 	if e.IsLiteral() {
 		e.convertNumberLiteralTo(typ)
@@ -259,7 +261,7 @@ func (e *Expression) ConvertToNumber(typ int) {
 type ExpressionTypeAssert ExpressionTypeConvertion
 
 /*
-	mk a expression from a const
+	fill a expression from a const
 */
 func (e *Expression) fromConst(c *Const) {
 	switch c.Typ.Typ {
@@ -328,7 +330,8 @@ func (e *Expression) isBool() bool {
 		e.Typ == EXPRESSION_TYPE_DOT ||
 		e.Typ == EXPRESSION_TYPE_INDEX
 }
-func (e *Expression) canBeUsedAsStatemen() bool {
+
+func (e *Expression) canBeUsedAsStatement() bool {
 	return e.Typ == EXPRESSION_TYPE_COLON_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
@@ -371,7 +374,7 @@ func (e *Expression) isFloat() bool {
 }
 
 /*
-	check this expression is increment or decrement
+	check out this expression is increment or decrement
 */
 func (e *Expression) IsSelfIncrement() bool {
 	return e.Typ == EXPRESSION_TYPE_INCREMENT ||
@@ -449,7 +452,7 @@ type ExpressionIndex struct {
 type ExpressionDot struct {
 	Expression      *Expression
 	Name            string
-	Field           *ClassField
+	Field           *ClassField         // expression is class or object
 	PackageVariable *VariableDefinition // expression is package
 	EnumName        *EnumName           // expression is package
 }
@@ -459,7 +462,6 @@ type ExpressionMethodCall struct {
 	Args       CallArgs
 	Name       string
 	Method     *ClassMethod
-	Data       interface{}
 }
 
 type ExpressionNew struct {

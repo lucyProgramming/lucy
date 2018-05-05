@@ -6,8 +6,8 @@ import (
 
 func (e *Expression) getBinaryExpressionConstValue(f binaryConstFolder) (is bool, err error) {
 	bin := e.Data.(*ExpressionBinary)
-	is1, err1 := bin.Left.getConstValue()
-	is2, err2 := bin.Right.getConstValue()
+	is1, err1 := bin.Left.constFold()
+	is2, err2 := bin.Right.constFold()
 	if err1 != nil { //something is wrong
 		err = err1
 		return
@@ -34,14 +34,37 @@ func (e *Expression) wrongOpErr(typ1, typ2 string) error {
 		typ2)
 }
 
-func (e *Expression) getConstValue() (is bool, err error) {
+func (e *Expression) constFold() (is bool, err error) {
 	if e.IsLiteral() {
 		return true, nil
+	}
+	// ~
+	if e.Typ == EXPRESSION_TYPE_BITWISE_ {
+		ee := e.Data.(*Expression)
+		is, err = ee.constFold()
+		if err != nil || is == false {
+			return
+		}
+		if ee.isInteger() == false {
+			err = fmt.Errorf("%s cannot apply '^' on a non-integer expression", errMsgPrefix(e.Pos))
+			return
+		}
+		e.Typ = ee.Typ
+		switch ee.Typ {
+		case EXPRESSION_TYPE_BYTE:
+			e.Data = ^ee.Data.(byte)
+		case EXPRESSION_TYPE_SHORT:
+			e.Data = ^ee.Data.(int32)
+		case EXPRESSION_TYPE_INT:
+			e.Data = ^ee.Data.(int32)
+		case EXPRESSION_TYPE_LONG:
+			e.Data = ^ee.Data.(int64)
+		}
 	}
 	// !
 	if e.Typ == EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*Expression)
-		is, err = ee.getConstValue()
+		is, err = ee.constFold()
 		if err != nil || is == false {
 			return
 		}
@@ -55,7 +78,7 @@ func (e *Expression) getConstValue() (is bool, err error) {
 	}
 	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
 		ee := e.Data.(*Expression)
-		is, err = ee.getConstValue()
+		is, err = ee.constFold()
 		if err != nil || is == false {
 			return
 		}
@@ -198,7 +221,7 @@ func (e *Expression) getConstValue() (is bool, err error) {
 	}
 	if e.Typ == EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*Expression)
-		is, err = ee.getConstValue()
+		is, err = ee.constFold()
 		if err != nil {
 			return
 		}

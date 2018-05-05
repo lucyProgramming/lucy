@@ -8,7 +8,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 	if e == nil {
 		return nil, []error{}
 	}
-	_, err := e.getConstValue()
+	_, err := e.constFold()
 	if err != nil {
 		return nil, []error{err}
 	}
@@ -161,12 +161,12 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		e.Value = tt
 	case EXPRESSION_TYPE_CONST: // no return value
 		errs = e.checkConst(block)
-		e.Value = mkVoidType(e.Pos)
-		Types = []*VariableType{e.Value}
+		Types = []*VariableType{mkVoidType(e.Pos)}
+		e.Value = Types[0]
 	case EXPRESSION_TYPE_VAR:
 		e.checkVarExpression(block, &errs)
-		e.Value = mkVoidType(e.Pos)
-		Types = []*VariableType{e.Value}
+		Types = []*VariableType{mkVoidType(e.Pos)}
+		e.Value = Types[0]
 	case EXPRESSION_TYPE_FUNCTION_CALL:
 		Types = e.checkFunctionCallExpression(block, &errs)
 		e.Values = Types
@@ -253,7 +253,8 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		}
 		e.Value = tt
 	case EXPRESSION_TYPE_RANGE:
-		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement", errMsgPrefix(e.Pos)))
+		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement",
+			errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_SLICE:
 		tt := e.checkSlice(block, &errs)
 		e.Value = tt
@@ -267,7 +268,8 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 		}
 	case EXPRESSION_TYPE_FUNCTION:
-		errs = append(errs, fmt.Errorf("%s cannot use function as  a expression", errMsgPrefix(e.Pos)))
+		errs = append(errs, fmt.Errorf("%s cannot use function as  a expression",
+			errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_LIST:
 		fallthrough
 	case EXPRESSION_TYPE_LABLE:

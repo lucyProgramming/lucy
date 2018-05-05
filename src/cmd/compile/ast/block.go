@@ -26,7 +26,7 @@ type Block struct {
 }
 
 /*
-	search any thing
+	search anything
 */
 func (b *Block) SearchByName(name string) interface{} {
 	if b.Funcs != nil {
@@ -150,18 +150,15 @@ func (b *Block) check() []error {
 	return errs
 }
 
-func (b *Block) checkExpression_(e *Expression) (t []*VariableType, errs []error) {
-	return e.check(b)
-}
-
 func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
 	errs = []error{}
-	ts, es := b.checkExpression_(e)
+	ts, es := e.check(b)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	if ts != nil && len(ts) > 1 {
-		errs = append(errs, fmt.Errorf("%s multi values in single value context", errMsgPrefix(e.Pos)))
+		errs = append(errs, fmt.Errorf("%s multi values in single value context",
+			errMsgPrefix(e.Pos)))
 	}
 	if len(ts) > 0 {
 		t = ts[0]
@@ -239,7 +236,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if v, ok := b.Vars[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(v.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(v.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Classes == nil {
@@ -248,7 +245,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if c, ok := b.Classes[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(c.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Funcs == nil {
@@ -257,7 +254,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if f, ok := b.Funcs[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(f.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Consts == nil {
@@ -266,7 +263,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if c, ok := b.Consts[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(c.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Enums == nil {
@@ -275,7 +272,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if e, ok := b.Enums[name]; ok {
 		errmsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(e.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.EnumNames == nil {
@@ -284,7 +281,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if en, ok := b.EnumNames[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(en.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Lables == nil {
@@ -293,7 +290,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if l, ok := b.Lables[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(l.Statement.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	if b.Types == nil {
@@ -302,7 +299,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if t, ok := b.Types[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("%s", errMsgPrefix(t.Pos))
+		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
 		return fmt.Errorf(errmsg)
 	}
 	switch d.(type) {

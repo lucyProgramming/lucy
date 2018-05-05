@@ -9,7 +9,7 @@ import (
 */
 func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	arr := e.Data.(*ExpressionArrayLiteral)
-	if arr.Typ == nil && (arr.Expressions == nil || len(arr.Expressions) == 0) {
+	if arr.Typ == nil && len(arr.Expressions) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression, cannot inference it`s type ",
 			errMsgPrefix(e.Pos)))
 		return nil
@@ -36,10 +36,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 				continue
 			}
 			if notyp && arr.Typ == nil {
-				if t.isTyped() == false {
-					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,type=%s",
-						errMsgPrefix(e.Pos), t.TypeString()))
-				} else if t.RightValueValid() {
+				if t.RightValueValid() && t.isTyped() {
 					tt := t.Clone()
 					tt.Pos = e.Pos
 					arr.Typ = &VariableType{}
@@ -47,9 +44,13 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 					arr.Typ.ArrayType = tt
 					arr.Typ.Pos = e.Pos
 				} else {
-					*errs = append(*errs, fmt.Errorf("%s cannot inference it`s type,"+
-						"because type named '%s' is not right value valid ",
-						errMsgPrefix(e.Pos), t.TypeString()))
+					if t.RightValueValid() {
+						*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
+							errMsgPrefix(e.Pos), t.TypeString()))
+					} else {
+						*errs = append(*errs, fmt.Errorf("%s right value '%s' invalid",
+							errMsgPrefix(e.Pos), t.TypeString()))
+					}
 				}
 			}
 			if arr.Typ != nil {

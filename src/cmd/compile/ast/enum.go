@@ -23,9 +23,9 @@ func (e *Enum) check() error {
 		e.Init = &Expression{}
 		e.Init.Typ = EXPRESSION_TYPE_INT
 		e.Init.Data = int32(0)
-		e.Pos = e.Pos
+		e.Init.Pos = e.Pos
 	}
-	is, err := e.Init.getConstValue()
+	is, err := e.Init.constFold()
 	if err != nil || is == false || e.Init.Typ != EXPRESSION_TYPE_INT {
 		return fmt.Errorf("%s enum type must inited by integer", errMsgPrefix(e.Pos))
 	}

@@ -18,7 +18,6 @@ type ClassHighLevel struct {
 	Fields                 map[string]*FieldHighLevel
 	Methods                map[string][]*MethodHighLevel
 	TriggerCLinit          *MethodHighLevel
-	//InnerClasss            []*ClassHighLevel
 }
 
 func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {

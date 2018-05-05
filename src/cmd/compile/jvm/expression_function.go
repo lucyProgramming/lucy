@@ -68,7 +68,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
-	total := len(function.ClosureVars.Vars) + len(function.ClosureVars.Funcs)
+	total := len(function.ClosureVars.Vars) + len(function.ClosureVars.Functions)
 	i := 0
 	for v, _ := range function.ClosureVars.Vars {
 		filed := &cg.FieldHighLevel{}
@@ -110,7 +110,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 3
 		i++
 	}
-	for v, _ := range function.ClosureVars.Funcs {
+	for v, _ := range function.ClosureVars.Functions {
 		filed := &cg.FieldHighLevel{}
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC

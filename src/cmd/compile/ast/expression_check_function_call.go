@@ -16,35 +16,21 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_CLASS { // cast type
-		ret := make([]*VariableType, 1)
-		ret[0] = &VariableType{}
-		ret[0].Typ = VARIABLE_TYPE_OBJECT
-		ret[0].Class = t.Class
+		convertType := &ExpressionTypeConvertion{}
+		convertType.Typ = &VariableType{}
+		convertType.Typ.Typ = VARIABLE_TYPE_OBJECT
+		convertType.Typ.Class = t.Class
+		convertType.Typ.Pos = e.Pos
+		ret := []*VariableType{convertType.Typ}
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 				errMsgPrefix(e.Pos)))
 			return ret
 		}
 		e.Typ = EXPRESSION_TYPE_CHECK_CAST
-		convertType := &ExpressionTypeConvertion{}
 		convertType.Expression = call.Args[0]
-		convertType.Typ = ret[0]
 		e.Data = convertType
-		ts, es := call.Args[0].check(block)
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
-		t, err := call.Args[0].mustBeOneValueContext(ts)
-		if err != nil {
-			*errs = append(*errs, err)
-		}
-		if t == nil {
-			return ret
-		}
-		if t.IsPrimitive() {
-			*errs = append(*errs, fmt.Errorf("%s expression is primitive(non-pointer),cannot be cast to pointer",
-				errMsgPrefix(e.Pos)))
-		}
+		e.checkTypeConvertionExpression(block, errs)
 		return ret
 	}
 	if t.Typ != VARIABLE_TYPE_FUNCTION {

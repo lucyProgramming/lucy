@@ -15,17 +15,19 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	var mapv *VariableType
 	noType := m.Typ == nil
 	if noType && len(m.Values) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type ", errMsgPrefix(e.Pos)))
-		goto end
+		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type ",
+			errMsgPrefix(e.Pos)))
+		return nil
 	}
 	if m.Typ == nil {
 		m.Typ = &VariableType{}
+		m.Typ.Pos = e.Pos
 		m.Typ.Typ = VARIABLE_TYPE_MAP
 	}
 	if m.Typ.Map == nil {
 		m.Typ.Map = &Map{}
 	}
-	for k, v := range m.Values {
+	for _, v := range m.Values {
 		// map k
 		ktypes, es := v.Left.check(block)
 		if errsNotEmpty(es) {
@@ -40,14 +42,12 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			if false == rightValueValid {
 				*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
 			}
-			if noType && k == 0 {
+			if noType && m.Typ.Map.K == nil {
 				if ktype.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k", errMsgPrefix(v.Left.Pos)))
 				} else {
-					if noType && k == 0 {
-						m.Typ.Map.K = ktype
-						mapk = m.Typ.Map.K
-					}
+					m.Typ.Map.K = ktype
+					mapk = m.Typ.Map.K
 				}
 			}
 			if rightValueValid && mapk != nil {
@@ -74,15 +74,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 				errMsgPrefix(v.Left.Pos)))
 			continue
 		}
-		if noType && k == 0 {
+		if noType && m.Typ.Map.V == nil {
 			if vtype.isTyped() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
 					errMsgPrefix(v.Left.Pos)))
 			} else {
-				if noType && k == 0 {
-					m.Typ.Map.V = vtype
-					mapv = m.Typ.Map.V
-				}
+				m.Typ.Map.V = vtype
+				mapv = m.Typ.Map.V
 			}
 		}
 		if mapv != nil {
@@ -94,7 +92,6 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 		}
 	}
 
-end:
 	if m.Typ.Map.K == nil {
 		m.Typ.Map.K = &VariableType{
 			Typ: VARIABLE_TYPE_VOID,

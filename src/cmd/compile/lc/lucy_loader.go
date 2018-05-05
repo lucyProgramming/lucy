@@ -120,7 +120,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		if err != nil {
 			return err
 		}
-		if constValue != nil && len(constValue) > 0 {
+		if len(f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_CONST)) > 0 {
 			//const
 			cos := &ast.Const{}
 			cos.Name = name
@@ -155,7 +155,6 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			//global vars
 			vd := &ast.VariableDefinition{}
 			vd.Name = name
-
 			vd.AccessFlags = f.AccessFlags
 			vd.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
 			vd.Typ = typ

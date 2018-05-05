@@ -168,7 +168,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		}
 		return nil
 	}
-	if s.Expression.canBeUsedAsStatemen() {
+	if s.Expression.canBeUsedAsStatement() {
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)
 			if f.Name == "" {

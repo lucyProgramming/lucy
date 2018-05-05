@@ -1,8 +1,8 @@
 package ast
 
 type Closure struct {
-	Vars  map[*VariableDefinition]struct{}
-	Funcs map[*Function]struct{}
+	Vars      map[*VariableDefinition]struct{}
+	Functions map[*Function]struct{}
 }
 
 func (c *Closure) ClosureVariableExist(v *VariableDefinition) bool {
@@ -14,29 +14,29 @@ func (c *Closure) ClosureVariableExist(v *VariableDefinition) bool {
 }
 
 func (c *Closure) ClosureFunctionExist(v *Function) bool {
-	if c.Funcs == nil {
+	if c.Functions == nil {
 		return false
 	}
-	_, ok := c.Funcs[v]
+	_, ok := c.Functions[v]
 	return ok
 }
 
 func (c *Closure) NotEmpty(f *Function) bool {
 	filterOutNotClosureFunction := func() {
 		fs := make(map[*Function]struct{})
-		for f, _ := range c.Funcs {
+		for f, _ := range c.Functions {
 			if f.IsClosureFunction {
 				fs[f] = struct{}{}
 			}
 		}
-		c.Funcs = fs
+		c.Functions = fs
 	}
 	if c.Vars != nil && len(c.Vars) > 0 {
 		f.IsClosureFunction = true // incase capture it self
 		filterOutNotClosureFunction()
 		return true
 	}
-	if c.Funcs == nil || len(c.Funcs) > 0 {
+	if c.Functions == nil || len(c.Functions) > 0 {
 		return false
 	}
 	filterOutNotClosureFunction()
@@ -52,10 +52,10 @@ func (c *Closure) InsertVar(v *VariableDefinition) {
 }
 
 func (c *Closure) InsertFunction(f *Function) {
-	if c.Funcs == nil {
-		c.Funcs = make(map[*Function]struct{})
+	if c.Functions == nil {
+		c.Functions = make(map[*Function]struct{})
 	}
-	c.Funcs[f] = struct{}{}
+	c.Functions[f] = struct{}{}
 }
 
 func (c *Closure) Search(name string) interface{} {
@@ -64,7 +64,7 @@ func (c *Closure) Search(name string) interface{} {
 			return v
 		}
 	}
-	for v, _ := range c.Funcs {
+	for v, _ := range c.Functions {
 		if v.Name == name {
 			return v
 		}

@@ -198,16 +198,12 @@ func (s *StatementFor) checkRange() []error {
 	}
 
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
-		t1, es := lefts[0].getLeftValue(s.Block)
-		if errsNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+		t1 := lefts[0].getLeftValue(s.Block, &errs)
+		lefts[0].Value = t1
 		var t2 *VariableType
 		if modelkv {
-			t2, es = lefts[1].getLeftValue(s.Block)
-			if errsNotEmpty(es) {
-				errs = append(errs, es...)
-			}
+			t2 = lefts[1].getLeftValue(s.Block, &errs)
+			lefts[1].Value = t2
 		}
 		if t1 == nil {
 			return errs
@@ -283,7 +279,7 @@ func (s *StatementFor) check(block *Block) []error {
 	}()
 	if s.Init != nil {
 		s.Init.IsStatementExpression = true
-		if s.Init.canBeUsedAsStatemen() == false {
+		if s.Init.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Init.Pos)))
 		}
 		_, es := s.Block.checkExpression(s.Init)
@@ -309,7 +305,7 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	if s.Post != nil {
 		s.Post.IsStatementExpression = true
-		if s.Post.canBeUsedAsStatemen() == false {
+		if s.Post.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Post.Pos)))
 		}
 		_, es := s.Block.checkExpression(s.Post)

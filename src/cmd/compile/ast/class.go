@@ -172,7 +172,8 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 			continue
 		}
 		if t.Typ != VARIABLE_TYPE_OBJECT {
-			errs = append(errs, fmt.Errorf("%s '%s' is not a class", errMsgPrefix(i.Pos), i.Name))
+			errs = append(errs, fmt.Errorf("%s '%s' is not a class",
+				errMsgPrefix(i.Pos), i.Name))
 			continue
 		}
 		c.Interfaces = append(c.Interfaces, t.Class)

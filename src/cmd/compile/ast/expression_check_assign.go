@@ -20,7 +20,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
 	ts := checkRightValuesValid(checkExpressions(block, values, errs), errs)
-	if len(names) != len(ts) && len(ts) != 0 {
+	if len(names) != len(ts) {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(e.Pos),
 			len(ts),
@@ -104,11 +104,8 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {
 	bin := e.Data.(*ExpressionBinary)
-	t1, es := bin.Left.getLeftValue(block)
+	t1 := bin.Left.getLeftValue(block, errs)
 	bin.Left.Value = t1
-	if errsNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
 	ts, es := bin.Right.check(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
@@ -122,6 +119,10 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	}
 	ret := t1.Clone()
 	ret.Pos = e.Pos
+	/*
+		var  s string;
+		s += "11111111";
+	*/
 	if t1.Typ == VARIABLE_TYPE_STRING {
 		if t2.Typ != VARIABLE_TYPE_STRING || (e.Typ != EXPRESSION_TYPE_PLUS_ASSIGN) {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
@@ -137,21 +138,19 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
-		if t1.IsNumber() && t2.IsNumber() {
+		if t1.IsInteger() && t2.IsInteger() {
 			if t1.Equal(t2) == false {
-				if t1.IsInteger() && t2.IsInteger() {
-					bin.Right.ConvertToNumber(t1.Typ)
-					return ret
-				}
-				if t1.IsFloat() && t2.IsFloat() {
-					bin.Right.ConvertToNumber(t1.Typ)
-					return ret
-				}
-				goto end
-
+				bin.Right.ConvertToNumber(t1.Typ)
 			}
 			return ret
 		}
+		if t1.IsFloat() && t2.IsFloat() {
+			if t1.Equal(t2) == false {
+				bin.Right.ConvertToNumber(t1.Typ)
+			}
+			return ret
+		}
+		goto end
 	}
 	if e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
@@ -191,9 +190,11 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		bin.Left.Data = lefts // rewrite to list anyway
 	}
 	values := bin.Right.Data.([]*Expression)
-	valueTypes := checkExpressions(block, values, errs)
+
+	valueTypes := checkRightValuesValid(
+		checkExpressions(block, values, errs),
+		errs)
 	leftTypes := []*VariableType{}
-	noAssign := true
 	for _, v := range lefts {
 		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifer)
@@ -202,13 +203,8 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 				continue
 			}
 		}
-		noAssign = false
-		t, es := v.getLeftValue(block)
+		t := v.getLeftValue(block, errs)
 		v.Value = t
-		if errsNotEmpty(es) {
-			*errs = append(*errs, es...)
-			continue
-		}
 		leftTypes = append(leftTypes, t) // append even if it`s nil
 	}
 	bin.Left.Values = leftTypes
@@ -230,17 +226,14 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 			}
 		}
 	}
-	if noAssign {
-		*errs = append(*errs, fmt.Errorf("%s no assign able expression on the left",
-			errMsgPrefix(e.Pos)))
-		return nil
+	voidReturn := mkVoidType(e.Pos)
+	if len(leftTypes) > 1 || len(leftTypes) == 0 {
+		return voidReturn
 	}
-	if len(leftTypes) == 0 {
-		return nil
+	if leftTypes[0] == nil {
+		return voidReturn
 	}
-	if len(leftTypes) > 1 {
-		return mkVoidType(e.Pos)
-	}
+	// here is safe
 	tt := leftTypes[0].Clone()
 	tt.Pos = e.Pos
 	return tt

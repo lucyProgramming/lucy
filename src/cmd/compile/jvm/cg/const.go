@@ -16,4 +16,5 @@ const (
 	ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS     = "LucyDefaultParameters"
 	ATTRIBUTE_NAME_LUCY_TYPE_ALIAS             = "LucyTypeAlias"
 	ATTRIBUTE_NAME_LUCY_ENUM                   = "LucyEnum"
+	ATTRIBUTE_NAME_LUCY_CONST                  = "LucyConst" // indicate a package const
 )

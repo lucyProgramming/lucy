@@ -41,12 +41,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
 		EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
 		if t1.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression on left,but '%s'",
 				errMsgPrefix(bin.Left.Pos),
 				t1.TypeString()))
 		}
 		if t2.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression,but '%s'",
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression on right,but '%s'",
 				errMsgPrefix(bin.Right.Pos),
 				t2.TypeString()))
 		}
@@ -69,7 +69,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				errMsgPrefix(bin.Right.Pos)))
 		}
 		if t1.IsNumber() && t2.IsNumber() {
-			if t1.Typ != t2.Typ { //force to equal
+			if t1.Equal(t2) { //force to equal
 				*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos), e.OpName(),
 					t1.TypeString(),
@@ -97,7 +97,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
 			}
 		}
-
 		result = t1.Clone()
 		result.Pos = e.Pos
 		return result
@@ -111,11 +110,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		//number
 		switch t1.Typ {
 		case VARIABLE_TYPE_BOOL:
-			if t2.Typ == VARIABLE_TYPE_BOOL {
-				if e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE {
-					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
-				}
-			} else {
+			if t2.Typ != VARIABLE_TYPE_BOOL || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_ENUM:
@@ -150,7 +145,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
-			if t2.Typ != VARIABLE_TYPE_STRING && t2.Typ != VARIABLE_TYPE_NULL {
+			if t1.Equal(t2) == false {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
@@ -160,6 +155,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					e.OpName(),
 					t2.TypeString()))
 			}
+		case VARIABLE_TYPE_MAP:
+			fallthrough
 		case VARIABLE_TYPE_JAVA_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_ARRAY:

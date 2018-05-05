@@ -29,7 +29,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 		//uncondition goto
-		if m.statementIsUnconditionGoto(s) {
+		if m.statementIsUnConditionGoto(s) {
 			deadend = true
 			continue
 		}
@@ -77,11 +77,10 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	return
 }
 
-func (m *MakeClass) statementIsUnconditionGoto(s *ast.Statement) bool {
+func (m *MakeClass) statementIsUnConditionGoto(s *ast.Statement) bool {
 	return s.Typ == ast.STATEMENT_TYPE_RETURN ||
 		s.Typ == ast.STATEMENT_TYPE_SKIP ||
 		s.Typ == ast.STATEMENT_TYPE_GOTO ||
 		s.Typ == ast.STATEMENT_TYPE_CONTINUE ||
 		s.Typ == ast.STATEMENT_TYPE_BREAK
-
 }

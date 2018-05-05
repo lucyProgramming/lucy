@@ -18,18 +18,23 @@ const (
 )
 
 type Class struct {
-	dest                     io.Writer
-	magic                    uint32 //0xCAFEBABE
-	MinorVersion             uint16
-	MajorVersion             uint16
-	ConstPool                []*ConstPool
-	AccessFlag               uint16
-	ThisClass                uint16
-	SuperClass               uint16
-	Interfaces               []uint16
-	Fields                   []*FieldInfo
-	Methods                  []*MethodInfo
-	Attributes               []*AttributeInfo
+	dest                   io.Writer
+	magic                  uint32 //0xCAFEBABE
+	MinorVersion           uint16
+	MajorVersion           uint16
+	ConstPool              []*ConstPool
+	AccessFlag             uint16
+	ThisClass              uint16
+	SuperClass             uint16
+	Interfaces             []uint16
+	Fields                 []*FieldInfo
+	Methods                []*MethodInfo
+	Attributes             []*AttributeInfo
+	AttributeClosureClass  *AttributeClosureFunctionClass
+	AttributeGroupedByName AttributeGroupedByName
+	TypeAlias              []*AttributeLucyTypeAlias
+	AttributeLucyEnum      *AttributeLucyEnum
+	//caches
 	Utf8Consts               map[string]*ConstPool
 	IntConsts                map[int32]*ConstPool
 	LongConsts               map[int64]*ConstPool
@@ -41,10 +46,6 @@ type Class struct {
 	NameAndTypeConsts        map[CONSTANT_NameAndType_info_high_level]*ConstPool
 	MethodrefConsts          map[CONSTANT_Methodref_info_high_level]*ConstPool
 	InterfaceMethodrefConsts map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
-	AttributeClosureClass    *AttributeClosureFunctionClass
-	AttributeGroupedByName   AttributeGroupedByName
-	TypeAlias                []*AttributeLucyTypeAlias
-	AttributeLucyEnum        *AttributeLucyEnum
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
@@ -289,12 +290,15 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		if f.AttributeLucyFieldDescritor != nil {
 			field.Attributes = append(field.Attributes, f.AttributeLucyFieldDescritor.ToAttributeInfo(c))
 		}
+		if f.AttributeLucyConst != nil {
+			field.Attributes = append(field.Attributes, f.AttributeLucyConst.ToAttributeInfo(c))
+		}
 		c.Fields = append(c.Fields, field)
 	}
 	for _, ms := range high.Methods {
 		for _, m := range ms {
 			info := &MethodInfo{}
-			info.AccessFlags = m.AccessFlags //accessflag
+			info.AccessFlags = m.AccessFlags
 			info.NameIndex = c.insertUtf8Const(m.Name)
 			info.DescriptorIndex = c.insertUtf8Const(m.Descriptor)
 			if m.Code != nil {

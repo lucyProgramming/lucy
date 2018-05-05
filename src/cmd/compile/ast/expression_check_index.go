@@ -31,12 +31,16 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		indexType, err := e.mustBeOneValueContext(ts)
+		indexType, err := index.Index.mustBeOneValueContext(ts)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
 		if indexType != nil {
-			if !indexType.IsInteger() {
+			if indexType.IsInteger() {
+				if indexType.Typ == VARIABLE_TYPE_LONG {
+					index.Index.ConvertToNumber(VARIABLE_TYPE_INT) //  convert to int
+				}
+			} else {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
 					errMsgPrefix(e.Pos), indexType.TypeString()))
 			}
@@ -46,25 +50,25 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 		return tt
 	}
 	// map
-	indexTs, es := index.Index.check(block)
+	ret := t.Map.V.Clone()
+	ret.Pos = e.Pos
+	ts, es = index.Index.check(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	indexT, err := index.Index.mustBeOneValueContext(indexTs)
+	indexType, err := index.Index.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
-	if indexT == nil {
-		return nil
+	if indexType == nil {
+		return ret
 	}
 	if t != nil {
-		if t.Map.K.Equal(indexT) == false {
+		if t.Map.K.Equal(indexType) == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-				errMsgPrefix(e.Pos), indexT.TypeString(), t.Map.K.TypeString()))
+				errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.K.TypeString()))
 		}
 	}
-	tt := t.Map.V.Clone()
-	tt.Pos = e.Pos
-	return tt
+	return ret
 
 }

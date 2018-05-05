@@ -2,8 +2,7 @@ package ast
 
 type Const struct {
 	VariableDefinition
-	InsertedIntoBlockAlready bool
-	Value                    interface{} // value base on type
+	Value interface{} // value base on type
 }
 
 func (c *Const) mkDefaultValue() {

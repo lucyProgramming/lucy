@@ -3,8 +3,8 @@ package ast
 import "fmt"
 
 type Defer struct {
-	allowCatch     bool // if in function top block
-	StartPc        int
+	allowCatch     bool        // if in function top block
+	StartPc        int         // for jvm
 	StackMapState  interface{} // *jvm.StackMapState
 	Block          Block
 	ExceptionClass *Class

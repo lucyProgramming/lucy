@@ -83,6 +83,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		class.InsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		if len([]byte(e.Data.(string))) > 65536 {
+			panic("jvm max string length is 65536")
+		}
 		maxstack = 1
 	//binary expression
 	case ast.EXPRESSION_TYPE_LOGICAL_OR:

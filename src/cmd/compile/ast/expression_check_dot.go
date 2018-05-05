@@ -3,7 +3,6 @@ package ast
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"path/filepath"
 )
 
 func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *VariableType) {
@@ -122,14 +121,13 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
-			if !dot.Expression.isThis() && !field.IsPublic() {
+			if false == dot.Expression.isThis() && false == field.IsPublic() {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is private", errMsgPrefix(e.Pos),
 					dot.Name))
 			}
 			if field.IsStatic() {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,should access by className(%s)",
-					errMsgPrefix(e.Pos),
-					dot.Name, filepath.Base(t.Class.Name)))
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by object",
+					errMsgPrefix(e.Pos)))
 			}
 			t := field.Typ.Clone()
 			t.Pos = e.Pos
@@ -148,10 +146,10 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 				return t
 			}
-			t := t.Clone()
-			t.Pos = e.Pos
-			t.Class = t.Class.SuperClass
-			return t
+			tt := t.Clone()
+			tt.Pos = e.Pos
+			tt.Class = tt.Class.SuperClass
+			return tt
 		}
 		field, err := t.Class.accessField(dot.Name, false)
 		if err != nil {

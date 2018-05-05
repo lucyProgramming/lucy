@@ -144,7 +144,7 @@ func checkConst(block *Block, c *Const) error {
 	if c.Expression == nil {
 		return fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
 	}
-	is, err := c.Expression.getConstValue()
+	is, err := c.Expression.constFold()
 	if err != nil {
 		return err
 	}

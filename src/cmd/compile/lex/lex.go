@@ -471,6 +471,9 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, eof bool, err error) {
 			err = fmt.Errorf("unknown escape sequence")
 		}
 	}
+	if c == '\n' {
+		err = fmt.Errorf("string literal start new line")
+	}
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	token.Data = string(bs)
@@ -756,34 +759,3 @@ redo:
 	token.EndColumn = lex.column
 	return
 }
-
-//		if identifier == "else" {
-//			c, eof = lex.getchar()
-//			for (c == ' ' || c == '\t') && eof == false { // skip some charactor
-//				c, eof = lex.getchar()
-//			}
-//			if eof == false {
-//				if c == 'i' {
-//					c, eof = lex.getchar()
-//					if eof == false {
-//						if c == 'f' {
-//							c, eof = lex.getchar()
-//							if eof == false && lex.isLetter(c) {
-//								token.Type = TOKEN_ELSEIF
-//								token.Desp = "elseif"
-//								lex.ungetchar()
-//							} else {
-//								lex.ungetchar()
-//								lex.ungetchar()
-//								lex.ungetchar()
-//							}
-//						} else {
-//							lex.ungetchar()
-//							lex.ungetchar()
-//						}
-//					}
-//				} else {
-//					lex.ungetchar()
-//				}
-//			}
-//		}

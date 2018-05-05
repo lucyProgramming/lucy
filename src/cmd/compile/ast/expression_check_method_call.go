@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -35,40 +34,38 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		} else if object.Package.Block.Classes != nil && object.Package.Block.Classes[call.Name] != nil {
 			//object cast
 			class := object.Package.Block.Classes[call.Name]
-			ret := make([]*VariableType, 1)
-			ret[0] = &VariableType{}
-			ret[0].Typ = VARIABLE_TYPE_OBJECT
-			ret[0].Pos = e.Pos
-			ret[0].Class = class
-			e.Typ = EXPRESSION_TYPE_CHECK_CAST
 			typeConvertion := &ExpressionTypeConvertion{}
-			typeConvertion.Typ = ret[0]
+			typeConvertion.Typ = &VariableType{}
+			typeConvertion.Typ.Typ = VARIABLE_TYPE_OBJECT
+			typeConvertion.Typ.Pos = e.Pos
+			typeConvertion.Typ.Class = class
+			e.Typ = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
 				typeConvertion.Expression = call.Args[0]
 			}
 			e.Data = typeConvertion
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
-				return ret
+				return []*VariableType{typeConvertion.Typ.Clone()}
 			}
-			ts, es := call.Args[0].check(block)
-			if errsNotEmpty(es) {
-				*errs = append(*errs, es...)
+			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
+		} else if object.Package.Block.Types != nil && object.Package.Block.Types[call.Name] != nil {
+			typeConvertion := &ExpressionTypeConvertion{}
+			typeConvertion.Typ = object.Package.Block.Types[call.Name]
+			e.Typ = EXPRESSION_TYPE_CHECK_CAST
+			if len(call.Args) >= 1 {
+				typeConvertion.Expression = call.Args[0]
 			}
-			t, err := call.Args[0].mustBeOneValueContext(ts)
-			if err != nil {
-				*errs = append(*errs, err)
-			}
-			if t == nil {
-				return ret
-			}
-			if t.IsPrimitive() {
-				*errs = append(*errs, fmt.Errorf("%s expression is primitive,cannot be cast to another type",
+			e.Data = typeConvertion
+			if len(call.Args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 					errMsgPrefix(e.Pos)))
+				return []*VariableType{typeConvertion.Typ}
 			}
-			return ret
+			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
 		} else {
-			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function", errMsgPrefix(e.Pos), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
+				errMsgPrefix(e.Pos), call.Name))
 			return nil
 		}
 		return nil

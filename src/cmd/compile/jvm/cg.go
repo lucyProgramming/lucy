@@ -145,6 +145,7 @@ func (m *MakeClass) mkConsts() {
 		case ast.VARIABLE_TYPE_STRING:
 			f.ConstantValue.Index = m.mainclass.Class.InsertStringConst(v.Value.(string))
 		}
+		f.AttributeLucyConst = &cg.AttributeLucyConst{}
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		m.mainclass.Fields[k] = f
 	}
