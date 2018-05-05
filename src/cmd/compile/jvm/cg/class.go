@@ -283,8 +283,8 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 		field := &FieldInfo{}
 		field.AccessFlags = f.AccessFlags
 		field.NameIndex = c.insertUtf8Const(f.Name)
-		if f.ConstantValue != nil {
-			field.Attributes = append(field.Attributes, f.ConstantValue.ToAttributeInfo(c))
+		if f.AttributeConstantValue != nil {
+			field.Attributes = append(field.Attributes, f.AttributeConstantValue.ToAttributeInfo(c))
 		}
 		field.DescriptorIndex = c.insertUtf8Const(f.Descriptor)
 		if f.AttributeLucyFieldDescritor != nil {

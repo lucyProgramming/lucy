@@ -24,6 +24,7 @@ type Run struct {
 	compilerAt          string
 	classPaths          []string
 	Flags               Flags
+	PackageCompiled     map[string]struct{}
 }
 
 func (r *Run) Help(command string) {
@@ -45,6 +46,20 @@ func (r *Run) parseCmd(args []string) error {
 	return nil
 }
 
+func (r *Run) setCompiler() error {
+	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
+
+	t := r.compilerAt
+	if runtime.GOOS == "windows" {
+		t += ".exe"
+	}
+	_, e := os.Stat(t)
+	if e != nil {
+		return fmt.Errorf("compiler not found")
+	}
+	return nil
+}
+
 func (r *Run) RunCommand(command string, args []string) {
 	r.command = command
 	err := r.parseCmd(args)
@@ -62,30 +77,28 @@ func (r *Run) RunCommand(command string, args []string) {
 		fmt.Println(err)
 		os.Exit(2)
 	}
+	r.classPaths = common.GetClassPaths()
+	err = r.setCompiler()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+	r.PackageCompiled = make(map[string]struct{})
 	founds := r.findPackageIn(r.Package)
-
 	err = r.foundError(r.Package, founds)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
 	r.MainPackageLucyPath = founds[0]
-
 	//
-	r.classPaths = common.GetClassPaths()
-	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
 	{
-		t := r.compilerAt
-		if runtime.GOOS == "windows" {
-			t += ".exe"
-		}
-		_, e := os.Stat(t)
-		if e != nil {
-			fmt.Println("compiler not found")
-			return
+		_, _, err = r.buildPackage("", common.CORE_PACAKGE)
+		if err != nil {
+			fmt.Printf("build  buildin package '%s' failed,err:%v\n", common.CORE_PACAKGE, err)
+			os.Exit(3)
 		}
 	}
-
 	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
 	if err != nil {
 		fmt.Println(err)
@@ -118,7 +131,6 @@ func (r *Run) RunCommand(command string, args []string) {
 	} else { // unix style
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classPathArray, ":")))
 	}
-	//fmt.Println("CLASSPATH:", classPathArray)
 	err = cmd.Start()
 	if err != nil {
 		fmt.Println(err)
@@ -165,6 +177,9 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 	}
 	if len(lucyFiles) == 0 {
 		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
+		return
+	}
+	if r.Flags.forceReBuild {
 		return
 	}
 	destDir := filepath.Join(lucypath, "class", packageName)
@@ -230,10 +245,7 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	//only lucy packages
-	//fmt.Println("!!!!!!!!!!!!!!!!", is)
 	is, err = r.javaPackageFilter(is)
-	//fmt.Println("@@@@@@@@@@@@@", is)
 	return is, err
 }
 
@@ -250,6 +262,12 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 						break
 					}
 				}
+				continue
+			}
+			dir = filepath.Join(v, name+".class")
+			f, _ = os.Stat(dir)
+			if f != nil && f.IsDir() == false {
+				found = append(found, v)
 			}
 		}
 		return
@@ -264,6 +282,13 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 		}
 		return
 	}
+	formatPaths := func(paths []string) string {
+		var s string
+		for _, v := range paths {
+			s += "\t" + v + "\n"
+		}
+		return s
+	}
 	for _, i := range is {
 		found := existInLucyPath(i)
 		if len(found) > 1 {
@@ -271,13 +296,21 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 			return
 		}
 		if len(found) == 1 { // perfect found in lucypath
-			lucyPackages = append(lucyPackages, i)
+			if i != common.CORE_PACAKGE {
+				lucyPackages = append(lucyPackages, i)
+			}
 			continue
 		}
 		found = existInClassPath(i)
 		if len(found) > 1 {
-			err = fmt.Errorf("not 1 package named '%s' in $CLASSPATH", i)
-			return
+			errmsg := fmt.Sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n", i)
+			errmsg += formatPaths(r.classPaths)
+			return nil, fmt.Errorf(errmsg)
+		}
+		if len(found) == 0 {
+			errmsg := fmt.Sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n", i)
+			errmsg += formatPaths(r.classPaths)
+			return nil, fmt.Errorf(errmsg)
 		}
 	}
 	return

@@ -18,7 +18,7 @@ const (
 	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
 	SUPER_FIELD_NAME         = "super"
 	CONSTRUCTION_METHOD_NAME = "<init>"
-	BUILDIN_PACKAGE          = "lucy/lang"
+	//BUILDIN_PACKAGE          = "lucy/lang"
 )
 
 var (

@@ -8,6 +8,7 @@ type ClassField struct {
 	VariableDefinition
 	Class           *Class
 	LoadFromOutSide bool
+	DefaultValue    interface{} // value base on type
 }
 
 func (f *ClassField) IsStatic() bool {

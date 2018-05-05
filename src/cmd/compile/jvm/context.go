@@ -6,6 +6,7 @@ import (
 )
 
 type Context struct {
+	class                    *ast.Class
 	lastStackMapState        *StackMapState
 	LastStackMapOffset       int
 	LastStackMapOffsetSetted bool

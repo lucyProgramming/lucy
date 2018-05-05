@@ -77,8 +77,9 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 	return
 }
 
-func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHighLevel, f *ast.Function) {
+func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
+	context.class = astClass
 	context.function = f
 	method.Code.Codes = make([]byte, 65536)
 	method.Code.CodeLength = 0
@@ -97,9 +98,13 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, method *cg.MethodHig
 			}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
 			method.Code.CodeLength += 4
 			method.Code.MaxStack = 1
+			// field default value
+			m.mkFieldDefaultValue(class, method.Code, context, state)
 		}
 		method.Code.MaxLocals = 1
-		state.appendLocals(class, state.newObjectVariableType(class.Name))
+
+		v := &cg.StackMap_UninitializedThis_variable_info{}
+		state.Locals = append(state.Locals, &cg.StackMap_verification_type_info{Verify: v})
 	} else if f.Name == ast.MAIN_FUNCTION_NAME { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -181,4 +186,25 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 	}
 
 	return
+}
+
+func (m *MakeClass) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
+	for _, v := range context.class.Fields {
+		if v.DefaultValue == nil || v.IsStatic() {
+			continue
+		}
+		code.Codes[code.CodeLength] = cg.OP_aload_0
+		code.CodeLength++
+		stack, _ := m.MakeExpression.build(class, code, v.Expression, context, state)
+		if t := 1 + stack; t > code.MaxStack {
+			code.MaxStack = t
+		}
+		code.Codes[code.CodeLength] = cg.OP_putfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      class.Name,
+			Field:      v.Name,
+			Descriptor: Descriptor.typeDescriptor(v.Typ),
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	}
 }

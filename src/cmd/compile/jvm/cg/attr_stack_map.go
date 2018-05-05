@@ -123,20 +123,13 @@ func (s *StackMap_full_frame) ToBytes() []byte {
 	return bs
 }
 
-type StackMap_Top_variable_info struct {
-}
-type StackMap_Integer_variable_info struct {
-}
-type StackMap_Float_variable_info struct {
-}
-type StackMap_Long_variable_info struct {
-}
-type StackMap_Double_variable_info struct {
-}
-type StackMap_Null_variable_info struct {
-}
-type StackMap_UninitializedThis_variable_info struct {
-}
+type StackMap_Top_variable_info struct{}
+type StackMap_Integer_variable_info struct{}
+type StackMap_Float_variable_info struct{}
+type StackMap_Long_variable_info struct{}
+type StackMap_Double_variable_info struct{}
+type StackMap_Null_variable_info struct{}
+type StackMap_UninitializedThis_variable_info struct{}
 type StackMap_Object_variable_info struct {
 	Index uint16
 }

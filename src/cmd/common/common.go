@@ -16,6 +16,7 @@ const (
 	LUCY_MAINTAIN_FILE        = "maintain.json"
 	DIR_FOR_COMPILED_CLASS    = "class" // sub directory of $LUCYPATH
 	DIR_FOR_LUCY_SOURCE_FILES = "src"
+	CORE_PACAKGE              = "lucy/lang"
 )
 
 func GetClassPaths() []string {

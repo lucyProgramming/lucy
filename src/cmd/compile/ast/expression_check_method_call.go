@@ -283,6 +283,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				ret := []*VariableType{&VariableType{}}
 				ret[0].Typ = VARIABLE_TYPE_VOID
 				ret[0].Pos = e.Pos
+				block.Statements[0].IsCallFatherContructionStatement = true
 				return ret
 			}
 			if len(ms) == 0 {

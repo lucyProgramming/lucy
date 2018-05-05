@@ -67,7 +67,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	mainclass.SuperClass = ast.JAVA_ROOT_CLASS
 	mainclass.Name = p.Name + "/main"
 	mainclass.Fields = make(map[string]*cg.FieldHighLevel)
-	mkClassDefaultContruction(m.mainclass)
+	m.mkClassDefaultContruction(m.mainclass, nil)
 	m.MakeExpression.MakeClass = m
 	m.Classes = make(map[string]*cg.ClassHighLevel)
 	m.mkConsts()
@@ -76,7 +76,7 @@ func (m *MakeClass) Make(p *ast.Package) {
 	m.mkFuncs()
 	m.mkInitFunctions()
 	for _, v := range p.Block.Classes {
-		m.Classes[v.Name] = m.mkClass(v)
+		m.Classes[v.Name] = m.buildClass(v)
 	}
 	for _, v := range p.Block.Enums {
 		m.Classes[v.Name] = m.mkEnum(v)
@@ -105,8 +105,8 @@ func (m *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 		}
 		field.Name = v.Name
 		field.Descriptor = "I"
-		field.ConstantValue = &cg.AttributeConstantValue{}
-		field.ConstantValue.Index = class.Class.InsertIntConst(v.Value)
+		field.AttributeConstantValue = &cg.AttributeConstantValue{}
+		field.AttributeConstantValue.Index = class.Class.InsertIntConst(v.Value)
 		class.Fields[v.Name] = field
 	}
 	return class
@@ -122,29 +122,8 @@ func (m *MakeClass) mkConsts() {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		f.Name = v.Name
-		f.ConstantValue = &cg.AttributeConstantValue{}
-		switch v.Typ.Typ {
-		case ast.VARIABLE_TYPE_BOOL:
-			if v.Value.(bool) {
-				f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(1)
-			} else {
-				f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(0)
-			}
-		case ast.VARIABLE_TYPE_BYTE:
-			f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(int32(v.Value.(byte)))
-		case ast.VARIABLE_TYPE_SHORT:
-			fallthrough
-		case ast.VARIABLE_TYPE_INT:
-			f.ConstantValue.Index = m.mainclass.Class.InsertIntConst(v.Value.(int32))
-		case ast.VARIABLE_TYPE_LONG:
-			f.ConstantValue.Index = m.mainclass.Class.InsertLongConst(v.Value.(int64))
-		case ast.VARIABLE_TYPE_FLOAT:
-			f.ConstantValue.Index = m.mainclass.Class.InsertFloatConst(v.Value.(float32))
-		case ast.VARIABLE_TYPE_DOUBLE:
-			f.ConstantValue.Index = m.mainclass.Class.InsertDoubleConst(v.Value.(float64))
-		case ast.VARIABLE_TYPE_STRING:
-			f.ConstantValue.Index = m.mainclass.Class.InsertStringConst(v.Value.(string))
-		}
+		f.AttributeConstantValue = &cg.AttributeConstantValue{}
+		f.AttributeConstantValue.Index = m.insertDefaultValue(m.mainclass, v.Typ, v.Value)
 		f.AttributeLucyConst = &cg.AttributeLucyConst{}
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		m.mainclass.Fields[k] = f
@@ -200,7 +179,7 @@ func (m *MakeClass) mkInitFunctions() {
 		method.Class = m.mainclass
 		method.Descriptor = "()V"
 		method.Code = &cg.AttributeCode{}
-		m.buildFunction(m.mainclass, method, v)
+		m.buildFunction(m.mainclass, nil, method, v)
 		m.mainclass.AppendMethod(method)
 	}
 	method := &cg.MethodHighLevel{}
@@ -253,8 +232,32 @@ func (m *MakeClass) mkInitFunctions() {
 	m.mainclass.AppendMethod(trigger)
 	m.mainclass.TriggerCLinit = trigger
 }
-
-func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
+func (m *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.VariableType, v interface{}) (index uint16) {
+	switch t.Typ {
+	case ast.VARIABLE_TYPE_BOOL:
+		if v.(bool) {
+			index = c.Class.InsertIntConst(1)
+		} else {
+			index = c.Class.InsertIntConst(0)
+		}
+	case ast.VARIABLE_TYPE_BYTE:
+		index = c.Class.InsertIntConst(int32(v.(byte)))
+	case ast.VARIABLE_TYPE_SHORT:
+		fallthrough
+	case ast.VARIABLE_TYPE_INT:
+		index = c.Class.InsertIntConst(v.(int32))
+	case ast.VARIABLE_TYPE_LONG:
+		index = c.Class.InsertLongConst(v.(int64))
+	case ast.VARIABLE_TYPE_FLOAT:
+		index = c.Class.InsertFloatConst(v.(float32))
+	case ast.VARIABLE_TYPE_DOUBLE:
+		index = c.Class.InsertDoubleConst(v.(float64))
+	case ast.VARIABLE_TYPE_STRING:
+		index = c.Class.InsertStringConst(v.(string))
+	}
+	return
+}
+func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
 	class.SourceFiles = make(map[string]struct{})
@@ -271,6 +274,10 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		f := &cg.FieldHighLevel{}
 		f.Name = v.Name
 		f.AccessFlags = v.AccessFlags
+		if v.IsStatic() && v.DefaultValue != nil {
+			f.AttributeConstantValue = &cg.AttributeConstantValue{}
+			f.AttributeConstantValue.Index = m.insertDefaultValue(class, v.Typ, v.DefaultValue)
+		}
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		if LucyFieldSignatureParser.Need(v.Typ) {
 			t := &cg.AttributeLucyFieldDescriptor{}
@@ -295,7 +302,7 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 		method.Descriptor = Descriptor.methodDescriptor(vv.Func)
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
-			m.buildFunction(class, method, vv.Func)
+			m.buildFunction(class, nil, method, vv.Func)
 		}
 		class.AppendMethod(method)
 	}
@@ -309,13 +316,13 @@ func (m *MakeClass) mkClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Descriptor = Descriptor.methodDescriptor(t[0].Func)
 			method.IsConstruction = true
 			method.Code = &cg.AttributeCode{}
-			m.buildFunction(class, method, t[0].Func)
+			m.buildFunction(class, c, method, t[0].Func)
 			class.AppendMethod(method)
 			if len(t[0].Func.Typ.ParameterList) > 0 {
-				mkClassDefaultContruction(class)
+				m.mkClassDefaultContruction(class, c)
 			}
 		} else {
-			mkClassDefaultContruction(class)
+			m.mkClassDefaultContruction(class, c)
 		}
 	}
 	return class
@@ -345,7 +352,7 @@ func (m *MakeClass) mkFuncs() {
 		if f.IsBuildin { //
 			continue
 		}
-		m.buildFunction(ms[k].Class, ms[k], f)
+		m.buildFunction(ms[k].Class, nil, ms[k], f)
 	}
 }
 
@@ -373,4 +380,37 @@ func (m *MakeClass) Dump() error {
 		}
 	}
 	return nil
+}
+
+/*
+	make a default construction
+*/
+func (m *MakeClass) mkClassDefaultContruction(class *cg.ClassHighLevel, astClass *ast.Class) {
+	method := &cg.MethodHighLevel{}
+	method.Name = special_method_init
+	method.Descriptor = "()V"
+	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	method.Code = &cg.AttributeCode{}
+	method.Code.Codes = make([]byte, 65536)
+	defer func() {
+		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
+	}()
+	method.Code.Codes[0] = cg.OP_aload_0
+	method.Code.Codes[1] = cg.OP_invokespecial
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      class.SuperClass,
+		Method:     special_method_init,
+		Descriptor: "()V",
+	}, method.Code.Codes[2:4])
+	if 1 > method.Code.MaxStack {
+		method.Code.MaxStack = 1
+	}
+	method.Code.CodeLength = 4
+	if astClass != nil {
+		m.mkFieldDefaultValue(class, method.Code, &Context{class: astClass}, nil)
+	}
+	method.Code.Codes[method.Code.CodeLength] = cg.OP_return
+	method.Code.CodeLength += 1
+	method.Code.MaxLocals = 1
+	class.AppendMethod(method)
 }

@@ -251,6 +251,21 @@ func (c *Class) implemented(inter string) (bool, error) {
 
 func (c *Class) checkFields() []error {
 	errs := []error{}
+	for _, v := range c.Fields {
+		if v.Expression != nil {
+			if v.Expression.IsLiteral() == false {
+				errs = append(errs, fmt.Errorf("%s field default value must be literal", errMsgPrefix(v.Pos)))
+				continue
+			}
+			ts, _ := v.Expression.check(&c.Block)
+			if v.Typ.Equal(ts[0]) == false {
+				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
+					errMsgPrefix(v.Pos), ts[0].TypeString(), v.Typ.TypeString()))
+				continue
+			}
+			v.DefaultValue = v.Expression.Data // copy default value
+		}
+	}
 	return errs
 }
 

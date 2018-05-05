@@ -79,7 +79,7 @@ func (test *Test) testDir(dir string, prefix string) {
 	path := filepath.Join(dir, prefix)
 	if true == common.SourceFileExist(path) {
 		// test this package
-		cmd := exec.Command(test.lucyCommandAt, "run", prefix)
+		cmd := exec.Command(test.lucyCommandAt, "run", "-forceReBuild", prefix)
 		fmt.Printf(test_package_pre_msg, prefix, path) // output debug infos
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout

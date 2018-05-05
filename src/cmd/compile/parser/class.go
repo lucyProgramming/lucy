@@ -64,6 +64,7 @@ func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
 	}
 	return ret, nil
 }
+
 func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	defer c.resetProperty()
 	classDefinition = &ast.Class{}
@@ -166,7 +167,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 				c.parser.errs = append(c.parser.errs, err)
 			}
 		case lex.TOKEN_IDENTIFIER:
-			err = c.parseFiled()
+			err = c.parseField(&c.parser.errs)
 			if err != nil {
 				c.consume(untils_semicolon)
 				c.Next()
@@ -272,7 +273,7 @@ func (c *Class) parseConst() error {
 	return nil
 }
 
-func (c *Class) parseFiled() error {
+func (c *Class) parseField(errs *[]error) error {
 	names, err := c.parser.parseNameList()
 	if err != nil {
 		return err
@@ -281,10 +282,28 @@ func (c *Class) parseFiled() error {
 	if err != nil {
 		return err
 	}
+	var es []*ast.Expression
+	if c.parser.token.Type == lex.TOKEN_ASSIGN {
+		c.Next() // skip =
+		es, err = c.parser.ExpressionParser.parseExpressions()
+		if err != nil {
+			*errs = append(*errs, err)
+		}
+	}
+
+	if c.parser.token.Type != lex.TOKEN_SEMICOLON {
+		*errs = append(*errs, fmt.Errorf("%s missing senicolon after field definition",
+			c.parser.errorMsgPrefix()))
+	}
 	if c.classDefinition.Fields == nil {
 		c.classDefinition.Fields = make(map[string]*ast.ClassField)
 	}
-	for _, v := range names {
+	if es != nil && len(es) != len(names) {
+		err := fmt.Errorf("%s cannot assign %d values to %d destinations",
+			c.parser.errorMsgPrefix(), len(es), len(names))
+		*errs = append(*errs, err)
+	}
+	for k, v := range names {
 		if _, ok := c.classDefinition.Fields[v.Name]; ok {
 			c.parser.errs = append(c.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
@@ -297,6 +316,9 @@ func (c *Class) parseFiled() error {
 		f.Typ = &ast.VariableType{}
 		*f.Typ = *t
 		f.AccessFlags = 0
+		if k < len(es) && es[k] != nil {
+			f.Expression = es[k]
+		}
 		if c.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
 		}
@@ -308,7 +330,7 @@ func (c *Class) parseFiled() error {
 				f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			case lex.TOKEN_PROTECTED:
 				f.AccessFlags |= cg.ACC_FIELD_PROTECTED
-			default: // private case
+			default: // private
 				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
 		}

@@ -23,7 +23,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_return
 		code.CodeLength++
-		//context.MakeStackMap(code, state, code.CodeLength)
 		return
 	}
 	if len(context.function.Typ.ReturnList) == 1 {
@@ -36,7 +35,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1)
 			}
-
 		} else { // load return parameter
 		}
 		// execute defer first
@@ -178,7 +176,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		if len(statementReturn.Expressions) > 0 {
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
 				context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
-
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -190,9 +187,11 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			maxstack = stack
 		}
 		//restore the stack
-		copyOP(code,
-			loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
-				context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+		if len(statementReturn.Expressions) > 0 {
+			copyOP(code,
+				loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
+					context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+		}
 	}
 	if len(statementReturn.Expressions) > 0 {
 		code.Codes[code.CodeLength] = cg.OP_areturn
@@ -335,25 +334,19 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 			continue
 		}
 		//expection that have been handled
-		if len(statementReturn.Expressions) > 0 {
-			if len(context.function.Typ.ReturnList) == 1 {
-				t := m.buildReturnFromFunctionReturnList(class, code, context)
-				if t > code.MaxStack {
-					code.MaxStack = t
-				}
-			} else {
-				//load when function have multi returns if read to end
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
-				code.Codes[code.CodeLength] = cg.OP_ifnull
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-				code.Codes[code.CodeLength+3] = cg.OP_goto
-				length := code.CodeLength + 3
-				code.CodeLength += 6
-				context.MakeStackMap(code, state, code.CodeLength)
-				m.buildReturnFromFunctionReturnList(class, code, context)
-				context.MakeStackMap(code, state, code.CodeLength)
-				binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
-			}
+		if len(statementReturn.Expressions) > 0 && len(context.function.Typ.ReturnList) > 1 {
+			//load when function have multi returns if read to end
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+			code.Codes[code.CodeLength] = cg.OP_ifnull
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+			code.Codes[code.CodeLength+3] = cg.OP_goto
+			length := code.CodeLength + 3
+			code.CodeLength += 6
+			context.MakeStackMap(code, state, code.CodeLength)
+			m.buildReturnFromFunctionReturnList(class, code, context)
+			context.MakeStackMap(code, state, code.CodeLength)
+			binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
+
 		}
 		index--
 	}

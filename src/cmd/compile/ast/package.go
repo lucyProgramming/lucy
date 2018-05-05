@@ -3,6 +3,7 @@ package ast
 import (
 	"errors"
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"strings"
 )
 
@@ -21,10 +22,10 @@ type Package struct {
 }
 
 func (p *Package) loadBuildinPackage() error {
-	if p.Name == BUILDIN_PACKAGE {
+	if p.Name == common.CORE_PACAKGE {
 		return nil
 	}
-	pp, err := p.load(BUILDIN_PACKAGE)
+	pp, err := p.load(common.CORE_PACAKGE)
 	if err != nil {
 		return err
 	}
@@ -40,11 +41,6 @@ func (p *Package) getImport(file string, accessName string) *Import {
 		return nil
 	}
 	return p.Files[file].Imports[accessName]
-}
-
-type LoadedResouces struct {
-	T   interface{}
-	Err error
 }
 
 func (p *Package) mkInitFunctions(bs []*Block) {
@@ -203,14 +199,14 @@ func (i *Import) GetAccessName() (string, error) {
 }
 
 type RedeclareError struct {
-	Name  string
-	Poses []*Pos
-	Types []string //varialbe or function
+	Name      string
+	Positions []*Pos
+	Types     []string //varialbe or function
 }
 
 func (r *RedeclareError) Error() error {
 	s := fmt.Sprintf("name '%s' defined  multi times,which are:\n", r.Name)
-	for k, v := range r.Poses {
+	for k, v := range r.Positions {
 		s += fmt.Sprintf("\t%s '%s' named '%s'\n", errMsgPrefix(v), r.Types[k], r.Name)
 	}
 	return errors.New(s)

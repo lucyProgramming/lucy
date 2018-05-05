@@ -28,6 +28,9 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			}
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
+		if s.IsCallFatherContructionStatement { // special case
+			m.mkFieldDefaultValue(class, code, context, state)
+		}
 		//uncondition goto
 		if m.statementIsUnConditionGoto(s) {
 			deadend = true

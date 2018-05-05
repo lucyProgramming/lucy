@@ -20,7 +20,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		method.AttributeLucyInnerStaticMethod = &cg.AttributeLucyInnerStaticMethod{}
 		method.Descriptor = Descriptor.methodDescriptor(function)
 		method.Code = &cg.AttributeCode{}
-		m.buildFunction(class, method, function)
+		m.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
 		return
 	}
@@ -34,7 +34,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	closureClass.Class.AttributeClosureClass = &cg.AttributeClosureFunctionClass{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	mkClassDefaultContruction(closureClass)
+	m.mkClassDefaultContruction(closureClass, nil)
 	m.putClass(classname, closureClass)
 
 	method := &cg.MethodHighLevel{}
@@ -151,7 +151,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	}
 	method.Code = &cg.AttributeCode{}
 	// build function
-	m.buildFunction(closureClass, method, function)
+	m.buildFunction(closureClass, nil, method, function)
 	return
 
 }

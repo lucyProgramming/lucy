@@ -33,7 +33,8 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 	return
 }
 
-func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context) (maxstack uint16) {
 	if e.Value.Typ == ast.VARIABLE_TYPE_CLASS {
 		return
 	}

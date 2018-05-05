@@ -21,20 +21,21 @@ const (
 )
 
 type Statement struct {
-	Checked           bool
-	Pos               *Pos
-	Typ               int
-	StatementIf       *StatementIF
-	Expression        *Expression // expression statment like a=123
-	StatementFor      *StatementFor
-	StatementReturn   *StatementReturn
-	StatementSwitch   *StatementSwitch
-	StatementBreak    *StatementBreak
-	Block             *Block
-	StatementContinue *StatementContinue
-	StatmentLable     *StatementLable
-	StatementGoto     *StatementGoto
-	Defer             *Defer
+	Checked                          bool
+	Pos                              *Pos
+	Typ                              int
+	StatementIf                      *StatementIF
+	Expression                       *Expression // expression statment like a=123
+	StatementFor                     *StatementFor
+	StatementReturn                  *StatementReturn
+	StatementSwitch                  *StatementSwitch
+	StatementBreak                   *StatementBreak
+	Block                            *Block
+	StatementContinue                *StatementContinue
+	StatmentLable                    *StatementLable
+	StatementGoto                    *StatementGoto
+	Defer                            *Defer
+	IsCallFatherContructionStatement bool
 }
 
 func (s *Statement) StatementName() string {

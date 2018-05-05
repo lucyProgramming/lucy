@@ -4,7 +4,7 @@ type FieldHighLevel struct {
 	Name                        string
 	Descriptor                  string
 	AccessFlags                 uint16
-	ConstantValue               *AttributeConstantValue
+	AttributeConstantValue      *AttributeConstantValue
 	AttributeLucyFieldDescritor *AttributeLucyFieldDescriptor
 	AttributeLucyConst          *AttributeLucyConst
 }

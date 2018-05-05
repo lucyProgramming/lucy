@@ -197,33 +197,33 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 		r := &RedeclareError{}
 		r.Name = k
-		r.Poses = make([]*Pos, len(v))
+		r.Positions = make([]*Pos, len(v))
 		r.Types = make([]string, len(v))
 		for kk, vv := range v {
 			switch vv.(type) {
 			case *Const:
 				t := vv.(*Const)
-				r.Poses[kk] = t.Pos
+				r.Positions[kk] = t.Pos
 				r.Types[kk] = "const"
 			case *Enum:
 				t := vv.(*EnumName)
-				r.Poses[kk] = t.Pos
+				r.Positions[kk] = t.Pos
 				r.Types[kk] = "enum"
 			case *Function:
 				t := vv.(*Function)
-				r.Poses[kk] = t.Pos
+				r.Positions[kk] = t.Pos
 				r.Types[kk] = "function"
 			case *Class:
 				t := vv.(*Class)
-				r.Poses[kk] = t.Pos
+				r.Positions[kk] = t.Pos
 				r.Types[kk] = "class"
 			case *ExpressionTypeAlias:
 				t := vv.(*ExpressionTypeAlias)
-				r.Poses[kk] = t.Pos
+				r.Positions[kk] = t.Pos
 				r.Types[kk] = "type alias"
 			case *EnumName:
 				t := vv.(*EnumName)
-				r.Poses[kk] = t.Pos
+				r.Positions[kk] = t.Pos
 				r.Types[kk] = "enum name"
 			default:
 				panic("make error")
