@@ -61,7 +61,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	defer state.popStack(1)
 	if call.Name == ast.CONSTRUCTION_METHOD_NAME {
 		state.popStack(1)
-		v := &cg.StackMap_UninitializedThis_variable_info{}
+		v := &cg.StackMap_UninitializedThis_variable_info{} // make it right
 		state.Stacks = append(state.Stacks, &cg.StackMap_verification_type_info{
 			Verify: v,
 		})
