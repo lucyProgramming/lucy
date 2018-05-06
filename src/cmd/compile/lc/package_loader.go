@@ -29,6 +29,7 @@ type Resource struct {
 }
 
 func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interface{}, error) {
+	//fmt.Println("load:", resouceName)
 	var realpaths []*Resource
 	for _, v := range compiler.lucyPaths {
 		p := filepath.Join(v, "class", resouceName)

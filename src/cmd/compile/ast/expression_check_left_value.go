@@ -54,7 +54,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 						errMsgPrefix(e.Pos), dot.Name))
 				}
 				// not this and private
-				if dot.Expression.isThis() == false && field.IsPrivate() {
+				if dot.Expression.IsThis() == false && field.IsPrivate() {
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
@@ -80,12 +80,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 			}
 			return nil
 		} else if t.Typ == VARIABLE_TYPE_PACKAGE {
-			variable := t.Package.Block.SearchByName(dot.Name)
-			if nil == variable {
+			if false == t.Package.Block.nameExists(dot.Name) {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			}
+			variable := t.Package.Block.SearchByName(dot.Name)
 			if vd, ok := variable.(*VariableDefinition); ok == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not varible",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))

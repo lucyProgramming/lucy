@@ -6,9 +6,9 @@ import (
 )
 
 type StackMapState struct {
-	Locals     []*cg.StackMap_verification_type_info
-	LastLocals []*cg.StackMap_verification_type_info
-	Stacks     []*cg.StackMap_verification_type_info
+	Locals             []*cg.StackMap_verification_type_info
+	LastStackMapLocals []*cg.StackMap_verification_type_info
+	Stacks             []*cg.StackMap_verification_type_info
 }
 
 func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.VariableType) {
@@ -53,8 +53,6 @@ func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType)
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
 	copy(s.Locals, last.Locals)
-	//s.Stacks = make([]*cg.StackMap_verification_type_info, len(last.Stacks))
-	//copy(s.Stacks, last.Stacks)
 	return s
 }
 

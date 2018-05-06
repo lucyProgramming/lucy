@@ -187,14 +187,14 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
 	}
-	if pp, ok := p.(*Package); ok == false && pp != nil {
-		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
-	} else {
-		d = pp.Block.SearchByName(packageAndName[1])
-		if d == nil {
+	if pp, ok := p.(*Package); ok && pp != nil {
+		d = pp.Block.nameExists(packageAndName[1])
+		if d == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos))
 		}
-		return d, err
+		return pp.Block.SearchByName(packageAndName[1]), err
+	} else {
+		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
 	}
 
 }

@@ -64,7 +64,7 @@ const (
 	TOKEN_LEFT_SHIFT_ASSIGN  // <<=
 	TOKEN_RIGHT_SHIFT_ASSIGN // >>=
 	TOKEN_NOT                // !false
-	TOKEN_SWITCH             //swtich
+	TOKEN_SWITCH             //switch
 	TOKEN_CASE               //case
 	TOKEN_DEFAULT            //default
 	TOKEN_IMPORT             //import

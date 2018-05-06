@@ -50,7 +50,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 	c.Block.inherite(father)
 	errs := c.Block.checkConst()
 	c.Block.InheritedAttribute.class = c
-	es := c.resolveName(father)
+	es := c.resolveAllNames(father)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -90,7 +90,7 @@ func (c *Class) checkPhase2(father *Block) []error {
 	return errs
 }
 
-func (c *Class) resolveName(b *Block) []error {
+func (c *Class) resolveAllNames(b *Block) []error {
 	errs := []error{}
 	var err error
 	for _, v := range c.Fields {
@@ -119,7 +119,11 @@ func (c *Class) resolveFather(block *Block) error {
 	}
 	defer func() {
 		if c.SuperClassName == "" {
-			c.SuperClassName = LUCY_ROOT_CLASS
+			if c.IsInterface() == false {
+				c.SuperClassName = LUCY_ROOT_CLASS
+			} else {
+				c.SuperClassName = JAVA_ROOT_CLASS
+			}
 		}
 	}()
 	if c.SuperClassName == "" {
@@ -131,17 +135,28 @@ func (c *Class) resolveFather(block *Block) error {
 		if i == nil {
 			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		superClass, err := PackageBeenCompile.load(i.Resource + "/" + t[1])
+		r, err := PackageBeenCompile.load(i.Resource)
 		if err != nil {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}
-		if ss, ok := superClass.(*Class); ok == false || ss == nil {
-			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
-		} else {
-			t := ss
-			c.SuperClassName = t.Name
-			c.SuperClass = t
+		if p, ok := r.(*Package); ok && p != nil { // if package
+			if false == p.Block.nameExists(t[1]) {
+				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
+			}
+			if p.Block.Classes == nil || p.Block.Classes[t[1]] == nil {
+				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
+			}
+			c.SuperClass = p.Block.Classes[t[1]]
+		} else { // must be class now
+			if ss, ok := r.(*Class); ok == false || ss == nil {
+				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+			} else {
+				t := ss
+				c.SuperClassName = t.Name
+				c.SuperClass = t
+			}
 		}
+
 	} else {
 		variableType := VariableType{}
 		variableType.Typ = VARIABLE_TYPE_NAME // naming
@@ -156,6 +171,14 @@ func (c *Class) resolveFather(block *Block) error {
 		}
 		c.SuperClassName = variableType.Class.Name
 		c.SuperClass = variableType.Class
+	}
+	if c.IsInterface() {
+		if c.SuperClass.Name == JAVA_ROOT_CLASS {
+			//nothing
+		} else {
+			return fmt.Errorf("%s interface`s super-class must be '%s'",
+				errMsgPrefix(c.Pos), JAVA_ROOT_CLASS)
+		}
 	}
 	return nil
 }
@@ -183,15 +206,22 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 
 func (c *Class) suitableForInterfaces() []error {
 	errs := []error{}
+	if c.IsInterface() {
+		return errs
+	}
+	// c is class
 	for _, i := range c.Interfaces {
-		errs = append(errs, c.suitableForInterface(i)...)
+		errs = append(errs, c.suitableForInterface(i, false)...)
 	}
 	return errs
 }
-func (c *Class) suitableForInterface(inter *Class) []error {
+func (c *Class) suitableForInterface(inter *Class, fromsub bool) []error {
 	errs := []error{}
 	for name, v := range inter.Methods {
 		m := v[0]
+		if fromsub == false || m.IsPrivate() == false {
+			continue
+		}
 		args := make([]*VariableType, len(m.Func.Typ.ParameterList))
 		for k, v := range m.Func.Typ.ParameterList {
 			args[k] = v.Typ
@@ -203,7 +233,6 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 			errs = append(errs, err)
 		}
 	}
-
 	return errs
 }
 
@@ -276,6 +305,9 @@ func (c *Class) checkMethods() []error {
 	}
 	for name, v := range c.Methods {
 		for _, vv := range v {
+			if c.IsInterface() {
+				continue
+			}
 			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
 				if vv.Func.Block.Vars == nil {
 					vv.Func.Block.Vars = make(map[string]*VariableDefinition)
@@ -293,9 +325,10 @@ func (c *Class) checkMethods() []error {
 				errs = append(errs, fmt.Errorf("%s construction method expect no return values",
 					errMsgPrefix(vv.Func.Typ.ParameterList[0].Pos)))
 			}
-			vv.Func.Block.InheritedAttribute.IsConstruction = isConstruction
-			vv.Func.checkBlock(&errs)
-
+			if c.IsInterface() == false {
+				vv.Func.Block.InheritedAttribute.IsConstruction = isConstruction
+				vv.Func.checkBlock(&errs)
+			}
 		}
 	}
 	return errs
@@ -305,11 +338,14 @@ func (c *Class) loadSuperClass() error {
 	if c.SuperClass != nil {
 		return nil
 	}
+	if c.Name == JAVA_ROOT_CLASS {
+		return fmt.Errorf("root class already")
+	}
 	d, err := PackageBeenCompile.load(c.SuperClassName)
 	if err != nil {
 		return err
 	}
-	if class, ok := d.(*Class); ok && ok && class != nil {
+	if class, ok := d.(*Class); ok && class != nil {
 		c.SuperClass = class
 		return nil
 	} else {

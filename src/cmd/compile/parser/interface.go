@@ -22,26 +22,6 @@ func (c *Interface) consume(m map[int]bool) {
 	c.parser.consume(m)
 }
 
-func (c *Interface) parseClassName() (string, error) {
-	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-		err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
-		c.parser.errs = append(c.parser.errs, err)
-		return "", err
-	}
-	name := c.parser.token.Data.(string)
-	c.Next()
-	if c.parser.token.Type == lex.TOKEN_DOT {
-		c.Next()
-		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
-			err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
-			c.parser.errs = append(c.parser.errs, err)
-		}
-		name += "/" + c.parser.token.Data.(string)
-		c.Next() // skip name identifier
-	}
-	return name, nil
-}
-
 func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 	c.Next() // skip interface key word
 	classDefinition = &ast.Class{}
@@ -50,7 +30,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 	c.classDefinition.Block.IsClassBlock = true
 	c.classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
 	c.classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
-	c.classDefinition.Name, err = c.parseClassName()
+	c.classDefinition.Name, err = c.parser.Class.parseClassName()
 	if err != nil {
 		return nil, err
 	}
@@ -67,12 +47,19 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
-			t, err := c.parseClassName()
+			t, err := c.parser.Class.parseClassName()
 			c.classDefinition.SuperClassName = t
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
 				return nil, err
 			}
+		}
+	}
+	if c.parser.token.Type == lex.TOKEN_IMPLEMENTS {
+		c.Next() // skip key word
+		c.classDefinition.InterfaceNames, err = c.parser.Class.parseInterfaces()
+		if err != nil {
+			c.consume(untils_lc)
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {

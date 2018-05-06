@@ -98,13 +98,17 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 			}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
 			method.Code.CodeLength += 4
 			method.Code.MaxStack = 1
+			method.Code.MaxLocals = 1
+			state.Locals = append(state.Locals,
+				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(astClass.Name)))
 			// field default value
 			m.mkFieldDefaultValue(class, method.Code, context, state)
+		} else {
+			method.Code.MaxLocals = 1
+			t := &cg.StackMap_verification_type_info{}
+			t.Verify = &cg.StackMap_UninitializedThis_variable_info{}
+			state.Locals = append(state.Locals, t)
 		}
-		method.Code.MaxLocals = 1
-
-		v := &cg.StackMap_UninitializedThis_variable_info{}
-		state.Locals = append(state.Locals, &cg.StackMap_verification_type_info{Verify: v})
 	} else if f.Name == ast.MAIN_FUNCTION_NAME { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -149,7 +153,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	if t := m.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
-	m.buildBlock(class, method.Code, f.Block, context, state)
+	m.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }
 func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {

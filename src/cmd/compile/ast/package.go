@@ -48,7 +48,7 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 	for k, b := range bs {
 		b.IsFunctionTopBlock = true
 		f := &Function{}
-		f.Block = b
+		f.Block = *b
 		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition
 		p.InitFunctions[k] = f
 		f.Used = true

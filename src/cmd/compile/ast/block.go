@@ -25,6 +25,65 @@ type Block struct {
 	Vars                       map[string]*VariableDefinition
 }
 
+func (b *Block) nameExists(name string) bool {
+	if b.Funcs != nil {
+		if _, ok := b.Funcs[name]; ok {
+			return true
+		}
+	}
+	if b.Classes != nil {
+		if _, ok := b.Classes[name]; ok {
+			return true
+		}
+	}
+	if b.Vars != nil {
+		if _, ok := b.Vars[name]; ok {
+			return true
+		}
+	}
+	if b.Lables != nil {
+		if _, ok := b.Lables[name]; ok {
+			return true
+		}
+	}
+	if b.Consts != nil {
+		if _, ok := b.Consts[name]; ok {
+			return true
+
+		}
+	}
+	if b.Enums != nil {
+		if _, ok := b.Enums[name]; ok {
+			return true
+
+		}
+	}
+	if b.EnumNames != nil {
+		if _, ok := b.EnumNames[name]; ok {
+			return true
+
+		}
+	}
+	if b.Types != nil {
+		if _, ok := b.Types[name]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func (b *Block) searchLable(name string) *StatementLable {
+	for b != nil {
+		if b.Lables != nil {
+			if l, ok := b.Lables[name]; ok {
+				return l
+			}
+		}
+		b = b.Outter
+	}
+	return nil
+}
+
 /*
 	search anything
 */

@@ -27,17 +27,15 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
-		find := t.Package.Block.SearchByName(dot.Name)
-		if find == nil {
+		if t.Package.Block.nameExists(dot.Name) == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
 		}
-		switch find.(type) {
-		case *Function: // return function
-			f := find.(*Function)
+		if t.Package.Block.Funcs != nil && t.Package.Block.Funcs[dot.Name] != nil {
 			tt := &VariableType{}
 			tt.Typ = VARIABLE_TYPE_FUNCTION
+			f := t.Package.Block.Funcs[dot.Name]
 			tt.Function = f
 			tt.Pos = e.Pos
 			if (f.AccessFlags & cg.ACC_METHOD_PUBLIC) == 0 {
@@ -45,60 +43,58 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 				*errs = append(*errs, err)
 			}
 			return tt
-		case *Const:
-			t := find.(*Const)
-			e.fromConst(t) //
-			tt := t.Typ.Clone()
+		}
+		if t.Package.Block.Funcs != nil && t.Package.Block.Consts[dot.Name] != nil {
+			c := t.Package.Block.Consts[dot.Name]
+			e.fromConst(c) //
+			tt := c.Typ.Clone()
 			tt.Pos = e.Pos
-			if t.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
+			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
 				err = fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			return tt
-		case *Class:
-			t := find.(*Class)
+		}
+		if t.Package.Block.Funcs != nil && t.Package.Block.Classes[dot.Name] != nil {
+			c := t.Package.Block.Classes[dot.Name]
 			tt := &VariableType{}
 			tt.Pos = e.Pos
 			tt.Typ = VARIABLE_TYPE_CLASS
-			tt.Class = t
-			if (t.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
+			tt.Class = c
+			if (c.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
 				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			return tt
-		case *VariableDefinition:
-			t := find.(*VariableDefinition)
-			tt := t.Typ.Clone()
+		}
+		if t.Package.Block.Funcs != nil && t.Package.Block.Vars[dot.Name] != nil {
+			v := t.Package.Block.Vars[dot.Name]
+			tt := v.Typ.Clone()
 			tt.Pos = e.Pos
-			if (t.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
+			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
 				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
-			dot.PackageVariable = t
+			dot.PackageVariable = v
 			return tt
-		case *EnumName:
-			t := find.(*EnumName)
-			if (t.Enum.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
+		}
+		if t.Package.Block.Funcs != nil && t.Package.Block.EnumNames[dot.Name] != nil {
+			n := t.Package.Block.EnumNames[dot.Name]
+			if (n.Enum.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
 			tt := &VariableType{}
 			tt.Pos = e.Pos
-			tt.Enum = t.Enum
-			tt.EnumName = t
+			tt.Enum = n.Enum
+			tt.EnumName = n
 			tt.Typ = VARIABLE_TYPE_ENUM
-			dot.EnumName = t
+			dot.EnumName = n
 			return tt
-		case *VariableType:
-			err = fmt.Errorf("%s name '%s' is a type,not a expression",
-				errMsgPrefix(e.Pos), dot.Name)
-			*errs = append(*errs, err)
-			return nil
-		default:
-			err = fmt.Errorf("%s name '%s' is not a expression", errMsgPrefix(e.Pos), dot.Name)
-			*errs = append(*errs, err)
-			return nil
 		}
+		err = fmt.Errorf("%s name '%s' is not a expression", errMsgPrefix(e.Pos), dot.Name)
+		*errs = append(*errs, err)
+		return nil
 	} else if t.Typ == VARIABLE_TYPE_OBJECT { // object
 		if dot.Name == SUPER_FIELD_NAME {
 			if t.Class.Name == JAVA_ROOT_CLASS {
@@ -121,7 +117,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
-			if false == dot.Expression.isThis() && false == field.IsPublic() {
+			if false == dot.Expression.IsThis() && false == field.IsPublic() {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is private", errMsgPrefix(e.Pos),
 					dot.Name))
 			}

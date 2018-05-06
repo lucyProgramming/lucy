@@ -21,7 +21,7 @@ type Function struct {
 	Typ                            FunctionType
 	ClosureVars                    Closure
 	Name                           string // if name is nil string,means no name function
-	Block                          *Block
+	Block                          Block
 	Pos                            *Pos
 	Descriptor                     string
 	AutoVarForException            *AutoVarForException
@@ -167,13 +167,11 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			}
 		}
 		f.Typ.ParameterList[0].LocalValOffset = 1
-		//f.VarOffset = 2 //
 		return
 	}
 	var err error
 	for k, v := range f.Typ.ParameterList {
-		//v.IsFunctionParameter = true
-		err = v.Typ.resolve(f.Block)
+		err = v.Typ.resolve(&f.Block)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
 		}
@@ -191,7 +189,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				f.DefaultValueStartAt = k
 			}
 			f.HaveDefaultValue = true
-			ts, es := v.Expression.check(f.Block)
+			ts, es := v.Expression.check(&f.Block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
@@ -214,7 +212,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	}
 	//handler return
 	for _, v := range f.Typ.ReturnList {
-		err = v.Typ.resolve(f.Block)
+		err = v.Typ.resolve(&f.Block)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
@@ -225,7 +223,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		if v.Expression == nil {
 			v.Expression = v.Typ.mkDefaultValueExpression()
 		} else {
-			ts, es := v.Expression.check(f.Block)
+			ts, es := v.Expression.check(&f.Block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
 				continue

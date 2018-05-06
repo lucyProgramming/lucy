@@ -19,7 +19,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if object.Typ == VARIABLE_TYPE_PACKAGE {
-		if object.Package.Block.SearchByName(call.Name) == nil {
+		if object.Package.Block.nameExists(call.Name) == false {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' not found", errMsgPrefix(e.Pos), call.Name))
 			return nil
 		}
@@ -259,7 +259,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				errMsgPrefix(e.Pos), object.TypeString()))
 			return nil
 		}
-		if call.Expression.isThis() == false {
+		if call.Expression.IsThis() == false {
 			*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use this",
 				errMsgPrefix(e.Pos)))
 			return nil
@@ -304,7 +304,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if matched {
-		if false == call.Expression.isThis() &&
+		if false == call.Expression.IsThis() &&
 			ms[0].IsPublic() == false {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 		}

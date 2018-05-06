@@ -2,11 +2,9 @@ import "java/io";
 import "lucy/lang";
 
 
-
 public class File extends io.File {
 	reader io.FileInputStream;
 	writer io.FileOutputStream;
-	
 	public fn File(filepath string ,model string = ""){
 		this.super(filepath);
 		isCreate := false;

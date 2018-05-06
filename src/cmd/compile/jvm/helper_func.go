@@ -26,7 +26,8 @@ func copyOP(code *cg.AttributeCode, op ...byte) {
 	code.CodeLength += len(op)
 }
 
-func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname, name, descriptor string) {
+func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname,
+	name, descriptor string) {
 	if len(ops) == 0 {
 		return
 	}
@@ -97,7 +98,8 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	}
 }
 
-func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) (increment uint16) {
+func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	context *Context, state *StackMapState) (increment uint16) {
 	increment = 1
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
@@ -122,7 +124,8 @@ func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLev
 	return
 }
 
-func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) {
+func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode,
+	v *ast.VariableDefinition) {
 	code.Codes[code.CodeLength] = cg.OP_putstatic
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      mainClass.Name,

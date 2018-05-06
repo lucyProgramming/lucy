@@ -74,7 +74,6 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		maxstack = t
 	}
 	if call.Name == ast.CONSTRUCTION_METHOD_NAME { // call father construction method
-
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,

@@ -14,7 +14,8 @@ type AutoVarForRangeMap struct {
 	K, V             uint16
 }
 
-func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
 	maxstack, _ = m.MakeExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // map instance on stack
 	// if null skip
 	{

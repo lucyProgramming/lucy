@@ -263,7 +263,11 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	class.SourceFiles = make(map[string]struct{})
 	class.SourceFiles[c.Pos.Filename] = struct{}{}
 	class.AccessFlags = c.AccessFlags
-	class.SuperClass = c.SuperClassName
+	if c.SuperClass != nil {
+		class.SuperClass = c.SuperClass.Name
+	} else {
+		class.SuperClass = c.SuperClassName
+	}
 	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range c.Interfaces {
