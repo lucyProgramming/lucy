@@ -26,6 +26,10 @@ type Class struct {
 	LoadFromOutSide bool
 }
 
+func (c *Class) IsInterface() bool {
+	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
+}
+
 func (c *Class) loadSelf() error {
 	if c.NotImportedYet == false {
 		return nil
@@ -234,10 +238,6 @@ func (c *Class) suitableForInterface(inter *Class, fromsub bool) []error {
 		}
 	}
 	return errs
-}
-
-func (c *Class) IsInterface() bool {
-	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
 
 func (c *Class) haveSuper(superclassName string) (bool, error) {
