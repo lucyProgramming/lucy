@@ -9,11 +9,7 @@ import (
 
 func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	b.Next() // skip if
-	if b.parser.eof {
-		err = b.parser.mkUnexpectedEofErr()
-		b.parser.errs = append(b.parser.errs, err)
-		return nil, err
-	}
+
 	var e *ast.Expression
 	e, err = b.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
@@ -56,7 +52,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 	es = []*ast.StatementElseIf{}
 	var e *ast.Expression
-	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && !b.parser.eof {
+	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && b.parser.token.Type != lex.TOKEN_EOF {
 		b.Next() // skip elseif token
 		e, err = b.parser.ExpressionParser.parseExpression(false)
 		if err != nil {

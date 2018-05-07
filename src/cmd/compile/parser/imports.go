@@ -65,9 +65,9 @@ func (p *Parser) parseImports() {
 		p.parseImports()
 		return
 	} else {
+		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon after", p.errorMsgPrefix()))
 		p.consume(untils_semicolon)
 		p.Next()
-		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon after", p.errorMsgPrefix()))
 		p.parseImports()
 		return
 	}

@@ -3,6 +3,7 @@ package lc
 import (
 	"encoding/binary"
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -195,7 +196,7 @@ func (c *ClassDecoder) parseAttributes() (cg.AttributeGroupedByName, error) {
 		a := &cg.AttributeInfo{}
 		a.NameIndex = binary.BigEndian.Uint16(c.bs)
 		if c.ret.ConstPool[a.NameIndex].Tag != cg.CONSTANT_POOL_TAG_Utf8 {
-			return ret, fmt.Errorf("name index %d is not a utf const", a.NameIndex)
+			return ret, fmt.Errorf("name index %d is not a utf8 const", a.NameIndex)
 		}
 		length := binary.BigEndian.Uint32(c.bs[2:])
 		c.bs = c.bs[6:]

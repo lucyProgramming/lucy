@@ -11,9 +11,6 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 	var err error
 	pos := ep.parser.mkPos()
 	ep.Next() // skip (
-	if ep.parser.eof {
-		return nil, ep.parser.mkUnexpectedEofErr()
-	}
 	args := []*ast.Expression{}
 	if ep.parser.token.Type != lex.TOKEN_RP { //a(123)
 		args, err = ep.parseExpressions()

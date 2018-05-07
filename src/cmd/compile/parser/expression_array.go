@@ -81,7 +81,7 @@ func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 	}
 	ep.Next() // skip {
 	es := []*ast.Expression{}
-	for ep.parser.eof == false && ep.parser.token.Type != lex.TOKEN_RC {
+	for ep.parser.token.Type != lex.TOKEN_EOF && ep.parser.token.Type != lex.TOKEN_RC {
 		if ep.parser.token.Type == lex.TOKEN_LC {
 			ees, err := ep.parseArrayValues()
 			if err != nil {
@@ -111,7 +111,6 @@ func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 			break
 		}
 	}
-
 	if ep.parser.token.Type != lex.TOKEN_RC {
 		return es, fmt.Errorf("%s expect '}',but '%s' ", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 	}

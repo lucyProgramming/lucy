@@ -27,7 +27,7 @@ type Parser struct {
 	filename         string
 	lastToken        *lex.Token
 	token            *lex.Token
-	eof              bool
+	expect           *lex.Token
 	errs             []error
 	imports          map[string]*ast.Import
 	nerr             int
@@ -47,11 +47,11 @@ func (p *Parser) Parse() []error {
 	p.scanner = lex.New(p.bs)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
-	if p.eof {
+	if p.token.Type == lex.TOKEN_EOF {
 		return nil
 	}
 	p.parseImports() // next is called
-	if p.eof {
+	if p.token.Type == lex.TOKEN_EOF {
 		return p.errs
 	}
 	if p.onlyimport { // only parse imports
@@ -62,7 +62,7 @@ func (p *Parser) Parse() []error {
 		ispublic = false
 	}
 	var err error
-	for !p.eof {
+	for p.token.Type != lex.TOKEN_EOF {
 		if len(p.errs) > p.nerr {
 			break
 		}
@@ -118,12 +118,17 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_FUNCTION:
-			f, err := p.Function.parse(ispublic)
+			f, err := p.Function.parse(true)
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(untils_rc)
 				p.Next()
 				continue
+			}
+			if ispublic {
+				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
+			} else {
+				f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			}
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: f,
@@ -188,7 +193,7 @@ func (p *Parser) Parse() []error {
 				continue
 			}
 			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
-				p.errs = append(p.errs, fmt.Errorf("%s not ; after variable or const definition,but %s",
+				p.errs = append(p.errs, fmt.Errorf("%s not semicolon after variable or const definition,but %s",
 					p.errorMsgPrefix(), p.token.Desp))
 				p.Next()
 				p.consume(untils_semicolon)
@@ -239,8 +244,10 @@ func (p *Parser) Parse() []error {
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: a,
 			})
+		case lex.TOKEN_EOF:
+			break
 		default:
-			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except", p.errorMsgPrefix(), p.token.Desp))
+			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except", p.errorMsgPrefix(), p.token.Desp, p.token.Type))
 			p.consume(untils_semicolon)
 			resetProperty()
 		}
@@ -320,11 +327,6 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 	}
 	typ := p.token.Type
 	p.Next() // skip = or :=
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		p.errs = append(p.errs, err)
-		return nil, nil, typ, err
-	}
 	es, err := p.ExpressionParser.parseExpressions()
 	if err != nil {
 		return nil, nil, typ, err
@@ -336,23 +338,20 @@ func (p *Parser) Next() {
 	var err error
 	var tok *lex.Token
 	p.lastToken = p.token
-	for !p.eof {
-		tok, p.eof, err = p.scanner.Next()
+	for {
+		tok, err = p.scanner.Next()
 		if err != nil {
 			p.errs = append(p.errs, fmt.Errorf("%s %s", p.errorMsgPrefix(), err.Error()))
-		}
-		if p.eof {
-			break
 		}
 		if tok == nil {
 			continue
 		}
+		p.token = tok
 		if tok.Type != lex.TOKEN_CRLF {
-			p.token = tok
 			if p.token.Desp != "" {
-				//fmt.Println("#########", p.token.Desp)
+				//fmt.Println("#########", p.token.Type, p.token.Desp)
 			} else {
-				//fmt.Println("#########", p.token.Data)
+				//fmt.Println("#########", p.token.Type, p.token.Data)
 			}
 			break
 		}
@@ -376,7 +375,7 @@ func (p *Parser) consume(untils map[int]bool) {
 		panic("no token to consume")
 	}
 	var ok bool
-	for p.eof == false {
+	for p.token.Type != lex.TOKEN_EOF {
 		if _, ok = untils[p.token.Type]; ok {
 			return
 		}
@@ -435,7 +434,7 @@ func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
 // a,b int or int,bool  c xxx
 func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 	vs = []*ast.VariableDefinition{}
-	for !p.eof {
+	for p.token.Type != lex.TOKEN_EOF {
 		ns, err := p.parseNameList()
 		if err != nil {
 			return vs, err
@@ -458,11 +457,4 @@ func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 		}
 	}
 	return vs, nil
-}
-func (p *Parser) unexpectedErr() {
-	p.errs = append(p.errs, p.mkUnexpectedEofErr())
-}
-
-func (p *Parser) mkUnexpectedEofErr() error {
-	return fmt.Errorf("%s unexpected EOF", p.errorMsgPrefix())
 }

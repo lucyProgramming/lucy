@@ -143,6 +143,10 @@ func (b *Block) SearchByName(name string) interface{} {
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionTopBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false {
+
+				if v.Name == THIS {
+					return nil // capture this not allow
+				}
 				b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
 			}
 			//cannot search variable from class body

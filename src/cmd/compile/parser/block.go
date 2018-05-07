@@ -2,7 +2,9 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
@@ -34,7 +36,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			b.parser.token.Type == lex.TOKEN_LC
 	}
 	block.Statements = []*ast.Statement{}
-	for false == b.parser.eof {
+	for lex.TOKEN_EOF != b.parser.token.Type {
 		if len(b.parser.errs) > b.parser.nerr {
 			block.EndPos = b.parser.mkPos()
 			break
@@ -67,10 +69,11 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			reset()
 		case lex.TOKEN_FUNCTION:
 			pos := b.parser.mkPos()
-			f, err := b.parser.Function.parse(false)
+			f, err := b.parser.Function.parse(true)
 			if err != nil {
 				b.parser.consume(untils_rc_semicolon)
 			}
+			f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			s := &ast.Statement{}
 			s.Pos = pos
 			s.Typ = ast.STATEMENT_TYPE_EXPRESSION
@@ -393,11 +396,12 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		b.Next()
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_LABLE {
+	if e.Typ == ast.EXPRESSION_TYPE_IDENTIFIER && b.parser.token.Type == lex.TOKEN_COLON {
 		if isDefer {
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement lable has no meaning",
 				b.parser.errorMsgPrefix()))
 		}
+		b.Next() // skip :
 		s := &ast.Statement{}
 		s.Pos = pos
 		s.Typ = ast.STATEMENT_TYPE_LABLE

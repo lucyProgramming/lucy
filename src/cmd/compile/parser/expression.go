@@ -17,7 +17,7 @@ func (ep *ExpressionParser) Next() {
 
 func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
-	for !ep.parser.eof {
+	for ep.parser.token.Type != lex.TOKEN_EOF {
 		e, err := ep.parseExpression(false)
 		if err != nil {
 			return es, err
@@ -38,16 +38,13 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 
 //parse assign expression
 func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression, error) {
-	left, err := ep.parseLogicalExpression(statemenLevel) //
+	left, err := ep.parseLogicalExpression() //
 	if err != nil {
 		return nil, err
 	}
-	if left.Typ == ast.EXPRESSION_TYPE_LABLE {
-		return left, nil
-	}
 	for ep.parser.token.Type == lex.TOKEN_COMMA && statemenLevel { // read more
-		ep.Next()                                      //  skip comma
-		left2, err := ep.parseLogicalExpression(false) //
+		ep.Next()                                 //  skip comma
+		left2, err := ep.parseLogicalExpression() //
 		if err != nil {
 			return nil, err
 		}
@@ -75,9 +72,6 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 	mkBinayExpression := func(typ int, multi bool) (*ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		ep.Next() // skip = :=
-		if ep.parser.eof {
-			return nil, ep.parser.mkUnexpectedEofErr()
-		}
 		result := &ast.Expression{}
 		result.Typ = typ
 		bin := &ast.ExpressionBinary{}
@@ -120,10 +114,10 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
 	case lex.TOKEN_LEFT_SHIFT_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN, false)
+		return mkBinayExpression(ast.EXPRESSION_TYPE_LSH_ASSIGN, false)
 	case lex.TOKEN_RIGHT_SHIFT_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN, false)
+		return mkBinayExpression(ast.EXPRESSION_TYPE_RSH_ASSIGN, false)
 	case lex.TOKEN_AND_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_AND_ASSIGN, false)

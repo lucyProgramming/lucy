@@ -120,11 +120,11 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ior
 			code.CodeLength++
-		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_LSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
-		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_RSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishr
 			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
@@ -156,11 +156,11 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ior
 			code.CodeLength++
-		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_LSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
-		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_RSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishr
 			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
@@ -190,10 +190,10 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ior
 			code.CodeLength++
-		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_LSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.CodeLength++
-		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_RSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishr
 			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {
@@ -222,10 +222,10 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		} else if e.Typ == ast.EXPRESSION_TYPE_OR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lor
 			code.CodeLength++
-		} else if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_LSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lshl
 			code.CodeLength++
-		} else if e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+		} else if e.Typ == ast.EXPRESSION_TYPE_RSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lshr
 			code.CodeLength++
 		} else if e.Typ == ast.EXPRESSION_TYPE_XOR_ASSIGN {

@@ -138,19 +138,18 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
-		if t1.IsInteger() && t2.IsInteger() {
-			if t1.Equal(t2) == false {
-				bin.Right.ConvertToNumber(t1.Typ)
-			}
+		if t1.Equal(t2) {
 			return ret
 		}
-		if t1.IsFloat() && t2.IsFloat() {
-			if t1.Equal(t2) == false {
-				bin.Right.ConvertToNumber(t1.Typ)
-			}
+		if t1.IsInteger() && t2.IsInteger() && bin.Right.IsLiteral() {
+			bin.Right.ConvertToNumber(t1.Typ)
 			return ret
 		}
-		goto end
+		if t1.IsFloat() && t2.IsFloat() && bin.Right.IsLiteral() {
+			bin.Right.ConvertToNumber(t1.Typ)
+			return ret
+		}
+
 	}
 	if e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
@@ -159,8 +158,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 			return ret
 		}
 	}
-	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN {
+	if e.Typ == EXPRESSION_TYPE_LSH_ASSIGN ||
+		e.Typ == EXPRESSION_TYPE_RSH_ASSIGN {
 		if t1.IsInteger() && t2.IsInteger() {
 			if t2.Typ == VARIABLE_TYPE_LONG {
 				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
@@ -168,7 +167,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 			return ret
 		}
 	}
-end:
+
 	*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 		errMsgPrefix(e.Pos),
 		e.OpName(),

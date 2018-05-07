@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -34,11 +35,6 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 	if err != nil {
 		return nil, err
 	}
-	if c.parser.eof {
-		err = c.parser.mkUnexpectedEofErr()
-		c.parser.errs = append(c.parser.errs, err)
-		return nil, err
-	}
 	if c.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
 		c.Next() // skip extends
 		c.classDefinition.Pos = c.parser.mkPos()
@@ -68,7 +64,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 		return nil, err
 	}
 	c.Next()
-	for !c.parser.eof {
+	for c.parser.token.Type != lex.TOKEN_EOF {
 		if len(c.parser.errs) > c.parser.nerr {
 			break
 		}

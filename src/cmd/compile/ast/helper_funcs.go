@@ -164,3 +164,36 @@ func checkConst(block *Block, c *Const) error {
 	}
 	return nil
 }
+
+func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, checked []*VariableType) {
+	if len(es) == 0 {
+		return
+	}
+	if len(es) != len(checked) { // means multi return
+		return
+	}
+	if len(es) != len(needs) { // not whole
+		return
+	}
+	for k, e := range es {
+		if e.IsLiteral() == false {
+			continue
+		}
+		if needs[k] == nil {
+			continue
+		}
+		if checked[k] == nil {
+			continue
+		}
+		if needs[k].Equal(checked[k]) {
+			continue // no need
+		}
+		if (needs[k].IsInteger() && checked[k].IsInteger()) ||
+			(needs[k].IsFloat() && checked[k].IsFloat()) {
+			pos := checked[k].Pos // keep pos
+			e.convertNumberLiteralTo(needs[k].Typ)
+			*checked[k] = *needs[k]
+			checked[k].Pos = pos
+		}
+	}
+}

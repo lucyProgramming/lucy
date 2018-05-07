@@ -98,9 +98,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		fallthrough
 	case ast.EXPRESSION_TYPE_XOR:
 		fallthrough
-	case ast.EXPRESSION_TYPE_LEFT_SHIFT:
+	case ast.EXPRESSION_TYPE_LSH:
 		fallthrough
-	case ast.EXPRESSION_TYPE_RIGHT_SHIFT:
+	case ast.EXPRESSION_TYPE_RSH:
 		fallthrough
 	case ast.EXPRESSION_TYPE_ADD:
 		fallthrough
@@ -132,9 +132,9 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		fallthrough
 	case ast.EXPRESSION_TYPE_OR_ASSIGN:
 		fallthrough
-	case ast.EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN:
+	case ast.EXPRESSION_TYPE_LSH_ASSIGN:
 		fallthrough
-	case ast.EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN:
+	case ast.EXPRESSION_TYPE_RSH_ASSIGN:
 		fallthrough
 	case ast.EXPRESSION_TYPE_XOR_ASSIGN:
 		maxstack = m.buildOpAssign(class, code, e, context, state)
@@ -172,7 +172,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
 		maxstack = m.buildSelfIncrement(class, code, e, context, state)
 	//
-	case ast.EXPRESSION_TYPE_BITWISE_:
+	case ast.EXPRESSION_TYPE_BITWISE_NOT:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NEGATIVE:
 		fallthrough

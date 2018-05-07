@@ -34,7 +34,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return ret
 	}
 	if t.Typ != VARIABLE_TYPE_FUNCTION {
-		*errs = append(*errs, fmt.Errorf("%s %s is not a function,but '%s'",
+		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), t.TypeString()))
 		return nil
@@ -56,6 +56,8 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		errmsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
 		*errs = append(*errs, fmt.Errorf(errmsg))
 	}
+	//trying to convert literal
+	convertLiteralExpressionsToNeeds(*args, f.Typ.needParameterTypes(), callargsTypes)
 	ret := f.Typ.retTypes(e.Pos)
 	if len(callargsTypes) < len(f.Typ.ParameterList) {
 		if f.HaveDefaultValue && len(callargsTypes) >= f.DefaultValueStartAt {

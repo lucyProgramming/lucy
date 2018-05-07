@@ -15,7 +15,7 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		return nil, err
 	}
 	names = []*ast.NameWithPos{}
-	for p.token.Type == lex.TOKEN_IDENTIFIER && !p.eof {
+	for p.token.Type == lex.TOKEN_IDENTIFIER && p.token.Type != lex.TOKEN_EOF {
 		names = append(names, &ast.NameWithPos{
 			Name: p.token.Data.(string),
 			Pos:  p.mkPos(),

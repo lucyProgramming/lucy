@@ -99,6 +99,7 @@ const (
 	TOKEN_GOTO               //goto
 	TOKEN_RANGE              //range
 	TOKEN_MAP                //map
+	TOKEN_EOF                // end of file
 )
 
 var (

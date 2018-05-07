@@ -2,17 +2,18 @@ package lc
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type NotSupportTypeSignatureError struct {
-}
+//type NotSupportTypeSignatureError struct {
+//}
 
-func (e *NotSupportTypeSignatureError) Error() string {
-	return "lucy does not support typed parameter currently"
-}
+//func (e *NotSupportTypeSignatureError) Error() string {
+//	return "lucy does not support typed parameter currently"
+//}
 
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name

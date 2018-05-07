@@ -24,7 +24,10 @@ type Run struct {
 	compilerAt          string
 	classPaths          []string
 	Flags               Flags
-	PackageCompiled     map[string]struct{}
+	PackagesCompiled    map[string]*PackageCompiled
+}
+type PackageCompiled struct {
+	meta *common.PackageMeta
 }
 
 func (r *Run) Help(command string) {
@@ -83,7 +86,7 @@ func (r *Run) RunCommand(command string, args []string) {
 		fmt.Println(err)
 		os.Exit(2)
 	}
-	r.PackageCompiled = make(map[string]struct{})
+	r.PackagesCompiled = make(map[string]*PackageCompiled)
 	founds := r.findPackageIn(r.Package)
 	err = r.foundError(r.Package, founds)
 	if err != nil {
@@ -179,6 +182,9 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
 		return
 	}
+	if t, ok := r.PackagesCompiled[packageName]; ok {
+		return t.meta, false, lucyFiles, nil
+	}
 	if r.Flags.forceReBuild {
 		return
 	}
@@ -243,9 +249,21 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	is := []string{}
 	err = json.Unmarshal(bs, &is)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse import failed,err:%v", err)
 	}
 	is, err = r.javaPackageFilter(is)
+	if err != nil {
+		err = fmt.Errorf("parse import failed,err:%v", err)
+	}
+	isM := make(map[string]struct{})
+	for _, v := range is {
+		isM[v] = struct{}{}
+	}
+	is = []string{}
+	for k, _ := range isM {
+		is = append(is, k)
+	}
+
 	return is, err
 }
 
@@ -337,7 +355,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 
 	meta, needBuild, lucyFiles, err := r.needCompile(lucypath, packageName)
 	if err != nil {
-		err = fmt.Errorf("check if not compile,err:%v", err)
+		err = fmt.Errorf("check if need compile,err:%v", err)
 		return
 	}
 	if needBuild == false { // current package no need to compile,but I need to check dependies
@@ -353,6 +371,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		}
 		needBuild = need
 	}
+
 	if needBuild == false { // no need actually
 		return
 	}
@@ -435,5 +454,8 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
 		bs,
 		0644)
+	r.PackagesCompiled[packageName] = &PackageCompiled{
+		meta: meta,
+	}
 	return
 }

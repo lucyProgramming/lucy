@@ -22,3 +22,11 @@ func (ft FunctionType) retTypes(pos *Pos) []*VariableType {
 	}
 	return ret
 }
+
+func (ft FunctionType) needParameterTypes() []*VariableType {
+	ret := make([]*VariableType, len(ft.ParameterList))
+	for k, v := range ft.ParameterList {
+		ret[k] = v.Typ
+	}
+	return ret
+}

@@ -40,15 +40,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
 		EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
-		if t1.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression on left,but '%s'",
-				errMsgPrefix(bin.Left.Pos),
-				t1.TypeString()))
-		}
-		if t2.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression on right,but '%s'",
-				errMsgPrefix(bin.Right.Pos),
-				t2.TypeString()))
+		if t1.Typ != VARIABLE_TYPE_BOOL || t2.Typ != VARIABLE_TYPE_BOOL {
+			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 		result = &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
@@ -60,39 +53,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Typ == EXPRESSION_TYPE_OR ||
 		EXPRESSION_TYPE_AND == e.Typ ||
 		EXPRESSION_TYPE_XOR == e.Typ {
-		if !t1.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s not a number expression",
-				errMsgPrefix(bin.Left.Pos)))
-		}
-		if !t2.IsNumber() {
-			*errs = append(*errs, fmt.Errorf("%s not a number expression",
-				errMsgPrefix(bin.Right.Pos)))
-		}
-		if t1.IsNumber() && t2.IsNumber() {
-			if t1.Equal(t2) { //force to equal
-				*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
-					errMsgPrefix(e.Pos), e.OpName(),
-					t1.TypeString(),
-					t2.TypeString()))
-			}
+		if t1.IsInteger() == false || t1.Equal(t2) == false {
+			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 		result = t1.Clone()
 		result.Pos = e.Pos
 		return result
 	}
 
-	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT ||
-		e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
-		if !t1.IsInteger() {
-			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
-				errMsgPrefix(bin.Left.Pos),
-				t1.TypeString()))
-		}
-		if !t2.IsInteger() {
-			*errs = append(*errs, fmt.Errorf("%s not a integer expression,but '%s'",
-				errMsgPrefix(bin.Right.Pos),
-				t2.TypeString()))
-		} else { // integer
+	if e.Typ == EXPRESSION_TYPE_LSH ||
+		e.Typ == EXPRESSION_TYPE_RSH {
+		if false == t1.IsInteger() || t2.IsInteger() == false {
+			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+		} else {
 			if t2.Typ == VARIABLE_TYPE_LONG {
 				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
 			}
@@ -182,6 +155,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		return t
 	}
+	//
 	if e.Typ == EXPRESSION_TYPE_ADD ||
 		e.Typ == EXPRESSION_TYPE_SUB ||
 		e.Typ == EXPRESSION_TYPE_MUL ||

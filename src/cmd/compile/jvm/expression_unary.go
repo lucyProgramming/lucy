@@ -29,7 +29,7 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_BITWISE_ {
+	if e.Typ == ast.EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*ast.Expression)
 		maxstack, _ = m.build(class, code, ee, context, state)
 		if t := jvmSize(ee.Value) * 2; t > maxstack {
@@ -41,42 +41,34 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 			code.Codes[code.CodeLength+1] = 255
 			code.Codes[code.CodeLength+2] = cg.OP_ixor
 			code.CodeLength += 3
+			if 2 > maxstack {
+				maxstack = 2
+			}
 		case ast.VARIABLE_TYPE_SHORT:
 			code.Codes[code.CodeLength] = cg.OP_sipush
 			code.Codes[code.CodeLength+1] = 255
 			code.Codes[code.CodeLength+2] = 255
 			code.Codes[code.CodeLength+3] = cg.OP_ixor
 			code.CodeLength += 4
+			if 2 > maxstack {
+				maxstack = 2
+			}
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], uint16(len(class.Class.ConstPool)))
+			class.InsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_ixor
 			code.CodeLength += 4
-			t := &cg.ConstPool{}
-			t.Tag = cg.CONSTANT_POOL_TAG_Integer
-			t.Info = make([]byte, 4)
-			t.Info[0] = 255
-			t.Info[1] = 255
-			t.Info[2] = 255
-			t.Info[3] = 255
-			class.Class.ConstPool = append(class.Class.ConstPool, t)
+			if 2 > maxstack {
+				maxstack = 2
+			}
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], uint16(len(class.Class.ConstPool)))
+			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_lxor
 			code.CodeLength += 4
-			t := &cg.ConstPool{}
-			t.Tag = cg.CONSTANT_POOL_TAG_Long
-			t.Info = make([]byte, 8)
-			t.Info[0] = 255
-			t.Info[1] = 255
-			t.Info[2] = 255
-			t.Info[3] = 255
-			t.Info[4] = 255
-			t.Info[5] = 255
-			t.Info[6] = 255
-			t.Info[7] = 255
-			class.Class.ConstPool = append(class.Class.ConstPool, t, nil)
+			if 4 > maxstack {
+				maxstack = 4
+			}
 		}
 		return
 	}
@@ -86,7 +78,6 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		var es []*cg.JumpBackPatch
 		maxstack, es = m.build(class, code, ee, context, state)
 		if len(es) > 0 {
-
 			state.pushStack(class, ee.Value)
 			backPatchEs(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)

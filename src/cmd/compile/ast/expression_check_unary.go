@@ -43,7 +43,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 		tt.Pos = e.Pos
 		return tt
 	}
-	if e.Typ == EXPRESSION_TYPE_BITWISE_ {
+	if e.Typ == EXPRESSION_TYPE_BITWISE_NOT {
 		if t.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
 				errMsgPrefix(e.Pos), t.TypeString()))

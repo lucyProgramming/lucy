@@ -40,7 +40,10 @@ func (c *Class) accessMethod(name string, args []*VariableType,
 					errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
 					return nil, false, fmt.Errorf(errmsg)
 				}
+			} else {
+				convertLiteralExpressionsToNeeds(*callArgs, m.Func.Typ.needParameterTypes(), args)
 			}
+
 			for k, v := range m.Func.Typ.ParameterList {
 				if k < len(args) {
 					if args[k] != nil && !v.Typ.TypeCompatible(args[k]) {

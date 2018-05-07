@@ -10,11 +10,6 @@ import (
 
 func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	p.Next() // skip enum
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		p.errs = append(p.errs, err)
-		return nil, err
-	}
 
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s enum type have no name", p.errorMsgPrefix())
@@ -26,11 +21,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		Pos:  p.mkPos(),
 	}
 	p.Next() // skip enum name
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		p.errs = append(p.errs, err)
-		return nil, err
-	}
+
 	if p.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s enum type have no '{' after it`s name defined,but '%s'",
 			p.errorMsgPrefix(), p.token.Desp)
@@ -38,10 +29,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		return nil, err
 	}
 	p.Next() // skip {
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		return nil, err
-	}
+
 	e = &ast.Enum{}
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
@@ -62,19 +50,10 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		},
 	}
 	p.Next()
-	if p.eof {
-		err = p.mkUnexpectedEofErr()
-		p.errs = append(p.errs, err)
-		return nil, err
-	}
+
 	var initExpression *ast.Expression
 	if p.token.Type == lex.TOKEN_ASSIGN { // first value defined here
 		p.Next()
-		if p.eof {
-			err = p.mkUnexpectedEofErr()
-			p.errs = append(p.errs, err)
-			return nil, err
-		}
 		initExpression, err = p.ExpressionParser.parseExpression(false)
 		if err != nil {
 			p.errs = append(p.errs, err)

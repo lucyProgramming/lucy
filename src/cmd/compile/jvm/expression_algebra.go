@@ -15,7 +15,6 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		e.Typ == ast.EXPRESSION_TYPE_AND ||
 		e.Typ == ast.EXPRESSION_TYPE_XOR {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
-
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
@@ -170,8 +169,8 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 
-	if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT ||
-		e.Typ == ast.EXPRESSION_TYPE_RIGHT_SHIFT {
+	if e.Typ == ast.EXPRESSION_TYPE_LSH ||
+		e.Typ == ast.EXPRESSION_TYPE_RSH {
 		maxstack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
@@ -180,7 +179,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
-			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+			if e.Typ == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
@@ -188,7 +187,7 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_SHORT:
-			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+			if e.Typ == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
@@ -196,14 +195,14 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
 		case ast.VARIABLE_TYPE_INT:
-			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+			if e.Typ == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
 			}
 			code.CodeLength++
 		case ast.VARIABLE_TYPE_LONG:
-			if e.Typ == ast.EXPRESSION_TYPE_LEFT_SHIFT {
+			if e.Typ == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_lshl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_lshr

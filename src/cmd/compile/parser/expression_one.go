@@ -7,10 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expression, error) {
-	if ep.parser.eof {
-		return nil, ep.parser.mkUnexpectedEofErr()
-	}
+func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch ep.parser.token.Type {
@@ -92,9 +89,6 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 		ep.Next()
 	case lex.TOKEN_LP:
 		ep.Next()
-		if ep.parser.eof {
-			return nil, ep.parser.mkUnexpectedEofErr()
-		}
 		left, err = ep.parseExpression(false)
 		if err != nil {
 			return nil, err
@@ -108,7 +102,7 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 		ep.Next() // skip ++
 		newE := &ast.Expression{}
 		newE.Pos = ep.parser.mkPos()
-		left, err = ep.parseOneExpression(false)
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -118,7 +112,7 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 	case lex.TOKEN_DECREMENT:
 		ep.Next() // skip --
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression(false)
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -129,7 +123,7 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 	case lex.TOKEN_NOT:
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression(false)
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -140,18 +134,18 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 	case lex.TOKEN_BITWISE_COMPLEMENT:
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression(false)
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
-		newE.Typ = ast.EXPRESSION_TYPE_BITWISE_
+		newE.Typ = ast.EXPRESSION_TYPE_BITWISE_NOT
 		newE.Data = left
 		newE.Pos = ep.parser.mkPos()
 		left = newE
 	case lex.TOKEN_SUB:
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression(false)
+		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -267,14 +261,6 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
-	if ep.parser.token.Type == lex.TOKEN_COLON &&
-		left.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
-		statementLevel {
-		left.Typ = ast.EXPRESSION_TYPE_LABLE
-		ep.Next()
-		return left, nil // lable here
-	}
-
 	for ep.parser.token.Type == lex.TOKEN_INCREMENT ||
 		ep.parser.token.Type == lex.TOKEN_DECREMENT ||
 		ep.parser.token.Type == lex.TOKEN_LP ||
@@ -331,11 +317,8 @@ func (ep *ExpressionParser) parseOneExpression(statementLevel bool) (*ast.Expres
 			if err != nil {
 				return nil, err
 			}
-			if e.Typ == ast.EXPRESSION_TYPE_LABLE || ep.parser.token.Type == lex.TOKEN_COLON {
-				if e.Typ == ast.EXPRESSION_TYPE_LABLE && ep.parser.token.Type == lex.TOKEN_COLON {
-					//
-					ep.parser.Next()
-				}
+			if ep.parser.token.Type == lex.TOKEN_COLON {
+				ep.parser.Next()
 				if ep.parser.token.Type == lex.TOKEN_COLON {
 					ep.parser.Next() // skip :
 				}

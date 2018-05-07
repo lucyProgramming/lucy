@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -25,7 +26,7 @@ func (ep *ExpressionParser) parseMapExprssion(needType bool) (*ast.Expression, e
 	m := &ast.ExpressionMap{}
 	m.Typ = typ
 	ret.Data = m
-	for ep.parser.eof == false && ep.parser.token.Type != lex.TOKEN_RC {
+	for ep.parser.token.Type != lex.TOKEN_EOF && ep.parser.token.Type != lex.TOKEN_RC {
 		// key
 		k, err := ep.parseExpression(false)
 		if err != nil {

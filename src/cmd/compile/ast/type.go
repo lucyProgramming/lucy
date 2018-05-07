@@ -275,35 +275,6 @@ func (t *VariableType) resolveName(block *Block) error {
 	return t.mkTypeFromInterface(d)
 }
 
-/*
-	number convert rule
-*/
-func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
-	if t.Typ == t2.Typ {
-		return t.Typ
-	}
-	if t.Typ == VARIABLE_TYPE_DOUBLE || t2.Typ == VARIABLE_TYPE_DOUBLE {
-		return VARIABLE_TYPE_DOUBLE
-	}
-	if t.Typ == VARIABLE_TYPE_FLOAT || t2.Typ == VARIABLE_TYPE_FLOAT {
-		if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
-			return VARIABLE_TYPE_DOUBLE
-		} else {
-			return VARIABLE_TYPE_FLOAT
-		}
-	}
-	if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
-		return VARIABLE_TYPE_LONG
-	}
-	if t.Typ == VARIABLE_TYPE_INT || t2.Typ == VARIABLE_TYPE_INT {
-		return VARIABLE_TYPE_INT
-	}
-	if t.Typ == VARIABLE_TYPE_SHORT || t2.Typ == VARIABLE_TYPE_SHORT {
-		return VARIABLE_TYPE_SHORT
-	}
-	return VARIABLE_TYPE_BYTE
-}
-
 func (t *VariableType) IsNumber() bool {
 	return t.IsInteger() || t.IsFloat()
 
@@ -312,9 +283,10 @@ func (t *VariableType) IsNumber() bool {
 func (t *VariableType) IsPointer() bool {
 	return t.Typ == VARIABLE_TYPE_OBJECT ||
 		t.Typ == VARIABLE_TYPE_ARRAY ||
+		t.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
 		t.Typ == VARIABLE_TYPE_MAP ||
-		t.Typ == VARIABLE_TYPE_STRING ||
-		t.Typ == VARIABLE_TYPE_JAVA_ARRAY
+		t.Typ == VARIABLE_TYPE_STRING
+
 }
 
 func (t *VariableType) IsInteger() bool {
@@ -417,7 +389,9 @@ func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
 	if v == assignMent {
 		return true
 	}
-
+	if v.Typ != assignMent.Typ {
+		return false
+	}
 	if v.IsPrimitive() && assignMent.IsPrimitive() {
 		return v.Typ == assignMent.Typ
 	}
@@ -452,3 +426,32 @@ func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
 	}
 	return false
 }
+
+///*
+//	number convert rule
+//*/
+//func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
+//	if t.Typ == t2.Typ {
+//		return t.Typ
+//	}
+//	if t.Typ == VARIABLE_TYPE_DOUBLE || t2.Typ == VARIABLE_TYPE_DOUBLE {
+//		return VARIABLE_TYPE_DOUBLE
+//	}
+//	if t.Typ == VARIABLE_TYPE_FLOAT || t2.Typ == VARIABLE_TYPE_FLOAT {
+//		if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
+//			return VARIABLE_TYPE_DOUBLE
+//		} else {
+//			return VARIABLE_TYPE_FLOAT
+//		}
+//	}
+//	if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
+//		return VARIABLE_TYPE_LONG
+//	}
+//	if t.Typ == VARIABLE_TYPE_INT || t2.Typ == VARIABLE_TYPE_INT {
+//		return VARIABLE_TYPE_INT
+//	}
+//	if t.Typ == VARIABLE_TYPE_SHORT || t2.Typ == VARIABLE_TYPE_SHORT {
+//		return VARIABLE_TYPE_SHORT
+//	}
+//	return VARIABLE_TYPE_BYTE
+//}

@@ -7,10 +7,7 @@ import (
 
 func New(bs []byte) *LucyLexer {
 	lex := &LucyLexer{bs: bs}
-	lex.end = len(bs) - 1
-	if lex.end == -1 { // incase len(bs) == 0
-		lex.end = 0
-	}
+	lex.end = len(bs)
 	lex.line = 1
 	lex.lastline = 1
 	lex.column = 1
@@ -51,7 +48,14 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 		}
 	}
 	return
+
 }
+
+func (lex *LucyLexer) ungetchar() {
+	lex.offset--
+	lex.line, lex.column = lex.lastline, lex.lastcolumn
+}
+
 func (lex *LucyLexer) isLetter(c byte) bool {
 	return ('a' <= c && c <= 'z') ||
 		('A' <= c && c <= 'Z')
@@ -76,11 +80,6 @@ func (lex *LucyLexer) hexbyte2Byte(c byte) byte {
 		return c - 'A' + 10
 	}
 	return c - '0' //also valid for digit
-}
-
-func (lex *LucyLexer) ungetchar() {
-	lex.offset--
-	lex.line, lex.column = lex.lastline, lex.lastcolumn
 }
 
 func (lex *LucyLexer) parseInt(bs []byte) int64 {
@@ -305,12 +304,12 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	return
 }
-func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, eof bool, err error) {
+func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column - 1 // c is readed
 	bs := []byte{c}
-	c, eof = lex.getchar()
+	c, eof := lex.getchar()
 	for eof == false {
 		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {
 			bs = append(bs, c)
@@ -372,14 +371,14 @@ func (lex *LucyLexer) tryLexElseIf() (is bool) {
 	return
 }
 
-func (lex *LucyLexer) lexString(endc byte) (token *Token, eof bool, err error) {
+func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column
 	token.Type = TOKEN_LITERAL_STRING
 	bs := []byte{}
 	var c byte
-	c, eof = lex.getchar()
+	c, eof := lex.getchar()
 	for c != endc && c != '\n' && eof == false {
 		if c != '\\' {
 			bs = append(bs, c)
@@ -497,29 +496,37 @@ redo:
 	goto redo
 }
 
-func (lex *LucyLexer) Next() (token *Token, eof bool, err error) {
+func (lex *LucyLexer) Next() (token *Token, err error) {
 redo:
+	token = &Token{}
 	var c byte
-	c, eof = lex.getchar()
+	c, eof := lex.getchar()
 	if eof {
+		token.StartLine = lex.line
+		token.StartColumn = lex.column
+		token.Type = TOKEN_EOF
+		token.Desp = "EOF"
 		return
 	}
 	for c == ' ' || c == '\t' || c == '\r' {
 		c, eof = lex.getchar()
 	}
 	if eof {
+		token.StartLine = lex.line
+		token.StartColumn = lex.column
+		token.Type = TOKEN_EOF
+		token.Desp = "EOF"
 		return
 	}
 	if lex.isLetter(c) || c == '_' || c == '$' {
 		return lex.lexIdentifier(c)
 	}
-	token = &Token{}
-	token.StartLine = lex.line
-	token.StartColumn = lex.column - 1
 	if lex.isDigit(c) {
 		eof, err = lex.lexNumber(token, c)
 		return
 	}
+	token.StartLine = lex.line
+	token.StartColumn = lex.column
 	switch c {
 	case '(':
 		token.Type = TOKEN_LP
@@ -730,7 +737,7 @@ redo:
 	case '"':
 		return lex.lexString('"')
 	case '\'':
-		token, eof, err = lex.lexString('\'')
+		token, err = lex.lexString('\'')
 		if err == nil {
 			if t := []byte(token.Data.(string)); len(t) != 1 {
 				err = fmt.Errorf("expect one char")

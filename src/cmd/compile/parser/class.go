@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -46,7 +47,7 @@ func (c *Class) parseClassName() (string, error) {
 
 func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
 	ret := []*ast.NameWithPos{}
-	for c.parser.eof == false {
+	for c.parser.token.Type != lex.TOKEN_EOF {
 		pos := c.parser.mkPos()
 		name, err := c.parseClassName()
 		if err != nil {
@@ -74,11 +75,6 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	c.classDefinition.Name, err = c.parseClassName()
 	c.classDefinition.Block.IsClassBlock = true
 	if err != nil {
-		return nil, err
-	}
-	if c.parser.eof {
-		err = c.parser.mkUnexpectedEofErr()
-		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
 	if c.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
@@ -126,7 +122,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		}
 		return fmt.Errorf("%s not a valid token after 'static'", c.parser.errorMsgPrefix())
 	}
-	for !c.parser.eof {
+	for c.parser.token.Type != lex.TOKEN_EOF {
 		if len(c.parser.errs) > c.parser.nerr {
 			break
 		}
@@ -183,7 +179,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_FUNCTION:
-			f, err := c.parser.Function.parse(false)
+			f, err := c.parser.Function.parse(true)
 			if err != nil {
 				c.consume(untils_rc)
 				c.Next()

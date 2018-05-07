@@ -80,6 +80,7 @@ func (test *Test) testDir(dir string, prefix string) {
 	if true == common.SourceFileExist(path) {
 		// test this package
 		cmd := exec.Command(test.lucyCommandAt, "run", "-forceReBuild", prefix)
+		fmt.Println("@@@@@@@@@@@@@@@@@@@@@", test.lucyCommandAt, "run", "-forceReBuild", prefix)
 		fmt.Printf(test_package_pre_msg, prefix, path) // output debug infos
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
@@ -93,7 +94,7 @@ func (test *Test) testDir(dir string, prefix string) {
 		err = cmd.Wait()
 		if err != nil {
 			fmt.Printf("test package '%s'  in '%s' failed\n", prefix, path)
-			fmt.Printf("are you wish to continue?[y/n]")
+			fmt.Printf("are you wish to continue?[y/n]\n")
 			buf := bufio.NewReader(os.Stdin)
 			line, _, _ := buf.ReadLine()
 			if line != nil && len(line) > 0 && (line[0] == 'n' || line[0] == 'N') {

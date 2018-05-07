@@ -39,7 +39,7 @@ func (e *Expression) constFold() (is bool, err error) {
 		return true, nil
 	}
 	// ~
-	if e.Typ == EXPRESSION_TYPE_BITWISE_ {
+	if e.Typ == EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*Expression)
 		is, err = ee.constFold()
 		if err != nil || is == false {
@@ -133,32 +133,32 @@ func (e *Expression) constFold() (is bool, err error) {
 		return
 	}
 	// <<  >>
-	if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT || e.Typ == EXPRESSION_TYPE_RIGHT_SHIFT {
+	if e.Typ == EXPRESSION_TYPE_LSH || e.Typ == EXPRESSION_TYPE_RSH {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.isInteger() == false || bin.Right.isInteger() == false {
 				return
 			}
 			switch bin.Left.Typ {
 			case EXPRESSION_TYPE_BYTE:
-				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+				if e.Typ == EXPRESSION_TYPE_LSH {
 					e.Data = byte(bin.Left.Data.(byte) << bin.Right.getByteValue())
 				} else {
 					e.Data = byte(bin.Left.Data.(byte) >> bin.Right.getByteValue())
 				}
 			case EXPRESSION_TYPE_SHORT:
-				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+				if e.Typ == EXPRESSION_TYPE_LSH {
 					e.Data = int32(bin.Left.Data.(int32) << bin.Right.getByteValue())
 				} else {
 					e.Data = int32(bin.Left.Data.(int32) >> bin.Right.getByteValue())
 				}
 			case EXPRESSION_TYPE_INT:
-				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+				if e.Typ == EXPRESSION_TYPE_LSH {
 					e.Data = int32(bin.Left.Data.(int32) << bin.Right.getByteValue())
 				} else {
 					e.Data = int32(bin.Left.Data.(int32) >> bin.Right.getByteValue())
 				}
 			case EXPRESSION_TYPE_LONG:
-				if e.Typ == EXPRESSION_TYPE_LEFT_SHIFT {
+				if e.Typ == EXPRESSION_TYPE_LSH {
 					e.Data = int64(bin.Left.Data.(int64) << bin.Right.getByteValue())
 				} else {
 					e.Data = int64(bin.Left.Data.(int64) >> bin.Right.getByteValue())
@@ -179,7 +179,6 @@ func (e *Expression) constFold() (is bool, err error) {
 				bin.Left.Typ != bin.Right.Typ {
 				return // not integer or type not equal
 			}
-			e.Typ = bin.Left.Typ
 			switch bin.Left.Typ {
 			case EXPRESSION_TYPE_BYTE:
 				if e.Typ == EXPRESSION_TYPE_AND {
@@ -215,6 +214,7 @@ func (e *Expression) constFold() (is bool, err error) {
 				}
 			}
 			is = true
+			e.Typ = bin.Left.Typ
 			return
 		}
 		return e.getBinaryExpressionConstValue(f)

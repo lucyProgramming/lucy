@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -28,7 +29,7 @@ func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 	s := &ast.StatementSwitch{}
 	s.Pos = pos
 	s.Condition = condition
-	for b.parser.eof == false && b.parser.token.Type == lex.TOKEN_CASE {
+	for b.parser.token.Type != lex.TOKEN_EOF && b.parser.token.Type == lex.TOKEN_CASE {
 		b.Next() // skip case
 		es, err := b.parser.ExpressionParser.parseExpressions()
 		if err != nil {

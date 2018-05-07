@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
@@ -20,13 +19,8 @@ func (p *Function) consume(untils map[int]bool) {
 	p.parser.consume(untils)
 }
 
-func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
+func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	p.Next() // skip fn key word
-	if p.parser.eof {
-		err = p.parser.mkUnexpectedEofErr()
-		p.parser.errs = append(p.parser.errs, err)
-		return nil, err
-	}
 	f = &ast.Function{}
 	f.Pos = p.parser.mkPos()
 	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
@@ -38,17 +32,10 @@ func (p *Function) parse(ispublic bool) (f *ast.Function, err error) {
 		p.consume(untils_lc)
 	}
 	if p.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s except { but %s", p.parser.errorMsgPrefix(), p.parser.token.Desp)
+		err = fmt.Errorf("%s except '{' but '%s'", p.parser.errorMsgPrefix(), p.parser.token.Desp)
 		p.parser.errs = append(p.parser.errs, err)
 		return
 	}
-	if ispublic {
-		f.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	} else {
-		f.AccessFlags |= cg.ACC_METHOD_PRIVATE
-	}
-	f.AccessFlags |= cg.ACC_METHOD_STATIC
-	f.AccessFlags |= cg.ACC_METHOD_FINAL
 	f.Block.IsFunctionTopBlock = true
 	p.Next()
 	err = p.parser.Block.parse(&f.Block, false, lex.TOKEN_RC)

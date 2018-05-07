@@ -26,7 +26,7 @@ func (s *StatementReturn) check(b *Block) []error {
 		return nil
 	}
 	errs := make([]error, 0)
-	returndValueTypes := checkExpressions(b, s.Expressions, &errs)
+	returndValueTypes := checkRightValuesValid(checkExpressions(b, s.Expressions, &errs), &errs)
 	pos := s.Expressions[len(s.Expressions)-1].Pos
 	rs := b.InheritedAttribute.Function.Typ.ReturnList
 	if len(returndValueTypes) < len(rs) {
@@ -35,6 +35,8 @@ func (s *StatementReturn) check(b *Block) []error {
 	if len(returndValueTypes) > len(rs) {
 		errs = append(errs, fmt.Errorf("%s too many arguments to return", errMsgPrefix(pos)))
 	}
+	convertLiteralExpressionsToNeeds(s.Expressions,
+		b.InheritedAttribute.Function.Typ.retTypes(s.Expressions[0].Pos), returndValueTypes)
 	for k, v := range rs {
 		if k < len(returndValueTypes) && returndValueTypes[k] != nil {
 			if !v.Typ.TypeCompatible(returndValueTypes[k]) {

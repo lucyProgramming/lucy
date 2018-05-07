@@ -101,9 +101,9 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		fallthrough
 	case EXPRESSION_TYPE_XOR:
 		fallthrough
-	case EXPRESSION_TYPE_LEFT_SHIFT:
+	case EXPRESSION_TYPE_LSH:
 		fallthrough
-	case EXPRESSION_TYPE_RIGHT_SHIFT:
+	case EXPRESSION_TYPE_RSH:
 		fallthrough
 	case EXPRESSION_TYPE_EQ:
 		fallthrough
@@ -198,7 +198,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
-	case EXPRESSION_TYPE_BITWISE_:
+	case EXPRESSION_TYPE_BITWISE_NOT:
 		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
 			Types = []*VariableType{tt}
@@ -242,9 +242,9 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		fallthrough
 	case EXPRESSION_TYPE_OR_ASSIGN:
 		fallthrough
-	case EXPRESSION_TYPE_LEFT_SHIFT_ASSIGN:
+	case EXPRESSION_TYPE_LSH_ASSIGN:
 		fallthrough
-	case EXPRESSION_TYPE_RIGHT_SHIFT_ASSIGN:
+	case EXPRESSION_TYPE_RSH_ASSIGN:
 		fallthrough
 	case EXPRESSION_TYPE_XOR_ASSIGN:
 		tt := e.checkOpAssignExpression(block, &errs)
@@ -271,8 +271,6 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		errs = append(errs, fmt.Errorf("%s cannot use function as  a expression",
 			errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_LIST:
-		fallthrough
-	case EXPRESSION_TYPE_LABLE:
 		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 			"this may be cause be compiler error,please contact with author",
 			errMsgPrefix(e.Pos), e.OpName()))
