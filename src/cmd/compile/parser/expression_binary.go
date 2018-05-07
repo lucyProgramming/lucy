@@ -43,7 +43,9 @@ func (ep *ExpressionParser) parseBitANDORExpression() (*ast.Expression, error) {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_AND || ep.parser.token.Type == lex.TOKEN_OR || ep.parser.token.Type == lex.TOKEN_XOR) &&
+	for (ep.parser.token.Type == lex.TOKEN_AND ||
+		ep.parser.token.Type == lex.TOKEN_OR ||
+		ep.parser.token.Type == lex.TOKEN_XOR) &&
 		ep.parser.token.Type != lex.TOKEN_EOF {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
@@ -77,7 +79,8 @@ func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_EQUAL || ep.parser.token.Type == lex.TOKEN_NE) && ep.parser.token.Type != lex.TOKEN_EOF {
+	for (ep.parser.token.Type == lex.TOKEN_EQUAL ||
+		ep.parser.token.Type == lex.TOKEN_NE) && ep.parser.token.Type != lex.TOKEN_EOF {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
@@ -145,7 +148,8 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 	}
 	var typ int
 	for (ep.parser.token.Type == lex.TOKEN_LEFT_SHIFT ||
-		ep.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) && ep.parser.token.Type != lex.TOKEN_EOF {
+		ep.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) &&
+		ep.parser.token.Type != lex.TOKEN_EOF {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
@@ -176,7 +180,8 @@ func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_ADD || ep.parser.token.Type == lex.TOKEN_SUB) && ep.parser.token.Type != lex.TOKEN_EOF {
+	for (ep.parser.token.Type == lex.TOKEN_ADD || ep.parser.token.Type == lex.TOKEN_SUB) &&
+		ep.parser.token.Type != lex.TOKEN_EOF {
 		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()

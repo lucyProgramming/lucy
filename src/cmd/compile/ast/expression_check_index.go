@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *VariableType) {
+func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *VariableType {
 	index := e.Data.(*ExpressionIndex)
 	ts, es := index.Expression.check(block)
 	if errsNotEmpty(es) {
@@ -63,11 +63,9 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) (t *Varia
 	if indexType == nil {
 		return ret
 	}
-	if t != nil {
-		if t.Map.K.Equal(indexType) == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-				errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.K.TypeString()))
-		}
+	if t.Map.K.Equal(indexType) == false {
+		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
+			errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.K.TypeString()))
 	}
 	return ret
 

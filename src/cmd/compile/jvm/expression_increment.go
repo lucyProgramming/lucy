@@ -13,8 +13,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		ok &&
 		t.Var.BeenCaptured == false &&
 		t.Var.Typ.Typ == ast.VARIABLE_TYPE_INT {
-
-		if t.Var.LocalValOffset > 255 { // earlly check
+		if t.Var.LocalValOffset > 255 { // early check
 			panic("over 255")
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
@@ -31,7 +30,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		} else { // --
 			code.Codes[code.CodeLength] = cg.OP_iinc
 			code.Codes[code.CodeLength+1] = byte(t.Var.LocalValOffset)
-			code.Codes[code.CodeLength+2] = 255
+			code.Codes[code.CodeLength+2] = 255 // -1
 			code.CodeLength += 3
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
@@ -55,9 +54,6 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		maxstack = t
 	}
 	currentStack := jvmSize(ee.Value) + remainStack
-	if currentStack > maxstack {
-		maxstack = currentStack
-	}
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
 			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
@@ -107,9 +103,9 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_lconst_1
 			code.CodeLength++
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_iconst_m1
-			code.Codes[code.CodeLength+1] = cg.OP_i2l
-			code.CodeLength += 2
+			code.Codes[code.CodeLength] = cg.OP_ldc2_w
+			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
 		}
 		if t := currentStack + 2; t > maxstack { // last op will change stack
 			maxstack = t
@@ -121,11 +117,10 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_fconst_1
 			code.CodeLength++
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_iconst_m1
-			code.Codes[code.CodeLength+1] = cg.OP_i2f
-			code.CodeLength += 2
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertFloatConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
 		}
-		code.Codes[code.CodeLength+1] = cg.OP_i2f
 		if t := currentStack + 1; t > maxstack { // last op will change stack
 			maxstack = t
 		}
@@ -133,12 +128,12 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
 		if e.IsSelfIncrement() {
-			code.Codes[code.CodeLength] = cg.OP_dconst_0
+			code.Codes[code.CodeLength] = cg.OP_dconst_1
 			code.CodeLength++
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_iconst_m1
-			code.Codes[code.CodeLength+1] = cg.OP_i2d
-			code.CodeLength += 2
+			code.Codes[code.CodeLength] = cg.OP_ldc2_w
+			class.InsertDoubleConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
 		}
 		if t := currentStack + 2; t > maxstack { // last op will change stack
 			maxstack = t

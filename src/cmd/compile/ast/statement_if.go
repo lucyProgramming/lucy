@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -45,11 +46,9 @@ func (s *StatementIF) check(father *Block) []error {
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
-			if conditionType != nil {
-				if conditionType.Typ != VARIABLE_TYPE_BOOL {
-					errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-						errMsgPrefix(s.Condition.Pos)))
-				}
+			if conditionType != nil && conditionType.Typ != VARIABLE_TYPE_BOOL {
+				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+					errMsgPrefix(s.Condition.Pos)))
 			}
 			errs = append(errs, v.Block.check()...)
 		}

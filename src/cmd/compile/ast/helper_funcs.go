@@ -63,15 +63,14 @@ func mkVoidType(pos *Pos) *VariableType {
 func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
 	ret = []*VariableType{}
 	for _, v := range ts {
-		if v == nil { // avoid null pointer
+		ret = append(ret, v)
+		if v == nil {
 			continue
 		}
-		if !v.RightValueValid() {
+		if false == v.RightValueValid() {
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value",
 				errMsgPrefix(v.Pos), v.TypeString()))
-			continue
 		}
-		ret = append(ret, v)
 	}
 	return ret
 }
@@ -169,10 +168,7 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, c
 	if len(es) == 0 {
 		return
 	}
-	if len(es) != len(checked) { // means multi return
-		return
-	}
-	if len(es) != len(needs) { // not whole
+	if len(es) != len(checked) || len(es) != len(needs) { // means multi return
 		return
 	}
 	for k, e := range es {

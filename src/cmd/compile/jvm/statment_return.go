@@ -35,11 +35,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1)
 			}
-		} else { // load return parameter
 		}
 		// execute defer first
 		if len(statementReturn.Defers) > 0 {
-			//return value  is on stack,  store it temp var
+			//return value  is on stack,  store to local var
 			if len(statementReturn.Expressions) > 0 { //rewrite return value
 				m.storeLocalVar(class, code, context.function.Typ.ReturnList[0])
 			}
@@ -107,15 +106,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		maxstack = 2 // max stack is 2
-		{
-			t := state.newStackMapVerificationTypeInfo(class,
-				state.newObjectVariableType(java_arrylist_class))
-			state.Stacks = append(state.Stacks, t)
-			state.Stacks = append(state.Stacks, t)
-			defer func() {
-				state.popStack(2)
-			}()
-		}
+		arrayListObject := state.newObjectVariableType(java_arrylist_class)
+		state.pushStack(class, arrayListObject)
+		state.pushStack(class, arrayListObject)
+		defer state.popStack(2)
 		for _, v := range statementReturn.Expressions {
 			currentStack := uint16(1)
 			code.Codes[code.CodeLength] = cg.OP_dup // dup array list
@@ -125,9 +119,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				maxstack = maxstack
 			}
 			if v.MayHaveMultiValue() && len(v.Values) > 1 {
-				if currentStack > maxstack {
-					maxstack = maxstack
-				} // make the call
 				stack, _ := m.MakeExpression.build(class, code, v, context, nil)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
@@ -142,10 +133,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				code.CodeLength += 4
 				continue
 			}
-			variableType := v.Value
-			if v.MayHaveMultiValue() {
-				variableType = v.Values[0]
-			}
 			stack, es := m.MakeExpression.build(class, code, v, context, state)
 			if len(es) > 0 {
 				backPatchEs(es, code.CodeLength)
@@ -157,7 +144,9 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				maxstack = t
 			}
 			//convert to object
-			typeConverter.putPrimitiveInObject(class, code, variableType)
+			if v.Value.IsPointer() == false {
+				typeConverter.putPrimitiveInObject(class, code, v.Value)
+			}
 			// append
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -168,8 +157,6 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength+3] = cg.OP_pop
 			code.CodeLength += 4
 		}
-	} else {
-		//nothing to do
 	}
 	if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 		//store a simple var,should be no exception
@@ -346,7 +333,6 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 			m.buildReturnFromFunctionReturnList(class, code, context)
 			context.MakeStackMap(code, state, code.CodeLength)
 			binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
-
 		}
 		index--
 	}

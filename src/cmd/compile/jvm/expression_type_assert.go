@@ -15,14 +15,10 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof
 	class.InsertClassConst(assert.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
-	if 3 > maxstack {
-		maxstack = 3
-	}
-	{
+	code.Codes[code.CodeLength+3] = cg.OP_dup
+	code.CodeLength += 4
 
+	{
 		state.pushStack(class, assert.Expression.Value)
 		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength+7)
@@ -69,9 +65,9 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 		Method:     "add",
 		Descriptor: "(Ljava/lang/Object;)Z",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	code.Codes[code.CodeLength] = cg.OP_pop
-	code.CodeLength++
+	code.Codes[code.CodeLength+3] = cg.OP_pop
+	code.CodeLength += 4
+
 	// store if ok
 	code.Codes[code.CodeLength] = cg.OP_dup_x1
 	code.CodeLength++
@@ -84,8 +80,7 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 		Method:     "add",
 		Descriptor: "(Ljava/lang/Object;)Z",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	code.Codes[code.CodeLength] = cg.OP_pop
-	code.CodeLength++
+	code.Codes[code.CodeLength+3] = cg.OP_pop
+	code.CodeLength += 4
 	return
 }

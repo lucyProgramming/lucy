@@ -29,7 +29,6 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		}
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
-
 	}
 	// string([]byte{97,97})
 	if convertion.Typ.Typ == ast.VARIABLE_TYPE_STRING &&

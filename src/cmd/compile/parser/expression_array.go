@@ -27,7 +27,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 			Pos:  pos,
 		}, err
 	} else {
-		ep.Next()
+		ep.Next() // skip [
 		t, err = ep.parser.parseType()
 		if err != nil {
 			ep.parser.consume(untils_lc)

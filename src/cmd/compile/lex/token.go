@@ -61,8 +61,8 @@ const (
 	TOKEN_AND_ASSIGN         // &=
 	TOKEN_OR_ASSIGN          // |=
 	TOKEN_XOR_ASSIGN         // ^=
-	TOKEN_LEFT_SHIFT_ASSIGN  // <<=
-	TOKEN_RIGHT_SHIFT_ASSIGN // >>=
+	TOKEN_LSH_ASSIGN         // <<=
+	TOKEN_RSH_ASSIGN         // >>=
 	TOKEN_NOT                // !false
 	TOKEN_SWITCH             //switch
 	TOKEN_CASE               //case

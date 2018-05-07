@@ -88,7 +88,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 			}
 			variable := t.Package.Block.SearchByName(dot.Name)
 			if vd, ok := variable.(*VariableDefinition); ok == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not varible",
+				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			} else {

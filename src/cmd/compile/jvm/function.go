@@ -26,7 +26,7 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			maxstack = t
 		}
 		m.storeLocalVar(class, code, v)
-		v.LocalValOffset = code.MaxLocals
+		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
@@ -48,6 +48,8 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			}
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
+			state.pushStack(class,
+				state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
 		} else {
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals += jvmSize(v.Typ)
@@ -55,20 +57,16 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			length := len(state.Stacks)
-			if v.BeenCaptured {
-				state.pushStack(class,
-					state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
-			}
 			state.pushStack(class, v.Typ)
 			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(len(state.Stacks) - length)
+			state.popStack(1)
 		}
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
 		m.storeLocalVar(class, code, v)
 		if v.BeenCaptured {
+			state.popStack(1)
 			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
 		} else {
 			state.appendLocals(class, v.Typ)

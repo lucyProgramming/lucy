@@ -15,10 +15,9 @@ func registerBuildinFunctions() {
 		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
 			e.BuildinFunctionMeta = meta
-			if len(args) == 0 {
+			if len(args) == 0 || args[0] == nil {
 				return // not error
 			}
-
 			if args[0].Typ == VARIABLE_TYPE_OBJECT {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {
@@ -130,6 +129,9 @@ func registerBuildinFunctions() {
 			*errs = append(*errs, err)
 			return
 		}
+		if args[0] == nil {
+			return
+		}
 		if args[0].Typ != VARIABLE_TYPE_STRING {
 			err := fmt.Errorf("%s '%s' first argument must be string",
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_SPRINTF)
@@ -159,6 +161,10 @@ func registerBuildinFunctions() {
 				*errs = append(*errs, err)
 				return
 			}
+			if args[0] == nil {
+				return
+			}
+
 			if args[0].Typ == VARIABLE_TYPE_OBJECT {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {
@@ -177,6 +183,9 @@ func registerBuildinFunctions() {
 				err := fmt.Errorf("%s missing format argument",
 					errMsgPrefix(pos))
 				*errs = append(*errs, err)
+				return
+			}
+			if args[0] == nil {
 				return
 			}
 			if args[0].Typ != VARIABLE_TYPE_STRING {
@@ -203,6 +212,9 @@ func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *
 	args []*VariableType, pos *Pos) {
 	if len(args) != 1 {
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
+		return
+	}
+	if args[0] == nil {
 		return
 	}
 	if args[0].IsPointer() == false || args[0].Typ == VARIABLE_TYPE_STRING {

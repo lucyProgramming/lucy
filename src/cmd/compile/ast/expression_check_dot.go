@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -32,19 +33,18 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, err)
 			return nil
 		}
-		if t.Package.Block.Funcs != nil && t.Package.Block.Funcs[dot.Name] != nil {
-			tt := &VariableType{}
-			tt.Typ = VARIABLE_TYPE_FUNCTION
-			f := t.Package.Block.Funcs[dot.Name]
-			tt.Function = f
+		if t.Package.Block.Vars != nil && t.Package.Block.Vars[dot.Name] != nil {
+			v := t.Package.Block.Vars[dot.Name]
+			tt := v.Typ.Clone()
 			tt.Pos = e.Pos
-			if (f.AccessFlags & cg.ACC_METHOD_PUBLIC) == 0 {
-				err = fmt.Errorf("%s function '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
+			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
+				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
 			}
+			dot.PackageVariable = v
 			return tt
 		}
-		if t.Package.Block.Funcs != nil && t.Package.Block.Consts[dot.Name] != nil {
+		if t.Package.Block.Consts != nil && t.Package.Block.Consts[dot.Name] != nil {
 			c := t.Package.Block.Consts[dot.Name]
 			e.fromConst(c) //
 			tt := c.Typ.Clone()
@@ -55,7 +55,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			}
 			return tt
 		}
-		if t.Package.Block.Funcs != nil && t.Package.Block.Classes[dot.Name] != nil {
+		if t.Package.Block.Classes != nil && t.Package.Block.Classes[dot.Name] != nil {
 			c := t.Package.Block.Classes[dot.Name]
 			tt := &VariableType{}
 			tt.Pos = e.Pos
@@ -67,18 +67,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			}
 			return tt
 		}
-		if t.Package.Block.Funcs != nil && t.Package.Block.Vars[dot.Name] != nil {
-			v := t.Package.Block.Vars[dot.Name]
-			tt := v.Typ.Clone()
-			tt.Pos = e.Pos
-			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
-				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
-				*errs = append(*errs, err)
-			}
-			dot.PackageVariable = v
-			return tt
-		}
-		if t.Package.Block.Funcs != nil && t.Package.Block.EnumNames[dot.Name] != nil {
+		if t.Package.Block.EnumNames != nil && t.Package.Block.EnumNames[dot.Name] != nil {
 			n := t.Package.Block.EnumNames[dot.Name]
 			if (n.Enum.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), dot.Name)

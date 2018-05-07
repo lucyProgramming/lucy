@@ -256,7 +256,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+1] = byte(autoVar.KeySetsK)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
-	jumpto(cg.OP_goto, code, loopBeginsAt)
+	jumpTo(cg.OP_goto, code, loopBeginsAt)
 	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
 
 	{

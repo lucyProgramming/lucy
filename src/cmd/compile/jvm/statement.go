@@ -73,7 +73,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		code.CodeLength++
 	case ast.STATEMENT_TYPE_GOTO:
 		if s.StatementGoto.StatementLable.OffsetGenerated {
-			jumpto(cg.OP_goto, code, s.StatementGoto.StatementLable.Offset)
+			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLable.Offset)
 		} else {
 			b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 			s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)

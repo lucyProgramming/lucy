@@ -16,9 +16,10 @@ func New(bs []byte) *LucyLexer {
 }
 
 type LucyLexer struct {
-	bs                                 []byte
-	lastline, lastcolumn, line, column int
-	offset, end                        int
+	bs                   []byte
+	lastline, lastcolumn int
+	line, column         int
+	offset, end          int
 }
 
 func (lex *LucyLexer) Pos() (int, int) {
@@ -33,14 +34,12 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 	offset := lex.offset
 	lex.offset++
 	c = lex.bs[offset]
+	lex.lastline = lex.line
+	lex.lastcolumn = lex.column
 	if c == '\n' {
-		lex.lastline = lex.line
-		lex.lastcolumn = lex.column
 		lex.line++
 		lex.column = 1
 	} else {
-		lex.lastcolumn = lex.column
-		lex.lastline = lex.line
 		if c == '\t' {
 			lex.column += 4 // TODO:: 4 OR 8
 		} else {
@@ -489,8 +488,11 @@ redo:
 	for c != '*' && eof == false {
 		c, eof = lex.getchar()
 	}
+	if eof {
+		return
+	}
 	c, eof = lex.getchar()
-	if eof == true || c == '/' {
+	if eof || c == '/' {
 		return
 	}
 	goto redo
@@ -606,7 +608,7 @@ redo:
 		} else if c == '>' {
 			c, eof = lex.getchar()
 			if c == '=' {
-				token.Type = TOKEN_RIGHT_SHIFT_ASSIGN
+				token.Type = TOKEN_RSH_ASSIGN
 				token.Desp = ">>="
 			} else {
 				lex.ungetchar()
@@ -626,7 +628,7 @@ redo:
 		} else if c == '<' {
 			c, eof = lex.getchar()
 			if c == '=' {
-				token.Type = TOKEN_LEFT_SHIFT_ASSIGN
+				token.Type = TOKEN_LSH_ASSIGN
 				token.Desp = "<<="
 			} else {
 				lex.ungetchar()

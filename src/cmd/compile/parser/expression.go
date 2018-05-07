@@ -37,12 +37,12 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 }
 
 //parse assign expression
-func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
 	left, err := ep.parseLogicalExpression() //
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_COMMA && statemenLevel { // read more
+	for ep.parser.token.Type == lex.TOKEN_COMMA && statementLevel { // read more
 		ep.Next()                                 //  skip comma
 		left2, err := ep.parseLogicalExpression() //
 		if err != nil {
@@ -112,10 +112,10 @@ func (ep *ExpressionParser) parseExpression(statemenLevel bool) (*ast.Expression
 	case lex.TOKEN_MOD_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
-	case lex.TOKEN_LEFT_SHIFT_ASSIGN:
+	case lex.TOKEN_LSH_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_LSH_ASSIGN, false)
-	case lex.TOKEN_RIGHT_SHIFT_ASSIGN:
+	case lex.TOKEN_RSH_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_RSH_ASSIGN, false)
 	case lex.TOKEN_AND_ASSIGN:

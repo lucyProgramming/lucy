@@ -51,10 +51,10 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
-		jumpto(cg.OP_goto, code, loopBeginAt)
+		jumpTo(cg.OP_goto, code, loopBeginAt)
 	} else {
 		if s.Block.DeadEnding == false { //will execute to here
-			jumpto(cg.OP_goto, code, loopBeginAt)
+			jumpTo(cg.OP_goto, code, loopBeginAt)
 		}
 	}
 	return

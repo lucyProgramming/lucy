@@ -14,7 +14,7 @@ func backPatchEs(es []*cg.JumpBackPatch, t int) {
 	}
 }
 
-func jumpto(op byte, code *cg.AttributeCode, to int) {
+func jumpTo(op byte, code *cg.AttributeCode, to int) {
 	b := (&cg.JumpBackPatch{}).FromCode(op, code)
 	backPatchEs([]*cg.JumpBackPatch{b}, to)
 }

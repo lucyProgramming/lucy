@@ -43,7 +43,6 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_MAP:
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
-
 			context.MakeStackMap(code, state, code.CodeLength+7)
 			state.pushStack(class, &ast.VariableType{
 				Typ: ast.VARIABLE_TYPE_BOOL,
@@ -98,7 +97,8 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					}
 					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
-					gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
+					// consume result on stack
+					gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
 				}
 				continue
 			}

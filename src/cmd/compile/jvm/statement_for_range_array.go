@@ -288,7 +288,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 	//goto begin
-	jumpto(cg.OP_goto, code, loopbeginAt)
+	jumpTo(cg.OP_goto, code, loopbeginAt)
 	backPatchEs([]*cg.JumpBackPatch{rangeend}, code.CodeLength) // jump to here
 	//pop index on stack
 

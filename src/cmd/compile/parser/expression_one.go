@@ -51,18 +51,10 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
-
 		ep.Next()
 	case lex.TOKEN_LITERAL_LONG:
 		left = &ast.Expression{
 			Typ:  ast.EXPRESSION_TYPE_LONG,
-			Data: ep.parser.token.Data,
-			Pos:  ep.parser.mkPos(),
-		}
-		ep.Next()
-	case lex.TOKEN_LITERAL_STRING:
-		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_STRING,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
@@ -81,6 +73,13 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
+	case lex.TOKEN_LITERAL_STRING:
+		left = &ast.Expression{
+			Typ:  ast.EXPRESSION_TYPE_STRING,
+			Data: ep.parser.token.Data,
+			Pos:  ep.parser.mkPos(),
+		}
+		ep.Next()
 	case lex.TOKEN_NULL:
 		left = &ast.Expression{
 			Typ: ast.EXPRESSION_TYPE_NULL,
@@ -94,7 +93,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			return nil, err
 		}
 		if ep.parser.token.Type != lex.TOKEN_RP {
-			return nil, fmt.Errorf("%s ( and ) not matched, but %s",
+			return nil, fmt.Errorf("%s '(' and ')' not matched, but '%s'",
 				ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		}
 		ep.Next()
@@ -261,6 +260,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 		return nil, err
 	}
+
 	for ep.parser.token.Type == lex.TOKEN_INCREMENT ||
 		ep.parser.token.Type == lex.TOKEN_DECREMENT ||
 		ep.parser.token.Type == lex.TOKEN_LP ||

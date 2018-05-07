@@ -24,19 +24,20 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		*errs = append(*errs, err)
 	}
 	if t1 == nil || t2 == nil {
-		var tt *VariableType
+
 		if t1 != nil {
-			tt = t1.Clone()
+			tt := t1.Clone()
 			tt.Pos = e.Pos
 			return tt
 		}
 		if t2 != nil {
-			tt = t2.Clone()
+			tt := t2.Clone()
 			tt.Pos = e.Pos
 			return tt
 		}
-		return tt
+		return nil
 	}
+
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
 		EXPRESSION_TYPE_LOGICAL_AND == e.Typ {

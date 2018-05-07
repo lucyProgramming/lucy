@@ -36,9 +36,6 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		maxstack = t
 	}
 	m.stackTop2String(class, code, e.Left.Value, context, state)
-	if t := currenStack + stack + jvmSize(e.Left.Value); t > maxstack {
-		maxstack = t
-	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_string_builder_class,
@@ -46,7 +43,6 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	currenStack = 1
 	stack, es = m.build(class, code, e.Right, context, state)
 	if len(es) > 0 {
 		backPatchEs(es, code.CodeLength)

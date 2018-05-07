@@ -296,11 +296,10 @@ func (s *StatementFor) check(block *Block) []error {
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
-		if t != nil {
-			if t.Typ != VARIABLE_TYPE_BOOL {
-				errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
-					errMsgPrefix(s.Condition.Pos), t.TypeString()))
-			}
+		if t != nil && t.Typ != VARIABLE_TYPE_BOOL {
+			errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
+				errMsgPrefix(s.Condition.Pos), t.TypeString()))
+
 		}
 	}
 	if s.Post != nil {

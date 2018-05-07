@@ -22,10 +22,9 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
 	}
-
+	ret := convertion.Typ.Clone()
+	ret.Pos = e.Pos
 	if t.IsNumber() && convertion.Typ.IsNumber() {
-		tt := convertion.Typ.Clone()
-		tt.Pos = e.Pos
 		if convertion.Expression.IsLiteral() {
 			convertion.Expression.convertNumberLiteralTo(convertion.Typ.Typ)
 			//rewrite
@@ -33,10 +32,8 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 			*e = *convertion.Expression
 			e.Pos = pos // keep pos
 		}
-		return tt
+		return ret
 	}
-	ret := convertion.Typ.Clone()
-	ret.Pos = e.Pos
 	// string(['h'] , 'e')
 	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
 		t.Typ == VARIABLE_TYPE_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
