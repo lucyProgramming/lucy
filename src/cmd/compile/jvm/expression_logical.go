@@ -13,7 +13,6 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 	if es != nil {
 		exits = append(exits, es...)
 	}
-
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	if 2 > maxstack { // dup increment stack
@@ -22,7 +21,7 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 	if e.Typ == ast.EXPRESSION_TYPE_LOGICAL_OR {
 		// at this point,value is clear,leave 1 on stack
 		exits = append(exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifne, code))
-	} else {
+	} else { // and
 		// at this point,value is clear,leave 0 on stack
 		exits = append(exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
 	}

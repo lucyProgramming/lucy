@@ -43,6 +43,7 @@ func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCo
 		code.CodeLength += 3
 		return
 	}
+	// object
 	maxstack, _ = m.build(class, code, dot.Expression, context, state)
 	if t := jvmSize(e.Value); t > maxstack {
 		maxstack = t

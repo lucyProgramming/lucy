@@ -9,7 +9,6 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	//first round
-
 	for k, v := range vs.Vs {
 		if v.Name == ast.NO_NAME_IDENTIFIER {
 			continue

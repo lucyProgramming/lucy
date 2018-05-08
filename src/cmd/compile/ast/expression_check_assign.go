@@ -189,11 +189,11 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		bin.Left.Data = lefts // rewrite to list anyway
 	}
 	values := bin.Right.Data.([]*Expression)
-
 	valueTypes := checkRightValuesValid(
 		checkExpressions(block, values, errs),
 		errs)
 	leftTypes := []*VariableType{}
+
 	for _, v := range lefts {
 		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifer)
@@ -206,6 +206,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		v.Value = t
 		leftTypes = append(leftTypes, t) // append even if it`s nil
 	}
+	convertLiteralExpressionsToNeeds(values, leftTypes, valueTypes)
 	bin.Left.Values = leftTypes
 	if len(lefts) != len(valueTypes) { //expression length compare with value types is more appropriate
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",

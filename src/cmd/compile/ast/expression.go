@@ -457,11 +457,12 @@ type ExpressionDot struct {
 	EnumName        *EnumName           // expression is package
 }
 type ExpressionMethodCall struct {
-	Class      *Class //
-	Expression *Expression
-	Args       CallArgs
-	Name       string
-	Method     *ClassMethod
+	Class           *Class //
+	Expression      *Expression
+	Args            CallArgs
+	Name            string
+	Method          *ClassMethod
+	PackageFunction *Function // Expression is package
 }
 
 type ExpressionNew struct {

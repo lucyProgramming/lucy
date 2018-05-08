@@ -20,7 +20,7 @@ type StatmentSwitchCase struct {
 
 func (s *StatementSwitch) check(b *Block) []error {
 	errs := []error{}
-	conditionType, es := b.checkExpression(s.Condition)
+	conditionType, es := b.checkExpression(s.Condition, true)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -79,7 +79,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					stringValue = e.Data.(string)
 				}
 			}
-			t, es := b.checkExpression(e)
+			t, es := b.checkExpression(e, true)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}

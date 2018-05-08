@@ -316,6 +316,18 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			if m.AttributeDefaultParameters != nil {
 				info.Attributes = append(info.Attributes, m.AttributeDefaultParameters.ToAttributeInfo(c))
 			}
+			if m.AttributeMethodParameters != nil {
+				t := m.AttributeMethodParameters.ToAttributeInfo(c)
+				if t != nil {
+					info.Attributes = append(info.Attributes, t)
+				}
+			}
+			if m.AttributeLucyReturnListNames != nil {
+				t := m.AttributeLucyReturnListNames.ToAttributeInfo(c, ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES)
+				if t != nil {
+					info.Attributes = append(info.Attributes, t)
+				}
+			}
 			c.Methods = append(c.Methods, info)
 		}
 	}

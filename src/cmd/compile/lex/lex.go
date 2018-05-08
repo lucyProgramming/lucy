@@ -153,6 +153,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	if ishex && isfloat {
 		token.Type = TOKEN_LITERAL_INT
 		token.Data = 0
+
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
@@ -523,12 +524,13 @@ redo:
 	if lex.isLetter(c) || c == '_' || c == '$' {
 		return lex.lexIdentifier(c)
 	}
+	token.StartLine = lex.line
+	token.StartColumn = lex.column
 	if lex.isDigit(c) {
 		eof, err = lex.lexNumber(token, c)
 		return
 	}
-	token.StartLine = lex.line
-	token.StartColumn = lex.column
+
 	switch c {
 	case '(':
 		token.Type = TOKEN_LP
@@ -651,7 +653,7 @@ redo:
 			token.Desp = "^"
 		}
 	case '~':
-		token.Type = TOKEN_BITWISE_COMPLEMENT
+		token.Type = TOKEN_BITWISE_NOT
 		token.Desp = "~"
 	case '+':
 		c, eof = lex.getchar()

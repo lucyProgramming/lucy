@@ -130,7 +130,7 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 		newE.Data = left
 		newE.Pos = ep.parser.mkPos()
 		left = newE
-	case lex.TOKEN_BITWISE_COMPLEMENT:
+	case lex.TOKEN_BITWISE_NOT:
 		ep.Next()
 		newE := &ast.Expression{}
 		left, err = ep.parseOneExpression()

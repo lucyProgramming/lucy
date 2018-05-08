@@ -24,15 +24,15 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	values := e.Data.(*ast.ExpressionMap).Values
-	{
-		t := state.newObjectVariableType(java_hashmap_class)
-		state.pushStack(class, t)
-		state.pushStack(class, t)
-	}
+
+	hashMapObject := state.newObjectVariableType(java_hashmap_class)
+	state.pushStack(class, hashMapObject)
+
 	for _, v := range values {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack := uint16(2)
+		state.pushStack(class, hashMapObject)
 		stack, _ := m.build(class, code, v.Left, context, state)
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
@@ -49,7 +49,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		state.popStack(1) // @46 line
+		state.popStack(1) // @43 line
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
@@ -65,6 +65,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_pop
 		code.CodeLength += 4
+		state.popStack(1) // @35
 	}
 	return
 }

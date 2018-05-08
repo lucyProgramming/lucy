@@ -41,7 +41,6 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		maxstack = stack
 	}
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
-
 	m.buildBlock(class, code, s.Block, context, forState)
 	if s.Post != nil {
 		s.ContinueOPOffset = code.CodeLength

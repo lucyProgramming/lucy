@@ -272,7 +272,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			errMsgPrefix(e.Pos)))
 	case EXPRESSION_TYPE_LIST:
 		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
-			"this may be cause be compiler error,please contact with author",
+			"this may be cause be compiler error,please contact the author",
 			errMsgPrefix(e.Pos), e.OpName()))
 	default:
 		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))

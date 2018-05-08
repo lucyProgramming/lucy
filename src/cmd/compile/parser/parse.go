@@ -120,7 +120,6 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_FUNCTION:
 			f, err := p.Function.parse(true)
 			if err != nil {
-				p.errs = append(p.errs, err)
 				p.consume(untils_rc)
 				p.Next()
 				continue

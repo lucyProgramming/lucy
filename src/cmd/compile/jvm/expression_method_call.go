@@ -17,13 +17,10 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		return m.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
-	d := call.Method.Func.Descriptor
-	if call.Class.LoadFromOutSide == false {
-		d = Descriptor.methodDescriptor(call.Method.Func)
-	}
-	pop := func() {
+
+	pop := func(f *ast.Function) {
 		if e.IsStatementExpression {
-			if call.Method.Func.NoReturnValue() == false {
+			if f.NoReturnValue() == false {
 				if len(e.Values) == 1 {
 					if jvmSize(e.Values[0]) == 1 {
 						code.Codes[code.CodeLength] = cg.OP_pop
@@ -39,6 +36,26 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 			}
 		}
 	}
+	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
+		maxstack = m.buildCallArgs(class, code, call.Args, call.PackageFunction.Typ.ParameterList, context, state)
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      call.Expression.Value.Package.Name + "/main",
+			Method:     call.Name,
+			Descriptor: call.PackageFunction.Descriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if t := m.valueJvmSize(e); t > maxstack {
+			maxstack = t
+		}
+		pop(call.PackageFunction)
+		return
+	}
+
+	d := call.Method.Func.Descriptor
+	if call.Class.LoadFromOutSide == false {
+		d = Descriptor.methodDescriptor(call.Method.Func)
+	}
 	if call.Method.IsStatic() {
 		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -51,7 +68,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		if t := m.valueJvmSize(e); t > maxstack {
 			maxstack = t
 		}
-		pop()
+		pop(call.Method.Func)
 		return
 	}
 
@@ -102,6 +119,6 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	pop()
+	pop(call.Method.Func)
 	return
 }

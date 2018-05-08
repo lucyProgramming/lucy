@@ -148,6 +148,26 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	if t := m.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
+	{
+		method.AttributeMethodParameters = &cg.AttributeMethodParameters{}
+		for _, v := range f.Typ.ParameterList {
+			p := &cg.MethodParameter{}
+			p.Name = v.Name
+			p.AccessFlags = cg.METHOD_PARAMETER_ACC_MANDATED
+			method.AttributeMethodParameters.Parameters = append(method.AttributeMethodParameters.Parameters, p)
+		}
+	}
+	if f.NoReturnValue() == false {
+		method.AttributeLucyReturnListNames = &cg.AttributeMethodParameters{}
+		for _, v := range f.Typ.ReturnList {
+			p := &cg.MethodParameter{}
+			p.Name = v.Name
+			p.AccessFlags = cg.METHOD_PARAMETER_ACC_MANDATED
+			method.AttributeLucyReturnListNames.Parameters =
+				append(method.AttributeLucyReturnListNames.Parameters, p)
+		}
+	}
+
 	if t := m.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}

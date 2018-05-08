@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -25,12 +26,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		if object.Package.Block.Funcs != nil && object.Package.Block.Funcs[call.Name] != nil {
 			f := object.Package.Block.Funcs[call.Name]
-			e.Typ = EXPRESSION_TYPE_FUNCTION_CALL
-			functionCall := &ExpressionFunctionCall{}
-			functionCall.Func = f
-			functionCall.Args = call.Args
-			e.Data = functionCall
-			return e.checkFunctionCall(block, errs, f, &functionCall.Args)
+			call.PackageFunction = f
+			return e.checkFunctionCall(block, errs, f, &call.Args)
 		} else if object.Package.Block.Classes != nil && object.Package.Block.Classes[call.Name] != nil {
 			//object cast
 			class := object.Package.Block.Classes[call.Name]

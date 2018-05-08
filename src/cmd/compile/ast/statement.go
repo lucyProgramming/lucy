@@ -195,7 +195,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		errs = append(errs, err)
 	}
 	s.Expression.IsStatementExpression = true
-	_, es := b.checkExpression(s.Expression)
+	_, es := b.checkExpression(s.Expression, false)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}

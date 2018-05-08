@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -222,23 +223,22 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		}
 		if v.Expression == nil {
 			v.Expression = v.Typ.mkDefaultValueExpression()
-		} else {
-			ts, es := v.Expression.check(&f.Block)
-			if errsNotEmpty(es) {
-				*errs = append(*errs, es...)
-				continue
-			}
-			t, err := v.Expression.mustBeOneValueContext(ts)
-			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
-				continue
-			}
-			if t.TypeCompatible(v.Typ) == false {
-				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
-					t.TypeString(), v.Typ.TypeString())
-				*errs = append(*errs, err)
-			}
+			continue
+		}
+		ts, es := v.Expression.check(&f.Block)
+		if errsNotEmpty(es) {
+			*errs = append(*errs, es...)
+			continue
+		}
+		t, err := v.Expression.mustBeOneValueContext(ts)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
+
+		}
+		if t != nil && t.TypeCompatible(v.Typ) == false {
+			err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+				t.TypeString(), v.Typ.TypeString())
+			*errs = append(*errs, err)
 		}
 	}
-
 }

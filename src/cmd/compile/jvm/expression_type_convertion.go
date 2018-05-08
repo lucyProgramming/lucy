@@ -257,7 +257,8 @@ func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, ta
 	}
 }
 
-func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *ast.VariableType, context *Context, state *StackMapState) {
+func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	typ *ast.VariableType, context *Context, state *StackMapState) {
 	if typ.Typ == ast.VARIABLE_TYPE_STRING {
 		return
 	}

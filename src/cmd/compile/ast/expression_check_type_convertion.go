@@ -39,7 +39,7 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 		t.Typ == VARIABLE_TYPE_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
 		return ret
 	}
-	// string (new String(""))
+	// string (new Object(""))
 	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
 		t.Typ == VARIABLE_TYPE_OBJECT {
 		return ret

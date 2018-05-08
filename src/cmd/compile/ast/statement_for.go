@@ -282,7 +282,7 @@ func (s *StatementFor) check(block *Block) []error {
 		if s.Init.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Init.Pos)))
 		}
-		_, es := s.Block.checkExpression(s.Init)
+		_, es := s.Block.checkExpression(s.Init, false)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
@@ -292,7 +292,7 @@ func (s *StatementFor) check(block *Block) []error {
 			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
-		t, es := s.Block.checkExpression(s.Condition)
+		t, es := s.Block.checkExpression(s.Condition, true)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
@@ -307,7 +307,7 @@ func (s *StatementFor) check(block *Block) []error {
 		if s.Post.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Post.Pos)))
 		}
-		_, es := s.Block.checkExpression(s.Post)
+		_, es := s.Block.checkExpression(s.Post, false)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}

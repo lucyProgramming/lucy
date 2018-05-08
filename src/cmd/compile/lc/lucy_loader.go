@@ -3,10 +3,11 @@ package lc
 import (
 	"encoding/binary"
 	"fmt"
+	"path/filepath"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"path/filepath"
 )
 
 func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
@@ -69,6 +70,12 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBytes(t[0].Info)
 			jvm.FunctionDefaultValueParser.Decode(c, m.Func, dp)
+		}
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
+			parseMethodParameter(c, t[0].Info, m.Func)
+		}
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
+			parseReturnListNames(c, t[0].Info, m.Func)
 		}
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
@@ -198,6 +205,12 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			if err != nil {
 				return err
 			}
+		}
+		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
+			parseMethodParameter(c, t[0].Info, function)
+		}
+		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
+			parseReturnListNames(c, t[0].Info, function)
 		}
 		function.ClassMethod = &cg.MethodHighLevel{}
 		function.ClassMethod.Name = function.Name

@@ -344,6 +344,7 @@ func (r *Run) foundError(packageName string, founds []string) error {
 	return nil
 }
 func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool, meta *common.PackageMeta, err error) {
+	r.PackagesCompiled[packageName] = &PackageCompiled{}
 	if lucypath == "" {
 		founds := r.findPackageIn(packageName)
 		err = r.foundError(packageName, founds)
@@ -361,6 +362,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if needBuild == false { // current package no need to compile,but I need to check dependies
 		need := false
 		for _, v := range meta.Imports {
+
 			needBuild, _, err = r.buildPackage("", v)
 			if err != nil {
 				return
@@ -380,13 +382,18 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if err != nil {
 		return
 	}
+
 	for _, i := range is {
+		if _, ok := r.PackagesCompiled[i]; ok {
+			continue
+		}
 		_, _, err = r.buildPackage("", i) // compile depend
 		if err != nil {
 			return
 		}
 	}
 	fmt.Println("compiling.... ", packageName) // compile this package
+
 	// build this package
 	//read  files
 	destDir := filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName)
@@ -454,8 +461,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
 		bs,
 		0644)
-	r.PackagesCompiled[packageName] = &PackageCompiled{
-		meta: meta,
-	}
+
 	return
 }

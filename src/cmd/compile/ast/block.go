@@ -213,13 +213,14 @@ func (b *Block) check() []error {
 	return errs
 }
 
-func (b *Block) checkExpression(e *Expression) (t *VariableType, errs []error) {
+func (b *Block) checkExpression(e *Expression, singleValueContext bool) (t *VariableType, errs []error) {
 	errs = []error{}
 	ts, es := e.check(b)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	if ts != nil && len(ts) > 1 {
+
+	if ts != nil && len(ts) > 1 && singleValueContext {
 		errs = append(errs, fmt.Errorf("%s multi values in single value context",
 			errMsgPrefix(e.Pos)))
 	}
@@ -284,7 +285,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		return nil
 	}
 	if name == "" {
-		panic("null name")
+		return fmt.Errorf("%s name is null string", errMsgPrefix(pos))
 	}
 	if name == THIS {
 		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)

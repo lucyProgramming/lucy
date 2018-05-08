@@ -111,7 +111,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 					dot.Name))
 			}
 			if field.IsStatic() {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by object",
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by objectref",
 					errMsgPrefix(e.Pos)))
 			}
 			t := field.Typ.Clone()
