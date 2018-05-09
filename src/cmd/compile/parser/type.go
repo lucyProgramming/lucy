@@ -123,6 +123,13 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Map: m,
 			Pos: pos,
 		}, nil
+	case lex.TOKEN_T:
+		pos := p.mkPos()
+		p.Next()
+		return &ast.VariableType{
+			Typ: ast.VARIABLE_TYPE_T,
+			Pos: pos,
+		}, nil
 	}
 	err = fmt.Errorf("%s unkown type,begining token is '%s'",
 		p.errorMsgPrefix(), p.token.Desp)

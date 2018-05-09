@@ -192,9 +192,7 @@ func (loader *RealNameLoader) loadJavaPackage(r *Resource) (*ast.Package, error)
 		rr.realpath = filepath.Join(r.realpath, v.Name())
 		class, err := loader.loadClass(ret, &rr)
 		if err != nil {
-			//			if _, ok := err.(*NotSupportTypeSignatureError); ok == false {
 			return nil, err
-			//			}
 		}
 		if class != nil {
 			ret.Block.Classes[filepath.Base(class.Name)] = class

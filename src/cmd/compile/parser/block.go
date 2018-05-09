@@ -379,7 +379,8 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			block.Statements = append(block.Statements, s)
 			b.Next()
 		default:
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'",
+				b.parser.errorMsgPrefix(), b.parser.token.Desp))
 			b.consume(untils_rc_semicolon)
 			b.Next()
 		}

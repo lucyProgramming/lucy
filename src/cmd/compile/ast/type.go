@@ -28,6 +28,7 @@ const (
 	VARIABLE_TYPE_CLASS
 
 	VARIABLE_TYPE_NAME
+	VARIABLE_TYPE_T
 	VARIABLE_TYPE_VOID
 
 	VARIABLE_TYPE_PACKAGE
@@ -49,6 +50,7 @@ type VariableType struct {
 	Map       *Map
 	Package   *Package
 	Alias     string
+	T         *VariableType
 }
 
 type Map struct {
@@ -352,6 +354,8 @@ func (v *VariableType) typeString(ret *string) {
 		*ret += v.Name // resove wrong, but typeString is ok to return
 	case VARIABLE_TYPE_FUNCTION:
 		*ret += v.Function.readableMsg()
+	case VARIABLE_TYPE_T:
+		*ret = v.T.TypeString()
 	default:
 		panic(v.Typ)
 	}

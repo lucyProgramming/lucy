@@ -7,6 +7,7 @@ import (
 )
 
 type Function struct {
+	IsTemplateFunction             bool
 	ClassMethod                    *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser bool
 	HaveDefaultValue               bool
@@ -29,7 +30,9 @@ type Function struct {
 	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
+	SourceCode                     string // source code for T
 }
+
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 	args []*VariableType, pos *Pos)
 

@@ -19,4 +19,5 @@ const (
 	ATTRIBUTE_NAME_LUCY_CONST                  = "LucyConst" // indicate a package const
 	ATTRIBUTE_NAME_METHOD_PARAMETERS           = "MethodParameters"
 	ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES       = "LucyReturnListName"
+	ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION      = "LucyTemplateFunction"
 )

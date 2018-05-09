@@ -342,6 +342,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	if c.AttributeLucyEnum != nil {
 		c.Attributes = append(c.Attributes, c.AttributeLucyEnum.ToAttributeInfo(c))
 	}
+	for _, v := range high.TemplateFunctions {
+		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
+	}
 	c.ifConstPoolOverMaxSize()
 	return
 }

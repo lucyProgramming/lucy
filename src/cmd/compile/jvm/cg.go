@@ -1,12 +1,14 @@
 package jvm
 
 import (
+	"encoding/json"
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"math"
 	"os"
 	"path/filepath"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type MakeClass struct {
@@ -335,6 +337,14 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 func (m *MakeClass) mkFuncs() {
 	ms := make(map[string]*cg.MethodHighLevel)
 	for k, f := range m.p.Block.Funcs { // fisrt round
+		if f.IsTemplateFunction {
+			m.mainclass.TemplateFunctions = append(m.mainclass.TemplateFunctions, &cg.AttributeTemplateFunction{
+				Name:     f.Name,
+				Filename: f.Pos.Filename,
+
+				Code: f.SourceCode,
+			})
+		}
 		if f.IsBuildin { //
 			continue
 		}
@@ -353,10 +363,16 @@ func (m *MakeClass) mkFuncs() {
 		m.mainclass.AppendMethod(method)
 	}
 	for k, f := range m.p.Block.Funcs { // fisrt round
-		if f.IsBuildin { //
+		if f.IsBuildin || f.IsTemplateFunction { //
 			continue
 		}
 		m.buildFunction(ms[k].Class, nil, ms[k], f)
+		bs, err := json.Marshal(f)
+		if err != nil {
+			fmt.Println(err)
+			panic(11)
+		}
+		fmt.Println(string(bs))
 	}
 }
 
