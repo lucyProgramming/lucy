@@ -7,7 +7,7 @@ import (
 )
 
 type Function struct {
-	IsTemplateFunction             bool
+	TemplateFunction               *TemplateFunction
 	ClassMethod                    *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser bool
 	HaveDefaultValue               bool
@@ -30,7 +30,7 @@ type Function struct {
 	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
-	SourceCode                     string // source code for T
+	SourceCode                     []byte // source code for T
 }
 
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
@@ -184,11 +184,19 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			*errs = append(*errs, err)
 			continue
 		}
+		if v.Typ.Typ == VARIABLE_TYPE_T {
+			f.TemplateFunction = &TemplateFunction{}
+		}
 		if f.HaveDefaultValue && v.Expression == nil {
 			*errs = append(*errs, fmt.Errorf("%s expect default value", errMsgPrefix(v.Pos)))
 			continue
 		}
 		if v.Expression != nil {
+			if v.Typ.Typ == VARIABLE_TYPE_T {
+				*errs = append(*errs, fmt.Errorf("%s typ is tempalate,cannot have default value",
+					errMsgPrefix(v.Pos)))
+				continue
+			}
 			if f.HaveDefaultValue == false {
 				f.DefaultValueStartAt = k
 			}

@@ -20,8 +20,14 @@ func (p *Function) consume(untils map[int]bool) {
 }
 
 func (p *Function) parse(needName bool) (f *ast.Function, err error) {
-	p.Next() // skip fn key word
 	f = &ast.Function{}
+	{
+		offset := p.parser.scanner.GetOffSet()
+		defer func() {
+			f.SourceCode = p.parser.bs[offset:p.parser.scanner.GetOffSet()]
+		}()
+	}
+	p.Next() // skip fn key word
 	f.Pos = p.parser.mkPos()
 	if needName {
 		if p.parser.token.Type != lex.TOKEN_IDENTIFIER {

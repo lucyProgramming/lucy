@@ -44,7 +44,7 @@ func (p *Parser) Parse() []error {
 	p.Block = &Block{}
 	p.Block.parser = p
 	p.errs = []error{}
-	p.scanner = lex.New(p.bs)
+	p.scanner = lex.New(p.bs, 1, 1)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
 	if p.token.Type == lex.TOKEN_EOF {

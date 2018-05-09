@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -337,13 +336,17 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 func (m *MakeClass) mkFuncs() {
 	ms := make(map[string]*cg.MethodHighLevel)
 	for k, f := range m.p.Block.Funcs { // fisrt round
-		if f.IsTemplateFunction {
-			m.mainclass.TemplateFunctions = append(m.mainclass.TemplateFunctions, &cg.AttributeTemplateFunction{
-				Name:     f.Name,
-				Filename: f.Pos.Filename,
-
-				Code: f.SourceCode,
-			})
+		if f.TemplateFunction != nil {
+			if f.AccessFlags|cg.ACC_METHOD_PUBLIC != 0 {
+				m.mainclass.TemplateFunctions = append(m.mainclass.TemplateFunctions, &cg.AttributeTemplateFunction{
+					Name:        f.Name,
+					Filename:    f.Pos.Filename,
+					StartLine:   uint16(f.Pos.StartLine),
+					StartColumn: uint16(f.Pos.StartColumn),
+					Code:        string(f.SourceCode),
+				})
+			}
+			continue
 		}
 		if f.IsBuildin { //
 			continue
@@ -363,16 +366,11 @@ func (m *MakeClass) mkFuncs() {
 		m.mainclass.AppendMethod(method)
 	}
 	for k, f := range m.p.Block.Funcs { // fisrt round
-		if f.IsBuildin || f.IsTemplateFunction { //
+		if f.IsBuildin || f.TemplateFunction != nil { //
 			continue
 		}
 		m.buildFunction(ms[k].Class, nil, ms[k], f)
-		bs, err := json.Marshal(f)
-		if err != nil {
-			fmt.Println(err)
-			panic(11)
-		}
-		fmt.Println(string(bs))
+
 	}
 }
 

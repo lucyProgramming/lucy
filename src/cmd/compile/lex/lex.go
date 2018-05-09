@@ -5,12 +5,12 @@ import (
 	"math"
 )
 
-func New(bs []byte) *LucyLexer {
+func New(bs []byte, startLine, startColumn int) *LucyLexer {
 	lex := &LucyLexer{bs: bs}
 	lex.end = len(bs)
-	lex.line = 1
+	lex.line = startLine
+	lex.column = startColumn
 	lex.lastline = 1
-	lex.column = 1
 	lex.lastcolumn = 1
 	return lex
 }
@@ -24,6 +24,10 @@ type LucyLexer struct {
 
 func (lex *LucyLexer) Pos() (int, int) {
 	return lex.line, lex.column
+}
+
+func (lex *LucyLexer) GetOffSet() int {
+	return lex.offset
 }
 
 func (lex *LucyLexer) getchar() (c byte, eof bool) {
