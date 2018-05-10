@@ -355,7 +355,11 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_FUNCTION:
 		*ret += v.Function.readableMsg()
 	case VARIABLE_TYPE_T:
-		*ret = v.T.TypeString()
+		if v.T == nil {
+			*ret = "T"
+		} else {
+			*ret = "T@" + v.T.TypeString()
+		}
 	default:
 		panic(v.Typ)
 	}
@@ -382,9 +386,25 @@ func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
 	t2 can be cast to t1
 */
 func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
+	if v.Typ == VARIABLE_TYPE_T {
+		if v.T == nil {
+			return false
+		} else {
+			return v.T.Equal(assignMent)
+		}
+	}
+	if assignMent.Typ == VARIABLE_TYPE_T {
+		if assignMent.T == nil {
+			return false
+		} else {
+			return v.Equal(assignMent.T)
+		}
+	}
+
 	if v == assignMent {
 		return true
 	}
+
 	if v.Typ != assignMent.Typ {
 		return false
 	}

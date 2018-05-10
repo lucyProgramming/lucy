@@ -10,7 +10,7 @@ import (
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
-	return (&Parser{bs: bs, tops: tops, filename: filename, onlyimport: onlyimport, nerr: nerr}).Parse()
+	return (&Parser{bs: bs, tops: tops, filename: filename, onlyimport: onlyimport, nerr: nerr}).Parse(1, 1)
 }
 
 type Parser struct {
@@ -33,7 +33,7 @@ type Parser struct {
 	nerr             int
 }
 
-func (p *Parser) Parse() []error {
+func (p *Parser) Parse(startLine, startColoumn int) []error {
 	p.ExpressionParser = &ExpressionParser{p}
 	p.Function = &Function{}
 	p.Function.parser = p
@@ -44,7 +44,7 @@ func (p *Parser) Parse() []error {
 	p.Block = &Block{}
 	p.Block.parser = p
 	p.errs = []error{}
-	p.scanner = lex.New(p.bs, 1, 1)
+	p.scanner = lex.New(p.bs, startLine, startColoumn)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
 	if p.token.Type == lex.TOKEN_EOF {
@@ -254,6 +254,21 @@ func (p *Parser) Parse() []error {
 	return p.errs
 }
 
+func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
+	ret := []*ast.VariableType{}
+	for p.token.Type != lex.TOKEN_EOF {
+		t, err := p.parseType()
+		if err != nil {
+			return ret, err
+		}
+		ret = append(ret, t)
+		if p.token.Type != lex.TOKEN_COMMA {
+			break
+		}
+	}
+	return ret, nil
+}
+
 func (p *Parser) validAfterPublic() {
 	if p.token.Type == lex.TOKEN_FUNCTION ||
 		p.token.Type == lex.TOKEN_CLASS ||
@@ -290,6 +305,7 @@ func (p *Parser) mkPos() *ast.Pos {
 		Filename:    p.filename,
 		StartLine:   p.token.StartLine,
 		StartColumn: p.token.StartColumn,
+		Offset:      p.scanner.GetOffSet(),
 	}
 }
 

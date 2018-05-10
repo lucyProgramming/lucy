@@ -344,7 +344,7 @@ func (r *Run) foundError(packageName string, founds []string) error {
 	return nil
 }
 func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool, meta *common.PackageMeta, err error) {
-	r.PackagesCompiled[packageName] = &PackageCompiled{}
+	//r.PackagesCompiled[packageName] = &PackageCompiled{}
 	if lucypath == "" {
 		founds := r.findPackageIn(packageName)
 		err = r.foundError(packageName, founds)

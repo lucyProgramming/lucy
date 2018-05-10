@@ -35,7 +35,6 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 		slice.End.Typ = EXPRESSION_TYPE_INT
 		slice.End.Data = int32(-1) // special
 	}
-
 	endTs, es := slice.End.check(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)

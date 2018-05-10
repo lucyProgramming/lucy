@@ -24,7 +24,10 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	{
 		offset := p.parser.scanner.GetOffSet()
 		defer func() {
-			f.SourceCode = p.parser.bs[offset:p.parser.scanner.GetOffSet()]
+			if f.Block.EndPos != nil {
+				f.SourceCode = p.parser.bs[offset:f.Block.EndPos.Offset]
+			}
+
 		}()
 	}
 	p.Next() // skip fn key word

@@ -18,7 +18,6 @@ const (
 	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
 	SUPER_FIELD_NAME         = "super"
 	CONSTRUCTION_METHOD_NAME = "<init>"
-	//BUILDIN_PACKAGE          = "lucy/lang"
 )
 
 var (
@@ -28,6 +27,7 @@ var (
 	PackageBeenCompile     Package
 	buildinFunctionsMap    = make(map[string]*Function)
 	lucyLangBuildinPackage *Package
+	ParseFunctionHandler   func(bs []byte, pos *Pos) (*Function, []error)
 )
 
 type NameWithPos struct {
@@ -41,4 +41,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
 }

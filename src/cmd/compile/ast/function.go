@@ -8,6 +8,8 @@ import (
 
 type Function struct {
 	TemplateFunction               *TemplateFunction
+	AlreadyUsedForTemplate         bool
+	ParameterAndRetrunListOK       bool
 	ClassMethod                    *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser bool
 	HaveDefaultValue               bool
@@ -33,8 +35,16 @@ type Function struct {
 	SourceCode                     []byte // source code for T
 }
 
-type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
-	args []*VariableType, pos *Pos)
+func (f *Function) clone() (ret *Function, es []error) {
+	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
+	if errsNotEmpty(es) {
+		return ret, es
+	}
+	ret.checkParaMeterAndRetuns(&es)
+	return ret, es
+}
+
+type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos)
 
 type buildFunctionChecker CallChecker
 
@@ -125,6 +135,9 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
+	if f.TemplateFunction != nil {
+		return
+	}
 	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.check()...)
 }
@@ -152,6 +165,12 @@ func (f *Function) mkLastRetrunStatement() {
 }
 
 func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
+	errsLength := len(*errs)
+	defer func() {
+		if len(*errs) == errsLength {
+			f.ParameterAndRetrunListOK = true
+		}
+	}()
 	if f.Name == MAIN_FUNCTION_NAME {
 		errFunc := func() {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
@@ -227,11 +246,21 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 		err = v.Typ.resolve(&f.Block)
 		if err != nil {
 			*errs = append(*errs, err)
+			continue
+		}
+		if v.Typ.Typ == VARIABLE_TYPE_T {
+			f.TemplateFunction = &TemplateFunction{}
 		}
 		err = f.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
 		}
+		if v.Typ.Typ == VARIABLE_TYPE_T && v.Expression != nil {
+			*errs = append(*errs, fmt.Errorf("%s typ is tempalate,cannot have default value",
+				errMsgPrefix(v.Pos)))
+			continue
+		}
+
 		if v.Expression == nil {
 			v.Expression = v.Typ.mkDefaultValueExpression()
 			continue

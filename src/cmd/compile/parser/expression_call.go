@@ -10,6 +10,7 @@ import (
 func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
 	pos := ep.parser.mkPos()
+
 	ep.Next() // skip (
 	args := []*ast.Expression{}
 	if ep.parser.token.Type != lex.TOKEN_RP { //a(123)
@@ -46,6 +47,26 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 			ep.parser.errorMsgPrefix(), e.OpName())
 	}
 	ep.Next() // skip )
+	if ep.parser.token.Type == lex.TOKEN_LT {
+		ep.Next() // skip <
+		ts, err := ep.parser.parseTypes()
+		if err != nil {
+			ep.parser.consume(untils_gt)
+			ep.Next()
+		} else {
+			if ep.parser.token.Type != lex.TOKEN_GT {
+				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s '<' and '>' not match",
+					ep.parser.errorMsgPrefix()))
+				ep.parser.consume(untils_gt)
+			}
+			ep.Next()
+			if result.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL {
+				result.Data.(*ast.ExpressionFunctionCall).TypedParameters = ts
+			} else {
+				result.Data.(*ast.ExpressionMethodCall).TypedParameters = ts
+			}
+		}
+	}
 	result.Pos = pos
 	return &result, nil
 }

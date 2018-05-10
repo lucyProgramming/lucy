@@ -3,6 +3,7 @@ package ast
 import "fmt"
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
+	ret := []*VariableType{mkVoidType(e.Pos)}
 	call := e.Data.(*ExpressionFunctionCall)
 	ts, es := call.Expression.check(block)
 	if errsNotEmpty(es) {
@@ -13,7 +14,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, err)
 	}
 	if t == nil {
-		return nil
+		return ret
 	}
 	if t.Typ == VARIABLE_TYPE_CLASS { // cast type
 		convertType := &ExpressionTypeConvertion{}
@@ -37,19 +38,55 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), t.TypeString()))
-		return nil
+		return ret
 	}
 	call.Func = t.Function
 	if t.Function.IsBuildin {
 		return e.checkBuildinFunctionCall(block, errs, t.Function, call.Args)
 	} else {
-		return e.checkFunctionCall(block, errs, t.Function, &call.Args)
+		ret = e.checkFunctionCall(block, errs, t.Function, &call.Args)
+		return ret
 	}
+}
+
+func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error, argTypes []*VariableType, f *Function, tps TypedParameters) {
+	for k, v := range f.Typ.ParameterList {
+		if v == nil && v.Typ == nil && v.Typ.Typ != VARIABLE_TYPE_T {
+			continue
+		}
+		if k > len(argTypes) {
+			*errs = append(*errs, fmt.Errorf("%s missing %d typed parameter", k))
+			return
+		}
+		v.Typ.T = argTypes[k]
+	}
+	for k, v := range f.Typ.ReturnList {
+		if v == nil && v.Typ == nil && v.Typ.Typ != VARIABLE_TYPE_T {
+			continue
+		}
+		if len(tps) == 0 {
+			*errs = append(*errs, fmt.Errorf("%s missing %d return type", k))
+			continue
+		}
+		v.Typ.T = tps[0]
+		tps = tps[1:]
+	}
+
+	return
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args *CallArgs) []*VariableType {
 	callargsTypes := checkExpressions(block, *args, errs)
 	callargsTypes = checkRightValuesValid(callargsTypes, errs)
+	ret := []*VariableType{mkVoidType(e.Pos)}
+	if f.TemplateFunction != nil {
+		length := len(*errs)
+		e.checkTemplateFunctionCall(block, errs, callargsTypes, f, e.Data.(*ExpressionFunctionCall).TypedParameters)
+		if len(*errs) != length { // if no
+			return ret
+		}
+	}
+
 	if len(callargsTypes) > len(f.Typ.ParameterList) {
 		errmsg := fmt.Sprintf("%s too many paramaters to call function '%s':\n", errMsgPrefix(e.Pos), f.Name)
 		errmsg += fmt.Sprintf("\thave %s\n", f.badParameterMsg(f.Name, callargsTypes))
@@ -58,7 +95,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	}
 	//trying to convert literal
 	convertLiteralExpressionsToNeeds(*args, f.Typ.needParameterTypes(), callargsTypes)
-	ret := f.Typ.retTypes(e.Pos)
+	ret = f.Typ.retTypes(e.Pos)
 	if len(callargsTypes) < len(f.Typ.ParameterList) {
 		if f.HaveDefaultValue && len(callargsTypes) >= f.DefaultValueStartAt {
 			for i := len(callargsTypes); i < len(f.Typ.ParameterList); i++ {
@@ -80,6 +117,9 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 					callargsTypes[k].TypeString(), v.Typ.TypeString()))
 			}
 		}
+	}
+	if f.TemplateFunction != nil {
+
 	}
 	return ret
 }
