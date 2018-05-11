@@ -422,11 +422,27 @@ type CallArgs []*Expression // f(1,2)　调用参数列表
 type TypedParameters []*VariableType
 
 type ExpressionFunctionCall struct {
-	BuildinFunctionMeta interface{}
-	Expression          *Expression
-	Args                CallArgs
-	Func                *Function
-	TypedParameters     TypedParameters
+	BuildinFunctionMeta      interface{}
+	Expression               *Expression
+	Args                     CallArgs
+	Func                     *Function
+	TypedParameters          TypedParameters
+	TemplateFunctionCallPair *TemplateFunctionCallPair
+}
+
+func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *ExpressionFunctionCall {
+	e.Args = call.Args
+	return e
+}
+
+type ExpressionMethodCall struct {
+	Class           *Class //
+	Expression      *Expression
+	Args            CallArgs
+	Name            string
+	Method          *ClassMethod
+	PackageFunction *Function // Expression is package
+	TypedParameters TypedParameters
 }
 
 type ExpressionDeclareVariable struct {
@@ -458,15 +474,6 @@ type ExpressionDot struct {
 	Field           *ClassField         // expression is class or object
 	PackageVariable *VariableDefinition // expression is package
 	EnumName        *EnumName           // expression is package
-}
-type ExpressionMethodCall struct {
-	Class           *Class //
-	Expression      *Expression
-	Args            CallArgs
-	Name            string
-	Method          *ClassMethod
-	PackageFunction *Function // Expression is package
-	TypedParameters TypedParameters
 }
 
 type ExpressionNew struct {

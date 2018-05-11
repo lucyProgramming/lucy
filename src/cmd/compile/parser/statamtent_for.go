@@ -12,7 +12,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 	f.Block = &ast.Block{}
 	b.Next()                                                                               // skip for
 	if b.parser.token.Type != lex.TOKEN_LC && b.parser.token.Type != lex.TOKEN_SEMICOLON { // not {
-		e, err := b.parser.ExpressionParser.parseExpression(true)
+		e, err := b.parser.Expression.parseExpression(true)
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 		} else {
@@ -24,7 +24,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 		f.Init = f.Condition
 		//condition
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-			e, err := b.parser.ExpressionParser.parseExpression(false)
+			e, err := b.parser.Expression.parseExpression(false)
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 				b.consume(untils_semicolon)
@@ -38,7 +38,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 		}
 		b.Next()
 		if b.parser.token.Type != lex.TOKEN_LC {
-			e, err := b.parser.ExpressionParser.parseExpression(true)
+			e, err := b.parser.Expression.parseExpression(true)
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 			}

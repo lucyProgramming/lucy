@@ -2,6 +2,9 @@ package jvm
 
 import (
 	"encoding/binary"
+	"fmt"
+	"strings"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -153,4 +156,27 @@ func jvmSize(v *ast.VariableType) uint16 {
 	} else {
 		return 1
 	}
+}
+
+func nameTemplateFunction(f *ast.Function) string {
+	s := f.Name
+	for _, v := range f.Typ.ParameterList {
+		if v.Typ.IsPrimitive() {
+			s += fmt.Sprintf("_%s", v.Typ.TypeString())
+			continue
+		}
+		switch v.Typ.Typ {
+		case ast.VARIABLE_TYPE_OBJECT:
+			s += fmt.Sprintf("_%s", strings.Replace(v.Typ.Class.Name, "/", "_", -1))
+		case ast.VARIABLE_TYPE_MAP:
+			s += "_map"
+		case ast.VARIABLE_TYPE_ARRAY:
+			s += "_array"
+		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			s += "_java_array"
+		case ast.VARIABLE_TYPE_ENUM:
+			s += fmt.Sprintf("_%s", strings.Replace(v.Typ.Enum.Name, "/", "_", -1))
+		}
+	}
+	return s
 }

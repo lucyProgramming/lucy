@@ -5,9 +5,16 @@ type TemplateFunction struct {
 }
 
 type TemplateFunctionCallPair struct {
-	Args      []*VariableType
-	Returns   []*VariableType
-	Generated bool
+	Args                              []*VariableType
+	Returns                           []*VariableType
+	TemplateFunctionCallPairGenerated *TemplateFunctionCallPairGenerated
+	F                                 *Function
+	ClassName                         string
+}
+type TemplateFunctionCallPairGenerated struct {
+	ClassName  string
+	Method     string
+	Descriptor string
 }
 
 func (t *TemplateFunction) callPairExists(Args []*VariableType,
@@ -40,13 +47,14 @@ func (t *TemplateFunction) callPairExists(Args []*VariableType,
 }
 
 func (t *TemplateFunction) insert(Args []*VariableType,
-	Returns []*VariableType) *TemplateFunctionCallPair {
+	Returns []*VariableType, f *Function) *TemplateFunctionCallPair {
 	if t := t.callPairExists(Args, Returns); t != nil {
 		return t
 	}
 	ret := &TemplateFunctionCallPair{
 		Args:    Args,
 		Returns: Returns,
+		F:       f,
 	}
 	t.Pairs = append(t.Pairs, ret)
 	return ret

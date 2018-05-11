@@ -17,7 +17,6 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		return m.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
-
 	pop := func(f *ast.Function) {
 		if e.IsStatementExpression {
 			if f.NoReturnValue() == false {

@@ -100,7 +100,6 @@ func (p *Package) TypeCheck() []error {
 		}
 
 	}
-
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase2(&p.Block)
 		if errsNotEmpty(es) {
@@ -110,12 +109,13 @@ func (p *Package) TypeCheck() []error {
 			return p.Errors
 		}
 	}
-
 	for _, v := range p.Block.Funcs {
 		if v.IsBuildin {
 			continue
 		}
-		v.checkBlock(&p.Errors)
+		if v.TemplateFunction == nil {
+			v.checkBlock(&p.Errors)
+		}
 		if PackageBeenCompile.shouldStop(nil) {
 			return p.Errors
 		}

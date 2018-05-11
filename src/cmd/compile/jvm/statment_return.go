@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-	//"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -25,6 +24,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		return
 	}
+
 	if len(context.function.Typ.ReturnList) == 1 {
 		var es []*cg.JumpBackPatch
 		if len(statementReturn.Expressions) > 0 {

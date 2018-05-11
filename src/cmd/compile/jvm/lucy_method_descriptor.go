@@ -42,7 +42,7 @@ func (parser *LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor stri
 }
 
 //rewrite types
-func (parser *LucyMethodSignatureParse) Deocde(bs []byte, f *ast.Function) error {
+func (parser *LucyMethodSignatureParse) Decode(f *ast.Function, bs []byte) error {
 	bs = bs[1:] // skip (
 	var err error
 	for i := 0; i < len(f.Typ.ParameterList); i++ {
@@ -69,3 +69,35 @@ func (parser *LucyMethodSignatureParse) Deocde(bs []byte, f *ast.Function) error
 
 	return nil
 }
+
+//
+////rewrite types
+//func (parser *LucyMethodSignatureParse) DecodeAllBaseOnBs(f *ast.Function, bs []byte) error {
+//	bs = bs[1:] // skip (
+//	var err error
+//	var t *ast.VariableType
+//	for bs[0] != ')' {
+//		bs, t, err = LucyFieldSignatureParser.Decode(bs)
+//		if err != nil {
+//			return err
+//		}
+//
+//	}
+//	bs = bs[1:] // skip )
+//	f.Typ.ReturnList = []*ast.VariableDefinition{}
+//	i := 1
+//	for len(bs) > 0 {
+//		var t *ast.VariableType
+//		bs, t, err = LucyFieldSignatureParser.Decode(bs)
+//		if err != nil {
+//			return err
+//		}
+//		vd := &ast.VariableDefinition{}
+//		vd.Name = fmt.Sprintf("returnValue%d", i)
+//		vd.Typ = t
+//		f.Typ.ReturnList = append(f.Typ.ReturnList, vd)
+//		i++
+//	}
+//
+//	return nil
+//}

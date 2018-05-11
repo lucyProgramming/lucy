@@ -58,6 +58,7 @@ func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 		return "L" + java_hashmap_class + ";"
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		return "[" + m.typeDescriptor(v.ArrayType)
+
 	}
 	panic("unhandle type signature")
 }

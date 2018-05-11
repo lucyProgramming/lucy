@@ -18,29 +18,15 @@ type MakeClass struct {
 }
 
 func (m *MakeClass) newClassName(prefix string) (autoName string) {
-	if m.p.Block.SearchByName(prefix) == nil {
+	if m.p.Block.NameExists(prefix) == false {
 		return m.p.Name + "/" + prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
 		autoName = fmt.Sprintf("%s_%d", prefix, i)
-		_, ok := m.p.Block.Classes[autoName]
-		if ok {
+		if m.p.Block.NameExists(autoName) {
 			continue
 		}
-		_, ok = m.p.Block.EnumNames[autoName]
-		if ok {
-			continue
-		}
-		_, ok = m.p.Block.Enums[autoName]
-		if ok {
-			continue
-		}
-		autoName = m.p.Name + "/" + autoName
-		_, ok = m.Classes[autoName]
-		if ok {
-			continue
-		}
-		return autoName
+		return m.p.Name + "/" + autoName
 	}
 	panic("new class name overflow")
 }
@@ -337,15 +323,14 @@ func (m *MakeClass) mkFuncs() {
 	ms := make(map[string]*cg.MethodHighLevel)
 	for k, f := range m.p.Block.Funcs { // fisrt round
 		if f.TemplateFunction != nil {
-			if f.AccessFlags|cg.ACC_METHOD_PUBLIC != 0 {
-				m.mainclass.TemplateFunctions = append(m.mainclass.TemplateFunctions, &cg.AttributeTemplateFunction{
-					Name:        f.Name,
-					Filename:    f.Pos.Filename,
-					StartLine:   uint16(f.Pos.StartLine),
-					StartColumn: uint16(f.Pos.StartColumn),
-					Code:        string(f.SourceCode),
-				})
-			}
+			m.mainclass.TemplateFunctions = append(m.mainclass.TemplateFunctions, &cg.AttributeTemplateFunction{
+				Name:        f.Name,
+				Filename:    f.Pos.Filename,
+				StartLine:   uint16(f.Pos.StartLine),
+				StartColumn: uint16(f.Pos.StartColumn),
+				Code:        string(f.SourceCode),
+				Descriptor:  LucyMethodSignatureParser.Encode(f),
+			})
 			continue
 		}
 		if f.IsBuildin { //

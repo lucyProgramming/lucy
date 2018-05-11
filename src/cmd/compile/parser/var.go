@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -37,16 +35,25 @@ func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
 	tops := []*ast.Node{}
 	p.tops = &tops
 	p.bs = bs
-	es := p.Parse(pos.StartLine, pos.StartColumn)
-	if es != nil && len(es) > 0 {
-		return nil, es
+	p.Function = &Function{
+		parser: p,
 	}
-	if len(tops) == 0 {
-		return nil, []error{fmt.Errorf("function not found")}
+	p.Block = &Block{
+		parser: p,
 	}
-	f, ok := tops[0].Data.(*ast.Function)
-	if ok == false {
-		return nil, []error{fmt.Errorf("not a function")}
+	p.Expression = &Expression{
+		parser: p,
 	}
-	return f, nil
+	p.Class = &Class{
+		parser: p,
+	}
+	p.Interface = &Interface{
+		parser: p,
+	}
+	p.scanner = lex.New(p.bs, pos.StartLine, pos.StartColumn)
+	f, err := p.Function.parse(true)
+	if err != nil {
+		p.errs = append(p.errs, err)
+	}
+	return f, p.errs
 }

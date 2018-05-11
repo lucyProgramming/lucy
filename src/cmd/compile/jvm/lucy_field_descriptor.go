@@ -1,6 +1,8 @@
 package jvm
 
 import (
+	"bytes"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
@@ -22,6 +24,9 @@ func (l *LucyFieldSignatureParse) Encode(variableType *ast.VariableType) (d stri
 		d = "]"
 		d += l.Encode(variableType.ArrayType)
 		return d
+	}
+	if variableType.Typ == ast.VARIABLE_TYPE_T {
+		return fmt.Sprintf("T%s;", variableType.Name)
 	}
 	return Descriptor.typeDescriptor(variableType)
 }
@@ -52,6 +57,16 @@ func (l *LucyFieldSignatureParse) Decode(bs []byte) ([]byte, *ast.VariableType, 
 		a.Typ = ast.VARIABLE_TYPE_ARRAY
 		bs, a.ArrayType, err = l.Decode(bs)
 		return bs, a, err
+	}
+	if bs[0] == 'T' {
+		bs = bs[1:]
+		a := &ast.VariableType{}
+		a.Typ = ast.VARIABLE_TYPE_T
+		index := bytes.Index(bs, []byte{';'})
+		a.Name = string(bs[0:index])
+		bs = bs[index+1:]
+		fmt.Println(a.Name)
+		return bs, a, nil
 	}
 	return Descriptor.ParseType(bs)
 }

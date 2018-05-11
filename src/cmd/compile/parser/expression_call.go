@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
+func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
 	pos := ep.parser.mkPos()
 

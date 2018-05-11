@@ -2,13 +2,12 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Function struct {
 	TemplateFunction               *TemplateFunction
-	AlreadyUsedForTemplate         bool
+	TypeParameters                 map[string]*VariableType
 	ParameterAndRetrunListOK       bool
 	ClassMethod                    *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser bool
@@ -33,15 +32,6 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
 	SourceCode                     []byte // source code for T
-}
-
-func (f *Function) clone() (ret *Function, es []error) {
-	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
-	if errsNotEmpty(es) {
-		return ret, es
-	}
-	ret.checkParaMeterAndRetuns(&es)
-	return ret, es
 }
 
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos)
@@ -135,9 +125,6 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	if f.TemplateFunction != nil {
-		return
-	}
 	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.check()...)
 }
@@ -145,12 +132,24 @@ func (f *Function) checkBlock(errs *[]error) {
 func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Block.inherite(b)
-	f.Block.InheritedAttribute.Function = f
 	f.checkParaMeterAndRetuns(&errs)
-	f.checkBlock(&errs)
+	f.Block.InheritedAttribute.Function = f
+	if f.TemplateFunction == nil {
+		f.checkBlock(&errs)
+	}
 	return errs
 }
 
+func (f *Function) clone(block *Block) (ret *Function, es []error) {
+	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
+	if errsNotEmpty(es) {
+		return ret, es
+	}
+	ret.Block.inherite(block)
+	ret.checkParaMeterAndRetuns(&es)
+	ret.Block.InheritedAttribute.Function = ret
+	return ret, es
+}
 func (f *Function) mkLastRetrunStatement() {
 	if len(f.Block.Statements) == 0 ||
 		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN &&
@@ -194,16 +193,18 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	}
 	var err error
 	for k, v := range f.Typ.ParameterList {
-		err = v.Typ.resolve(&f.Block)
-		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(v.Pos), err.Error()))
+		if v.Typ.Typ != VARIABLE_TYPE_T {
+			err = v.Typ.resolve(&f.Block)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
 		}
 		err = f.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			*errs = append(*errs, err)
 			continue
 		}
-		if v.Typ.Typ == VARIABLE_TYPE_T {
+		if v.Typ.Typ == VARIABLE_TYPE_T && f.TemplateFunction == nil {
 			f.TemplateFunction = &TemplateFunction{}
 		}
 		if f.HaveDefaultValue && v.Expression == nil {
@@ -243,12 +244,14 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	}
 	//handler return
 	for _, v := range f.Typ.ReturnList {
-		err = v.Typ.resolve(&f.Block)
-		if err != nil {
-			*errs = append(*errs, err)
-			continue
+		if v.Typ.Typ != VARIABLE_TYPE_T {
+			err = v.Typ.resolve(&f.Block)
+			if err != nil {
+				*errs = append(*errs, err)
+				continue
+			}
 		}
-		if v.Typ.Typ == VARIABLE_TYPE_T {
+		if v.Typ.Typ == VARIABLE_TYPE_T && f.TemplateFunction == nil {
 			f.TemplateFunction = &TemplateFunction{}
 		}
 		err = f.Block.insert(v.Name, v.Pos, v)

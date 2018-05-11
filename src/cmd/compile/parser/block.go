@@ -229,7 +229,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				continue
 			}
 			var es []*ast.Expression
-			es, err = b.parser.ExpressionParser.parseExpressions()
+			es, err = b.parser.Expression.parseExpressions()
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 				b.consume(untils_semicolon)
@@ -390,7 +390,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 
 func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 	pos := b.parser.mkPos()
-	e, err := b.parser.ExpressionParser.parseExpression(true)
+	e, err := b.parser.Expression.parseExpression(true)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
 		b.parser.consume(untils_semicolon)

@@ -7,18 +7,16 @@ import (
 )
 
 type ClassHighLevel struct {
-	Class                  Class
-	SourceFiles            map[string]struct{} // one class file can be compile form multi
-	Name                   string
-	IsClosureFunctionClass bool
-	MainClass              *ClassHighLevel
-	AccessFlags            uint16
-	SuperClass             string
-	Interfaces             []string
-	Fields                 map[string]*FieldHighLevel
-	Methods                map[string][]*MethodHighLevel
-	TriggerCLinit          *MethodHighLevel
-	TemplateFunctions      []*AttributeTemplateFunction
+	Class             Class
+	SourceFiles       map[string]struct{} // one class file can be compile form multi
+	Name              string
+	AccessFlags       uint16
+	SuperClass        string
+	Interfaces        []string
+	Fields            map[string]*FieldHighLevel
+	Methods           map[string][]*MethodHighLevel
+	TriggerCLinit     *MethodHighLevel
+	TemplateFunctions []*AttributeTemplateFunction
 }
 
 func (c *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level, location []byte) {

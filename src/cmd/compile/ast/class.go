@@ -144,7 +144,7 @@ func (c *Class) resolveFather(block *Block) error {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}
 		if p, ok := r.(*Package); ok && p != nil { // if package
-			if false == p.Block.nameExists(t[1]) {
+			if false == p.Block.NameExists(t[1]) {
 				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
 			}
 			if p.Block.Classes == nil || p.Block.Classes[t[1]] == nil {

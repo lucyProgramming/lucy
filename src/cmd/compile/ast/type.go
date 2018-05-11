@@ -39,7 +39,7 @@ type VariableType struct {
 	Resolved  bool
 	Pos       *Pos
 	Typ       int
-	Name      string
+	Name      string //
 	ArrayType *VariableType
 	Const     *Const
 	Var       *VariableDefinition
@@ -50,7 +50,6 @@ type VariableType struct {
 	Map       *Map
 	Package   *Package
 	Alias     string
-	T         *VariableType
 }
 
 type Map struct {
@@ -143,6 +142,16 @@ func (t *VariableType) resolve(block *Block) error {
 		return nil
 	}
 	t.Resolved = true
+	if t.Typ == VARIABLE_TYPE_T {
+		if block.InheritedAttribute.Function.TypeParameters == nil || block.InheritedAttribute.Function.TypeParameters[t.Name] == nil {
+			return fmt.Errorf("%s typed parameter '%s' not found",
+				errMsgPrefix(t.Pos), t.Name)
+		}
+		pos := t.Pos
+		*t = *block.InheritedAttribute.Function.TypeParameters[t.Name]
+		t.Pos = pos // keep pos
+		return nil
+	}
 	if t.Typ == VARIABLE_TYPE_NAME { //
 		return t.resolveName(block)
 	}
@@ -182,7 +191,7 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
 	}
 	if pp, ok := p.(*Package); ok && pp != nil {
-		d = pp.Block.nameExists(packageAndName[1])
+		d = pp.Block.NameExists(packageAndName[1])
 		if d == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos))
 		}
@@ -355,11 +364,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_FUNCTION:
 		*ret += v.Function.readableMsg()
 	case VARIABLE_TYPE_T:
-		if v.T == nil {
-			*ret = "T"
-		} else {
-			*ret = "T@" + v.T.TypeString()
-		}
+		*ret += v.Name
 	default:
 		panic(v.Typ)
 	}
@@ -386,21 +391,6 @@ func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
 	t2 can be cast to t1
 */
 func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
-	if v.Typ == VARIABLE_TYPE_T {
-		if v.T == nil {
-			return false
-		} else {
-			return v.T.Equal(assignMent)
-		}
-	}
-	if assignMent.Typ == VARIABLE_TYPE_T {
-		if assignMent.T == nil {
-			return false
-		} else {
-			return v.Equal(assignMent.T)
-		}
-	}
-
 	if v == assignMent {
 		return true
 	}

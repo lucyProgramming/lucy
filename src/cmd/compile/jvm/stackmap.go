@@ -45,6 +45,10 @@ func (s *StackMapState) popStack(pop int) {
 	if pop < 0 {
 		panic("negative pop")
 	}
+	if len(s.Stacks) == 0 {
+		panic("already 0")
+	}
+	//fmt.Println(0, s.Stacks, len(s.Stacks), len(s.Stacks)-pop, s.Stacks)
 	s.Stacks = s.Stacks[:len(s.Stacks)-pop]
 }
 func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType) {

@@ -9,7 +9,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	function := e.Data.(*ast.Function)
 	if function.IsClosureFunction == false {
-		function.Name = class.NewFunctionName(function.Name) // new a function name
+		function.Name = m.newClassName(function.Name) // new a function name
 		method := &cg.MethodHighLevel{}
 		method.Name = function.Name
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
@@ -31,7 +31,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	closureClass.Name = classname
 	closureClass.SuperClass = ast.LUCY_ROOT_CLASS
 	closureClass.AccessFlags = 0
-	closureClass.Class.AttributeClosureClass = &cg.AttributeClosureFunctionClass{}
+	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
 	m.mkClassDefaultContruction(closureClass, nil)

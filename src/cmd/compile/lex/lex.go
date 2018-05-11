@@ -308,6 +308,24 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	return
 }
+func (lex *LucyLexer) looksLikeT(bs []byte) bool {
+	if len(bs) == 0 {
+		return false
+	}
+	if bs[0] != 'T' {
+		return false
+	}
+	bs = bs[1:]
+	for _, v := range bs {
+		if v >= '0' && v <= '9' {
+
+		} else {
+			return false
+		}
+	}
+	return true
+}
+
 func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
@@ -337,9 +355,16 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 			}
 		}
 	} else {
-		token.Type = TOKEN_IDENTIFIER
-		token.Data = identifier
-		token.Desp = "identifer_" + identifier
+		if lex.looksLikeT(bs) {
+			token.Type = TOKEN_T
+			token.Data = identifier
+			token.Desp = identifier
+		} else {
+			token.Type = TOKEN_IDENTIFIER
+			token.Data = identifier
+			token.Desp = "identifer_" + identifier
+		}
+
 	}
 	token.EndLine = lex.line
 	token.EndColumn = lex.column

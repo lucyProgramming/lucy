@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
+func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch ep.parser.token.Type {
@@ -229,6 +229,11 @@ func (ep *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 			return left, err
 		}
 	case lex.TOKEN_STRING:
+		left, err = ep.parseTypeConvertionExpression()
+		if err != nil {
+			return left, err
+		}
+	case lex.TOKEN_T:
 		left, err = ep.parseTypeConvertionExpression()
 		if err != nil {
 			return left, err

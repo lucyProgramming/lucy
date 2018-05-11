@@ -281,7 +281,7 @@ func (c *Class) parseField(errs *[]error) error {
 	var es []*ast.Expression
 	if c.parser.token.Type == lex.TOKEN_ASSIGN {
 		c.Next() // skip =
-		es, err = c.parser.ExpressionParser.parseExpressions()
+		es, err = c.parser.Expression.parseExpressions()
 		if err != nil {
 			*errs = append(*errs, err)
 		}

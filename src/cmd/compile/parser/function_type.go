@@ -63,7 +63,7 @@ func (p *Parser) parseReturnList() (vs []*ast.VariableDefinition, err error) {
 	p.Next() // skip =
 	for k, v := range vs {
 		var er error
-		v.Expression, er = p.ExpressionParser.parseExpression(false)
+		v.Expression, er = p.Expression.parseExpression(false)
 		if er != nil {
 			p.errs = append(p.errs, err)
 			p.consume(map[int]bool{

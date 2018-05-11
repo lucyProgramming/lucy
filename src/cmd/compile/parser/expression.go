@@ -7,15 +7,15 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-type ExpressionParser struct {
+type Expression struct {
 	parser *Parser
 }
 
-func (ep *ExpressionParser) Next() {
+func (ep *Expression) Next() {
 	ep.parser.Next()
 }
 
-func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
+func (ep *Expression) parseExpressions() ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
 	for ep.parser.token.Type != lex.TOKEN_EOF {
 		e, err := ep.parseExpression(false)
@@ -37,7 +37,7 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 }
 
 //parse assign expression
-func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
+func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, error) {
 	left, err := ep.parseLogicalExpression() //
 	if err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 	return left, nil
 }
 
-func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, error) {
+func (ep *Expression) parseTypeConvertionExpression() (*ast.Expression, error) {
 	t, err := ep.parser.parseType()
 	if err != nil {
 		return nil, err

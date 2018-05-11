@@ -11,7 +11,7 @@ import (
 )
 
 func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
-	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_CLOSURE_FUNCTION_CLASS); t != nil && len(t) > 0 {
+	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_COMPILTER_AUTO); t != nil && len(t) > 0 {
 		return nil, nil
 	}
 	//name
@@ -61,7 +61,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
-			err = jvm.LucyMethodSignatureParser.Deocde(c.ConstPool[index].Info, m.Func)
+			err = jvm.LucyMethodSignatureParser.Decode(m.Func, c.ConstPool[index].Info)
 			if err != nil {
 				return nil, err
 			}
@@ -117,6 +117,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 	mainClassName.Name = pack.Name + "/main"
 	pack.Block.Vars = make(map[string]*ast.VariableDefinition)
 	pack.Block.Consts = make(map[string]*ast.Const)
+	pack.Block.Funcs = make(map[string]*ast.Function)
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
@@ -176,7 +177,6 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			}
 		}
 	}
-
 	for _, m := range c.Methods {
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_INNER_STATIC_METHOD); t != nil && len(t) > 0 {
 			//inner static method cannot called from outside
@@ -201,7 +201,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		}
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
-			err = jvm.LucyMethodSignatureParser.Deocde(c.ConstPool[index].Info, function)
+			err = jvm.LucyMethodSignatureParser.Decode(function, c.ConstPool[index].Info)
 			if err != nil {
 				return err
 			}
@@ -216,9 +216,6 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		function.ClassMethod.Name = function.Name
 		function.ClassMethod.Class = mainClassName
 		function.IsGlobal = true
-		if pack.Block.Funcs == nil {
-			pack.Block.Funcs = make(map[string]*ast.Function)
-		}
 		pack.Block.Funcs[name] = function
 	}
 	if pack.Block.Types == nil {
@@ -232,6 +229,20 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		}
 		typ.Alias = name
 		pack.Block.Types[name] = typ
+	}
+	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION) {
+		attr := &cg.AttributeTemplateFunction{}
+		attr.FromBytes(c, v.Info)
+		f, es := ParseFunctionHandler([]byte(attr.Code), &ast.Pos{
+			Filename:    attr.Filename,
+			StartLine:   int(attr.StartLine),
+			StartColumn: int(attr.StartColumn),
+		})
+		if len(es) > 0 { // looks impossible
+			return es[0]
+		}
+		f.TemplateFunction = &ast.TemplateFunction{}
+		pack.Block.Funcs[attr.Name] = f
 	}
 	return nil
 }

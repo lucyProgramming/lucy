@@ -3,12 +3,13 @@ package clean
 import (
 	"encoding/json"
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 )
 
 type Clean struct {
@@ -77,7 +78,6 @@ func (c *Clean) cleanPath(path string) {
 	var meta common.PackageMeta
 	err = json.Unmarshal(bs, &meta)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	for _, v := range meta.Classes {

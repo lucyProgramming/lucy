@@ -19,11 +19,17 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 	}
 	err = convertion.Typ.resolve(block)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		*errs = append(*errs, err)
 		return nil
 	}
 	ret := convertion.Typ.Clone()
 	ret.Pos = e.Pos
+	if convertion.Typ.Equal(t) {
+		*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s',because they are eqaul",
+			errMsgPrefix(e.Pos), t.TypeString(), convertion.Typ.TypeString()))
+		return ret
+	}
+
 	if t.IsNumber() && convertion.Typ.IsNumber() {
 		if convertion.Expression.IsLiteral() {
 			convertion.Expression.convertNumberLiteralTo(convertion.Typ.Typ)

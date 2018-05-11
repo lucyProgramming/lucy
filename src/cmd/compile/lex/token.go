@@ -147,7 +147,6 @@ var (
 		"goto":       TOKEN_GOTO,
 		"range":      TOKEN_RANGE,
 		"map":        TOKEN_MAP,
-		"T":          TOKEN_T,
 	}
 )
 

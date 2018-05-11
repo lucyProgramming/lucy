@@ -14,27 +14,28 @@ func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr 
 }
 
 type Parser struct {
-	onlyimport       bool
-	bs               []byte
-	lines            [][]byte
-	tops             *[]*ast.Node
-	ExpressionParser *ExpressionParser
-	Function         *Function
-	Class            *Class
-	Block            *Block
-	Interface        *Interface
-	scanner          *lex.LucyLexer
-	filename         string
-	lastToken        *lex.Token
-	token            *lex.Token
-	expect           *lex.Token
-	errs             []error
-	imports          map[string]*ast.Import
-	nerr             int
+	onlyimport bool
+	bs         []byte
+	lines      [][]byte
+	tops       *[]*ast.Node
+	scanner    *lex.LucyLexer
+	filename   string
+	lastToken  *lex.Token
+	token      *lex.Token
+	// expect     *lex.Token
+	errs    []error
+	imports map[string]*ast.Import
+	nerr    int
+	// parsers
+	Expression *Expression
+	Function   *Function
+	Class      *Class
+	Block      *Block
+	Interface  *Interface
 }
 
 func (p *Parser) Parse(startLine, startColoumn int) []error {
-	p.ExpressionParser = &ExpressionParser{p}
+	p.Expression = &Expression{p}
 	p.Function = &Function{}
 	p.Function.parser = p
 	p.Class = &Class{}
@@ -91,7 +92,7 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 			})
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			e, err := p.ExpressionParser.parseExpression(true)
+			e, err := p.Expression.parseExpression(true)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -342,7 +343,7 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 	}
 	typ := p.token.Type
 	p.Next() // skip = or :=
-	es, err := p.ExpressionParser.parseExpressions()
+	es, err := p.Expression.parseExpressions()
 	if err != nil {
 		return nil, nil, typ, err
 	}

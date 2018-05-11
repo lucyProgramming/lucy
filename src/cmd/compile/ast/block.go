@@ -25,7 +25,7 @@ type Block struct {
 	Vars                       map[string]*VariableDefinition
 }
 
-func (b *Block) nameExists(name string) bool {
+func (b *Block) NameExists(name string) bool {
 	if b.Funcs != nil {
 		if _, ok := b.Funcs[name]; ok {
 			return true
@@ -192,10 +192,6 @@ type InheritedAttribute struct {
 func (b *Block) check() []error {
 	errs := []error{}
 	errs = append(errs, b.checkConst()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	errs = append(errs, b.checkFunctions()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}

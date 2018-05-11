@@ -30,7 +30,7 @@ type Class struct {
 	Fields                 []*FieldInfo
 	Methods                []*MethodInfo
 	Attributes             []*AttributeInfo
-	AttributeClosureClass  *AttributeClosureFunctionClass
+	AttributeCompilerAuto  *AttributeCompilerAuto
 	AttributeGroupedByName AttributeGroupedByName
 	TypeAlias              []*AttributeLucyTypeAlias
 	AttributeLucyEnum      *AttributeLucyEnum
@@ -333,8 +333,8 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 	}
 	//source file
 	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
-	if c.AttributeClosureClass != nil {
-		c.Attributes = append(c.Attributes, c.AttributeClosureClass.ToAttributeInfo(c))
+	if c.AttributeCompilerAuto != nil {
+		c.Attributes = append(c.Attributes, c.AttributeCompilerAuto.ToAttributeInfo(c))
 	}
 	for _, v := range c.TypeAlias {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))

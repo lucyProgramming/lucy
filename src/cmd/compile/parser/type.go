@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 
+	"strconv"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -87,7 +89,17 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			Pos: pos,
 		}, nil
 	case lex.TOKEN_IDENTIFIER:
-		return p.parseIdentifierType()
+		t, err := p.parseIdentifierType()
+		if err != nil {
+			return t, err
+		}
+		if t.Name[0] == 'T' { // first byte is 'T'
+			_, err := strconv.Atoi(t.Name[1:])
+			if err == nil { // valid number after T
+				t.Typ = ast.VARIABLE_TYPE_T // correct type named 'T1' or 'T2' to Templates
+			}
+		}
+		return t, nil
 	case lex.TOKEN_MAP:
 		pos := p.mkPos()
 		p.Next() // skip map key word
@@ -125,11 +137,13 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		}, nil
 	case lex.TOKEN_T:
 		pos := p.mkPos()
+		ret := &ast.VariableType{
+			Typ:  ast.VARIABLE_TYPE_T,
+			Pos:  pos,
+			Name: p.token.Data.(string),
+		}
 		p.Next()
-		return &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_T,
-			Pos: pos,
-		}, nil
+		return ret, nil
 	}
 	err = fmt.Errorf("%s unkown type,begining token is '%s'",
 		p.errorMsgPrefix(), p.token.Desp)

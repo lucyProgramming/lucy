@@ -52,9 +52,20 @@ func (lc *LucyCompile) exit() {
 	if len(lc.Errs) > 0 {
 		code = 2
 	}
-	// sort error
-	es := SortErrs(lc.Errs)
-	sort.Sort(es)
+	//template function maybe parse twice,maybe  same error
+	errsM := make(map[string]struct{})
+	es := []error{}
+	for _, v := range lc.Errs {
+		if _, ok := errsM[v.Error()]; ok {
+			continue
+		}
+		es = append(es, v)
+		errsM[v.Error()] = struct{}{}
+	}
+	lc.Errs = es
+	// sort errors
+	es = SortErrs(lc.Errs)
+	sort.Sort(SortErrs(es))
 	for _, v := range es {
 		fmt.Fprintln(os.Stderr, v)
 	}

@@ -14,12 +14,15 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	if call.Func.IsBuildin {
 		return m.mkBuildinFunctionCall(class, code, e, context, state)
 	}
+	if call.Func.TemplateFunction != nil {
+		return m.buildTemplateFunctionCall(class, code, e, context, state)
+	}
 	if call.Func.IsClosureFunction == false {
 		maxstack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
-			Method:     call.Func.Name,
+			Method:     call.Func.ClassMethod.Name,
 			Descriptor: call.Func.ClassMethod.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3

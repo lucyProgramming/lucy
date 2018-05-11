@@ -5,9 +5,10 @@ import (
 )
 
 var (
-	CompileFlags Flags
-	compiler     LucyCompile
-	loader       RealNameLoader
+	CompileFlags         Flags
+	compiler             LucyCompile
+	loader               RealNameLoader
+	ParseFunctionHandler func(bs []byte, pos *ast.Pos) (*ast.Function, []error)
 )
 
 type Flags struct {
@@ -17,6 +18,7 @@ type Flags struct {
 
 func init() {
 	ast.NameLoader = &loader
+	ParseFunctionHandler = ast.ParseFunctionHandler
 }
 
 const (

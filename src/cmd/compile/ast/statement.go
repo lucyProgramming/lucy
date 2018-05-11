@@ -187,6 +187,10 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				errs = append(errs, es...)
 			}
 			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
+			if f.IsClosureFunction && f.TemplateFunction != nil {
+				errs = append(errs, fmt.Errorf("%s function '%s' cannot be 'template function' and 'closure function' at the same time",
+					errMsgPrefix(f.Pos)))
+			}
 			return errs
 		}
 	} else {

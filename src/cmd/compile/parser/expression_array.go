@@ -8,7 +8,7 @@ import (
 )
 
 // []int{1,2,3}
-func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
+func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 	pos := ep.parser.mkPos()
 	ep.parser.Next() // skip [
 	var t *ast.VariableType
@@ -75,7 +75,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 }
 
 //{1,2,3}  {{1,2,3},{456}}
-func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
+func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 	if ep.parser.token.Type != lex.TOKEN_LC {
 		return nil, fmt.Errorf("%s expect '{',but '%s'", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 	}
