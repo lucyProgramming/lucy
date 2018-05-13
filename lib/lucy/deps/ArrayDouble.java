@@ -115,6 +115,6 @@ public class ArrayDouble   {
 		this.cap = length;
 		return elements;
 	}
-
+	
 }
 

@@ -329,7 +329,6 @@ func (m *MakeClass) mkFuncs() {
 				StartLine:   uint16(f.Pos.StartLine),
 				StartColumn: uint16(f.Pos.StartColumn),
 				Code:        string(f.SourceCode),
-				Descriptor:  LucyMethodSignatureParser.Encode(f),
 			})
 			continue
 		}

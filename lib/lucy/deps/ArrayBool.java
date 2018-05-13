@@ -115,6 +115,6 @@ public class ArrayBool   {
 		this.cap = length;
 		return elements;
 	}
-
+	
 }
 
