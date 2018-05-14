@@ -5,28 +5,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-// && ||
-func (ep *Expression) parseLogicalExpression() (*ast.Expression, error) {
-	e, err := ep.parseBitANDORExpression()
+//||
+func (ep *Expression) parseLogicalOrExpression() (*ast.Expression, error) {
+	e, err := ep.parseLogicalAndExpression()
 	if err != nil {
 		return nil, err
 	}
-	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_AND ||
-		ep.parser.token.Type == lex.TOKEN_LOGICAL_OR) && ep.parser.token.Type != lex.TOKEN_EOF {
-		typ := ep.parser.token.Type
+	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_OR) && ep.parser.token.Type != lex.TOKEN_EOF {
 		pos := ep.parser.mkPos()
 		ep.Next()
-		e2, err := ep.parseBitANDORExpression()
+		e2, err := ep.parseLogicalAndExpression()
 		if err != nil {
 			return nil, err
 		}
 		newe := &ast.Expression{}
 		newe.Pos = pos
-		if typ == lex.TOKEN_LOGICAL_AND {
-			newe.Typ = ast.EXPRESSION_TYPE_LOGICAL_AND
-		} else {
-			newe.Typ = ast.EXPRESSION_TYPE_LOGICAL_OR
-		}
+		newe.Typ = ast.EXPRESSION_TYPE_LOGICAL_OR
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
@@ -36,18 +30,92 @@ func (ep *Expression) parseLogicalExpression() (*ast.Expression, error) {
 	return e, nil
 }
 
-// & |
-func (ep *Expression) parseBitANDORExpression() (*ast.Expression, error) {
+// &&
+func (ep *Expression) parseLogicalAndExpression() (*ast.Expression, error) {
+	e, err := ep.parseOrExpression()
+	if err != nil {
+		return nil, err
+	}
+	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_AND) && ep.parser.token.Type != lex.TOKEN_EOF {
+		pos := ep.parser.mkPos()
+		ep.Next()
+		e2, err := ep.parseOrExpression()
+		if err != nil {
+			return nil, err
+		}
+		newe := &ast.Expression{}
+		newe.Pos = pos
+		newe.Typ = ast.EXPRESSION_TYPE_LOGICAL_AND
+		binary := &ast.ExpressionBinary{}
+		binary.Left = e
+		binary.Right = e2
+		newe.Data = binary
+		e = newe
+	}
+	return e, nil
+}
+
+//  |
+func (ep *Expression) parseOrExpression() (*ast.Expression, error) {
+	e, err := ep.parseXorExpression()
+	if err != nil {
+		return nil, err
+	}
+	for ep.parser.token.Type == lex.TOKEN_OR &&
+		ep.parser.token.Type != lex.TOKEN_EOF {
+		pos := ep.parser.mkPos()
+		ep.Next()
+		e2, err := ep.parseXorExpression()
+		if err != nil {
+			return nil, err
+		}
+		newe := &ast.Expression{}
+		newe.Pos = pos
+		newe.Typ = ast.EXPRESSION_TYPE_OR
+		binary := &ast.ExpressionBinary{}
+		binary.Left = e
+		binary.Right = e2
+		newe.Data = binary
+		e = newe
+	}
+	return e, nil
+}
+
+// ^
+func (ep *Expression) parseXorExpression() (*ast.Expression, error) {
+	e, err := ep.parseAndExpression()
+	if err != nil {
+		return nil, err
+	}
+
+	for ep.parser.token.Type == lex.TOKEN_XOR &&
+		ep.parser.token.Type != lex.TOKEN_EOF {
+		pos := ep.parser.mkPos()
+		ep.Next()
+		e2, err := ep.parseAndExpression()
+		if err != nil {
+			return nil, err
+		}
+		newe := &ast.Expression{}
+		newe.Pos = pos
+		newe.Typ = ast.EXPRESSION_TYPE_XOR
+		binary := &ast.ExpressionBinary{}
+		binary.Left = e
+		binary.Right = e2
+		newe.Data = binary
+		e = newe
+	}
+	return e, nil
+}
+
+// &
+func (ep *Expression) parseAndExpression() (*ast.Expression, error) {
 	e, err := ep.parseEqualExpression()
 	if err != nil {
 		return nil, err
 	}
-	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_AND ||
-		ep.parser.token.Type == lex.TOKEN_OR ||
-		ep.parser.token.Type == lex.TOKEN_XOR) &&
+	for ep.parser.token.Type == lex.TOKEN_AND &&
 		ep.parser.token.Type != lex.TOKEN_EOF {
-		typ = ep.parser.token.Type
 		pos := ep.parser.mkPos()
 		ep.Next()
 		e2, err := ep.parseEqualExpression()
@@ -56,13 +124,7 @@ func (ep *Expression) parseBitANDORExpression() (*ast.Expression, error) {
 		}
 		newe := &ast.Expression{}
 		newe.Pos = pos
-		if typ == lex.TOKEN_AND {
-			newe.Typ = ast.EXPRESSION_TYPE_AND
-		} else if typ == lex.TOKEN_OR {
-			newe.Typ = ast.EXPRESSION_TYPE_OR
-		} else {
-			newe.Typ = ast.EXPRESSION_TYPE_XOR
-		}
+		newe.Typ = ast.EXPRESSION_TYPE_AND
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2

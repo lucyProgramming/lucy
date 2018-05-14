@@ -16,7 +16,6 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 			return nil, err
 		}
 	}
-
 	if ep.parser.token.Type != lex.TOKEN_LC {
 		return nil, fmt.Errorf("expect '{',but '%s'", ep.parser.token.Desp)
 	}

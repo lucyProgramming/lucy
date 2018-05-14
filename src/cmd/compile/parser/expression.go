@@ -38,13 +38,13 @@ func (ep *Expression) parseExpressions() ([]*ast.Expression, error) {
 
 //parse assign expression
 func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, error) {
-	left, err := ep.parseLogicalExpression() //
+	left, err := ep.parseTernaryExpression() //
 	if err != nil {
 		return nil, err
 	}
 	for ep.parser.token.Type == lex.TOKEN_COMMA && statementLevel { // read more
 		ep.Next()                                 //  skip comma
-		left2, err := ep.parseLogicalExpression() //
+		left2, err := ep.parseTernaryExpression() //
 		if err != nil {
 			return nil, err
 		}
@@ -127,6 +127,7 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 	case lex.TOKEN_XOR_ASSIGN:
 		mustBeOneExpression()
 		return mkBinayExpression(ast.EXPRESSION_TYPE_XOR_ASSIGN, false)
+
 	}
 	return left, nil
 }

@@ -394,10 +394,6 @@ func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
 	if v == assignMent {
 		return true
 	}
-
-	if v.Typ != assignMent.Typ {
-		return false
-	}
 	if v.IsPrimitive() && assignMent.IsPrimitive() {
 		return v.Typ == assignMent.Typ
 	}

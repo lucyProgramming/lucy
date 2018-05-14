@@ -98,9 +98,10 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		}
 		ep.Next()
 	case lex.TOKEN_INCREMENT:
+		pos := ep.parser.mkPos()
 		ep.Next() // skip ++
 		newE := &ast.Expression{}
-		newE.Pos = ep.parser.mkPos()
+		newE.Pos = pos
 		left, err = ep.parseOneExpression()
 		if err != nil {
 			return nil, err
@@ -109,6 +110,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		newE.Data = left
 		left = newE
 	case lex.TOKEN_DECREMENT:
+		pos := ep.parser.mkPos()
 		ep.Next() // skip --
 		newE := &ast.Expression{}
 		left, err = ep.parseOneExpression()
@@ -117,9 +119,10 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		}
 		newE.Typ = ast.EXPRESSION_TYPE_PRE_DECREMENT
 		newE.Data = left
-		newE.Pos = ep.parser.mkPos()
+		newE.Pos = pos
 		left = newE
 	case lex.TOKEN_NOT:
+		pos := ep.parser.mkPos()
 		ep.Next()
 		newE := &ast.Expression{}
 		left, err = ep.parseOneExpression()
@@ -128,9 +131,10 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		}
 		newE.Typ = ast.EXPRESSION_TYPE_NOT
 		newE.Data = left
-		newE.Pos = ep.parser.mkPos()
+		newE.Pos = pos
 		left = newE
 	case lex.TOKEN_BITWISE_NOT:
+		pos := ep.parser.mkPos()
 		ep.Next()
 		newE := &ast.Expression{}
 		left, err = ep.parseOneExpression()
@@ -139,9 +143,10 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		}
 		newE.Typ = ast.EXPRESSION_TYPE_BITWISE_NOT
 		newE.Data = left
-		newE.Pos = ep.parser.mkPos()
+		newE.Pos = pos
 		left = newE
 	case lex.TOKEN_SUB:
+		pos := ep.parser.mkPos()
 		ep.Next()
 		newE := &ast.Expression{}
 		left, err = ep.parseOneExpression()
@@ -150,7 +155,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		}
 		newE.Typ = ast.EXPRESSION_TYPE_NEGATIVE
 		newE.Data = left
-		newE.Pos = ep.parser.mkPos()
+		newE.Pos = pos
 		left = newE
 	// case lex.TOKEN_FUNCTION:
 	// 	f, err := ep.parser.Function.parse(false)
@@ -162,6 +167,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 	// 		Data: f,
 	// 	}, nil
 	case lex.TOKEN_NEW:
+		pos := ep.parser.mkPos()
 		ep.Next()
 		t, err := ep.parser.parseType()
 		if err != nil {
@@ -183,7 +189,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		}
 		ep.Next()
 		left = &ast.Expression{
-			Pos: ep.parser.mkPos(),
+			Pos: pos,
 			Typ: ast.EXPRESSION_TYPE_NEW,
 			Data: &ast.ExpressionNew{
 				Args: es,
@@ -291,7 +297,8 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 			ep.Next()
 			continue
 		}
-		// [
+
+		//  [
 		if ep.parser.token.Type == lex.TOKEN_LB {
 			pos := ep.parser.mkPos()
 			ep.Next()                                    // skip [
@@ -378,7 +385,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 				left = newe
 				ep.Next()
 				continue
-			} else if ep.parser.token.Type == lex.TOKEN_LP {
+			} else if ep.parser.token.Type == lex.TOKEN_LP { //  a.(xxx)
 				//
 				ep.Next() // skip (
 				typ, err := ep.parser.parseType()
@@ -399,7 +406,8 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 				left = newe
 				continue
 			} else {
-				return nil, fmt.Errorf("%s expect  'identifier' or '('", ep.parser.errorMsgPrefix())
+				return nil, fmt.Errorf("%s expect  'identifier' or '(',but '%s'",
+					ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 			}
 		}
 		//  aa ()

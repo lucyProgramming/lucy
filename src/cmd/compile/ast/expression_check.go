@@ -312,9 +312,10 @@ func (e *Expression) checkSingleValueContextExpression(block *Block) (*VariableT
 	t, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		if es == nil {
-			es = []error{}
+			es = []error{err}
+		} else {
+			es = append(es, err)
 		}
-		es = append(es, err)
 	}
 	return t, es
 }

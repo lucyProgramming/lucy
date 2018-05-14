@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -10,7 +9,6 @@ import (
 func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
 	pos := ep.parser.mkPos()
-
 	ep.Next() // skip (
 	args := []*ast.Expression{}
 	if ep.parser.token.Type != lex.TOKEN_RP { //a(123)

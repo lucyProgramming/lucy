@@ -8,13 +8,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-//type NotSupportTypeSignatureError struct {
-//}
-
-//func (e *NotSupportTypeSignatureError) Error() string {
-//	return "lucy does not support typed parameter currently"
-//}
-
 func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
 	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {

@@ -223,7 +223,6 @@ func (e *Expression) OpName() string {
 		return "type assert"
 	case EXPRESSION_TYPE_TYPE_ALIAS:
 		return "type alias"
-
 	}
 	panic(fmt.Sprintf("missing:%d", e.Typ))
 }
@@ -413,7 +412,7 @@ func (e *Expression) canbeUsedForRange() bool {
 	if bin.Right.Typ == EXPRESSION_TYPE_LIST {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) == 1 && t[0].Typ == EXPRESSION_TYPE_RANGE {
-			bin.Right = t[0] // override
+			// bin.Right = t[0] // override
 			return true
 		}
 	}
