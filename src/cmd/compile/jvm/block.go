@@ -72,8 +72,13 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	if b.IsFunctionTopBlock == false && len(b.Defers) > 0 {
 		index := len(b.Defers) - 1
 		for index >= 0 {
-			ss := (&StackMapState{}).FromLast(state)
-			m.buildBlock(class, code, &b.Defers[index].Block, context, state)
+			var ss *StackMapState
+			if b.HaveVariableDefinition() {
+				ss = (&StackMapState{}).FromLast(state)
+			} else {
+				ss = state
+			}
+			m.buildBlock(class, code, &b.Defers[index].Block, context, ss)
 			state.addTop(ss)
 			index--
 		}

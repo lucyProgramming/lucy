@@ -137,7 +137,12 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 
 		//block is here
 		if c.Block != nil {
-			ss := (&StackMapState{}).FromLast(state)
+			var ss *StackMapState
+			if c.Block.HaveVariableDefinition() {
+				ss = (&StackMapState{}).FromLast(state)
+			} else {
+				ss = state
+			}
 			m.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
@@ -159,7 +164,12 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.CodeLength++
 		if s.Default != nil {
-			ss := (&StackMapState{}).FromLast(state)
+			var ss *StackMapState
+			if s.Default.HaveVariableDefinition() {
+				ss = (&StackMapState{}).FromLast(state)
+			} else {
+				ss = state
+			}
 			m.buildBlock(class, code, s.Default, context, ss)
 			state.addTop(ss)
 		}

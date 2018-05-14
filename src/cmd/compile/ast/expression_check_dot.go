@@ -2,18 +2,15 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *VariableType) {
 	dot := e.Data.(*ExpressionDot)
-	ts, es := dot.Expression.check(block)
+	t, es := dot.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
-	}
-	t, err := e.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
 	}
 	if t == nil {
 		return nil
@@ -26,6 +23,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			errMsgPrefix(e.Pos), dot.Name, t.TypeString()))
 		return nil
 	}
+	var err error
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
 		if t.Package.Block.NameExists(dot.Name) == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), dot.Name)

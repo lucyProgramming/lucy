@@ -43,13 +43,9 @@ func (s *StatementFor) checkRange() []error {
 		}
 		rangeExpression = t[0].Data.(*Expression)
 	}
-	ts, es := rangeExpression.check(s.Block)
+	rangeOn, es := rangeExpression.checkSingleValueContextExpression(s.Block)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
-	}
-	rangeOn, err := rangeExpression.mustBeOneValueContext(ts)
-	if err != nil {
-		errs = append(errs, err)
 	}
 	if rangeOn == nil {
 		return errs
@@ -88,6 +84,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 	}
 	s.RangeAttr.RangeOn = rangeExpression
+	var err error
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
 		var identifier *ExpressionIdentifer
 		var pos *Pos
@@ -258,25 +255,23 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 	}
-	errs = append(errs, s.Block.check()...)
+	errs = append(errs, s.Block.checkStatements()...)
 	return errs
 }
 func (s *StatementFor) check(block *Block) []error {
 	s.Block.inherite(block)
 	s.Block.InheritedAttribute.StatementFor = s
-	s.Block.InheritedAttribute.mostCloseIsForOrSwitch = s
+	s.Block.InheritedAttribute.statementForBreak = s
 	errs := []error{}
 	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canbeUsedForRange() { // for k,v := range arr
 		return s.checkRange()
 	}
-	defer func() { // make sure condition is not null
-		if s.Condition == nil {
-			s.Condition = &Expression{}
-			s.Condition.Typ = EXPRESSION_TYPE_BOOL
-			s.Condition.Data = true
-			s.Condition.Pos = s.Pos
-		}
-	}()
+	if s.Condition == nil {
+		s.Condition = &Expression{}
+		s.Condition.Typ = EXPRESSION_TYPE_BOOL
+		s.Condition.Data = true
+		s.Condition.Pos = s.Pos
+	}
 	if s.Init != nil {
 		s.Init.IsStatementExpression = true
 		if s.Init.canBeUsedAsStatement() == false {
@@ -288,7 +283,7 @@ func (s *StatementFor) check(block *Block) []error {
 		}
 	}
 	if s.Condition != nil {
-		if s.Condition.isBool() == false {
+		if s.Condition.canbeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
@@ -312,7 +307,7 @@ func (s *StatementFor) check(block *Block) []error {
 			errs = append(errs, es...)
 		}
 	}
-	es := s.Block.check()
+	es := s.Block.checkStatements()
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}

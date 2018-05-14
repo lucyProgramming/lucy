@@ -8,13 +8,9 @@ import (
 
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*VariableType {
 	call := e.Data.(*ExpressionMethodCall)
-	ts, es := call.Expression.check(block)
+	object, es := call.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
-	}
-	object, err := e.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
 	}
 	if object == nil {
 		return nil
@@ -88,13 +84,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				return []*VariableType{ret}
 			}
 			matchkey := call.Name == common.MAP_METHOD_KEY_EXISTS
-			ts, es := call.Args[0].check(block)
+			t, es := call.Args[0].checkSingleValueContextExpression(block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
-			}
-			t, err := call.Args[0].mustBeOneValueContext(ts)
-			if err != nil {
-				*errs = append(*errs, err)
 			}
 			if t == nil {
 				return []*VariableType{ret}

@@ -97,10 +97,10 @@ func (s *Statement) check(block *Block) []error { // b is father
 					errMsgPrefix(s.Pos), s.StatementName())}
 			}
 			s.StatementBreak = &StatementBreak{}
-			if f, ok := block.InheritedAttribute.mostCloseIsForOrSwitch.(*StatementFor); ok {
+			if f, ok := block.InheritedAttribute.statementForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
 			} else {
-				s.StatementBreak.StatementSwitch = block.InheritedAttribute.mostCloseIsForOrSwitch.(*StatementSwitch)
+				s.StatementBreak.StatementSwitch = block.InheritedAttribute.statementForBreak.(*StatementSwitch)
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
@@ -138,12 +138,12 @@ func (s *Statement) check(block *Block) []error { // b is father
 		s.Defer.Block.inherite(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
 		s.Defer.allowCatch = block.IsFunctionTopBlock
-		es := s.Defer.Block.check()
+		es := s.Defer.Block.checkStatements()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
 	case STATEMENT_TYPE_BLOCK:
 		s.Block.inherite(block)
-		return s.Block.check()
+		return s.Block.checkStatements()
 	case STATEMENT_TYPE_LABLE: // nothing to do
 	case STATEMENT_TYPE_SKIP:
 		if block.InheritedAttribute.Function.isPackageBlockFunction == false {
@@ -172,24 +172,26 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	if s.Expression.canBeUsedAsStatement() {
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)
-			if f.Name == "" {
-				err := fmt.Errorf("%s function must have a name",
-					errMsgPrefix(s.Expression.Pos))
+
+			err := b.insert(f.Name, f.Pos, f)
+			if err != nil {
 				errs = append(errs, err)
-			} else {
-				err := b.insert(f.Name, f.Pos, f)
-				if err != nil {
-					errs = append(errs, err)
-				}
 			}
 			es := f.check(b)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
 			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
-			if f.IsClosureFunction && f.TemplateFunction != nil {
-				errs = append(errs, fmt.Errorf("%s function '%s' cannot be 'template function' and 'closure function' at the same time",
-					errMsgPrefix(f.Pos)))
+			if f.IsClosureFunction {
+				if f.TemplateFunction != nil {
+					errs = append(errs, fmt.Errorf("%s function '%s' cannot be 'template function' and 'closure function' at the same time",
+						errMsgPrefix(f.Pos)))
+				} else {
+					if b.ClosureFuncs == nil {
+						b.ClosureFuncs = make(map[string]*Function)
+					}
+					b.ClosureFuncs[f.Name] = f
+				}
 			}
 			return errs
 		}

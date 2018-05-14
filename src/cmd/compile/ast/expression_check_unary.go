@@ -6,14 +6,11 @@ import (
 
 func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *VariableType {
 	ee := e.Data.(*Expression)
-	ts, es := ee.check(block)
+	t, es := ee.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := e.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if t == nil {
 		if e.Typ == EXPRESSION_TYPE_NOT {
 			return &VariableType{

@@ -100,6 +100,7 @@ const (
 	TOKEN_RANGE          //range
 	TOKEN_MAP            //map
 	TOKEN_T              //T
+	TOKEN_QUESTION       // ?
 	TOKEN_EOF            // end of file
 )
 

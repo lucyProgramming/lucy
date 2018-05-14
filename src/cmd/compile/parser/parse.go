@@ -266,6 +266,7 @@ func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
 		if p.token.Type != lex.TOKEN_COMMA {
 			break
 		}
+		p.Next() // skip ,
 	}
 	return ret, nil
 }

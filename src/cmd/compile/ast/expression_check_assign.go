@@ -106,13 +106,9 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	bin := e.Data.(*ExpressionBinary)
 	t1 := bin.Left.getLeftValue(block, errs)
 	bin.Left.Value = t1
-	ts, es := bin.Right.check(block)
+	t2, es := bin.Right.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
-	}
-	t2, err := bin.Right.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
 	}
 	if t1 == nil || t2 == nil {
 		return

@@ -5,13 +5,9 @@ import "fmt"
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
 	ret := []*VariableType{mkVoidType(e.Pos)}
 	call := e.Data.(*ExpressionFunctionCall)
-	ts, es := call.Expression.check(block)
+	t, es := call.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
-	}
-	t, err := e.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
 	}
 	if t == nil {
 		return ret
@@ -52,53 +48,74 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	argTypes []*VariableType, f *Function) (ret *Function) {
 	call := e.Data.(*ExpressionFunctionCall)
-	ret, es := f.clone(block)
-	if errsNotEmpty(es) {
-		*errs = append(*errs, es...)
-		return ret
-	}
 	typeParameters := make(map[string]*VariableType)
-	for k, v := range ret.Typ.ParameterList {
-		if v == nil && v.Typ == nil && v.Typ.Typ != VARIABLE_TYPE_T {
+	tArgs := []*VariableType{}
+	tIndexes := []int{}
+	for k, v := range f.Typ.ParameterList {
+		if v == nil || v.Typ == nil || v.Typ.Typ != VARIABLE_TYPE_T {
 			continue
 		}
-		if k > len(argTypes) || argTypes[k] == nil {
-			*errs = append(*errs, fmt.Errorf("%s missing %d typed parameter", k))
+		if k >= len(argTypes) || argTypes[k] == nil {
+			*errs = append(*errs, fmt.Errorf("%s missing typed parameter,index at %d",
+				errMsgPrefix(e.Pos), k))
 			return
 		}
-		pos := v.Typ.Pos // keep pos
+
 		name := v.Typ.Name
-		*v.Typ = *argTypes[k]
-		v.Typ.Pos = pos
 		typeParameters[name] = v.Typ
+		tArgs = append(tArgs, argTypes[k])
+		tIndexes = append(tIndexes, k)
 	}
 	tps := call.TypedParameters
 	retTypes := []*VariableType{}
-	for k, v := range ret.Typ.ReturnList {
-		if v.Typ == nil {
-			continue
-		}
-		if v == nil && v.Typ == nil && v.Typ.Typ != VARIABLE_TYPE_T {
-			retTypes = append(retTypes, v.Typ)
+	retIndexes := []int{}
+	for k, v := range f.Typ.ReturnList {
+		if v == nil || v.Typ == nil || v.Typ.Typ != VARIABLE_TYPE_T {
 			continue
 		}
 		if len(tps) == 0 || tps[0] == nil {
-			*errs = append(*errs, fmt.Errorf("%s missing %d return type", k))
+			*errs = append(*errs, fmt.Errorf("%s missing typed return value,index at %d",
+				errMsgPrefix(e.Pos), k))
 			continue
 		}
 		name := v.Typ.Name
-		pos := v.Typ.Pos // keep pos
-		*v.Typ = *tps[0]
-		v.Typ.Pos = pos
+		retTypes = append(retTypes, tps[0])
+		typeParameters[name] = tps[0]
+		retIndexes = append(retIndexes, k)
 		tps = tps[1:]
-		retTypes = append(retTypes, v.Typ)
-		typeParameters[name] = v.Typ
-		v.Expression = v.Typ.mkDefaultValueExpression()
 	}
-	call.TemplateFunctionCallPair = f.TemplateFunction.insert(argTypes, retTypes, ret)
-	ret.TypeParameters = typeParameters
-	// when all ok ,tf is not  template function
-	ret.TemplateFunction = nil
+	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret)
+	if call.TemplateFunctionCallPair.F == nil { // not called before,make the binds
+		t, es := f.clone(block)
+		if errsNotEmpty(es) {
+			*errs = append(*errs, es...)
+			return nil
+		}
+		t.TemplateFunction = nil
+		call.TemplateFunctionCallPair.F = t
+		for k, v := range tArgs {
+			index := tIndexes[k]
+			pos := f.Typ.ParameterList[index].Pos //
+			*call.TemplateFunctionCallPair.F.Typ.ParameterList[index].Typ =
+				*v
+			call.TemplateFunctionCallPair.F.Typ.ParameterList[index].Typ.Pos = pos
+		}
+		for k, v := range retTypes {
+			index := retIndexes[k]
+			pos := f.Typ.ReturnList[index].Pos //
+			*call.TemplateFunctionCallPair.F.Typ.ReturnList[index].Typ =
+				*v
+			call.TemplateFunctionCallPair.F.Typ.ReturnList[index].Typ.Pos = pos
+			call.TemplateFunctionCallPair.F.Typ.ReturnList[index].Expression =
+				v.mkDefaultValueExpression()
+		}
+	}
+	ret = call.TemplateFunctionCallPair.F
+	// when all ok ,ret is not a template function any more
+	if len(tps) > 0 {
+		*errs = append(*errs, fmt.Errorf("%s to many typed parameter to call template function.",
+			errMsgPrefix(e.Pos)))
+	}
 	return ret
 }
 
@@ -129,7 +146,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		ret = tf.Typ.retTypes(e.Pos)
 	}
 	{
-		f := f
+		f := f // override f
 		if f.TemplateFunction != nil {
 			f = tf
 		}

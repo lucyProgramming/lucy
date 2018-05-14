@@ -6,25 +6,16 @@ import (
 
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *VariableType) {
 	bin := e.Data.(*ExpressionBinary)
-	ts1, es := bin.Left.check(block)
+	t1, es := bin.Left.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	ts2, es := bin.Right.check(block)
+	t2, es := bin.Right.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	var err error
-	t1, err := e.mustBeOneValueContext(ts1)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
-	t2, err := e.mustBeOneValueContext(ts2)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
-	if t1 == nil || t2 == nil {
 
+	if t1 == nil || t2 == nil {
 		if t1 != nil {
 			tt := t1.Clone()
 			tt.Pos = e.Pos

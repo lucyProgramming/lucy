@@ -22,7 +22,7 @@ func (s *StatementIF) check(father *Block) []error {
 		errs = append(errs, es...)
 	}
 	if es == nil || len(es) == 0 {
-		if s.Condition.isBool() == false {
+		if s.Condition.canbeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
@@ -34,11 +34,11 @@ func (s *StatementIF) check(father *Block) []error {
 		}
 	}
 
-	errs = append(errs, s.Block.check()...)
+	errs = append(errs, s.Block.checkStatements()...)
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		for _, v := range s.ElseIfList {
 			v.Block.inherite(father)
-			if v.Condition.isBool() == false {
+			if v.Condition.canbeUsedAsCondition() == false {
 				errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 					errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
 			}
@@ -50,12 +50,12 @@ func (s *StatementIF) check(father *Block) []error {
 				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 					errMsgPrefix(s.Condition.Pos)))
 			}
-			errs = append(errs, v.Block.check()...)
+			errs = append(errs, v.Block.checkStatements()...)
 		}
 	}
 	if s.ElseBlock != nil {
 		s.ElseBlock.inherite(father)
-		errs = append(errs, s.ElseBlock.check()...)
+		errs = append(errs, s.ElseBlock.checkStatements()...)
 	}
 	return errs
 }

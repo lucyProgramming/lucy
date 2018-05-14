@@ -32,13 +32,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 		return e.checkIndexExpression(block, errs)
 	case EXPRESSION_TYPE_DOT:
 		dot := e.Data.(*ExpressionDot)
-		ts, es := dot.Expression.check(block)
+		t, es := dot.Expression.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
-		}
-		t, err := e.mustBeOneValueContext(ts)
-		if err != nil {
-			*errs = append(*errs, err)
 		}
 		if t == nil {
 			return nil

@@ -20,7 +20,12 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_BLOCK: //new
-		ss := (&StackMapState{}).FromLast(state)
+		var ss *StackMapState
+		if s.Block.HaveVariableDefinition() {
+			ss = (&StackMapState{}).FromLast(state)
+		} else {
+			ss = state
+		}
 		m.buildBlock(class, code, s.Block, context, ss)
 		state.addTop(ss)
 	case ast.STATEMENT_TYPE_FOR:
@@ -37,8 +42,13 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		if b.Defers != nil && len(b.Defers) > 0 {
 			index := len(b.Defers) - 1
 			for index >= 0 {
-				ss := (&StackMapState{}).FromLast(state)
-				m.buildBlock(class, code, &b.Defers[index].Block, context, state)
+				var ss *StackMapState
+				if s.Block.HaveVariableDefinition() {
+					ss = (&StackMapState{}).FromLast(state)
+				} else {
+					ss = state
+				}
+				m.buildBlock(class, code, &b.Defers[index].Block, context, ss)
 				index--
 				state.addTop(ss)
 			}
@@ -49,8 +59,13 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		if b.Defers != nil && len(b.Defers) > 0 {
 			index := len(b.Defers) - 1
 			for index >= 0 {
-				ss := (&StackMapState{}).FromLast(state)
-				m.buildBlock(class, code, &b.Defers[index].Block, context, state)
+				var ss *StackMapState
+				if s.Block.HaveVariableDefinition() {
+					ss = (&StackMapState{}).FromLast(state)
+				} else {
+					ss = state
+				}
+				m.buildBlock(class, code, &b.Defers[index].Block, context, ss)
 				index--
 				state.addTop(ss)
 			}

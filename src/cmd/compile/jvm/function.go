@@ -153,7 +153,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		for _, v := range f.Typ.ParameterList {
 			p := &cg.MethodParameter{}
 			p.Name = v.Name
-			p.AccessFlags = cg.METHOD_PARAMETER_ACC_MANDATED
+			p.AccessFlags = cg.METHOD_PARAMETER_TYPE_ACC_MANDATED
 			method.AttributeMethodParameters.Parameters = append(method.AttributeMethodParameters.Parameters, p)
 		}
 	}
@@ -162,7 +162,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		for _, v := range f.Typ.ReturnList {
 			p := &cg.MethodParameter{}
 			p.Name = v.Name
-			p.AccessFlags = cg.METHOD_PARAMETER_ACC_MANDATED
+			p.AccessFlags = cg.METHOD_PARAMETER_TYPE_ACC_MANDATED
 			method.AttributeLucyReturnListNames.Parameters =
 				append(method.AttributeLucyReturnListNames.Parameters, p)
 		}

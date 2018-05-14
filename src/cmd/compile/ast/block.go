@@ -23,6 +23,14 @@ type Block struct {
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
 	Vars                       map[string]*VariableDefinition
+	ClosureFuncs               map[string]*Function //in "Funcs" too
+}
+
+func (b *Block) HaveVariableDefinition() bool {
+	if b.ClosureFuncs == nil && b.Vars == nil {
+		return false
+	}
+	return len(b.ClosureFuncs) > 0 || len(b.Vars) > 0
 }
 
 func (b *Block) NameExists(name string) bool {
@@ -178,27 +186,8 @@ func (b *Block) inherite(father *Block) {
 	}
 }
 
-type InheritedAttribute struct {
-	StatementOffset        int
-	IsConstruction         bool
-	StatementFor           *StatementFor // if this statement is in for or not
-	StatementSwitch        *StatementSwitch
-	mostCloseIsForOrSwitch interface{}
-	Function               *Function
-	class                  *Class
-	Defer                  *Defer
-}
-
-func (b *Block) check() []error {
+func (b *Block) checkStatements() []error {
 	errs := []error{}
-	errs = append(errs, b.checkConst()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	errs = append(errs, b.checkClass()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
 	for k, s := range b.Statements {
 		b.InheritedAttribute.StatementOffset = k
 		errs = append(errs, s.check(b)...)
@@ -226,14 +215,6 @@ func (b *Block) checkExpression(e *Expression, singleValueContext bool) (t *Vari
 	return
 }
 
-func (b *Block) checkClass() []error {
-	errs := []error{}
-	for _, v := range b.Classes {
-		errs = append(errs, v.check(b)...)
-	}
-	return errs
-}
-
 func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
 	for _, c := range b.Consts {
@@ -249,17 +230,6 @@ func (b *Block) checkConst() []error {
 			errs = append(errs, err)
 			delete(b.Consts, c.Name)
 		}
-	}
-	return errs
-}
-
-func (b *Block) checkFunctions() []error {
-	errs := []error{}
-	for _, v := range b.Funcs {
-		if v.IsBuildin {
-			continue
-		}
-		errs = append(errs, v.check(b)...)
 	}
 	return errs
 }

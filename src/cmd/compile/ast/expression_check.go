@@ -204,6 +204,12 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 		}
 		e.Value = tt
+	case EXPRESSION_TYPE_TERNARY:
+		tt := e.checkTernaryExpression(block, &errs)
+		if tt != nil {
+			Types = []*VariableType{tt}
+		}
+		e.Value = tt
 	case EXPRESSION_TYPE_INDEX:
 		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
@@ -300,4 +306,15 @@ func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Fu
 		return f.Typ.retTypes(e.Pos)
 	}
 	return nil //
+}
+func (e *Expression) checkSingleValueContextExpression(block *Block) (*VariableType, []error) {
+	ts, es := e.check(block)
+	t, err := e.mustBeOneValueContext(ts)
+	if err != nil {
+		if es == nil {
+			es = []error{}
+		}
+		es = append(es, err)
+	}
+	return t, es
 }

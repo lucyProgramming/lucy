@@ -6,18 +6,15 @@ import (
 
 func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
 	convertion := e.Data.(*ExpressionTypeConvertion)
-	ts, es := convertion.Expression.check(block)
+	t, es := convertion.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := convertion.Expression.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if t == nil {
 		return nil
 	}
-	err = convertion.Typ.resolve(block)
+	err := convertion.Typ.resolve(block)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil

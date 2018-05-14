@@ -27,7 +27,7 @@ const (
 //}
 
 type ConstPool struct {
-	selfindex uint16 // using when is is utf
+	selfindex uint16 // using when it`s self
 	Tag       uint8
 	Info      []byte
 }

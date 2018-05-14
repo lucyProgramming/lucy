@@ -29,13 +29,9 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	}
 	for _, v := range m.Values {
 		// map k
-		ktypes, es := v.Left.check(block)
+		ktype, es := v.Left.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
-		}
-		ktype, err := v.Left.mustBeOneValueContext(ktypes)
-		if err != nil {
-			*errs = append(*errs, err)
 		}
 		if ktype != nil {
 			rightValueValid := ktype.RightValueValid()
@@ -58,13 +54,9 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			}
 		}
 		// map v
-		vtypes, es := v.Right.check(block)
+		vtype, es := v.Right.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
-		}
-		vtype, err := v.Right.mustBeOneValueContext(vtypes)
-		if err != nil {
-			*errs = append(*errs, err)
 		}
 		if vtype == nil {
 			continue

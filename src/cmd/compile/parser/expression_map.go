@@ -21,7 +21,6 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 		return nil, fmt.Errorf("expect '{',but '%s'", ep.parser.token.Desp)
 	}
 	ep.Next() // skip {
-
 	ret := &ast.Expression{Typ: ast.EXPRESSION_TYPE_MAP}
 	m := &ast.ExpressionMap{}
 	m.Typ = typ

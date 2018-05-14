@@ -9,7 +9,12 @@ import (
 
 func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxstack uint16) {
 	var es []*cg.JumpBackPatch
-	IfState := (&StackMapState{}).FromLast(state)
+	var IfState *StackMapState
+	if s.Block.HaveVariableDefinition() {
+		IfState = (&StackMapState{}).FromLast(state)
+	} else {
+		IfState = state
+	}
 	maxstack, es = m.MakeExpression.build(class, code, s.Condition, context, IfState)
 	if len(es) > 0 {
 		backPatchEs(es, code.CodeLength)
@@ -22,16 +27,21 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	falseExit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
 	m.buildBlock(class, code, s.Block, context, IfState)
+	state.addTop(IfState)
 	if len(s.ElseIfList) > 0 || s.ElseBlock != nil {
 		if s.Block.DeadEnding == false {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 		}
 	}
-	state.addTop(IfState)
 	for k, v := range s.ElseIfList {
 		context.MakeStackMap(code, state, code.CodeLength) // state is not change,all block var should be access from outside
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
-		elseIfState := (&StackMapState{}).FromLast(state)
+		var elseIfState *StackMapState
+		if v.Block.HaveVariableDefinition() {
+			elseIfState = (&StackMapState{}).FromLast(state)
+		} else {
+			elseIfState = state
+		}
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
@@ -56,10 +66,16 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		state.addTop(elseIfState)
 	}
 	if s.ElseBlock != nil {
+
 		context.MakeStackMap(code, state, code.CodeLength)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		falseExit = nil
-		elseState := (&StackMapState{}).FromLast(state)
+		var elseState *StackMapState
+		if s.ElseBlock.HaveVariableDefinition() {
+			elseState = (&StackMapState{}).FromLast(state)
+		} else {
+			elseState = state
+		}
 		m.buildBlock(class, code, s.ElseBlock, context, elseState)
 		state.addTop(elseState)
 	}

@@ -197,6 +197,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxstack = m.buildColonAssign(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TYPE_ASSERT:
 		maxstack = m.buildTypeAssert(class, code, e, context, state)
+	case ast.EXPRESSION_TYPE_TERNARY:
+		maxstack = m.buildTernary(class, code, e, context, state)
 	default:
 		panic(e.OpName())
 	}

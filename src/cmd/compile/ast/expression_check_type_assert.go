@@ -9,14 +9,11 @@ import (
 */
 func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*VariableType {
 	assert := e.Data.(*ExpressionTypeAssert)
-	objectTs, es := assert.Expression.check(block)
+	object, es := assert.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	object, err := assert.Expression.mustBeOneValueContext(objectTs)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if object == nil {
 		return nil
 	}
@@ -24,7 +21,7 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*VariableTyp
 		*errs = append(*errs, fmt.Errorf("%s expression is primitive", errMsgPrefix(e.Pos)))
 		return nil
 	}
-	err = assert.Typ.resolve(block)
+	err := assert.Typ.resolve(block)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil

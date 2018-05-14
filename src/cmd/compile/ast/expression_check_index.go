@@ -6,14 +6,11 @@ import (
 
 func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *VariableType {
 	index := e.Data.(*ExpressionIndex)
-	ts, es := index.Expression.check(block)
+	t, es := index.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	t, err := e.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if t == nil {
 		return nil
 	}
@@ -27,14 +24,11 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Variable
 	// array
 	if t.Typ == VARIABLE_TYPE_ARRAY ||
 		t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		ts, es := index.Index.check(block)
+		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		indexType, err := index.Index.mustBeOneValueContext(ts)
-		if err != nil {
-			*errs = append(*errs, err)
-		}
+
 		if indexType != nil {
 			if indexType.IsInteger() {
 				if indexType.Typ == VARIABLE_TYPE_LONG {
@@ -52,14 +46,11 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Variable
 	// map
 	ret := t.Map.V.Clone()
 	ret.Pos = e.Pos
-	ts, es = index.Index.check(block)
+	indexType, es := index.Index.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	indexType, err := index.Index.mustBeOneValueContext(ts)
-	if err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if indexType == nil {
 		return ret
 	}

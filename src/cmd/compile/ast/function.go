@@ -2,10 +2,12 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Function struct {
+	BlockChecked                   bool // template function may be multi time check
 	TemplateFunction               *TemplateFunction
 	TypeParameters                 map[string]*VariableType
 	ParameterAndRetrunListOK       bool
@@ -125,8 +127,12 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
+	if f.BlockChecked {
+		return
+	}
 	f.mkLastRetrunStatement()
-	*errs = append(*errs, f.Block.check()...)
+	*errs = append(*errs, f.Block.checkStatements()...)
+	f.BlockChecked = true
 }
 
 func (f *Function) check(b *Block) []error {
@@ -205,6 +211,10 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			continue
 		}
 		if v.Typ.Typ == VARIABLE_TYPE_T && f.TemplateFunction == nil {
+			if f.HaveDefaultValue {
+				*errs = append(*errs, fmt.Errorf("%s cannot have typed parameter after default value",
+					errMsgPrefix(f.Pos)))
+			}
 			f.TemplateFunction = &TemplateFunction{}
 		}
 		if f.HaveDefaultValue && v.Expression == nil {
@@ -221,14 +231,11 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				f.DefaultValueStartAt = k
 			}
 			f.HaveDefaultValue = true
-			ts, es := v.Expression.check(&f.Block)
+			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
-			t, err := v.Expression.mustBeOneValueContext(ts)
-			if err != nil {
-				*errs = append(*errs, err)
-			}
+
 			if t != nil {
 				if v.Typ.Equal(t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
@@ -268,15 +275,10 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			v.Expression = v.Typ.mkDefaultValueExpression()
 			continue
 		}
-		ts, es := v.Expression.check(&f.Block)
+		t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
-		}
-		t, err := v.Expression.mustBeOneValueContext(ts)
-		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
-
 		}
 		if t != nil && t.TypeCompatible(v.Typ) == false {
 			err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),

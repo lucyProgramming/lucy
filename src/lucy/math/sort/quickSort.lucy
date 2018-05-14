@@ -1,18 +1,18 @@
 
 
 
-public fn quickSort(s T, l int, r int) {  
-    if  l< r  {        
+public fn quickSort(s T, l int, r int,desc bool = false) {  
+    if  l< r  && desc == false{        
         i ,j := l, r;
         x := s[l];  
         for  i < j {  
-            for i < j && s[j]>= x {// 从右向左找第一个小于x的数  
+            for i < j && s[j]>= x { 
             	j--;
             } 
             if i < j {
             	s[i++] = s[j];  
             } 
-            for i < j && s[i]< x{ // 从左向右找第一个大于等于x的数  
+            for i < j && s[i]< x{ 
             	i++;
             }   
             if i < j  {
@@ -20,10 +20,33 @@ public fn quickSort(s T, l int, r int) {
             }
         }  
         s[i] = x; 
-        quickSort(s, l, i - 1); // 递归调用  
-        quickSort(s, i + 1, r);  
-    }  
+        quickSort(s, l, i - 1,desc);  
+        quickSort(s, i + 1, r,desc);  
+    } 
+    if  l< r  && desc {        
+        i ,j := l, r;
+        x := s[l];  
+        for  i < j {  
+            for i < j && s[j] < x { 
+                j--;
+            } 
+            if i < j {
+                s[i++] = s[j];  
+            } 
+            for i < j && s[i] >=  x{ 
+                i++;
+            }   
+            if i < j  {
+                s[j--] = s[i];  
+            }
+        }  
+        s[i] = x; 
+        quickSort(s, l, i - 1,desc); 
+        quickSort(s, i + 1, r,desc);  
+    } 
 }
+
+
 
 
 

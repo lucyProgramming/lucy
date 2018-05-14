@@ -27,7 +27,7 @@ func (e *Enum) check() error {
 	}
 	is, err := e.Init.constFold()
 	if err != nil || is == false || e.Init.Typ != EXPRESSION_TYPE_INT {
-		return fmt.Errorf("%s enum type must inited by integer", errMsgPrefix(e.Pos))
+		return fmt.Errorf("%s enum type must inited by integer_expression", errMsgPrefix(e.Pos))
 	}
 	initV := e.Init.Data.(int32)
 	for k, v := range e.Enums {

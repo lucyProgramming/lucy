@@ -80,12 +80,13 @@ const (
 	EXPRESSION_TYPE_VAR
 	EXPRESSION_TYPE_CONST
 	EXPRESSION_TYPE_CHECK_CAST // []byte(str)
-	// EXPRESSION_TYPE_LABLE      // end:
+
 	EXPRESSION_TYPE_RANGE // for range
 	EXPRESSION_TYPE_SLICE // arr[0:2]
 	EXPRESSION_TYPE_MAP   // map literal
 	EXPRESSION_TYPE_TYPE_ALIAS
 	EXPRESSION_TYPE_TYPE_ASSERT
+	EXPRESSION_TYPE_TERNARY
 )
 
 func (e *Expression) OpName() string {
@@ -190,6 +191,8 @@ func (e *Expression) OpName() string {
 		return "--"
 	case EXPRESSION_TYPE_NEGATIVE:
 		return "negative(-)"
+	case EXPRESSION_TYPE_TERNARY:
+		return "ternary(?:)"
 	case EXPRESSION_TYPE_NOT:
 		return "not(!)"
 	case EXPRESSION_TYPE_BITWISE_NOT:
@@ -220,6 +223,7 @@ func (e *Expression) OpName() string {
 		return "type assert"
 	case EXPRESSION_TYPE_TYPE_ALIAS:
 		return "type alias"
+
 	}
 	panic(fmt.Sprintf("missing:%d", e.Typ))
 }
@@ -298,6 +302,12 @@ type ExpressionTypeAlias struct {
 	Pos  *Pos
 }
 
+type ExpressionTernary struct {
+	Condition *Expression
+	True      *Expression
+	False     *Expression
+}
+
 type ExpressionSlice struct {
 	Expression *Expression
 	Start, End *Expression
@@ -313,7 +323,7 @@ func (e *Expression) IsLiteral() bool {
 /*
 	valid for condition
 */
-func (e *Expression) isBool() bool {
+func (e *Expression) canbeUsedAsCondition() bool {
 	return e.Typ == EXPRESSION_TYPE_EQ ||
 		e.Typ == EXPRESSION_TYPE_NE ||
 		e.Typ == EXPRESSION_TYPE_GE ||
@@ -402,7 +412,10 @@ func (e *Expression) canbeUsedForRange() bool {
 	}
 	if bin.Right.Typ == EXPRESSION_TYPE_LIST {
 		t := bin.Right.Data.([]*Expression)
-		return len(t) > 0 && t[0].Typ == EXPRESSION_TYPE_RANGE
+		if len(t) == 1 && t[0].Typ == EXPRESSION_TYPE_RANGE {
+			bin.Right = t[0] // override
+			return true
+		}
 	}
 	return false
 }

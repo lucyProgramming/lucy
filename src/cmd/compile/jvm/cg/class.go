@@ -34,7 +34,7 @@ type Class struct {
 	AttributeGroupedByName AttributeGroupedByName
 	TypeAlias              []*AttributeLucyTypeAlias
 	AttributeLucyEnum      *AttributeLucyEnum
-	//caches
+	//const caches
 	Utf8Consts               map[string]*ConstPool
 	IntConsts                map[int32]*ConstPool
 	LongConsts               map[int64]*ConstPool

@@ -317,9 +317,7 @@ func (lex *LucyLexer) looksLikeT(bs []byte) bool {
 	}
 	bs = bs[1:]
 	for _, v := range bs {
-		if v >= '0' && v <= '9' {
-
-		} else {
+		if !(v >= '0' && v <= '9') {
 			return false
 		}
 	}
@@ -364,7 +362,6 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 			token.Data = identifier
 			token.Desp = "identifer_" + identifier
 		}
-
 	}
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
@@ -559,8 +556,10 @@ redo:
 		eof, err = lex.lexNumber(token, c)
 		return
 	}
-
 	switch c {
+	case '?':
+		token.Type = TOKEN_QUESTION
+		token.Desp = "?"
 	case '(':
 		token.Type = TOKEN_LP
 		token.Desp = "("
