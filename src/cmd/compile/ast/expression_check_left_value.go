@@ -77,7 +77,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 			}
 			return nil
 		} else if t.Typ == VARIABLE_TYPE_PACKAGE {
-			if false == t.Package.Block.NameExists(dot.Name) {
+			if _, exists := t.Package.Block.NameExists(dot.Name); exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil

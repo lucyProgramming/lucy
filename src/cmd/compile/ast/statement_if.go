@@ -17,7 +17,7 @@ type StatementIF struct {
 func (s *StatementIF) check(father *Block) []error {
 	s.Block.inherite(father)
 	errs := []error{}
-	conditionType, es := s.Block.checkExpression(s.Condition, true)
+	conditionType, es := s.Condition.checkSingleValueContextExpression(father)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -42,7 +42,7 @@ func (s *StatementIF) check(father *Block) []error {
 				errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 					errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
 			}
-			conditionType, es := v.Block.checkExpression(v.Condition, true)
+			conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}

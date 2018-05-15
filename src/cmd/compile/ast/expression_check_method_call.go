@@ -16,7 +16,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if object.Typ == VARIABLE_TYPE_PACKAGE {
-		if object.Package.Block.NameExists(call.Name) == false {
+		if _, exists := object.Package.Block.NameExists(call.Name); exists == false {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' not found", errMsgPrefix(e.Pos), call.Name))
 			return nil
 		}

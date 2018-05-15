@@ -21,7 +21,7 @@ type StatmentSwitchCase struct {
 
 func (s *StatementSwitch) check(b *Block) []error {
 	errs := []error{}
-	conditionType, es := b.checkExpression(s.Condition, true)
+	conditionType, es := s.Condition.checkSingleValueContextExpression(b)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -38,7 +38,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 			errMsgPrefix(s.Pos)))
 	}
 	byteMap := make(map[byte]*Pos)
-	shortMap := make(map[int16]*Pos)
+	shortMap := make(map[int32]*Pos)
 	int32Map := make(map[int32]*Pos)
 	int64Map := make(map[int64]*Pos)
 	type floatExist struct {
@@ -56,7 +56,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 	for _, v := range s.StatmentSwitchCases {
 		for _, e := range v.Matches {
 			var byteValue byte
-			var shortValue int16
+			var shortValue int32
 			var int32Vavlue int32
 			var int64Value int64
 			var floatValue float32
@@ -68,6 +68,8 @@ func (s *StatementSwitch) check(b *Block) []error {
 				switch e.Typ {
 				case EXPRESSION_TYPE_BYTE:
 					byteValue = e.Data.(byte)
+				case EXPRESSION_TYPE_SHORT:
+					shortValue = e.Data.(int32)
 				case EXPRESSION_TYPE_INT:
 					int32Vavlue = e.Data.(int32)
 				case EXPRESSION_TYPE_LONG:
@@ -80,7 +82,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					stringValue = e.Data.(string)
 				}
 			}
-			t, es := b.checkExpression(e, true)
+			t, es := e.checkSingleValueContextExpression(b)
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
@@ -105,13 +107,16 @@ func (s *StatementSwitch) check(b *Block) []error {
 					continue
 				}
 			}
-
-			errMsg := func(first *Pos) string {
-				errmsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
-				errmsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
-				return errmsg
+			if e.canbeUsedAsCondition() == false {
+				errs = append(errs, fmt.Errorf("%s expression cannot use as condition",
+					errMsgPrefix(e.Pos)))
 			}
 			if valueValid {
+				errMsg := func(first *Pos) string {
+					errmsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
+					errmsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
+					return errmsg
+				}
 				switch conditionType.Typ {
 				case VARIABLE_TYPE_BYTE:
 					if first, ok := byteMap[byteValue]; ok {

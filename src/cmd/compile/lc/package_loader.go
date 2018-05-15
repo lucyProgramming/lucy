@@ -51,7 +51,6 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 			})
 		}
 	}
-
 	for _, v := range compiler.ClassPaths {
 		p := filepath.Join(v, resouceName)
 		f, err := os.Stat(p)
@@ -89,13 +88,13 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		for _, v := range realpathMap {
 			switch v[0].kind {
 			case RESOURCE_KIND_JAVA_CLASS:
-				errMsg += fmt.Sprintf("\t '%s' is a java class\n", v[0].realpath)
+				errMsg += fmt.Sprintf("\t in '%s' is a java class\n", v[0].realpath)
 			case RESOURCE_KIND_JAVA_PACKAGE:
-				errMsg += fmt.Sprintf("\t '%s' is a java package\n", v[0].realpath)
+				errMsg += fmt.Sprintf("\t in '%s' is a java package\n", v[0].realpath)
 			case RESOURCE_KIND_LUCY_CLASS:
-				errMsg += fmt.Sprintf("\t '%s' is a lucy class\n", v[0].realpath)
+				errMsg += fmt.Sprintf("\t in '%s' is a lucy class\n", v[0].realpath)
 			case RESOURCE_KIND_LUCY_PACKAGE:
-				errMsg += fmt.Sprintf("\t '%s' is a lucy package\n", v[0].realpath)
+				errMsg += fmt.Sprintf("\t in '%s' is a lucy package\n", v[0].realpath)
 			}
 		}
 		return nil, nil, fmt.Errorf(errMsg)
@@ -109,6 +108,7 @@ func (loader *RealNameLoader) LoadName(resouceName string) (*ast.Package, interf
 		class, err := loader.loadClass(nil, realpaths[0])
 		return nil, class, err
 	} else if realpaths[0].kind == RESOURCE_KIND_LUCY_CLASS {
+
 		return nil, nil, fmt.Errorf("load lucy class not allow,should load package")
 	} else if realpaths[0].kind == RESOURCE_KIND_JAVA_PACKAGE {
 		p, err := loader.loadJavaPackage(realpaths[0])
@@ -208,7 +208,6 @@ func (loader *RealNameLoader) loadClass(p *ast.Package, r *Resource) (*ast.Class
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
 	if r.kind == RESOURCE_KIND_LUCY_CLASS {
-
 		if t := c.AttributeGroupedByName[cg.ATTRIBUTE_NAME_LUCY_ENUM]; t != nil && len(t) > 0 {
 			return nil, loader.loadLucyEnum(p, c)
 		} else {

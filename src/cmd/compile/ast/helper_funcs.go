@@ -111,29 +111,8 @@ func searchBuildIns(name string) interface{} {
 	if ok {
 		return t
 	}
-	if lucyLangBuildinPackage != nil {
-		t, ok = lucyLangBuildinPackage.Block.Types[name]
-		if ok {
-			return t
-		}
-		t, ok = lucyLangBuildinPackage.Block.Classes[name]
-		if ok {
-			return t
-		}
-		t, ok = lucyLangBuildinPackage.Block.Vars[name]
-		if ok {
-			return t
-		}
-		t, ok = lucyLangBuildinPackage.Block.Consts[name]
-		if ok {
-			return t
-		}
-		t, ok = lucyLangBuildinPackage.Block.Enums[name]
-		if ok {
-			return t
-		}
-	}
-	return nil
+	t, _ = lucyLangBuildinPackage.Block.NameExists(name)
+	return t
 }
 
 func checkConst(block *Block, c *Const) error {

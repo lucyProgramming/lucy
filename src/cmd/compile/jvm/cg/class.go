@@ -304,9 +304,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 			if m.Code != nil {
 				info.Attributes = append(info.Attributes, m.Code.ToAttributeInfo(c))
 			}
-			if m.AttributeLucyInnerStaticMethod != nil {
-				info.Attributes = append(info.Attributes, m.AttributeLucyInnerStaticMethod.ToAttributeInfo(c))
-			}
+
 			if m.AttributeLucyMethodDescritor != nil {
 				info.Attributes = append(info.Attributes, m.AttributeLucyMethodDescritor.ToAttributeInfo(c))
 			}
@@ -321,6 +319,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel) {
 				if t != nil {
 					info.Attributes = append(info.Attributes, t)
 				}
+			}
+			if m.AttributeCompilerAuto != nil {
+				info.Attributes = append(info.Attributes, m.AttributeCompilerAuto.ToAttributeInfo(c))
 			}
 			if m.AttributeLucyReturnListNames != nil {
 				t := m.AttributeLucyReturnListNames.ToAttributeInfo(c, ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES)

@@ -15,9 +15,9 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
 		function.ClassMethod = method
 		method.Class = class
-		method.AttributeLucyInnerStaticMethod = &cg.AttributeLucyInnerStaticMethod{}
 		method.Descriptor = Descriptor.methodDescriptor(function)
 		method.Code = &cg.AttributeCode{}
 		m.buildFunction(class, nil, method, function)

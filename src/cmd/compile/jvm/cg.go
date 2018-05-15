@@ -18,12 +18,12 @@ type MakeClass struct {
 }
 
 func (m *MakeClass) newClassName(prefix string) (autoName string) {
-	if m.p.Block.NameExists(prefix) == false {
+	if _, exists := m.p.Block.NameExists(prefix); exists == false {
 		return m.p.Name + "/" + prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
 		autoName = fmt.Sprintf("%s_%d", prefix, i)
-		if m.p.Block.NameExists(autoName) {
+		if _, exists := m.p.Block.NameExists(autoName); exists == false {
 			continue
 		}
 		return m.p.Name + "/" + autoName
@@ -127,8 +127,8 @@ func (m *MakeClass) mkTypes() {
 func (m *MakeClass) mkVars() {
 	for k, v := range m.p.Block.Vars {
 		f := &cg.FieldHighLevel{}
+		f.AccessFlags |= v.AccessFlags
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
-		//f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.Descriptor = Descriptor.typeDescriptor(v.Typ)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC

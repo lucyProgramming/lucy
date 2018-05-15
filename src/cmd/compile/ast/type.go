@@ -191,11 +191,12 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
 	}
 	if pp, ok := p.(*Package); ok && pp != nil {
-		d = pp.Block.NameExists(packageAndName[1])
-		if d == false {
+		var exists bool
+		d, exists = pp.Block.NameExists(packageAndName[1])
+		if exists == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos))
 		}
-		return pp.Block.SearchByName(packageAndName[1]), err
+		return d, err
 	} else {
 		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
 	}

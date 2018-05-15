@@ -172,7 +172,6 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	if s.Expression.canBeUsedAsStatement() {
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)
-
 			err := b.insert(f.Name, f.Pos, f)
 			if err != nil {
 				errs = append(errs, err)
@@ -183,15 +182,11 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			}
 			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
 			if f.IsClosureFunction {
-				if f.TemplateFunction != nil {
-					errs = append(errs, fmt.Errorf("%s function '%s' cannot be 'template function' and 'closure function' at the same time",
-						errMsgPrefix(f.Pos)))
-				} else {
-					if b.ClosureFuncs == nil {
-						b.ClosureFuncs = make(map[string]*Function)
-					}
-					b.ClosureFuncs[f.Name] = f
+				if b.ClosureFuncs == nil {
+					b.ClosureFuncs = make(map[string]*Function)
 				}
+				b.ClosureFuncs[f.Name] = f
+
 			}
 			return errs
 		}
@@ -201,7 +196,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		errs = append(errs, err)
 	}
 	s.Expression.IsStatementExpression = true
-	_, es := b.checkExpression(s.Expression, false)
+	_, es := s.Expression.check(b)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}

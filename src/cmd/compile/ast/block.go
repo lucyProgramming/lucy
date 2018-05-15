@@ -33,51 +33,50 @@ func (b *Block) HaveVariableDefinition() bool {
 	return len(b.ClosureFuncs) > 0 || len(b.Vars) > 0
 }
 
-func (b *Block) NameExists(name string) bool {
+func (b *Block) NameExists(name string) (interface{}, bool) {
 	if b.Funcs != nil {
-		if _, ok := b.Funcs[name]; ok {
-			return true
+		if t, ok := b.Funcs[name]; ok {
+			return t, true
 		}
 	}
 	if b.Classes != nil {
-		if _, ok := b.Classes[name]; ok {
-			return true
+		if t, ok := b.Classes[name]; ok {
+			return t, true
 		}
 	}
 	if b.Vars != nil {
-		if _, ok := b.Vars[name]; ok {
-			return true
+		if t, ok := b.Vars[name]; ok {
+			return t, true
 		}
 	}
 	if b.Lables != nil {
-		if _, ok := b.Lables[name]; ok {
-			return true
+		if t, ok := b.Lables[name]; ok {
+			return t, true
 		}
 	}
 	if b.Consts != nil {
-		if _, ok := b.Consts[name]; ok {
-			return true
+		if t, ok := b.Consts[name]; ok {
+			return t, true
 
 		}
 	}
 	if b.Enums != nil {
-		if _, ok := b.Enums[name]; ok {
-			return true
+		if t, ok := b.Enums[name]; ok {
+			return t, true
 
 		}
 	}
 	if b.EnumNames != nil {
-		if _, ok := b.EnumNames[name]; ok {
-			return true
-
+		if t, ok := b.EnumNames[name]; ok {
+			return t, true
 		}
 	}
 	if b.Types != nil {
-		if _, ok := b.Types[name]; ok {
-			return true
+		if t, ok := b.Types[name]; ok {
+			return t, true
 		}
 	}
-	return false
+	return nil, false
 }
 
 func (b *Block) searchLable(name string) *StatementLable {
@@ -96,45 +95,8 @@ func (b *Block) searchLable(name string) *StatementLable {
 	search anything
 */
 func (b *Block) SearchByName(name string) interface{} {
-	if b.Funcs != nil {
-		if t, ok := b.Funcs[name]; ok {
-			return t
-		}
-	}
-	if b.Classes != nil {
-		if t, ok := b.Classes[name]; ok {
-			return t
-		}
-	}
-	if b.Vars != nil {
-		if t, ok := b.Vars[name]; ok {
-			return t
-		}
-	}
-	if b.Lables != nil {
-		if l, ok := b.Lables[name]; ok {
-			return l
-		}
-	}
-	if b.Consts != nil {
-		if t, ok := b.Consts[name]; ok {
-			return t
-		}
-	}
-	if b.Enums != nil {
-		if t, ok := b.Enums[name]; ok {
-			return t
-		}
-	}
-	if b.EnumNames != nil {
-		if t, ok := b.EnumNames[name]; ok {
-			return t
-		}
-	}
-	if b.Types != nil {
-		if t, ok := b.Types[name]; ok {
-			return t
-		}
+	if t, exists := b.NameExists(name); exists {
+		return t
 	}
 	// search closure
 	if b.InheritedAttribute.Function != nil {
@@ -151,11 +113,15 @@ func (b *Block) SearchByName(name string) interface{} {
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionTopBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false {
-
 				if v.Name == THIS {
 					return nil // capture this not allow
 				}
-				b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
+				if len(b.InheritedAttribute.Function.TypeParameters) > 0 { // template function
+					return nil
+				} else {
+					b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
+				}
+
 			}
 			//cannot search variable from class body
 			if b.InheritedAttribute.class != nil && b.IsClassBlock {
@@ -196,23 +162,6 @@ func (b *Block) checkStatements() []error {
 		}
 	}
 	return errs
-}
-
-func (b *Block) checkExpression(e *Expression, singleValueContext bool) (t *VariableType, errs []error) {
-	errs = []error{}
-	ts, es := e.check(b)
-	if errsNotEmpty(es) {
-		errs = append(errs, es...)
-	}
-
-	if ts != nil && len(ts) > 1 && singleValueContext {
-		errs = append(errs, fmt.Errorf("%s multi values in single value context",
-			errMsgPrefix(e.Pos)))
-	}
-	if len(ts) > 0 {
-		t = ts[0]
-	}
-	return
 }
 
 func (b *Block) checkConst() []error {

@@ -15,9 +15,9 @@ func (m *MakeExpression) buildTemplateFunctionCall(class *cg.ClassHighLevel, cod
 		method.AccessFlags |= cg.ACC_CLASS_PUBLIC
 		method.AccessFlags |= cg.ACC_CLASS_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
+		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
 		method.Descriptor = Descriptor.methodDescriptor(call.TemplateFunctionCallPair.F)
 		method.Code = &cg.AttributeCode{}
-		method.AttributeLucyInnerStaticMethod = &cg.AttributeLucyInnerStaticMethod{}
 		class.AppendMethod(method)
 		call.TemplateFunctionCallPair.F.ClassMethod = method
 		//build function

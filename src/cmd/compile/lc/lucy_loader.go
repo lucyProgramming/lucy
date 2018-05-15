@@ -178,12 +178,11 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		}
 	}
 	for _, m := range c.Methods {
-		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_INNER_STATIC_METHOD); t != nil && len(t) > 0 {
-			//inner static method cannot called from outside
-			continue
-		}
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT); t != nil && len(t) > 0 {
 			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
+			continue
+		}
+		if m.AccessFlags&cg.ACC_METHOD_BRIDGE != 0 {
 			continue
 		}
 		name := string(c.ConstPool[m.NameIndex].Info)

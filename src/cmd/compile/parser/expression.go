@@ -69,7 +69,7 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 			}
 		}
 	}
-	mkBinayExpression := func(typ int, multi bool) (*ast.Expression, error) {
+	mkExpression := func(typ int, multi bool) (*ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		ep.Next() // skip = :=
 		result := &ast.Expression{}
@@ -94,39 +94,39 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 	// := += -= *= /= %=
 	switch ep.parser.token.Type {
 	case lex.TOKEN_ASSIGN:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
+		return mkExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
 	case lex.TOKEN_COLON_ASSIGN:
-		return mkBinayExpression(ast.EXPRESSION_TYPE_COLON_ASSIGN, true)
+		return mkExpression(ast.EXPRESSION_TYPE_COLON_ASSIGN, true)
 	case lex.TOKEN_ADD_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_PLUS_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_PLUS_ASSIGN, false)
 	case lex.TOKEN_SUB_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_MINUS_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_MINUS_ASSIGN, false)
 	case lex.TOKEN_MUL_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_MUL_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_MUL_ASSIGN, false)
 	case lex.TOKEN_DIV_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_DIV_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_DIV_ASSIGN, false)
 	case lex.TOKEN_MOD_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
 	case lex.TOKEN_LSH_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_LSH_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_LSH_ASSIGN, false)
 	case lex.TOKEN_RSH_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_RSH_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_RSH_ASSIGN, false)
 	case lex.TOKEN_AND_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_AND_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_AND_ASSIGN, false)
 	case lex.TOKEN_OR_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_OR_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_OR_ASSIGN, false)
 	case lex.TOKEN_XOR_ASSIGN:
 		mustBeOneExpression()
-		return mkBinayExpression(ast.EXPRESSION_TYPE_XOR_ASSIGN, false)
+		return mkExpression(ast.EXPRESSION_TYPE_XOR_ASSIGN, false)
 
 	}
 	return left, nil

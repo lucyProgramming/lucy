@@ -3,8 +3,9 @@ package ast
 import (
 	"errors"
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"strings"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Class struct {
@@ -144,7 +145,7 @@ func (c *Class) resolveFather(block *Block) error {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}
 		if p, ok := r.(*Package); ok && p != nil { // if package
-			if false == p.Block.NameExists(t[1]) {
+			if _, ok := p.Block.NameExists(t[1]); ok == false {
 				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
 			}
 			if p.Block.Classes == nil || p.Block.Classes[t[1]] == nil {

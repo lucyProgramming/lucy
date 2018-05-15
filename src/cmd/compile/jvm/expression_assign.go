@@ -163,7 +163,8 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	return
 }
 
-func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string, stackTopType *ast.VariableType) (increment uint16) {
+func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string,
+	stackTopType *ast.VariableType) (increment uint16) {
 	// no object after value,just dup top
 	if op[0] == cg.OP_istore || // 将栈顶 int 型数值存入指定局部变量。
 		op[0] == cg.OP_lstore || //将栈顶 long 型数值存入指定局部变量。

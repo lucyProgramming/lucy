@@ -25,7 +25,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 	}
 	var err error
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
-		if t.Package.Block.NameExists(dot.Name) == false {
+		if _, ok := t.Package.Block.NameExists(dot.Name); ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
