@@ -14,7 +14,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-
 	if t1 == nil || t2 == nil {
 		if t1 != nil {
 			tt := t1.Clone()

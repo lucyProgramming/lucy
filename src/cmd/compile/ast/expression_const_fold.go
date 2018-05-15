@@ -46,7 +46,8 @@ func (e *Expression) constFold() (is bool, err error) {
 			return
 		}
 		if ee.isInteger() == false {
-			err = fmt.Errorf("%s cannot apply '^' on a non-integer expression", errMsgPrefix(e.Pos))
+			err = fmt.Errorf("%s cannot apply '^' on a non-integer expression",
+				errMsgPrefix(e.Pos))
 			return
 		}
 		e.Typ = ee.Typ
@@ -69,7 +70,8 @@ func (e *Expression) constFold() (is bool, err error) {
 			return
 		}
 		if ee.Typ != EXPRESSION_TYPE_BOOL {
-			err = fmt.Errorf("%s cannot apply '!' on a non-bool expression", errMsgPrefix(e.Pos))
+			err = fmt.Errorf("%s cannot apply '!' on a non-bool expression",
+				errMsgPrefix(e.Pos))
 			return
 		}
 		e.Typ = EXPRESSION_TYPE_BOOL
@@ -84,7 +86,8 @@ func (e *Expression) constFold() (is bool, err error) {
 		}
 		if ee.isNumber() == false {
 			is = false
-			err = fmt.Errorf("%s cannot apply '-' on '%s'", errMsgPrefix(e.Pos), ee.OpName())
+			err = fmt.Errorf("%s cannot apply '-' on '%s'",
+				errMsgPrefix(e.Pos), ee.OpName())
 			return
 		}
 		e.Typ = ee.Typ

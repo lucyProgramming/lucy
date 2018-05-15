@@ -3,7 +3,6 @@ package lc
 import (
 	"encoding/binary"
 	"fmt"
-	"path/filepath"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
@@ -44,6 +43,9 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 				return nil, err
 			}
 		}
+		if f.Typ.Typ == ast.VARIABLE_TYPE_ENUM {
+			loadEnumForVariableType(f.Typ)
+		}
 		f.AccessFlags = v.AccessFlags
 		astClass.Fields[f.Name] = f
 	}
@@ -77,6 +79,10 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Func)
 		}
+		err = loadEnumForFunction(m.Func)
+		if err != nil {
+			return nil, err
+		}
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
 		} else {
@@ -85,20 +91,14 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	}
 	return astClass, nil
 }
-func (loader *RealNameLoader) loadLucyEnum(pack *ast.Package, c *cg.Class) error {
+
+func (loader *RealNameLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	e := &ast.Enum{}
 	{
 		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
 		e.Name = string(c.ConstPool[nameindex].Info)
 	}
 	e.AccessFlags = c.AccessFlag
-	if pack.Block.Enums == nil {
-		pack.Block.Enums = make(map[string]*ast.Enum)
-	}
-	pack.Block.Enums[filepath.Base(e.Name)] = e
-	if pack.Block.EnumNames == nil {
-		pack.Block.EnumNames = make(map[string]*ast.EnumName)
-	}
 	for _, v := range c.Fields {
 		en := &ast.EnumName{}
 		name := string(c.ConstPool[v.NameIndex].Info)
@@ -106,11 +106,11 @@ func (loader *RealNameLoader) loadLucyEnum(pack *ast.Package, c *cg.Class) error
 		en.Enum = e
 		constValue := v.AttributeGroupedByName[cg.ATTRIBUTE_NAME_CONST_VALUE][0] // must have this attribute
 		en.Value = int32(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
-		pack.Block.EnumNames[name] = en
 		e.Enums = append(e.Enums, en)
 	}
-	return nil
+	return e, nil
 }
+
 func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
@@ -175,6 +175,9 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 					return err
 				}
 			}
+			if typ.Typ == ast.VARIABLE_TYPE_ENUM {
+				loadEnumForVariableType(typ)
+			}
 		}
 	}
 	for _, m := range c.Methods {
@@ -205,6 +208,10 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 				return err
 			}
 		}
+		err = loadEnumForFunction(function)
+		if err != nil {
+			return err
+		}
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, function)
 		}
@@ -228,6 +235,12 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		}
 		typ.Alias = name
 		pack.Block.Types[name] = typ
+		if typ.Typ == ast.VARIABLE_TYPE_ENUM {
+			err = loadEnumForVariableType(typ)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION) {
 		attr := &cg.AttributeTemplateFunction{}

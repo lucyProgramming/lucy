@@ -14,10 +14,12 @@ var (
 type Flags struct {
 	OnlyImport  bool
 	PackageName string
+	JvmVersion  int
 }
 
 func init() {
 	ast.NameLoader = &loader
+	loader.caches = make(map[string]interface{})
 	ParseFunctionHandler = ast.ParseFunctionHandler
 }
 

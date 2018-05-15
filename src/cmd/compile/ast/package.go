@@ -3,8 +3,9 @@ package ast
 import (
 	"errors"
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"strings"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 )
 
 type Package struct {
@@ -139,17 +140,15 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if t, ok := p.LoadedPackages[resource]; ok {
 		return t, nil
 	}
-	var pp *Package
-	pp, t, err := NameLoader.LoadName(resource)
-	if pp != nil {
-		PackageBeenCompile.LoadedPackages[resource] = pp
-		p.mkClassCache(pp)
-	}
+	t, err := NameLoader.LoadName(resource)
 	if pp, ok := t.(*Package); ok && pp != nil {
 		PackageBeenCompile.LoadedPackages[resource] = pp
 		p.mkClassCache(pp)
 	}
 	if c, ok := t.(*Class); ok && c != nil {
+		if c.IsJava == false {
+			return nil, fmt.Errorf("load lucy class not allow")
+		}
 		PackageBeenCompile.loadedClasses[resource] = c
 	}
 	return t, err

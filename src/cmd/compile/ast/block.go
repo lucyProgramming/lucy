@@ -187,7 +187,8 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	return b.insert(name, pos, d)
 }
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
-	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition { // global var insert into block
+	// global var insert into block
+	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
 		if vv, ok := b.Vars[name]; ok {
 			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
@@ -208,7 +209,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == "_" {
 		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
-
 	if b.Vars == nil {
 		b.Vars = make(map[string]*VariableDefinition)
 	}

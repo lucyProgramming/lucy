@@ -112,7 +112,7 @@ func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 		}
 	}
 	if ep.parser.token.Type != lex.TOKEN_RC {
-		return es, fmt.Errorf("%s expect '}',but '%s' ", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		return es, fmt.Errorf("%s expect '}',but '%s'", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 	}
 	ep.Next()
 	return es, nil

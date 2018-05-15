@@ -52,7 +52,7 @@ func (lc *LucyCompile) exit() {
 	if len(lc.Errs) > 0 {
 		code = 2
 	}
-	//template function maybe parse twice,maybe  same error
+	//template function maybe parse twice,maybe same error
 	errsM := make(map[string]struct{})
 	es := []error{}
 	for _, v := range lc.Errs {
@@ -122,6 +122,6 @@ func (lc *LucyCompile) compile() {
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}
-	lc.Maker.Make(&ast.PackageBeenCompile)
+	lc.Maker.Make(&ast.PackageBeenCompile, CompileFlags.JvmVersion)
 	lc.exit()
 }

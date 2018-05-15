@@ -12,7 +12,7 @@ type Class struct {
 	NotImportedYet  bool // not imported
 	Name            string
 	Pos             *Pos
-	IsJava          bool // compiled from java source file
+	IsJava          bool // class found in CLASSPATH
 	IsGlobal        bool
 	Block           Block
 	AccessFlags     uint16

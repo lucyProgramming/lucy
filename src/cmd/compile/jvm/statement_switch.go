@@ -64,7 +64,6 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	size := jvmSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
-	defer state.popStack(1)
 	for k, c := range s.StatmentSwitchCases {
 		if exit != nil {
 			backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
@@ -134,15 +133,9 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength] = cg.OP_pop2
 		}
 		code.CodeLength++
-
 		//block is here
 		if c.Block != nil {
-			var ss *StackMapState
-			if c.Block.HaveVariableDefinition() {
-				ss = (&StackMapState{}).FromLast(state)
-			} else {
-				ss = state
-			}
+			ss := (&StackMapState{}).FromLast(state)
 			m.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
@@ -163,6 +156,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength] = cg.OP_pop2
 		}
 		code.CodeLength++
+		state.popStack(1)
 		if s.Default != nil {
 			var ss *StackMapState
 			if s.Default.HaveVariableDefinition() {
@@ -180,6 +174,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength] = cg.OP_pop2
 		}
 		code.CodeLength++
+		state.popStack(1)
 	}
 	return
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type LoadName interface {
-	LoadName(resouceName string) (*Package, interface{}, error)
+	LoadName(resouceName string) (interface{}, error)
 }
 
 const (

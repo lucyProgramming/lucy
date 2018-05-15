@@ -253,14 +253,14 @@ func (c *Class) InsertStringConst(s string) uint16 {
 	return info.selfindex
 }
 
-func (high *ClassHighLevel) ToLow() *Class {
-	high.Class.fromHighLevel(high)
+func (high *ClassHighLevel) ToLow(jvmVersion int) *Class {
+	high.Class.fromHighLevel(high, jvmVersion)
 	return &high.Class
 }
 
-func (c *Class) fromHighLevel(high *ClassHighLevel) {
+func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 	c.MinorVersion = 0
-	c.MajorVersion = 54
+	c.MajorVersion = uint16(jvmVersion)
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}
