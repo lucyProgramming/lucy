@@ -2,12 +2,12 @@ package jvm
 
 import (
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"math"
 	"os"
 	"path/filepath"
-
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type MakeClass struct {
@@ -15,7 +15,6 @@ type MakeClass struct {
 	Classes        map[string]*cg.ClassHighLevel
 	mainclass      *cg.ClassHighLevel
 	MakeExpression MakeExpression
-	jvmVersion     int
 }
 
 func (m *MakeClass) newClassName(prefix string) (autoName string) {
@@ -45,11 +44,10 @@ func (m *MakeClass) putClass(name string, class *cg.ClassHighLevel) {
 	m.Classes[name] = class
 }
 
-func (m *MakeClass) Make(p *ast.Package, jvmVersion int) {
+func (m *MakeClass) Make(p *ast.Package) {
 	m.p = p
 	mainclass := &cg.ClassHighLevel{}
 	m.mainclass = mainclass
-	m.jvmVersion = jvmVersion
 	mainclass.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	mainclass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainclass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
@@ -366,7 +364,7 @@ func (m *MakeClass) Dump() error {
 	if err != nil {
 		return err
 	}
-	if err := m.mainclass.ToLow(m.jvmVersion).OutPut(f); err != nil {
+	if err := m.mainclass.ToLow(common.CompileFlags.JvmVersion).OutPut(f); err != nil {
 		f.Close()
 		return err
 	}
@@ -376,7 +374,7 @@ func (m *MakeClass) Dump() error {
 		if err != nil {
 			return err
 		}
-		if err = c.ToLow(m.jvmVersion).OutPut(f); err != nil {
+		if err = c.ToLow(common.CompileFlags.JvmVersion).OutPut(f); err != nil {
 			f.Close()
 			return err
 		} else {

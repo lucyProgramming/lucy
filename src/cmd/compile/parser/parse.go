@@ -3,14 +3,20 @@ package parser
 import (
 	"bytes"
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
-	return (&Parser{bs: bs, tops: tops, filename: filename, onlyimport: onlyimport, nerr: nerr}).Parse(1, 1)
+	p := &Parser{
+		bs:         bs,
+		tops:       tops,
+		filename:   filename,
+		onlyimport: onlyimport,
+		nerr:       nerr,
+	}
+	return p.Parse()
 }
 
 type Parser struct {
@@ -22,10 +28,9 @@ type Parser struct {
 	filename   string
 	lastToken  *lex.Token
 	token      *lex.Token
-	// expect     *lex.Token
-	errs    []error
-	imports map[string]*ast.Import
-	nerr    int
+	errs       []error
+	imports    map[string]*ast.Import
+	nerr       int
 	// parsers
 	Expression *Expression
 	Function   *Function
@@ -34,7 +39,7 @@ type Parser struct {
 	Interface  *Interface
 }
 
-func (p *Parser) Parse(startLine, startColoumn int) []error {
+func (p *Parser) Parse() []error {
 	p.Expression = &Expression{p}
 	p.Function = &Function{}
 	p.Function.parser = p
@@ -45,7 +50,7 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 	p.Block = &Block{}
 	p.Block.parser = p
 	p.errs = []error{}
-	p.scanner = lex.New(p.bs, startLine, startColoumn)
+	p.scanner = lex.New(p.bs, 1, 1)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
 	p.Next()
 	if p.token.Type == lex.TOKEN_EOF {
@@ -181,7 +186,7 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 		case lex.TOKEN_PUBLIC:
 			ispublic = true
 			p.Next()
-			p.validAfterPublic()
+			p.validAfterPublic(ispublic)
 			continue
 		case lex.TOKEN_CONST:
 			p.Next() // skip const key word
@@ -192,9 +197,7 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 				resetProperty()
 				continue
 			}
-			if p.token.Type != lex.TOKEN_SEMICOLON && (p.lastToken != nil && p.lastToken.Type != lex.TOKEN_RC) { //assume missing ; not big deal
-				p.errs = append(p.errs, fmt.Errorf("%s not semicolon after variable or const definition,but %s",
-					p.errorMsgPrefix(), p.token.Desp))
+			if p.validStatementEnding() == false { //assume missing ; not big deal
 				p.Next()
 				p.consume(untils_semicolon)
 				resetProperty()
@@ -202,7 +205,8 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 			}
 			// const a := 1 is wrong,
 			if typ == lex.TOKEN_COLON_ASSIGN {
-				p.errs = append(p.errs, fmt.Errorf("%s use = instead of := for const definition", p.errorMsgPrefix()))
+				p.errs = append(p.errs, fmt.Errorf("%s use '=' instead of ':=' for const definition",
+					p.errorMsgPrefix()))
 				resetProperty()
 				continue
 			}
@@ -231,7 +235,7 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 		case lex.TOKEN_PRIVATE: //is a default attribute
 			ispublic = false
 			p.Next()
-			p.validAfterPublic()
+			p.validAfterPublic(ispublic)
 			continue
 		case lex.TOKEN_TYPE:
 			a, err := p.parseTypeaAlias()
@@ -247,7 +251,8 @@ func (p *Parser) Parse(startLine, startColoumn int) []error {
 		case lex.TOKEN_EOF:
 			break
 		default:
-			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except", p.errorMsgPrefix(), p.token.Desp, p.token.Type))
+			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except",
+				p.errorMsgPrefix(), p.token.Desp))
 			p.consume(untils_semicolon)
 			resetProperty()
 		}
@@ -271,7 +276,7 @@ func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
 	return ret, nil
 }
 
-func (p *Parser) validAfterPublic() {
+func (p *Parser) validAfterPublic(isPublic bool) {
 	if p.token.Type == lex.TOKEN_FUNCTION ||
 		p.token.Type == lex.TOKEN_CLASS ||
 		p.token.Type == lex.TOKEN_ENUM ||
@@ -279,27 +284,33 @@ func (p *Parser) validAfterPublic() {
 		p.token.Type == lex.TOKEN_INTERFACE ||
 		p.token.Type == lex.TOKEN_CONST ||
 		p.token.Type == lex.TOKEN_VAR {
-
 		return
 	}
 	var err error
+	token := "public"
+	if isPublic == false {
+		token = "private"
+	}
 	if p.token.Desp != "" {
-		err = fmt.Errorf("%s cannot have token:'%s' after 'public' or 'private'", p.errorMsgPrefix(), p.token.Desp)
+		err = fmt.Errorf("%s cannot have token:%s after '%s'",
+			p.errorMsgPrefix(), p.token.Desp, token)
 	} else {
-		err = fmt.Errorf("%s cannot have token:'%v' after 'public' or 'private'", p.errorMsgPrefix(), p.token.Data)
+		err = fmt.Errorf("%s cannot have token:%s after '%s'",
+			p.errorMsgPrefix(), p.token.Desp, token)
 	}
 	p.errs = append(p.errs, err)
 }
-func (p *Parser) validStatementEnding(pos ...*ast.Pos) {
-	if p.token.Type == lex.TOKEN_SEMICOLON || p.lastToken != nil && p.lastToken.Type == lex.TOKEN_RC {
-		return
+func (p *Parser) validStatementEnding(pos ...*ast.Pos) bool {
+	if p.token.Type == lex.TOKEN_SEMICOLON ||
+		(p.lastToken != nil && p.lastToken.Type == lex.TOKEN_RC) {
+		return true
 	}
 	if len(pos) > 0 {
 		p.errs = append(p.errs, fmt.Errorf("%s missing semicolon", p.errorMsgPrefix(pos[0])))
 	} else {
 		p.errs = append(p.errs, fmt.Errorf("%s missing semicolon", p.errorMsgPrefix()))
 	}
-
+	return false
 }
 
 func (p *Parser) mkPos() *ast.Pos {
@@ -381,10 +392,10 @@ func (p *Parser) Next() {
 */
 func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
-		return fmt.Sprintf("%s:%d:%d ", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
+		return fmt.Sprintf("%s:%d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
 	}
 	line, column := p.scanner.Pos()
-	return fmt.Sprintf("%s:%d:%d ", p.filename, line, column)
+	return fmt.Sprintf("%s:%d:%d", p.filename, line, column)
 }
 
 func (p *Parser) consume(untils map[int]bool) {

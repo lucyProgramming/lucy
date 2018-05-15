@@ -162,7 +162,8 @@ func (p *Parser) isValidTypeBegin() bool {
 		p.token.Type == lex.TOKEN_LONG ||
 		p.token.Type == lex.TOKEN_STRING ||
 		p.token.Type == lex.TOKEN_MAP ||
-		p.token.Type == lex.TOKEN_IDENTIFIER
+		p.token.Type == lex.TOKEN_IDENTIFIER ||
+		p.token.Type == lex.TOKEN_T
 
 }
 func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
@@ -175,7 +176,8 @@ func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
 	for p.token.Type == lex.TOKEN_DOT && p.token.Type != lex.TOKEN_EOF {
 		p.Next() // skip .
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
-			return nil, fmt.Errorf("%s not a identifier after dot", p.errorMsgPrefix())
+			return nil, fmt.Errorf("%s not a identifier after dot",
+				p.errorMsgPrefix())
 		}
 		name += "." + p.token.Data.(string)
 		p.Next() // if

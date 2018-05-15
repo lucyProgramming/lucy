@@ -3,14 +3,14 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
 	"io/ioutil"
 	"os"
 	"sort"
-
-	"gitee.com/yuyang-fine/lucy/src/cmd/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
 )
 
 func Main(files []string) {
@@ -18,8 +18,8 @@ func Main(files []string) {
 		fmt.Println("no file specfied")
 		os.Exit(1)
 	}
-	if CompileFlags.OnlyImport == false {
-		if CompileFlags.PackageName == "" {
+	if compileCommon.CompileFlags.OnlyImport == false {
+		if compileCommon.CompileFlags.PackageName == "" {
 			fmt.Println("package name not specfied")
 			os.Exit(1)
 		}
@@ -102,16 +102,16 @@ func (lc *LucyCompile) compile() {
 			continue
 		}
 		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs,
-			CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
+			compileCommon.CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
 		lc.shouldExit()
 	}
 	// parse import only
-	if CompileFlags.OnlyImport {
+	if compileCommon.CompileFlags.OnlyImport {
 		lc.parseImports()
 		return
 	}
 	c := ast.ConvertTops2Package{}
-	ast.PackageBeenCompile.Name = CompileFlags.PackageName
+	ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName
 	rs, errs := c.ConvertTops2Package(lc.Tops)
 	lc.Errs = append(lc.Errs, errs...)
 	for _, v := range rs {
@@ -122,6 +122,6 @@ func (lc *LucyCompile) compile() {
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}
-	lc.Maker.Make(&ast.PackageBeenCompile, CompileFlags.JvmVersion)
+	lc.Maker.Make(&ast.PackageBeenCompile)
 	lc.exit()
 }

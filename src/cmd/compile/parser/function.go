@@ -39,7 +39,6 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 			p.parser.errs = append(p.parser.errs, err)
 			return nil, err
 		}
-
 	}
 	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
 		f.Name = p.parser.token.Data.(string)

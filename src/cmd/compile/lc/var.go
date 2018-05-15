@@ -5,17 +5,10 @@ import (
 )
 
 var (
-	CompileFlags         Flags
 	compiler             LucyCompile
 	loader               RealNameLoader
 	ParseFunctionHandler func(bs []byte, pos *ast.Pos) (*ast.Function, []error)
 )
-
-type Flags struct {
-	OnlyImport  bool
-	PackageName string
-	JvmVersion  int
-}
 
 func init() {
 	ast.NameLoader = &loader
