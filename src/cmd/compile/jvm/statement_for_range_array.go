@@ -116,6 +116,29 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength] = cg.OP_iconst_0
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
+
+	//handle captured vars
+	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
+		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			copyOP(code,
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+			forState.appendLocals(class,
+				state.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
+		}
+		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Var.BeenCaptured {
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
+			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			copyOP(code,
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+			forState.appendLocals(class,
+				state.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
+		}
+	}
+
 	loopbeginAt := code.CodeLength
 	context.MakeStackMap(code, forState, loopbeginAt)
 	// load start
@@ -185,56 +208,22 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ, autoVar.V)...)
-			if t := 2 + jvmSize(s.RangeAttr.RangeOn.Value.ArrayType); t > maxstack {
-				maxstack = t
-			}
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-			code.MaxLocals++
+				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ,
+					autoVar.V)...)
 			m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
-			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.appendLocals(class,
-				state.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
 		} else {
-			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ, autoVar.V)...)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(s.RangeAttr.IdentifierV.Var.Typ)
-			copyOP(code,
-				storeSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.appendLocals(class, s.RangeAttr.IdentifierV.Var.Typ)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
 		}
 		if s.RangeAttr.ModelKV {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				copyOP(code,
-					loadSimpleVarOp(s.RangeAttr.IdentifierK.Var.Typ.Typ, autoVar.K)...)
-				if t := 2 + jvmSize(s.RangeAttr.IdentifierK.Var.Typ); t > maxstack {
-					maxstack = t
-				}
-				s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
-				code.MaxLocals++
-				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
-				copyOP(code,
-					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
-				forState.appendLocals(class,
-					state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierK.Var.Typ.Typ).className))
-			} else {
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 				copyOP(code,
 					loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-				s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
-				code.MaxLocals++
-				copyOP(code,
-					storeSimpleVarOp(ast.VARIABLE_TYPE_INT,
-						s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
-				forState.appendLocals(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
+			} else {
+				s.RangeAttr.IdentifierK.Var.LocalValOffset = autoVar.K
 			}
 		}
 	} else { // for k,v = range arr

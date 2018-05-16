@@ -31,7 +31,6 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		if s.IsCallFatherContructionStatement { // special case
 			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
 			m.mkFieldDefaultValue(class, code, context, state)
-
 		}
 		//uncondition goto
 		if m.statementIsUnConditionGoto(s) {

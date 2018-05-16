@@ -3,14 +3,16 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"sort"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/optimizer"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
-	"io/ioutil"
-	"os"
-	"sort"
 )
 
 func Main(files []string) {
@@ -122,6 +124,7 @@ func (lc *LucyCompile) compile() {
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}
+	optimizer.Optimize(&ast.PackageBeenCompile)
 	lc.Maker.Make(&ast.PackageBeenCompile)
 	lc.exit()
 }

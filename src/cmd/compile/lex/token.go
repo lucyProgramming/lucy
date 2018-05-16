@@ -90,7 +90,7 @@ const (
 	TOKEN_LITERAL_STRING // ""
 	TOKEN_LITERAL_FLOAT  // 0.000
 	TOKEN_LITERAL_DOUBLE // 0.0d
-	TOKEN_LITERAL_LONG   //
+	TOKEN_LITERAL_LONG   // 100L
 	TOKEN_DEFER          // defer
 	TOKEN_TYPE           //type
 	TOKEN_ARROW          //->

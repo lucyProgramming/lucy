@@ -193,12 +193,15 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			} else {
 				errFunc()
 			}
+			f.Typ.ParameterList[0].LocalValOffset = 1
+			f.Typ.ParameterList[0].IsFunctionParameter = true
 		}
-		f.Typ.ParameterList[0].LocalValOffset = 1
+
 		return
 	}
 	var err error
 	for k, v := range f.Typ.ParameterList {
+		v.IsFunctionParameter = true
 		if v.Typ.Typ != VARIABLE_TYPE_T {
 			err = v.Typ.resolve(&f.Block)
 			if err != nil {
@@ -251,6 +254,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	}
 	//handler return
 	for _, v := range f.Typ.ReturnList {
+		v.IsRetrunVar = true
 		if v.Typ.Typ != VARIABLE_TYPE_T {
 			err = v.Typ.resolve(&f.Block)
 			if err != nil {

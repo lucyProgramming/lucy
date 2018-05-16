@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
 type Block struct {
@@ -110,18 +112,17 @@ func (b *Block) SearchByName(name string) interface{} {
 	}
 	t := b.Outter.SearchByName(name) // search by outter block
 	if t != nil {                    //
+		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionTopBlock &&
+			len(b.InheritedAttribute.Function.TypeParameters) > 0 { // template function
+			return nil
+		}
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionTopBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false {
 				if v.Name == THIS {
 					return nil // capture this not allow
 				}
-				if len(b.InheritedAttribute.Function.TypeParameters) > 0 { // template function
-					return nil
-				} else {
-					b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
-				}
-
+				b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
 			}
 			//cannot search variable from class body
 			if b.InheritedAttribute.class != nil && b.IsClassBlock {
@@ -152,6 +153,18 @@ func (b *Block) inherite(father *Block) {
 	}
 }
 
+func (b *Block) checkUnUsedVariable() (es []error) {
+	es = []error{}
+	for _, v := range b.Vars {
+		if v.Used || v.IsGlobal || v.IsFunctionParameter || v.IsRetrunVar {
+			continue
+		}
+		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",
+			errMsgPrefix(v.Pos), v.Name))
+	}
+	return es
+}
+
 func (b *Block) checkStatements() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
@@ -160,6 +173,9 @@ func (b *Block) checkStatements() []error {
 		if PackageBeenCompile.shouldStop(errs) {
 			return errs
 		}
+	}
+	if common.CompileFlags.DisAbleCheckUnUsedVariable == false {
+		errs = append(errs, b.checkUnUsedVariable()...)
 	}
 	return errs
 }

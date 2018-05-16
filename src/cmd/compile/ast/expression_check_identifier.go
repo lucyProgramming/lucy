@@ -6,6 +6,10 @@ import (
 
 func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, err error) {
 	identifer := e.Data.(*ExpressionIdentifer)
+	if identifer.Name == NO_NAME_IDENTIFIER {
+		return nil, fmt.Errorf("%s '%s' is not a valid name",
+			errMsgPrefix(e.Pos), NO_NAME_IDENTIFIER)
+	}
 	fromImport := false
 	d := block.SearchByName(identifer.Name)
 	if d == nil {

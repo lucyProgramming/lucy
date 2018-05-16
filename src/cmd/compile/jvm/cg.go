@@ -2,12 +2,13 @@ package jvm
 
 import (
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"math"
 	"os"
 	"path/filepath"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type MakeClass struct {
@@ -18,15 +19,17 @@ type MakeClass struct {
 }
 
 func (m *MakeClass) newClassName(prefix string) (autoName string) {
-	if _, exists := m.p.Block.NameExists(prefix); exists == false {
-		return m.p.Name + "/" + prefix
-	}
 	for i := 0; i < math.MaxInt16; i++ {
 		autoName = fmt.Sprintf("%s_%d", prefix, i)
-		if _, exists := m.p.Block.NameExists(autoName); exists == false {
+		if _, exists := m.p.Block.NameExists(autoName); exists {
 			continue
 		}
-		return m.p.Name + "/" + autoName
+		autoName = m.p.Name + "/" + autoName
+		if m.Classes != nil && m.Classes[autoName] != nil {
+			continue
+		} else {
+			return autoName
+		}
 	}
 	panic("new class name overflow")
 }
@@ -39,7 +42,7 @@ func (m *MakeClass) putClass(name string, class *cg.ClassHighLevel) {
 		m.Classes = make(map[string]*cg.ClassHighLevel)
 	}
 	if _, ok := m.Classes[name]; ok {
-		panic("name:" + name + " already been token")
+		panic(fmt.Sprintf("name:'%s' already been token", name))
 	}
 	m.Classes[name] = class
 }

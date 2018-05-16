@@ -10,7 +10,7 @@ public class File extends io.File {
 		isCreate := false;
 		isRead  := false;
 		isWrite := false;
-		for k,v := range []byte(model){
+		for v := range []byte(model){
 			if v == 'r' {
 				isRead = true;
 			}

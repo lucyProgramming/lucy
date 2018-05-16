@@ -95,6 +95,27 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 
+	//handle captured vars
+	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
+		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			copyOP(code,
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+			forState.appendLocals(class,
+				state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
+		}
+		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Var.BeenCaptured {
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
+			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			copyOP(code,
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+			forState.appendLocals(class,
+				state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierK.Var.Typ.Typ).className))
+		}
+	}
 	//continue offset start from here
 	loopBeginsAt := code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
@@ -154,57 +175,22 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	//store v in real v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
+			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
-			if t := 2 + jvmSize(s.RangeAttr.RangeOn.Value.Map.V); t > maxstack {
-				maxstack = t
-			}
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-			code.MaxLocals++
+				loadSimpleVarOp(s.RangeAttr.IdentifierV.Var.Typ.Typ,
+					autoVar.V)...)
 			m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
-			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.appendLocals(class,
-				state.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.Map.V.Typ).className))
 		} else {
-			// load v
-			copyOP(code, loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ,
-				autoVar.V)...)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
-			copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ,
-				s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
 		}
 		if s.RangeAttr.ModelKV {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 				copyOP(code,
 					loadSimpleVarOp(s.RangeAttr.IdentifierK.Var.Typ.Typ, autoVar.K)...)
-				if t := 2 + jvmSize(s.RangeAttr.IdentifierK.Var.Typ); t > maxstack {
-					maxstack = t
-				}
-				s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
-				code.MaxLocals++
 				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
-				copyOP(code,
-					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
-				forState.appendLocals(class,
-					state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierK.Var.Typ.Typ).className))
 			} else {
-				copyOP(code, loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ,
-					autoVar.K)...)
-				s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
-				code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.K)
-				copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ,
-					s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
-				forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.K)
-
+				s.RangeAttr.IdentifierK.Var.LocalValOffset = autoVar.K
 			}
 		}
 	} else { // for k,v  = range xxx

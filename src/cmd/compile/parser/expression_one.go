@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
+func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch ep.parser.token.Type {
@@ -102,7 +102,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		ep.Next() // skip ++
 		newE := &ast.Expression{}
 		newE.Pos = pos
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(true)
 		if err != nil {
 			return nil, err
 		}
@@ -113,7 +113,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		ep.Next() // skip --
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(true)
 		if err != nil {
 			return nil, err
 		}
@@ -125,7 +125,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(true)
 		if err != nil {
 			return nil, err
 		}
@@ -137,7 +137,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(true)
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +149,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		newE := &ast.Expression{}
-		left, err = ep.parseOneExpression()
+		left, err = ep.parseOneExpression(true)
 		if err != nil {
 			return nil, err
 		}
@@ -280,6 +280,9 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 		// ++ or --
 		if ep.parser.token.Type == lex.TOKEN_INCREMENT ||
 			ep.parser.token.Type == lex.TOKEN_DECREMENT { //  ++ or --
+			if unary {
+				return left, nil
+			}
 			newe := &ast.Expression{}
 			if ep.parser.token.Type == lex.TOKEN_INCREMENT {
 				newe.Typ = ast.EXPRESSION_TYPE_INCREMENT
@@ -297,8 +300,7 @@ func (ep *Expression) parseOneExpression() (*ast.Expression, error) {
 			ep.Next()
 			continue
 		}
-
-		//  [
+		// [
 		if ep.parser.token.Type == lex.TOKEN_LB {
 			pos := ep.parser.mkPos()
 			ep.Next()                                    // skip [
