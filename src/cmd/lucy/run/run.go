@@ -134,6 +134,18 @@ func (r *Run) RunCommand(command string, args []string) {
 	} else { // unix style
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CLASSPATH=%s", strings.Join(classPathArray, ":")))
 	}
+	{
+		envs := os.Environ()
+		ts := []string{}
+		for _, v := range envs {
+			if strings.HasPrefix(v, "CLASSPATH=") {
+				continue
+			}
+			ts = append(ts, v)
+		}
+		cmd.Env = append(cmd.Env, ts...)
+	}
+
 	err = cmd.Start()
 	if err != nil {
 		fmt.Println(err)

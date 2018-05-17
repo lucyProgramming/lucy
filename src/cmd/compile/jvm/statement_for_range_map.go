@@ -97,16 +97,21 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-			code.MaxLocals++
-			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.appendLocals(class,
-				state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
+		if s.RangeAttr.IdentifierV.Name != ast.NO_NAME_IDENTIFIER {
+			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+				closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+				s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+				code.MaxLocals++
+				copyOP(code,
+					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+				forState.appendLocals(class,
+					state.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
+			}
 		}
-		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Var.BeenCaptured {
+
+		if s.RangeAttr.ModelKV &&
+			s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER &&
+			s.RangeAttr.IdentifierK.Var.BeenCaptured {
 			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -154,7 +159,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
 	forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
 	// store to k,if need
-	if s.RangeAttr.ModelKV {
+	if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER {
 		// load k sets
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 		// load k
@@ -174,16 +179,19 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	// store k and v into user defined variable
 	//store v in real v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.IdentifierV.Var.Typ.Typ,
-					autoVar.V)...)
-			m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
-		} else {
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
+		if s.RangeAttr.IdentifierV.Name != ast.NO_NAME_IDENTIFIER {
+			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+				copyOP(code,
+					loadSimpleVarOp(s.RangeAttr.IdentifierV.Var.Typ.Typ,
+						autoVar.V)...)
+				m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
+			} else {
+				s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
+			}
 		}
-		if s.RangeAttr.ModelKV {
+
+		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 				copyOP(code,

@@ -15,3 +15,12 @@ type Optimizer struct {
 func (o *Optimizer) Optimize() {
 
 }
+
+//func (o *Optimizer) optimizeFunction(f *ast.Function) {
+//	for _, v := range f.Typ.ReturnList {
+//		if v.Expression.IsCompileAuto {
+//			continue
+//		}
+//		(&Expression{}).optimize(&f.Block, v.Expression)
+//	}
+//}

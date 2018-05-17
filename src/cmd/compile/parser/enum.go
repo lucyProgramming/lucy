@@ -12,7 +12,8 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	p.Next() // skip enum
 
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		err = fmt.Errorf("%s enum type have no name", p.errorMsgPrefix())
+		err = fmt.Errorf("%s expect 'identifier', but '%s'",
+			p.errorMsgPrefix(), p.token.Desp)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -21,9 +22,8 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		Pos:  p.mkPos(),
 	}
 	p.Next() // skip enum name
-
 	if p.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s enum type have no '{' after it`s name defined,but '%s'",
+		err = fmt.Errorf("%s expect '{',but '%s'",
 			p.errorMsgPrefix(), p.token.Desp)
 		p.errs = append(p.errs, err)
 		return nil, err
@@ -32,10 +32,10 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	e = &ast.Enum{}
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
-
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		err = fmt.Errorf("%s no enum names defined after {", p.errorMsgPrefix())
+		err = fmt.Errorf("%s expect 'identifier',but '%s'",
+			p.errorMsgPrefix(), p.token.Desp)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -46,10 +46,9 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		},
 	}
 	p.Next()
-
 	var initExpression *ast.Expression
 	if p.token.Type == lex.TOKEN_ASSIGN { // first value defined here
-		p.Next()
+		p.Next() // skip assign
 		initExpression, err = p.Expression.parseExpression(false)
 		if err != nil {
 			p.errs = append(p.errs, err)

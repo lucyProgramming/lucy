@@ -11,7 +11,6 @@ import (
 func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 	pos := ep.parser.mkPos()
 	ep.parser.Next() // skip [
-	var t *ast.VariableType
 	var err error
 	if ep.parser.token.Type != lex.TOKEN_RB {
 		arr := &ast.ExpressionArrayLiteral{}
@@ -26,37 +25,36 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 			Data: arr,
 			Pos:  pos,
 		}, err
-	} else {
-		ep.Next() // skip [
-		t, err = ep.parser.parseType()
+	}
+	ep.Next() // skip [
+	t, err := ep.parser.parseType()
+	if err != nil {
+		return nil, err
+	}
+	if ep.parser.token.Type == lex.TOKEN_LP { // []byte("1111111111")
+		ep.Next() // skip (
+		e, err := ep.parseExpression(false)
 		if err != nil {
-			ep.parser.consume(untils_lc)
-			ep.parser.Next() //
 			return nil, err
 		}
-		if ep.parser.token.Type == lex.TOKEN_LP {
-			ep.Next() // skip (
-			e, err := ep.parseExpression(false)
-			if err != nil {
-				return nil, err
-			}
-			if ep.parser.token.Type != lex.TOKEN_RP {
-				return nil, fmt.Errorf("%s '(' and  ')' not match", ep.parser.errorMsgPrefix())
-			}
-			ep.Next() // skip )
-			ret := &ast.Expression{}
-			ret.Pos = pos
-			ret.Typ = ast.EXPRESSION_TYPE_CHECK_CAST
-			data := &ast.ExpressionTypeConvertion{}
-			data.Typ = &ast.VariableType{}
-			data.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
-			data.Typ.Pos = pos
-			data.Typ.ArrayType = t
-			data.Expression = e
-			ret.Data = data
-			return ret, nil
+		if ep.parser.token.Type != lex.TOKEN_RP {
+			return nil, fmt.Errorf("%s '(' and  ')' not match",
+				ep.parser.errorMsgPrefix())
 		}
+		ep.Next() // skip )
+		ret := &ast.Expression{}
+		ret.Pos = pos
+		ret.Typ = ast.EXPRESSION_TYPE_CHECK_CAST
+		data := &ast.ExpressionTypeConvertion{}
+		data.Typ = &ast.VariableType{}
+		data.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
+		data.Typ.Pos = pos
+		data.Typ.ArrayType = t
+		data.Expression = e
+		ret.Data = data
+		return ret, nil
 	}
+
 	arr := &ast.ExpressionArrayLiteral{}
 	if t != nil {
 		arr.Typ = &ast.VariableType{}
@@ -64,7 +62,6 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 		arr.Typ.ArrayType = t
 		arr.Typ.Pos = pos
 	}
-
 	arr.Expressions, err = ep.parseArrayValues()
 	return &ast.Expression{
 		Typ:  ast.EXPRESSION_TYPE_ARRAY,
@@ -77,7 +74,8 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 //{1,2,3}  {{1,2,3},{456}}
 func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 	if ep.parser.token.Type != lex.TOKEN_LC {
-		return nil, fmt.Errorf("%s expect '{',but '%s'", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		return nil, fmt.Errorf("%s expect '{',but '%s'",
+			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 	}
 	ep.Next() // skip {
 	es := []*ast.Expression{}

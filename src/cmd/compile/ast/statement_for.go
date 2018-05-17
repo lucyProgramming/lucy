@@ -86,111 +86,72 @@ func (s *StatementFor) checkRange() []error {
 	s.RangeAttr.RangeOn = rangeExpression
 	var err error
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
-		var identifier *ExpressionIdentifer
-		var pos *Pos
-		if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
-			errs = append(errs, fmt.Errorf("%s not a identifier on left",
-				errMsgPrefix(lefts[0].Pos)))
-			return errs
-		} else {
-			identifier = lefts[0].Data.(*ExpressionIdentifer)
-			pos = lefts[0].Pos
-		}
-		var identifier2 *ExpressionIdentifer
-		var pos2 *Pos
 		if modelkv {
+			if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
+				errs = append(errs, fmt.Errorf("%s not a identifier on left",
+					errMsgPrefix(lefts[0].Pos)))
+				return errs
+			}
 			if lefts[1].Typ != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
-					errMsgPrefix(lefts[1].Pos)))
+					errMsgPrefix(lefts[0].Pos)))
 				return errs
-
-			} else {
-				identifier2 = lefts[1].Data.(*ExpressionIdentifer)
-				pos2 = lefts[1].Pos
-			}
-		}
-		if modelkv {
-			if identifier2 != nil { // alloc v first
-				if identifier2.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left",
-						errMsgPrefix(pos2)))
-					return errs
-
-				} else {
-					vd := &VariableDefinition{}
-					if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-						vd.Typ = rangeOn.ArrayType.Clone()
-					} else {
-						vd.Typ = rangeOn.Map.V.Clone()
-					}
-					vd.Pos = pos2
-					vd.Name = identifier2.Name
-					err = s.Block.insert(identifier2.Name, s.Condition.Pos, vd)
-					if err != nil {
-						errs = append(errs, err)
-					}
-					identifier2.Var = vd
-					s.RangeAttr.IdentifierV = identifier2
-				}
-			}
-
-			if identifier != nil {
-				if identifier.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left",
-						errMsgPrefix(pos)))
-					return errs
-				} else {
-					vd := &VariableDefinition{}
-					var vt *VariableType
-					if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
-						rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-						vt = &VariableType{}
-						vt.Typ = VARIABLE_TYPE_INT
-					} else {
-						vt = rangeOn.Map.K.Clone()
-						vt.Pos = rangeOn.Pos
-					}
-					vd.Name = identifier.Name
-					vd.Typ = vt
-					vd.Pos = pos
-					err = s.Block.insert(identifier.Name, pos, vd)
-					if err != nil {
-						errs = append(errs, err)
-					}
-					identifier.Var = vd
-					s.RangeAttr.IdentifierK = identifier
-				}
 			}
 		} else {
-			if identifier != nil && identifier.Name == NO_NAME_IDENTIFIER {
+			if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
-					errMsgPrefix(lefts[1].Pos)))
+					errMsgPrefix(lefts[0].Pos)))
 				return errs
-
 			}
-			if identifier != nil {
-				if identifier.Name == NO_NAME_IDENTIFIER {
-					errs = append(errs, fmt.Errorf("%s not a valid name one left",
-						errMsgPrefix(pos2)))
-					return errs
-				} else {
-					vd := &VariableDefinition{}
-					if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-						vd.Typ = rangeOn.ArrayType.Clone()
-					} else {
-						vd.Typ = rangeOn.Map.V.Clone()
-					}
-					vd.Name = identifier.Name
-					vd.Typ.Pos = pos2
-					vd.Pos = pos2
-					err = s.Block.insert(identifier.Name, s.Condition.Pos, vd)
-					if err != nil {
-						errs = append(errs, err)
-					}
-					identifier.Var = vd
-					s.RangeAttr.IdentifierV = identifier
-				}
+		}
+		var identifierK *ExpressionIdentifer
+		var identifierV *ExpressionIdentifer
+		var posk, posv *Pos
+		if modelkv {
+			identifierK = lefts[0].Data.(*ExpressionIdentifer)
+			identifierV = lefts[1].Data.(*ExpressionIdentifer)
+			posk = lefts[0].Pos
+			posv = lefts[1].Pos
+		} else {
+			identifierV = lefts[0].Data.(*ExpressionIdentifer)
+			posv = lefts[0].Pos
+		}
+		s.RangeAttr.IdentifierV = identifierV
+		s.RangeAttr.IdentifierK = identifierK
+		if identifierV.Name != NO_NAME_IDENTIFIER {
+			vd := &VariableDefinition{}
+			if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+				vd.Typ = rangeOn.ArrayType.Clone()
+			} else {
+				vd.Typ = rangeOn.Map.V.Clone()
 			}
+			vd.Pos = posv
+			vd.Name = identifierV.Name
+			err = s.Block.insert(identifierV.Name, s.Condition.Pos, vd)
+			if err != nil {
+				errs = append(errs, err)
+			}
+			identifierV.Var = vd
+		}
+		if modelkv && identifierK.Name != NO_NAME_IDENTIFIER {
+			vd := &VariableDefinition{}
+			var vt *VariableType
+			if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
+				rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+				vt = &VariableType{}
+				vt.Typ = VARIABLE_TYPE_INT
+			} else {
+				vt = rangeOn.Map.K.Clone()
+				vt.Pos = rangeOn.Pos
+			}
+			vd.Name = identifierK.Name
+			vd.Typ = vt
+			vd.Pos = posk
+			err = s.Block.insert(identifierK.Name, posk, vd)
+			if err != nil {
+				errs = append(errs, err)
+			}
+			identifierK.Var = vd
 		}
 	}
 
@@ -212,7 +173,8 @@ func (s *StatementFor) checkRange() []error {
 		if modelkv && t2 != nil {
 			lefts[1].Value = t2
 		}
-		if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
+			rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 			if modelkv {
 				if t1.IsInteger() == false {
 					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))

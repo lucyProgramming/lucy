@@ -119,16 +119,19 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-			code.MaxLocals++
-			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			forState.appendLocals(class,
-				state.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
+		if s.RangeAttr.IdentifierV.Name != ast.NO_NAME_IDENTIFIER {
+			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+				closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+				s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+				code.MaxLocals++
+				copyOP(code,
+					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+				forState.appendLocals(class,
+					state.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
+			}
 		}
-		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Var.BeenCaptured {
+
+		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER && s.RangeAttr.IdentifierK.Var.BeenCaptured {
 			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -198,32 +201,37 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 	// v
 	autoVar.V = code.MaxLocals
-	code.MaxLocals += jvmSize(s.RangeAttr.IdentifierV.Var.Typ)
+	code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.ArrayType)
 	//store to v tmp
 	copyOP(code,
 		storeSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ,
 			autoVar.V)...)
 
-	forState.appendLocals(class, s.RangeAttr.IdentifierV.Var.Typ)
+	forState.appendLocals(class, s.RangeAttr.RangeOn.Value.ArrayType)
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ,
-					autoVar.V)...)
-			m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
-		} else {
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
-		}
-		if s.RangeAttr.ModelKV {
-			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+		if s.RangeAttr.IdentifierV.Name != ast.NO_NAME_IDENTIFIER {
+			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
+				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 				copyOP(code,
-					loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
+					loadSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ,
+						autoVar.V)...)
+				m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
 			} else {
-				s.RangeAttr.IdentifierK.Var.LocalValOffset = autoVar.K
+				s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
+			}
+		}
+
+		if s.RangeAttr.ModelKV {
+			if s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER {
+				if s.RangeAttr.IdentifierK.Var.BeenCaptured {
+					copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+					copyOP(code,
+						loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
+					m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
+				} else {
+					s.RangeAttr.IdentifierK.Var.LocalValOffset = autoVar.K
+				}
 			}
 		}
 	} else { // for k,v = range arr

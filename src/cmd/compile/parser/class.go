@@ -222,7 +222,8 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			c.classDefinition.Methods[f.Name] = append(c.classDefinition.Methods[f.Name], m)
 			c.resetProperty()
 		default:
-			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(), c.parser.token.Desp))
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect '%s'",
+				c.parser.errorMsgPrefix(), c.parser.token.Desp))
 			c.Next()
 		}
 	}

@@ -11,7 +11,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/optimizer"
+	//	"gitee.com/yuyang-fine/lucy/src/cmd/compile/optimizer"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
 )
 
@@ -124,7 +124,7 @@ func (lc *LucyCompile) compile() {
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}
-	optimizer.Optimize(&ast.PackageBeenCompile)
+	//optimizer.Optimize(&ast.PackageBeenCompile)
 	lc.Maker.Make(&ast.PackageBeenCompile)
 	lc.exit()
 }

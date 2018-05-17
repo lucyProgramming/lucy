@@ -386,7 +386,6 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				newe.Data = index
 				left = newe
 				ep.Next()
-				continue
 			} else if ep.parser.token.Type == lex.TOKEN_LP { //  a.(xxx)
 				//
 				ep.Next() // skip (
@@ -406,13 +405,13 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				typeAssert.Expression = left
 				newe.Data = typeAssert
 				left = newe
-				continue
 			} else {
 				return nil, fmt.Errorf("%s expect  'identifier' or '(',but '%s'",
 					ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
 			}
+			continue
 		}
-		//  aa ()
+		// aa()
 		if ep.parser.token.Type == lex.TOKEN_LP {
 			newe, err := ep.parseCallExpression(left)
 			if err != nil {
