@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -79,11 +80,16 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_VAR:
 			pos := p.mkPos()
 			p.Next() // skip var key word
-			vs, es, _, err := p.parseConstDefinition(true)
+			vs, es, typ, err := p.parseConstDefinition(true)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
 				continue
+			}
+			if typ != lex.TOKEN_ASSIGN {
+				p.errs = append(p.errs,
+					fmt.Errorf("%s use '=' to initialize value",
+						p.errorMsgPrefix()))
 			}
 			d := &ast.ExpressionDeclareVariable{Vs: vs, Values: es}
 			e := &ast.Expression{
@@ -350,7 +356,8 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 		}
 		return vs
 	}
-	if p.token.Type != lex.TOKEN_ASSIGN && p.token.Type != lex.TOKEN_COLON_ASSIGN {
+	if p.token.Type != lex.TOKEN_ASSIGN &&
+		p.token.Type != lex.TOKEN_COLON_ASSIGN {
 		return f(), nil, 0, err
 	}
 	typ := p.token.Type

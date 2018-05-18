@@ -761,7 +761,7 @@ redo:
 		if err == nil {
 			if t := []byte(token.Data.(string)); len(t) != 1 {
 				err = fmt.Errorf("expect one char")
-			} else {
+			} else { // correct token
 				token.Type = TOKEN_LITERAL_BYTE
 				token.Data = byte([]byte(t)[0])
 			}

@@ -258,7 +258,6 @@ func (e *Expression) ConvertToNumber(typ int) {
 			Typ: typ,
 		})
 	}
-
 }
 
 type ExpressionTypeAssert ExpressionTypeConvertion
@@ -323,21 +322,51 @@ func (e *Expression) IsLiteral() bool {
 	valid for condition
 */
 func (e *Expression) canbeUsedAsCondition() bool {
-	return e.Typ == EXPRESSION_TYPE_EQ ||
+	return e.Typ == EXPRESSION_TYPE_NULL ||
+		e.Typ == EXPRESSION_TYPE_BOOL ||
+		e.Typ == EXPRESSION_TYPE_BYTE ||
+		e.Typ == EXPRESSION_TYPE_SHORT ||
+		e.Typ == EXPRESSION_TYPE_INT ||
+		e.Typ == EXPRESSION_TYPE_LONG ||
+		e.Typ == EXPRESSION_TYPE_FLOAT ||
+		e.Typ == EXPRESSION_TYPE_DOUBLE ||
+		e.Typ == EXPRESSION_TYPE_STRING ||
+		e.Typ == EXPRESSION_TYPE_ARRAY ||
+		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
+		e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
+		e.Typ == EXPRESSION_TYPE_OR ||
+		e.Typ == EXPRESSION_TYPE_AND ||
+		e.Typ == EXPRESSION_TYPE_XOR ||
+		e.Typ == EXPRESSION_TYPE_LSH ||
+		e.Typ == EXPRESSION_TYPE_RSH ||
+		e.Typ == EXPRESSION_TYPE_ADD ||
+		e.Typ == EXPRESSION_TYPE_SUB ||
+		e.Typ == EXPRESSION_TYPE_MUL ||
+		e.Typ == EXPRESSION_TYPE_DIV ||
+		e.Typ == EXPRESSION_TYPE_MOD ||
+		e.Typ == EXPRESSION_TYPE_EQ ||
 		e.Typ == EXPRESSION_TYPE_NE ||
 		e.Typ == EXPRESSION_TYPE_GE ||
 		e.Typ == EXPRESSION_TYPE_GT ||
 		e.Typ == EXPRESSION_TYPE_LE ||
 		e.Typ == EXPRESSION_TYPE_LT ||
-		e.Typ == EXPRESSION_TYPE_BOOL ||
-		e.Typ == EXPRESSION_TYPE_LOGICAL_AND ||
-		e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
-		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
-		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Typ == EXPRESSION_TYPE_NOT ||
-		e.Typ == EXPRESSION_TYPE_IDENTIFIER ||
+		e.Typ == EXPRESSION_TYPE_INDEX ||
 		e.Typ == EXPRESSION_TYPE_DOT ||
-		e.Typ == EXPRESSION_TYPE_INDEX
+		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
+		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
+		e.Typ == EXPRESSION_TYPE_INCREMENT ||
+		e.Typ == EXPRESSION_TYPE_DECREMENT ||
+		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT ||
+		e.Typ == EXPRESSION_TYPE_PRE_DECREMENT ||
+		e.Typ == EXPRESSION_TYPE_NEGATIVE ||
+		e.Typ == EXPRESSION_TYPE_NOT ||
+		e.Typ == EXPRESSION_TYPE_BITWISE_NOT ||
+		e.Typ == EXPRESSION_TYPE_IDENTIFIER ||
+		e.Typ == EXPRESSION_TYPE_NEW ||
+		e.Typ == EXPRESSION_TYPE_CHECK_CAST ||
+		e.Typ == EXPRESSION_TYPE_SLICE ||
+		e.Typ == EXPRESSION_TYPE_MAP ||
+		e.Typ == EXPRESSION_TYPE_TERNARY
 }
 
 func (e *Expression) canBeUsedAsStatement() bool {

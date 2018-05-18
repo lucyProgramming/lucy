@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -83,11 +84,16 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 		case lex.TOKEN_VAR:
 			pos := b.parser.mkPos()
 			b.Next() // skip var key word
-			vs, es, _, err := b.parser.parseConstDefinition(true)
+			vs, es, typ, err := b.parser.parseConstDefinition(true)
 			if err != nil {
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
+			}
+			if typ != lex.TOKEN_ASSIGN {
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s use '=' to initialize value",
+						b.parser.errorMsgPrefix()))
 			}
 			s := &ast.Statement{
 				Typ: ast.STATEMENT_TYPE_EXPRESSION,
