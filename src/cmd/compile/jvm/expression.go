@@ -215,3 +215,68 @@ func (m *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
 	}
 	return jvmSize(e.Value)
 }
+
+func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	es []*ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	code.Codes[code.CodeLength] = cg.OP_new
+	class.InsertClassConst(java_arrylist_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength+3] = cg.OP_dup
+	code.CodeLength += 4
+	if 2 > maxstack {
+		maxstack = 2
+	}
+	code.Codes[code.CodeLength] = cg.OP_invokespecial
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      java_arrylist_class,
+		Method:     special_method_init,
+		Descriptor: "()V",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	currentStack := uint16(1)
+	arrylistObject := state.newObjectVariableType(java_arrylist_class)
+	state.pushStack(class, arrylistObject)
+	state.pushStack(class, arrylistObject)
+	defer state.popStack(2)
+	for _, v := range es {
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		currentStack++
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+			stack, _ := m.build(class, code, v, context, state)
+			if t := currentStack + stack; t > maxstack {
+				maxstack = t
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      java_arrylist_class,
+				Method:     "addAll",
+				Descriptor: "(Ljava/util/Collection;)Z",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.Codes[code.CodeLength+3] = cg.OP_pop
+			code.CodeLength += 4
+			continue
+		}
+		stack, es := m.build(class, code, v, context, state)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
+			state.pushStack(class, v.Value)
+			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
+		}
+		if t := currentStack + stack; t > maxstack {
+			maxstack = t
+		}
+		if v.Value.IsPointer() == false {
+			typeConverter.putPrimitiveInObject(class, code, v.Value)
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_arrylist_class,
+			Method:     "add",
+			Descriptor: "(Ljava/lang/Object;)Z",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_pop
+		code.CodeLength += 4
+	}
+	return
+}

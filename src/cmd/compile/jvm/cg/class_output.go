@@ -85,11 +85,7 @@ func (c *Class) OutPut(dest io.Writer) error {
 		return err
 	}
 	// attribute
-	binary.BigEndian.PutUint16(bs2, uint16(len(c.Attributes)))
-	_, err = dest.Write(bs2)
-	if err != nil {
-		return err
-	}
+
 	return c.writeAttributeInfo(c.Attributes)
 }
 
@@ -117,11 +113,7 @@ func (c *Class) writeMethods() error {
 		if err != nil {
 			return err
 		}
-		binary.BigEndian.PutUint16(bs2, uint16(len(v.Attributes)))
-		_, err = c.dest.Write(bs2)
-		if err != nil {
-			return err
-		}
+
 		err = c.writeAttributeInfo(v.Attributes)
 		if err != nil {
 			return err
@@ -154,11 +146,7 @@ func (c *Class) writeFields() error {
 		if err != nil {
 			return err
 		}
-		binary.BigEndian.PutUint16(bs2, uint16(len(v.Attributes)))
-		_, err = c.dest.Write(bs2)
-		if err != nil {
-			return err
-		}
+
 		err = c.writeAttributeInfo(v.Attributes)
 		if err != nil {
 			return err
@@ -168,12 +156,13 @@ func (c *Class) writeFields() error {
 }
 
 func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
-	if len(as) == 0 {
-		return nil
-	}
-	var err error
-	bs4 := make([]byte, 4)
 	bs2 := make([]byte, 2)
+	binary.BigEndian.PutUint16(bs2, uint16(len(as)))
+	_, err := c.dest.Write(bs2)
+	if err != nil {
+		return err
+	}
+	bs4 := make([]byte, 4)
 	for _, v := range as {
 		binary.BigEndian.PutUint16(bs2, v.NameIndex)
 		_, err = c.dest.Write(bs2)

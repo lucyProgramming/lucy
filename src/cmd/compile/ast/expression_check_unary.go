@@ -17,8 +17,12 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 				Typ: EXPRESSION_TYPE_BOOL,
 				Pos: e.Pos,
 			}
+		} else {
+			return &VariableType{
+				Typ: EXPRESSION_TYPE_INT,
+				Pos: e.Pos,
+			}
 		}
-		return nil
 	}
 	if e.Typ == EXPRESSION_TYPE_NOT {
 		if t.Typ != VARIABLE_TYPE_BOOL {
@@ -37,7 +41,6 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
 				errMsgPrefix(e.Pos), t.TypeString()))
 		}
-
 	}
 	ret := t.Clone()
 	ret.Pos = e.Pos

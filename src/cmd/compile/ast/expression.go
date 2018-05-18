@@ -390,6 +390,13 @@ func (e *Expression) IsSelfIncrement() bool {
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
 }
 
+func (e *Expression) ListAndMoreThan(i int) bool {
+	if e.Typ != EXPRESSION_TYPE_LIST {
+		return false
+	}
+	return len(e.Data.([]*Expression)) > i
+}
+
 func (e *Expression) HaveOnlyOneValue() bool {
 	if e.MayHaveMultiValue() {
 		return len(e.Values) == 1

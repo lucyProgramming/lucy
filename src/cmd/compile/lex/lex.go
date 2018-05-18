@@ -519,20 +519,20 @@ func (lex *LucyLexer) Next() (token *Token, err error) {
 redo:
 	token = &Token{}
 	var c byte
+	token.StartLine = lex.line
+	token.StartColumn = lex.column
 	c, eof := lex.getchar()
 	if eof {
-		token.StartLine = lex.line
-		token.StartColumn = lex.column
 		token.Type = TOKEN_EOF
 		token.Desp = "EOF"
 		return
 	}
 	for c == ' ' || c == '\t' || c == '\r' {
+		token.StartLine = lex.line
+		token.StartColumn = lex.column
 		c, eof = lex.getchar()
 	}
 	if eof {
-		token.StartLine = lex.line
-		token.StartColumn = lex.column
 		token.Type = TOKEN_EOF
 		token.Desp = "EOF"
 		return
@@ -540,8 +540,6 @@ redo:
 	if lex.isLetter(c) || c == '_' || c == '$' {
 		return lex.lexIdentifier(c)
 	}
-	token.StartLine = lex.line
-	token.StartColumn = lex.column
 	if lex.isDigit(c) {
 		eof, err = lex.lexNumber(token, c)
 		return

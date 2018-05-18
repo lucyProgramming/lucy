@@ -270,13 +270,13 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 			forState.popStack(len(forState.Stacks) - stackLength)
 		}
 	}
-	continueState := (&StackMapState{}).FromLast(forState)
+	blockState := (&StackMapState{}).FromLast(forState)
 	// build block
 	m.buildBlock(class, code, s.Block, context, forState)
 	//innc k
 	s.ContinueOPOffset = code.CodeLength
-	continueState.addTop(forState)
-	context.MakeStackMap(code, continueState, code.CodeLength)
+	blockState.addTop(forState)
+	context.MakeStackMap(code, blockState, code.CodeLength)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.K > 255 {
 		panic("over 255")
