@@ -37,6 +37,7 @@ func (r *Run) Help(command string) {
 func (r *Run) parseCmd(args []string) error {
 	cmd := flag.NewFlagSet("run", flag.ErrorHandling(1))
 	cmd.BoolVar(&r.Flags.forceReBuild, "forceReBuild", false, "force rebuild all package")
+	cmd.IntVar(&r.Flags.JvmVersion, "jvm-version", 54, "jvm major version")
 	err := cmd.Parse(args)
 	if err != nil {
 		return err
@@ -371,7 +372,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		err = fmt.Errorf("check if need compile,err:%v", err)
 		return
 	}
-	if needBuild == false { // current package no need to compile,but I need to check dependies
+	if needBuild == false { //current package no need to compile,but I need to check dependies
 		need := false
 		for _, v := range meta.Imports {
 
@@ -405,7 +406,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		}
 	}
 	fmt.Println("compiling.... ", packageName) // compile this package
-
 	// build this package
 	//read  files
 	destDir := filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName)
@@ -432,7 +432,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	}
 	// cd to destDir
 	os.Chdir(destDir)
-	args := []string{"-package-name", packageName}
+	args := []string{"-package-name", packageName, "-jvm-version", r.Flags.JvmVersion}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
 	cmd.Stderr = os.Stderr

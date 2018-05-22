@@ -22,6 +22,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 	if b.parser.token.Type == lex.TOKEN_SEMICOLON {
 		b.Next() // skip ;
 		f.Init = f.Condition
+		f.Condition = nil // mk nil
 		//condition
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 			e, err := b.parser.Expression.parseExpression(false)
