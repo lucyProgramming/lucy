@@ -241,7 +241,7 @@ func (c *Class) parseConst() error {
 	if err != nil {
 		return err
 	}
-	if typ != lex.TOKEN_ASSIGN {
+	if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
 		c.parser.errs = append(c.parser.errs,
 			fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’",
 				c.parser.errorMsgPrefix(vs[0].Pos)))

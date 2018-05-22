@@ -90,7 +90,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				b.Next()
 				continue
 			}
-			if typ != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s use '=' to initialize value",
 						b.parser.errorMsgPrefix()))
@@ -179,7 +179,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				b.Next()
 				continue
 			}
-			if typ != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’",
 						b.parser.errorMsgPrefix(vs[0].Pos)))
@@ -383,6 +383,38 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			s.Expression.Data = alias
 			block.Statements = append(block.Statements, s)
 			b.Next()
+		case lex.TOKEN_CLASS, lex.TOKEN_INTERFACE:
+			pos := b.parser.mkPos()
+			var class *ast.Class
+			var err error
+			if b.parser.token.Type == lex.TOKEN_CLASS {
+				class, err = b.parser.Class.parse()
+			} else {
+				class, err = b.parser.Interface.parse()
+			}
+			if err != nil {
+				b.consume(untils_rc)
+				b.Next()
+				continue
+			}
+			s := &ast.Statement{}
+			s.Pos = pos
+			s.Typ = ast.STATEMENT_TYPE_CLASS
+			s.Class = class
+			block.Statements = append(block.Statements, s)
+		case lex.TOKEN_ENUM:
+			pos := b.parser.mkPos()
+			e, err := b.parser.parseEnum(false)
+			if err != nil {
+				b.consume(untils_rc)
+				b.Next()
+				continue
+			}
+			s := &ast.Statement{}
+			s.Pos = pos
+			s.Typ = ast.STATEMENT_TYPE_ENUM
+			s.Enum = e
+			block.Statements = append(block.Statements, s)
 		default:
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'",
 				b.parser.errorMsgPrefix(), b.parser.token.Desp))

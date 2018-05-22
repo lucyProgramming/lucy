@@ -139,7 +139,6 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		e.Value = tt
 	case EXPRESSION_TYPE_COLON_ASSIGN:
 		e.checkColonAssignExpression(block, &errs)
-
 		e.Value = mkVoidType(e.Pos)
 		Types = []*VariableType{e.Value}
 		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Vs) > 1 {
@@ -151,10 +150,9 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 		}
 		e.Value = tt
-		if e.Data.(*ExpressionBinary).Left.ListAndMoreThan(1) {
+		if e.Data.(*ExpressionBinary).Left.ListAndMoreThanIElements(1) {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
-
 	case EXPRESSION_TYPE_INCREMENT:
 		fallthrough
 	case EXPRESSION_TYPE_DECREMENT:

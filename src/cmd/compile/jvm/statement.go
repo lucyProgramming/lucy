@@ -103,6 +103,10 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
+	case ast.STATEMENT_TYPE_CLASS:
+		s.Class.Name = m.newClassName(s.Class.Name)
+		c := m.buildClass(s.Class)
+		m.putClass(c.Name, c)
 	}
 	return
 }

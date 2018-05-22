@@ -393,9 +393,6 @@ func (e *Expression) canBeUsedAsStatement() bool {
 		e.Typ == EXPRESSION_TYPE_CONST
 }
 
-/*
-	take one argument
-*/
 func (e *Expression) isNumber() bool {
 	return e.isInteger() || e.isFloat()
 }
@@ -419,7 +416,7 @@ func (e *Expression) IsSelfIncrement() bool {
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
 }
 
-func (e *Expression) ListAndMoreThan(i int) bool {
+func (e *Expression) ListAndMoreThanIElements(i int) bool {
 	if e.Typ != EXPRESSION_TYPE_LIST {
 		return false
 	}

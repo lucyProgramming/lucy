@@ -18,6 +18,8 @@ const (
 	STATEMENT_TYPE_LABLE
 	STATEMENT_TYPE_GOTO
 	STATEMENT_TYPE_DEFER
+	STATEMENT_TYPE_CLASS
+	STATEMENT_TYPE_ENUM
 )
 
 type Statement struct {
@@ -36,6 +38,8 @@ type Statement struct {
 	StatementGoto                    *StatementGoto
 	Defer                            *Defer
 	IsCallFatherContructionStatement bool
+	Class                            *Class
+	Enum                             *Enum
 }
 
 func (s *Statement) StatementName() string {
@@ -64,6 +68,10 @@ func (s *Statement) StatementName() string {
 		return "block statement"
 	case STATEMENT_TYPE_RETURN:
 		return "return statement"
+	case STATEMENT_TYPE_CLASS:
+		return "class"
+	case STATEMENT_TYPE_ENUM:
+		return "enum"
 	default:
 		panic(11)
 	}
@@ -150,6 +158,29 @@ func (s *Statement) check(block *Block) []error { // b is father
 			return []error{fmt.Errorf("cannot have '%s' at this scope", s.StatementName())}
 		}
 		return nil
+	case STATEMENT_TYPE_CLASS:
+		if block.Classes == nil {
+			block.Classes = make(map[string]*Class)
+		}
+		block.Classes[s.Class.Name] = s.Class
+		return s.Class.check(block)
+	case STATEMENT_TYPE_ENUM:
+		if block.Enums == nil {
+			block.Enums = make(map[string]*Enum)
+		}
+		if block.EnumNames == nil {
+			block.EnumNames = make(map[string]*EnumName)
+		}
+		block.Enums[s.Enum.Name] = s.Enum
+		for _, v := range s.Enum.Enums {
+			block.EnumNames[v.Name] = v
+		}
+		err := s.Enum.check()
+		if err != nil {
+			return []error{err}
+		} else {
+			return nil
+		}
 	}
 	return nil
 }

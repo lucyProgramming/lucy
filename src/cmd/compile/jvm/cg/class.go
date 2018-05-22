@@ -1,7 +1,6 @@
 package cg
 
 import (
-	"encoding/binary"
 	"fmt"
 	"io"
 )
@@ -265,14 +264,8 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}
 	c.AccessFlag = high.AccessFlags
-	thisClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	binary.BigEndian.PutUint16(thisClassConst.Info[0:2], c.insertUtf8Const(high.Name))
-	c.ThisClass = c.constPoolUint16Length()
-	c.ConstPool = append(c.ConstPool, thisClassConst)
-	superClassConst := (&CONSTANT_Class_info{}).ToConstPool()
-	binary.BigEndian.PutUint16(superClassConst.Info[0:2], c.insertUtf8Const(high.SuperClass))
-	c.SuperClass = c.constPoolUint16Length()
-	c.ConstPool = append(c.ConstPool, superClassConst)
+	c.ThisClass = c.InsertClassConst(high.Name)
+	c.SuperClass = c.InsertClassConst(high.SuperClass)
 	for _, i := range high.Interfaces {
 		inter := (&CONSTANT_Class_info{c.insertUtf8Const(i)}).ToConstPool()
 		index := c.constPoolUint16Length()

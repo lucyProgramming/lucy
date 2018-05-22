@@ -9,10 +9,12 @@ import (
 
 func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	length := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - length)
-	}()
+	{
+		length := len(state.Stacks)
+		defer func() {
+			state.popStack(len(state.Stacks) - length)
+		}()
+	}
 	convertion := e.Data.(*ast.ExpressionTypeConvertion)
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
@@ -258,10 +260,11 @@ func (m *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, ta
 }
 
 func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	typ *ast.VariableType, context *Context, state *StackMapState) {
+	typ *ast.VariableType, context *Context, state *StackMapState) (maxstack uint16) {
 	if typ.Typ == ast.VARIABLE_TYPE_STRING {
 		return
 	}
+	maxstack = jvmSize(typ)
 	switch typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -316,6 +319,9 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
+		if 2 > maxstack {
+			maxstack = 2
+		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		{
@@ -343,4 +349,5 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength += 13
 	}
 
+	return
 }

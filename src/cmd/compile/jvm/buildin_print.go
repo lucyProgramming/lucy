@@ -173,7 +173,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}
-				m.stackTop2String(class, code, tt, context, state)
+				if t := currentStack + m.stackTop2String(class, code, tt, context, state); t > maxstack {
+					maxstack = t
+				}
 				if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
 					if t := 2 + currentStack; t > maxstack {
 						maxstack = t
@@ -197,7 +199,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if t := currentStack + stack; t > maxstack {
 			maxstack = t
 		}
-		m.stackTop2String(class, code, variableType, context, state)
+		if t := currentStack + m.stackTop2String(class, code, variableType, context, state); t > maxstack {
+			maxstack = t
+		}
 		app(k == len(call.Args)-1)
 	}
 	// tostring

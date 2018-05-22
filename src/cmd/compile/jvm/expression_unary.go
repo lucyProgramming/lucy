@@ -72,7 +72,6 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		return
 	}
-
 	if e.Typ == ast.EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.JumpBackPatch

@@ -86,7 +86,7 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
-			if typ != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
 				p.errs = append(p.errs,
 					fmt.Errorf("%s use '=' to initialize value",
 						p.errorMsgPrefix()))
@@ -210,7 +210,7 @@ func (p *Parser) Parse() []error {
 				continue
 			}
 			// const a := 1 is wrong,
-			if typ == lex.TOKEN_COLON_ASSIGN {
+			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
 				p.errs = append(p.errs, fmt.Errorf("%s use '=' instead of ':=' for const definition",
 					p.errorMsgPrefix()))
 				resetProperty()
@@ -254,6 +254,7 @@ func (p *Parser) Parse() []error {
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: a,
 			})
+
 		case lex.TOKEN_EOF:
 			break
 		default:
@@ -329,10 +330,10 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition, []*ast.Expression, int, error) {
+func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition, []*ast.Expression, *lex.Token, error) {
 	names, err := p.parseNameList()
 	if err != nil {
-		return nil, nil, 0, err
+		return nil, nil, nil, err
 	}
 	var variableType *ast.VariableType
 	//trying to parse type
@@ -340,7 +341,7 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 		variableType, err = p.parseType()
 		if err != nil {
 			p.errs = append(p.errs, err)
-			return nil, nil, 0, err
+			return nil, nil, nil, err
 		}
 	}
 	f := func() []*ast.VariableDefinition {
@@ -358,9 +359,9 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 	}
 	if p.token.Type != lex.TOKEN_ASSIGN &&
 		p.token.Type != lex.TOKEN_COLON_ASSIGN {
-		return f(), nil, 0, err
+		return f(), nil, nil, err
 	}
-	typ := p.token.Type
+	typ := p.token
 	p.Next() // skip = or :=
 	es, err := p.Expression.parseExpressions()
 	if err != nil {

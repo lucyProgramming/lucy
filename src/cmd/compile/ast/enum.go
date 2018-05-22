@@ -18,7 +18,7 @@ type Enum struct {
 	Used        bool
 }
 
-func (e *Enum) check() error {
+func (e *Enum) check() (err error) {
 	if e.Init == nil {
 		e.Init = &Expression{}
 		e.Init.Typ = EXPRESSION_TYPE_INT
@@ -27,9 +27,16 @@ func (e *Enum) check() error {
 	}
 	is, err := e.Init.constFold()
 	if err != nil || is == false || e.Init.Typ != EXPRESSION_TYPE_INT {
-		return fmt.Errorf("%s enum type must inited by integer_expression", errMsgPrefix(e.Pos))
+		if err == nil {
+			err = fmt.Errorf("%s enum type must inited by integer_expression", errMsgPrefix(e.Pos))
+		}
 	}
-	initV := e.Init.Data.(int32)
+	var initV int32 = 0
+	if e.Init.Data != nil {
+		if t, ok := e.Init.Data.(int32); ok {
+			initV = t
+		}
+	}
 	for k, v := range e.Enums {
 		v.Value = int32(k) + initV
 	}

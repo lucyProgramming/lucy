@@ -252,9 +252,10 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			}
 		}
 	}
+
 	//handler return
 	for _, v := range f.Typ.ReturnList {
-		v.IsRetrunVar = true
+		v.IsFunctionRetrunVar = true
 		if v.Typ.Typ != VARIABLE_TYPE_T {
 			err = v.Typ.resolve(&f.Block)
 			if err != nil {

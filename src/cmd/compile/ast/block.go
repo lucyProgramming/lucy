@@ -156,9 +156,14 @@ func (b *Block) inherite(father *Block) {
 func (b *Block) checkUnUsedVariable() (es []error) {
 	es = []error{}
 	for _, v := range b.Vars {
-		if v.Used || v.IsGlobal || v.IsFunctionParameter || v.IsRetrunVar {
+		if v.Used ||
+			v.IsGlobal ||
+			v.IsFunctionParameter ||
+			v.IsFunctionRetrunVar ||
+			v.Name == THIS {
 			continue
 		}
+
 		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",
 			errMsgPrefix(v.Pos), v.Name))
 	}
