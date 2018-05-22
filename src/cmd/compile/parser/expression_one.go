@@ -224,6 +224,11 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		if err != nil {
 			return left, err
 		}
+	case lex.TOKEN_LONG:
+		left, err = ep.parseTypeConvertionExpression()
+		if err != nil {
+			return left, err
+		}
 	case lex.TOKEN_FLOAT:
 		left, err = ep.parseTypeConvertionExpression()
 		if err != nil {

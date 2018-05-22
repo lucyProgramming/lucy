@@ -437,9 +437,9 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
 		case '"':
 			bs = append(bs, '"')
 			c, eof = lex.getchar()
-		case 'x', 'X':
+		case 'x':
 			var c1, c2 byte
-			c1, eof = lex.getchar() //skip 'x' or 'X'
+			c1, eof = lex.getchar() //skip 'x'
 			if eof {
 				err = fmt.Errorf("unexpect EOF")
 				continue
