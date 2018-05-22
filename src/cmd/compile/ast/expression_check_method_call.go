@@ -78,7 +78,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret := &VariableType{}
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_BOOL
-			if len(call.Args) == 0 || len(call.Args) > 1 {
+			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s call '%s' expect one argument",
 					errMsgPrefix(e.Pos), call.Name))
 				return []*VariableType{ret}

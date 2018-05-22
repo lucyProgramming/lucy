@@ -95,9 +95,29 @@ func registerBuildinFunctions() {
 		}
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
-		buildChecker: oneAnyTypeParameterChecker,
-		IsBuildin:    true,
-		Name:         common.BUILD_IN_FUNCTION_PANIC,
+		buildChecker: func(ft *Function, e *ExpressionFunctionCall,
+			block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+			if len(args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s buildin function 'panic' expect one argument",
+					errMsgPrefix(pos)))
+				return
+			}
+			if len(args) == 0 || args[0] == nil {
+				return
+			}
+			if args[0].Typ != VARIABLE_TYPE_OBJECT {
+				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
+					errMsgPrefix(pos), args[0].TypeString()))
+				return
+			}
+			if have, _ := args[0].Class.haveSuper(JAVA_THROWABLE_CLASS); have == false {
+				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
+					errMsgPrefix(pos), args[0].TypeString()))
+				return
+			}
+		},
+		IsBuildin: true,
+		Name:      common.BUILD_IN_FUNCTION_PANIC,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
 		buildChecker: monitorChecker,

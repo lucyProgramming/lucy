@@ -249,7 +249,7 @@ func (s *StatementFor) check(block *Block) []error {
 			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
-		t, es := s.Condition.checkSingleValueContextExpression(block)
+		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}

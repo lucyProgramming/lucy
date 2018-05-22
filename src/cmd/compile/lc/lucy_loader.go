@@ -221,6 +221,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		function.ClassMethod = &cg.MethodHighLevel{}
 		function.ClassMethod.Name = function.Name
 		function.ClassMethod.Class = mainClassName
+		function.ClassMethod.Descriptor = function.Descriptor
 		function.IsGlobal = true
 		pack.Block.Funcs[name] = function
 	}
