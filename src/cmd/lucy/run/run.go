@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
+	"strconv"
 )
 
 type Run struct {
@@ -432,7 +433,7 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	}
 	// cd to destDir
 	os.Chdir(destDir)
-	args := []string{"-package-name", packageName, "-jvm-version", r.Flags.JvmVersion}
+	args := []string{"-package-name", packageName, "-jvm-version", strconv.Itoa(r.Flags.JvmVersion)}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
 	cmd.Stderr = os.Stderr

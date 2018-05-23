@@ -7,7 +7,7 @@ import (
 
 func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifer)
-	captured := context.function.ClosureVars.ClosureVariableExist(identifier.Var)
+	captured := context.function.Closure.ClosureVariableExist(identifier.Var)
 	if captured == false {
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	} else {

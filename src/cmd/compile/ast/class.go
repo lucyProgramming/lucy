@@ -9,22 +9,31 @@ import (
 )
 
 type Class struct {
-	NotImportedYet  bool // not imported
-	Name            string
-	Pos             *Pos
-	IsJava          bool // class found in CLASSPATH
-	IsGlobal        bool
-	Block           Block
-	AccessFlags     uint16
-	Fields          map[string]*ClassField
-	Methods         map[string][]*ClassMethod
-	SuperClassName  string
-	SuperClass      *Class
-	InterfaceNames  []*NameWithPos
-	Interfaces      []*Class
-	SouceFile       string
-	Used            bool
-	LoadFromOutSide bool
+	IsStatementClass bool
+	NotImportedYet   bool // not imported
+	Name             string
+	Pos              *Pos
+	IsJava           bool //class found in CLASSPATH
+	IsGlobal         bool
+	Block            Block
+	AccessFlags      uint16
+	Fields           map[string]*ClassField
+	Methods          map[string][]*ClassMethod
+	SuperClassName   string
+	SuperClass       *Class
+	InterfaceNames   []*NameWithPos
+	Interfaces       []*Class
+	SouceFile        string
+	Used             bool
+	LoadFromOutSide  bool
+	CaptureFunctions map[*Function]*ClassField
+}
+
+func (c *Class) insertCaptureFunction(f *Function) {
+	if c.CaptureFunctions == nil {
+		c.CaptureFunctions = make(map[*Function]*ClassField)
+	}
+	c.CaptureFunctions[f] = &ClassField{}
 }
 
 func (c *Class) IsInterface() bool {
@@ -51,10 +60,25 @@ func (c *Class) check(father *Block) []error {
 	return errs
 }
 
+func (c *Class) mkDefaultContruction() {
+	if c.Methods != nil && len(c.Methods[CONSTRUCTION_METHOD_NAME]) > 0 {
+		return
+	}
+	if c.Methods == nil {
+		c.Methods = make(map[string][]*ClassMethod)
+	}
+	m := &ClassMethod{}
+	m.IsConstructionMethod = true
+	m.Func = &Function{}
+	m.Func.Pos = c.Pos
+	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
+}
+
 func (c *Class) checkPhase1(father *Block) []error {
+	c.mkDefaultContruction()
 	c.Block.inherite(father)
 	errs := c.Block.checkConst()
-	c.Block.InheritedAttribute.class = c
+	c.Block.InheritedAttribute.Class = c
 	es := c.resolveAllNames(father)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
@@ -72,7 +96,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 
 func (c *Class) checkPhase2(father *Block) []error {
 	errs := []error{}
-	c.Block.InheritedAttribute.class = c
+	c.Block.InheritedAttribute.Class = c
 	errs = append(errs, c.checkFields()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs

@@ -20,8 +20,11 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxstack = 2
+	if context.method.CaptureFunctionLength > 0 {
+
+	}
 	if n.Args != nil && len(n.Args) > 0 {
-		maxstack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context, state)
+		maxstack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList[context.method.CaptureFunctionLength:], context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {

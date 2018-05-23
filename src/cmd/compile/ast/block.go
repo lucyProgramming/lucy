@@ -59,13 +59,11 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 	if b.Consts != nil {
 		if t, ok := b.Consts[name]; ok {
 			return t, true
-
 		}
 	}
 	if b.Enums != nil {
 		if t, ok := b.Enums[name]; ok {
 			return t, true
-
 		}
 	}
 	if b.EnumNames != nil {
@@ -102,7 +100,7 @@ func (b *Block) SearchByName(name string) interface{} {
 	}
 	// search closure
 	if b.InheritedAttribute.Function != nil {
-		v := b.InheritedAttribute.Function.ClosureVars.Search(name)
+		v := b.InheritedAttribute.Function.Closure.Search(name)
 		if v != nil {
 			return v
 		}
@@ -122,10 +120,10 @@ func (b *Block) SearchByName(name string) interface{} {
 				if v.Name == THIS {
 					return nil // capture this not allow
 				}
-				b.InheritedAttribute.Function.ClosureVars.InsertVar(v)
+				b.InheritedAttribute.Function.Closure.InsertVar(v)
 			}
 			//cannot search variable from class body
-			if b.InheritedAttribute.class != nil && b.IsClassBlock {
+			if b.InheritedAttribute.Class != nil && b.IsClassBlock {
 				return nil //
 			}
 		}
@@ -139,7 +137,11 @@ func (b *Block) SearchByName(name string) interface{} {
 		// if it is a function
 		if f, ok := t.(*Function); ok && f.IsGlobal == false {
 			if b.IsFunctionTopBlock {
-				b.InheritedAttribute.Function.ClosureVars.InsertFunction(f)
+				b.InheritedAttribute.Function.Closure.InsertFunction(f)
+			}
+			if b.IsClassBlock && f.IsClosureFunction {
+				b.InheritedAttribute.Class.insertCaptureFunction(f)
+				return t
 			}
 		}
 	}
@@ -163,7 +165,6 @@ func (b *Block) checkUnUsedVariable() (es []error) {
 			v.Name == THIS {
 			continue
 		}
-
 		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",
 			errMsgPrefix(v.Pos), v.Name))
 	}

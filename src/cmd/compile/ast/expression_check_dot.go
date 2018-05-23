@@ -138,7 +138,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
-			if field.IsPublic() == false && t.Class != block.InheritedAttribute.class {
+			if field.IsPublic() == false && t.Class != block.InheritedAttribute.Class {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public",
 					errMsgPrefix(e.Pos),
 					dot.Name))

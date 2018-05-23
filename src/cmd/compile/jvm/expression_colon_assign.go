@@ -53,7 +53,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				} else {
 					code.MaxLocals += jvmSize(v.Typ)
 				}
-				m.MakeClass.storeLocalVar(class, code, vs.Vs[0])
+				m.MakeClass.storeLocalVar(class, code, v)
 				if vs.Vs[0].BeenCaptured {
 					copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))

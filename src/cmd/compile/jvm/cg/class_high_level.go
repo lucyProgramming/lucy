@@ -7,8 +7,11 @@ import (
 )
 
 type ClassHighLevel struct {
-	Class             Class
-	SourceFiles       map[string]struct{} // one class file can be compile form multi
+	Class Class
+	/*
+		one class file can be compile form multi souce file
+	*/
+	SourceFiles       map[string]struct{}
 	Name              string
 	AccessFlags       uint16
 	SuperClass        string
@@ -31,8 +34,21 @@ func (c *ClassHighLevel) NewFunctionName(prefix string) string {
 		return prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
-		name := prefix + fmt.Sprintf("%d", i)
+		name := fmt.Sprintf("%s_%d", prefix, i)
 		if _, ok := c.Methods[name]; ok == false {
+			return name
+		}
+	}
+	panic("names over flow") // this is not happening
+}
+
+func (c *ClassHighLevel) NewFieldName(prefix string) string {
+	if c.Fields == nil || c.Fields[prefix] == nil {
+		return prefix
+	}
+	for i := 0; i < math.MaxInt16; i++ {
+		name := fmt.Sprintf("%s_%d", prefix, i)
+		if _, ok := c.Fields[name]; ok == false {
 			return name
 		}
 	}

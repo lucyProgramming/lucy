@@ -26,7 +26,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 	} else {
 		//closure function call
 		//load object
-		if context.function.ClosureVars.ClosureFunctionExist(call.Func) {
+		if context.function.Closure.ClosureFunctionExist(call.Func) {
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

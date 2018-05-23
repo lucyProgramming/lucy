@@ -263,7 +263,6 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	for _, v := range c.Interfaces {
 		class.Interfaces = append(class.Interfaces, v.Name)
 	}
-
 	for _, v := range c.Fields {
 		f := &cg.FieldHighLevel{}
 		f.Name = v.Name
@@ -280,6 +279,17 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		class.Fields[v.Name] = f
 	}
+	for k, v := range c.CaptureFunctions {
+		f := &cg.FieldHighLevel{}
+		f.Name = class.NewFieldName(k.Name)
+		v.Name = f.Name
+		v.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		f.AccessFlags = v.AccessFlags
+		v.Descriptor = "L" + k.ClassMethod.Class.Name + ";"
+		f.Descriptor = v.Descriptor
+		class.Fields[f.Name] = f
+	}
+
 	for k, v := range c.Methods {
 		if k == ast.CONSTRUCTION_METHOD_NAME && c.IsInterface() == false {
 			continue
@@ -307,6 +317,21 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Name = "<init>"
 			method.AccessFlags = t[0].Func.AccessFlags
 			method.Class = class
+			if len(c.CaptureFunctions) > 0 {
+				fs := []*ast.VariableDefinition{}
+				for f, v := range c.CaptureFunctions {
+					vd := &ast.VariableDefinition{}
+					vd.Name = v.Name
+					vd.Typ = &ast.VariableType{}
+					vd.Typ.Typ = ast.VARIABLE_TYPE_OBJECT
+					vd.Typ.Class = &ast.Class{}
+					vd.Typ.Class.Name = f.ClassMethod.Class.Name
+					vd.Descriptor = v.Descriptor
+					fs = append(fs, vd)
+				}
+				t[0].Func.Typ.ParameterList = append(fs, t[0].Func.Typ.ParameterList...)
+				method.CaptureFunctionLength = len(fs)
+			}
 			method.Descriptor = Descriptor.methodDescriptor(t[0].Func)
 			method.IsConstruction = true
 			method.Code = &cg.AttributeCode{}

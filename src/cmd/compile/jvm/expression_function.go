@@ -68,9 +68,9 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
-	total := len(function.ClosureVars.Vars) + len(function.ClosureVars.Functions)
+	total := len(function.Closure.Vars) + len(function.Closure.Functions)
 	i := 0
-	for v, _ := range function.ClosureVars.Vars {
+	for v, _ := range function.Closure.Vars {
 		filed := &cg.FieldHighLevel{}
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
@@ -82,7 +82,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 		}
-		if context.function.ClosureVars.ClosureVariableExist(v) {
+		if context.function.Closure.ClosureVariableExist(v) {
 			// I Know class at 0 offset
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxstack {
@@ -110,7 +110,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 3
 		i++
 	}
-	for v, _ := range function.ClosureVars.Functions {
+	for v, _ := range function.Closure.Functions {
 		filed := &cg.FieldHighLevel{}
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
@@ -121,7 +121,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 		}
-		if context.function.ClosureVars.ClosureFunctionExist(v) {
+		if context.function.Closure.ClosureFunctionExist(v) {
 			// I Know class at 0 offset
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxstack {

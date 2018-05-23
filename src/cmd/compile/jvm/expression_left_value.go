@@ -14,7 +14,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 	target = identifier.Var.Typ
 	op = []byte{cg.OP_putfield}
 	meta := closure.getMeta(identifier.Var.Typ.Typ)
-	if context.function.ClosureVars.ClosureVariableExist(identifier.Var) { // capture var exits
+	if context.function.Closure.ClosureVariableExist(identifier.Var) { // capture var exits
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

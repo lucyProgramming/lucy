@@ -7,6 +7,6 @@ type InheritedAttribute struct {
 	StatementSwitch   *StatementSwitch
 	statementForBreak interface{} // for or switch statement
 	Function          *Function
-	class             *Class
+	Class             *Class
 	Defer             *Defer
 }

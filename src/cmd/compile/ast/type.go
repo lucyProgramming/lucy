@@ -257,7 +257,6 @@ func (t *VariableType) resolveName(block *Block) error {
 				} else {
 					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
 				}
-
 			}
 		}
 		if loadFromImport {

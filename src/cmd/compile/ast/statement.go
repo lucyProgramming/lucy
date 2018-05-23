@@ -163,6 +163,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 			block.Classes = make(map[string]*Class)
 		}
 		block.Classes[s.Class.Name] = s.Class
+		s.Class.IsStatementClass = true
 		return s.Class.check(block)
 	case STATEMENT_TYPE_ENUM:
 		if block.Enums == nil {
@@ -211,7 +212,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			if errsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
-			f.IsClosureFunction = f.ClosureVars.NotEmpty(f)
+			f.IsClosureFunction = f.Closure.NotEmpty(f)
 			if f.IsClosureFunction {
 				if b.ClosureFuncs == nil {
 					b.ClosureFuncs = make(map[string]*Function)

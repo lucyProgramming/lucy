@@ -24,7 +24,7 @@ type Function struct {
 	Used                           bool
 	AccessFlags                    uint16 // public private or protected
 	Typ                            FunctionType
-	ClosureVars                    Closure
+	Closure                        Closure
 	Name                           string // if name is nil string,means no name function
 	Block                          Block
 	Pos                            *Pos
