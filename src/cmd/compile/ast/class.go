@@ -26,14 +26,6 @@ type Class struct {
 	SouceFile        string
 	Used             bool
 	LoadFromOutSide  bool
-	CaptureFunctions map[*Function]*ClassField
-}
-
-func (c *Class) insertCaptureFunction(f *Function) {
-	if c.CaptureFunctions == nil {
-		c.CaptureFunctions = make(map[*Function]*ClassField)
-	}
-	c.CaptureFunctions[f] = &ClassField{}
 }
 
 func (c *Class) IsInterface() bool {

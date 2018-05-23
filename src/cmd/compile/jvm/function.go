@@ -148,21 +148,6 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	if t := m.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
-	if method.IsConstruction && method.CaptureFunctionLength > 0 {
-		for _, v := range f.Typ.ParameterList[0:method.CaptureFunctionLength] {
-			method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
-			method.Code.CodeLength++
-			copyOP(method.Code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-			method.Code.Codes[method.Code.CodeLength] = cg.OP_putfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      class.Name,
-				Field:      v.Name,
-				Descriptor: v.Descriptor,
-			},
-				method.Code.Codes[method.Code.CodeLength+1:method.Code.CodeLength+3])
-			method.Code.CodeLength += 3
-		}
-	}
 	{
 		method.AttributeMethodParameters = &cg.AttributeMethodParameters{}
 		for _, v := range f.Typ.ParameterList {

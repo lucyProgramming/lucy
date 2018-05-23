@@ -1,7 +1,6 @@
 package cg
 
 type MethodHighLevel struct {
-	CaptureFunctionLength                 int
 	IsConstruction                        bool
 	Class                                 *ClassHighLevel
 	Name                                  string

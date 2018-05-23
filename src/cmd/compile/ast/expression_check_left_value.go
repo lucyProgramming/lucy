@@ -10,7 +10,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 	switch e.Typ {
 	case EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ExpressionIdentifer)
-		d := block.SearchByName(identifier.Name)
+		d, _ := block.SearchByName(identifier.Name)
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
 				errMsgPrefix(e.Pos), identifier.Name))
@@ -82,7 +82,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			}
-			variable := t.Package.Block.SearchByName(dot.Name)
+			variable, _ := t.Package.Block.SearchByName(dot.Name)
 			if vd, ok := variable.(*VariableDefinition); ok == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))

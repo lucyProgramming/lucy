@@ -6,7 +6,6 @@ import (
 )
 
 type Context struct {
-	method                   *cg.MethodHighLevel
 	class                    *ast.Class
 	lastStackMapState        *StackMapState
 	LastStackMapOffset       int

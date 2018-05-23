@@ -94,44 +94,47 @@ func (b *Block) searchLable(name string) *StatementLable {
 /*
 	search anything
 */
-func (b *Block) SearchByName(name string) interface{} {
+func (b *Block) SearchByName(name string) (interface{}, error) {
 	if t, exists := b.NameExists(name); exists {
-		return t
+		return t, nil
 	}
 	// search closure
 	if b.InheritedAttribute.Function != nil {
 		v := b.InheritedAttribute.Function.Closure.Search(name)
 		if v != nil {
-			return v
+			return v, nil
 		}
 	}
 	if b.Outter == nil {
-		return searchBuildIns(name)
+		return searchBuildIns(name), nil
 	}
-	t := b.Outter.SearchByName(name) // search by outter block
-	if t != nil {                    //
+	t, err := b.Outter.SearchByName(name) // search by outter block
+	if err != nil {
+		return t, err
+	}
+	if t != nil { //
 		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionTopBlock &&
 			len(b.InheritedAttribute.Function.TypeParameters) > 0 { // template function
-			return nil
+			return nil, nil
 		}
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionTopBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false {
 				if v.Name == THIS {
-					return nil // capture this not allow
+					return nil, nil // capture this not allow
 				}
 				b.InheritedAttribute.Function.Closure.InsertVar(v)
 			}
 			//cannot search variable from class body
 			if b.InheritedAttribute.Class != nil && b.IsClassBlock {
-				return nil //
+				return nil, nil //
 			}
 		}
 		if l, ok := t.(*StatementLable); ok {
 			if b.IsFunctionTopBlock { // search lable from outside out not allow
-				return nil
+				return nil, nil
 			} else {
-				return l
+				return l, nil
 			}
 		}
 		// if it is a function
@@ -140,12 +143,11 @@ func (b *Block) SearchByName(name string) interface{} {
 				b.InheritedAttribute.Function.Closure.InsertFunction(f)
 			}
 			if b.IsClassBlock && f.IsClosureFunction {
-				b.InheritedAttribute.Class.insertCaptureFunction(f)
-				return t
+				return nil, fmt.Errorf("trying to access closure function '%s' from class", name)
 			}
 		}
 	}
-	return t
+	return t, nil
 }
 
 func (b *Block) inherite(father *Block) {

@@ -235,7 +235,7 @@ func (t *VariableType) resolveName(block *Block) error {
 	var err error
 	var d interface{}
 	if strings.Contains(t.Name, ".") == false {
-		d = block.SearchByName(t.Name)
+		d, _ = block.SearchByName(t.Name)
 		loadFromImport := (d == nil)
 		if loadFromImport == false { // d is not nil
 			switch d.(type) {

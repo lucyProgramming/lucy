@@ -11,7 +11,10 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 			errMsgPrefix(e.Pos), NO_NAME_IDENTIFIER)
 	}
 	fromImport := false
-	d := block.SearchByName(identifer.Name)
+	d, err := block.SearchByName(identifer.Name)
+	if err != nil {
+		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+	}
 	if d == nil {
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifer.Name)
 		if i != nil {
