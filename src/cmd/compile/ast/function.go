@@ -9,7 +9,7 @@ import (
 type Function struct {
 	BlockChecked                   bool // template function may be multi time check
 	TemplateFunction               *TemplateFunction
-	TypeParameters                 map[string]*VariableType
+	TypeParameters                 map[string]*VariableType //typed parameters
 	ParameterAndRetrunListOK       bool
 	ClassMethod                    *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser bool

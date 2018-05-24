@@ -77,17 +77,13 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 			}
 			return nil
 		} else if t.Typ == VARIABLE_TYPE_PACKAGE {
-			if _, exists := t.Package.Block.NameExists(dot.Name); exists == false {
+			variable, exists := t.Package.Block.NameExists(dot.Name)
+			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			}
-			variable, _ := t.Package.Block.SearchByName(dot.Name)
-			if vd, ok := variable.(*VariableDefinition); ok == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
-					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
-				return nil
-			} else {
+			if vd, ok := variable.(*VariableDefinition); ok && vd != nil {
 				if vd.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
@@ -96,6 +92,10 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 				tt := vd.Typ.Clone()
 				tt.Pos = e.Pos
 				return tt
+			} else {
+				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
+					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+				return nil
 			}
 		} else {
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",

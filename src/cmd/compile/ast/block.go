@@ -21,7 +21,7 @@ type Block struct {
 	EnumNames                  map[string]*EnumName
 	Lables                     map[string]*StatementLable
 	Types                      map[string]*VariableType
-	Outter                     *Block //for closure,capture variables
+	Outter                     *Block
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
 	Vars                       map[string]*VariableDefinition
@@ -106,6 +106,10 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 		}
 	}
 	if b.Outter == nil {
+		return searchBuildIns(name), nil
+	}
+	if b.IsFunctionTopBlock &&
+		len(b.InheritedAttribute.Function.TypeParameters) > 0 {
 		return searchBuildIns(name), nil
 	}
 	t, err := b.Outter.SearchByName(name) // search by outter block
