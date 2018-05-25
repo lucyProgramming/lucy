@@ -103,7 +103,6 @@ func (s *Statement) check(block *Block) []error { // b is father
 				return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
 					errMsgPrefix(s.Pos), s.StatementName())}
 			}
-			s.StatementBreak = &StatementBreak{}
 			if f, ok := block.InheritedAttribute.statementForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
 			} else {
@@ -120,9 +119,6 @@ func (s *Statement) check(block *Block) []error { // b is father
 		if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
 				errMsgPrefix(s.Pos), s.StatementName())}
-		}
-		if s.StatementContinue == nil {
-			s.StatementContinue = &StatementContinue{}
 		}
 		if s.StatementContinue.StatementFor == nil { // for
 			s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
