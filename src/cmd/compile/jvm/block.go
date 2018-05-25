@@ -69,18 +69,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	}
 	// if b.IsFunctionTopBlock == true must a return at end
 	if b.IsFunctionTopBlock == false && len(b.Defers) > 0 {
-		index := len(b.Defers) - 1
-		for index >= 0 {
-			var ss *StackMapState
-			if b.HaveVariableDefinition() {
-				ss = (&StackMapState{}).FromLast(state)
-			} else {
-				ss = state
-			}
-			m.buildBlock(class, code, &b.Defers[index].Block, context, ss)
-			state.addTop(ss)
-			index--
-		}
+		m.buildDefers(class, code, context, b.Defers, state)
 	}
 	b.DeadEnding = deadend
 	return
@@ -88,7 +77,6 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 
 func (m *MakeClass) statementIsUnConditionGoto(s *ast.Statement) bool {
 	return s.Typ == ast.STATEMENT_TYPE_RETURN ||
-		s.Typ == ast.STATEMENT_TYPE_SKIP ||
 		s.Typ == ast.STATEMENT_TYPE_GOTO ||
 		s.Typ == ast.STATEMENT_TYPE_CONTINUE ||
 		s.Typ == ast.STATEMENT_TYPE_BREAK

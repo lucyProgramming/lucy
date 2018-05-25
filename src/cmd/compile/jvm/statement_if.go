@@ -9,11 +9,19 @@ import (
 
 func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxstack uint16) {
 	var es []*cg.JumpBackPatch
+	conditionState := (&StackMapState{}).FromLast(state)
+	defer state.addTop(conditionState)
+	for _, v := range s.PreExpressions {
+		stack, _ := m.MakeExpression.build(class, code, v, context, conditionState)
+		if stack > maxstack {
+			maxstack = stack
+		}
+	}
 	var IfState *StackMapState
 	if s.Block.HaveVariableDefinition() {
-		IfState = (&StackMapState{}).FromLast(state)
+		IfState = (&StackMapState{}).FromLast(conditionState)
 	} else {
-		IfState = state
+		IfState = conditionState
 	}
 	maxstack, es = m.MakeExpression.build(class, code, s.Condition, context, IfState)
 	if len(es) > 0 {
@@ -26,21 +34,21 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	codelength := code.CodeLength
 	falseExit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
-	m.buildBlock(class, code, s.Block, context, IfState)
-	state.addTop(IfState)
+	m.buildBlock(class, code, &s.Block, context, IfState)
+	conditionState.addTop(IfState)
 	if len(s.ElseIfList) > 0 || s.ElseBlock != nil {
 		if s.Block.DeadEnding == false {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 		}
 	}
 	for k, v := range s.ElseIfList {
-		context.MakeStackMap(code, state, code.CodeLength) // state is not change,all block var should be access from outside
+		context.MakeStackMap(code, conditionState, code.CodeLength) // state is not change,all block var should be access from outside
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		var elseIfState *StackMapState
 		if v.Block.HaveVariableDefinition() {
-			elseIfState = (&StackMapState{}).FromLast(state)
+			elseIfState = (&StackMapState{}).FromLast(conditionState)
 		} else {
-			elseIfState = state
+			elseIfState = conditionState
 		}
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
@@ -63,24 +71,23 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 			}
 		}
 		// when done
-		state.addTop(elseIfState)
+		conditionState.addTop(elseIfState)
 	}
 	if s.ElseBlock != nil {
-
-		context.MakeStackMap(code, state, code.CodeLength)
+		context.MakeStackMap(code, conditionState, code.CodeLength)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 		falseExit = nil
 		var elseState *StackMapState
 		if s.ElseBlock.HaveVariableDefinition() {
-			elseState = (&StackMapState{}).FromLast(state)
+			elseState = (&StackMapState{}).FromLast(conditionState)
 		} else {
-			elseState = state
+			elseState = conditionState
 		}
 		m.buildBlock(class, code, s.ElseBlock, context, elseState)
-		state.addTop(elseState)
+		conditionState.addTop(elseState)
 	}
 	if falseExit != nil {
-		context.MakeStackMap(code, state, code.CodeLength)
+		context.MakeStackMap(code, conditionState, code.CodeLength)
 		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
 	}
 	return

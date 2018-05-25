@@ -5,7 +5,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-//TODO:: stack maps
 func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary, context *Context, state *StackMapState) (maxstack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {

@@ -158,8 +158,7 @@ func (f *Function) clone(block *Block) (ret *Function, es []error) {
 }
 func (f *Function) mkLastRetrunStatement() {
 	if len(f.Block.Statements) == 0 ||
-		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN &&
-			f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_SKIP) {
+		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN) {
 		s := &StatementReturn{}
 		f.Block.Statements = append(f.Block.Statements, &Statement{
 			Typ:             STATEMENT_TYPE_RETURN,

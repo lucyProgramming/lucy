@@ -30,7 +30,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 		slice.End = &Expression{}
 		slice.End.Pos = e.Pos
 		slice.End.Typ = EXPRESSION_TYPE_INT
-		slice.End.Data = int32(-1) // special
+		slice.End.Data = int32(-1) // special  , end == arr.end
 	}
 	endT, es := slice.End.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {

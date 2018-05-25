@@ -2,22 +2,36 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type StatementIF struct {
-	BackPatchs []*cg.JumpBackPatch
-	Condition  *Expression
-	Block      *Block
-	ElseBlock  *Block
-	ElseIfList []*StatementElseIf
+	PreExpressions []*Expression
+	Condition      *Expression
+	CondtionBlock  Block
+	Block          Block
+	ElseIfList     []*StatementElseIf
+	ElseBlock      *Block
+	BackPatchs     []*cg.JumpBackPatch
 }
 
 func (s *StatementIF) check(father *Block) []error {
-	s.Block.inherite(father)
+	s.CondtionBlock.inherite(father)
 	errs := []error{}
-	conditionType, es := s.Condition.checkSingleValueContextExpression(father)
+	for _, v := range s.PreExpressions {
+		_, es := v.check(&s.CondtionBlock)
+		if errsNotEmpty(es) {
+			errs = append(errs, es...)
+		}
+		if v.canBeUsedAsStatement() == false {
+			err := fmt.Errorf("%s expression '%s' evaluate but not used",
+				errMsgPrefix(v.Pos), v.OpName())
+			errs = append(errs, err)
+			continue
+		}
+		v.IsStatementExpression = true
+	}
+	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.CondtionBlock)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -37,7 +51,7 @@ func (s *StatementIF) check(father *Block) []error {
 	errs = append(errs, s.Block.checkStatements()...)
 	if s.ElseIfList != nil && len(s.ElseIfList) > 0 {
 		for _, v := range s.ElseIfList {
-			v.Block.inherite(father)
+			v.Block.inherite(&s.CondtionBlock)
 			if v.Condition.canbeUsedAsCondition() == false {
 				errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
 					errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
@@ -54,7 +68,7 @@ func (s *StatementIF) check(father *Block) []error {
 		}
 	}
 	if s.ElseBlock != nil {
-		s.ElseBlock.inherite(father)
+		s.ElseBlock.inherite(&s.CondtionBlock)
 		errs = append(errs, s.ElseBlock.checkStatements()...)
 	}
 	return errs

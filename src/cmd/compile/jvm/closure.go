@@ -188,14 +188,15 @@ func (closure *Closure) storeLocalCloureVar(class *cg.ClassHighLevel, code *cg.A
 */
 func (closure *Closure) loadLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-	maxstack = closure.unPack(class, code, v.Typ)
+	closure.unPack(class, code, v.Typ)
+	maxstack = jvmSize(v.Typ)
 	return
 }
 
 /*
 	closure object is on stack
 */
-func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) (maxstack uint16) {
+func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) {
 	switch v.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -214,7 +215,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 1
+
 	case ast.VARIABLE_TYPE_LONG:
 		meta := closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -224,7 +225,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 2
+
 	case ast.VARIABLE_TYPE_FLOAT:
 		meta := closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -234,7 +235,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 1
+
 	case ast.VARIABLE_TYPE_DOUBLE:
 		meta := closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -244,7 +245,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 2
+
 	case ast.VARIABLE_TYPE_STRING:
 		meta := closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -254,7 +255,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 1
+
 	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
@@ -271,7 +272,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		typeConverter.castPointerTypeToRealType(class, code, v)
-		maxstack = 1
+
 	}
-	return
+
 }

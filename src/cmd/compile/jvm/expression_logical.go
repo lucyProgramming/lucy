@@ -21,7 +21,7 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 	if e.Typ == ast.EXPRESSION_TYPE_LOGICAL_OR {
 		// at this point,value is clear,leave 1 on stack
 		exits = append(exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifne, code))
-	} else { // and
+	} else { //  &&
 		// at this point,value is clear,leave 0 on stack
 		exits = append(exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
 	}

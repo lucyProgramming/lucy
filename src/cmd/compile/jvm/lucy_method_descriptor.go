@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
@@ -62,7 +60,6 @@ func (parser *LucyMethodSignatureParse) Decode(f *ast.Function, bs []byte) error
 			return err
 		}
 		vd := &ast.VariableDefinition{}
-		vd.Name = fmt.Sprintf("returnValue%d", i)
 		vd.Typ = t
 		f.Typ.ReturnList = append(f.Typ.ReturnList, vd)
 		i++

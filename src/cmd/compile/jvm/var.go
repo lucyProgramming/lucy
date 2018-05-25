@@ -9,10 +9,7 @@ var (
 	LucyFieldSignatureParser   LucyFieldSignatureParse
 	LucyTypeAliasParser        LucyTypeAliasParse
 	FunctionDefaultValueParser FunctionDefaultValueParse
-	java_throwable_class       = "java/lang/Throwable"
-
-	arrayListPacker         ArrayListPacker
-	java_print_stream_class = "java/io/PrintStream"
+	arrayListPacker            ArrayListPacker
 )
 
 const (
@@ -27,4 +24,6 @@ const (
 	java_long_class                         = "java/lang/Long"
 	java_index_out_of_range_exception_class = "java/lang/ArrayIndexOutOfBoundsException"
 	java_string_builder_class               = "java/lang/StringBuilder"
+	java_throwable_class                    = "java/lang/Throwable"
+	java_print_stream_class                 = "java/io/PrintStream"
 )

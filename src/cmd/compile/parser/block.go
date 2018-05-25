@@ -288,7 +288,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 					b.parser.errorMsgPrefix()))
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ: ast.STATEMENT_TYPE_SKIP,
+				Typ: ast.STATEMENT_TYPE_RETURN,
 				Pos: pos,
 			})
 		case lex.TOKEN_CONTINUE:

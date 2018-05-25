@@ -14,7 +14,6 @@ const (
 	STATEMENT_TYPE_RETURN
 	STATEMENT_TYPE_BREAK
 	STATEMENT_TYPE_SWITCH
-	STATEMENT_TYPE_SKIP // skip this block
 	STATEMENT_TYPE_LABLE
 	STATEMENT_TYPE_GOTO
 	STATEMENT_TYPE_DEFER
@@ -56,8 +55,6 @@ func (s *Statement) StatementName() string {
 		return "break statement"
 	case STATEMENT_TYPE_SWITCH:
 		return "switch statement"
-	case STATEMENT_TYPE_SKIP:
-		return "skip statement"
 	case STATEMENT_TYPE_LABLE:
 		return "lable statement"
 	case STATEMENT_TYPE_GOTO:
@@ -97,6 +94,8 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_SWITCH:
 		return s.StatementSwitch.check(block)
 	case STATEMENT_TYPE_BREAK:
+		s.StatementBreak.Defers = make([]*Defer, len(block.Defers))
+		copy(s.StatementBreak.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
 		} else {
@@ -112,6 +111,8 @@ func (s *Statement) check(block *Block) []error { // b is father
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
+		s.StatementBreak.Defers = make([]*Defer, len(block.Defers))
+		copy(s.StatementBreak.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.StatementName())}
@@ -153,11 +154,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 		s.Block.inherite(block)
 		return s.Block.checkStatements()
 	case STATEMENT_TYPE_LABLE: // nothing to do
-	case STATEMENT_TYPE_SKIP:
-		if block.InheritedAttribute.Function.isPackageBlockFunction == false {
-			return []error{fmt.Errorf("cannot have '%s' at this scope", s.StatementName())}
-		}
-		return nil
+
 	case STATEMENT_TYPE_CLASS:
 		if block.Classes == nil {
 			block.Classes = make(map[string]*Class)

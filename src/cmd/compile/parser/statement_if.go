@@ -17,17 +17,31 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		b.consume(untils_lc)
 		b.Next()
 	}
+	i = &ast.StatementIF{}
+	i.Condition = e
+	for b.parser.token.Type == lex.TOKEN_SEMICOLON {
+		if i.Condition != nil {
+			i.PreExpressions = append(i.PreExpressions, i.Condition)
+		}
+		b.Next() // skip ;
+		i.Condition, err = b.parser.Expression.parseExpression(false)
+		if err != nil {
+			b.parser.errs = append(b.parser.errs, err)
+			b.consume(untils_lc)
+			b.Next()
+		}
+
+	}
+
 	if b.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
 		b.parser.errs = append(b.parser.errs, err)
 		b.consume(untils_lc) // consume and next
 		b.Next()
 	}
-	i = &ast.StatementIF{}
-	i.Condition = e
-	i.Block = &ast.Block{}
+
 	b.Next()
-	err = b.parse(i.Block, false, lex.TOKEN_RC)
+	err = b.parse(&i.Block, false, lex.TOKEN_RC)
 	if b.parser.token.Type == lex.TOKEN_ELSEIF {
 		es, err := b.parseElseIfList()
 		if err != nil {

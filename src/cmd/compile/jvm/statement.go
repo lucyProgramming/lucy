@@ -39,38 +39,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
-		if b.Defers != nil && len(b.Defers) > 0 {
-			index := len(b.Defers) - 1
-			for index >= 0 {
-				var ss *StackMapState
-				if s.Block.HaveVariableDefinition() {
-					ss = (&StackMapState{}).FromLast(state)
-				} else {
-					ss = state
-				}
-				m.buildBlock(class, code, &b.Defers[index].Block, context, ss)
-				index--
-				state.addTop(ss)
-			}
-		}
+		m.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
 			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	case ast.STATEMENT_TYPE_BREAK:
-		if b.Defers != nil && len(b.Defers) > 0 {
-			index := len(b.Defers) - 1
-			for index >= 0 {
-				var ss *StackMapState
-				if s.Block.HaveVariableDefinition() {
-					ss = (&StackMapState{}).FromLast(state)
-				} else {
-					ss = state
-				}
-				m.buildBlock(class, code, &b.Defers[index].Block, context, ss)
-				index--
-				state.addTop(ss)
-			}
-		}
-		code.Codes[code.CodeLength] = cg.OP_goto
+		m.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
 			s.StatementBreak.StatementFor.BackPatchs = append(s.StatementBreak.StatementFor.BackPatchs, b)
@@ -81,11 +54,10 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
 	case ast.STATEMENT_TYPE_SWITCH:
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
-		backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
-		context.MakeStackMap(code, state, code.CodeLength)
-	case ast.STATEMENT_TYPE_SKIP: // skip this block
-		code.Codes[code.CodeLength] = cg.OP_return
-		code.CodeLength++
+		if len(s.StatementSwitch.BackPatchs) > 0 {
+			backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
+			context.MakeStackMap(code, state, code.CodeLength)
+		}
 	case ast.STATEMENT_TYPE_GOTO:
 		if s.StatementGoto.StatementLable.OffsetGenerated {
 			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLable.Offset)
@@ -109,4 +81,18 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		m.putClass(c.Name, c)
 	}
 	return
+}
+func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ds []*ast.Defer, state *StackMapState) {
+	index := len(ds) - 1
+	for index >= 0 {
+		var ss *StackMapState
+		if ds[index].Block.HaveVariableDefinition() {
+			ss = (&StackMapState{}).FromLast(state)
+		} else {
+			ss = state
+		}
+		m.buildBlock(class, code, &ds[index].Block, context, ss)
+		index--
+		state.addTop(ss)
+	}
 }

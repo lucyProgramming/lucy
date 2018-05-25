@@ -86,11 +86,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // pop java_root_class ref
 		}
-
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
-
 		typeConverter.getFromObject(class, code, index.Expression.Value.Map.V)
-
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 		{
 			state.pushStack(class, e.Value)

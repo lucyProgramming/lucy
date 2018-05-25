@@ -26,13 +26,6 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall,
-	block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-	if len(args) != 1 {
-		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
-	}
-}
-
 func devisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
@@ -176,3 +169,10 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, c
 		}
 	}
 }
+
+//func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall,
+//	block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+//	if len(args) != 1 {
+//		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
+//	}
+//}

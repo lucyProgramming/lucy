@@ -127,10 +127,9 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 				copyOP(code,
 					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 				forState.appendLocals(class,
-					state.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
+					forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
 			}
 		}
-
 		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER && s.RangeAttr.IdentifierK.Var.BeenCaptured {
 			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
@@ -138,7 +137,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 			copyOP(code,
 				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 			forState.appendLocals(class,
-				state.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
+				forState.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
 		}
 	}
 

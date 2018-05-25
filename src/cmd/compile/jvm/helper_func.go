@@ -95,7 +95,7 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 			code.CodeLength += 3
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertIntConst(int32(value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertIntConst(value, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}
