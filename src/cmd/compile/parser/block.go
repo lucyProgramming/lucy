@@ -325,9 +325,9 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				b.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:               ast.STATEMENT_TYPE_BREAK,
-				StatementContinue: &ast.StatementContinue{},
-				Pos:               pos,
+				Typ:            ast.STATEMENT_TYPE_BREAK,
+				StatementBreak: &ast.StatementBreak{},
+				Pos:            pos,
 			})
 		case lex.TOKEN_GOTO:
 			pos := b.parser.mkPos()
