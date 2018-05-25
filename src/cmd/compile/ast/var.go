@@ -12,7 +12,7 @@ const (
 	MAIN_FUNCTION_NAME       = "main"
 	THIS                     = "this"
 	NO_NAME_IDENTIFIER       = "_"
-	LUCY_ROOT_CLASS          = "lucy/deps/Object"
+	LUCY_ROOT_CLASS          = "lucy/lang/Object"
 	JAVA_ROOT_CLASS          = "java/lang/Object"
 	DEFAULT_EXCEPTION_CLASS  = "java/lang/Exception"
 	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"

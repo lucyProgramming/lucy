@@ -447,7 +447,6 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		s.StatmentLable = lable
 		lable.Statement = s
 		lable.Name = e.Data.(*ast.ExpressionIdentifer).Name
-		lable.StatementsOffset = len(block.Statements)
 		block.Statements = append(block.Statements, s)
 		lable.Block = block
 		block.Insert(lable.Name, e.Pos, lable) // insert first,so this label can be found before it is checked

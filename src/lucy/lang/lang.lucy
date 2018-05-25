@@ -1,4 +1,11 @@
 
+/*
+	root object for all lucy default super object
+*/
+public class Object {
+	
+	
+}
 
  
 

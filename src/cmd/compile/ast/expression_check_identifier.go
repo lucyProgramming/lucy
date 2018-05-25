@@ -177,7 +177,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 		errMsgPrefix(e.Pos), identifer.Name)
 }
 
-func (e *Expression) IsThis() bool {
+func (e *Expression) isThis() bool {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return false
 	}

@@ -44,6 +44,9 @@ func registerBuildinFunctions() {
 		catchBuildFunction.Typ.ReturnList[0].Name = "retrunValue"
 		catchBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
 		catchBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
+		catchBuildFunction.Typ.ReturnList[0].Typ.Class = &Class{}
+		catchBuildFunction.Typ.ReturnList[0].Typ.Class.Name = DEFAULT_EXCEPTION_CLASS
+		catchBuildFunction.Typ.ReturnList[0].Typ.Class.NotImportedYet = true
 		//class is going to make value by checker
 	}
 	catchBuildFunction.buildChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
@@ -73,13 +76,16 @@ func registerBuildinFunctions() {
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 				}
-				return
 			} else {
 				ft.Typ.ReturnList[0].Typ.Class = block.InheritedAttribute.Defer.ExceptionClass
-				return
+
 			}
+			return
 		}
-		if args[0].Typ != VARIABLE_TYPE_CLASS {
+		if args[0] == nil {
+			return
+		}
+		if args[0].Typ != VARIABLE_TYPE_OBJECT {
 			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect a object ref argument",
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
 			return
@@ -184,7 +190,6 @@ func registerBuildinFunctions() {
 			if args[0] == nil {
 				return
 			}
-
 			if args[0].Typ == VARIABLE_TYPE_OBJECT {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {

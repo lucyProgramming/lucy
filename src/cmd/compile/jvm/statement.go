@@ -59,15 +59,15 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_GOTO:
-		if s.StatementGoto.StatementLable.OffsetGenerated {
-			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLable.Offset)
+		if s.StatementGoto.StatementLable.CodeOffsetGenerated {
+			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLable.CodeOffset)
 		} else {
 			b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 			s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
 		}
 	case ast.STATEMENT_TYPE_LABLE:
-		s.StatmentLable.OffsetGenerated = true
-		s.StatmentLable.Offset = code.CodeLength
+		s.StatmentLable.CodeOffsetGenerated = true
+		s.StatmentLable.CodeOffset = code.CodeLength
 		if len(s.StatmentLable.BackPatches) > 0 {
 			backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
 		}

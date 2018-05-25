@@ -19,7 +19,7 @@ func (s *StatementReturn) mkDefers(b *Block) {
 }
 
 func (s *StatementReturn) check(b *Block) []error {
-	//s.Function = b.InheritedAttribute.Function
+
 	s.mkDefers(b)
 
 	if len(s.Expressions) == 0 {

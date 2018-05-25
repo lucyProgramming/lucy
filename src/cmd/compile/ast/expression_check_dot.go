@@ -103,7 +103,7 @@ func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *Variabl
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
-			if false == dot.Expression.IsThis() && false == field.IsPublic() {
+			if false == dot.Expression.isThis() && false == field.IsPublic() {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is private", errMsgPrefix(e.Pos),
 					dot.Name))
 			}

@@ -63,6 +63,7 @@ func (c *Class) mkDefaultContruction() {
 	m.IsConstructionMethod = true
 	m.Func = &Function{}
 	m.Func.Pos = c.Pos
+	m.Func.Block.IsFunctionTopBlock = true
 	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
 }
 

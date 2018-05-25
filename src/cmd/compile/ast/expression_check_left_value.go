@@ -51,7 +51,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 						errMsgPrefix(e.Pos), dot.Name))
 				}
 				// not this and private
-				if dot.Expression.IsThis() == false && field.IsPrivate() {
+				if dot.Expression.isThis() == false && field.IsPrivate() {
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
 						errMsgPrefix(e.Pos), dot.Name))
 				}

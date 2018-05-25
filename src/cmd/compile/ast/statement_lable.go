@@ -8,20 +8,22 @@ import (
 )
 
 type StatementLable struct {
-	OffsetGenerated  bool
-	Offset           int
-	Block            *Block
-	StatementsOffset int
-	Name             string
-	BackPatches      []*cg.JumpBackPatch
-	Statement        *Statement
+	CodeOffsetGenerated bool
+	CodeOffset          int
+	Block               *Block
+	Name                string
+	BackPatches         []*cg.JumpBackPatch
+	Statement           *Statement
 }
 
 func (s *StatementLable) Ready(from *Pos) error {
 	ss := []*Statement{}
-	for i := 0; i < s.StatementsOffset; i++ {
-		if s.Block.Statements[i].isVariableDefinition() && s.Block.Statements[i].Checked == false {
-			ss = append(ss, s.Block.Statements[i])
+	for _, v := range s.Block.Statements {
+		if v.StatmentLable == s {
+			break
+		}
+		if v.isVariableDefinition() && v.Checked == false {
+			ss = append(ss, v)
 		}
 	}
 	if len(ss) == 0 {
