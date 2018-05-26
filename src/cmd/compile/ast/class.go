@@ -9,23 +9,22 @@ import (
 )
 
 type Class struct {
-	IsStatementClass bool
-	NotImportedYet   bool // not imported
-	Name             string
-	Pos              *Pos
-	IsJava           bool //class found in CLASSPATH
-	IsGlobal         bool
-	Block            Block
-	AccessFlags      uint16
-	Fields           map[string]*ClassField
-	Methods          map[string][]*ClassMethod
-	SuperClassName   string
-	SuperClass       *Class
-	InterfaceNames   []*NameWithPos
-	Interfaces       []*Class
-	SouceFile        string
-	Used             bool
-	LoadFromOutSide  bool
+	NotImportedYet  bool // not imported
+	Name            string
+	Pos             *Pos
+	IsJava          bool //class found in CLASSPATH
+	IsGlobal        bool
+	Block           Block
+	AccessFlags     uint16
+	Fields          map[string]*ClassField
+	Methods         map[string][]*ClassMethod
+	SuperClassName  string
+	SuperClass      *Class
+	InterfaceNames  []*NameWithPos
+	Interfaces      []*Class
+	SouceFile       string
+	Used            bool
+	LoadFromOutSide bool
 }
 
 func (c *Class) IsInterface() bool {

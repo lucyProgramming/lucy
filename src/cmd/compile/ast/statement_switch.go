@@ -37,20 +37,13 @@ func (s *StatementSwitch) check(b *Block) []error {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
 			errMsgPrefix(s.Pos)))
 	}
+
 	byteMap := make(map[byte]*Pos)
 	shortMap := make(map[int32]*Pos)
 	int32Map := make(map[int32]*Pos)
 	int64Map := make(map[int64]*Pos)
-	type floatExist struct {
-		value float32
-		pos   *Pos
-	}
-	floatMap := []floatExist{}
-	type doubleExist struct {
-		value float64
-		pos   *Pos
-	}
-	doubleMap := []doubleExist{}
+	floatMap := make(map[float32]*Pos)
+	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
 	enumNamesMap := make(map[string]*Pos)
 	for _, v := range s.StatmentSwitchCases {
@@ -147,36 +140,18 @@ func (s *StatementSwitch) check(b *Block) []error {
 						int64Map[int64Value] = e.Pos
 					}
 				case VARIABLE_TYPE_FLOAT:
-					var first *Pos
-					found := false
-					for _, v := range floatMap {
-						if v.value == floatValue {
-							first = v.pos
-							found = true
-							break
-						}
-					}
-					if found {
+					if first, found := floatMap[floatValue]; found {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
-						floatMap = append(floatMap, floatExist{value: floatValue, pos: e.Pos})
+						floatMap[floatValue] = e.Pos
 					}
 				case VARIABLE_TYPE_DOUBLE:
-					var first *Pos
-					found := false
-					for _, v := range doubleMap {
-						if v.value == doubleValue {
-							found = true
-							first = v.pos
-							break
-						}
-					}
-					if found {
+					if first, found := doubleMap[doubleValue]; found {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
-						doubleMap = append(doubleMap, doubleExist{value: doubleValue, pos: e.Pos})
+						doubleMap[doubleValue] = e.Pos
 					}
 				case VARIABLE_TYPE_STRING:
 					if first, ok := stringMap[stringValue]; ok {
@@ -207,6 +182,22 @@ func (s *StatementSwitch) check(b *Block) []error {
 		s.Default.InheritedAttribute.StatementSwitch = s
 		s.Default.InheritedAttribute.statementForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
+	}
+	if conditionType.Typ == VARIABLE_TYPE_ENUM &&
+		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
+		s.Default == nil {
+		//some enum are missing, not allow
+		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
+			errMsgPrefix(s.Pos), conditionType.Enum.Name)
+		errMsg += "\tyou can use 'default:' or give missing enumName,which are:\n"
+		for _, v := range conditionType.Enum.Enums {
+			_, ok := enumNamesMap[v.Name]
+			if ok {
+				continue
+			}
+			errMsg += fmt.Sprintf("\t\tcase %v:\n", v.Name)
+		}
+		errs = append(errs, fmt.Errorf(errMsg))
 	}
 	return errs
 }

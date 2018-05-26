@@ -93,7 +93,6 @@ func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeC
 			Descriptor: "()D",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-
 	}
 
 }

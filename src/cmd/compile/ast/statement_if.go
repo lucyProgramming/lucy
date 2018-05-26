@@ -19,6 +19,7 @@ func (s *StatementIF) check(father *Block) []error {
 	s.CondtionBlock.inherite(father)
 	errs := []error{}
 	for _, v := range s.PreExpressions {
+		v.IsStatementExpression = true
 		_, es := v.check(&s.CondtionBlock)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
@@ -29,30 +30,25 @@ func (s *StatementIF) check(father *Block) []error {
 			errs = append(errs, err)
 			continue
 		}
-		v.IsStatementExpression = true
 	}
 	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.CondtionBlock)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	if len(es) == 0 {
-		if s.Condition.canbeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
-		}
-		if conditionType != nil {
-			if conditionType.Typ != VARIABLE_TYPE_BOOL {
-				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-					errMsgPrefix(s.Condition.Pos)))
-			}
-		}
+	if s.Condition.canbeUsedAsCondition() == false {
+		errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
+			errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
+	}
+	if conditionType != nil && conditionType.Typ != VARIABLE_TYPE_BOOL {
+		errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+			errMsgPrefix(s.Condition.Pos)))
 	}
 	s.Block.inherite(&s.CondtionBlock)
 	errs = append(errs, s.Block.checkStatements()...)
 	for _, v := range s.ElseIfList {
 		v.Block.inherite(&s.CondtionBlock)
 		if v.Condition.canbeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
+			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
 		}
 		conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)

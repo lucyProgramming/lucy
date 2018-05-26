@@ -22,23 +22,26 @@ const (
 )
 
 type Statement struct {
-	Checked                          bool
-	Pos                              *Pos
-	Typ                              int
-	StatementIf                      *StatementIF
-	Expression                       *Expression // expression statment like a=123
-	StatementFor                     *StatementFor
-	StatementReturn                  *StatementReturn
-	StatementSwitch                  *StatementSwitch
-	StatementBreak                   *StatementBreak
-	Block                            *Block
-	StatementContinue                *StatementContinue
-	StatmentLable                    *StatementLable
-	StatementGoto                    *StatementGoto
-	Defer                            *Defer
+	Checked           bool
+	Pos               *Pos
+	Typ               int
+	StatementIf       *StatementIF
+	Expression        *Expression // expression statment like a=123
+	StatementFor      *StatementFor
+	StatementReturn   *StatementReturn
+	StatementSwitch   *StatementSwitch
+	StatementBreak    *StatementBreak
+	Block             *Block
+	StatementContinue *StatementContinue
+	StatmentLable     *StatementLable
+	StatementGoto     *StatementGoto
+	Defer             *Defer
+	Class             *Class
+	Enum              *Enum
+	/*
+		this.super()
+	*/
 	IsCallFatherContructionStatement bool
-	Class                            *Class
-	Enum                             *Enum
 }
 
 func (s *Statement) StatementName() string {
@@ -69,8 +72,6 @@ func (s *Statement) StatementName() string {
 		return "class"
 	case STATEMENT_TYPE_ENUM:
 		return "enum"
-	default:
-		panic(11)
 	}
 	return ""
 }
@@ -84,6 +85,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 	defer func() {
 		s.Checked = true
 	}()
+	errs := []error{}
 	switch s.Typ {
 	case STATEMENT_TYPE_EXPRESSION:
 		return s.checkStatementExpression(block)
@@ -99,8 +101,8 @@ func (s *Statement) check(block *Block) []error { // b is father
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
 		} else {
-			if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
-				return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
+			if block.InheritedAttribute.Defer != nil {
+				return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 					errMsgPrefix(s.Pos), s.StatementName())}
 			}
 			if f, ok := block.InheritedAttribute.statementForBreak.(*StatementFor); ok {
@@ -116,8 +118,8 @@ func (s *Statement) check(block *Block) []error { // b is father
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.StatementName())}
 		}
-		if block.InheritedAttribute.StatementFor != nil && block.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has '%s' in both 'defer' and 'for'",
+		if block.InheritedAttribute.Defer != nil {
+			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.StatementName())}
 		}
 		if s.StatementContinue.StatementFor == nil { // for
@@ -152,24 +154,17 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_LABLE: // nothing to do
 
 	case STATEMENT_TYPE_CLASS:
-		if block.Classes == nil {
-			block.Classes = make(map[string]*Class)
+		err := block.insert(s.Class.Name, s.Pos, s.Class)
+		if err != nil {
+			errs = append(errs, err)
 		}
-		block.Classes[s.Class.Name] = s.Class
-		s.Class.IsStatementClass = true
-		return s.Class.check(block)
+		return append(errs, s.Class.check(block)...)
 	case STATEMENT_TYPE_ENUM:
-		if block.Enums == nil {
-			block.Enums = make(map[string]*Enum)
-		}
-		if block.EnumNames == nil {
-			block.EnumNames = make(map[string]*EnumName)
-		}
-		block.Enums[s.Enum.Name] = s.Enum
-		for _, v := range s.Enum.Enums {
-			block.EnumNames[v.Name] = v
-		}
 		err := s.Enum.check()
+		if err != nil {
+			return []error{err}
+		}
+		err = block.insert(s.Enum.Name, s.Pos, s.Enum)
 		if err != nil {
 			return []error{err}
 		} else {
@@ -195,6 +190,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		return nil
 	}
 	if s.Expression.canBeUsedAsStatement() {
+		s.Expression.IsStatementExpression = true
 		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)
 			err := b.insert(f.Name, f.Pos, f)
@@ -215,12 +211,12 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			}
 			return errs
 		}
+
 	} else {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
 		errs = append(errs, err)
 	}
-	s.Expression.IsStatementExpression = true
 	_, es := s.Expression.check(b)
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)

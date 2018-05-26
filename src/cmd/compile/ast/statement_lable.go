@@ -19,7 +19,7 @@ type StatementLable struct {
 func (s *StatementLable) Ready(from *Pos) error {
 	ss := []*Statement{}
 	for _, v := range s.Block.Statements {
-		if v.StatmentLable == s {
+		if v.StatmentLable == s { // this is me
 			break
 		}
 		if v.isVariableDefinition() && v.Checked == false {
@@ -29,9 +29,9 @@ func (s *StatementLable) Ready(from *Pos) error {
 	if len(ss) == 0 {
 		return nil
 	}
-	errmsg := fmt.Sprintf("%s cannot jump over variable definition:\n", errMsgPrefix(from))
+	errMsg := fmt.Sprintf("%s cannot jump over variable definition:\n", errMsgPrefix(from))
 	for _, v := range ss {
-		errmsg += fmt.Sprintf("\t%s constains variable definition\n", errMsgPrefix(v.Pos))
+		errMsg += fmt.Sprintf("\t%s constains variable definition\n", errMsgPrefix(v.Pos))
 	}
-	return errors.New(errmsg)
+	return errors.New(errMsg)
 }

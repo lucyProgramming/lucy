@@ -8,7 +8,26 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
+/*
+	lucy and java have no difference
+*/
+func (loader *RealNameLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
+	astClass.InterfaceNames = make([]*ast.NameWithPos, len(c.Interfaces))
+	for k, v := range c.Interfaces {
+		astClass.InterfaceNames[k] = &ast.NameWithPos{
+			Name: string(c.ConstPool[v].Info),
+		}
+	}
+	for k, c := range astClass.InterfaceNames {
+		i := &ast.Class{}
+		i.Name = c.Name
+		i.NotImportedYet = true
+		astClass.Interfaces[k] = i
+	}
+	return nil
+}
+
+func (loader *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
 	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
 		//TODO:: support signature???
@@ -22,6 +41,7 @@ func (this *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
+	loader.loadInterfaces(astClass, c)
 	astClass.AccessFlags = c.AccessFlag
 	astClass.IsJava = true // class compiled from java
 	var err error

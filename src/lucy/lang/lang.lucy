@@ -1,6 +1,6 @@
 
 /*
-	root object for all lucy default super object
+	root object for lucy
 */
 public class Object {
 	

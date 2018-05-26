@@ -10,7 +10,6 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-
 	if t == nil {
 		return nil
 	}

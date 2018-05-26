@@ -11,8 +11,6 @@ import (
 type Package struct {
 	TriggerPackageInitMethodName string
 	Name                         string
-	Main                         *Function
-	DestPath                     string
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block

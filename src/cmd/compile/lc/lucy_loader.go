@@ -23,6 +23,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
 		}
 	}
+	loader.loadInterfaces(astClass, c)
 	astClass.AccessFlags = c.AccessFlag
 	astClass.LoadFromOutSide = true
 	var err error
