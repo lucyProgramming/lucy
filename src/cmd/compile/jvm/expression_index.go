@@ -21,7 +21,6 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	if t := currentStack + stack; t > maxstack {
 		maxstack = t
 	}
-
 	currentStack = 2 // mapref kref
 	if index.Expression.Value.Map.K.IsPointer() == false {
 		typeConverter.putPrimitiveInObject(class, code, index.Expression.Value.Map.K)
@@ -34,8 +33,9 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.popStack(1)
-	if index.Expression.Value.Map.V.IsPointer() &&
-		index.Expression.Value.Map.V.Typ != ast.VARIABLE_TYPE_STRING {
+	if index.Expression.Value.Map.V.Typ == ast.VARIABLE_TYPE_ENUM {
+		typeConverter.getFromObject(class, code, index.Expression.Value.Map.V)
+	} else if index.Expression.Value.Map.V.IsPointer() {
 		typeConverter.castPointerTypeToRealType(class, code, index.Expression.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
@@ -53,8 +53,6 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
 			fallthrough
-		case ast.VARIABLE_TYPE_ENUM:
-			fallthrough
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_iconst_0
@@ -71,11 +69,6 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_dconst_0
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_STRING:
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.Codes[code.CodeLength+1] = cg.OP_ldc_w
-			class.InsertStringConst("", code.Codes[code.CodeLength+2:code.CodeLength+4])
-			code.CodeLength += 4
 		}
 		code.Codes[code.CodeLength] = cg.OP_goto
 		codeLength2 := code.CodeLength

@@ -22,7 +22,7 @@ const (
 	TOKEN_RC             // }
 	TOKEN_LB             // [
 	TOKEN_RB             // ]
-	TOKEN_SKIP           // skip;
+	TOKEN_PASS           // pass ;
 	TOKEN_SEMICOLON      // ;
 	TOKEN_CRLF           // enter
 	TOKEN_COMMA          // ,
@@ -119,7 +119,7 @@ var (
 		"bool":       TOKEN_BOOL,
 		"true":       TOKEN_TRUE,
 		"false":      TOKEN_FALSE,
-		"skip":       TOKEN_SKIP,
+		"pass":       TOKEN_PASS,
 		"var":        TOKEN_VAR,
 		"new":        TOKEN_NEW,
 		"switch":     TOKEN_SWITCH,

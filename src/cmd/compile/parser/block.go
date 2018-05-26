@@ -20,7 +20,7 @@ func (b *Block) consume(c map[int]bool) {
 	b.parser.consume(c)
 }
 
-func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err error) {
+func (b *Block) parse(block *ast.Block, isGlobal bool, isSwtich bool, endTokens ...int) (err error) {
 	block.Pos = b.parser.mkPos()
 	endTokenM := make(map[int]struct{})
 	for _, v := range endTokens {
@@ -222,6 +222,11 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 						b.parser.errorMsgPrefix()))
 				reset()
 			}
+			if isGlobal {
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s 'return' cannot used in global block",
+						b.parser.errorMsgPrefix()))
+			}
 			b.Next()
 			r := &ast.StatementReturn{}
 			block.Statements = append(block.Statements, &ast.Statement{
@@ -252,7 +257,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 			pos := b.parser.mkPos()
 			newblock := ast.Block{}
 			b.Next()
-			err = b.parse(&newblock, false, lex.TOKEN_RC)
+			err = b.parse(&newblock, false, false, lex.TOKEN_RC)
 			if err != nil {
 				b.consume(untils_rc)
 				b.Next()
@@ -274,7 +279,7 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 				})
 			}
 			reset()
-		case lex.TOKEN_SKIP:
+		case lex.TOKEN_PASS:
 			pos := b.parser.mkPos()
 			if isDefer {
 				b.parser.errs = append(b.parser.errs,
@@ -282,14 +287,20 @@ func (b *Block) parse(block *ast.Block, isSwtich bool, endTokens ...int) (err er
 						b.parser.errorMsgPrefix()))
 				reset()
 			}
+			if isGlobal == false {
+				b.parser.errs = append(b.parser.errs,
+					fmt.Errorf("%s 'pass' can only be used in global blocks",
+						b.parser.errorMsgPrefix()))
+			}
 			b.Next()
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s  missing semicolon after 'skip'",
 					b.parser.errorMsgPrefix()))
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ: ast.STATEMENT_TYPE_RETURN,
-				Pos: pos,
+				Typ:             ast.STATEMENT_TYPE_RETURN,
+				Pos:             pos,
+				StatementReturn: &ast.StatementReturn{},
 			})
 		case lex.TOKEN_CONTINUE:
 			pos := b.parser.mkPos()

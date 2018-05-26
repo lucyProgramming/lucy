@@ -55,6 +55,6 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	}
 	f.Block.IsFunctionTopBlock = true
 	p.Next()
-	err = p.parser.Block.parse(&f.Block, false, lex.TOKEN_RC)
+	err = p.parser.Block.parse(&f.Block, false, false, lex.TOKEN_RC)
 	return f, err
 }

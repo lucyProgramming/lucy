@@ -53,7 +53,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 		return
 	}
 	b.Next()
-	err = b.parse(f.Block, false, lex.TOKEN_RC)
+	err = b.parse(f.Block, false, false, lex.TOKEN_RC)
 	if err != nil {
 		return nil, err
 	}

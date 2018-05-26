@@ -63,17 +63,10 @@ func init() {
 		import java.lang.Object;
 `,
 	})
-	d := `
-		for(int i =0 ;i < this.end;i ++){
-			if(this.elements[i] == null){
-				this.elements[i] = "";
-			}
-		}
-	`
+
 	installs = append(installs, &InstallType{
-		classname:    "ArrayString",
-		typename:     "String",
-		defaultValue: d,
+		classname: "ArrayString",
+		typename:  "String",
 	})
 }
 

@@ -85,32 +85,32 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		tps = tps[1:]
 	}
 	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret)
-	if call.TemplateFunctionCallPair.F == nil { // not called before,make the binds
+	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		t, es := f.clone(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			return nil
 		}
 		t.TemplateFunction = nil
-		call.TemplateFunctionCallPair.F = t
+		call.TemplateFunctionCallPair.Function = t
 		for k, v := range tArgs {
 			index := tIndexes[k]
 			pos := f.Typ.ParameterList[index].Pos //
-			*call.TemplateFunctionCallPair.F.Typ.ParameterList[index].Typ =
+			*call.TemplateFunctionCallPair.Function.Typ.ParameterList[index].Typ =
 				*v
-			call.TemplateFunctionCallPair.F.Typ.ParameterList[index].Typ.Pos = pos
+			call.TemplateFunctionCallPair.Function.Typ.ParameterList[index].Typ.Pos = pos
 		}
 		for k, v := range retTypes {
 			index := retIndexes[k]
 			pos := f.Typ.ReturnList[index].Pos //
-			*call.TemplateFunctionCallPair.F.Typ.ReturnList[index].Typ =
+			*call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Typ =
 				*v
-			call.TemplateFunctionCallPair.F.Typ.ReturnList[index].Typ.Pos = pos
-			call.TemplateFunctionCallPair.F.Typ.ReturnList[index].Expression =
+			call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Typ.Pos = pos
+			call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Expression =
 				v.mkDefaultValueExpression()
 		}
 	}
-	ret = call.TemplateFunctionCallPair.F
+	ret = call.TemplateFunctionCallPair.Function
 	// when all ok ,ret is not a template function any more
 	if len(tps) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s to many typed parameter to call template function.",

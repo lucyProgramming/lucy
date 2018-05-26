@@ -117,6 +117,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			}
 			state.pushStack(class, s.Condition.Value)
 			compare(s.Condition.Value)
+
 			gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
@@ -137,7 +138,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			m.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if c.Block != nil && c.Block.DeadEnding == false {
+		if c.Block == nil || c.Block.DeadEnding == false {
 			s.BackPatchs = append(s.BackPatchs,
 				(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}

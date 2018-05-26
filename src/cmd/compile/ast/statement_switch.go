@@ -88,8 +88,14 @@ func (s *StatementSwitch) check(b *Block) []error {
 				continue
 			}
 			if conditionType.Typ == VARIABLE_TYPE_ENUM {
-				enumName = t.EnumName.Name
-				valueValid = true
+				if t.EnumName == nil {
+					errs = append(errs, fmt.Errorf("%s enum value is not literal",
+						errMsgPrefix(e.Pos)))
+					continue
+				} else {
+					enumName = t.EnumName.Name
+					valueValid = true
+				}
 			}
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {

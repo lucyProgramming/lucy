@@ -223,8 +223,10 @@ func (e *Expression) OpName() string {
 		return "type assert"
 	case EXPRESSION_TYPE_TYPE_ALIAS:
 		return "type alias"
+	default:
+		return fmt.Sprintf("op[%d](missing handle)", e.Typ)
 	}
-	panic(fmt.Sprintf("missing:%d", e.Typ))
+
 }
 
 type Expression struct {

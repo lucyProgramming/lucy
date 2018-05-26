@@ -41,7 +41,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	}
 
 	b.Next()
-	err = b.parse(&i.Block, false, lex.TOKEN_RC)
+	err = b.parse(&i.Block, false, false, lex.TOKEN_RC)
 	if b.parser.token.Type == lex.TOKEN_ELSEIF {
 		es, err := b.parseElseIfList()
 		if err != nil {
@@ -58,7 +58,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		}
 		i.ElseBlock = &ast.Block{}
 		b.Next()
-		err = b.parse(i.ElseBlock, false, lex.TOKEN_RC)
+		err = b.parse(i.ElseBlock, false, false, lex.TOKEN_RC)
 	}
 	return i, err
 }
@@ -80,7 +80,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		}
 		block := &ast.Block{}
 		b.Next()
-		err = b.parse(block, false, lex.TOKEN_RC)
+		err = b.parse(block, false, false, lex.TOKEN_RC)
 		if err != nil {
 			b.consume(untils_rc)
 			b.Next()

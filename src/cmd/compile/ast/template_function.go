@@ -8,7 +8,7 @@ type TemplateFunctionCallPair struct {
 	Args                              []*VariableType
 	Returns                           []*VariableType
 	TemplateFunctionCallPairGenerated *TemplateFunctionCallPairGenerated
-	F                                 *Function
+	Function                          *Function
 	ClassName                         string
 }
 type TemplateFunctionCallPairGenerated struct {
@@ -52,9 +52,9 @@ func (t *TemplateFunction) insert(Args []*VariableType,
 		return t
 	}
 	ret := &TemplateFunctionCallPair{
-		Args:    Args,
-		Returns: Returns,
-		F:       f,
+		Args:     Args,
+		Returns:  Returns,
+		Function: f,
 	}
 	t.Pairs = append(t.Pairs, ret)
 	return ret

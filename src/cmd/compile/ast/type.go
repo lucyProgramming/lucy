@@ -41,8 +41,6 @@ type VariableType struct {
 	Typ       int
 	Name      string //
 	ArrayType *VariableType
-	Const     *Const
-	Var       *VariableDefinition
 	Class     *Class
 	Enum      *Enum
 	EnumName  *EnumName
@@ -72,7 +70,6 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 	case VARIABLE_TYPE_SHORT:
 		e.Typ = EXPRESSION_TYPE_INT
 		e.Data = int32(0)
-
 	case VARIABLE_TYPE_INT:
 		e.Typ = EXPRESSION_TYPE_INT
 		e.Data = int32(0)
@@ -86,9 +83,10 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 		e.Typ = EXPRESSION_TYPE_DOUBLE
 		e.Data = float64(0)
 	case VARIABLE_TYPE_STRING:
-		e.Typ = EXPRESSION_TYPE_STRING
-		e.Data = ""
+		fallthrough
 	case VARIABLE_TYPE_OBJECT:
+		fallthrough
+	case VARIABLE_TYPE_JAVA_ARRAY:
 		fallthrough
 	case VARIABLE_TYPE_MAP:
 		fallthrough
@@ -103,12 +101,7 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 
 func (v *VariableType) RightValueValid() bool {
 	return v.Typ == VARIABLE_TYPE_BOOL ||
-		v.Typ == VARIABLE_TYPE_BYTE ||
-		v.Typ == VARIABLE_TYPE_SHORT ||
-		v.Typ == VARIABLE_TYPE_INT ||
-		v.Typ == VARIABLE_TYPE_LONG ||
-		v.Typ == VARIABLE_TYPE_FLOAT ||
-		v.Typ == VARIABLE_TYPE_DOUBLE ||
+		v.IsNumber() ||
 		v.Typ == VARIABLE_TYPE_STRING ||
 		v.Typ == VARIABLE_TYPE_OBJECT ||
 		v.Typ == VARIABLE_TYPE_ARRAY ||
@@ -134,7 +127,7 @@ func (t *VariableType) Clone() *VariableType {
 	return ret
 }
 
-func (t *VariableType) resolve(block *Block) error {
+func (t *VariableType) resolve(block *Block, subPart ...bool) error {
 	if t == nil {
 		return nil
 	}
@@ -143,7 +136,8 @@ func (t *VariableType) resolve(block *Block) error {
 	}
 	t.Resolved = true
 	if t.Typ == VARIABLE_TYPE_T {
-		if block.InheritedAttribute.Function.TypeParameters == nil || block.InheritedAttribute.Function.TypeParameters[t.Name] == nil {
+		if block.InheritedAttribute.Function.TypeParameters == nil ||
+			block.InheritedAttribute.Function.TypeParameters[t.Name] == nil {
 			return fmt.Errorf("%s typed parameter '%s' not found",
 				errMsgPrefix(t.Pos), t.Name)
 		}
@@ -153,21 +147,21 @@ func (t *VariableType) resolve(block *Block) error {
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_NAME { //
-		return t.resolveName(block)
+		return t.resolveName(block, len(subPart) > 0)
 	}
 	if t.Typ == VARIABLE_TYPE_ARRAY {
-		return t.ArrayType.resolve(block)
+		return t.ArrayType.resolve(block, true)
 	}
 	if t.Typ == VARIABLE_TYPE_MAP {
 		var err error
 		if t.Map.K != nil {
-			err = t.Map.K.resolve(block)
+			err = t.Map.K.resolve(block, true)
 			if err != nil {
 				return err
 			}
 		}
 		if t.Map.V != nil {
-			return t.Map.V.resolve(block)
+			return t.Map.V.resolve(block, true)
 		}
 	}
 	return nil
@@ -203,7 +197,7 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 
 }
 
-func (t *VariableType) mkTypeFromInterface(d interface{}) error {
+func (t *VariableType) mkTypeFrom(d interface{}) error {
 	switch d.(type) {
 	case *Class:
 		dd := d.(*Class)
@@ -231,9 +225,10 @@ func (t *VariableType) mkTypeFromInterface(d interface{}) error {
 	return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(t.Pos), t.Name)
 }
 
-func (t *VariableType) resolveName(block *Block) error {
+func (t *VariableType) resolveName(block *Block, subPart bool) error {
 	var err error
 	var d interface{}
+
 	if strings.Contains(t.Name, ".") == false {
 		d, _ = block.SearchByName(t.Name)
 		loadFromImport := (d == nil)
@@ -274,13 +269,21 @@ func (t *VariableType) resolveName(block *Block) error {
 	if d == nil {
 		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
-
-	return t.mkTypeFromInterface(d)
+	err = t.mkTypeFrom(d)
+	if err != nil {
+		return err
+	}
+	if t.Typ == VARIABLE_TYPE_ENUM && subPart {
+		if t.Enum.Enums[0].Value != 0 {
+			return fmt.Errorf("%s enum named '%s' as subPart of a type,first enum value named by '%s' must have value '0'",
+				errMsgPrefix(t.Pos), t.Enum.Name, t.Enum.Enums[0].Name)
+		}
+	}
+	return nil
 }
 
 func (t *VariableType) IsNumber() bool {
 	return t.IsInteger() || t.IsFloat()
-
 }
 
 func (t *VariableType) IsPointer() bool {

@@ -166,6 +166,7 @@ func (e *Expression) constFold() (is bool, err error) {
 				} else {
 					e.Data = int64(bin.Left.Data.(int64) >> bin.Right.getByteValue())
 				}
+
 			}
 			e.Typ = bin.Left.Typ
 			return
