@@ -64,7 +64,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	size := jvmSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
-	for k, c := range s.StatmentSwitchCases {
+	for _, c := range s.StatmentSwitchCases {
 		if exit != nil {
 			backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -120,9 +120,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
-		if k != len(s.StatmentSwitchCases)-1 || s.Default != nil {
-			exit = (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
-		}
+		exit = (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 		// if match goto here
 		backPatchEs(gotoBodyExits, code.CodeLength)
 		//before block,pop off stack
@@ -139,42 +137,30 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			m.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if k != len(s.StatmentSwitchCases)-1 || s.Default != nil {
-			if c.Block == nil || c.Block.DeadEnding == false {
-				s.BackPatchs = append(s.BackPatchs,
-					(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
-			}
+		if c.Block != nil && c.Block.DeadEnding == false {
+			s.BackPatchs = append(s.BackPatchs,
+				(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
+	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+	context.MakeStackMap(code, state, code.CodeLength)
+	if size == 1 {
+		code.Codes[code.CodeLength] = cg.OP_pop
+	} else {
+		code.Codes[code.CodeLength] = cg.OP_pop2
+	}
+	code.CodeLength++
+	state.popStack(1)
 	// build default
 	if s.Default != nil {
-		backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
-		context.MakeStackMap(code, state, code.CodeLength)
-		if size == 1 {
-			code.Codes[code.CodeLength] = cg.OP_pop
+		var ss *StackMapState
+		if s.Default.HaveVariableDefinition() {
+			ss = (&StackMapState{}).FromLast(state)
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_pop2
+			ss = state
 		}
-		code.CodeLength++
-		state.popStack(1)
-		if s.Default != nil {
-			var ss *StackMapState
-			if s.Default.HaveVariableDefinition() {
-				ss = (&StackMapState{}).FromLast(state)
-			} else {
-				ss = state
-			}
-			m.buildBlock(class, code, s.Default, context, ss)
-			state.addTop(ss)
-		}
-	} else {
-		if size == 1 {
-			code.Codes[code.CodeLength] = cg.OP_pop
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_pop2
-		}
-		code.CodeLength++
-		state.popStack(1)
+		m.buildBlock(class, code, s.Default, context, ss)
+		state.addTop(ss)
 	}
 	return
 }
