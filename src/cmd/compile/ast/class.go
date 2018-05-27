@@ -110,10 +110,16 @@ func (c *Class) checkPhase1(father *Block) []error {
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	err := c.checkIfClassCircularity()
+	err := c.resolveFather(father)
 	if err != nil {
 		errs = append(errs, err)
+	} else {
+		err = c.checkIfClassCircularity()
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
+
 	es = c.resolveInterfaces(father)
 	errs = append(errs, es...)
 	es = c.suitableForInterfaces()
@@ -392,6 +398,9 @@ func (c *Class) loadSuperClass() error {
 	}
 	if c.Name == JAVA_ROOT_CLASS {
 		return fmt.Errorf("root class already")
+	}
+	if c.SuperClassName == "" {
+
 	}
 	d, err := PackageBeenCompile.load(c.SuperClassName)
 	if err != nil {
