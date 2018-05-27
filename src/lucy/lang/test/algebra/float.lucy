@@ -1,0 +1,99 @@
+
+
+
+
+
+fn testFloat()->(ok bool = true){
+	var a ,b float;
+	a = 1.0;
+	b = 2.0;
+	if 3.0 != a + b {
+		ok = false;
+		return ;
+	}
+	if -1.0 != a - b {
+		ok = false;
+		return ;
+	}
+	if 1.0 != b - a {
+		ok = false;
+		return ;
+	}
+	if 2.0 != b * a {
+		ok = false;
+		return ;
+	}
+
+	if 2.0 != b / a {
+		ok = false;
+		return ;
+	}
+	if 0.5 != a / b {
+		ok = false;
+		return ;
+	}
+	if 0.0 != b % a {
+		ok = false;
+		return ;
+	}
+	if 1.0 != a % b {
+		ok = false;
+		return ;
+	}
+}
+
+
+
+fn testDouble()->(ok bool = true){
+	var a ,b double;
+	a = 1.0;
+	b = 2.0;
+	if 3.0 != a + b {
+		ok = false;
+		return ;
+	}
+	if -1.0 != a - b {
+		ok = false;
+		return ;
+	}
+	if 1.0 != b - a {
+		ok = false;
+		return ;
+	}
+	if 2.0 != b * a {
+		ok = false;
+		return ;
+	}
+	if 2.0 != b / a {
+		ok = false;
+		return ;
+	}
+	if 0.5 != a / b {
+		ok = false;
+		return ;
+	}
+	if 0.0 != b % a {
+		ok = false;
+		return ;
+	}
+	if 1.0 != a % b {
+		ok = false;
+		return ;
+	}
+}
+
+
+
+
+
+
+fn testFloats(){
+	if false == testFloat() {
+		panic(new error("test float failed"));
+	}
+    if false == testDouble()  {
+		panic(new error("test double failed"));
+	}
+}
+
+

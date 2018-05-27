@@ -1,0 +1,10 @@
+
+
+fn main(args []string) {
+	 testIntegers();
+	 testFloats();
+}
+
+
+
+

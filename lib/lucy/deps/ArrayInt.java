@@ -43,18 +43,6 @@ public class ArrayInt   {
 		result.cap = this.cap;
 		return result;
 	}
-	public int get(int index){
-		if(this.start + index >= this.end || index < 0){
-			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
-		}
-		return this.elements[this.start + index];
-	}
-	public void set(int index,int v){
-		if(this.start + index >= this.end || index < 0){
-			new ArrayIndexOutOfBoundsException(outOfRagneMsg);
-		}
-		this.elements[this.start + index] = v;
-	}
 	public ArrayInt append(int e){
 		if(this.end < this.cap){
 		}else{
@@ -83,7 +71,7 @@ public class ArrayInt   {
 			this.expand((this.cap + es.size()) * 2);
 		}
 		for(int i = this.end;i < es.size();i++){
-			this.elements[this.end + i] = es.get(i);
+			this.elements[this.end + i] = es.elements[es.start + i ];
 		}
 		this.end += es.size();
 		return this;

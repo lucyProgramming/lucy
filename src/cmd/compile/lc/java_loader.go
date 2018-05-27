@@ -18,6 +18,8 @@ func (loader *RealNameLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) e
 			Name: string(c.ConstPool[v].Info),
 		}
 	}
+
+	astClass.Interfaces = make([]*ast.Class, len(astClass.InterfaceNames))
 	for k, c := range astClass.InterfaceNames {
 		i := &ast.Class{}
 		i.Name = c.Name

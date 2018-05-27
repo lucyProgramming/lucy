@@ -36,11 +36,14 @@ func (p *Parser) parseImports() {
 			p.insertImports(i)
 			p.parseImports()
 			return
+		} else {
+			i.AccessName = p.token.Data.(string)
+			p.Next() // skip identifier
 		}
-		i.AccessName = p.token.Data.(string)
 	}
 	if p.token.Type != lex.TOKEN_SEMICOLON {
-		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon after, but '%s'", p.errorMsgPrefix()))
+		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon, but '%s'",
+			p.errorMsgPrefix(), p.token.Desp))
 		p.consume(untils_semicolon)
 		p.consume(untils_semicolon)
 		p.Next()

@@ -1,8 +1,10 @@
 
+import "java/lang/Object" as javaRootClass;
+
 /*
 	root object for lucy
 */
-public class Object {
+public class Object extends javaRootClass {
 	
 	
 }

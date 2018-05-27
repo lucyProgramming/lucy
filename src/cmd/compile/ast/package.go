@@ -84,6 +84,12 @@ func (p *Package) TypeCheck() []error {
 		v.Name = p.Name + "/" + v.Name
 	}
 	for _, v := range p.Block.Classes {
+		err := v.resolveFather(&p.Block)
+		if err != nil {
+			p.Errors = append(p.Errors, err)
+		}
+	}
+	for _, v := range p.Block.Classes {
 		es := v.checkPhase1(&p.Block)
 		if errsNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)

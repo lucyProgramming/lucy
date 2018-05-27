@@ -61,11 +61,46 @@ func (c *Class) mkDefaultContruction() {
 	m := &ClassMethod{}
 	m.IsConstructionMethod = true
 	m.Func = &Function{}
+	m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	//m.Func.AccessFlags |= cg.ACC_METHOD_BRIDGE
 	m.Func.Pos = c.Pos
 	m.Func.Block.IsFunctionTopBlock = true
 	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
 }
 
+func (c *Class) checkIfClassCircularity() error {
+	m := make(map[string]struct{})
+	arr := []string{}
+	is := false
+	for c.Name != JAVA_ROOT_CLASS {
+		_, ok := m[c.Name]
+		if ok {
+			arr = append(arr, c.Name)
+			is = true
+			break
+		}
+		m[c.Name] = struct{}{}
+		arr = append(arr, c.Name)
+		err := c.loadSuperClass()
+		if err != nil {
+			return err
+		}
+		c = c.SuperClass
+	}
+	if is == false {
+		return nil
+	}
+	errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy\n",
+		errMsgPrefix(c.Pos), c.Name)
+	var tab string = "\t"
+	index := len(arr) - 1
+	for index >= 0 {
+		errMsg += tab + arr[index] + "\n"
+		tab += " "
+		index--
+	}
+	return fmt.Errorf(errMsg)
+}
 func (c *Class) checkPhase1(father *Block) []error {
 	c.mkDefaultContruction()
 	c.Block.inherite(father)
@@ -75,7 +110,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 	if errsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-	err := c.resolveFather(father)
+	err := c.checkIfClassCircularity()
 	if err != nil {
 		errs = append(errs, err)
 	}

@@ -103,15 +103,17 @@ func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 	source files
 */
 func (c *ClassHighLevel) getSourceFile() string {
-	s := ""
-	last := len(c.SourceFiles) - 1
-	i := 0
+	var s string
+	if len(c.SourceFiles) > 1 {
+		s = "multi source compile into one class file,which are:\n"
+	}
+	prefix := ""
+	if len(c.SourceFiles) > 1 {
+		prefix = "\t\t: "
+	}
 	for f, _ := range c.SourceFiles {
-		s += f
-		if i != last {
-			s += "\n"
-		}
-		i++
+		s += prefix + f
+		s += "\n"
 	}
 	return s
 }

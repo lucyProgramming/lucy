@@ -43,18 +43,6 @@ public class ArrayBool   {
 		result.cap = this.cap;
 		return result;
 	}
-	public boolean get(int index){
-		if(this.start + index >= this.end || index < 0){
-			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
-		}
-		return this.elements[this.start + index];
-	}
-	public void set(int index,boolean v){
-		if(this.start + index >= this.end || index < 0){
-			new ArrayIndexOutOfBoundsException(outOfRagneMsg);
-		}
-		this.elements[this.start + index] = v;
-	}
 	public ArrayBool append(boolean e){
 		if(this.end < this.cap){
 		}else{
@@ -83,7 +71,7 @@ public class ArrayBool   {
 			this.expand((this.cap + es.size()) * 2);
 		}
 		for(int i = this.end;i < es.size();i++){
-			this.elements[this.end + i] = es.get(i);
+			this.elements[this.end + i] = es.elements[es.start + i ];
 		}
 		this.end += es.size();
 		return this;

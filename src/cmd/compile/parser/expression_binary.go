@@ -267,7 +267,7 @@ func (ep *Expression) parseAddExpression() (*ast.Expression, error) {
 	return e, nil
 }
 
-// */ %
+// * / %
 func (ep *Expression) parseMulExpression() (*ast.Expression, error) {
 	e, err := ep.parseOneExpression(false)
 	if err != nil {

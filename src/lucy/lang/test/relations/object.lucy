@@ -1,0 +1,47 @@
+
+
+
+fn testObject()->(ok bool = true){
+	a := new []int();
+	if true != (a != null){
+		ok = false;
+		return ;
+	}
+	if false != (a == null){
+		ok = false;
+		return ;
+	}
+	class test{
+
+	}
+	var x,y test;
+	x = new test();
+    if false != (x == y) {
+        ok = false;
+        return ;
+    }
+    if true != (x != y) {
+        ok = false;
+        return ;
+    }
+    y = x;
+
+    if true != (x == y) {
+        ok = false;
+        return ;
+    }
+    if false != (x != y) {
+        ok = false;
+        return ;
+    }
+
+
+
+
+
+}
+
+
+
+
+

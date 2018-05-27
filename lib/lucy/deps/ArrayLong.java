@@ -43,18 +43,6 @@ public class ArrayLong   {
 		result.cap = this.cap;
 		return result;
 	}
-	public long get(int index){
-		if(this.start + index >= this.end || index < 0){
-			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
-		}
-		return this.elements[this.start + index];
-	}
-	public void set(int index,long v){
-		if(this.start + index >= this.end || index < 0){
-			new ArrayIndexOutOfBoundsException(outOfRagneMsg);
-		}
-		this.elements[this.start + index] = v;
-	}
 	public ArrayLong append(long e){
 		if(this.end < this.cap){
 		}else{
@@ -83,7 +71,7 @@ public class ArrayLong   {
 			this.expand((this.cap + es.size()) * 2);
 		}
 		for(int i = this.end;i < es.size();i++){
-			this.elements[this.end + i] = es.get(i);
+			this.elements[this.end + i] = es.elements[es.start + i ];
 		}
 		this.end += es.size();
 		return this;

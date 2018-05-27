@@ -338,8 +338,9 @@ func (m *MakeClass) mkFuncs() {
 		if f.IsBuildin { //
 			continue
 		}
+		class := m.mainclass
 		method := &cg.MethodHighLevel{}
-		method.Class = m.mainclass
+		method.Class = class
 		method.Name = f.Name
 		method.Descriptor = Descriptor.methodDescriptor(f)
 		method.AccessFlags = 0
@@ -357,7 +358,6 @@ func (m *MakeClass) mkFuncs() {
 			continue
 		}
 		m.buildFunction(ms[k].Class, nil, ms[k], f)
-
 	}
 }
 

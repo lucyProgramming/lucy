@@ -1,0 +1,31 @@
+
+
+
+
+
+fn main(args []string){
+	testFloats();
+	testIntegers();
+	if false == testString() {
+		panic(new error("test string failed"));
+	}
+	if false == testObject() {
+		panic(new error("test object failed"));
+	}	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

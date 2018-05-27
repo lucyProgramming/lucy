@@ -86,7 +86,7 @@ func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeC
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_double_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_double_class,
 			Method:     "doubleValue",
@@ -94,7 +94,6 @@ func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeC
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-
 }
 
 func (TypeConverter) putPrimitiveInObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {

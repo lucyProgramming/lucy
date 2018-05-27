@@ -254,6 +254,10 @@ func (e *Expression) ConvertTo(t *VariableType) {
 func (e *Expression) ConvertToNumber(typ int) {
 	if e.IsLiteral() {
 		e.convertNumberLiteralTo(typ)
+		e.Value = &VariableType{
+			Typ: typ,
+			Pos: e.Pos,
+		}
 	} else {
 		e.ConvertTo(&VariableType{
 			Pos: e.Pos,
