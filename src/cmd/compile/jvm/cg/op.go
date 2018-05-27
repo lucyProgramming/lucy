@@ -1,93 +1,115 @@
 package cg
 
 const (
-	OP_nop             byte = 0x00 //什么都不做。
-	OP_aconst_null     byte = 0x01 // 将 null 推送至栈顶。
-	OP_iconst_m1       byte = 0x02 //将 int 型-1 推送至栈顶。
-	OP_iconst_0        byte = 0x03 // 将 int 型 0 推送至栈顶。
-	OP_iconst_1        byte = 0x04 // 将 int 型 1 推送至栈顶。
-	OP_iconst_2        byte = 0x05 //将 int 型 2 推送至栈顶。
-	OP_iconst_3        byte = 0x06 // 将 int 型 3 推送至栈顶。
-	OP_iconst_4        byte = 0x07 //将 int 型 4 推送至栈顶。
-	OP_iconst_5        byte = 0x08 //将 int 型 5 推送至栈顶。
-	OP_lconst_0        byte = 0x09 //将 long 型 0 推送至栈顶。
-	OP_lconst_1        byte = 0x0a // 将 long 型 1 推送至栈顶。
-	OP_fconst_0        byte = 0x0b // 将 float 型 0 推送至栈顶。
-	OP_fconst_1        byte = 0x0c // 将 float 型 1 推送至栈顶。
-	OP_fconst_2        byte = 0x0d //将 float 型 2 推送至栈顶。
-	OP_dconst_0        byte = 0x0e //将 double 型 0 推送至栈顶。
-	OP_dconst_1        byte = 0x0f // 将 double 型 1 推送至栈顶。
-	OP_bipush          byte = 0x10 //将单字节的常量值（-128~127）推送至栈顶。
-	OP_sipush          byte = 0x11 //将一个短整型常量值（-32768~32767）推送至栈顶。
-	OP_ldc             byte = 0x12 //将 int，float 或 String 型常量值从常量池中推送至栈顶。
-	OP_ldc_w           byte = 0x13 //将 int，float 或 String 型常量值从常量池中推送至栈顶（宽 索引）。
-	OP_ldc2_w          byte = 0x14 //将 long 或 double 型常量值从常量池中推送至栈顶（宽索引）。
-	OP_iload           byte = 0x15 //将指定的 int 型局部变量推送至栈顶。
-	OP_lload           byte = 0x16 //将指定的 long 型局部变量推送至栈顶。
-	OP_fload           byte = 0x17 //将指定的 float 型局部变量推送至栈顶。
-	OP_dload           byte = 0x18 //将指定的 double 型局部变量推送至栈顶。
-	OP_aload           byte = 0x19 //将指定的引用类型局部变量推送至栈顶。
-	OP_iload_0         byte = 0x1a // 将第一个 int 型局部变量推送至栈顶。
-	OP_iload_1         byte = 0x1b //将第二个 int 型局部变量推送至栈顶。
-	OP_iload_2         byte = 0x1c //将第三个 int 型局部变量推送至栈顶。
-	OP_iload_3         byte = 0x1d //将第四个 int 型局部变量推送至栈顶。
-	OP_lload_0         byte = 0x1e //将第一个 long 型局部变量推送至栈顶。
-	OP_lload_1         byte = 0x1f // 将第二个 long 型局部变量推送至栈顶。
-	OP_lload_2         byte = 0x20 //将第三个 long 型局部变量推送至栈顶。
-	OP_lload_3         byte = 0x21 // 将第四个 long 型局部变量推送至栈顶。
-	OP_fload_0         byte = 0x22 // 将第一个 float 型局部变量推送至栈顶。
-	OP_fload_1         byte = 0x23 //将第二个 float 型局部变量推送至栈顶。
-	OP_fload_2         byte = 0x24 // 将第三个 float 型局部变量推送至栈顶
-	OP_fload_3         byte = 0x25 //将第四个 float 型局部变量推送至栈顶。
-	OP_dload_0         byte = 0x26 //将第一个 double 型局部变量推送至栈顶。
-	OP_dload_1         byte = 0x27 //将第二个 double 型局部变量推送至栈顶。
-	OP_dload_2         byte = 0x28 //将第三个 double 型局部变量推送至栈顶。
-	OP_dload_3         byte = 0x29 //将第四个 double 型局部变量推送至栈顶。
-	OP_aload_0         byte = 0x2a //将第一个引用类型局部变量推送至栈顶。
-	OP_aload_1         byte = 0x2b //将第二个引用类型局部变量推送至栈顶。
-	OP_aload_2         byte = 0x2c //将第三个引用类型局部变量推送至栈顶。
-	OP_aload_3         byte = 0x2d //将第四个引用类型局部变量推送至栈顶。
-	OP_iaload          byte = 0x2e //将 int 型数组指定索引的值推送至栈顶。
-	OP_laload          byte = 0x2f //将 long 型数组指定索引的值推送至栈顶。
-	OP_faload          byte = 0x30 //将 float 型数组指定索引的值推送至栈顶。
-	OP_daload          byte = 0x31 // 将 double 型数组指定索引的值推送至栈顶。
-	OP_aaload          byte = 0x32 //将引用型数组指定索引的值推送至栈顶。
-	OP_baload          byte = 0x33 //将 boolean 或 byte 型数组指定索引的值推送至栈顶。
-	OP_caload          byte = 0x34 // 将 char 型数组指定索引的值推送至栈顶。
-	OP_saload          byte = 0x35 //将 short 型数组指定索引的值推送至栈顶。
-	OP_istore          byte = 0x36 // 将栈顶 int 型数值存入指定局部变量。
-	OP_lstore          byte = 0x37 //将栈顶 long 型数值存入指定局部变量。
-	OP_fstore          byte = 0x38 //将栈顶 float 型数值存入指定局部变量。
-	OP_dstore          byte = 0x39 //将栈顶 double 型数值存入指定局部变量。
-	OP_astore          byte = 0x3a // 将栈顶引用型数值存入指定局部变量。
-	OP_istore_0        byte = 0x3b //将栈顶 int 型数值存入第一个局部变量。
-	OP_istore_1        byte = 0x3c // 将栈顶 int 型数值存入第二个局部变量。
-	OP_istore_2        byte = 0x3d //将栈顶 int 型数值存入第三个局部变量。
-	OP_istore_3        byte = 0x3e // 将栈顶 int 型数值存入第四个局部变量。
-	OP_lstore_0        byte = 0x3f //将栈顶 long 型数值存入第一个局部变量。
-	OP_lstore_1        byte = 0x40 // 将栈顶 long 型数值存入第二个局部变量。
-	OP_lstore_2        byte = 0x41 //将栈顶 long 型数值存入第三个局部变量。
-	OP_lstore_3        byte = 0x42 // 将栈顶 long 型数值存入第四个局部变量。
-	OP_fstore_0        byte = 0x43 //将栈顶 float 型数值存入第一个局部变量。
-	OP_fstore_1        byte = 0x44 //将栈顶 float 型数值存入第二个局部变量。
-	OP_fstore_2        byte = 0x45 //将栈顶 float 型数值存入第三个局部变量。
-	OP_fstore_3        byte = 0x46 //将栈顶 float 型数值存入第四个局部变量。
-	OP_dstore_0        byte = 0x47 //将栈顶 double 型数值存入第一个局部变量。
-	OP_dstore_1        byte = 0x48 //将栈顶 double 型数值存入第二个局部变量。
-	OP_dstore_2        byte = 0x49 // 将栈顶 double 型数值存入第三个局部变量。
-	OP_dstore_3        byte = 0x4a //将栈顶 double 型数值存入第四个局部变量。
-	OP_astore_0        byte = 0x4b //将栈顶引用型数值存入第一个局部变量。
-	OP_astore_1        byte = 0x4c ///将栈顶引用型数值存入第二个局部变量。
-	OP_astore_2        byte = 0x4d //将栈顶引用型数值存入第三个局部变量
-	OP_astore_3        byte = 0x4e //将栈顶引用型数值存入第四个局部变量。
-	OP_iastore         byte = 0x4f // 将栈顶 int 型数值存入指定数组的指定索引位置
-	OP_lastore         byte = 0x50 //将栈顶 long 型数值存入指定数组的指定索引位置。
-	OP_fastore         byte = 0x51 //将栈顶 float 型数值存入指定数组的指定索引位置。
-	OP_dastore         byte = 0x52 //将栈顶 double 型数值存入指定数组的指定索引位置。
-	OP_aastore         byte = 0x53 //将栈顶引用型数值存入指定数组的指定索引位置。
-	OP_bastore         byte = 0x54 //将栈顶 boolean 或 byte 型数值存入指定数组的指定索引位置。
-	OP_castore         byte = 0x55 //将栈顶 char 型数值存入指定数组的指定索引位置
-	OP_sastore         byte = 0x56 // 将栈顶 short 型数值存入指定数组的指定索引位置。
+	OP_nop byte = 0x00 //什么都不做。
+	//
+	OP_aconst_null byte = 0x01 // 将 null 推送至栈顶。
+	//
+	OP_iconst_m1 byte = 0x02 //将 int 型-1 推送至栈顶。
+	OP_iconst_0  byte = 0x03 // 将 int 型 0 推送至栈顶。
+	OP_iconst_1  byte = 0x04 // 将 int 型 1 推送至栈顶。
+	OP_iconst_2  byte = 0x05 //将 int 型 2 推送至栈顶。
+	OP_iconst_3  byte = 0x06 // 将 int 型 3 推送至栈顶。
+	OP_iconst_4  byte = 0x07 //将 int 型 4 推送至栈顶。
+	OP_iconst_5  byte = 0x08 //将 int 型 5 推送至栈顶。
+	//
+	OP_lconst_0 byte = 0x09 //将 long 型 0 推送至栈顶。
+	OP_lconst_1 byte = 0x0a // 将 long 型 1 推送至栈顶。
+	//
+	OP_fconst_0 byte = 0x0b // 将 float 型 0 推送至栈顶。
+	OP_fconst_1 byte = 0x0c // 将 float 型 1 推送至栈顶。
+	OP_fconst_2 byte = 0x0d //将 float 型 2 推送至栈顶。
+	//
+	OP_dconst_0 byte = 0x0e //将 double 型 0 推送至栈顶。
+	OP_dconst_1 byte = 0x0f // 将 double 型 1 推送至栈顶。
+	//
+	OP_bipush byte = 0x10 //将单字节的常量值（-128~127）推送至栈顶。
+	OP_sipush byte = 0x11 //将一个短整型常量值（-32768~32767）推送至栈顶。
+	//
+	OP_ldc    byte = 0x12 //将 int，float 或 String 型常量值从常量池中推送至栈顶。
+	OP_ldc_w  byte = 0x13 //将 int，float 或 String 型常量值从常量池中推送至栈顶（宽 索引）。
+	OP_ldc2_w byte = 0x14 //将 long 或 double 型常量值从常量池中推送至栈顶（宽索引）。
+	//
+	OP_iload byte = 0x15 //将指定的 int 型局部变量推送至栈顶。
+	OP_lload byte = 0x16 //将指定的 long 型局部变量推送至栈顶。
+	OP_fload byte = 0x17 //将指定的 float 型局部变量推送至栈顶。
+	OP_dload byte = 0x18 //将指定的 double 型局部变量推送至栈顶。
+	OP_aload byte = 0x19 //将指定的引用类型局部变量推送至栈顶。
+	//
+	OP_iload_0 byte = 0x1a // 将第一个 int 型局部变量推送至栈顶。
+	OP_iload_1 byte = 0x1b //将第二个 int 型局部变量推送至栈顶。
+	OP_iload_2 byte = 0x1c //将第三个 int 型局部变量推送至栈顶。
+	OP_iload_3 byte = 0x1d //将第四个 int 型局部变量推送至栈顶。
+	//
+	OP_lload_0 byte = 0x1e //将第一个 long 型局部变量推送至栈顶。
+	OP_lload_1 byte = 0x1f // 将第二个 long 型局部变量推送至栈顶。
+	OP_lload_2 byte = 0x20 //将第三个 long 型局部变量推送至栈顶。
+	OP_lload_3 byte = 0x21 // 将第四个 long 型局部变量推送至栈顶。
+	//
+	OP_fload_0 byte = 0x22 // 将第一个 float 型局部变量推送至栈顶。
+	OP_fload_1 byte = 0x23 //将第二个 float 型局部变量推送至栈顶。
+	OP_fload_2 byte = 0x24 // 将第三个 float 型局部变量推送至栈顶
+	OP_fload_3 byte = 0x25 //将第四个 float 型局部变量推送至栈顶。
+	//
+	OP_dload_0 byte = 0x26 //将第一个 double 型局部变量推送至栈顶。
+	OP_dload_1 byte = 0x27 //将第二个 double 型局部变量推送至栈顶。
+	OP_dload_2 byte = 0x28 //将第三个 double 型局部变量推送至栈顶。
+	OP_dload_3 byte = 0x29 //将第四个 double 型局部变量推送至栈顶。
+	//
+	OP_aload_0 byte = 0x2a //将第一个引用类型局部变量推送至栈顶。
+	OP_aload_1 byte = 0x2b //将第二个引用类型局部变量推送至栈顶。
+	OP_aload_2 byte = 0x2c //将第三个引用类型局部变量推送至栈顶。
+	OP_aload_3 byte = 0x2d //将第四个引用类型局部变量推送至栈顶。
+	//
+	OP_iaload byte = 0x2e //将 int 型数组指定索引的值推送至栈顶。
+	OP_laload byte = 0x2f //将 long 型数组指定索引的值推送至栈顶。
+	OP_faload byte = 0x30 //将 float 型数组指定索引的值推送至栈顶。
+	OP_daload byte = 0x31 // 将 double 型数组指定索引的值推送至栈顶。
+	OP_aaload byte = 0x32 //将引用型数组指定索引的值推送至栈顶。
+	OP_baload byte = 0x33 //将 boolean 或 byte 型数组指定索引的值推送至栈顶。
+	OP_caload byte = 0x34 // 将 char 型数组指定索引的值推送至栈顶。
+	OP_saload byte = 0x35 //将 short 型数组指定索引的值推送至栈顶。
+	//
+	OP_istore byte = 0x36 // 将栈顶 int 型数值存入指定局部变量。
+	OP_lstore byte = 0x37 //将栈顶 long 型数值存入指定局部变量。
+	OP_fstore byte = 0x38 //将栈顶 float 型数值存入指定局部变量。
+	OP_dstore byte = 0x39 //将栈顶 double 型数值存入指定局部变量。
+	OP_astore byte = 0x3a // 将栈顶引用型数值存入指定局部变量。
+	//
+	OP_istore_0 byte = 0x3b //将栈顶 int 型数值存入第一个局部变量。
+	OP_istore_1 byte = 0x3c // 将栈顶 int 型数值存入第二个局部变量。
+	OP_istore_2 byte = 0x3d //将栈顶 int 型数值存入第三个局部变量。
+	OP_istore_3 byte = 0x3e // 将栈顶 int 型数值存入第四个局部变量。
+	//
+	OP_lstore_0 byte = 0x3f //将栈顶 long 型数值存入第一个局部变量。
+	OP_lstore_1 byte = 0x40 // 将栈顶 long 型数值存入第二个局部变量。
+	OP_lstore_2 byte = 0x41 //将栈顶 long 型数值存入第三个局部变量。
+	OP_lstore_3 byte = 0x42 // 将栈顶 long 型数值存入第四个局部变量。
+	//
+	OP_fstore_0 byte = 0x43 //将栈顶 float 型数值存入第一个局部变量。
+	OP_fstore_1 byte = 0x44 //将栈顶 float 型数值存入第二个局部变量。
+	OP_fstore_2 byte = 0x45 //将栈顶 float 型数值存入第三个局部变量。
+	OP_fstore_3 byte = 0x46 //将栈顶 float 型数值存入第四个局部变量。
+	//
+	OP_dstore_0 byte = 0x47 //将栈顶 double 型数值存入第一个局部变量。
+	OP_dstore_1 byte = 0x48 //将栈顶 double 型数值存入第二个局部变量。
+	OP_dstore_2 byte = 0x49 // 将栈顶 double 型数值存入第三个局部变量。
+	OP_dstore_3 byte = 0x4a //将栈顶 double 型数值存入第四个局部变量。
+	//
+	OP_astore_0 byte = 0x4b //将栈顶引用型数值存入第一个局部变量。
+	OP_astore_1 byte = 0x4c ///将栈顶引用型数值存入第二个局部变量。
+	OP_astore_2 byte = 0x4d //将栈顶引用型数值存入第三个局部变量
+	OP_astore_3 byte = 0x4e //将栈顶引用型数值存入第四个局部变量。
+	//
+	OP_iastore byte = 0x4f // 将栈顶 int 型数值存入指定数组的指定索引位置
+	OP_lastore byte = 0x50 //将栈顶 long 型数值存入指定数组的指定索引位置。
+	OP_fastore byte = 0x51 //将栈顶 float 型数值存入指定数组的指定索引位置。
+	OP_dastore byte = 0x52 //将栈顶 double 型数值存入指定数组的指定索引位置。
+	OP_aastore byte = 0x53 //将栈顶引用型数值存入指定数组的指定索引位置。
+	OP_bastore byte = 0x54 //将栈顶 boolean 或 byte 型数值存入指定数组的指定索引位置。
+	OP_castore byte = 0x55 //将栈顶 char 型数值存入指定数组的指定索引位置
+	OP_sastore byte = 0x56 // 将栈顶 short 型数值存入指定数组的指定索引位置。
+	//
 	OP_pop             byte = 0x57 //将栈顶数值弹出（数值不能是 long 或 double 类型的）。
 	OP_pop2            byte = 0x58 //将栈顶的一个（long 或 double 类型的）或两个数值弹出（其 它）。
 	OP_dup             byte = 0x59 //复制栈顶数值并将复制值压入栈顶。

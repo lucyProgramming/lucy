@@ -66,7 +66,6 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 
 func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string,
 	stackTopType *ast.VariableType) (increment uint16) {
-	// no object after value,just dup top
 	if op[0] == cg.OP_istore ||
 		op[0] == cg.OP_lstore ||
 		op[0] == cg.OP_fstore ||
@@ -91,8 +90,18 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		op[0] == cg.OP_astore_0 ||
 		op[0] == cg.OP_astore_1 ||
 		op[0] == cg.OP_astore_2 ||
-		op[0] == cg.OP_astore_3 ||
-		op[0] == cg.OP_putstatic {
+		op[0] == cg.OP_astore_3 {
+		if jvmSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_dup2
+			increment = 2
+		}
+		code.CodeLength++
+		return
+	}
+	if op[0] == cg.OP_putstatic {
 		if jvmSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -114,21 +123,36 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		code.CodeLength++
 		return
 	}
-	if op[0] == cg.OP_invokevirtual { // array or map
-		if ArrayMetasMap[classname] != nil || classname == java_hashmap_class {
-			// stack is arrayref index or mapref kref which are all category 1 type
-			if jvmSize(stackTopType) == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup_x2
-				code.CodeLength++
-			} else {
-				increment = 2
-				code.Codes[code.CodeLength] = cg.OP_dup2_x2
-				code.CodeLength++
-			}
-			return
+	if op[0] == cg.OP_iastore ||
+		op[0] == cg.OP_lastore ||
+		op[0] == cg.OP_fastore ||
+		op[0] == cg.OP_dastore ||
+		op[0] == cg.OP_aastore ||
+		op[0] == cg.OP_bastore ||
+		op[0] == cg.OP_castore ||
+		op[0] == cg.OP_sastore {
+		if jvmSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup_x2
+			code.CodeLength++
+		} else {
+			increment = 2
+			code.Codes[code.CodeLength] = cg.OP_dup2_x2
+			code.CodeLength++
 		}
+		return
 	}
-	panic("other case")
+	if op[0] == cg.OP_invokevirtual && classname == java_hashmap_class {
+		if jvmSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup_x2
+			code.CodeLength++
+		} else {
+			increment = 2
+			code.Codes[code.CodeLength] = cg.OP_dup2_x2
+			code.CodeLength++
+		}
+		return
+	}
 	return
 }

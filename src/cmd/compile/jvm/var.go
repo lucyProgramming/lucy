@@ -2,7 +2,6 @@ package jvm
 
 var (
 	ArrayMetas                 = map[int]*ArrayMeta{}
-	ArrayMetasMap              = make(map[string]*ArrayMeta)
 	typeConverter              TypeConverter
 	Descriptor                 Descript
 	LucyMethodSignatureParser  LucyMethodSignatureParse

@@ -109,8 +109,5 @@ func init() {
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_ARRAY] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]
 	ArrayMetas[ast.VARIABLE_TYPE_MAP] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]
-	for _, v := range ArrayMetas {
-		ArrayMetasMap[v.classname] = v
-	}
 	ArrayMetas[ast.VARIABLE_TYPE_ENUM] = ArrayMetas[ast.VARIABLE_TYPE_INT]
 }
