@@ -30,7 +30,16 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				state.pushStack(class, obj)
 			}
 		}
-		maxstack, _ = m.build(class, code, vs.Values[0], context, state)
+		stack, es := m.build(class, code, vs.Values[0], context, state)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
+			state.pushStack(class, vs.Values[0].Value)
+			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
+		}
+		if t := currentStack + stack; t > maxstack {
+			maxstack = t
+		}
 		if v.Name == ast.NO_NAME_IDENTIFIER {
 			if jvmSize(vs.Values[0].Value) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
@@ -122,5 +131,98 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		m.MakeClass.storeLocalVar(class, code, v)
 	}
+	return
+}
+
+func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	vs := e.Data.(*ast.ExpressionDeclareVariable)
+	for _, v := range vs.Vs {
+		if v.BeenCaptured {
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+		} else {
+			v.LocalValOffset = code.MaxLocals
+			code.MaxLocals += jvmSize(v.Typ)
+		}
+	}
+	index := len(vs.Vs) - 1
+	currentStack := uint16(0)
+	for index >= 0 {
+		if vs.Vs[index].BeenCaptured == false {
+			index--
+			continue
+		}
+		v := vs.Vs[index]
+		closure.createCloureVar(class, code, v.Typ)
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		{
+			t := state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className)
+			state.pushStack(class, t)
+			state.pushStack(class, t)
+		}
+		currentStack += 2
+		index--
+	}
+	if currentStack > maxstack {
+		maxstack = currentStack
+	}
+	index = 0
+	for _, v := range vs.Values {
+		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+			stack, _ := m.build(class, code, vs.Values[0], context, state)
+			if t := currentStack + stack; t > maxstack {
+				maxstack = t
+			}
+			for kk, tt := range v.Values {
+				stack = arrayListPacker.unPack(class, code, kk, tt, context)
+				if t := stack + currentStack; t > maxstack {
+					maxstack = t
+				}
+				if vs.Vs[index].IsGlobal {
+					storeGlobalVar(class, m.MakeClass.mainclass, code, vs.Vs[index])
+					index++
+					continue
+				}
+				m.MakeClass.storeLocalVar(class, code, vs.Vs[index])
+				if vs.Vs[index].BeenCaptured {
+					copyOP(code, storeSimpleVarOp(vs.Vs[index].Typ.Typ, vs.Vs[index].LocalValOffset)...)
+					state.popStack(2)
+					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className))
+				} else {
+					state.appendLocals(class, vs.Vs[index].Typ)
+				}
+				index++
+			}
+			continue
+		}
+		//
+		stack, es := m.build(class, code, vs.Values[0], context, state)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
+			state.pushStack(class, vs.Values[0].Value)
+			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
+		}
+		if t := currentStack + stack; t > maxstack {
+			maxstack = t
+		}
+		if vs.Vs[index].IsGlobal {
+			storeGlobalVar(class, m.MakeClass.mainclass, code, vs.Vs[index])
+			index++
+			continue
+		}
+		m.MakeClass.storeLocalVar(class, code, vs.Vs[index])
+		if vs.Vs[index].BeenCaptured {
+			copyOP(code, storeSimpleVarOp(vs.Vs[index].Typ.Typ, vs.Vs[index].LocalValOffset)...)
+			state.popStack(2)
+			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Vs[index].Typ.Typ).className))
+		} else {
+			state.appendLocals(class, vs.Vs[index].Typ)
+		}
+		index++
+	}
+
 	return
 }

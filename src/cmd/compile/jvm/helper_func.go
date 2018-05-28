@@ -9,9 +9,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func backPatchEs(es []*cg.JumpBackPatch, t int) {
+func backPatchEs(es []*cg.JumpBackPatch, to int) {
 	for _, e := range es {
-		offset := int16(t - int(e.CurrentCodeLength))
+		offset := int16(to - int(e.CurrentCodeLength))
 		e.Bs[0] = byte(offset >> 8)
 		e.Bs[1] = byte(offset)
 	}

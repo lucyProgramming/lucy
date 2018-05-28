@@ -4,6 +4,9 @@ import (
 	"encoding/binary"
 )
 
+type StackMap interface {
+	ToBytes() []byte
+}
 type AttributeStackMap struct {
 	StackMaps []StackMap
 }
@@ -24,9 +27,6 @@ func (a *AttributeStackMap) ToAttributeInfo(class *Class) *AttributeInfo {
 	return info
 }
 
-type StackMap interface {
-	ToBytes() []byte
-}
 type StackMap_same_frame struct {
 	FrameType byte
 }

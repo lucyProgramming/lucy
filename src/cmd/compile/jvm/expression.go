@@ -194,7 +194,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_MAP:
 		maxstack = m.buildMapLiteral(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_VAR:
-		maxstack = m.buildColonAssign(class, code, e, context, state)
+		maxstack = m.buildVar(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TYPE_ASSERT:
 		maxstack = m.buildTypeAssert(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TERNARY:
