@@ -193,6 +193,9 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
 		return
 	}
+	if p, ok := r.PackagesCompiled[packageName]; ok {
+		return p.meta, false, nil, nil
+	}
 	if r.Flags.forceReBuild {
 		return
 	}

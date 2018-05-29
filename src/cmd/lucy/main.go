@@ -3,25 +3,11 @@ package main
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/clean"
-	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/command"
-	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/run"
-	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/test"
 	"os"
 	"runtime"
 )
-
-var (
-	commands = make(map[string]command.RunCommand)
-)
-
-func init() {
-	commands["run"] = &run.Run{}
-	commands["install_lucy_array"] = &install_lucy_array.InstallLucyArray{}
-	commands["clean"] = &clean.Clean{}
-	commands["test"] = &test.Test{}
-}
 
 func printUsage() {
 	msg := `lucy is a new programing language build on jvm
@@ -38,14 +24,15 @@ func main() {
 		printUsage()
 		os.Exit(0)
 	}
-	if os.Args[1] == "version" {
+	switch os.Args[1] {
+	case "version":
 		fmt.Printf("lucy-%v@(%s/%s)\n", common.VERSION, runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
-	}
-	c, ok := commands[os.Args[1]]
-	if ok == false {
+	case "run":
+		(&run.Run{}).RunCommand(os.Args[1], os.Args[2:])
+	default:
 		printUsage()
-		os.Exit(0)
+		os.Exit(1)
 	}
-	c.RunCommand(os.Args[1], os.Args[2:])
+
 }

@@ -1,0 +1,39 @@
+
+
+class InstallType {
+	public classname    string ; 
+	public typename     string ; 
+	public imports      string ;
+	
+	public fn InstallType(classname ,typename string){
+		this.classname = classname;
+		this.typename = typename;
+	}
+}
+
+
+var installs []InstallType;
+
+{
+	installs.append(new InstallType("ArrayBool" , "boolean") , new InstallType("ArrayByte" ,  "byte"));
+	installs.append(new InstallType("ArrayShort" , "short") , new InstallType("ArrayInt" ,  "int"));
+	installs.append(new InstallType("ArrayLong" , "long") , new InstallType("ArrayFloat" ,  "float"));
+	installs.append(new InstallType("ArrayDouble" , "double") , new InstallType("ArrayString" , "String"));
+	object := new InstallType("ArrayObject" , "Object");
+	object.imports = `
+		import java.lang.Object;
+	`;
+	installs.append(object);
+}
+
+
+
+
+
+
+
+
+
+
+
+

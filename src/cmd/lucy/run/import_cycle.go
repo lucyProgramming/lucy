@@ -17,17 +17,20 @@ func (i *ImportStack) fromLast(last *ImportStack) *ImportStack {
 	return i
 }
 
+/*
+	check if import cycling
+*/
 func (i *ImportStack) insert(c *PackageCompiled) error {
 	if _, ok := i.M[c.packageName]; ok {
 		errMsg := fmt.Sprintf("package named '%s' import cycling\n", c.packageName)
 		errMsg += "\t"
-
 		for _, v := range i.Stacks {
 			errMsg += fmt.Sprintf("'%s' -> ", v.packageName)
 		}
 		errMsg += c.packageName
 		return fmt.Errorf(errMsg)
 	}
+
 	i.Stacks = append(i.Stacks, c)
 	i.M[c.packageName] = c
 	return nil

@@ -18,7 +18,6 @@ func (loader *RealNameLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) e
 			Name: string(c.ConstPool[v].Info),
 		}
 	}
-
 	astClass.Interfaces = make([]*ast.Class, len(astClass.InterfaceNames))
 	for k, c := range astClass.InterfaceNames {
 		i := &ast.Class{}
@@ -79,7 +78,6 @@ func (loader *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Func)
 		}
-
 		if astClass.Methods[m.Func.Name] == nil {
 			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
 		} else {

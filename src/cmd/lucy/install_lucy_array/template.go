@@ -106,7 +106,6 @@ public class ArrayTTT   {
 		this.cap = length;
 		return elements;
 	}
-	
 }
 
 `
