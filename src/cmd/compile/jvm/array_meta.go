@@ -96,7 +96,7 @@ func init() {
 		sliceDescriptor:           "(II)Llucy/deps/ArrayString;",
 		appendDescriptor:          "(Ljava/lang/String;)Llucy/deps/ArrayString;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayString;)Llucy/deps/ArrayString;",
-		getJavaArrayDescriptor:    "()[Llucy/deps/ArrayString;",
+		getJavaArrayDescriptor:    "()[Ljava/lang/String;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_OBJECT] = &ArrayMeta{
 		classname:                 "lucy/deps/ArrayObject",
@@ -105,7 +105,7 @@ func init() {
 		sliceDescriptor:           "(II)Llucy/deps/ArrayObject;",
 		appendDescriptor:          "(Ljava/lang/Object;)Llucy/deps/ArrayObject;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayObject;)Llucy/deps/ArrayObject;",
-		getJavaArrayDescriptor:    "()[Llucy/deps/ArrayObject;",
+		getJavaArrayDescriptor:    "()[Ljava/lang/Object;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_ARRAY] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]
 	ArrayMetas[ast.VARIABLE_TYPE_MAP] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]

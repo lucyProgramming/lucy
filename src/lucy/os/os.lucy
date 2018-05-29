@@ -44,7 +44,7 @@ public fn getCwd()->(d string = System.getProperty("user.dir")){
 	change working directory to
 */
 public fn chCwd(to string){
-	System.setProperty("user.dir",to);
+	System.setProperty("user.dir", to);
 }
 
 /*

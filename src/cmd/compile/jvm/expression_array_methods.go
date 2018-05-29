@@ -158,7 +158,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++
 		}
-	case common.ARRAY_METHOD_TO_JAVA:
+	case common.ARRAY_METHOD_TO_JAVA_ARRAY:
 		meta := ArrayMetas[call.Expression.Value.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -167,6 +167,11 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			Descriptor: meta.getJavaArrayDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		if e.Value.IsPointer() || e.Value.Typ != ast.VARIABLE_TYPE_STRING {
+			code.Codes[code.CodeLength] = cg.OP_checkcast
+			class.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
 		if e.IsStatementExpression {
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++

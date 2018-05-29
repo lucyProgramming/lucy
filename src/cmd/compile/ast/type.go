@@ -173,7 +173,8 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		if i != nil {
 			return PackageBeenCompile.load(i.Resource)
 		}
-		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), t.Name)
+		panic(11)
+		return nil, fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
 	packageAndName := strings.Split(t.Name, ".")
 	i := PackageBeenCompile.getImport(t.Pos.Filename, packageAndName[0])

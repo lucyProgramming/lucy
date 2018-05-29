@@ -548,3 +548,17 @@ type ExpressionArrayLiteral struct {
 	Expressions []*Expression
 	Length      int
 }
+
+func (e *Expression) isThis() bool {
+	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
+		return false
+	}
+	return e.Data.(*ExpressionIdentifer).Name == THIS
+}
+
+func (e *Expression) IsNoNameIdentifier() bool {
+	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
+		return false
+	}
+	return e.Data.(*ExpressionIdentifer).Name == NO_NAME_IDENTIFIER
+}

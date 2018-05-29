@@ -1,6 +1,6 @@
 
 import "os";
-
+import "java/lang/Runtime";
 
 
 fn main(args []string){
@@ -9,16 +9,37 @@ fn main(args []string){
 		print("env variable 'LUCYROOT' is not set");
 		return;
 	}
-	
-	
+	installDir := lucyRoot + "/lib/lucy/deps";
+	os.chDir(installDir);
+	for v := range installs{
+		filename := v.classname + ".java" ; 
+		s := array_template.replaceAll("ArrayTTT" , v.classname);
+		s = s.replaceAll("TTT" , v.typename );
+		s = s.replaceAll("IMPORTS" , v.imports );
+		os.File.writeFile(filename , []byte(s));
+		p := Runtime.getRuntime.exec( ["javac" ,  filename ] . toJavaArray());
+		if code := p.waitFor(); code != 1 {
+			printf("call javac failed,errCode:%d\n" , code);
+			os.exit(1);
+		}
+	}
 }
 
 
+var installs []InstallType;
 
-
-
-
-
+{
+	installs = new []InstallType(0);
+	installs.append(new InstallType("ArrayBool" , "boolean") , new InstallType("ArrayByte" ,  "byte"));
+	installs.append(new InstallType("ArrayShort" , "short") , new InstallType("ArrayInt" ,  "int"));
+	installs.append(new InstallType("ArrayLong" , "long") , new InstallType("ArrayFloat" ,  "float"));
+	installs.append(new InstallType("ArrayDouble" , "double") , new InstallType("ArrayString" , "String"));
+	object := new InstallType("ArrayObject" , "Object");
+	object.imports = `
+		import java.lang.Object;
+	`;
+	installs.append(object);
+}
 
 
 

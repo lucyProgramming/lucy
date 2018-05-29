@@ -9,22 +9,23 @@ import (
 )
 
 type Class struct {
-	NotImportedYet  bool // not imported
-	Name            string
-	Pos             *Pos
-	IsJava          bool //class found in CLASSPATH
-	IsGlobal        bool
-	Block           Block
-	AccessFlags     uint16
-	Fields          map[string]*ClassField
-	Methods         map[string][]*ClassMethod
-	SuperClassName  string
-	SuperClass      *Class
-	InterfaceNames  []*NameWithPos
-	Interfaces      []*Class
-	SouceFile       string
-	Used            bool
-	LoadFromOutSide bool
+	FatherNameResolved bool
+	NotImportedYet     bool // not imported
+	Name               string
+	Pos                *Pos
+	IsJava             bool //class found in CLASSPATH
+	IsGlobal           bool
+	Block              Block
+	AccessFlags        uint16
+	Fields             map[string]*ClassField
+	Methods            map[string][]*ClassMethod
+	SuperClassName     string
+	SuperClass         *Class
+	InterfaceNames     []*NameWithPos
+	Interfaces         []*Class
+	SouceFile          string
+	Used               bool
+	LoadFromOutSide    bool
 }
 
 func (c *Class) IsInterface() bool {
@@ -176,7 +177,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 }
 
 func (c *Class) resolveFather(block *Block) error {
-	if c.SuperClass != nil {
+	if c.SuperClass != nil || c.FatherNameResolved {
 		return nil
 	}
 	defer func() {
@@ -187,6 +188,7 @@ func (c *Class) resolveFather(block *Block) error {
 				c.SuperClassName = JAVA_ROOT_CLASS
 			}
 		}
+		c.FatherNameResolved = true
 	}()
 	if c.SuperClassName == "" {
 		return nil
@@ -341,7 +343,8 @@ func (c *Class) checkFields() []error {
 	for _, v := range c.Fields {
 		if v.Expression != nil {
 			if v.Expression.IsLiteral() == false {
-				errs = append(errs, fmt.Errorf("%s field default value must be literal", errMsgPrefix(v.Pos)))
+				errs = append(errs, fmt.Errorf("%s field default value must be literal",
+					errMsgPrefix(v.Pos)))
 				continue
 			}
 			ts, _ := v.Expression.check(&c.Block)
@@ -398,9 +401,6 @@ func (c *Class) loadSuperClass() error {
 	}
 	if c.Name == JAVA_ROOT_CLASS {
 		return fmt.Errorf("root class already")
-	}
-	if c.SuperClassName == "" {
-
 	}
 	d, err := PackageBeenCompile.load(c.SuperClassName)
 	if err != nil {
