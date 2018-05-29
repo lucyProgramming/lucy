@@ -11,9 +11,6 @@ fn printUsagaAndExit(){
 fn main(args []string){
 	
 	
-
-	
-	
 }
 
 
