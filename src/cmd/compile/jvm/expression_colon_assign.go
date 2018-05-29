@@ -165,9 +165,6 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		currentStack += 2
 		index--
 	}
-	if currentStack > maxstack {
-		maxstack = currentStack
-	}
 	index = 0
 	for _, v := range vs.Values {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
@@ -201,7 +198,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		stack, es := m.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
-			state.pushStack(class, vs.Values[0].Value)
+			state.pushStack(class, v.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}

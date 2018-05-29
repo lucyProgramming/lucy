@@ -15,7 +15,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	var mapv *VariableType
 	noType := m.Typ == nil
 	if noType && len(m.Values) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type ",
+		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type",
 			errMsgPrefix(e.Pos)))
 		return nil
 	}

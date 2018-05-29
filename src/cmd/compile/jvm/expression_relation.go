@@ -264,7 +264,6 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		code.Codes[code.CodeLength+4] = cg.OP_goto
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
 		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-
 		code.CodeLength += 8
 		return
 	}

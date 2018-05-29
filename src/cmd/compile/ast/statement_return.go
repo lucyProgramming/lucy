@@ -29,8 +29,7 @@ func (s *StatementReturn) check(b *Block) []error {
 	rs := b.InheritedAttribute.Function.Typ.ReturnList
 	if len(returndValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few arguments to return", errMsgPrefix(pos)))
-	}
-	if len(returndValueTypes) > len(rs) {
+	} else if len(returndValueTypes) > len(rs) {
 		errs = append(errs, fmt.Errorf("%s too many arguments to return", errMsgPrefix(pos)))
 	}
 	convertLiteralExpressionsToNeeds(s.Expressions,

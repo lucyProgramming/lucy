@@ -27,9 +27,6 @@ type Run struct {
 	Flags               Flags
 	PackagesCompiled    map[string]*PackageCompiled
 }
-type PackageCompiled struct {
-	meta *common.PackageMeta
-}
 
 func (r *Run) Help(command string) {
 
@@ -98,13 +95,13 @@ func (r *Run) RunCommand(command string, args []string) {
 	r.MainPackageLucyPath = founds[0]
 	//
 	{
-		_, _, err = r.buildPackage("", common.CORE_PACAKGE)
+		_, _, err = r.buildPackage("", common.CORE_PACAKGE, &ImportStack{})
 		if err != nil {
 			fmt.Printf("build  buildin package '%s' failed,err:%v\n", common.CORE_PACAKGE, err)
 			os.Exit(3)
 		}
 	}
-	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package)
+	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package, &ImportStack{})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
@@ -196,9 +193,6 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
 		return
 	}
-	if t, ok := r.PackagesCompiled[packageName]; ok {
-		return t.meta, false, lucyFiles, nil
-	}
 	if r.Flags.forceReBuild {
 		return
 	}
@@ -265,10 +259,6 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse import failed,err:%v", err)
 	}
-	is, err = r.javaPackageFilter(is)
-	if err != nil {
-		err = fmt.Errorf("parse import failed,err:%v", err)
-	}
 	isM := make(map[string]struct{})
 	for _, v := range is {
 		isM[v] = struct{}{}
@@ -277,7 +267,10 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	for k, _ := range isM {
 		is = append(is, k)
 	}
-
+	is, err = r.javaPackageFilter(is)
+	if err != nil {
+		err = fmt.Errorf("parse import failed,err:%v", err)
+	}
 	return is, err
 }
 
@@ -357,8 +350,12 @@ func (r *Run) foundError(packageName string, founds []string) error {
 	}
 	return nil
 }
-func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool, meta *common.PackageMeta, err error) {
-	//r.PackagesCompiled[packageName] = &PackageCompiled{}
+
+func (r *Run) buildPackage(lucypath string, packageName string, importStack *ImportStack) (needBuild bool,
+	meta *common.PackageMeta, err error) {
+	if p, ok := r.PackagesCompiled[packageName]; ok {
+		return false, p.meta, nil
+	}
 	if lucypath == "" {
 		founds := r.findPackageIn(packageName)
 		err = r.foundError(packageName, founds)
@@ -367,7 +364,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		}
 		lucypath = founds[0]
 	}
-
 	meta, needBuild, lucyFiles, err := r.needCompile(lucypath, packageName)
 	if err != nil {
 		err = fmt.Errorf("check if need compile,err:%v", err)
@@ -376,8 +372,15 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if needBuild == false { //current package no need to compile,but I need to check dependies
 		need := false
 		for _, v := range meta.Imports {
-
-			needBuild, _, err = r.buildPackage("", v)
+			if _, ok := r.PackagesCompiled[v]; ok {
+				continue
+			}
+			i := (&ImportStack{}).fromLast(importStack)
+			err = i.insert(&PackageCompiled{packageName: packageName})
+			if err != nil {
+				return
+			}
+			needBuild, _, err = r.buildPackage("", v, i)
 			if err != nil {
 				return
 			}
@@ -387,7 +390,6 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		}
 		needBuild = need
 	}
-
 	if needBuild == false { // no need actually
 		return
 	}
@@ -396,18 +398,22 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 	if err != nil {
 		return
 	}
-
+	fmt.Println("compiling.... ", packageName) // compile this package
 	for _, i := range is {
 		if _, ok := r.PackagesCompiled[i]; ok {
 			continue
 		}
-		_, _, err = r.buildPackage("", i) // compile depend
+		im := (&ImportStack{}).fromLast(importStack)
+		err = im.insert(&PackageCompiled{packageName: packageName})
+		if err != nil {
+			return
+		}
+		_, _, err = r.buildPackage("", i, im) // compile depend
 		if err != nil {
 			return
 		}
 	}
-	fmt.Println("compiling.... ", packageName) // compile this package
-	// build this package
+	//build this package
 	//read  files
 	destDir := filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName)
 	// mkdir all
@@ -474,6 +480,9 @@ func (r *Run) buildPackage(lucypath string, packageName string) (needBuild bool,
 		filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
 		bs,
 		0644)
-
+	r.PackagesCompiled[packageName] = &PackageCompiled{
+		meta:        meta,
+		packageName: packageName,
+	}
 	return
 }
