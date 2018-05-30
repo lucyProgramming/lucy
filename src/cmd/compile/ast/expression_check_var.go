@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -39,7 +40,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				continue
 			}
 			if k < len(valueTypes) && valueTypes[k] != nil {
-				if vs.Vs[k].Typ.TypeCompatible(valueTypes[k]) == false {
+				if vs.Vs[k].Typ.Equal(valueTypes[k]) == false {
 					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 						errMsgPrefix(valueTypes[k].Pos),
 						valueTypes[k].TypeString(),

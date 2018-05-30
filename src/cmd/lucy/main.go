@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 
-	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array"
-	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/run"
 	"os"
 	"runtime"
+
+	//	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array"
+	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array"
+	"gitee.com/yuyang-fine/lucy/src/cmd/lucy/run"
 )
 
 func printUsage() {
@@ -32,15 +35,19 @@ func main() {
 	case "run":
 		(&run.Run{}).RunCommand(os.Args[1], os.Args[2:])
 	case "clean":
-		args := []string{"run", "lucy/cmd/langtools/clean"}
+
+		args := []string{"lucy/cmd/langtools/clean"}
 		args = append(args, os.Args[2:]...)
-		callExternCmd("lucy", args)
+		(&run.Run{}).RunCommand("run", args)
 	case "test":
-		args := []string{"run", "lucy/cmd/langtools/test"}
+		args := []string{"lucy/cmd/langtools/test"}
 		args = append(args, os.Args[2:]...)
-		callExternCmd("lucy", args)
+		(&run.Run{}).RunCommand("run", args)
 	case "install_lucy_array":
-		(&install_lucy_array.InstallLucyArray{}).RunCommand(os.Args[1], os.Args[2:])
+		(&install_lucy_array.InstallLucyArray{}).RunCommand("install_lucy_array", nil)
+		//args := []string{"lucy/cmd/langtools/install_lucy_array"}
+		//args = append(args, os.Args[2:]...)
+		//(&run.Run{}).RunCommand("run", args)
 	default:
 		printUsage()
 		os.Exit(1)

@@ -13,11 +13,21 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if e.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
 	}
+	stacklength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stacklength)
+	}()
+
 	//new class
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
+	t := &cg.StackMap_verification_type_info{}
+	t.Verify = &cg.StackMap_Uninitialized_variable_info{
+		Index: uint16(code.CodeLength),
+	}
+	state.Stacks = append(state.Stacks, t, t)
 	code.CodeLength += 4
 	maxstack = 2
 	if n.Args != nil && len(n.Args) > 0 {

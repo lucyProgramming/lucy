@@ -1,0 +1,102 @@
+import "lucy/os";
+
+class Test {
+	lucypaths []string ;
+	packageName string ;
+	
+	public fn Test(lucypaths []string,packageName string){
+		this.lucypaths = lucypaths;
+		this.packageName = packageName;
+	}
+	
+	fn findPackageLiesIn()->(which string,err error){
+		ps := []string{} ; 
+		for _,v := range this.lucypaths {
+			if true == (new os.File(v + "/src/" + this.packageName)).isDirectory() {
+				ps.append(v);
+				break;
+			}
+		}
+		if ps.size() == 0 {
+			err = new error(sprintf("package '%s' not found" , this.packageName));
+			return ; 
+		}
+		if ps.size() > 1 {
+			errmsg := sprintf("more than 1 package named '%s'" , this.packageName);
+			err = new error(errmsg);
+			return ; 
+		}
+		which = ps[0];
+		
+		
+	}
+	
+	//real test method
+	public fn test(){
+    	w,err := this.findPackageLiesIn();
+		if err != null  {
+			print(err);
+			os.exit(1);
+		}
+		// check is test exist
+		dir := w + "/src/" + this.packageName + "/test" ;
+		if f := new os.File(dir); f.isDirectory() == false {
+			printf("dir '%s' is not directory\n" , dir);
+			return ;
+		}
+		this.testDir(this.packageName , dir );
+		
+		
+	}
+	
+	fn testDir(packageName  , dir string) {
+		fis,err := os.File.listDir(dir);
+		if err != null {
+			print(err);
+			return ;
+		}
+		lucyFiles := []os.File{}  ;
+		for v := range fis {
+		    name := v.getName();
+		    if v.isDirectory(){
+		        this.testDir(packageName + "/" + name , dir + "/" + name);
+		        continue;
+		    }
+		    if name.endsWith(".lucy")  {
+		        lucyFiles.append(v);
+		    }
+			print(v.getName());
+		}
+		if lucyFiles.size() == 0 {
+		    return ;
+		}
+
+
+        print("need" , dir , packageName );
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

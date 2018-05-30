@@ -31,18 +31,21 @@ func (s *StatementIF) check(father *Block) []error {
 			continue
 		}
 	}
-	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.CondtionBlock)
-	if errsNotEmpty(es) {
-		errs = append(errs, es...)
+	if s.Condition != nil {
+		conditionType, es := s.Condition.checkSingleValueContextExpression(&s.CondtionBlock)
+		if errsNotEmpty(es) {
+			errs = append(errs, es...)
+		}
+		if s.Condition.canbeUsedAsCondition() == false {
+			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
+				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
+		}
+		if conditionType != nil && conditionType.Typ != VARIABLE_TYPE_BOOL {
+			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+				errMsgPrefix(s.Condition.Pos)))
+		}
 	}
-	if s.Condition.canbeUsedAsCondition() == false {
-		errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-			errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
-	}
-	if conditionType != nil && conditionType.Typ != VARIABLE_TYPE_BOOL {
-		errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-			errMsgPrefix(s.Condition.Pos)))
-	}
+
 	s.Block.inherite(&s.CondtionBlock)
 	errs = append(errs, s.Block.checkStatements()...)
 	for _, v := range s.ElseIfList {

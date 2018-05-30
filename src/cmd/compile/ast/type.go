@@ -381,16 +381,6 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
-func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
-	// if t.IsInteger() && t2.IsInteger() {
-	// 	return true
-	// }
-	// if t.IsFloat() && t2.IsFloat() {
-	// 	return true
-	// }
-	return t.Equal(t2)
-}
-
 /*
 	t2 can be cast to t1
 */
@@ -432,6 +422,16 @@ func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
 	}
 	return false
 }
+
+//func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
+//	// if t.IsInteger() && t2.IsInteger() {
+//	// 	return true
+//	// }
+//	// if t.IsFloat() && t2.IsFloat() {
+//	// 	return true
+//	// }
+//	return t.Equal(t2)
+//}
 
 ///*
 //	number convert rule

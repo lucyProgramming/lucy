@@ -1,5 +1,7 @@
 
+// using go implementation
 
+/*
 class InstallType {
 	public classname    string ; 
 	public typename     string ; 
@@ -10,7 +12,7 @@ class InstallType {
 		this.typename = typename;
 	}
 }
-
+*/
 
 
 

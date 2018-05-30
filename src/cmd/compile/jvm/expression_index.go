@@ -207,7 +207,8 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength] = cg.OP_aaload
 	}
 	code.CodeLength++
-	if e.Value.IsPointer() {
+	if index.Expression.Typ == ast.VARIABLE_TYPE_ARRAY &&
+		e.Value.IsPointer() && e.Value.Typ != ast.VARIABLE_TYPE_STRING {
 		typeConverter.castPointerTypeToRealType(class, code, e.Value)
 	}
 	return

@@ -52,7 +52,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		if variable, ok := block.Vars[identifier.Name]; ok {
 			if variableType != nil {
-				if variable.Typ.TypeCompatible(ts[k]) == false {
+				if variable.Typ.Equal(ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(ts[k].Pos),
 						variable.Typ.TypeString(),
@@ -215,7 +215,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 			continue
 		}
 		if k < len(valueTypes) && valueTypes[k] != nil {
-			if !leftTypes[k].TypeCompatible(valueTypes[k]) {
+			if !leftTypes[k].Equal(valueTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 					errMsgPrefix(e.Pos),
 					valueTypes[k].TypeString(), leftTypes[k].TypeString()))

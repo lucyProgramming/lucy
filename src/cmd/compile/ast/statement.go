@@ -112,8 +112,8 @@ func (s *Statement) check(block *Block) []error { // b is father
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
-		s.StatementBreak.Defers = make([]*Defer, len(block.Defers))
-		copy(s.StatementBreak.Defers, block.Defers)
+		s.StatementContinue.Defers = make([]*Defer, len(block.Defers))
+		copy(s.StatementContinue.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.StatementName())}

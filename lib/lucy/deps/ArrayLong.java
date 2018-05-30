@@ -103,6 +103,5 @@ public class ArrayLong   {
 		this.cap = length;
 		return elements;
 	}
-	
 }
 

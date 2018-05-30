@@ -46,7 +46,7 @@ func (c *Class) accessMethod(name string, args []*VariableType,
 
 			for k, v := range m.Func.Typ.ParameterList {
 				if k < len(args) {
-					if args[k] != nil && !v.Typ.TypeCompatible(args[k]) {
+					if args[k] != nil && !v.Typ.Equal(args[k]) {
 						errmsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Typ.TypeString())
 						errmsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(m.Func.Name, args))
 						errmsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())

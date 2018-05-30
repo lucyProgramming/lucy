@@ -1,23 +1,34 @@
 
-import "os";
+
+// using go implementation
+
+/*
+
+import "lucy/os";
 import "java/lang/Runtime";
+
+var installs []InstallType;
 
 
 fn main(args []string){
 	lucyRoot := os.getEnv("LUCYROOT");
 	if lucyRoot == null || lucyRoot == ""{
 		print("env variable 'LUCYROOT' is not set");
-		return;
+		return ;
 	}
 	installDir := lucyRoot + "/lib/lucy/deps";
-	os.chDir(installDir);
+	os.chCwd(installDir);
 	for v := range installs{
 		filename := v.classname + ".java" ; 
+		print("installing: ",filename);
 		s := array_template.replaceAll("ArrayTTT" , v.classname);
 		s = s.replaceAll("TTT" , v.typename );
-		s = s.replaceAll("IMPORTS" , v.imports );
+		if v.imports != null {
+			s = s.replaceAll("IMPORTS" , v.imports );
+		}
 		os.File.writeFile(filename , []byte(s));
-		p := Runtime.getRuntime.exec( ["javac" ,  filename ] . toJavaArray());
+		p := Runtime.getRuntime().exec( ["javac" ,  filename ] . toJavaArray());
+		print(["javac" ,  filename ]);
 		if code := p.waitFor(); code != 1 {
 			printf("call javac failed,errCode:%d\n" , code);
 			os.exit(1);
@@ -26,7 +37,7 @@ fn main(args []string){
 }
 
 
-var installs []InstallType;
+
 
 {
 	installs = new []InstallType(0);
@@ -153,6 +164,6 @@ public class ArrayTTT   {
 }
 ` ; 
 
-
+*/
 
 

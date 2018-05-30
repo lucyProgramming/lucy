@@ -180,14 +180,14 @@ func (s *StatementFor) checkRange() []error {
 					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
 					return errs
 				}
-				if t2.TypeCompatible(rangeOn.ArrayType) == false {
+				if t2.Equal(rangeOn.ArrayType) == false {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(lefts[1].Pos), rangeOn.ArrayType.TypeString(), t2.TypeString()))
 					return errs
 				}
 
 			} else { // v model
-				if t1.TypeCompatible(rangeOn.ArrayType) == false {
+				if t1.Equal(rangeOn.ArrayType) == false {
 					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(lefts[1].Pos), rangeOn.ArrayType.TypeString(), t2.TypeString()))
 					return errs

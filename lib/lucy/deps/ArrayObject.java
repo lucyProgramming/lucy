@@ -105,6 +105,5 @@ public class ArrayObject   {
 		this.cap = length;
 		return elements;
 	}
-	
 }
 

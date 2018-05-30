@@ -284,7 +284,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			*errs = append(*errs, es...)
 			continue
 		}
-		if t != nil && t.TypeCompatible(v.Typ) == false {
+		if t != nil && t.Equal(v.Typ) == false {
 			err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
 				t.TypeString(), v.Typ.TypeString())
 			*errs = append(*errs, err)

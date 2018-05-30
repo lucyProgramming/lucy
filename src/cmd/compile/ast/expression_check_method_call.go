@@ -227,6 +227,34 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
+
+	if object.Typ == VARIABLE_TYPE_STRING {
+		if err := loadJavaStringClass(e.Pos); err != nil {
+			*errs = append(*errs, err)
+			return nil
+		}
+		args := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+		ms, matched, err := javaStringClass.accessMethod(call.Name, args, nil, false)
+		if err != nil {
+			*errs = append(*errs, err)
+			return nil
+		}
+		if matched {
+			call.Class = javaStringClass
+			if false == call.Expression.isThis() &&
+				ms[0].IsPublic() == false {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			}
+			call.Method = ms[0]
+			return ms[0].Func.Typ.retTypes(e.Pos)
+		}
+		if len(ms) == 0 {
+			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
+		} else {
+			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))
+		}
+		return nil
+	}
 	if object.Typ != VARIABLE_TYPE_OBJECT && object.Typ != VARIABLE_TYPE_CLASS {
 		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
@@ -297,7 +325,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		call.Method = ms[0]
 		return ms[0].Func.Typ.retTypes(e.Pos)
 	}
-	if ms == nil || len(ms) == 0 {
+	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
 	} else {
 		*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))

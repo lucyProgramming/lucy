@@ -17,16 +17,22 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	if no.Typ.Typ == VARIABLE_TYPE_ARRAY {
 		return e.checkNewArrayExpression(block, no, errs)
 	}
-	ret := &VariableType{}
-	*ret = *no.Typ
-	ret.Typ = VARIABLE_TYPE_OBJECT
-	ret.Pos = e.Pos
+
 	// new object
 	if no.Typ.Typ != VARIABLE_TYPE_OBJECT {
 		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'",
 			errMsgPrefix(e.Pos), no.Typ.TypeString()))
-		return ret
+		return nil
 	}
+	if no.Typ.Class.IsInterface() {
+		*errs = append(*errs, fmt.Errorf("%s '%s' is interface",
+			errMsgPrefix(e.Pos), no.Typ.Class.Name))
+		return nil
+	}
+	ret := &VariableType{}
+	*ret = *no.Typ
+	ret.Typ = VARIABLE_TYPE_OBJECT
+	ret.Pos = e.Pos
 	args := checkExpressions(block, no.Args, errs)
 	ms, matched, err := no.Typ.Class.matchContructionFunction(args, &no.Args)
 	if err != nil {

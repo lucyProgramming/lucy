@@ -103,6 +103,5 @@ public class ArrayByte   {
 		this.cap = length;
 		return elements;
 	}
-	
 }
 

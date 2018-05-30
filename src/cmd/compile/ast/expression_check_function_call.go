@@ -165,7 +165,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 		for k, v := range f.Typ.ParameterList {
 			if k < len(callargsTypes) && callargsTypes[k] != nil {
-				if !v.Typ.TypeCompatible(callargsTypes[k]) {
+				if !v.Typ.Equal(callargsTypes[k]) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix((*args)[k].Pos),
 						callargsTypes[k].TypeString(), v.Typ.TypeString()))

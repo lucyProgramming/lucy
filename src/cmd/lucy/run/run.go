@@ -12,8 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"strconv"
+
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 )
 
 type Run struct {
@@ -26,6 +27,7 @@ type Run struct {
 	classPaths          []string
 	Flags               Flags
 	PackagesCompiled    map[string]*PackageCompiled
+	Args                []string // lucy application args
 }
 
 func (r *Run) Help(command string) {
@@ -45,6 +47,7 @@ func (r *Run) parseCmd(args []string) error {
 		return fmt.Errorf("no package to run")
 	}
 	r.Package = args[0]
+	r.Args = args[1:]
 	return nil
 }
 
@@ -107,7 +110,7 @@ func (r *Run) RunCommand(command string, args []string) {
 		os.Exit(3)
 	}
 	//
-	cmd := exec.Command("java", r.Package+"/"+"main")
+	cmd := exec.Command("java", append([]string{r.Package + "/" + "main"}, r.Args...)...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -303,6 +306,7 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 	existInLucyPath := func(name string) (found []string) {
 		for _, v := range r.LucyPaths {
 			dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, name)
+			//fmt.Println(dir)
 			f, _ := os.Stat(dir)
 			if f != nil && f.IsDir() {
 				found = append(found, v)

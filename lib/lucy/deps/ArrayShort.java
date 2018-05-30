@@ -103,6 +103,5 @@ public class ArrayShort   {
 		this.cap = length;
 		return elements;
 	}
-	
 }
 

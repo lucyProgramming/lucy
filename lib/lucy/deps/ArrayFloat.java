@@ -103,6 +103,5 @@ public class ArrayFloat   {
 		this.cap = length;
 		return elements;
 	}
-	
 }
 

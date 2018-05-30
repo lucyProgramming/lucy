@@ -1,0 +1,61 @@
+
+import "lucy/os";
+import "java/lang/System";
+
+
+public fn getLucyRoot()->(path string , err error ){
+	envs := os.getEnvs();
+	if envs.contains("LUCYROOT") == false {
+		err = new error("env variable LUCYROOT is not set");
+		return ;
+	}
+	path = envs["LUCYROOT"];
+}
+
+public fn getLucyPath()->(paths []string, err error){
+	envs := os.getEnvs();
+	if envs.contains("LUCYROOT") == false {
+		err = new error("env variable LUCYROOT is not set");
+		return ;
+	}
+	if envs.contains("LUCYPATH") == false {
+		err = new error("env variable LUCYPATH is not set");
+		return ;
+	}
+	ps := { envs["LUCYROOT"] -> true };
+	lucyPath := envs["LUCYPATH"];
+	osName := System.getProperty("os.name").toLowerCase();
+	if osName.startsWith("windows") {
+	    for v := range lucyPath.split(";"){
+        		ps[v] = true;
+        }
+	}else {  // unix style
+	    for v := range lucyPath.split(":"){
+        		ps[v] = true;
+        }
+	}
+	
+	
+	paths = new []string(ps.size());
+	i := 0 ;
+	for k,_ := range ps {
+		paths[i] = k;
+		i++; 
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,6 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
+//
 type Block struct {
 	DeadEnding                 bool
 	Defers                     []*Defer
