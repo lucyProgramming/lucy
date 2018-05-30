@@ -216,7 +216,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			if object.ArrayType.Typ == VARIABLE_TYPE_ARRAY {
-				*errs = append(*errs, fmt.Errorf("%s cannot convert more 1 dimension 'lucy array' to ' java array'",
+				*errs = append(*errs, fmt.Errorf("%s cannot convert more than 1 dimension 'lucy array' to ' java array'",
 					errMsgPrefix(e.Pos)))
 			}
 			tt := object.Clone()

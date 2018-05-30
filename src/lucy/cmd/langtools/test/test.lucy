@@ -14,7 +14,6 @@ class Test {
 		for _,v := range this.lucypaths {
 			if true == (new os.File(v + "/src/" + this.packageName)).isDirectory() {
 				ps.append(v);
-				break;
 			}
 		}
 		if ps.size() == 0 {
