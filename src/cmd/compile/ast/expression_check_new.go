@@ -14,7 +14,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	if no.Typ.Typ == VARIABLE_TYPE_MAP {
 		return e.checkNewMapExpression(block, no, errs)
 	}
-	if no.Typ.Typ == VARIABLE_TYPE_ARRAY {
+	if no.Typ.Typ == VARIABLE_TYPE_ARRAY || no.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 		return e.checkNewArrayExpression(block, no, errs)
 	}
 

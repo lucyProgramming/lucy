@@ -28,7 +28,6 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Variable
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-
 		if indexType != nil {
 			if indexType.IsInteger() {
 				if indexType.Typ == VARIABLE_TYPE_LONG {

@@ -27,7 +27,6 @@ class Test {
 		}
 		which = ps[0];
 		
-		
 	}
 	
 	//real test method
@@ -44,7 +43,6 @@ class Test {
 			return ;
 		}
 		this.testDir(this.packageName , dir );
-		
 		
 	}
 	

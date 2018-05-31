@@ -11,6 +11,7 @@ import (
 
 func (p *Parser) parseType() (*ast.VariableType, error) {
 	var err error
+	//	var ret *ast.VariableType
 	switch p.token.Type {
 	case lex.TOKEN_LB:
 		pos := p.mkPos()

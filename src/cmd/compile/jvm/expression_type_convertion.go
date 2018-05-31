@@ -88,7 +88,7 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.classname,
 			Method:     "getJavaArray",
-			Descriptor: meta.getJavaArrayDescriptor,
+			Descriptor: "()[B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokespecial

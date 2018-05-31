@@ -381,10 +381,7 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
-/*
-	t2 can be cast to t1
-*/
-func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
+func (v *VariableType) Equal(assignMent *VariableType) bool {
 	if v == assignMent {
 		return true
 	}
@@ -395,33 +392,68 @@ func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
 		return true
 	}
 	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
-		return v.ArrayType.Equal(assignMent.ArrayType, true)
+		return v.ArrayType.Equal(assignMent.ArrayType)
 	}
 	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return v.ArrayType.Equal(assignMent.ArrayType, true)
+		return v.ArrayType.Equal(assignMent.ArrayType)
 	}
 
 	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
 		return v.Enum.Name == assignMent.Enum.Name
 	}
 	if v.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
-		return v.Map.K.Equal(assignMent.Map.K, true) && v.Map.V.Equal(assignMent.Map.V, true)
+		return v.Map.K.Equal(assignMent.Map.K) && v.Map.V.Equal(assignMent.Map.V)
 	}
 	if v.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
-		if len(subPart) > 0 {
-			return v.Class.Name == assignMent.Class.Name
-		} else {
-			if v.Class.IsInterface() {
-				i, _ := assignMent.Class.implemented(v.Class.Name)
-				return i
-			} else { // class
-				has, _ := assignMent.Class.haveSuper(v.Class.Name)
-				return has
-			}
+		if v.Class.IsInterface() {
+			i, _ := assignMent.Class.implemented(v.Class.Name)
+			return i
+		} else { // class
+			has, _ := assignMent.Class.haveSuper(v.Class.Name)
+			return has
 		}
 	}
 	return false
 }
+
+//func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
+//	if v == assignMent {
+//		return true
+//	}
+//	if v.IsPrimitive() && assignMent.IsPrimitive() {
+//		return v.Typ == assignMent.Typ
+//	}
+//	if v.IsPointer() && assignMent.Typ == VARIABLE_TYPE_NULL {
+//		return true
+//	}
+//	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
+//		return v.ArrayType.Equal(assignMent.ArrayType, true)
+//	}
+//	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+//		return v.ArrayType.Equal(assignMent.ArrayType, true)
+//	}
+
+//	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
+//		return v.Enum.Name == assignMent.Enum.Name
+//	}
+//	if v.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
+//		return v.Map.K.Equal(assignMent.Map.K, true) && v.Map.V.Equal(assignMent.Map.V, true)
+//	}
+//	if v.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
+//		if len(subPart) > 0 {
+//			return v.Class.Name == assignMent.Class.Name
+//		} else {
+//			if v.Class.IsInterface() {
+//				i, _ := assignMent.Class.implemented(v.Class.Name)
+//				return i
+//			} else { // class
+//				has, _ := assignMent.Class.haveSuper(v.Class.Name)
+//				return has
+//			}
+//		}
+//	}
+//	return false
+//}
 
 //func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
 //	// if t.IsInteger() && t2.IsInteger() {

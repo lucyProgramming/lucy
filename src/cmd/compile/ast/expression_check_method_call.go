@@ -210,18 +210,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			t := object.Clone()
 			t.Pos = e.Pos
 			return []*VariableType{t}
-		case common.ARRAY_METHOD_TO_JAVA_ARRAY:
-			if len(call.Args) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s '%s' expect no arguments",
-					errMsgPrefix(e.Pos), call.Name))
-			}
-			if object.ArrayType.Typ == VARIABLE_TYPE_ARRAY {
-				*errs = append(*errs, fmt.Errorf("%s cannot convert more than 1 dimension 'lucy array' to ' java array'",
-					errMsgPrefix(e.Pos)))
-			}
-			tt := object.Clone()
-			tt.Typ = VARIABLE_TYPE_JAVA_ARRAY
-			return []*VariableType{tt}
+
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}

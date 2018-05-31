@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
 	"fmt"
 	"strings"
 
@@ -99,32 +98,6 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 			code.CodeLength += 3
 		}
 	}
-}
-
-func checkStackTopIfNagetiveThrowIndexOutOfRangeException(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	context *Context, state *StackMapState) (increment uint16) {
-	increment = 1
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
-	context.MakeStackMap(code, state, code.CodeLength+6)
-	context.MakeStackMap(code, state, code.CodeLength+15)
-	code.Codes[code.CodeLength] = cg.OP_iflt
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-	code.Codes[code.CodeLength+3] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 12)
-	code.Codes[code.CodeLength+6] = cg.OP_pop
-	code.Codes[code.CodeLength+7] = cg.OP_new
-	class.InsertClassConst(java_index_out_of_range_exception_class, code.Codes[code.CodeLength+8:code.CodeLength+10])
-	code.Codes[code.CodeLength+10] = cg.OP_dup
-	code.Codes[code.CodeLength+11] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_index_out_of_range_exception_class,
-		Method:     special_method_init,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+12:code.CodeLength+14])
-	code.Codes[code.CodeLength+14] = cg.OP_athrow
-	code.CodeLength += 15
-	return
 }
 
 func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode,

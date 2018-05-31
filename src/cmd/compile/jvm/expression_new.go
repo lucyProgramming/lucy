@@ -10,6 +10,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if e.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildNewArray(class, code, e, context, state)
 	}
+	if e.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+		return m.buildNewJavaArray(class, code, e, context, state)
+	}
 	if e.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
 	}
@@ -71,6 +74,34 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	return
 }
+
+func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context, state *StackMapState) (maxstack uint16) {
+	dimensions := byte(0)
+	{
+		// get dimension
+		t := e.Value
+		for t.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+			dimensions++
+			t = t.ArrayType
+		}
+	}
+	n := e.Data.(*ast.ExpressionNew)
+	maxstack, _ = m.build(class, code, n.Args[0], context, state) // must be a integer
+	currentStack := uint16(1)
+	for i := byte(0); i < dimensions-1; i++ {
+		loadInt32(class, code, 1)
+		currentStack++
+		if currentStack > maxstack {
+			maxstack = currentStack
+		}
+	}
+	code.Codes[code.CodeLength] = cg.OP_multianewarray
+	class.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength+3] = dimensions
+	code.CodeLength += 4
+	return
+}
 func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxstack uint16) {
 	//new
@@ -101,9 +132,6 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	currentStack := uint16(3)
 	if currentStack > maxstack {
 		maxstack = currentStack
-	}
-	if t := checkStackTopIfNagetiveThrowIndexOutOfRangeException(class, code, context, state) + currentStack; t > maxstack {
-		maxstack = t
 	}
 	switch e.Value.ArrayType.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
