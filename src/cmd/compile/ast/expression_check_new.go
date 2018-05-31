@@ -14,8 +14,11 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	if no.Typ.Typ == VARIABLE_TYPE_MAP {
 		return e.checkNewMapExpression(block, no, errs)
 	}
-	if no.Typ.Typ == VARIABLE_TYPE_ARRAY || no.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+	if no.Typ.Typ == VARIABLE_TYPE_ARRAY {
 		return e.checkNewArrayExpression(block, no, errs)
+	}
+	if no.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return e.checkNewJavaArrayExpression(block, no, errs)
 	}
 
 	// new object
@@ -61,6 +64,11 @@ func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
 	tt := newMap.Typ.Clone()
 	tt.Pos = e.Pos
 	return tt
+}
+
+func (e *Expression) checkNewJavaArrayExpression(block *Block, newArray *ExpressionNew,
+	errs *[]error) *VariableType {
+	return e.checkNewArrayExpression(block, newArray, errs)
 }
 
 func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew,

@@ -3,18 +3,33 @@ package parser
 import (
 	"fmt"
 
-	"strconv"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (p *Parser) parseType() (*ast.VariableType, error) {
+func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) {
 	var err error
-	//	var ret *ast.VariableType
+	var ret *ast.VariableType
 	switch p.token.Type {
+
 	case lex.TOKEN_LB:
 		pos := p.mkPos()
+		if len(pre) > 0 {
+			p.Next()
+			if p.token.Type != lex.TOKEN_RB {
+				// [ and ] not match
+				err = fmt.Errorf("%s '[' and ']' not match", p.errorMsgPrefix())
+				p.errs = append(p.errs, err)
+				return nil, err
+			}
+			p.Next() //skip ]
+			ret = &ast.VariableType{
+				Pos:       pos,
+				Typ:       ast.VARIABLE_TYPE_JAVA_ARRAY,
+				ArrayType: pre[0],
+			}
+			break
+		}
 		p.Next()
 		if p.token.Type != lex.TOKEN_RB {
 			// [ and ] not match
@@ -28,79 +43,72 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 		if err != nil {
 			return nil, err
 		}
-		tt := &ast.VariableType{}
-		tt.Pos = pos
-		tt.Typ = ast.VARIABLE_TYPE_ARRAY
-		tt.ArrayType = t
-		return tt, nil
+		ret = &ast.VariableType{}
+		ret.Pos = pos
+		ret.Typ = ast.VARIABLE_TYPE_ARRAY
+		ret.ArrayType = t
 	case lex.TOKEN_BOOL:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BOOL,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_BYTE:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_BYTE,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_SHORT:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_SHORT,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_INT:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_INT,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_FLOAT:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_FLOAT,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_DOUBLE:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_DOUBLE,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_LONG:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_LONG,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_STRING:
 		pos := p.mkPos()
 		p.Next()
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_STRING,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_IDENTIFIER:
-		t, err := p.parseIdentifierType()
+		ret, err = p.parseIdentifierType()
 		if err != nil {
-			return t, err
+			return nil, err
 		}
-		if t.Name[0] == 'T' { // first byte is 'T'
-			_, err := strconv.Atoi(t.Name[1:])
-			if err == nil { // valid number after T
-				t.Typ = ast.VARIABLE_TYPE_T // correct type named 'T1' or 'T2' to Templates
-			}
-		}
-		return t, nil
+
 	case lex.TOKEN_MAP:
 		pos := p.mkPos()
 		p.Next() // skip map key word
@@ -109,7 +117,8 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 				p.errorMsgPrefix(), p.token.Desp)
 		}
 		p.Next() // skip {
-		k, err := p.parseType()
+		var k, v *ast.VariableType
+		k, err = p.parseType()
 		if err != nil {
 			return nil, err
 		}
@@ -131,25 +140,33 @@ func (p *Parser) parseType() (*ast.VariableType, error) {
 			K: k,
 			V: v,
 		}
-		return &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ: ast.VARIABLE_TYPE_MAP,
 			Map: m,
 			Pos: pos,
-		}, nil
+		}
 	case lex.TOKEN_T:
 		pos := p.mkPos()
-		ret := &ast.VariableType{
+		ret = &ast.VariableType{
 			Typ:  ast.VARIABLE_TYPE_T,
 			Pos:  pos,
 			Name: p.token.Data.(string),
 		}
 		p.Next()
+	default:
+		err = fmt.Errorf("%s unkown type,begining token is '%s'",
+			p.errorMsgPrefix(), p.token.Desp)
+	}
+	if err != nil {
+		p.errs = append(p.errs, err)
 		return ret, nil
 	}
-	err = fmt.Errorf("%s unkown type,begining token is '%s'",
-		p.errorMsgPrefix(), p.token.Desp)
-	p.errs = append(p.errs, err)
-	return nil, err
+	if p.token.Type == lex.TOKEN_LB {
+		return p.parseType(ret)
+	} else {
+		return ret, err
+	}
+
 }
 
 func (p *Parser) isValidTypeBegin() bool {

@@ -16,8 +16,8 @@ const (
 	VARIABLE_TYPE_FLOAT
 	VARIABLE_TYPE_DOUBLE
 	//ref types
-
 	VARIABLE_TYPE_STRING
+
 	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_MAP
 	VARIABLE_TYPE_ARRAY
@@ -39,7 +39,7 @@ type VariableType struct {
 	Resolved  bool
 	Pos       *Pos
 	Typ       int
-	Name      string //
+	Name      string
 	ArrayType *VariableType
 	Class     *Class
 	Enum      *Enum

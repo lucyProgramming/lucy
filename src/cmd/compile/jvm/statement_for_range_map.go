@@ -2,7 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
-	//"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -33,9 +33,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+7] = cg.OP_pop
 	code.CodeLength += 8
 	forState := (&StackMapState{}).FromLast(state)
-	defer func() {
-		state.addTop(forState)
-	}()
 
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	//keySets
@@ -97,20 +94,16 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV.Name != ast.NO_NAME_IDENTIFIER {
-			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-				closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
-				s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
-				code.MaxLocals++
-				copyOP(code,
-					storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
-				forState.appendLocals(class,
-					forState.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
-			}
+		if s.RangeAttr.IdentifierV != nil && s.RangeAttr.IdentifierV.Var.BeenCaptured {
+			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+			code.MaxLocals++
+			copyOP(code,
+				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+			forState.appendLocals(class,
+				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
 		}
-
-		if s.RangeAttr.ModelKV &&
-			s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER &&
+		if s.RangeAttr.IdentifierK != nil &&
 			s.RangeAttr.IdentifierK.Var.BeenCaptured {
 			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
@@ -121,13 +114,11 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierK.Var.Typ.Typ).className))
 		}
 	}
+
 	//continue offset start from here
 	loopBeginsAt := code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
-	// load  map object
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
-	// load k sets
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
+
 	// load k
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 	code.Codes[code.CodeLength] = cg.OP_dup
@@ -138,29 +129,44 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		maxstack = 5
 	}
 	exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)
-	//get object for hashMap
-	code.Codes[code.CodeLength] = cg.OP_aaload
-	code.CodeLength++
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_hashmap_class,
-		Method:     "get",
-		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	if s.RangeAttr.RangeOn.Value.Map.V.IsPointer() == false {
-		typeConverter.getFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+	if s.RangeAttr.IdentifierV != nil || s.RangeAttr.ExpressionV != nil {
+		// load k sets
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
+		// swap
+		code.Codes[code.CodeLength] = cg.OP_swap
+		code.CodeLength++
+		//get object for hashMap
+		code.Codes[code.CodeLength] = cg.OP_aaload
+		code.CodeLength++
+		// load  map object
+		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
+		// swap
+		code.Codes[code.CodeLength] = cg.OP_swap
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      java_hashmap_class,
+			Method:     "get",
+			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if s.RangeAttr.RangeOn.Value.Map.V.IsPointer() == false {
+			typeConverter.getFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+		} else {
+			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+		}
+		autoVar.V = code.MaxLocals
+		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
+		//store to V
+		copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
+		forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
 	} else {
-		typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.CodeLength++
 	}
-	autoVar.V = code.MaxLocals
-	code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
-	//store to V
-	copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
-	forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
-	// store to k,if need
 
-	if s.RangeAttr.ModelKV {
+	// store to k,if need
+	if s.RangeAttr.IdentifierK != nil || s.RangeAttr.ExpressionK != nil {
 		// load k sets
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 		// load k
@@ -181,7 +187,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	// store k and v into user defined variable
 	//store v in real v
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV.Name != ast.NO_NAME_IDENTIFIER {
+		if s.RangeAttr.IdentifierV != nil {
 			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 				copyOP(code,
@@ -192,7 +198,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 				s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
 			}
 		}
-		if s.RangeAttr.ModelKV && s.RangeAttr.IdentifierK.Name != ast.NO_NAME_IDENTIFIER {
+		if s.RangeAttr.IdentifierK != nil {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 				copyOP(code,
@@ -217,7 +223,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
 		forState.popStack(len(forState.Stacks) - stackLength)
-		if s.RangeAttr.ModelKV {
+		if s.RangeAttr.ExpressionK != nil {
 			stackLength := len(forState.Stacks)
 			stack, remainStack, op, _, classname, name, descriptor :=
 				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, forState)
@@ -254,21 +260,15 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	jumpTo(cg.OP_goto, code, loopBeginsAt)
 	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
 
+	state.addTop(forState) // add top
 	{
-		// object ref
-		state.pushStack(class,
-			state.newObjectVariableType(java_hashmap_class))
-		t := &ast.VariableType{}
-		t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
-		t.ArrayType = state.newObjectVariableType(java_root_class)
-		state.pushStack(class, t)
 		state.pushStack(class,
 			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(3)
+		state.popStack(1)
 	}
 
 	// pop 3
-	copyOP(code, []byte{cg.OP_pop, cg.OP_pop, cg.OP_pop}...)
+	copyOP(code, []byte{cg.OP_pop}...)
 	return
 }

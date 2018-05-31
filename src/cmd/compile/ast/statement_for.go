@@ -20,7 +20,6 @@ type StatementFor struct {
 }
 
 type StatmentForRangeAttr struct {
-	ModelKV     bool
 	IdentifierK *ExpressionIdentifer
 	IdentifierV *ExpressionIdentifer
 	ExpressionK *Expression
@@ -74,13 +73,18 @@ func (s *StatementFor) checkRange() []error {
 		modelkv = true
 	}
 	s.RangeAttr = &StatmentForRangeAttr{}
-	s.RangeAttr.ModelKV = modelkv
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
 		if modelkv {
-			s.RangeAttr.ExpressionK = lefts[0]
-			s.RangeAttr.ExpressionV = lefts[1]
+			if false == lefts[0].IsNoNameIdentifier() {
+				s.RangeAttr.ExpressionK = lefts[0]
+			}
+			if false == lefts[1].IsNoNameIdentifier() {
+				s.RangeAttr.ExpressionV = lefts[1]
+			}
 		} else {
-			s.RangeAttr.ExpressionV = lefts[0]
+			if false == lefts[0].IsNoNameIdentifier() {
+				s.RangeAttr.ExpressionV = lefts[0]
+			}
 		}
 	}
 	s.RangeAttr.RangeOn = rangeExpression
@@ -116,8 +120,7 @@ func (s *StatementFor) checkRange() []error {
 			identifierV = lefts[0].Data.(*ExpressionIdentifer)
 			posv = lefts[0].Pos
 		}
-		s.RangeAttr.IdentifierV = identifierV
-		s.RangeAttr.IdentifierK = identifierK
+
 		if identifierV.Name != NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
 			if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
@@ -132,6 +135,7 @@ func (s *StatementFor) checkRange() []error {
 				errs = append(errs, err)
 			}
 			identifierV.Var = vd
+			s.RangeAttr.IdentifierV = identifierV
 		}
 		if modelkv && identifierK.Name != NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
@@ -152,68 +156,51 @@ func (s *StatementFor) checkRange() []error {
 				errs = append(errs, err)
 			}
 			identifierK.Var = vd
+			s.RangeAttr.IdentifierK = identifierK
 		}
 	}
 
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
-		t1 := lefts[0].getLeftValue(s.Block, &errs)
-		lefts[0].Value = t1
-		var t2 *VariableType
-		if modelkv {
-			t2 = lefts[1].getLeftValue(s.Block, &errs)
-			lefts[1].Value = t2
+		var tk *VariableType
+		if s.RangeAttr.ExpressionK != nil {
+			tk = s.RangeAttr.ExpressionK.getLeftValue(s.Block, &errs)
+			if tk == nil {
+				return errs
+			}
 		}
-		if t1 == nil {
-			return errs
+		var tv *VariableType
+		if s.RangeAttr.ExpressionV != nil {
+			tv = s.RangeAttr.ExpressionV.getLeftValue(s.Block, &errs)
+			if tv == nil {
+				return errs
+			}
 		}
-		if modelkv && t2 == nil {
-			return errs
-		}
-		lefts[0].Value = t1
-		if modelkv && t2 != nil {
-			lefts[1].Value = t2
-		}
+		var tkk, tvv *VariableType
+
 		if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
 			rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-			if modelkv {
-				if t1.IsInteger() == false {
-					errs = append(errs, fmt.Errorf("%s index must be integer", errMsgPrefix(lefts[0].Pos)))
-					return errs
-				}
-				if t2.Equal(rangeOn.ArrayType) == false {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-						errMsgPrefix(lefts[1].Pos), rangeOn.ArrayType.TypeString(), t2.TypeString()))
-					return errs
-				}
-
-			} else { // v model
-				if t1.Equal(rangeOn.ArrayType) == false {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-						errMsgPrefix(lefts[1].Pos), rangeOn.ArrayType.TypeString(), t2.TypeString()))
-					return errs
-				}
+			tkk = &VariableType{
+				Typ: VARIABLE_TYPE_INT,
 			}
-		} else { // map type
-			if modelkv {
-				if false == t1.Equal(rangeOn.Map.K) {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-						errMsgPrefix(lefts[1].Pos), rangeOn.Map.K.TypeString(), t1.TypeString()))
-					return errs
-
-				}
-				if false == t2.Equal(rangeOn.Map.V) {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-						errMsgPrefix(lefts[1].Pos), rangeOn.Map.K.TypeString(), t2.TypeString()))
-					return errs
-
-				}
-			} else {
-				if false == t1.Equal(rangeOn.Map.V) {
-					errs = append(errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-						errMsgPrefix(lefts[1].Pos), rangeOn.Map.K.TypeString(), t1.TypeString()))
-					return errs
-
-				}
+			tvv = rangeOn.ArrayType
+		} else {
+			tkk = rangeOn.Map.K
+			tvv = rangeOn.Map.V
+		}
+		if tk != nil {
+			if tk.Equal(tkk) == false {
+				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
+					errMsgPrefix(s.RangeAttr.ExpressionK.Pos), tk.TypeString(), tkk.TypeString())
+				errs = append(errs, err)
+				return errs
+			}
+		}
+		if tv != nil {
+			if tv.Equal(tvv) == false {
+				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
+					errMsgPrefix(s.RangeAttr.ExpressionK.Pos), tk.TypeString(), tkk.TypeString())
+				errs = append(errs, err)
+				return errs
 			}
 		}
 	}

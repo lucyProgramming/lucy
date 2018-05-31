@@ -90,7 +90,7 @@ func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.At
 	maxstack, _ = m.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
-		loadInt32(class, code, 1)
+		loadInt32(class, code, 0)
 		currentStack++
 		if currentStack > maxstack {
 			maxstack = currentStack
@@ -180,6 +180,10 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
 		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(Descriptor.typeDescriptor(e.Value.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
