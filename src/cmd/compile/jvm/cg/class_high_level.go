@@ -103,6 +103,11 @@ func (c *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
 	source files
 */
 func (c *ClassHighLevel) getSourceFile() string {
+	if len(c.SourceFiles) == 1 {
+		for k, _ := range c.SourceFiles {
+			return k
+		}
+	}
 	var s string
 	if len(c.SourceFiles) > 1 {
 		s = "multi source compile into one class file,which are:\n"

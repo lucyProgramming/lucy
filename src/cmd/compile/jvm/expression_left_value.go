@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -248,11 +249,11 @@ func (m *MakeExpression) getLeftValue(
 			}
 			switch e.Value.Typ {
 			case ast.VARIABLE_TYPE_BOOL:
-				fallthrough
+				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_BYTE:
-				fallthrough
+				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_SHORT:
-				fallthrough
+				op = []byte{cg.OP_sastore}
 			case ast.VARIABLE_TYPE_ENUM:
 				fallthrough
 			case ast.VARIABLE_TYPE_INT:
@@ -290,11 +291,11 @@ func (m *MakeExpression) getLeftValue(
 			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			switch e.Value.Typ {
 			case ast.VARIABLE_TYPE_BOOL:
-				fallthrough
+				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_BYTE:
-				fallthrough
+				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_SHORT:
-				fallthrough
+				op = []byte{cg.OP_sastore}
 			case ast.VARIABLE_TYPE_ENUM:
 				fallthrough
 			case ast.VARIABLE_TYPE_INT:

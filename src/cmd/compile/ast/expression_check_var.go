@@ -44,7 +44,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 						errMsgPrefix(valueTypes[k].Pos),
 						valueTypes[k].TypeString(),
-						vs.Vs[k].Typ.TypeString())
+						v.Typ.TypeString())
 					*errs = append(*errs, err)
 					noErr = false
 					continue

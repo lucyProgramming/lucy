@@ -1,3 +1,6 @@
+
+
+
 import "java/io";
 import "lucy/lang";
 
@@ -65,7 +68,7 @@ public class File extends io.File {
 		}
 	}
 	
-	public static fn writeFile( filepath string ,bs []byte){
+	public static fn writeFile( filepath string , bs []byte){
 		writer := new io.FileOutputStream(new io.File(filepath));
 		defer writer.close();
 		writer.write(bs.toJavaArray());

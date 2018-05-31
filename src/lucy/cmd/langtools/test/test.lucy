@@ -1,3 +1,4 @@
+import "java/io";
 import "lucy/os";
 
 class Test {
@@ -12,7 +13,7 @@ class Test {
 	fn findPackageLiesIn()->(which string,err error){
 		ps := []string{} ; 
 		for _,v := range this.lucypaths {
-			if true == (new os.File(v + "/src/" + this.packageName)).isDirectory() {
+			if true == (new io.File(v + "/src/" + this.packageName)).isDirectory() {
 				ps.append(v);
 			}
 		}
@@ -38,7 +39,7 @@ class Test {
 		}
 		// check is test exist
 		dir := w + "/src/" + this.packageName + "/test" ;
-		if f := new os.File(dir); f.isDirectory() == false {
+		if f := new io.File(dir); f.isDirectory() == false {
 			printf("dir '%s' is not directory\n" , dir);
 			return ;
 		}
@@ -47,12 +48,12 @@ class Test {
 	}
 	
 	fn testDir(packageName  , dir string) {
-		fis,err := os.File.listDir(dir);
+		fis,err := io.File.listDir(dir);
 		if err != null {
 			print(err);
 			return ;
 		}
-		lucyFiles := []os.File{}  ;
+		lucyFiles := []io.File{}  ;
 		for v := range fis {
 		    name := v.getName();
 		    if v.isDirectory(){

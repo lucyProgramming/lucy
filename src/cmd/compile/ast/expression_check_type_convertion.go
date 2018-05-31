@@ -31,27 +31,32 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 		}
 		return ret
 	}
-	// string(['h'] , 'e')
+
+	// string([]byte)
 	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
 		t.Typ == VARIABLE_TYPE_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
 		return ret
 	}
-	// string (new Object(""))
+	// string(byte[])
 	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
-		t.Typ == VARIABLE_TYPE_OBJECT {
+		t.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
 		return ret
 	}
+
 	// []byte("hello world")
 	if convertion.Typ.Typ == VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
 		t.Typ == VARIABLE_TYPE_STRING {
 		return ret
 	}
-	/*
-		xxx(yyy)
-	*/
-	if convertion.Typ.Typ == VARIABLE_TYPE_OBJECT && t.IsPointer() {
+	// byte[]("hello world")
+	if convertion.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY && convertion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
+		t.Typ == VARIABLE_TYPE_STRING {
 		return ret
 	}
+	if convertion.Typ.validForTypeAssert() && t.IsPointer() {
+		return ret
+	}
+
 	*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s'",
 		errMsgPrefix(e.Pos), t.TypeString(), convertion.Typ.TypeString()))
 	return ret

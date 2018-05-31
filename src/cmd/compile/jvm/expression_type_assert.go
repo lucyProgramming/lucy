@@ -14,7 +14,14 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof
-	class.InsertClassConst(assert.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	if assert.Typ.Typ == ast.VARIABLE_TYPE_OBJECT {
+		class.InsertClassConst(assert.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	} else if assert.Typ.Typ == ast.VARIABLE_TYPE_ARRAY { // arrays
+		meta := ArrayMetas[assert.Typ.ArrayType.Typ]
+		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	} else {
+		class.InsertClassConst(Descriptor.typeDescriptor(assert.Typ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+	}
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 

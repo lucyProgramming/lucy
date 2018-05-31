@@ -50,6 +50,27 @@ type VariableType struct {
 	Alias     string
 }
 
+func (v *VariableType) validForTypeAssert() bool {
+	if v.IsPointer() == false {
+		return false
+	}
+	if v.Typ == VARIABLE_TYPE_ARRAY && v.ArrayType.IsPrimitive() {
+		return true
+	}
+	if v.Typ == VARIABLE_TYPE_OBJECT || v.Typ == VARIABLE_TYPE_STRING {
+		return true
+	}
+	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		if v.ArrayType.IsPointer() {
+			return v.ArrayType.validForTypeAssert()
+		} else {
+			return true
+		}
+	}
+
+	return false
+}
+
 type Map struct {
 	K *VariableType
 	V *VariableType
@@ -389,6 +410,10 @@ func (v *VariableType) Equal(assignMent *VariableType) bool {
 		return v.Typ == assignMent.Typ
 	}
 	if v.IsPointer() && assignMent.Typ == VARIABLE_TYPE_NULL {
+		return true
+	}
+	if v.Typ == VARIABLE_TYPE_OBJECT && v.Class.Name == JAVA_ROOT_CLASS &&
+		assignMent.IsPointer() {
 		return true
 	}
 	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
