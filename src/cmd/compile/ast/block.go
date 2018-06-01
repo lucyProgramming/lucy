@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -355,7 +356,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		}
 		b.Types[name] = d.(*VariableType)
 	default:
-		panic("????????")
+		panic(d) // panic d
 	}
 	return nil
 }

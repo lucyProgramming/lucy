@@ -21,14 +21,13 @@ func (p *Function) consume(untils map[int]bool) {
 
 func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
-	{
-		offset := p.parser.scanner.GetOffSet()
-		defer func() {
-			if f.Block.EndPos != nil {
-				f.SourceCode = p.parser.bs[offset:f.Block.EndPos.Offset]
-			}
-		}()
-	}
+	var offset int
+	//	if p.parser.token == nil {
+	//		offset = 0 // template function
+	//	} else {
+	offset = p.parser.token.Offset
+	//	}
+
 	p.Next() // skip fn key word
 	f.Pos = p.parser.mkPos()
 	if needName {
@@ -36,7 +35,9 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 			err := fmt.Errorf("%s expect function name,but '%s'",
 				p.parser.errorMsgPrefix(), p.parser.token.Desp)
 			p.parser.errs = append(p.parser.errs, err)
-			return nil, err
+			if p.parser.token.Type != lex.TOKEN_LC {
+				return nil, err
+			}
 		}
 	}
 	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
@@ -54,6 +55,13 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	}
 	f.Block.IsFunctionTopBlock = true
 	p.Next()
-	err = p.parser.Block.parse(&f.Block, false, false, lex.TOKEN_RC)
+	p.parser.Block.parseStatementList(&f.Block, false)
+	if p.parser.token.Type != lex.TOKEN_RC {
+		err = fmt.Errorf("%s expect '}', but '%s'")
+	} else {
+		f.SourceCode = p.parser.bs[offset : p.parser.token.Offset+1]
+		p.Next()
+	}
+
 	return f, err
 }

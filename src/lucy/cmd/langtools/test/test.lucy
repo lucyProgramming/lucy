@@ -68,9 +68,9 @@ class Test {
 		if lucyFiles.size() == 0 {
 		    return ;
 		}
-
-
         print("need" , dir , packageName );
+        
+
 	}
 }
 

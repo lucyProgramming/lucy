@@ -20,12 +20,8 @@ func (b *Block) consume(c map[int]bool) {
 	b.parser.consume(c)
 }
 
-func (b *Block) parse(block *ast.Block, isGlobal bool, isSwtich bool, endTokens ...int) (err error) {
+func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 	block.Pos = b.parser.mkPos()
-	endTokenM := make(map[int]struct{})
-	for _, v := range endTokens {
-		endTokenM[v] = struct{}{}
-	}
 	isDefer := false
 	reset := func() {
 		isDefer = false
@@ -35,17 +31,11 @@ func (b *Block) parse(block *ast.Block, isGlobal bool, isSwtich bool, endTokens 
 			b.parser.token.Type == lex.TOKEN_LP ||
 			b.parser.token.Type == lex.TOKEN_LC
 	}
+	var err error
 	block.Statements = []*ast.Statement{}
 	for lex.TOKEN_EOF != b.parser.token.Type {
 		if len(b.parser.errs) > b.parser.nerr {
 			block.EndPos = b.parser.mkPos()
-			break
-		}
-		if _, ok := endTokenM[b.parser.token.Type]; ok {
-			block.EndPos = b.parser.mkPos()
-			if b.parser.token.Type == lex.TOKEN_RC && isSwtich == false {
-				b.Next() // if switch ,don`t read next token
-			}
 			break
 		}
 		switch b.parser.token.Type {
@@ -256,12 +246,13 @@ func (b *Block) parse(block *ast.Block, isGlobal bool, isSwtich bool, endTokens 
 		case lex.TOKEN_LC:
 			pos := b.parser.mkPos()
 			newblock := ast.Block{}
-			b.Next()
-			err = b.parse(&newblock, false, false, lex.TOKEN_RC)
-			if err != nil {
+			b.Next() // skip {
+			b.parseStatementList(&newblock, false)
+			if b.parser.token.Type != lex.TOKEN_RC {
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'"))
 				b.consume(untils_rc)
-				b.Next()
 			}
+			b.Next()
 			if isDefer {
 				d := &ast.Defer{
 					Block: newblock,
@@ -427,10 +418,7 @@ func (b *Block) parse(block *ast.Block, isGlobal bool, isSwtich bool, endTokens 
 			s.Enum = e
 			block.Statements = append(block.Statements, s)
 		default:
-			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s unkown begining of a statement, but '%s'",
-				b.parser.errorMsgPrefix(), b.parser.token.Desp))
-			b.consume(untils_rc_semicolon)
-			b.Next()
+			return
 		}
 	}
 	return

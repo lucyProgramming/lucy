@@ -51,6 +51,7 @@ func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
 		parser: p,
 	}
 	p.scanner = lex.New(p.bs, pos.StartLine, pos.StartColumn)
+	p.Next() // parse fn
 	f, err := p.Function.parse(true)
 	if err != nil {
 		p.errs = append(p.errs, err)

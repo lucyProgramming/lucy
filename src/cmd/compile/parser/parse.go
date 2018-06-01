@@ -68,7 +68,6 @@ func (p *Parser) Parse() []error {
 	resetProperty := func() {
 		ispublic = false
 	}
-	var err error
 	for p.token.Type != lex.TOKEN_EOF {
 		if len(p.errs) > p.nerr {
 			break
@@ -147,12 +146,13 @@ func (p *Parser) Parse() []error {
 			resetProperty()
 		case lex.TOKEN_LC:
 			b := &ast.Block{}
-			p.Next()
-			err = p.Block.parse(b, true, false, lex.TOKEN_RC) // this function will lookup next
-			if err != nil {
+			p.Next()                            // skip {
+			p.Block.parseStatementList(b, true) // this function will lookup next
+			if p.token.Type != lex.TOKEN_RC {
+				p.errs = append(p.errs, fmt.Errorf("%s expect '}', but '%s'"))
 				p.consume(untils_rc)
-				p.Next()
 			}
+			p.Next() // skip }
 			*p.tops = append(*p.tops, &ast.Node{
 				Data: b,
 			})

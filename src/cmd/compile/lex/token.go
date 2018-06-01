@@ -151,6 +151,7 @@ var (
 )
 
 type Token struct {
+	Offset      int
 	Type        int
 	StartLine   int
 	StartColumn int

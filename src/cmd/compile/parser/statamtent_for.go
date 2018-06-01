@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -48,14 +49,17 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 
 	}
 	if b.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s not { after for", b.parser.errorMsgPrefix())
+		err = fmt.Errorf("%s expect '{',but '%s'",
+			b.parser.errorMsgPrefix(), b.parser.token.Desp)
 		b.parser.errs = append(b.parser.errs, err)
 		return
 	}
-	b.Next()
-	err = b.parse(f.Block, false, false, lex.TOKEN_RC)
-	if err != nil {
-		return nil, err
+	b.Next() // skip {
+	b.parseStatementList(f.Block, false)
+	if b.parser.token.Type != lex.TOKEN_RC {
+		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'"))
+		b.consume(untils_rc)
 	}
+	b.Next() // }
 	return f, nil
 }

@@ -45,10 +45,8 @@ func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 		var block *ast.Block
 		if b.parser.token.Type != lex.TOKEN_CASE && b.parser.token.Type != lex.TOKEN_DEFAULT {
 			block = &ast.Block{}
-			err = b.parse(block, false, true, lex.TOKEN_CASE, lex.TOKEN_RC, lex.TOKEN_DEFAULT)
-			if err != nil {
-				return s, nil
-			}
+			b.parseStatementList(block, false)
+
 		}
 		s.StatmentSwitchCases = append(s.StatmentSwitchCases, &ast.StatmentSwitchCase{
 			Matches: es,
@@ -65,10 +63,7 @@ func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 			b.Next()
 		}
 		block := ast.Block{}
-		err = b.parse(&block, false, true, lex.TOKEN_RC)
-		if err != nil {
-			return s, err
-		}
+		b.parseStatementList(&block, false)
 		s.Default = &block
 	}
 	if b.parser.token.Type != lex.TOKEN_RC {

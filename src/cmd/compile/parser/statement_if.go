@@ -40,8 +40,13 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		b.Next()
 	}
 
-	b.Next()
-	err = b.parse(&i.Block, false, false, lex.TOKEN_RC)
+	b.Next() //skip {
+	b.parseStatementList(&i.Block, false)
+	if b.parser.token.Type != lex.TOKEN_RC {
+		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'"))
+		b.consume(untils_rc)
+	}
+	b.Next() // skip }
 	if b.parser.token.Type == lex.TOKEN_ELSEIF {
 		es, err := b.parseElseIfList()
 		if err != nil {
@@ -58,7 +63,13 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		}
 		i.ElseBlock = &ast.Block{}
 		b.Next()
-		err = b.parse(i.ElseBlock, false, false, lex.TOKEN_RC)
+		b.parseStatementList(i.ElseBlock, false)
+		if b.parser.token.Type != lex.TOKEN_RC {
+			err = fmt.Errorf("%s expect '}', but '%s'")
+			b.consume(untils_rc)
+		}
+		b.Next()
+
 	}
 	return i, err
 }
@@ -80,12 +91,8 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		}
 		block := &ast.Block{}
 		b.Next()
-		err = b.parse(block, false, false, lex.TOKEN_RC)
-		if err != nil {
-			b.consume(untils_rc)
-			b.Next()
-			continue
-		}
+		b.parseStatementList(block, false)
+
 		es = append(es, &ast.StatementElseIf{
 			Condition: e,
 			Block:     block,

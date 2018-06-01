@@ -13,7 +13,7 @@ const (
 	MAIN_FUNCTION_NAME       = "main"
 	THIS                     = "this"
 	NO_NAME_IDENTIFIER       = "_"
-	LUCY_ROOT_CLASS          = "lucy/lang/Object"
+	LUCY_ROOT_CLASS          = "lucy/lang/Lucy"
 	JAVA_ROOT_CLASS          = "java/lang/Object"
 	DEFAULT_EXCEPTION_CLASS  = "java/lang/Exception"
 	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
@@ -29,8 +29,9 @@ var (
 	PackageBeenCompile     Package
 	buildinFunctionsMap    = make(map[string]*Function)
 	lucyLangBuildinPackage *Package
-	ParseFunctionHandler   func(bs []byte, pos *Pos) (*Function, []error)
-	javaStringClass        *Class
+	// implement by parser
+	ParseFunctionHandler func(bs []byte, pos *Pos) (*Function, []error)
+	javaStringClass      *Class
 )
 
 func loadJavaStringClass(pos *Pos) error {

@@ -15,8 +15,8 @@ import (
 
 func printUsage() {
 	msg := `lucy is a new programing language build on jvm
-	run                    run a lucy package
 	version                print version
+	run                    run a lucy package
 	clean                  clean compiled files
 	pack                   make jar
 	test                   test a package`
@@ -35,7 +35,6 @@ func main() {
 	case "run":
 		(&run.Run{}).RunCommand(os.Args[1], os.Args[2:])
 	case "clean":
-
 		args := []string{"lucy/cmd/langtools/clean"}
 		args = append(args, os.Args[2:]...)
 		(&run.Run{}).RunCommand("run", args)

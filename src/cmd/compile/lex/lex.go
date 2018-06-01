@@ -319,6 +319,7 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	token.StartLine = lex.line
 	token.StartColumn = lex.column - 1 // c is readed
 	bs := []byte{c}
+	token.Offset = lex.offset - 1 // readed
 	c, eof := lex.getchar()
 	for eof == false {
 		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {
@@ -544,6 +545,7 @@ redo:
 		eof, err = lex.lexNumber(token, c)
 		return
 	}
+	token.Offset = lex.offset
 	switch c {
 	case '?':
 		token.Type = TOKEN_QUESTION
