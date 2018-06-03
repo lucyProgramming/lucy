@@ -2,14 +2,13 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
-//
 type Block struct {
 	DeadEnding                 bool
 	Defers                     []*Defer
+	isPackage                  bool
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool

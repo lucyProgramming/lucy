@@ -1,0 +1,48 @@
+
+import "java/lang/Object";
+
+
+public fn encode(x Object,format bool = false) -> (bs []byte ,err error){
+	e := new Encoder(x,format);
+	return e.encode();
+}
+
+
+public fn decode(x Object , bs []byte ) -> (err error){
+	e := new Decoder(x , bs);
+	return e.decode();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

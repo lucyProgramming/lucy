@@ -57,6 +57,9 @@ func (s *StackMapState) popStack(pop int) {
 	s.Stacks = s.Stacks[:len(s.Stacks)-pop]
 }
 func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType) {
+	if s == nil {
+		panic("s is nil")
+	}
 	s.Stacks = append(s.Stacks, s.newStackMapVerificationTypeInfo(class, v))
 }
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {

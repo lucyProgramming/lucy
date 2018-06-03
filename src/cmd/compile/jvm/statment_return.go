@@ -119,7 +119,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				maxstack = maxstack
 			}
 			if v.MayHaveMultiValue() && len(v.Values) > 1 {
-				stack, _ := m.MakeExpression.build(class, code, v, context, nil)
+				stack, _ := m.MakeExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}

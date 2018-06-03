@@ -1,0 +1,104 @@
+
+import "java/lang/Object";
+
+
+enum TokenType {
+	TOKEN_LB  = 1,
+	TOKEN_RB ,
+	TOKEN_LC , 
+	TOKEN_RC 
+}
+
+
+
+class Token {
+	public Typ TokenType;
+}
+
+
+class Decoder {
+	x Object ;
+	bs []byte;
+	offset int ; 
+	tokens []Token; 
+	stack []Token; 
+	public fn Decoder(x Object,bs []byte) {
+		this.x = x;
+		this.bs = bs;
+		this.stack = new []Token(0);
+	}
+
+	fn parseTokens() -> (err error) {
+		
+	}
+	
+
+	fn parseString() -> (s string) {
+
+	}
+	fn isDigit(b byte) -> (is bool) {
+		is = b >= '0' && b <= '9';
+	}
+	fn isLetter(b byte) -> (is bool) {
+		is = (b >= 'a' && b <= 'z') || 
+				(b >= 'A' && b <= 'Z') ;
+	}
+
+	public fn decode() -> (err error){
+		err = this.parseTokens();
+		if err != null {
+			return ; 
+		}
+
+
+	}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

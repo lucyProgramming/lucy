@@ -214,13 +214,19 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 		if v == nil { // get left value error or "_"
 			continue
 		}
-		if k < len(valueTypes) && valueTypes[k] != nil {
-			if !leftTypes[k].Equal(valueTypes[k]) {
-				*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-					errMsgPrefix(e.Pos),
-					valueTypes[k].TypeString(), leftTypes[k].TypeString()))
-			}
+		if k >= len(valueTypes) {
+			continue
 		}
+		if valueTypes[k] == nil {
+			continue
+		}
+		//fmt.Println(leftTypes[k].TypeString(), valueTypes[k].TypeString())
+		if false == leftTypes[k].Equal(valueTypes[k]) {
+			*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
+				errMsgPrefix(e.Pos),
+				valueTypes[k].TypeString(), leftTypes[k].TypeString()))
+		}
+
 	}
 	voidReturn := mkVoidType(e.Pos)
 	if len(leftTypes) > 1 || len(leftTypes) == 0 {

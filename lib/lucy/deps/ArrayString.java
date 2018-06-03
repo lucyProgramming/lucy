@@ -70,7 +70,7 @@ public class ArrayString   {
 		}else {
 			this.expand((this.cap + es.size()) * 2);
 		}
-		for(int i = this.end;i < es.size();i++){
+		for(int i = 0;i < es.size();i++){
 			this.elements[this.end + i] = es.elements[es.start + i ];
 		}
 		this.end += es.size();

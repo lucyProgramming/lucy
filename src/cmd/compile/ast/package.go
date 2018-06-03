@@ -103,7 +103,6 @@ func (p *Package) TypeCheck() []error {
 		if p.shouldStop(nil) {
 			return p.Errors
 		}
-
 	}
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase2(&p.Block)
@@ -118,9 +117,11 @@ func (p *Package) TypeCheck() []error {
 		if v.IsBuildin {
 			continue
 		}
-		if v.TemplateFunction == nil {
-			v.checkBlock(&p.Errors)
+		if v.TemplateFunction != nil {
+			continue
 		}
+		p.Block.SearchByName("encode")
+		v.checkBlock(&p.Errors)
 		if PackageBeenCompile.shouldStop(nil) {
 			return p.Errors
 		}

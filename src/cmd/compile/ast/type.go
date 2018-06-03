@@ -170,7 +170,8 @@ func (t *VariableType) resolve(block *Block, subPart ...bool) error {
 	if t.Typ == VARIABLE_TYPE_NAME { //
 		return t.resolveName(block, len(subPart) > 0)
 	}
-	if t.Typ == VARIABLE_TYPE_ARRAY {
+	if t.Typ == VARIABLE_TYPE_ARRAY ||
+		t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 		return t.ArrayType.resolve(block, true)
 	}
 	if t.Typ == VARIABLE_TYPE_MAP {
@@ -194,7 +195,6 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		if i != nil {
 			return PackageBeenCompile.load(i.Resource)
 		}
-		panic(11)
 		return nil, fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
 	}
 	packageAndName := strings.Split(t.Name, ".")

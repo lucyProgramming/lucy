@@ -29,10 +29,13 @@ var (
 	PackageBeenCompile     Package
 	buildinFunctionsMap    = make(map[string]*Function)
 	lucyLangBuildinPackage *Package
-	// implement by parser
-	ParseFunctionHandler func(bs []byte, pos *Pos) (*Function, []error)
-	javaStringClass      *Class
+	ParseFunctionHandler   func(bs []byte, pos *Pos) (*Function, []error)
+	javaStringClass        *Class
 )
+
+func init() {
+	PackageBeenCompile.Block.isPackage = true
+}
 
 func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {

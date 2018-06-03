@@ -1,0 +1,56 @@
+
+
+
+class xxx {
+	public x bool;
+	public y string ; 
+	public c map { int -> string } ; 
+}
+
+
+
+
+fn main(args []string) {
+	x := new xxx();
+	x.x = true ; 
+	x.y = "11111111111";
+	x.c = new map { int -> string }();
+	x.c[1] = "hello world";
+	x.c[2] = "hello world";
+	bs,err := encode(x , true );
+	if err != null {
+		print(err);
+	}
+
+	//print(bs);
+	print(string(bs));
+
+
+	x2 := new xxx[](10);
+
+	for k, _:= range x2 {
+		if k == 0 {
+			continue ; 
+		}
+		x2[k] = new xxx();
+	} 
+	bs,err = encode(x2);
+	if err != null {
+		print(err);
+	}
+	print(string(bs));
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
