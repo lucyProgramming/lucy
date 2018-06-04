@@ -23,7 +23,6 @@ const (
 )
 
 var (
-	Nodes                  *[]*Node
 	packageAliasReg        *regexp.Regexp
 	NameLoader             LoadName
 	PackageBeenCompile     Package
@@ -35,6 +34,11 @@ var (
 
 func init() {
 	PackageBeenCompile.Block.isPackage = true
+	var err error
+	packageAliasReg, err = regexp.Compile(`^[a-zA-Z][[a-zA-Z1-9\_]+$`)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func loadJavaStringClass(pos *Pos) error {
@@ -51,18 +55,5 @@ func loadJavaStringClass(pos *Pos) error {
 	} else {
 		return fmt.Errorf("%s '%s' is not class",
 			errMsgPrefix(pos), JAVA_STRING_CLASS)
-	}
-}
-
-type NameWithPos struct {
-	Name string
-	Pos  *Pos
-}
-
-func init() {
-	var err error
-	packageAliasReg, err = regexp.Compile(`^[a-zA-Z][[a-zA-Z1-9\_]+$`)
-	if err != nil {
-		panic(err)
 	}
 }

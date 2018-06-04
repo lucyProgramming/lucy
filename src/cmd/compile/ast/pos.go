@@ -6,3 +6,8 @@ type Pos struct {
 	StartColumn int
 	Offset      int // offset at bs , for special use
 }
+
+type NameWithPos struct {
+	Name string
+	Pos  *Pos
+}
