@@ -187,7 +187,7 @@ func (b *Block) checkStatements() []error {
 			return errs
 		}
 	}
-	if common.CompileFlags.DisAbleCheckUnUsedVariable == false {
+	if common.CompileFlags.DisableCheckUnUsedVariable == false {
 		errs = append(errs, b.checkUnUsedVariable()...)
 	}
 	return errs

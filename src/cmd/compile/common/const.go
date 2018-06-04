@@ -8,7 +8,6 @@ const (
 	ARRAY_METHOD_END        = "end"
 	ARRAY_METHOD_APPEND     = "append"
 	ARRAY_METHOD_APPEND_ALL = "appendAll"
-	//ARRAY_METHOD_TO_JAVA_ARRAY = "toJavaArray"
 	// map
 	MAP_METHOD_REMOVE     = "remove"
 	MAP_METHOD_REMOVEALL  = "removeAll"

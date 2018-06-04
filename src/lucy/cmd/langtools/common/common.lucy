@@ -42,7 +42,6 @@ public fn getLucyPath()->(paths []string, err error){
 		paths[i] = k;
 		i++; 
 	}
-	
 }
 
 
