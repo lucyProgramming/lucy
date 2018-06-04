@@ -82,7 +82,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 			if t == nil {
 				continue
 			}
-			if conditionType.Equal(t) == false {
+			if conditionType.Equal(&errs, t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
 				continue

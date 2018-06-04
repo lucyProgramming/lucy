@@ -2,33 +2,51 @@
 import "java/lang/Object";
 
 
-enum TokenType {
-	TOKEN_LB  = 1,
-	TOKEN_RB ,
-	TOKEN_LC , 
-	TOKEN_RC 
+enum JSON_SYNTAX_TREE_TYPE {
+	JSON_SYNTAX_TREE_TYPE_ARRAY = 1  ,
+	JSON_SYNTAX_TREE_TYPE_OBJECT ,
+	JSON_SYNTAX_TREE_TYPE_INTERGER , 
+	JSON_SYNTAX_TREE_TYPE_BOOL , 
+	JSON_SYNTAX_TREE_TYPE_STRING ,
+	JSON_SYNTAX_TREE_TYPE_NULL 
 }
 
 
 
-class Token {
-	public Typ TokenType;
+
+class JsonSyntaxTreeNode {
+	Type JSON_SYNTAX_TREE_TYPE ;
+	boolValue bool ; 
+	intValue long ; 
+	stringValue string ; 
+	arrayElements []JsonSyntaxTreeNode ; 
+	keyPairs []JsonKeyPair;
 }
+
+
+class JsonKeyPair {
+	k string ; 
+	v JsonSyntaxTreeNode;
+}
+
+
+
+
 
 
 class Decoder {
 	x Object ;
 	bs []byte;
 	offset int ; 
-	tokens []Token; 
-	stack []Token; 
+	tree JsonSyntaxTreeNode ; 
+	
 	public fn Decoder(x Object,bs []byte) {
 		this.x = x;
 		this.bs = bs;
-		this.stack = new []Token(0);
+		this.tree = new JsonSyntaxTreeNode();
 	}
-
-	fn parseTokens() -> (err error) {
+	
+	fn generateSyntaxTree() -> (err error) {
 		
 	}
 	
@@ -45,11 +63,10 @@ class Decoder {
 	}
 
 	public fn decode() -> (err error){
-		err = this.parseTokens();
+		err = this.generateSyntaxTree();
 		if err != null {
 			return ; 
 		}
-
 
 	}
 

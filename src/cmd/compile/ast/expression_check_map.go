@@ -47,7 +47,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 				}
 			}
 			if rightValueValid && mapk != nil {
-				if mapk.Equal(ktype) == false {
+				if mapk.Equal(errs, ktype) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(v.Left.Pos),
 						ktype.TypeString(), mapk.TypeString()))
 				}
@@ -76,7 +76,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			}
 		}
 		if mapv != nil {
-			if mapv.Equal(vtype) == false {
+			if mapv.Equal(errs, vtype) == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(v.Right.Pos),
 					vtype.TypeString(), mapv.TypeString()))

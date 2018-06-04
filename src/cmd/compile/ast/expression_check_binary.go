@@ -44,7 +44,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Typ == EXPRESSION_TYPE_OR ||
 		EXPRESSION_TYPE_AND == e.Typ ||
 		EXPRESSION_TYPE_XOR == e.Typ {
-		if t1.IsInteger() == false || t1.Equal(t2) == false {
+		if t1.IsInteger() == false || t1.Equal(errs, t2) == false {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 		result = t1.Clone()
@@ -78,7 +78,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_ENUM:
-			if t1.Equal(t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+			if t1.Equal(errs, t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_BYTE:
@@ -94,7 +94,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VARIABLE_TYPE_DOUBLE:
 			if (t1.IsInteger() && t2.IsInteger()) ||
 				(t1.IsFloat() && t2.IsFloat()) {
-				if t1.Equal(t2) == false {
+				if t1.Equal(errs, t2) == false {
 					if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
 						*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 					} else {
@@ -109,7 +109,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
-			if t1.Equal(t2) == false {
+			if t1.Equal(errs, t2) == false {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
@@ -126,7 +126,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VARIABLE_TYPE_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:
-			if t1.Equal(t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+			if t1.Equal(errs, t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
@@ -164,7 +164,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		if (t1.IsInteger() && t2.IsInteger()) ||
 			(t1.IsFloat() && t2.IsFloat()) {
-			if t1.Equal(t2) == false {
+			if t1.Equal(errs, t2) == false {
 				if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
 					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 				} else {

@@ -37,7 +37,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 	ret.Typ = VARIABLE_TYPE_OBJECT
 	ret.Pos = e.Pos
 	args := checkExpressions(block, no.Args, errs)
-	ms, matched, err := no.Typ.Class.matchContructionFunction(args, &no.Args)
+	ms, matched, err := no.Typ.Class.matchContructionFunction(e.Pos, errs, args, &no.Args)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return ret

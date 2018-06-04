@@ -92,12 +92,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				return []*VariableType{ret}
 			}
 			if matchkey {
-				if false == object.Map.K.Equal(t) {
+				if false == object.Map.K.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
 				}
 			} else {
-				if false == object.Map.V.Equal(t) {
+				if false == object.Map.V.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(e.Pos), t.TypeString(), object.Map.V.TypeString()))
 				}
@@ -120,7 +120,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					if t == nil {
 						continue
 					}
-					if object.Map.K.Equal(t) == false {
+					if object.Map.K.Equal(errs, t) == false {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
 					}
@@ -195,12 +195,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				}
 				for _, t := range ts {
 					if call.Name == common.ARRAY_METHOD_APPEND {
-						if object.ArrayType.Equal(t) == false {
+						if object.ArrayType.Equal(errs, t) == false {
 							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
 								errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString(), call.Name))
 						}
 					} else {
-						if object.Equal(t) == false {
+						if object.Equal(errs, t) == false {
 							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
 								errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString(), call.Name))
 						}
@@ -223,7 +223,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			return nil
 		}
 		args := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
-		ms, matched, err := javaStringClass.accessMethod(call.Name, args, nil, false)
+		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, args, nil, false)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
@@ -274,7 +274,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		args := checkExpressions(block, call.Args, errs)
 		args = checkRightValuesValid(args, errs)
-		ms, matched, err := object.Class.SuperClass.matchContructionFunction(args, &call.Args)
+		ms, matched, err := object.Class.SuperClass.matchContructionFunction(e.Pos, errs, args, &call.Args)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		} else {
@@ -301,7 +301,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	call.Class = object.Class
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
-	ms, matched, err := object.Class.accessMethod(call.Name, args, &call.Args, false)
+	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, args, &call.Args, false)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil

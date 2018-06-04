@@ -289,7 +289,7 @@ func (c *Class) suitableForInterface(inter *Class, fromsub bool) []error {
 		for k, v := range m.Func.Typ.ParameterList {
 			args[k] = v.Typ
 		}
-		_, match, _ := c.accessMethod(name, args, nil, false)
+		_, match, _ := c.accessMethod(c.Pos, &errs, name, args, nil, false)
 		if match == false {
 			err := fmt.Errorf("%s class named '%s' does not implement '%s',missing method '%s'",
 				errMsgPrefix(c.Pos), c.Name, inter.Name, m.Func.readableMsg())
@@ -347,7 +347,7 @@ func (c *Class) checkFields() []error {
 				continue
 			}
 			ts, _ := v.Expression.check(&c.Block)
-			if v.Typ.Equal(ts[0]) == false {
+			if v.Typ.Equal(&errs, ts[0]) == false {
 				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
 					errMsgPrefix(v.Pos), ts[0].TypeString(), v.Typ.TypeString()))
 				continue

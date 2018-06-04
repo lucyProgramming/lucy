@@ -18,7 +18,7 @@ type TemplateFunctionCallPairGenerated struct {
 }
 
 func (t *TemplateFunction) callPairExists(Args []*VariableType,
-	Returns []*VariableType) *TemplateFunctionCallPair {
+	Returns []*VariableType, errs *[]error) *TemplateFunctionCallPair {
 	f := func(p *TemplateFunctionCallPair) *TemplateFunctionCallPair {
 		if len(p.Args) != len(Args) {
 			return nil
@@ -27,12 +27,12 @@ func (t *TemplateFunction) callPairExists(Args []*VariableType,
 			return nil
 		}
 		for k, v := range p.Args {
-			if false == v.Equal(Args[k]) {
+			if false == v.Equal(errs, Args[k]) {
 				return nil
 			}
 		}
 		for k, v := range p.Returns {
-			if false == v.Equal(Args[k]) {
+			if false == v.Equal(errs, Args[k]) {
 				return nil
 			}
 		}
@@ -47,8 +47,8 @@ func (t *TemplateFunction) callPairExists(Args []*VariableType,
 }
 
 func (t *TemplateFunction) insert(Args []*VariableType,
-	Returns []*VariableType, f *Function) *TemplateFunctionCallPair {
-	if t := t.callPairExists(Args, Returns); t != nil {
+	Returns []*VariableType, f *Function, errs *[]error) *TemplateFunctionCallPair {
+	if t := t.callPairExists(Args, Returns, errs); t != nil {
 		return t
 	}
 	ret := &TemplateFunctionCallPair{

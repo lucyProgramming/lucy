@@ -210,7 +210,7 @@ func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
 		var exists bool
 		d, exists = pp.Block.NameExists(packageAndName[1])
 		if exists == false {
-			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos))
+			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), packageAndName[1])
 		}
 		return d, err
 	} else {
@@ -402,7 +402,7 @@ func (v *VariableType) TypeString() string {
 	return t
 }
 
-func (v *VariableType) Equal(assignMent *VariableType) bool {
+func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
 	if v == assignMent {
 		return true
 	}
@@ -417,24 +417,42 @@ func (v *VariableType) Equal(assignMent *VariableType) bool {
 		return true
 	}
 	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
-		return v.ArrayType.Equal(assignMent.ArrayType)
+		return v.ArrayType.Equal(errs, assignMent.ArrayType)
 	}
 	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return v.ArrayType.Equal(assignMent.ArrayType)
+		return v.ArrayType.Equal(errs, assignMent.ArrayType)
 	}
 
 	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
 		return v.Enum.Name == assignMent.Enum.Name
 	}
 	if v.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
-		return v.Map.K.Equal(assignMent.Map.K) && v.Map.V.Equal(assignMent.Map.V)
+		return v.Map.K.Equal(errs, assignMent.Map.K) && v.Map.V.Equal(errs, assignMent.Map.V)
 	}
 	if v.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
+		if v.Class.NotImportedYet {
+			if err := v.Class.loadSelf(); err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
+				return false
+			}
+		}
+		if assignMent.Class.NotImportedYet {
+			if err := assignMent.Class.loadSelf(); err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
+				return false
+			}
+		}
 		if v.Class.IsInterface() {
-			i, _ := assignMent.Class.implemented(v.Class.Name)
+			i, err := assignMent.Class.implemented(v.Class.Name)
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
+			}
 			return i
 		} else { // class
-			has, _ := assignMent.Class.haveSuper(v.Class.Name)
+			has, err := assignMent.Class.haveSuper(v.Class.Name)
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
+			}
 			return has
 		}
 	}

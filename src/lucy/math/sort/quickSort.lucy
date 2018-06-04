@@ -1,8 +1,8 @@
 
 
 
-public fn quickSort(s T, l int, r int,desc bool = false) {  
-    if  l< r  && desc == false{        
+public fn quickSort(s T, l int, r int,asc bool) {  
+    if  l< r  && asc{        
         i ,j := l, r;
         x := s[l];  
         for  i < j {  
@@ -23,7 +23,7 @@ public fn quickSort(s T, l int, r int,desc bool = false) {
         quickSort(s, l, i - 1,desc);  
         quickSort(s, i + 1, r,desc);  
     } 
-    if  l< r  && desc {        
+    if  l< r  && asc == false {        
         i ,j := l, r;
         x := s[l];  
         for  i < j {  

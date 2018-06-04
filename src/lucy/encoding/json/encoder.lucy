@@ -61,8 +61,8 @@ class Encoder {
 			if err != null {
 				return null , err ; 
 			}
-			bs.appendAll(bs2);
-			bs.appendAll( []byte (" : "));
+			bs.appendAll([]byte("\"") , bs2);
+			bs.appendAll( []byte ("\" : "));
 			bs2,err = (new Encoder(x.get(v)  , this.format)).encode();
 			if err != null {
 				return null , err ; 

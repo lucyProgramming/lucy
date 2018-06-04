@@ -1,0 +1,134 @@
+
+import "java/io/InputStream";
+import "java/io/PrintStream";
+import "java/lang/Runnable";
+import "java/io/OutputStream";
+import "lucy/io";
+import "java/lang/Process";
+import "java/lang/Runtime";
+import "java/lang/Thread";
+import "java/io/File";
+
+public class Command implements Runnable{
+	public cmd string ; 
+	public args string [] ; 
+	public envs string [] ;
+	public file File ;
+	public stdin  InputStream;
+	public stdout , stderr  OutputStream ;
+	public in InputStream ;
+	public out OutputStream ; 
+
+
+	p Process;
+	public fn Command(cmd string , envs string []  ,args  string[]  ,file File  ){
+		this.cmd = cmd;
+		this.args = args;
+		this.envs = envs;
+		this.file = file ; 
+	}
+	public fn destroy() {
+		this.p.destroy();
+	}
+
+	public fn getProcess() -> (p Process ) {
+        p = this . p ;
+	}
+
+	public fn start() -> (err error) {
+		if this.cmd == null || this.cmd == "" {
+			err = new error("cmd is not set");
+			return ;
+		} 
+		if this.file != null  {
+			if this.envs == null {
+				this.envs = new string [] (0) ;
+			}
+			if this.args == null {
+				this.args = new string [] (0) ; 
+			}
+		}
+		if this.envs != null {
+			if this.args == null {
+				this.args = new string [] (0) ; 
+			}
+		}
+		// start process
+		if this.file != null {
+			this.p = Runtime.getRuntime().exec(this.mkCmdArray(), this.envs , this.file);
+		}else if this.envs != null {
+			this.p = Runtime.getRuntime().exec(this.mkCmdArray(), this.envs );
+		}else if this.args != null {
+			this.p = Runtime.getRuntime().exec(this.mkCmdArray());
+		}else {
+			this.p = Runtime.getRuntime().exec(this.cmd);
+		}
+		// copy io 
+		if this.stdin != null {
+			r := new Command("" , null , null ,null );
+			r.out = this.p.getOutputStream() ;
+			r.in = this.stdin;
+			(new Thread(r)).start();
+		}
+		if this.stdout != null {
+			r := new Command("", null , null ,null);
+			r.out =  this.stdout ;
+			r.in = this.p.getInputStream();
+			(new Thread(r)).start();
+		}
+		if this.stderr != null {
+			r := new Command("", null , null ,null);
+			r.out = this.stderr ;
+			r.in = this.p.getErrorStream();
+			(new Thread(r)).start();
+		}
+
+
+	}
+	fn mkCmdArray() -> (arr string[]) {
+		cmdarray := new string[] (1 + this.args.size()) ; 
+		cmdarray[0] = this.cmd;
+		for k,v := range this.args {
+			cmdarray[k + 1] = v ;
+		}
+		return cmdarray;
+	}
+
+	public fn wait() -> (err error){
+		code := this.p.waitFor(); 
+		if code != 0 {
+			err = new error("errcode:" + code );
+		}
+	}
+
+	//for io copy ,no a
+	public fn run() {
+		if this.in == null && this.out == null {
+			return ;
+		}
+		io.ioCopy(this.out, this.in);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

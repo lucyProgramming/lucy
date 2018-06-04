@@ -30,23 +30,24 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 			b.consume(untils_lc)
 			b.Next()
 		}
-
 	}
 
 	if b.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s missing '{' after a expression,but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
+			b.parser.errorMsgPrefix(), b.parser.token.Desp)
 		b.parser.errs = append(b.parser.errs, err)
 		b.consume(untils_lc) // consume and next
 		b.Next()
 	}
-
 	b.Next() //skip {
 	b.parseStatementList(&i.Block, false)
 	if b.parser.token.Type != lex.TOKEN_RC {
-		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'"))
+		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+			b.parser.errorMsgPrefix(), b.parser.token.Desp))
 		b.consume(untils_rc)
 	}
 	b.Next() // skip }
+	//fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	if b.parser.token.Type == lex.TOKEN_ELSEIF {
 		es, err := b.parseElseIfList()
 		if err != nil {
@@ -54,6 +55,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		}
 		i.ElseIfList = es
 	}
+	//fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	if b.parser.token.Type == lex.TOKEN_ELSE {
 		b.Next()
 		if b.parser.token.Type != lex.TOKEN_LC {
@@ -65,7 +67,8 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		b.Next()
 		b.parseStatementList(i.ElseBlock, false)
 		if b.parser.token.Type != lex.TOKEN_RC {
-			err = fmt.Errorf("%s expect '}', but '%s'")
+			err = fmt.Errorf("%s expect '}', but '%s'",
+				b.parser.errorMsgPrefix(), b.parser.token.Desp)
 			b.consume(untils_rc)
 		}
 		b.Next()
@@ -77,7 +80,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 	es = []*ast.StatementElseIf{}
 	var e *ast.Expression
-	for (b.parser.token.Type == lex.TOKEN_ELSEIF) && b.parser.token.Type != lex.TOKEN_EOF {
+	for b.parser.token.Type == lex.TOKEN_ELSEIF {
 		b.Next() // skip elseif token
 		e, err = b.parser.Expression.parseExpression(false)
 		if err != nil {
@@ -85,18 +88,24 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 			return es, err
 		}
 		if b.parser.token.Type != lex.TOKEN_LC {
-			err = fmt.Errorf("%s not { after a expression,but %s", b.parser.errorMsgPrefix(), b.parser.token.Desp)
+			err = fmt.Errorf("%s not '{' after a expression,but '%s'",
+				b.parser.errorMsgPrefix(), b.parser.token.Desp)
 			b.parser.errs = append(b.parser.errs)
 			return es, err
 		}
 		block := &ast.Block{}
 		b.Next()
 		b.parseStatementList(block, false)
-
 		es = append(es, &ast.StatementElseIf{
 			Condition: e,
 			Block:     block,
 		})
+		if b.parser.token.Type != lex.TOKEN_RC {
+			err = fmt.Errorf("%s expect '}', but '%s'",
+				b.parser.errorMsgPrefix(), b.parser.token.Desp)
+			b.consume(untils_rc)
+		}
+		b.Next() // skip }
 	}
 	return es, err
 }

@@ -53,7 +53,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Variable
 	if indexType == nil {
 		return ret
 	}
-	if t.Map.K.Equal(indexType) == false {
+	if t.Map.K.Equal(errs, indexType) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
 			errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.K.TypeString()))
 	}

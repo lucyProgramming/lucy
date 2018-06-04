@@ -27,7 +27,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Variab
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if True != nil && False != nil && True.Equal(False) == false {
+	if True != nil && False != nil && True.Equal(errs, False) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 			errMsgPrefix(e.Pos), False.TypeString(), True.TypeString()))
 	}

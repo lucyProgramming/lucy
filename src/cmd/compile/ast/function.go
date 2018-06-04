@@ -237,16 +237,21 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
-
 			if t != nil {
-				if v.Typ.Equal(t) == false {
+				if v.Typ.Equal(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
 					continue
 				}
+
 			}
 			if v.Expression.IsLiteral() == false {
 				*errs = append(*errs, fmt.Errorf("%s default value must be literal",
+					errMsgPrefix(v.Expression.Pos)))
+				continue
+			}
+			if v.Expression.Typ == EXPRESSION_TYPE_NULL {
+				*errs = append(*errs, fmt.Errorf("%s cannot use 'null' as default value",
 					errMsgPrefix(v.Expression.Pos)))
 			}
 		}
@@ -284,7 +289,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			*errs = append(*errs, es...)
 			continue
 		}
-		if t != nil && t.Equal(v.Typ) == false {
+		if t != nil && t.Equal(errs, v.Typ) == false {
 			err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
 				t.TypeString(), v.Typ.TypeString())
 			*errs = append(*errs, err)

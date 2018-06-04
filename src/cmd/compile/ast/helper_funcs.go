@@ -112,7 +112,7 @@ func searchBuildIns(name string) interface{} {
 
 }
 
-func checkConst(block *Block, c *Const) error {
+func checkConst(block *Block, c *Const, errs *[]error) error {
 	if c.Typ != nil {
 		c.mkDefaultValue()
 	}
@@ -130,7 +130,7 @@ func checkConst(block *Block, c *Const) error {
 	c.Value = c.Expression.Data
 	tt, _ := c.Expression.check(block)
 	if c.Typ != nil {
-		if c.Typ.Equal(tt[0]) == false {
+		if c.Typ.Equal(errs, tt[0]) == false {
 			return fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
 				errMsgPrefix(c.Pos), c.Typ.TypeString(), tt[0].TypeString())
 		}
@@ -140,13 +140,15 @@ func checkConst(block *Block, c *Const) error {
 	return nil
 }
 
-func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, checked []*VariableType) {
+func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, checked []*VariableType) []error {
+	errs := []error{}
 	if len(es) == 0 {
-		return
+		return errs
 	}
 	if len(es) != len(checked) || len(es) != len(needs) { // means multi return
-		return
+		return errs
 	}
+
 	for k, e := range es {
 		if e.IsLiteral() == false {
 			continue
@@ -157,7 +159,7 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, c
 		if checked[k] == nil {
 			continue
 		}
-		if needs[k].Equal(checked[k]) {
+		if needs[k].Equal(&errs, checked[k]) {
 			continue // no need
 		}
 		if (needs[k].IsInteger() && checked[k].IsInteger()) ||
@@ -168,6 +170,7 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, c
 			checked[k].Pos = pos
 		}
 	}
+	return errs
 }
 
 //func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall,

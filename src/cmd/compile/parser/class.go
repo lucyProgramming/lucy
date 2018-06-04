@@ -311,6 +311,9 @@ func (c *Class) parseField(errs *[]error) error {
 		f.Name = v.Name
 		f.Pos = v.Pos
 		f.Typ = &ast.VariableType{}
+		if t == nil {
+			panic(11)
+		}
 		*f.Typ = *t
 		f.AccessFlags = 0
 		if k < len(es) && es[k] != nil {

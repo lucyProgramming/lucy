@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
@@ -202,7 +203,7 @@ func (b *Block) checkConst() []error {
 			delete(b.Consts, c.Name)
 			continue
 		}
-		err := checkConst(b, c)
+		err := checkConst(b, c, &errs)
 		if err != nil && c.Typ == nil {
 			errs = append(errs, err)
 			delete(b.Consts, c.Name)

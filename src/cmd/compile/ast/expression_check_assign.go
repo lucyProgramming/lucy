@@ -52,7 +52,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		if variable, ok := block.Vars[identifier.Name]; ok {
 			if variableType != nil {
-				if variable.Typ.Equal(ts[k]) == false {
+				if variable.Typ.Equal(errs, ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(ts[k].Pos),
 						variable.Typ.TypeString(),
@@ -134,7 +134,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
-		if t1.Equal(t2) {
+		if t1.Equal(errs, t2) {
 			return ret
 		}
 		if t1.IsInteger() && t2.IsInteger() && bin.Right.IsLiteral() {
@@ -150,7 +150,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	if e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
 		e.Typ == EXPRESSION_TYPE_XOR_ASSIGN {
-		if t1.IsInteger() && t1.Equal(t2) {
+		if t1.IsInteger() && t1.Equal(errs, t2) {
 			return ret
 		}
 	}
@@ -221,7 +221,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 			continue
 		}
 		//fmt.Println(leftTypes[k].TypeString(), valueTypes[k].TypeString())
-		if false == leftTypes[k].Equal(valueTypes[k]) {
+		if false == leftTypes[k].Equal(errs, valueTypes[k]) {
 			*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 				errMsgPrefix(e.Pos),
 				valueTypes[k].TypeString(), leftTypes[k].TypeString()))

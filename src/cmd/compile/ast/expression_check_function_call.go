@@ -91,7 +91,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 		for k, v := range f.Typ.ParameterList {
 			if k < len(callargsTypes) && callargsTypes[k] != nil {
-				if !v.Typ.Equal(callargsTypes[k]) {
+				if !v.Typ.Equal(errs, callargsTypes[k]) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix((*args)[k].Pos),
 						callargsTypes[k].TypeString(), v.Typ.TypeString()))
@@ -148,7 +148,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		retIndexes = append(retIndexes, k)
 		tps = tps[1:]
 	}
-	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret)
+	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret, errs)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		t, es := f.clone(block)
 		if errsNotEmpty(es) {

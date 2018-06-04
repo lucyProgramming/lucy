@@ -188,7 +188,7 @@ func (s *StatementFor) checkRange() []error {
 			tvv = rangeOn.Map.V
 		}
 		if tk != nil {
-			if tk.Equal(tkk) == false {
+			if tk.Equal(&errs, tkk) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
 					errMsgPrefix(s.RangeAttr.ExpressionK.Pos), tk.TypeString(), tkk.TypeString())
 				errs = append(errs, err)
@@ -196,7 +196,7 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 		if tv != nil {
-			if tv.Equal(tvv) == false {
+			if tv.Equal(&errs, tvv) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
 					errMsgPrefix(s.RangeAttr.ExpressionK.Pos), tk.TypeString(), tkk.TypeString())
 				errs = append(errs, err)

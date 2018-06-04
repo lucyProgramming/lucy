@@ -54,7 +54,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 				}
 			}
 			if arr.Typ != nil {
-				if arr.Typ.ArrayType.Equal(t) == false {
+				if arr.Typ.ArrayType.Equal(errs, t) == false {
 					if notyp {
 						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
 							errMsgPrefix(t.Pos), arr.Typ.ArrayType.TypeString(), t.TypeString()))

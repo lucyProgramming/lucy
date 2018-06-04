@@ -7,15 +7,17 @@ import "lucy/cmd/langtools/common";
 
 
 fn main(args []string){
+	lucyroot,err := common.getLucyRoot();
+	if err != null {
+		print(err);
+		return ;
+	}
 	lcypaths ,err := common.getLucyPath();
 	if err != null {
 		print(err);
 		return ;
 	}
-	(new Test(lcypaths ,args[0]) ).test();
-	
-	
-	
+	(new Test(lucyroot , lcypaths ,args[0]) ).test();
 }
 
 

@@ -11,7 +11,6 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 	var err error
 	var ret *ast.VariableType
 	switch p.token.Type {
-
 	case lex.TOKEN_LB:
 		pos := p.mkPos()
 		if len(pre) > 0 {
@@ -105,9 +104,6 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 		}
 	case lex.TOKEN_IDENTIFIER:
 		ret, err = p.parseIdentifierType()
-		if err != nil {
-			return nil, err
-		}
 
 	case lex.TOKEN_MAP:
 		pos := p.mkPos()
@@ -159,7 +155,7 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 	}
 	if err != nil {
 		p.errs = append(p.errs, err)
-		return ret, nil
+		return nil, err
 	}
 	if p.token.Type == lex.TOKEN_LB {
 		return p.parseType(ret)

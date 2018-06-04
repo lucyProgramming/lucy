@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -77,6 +78,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.Codes[code.CodeLength] = cg.OP_freturn
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_dreturn
+		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			fallthrough
 		case ast.VARIABLE_TYPE_STRING:
 			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
@@ -216,6 +219,8 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 			code.Codes[code.CodeLength] = cg.OP_freturn
 		case ast.VARIABLE_TYPE_DOUBLE:
 			code.Codes[code.CodeLength] = cg.OP_dreturn
+		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			fallthrough
 		case ast.VARIABLE_TYPE_STRING:
 			fallthrough
 		case ast.VARIABLE_TYPE_OBJECT:
