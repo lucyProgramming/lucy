@@ -80,7 +80,7 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 	return nil, false
 }
 
-func (b *Block) searchLable(name string) *StatementLable {
+func (b *Block) searchLabel(name string) *StatementLable {
 	for b != nil {
 		if b.Lables != nil {
 			if l, ok := b.Lables[name]; ok {

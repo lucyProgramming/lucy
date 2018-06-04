@@ -195,7 +195,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 		//some enum are missing, not allow
 		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
 			errMsgPrefix(s.Pos), conditionType.Enum.Name)
-		errMsg += "\tyou can use 'default:' or give missing enumName,which are:\n"
+		errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 		for _, v := range conditionType.Enum.Enums {
 			_, ok := enumNamesMap[v.Name]
 			if ok {

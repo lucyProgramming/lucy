@@ -8,7 +8,6 @@ import (
 
 type StatementFor struct {
 	RangeAttr          *StatmentForRangeAttr
-	Num                int
 	BackPatchs         []*cg.JumpBackPatch
 	ContinueBackPatchs []*cg.JumpBackPatch
 	ContinueOPOffset   int

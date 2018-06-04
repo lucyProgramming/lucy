@@ -5,6 +5,7 @@ class xxx {
 	public x bool;
 	public y string ; 
 	public c map { int -> string } ; 
+	public d map { string  -> int } ; 
 }
 
 
@@ -17,6 +18,7 @@ fn main(args []string) {
 	x.c = new map { int -> string }();
 	x.c[1] = "hello world";
 	x.c[2] = "hello world";
+	x.d = { "hello world" -> 1 , "11111111111111111" -> 222 }; 
 	bs,err := encode(x , true );
 	if err != null {
 		print(err);

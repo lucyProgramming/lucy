@@ -61,8 +61,20 @@ class Encoder {
 			if err != null {
 				return null , err ; 
 			}
-			bs.appendAll([]byte("\"") , bs2);
-			bs.appendAll( []byte ("\" : "));
+			isString := false ;
+			if bs2.size () > 0 {
+				isString = bs2[0] == '"' ; 
+			}
+			if isString {
+				bs.appendAll(bs2);
+			}else {
+				bs.appendAll([]byte("\"") , bs2);
+			}
+			if isString {
+				bs.appendAll( []byte (" : "));
+			}else {
+				bs.appendAll( []byte ("\" : "));
+			}
 			bs2,err = (new Encoder(x.get(v)  , this.format)).encode();
 			if err != null {
 				return null , err ; 

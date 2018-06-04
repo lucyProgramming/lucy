@@ -403,7 +403,7 @@ func (v *VariableType) TypeString() string {
 }
 
 func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
-	if v == assignMent {
+	if v == assignMent { // equal
 		return true
 	}
 	if v.IsPrimitive() && assignMent.IsPrimitive() {
@@ -458,81 +458,3 @@ func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
 	}
 	return false
 }
-
-//func (v *VariableType) Equal(assignMent *VariableType, subPart ...bool) bool {
-//	if v == assignMent {
-//		return true
-//	}
-//	if v.IsPrimitive() && assignMent.IsPrimitive() {
-//		return v.Typ == assignMent.Typ
-//	}
-//	if v.IsPointer() && assignMent.Typ == VARIABLE_TYPE_NULL {
-//		return true
-//	}
-//	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
-//		return v.ArrayType.Equal(assignMent.ArrayType, true)
-//	}
-//	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-//		return v.ArrayType.Equal(assignMent.ArrayType, true)
-//	}
-
-//	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
-//		return v.Enum.Name == assignMent.Enum.Name
-//	}
-//	if v.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
-//		return v.Map.K.Equal(assignMent.Map.K, true) && v.Map.V.Equal(assignMent.Map.V, true)
-//	}
-//	if v.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
-//		if len(subPart) > 0 {
-//			return v.Class.Name == assignMent.Class.Name
-//		} else {
-//			if v.Class.IsInterface() {
-//				i, _ := assignMent.Class.implemented(v.Class.Name)
-//				return i
-//			} else { // class
-//				has, _ := assignMent.Class.haveSuper(v.Class.Name)
-//				return has
-//			}
-//		}
-//	}
-//	return false
-//}
-
-//func (t *VariableType) TypeCompatible(t2 *VariableType) bool {
-//	// if t.IsInteger() && t2.IsInteger() {
-//	// 	return true
-//	// }
-//	// if t.IsFloat() && t2.IsFloat() {
-//	// 	return true
-//	// }
-//	return t.Equal(t2)
-//}
-
-///*
-//	number convert rule
-//*/
-//func (t *VariableType) NumberTypeConvertRule(t2 *VariableType) int {
-//	if t.Typ == t2.Typ {
-//		return t.Typ
-//	}
-//	if t.Typ == VARIABLE_TYPE_DOUBLE || t2.Typ == VARIABLE_TYPE_DOUBLE {
-//		return VARIABLE_TYPE_DOUBLE
-//	}
-//	if t.Typ == VARIABLE_TYPE_FLOAT || t2.Typ == VARIABLE_TYPE_FLOAT {
-//		if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
-//			return VARIABLE_TYPE_DOUBLE
-//		} else {
-//			return VARIABLE_TYPE_FLOAT
-//		}
-//	}
-//	if t.Typ == VARIABLE_TYPE_LONG || t2.Typ == VARIABLE_TYPE_LONG {
-//		return VARIABLE_TYPE_LONG
-//	}
-//	if t.Typ == VARIABLE_TYPE_INT || t2.Typ == VARIABLE_TYPE_INT {
-//		return VARIABLE_TYPE_INT
-//	}
-//	if t.Typ == VARIABLE_TYPE_SHORT || t2.Typ == VARIABLE_TYPE_SHORT {
-//		return VARIABLE_TYPE_SHORT
-//	}
-//	return VARIABLE_TYPE_BYTE
-//}

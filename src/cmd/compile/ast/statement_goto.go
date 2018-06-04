@@ -8,11 +8,11 @@ type StatementGoto struct {
 }
 
 func (s *Statement) checkStatementGoto(b *Block) error {
-	lable := b.searchLable(s.StatementGoto.Name)
-	if lable == nil {
+	label := b.searchLabel(s.StatementGoto.Name)
+	if label == nil {
 		return fmt.Errorf("%s label named '%s' not found",
 			errMsgPrefix(s.Pos), s.StatementGoto.Name)
 	}
-	s.StatementGoto.StatementLable = lable
+	s.StatementGoto.StatementLable = label
 	return s.StatementGoto.StatementLable.Ready(s.Pos)
 }
