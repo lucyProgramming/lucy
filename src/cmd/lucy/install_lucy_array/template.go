@@ -36,10 +36,10 @@ public class ArrayTTT   {
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length
 		}
-		ArrayTTT result = new ArrayTTT();
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
 		}
+		ArrayTTT result = new ArrayTTT();
 		result.elements = this.elements;
 		result.start = this.start + start;
 		result.end = this.start + end;

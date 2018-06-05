@@ -62,7 +62,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 					break
 				}
 			}
-			t = t && s.StatementIf.ElseBlock.DeadEnding
+			t = t && s.StatementSwitch.Default.DeadEnding
 			deadend = t
 			continue
 		}

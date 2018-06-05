@@ -23,6 +23,7 @@ func printUsage() {
 }
 
 func main() {
+	//	fmt.Println(os.Args)
 	if len(os.Args) == 1 {
 		printUsage()
 		os.Exit(0)
@@ -44,6 +45,7 @@ func main() {
 	case "install_lucy_array":
 		(&install_lucy_array.InstallLucyArray{}).RunCommand("install_lucy_array", nil)
 	default:
+		//fmt.Printf("command[%s] not found\n", os.Args[1])
 		printUsage()
 		os.Exit(1)
 	}

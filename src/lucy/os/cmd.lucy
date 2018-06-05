@@ -19,9 +19,8 @@ public class Command implements Runnable{
 	public in InputStream ;
 	public out OutputStream ; 
 
-
 	p Process;
-	public fn Command(cmd string , envs string []  ,args  string[]  ,file File  ){
+	public fn Command(cmd string , args  , envs string []   ,file File  ){
 		this.cmd = cmd;
 		this.args = args;
 		this.envs = envs;
@@ -83,7 +82,6 @@ public class Command implements Runnable{
 			(new Thread(r)).start();
 		}
 
-
 	}
 	fn mkCmdArray() -> (arr string[]) {
 		cmdarray := new string[] (1 + this.args.size()) ; 
@@ -101,7 +99,7 @@ public class Command implements Runnable{
 		}
 	}
 
-	//for io copy ,no a
+	//for io copy only
 	public fn run() {
 		if this.in == null && this.out == null {
 			return ;

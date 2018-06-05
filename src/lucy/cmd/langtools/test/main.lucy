@@ -1,5 +1,11 @@
 import "lucy/cmd/langtools/common";
+import "lucy/os";
 
+
+fn printUsagaAndExit(code int){
+	print("expect package name");	
+	os.exit(code);
+}
 
 
 
@@ -7,6 +13,9 @@ import "lucy/cmd/langtools/common";
 
 
 fn main(args []string){
+	if args.size() == 0 {
+		printUsagaAndExit(1);
+	}
 	lucyroot,err := common.getLucyRoot();
 	if err != null {
 		print(err);

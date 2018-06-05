@@ -5,7 +5,7 @@ import "java/lang/Object";
 enum JSON_SYNTAX_TREE_TYPE {
 	JSON_SYNTAX_TREE_TYPE_ARRAY = 1  ,
 	JSON_SYNTAX_TREE_TYPE_OBJECT ,
-	JSON_SYNTAX_TREE_TYPE_INTERGER , 
+	JSON_SYNTAX_TREE_TYPE_NUMBER , 
 	JSON_SYNTAX_TREE_TYPE_BOOL , 
 	JSON_SYNTAX_TREE_TYPE_STRING ,
 	JSON_SYNTAX_TREE_TYPE_NULL 
@@ -15,12 +15,12 @@ enum JSON_SYNTAX_TREE_TYPE {
 
 
 class JsonSyntaxTreeNode {
-	Type JSON_SYNTAX_TREE_TYPE ;
-	boolValue bool ; 
-	intValue long ; 
-	stringValue string ; 
-	arrayElements []JsonSyntaxTreeNode ; 
-	keyPairs []JsonKeyPair;
+	public Type JSON_SYNTAX_TREE_TYPE ;
+	public boolValue bool ;
+	public numberValue string  ; // number value
+	public stringValue string ;
+	public arrayElements []JsonSyntaxTreeNode ;
+	public keyPairs []JsonKeyPair;
 }
 
 
@@ -28,7 +28,6 @@ class JsonKeyPair {
 	k string ; 
 	v JsonSyntaxTreeNode;
 }
-
 
 
 
@@ -43,35 +42,273 @@ class Decoder {
 	public fn Decoder(x Object,bs []byte) {
 		this.x = x;
 		this.bs = bs;
-		this.tree = new JsonSyntaxTreeNode();
+	}
+
+	public fn decode() -> (err error){
+		defer {
+			err = catch();
+		}
+		err = this.generateSyntaxTree();
+		if err != null {
+			return ; 
+		}
 	}
 	
 	fn generateSyntaxTree() -> (err error) {
+		this.skipWhiteSpace();
+		b := this.bs[this.offset] ; 
+		if b != '[' && b != '{' {
+			err = new error("unkown begining of json input");
+		}
+		this.tree ,err = this.parseValue();
+		if err != null {
+			return ; 
+		}
+		return this.letUsGo();
+	}
+
+
+	fn letUsGo() -> (err error ){
+
+	}
+
+	fn skipWhiteSpace() {
+		b := this.bs[this.offset] ;
+		for b == ' ' || b == '\t' || b == '\n' {
+			b = this.bs[this.offset++];
+		}
+	}
+
+	fn parseValue() -> (n JsonSyntaxTreeNode,err error ) {
+		this.skipWhiteSpace();
+		b := this.bs[this.offset];
+		switch b {
+			case '\"':
+				s := this.parseString();
+				n = new JsonSyntaxTreeNode();
+				n.Type = JSON_SYNTAX_TREE_TYPE_STRING ;
+				n.stringValue = s ;
+				return ;
+			case '[':
+				return this.parseArray();
+			case '{':
+				return this.parseObject();
+			case 't' , 'f':
+				isTrue := b == 't' ; 
+				if isTrue {
+					err = this.parseTrue();
+				}else {
+					err = this.parseFalse();
+				}
+				if err != null {
+					return null , err ; 
+				}
+				n = new JsonSyntaxTreeNode();
+				n.Type = JSON_SYNTAX_TREE_TYPE_BOOL ;
+				n.boolValue = isTrue;
+				return ;
+			case 'n':
+				err = this.parseNull();
+				if err != null {
+					return null , err ; 
+				}
+				n = new JsonSyntaxTreeNode();
+				n.Type = JSON_SYNTAX_TREE_TYPE_NULL ;
+				return  ; 
+			default:
+				if this.isDigit(b) == false && b != '-' {
+					err = new error("unkown begining of value");
+					return ;
+				}
+				var number string ; 
+				number,err = this.parseNumber();
+				if err != null {
+					return null , err ; 
+				}
+				n = new JsonSyntaxTreeNode();
+				n.Type = JSON_SYNTAX_TREE_TYPE_NUMBER ;
+				n.numberValue = number ;
+				return; 
+		} 
+	} 
+
+	fn parseArray() -> (n JsonSyntaxTreeNode,err error ) {
+		this.offset++ ; // skip [
+		n = new JsonSyntaxTreeNode();
+		n.Type = JSON_SYNTAX_TREE_TYPE_ARRAY ; 
+		n.arrayElements = []JsonSyntaxTreeNode{};
+		value,err := this.parseValue();
+		if err != null {
+			return null,err ;
+		}
+		n.arrayElements.append(value);
+		this.skipWhiteSpace();
+		b := this.bs[this.offset];
+		for b == ',' {
+			this.offset++ ;  // skip ,
+			value,err = this.parseValue();
+			if err != null {
+				return null,err ;
+			}
+			n.arrayElements.append(value);
+			this.skipWhiteSpace();
+			b = this.bs[this.offset];
+		}
+		if b != ']' {
+			return null , new error ("'[' and ']' not match");
+		}
+		this.offset++;
+		return n , null  ;
+	}
+
+	fn parseObject() -> (n JsonSyntaxTreeNode,err error )  {
 		
 	}
 	
 
 	fn parseString() -> (s string) {
-
+		b := this.bs[this.offset++]; // skip "
+		bs := []byte {} ; 
+		for b != '\"' {
+			if b != '\\' {
+				bs.append(b);
+				b = this.bs[this.offset++];
+				continue;
+			}
+			b = this.bs[this.offset++];
+			switch b{
+				case '\"' :
+					bs.append('\"');
+					b = this.bs[this.offset++];
+				case '\\':
+					bs.append('\\');
+					b = this.bs[this.offset++];
+				case 47b:
+					bs.append(47b);
+					b = this.bs[this.offset++];
+				case 'b':
+					bs.append('\b');
+					b = this.bs[this.offset++];
+				case 'f':
+					bs.append('\f');
+					b = this.bs[this.offset++];
+				case 'n':
+					bs.append('\n');
+					b = this.bs[this.offset++];
+				case 'r':
+					bs.append('\r');
+					b = this.bs[this.offset++];
+				case 't':
+					bs.append('\t');
+					b = this.bs[this.offset++];
+				case 'u':  // unicode
+					panic(new error("11111111"));
+			}
+		}
+		// b == '"'
+		this.offset++ ; // skip "
 	}
+
+
+	// 
+	fn parseTrue () ->(err error ) {
+		this.offset++ ; // skip 't' 
+		if this.bs[ this.offset ++ ] != 'r' {
+			err = new error("wrong true");
+		} 
+		if this.bs[ this.offset ++ ] != 'u' {
+			err = new error("wrong true");
+		} 
+		if this.bs[ this.offset ++ ] != 'e' {
+			err = new error("wrong true");
+		} 
+	}
+
+	fn parseNull () ->(err error ) {
+		this.offset++ ; // skip 'n' 
+		if this.bs[ this.offset ++ ] != 'u' {
+			err = new error("wrong true");
+		} 
+		if this.bs[ this.offset ++ ] != 'l' {
+			err = new error("wrong true");
+		} 
+		if this.bs[ this.offset ++ ] != 'l' {
+			err = new error("wrong true");
+		} 
+	}
+
+	fn parseFalse () ->(err error ) {
+		this.offset++ ; // skip 'f' 
+		if this.bs[ this.offset ++ ] != 'a' {
+			err = new error("wrong false");
+		} 
+		if this.bs[ this.offset ++ ] != 'l' {
+			err = new error("wrong false");
+		} 
+		if this.bs[ this.offset ++ ] != 's' {
+			err = new error("wrong false");
+		} 
+		if this.bs[ this.offset ++ ] != 'e' {
+			err = new error("wrong false");
+		} 
+	}
+
 	fn isDigit(b byte) -> (is bool) {
 		is = b >= '0' && b <= '9';
 	}
-	fn isLetter(b byte) -> (is bool) {
-		is = (b >= 'a' && b <= 'z') || 
-				(b >= 'A' && b <= 'Z') ;
-	}
+	fn isHex(b byte) -> (is bool) {
+		is = this.isDigit(b) || (b >= 'a' && b <= 'f');
+	} 
 
-	public fn decode() -> (err error){
-		err = this.generateSyntaxTree();
-		if err != null {
-			return ; 
+	fn parseNumber() -> (n string ,err error ) {
+		bs := []byte { this.bs[this.offset] } ;  
+		b := this.bs[this.offset++];
+		if bs[0] == '-' && false == this.isDigit(b) {
+			err = new error("expect number after '-'");
+			return ;
 		}
-
+		isZero := bs[0] == '-' ? b == '0' : bs[0] == '0';
+		if isZero {
+			bs.append(b);
+		}else {
+			for this.isDigit(b) {
+				bs.append(b);
+				b = this.bs[this.offset ++ ];
+			}
+		}
+		if b == '.' {
+			bs.append('.');
+			b = this.bs[this.offset++];
+			if this.isDigit(b) {
+				err = new error("expect number after '.'");
+				return ;
+			}
+			for this.isDigit(b) {
+				bs.append(b);
+				b = this.bs[this.offset ++ ];
+			}
+		}
+		if b == 'e' || b == 'E' {
+			bs.append('e');
+			b = this.bs[this.offset++];
+			if b == '+' {
+				bs.append('+');
+			}else if b == '-' {
+				bs.append('-');
+			}else if  this.isDigit(b) {
+				// nothing to do 
+			}else {
+				err = new error("expect number after 'e' or 'E'");
+				return ;
+			}
+			for this.isDigit(b) {
+				bs.append(b);
+				b = this.bs[this.offset ++ ];
+			}
+		}
+		n = string(bs);
 	}
-
-
-
+	
 }
 
 

@@ -57,6 +57,9 @@ class Encoder {
 		ks := x.keySet().toArray();
 		bs = []byte("{");
 		for k,v := range ks {
+			if err = Encoder.validForMapKey(v) ; err != null  {
+				return null , err ; 
+			}
 			bs2,err := (new Encoder(v , this.format)).encode();
 			if err != null {
 				return null , err ; 
@@ -86,6 +89,24 @@ class Encoder {
 		}
 		bs.append('}');
 	}
+
+	public static fn validForMapKey(x Object) -> (err error ){
+		c := x.getClass();
+		typeName := c.getTypeName();
+		if  typeName ==  "java.lang.Byte" || 
+			typeName ==  "java.lang.Short" || 
+			typeName ==  "java.lang.Character" || 
+			typeName ==  "java.lang.Integer" || 
+			typeName ==  "java.lang.Float" ||
+			typeName ==  "java.lang.Double" || 
+			typeName == "java.lang.String" {
+				
+			}else {
+				err = new error(sprintf("'%s' not valid for map key" , typeName));
+			}
+	}
+
+
 	public fn encodeArray() -> (bs []byte ,err error){
 		bs = []byte("[");
 		length := Array.getLength(this.x);
@@ -124,7 +145,6 @@ class Encoder {
 				return null,err;
 			}
 			bs.appendAll(bsv);
-
 			if k != fs.size() - 1 {
 				bs.appendAll([]byte{' ', ',' ,' '});
 			}

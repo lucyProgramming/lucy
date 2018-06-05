@@ -2,7 +2,7 @@
 import "java/lang/Object" as javaRootClass;
 
 /*
-	root object for lucy
+	root object for lucy default object
 */
 public class Lucy extends javaRootClass {
 	

@@ -1,5 +1,6 @@
 import "java/io";
 import "lucy/os";
+import "lucy/cmd/langtools/common";
 
 class Test {
 	lucypaths []string ;
@@ -10,42 +11,24 @@ class Test {
 		this.lucypaths = lucypaths;
 		this.packageName = packageName;
 	}
-	
-	fn findPackageLiesIn()->(which string,err error){
-		ps := []string{} ; 
-		for _,v := range this.lucypaths {
-			if true == (new io.File(v + "/src/" + this.packageName)).isDirectory() {
-				ps.append(v);
-			}
-		}
-		if ps.size() == 0 {
-			err = new error(sprintf("package '%s' not found" , this.packageName));
-			return ; 
-		}
-		if ps.size() > 1 {
-			errmsg := sprintf("more than 1 package named '%s'" , this.packageName);
-			err = new error(errmsg);
-			return ; 
-		}
-		which = ps[0];
-		
-	}
+
 	
 	//real test method
 	public fn test(){
-    	w,err := this.findPackageLiesIn();
+    	w,err := common.findPackageLiesIn(this.lucypaths , this.packageName);
 		if err != null  {
 			print(err);
 			os.exit(1);
 		}
 		// check is test exist
-		dir := w + "/src/" + this.packageName + "/test"	 ;
+		dir := w + "/src/" + this.packageName + "/test" ;
 		if f := new io.File(dir); f.isDirectory() == false {
 			printf("dir '%s' is not directory\n" , dir);
 			return ;
 		}
-		if err := this.testDir(this.packageName , dir )  ; err != null {
-			
+		if err := this.testDir(this.packageName + "/test" , dir )  ; err != null {
+			print(err);
+			return ; 
 		}
 	}
 	
@@ -67,7 +50,11 @@ class Test {
 		}
         printf("test package: %s\n" , packageName);
         printf("directory: %s\n" , dir);
-        cmd := new os.Command("lucy", null , null ,null);
+        args  := new string[](3);
+        args[0] = "run" ; 
+        args[1] = "-forceReBuild";
+        args[2] =  packageName;
+        cmd := new os.Command(this.lucyroot + "/bin/lucy", args  , null ,null);
         cmd.stdout = os.stdout ;
         cmd.stderr = os.stderr ; 
         if err =  cmd.start(); err != null {

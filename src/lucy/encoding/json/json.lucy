@@ -8,8 +8,8 @@ public fn encode(x Object,format bool = false) -> (bs []byte ,err error){
 }
 
 
-public fn decode(x Object , bs []byte ) -> (err error){
-	e := new Decoder(x , bs);
+public fn decode( bs []byte , x Object ) -> (err error){
+	e := new Decoder( x , bs   );
 	return e.decode();
 }
 

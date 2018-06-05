@@ -1,16 +1,29 @@
+import "lucy/cmd/langtools/common";
+import "lucy/os";
 
-
-
-fn printUsagaAndExit(){
-	
-
+fn printUsagaAndExit(code int){
+	print("expect package name");	
+	os.exit(code);
 }
 
 
 
+
 fn main(args []string){
-	
-	
+	if args.size() == 0 {
+		printUsagaAndExit(1);
+	}
+	lucyroot,err := common.getLucyRoot();
+	if err != null {
+		print(err);
+		return ;
+	}
+	lcypaths ,err := common.getLucyPath();
+	if err != null {
+		print(err);
+		return ;
+	}
+	(new Clean(lucyroot ,lcypaths , args[0] )).clean();
 }
 
 

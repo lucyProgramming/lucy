@@ -222,7 +222,7 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		if _, ok := meta.CompiledFrom[v.Name()]; ok == false { // new file
 			return
 		}
-		if v.ModTime().After(meta.CompiledFrom[v.Name()].LastModify) { // modified
+		if v.ModTime().Unix() > (meta.CompiledFrom[v.Name()].LastModify) { // modified
 			return
 		}
 	}
@@ -405,7 +405,7 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 	if err != nil {
 		return
 	}
-	fmt.Println("compiling.... ", packageName) // compile this package
+
 	for _, i := range is {
 		if _, ok := r.PackagesCompiled[i]; ok {
 			continue
@@ -444,6 +444,7 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 			}
 		}
 	}
+	fmt.Println("compiling.... ", packageName) // compile this package
 	// cd to destDir
 	os.Chdir(destDir)
 	args := []string{"-package-name", packageName, "-jvm-version", strconv.Itoa(r.Flags.JvmVersion)}
@@ -465,10 +466,10 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 			return
 		}
 		meta.CompiledFrom[filepath.Base(v)] = &common.FileMeta{
-			LastModify: f.ModTime(),
+			LastModify: f.ModTime().Unix(),
 		}
 	}
-	meta.CompileTime = time.Now()
+	meta.CompileTime = time.Now().Unix()
 	meta.Imports = is
 	fis, err := ioutil.ReadDir(destDir)
 	if err != nil {

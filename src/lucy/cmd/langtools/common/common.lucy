@@ -1,7 +1,7 @@
 
 import "lucy/os";
 import "java/lang/System";
-
+import "java/io";
 
 public fn getLucyRoot()->(path string , err error ){
 	envs := os.getEnvs();
@@ -34,8 +34,6 @@ public fn getLucyPath()->(paths []string, err error){
         		ps[v] = true;
         }
 	}
-	
-	
 	paths = new []string(ps.size());
 	i := 0 ;
 	for k,_ := range ps {
@@ -43,6 +41,31 @@ public fn getLucyPath()->(paths []string, err error){
 		i++; 
 	}
 }
+
+
+
+public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which string ,err error ){
+	ps := []string{} ; 
+	for _,v := range lucyPaths {
+		if true == (new io.File(v + "/src/" + packageName)).isDirectory() {
+			ps.append(v);
+		}
+	}
+	if ps.size() == 0 {
+		err = new error(sprintf("package '%s' not found" , packageName));
+		return ; 
+	}
+	if ps.size() > 1 {
+		errmsg := sprintf("more than 1 package named '%s'" , packageName);
+		err = new error(errmsg);
+		return ; 
+	}
+	which = ps[0];
+}
+
+
+
+
 
 
 

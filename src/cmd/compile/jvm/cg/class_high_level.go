@@ -116,6 +116,7 @@ func (c *ClassHighLevel) getSourceFile() string {
 	if len(c.SourceFiles) > 1 {
 		prefix = "\t\t: "
 	}
+
 	for f, _ := range c.SourceFiles {
 		s += prefix + f
 		s += "\n"
