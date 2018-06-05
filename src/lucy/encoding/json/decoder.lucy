@@ -227,13 +227,13 @@ class Decoder {
 	fn parseNull () ->(err error ) {
 		this.offset++ ; // skip 'n' 
 		if this.bs[ this.offset ++ ] != 'u' {
-			err = new error("wrong true");
+			err = new error("wrong null");
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong true");
+			err = new error("wrong null");
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong true");
+			err = new error("wrong null");
 		} 
 	}
 
@@ -293,12 +293,13 @@ class Decoder {
 			b = this.bs[this.offset++];
 			if b == '+' {
 				bs.append('+');
+				b = this.bs[this.offset++];
 			}else if b == '-' {
 				bs.append('-');
-			}else if  this.isDigit(b) {
-				// nothing to do 
-			}else {
-				err = new error("expect number after 'e' or 'E'");
+				b = this.bs[this.offset++];
+			}
+			if false ==  this.isDigit(b) {
+				 err = new error("expect number after 'e' or 'E'");
 				return ;
 			}
 			for this.isDigit(b) {
