@@ -28,7 +28,7 @@ public class ArrayBool   {
 		
 	}
 	private ArrayBool(){
-
+		
 	}
 	public ArrayBool slice(int start,int end){
 		if(end  < 0 ){

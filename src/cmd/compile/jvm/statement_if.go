@@ -73,10 +73,14 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		// when done
 		conditionState.addTop(elseIfState)
 	}
+	if context.LastStackMapOffset == code.CodeLength { // stackmap created at current offset
+		code.Codes[code.CodeLength] = cg.OP_nop
+		code.CodeLength++
+	}
+	context.MakeStackMap(code, conditionState, code.CodeLength)
+	binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
+
 	if s.ElseBlock != nil {
-		context.MakeStackMap(code, conditionState, code.CodeLength)
-		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
-		falseExit = nil
 		var elseState *StackMapState
 		if s.ElseBlock.HaveVariableDefinition() {
 			elseState = (&StackMapState{}).FromLast(conditionState)
@@ -86,9 +90,6 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		m.buildBlock(class, code, s.ElseBlock, context, elseState)
 		conditionState.addTop(elseState)
 	}
-	if falseExit != nil {
-		context.MakeStackMap(code, conditionState, code.CodeLength)
-		binary.BigEndian.PutUint16(falseExit, uint16(code.CodeLength-codelength))
-	}
+
 	return
 }

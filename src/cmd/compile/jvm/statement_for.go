@@ -26,10 +26,8 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			maxstack = stack
 		}
 	}
-	loopBeginAt := code.CodeLength
-	s.ContinueOPOffset = code.CodeLength
-	context.MakeStackMap(code, forState, code.CodeLength)
 	//condition
+	var firstExit *cg.JumpBackPatch
 	if s.Condition != nil {
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
@@ -41,23 +39,37 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
+		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
+		firstExit = (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
 	}
-
-	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
-	m.buildBlock(class, code, s.Block, context, forState)
+	s.ContinueOPOffset = code.CodeLength
+	context.MakeStackMap(code, forState, code.CodeLength)
 	if s.Post != nil {
-		s.ContinueOPOffset = code.CodeLength
-		//stack is here
-		context.MakeStackMap(code, forState, code.CodeLength)
 		stack, _ := m.MakeExpression.build(class, code, s.Post, context, forState)
 		if stack > maxstack {
 			maxstack = stack
 		}
-		jumpTo(cg.OP_goto, code, loopBeginAt)
-	} else {
-		if s.Block.DeadEnding == false { //will execute to here
-			jumpTo(cg.OP_goto, code, loopBeginAt)
+	}
+	if s.Condition != nil {
+		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
+		if len(es) > 0 {
+			backPatchEs(es, code.CodeLength)
+			forState.pushStack(class, s.Condition.Value)
+			context.MakeStackMap(code, forState, code.CodeLength)
+			forState.popStack(1) // must be bool expression
 		}
+		if stack > maxstack {
+			maxstack = stack
+		}
+		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
+	}
+	if firstExit != nil {
+		backPatchEs([]*cg.JumpBackPatch{firstExit}, code.CodeLength)
+		context.MakeStackMap(code, forState, code.CodeLength)
+	}
+	m.buildBlock(class, code, s.Block, context, forState)
+	if s.Block.DeadEnding == false {
+		jumpTo(cg.OP_goto, code, s.ContinueOPOffset)
 	}
 	return
 }

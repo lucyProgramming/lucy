@@ -7,15 +7,14 @@ import (
 )
 
 type StatementFor struct {
-	RangeAttr          *StatmentForRangeAttr
-	BackPatchs         []*cg.JumpBackPatch
-	ContinueBackPatchs []*cg.JumpBackPatch
-	ContinueOPOffset   int
-	Pos                *Pos
-	Init               *Expression
-	Condition          *Expression
-	Post               *Expression
-	Block              *Block
+	RangeAttr        *StatmentForRangeAttr
+	BackPatchs       []*cg.JumpBackPatch
+	ContinueOPOffset int
+	Pos              *Pos
+	Init             *Expression
+	Condition        *Expression
+	Post             *Expression
+	Block            *Block
 }
 
 type StatmentForRangeAttr struct {

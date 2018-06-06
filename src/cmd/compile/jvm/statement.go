@@ -1,12 +1,14 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxstack uint16) {
+	fmt.Println(s.Pos)
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
@@ -31,17 +33,16 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_FOR:
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.BackPatchs) > 0 {
+			if code.CodeLength == context.LastStackMapOffset {
+				code.Codes[code.CodeLength] = cg.OP_nop
+				code.CodeLength++
+			}
 			backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
-		if len(s.StatementFor.ContinueBackPatchs) > 0 {
-			// stack map is already maked
-			backPatchEs(s.StatementFor.ContinueBackPatchs, s.StatementFor.ContinueOPOffset)
-		}
 	case ast.STATEMENT_TYPE_CONTINUE:
 		m.buildDefers(class, code, context, s.StatementContinue.Defers, state)
-		s.StatementContinue.StatementFor.ContinueBackPatchs = append(s.StatementContinue.StatementFor.ContinueBackPatchs,
-			(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueOPOffset)
 	case ast.STATEMENT_TYPE_BREAK:
 		m.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		b := (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
@@ -55,6 +56,10 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_SWITCH:
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		if len(s.StatementSwitch.BackPatchs) > 0 {
+			if code.CodeLength == context.LastStackMapOffset {
+				code.Codes[code.CodeLength] = cg.OP_nop
+				code.CodeLength++
+			}
 			backPatchEs(s.StatementSwitch.BackPatchs, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}

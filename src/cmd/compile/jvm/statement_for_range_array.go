@@ -2,8 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -121,8 +119,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
 	}
 
-	// k set to 0
-	code.Codes[code.CodeLength] = cg.OP_iconst_0
+	// k set to  -1
+	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)
 
@@ -147,9 +145,15 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 				forState.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
 		}
 	}
-
-	loopbeginAt := code.CodeLength
-	context.MakeStackMap(code, forState, loopbeginAt)
+	s.ContinueOPOffset = code.CodeLength
+	context.MakeStackMap(code, forState, code.CodeLength)
+	code.Codes[code.CodeLength] = cg.OP_iinc
+	if autoVar.K > 255 {
+		panic("over 255")
+	}
+	code.Codes[code.CodeLength+1] = byte(autoVar.K)
+	code.Codes[code.CodeLength+2] = 1
+	code.CodeLength += 3
 	// load start
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
 	// load k
@@ -279,23 +283,10 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	blockState := (&StackMapState{}).FromLast(forState)
 	// build block
 	m.buildBlock(class, code, s.Block, context, blockState)
-	fmt.Println(len(blockState.Locals), len(forState.Locals), blockState == forState, forState == context.lastStackMapState)
 	forState.addTop(blockState)
-	context.MakeStackMap(code, forState, code.CodeLength)
-
-	//	panic(len(blockState.Locals))
-	//panic(len(forState.Locals))
-	//innc k
-	s.ContinueOPOffset = code.CodeLength
-	code.Codes[code.CodeLength] = cg.OP_iinc
-	if autoVar.K > 255 {
-		panic("over 255")
+	if s.Block.DeadEnding == false {
+		jumpTo(cg.OP_goto, code, s.ContinueOPOffset)
 	}
-	code.Codes[code.CodeLength+1] = byte(autoVar.K)
-	code.Codes[code.CodeLength+2] = 1
-	code.CodeLength += 3
-	//goto begin
-	jumpTo(cg.OP_goto, code, loopbeginAt)
 
 	state.addTop(forState) // add top
 	//pop index on stack

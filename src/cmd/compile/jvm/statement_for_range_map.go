@@ -2,8 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -89,7 +87,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
 	// k set to 0
-	code.Codes[code.CodeLength] = cg.OP_iconst_0
+	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 
@@ -116,10 +114,16 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	}
 
-	//continue offset start from here
-	loopBeginsAt := code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
-
+	s.ContinueOPOffset = code.CodeLength
+	context.MakeStackMap(code, forState, code.CodeLength)
+	code.Codes[code.CodeLength] = cg.OP_iinc
+	if autoVar.K > 255 {
+		panic("over 255")
+	}
+	code.Codes[code.CodeLength+1] = byte(autoVar.KeySetsK)
+	code.Codes[code.CodeLength+2] = 1
+	code.CodeLength += 3
 	// load k
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 	code.Codes[code.CodeLength] = cg.OP_dup
@@ -248,20 +252,11 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	// build block
 	blockState := (&StackMapState{}).FromLast(forState)
 	m.buildBlock(class, code, s.Block, context, blockState)
-	s.ContinueOPOffset = code.CodeLength
 	forState.addTop(blockState)
-	fmt.Println(len(blockState.Locals), len(forState.Locals))
-	context.MakeStackMap(code, forState, code.CodeLength)
-	code.Codes[code.CodeLength] = cg.OP_iinc
-	if autoVar.KeySetsK > 255 {
-		panic("over 255")
+	if s.Block.DeadEnding == false {
+		jumpTo(cg.OP_goto, code, s.ContinueOPOffset)
 	}
-	code.Codes[code.CodeLength+1] = byte(autoVar.KeySetsK)
-	code.Codes[code.CodeLength+2] = 1
-	code.CodeLength += 3
-	jumpTo(cg.OP_goto, code, loopBeginsAt)
 	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
-
 	state.addTop(forState) // add top
 	{
 		state.pushStack(class,
@@ -269,8 +264,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-
-	// pop 3
+	// pop 1
 	copyOP(code, []byte{cg.OP_pop}...)
 	return
 }

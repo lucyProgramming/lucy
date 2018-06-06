@@ -3,28 +3,29 @@ package jvm
 import (
 	//	"runtime/debug"
 
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Context struct {
-	class                    *ast.Class
-	lastStackMapState        *StackMapState
-	LastStackMapOffset       int
-	LastStackMapOffsetSetted bool
-	function                 *ast.Function
-	currentSoureFile         string
-	currentLineNUmber        int
-	Defer                    *ast.Defer
+	class              *ast.Class
+	lastStackMapState  *StackMapState
+	LastStackMapOffset int
+	NotFirstStackMap   bool
+	function           *ast.Function
+	currentSoureFile   string
+	currentLineNUmber  int
+	Defer              *ast.Defer
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
-	if context.LastStackMapOffset == offset && context.LastStackMapOffsetSetted {
-		// avoid 0 == 0
+	if context.LastStackMapOffset == offset && context.NotFirstStackMap {
+		panic(fmt.Sprintf("missing checking same offset:%d", offset))
 		return
 	}
 	var delta uint16
-	if context.LastStackMapOffsetSetted == false {
+	if context.NotFirstStackMap == false {
 		delta = uint16(offset)
 	} else {
 		delta = uint16(offset - context.LastStackMapOffset - 1)
@@ -34,7 +35,7 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		context.lastStackMapState = state
 		state.LastStackMapLocals = make([]*cg.StackMap_verification_type_info, len(state.Locals))
 		copy(state.LastStackMapLocals, state.Locals)
-		context.LastStackMapOffsetSetted = true
+		context.NotFirstStackMap = true
 
 	}()
 	if context.lastStackMapState != nil && context.lastStackMapState == state {
@@ -79,7 +80,6 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 			}
 		}
 	}
-
 	// full frame
 	fullFrame := &cg.StackMap_full_frame{}
 	fullFrame.FrameType = 255
