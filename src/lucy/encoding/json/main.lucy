@@ -6,7 +6,6 @@ class xxx {
 	public y string ; 
 	public c map { int -> string } ; 
 	public d map { string  -> int } ; 
-	public e map {xxx -> bool } ; 
 }
 
 
@@ -20,7 +19,6 @@ fn main(args []string) {
 	x.c[1] = "hello world";
 	x.c[2] = "hello world";
 	x.d = { "hello world" -> 1 , "11111111111111111" -> 222 }; 
-	x.e = {(new xxx() ) -> true } ;
 	bs,err := encode(x , true ) ;
 	if err != null {
 		print(err);
@@ -43,6 +41,29 @@ fn main(args []string) {
 		print(err);
 	}
 	print(string(bs));
+
+	print("#############################");
+
+
+
+	y := new xxx ();
+
+	s := `
+		{
+			"x" : true  
+		} 
+	` ; 
+
+	err = decode([]byte(s) , y );
+	if err != null {
+		panic(err);
+	}
+
+	print(y.x);
+
+
+
+
 
 
 }

@@ -1,5 +1,6 @@
 
 package lucy.deps;
+import java.lang.reflect.* ; 
 
 public class ArrayByte   {
 	public int start;
@@ -27,16 +28,16 @@ public class ArrayByte   {
 		
 	}
 	private ArrayByte(){
-		
+
 	}
 	public ArrayByte slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length
 		}
-		ArrayByte result = new ArrayByte();
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
 		}
+		ArrayByte result = new ArrayByte();
 		result.elements = this.elements;
 		result.start = this.start + start;
 		result.end = this.start + end;
@@ -55,7 +56,8 @@ public class ArrayByte   {
 		if(cap <= 0){
 		    cap = 10;
 		}
-		byte[] eles = new byte[cap];
+		Class c = this.elements.getClass();
+		byte[] eles = (byte[]) Array.newInstance(c.getComponentType() , cap );
 		int length = this.size();
 		for(int i = 0;i < length;i++){
 			eles[i] = this.elements[i + this.start];

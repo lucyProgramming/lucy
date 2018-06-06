@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
@@ -75,6 +76,16 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 			Descriptor: meta.elementsFieldDescriptor,
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
+		if s.RangeAttr.RangeOn.Value.ArrayType.IsPointer() &&
+			s.RangeAttr.RangeOn.Value.ArrayType.Typ != ast.VARIABLE_TYPE_STRING {
+			code.Codes[code.CodeLength] = cg.OP_checkcast
+			t := &ast.VariableType{}
+			t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+			t.ArrayType = s.RangeAttr.RangeOn.Value.ArrayType
+			class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Elements)...)
 		//get start
 		code.Codes[code.CodeLength] = cg.OP_dup
@@ -267,11 +278,15 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 	blockState := (&StackMapState{}).FromLast(forState)
 	// build block
-	m.buildBlock(class, code, s.Block, context, forState)
-	blockState.addTop(forState)
+	m.buildBlock(class, code, s.Block, context, blockState)
+	fmt.Println(len(blockState.Locals), len(forState.Locals), blockState == forState, forState == context.lastStackMapState)
+	forState.addTop(blockState)
+	context.MakeStackMap(code, forState, code.CodeLength)
+
+	//	panic(len(blockState.Locals))
+	//panic(len(forState.Locals))
 	//innc k
 	s.ContinueOPOffset = code.CodeLength
-	context.MakeStackMap(code, blockState, code.CodeLength)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.K > 255 {
 		panic("over 255")

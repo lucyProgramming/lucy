@@ -1,5 +1,6 @@
 
 package lucy.deps;
+import java.lang.reflect.* ; 
 
 public class ArrayFloat   {
 	public int start;
@@ -27,16 +28,16 @@ public class ArrayFloat   {
 		
 	}
 	private ArrayFloat(){
-		
+
 	}
 	public ArrayFloat slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length
 		}
-		ArrayFloat result = new ArrayFloat();
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
 		}
+		ArrayFloat result = new ArrayFloat();
 		result.elements = this.elements;
 		result.start = this.start + start;
 		result.end = this.start + end;
@@ -55,7 +56,8 @@ public class ArrayFloat   {
 		if(cap <= 0){
 		    cap = 10;
 		}
-		float[] eles = new float[cap];
+		Class c = this.elements.getClass();
+		float[] eles = (float[]) Array.newInstance(c.getComponentType() , cap );
 		int length = this.size();
 		for(int i = 0;i < length;i++){
 			eles[i] = this.elements[i + this.start];

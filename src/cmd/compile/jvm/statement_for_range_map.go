@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
@@ -246,10 +247,11 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	}
 	// build block
 	blockState := (&StackMapState{}).FromLast(forState)
-	m.buildBlock(class, code, s.Block, context, forState)
+	m.buildBlock(class, code, s.Block, context, blockState)
 	s.ContinueOPOffset = code.CodeLength
-	blockState.addTop(forState)
-	context.MakeStackMap(code, blockState, code.CodeLength)
+	forState.addTop(blockState)
+	fmt.Println(len(blockState.Locals), len(forState.Locals))
+	context.MakeStackMap(code, forState, code.CodeLength)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.KeySetsK > 255 {
 		panic("over 255")

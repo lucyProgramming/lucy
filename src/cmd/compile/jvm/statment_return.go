@@ -286,6 +286,8 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 	for index >= 0 { // build defer,cannot have return statement is defer
 		state := statementReturn.Defers[index].StackMapState.(*StackMapState)
 		state.addTop(ss)
+		state = (&StackMapState{}).FromLast(state)
+		defer ss.addTop(state)
 		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}

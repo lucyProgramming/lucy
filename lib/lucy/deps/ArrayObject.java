@@ -1,5 +1,6 @@
 
 package lucy.deps;
+import java.lang.reflect.* ; 
 
 		import java.lang.Object;
 
@@ -29,16 +30,16 @@ public class ArrayObject   {
 		
 	}
 	private ArrayObject(){
-		
+
 	}
 	public ArrayObject slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length
 		}
-		ArrayObject result = new ArrayObject();
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
 		}
+		ArrayObject result = new ArrayObject();
 		result.elements = this.elements;
 		result.start = this.start + start;
 		result.end = this.start + end;
@@ -57,7 +58,8 @@ public class ArrayObject   {
 		if(cap <= 0){
 		    cap = 10;
 		}
-		Object[] eles = new Object[cap];
+		Class c = this.elements.getClass();
+		Object[] eles = (Object[]) Array.newInstance(c.getComponentType() , cap );
 		int length = this.size();
 		for(int i = 0;i < length;i++){
 			eles[i] = this.elements[i + this.start];

@@ -3,6 +3,7 @@ package install_lucy_array
 const (
 	array_template = `
 package lucy.deps;
+import java.lang.reflect.* ; 
 IMPORTS
 public class ArrayTTT   {
 	public int start;
@@ -30,7 +31,7 @@ public class ArrayTTT   {
 		DEFAULT_INIT
 	}
 	private ArrayTTT(){
-		
+
 	}
 	public ArrayTTT slice(int start,int end){
 		if(end  < 0 ){
@@ -58,7 +59,8 @@ public class ArrayTTT   {
 		if(cap <= 0){
 		    cap = 10;
 		}
-		TTT[] eles = new TTT[cap];
+		Class c = this.elements.getClass();
+		TTT[] eles = (TTT[]) Array.newInstance(c.getComponentType() , cap );
 		int length = this.size();
 		for(int i = 0;i < length;i++){
 			eles[i] = this.elements[i + this.start];
