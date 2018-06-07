@@ -307,9 +307,24 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if matched {
-		if false == call.Expression.isThis() &&
-			ms[0].IsPublic() == false {
-			*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+		if ms[0].IsStatic() {
+			//TODO::
+			if object.Typ != VARIABLE_TYPE_CLASS {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			if ms[0].IsPublic() == false && object.Class != block.InheritedAttribute.Class {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			}
+		} else {
+			if false == call.Expression.isThis() &&
+				ms[0].IsPublic() == false {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			}
+			if object.Typ != VARIABLE_TYPE_OBJECT {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
+					errMsgPrefix(e.Pos), call.Name))
+			}
 		}
 		call.Method = ms[0]
 		return ms[0].Func.Typ.retTypes(e.Pos)

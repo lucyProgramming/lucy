@@ -27,7 +27,7 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		t := &cg.StackMap_verification_type_info{}
 		t.Verify = &cg.StackMap_Uninitialized_variable_info{
-			Index: uint16(code.CodeLength),
+			CodeOffset: uint16(code.CodeLength),
 		}
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
@@ -43,7 +43,7 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		t := &cg.StackMap_verification_type_info{}
 		t.Verify = &cg.StackMap_Uninitialized_variable_info{
-			Index: uint16(code.CodeLength),
+			CodeOffset: uint16(code.CodeLength),
 		}
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4

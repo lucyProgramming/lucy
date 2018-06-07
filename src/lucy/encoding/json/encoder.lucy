@@ -26,7 +26,7 @@ class Encoder {
 		if this.x == null {
 			return []byte("null") , null ;
 		}
-		if this.isPrimitive(){
+		if isPrimitive(this.c){
 			return []byte(this.x.toString()) , null; 
 		} 
 		if this.isMap() {
@@ -123,17 +123,7 @@ class Encoder {
 		bs.append(']');
 	}
 
-	//TODO :: why 'this.c.isPrimitive()' not working,when find why remove this function
-	public fn isPrimitive()-> (is bool) {
-		typeName := this.c.getTypeName();
-		is = typeName == "java.lang.Boolean" || 
-			typeName ==  "java.lang.Byte" || 
-			typeName ==  "java.lang.Short" || 
-			typeName ==  "java.lang.Character" || 
-			typeName ==  "java.lang.Integer" || 
-			typeName ==  "java.lang.Float" ||
-			typeName ==  "java.lang.Double" ; 
-	}
+	
 
 	public fn encodeObject() ->  (bs []byte ,err error){
 		bs = []byte("{") ;

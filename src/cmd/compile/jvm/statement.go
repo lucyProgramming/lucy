@@ -1,14 +1,14 @@
 package jvm
 
 import (
-	"fmt"
+	//"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxstack uint16) {
-	fmt.Println(s.Pos)
+	//fmt.Println(s.Pos)
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
@@ -16,6 +16,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		}
 		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
 	case ast.STATEMENT_TYPE_IF:
+		s.StatementIf.BackPatchs = []*cg.JumpBackPatch{} //could compile multi times
 		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.BackPatchs) > 0 {
 			backPatchEs(s.StatementIf.BackPatchs, code.CodeLength)
@@ -31,12 +32,9 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		m.buildBlock(class, code, s.Block, context, ss)
 		state.addTop(ss)
 	case ast.STATEMENT_TYPE_FOR:
+		s.StatementFor.BackPatchs = []*cg.JumpBackPatch{} //could compile multi times
 		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.BackPatchs) > 0 {
-			if code.CodeLength == context.LastStackMapOffset {
-				code.Codes[code.CodeLength] = cg.OP_nop
-				code.CodeLength++
-			}
 			backPatchEs(s.StatementFor.BackPatchs, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
@@ -54,6 +52,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_RETURN:
 		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
 	case ast.STATEMENT_TYPE_SWITCH:
+		s.StatementSwitch.BackPatchs = []*cg.JumpBackPatch{} //could compile multi times
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		if len(s.StatementSwitch.BackPatchs) > 0 {
 			if code.CodeLength == context.LastStackMapOffset {
@@ -73,6 +72,7 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	case ast.STATEMENT_TYPE_LABLE:
 		s.StatmentLable.CodeOffsetGenerated = true
 		s.StatmentLable.CodeOffset = code.CodeLength
+		s.StatmentLable.BackPatches = []*cg.JumpBackPatch{} //could compile multi times
 		if len(s.StatmentLable.BackPatches) > 0 {
 			backPatchEs(s.StatmentLable.BackPatches, code.CodeLength) // back patch
 		}

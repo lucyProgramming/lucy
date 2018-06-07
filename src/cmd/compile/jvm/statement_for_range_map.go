@@ -32,7 +32,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+7] = cg.OP_pop
 	code.CodeLength += 8
 	forState := (&StackMapState{}).FromLast(state)
-
+	defer state.addTop(forState)
 	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
@@ -117,6 +117,8 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	context.MakeStackMap(code, forState, code.CodeLength)
 	s.ContinueOPOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
+
+	blockState := (&StackMapState{}).FromLast(forState)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.K > 255 {
 		panic("over 255")
@@ -164,7 +166,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
 		//store to V
 		copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
-		forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
@@ -186,7 +188,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		autoVar.K = code.MaxLocals
 		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.K)
 		copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
-		forState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.K)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.K)
 	}
 
 	// store k and v into user defined variable
@@ -215,9 +217,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	} else { // for k,v  = range xxx
 		// store v
-		stackLength := len(forState.Stacks)
+		stackLength := len(blockState.Stacks)
 		stack, remainStack, op, _, classname, name, descriptor :=
-			m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionV, context, forState)
+			m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionV, context, blockState)
 		if stack > maxstack { // this means  current stack is 0
 			maxstack = stack
 		}
@@ -227,11 +229,11 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			maxstack = t
 		}
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
-		forState.popStack(len(forState.Stacks) - stackLength)
+		forState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionK != nil {
-			stackLength := len(forState.Stacks)
+			stackLength := len(blockState.Stacks)
 			stack, remainStack, op, _, classname, name, descriptor :=
-				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, forState)
+				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, blockState)
 			if stack > maxstack { // this means  current stack is 0
 				maxstack = stack
 			}
@@ -246,23 +248,23 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 					s.RangeAttr.RangeOn.Value.Map.K)
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)
-			forState.popStack(len(forState.Stacks) - stackLength)
+			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}
 	// build block
-	blockState := (&StackMapState{}).FromLast(forState)
+
 	m.buildBlock(class, code, s.Block, context, blockState)
-	forState.addTop(blockState)
+	defer forState.addTop(blockState)
 	if s.Block.DeadEnding == false {
 		jumpTo(cg.OP_goto, code, s.ContinueOPOffset)
 	}
 	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
-	state.addTop(forState) // add top
+
 	{
-		state.pushStack(class,
+		forState.pushStack(class,
 			&ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(1)
+		context.MakeStackMap(code, forState, code.CodeLength)
+		forState.popStack(1)
 	}
 	// pop 1
 	copyOP(code, []byte{cg.OP_pop}...)

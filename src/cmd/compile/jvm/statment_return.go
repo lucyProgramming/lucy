@@ -285,9 +285,8 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 	index := len(statementReturn.Defers) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		state := statementReturn.Defers[index].StackMapState.(*StackMapState)
+		state = (&StackMapState{}).FromLast(state) // clone
 		state.addTop(ss)
-		state = (&StackMapState{}).FromLast(state)
-		defer ss.addTop(state)
 		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}
@@ -307,6 +306,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		// build block
 		context.Defer = statementReturn.Defers[index]
 		m.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
+		ss.addTop(state)
 		context.Defer = nil
 		//if need throw
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)

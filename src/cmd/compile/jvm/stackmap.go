@@ -6,9 +6,26 @@ import (
 )
 
 type StackMapState struct {
-	Locals             []*cg.StackMap_verification_type_info
-	LastStackMapLocals []*cg.StackMap_verification_type_info
-	Stacks             []*cg.StackMap_verification_type_info
+	Locals []*cg.StackMap_verification_type_info
+	Stacks []*cg.StackMap_verification_type_info
+}
+
+// same as last
+func (s *StackMapState) isSame(locals []*cg.StackMap_verification_type_info, stacks []*cg.StackMap_verification_type_info) bool {
+	if len(s.Locals) != len(locals) || len(s.Stacks) != len(stacks) {
+		return false
+	}
+	for k, v := range s.Locals {
+		if v.Equal(locals[k]) == false {
+			return false
+		}
+	}
+	for k, v := range s.Stacks {
+		if v.Equal(stacks[k]) == false {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.VariableType) {

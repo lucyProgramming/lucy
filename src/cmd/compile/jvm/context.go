@@ -9,20 +9,26 @@ import (
 )
 
 type Context struct {
-	class              *ast.Class
-	lastStackMapState  *StackMapState
-	LastStackMapOffset int
-	NotFirstStackMap   bool
-	function           *ast.Function
-	currentSoureFile   string
-	currentLineNUmber  int
-	Defer              *ast.Defer
+	class                   *ast.Class
+	lastStackMapState       *StackMapState
+	lastStackMapStateLocals []*cg.StackMap_verification_type_info
+	lastStackMapStateStacks []*cg.StackMap_verification_type_info
+	LastStackMapOffset      int
+	NotFirstStackMap        bool
+	function                *ast.Function
+	currentSoureFile        string
+	currentLineNUmber       int
+	Defer                   *ast.Defer
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
+	//fmt.Println(offset)
 	if context.LastStackMapOffset == offset && context.NotFirstStackMap {
-		panic(fmt.Sprintf("missing checking same offset:%d", offset))
-		return
+		if state.isSame(context.lastStackMapStateLocals, context.lastStackMapStateStacks) {
+			return // no need
+		} else {
+			panic(fmt.Sprintf("missing checking same offset:%d", offset))
+		}
 	}
 	var delta uint16
 	if context.NotFirstStackMap == false {
@@ -32,14 +38,15 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	}
 	defer func() {
 		context.LastStackMapOffset = offset // rewrite
-		context.lastStackMapState = state
-		state.LastStackMapLocals = make([]*cg.StackMap_verification_type_info, len(state.Locals))
-		copy(state.LastStackMapLocals, state.Locals)
+		context.lastStackMapStateLocals = make([]*cg.StackMap_verification_type_info, len(state.Locals))
+		copy(context.lastStackMapStateLocals, state.Locals)
+		context.lastStackMapStateStacks = make([]*cg.StackMap_verification_type_info, len(state.Stacks))
+		copy(context.lastStackMapStateStacks, state.Stacks)
 		context.NotFirstStackMap = true
-
+		context.lastStackMapState = state
 	}()
-	if context.lastStackMapState != nil && context.lastStackMapState == state {
-		if len(state.Locals) == len(state.LastStackMapLocals) && len(state.Stacks) == 0 { // same frame or same frame extended
+	if state == context.lastStackMapState {
+		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 { // same frame or same frame extended
 			if delta <= 63 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 					&cg.StackMap_same_frame{FrameType: byte(delta)})
@@ -50,7 +57,7 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 			}
 			return
 		}
-		if len(state.LastStackMapLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
+		if len(context.lastStackMapStateLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
 			if delta <= 64 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 					&cg.StackMap_same_locals_1_stack_item_frame{
@@ -67,8 +74,8 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 			}
 			return
 		}
-		if len(state.LastStackMapLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
-			num := len(state.Locals) - len(state.LastStackMapLocals)
+		if len(context.lastStackMapStateLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
+			num := len(state.Locals) - len(context.lastStackMapStateLocals)
 			if num <= 3 {
 				appendFrame := &cg.StackMap_append_frame{}
 				appendFrame.FrameType = byte(num + 251)

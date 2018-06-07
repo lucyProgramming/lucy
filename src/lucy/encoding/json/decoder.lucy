@@ -89,35 +89,49 @@ class Decoder {
 		return this.decodeObjectFromTree(tree , x , c);
 	}
 
-	fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
+	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object,err error) {
 		typeName := c.getName();
-		//bool
-		if typeName == "java.lang.Boolean" {
-			if tree.Type != JSON_SYNTAX_TREE_TYPE_BOOL {
-				return  new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()));
-			}else {
-				x,_  := x.(Boolean);
-				x.valueOf(tree.boolValue);
-			}
+		switch typeName{
+			case "java.lang.Boolean":
+				if tree.Type != JSON_SYNTAX_TREE_TYPE_BOOL {
+					return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()));
+				} 
+				return Boolean.valueOf(tree.boolValue), null;
+			case "java.lang.Byte":
+				
 		}
+	}
 
-
+	fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
 		fs := c.getFields();
 		for f := range fs {
 			if false == tree.keyPairs.contains(f.getName()) {
 				continue ; 
 			}
-			obj := f.get(x);
-			cc := obj.getClass();
-			err = this.decodeObjectFromTree( tree.keyPairs[f.getName()] , obj , cc );
+			cc := f.get(x).getClass();
+			if  isPrimitive(cc) {
+				if tree.keyPairs == null || tree.keyPairs[f.getName()] == null {
+					continue ; 
+				}
+				tree :=  tree.keyPairs[f.getName()] ; 
+				obj,err :=  Decoder.decodePrimitives( cc , tree  ) ;
+				if err != null {
+					return err ; 
+				}
+				f.set(x , obj) ;
+				continue ; 
+			}
+
+			err = this.decodeObjectFromTree( tree.keyPairs[f.getName()] , f.get(x) , cc );
 			if err != null {
 				return err ;
 			}
 		}
 	}
 
-	fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
 
+	fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
+		
 	}
 
 	fn skipWhiteSpace() {

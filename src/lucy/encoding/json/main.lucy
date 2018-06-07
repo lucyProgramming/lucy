@@ -56,8 +56,7 @@ fn main(args []string) {
 
 	err = decode([]byte(s) , y );
 	if err != null {
-		e := new error("123");
-		panic(e);
+		panic(err);
 	}
 
 	print(y.x);

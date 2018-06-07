@@ -22,10 +22,6 @@ const (
 	CONSTANT_POOL_TAG_InvokeDynamic      uint8 = 18
 )
 
-//type ToConstPool interface {
-//	ToConstPool() *ConstPool
-//}
-
 type ConstPool struct {
 	selfindex uint16 // using when it`s self
 	Tag       uint8
