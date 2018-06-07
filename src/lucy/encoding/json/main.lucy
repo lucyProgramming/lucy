@@ -50,7 +50,7 @@ fn main(args []string) {
 
 	s := `
 		{
-			"x" : true  
+			"x" : null  
 		} 
 	` ; 
 
