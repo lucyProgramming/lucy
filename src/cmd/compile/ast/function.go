@@ -18,7 +18,7 @@ type Function struct {
 	IsClosureFunction              bool
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
-	buildChecker                   buildFunctionChecker // used in build function
+	buildinFunctionChecker         buildFunctionChecker // used in build function
 	IsGlobal                       bool
 	IsBuildin                      bool
 	Used                           bool

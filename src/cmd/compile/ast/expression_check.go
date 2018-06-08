@@ -307,7 +307,7 @@ func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, e
 func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
 	callargsTypes := checkRightValuesValid(checkExpressions(block, args, errs), errs)
 	length := len(*errs)
-	f.buildChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callargsTypes, e.Pos)
+	f.buildinFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callargsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
 		return f.Typ.retTypes(e.Pos)

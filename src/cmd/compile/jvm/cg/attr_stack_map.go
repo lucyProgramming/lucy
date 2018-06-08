@@ -2,7 +2,6 @@ package cg
 
 import (
 	"encoding/binary"
-	"reflect"
 )
 
 type StackMap interface {
@@ -142,69 +141,70 @@ type StackMap_verification_type_info struct {
 	Verify interface{}
 }
 
-func (s *StackMap_verification_type_info) Equal(s2 *StackMap_verification_type_info) bool {
-	if s == s2 {
-		return true
-	}
-	if reflect.DeepEqual(s.Verify, s2.Verify) {
-		return true
-	}
-	// same as top
-	if t1, ok := s.Verify.(*StackMap_Top_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Top_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as int
-	if t1, ok := s.Verify.(*StackMap_Integer_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Integer_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as float
-	if t1, ok := s.Verify.(*StackMap_Float_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Float_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as double
-	if t1, ok := s.Verify.(*StackMap_Double_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Double_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as long
-	if t1, ok := s.Verify.(*StackMap_Long_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Long_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as null
-	if t1, ok := s.Verify.(*StackMap_Null_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Null_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as uninitialized this
-	if t1, ok := s.Verify.(*StackMap_UninitializedThis_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_UninitializedThis_variable_info); ok && t2 != nil {
-			return true
-		}
-	}
-	// same as object
-	if t1, ok := s.Verify.(*StackMap_Object_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Object_variable_info); ok && t2 != nil {
-			return t1.Index == t2.Index
-		}
-	}
-	// same as uninitialized variable
-	if t1, ok := s.Verify.(*StackMap_Uninitialized_variable_info); ok && t1 != nil {
-		if t2, ok := s2.Verify.(*StackMap_Uninitialized_variable_info); ok && t2 != nil {
-			return t1.CodeOffset == t2.CodeOffset
-		}
-	}
-	return false
-}
+//
+//func (s *StackMap_verification_type_info) Equal(s2 *StackMap_verification_type_info) bool {
+//	if s == s2 {
+//		return true
+//	}
+//	if reflect.DeepEqual(s.Verify, s2.Verify) {
+//		return true
+//	}
+//	// same as top
+//	if t1, ok := s.Verify.(*StackMap_Top_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Top_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as int
+//	if t1, ok := s.Verify.(*StackMap_Integer_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Integer_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as float
+//	if t1, ok := s.Verify.(*StackMap_Float_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Float_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as double
+//	if t1, ok := s.Verify.(*StackMap_Double_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Double_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as long
+//	if t1, ok := s.Verify.(*StackMap_Long_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Long_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as null
+//	if t1, ok := s.Verify.(*StackMap_Null_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Null_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as uninitialized this
+//	if t1, ok := s.Verify.(*StackMap_UninitializedThis_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_UninitializedThis_variable_info); ok && t2 != nil {
+//			return true
+//		}
+//	}
+//	// same as object
+//	if t1, ok := s.Verify.(*StackMap_Object_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Object_variable_info); ok && t2 != nil {
+//			return t1.Index == t2.Index
+//		}
+//	}
+//	// same as uninitialized variable
+//	if t1, ok := s.Verify.(*StackMap_Uninitialized_variable_info); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMap_Uninitialized_variable_info); ok && t2 != nil {
+//			return t1.CodeOffset == t2.CodeOffset
+//		}
+//	}
+//	return false
+//}
 
 func (s *StackMap_verification_type_info) ToBytes() []byte {
 	switch s.Verify.(type) {

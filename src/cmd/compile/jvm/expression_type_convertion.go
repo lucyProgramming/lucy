@@ -172,7 +172,7 @@ func (m *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2i
-		code.Codes[code.CodeLength+1] = cg.OP_l2i
+		code.Codes[code.CodeLength+1] = cg.OP_i2b
 		code.CodeLength += 2
 	}
 }

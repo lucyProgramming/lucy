@@ -1,10 +1,101 @@
 
 
 class Number {
-	integerPart []byte;
-	isFloat bool ;
-	floatPart []byte ; 
-	e []byte ;  
+	public isNegative bool;
+	public integerPart []byte;
+	public isFloat bool ;
+	public floatPart []byte ;
+	public eIsNegative bool ;
+	public e []byte ;  
+
+	public fn Number(){
+		this.integerPart = []byte{} ; 
+		this.floatPart = []byte{} ; 
+		this.e = []byte{} ; 
+	}
+
+	
+	
+	public fn prepare() -> (err error){
+		if len(this.e) == 0 {
+			return ; 
+		}
+		e := 0;
+		for v := range this.e {
+			e += e * 10 + int(v - '0') ; 
+		}
+		if this.eIsNegative == false {
+			if e >= len(this.floatPart) {
+				this.integerPart.appendAll(this.floatPart , this.mkAscii0Bytes (e - len(this.floatPart))) ;
+				this.isFloat = false ; 
+			}else {
+				this.integerPart.appendAll(this.floatPart[0:e]);
+				this.floatPart = this.floatPart[e:] ; 
+			}
+		}else {
+			this.isFloat = true;
+			if e >= len(this.integerPart) {
+				bs := this.mkAscii0Bytes (e - len(this.integerPart) ); 
+				bs.appendAll(this.integerPart , this.floatPart) ;	
+				this.integerPart = []byte{} ;
+				this.floatPart = bs ; 
+			}else {
+				this.integerPart = this.integerPart[ : len(this.integerPart) - e ];
+				bs := []byte{} ;
+				bs.appendAll(this.integerPart[ len(this.integerPart) - e : ]  );
+				if len(this.floatPart) > 0 {
+					bs.appendAll(this.floatPart);
+				}
+			}
+		}
+	}
+
+	fn mkAscii0Bytes(length int) -> (bs []byte ){
+		bs = new []byte(length);
+		for k,_ := range bs {
+			bs[k] = '0' ; 
+		}
+	}
+
+	public fn getLong() -> ( v long,err error){
+		print(this.integerPart);
+		err = this.prepare();
+		if err != null {
+			return ;
+		}
+		if this.isFloat {
+			err = new error("cannot convert 'float' to 'interger'");
+			return ;
+		}
+		ret := 0l;
+		print(this.integerPart);
+		for v := range this.integerPart {
+			ret = ret * 10 + long(v - '0') ; 
+		}
+		v = ret ; 
+		if this.isNegative {
+			v = -v ;
+		}
+	}
+
+	public fn getDouble() -> (v double,err error) {
+		err = this.prepare();
+		if err != null {
+			return ;
+		}
+		ret := 0.0d;
+		for v := range this.integerPart {
+			ret = ret * 10.0  + double(v - '0') ; 
+		}
+		f := 0.0d;
+		index := len(this.floatPart) - 1 ;
+		for index >= 0 {
+			f = f * 0.1 + double (this.floatPart[index] - '0' ) * 0.1 ; 
+			index -- ;
+		}
+		ret += f ;
+		v = ret; 
+	}
 	
 }
 

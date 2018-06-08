@@ -2,18 +2,32 @@
 
 
 class xxx {
-	public x bool;
+	public boolValue bool;
 	public y string ; 
+	public intValue int ; 
+	public floatValue float ;
+	public stringValue string ; 
 	public c map { int -> string } ; 
 	public d map { string  -> int } ; 
+	
+	public fn toString()->(s string ){
+		s = sprintf("boolValue:%b\n" , this.boolValue );		
+		s += sprintf("intValue:%d\n" , this.intValue );	
+		s += sprintf("stringValue:%s\n" , this.stringValue );	
+		s += sprintf("floatValue:%s\n" , this.floatValue );	
+	}
 }
+
+
+
+
+
 
 
 
 
 fn main(args []string) {
 	x := new xxx();
-	x.x = true ; 
 	x.y = "11111111111";
 	x.c = new map { int -> string }();
 	x.c[1] = "hello world";
@@ -50,7 +64,10 @@ fn main(args []string) {
 
 	s := `
 		{
-			"x" : null  
+			"boolValue" : true , 
+			"intValue" : 110e2 ,
+			"stringValue" :"hello world",
+			"floatValue" : 1e3 
 		} 
 	` ; 
 
@@ -59,7 +76,7 @@ fn main(args []string) {
 		panic(err);
 	}
 
-	print(y.x);
+	print(y);
 
 
 
@@ -67,6 +84,7 @@ fn main(args []string) {
 
 
 }
+
 
 
 

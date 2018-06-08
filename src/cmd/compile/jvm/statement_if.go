@@ -67,12 +67,12 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		if v.Block.DeadEnding == false {
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 		}
-
 		// when done
 		conditionState.addTop(elseIfState)
 	}
 	context.MakeStackMap(code, conditionState, code.CodeLength)
 	binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codelength))
+	//s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	if s.ElseBlock != nil {
 		var elseState *StackMapState
 		if s.ElseBlock.HaveVariableDefinition() {
@@ -86,6 +86,5 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 		}
 	}
-
 	return
 }

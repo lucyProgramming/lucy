@@ -14,12 +14,12 @@ const (
 	MAP_METHOD_KEY_EXISTS = "contains"
 	MAP_METHOD_SIZE       = "size"
 	// builin function
-	BUILD_IN_FUNCTION_PANIC   = "panic"
-	BUILD_IN_FUNCTION_CATCH   = "catch"
-	BUILD_IN_FUNCTION_PRINT   = "print"
-	BUILD_IN_FUNCTION_PRINTF  = "printf"
-	BUILD_IN_FUNCTION_SPRINTF = "sprintf"
-
+	BUILD_IN_FUNCTION_PANIC        = "panic"
+	BUILD_IN_FUNCTION_CATCH        = "catch"
+	BUILD_IN_FUNCTION_PRINT        = "print"
+	BUILD_IN_FUNCTION_PRINTF       = "printf"
+	BUILD_IN_FUNCTION_SPRINTF      = "sprintf"
+	BUILD_IN_FUNCTION_LEN          = "len"
 	BUILD_IN_FUNCTION_MONITORENTER = "monitorEnter"
 	BUILD_IN_FUNCTION_MONITOREXIT  = "monitorExit"
 )

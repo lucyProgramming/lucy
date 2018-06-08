@@ -3,7 +3,6 @@ package jvm
 import (
 	//	"runtime/debug"
 
-	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -19,16 +18,19 @@ type Context struct {
 	currentSoureFile        string
 	currentLineNUmber       int
 	Defer                   *ast.Defer
+	StackMapOffsets         []int
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
 	//fmt.Println(offset)
 	if context.LastStackMapOffset == offset && context.NotFirstStackMap {
-		if state.isSame(context.lastStackMapStateLocals, context.lastStackMapStateStacks) {
-			return // no need
-		} else {
-			panic(fmt.Sprintf("missing checking same offset:%d", offset))
-		}
+		//if state.isSame(context.lastStackMapStateLocals, context.lastStackMapStateStacks) {
+		//	return // no need
+		//} else {
+		code.AttributeStackMap.StackMaps = code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
+		context.StackMapOffsets = context.StackMapOffsets[0 : len(context.StackMapOffsets)-1]
+		context.LastStackMapOffset = context.StackMapOffsets[len(context.StackMapOffsets)-1]
+		//}
 	}
 	var delta uint16
 	if context.NotFirstStackMap == false {
@@ -44,6 +46,7 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		copy(context.lastStackMapStateStacks, state.Stacks)
 		context.NotFirstStackMap = true
 		context.lastStackMapState = state
+		context.StackMapOffsets = append(context.StackMapOffsets, offset)
 	}()
 	if state == context.lastStackMapState {
 		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 { // same frame or same frame extended

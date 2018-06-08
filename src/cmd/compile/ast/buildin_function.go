@@ -12,7 +12,7 @@ func init() {
 
 func registerBuildinFunctions() {
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
-		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+		buildinFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
 			e.BuildinFunctionMeta = meta
 			if len(args) == 0 || args[0] == nil {
@@ -49,7 +49,7 @@ func registerBuildinFunctions() {
 		catchBuildFunction.Typ.ReturnList[0].Typ.Class.NotImportedYet = true
 		//class is going to make value by checker
 	}
-	catchBuildFunction.buildChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+	catchBuildFunction.buildinFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 		if block.InheritedAttribute.Defer == nil ||
 			block.InheritedAttribute.Defer.allowCatch == false {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
@@ -101,7 +101,7 @@ func registerBuildinFunctions() {
 		}
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
-		buildChecker: func(ft *Function, e *ExpressionFunctionCall,
+		buildinFunctionChecker: func(ft *Function, e *ExpressionFunctionCall,
 			block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			if len(args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function 'panic' expect one argument",
@@ -126,15 +126,40 @@ func registerBuildinFunctions() {
 		Name:      common.BUILD_IN_FUNCTION_PANIC,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
-		buildChecker: monitorChecker,
-		IsBuildin:    true,
-		Name:         common.BUILD_IN_FUNCTION_MONITORENTER,
+		buildinFunctionChecker: monitorChecker,
+		IsBuildin:              true,
+		Name:                   common.BUILD_IN_FUNCTION_MONITORENTER,
 	}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
-		buildChecker: monitorChecker,
-		IsBuildin:    true,
-		Name:         common.BUILD_IN_FUNCTION_MONITOREXIT,
+		buildinFunctionChecker: monitorChecker,
+		IsBuildin:              true,
+		Name:                   common.BUILD_IN_FUNCTION_MONITOREXIT,
 	}
+	// len
+	buildinFunctionsMap[common.BUILD_IN_FUNCTION_LEN] = &Function{
+		buildinFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+			if len(args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s expect one argument", errMsgPrefix(pos)))
+				return
+			}
+			if args[0] == nil {
+				return
+			}
+			if args[0].Typ != VARIABLE_TYPE_ARRAY && args[0].Typ != VARIABLE_TYPE_JAVA_ARRAY &&
+				args[0].Typ != VARIABLE_TYPE_MAP && args[0].Typ != VARIABLE_TYPE_STRING {
+				*errs = append(*errs, fmt.Errorf("%s len expect 'array' or 'map' or 'string' argument",
+					errMsgPrefix(pos)))
+				return
+			}
+		},
+		IsBuildin: true,
+		Name:      common.BUILD_IN_FUNCTION_LEN,
+	}
+	lenFunction := buildinFunctionsMap[common.BUILD_IN_FUNCTION_LEN]
+	lenFunction.Typ.ReturnList = make(ReturnList, 1)
+	lenFunction.Typ.ReturnList[0] = &VariableDefinition{}
+	lenFunction.Typ.ReturnList[0].Typ = &VariableType{}
+	lenFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_INT
 	// sprintf
 	sprintfBuildFunction := &Function{}
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_SPRINTF] = sprintfBuildFunction
@@ -147,7 +172,7 @@ func registerBuildinFunctions() {
 		sprintfBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
 		sprintfBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_STRING
 	}
-	sprintfBuildFunction.buildChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	sprintfBuildFunction.buildinFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*VariableType, pos *Pos) {
 		if len(args) == 0 {
 			err := fmt.Errorf("%s '%s' expect one argument at lease",
@@ -177,7 +202,7 @@ func registerBuildinFunctions() {
 	}
 	// printf
 	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
-		buildChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+		buildinFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*VariableType, pos *Pos) {
 			meta := &BuildinFunctionPrintfMeta{}
 			e.BuildinFunctionMeta = meta
