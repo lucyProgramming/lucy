@@ -41,7 +41,7 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 		if err != nil {
 			return ret, err
 		}
-		m.Values = append(m.Values, &ast.ExpressionBinary{
+		m.KeyValuePairs = append(m.KeyValuePairs, &ast.ExpressionBinary{
 			Left:  k,
 			Right: v,
 		})

@@ -138,7 +138,7 @@ func (f *Function) checkBlock(errs *[]error) {
 
 func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
-	f.Block.inherite(b)
+	f.Block.inherit(b)
 	f.checkParaMeterAndRetuns(&errs)
 	f.Block.InheritedAttribute.Function = f
 	if f.TemplateFunction == nil {
@@ -152,7 +152,7 @@ func (f *Function) clone(block *Block) (ret *Function, es []error) {
 	if errsNotEmpty(es) {
 		return ret, es
 	}
-	ret.Block.inherite(block)
+	ret.Block.inherit(block)
 	ret.checkParaMeterAndRetuns(&es)
 	ret.Block.InheritedAttribute.Function = ret
 	return ret, es

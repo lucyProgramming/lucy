@@ -154,8 +154,8 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
 		maxstack = m.buildIndex(class, code, e, context, state)
-	case ast.EXPRESSION_TYPE_DOT:
-		maxstack = m.buildDot(class, code, e, context, state)
+	case ast.EXPRESSION_TYPE_SELECT:
+		maxstack = m.buildSelection(class, code, e, context, state)
 
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:

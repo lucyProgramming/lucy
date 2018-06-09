@@ -14,7 +14,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 	case lex.TOKEN_IDENTIFIER:
 		left = &ast.Expression{}
 		left.Typ = ast.EXPRESSION_TYPE_IDENTIFIER
-		identifier := &ast.ExpressionIdentifer{}
+		identifier := &ast.ExpressionIdentifier{}
 		identifier.Name = ep.parser.token.Data.(string)
 		left.Data = identifier
 		left.Pos = ep.parser.mkPos()
@@ -327,7 +327,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				newe.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
-				slice.Expression = left
+				slice.Array = left
 				slice.End = end
 				left = newe
 				continue
@@ -358,7 +358,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
 				slice.Start = e
-				slice.Expression = left
+				slice.Array = left
 				slice.End = end
 				left = newe
 				continue
@@ -384,8 +384,8 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 			if ep.parser.token.Type == lex.TOKEN_IDENTIFIER {
 				newe := &ast.Expression{}
 				newe.Pos = pos
-				newe.Typ = ast.EXPRESSION_TYPE_DOT
-				index := &ast.ExpressionDot{}
+				newe.Typ = ast.EXPRESSION_TYPE_SELECT
+				index := &ast.ExpressionSelection{}
 				index.Expression = left
 				index.Name = ep.parser.token.Data.(string)
 				newe.Data = index

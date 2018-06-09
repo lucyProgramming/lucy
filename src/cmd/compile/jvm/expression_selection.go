@@ -3,9 +3,9 @@ package jvm
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
-func (m *MakeExpression) buildDot(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (m *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	dot := e.Data.(*ast.ExpressionDot)
+	dot := e.Data.(*ast.ExpressionSelection)
 	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 		maxstack = jvmSize(e.Value)
 		if dot.PackageVariable != nil {

@@ -4,7 +4,7 @@ type Flags struct {
 	OnlyImport                 bool
 	PackageName                string
 	JvmVersion                 int
-	DisableCheckUnUsedVariable bool
+	DisableCheckUnUsedVariable bool //
 }
 
 var (

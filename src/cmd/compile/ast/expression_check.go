@@ -139,7 +139,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		e.checkColonAssignExpression(block, &errs)
 		e.Value = mkVoidType(e.Pos)
 		Types = []*VariableType{e.Value}
-		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Vs) > 1 {
+		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_ASSIGN:
@@ -148,7 +148,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 		}
 		e.Value = tt
-		if e.Data.(*ExpressionBinary).Left.ListAndMoreThanIElements(1) {
+		if e.Data.(*ExpressionBinary).Left.isListAndMoreThanIElements(1) {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_INCREMENT:
@@ -171,7 +171,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		e.checkVarExpression(block, &errs)
 		Types = []*VariableType{mkVoidType(e.Pos)}
 		e.Value = Types[0]
-		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Vs) > 1 {
+		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_FUNCTION_CALL:
@@ -223,8 +223,8 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 			e.Value = tt
 		}
-	case EXPRESSION_TYPE_DOT:
-		tt := e.checkDotExpression(block, &errs)
+	case EXPRESSION_TYPE_SELECT:
+		tt := e.checkSelectionExpression(block, &errs)
 		if tt != nil {
 			Types = []*VariableType{tt}
 			e.Value = tt

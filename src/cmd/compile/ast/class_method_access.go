@@ -70,7 +70,8 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*Vari
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string, args []*VariableType, fromsub bool) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string,
+	args []*VariableType, fromsub bool) (ms []*ClassMethod, matched bool, err error) {
 	for _, v := range c.Methods[name] {
 		if len(v.Func.Typ.ParameterList) != len(args) {
 			if fromsub == false || v.IsPublic() || v.IsProtected() {

@@ -23,7 +23,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	values := e.Data.(*ast.ExpressionMap).Values
+	values := e.Data.(*ast.ExpressionMap).KeyValuePairs
 
 	hashMapObject := state.newObjectVariableType(java_hashmap_class)
 	state.pushStack(class, hashMapObject)

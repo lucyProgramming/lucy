@@ -94,6 +94,5 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength+7] = cg.OP_iconst_0
 		code.CodeLength += 8
 	}
-
 	return
 }

@@ -89,7 +89,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				Typ: ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: &ast.Expression{
 					Typ:  ast.EXPRESSION_TYPE_VAR,
-					Data: &ast.ExpressionDeclareVariable{Vs: vs, Values: es},
+					Data: &ast.ExpressionDeclareVariable{Variables: vs, Values: es},
 					Pos:  pos,
 				},
 				Pos: pos,
@@ -445,7 +445,7 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		lable := &ast.StatementLable{}
 		s.StatmentLable = lable
 		lable.Statement = s
-		lable.Name = e.Data.(*ast.ExpressionIdentifer).Name
+		lable.Name = e.Data.(*ast.ExpressionIdentifier).Name
 		block.Statements = append(block.Statements, s)
 		lable.Block = block
 		block.Insert(lable.Name, e.Pos, lable) // insert first,so this label can be found before it is checked

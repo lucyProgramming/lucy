@@ -44,7 +44,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 		slice.End.ConvertToNumber(VARIABLE_TYPE_INT)
 	}
 
-	t, es := slice.Expression.checkSingleValueContextExpression(block)
+	t, es := slice.Array.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
@@ -53,7 +53,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *VariableType {
 	}
 	if t.Typ != VARIABLE_TYPE_ARRAY {
 		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
-			errMsgPrefix(slice.Expression.Pos), t.TypeString()))
+			errMsgPrefix(slice.Array.Pos), t.TypeString()))
 	}
 	tt := t.Clone()
 	tt.Pos = e.Pos

@@ -36,11 +36,11 @@ func (c *Class) loadSelf() error {
 	if c.NotImportedYet == false {
 		return nil
 	}
-	cc, err := PackageBeenCompile.load(c.Name)
+	cc, err := PackageBeenCompile.loadClass(c.Name)
 	if err != nil {
 		return err
 	}
-	*c = *(cc.(*Class))
+	*c = *cc
 	return nil
 }
 func (c *Class) check(father *Block) []error {
@@ -72,20 +72,25 @@ func (c *Class) checkIfClassCircularity() error {
 	m := make(map[string]struct{})
 	arr := []string{}
 	is := false
-	for c.Name != JAVA_ROOT_CLASS {
-		_, ok := m[c.Name]
+	class := c
+	for class.Name != JAVA_ROOT_CLASS {
+		_, ok := m[class.Name]
 		if ok {
-			arr = append(arr, c.Name)
+			arr = append(arr, class.Name)
 			is = true
 			break
 		}
-		m[c.Name] = struct{}{}
-		arr = append(arr, c.Name)
-		err := c.loadSuperClass()
+		m[class.Name] = struct{}{}
+		arr = append(arr, class.Name)
+		err := class.loadSuperClass()
 		if err != nil {
 			return err
 		}
-		c = c.SuperClass
+		if class.SuperClass == nil {
+			panic("class is nil")
+		}
+		class = class.SuperClass
+
 	}
 	if is == false {
 		return nil
@@ -103,7 +108,7 @@ func (c *Class) checkIfClassCircularity() error {
 }
 func (c *Class) checkPhase1(father *Block) []error {
 	c.mkDefaultContruction()
-	c.Block.inherite(father)
+	c.Block.inherit(father)
 	errs := c.Block.checkConst()
 	c.Block.InheritedAttribute.Class = c
 	es := c.resolveAllNames(father)
@@ -167,7 +172,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
-			vv.Func.Block.inherite(&c.Block)
+			vv.Func.Block.inherit(&c.Block)
 			vv.Func.Block.InheritedAttribute.Function = vv.Func
 			vv.Func.checkParaMeterAndRetuns(&errs)
 		}
@@ -210,16 +215,13 @@ func (c *Class) resolveFather(block *Block) error {
 				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
 			}
 			c.SuperClass = p.Block.Classes[t[1]]
-		} else { // must be class now
-			if ss, ok := r.(*Class); ok == false || ss == nil {
-				return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
-			} else {
-				t := ss
-				c.SuperClassName = t.Name
-				c.SuperClass = t
-			}
+		} else if ss, ok := r.(*Class); ok && ss != nil { // must be class now
+			t := ss
+			c.SuperClassName = t.Name
+			c.SuperClass = t
+		} else {
+			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		}
-
 	} else {
 		variableType := VariableType{}
 		variableType.Typ = VARIABLE_TYPE_NAME // naming
@@ -401,14 +403,10 @@ func (c *Class) loadSuperClass() error {
 	if c.Name == JAVA_ROOT_CLASS {
 		return fmt.Errorf("root class already")
 	}
-	d, err := PackageBeenCompile.load(c.SuperClassName)
+	class, err := PackageBeenCompile.loadClass(c.SuperClassName)
 	if err != nil {
 		return err
 	}
-	if class, ok := d.(*Class); ok && class != nil {
-		c.SuperClass = class
-		return nil
-	} else {
-		return fmt.Errorf("'%s' is not a class", c.SuperClassName)
-	}
+	c.SuperClass = class
+	return nil
 }

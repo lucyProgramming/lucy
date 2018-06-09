@@ -65,7 +65,7 @@ func registerBuildinFunctions() {
 			// make default exception class
 			// load java/lang/Exception this is default exception level to catch
 			if block.InheritedAttribute.Defer.ExceptionClass == nil {
-				c, err := NameLoader.LoadName(DEFAULT_EXCEPTION_CLASS)
+				c, err := ResourceLoader.LoadName(DEFAULT_EXCEPTION_CLASS)
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s load exception class failed,err:%v",
 						errMsgPrefix(pos), err))

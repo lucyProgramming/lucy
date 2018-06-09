@@ -10,17 +10,17 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	vs := e.Data.(*ExpressionDeclareVariable)
 	noErr := true
 	var err error
-	vs.IfDeclareBefor = make([]bool, len(vs.Vs)) // all create this time
+	vs.IfDeclareBefor = make([]bool, len(vs.Variables)) // all create this time
 	if vs.Values != nil && len(vs.Values) > 0 {
 		valueTypes := checkRightValuesValid(checkExpressions(block, vs.Values, errs), errs)
-		if len(valueTypes) != len(vs.Vs) {
+		if len(valueTypes) != len(vs.Variables) {
 			noErr = false
 			*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
 				errMsgPrefix(e.Pos),
 				len(valueTypes),
-				len(vs.Vs)))
+				len(vs.Variables)))
 		}
-		for k, v := range vs.Vs {
+		for k, v := range vs.Variables {
 			if v.Name == NO_NAME_IDENTIFIER {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
@@ -40,7 +40,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				continue
 			}
 			if k < len(valueTypes) && valueTypes[k] != nil {
-				if vs.Vs[k].Typ.Equal(errs, valueTypes[k]) == false {
+				if vs.Variables[k].Typ.Equal(errs, valueTypes[k]) == false {
 					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 						errMsgPrefix(valueTypes[k].Pos),
 						valueTypes[k].TypeString(),
@@ -55,7 +55,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			}
 		}
 	} else {
-		for _, v := range vs.Vs {
+		for _, v := range vs.Variables {
 			if v.Name == NO_NAME_IDENTIFIER {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))

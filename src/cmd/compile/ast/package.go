@@ -70,7 +70,7 @@ func (p *Package) TypeCheck() []error {
 		if v.IsBuildin {
 			continue
 		}
-		v.Block.inherite(&p.Block)
+		v.Block.inherit(&p.Block)
 		v.Block.InheritedAttribute.Function = v
 		v.checkParaMeterAndRetuns(&p.Errors)
 		if p.shouldStop(nil) {
@@ -145,7 +145,7 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if t, ok := p.LoadedPackages[resource]; ok {
 		return t, nil
 	}
-	t, err := NameLoader.LoadName(resource)
+	t, err := ResourceLoader.LoadName(resource)
 	if pp, ok := t.(*Package); ok && pp != nil {
 		PackageBeenCompile.LoadedPackages[resource] = pp
 		p.mkClassCache(pp)
@@ -158,6 +158,25 @@ func (p *Package) load(resource string) (interface{}, error) {
 	}
 	return t, err
 }
+func (p *Package) loadClass(className string) (*Class, error) {
+	if p.loadedClasses == nil {
+		p.loadedClasses = make(map[string]*Class)
+	}
+	if c, ok := p.loadedClasses[className]; ok && c != nil {
+		return c, nil
+	}
+	c, err := ResourceLoader.LoadName(className)
+	if err != nil {
+		return nil, err
+	}
+	if t, ok := c.(*Class); ok == false || t == nil {
+		return nil, fmt.Errorf("'%s' is not class", className)
+	}
+	cc := c.(*Class)
+	p.loadedClasses[className] = cc
+	return cc, nil
+}
+
 func (p *Package) mkClassCache(load *Package) {
 	for _, v := range load.Block.Classes {
 		p.loadedClasses[v.Name] = v // binary name

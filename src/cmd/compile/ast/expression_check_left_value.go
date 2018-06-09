@@ -9,7 +9,7 @@ import (
 func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType) {
 	switch e.Typ {
 	case EXPRESSION_TYPE_IDENTIFIER:
-		identifier := e.Data.(*ExpressionIdentifer)
+		identifier := e.Data.(*ExpressionIdentifier)
 		d, _ := block.SearchByName(identifier.Name)
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
@@ -30,8 +30,8 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 		}
 	case EXPRESSION_TYPE_INDEX:
 		return e.checkIndexExpression(block, errs)
-	case EXPRESSION_TYPE_DOT:
-		dot := e.Data.(*ExpressionDot)
+	case EXPRESSION_TYPE_SELECT:
+		dot := e.Data.(*ExpressionSelection)
 		t, es := dot.Expression.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)

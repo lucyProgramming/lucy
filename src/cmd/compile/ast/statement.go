@@ -142,14 +142,14 @@ func (s *Statement) check(block *Block) []error { // b is father
 		}
 	case STATEMENT_TYPE_DEFER:
 		block.InheritedAttribute.Function.mkAutoVarForException()
-		s.Defer.Block.inherite(block)
+		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
 		s.Defer.allowCatch = block.IsFunctionTopBlock
 		es := s.Defer.Block.checkStatements()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
 	case STATEMENT_TYPE_BLOCK:
-		s.Block.inherite(block)
+		s.Block.inherit(block)
 		return s.Block.checkStatements()
 	case STATEMENT_TYPE_LABLE: // nothing to do
 

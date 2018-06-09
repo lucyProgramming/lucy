@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	identifier := e.Data.(*ast.ExpressionIdentifer)
+	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Var)
 	if captured == false {
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
@@ -36,7 +36,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 	if e.Value.Typ == ast.VARIABLE_TYPE_CLASS {
 		return
 	}
-	identifier := e.Data.(*ast.ExpressionIdentifer)
+	identifier := e.Data.(*ast.ExpressionIdentifier)
 	if e.Value.Typ == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxstack = 1

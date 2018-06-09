@@ -12,7 +12,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 	context *Context, state *StackMapState) (
 	maxstack, remainStack uint16, op []byte,
 	target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
-	identifier := e.Data.(*ast.ExpressionIdentifer)
+	identifier := e.Data.(*ast.ExpressionIdentifier)
 	target = identifier.Var.Typ
 	op = []byte{cg.OP_putfield}
 	meta := closure.getMeta(identifier.Var.Typ.Typ)
@@ -69,7 +69,7 @@ func (m *MakeExpression) getLeftValue(
 	target *ast.VariableType, classname, name, descriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
-		identifier := e.Data.(*ast.ExpressionIdentifer)
+		identifier := e.Data.(*ast.ExpressionIdentifier)
 		if identifier.Var.IsGlobal {
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Var.Typ
@@ -319,8 +319,8 @@ func (m *MakeExpression) getLeftValue(
 			}
 			return
 		}
-	case ast.EXPRESSION_TYPE_DOT:
-		dot := e.Data.(*ast.ExpressionDot)
+	case ast.EXPRESSION_TYPE_SELECT:
+		dot := e.Data.(*ast.ExpressionSelection)
 		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
 			target = dot.PackageVariable.Typ

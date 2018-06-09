@@ -18,8 +18,8 @@ type StatementFor struct {
 }
 
 type StatmentForRangeAttr struct {
-	IdentifierK *ExpressionIdentifer
-	IdentifierV *ExpressionIdentifer
+	IdentifierK *ExpressionIdentifier
+	IdentifierV *ExpressionIdentifier
 	ExpressionK *Expression
 	ExpressionV *Expression
 	RangeOn     *Expression
@@ -106,16 +106,16 @@ func (s *StatementFor) checkRange() []error {
 				return errs
 			}
 		}
-		var identifierK *ExpressionIdentifer
-		var identifierV *ExpressionIdentifer
+		var identifierK *ExpressionIdentifier
+		var identifierV *ExpressionIdentifier
 		var posk, posv *Pos
 		if modelkv {
-			identifierK = lefts[0].Data.(*ExpressionIdentifer)
-			identifierV = lefts[1].Data.(*ExpressionIdentifer)
+			identifierK = lefts[0].Data.(*ExpressionIdentifier)
+			identifierV = lefts[1].Data.(*ExpressionIdentifier)
 			posk = lefts[0].Pos
 			posv = lefts[1].Pos
 		} else {
-			identifierV = lefts[0].Data.(*ExpressionIdentifer)
+			identifierV = lefts[0].Data.(*ExpressionIdentifier)
 			posv = lefts[0].Pos
 		}
 
@@ -206,11 +206,11 @@ func (s *StatementFor) checkRange() []error {
 	return errs
 }
 func (s *StatementFor) check(block *Block) []error {
-	s.Block.inherite(block)
+	s.Block.inherit(block)
 	s.Block.InheritedAttribute.StatementFor = s
 	s.Block.InheritedAttribute.statementForBreak = s
 	errs := []error{}
-	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canbeUsedForRange() { // for k,v := range arr
+	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canBeUsedForRange() { // for k,v := range arr
 		return s.checkRange()
 	}
 	if s.Init != nil {

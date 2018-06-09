@@ -38,11 +38,11 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			noErr = false
 			continue
 		}
-		identifier := v.Data.(*ExpressionIdentifer)
+		identifier := v.Data.(*ExpressionIdentifier)
 		if identifier.Name == NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
 			vd.Name = identifier.Name
-			declareVariableExpression.Vs = append(declareVariableExpression.Vs, vd)
+			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
 			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
 			continue
 		}
@@ -61,7 +61,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 				}
 			}
 			identifier.Var = variable
-			declareVariableExpression.Vs = append(declareVariableExpression.Vs, variable)
+			declareVariableExpression.Variables = append(declareVariableExpression.Variables, variable)
 			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, true)
 		} else { // should be no error
 			noNewVaraible = false
@@ -84,7 +84,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			declareVariableExpression.Vs = append(declareVariableExpression.Vs, vd)
+			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
 			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
 			if e.IsPublic { // only use when is is global
 				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
@@ -192,7 +192,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 
 	for _, v := range lefts {
 		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
-			name := v.Data.(*ExpressionIdentifer)
+			name := v.Data.(*ExpressionIdentifier)
 			if name.Name == NO_NAME_IDENTIFIER { // skip "_"
 				leftTypes = append(leftTypes, nil) // this is no assign situation
 				continue

@@ -16,7 +16,7 @@ type StatementIF struct {
 }
 
 func (s *StatementIF) check(father *Block) []error {
-	s.CondtionBlock.inherite(father)
+	s.CondtionBlock.inherit(father)
 	errs := []error{}
 	for _, v := range s.PreExpressions {
 		v.IsStatementExpression = true
@@ -46,10 +46,10 @@ func (s *StatementIF) check(father *Block) []error {
 		}
 	}
 
-	s.Block.inherite(&s.CondtionBlock)
+	s.Block.inherit(&s.CondtionBlock)
 	errs = append(errs, s.Block.checkStatements()...)
 	for _, v := range s.ElseIfList {
-		v.Block.inherite(&s.CondtionBlock)
+		v.Block.inherit(&s.CondtionBlock)
 		if v.Condition.canbeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
@@ -65,7 +65,7 @@ func (s *StatementIF) check(father *Block) []error {
 		errs = append(errs, v.Block.checkStatements()...)
 	}
 	if s.ElseBlock != nil {
-		s.ElseBlock.inherite(&s.CondtionBlock)
+		s.ElseBlock.inherit(&s.CondtionBlock)
 		errs = append(errs, s.ElseBlock.checkStatements()...)
 	}
 	return errs

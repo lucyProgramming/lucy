@@ -9,12 +9,14 @@ import (
 type Block struct {
 	DeadEnding                 bool
 	Defers                     []*Defer
-	isPackage                  bool
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool
 	Pos                        *Pos
 	EndPos                     *Pos
+	Outter                     *Block
+	InheritedAttribute         InheritedAttribute
+	Statements                 []*Statement
 	Consts                     map[string]*Const
 	Funcs                      map[string]*Function
 	Classes                    map[string]*Class
@@ -22,11 +24,9 @@ type Block struct {
 	EnumNames                  map[string]*EnumName
 	Lables                     map[string]*StatementLable
 	Types                      map[string]*VariableType
-	Outter                     *Block
-	InheritedAttribute         InheritedAttribute
-	Statements                 []*Statement
 	Vars                       map[string]*VariableDefinition
 	ClosureFuncs               map[string]*Function //in "Funcs" too
+
 }
 
 func (b *Block) HaveVariableDefinition() bool {
@@ -80,6 +80,9 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 	return nil, false
 }
 
+/*
+	search lable
+*/
 func (b *Block) searchLabel(name string) *StatementLable {
 	for b != nil {
 		if b.Lables != nil {
@@ -110,7 +113,7 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 		return searchBuildIns(name), nil
 	}
 	if b.IsFunctionTopBlock &&
-		len(b.InheritedAttribute.Function.TypeParameters) > 0 {
+		len(b.InheritedAttribute.Function.TypeParameters) > 0 { // this is a template function
 		return searchBuildIns(name), nil
 	}
 	t, err := b.Outter.SearchByName(name) // search by outter block
@@ -124,7 +127,7 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 		}
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionTopBlock &&
-				b.InheritedAttribute.Function.IsGlobal == false {
+				b.InheritedAttribute.Function.IsGlobal == false { // 	b.InheritedAttribute.Function.IsGlobal == false  no need to check
 				if v.Name == THIS {
 					return nil, nil // capture this not allow
 				}
@@ -155,11 +158,13 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 	return t, nil
 }
 
-func (b *Block) inherite(father *Block) {
-	if b != father {
-		b.InheritedAttribute = father.InheritedAttribute
-		b.Outter = father
+func (b *Block) inherit(father *Block) {
+	if b == father {
+		panic("inherit  from self")
 	}
+	b.InheritedAttribute = father.InheritedAttribute
+	b.Outter = father
+
 }
 
 func (b *Block) checkUnUsedVariable() (es []error) {
@@ -310,16 +315,14 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
 		return fmt.Errorf(errmsg)
 	}
+	// name exists in buildin, not allow
+	if t := searchBuildIns(name); t != nil {
+		return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+	}
 	switch d.(type) {
 	case *Class:
-		if t := searchBuildIns(name); t != nil {
-			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
-		}
 		b.Classes[name] = d.(*Class)
 	case *Function:
-		if t := searchBuildIns(name); t != nil {
-			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
-		}
 		t := d.(*Function)
 		if buildinFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
@@ -332,9 +335,6 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		t := d.(*VariableDefinition)
 		b.Vars[name] = t
 	case *Enum:
-		if t := searchBuildIns(name); t != nil {
-			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
-		}
 		e := d.(*Enum)
 		b.Enums[name] = e
 		for _, v := range e.Enums {
@@ -344,16 +344,10 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 			}
 		}
 	case *EnumName:
-		if t := searchBuildIns(name); t != nil {
-			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
-		}
 		b.EnumNames[name] = d.(*EnumName)
 	case *StatementLable:
 		b.Lables[name] = d.(*StatementLable)
 	case *VariableType:
-		if t := searchBuildIns(name); t != nil {
-			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
-		}
 		b.Types[name] = d.(*VariableType)
 	default:
 		panic(d) // panic d

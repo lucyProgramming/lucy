@@ -154,7 +154,7 @@ class Decoder {
 				return Integer.valueOf(int(longValue)) , null ;
 			case "java.lang.Long" :
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'long'" , tree.nodeType()));
 				} 
 				longValue,err := tree.numberValue.getLong();
 				if err != null {
@@ -163,7 +163,7 @@ class Decoder {
 				return Long.valueOf(longValue) , null ;
 			case "java.lang.Float" :
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'float'" , tree.nodeType()));
 				} 
 				doubleValue,err := tree.numberValue.getDouble();
 				if err != null {
@@ -176,7 +176,7 @@ class Decoder {
 				return Float.valueOf(float(doubleValue)) , null ;
 			case "java.lang.Double":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'double'" , tree.nodeType()));
 				} 
 				doubleValue,err := tree.numberValue.getDouble();
 				if err != null {
@@ -315,8 +315,8 @@ class Decoder {
 				this.offset++ ;	
 				this.skipWhiteSpace();
 				b = this.bs[this.offset];
-				if b == '}' {
-					return null , new error(sprintf("expect key value list, but '%s'",this.getErrMsg()));
+				if b == ']' {
+					return null , new error(sprintf("expect key value list, but '%s'" , this.getErrMsg()));
 				}
 			}else if b == ']' {
 				//nothing to do 

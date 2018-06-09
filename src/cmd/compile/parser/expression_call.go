@@ -32,10 +32,10 @@ func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, e
 		call.Args = args
 		result.Data = call
 		result.Pos = ep.parser.mkPos()
-	} else if e.Typ == ast.EXPRESSION_TYPE_DOT {
+	} else if e.Typ == ast.EXPRESSION_TYPE_SELECT {
 		result.Typ = ast.EXPRESSION_TYPE_METHOD_CALL
 		call := &ast.ExpressionMethodCall{}
-		index := e.Data.(*ast.ExpressionDot)
+		index := e.Data.(*ast.ExpressionSelection)
 		call.Expression = index.Expression
 		call.Args = args
 		call.Name = index.Name

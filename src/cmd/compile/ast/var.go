@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-type LoadName interface {
+type LoadResource interface {
 	LoadName(resouceName string) (interface{}, error)
 }
 
@@ -24,7 +24,7 @@ const (
 
 var (
 	packageAliasReg        *regexp.Regexp
-	NameLoader             LoadName
+	ResourceLoader         LoadResource
 	PackageBeenCompile     Package
 	buildinFunctionsMap    = make(map[string]*Function)
 	lucyLangBuildinPackage *Package
@@ -33,7 +33,6 @@ var (
 )
 
 func init() {
-	PackageBeenCompile.Block.isPackage = true
 	var err error
 	packageAliasReg, err = regexp.Compile(`^[a-zA-Z][[a-zA-Z1-9\_]+$`)
 	if err != nil {
@@ -45,7 +44,7 @@ func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {
 		return nil
 	}
-	c, err := NameLoader.LoadName(JAVA_STRING_CLASS)
+	c, err := ResourceLoader.LoadName(JAVA_STRING_CLASS)
 	if err != nil {
 		return err
 	}

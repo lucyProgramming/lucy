@@ -6,8 +6,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (e *Expression) checkDotExpression(block *Block, errs *[]error) (t *VariableType) {
-	dot := e.Data.(*ExpressionDot)
+func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *VariableType) {
+	dot := e.Data.(*ExpressionSelection)
 	t, es := dot.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)

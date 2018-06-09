@@ -58,8 +58,8 @@ const (
 	//
 
 	//
-	EXPRESSION_TYPE_INDEX // a["b"]
-	EXPRESSION_TYPE_DOT   //a.b
+	EXPRESSION_TYPE_INDEX  // a["b"]
+	EXPRESSION_TYPE_SELECT //a.b
 	//
 	EXPRESSION_TYPE_METHOD_CALL
 	EXPRESSION_TYPE_FUNCTION_CALL
@@ -172,8 +172,8 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_INDEX: // a["b"]
 		t := e.Data.(*ExpressionIndex)
 		return fmt.Sprintf("%s[%s]", t.Expression.OpName(), t.Index.OpName())
-	case EXPRESSION_TYPE_DOT: //a.b
-		t := e.Data.(*ExpressionDot)
+	case EXPRESSION_TYPE_SELECT: //a.b
+		t := e.Data.(*ExpressionSelection)
 		return fmt.Sprintf("%s.%s", t.Expression.OpName(), t.Name)
 	case EXPRESSION_TYPE_METHOD_CALL:
 		t := e.Data.(*ExpressionMethodCall)
@@ -198,7 +198,7 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_BITWISE_NOT:
 		return "~"
 	case EXPRESSION_TYPE_IDENTIFIER:
-		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifer).Name)
+		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifier).Name)
 	case EXPRESSION_TYPE_NULL:
 		return "null"
 	case EXPRESSION_TYPE_NEW:
@@ -226,16 +226,15 @@ func (e *Expression) OpName() string {
 	default:
 		return fmt.Sprintf("op[%d](missing handle)", e.Typ)
 	}
-
 }
 
 type Expression struct {
+	Typ                   int
 	IsPublic              bool // only for global var definition
 	IsCompileAuto         bool // compile auto expression
 	Value                 *VariableType
 	Values                []*VariableType
 	Pos                   *Pos
-	Typ                   int
 	Data                  interface{}
 	IsStatementExpression bool
 }
@@ -269,7 +268,7 @@ func (e *Expression) ConvertToNumber(typ int) {
 type ExpressionTypeAssert ExpressionTypeConvertion
 
 /*
-	fill a expression from a const
+	const
 */
 func (e *Expression) fromConst(c *Const) {
 	switch c.Typ.Typ {
@@ -313,7 +312,7 @@ type ExpressionTernary struct {
 }
 
 type ExpressionSlice struct {
-	Expression *Expression
+	Array      *Expression
 	Start, End *Expression
 }
 
@@ -357,7 +356,7 @@ func (e *Expression) canbeUsedAsCondition() bool {
 		e.Typ == EXPRESSION_TYPE_LE ||
 		e.Typ == EXPRESSION_TYPE_LT ||
 		e.Typ == EXPRESSION_TYPE_INDEX ||
-		e.Typ == EXPRESSION_TYPE_DOT ||
+		e.Typ == EXPRESSION_TYPE_SELECT ||
 		e.Typ == EXPRESSION_TYPE_METHOD_CALL ||
 		e.Typ == EXPRESSION_TYPE_FUNCTION_CALL ||
 		e.Typ == EXPRESSION_TYPE_INCREMENT ||
@@ -422,7 +421,7 @@ func (e *Expression) IsSelfIncrement() bool {
 		e.Typ == EXPRESSION_TYPE_PRE_INCREMENT
 }
 
-func (e *Expression) ListAndMoreThanIElements(i int) bool {
+func (e *Expression) isListAndMoreThanIElements(i int) bool {
 	if e.Typ != EXPRESSION_TYPE_LIST {
 		return false
 	}
@@ -440,7 +439,7 @@ func (e *Expression) HaveOnlyOneValue() bool {
 	k,v := range arr
 	k,v = range arr
 */
-func (e *Expression) canbeUsedForRange() bool {
+func (e *Expression) canBeUsedForRange() bool {
 	if e.Typ != EXPRESSION_TYPE_ASSIGN && e.Typ != EXPRESSION_TYPE_COLON_ASSIGN {
 		return false
 	}
@@ -473,11 +472,11 @@ type CallArgs []*Expression // f(1,2)　调用参数列表
 type TypedParameters []*VariableType
 
 type ExpressionFunctionCall struct {
-	BuildinFunctionMeta      interface{}
+	BuildinFunctionMeta      interface{} // for build function only
 	Expression               *Expression
 	Args                     CallArgs
 	Func                     *Function
-	TypedParameters          TypedParameters
+	TypedParameters          TypedParameters // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 }
 
@@ -497,7 +496,7 @@ type ExpressionMethodCall struct {
 }
 
 type ExpressionDeclareVariable struct {
-	Vs             []*VariableDefinition
+	Variables      []*VariableDefinition
 	Values         []*Expression
 	IfDeclareBefor []bool // used for colon assign
 }
@@ -507,7 +506,7 @@ type ExpressionTypeConvertion struct {
 	Expression *Expression
 }
 
-type ExpressionIdentifer struct {
+type ExpressionIdentifier struct {
 	Name     string
 	Var      *VariableDefinition
 	Func     *Function
@@ -519,7 +518,7 @@ type ExpressionIndex struct {
 	Expression *Expression
 	Index      *Expression
 }
-type ExpressionDot struct {
+type ExpressionSelection struct {
 	Expression      *Expression
 	Name            string
 	Field           *ClassField         // expression is class or object
@@ -534,10 +533,11 @@ type ExpressionNew struct {
 }
 
 type ExpressionMap struct {
-	Typ    *VariableType
-	Values []*ExpressionBinary
+	Typ           *VariableType
+	KeyValuePairs []*ExpressionBinary
 }
 
+// for general purpose
 type ExpressionBinary struct {
 	Left  *Expression
 	Right *Expression
@@ -553,12 +553,12 @@ func (e *Expression) isThis() bool {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return false
 	}
-	return e.Data.(*ExpressionIdentifer).Name == THIS
+	return e.Data.(*ExpressionIdentifier).Name == THIS
 }
 
 func (e *Expression) IsNoNameIdentifier() bool {
 	if e.Typ != EXPRESSION_TYPE_IDENTIFIER {
 		return false
 	}
-	return e.Data.(*ExpressionIdentifer).Name == NO_NAME_IDENTIFIER
+	return e.Data.(*ExpressionIdentifier).Name == NO_NAME_IDENTIFIER
 }

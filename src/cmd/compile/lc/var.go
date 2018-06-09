@@ -11,7 +11,7 @@ var (
 )
 
 func init() {
-	ast.NameLoader = &loader
+	ast.ResourceLoader = &loader
 	loader.caches = make(map[string]interface{})
 	ParseFunctionHandler = ast.ParseFunctionHandler
 }
