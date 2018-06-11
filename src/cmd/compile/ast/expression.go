@@ -317,8 +317,7 @@ type ExpressionSlice struct {
 }
 
 func (e *Expression) IsLiteral() bool {
-	return e.Typ == EXPRESSION_TYPE_NULL ||
-		e.Typ == EXPRESSION_TYPE_BOOL ||
+	return e.Typ == EXPRESSION_TYPE_BOOL ||
 		e.Typ == EXPRESSION_TYPE_STRING ||
 		e.isNumber()
 }
@@ -527,9 +526,10 @@ type ExpressionSelection struct {
 }
 
 type ExpressionNew struct {
-	Typ          *VariableType
-	Args         CallArgs
-	Construction *ClassMethod
+	Typ                      *VariableType
+	Args                     CallArgs
+	Construction             *ClassMethod
+	IsConvertJavaArray2Array bool
 }
 
 type ExpressionMap struct {

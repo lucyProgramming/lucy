@@ -54,11 +54,22 @@ func (m *MakeExpression) getMapLeftValue(
 	}
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
 	remainStack = 2
-	op = []byte{cg.OP_invokevirtual, cg.OP_pop}
+	op = []byte{}
+	if index.Expression.Value.Map.V.IsPointer() == false {
+		op = append(op,
+			typeConverter.putPrimitiveInObjectBytes(class, index.Expression.Value.Map.V)...)
+	}
+	bs4 := make([]byte, 4)
+	bs4[0] = cg.OP_invokevirtual
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      java_hashmap_class,
+		Method:     "put",
+		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+	}, bs4[1:3])
+	bs4[3] = cg.OP_pop
+	op = append(op, bs4...)
 	target = index.Expression.Value.Map.V
 	classname = java_hashmap_class
-	name = "put"
-	descriptor = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
 	return
 }
 
@@ -171,10 +182,8 @@ func (m *MakeExpression) getLeftValue(
 			meta := ArrayMetas[index.Expression.Value.ArrayType.Typ]
 			maxstack, _ = m.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
-			currentStack := uint16(1)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
-			currentStack++
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      meta.classname,
@@ -186,10 +195,6 @@ func (m *MakeExpression) getLeftValue(
 			code.CodeLength++
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
 			code.CodeLength++
-			currentStack++
-			if currentStack > maxstack {
-				maxstack = currentStack
-			}
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      meta.classname,
@@ -199,8 +204,9 @@ func (m *MakeExpression) getLeftValue(
 			code.CodeLength += 3
 			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+
 			stack, _ := m.build(class, code, index.Index, context, state)
-			if t := stack + 1; t > maxstack {
+			if t := stack + 3; t > maxstack {
 				maxstack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_iadd
@@ -243,7 +249,9 @@ func (m *MakeExpression) getLeftValue(
 			code.Codes[code.CodeLength] = cg.OP_swap
 			code.CodeLength++
 			{
-				_, t, _ := Descriptor.ParseType([]byte(meta.elementsFieldDescriptor))
+				t := &ast.VariableType{}
+				t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+				t.ArrayType = index.Expression.Value.ArrayType
 				state.pushStack(class, t)
 				state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 			}
@@ -275,7 +283,7 @@ func (m *MakeExpression) getLeftValue(
 			case ast.VARIABLE_TYPE_JAVA_ARRAY:
 				op = []byte{cg.OP_aastore}
 			}
-			remainStack = 2 // [objectref ,index]
+			remainStack = 2 // [arrayref ,index]
 			target = e.Value
 		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
 			return m.getMapLeftValue(class, code, e, context, state)
@@ -341,10 +349,10 @@ func (m *MakeExpression) getLeftValue(
 			if dot.Field.IsStatic() {
 				op = []byte{cg.OP_putstatic}
 			} else {
-				op = []byte{cg.OP_putfield}
 				maxstack, _ = m.build(class, code, dot.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, dot.Expression.Value)
+				op = []byte{cg.OP_putfield}
 			}
 		}
 	}

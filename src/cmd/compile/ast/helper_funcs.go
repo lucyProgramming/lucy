@@ -117,22 +117,29 @@ func checkConst(block *Block, c *Const, errs *[]error) error {
 		c.mkDefaultValue()
 	}
 	if c.Expression == nil {
-		return fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
+		err := fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
+		*errs = append(*errs, err)
+		return err
 	}
 	is, err := c.Expression.constFold()
 	if err != nil {
+		*errs = append(*errs, err)
 		return err
 	}
 	if is == false {
-		return fmt.Errorf("%s const named '%s' is not defined by const value",
+		err := fmt.Errorf("%s const named '%s' is not defined by const value",
 			errMsgPrefix(c.Pos), c.Name)
+		*errs = append(*errs, err)
+		return err
 	}
 	c.Value = c.Expression.Data
 	tt, _ := c.Expression.check(block)
 	if c.Typ != nil {
 		if c.Typ.Equal(errs, tt[0]) == false {
-			return fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
+			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
 				errMsgPrefix(c.Pos), c.Typ.TypeString(), tt[0].TypeString())
+			*errs = append(*errs, err)
+			return err
 		}
 	} else { // means use old typec
 		c.Typ = tt[0]

@@ -16,12 +16,14 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 	if object.Typ == VARIABLE_TYPE_PACKAGE {
-		if _, exists := object.Package.Block.NameExists(call.Name); exists == false {
+		d, exists := object.Package.Block.NameExists(call.Name)
+		if exists == false {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' not found", errMsgPrefix(e.Pos), call.Name))
 			return nil
 		}
-		if object.Package.Block.Funcs != nil && object.Package.Block.Funcs[call.Name] != nil {
-			f := object.Package.Block.Funcs[call.Name]
+		switch d.(type) {
+		case *Function:
+			f := d.(*Function)
 			if f.TemplateFunction == nil {
 				call.PackageFunction = f
 				return e.checkFunctionCall(block, errs, f, &call.Args)
@@ -33,9 +35,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				e.Data = call
 				return e.checkFunctionCall(block, errs, f, &call.Args)
 			}
-		} else if object.Package.Block.Classes != nil && object.Package.Block.Classes[call.Name] != nil {
+		case *Class:
 			//object cast
-			class := object.Package.Block.Classes[call.Name]
+			class := d.(*Class)
 			typeConvertion := &ExpressionTypeConvertion{}
 			typeConvertion.Typ = &VariableType{}
 			typeConvertion.Typ.Typ = VARIABLE_TYPE_OBJECT
@@ -51,7 +53,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				return []*VariableType{typeConvertion.Typ.Clone()}
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
-		} else if object.Package.Block.Types != nil && object.Package.Block.Types[call.Name] != nil {
+		case *VariableType:
 			typeConvertion := &ExpressionTypeConvertion{}
 			typeConvertion.Typ = object.Package.Block.Types[call.Name]
 			e.Typ = EXPRESSION_TYPE_CHECK_CAST
@@ -65,12 +67,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				return []*VariableType{typeConvertion.Typ}
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
-		} else {
+		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
 				errMsgPrefix(e.Pos), call.Name))
 			return nil
 		}
-		return nil
 	}
 	if object.Typ == VARIABLE_TYPE_MAP {
 		switch call.Name {
@@ -108,7 +109,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret.Pos = e.Pos
 			ret.Typ = VARIABLE_TYPE_VOID
 			if len(call.Args) == 0 {
-				*errs = append(*errs, fmt.Errorf("%s remove expect at last on argement",
+				*errs = append(*errs, fmt.Errorf("%s remove expect at last 1 argement",
 					errMsgPrefix(e.Pos)))
 			}
 			for _, v := range call.Args {
@@ -121,7 +122,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 						continue
 					}
 					if object.Map.K.Equal(errs, t) == false {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for key",
 							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
 					}
 				}
@@ -210,7 +211,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			t := object.Clone()
 			t.Pos = e.Pos
 			return []*VariableType{t}
-
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}
@@ -249,6 +249,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
+	// call father`s contruction method
 	if call.Name == SUPER_FIELD_NAME {
 		if block.InheritedAttribute.IsConstruction == false ||
 			block.IsFunctionTopBlock == false ||
@@ -263,7 +264,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			return nil
 		}
 		if call.Expression.isThis() == false {
-			*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use this",
+			*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'this'",
 				errMsgPrefix(e.Pos)))
 			return nil
 		}
@@ -277,24 +278,24 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		ms, matched, err := object.Class.SuperClass.matchContructionFunction(e.Pos, errs, args, &call.Args)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+			return nil
+		}
+		if matched {
+			call.Name = "<init>"
+			block.InheritedAttribute.Function.ConstructionMethodCalledByUser = true
+			call.Method = ms[0]
+			call.Class = object.Class.SuperClass
+			ret := []*VariableType{&VariableType{}}
+			ret[0].Typ = VARIABLE_TYPE_VOID
+			ret[0].Pos = e.Pos
+			block.Statements[0].IsCallFatherContructionStatement = true
+			return ret
+		}
+		if len(ms) == 0 {
+			*errs = append(*errs, fmt.Errorf("%s 'construction' not found",
+				errMsgPrefix(e.Pos)))
 		} else {
-			if matched {
-				call.Name = "<init>"
-				block.InheritedAttribute.Function.ConstructionMethodCalledByUser = true
-				call.Method = ms[0]
-				call.Class = object.Class.SuperClass
-				ret := []*VariableType{&VariableType{}}
-				ret[0].Typ = VARIABLE_TYPE_VOID
-				ret[0].Pos = e.Pos
-				block.Statements[0].IsCallFatherContructionStatement = true
-				return ret
-			}
-			if len(ms) == 0 {
-				*errs = append(*errs, fmt.Errorf("%s  'construction' not found",
-					errMsgPrefix(e.Pos)))
-			} else {
-				*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
-			}
+			*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
 		}
 		return nil
 	}
@@ -308,7 +309,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	if matched {
 		if ms[0].IsStatic() {
-			//TODO::
 			if object.Typ != VARIABLE_TYPE_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
 					errMsgPrefix(e.Pos), call.Name))

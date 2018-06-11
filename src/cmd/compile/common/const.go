@@ -11,7 +11,7 @@ const (
 	// map
 	MAP_METHOD_REMOVE     = "remove"
 	MAP_METHOD_REMOVEALL  = "removeAll"
-	MAP_METHOD_KEY_EXISTS = "contains"
+	MAP_METHOD_KEY_EXISTS = "keyExists"
 	MAP_METHOD_SIZE       = "size"
 	// builin function
 	BUILD_IN_FUNCTION_PANIC        = "panic"

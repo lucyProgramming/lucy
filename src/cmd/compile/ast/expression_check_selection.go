@@ -25,13 +25,15 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 	}
 	var err error
 	if t.Typ == VARIABLE_TYPE_PACKAGE {
-		if _, ok := t.Package.Block.NameExists(dot.Name); ok == false {
+		d, ok := t.Package.Block.NameExists(dot.Name)
+		if ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), dot.Name)
 			*errs = append(*errs, err)
 			return nil
 		}
-		if t.Package.Block.Vars != nil && t.Package.Block.Vars[dot.Name] != nil {
-			v := t.Package.Block.Vars[dot.Name]
+		switch d.(type) {
+		case *VariableDefinition:
+			v := d.(*VariableDefinition)
 			tt := v.Typ.Clone()
 			tt.Pos = e.Pos
 			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
@@ -40,9 +42,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			}
 			dot.PackageVariable = v
 			return tt
-		}
-		if t.Package.Block.Consts != nil && t.Package.Block.Consts[dot.Name] != nil {
-			c := t.Package.Block.Consts[dot.Name]
+		case *Const:
+			c := d.(*Const)
 			e.fromConst(c) //
 			tt := c.Typ.Clone()
 			tt.Pos = e.Pos
@@ -51,9 +52,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 				*errs = append(*errs, err)
 			}
 			return tt
-		}
-		if t.Package.Block.Classes != nil && t.Package.Block.Classes[dot.Name] != nil {
-			c := t.Package.Block.Classes[dot.Name]
+		case *Class:
+			c := d.(*Class)
 			tt := &VariableType{}
 			tt.Pos = e.Pos
 			tt.Typ = VARIABLE_TYPE_CLASS
@@ -63,9 +63,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 				*errs = append(*errs, err)
 			}
 			return tt
-		}
-		if t.Package.Block.EnumNames != nil && t.Package.Block.EnumNames[dot.Name] != nil {
-			n := t.Package.Block.EnumNames[dot.Name]
+		case *EnumName:
+			n := d.(*EnumName)
 			if (n.Enum.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), dot.Name)
 				*errs = append(*errs, err)
@@ -78,7 +77,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			dot.EnumName = n
 			return tt
 		}
-		err = fmt.Errorf("%s name '%s' is not a expression", errMsgPrefix(e.Pos), dot.Name)
+		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), dot.Name)
 		*errs = append(*errs, err)
 		return nil
 	} else if t.Typ == VARIABLE_TYPE_OBJECT { // object
@@ -144,7 +143,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 					dot.Name))
 			}
 			if field.IsStatic() == false {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by objectref",
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by className",
 					errMsgPrefix(e.Pos),
 					dot.Name))
 			}

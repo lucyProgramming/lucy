@@ -18,6 +18,10 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 		}
 		switch d.(type) {
 		case *VariableDefinition:
+			if identifier.Name == THIS {
+				*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
+					errMsgPrefix(e.Pos), THIS))
+			}
 			t := d.(*VariableDefinition)
 			identifier.Var = t
 			tt := identifier.Var.Typ.Clone()

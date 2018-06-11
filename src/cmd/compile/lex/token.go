@@ -22,7 +22,7 @@ const (
 	TOKEN_RC             // }
 	TOKEN_LB             // [
 	TOKEN_RB             // ]
-	TOKEN_PASS           // pass ;
+	TOKEN_PASS           // pass
 	TOKEN_SEMICOLON      // ;
 	TOKEN_CRLF           // enter
 	TOKEN_COMMA          // ,
@@ -98,7 +98,7 @@ const (
 	TOKEN_GOTO           // goto
 	TOKEN_RANGE          // range
 	TOKEN_MAP            // map
-	TOKEN_T              // T
+	TOKEN_T              // T or T1
 	TOKEN_QUESTION       // ?
 	TOKEN_EOF            // end of file
 )

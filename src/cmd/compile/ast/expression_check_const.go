@@ -6,7 +6,6 @@ func (e *Expression) checkConst(block *Block) []error {
 	for _, c := range cs {
 		err := checkConst(block, c, &errs)
 		if err != nil {
-			errs = append(errs, err)
 			continue
 		}
 		err = block.insert(c.Name, c.Pos, c)

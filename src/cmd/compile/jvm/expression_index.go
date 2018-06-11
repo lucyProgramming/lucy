@@ -107,7 +107,6 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		meta := ArrayMetas[e.Value.Typ]
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		currentStack++
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      meta.classname,
@@ -119,10 +118,6 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_dup_x1
 		code.CodeLength++
-		currentStack++
-		if currentStack > maxstack {
-			maxstack = currentStack
-		}
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      meta.classname,
@@ -132,6 +127,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength += 3
 		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+		currentStack = 3
 	}
 	stack, _ := m.build(class, code, index.Index, context, state)
 	if t := stack + currentStack; t > maxstack {
@@ -148,7 +144,6 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 			state.popStack(1)
 			context.MakeStackMap(code, state, code.CodeLength+6)
 			context.MakeStackMap(code, state, code.CodeLength+16)
-			state.popStack(2)
 		}
 		code.Codes[code.CodeLength] = cg.OP_if_icmple
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)

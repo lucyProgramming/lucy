@@ -19,20 +19,18 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 	}
 
 	pop := func(f *ast.Function) {
-		if e.IsStatementExpression {
-			if f.NoReturnValue() == false {
-				if len(e.Values) == 1 {
-					if jvmSize(e.Values[0]) == 1 {
-						code.Codes[code.CodeLength] = cg.OP_pop
-						code.CodeLength++
-					} else {
-						code.Codes[code.CodeLength] = cg.OP_pop2
-						code.CodeLength++
-					}
-				} else {
+		if e.IsStatementExpression && f.NoReturnValue() == false {
+			if len(e.Values) == 1 {
+				if jvmSize(e.Values[0]) == 1 {
 					code.Codes[code.CodeLength] = cg.OP_pop
 					code.CodeLength++
+				} else {
+					code.Codes[code.CodeLength] = cg.OP_pop2
+					code.CodeLength++
 				}
+			} else { // > 1
+				code.Codes[code.CodeLength] = cg.OP_pop
+				code.CodeLength++
 			}
 		}
 	}

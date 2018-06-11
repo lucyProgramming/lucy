@@ -40,6 +40,7 @@ type Statement struct {
 	Enum              *Enum
 	/*
 		this.super()
+		special case
 	*/
 	IsCallFatherContructionStatement bool
 }
@@ -105,10 +106,10 @@ func (s *Statement) check(block *Block) []error { // b is father
 				return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 					errMsgPrefix(s.Pos), s.StatementName())}
 			}
-			if f, ok := block.InheritedAttribute.statementForBreak.(*StatementFor); ok {
+			if f, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
 			} else {
-				s.StatementBreak.StatementSwitch = block.InheritedAttribute.statementForBreak.(*StatementSwitch)
+				s.StatementBreak.StatementSwitch = block.InheritedAttribute.ForBreak.(*StatementSwitch)
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
@@ -122,9 +123,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.StatementName())}
 		}
-		if s.StatementContinue.StatementFor == nil { // for
-			s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
-		}
+		s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
 	case STATEMENT_TYPE_RETURN:
 		if block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",

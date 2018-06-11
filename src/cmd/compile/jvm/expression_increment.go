@@ -150,9 +150,6 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			}
 		}
 	}
-	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map detination
-		typeConverter.putPrimitiveInObject(class, code, e.Value)
-	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	return

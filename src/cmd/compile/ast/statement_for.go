@@ -208,7 +208,7 @@ func (s *StatementFor) checkRange() []error {
 func (s *StatementFor) check(block *Block) []error {
 	s.Block.inherit(block)
 	s.Block.InheritedAttribute.StatementFor = s
-	s.Block.InheritedAttribute.statementForBreak = s
+	s.Block.InheritedAttribute.ForBreak = s
 	errs := []error{}
 	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canBeUsedForRange() { // for k,v := range arr
 		return s.checkRange()

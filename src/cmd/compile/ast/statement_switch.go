@@ -179,14 +179,14 @@ func (s *StatementSwitch) check(b *Block) []error {
 		if v.Block != nil {
 			v.Block.inherit(b)
 			v.Block.InheritedAttribute.StatementSwitch = s
-			v.Block.InheritedAttribute.statementForBreak = s
+			v.Block.InheritedAttribute.ForBreak = s
 			errs = append(errs, v.Block.checkStatements()...)
 		}
 	}
 	if s.Default != nil {
 		s.Default.inherit(b)
 		s.Default.InheritedAttribute.StatementSwitch = s
-		s.Default.InheritedAttribute.statementForBreak = s
+		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
 	}
 	if conditionType.Typ == VARIABLE_TYPE_ENUM &&

@@ -21,7 +21,6 @@ enum JSON_SYNTAX_TREE_TYPE {
 
 
 
-
 class JsonSyntaxTreeNode {
 	public Type JSON_SYNTAX_TREE_TYPE ;
 	public boolValue bool ;
@@ -192,7 +191,7 @@ class Decoder {
 			if null == tree.keyPairs {
 				continue ;
 			}
-			if false == tree.keyPairs.contains(f.getName()) {
+			if false == tree.keyPairs.keyExists(f.getName()) {
 				continue ; 
 			}
 			var cc Class ;
@@ -515,7 +514,7 @@ class Decoder {
 				n.eIsNegative = true;
 			}
 			if false ==  this.isDigit(b) {
-				err = new error("expect number after 'e' or 'E' ， " + this.getErrMsg() );
+				err = new error("expect number after 'e' or 'E' ，" + this.getErrMsg() );
 				return ;
 			}
 			for this.isDigit(b) {

@@ -35,25 +35,12 @@ func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byt
 	}
 	code.Codes[code.CodeLength] = ops[0]
 	code.CodeLength++
-	if classname != "" || name != "" || descriptor != "" {
-		if classname == "" || name == "" || descriptor == "" {
-			panic("....")
-		}
-		if ops[0] == cg.OP_putstatic || ops[0] == cg.OP_putfield {
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      classname,
-				Field:      name,
-				Descriptor: descriptor,
-			}, code.Codes[code.CodeLength:code.CodeLength+2])
-		} else if ops[0] == cg.OP_invokevirtual {
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      classname,
-				Method:     name,
-				Descriptor: descriptor,
-			}, code.Codes[code.CodeLength:code.CodeLength+2])
-		} else {
-			panic("...")
-		}
+	if ops[0] == cg.OP_putstatic || ops[0] == cg.OP_putfield {
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      classname,
+			Field:      name,
+			Descriptor: descriptor,
+		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
 	}
 	copyOP(code, ops[1:]...)

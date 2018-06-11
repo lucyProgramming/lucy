@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -241,11 +242,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
 			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.K); t > maxstack {
 				maxstack = t
-			}
-			if classname == java_hashmap_class {
-				// put in object
-				typeConverter.putPrimitiveInObject(class, code,
-					s.RangeAttr.RangeOn.Value.Map.K)
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)

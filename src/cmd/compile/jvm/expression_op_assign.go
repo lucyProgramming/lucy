@@ -271,9 +271,6 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 			maxstack = currentStack
 		}
 	}
-	if classname == java_hashmap_class && e.Value.IsPointer() == false { // map destination
-		typeConverter.putPrimitiveInObject(class, code, e.Value)
-	}
 	//copy op
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	return

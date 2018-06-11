@@ -30,9 +30,6 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 			maxstack = currentStack
 		}
 	}
-	if classname == java_hashmap_class && e.Value.IsPointer() == false {
-		typeConverter.putPrimitiveInObject(class, code, target)
-	}
 	copyOPLeftValue(class, code, op, classname, name, descriptor)
 	return
 }
@@ -142,7 +139,7 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		}
 		return
 	}
-	if op[0] == cg.OP_invokevirtual && classname == java_hashmap_class {
+	if classname == java_hashmap_class { // it is a flag indicated map destination
 		if jvmSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2

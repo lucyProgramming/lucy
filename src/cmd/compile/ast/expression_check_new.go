@@ -75,17 +75,11 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	errs *[]error) *VariableType {
 	ret := newArray.Typ.Clone() // clone the type
 	ret.Pos = e.Pos
-	if len(newArray.Args) > 1 { // 0 and 1 is accept
+	if len(newArray.Args) != 1 { // 0 and 1 is accept
 		*errs = append(*errs,
-			fmt.Errorf("%s new array must have one int argument",
+			fmt.Errorf("%s new array expect at least 1 argument ",
 				errMsgPrefix(newArray.Args[0].Pos)))
 		newArray.Args = []*Expression{} // reset to 0,continue to analyse
-	}
-	if len(newArray.Args) == 0 { // 0 is default
-		ee := &Expression{}
-		ee.Typ = EXPRESSION_TYPE_INT
-		ee.Data = int32(0)
-		newArray.Args = []*Expression{ee}
 	}
 	ts := checkRightValuesValid(checkExpressions(block, newArray.Args, errs), errs)
 	amount, err := e.mustBeOneValueContext(ts)
@@ -96,8 +90,13 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 		return ret
 	}
 	if amount.Typ != VARIABLE_TYPE_INT {
-		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
-			errMsgPrefix(amount.Pos), amount.TypeString()))
+		if amount.Typ == VARIABLE_TYPE_JAVA_ARRAY && newArray.Typ.ArrayType.Equal(errs, amount.ArrayType) {
+			//convert java array to array
+			newArray.IsConvertJavaArray2Array = true
+		} else {
+			*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
+				errMsgPrefix(amount.Pos), amount.TypeString()))
+		}
 	}
 	//no further checks
 	return ret

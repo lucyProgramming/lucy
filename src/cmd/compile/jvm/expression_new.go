@@ -120,71 +120,70 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		state.Stacks = append(state.Stacks, t, t) // 2 for dup
 		defer state.popStack(2)
 	}
-	// call init
-	stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
-	if t := 2 + stack; t > maxstack {
-		maxstack = t
-	}
-
-	state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-	defer state.popStack(1)
-	maxstack += stack
-	currentStack := uint16(3)
-	if currentStack > maxstack {
-		maxstack = currentStack
-	}
-	switch e.Value.ArrayType.Typ {
-	case ast.VARIABLE_TYPE_BOOL:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_BYTE:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_SHORT:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_ENUM:
-		fallthrough
-	case ast.VARIABLE_TYPE_INT:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_INT
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_LONG:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_LONG
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_FLOAT:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_FLOAT
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_DOUBLE:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
-		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_STRING:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_MAP:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_OBJECT:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(e.Value.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_ARRAY:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(Descriptor.typeDescriptor(e.Value.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+	if n.IsConvertJavaArray2Array {
+		stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
+		if t := 2 + stack; t > maxstack {
+			maxstack = t
+		}
+	} else {
+		// get amount
+		stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
+		if t := 2 + stack; t > maxstack {
+			maxstack = t
+		}
+		switch e.Value.ArrayType.Typ {
+		case ast.VARIABLE_TYPE_BOOL:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_BYTE:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_SHORT:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_ENUM:
+			fallthrough
+		case ast.VARIABLE_TYPE_INT:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_INT
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_LONG:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_LONG
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_FLOAT:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_FLOAT
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_DOUBLE:
+			code.Codes[code.CodeLength] = cg.OP_newarray
+			code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
+			code.CodeLength += 2
+		case ast.VARIABLE_TYPE_STRING:
+			code.Codes[code.CodeLength] = cg.OP_anewarray
+			class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_MAP:
+			code.Codes[code.CodeLength] = cg.OP_anewarray
+			class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_OBJECT:
+			code.Codes[code.CodeLength] = cg.OP_anewarray
+			class.InsertClassConst(e.Value.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_ARRAY:
+			code.Codes[code.CodeLength] = cg.OP_anewarray
+			meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
+			class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			code.Codes[code.CodeLength] = cg.OP_anewarray
+			class.InsertClassConst(Descriptor.typeDescriptor(e.Value.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
