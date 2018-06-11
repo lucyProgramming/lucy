@@ -193,7 +193,7 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 			code.MaxLocals++
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
 				f.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
-			state.appendLocals(class, state.newObjectVariableType(java_arrylist_class))
+			state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		}
 		maxstack = 1
 	}
@@ -203,7 +203,7 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 		f.AutoVarForMultiReturn.Offset = code.MaxLocals
 		code.MaxLocals++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
-		state.appendLocals(class, state.newObjectVariableType(java_arrylist_class))
+		state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		maxstack = 1
 	}
 

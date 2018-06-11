@@ -218,44 +218,55 @@ func (m *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
 
 func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	es []*ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
-	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_arrylist_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	if 2 > maxstack {
-		maxstack = 2
+	length := 0
+	for _, e := range es {
+		if e.MayHaveMultiValue() {
+			length += len(e.Values)
+			continue
+		}
+		length++
 	}
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_arrylist_class,
-		Method:     special_method_init,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	loadInt32(class, code, int32(length))
+	code.Codes[code.CodeLength] = cg.OP_newarray
+	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	currentStack := uint16(1)
-	arrylistObject := state.newObjectVariableType(java_arrylist_class)
+	if 1 > maxstack {
+		maxstack = 1
+	}
+
+	arrylistObject := state.newObjectVariableType(java_root_object_array)
 	state.pushStack(class, arrylistObject)
 	state.pushStack(class, arrylistObject)
 	defer state.popStack(2)
+	index := int32(0)
 	for _, v := range es {
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
-		currentStack++
+		currentStack := uint16(1)
+
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			stack, _ := m.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_arrylist_class,
-				Method:     "addAll",
-				Descriptor: "(Ljava/util/Collection;)Z",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_pop
-			code.CodeLength += 4
+			for kk, _ := range v.Values {
+				currentStack = 1
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				currentStack++
+				stack = arrayListPacker.unPackObject(class, code, kk, context)
+				if t := stack + currentStack; t > maxstack {
+					maxstack = t
+				}
+				loadInt32(class, code, index)
+				code.Codes[code.CodeLength] = cg.OP_swap
+				code.Codes[code.CodeLength+1] = cg.OP_aastore
+				code.CodeLength += 2
+				index++
+			}
 			continue
 		}
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		currentStack++
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backPatchEs(es, code.CodeLength)
@@ -269,14 +280,11 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 		if v.Value.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Value)
 		}
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_arrylist_class,
-			Method:     "add",
-			Descriptor: "(Ljava/lang/Object;)Z",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_pop
-		code.CodeLength += 4
+		loadInt32(class, code, index)
+		code.Codes[code.CodeLength] = cg.OP_swap
+		code.Codes[code.CodeLength+1] = cg.OP_aastore
+		code.CodeLength += 2
+		index++
 	}
 	return
 }

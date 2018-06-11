@@ -112,25 +112,12 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					maxstack = t
 				}
 				arrayListPacker.storeArrayListAutoVar(code, context)
-				for kk, _ := range v.Values {
+				for kk, tt := range v.Values {
 					currentStack := uint16(1)
-					arrayListPacker.buildLoadArrayListAutoVar(code, context)
-					loadInt32(class, code, int32(kk))
+					stack = arrayListPacker.unPack(class, code, kk, tt, context)
 					if t := currentStack + 2; t > maxstack {
 						maxstack = t
 					}
-					//
-					code.Codes[code.CodeLength] = cg.OP_invokevirtual
-					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      java_arrylist_class,
-						Method:     "get",
-						Descriptor: "(I)Ljava/lang/Object;",
-					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
-					//cast to real object
-					code.Codes[code.CodeLength] = cg.OP_checkcast
-					class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 						Class:      meta.classname,

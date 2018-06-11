@@ -58,7 +58,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					maxstack = t
 				}
 				arrayListPacker.storeArrayListAutoVar(code, context) // store to temp
-				for kk, _ := range v.Values {
+				for kk, tt := range v.Values {
 					currentStack = 1
 					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
 						code.Codes[code.CodeLength] = cg.OP_dup
@@ -67,15 +67,10 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 						state.pushStack(class, hashMapVerifyType)
 					}
 					//load
-					arrayListPacker.buildLoadArrayListAutoVar(code, context)
-					loadInt32(class, code, int32(kk))
-					code.Codes[code.CodeLength] = cg.OP_invokevirtual
-					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      java_arrylist_class,
-						Method:     "get",
-						Descriptor: "(I)Ljava/lang/Object;",
-					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
+					stack = arrayListPacker.unPack(class, code, kk, tt, context)
+					if t := stack + currentStack; t > maxstack {
+						maxstack = t
+					}
 					//remove
 					callRemove()
 					if k != len(call.Args)-1 || kk != len(v.Values)-1 {

@@ -46,34 +46,20 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.Codes[code.CodeLength+10] = cg.OP_aconst_null
 	code.CodeLength += 11
 
-	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_arrylist_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	if 4 > maxstack {
-		maxstack = 4
-	}
-	//
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_arrylist_class,
-		Method:     special_method_init,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength] = cg.OP_newarray
+	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	if 3 > maxstack {
+		maxstack = 3
+	}
+
 	// store object
 	code.Codes[code.CodeLength] = cg.OP_dup_x1
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_arrylist_class,
-		Method:     "add",
-		Descriptor: "(Ljava/lang/Object;)Z",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_pop
-	code.CodeLength += 4
+	code.Codes[code.CodeLength] = cg.OP_aastore
+	code.CodeLength++
 
 	// store if ok
 	code.Codes[code.CodeLength] = cg.OP_dup_x1
@@ -81,13 +67,7 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
 	typeConverter.putPrimitiveInObject(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_arrylist_class,
-		Method:     "add",
-		Descriptor: "(Ljava/lang/Object;)Z",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_pop
-	code.CodeLength += 4
+	code.Codes[code.CodeLength] = cg.OP_aastore
+	code.CodeLength++
 	return
 }

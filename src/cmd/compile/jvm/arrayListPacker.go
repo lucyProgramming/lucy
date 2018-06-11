@@ -49,12 +49,7 @@ func (a *ArrayListPacker) unPackObject(class *cg.ClassHighLevel, code *cg.Attrib
 		panic("over 127")
 	}
 	loadInt32(class, code, int32(k))
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_arrylist_class,
-		Method:     "get",
-		Descriptor: "(I)Ljava/lang/Object;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_aaload
+	code.CodeLength++
 	return
 }
