@@ -41,7 +41,6 @@ fn main(args []string) {
 	//print(bs);
 	print(string(bs));
 
-
 	x2 := new xxx[](10);
 
 	for k, _:= range x2 {

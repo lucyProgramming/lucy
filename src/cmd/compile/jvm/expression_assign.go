@@ -42,7 +42,11 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	if e.IsStatementExpression == false || len(lefts) == 1 {
 		return m.buildExpressionAssign(class, code, e, context, state)
 	}
-	maxstack = m.buildExpressions(class, code, rights, context, state)
+	if len(rights) == 1 {
+		maxstack, _ = m.build(class, code, rights[0], context, state)
+	} else {
+		maxstack = m.buildExpressions(class, code, rights, context, state)
+	}
 	arrayListPacker.storeArrayListAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)

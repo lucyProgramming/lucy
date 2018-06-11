@@ -13,7 +13,7 @@ var (
 
 const (
 	special_method_init                     = "<init>"
-	java_root_object_array                  = "[java/lang/Object;"
+	java_root_object_array                  = "[Ljava/lang/Object;"
 	java_string_class                       = "java/lang/String"
 	java_root_class                         = "java/lang/Object"
 	java_hashmap_class                      = "java/util/HashMap"

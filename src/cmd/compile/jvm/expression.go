@@ -227,7 +227,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 		length++
 	}
 	loadInt32(class, code, int32(length))
-	code.Codes[code.CodeLength] = cg.OP_newarray
+	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if 1 > maxstack {
@@ -241,7 +241,6 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 	index := int32(0)
 	for _, v := range es {
 		currentStack := uint16(1)
-
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			stack, _ := m.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxstack {

@@ -45,19 +45,23 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.Codes[code.CodeLength+9] = cg.OP_iconst_0
 	code.Codes[code.CodeLength+10] = cg.OP_aconst_null
 	code.CodeLength += 11
-
-	code.Codes[code.CodeLength] = cg.OP_newarray
+	loadInt32(class, code, 2)
+	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if 3 > maxstack {
-		maxstack = 3
-	}
 
 	// store object
 	code.Codes[code.CodeLength] = cg.OP_dup_x1
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
+	code.Codes[code.CodeLength] = cg.OP_iconst_0
+	code.CodeLength++
+	code.Codes[code.CodeLength] = cg.OP_swap
+	code.CodeLength++
+	if 5 > maxstack {
+		maxstack = 5
+	}
 	code.Codes[code.CodeLength] = cg.OP_aastore
 	code.CodeLength++
 
@@ -67,6 +71,10 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
 	typeConverter.putPrimitiveInObject(class, code, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
+	code.Codes[code.CodeLength] = cg.OP_iconst_1
+	code.CodeLength++
+	code.Codes[code.CodeLength] = cg.OP_swap
+	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_aastore
 	code.CodeLength++
 	return

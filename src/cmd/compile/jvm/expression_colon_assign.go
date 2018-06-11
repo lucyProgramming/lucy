@@ -73,8 +73,11 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		return
 	}
-
-	maxstack = m.buildExpressions(class, code, vs.Values, context, state)
+	if len(vs.Values) == 1 {
+		maxstack, _ = m.build(class, code, vs.Values[0], context, state)
+	} else {
+		maxstack = m.buildExpressions(class, code, vs.Values, context, state)
+	}
 	arrayListPacker.storeArrayListAutoVar(code, context)
 	//first round
 	for k, v := range vs.Variables {

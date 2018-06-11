@@ -24,7 +24,7 @@ func (m *Descript) methodDescriptor(f *ast.Function) string {
 	} else if len(f.Typ.ReturnList) == 1 {
 		s += m.typeDescriptor(f.Typ.ReturnList[0].Typ)
 	} else {
-		s += "Ljava/util/ArrayList;" //always this type
+		s += "[Ljava/lang/Object;" //always this type
 	}
 	return s
 }
