@@ -120,12 +120,12 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			if t := 3 + stack; t > maxstack {
 				maxstack = t
 			}
-			arrayListPacker.storeArrayListAutoVar(code, context)
+			multiValuePacker.storeArrayListAutoVar(code, context)
 			for k, t := range v.Values {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				loadInt32(class, code, index) // load index
-				stack := arrayListPacker.unPack(class, code, k, t, context)
+				stack := multiValuePacker.unPack(class, code, k, t, context)
 				if t := 5 + stack; t > maxstack {
 					maxstack = t
 				}

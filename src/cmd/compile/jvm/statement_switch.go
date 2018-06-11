@@ -76,7 +76,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				arrayListPacker.storeArrayListAutoVar(code, context)
+				multiValuePacker.storeArrayListAutoVar(code, context)
 				for kkk, ttt := range ee.Values {
 					currentStack = size
 					if size == 1 {
@@ -90,7 +90,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					if currentStack > maxstack {
 						maxstack = currentStack
 					}
-					stack = arrayListPacker.unPack(class, code, kkk, ttt, context)
+					stack = multiValuePacker.unPack(class, code, kkk, ttt, context)
 					if t := stack + currentStack; t > maxstack {
 						maxstack = t
 					}

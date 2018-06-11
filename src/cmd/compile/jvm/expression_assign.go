@@ -47,7 +47,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	} else {
 		maxstack = m.buildExpressions(class, code, rights, context, state)
 	}
-	arrayListPacker.storeArrayListAutoVar(code, context)
+	multiValuePacker.storeArrayListAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, target, classname, name, descriptor :=
@@ -55,7 +55,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		if stack > maxstack {
 			maxstack = stack
 		}
-		stack = arrayListPacker.unPack(class, code, k, target, context)
+		stack = multiValuePacker.unPack(class, code, k, target, context)
 		if t := remainStack + stack; t > maxstack {
 			maxstack = t
 		}

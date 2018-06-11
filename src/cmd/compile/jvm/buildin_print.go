@@ -167,9 +167,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			if t := stack + currentStack; t > maxstack {
 				maxstack = t
 			}
-			arrayListPacker.storeArrayListAutoVar(code, context)
+			multiValuePacker.storeArrayListAutoVar(code, context)
 			for kk, tt := range v.Values {
-				stack = arrayListPacker.unPack(class, code, kk, tt, context)
+				stack = multiValuePacker.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}

@@ -57,7 +57,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}
-				arrayListPacker.storeArrayListAutoVar(code, context) // store to temp
+				multiValuePacker.storeArrayListAutoVar(code, context) // store to temp
 				for kk, tt := range v.Values {
 					currentStack = 1
 					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
@@ -67,7 +67,7 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 						state.pushStack(class, hashMapVerifyType)
 					}
 					//load
-					stack = arrayListPacker.unPack(class, code, kk, tt, context)
+					stack = multiValuePacker.unPack(class, code, kk, tt, context)
 					if t := stack + currentStack; t > maxstack {
 						maxstack = t
 					}

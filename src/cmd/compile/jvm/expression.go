@@ -251,7 +251,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				currentStack++
-				stack = arrayListPacker.unPackObject(class, code, kk, context)
+				stack = multiValuePacker.unPackObject(class, code, kk, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}

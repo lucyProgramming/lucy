@@ -38,14 +38,14 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 				maxstack = t
 			}
 			// store in temp var
-			arrayListPacker.storeArrayListAutoVar(code, context)
+			multiValuePacker.storeArrayListAutoVar(code, context)
 			for kk, _ := range v.Values {
 				currentStack = 2
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				loadInt32(class, code, index)
 				currentStack += 2
-				stack = arrayListPacker.unPackObject(class, code, kk, context)
+				stack = multiValuePacker.unPackObject(class, code, kk, context)
 				if t := currentStack + stack; t > maxstack {
 					maxstack = t
 				}

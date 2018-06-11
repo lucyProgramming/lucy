@@ -8,7 +8,7 @@ var (
 	LucyFieldSignatureParser   LucyFieldSignatureParse
 	LucyTypeAliasParser        LucyTypeAliasParse
 	FunctionDefaultValueParser FunctionDefaultValueParse
-	arrayListPacker            ArrayListPacker
+	multiValuePacker           MultiValuePacker
 )
 
 const (

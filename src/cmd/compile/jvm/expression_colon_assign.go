@@ -78,14 +78,14 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 	} else {
 		maxstack = m.buildExpressions(class, code, vs.Values, context, state)
 	}
-	arrayListPacker.storeArrayListAutoVar(code, context)
+	multiValuePacker.storeArrayListAutoVar(code, context)
 	//first round
 	for k, v := range vs.Variables {
 		if v.Name == ast.NO_NAME_IDENTIFIER {
 			continue
 		}
 		if v.IsGlobal {
-			stack := arrayListPacker.unPack(class, code, k, v.Typ, context)
+			stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
 			if stack > maxstack {
 				maxstack = stack
 			}
@@ -96,12 +96,12 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		if vs.IfDeclareBefor[k] {
 			if v.BeenCaptured {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-				stack := arrayListPacker.unPack(class, code, k, v.Typ, context)
+				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
 				if t := 1 + stack; t > maxstack {
 					maxstack = t
 				}
 			} else {
-				stack := arrayListPacker.unPack(class, code, k, v.Typ, context)
+				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
 				if stack > maxstack {
 					maxstack = stack
 				}
@@ -129,7 +129,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			code.MaxLocals += jvmSize(v.Typ)
 			state.appendLocals(class, v.Typ)
 		}
-		if t := currentStack + arrayListPacker.unPack(class, code, k, v.Typ, context); t > maxstack {
+		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Typ, context); t > maxstack {
 			maxstack = t
 		}
 		m.MakeClass.storeLocalVar(class, code, v)
@@ -176,7 +176,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 				maxstack = t
 			}
 			for kk, tt := range v.Values {
-				stack = arrayListPacker.unPack(class, code, kk, tt, context)
+				stack = multiValuePacker.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
 				}
