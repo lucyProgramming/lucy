@@ -124,7 +124,10 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(e.Pos), k))
 			return
 		}
-
+		if v.Typ.canBeBindWith(argTypes[k]) == false {
+			*errs = append(*errs, fmt.Errorf("%s cannot bind '%s' to '%s'",
+				errMsgPrefix(e.Pos), v.Typ.TypeString(), argTypes[k].TypeString()))
+		}
 		name := v.Typ.Name
 		typeParameters[name] = v.Typ
 		tArgs = append(tArgs, argTypes[k])
@@ -141,6 +144,10 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 			*errs = append(*errs, fmt.Errorf("%s missing typed return value,index at %d",
 				errMsgPrefix(e.Pos), k))
 			continue
+		}
+		if v.Typ.canBeBindWith(tps[0]) == false {
+			*errs = append(*errs, fmt.Errorf("%s cannot bind '%s' to '%s'",
+				errMsgPrefix(e.Pos), v.Typ.TypeString(), tps[0].TypeString()))
 		}
 		name := v.Typ.Name
 		retTypes = append(retTypes, tps[0])

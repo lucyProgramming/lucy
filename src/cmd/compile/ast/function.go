@@ -213,7 +213,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 			*errs = append(*errs, err)
 			continue
 		}
-		if v.Typ.Typ == VARIABLE_TYPE_T && f.TemplateFunction == nil {
+		if v.Typ.haveT() && f.TemplateFunction == nil {
 			if f.HaveDefaultValue {
 				*errs = append(*errs, fmt.Errorf("%s cannot have typed parameter after default value",
 					errMsgPrefix(f.Pos)))
@@ -268,7 +268,7 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 				continue
 			}
 		}
-		if v.Typ.Typ == VARIABLE_TYPE_T && f.TemplateFunction == nil {
+		if v.Typ.haveT() && f.TemplateFunction == nil {
 			f.TemplateFunction = &TemplateFunction{}
 		}
 		err = f.Block.insert(v.Name, v.Pos, v)

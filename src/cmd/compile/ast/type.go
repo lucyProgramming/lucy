@@ -401,6 +401,34 @@ func (v *VariableType) TypeString() string {
 	v.typeString(&t)
 	return t
 }
+func (v *VariableType) haveT() bool {
+	if v.Typ == VARIABLE_TYPE_T {
+		return true
+	}
+	if v.Typ == VARIABLE_TYPE_ARRAY || v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return v.ArrayType.haveT()
+	}
+	if v.Typ == VARIABLE_TYPE_MAP {
+		return v.Map.K.haveT() || v.Map.V.haveT()
+	}
+	return false
+}
+
+func (v *VariableType) canBeBindWith(t *VariableType) bool {
+	if v.Typ == VARIABLE_TYPE_T {
+		return true
+	}
+	if v.Typ == VARIABLE_TYPE_ARRAY && t.Typ == VARIABLE_TYPE_ARRAY {
+		return v.ArrayType.canBeBindWith(t.ArrayType)
+	}
+	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return v.ArrayType.canBeBindWith(t.ArrayType)
+	}
+	if v.Typ == VARIABLE_TYPE_MAP {
+		return v.Map.K.canBeBindWith(t.Map.K) || v.Map.V.canBeBindWith(t.Map.V)
+	}
+	return false
+}
 
 func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
 	if v == assignMent { // equal
