@@ -206,7 +206,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				r.Positions[kk] = t.Pos
 				r.Types[kk] = "const"
 			case *Enum:
-				t := vv.(*EnumName)
+				t := vv.(*Enum)
 				r.Positions[kk] = t.Pos
 				r.Types[kk] = "enum"
 			case *Function:

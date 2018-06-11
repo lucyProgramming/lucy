@@ -90,13 +90,13 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 		return ret
 	}
 	if amount.Typ != VARIABLE_TYPE_INT {
-		if amount.Typ == VARIABLE_TYPE_JAVA_ARRAY && newArray.Typ.ArrayType.Equal(errs, amount.ArrayType) {
-			//convert java array to array
-			newArray.IsConvertJavaArray2Array = true
-		} else {
-			*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
-				errMsgPrefix(amount.Pos), amount.TypeString()))
-		}
+		//if amount.Typ == VARIABLE_TYPE_JAVA_ARRAY && newArray.Typ.ArrayType.Equal(errs, amount.ArrayType) {
+		//	//convert java array to array
+		//	newArray.IsConvertJavaArray2Array = true
+		//} else {
+		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
+			errMsgPrefix(amount.Pos), amount.TypeString()))
+		//}
 	}
 	//no further checks
 	return ret
