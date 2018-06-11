@@ -51,7 +51,19 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			s.StatementBreak.StatementSwitch.BackPatchs = append(s.StatementBreak.StatementSwitch.BackPatchs, b)
 		}
 	case ast.STATEMENT_TYPE_RETURN:
-		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
+		var haveVariableDefiniton bool
+		for _, v := range s.StatementReturn.Defers {
+			if v.Block.HaveVariableDefinition() {
+				haveVariableDefiniton = true
+				break
+			}
+		}
+		ss := state
+		if haveVariableDefiniton {
+			ss = (&StackMapState{}).FromLast(state)
+		}
+		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, ss)
+		state.addTop(ss)
 	case ast.STATEMENT_TYPE_SWITCH:
 		s.StatementSwitch.BackPatchs = []*cg.JumpBackPatch{} //could compile multi times
 		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
