@@ -69,7 +69,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			backfillExit([]*cg.Exit{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
-		gotoBodyExits := []*cg.Exit{}
+		mathes := []*cg.Exit{}
 		for _, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.Values) > 1 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
@@ -97,7 +97,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
 					// consume result on stack
-					gotoBodyExits = append(gotoBodyExits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+					mathes = append(mathes, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 				}
 				continue
 			}
@@ -118,12 +118,12 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			state.pushStack(class, s.Condition.Value)
 			compare(s.Condition.Value)
 
-			gotoBodyExits = append(gotoBodyExits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
+			mathes = append(mathes, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
 		exit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		// if match goto here
-		backfillExit(gotoBodyExits, code.CodeLength)
+		backfillExit(mathes, code.CodeLength)
 		//before block,pop off stack
 		context.MakeStackMap(code, state, code.CodeLength)
 		if size == 1 {

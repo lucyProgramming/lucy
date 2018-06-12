@@ -22,17 +22,15 @@ func (m *MakeExpression) buildTemplateFunctionCall(class *cg.ClassHighLevel, cod
 		call.TemplateFunctionCallPair.Function.ClassMethod = method
 		//build function
 		m.MakeClass.buildFunction(class, nil, method, call.TemplateFunctionCallPair.Function)
-		call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated = &ast.TemplateFunctionCallPairGenerated{}
-		call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.ClassName = class.Name
-		call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Method = method.Name
-		call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Descriptor = method.Descriptor
+		call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated = method
+
 	}
 	maxstack = m.buildCallArgs(class, code, call.Args,
 		call.TemplateFunctionCallPair.Function.Typ.ParameterList, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.ClassName,
-		Method:     call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Method,
+		Class:      call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Class.Name,
+		Method:     call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Name,
 		Descriptor: call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Descriptor,
 	},
 		code.Codes[code.CodeLength+1:code.CodeLength+3])

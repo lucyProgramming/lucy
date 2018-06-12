@@ -129,8 +129,6 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 		ret.Verify = &cg.StackMap_Object_variable_info{
 			Index: class.Class.InsertClassConst(d),
 		}
-	default:
-		panic(11)
 	}
 	return ret
 }

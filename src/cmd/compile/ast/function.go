@@ -141,14 +141,14 @@ func (f *Function) check(b *Block) []error {
 	return errs
 }
 
-func (f *Function) clone(block *Block) (ret *Function, es []error) {
+func (f *Function) clone() (ret *Function, es []error) {
 	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
 	if errsNotEmpty(es) {
 		return ret, es
 	}
-	ret.Block.inherit(block)
-	ret.checkParametersAndRetuns(&es)
-	ret.Block.InheritedAttribute.Function = ret
+	//	ret.Block.inherit(block)
+	//ret.checkParametersAndRetuns(&es)
+	//ret.Block.InheritedAttribute.Function = ret
 	return ret, es
 }
 func (f *Function) mkLastRetrunStatement() {

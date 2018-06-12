@@ -150,7 +150,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	}
 	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret, errs)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
-		cloneFunction, es := f.clone(block)
+		cloneFunction, es := f.clone()
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			return nil
@@ -180,6 +180,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		cloneFunction.Block.Funcs[cloneFunction.Name] = cloneFunction
 		cloneFunction.Block.inherit(&PackageBeenCompile.Block)
+		cloneFunction.Block.InheritedAttribute.Function = cloneFunction
 		cloneFunction.checkParametersAndRetuns(errs)
 		cloneFunction.checkBlock(errs)
 	}

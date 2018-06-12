@@ -143,7 +143,7 @@ func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byt
 		}
 		return
 	}
-	if classname == java_hashmap_class { // it is a flag indicated map destination
+	if classname == java_hashmap_class { // it is a flag indicate  map destination
 		if jvmSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2

@@ -22,7 +22,7 @@ const (
 )
 
 type Statement struct {
-	Checked           bool
+	Checked           bool // if checked
 	Pos               *Pos
 	Typ               int
 	StatementIf       *StatementIF
@@ -150,8 +150,8 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_BLOCK:
 		s.Block.inherit(block)
 		return s.Block.checkStatements()
-	case STATEMENT_TYPE_LABLE: // nothing to do
-
+	case STATEMENT_TYPE_LABLE:
+		// nothing to do
 	case STATEMENT_TYPE_CLASS:
 		err := block.insert(s.Class.Name, s.Pos, s.Class)
 		if err != nil {
@@ -206,7 +206,6 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 					b.ClosureFuncs = make(map[string]*Function)
 				}
 				b.ClosureFuncs[f.Name] = f
-
 			}
 			return errs
 		}

@@ -250,9 +250,8 @@ func (t *VariableType) mkTypeFrom(d interface{}) error {
 func (t *VariableType) resolveName(block *Block, subPart bool) error {
 	var err error
 	var d interface{}
-
 	if strings.Contains(t.Name, ".") == false {
-		d, _ = block.SearchByName(t.Name)
+		d = block.searchType(t.Name)
 		loadFromImport := (d == nil)
 		if loadFromImport == false { // d is not nil
 			switch d.(type) {

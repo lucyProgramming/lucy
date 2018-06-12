@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+)
+
 type TemplateFunction struct {
 	Pairs []*TemplateFunctionCallPair
 }
@@ -7,14 +11,9 @@ type TemplateFunction struct {
 type TemplateFunctionCallPair struct {
 	Args                              []*VariableType
 	Returns                           []*VariableType
-	TemplateFunctionCallPairGenerated *TemplateFunctionCallPairGenerated
+	TemplateFunctionCallPairGenerated *cg.MethodHighLevel
 	Function                          *Function
 	ClassName                         string
-}
-type TemplateFunctionCallPairGenerated struct {
-	ClassName  string
-	Method     string
-	Descriptor string
 }
 
 func (t *TemplateFunction) callPairExists(Args []*VariableType,

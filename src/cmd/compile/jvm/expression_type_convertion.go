@@ -156,9 +156,9 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 func (m *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VARIABLE_TYPE_BYTE:
+		// already is
 	case ast.VARIABLE_TYPE_SHORT:
-		code.Codes[code.CodeLength] = cg.OP_i2b
-		code.CodeLength++
+		fallthrough
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_i2b
 		code.CodeLength++
@@ -180,7 +180,9 @@ func (m *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
 func (m *MakeExpression) stackTop2Short(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VARIABLE_TYPE_BYTE:
+		// already is
 	case ast.VARIABLE_TYPE_SHORT:
+		// already is
 	case ast.VARIABLE_TYPE_INT:
 		code.Codes[code.CodeLength] = cg.OP_i2s
 		code.CodeLength++
@@ -202,8 +204,11 @@ func (m *MakeExpression) stackTop2Short(code *cg.AttributeCode, typ int) {
 func (m *MakeExpression) stackTop2Int(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VARIABLE_TYPE_BYTE:
+		// already is
 	case ast.VARIABLE_TYPE_SHORT:
+		// already is
 	case ast.VARIABLE_TYPE_INT:
+		// already is
 	case ast.VARIABLE_TYPE_FLOAT:
 		code.Codes[code.CodeLength] = cg.OP_f2i
 		code.CodeLength++
@@ -226,6 +231,7 @@ func (m *MakeExpression) stackTop2Float(code *cg.AttributeCode, typ int) {
 		code.Codes[code.CodeLength] = cg.OP_i2f
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_FLOAT:
+		// already is
 	case ast.VARIABLE_TYPE_DOUBLE:
 		code.Codes[code.CodeLength] = cg.OP_d2f
 		code.CodeLength++
@@ -251,7 +257,7 @@ func (m *MakeExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
 		code.Codes[code.CodeLength] = cg.OP_d2l
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_LONG:
-
+		// already is
 	}
 }
 
@@ -268,6 +274,7 @@ func (m *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 		code.Codes[code.CodeLength] = cg.OP_f2d
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
+		// already is
 	case ast.VARIABLE_TYPE_LONG:
 		code.Codes[code.CodeLength] = cg.OP_l2d
 		code.CodeLength++
@@ -363,7 +370,6 @@ func (m *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.Attr
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		{
-
 			state.pushStack(class, typ)
 			context.MakeStackMap(code, state, code.CodeLength+10)
 			state.popStack(1)

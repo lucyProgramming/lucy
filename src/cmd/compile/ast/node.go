@@ -28,7 +28,6 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
 		os.Exit(1)
 	}
-
 	errs = make([]error, 0)
 	PackageBeenCompile.Files = make(map[string]*File)
 	convertor.Name = []string{}

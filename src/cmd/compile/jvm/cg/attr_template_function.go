@@ -5,7 +5,10 @@ import (
 )
 
 type AttributeTemplateFunction struct {
-	Name        string
+	Name string
+	/*
+		regenerate pos
+	*/
 	Filename    string
 	StartLine   uint16
 	StartColumn uint16

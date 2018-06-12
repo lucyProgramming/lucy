@@ -23,13 +23,13 @@ const (
 )
 
 var (
-	packageAliasReg        *regexp.Regexp
-	ResourceLoader         LoadResource
-	PackageBeenCompile     Package
-	buildinFunctionsMap    = make(map[string]*Function)
-	lucyLangBuildinPackage *Package
-	ParseFunctionHandler   func(bs []byte, pos *Pos) (*Function, []error)
-	javaStringClass        *Class
+	packageAliasReg      *regexp.Regexp
+	ResourceLoader       LoadResource
+	PackageBeenCompile   Package
+	buildinFunctionsMap  = make(map[string]*Function)
+	lucyBuildinPackage   *Package
+	ParseFunctionHandler func(bs []byte, pos *Pos) (*Function, []error)
+	javaStringClass      *Class
 )
 
 func init() {

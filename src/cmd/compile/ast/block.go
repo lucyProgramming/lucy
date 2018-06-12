@@ -26,7 +26,6 @@ type Block struct {
 	Types                      map[string]*VariableType
 	Vars                       map[string]*VariableDefinition
 	ClosureFuncs               map[string]*Function //in "Funcs" too
-
 }
 
 func (b *Block) HaveVariableDefinition() bool {
@@ -42,18 +41,9 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
-	if b.Classes != nil {
-		if t, ok := b.Classes[name]; ok {
-			return t, true
-		}
-	}
+
 	if b.Vars != nil {
 		if t, ok := b.Vars[name]; ok {
-			return t, true
-		}
-	}
-	if b.Lables != nil {
-		if t, ok := b.Lables[name]; ok {
 			return t, true
 		}
 	}
@@ -62,13 +52,19 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
-	if b.Enums != nil {
-		if t, ok := b.Enums[name]; ok {
+	if b.EnumNames != nil {
+		if t, ok := b.EnumNames[name]; ok {
 			return t, true
 		}
 	}
-	if b.EnumNames != nil {
-		if t, ok := b.EnumNames[name]; ok {
+	if b.Classes != nil {
+		if t, ok := b.Classes[name]; ok {
+			return t, true
+		}
+	}
+
+	if b.Enums != nil {
+		if t, ok := b.Enums[name]; ok {
 			return t, true
 		}
 	}
@@ -84,23 +80,71 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 	search lable
 */
 func (b *Block) searchLabel(name string) *StatementLable {
-	for b != nil {
-		if b.Lables != nil {
-			if l, ok := b.Lables[name]; ok {
+	bb := b
+	for bb != nil {
+		if bb.Lables != nil {
+			if l, ok := bb.Lables[name]; ok {
 				return l
 			}
 		}
-		b = b.Outter
+		if bb.IsFunctionTopBlock {
+			return nil
+		}
+		bb = bb.Outter
 	}
 	return nil
 }
 
 /*
-	search anything
+	search type
+*/
+func (b *Block) searchType(name string) interface{} {
+	bb := b
+	for bb != nil {
+		if bb.Classes != nil {
+			if t, ok := bb.Classes[name]; ok {
+				return t
+			}
+			if t, ok := bb.Enums[name]; ok {
+				return t
+			}
+			if t, ok := bb.Types[name]; ok {
+				return t
+			}
+		}
+		bb = bb.Outter
+	}
+	return nil
+}
+
+/*
+	search rightValue
 */
 func (b *Block) SearchByName(name string) (interface{}, error) {
-	if t, exists := b.NameExists(name); exists {
-		return t, nil
+	if b.Funcs != nil {
+		if t, ok := b.Funcs[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Vars != nil {
+		if t, ok := b.Vars[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Consts != nil {
+		if t, ok := b.Consts[name]; ok {
+			return t, nil
+		}
+	}
+	if b.EnumNames != nil {
+		if t, ok := b.EnumNames[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Classes != nil {
+		if t, ok := b.Classes[name]; ok {
+			return t, nil
+		}
 	}
 	// search closure
 	if b.InheritedAttribute.Function != nil {
@@ -109,11 +153,11 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 			return v, nil
 		}
 	}
-	if b.Outter == nil {
-		return searchBuildIns(name), nil
-	}
 	if b.IsFunctionTopBlock &&
 		len(b.InheritedAttribute.Function.TypeParameters) > 0 { // this is a template function
+		return searchBuildIns(name), nil
+	}
+	if b.Outter == nil {
 		return searchBuildIns(name), nil
 	}
 	t, err := b.Outter.SearchByName(name) // search by outter block
@@ -136,13 +180,6 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 			//cannot search variable from class body
 			if b.InheritedAttribute.Class != nil && b.IsClassBlock {
 				return nil, nil //
-			}
-		}
-		if l, ok := t.(*StatementLable); ok {
-			if b.IsFunctionTopBlock { // search lable from outside out not allow
-				return nil, nil
-			} else {
-				return l, nil
 			}
 		}
 		// if it is a function
@@ -315,8 +352,10 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		return fmt.Errorf(errmsg)
 	}
 	// name exists in buildin, not allow
-	if t := searchBuildIns(name); t != nil {
-		return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+	if lucyBuildinPackage != nil {
+		if _, exits := lucyBuildinPackage.Block.NameExists(name); exits {
+			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		}
 	}
 	switch d.(type) {
 	case *Class:

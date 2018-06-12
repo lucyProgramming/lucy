@@ -28,7 +28,8 @@ func (p *Package) loadBuildinPackage() error {
 	if err != nil {
 		return err
 	}
-	lucyLangBuildinPackage = pp.(*Package)
+	lucyBuildinPackage = pp.(*Package)
+	p.Block.Outter = &lucyBuildinPackage.Block
 	return nil
 }
 
@@ -120,7 +121,6 @@ func (p *Package) TypeCheck() []error {
 		if v.TemplateFunction != nil {
 			continue
 		}
-		p.Block.SearchByName("encode")
 		v.checkBlock(&p.Errors)
 		if PackageBeenCompile.shouldStop(nil) {
 			return p.Errors
