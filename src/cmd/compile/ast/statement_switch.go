@@ -11,7 +11,7 @@ type StatementSwitch struct {
 	Condition           *Expression //switch
 	StatmentSwitchCases []*StatmentSwitchCase
 	Default             *Block
-	BackPatchs          []*cg.JumpBackPatch
+	BackPatchs          []*cg.Exit
 }
 
 type StatmentSwitchCase struct {

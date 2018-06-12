@@ -8,7 +8,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func backPatchEs(es []*cg.JumpBackPatch, to int) {
+func backfillExit(es []*cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
 		e.Bs[0] = byte(offset >> 8)
@@ -17,8 +17,8 @@ func backPatchEs(es []*cg.JumpBackPatch, to int) {
 }
 
 func jumpTo(op byte, code *cg.AttributeCode, to int) {
-	b := (&cg.JumpBackPatch{}).FromCode(op, code)
-	backPatchEs([]*cg.JumpBackPatch{b}, to)
+	b := (&cg.Exit{}).FromCode(op, code)
+	backfillExit([]*cg.Exit{b}, to)
 }
 
 func copyOP(code *cg.AttributeCode, op ...byte) {

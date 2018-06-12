@@ -6,8 +6,8 @@ import (
 )
 
 func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.JumpBackPatch) {
-	exits = []*cg.JumpBackPatch{}
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.Exit) {
+	exits = []*cg.Exit{}
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxstack, es := m.build(class, code, bin.Left, context, state)
 	if es != nil {
@@ -20,10 +20,10 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LOGICAL_OR {
 		// at this point,value is clear,leave 1 on stack
-		exits = append(exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifne, code))
+		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifne, code))
 	} else { //  &&
 		// at this point,value is clear,leave 0 on stack
-		exits = append(exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
+		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 	}
 	code.Codes[code.CodeLength] = cg.OP_pop // pop 0
 	code.CodeLength++

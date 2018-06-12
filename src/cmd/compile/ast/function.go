@@ -7,7 +7,6 @@ import (
 )
 
 type Function struct {
-	BlockChecked                   bool // template function may be multi time check
 	TemplateFunction               *TemplateFunction
 	TypeParameters                 map[string]*VariableType //typed parameters
 	ParameterAndRetrunListOK       bool
@@ -22,7 +21,7 @@ type Function struct {
 	IsGlobal                       bool
 	IsBuildin                      bool
 	Used                           bool
-	AccessFlags                    uint16 // public private or protected
+	AccessFlags                    uint16
 	Typ                            FunctionType
 	Closure                        Closure
 	Name                           string // if name is nil string,means no name function
@@ -34,7 +33,6 @@ type Function struct {
 	AutoVarForMultiReturn          *AutoVarForMultiReturn
 	VarOffSet                      uint16 // for closure
 	SourceCode                     []byte // source code for T
-	//	OutterFunction                 *Function
 }
 
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos)
@@ -128,18 +126,14 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	if f.BlockChecked {
-		return
-	}
 	f.mkLastRetrunStatement()
 	*errs = append(*errs, f.Block.checkStatements()...)
-	f.BlockChecked = true
 }
 
 func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Block.inherit(b)
-	f.checkParaMeterAndRetuns(&errs)
+	f.checkParametersAndRetuns(&errs)
 	f.Block.InheritedAttribute.Function = f
 	if f.TemplateFunction == nil {
 		f.checkBlock(&errs)
@@ -153,7 +147,7 @@ func (f *Function) clone(block *Block) (ret *Function, es []error) {
 		return ret, es
 	}
 	ret.Block.inherit(block)
-	ret.checkParaMeterAndRetuns(&es)
+	ret.checkParametersAndRetuns(&es)
 	ret.Block.InheritedAttribute.Function = ret
 	return ret, es
 }
@@ -169,7 +163,7 @@ func (f *Function) mkLastRetrunStatement() {
 	}
 }
 
-func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
+func (f *Function) checkParametersAndRetuns(errs *[]error) {
 	errsLength := len(*errs)
 	defer func() {
 		if len(*errs) == errsLength {
@@ -202,34 +196,25 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	var err error
 	for k, v := range f.Typ.ParameterList {
 		v.IsFunctionParameter = true
-		if v.Typ.Typ != VARIABLE_TYPE_T {
+		if v.Typ.haveT() {
+			if f.TemplateFunction == nil {
+				f.TemplateFunction = &TemplateFunction{}
+			}
+		} else {
 			err = v.Typ.resolve(&f.Block)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-		}
-		err = f.Block.insert(v.Name, v.Pos, v)
-		if err != nil {
-			*errs = append(*errs, err)
-			continue
-		}
-		if v.Typ.haveT() && f.TemplateFunction == nil {
-			if f.HaveDefaultValue {
-				*errs = append(*errs, fmt.Errorf("%s cannot have typed parameter after default value",
-					errMsgPrefix(f.Pos)))
+			err = f.Block.insert(v.Name, v.Pos, v)
+			if err != nil {
+				*errs = append(*errs, err)
+				continue
 			}
-			f.TemplateFunction = &TemplateFunction{}
 		}
-		if f.HaveDefaultValue && v.Expression == nil {
-			*errs = append(*errs, fmt.Errorf("%s expect default value", errMsgPrefix(v.Pos)))
+		if f.TemplateFunction != nil {
 			continue
 		}
 		if v.Expression != nil {
-			if v.Typ.Typ == VARIABLE_TYPE_T {
-				*errs = append(*errs, fmt.Errorf("%s typ is tempalate,cannot have default value",
-					errMsgPrefix(v.Pos)))
-				continue
-			}
 			if f.HaveDefaultValue == false {
 				f.DefaultValueStartAt = k
 			}
@@ -261,26 +246,24 @@ func (f *Function) checkParaMeterAndRetuns(errs *[]error) {
 	//handler return
 	for _, v := range f.Typ.ReturnList {
 		v.IsFunctionRetrunVar = true
-		if v.Typ.Typ != VARIABLE_TYPE_T {
+		if v.Typ.haveT() {
+			if f.TemplateFunction == nil {
+				f.TemplateFunction = &TemplateFunction{}
+			}
+		} else {
 			err = v.Typ.resolve(&f.Block)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			err = f.Block.insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
 				continue
 			}
 		}
-		if v.Typ.haveT() && f.TemplateFunction == nil {
-			f.TemplateFunction = &TemplateFunction{}
-		}
-		err = f.Block.insert(v.Name, v.Pos, v)
-		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s err:%v", errMsgPrefix(v.Pos), err))
-		}
-		if v.Typ.Typ == VARIABLE_TYPE_T && v.Expression != nil {
-			*errs = append(*errs, fmt.Errorf("%s typ is tempalate,cannot have default value",
-				errMsgPrefix(v.Pos)))
+		if f.TemplateFunction != nil {
 			continue
 		}
-
 		if v.Expression == nil {
 			v.Expression = v.Typ.mkDefaultValueExpression()
 			continue

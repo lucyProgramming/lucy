@@ -27,11 +27,11 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 
 	if len(context.function.Typ.ReturnList) == 1 {
-		var es []*cg.JumpBackPatch
+		var es []*cg.Exit
 		if len(statementReturn.Expressions) > 0 {
 			maxstack, es = m.MakeExpression.build(class, code, statementReturn.Expressions[0], context, state)
 			if len(es) > 0 {
-				backPatchEs(es, code.CodeLength)
+				backfillExit(es, code.CodeLength)
 				state.pushStack(class, statementReturn.Expressions[0].Value)
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1)
@@ -125,6 +125,9 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 							maxstack = t
 						}
 						loadInt32(class, code, index)
+						if t := currentStack + 2; t > maxstack {
+							maxstack = t
+						}
 						code.Codes[code.CodeLength] = cg.OP_swap
 						code.Codes[code.CodeLength+1] = cg.OP_aastore
 						code.CodeLength += 2
@@ -137,7 +140,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				currentStack++
 				stack, es := m.MakeExpression.build(class, code, v, context, state)
 				if len(es) > 0 {
-					backPatchEs(es, code.CodeLength)
+					backfillExit(es, code.CodeLength)
 					state.pushStack(class, v.Value)
 					context.MakeStackMap(code, state, code.CodeLength)
 					state.popStack(1) // must be bool expression
@@ -151,6 +154,10 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				}
 				// append
 				loadInt32(class, code, index)
+
+				if t := currentStack + 2; t > maxstack {
+					maxstack = t
+				}
 				code.Codes[code.CodeLength] = cg.OP_swap
 				code.Codes[code.CodeLength+1] = cg.OP_aastore
 				code.CodeLength += 2
@@ -243,9 +250,6 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack++
-		if currentStack > maxstack {
-			maxstack = currentStack
-		}
 		m.loadLocalVar(class, code, v)
 		if t := currentStack + jvmSize(v.Typ); t > maxstack {
 			maxstack = t
@@ -254,6 +258,9 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 			typeConverter.putPrimitiveInObject(class, code, v.Typ)
 		}
 		loadInt32(class, code, index)
+		if 4 > maxstack {
+			maxstack = 4
+		}
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.Codes[code.CodeLength+1] = cg.OP_aastore
 		code.CodeLength += 2

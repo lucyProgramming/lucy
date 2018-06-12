@@ -13,6 +13,20 @@ public class Lucy extends javaRootClass {
 
 
 
+public fn copy(dest T,src T , start int = -1 , end int = -1) {
+	if start == -1 {
+		start = 0;
+	}
+	if end == -1 {
+		end = src.size();
+	}
+	for i := start ; i < end ; i++ {
+		dest[i] = src[i] ; 
+	}
+}
+
+
+
 
 
 

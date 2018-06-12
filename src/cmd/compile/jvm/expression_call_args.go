@@ -33,7 +33,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 		stack, es := m.build(class, code, e, context, state)
 		if len(es) > 0 {
 			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}

@@ -12,7 +12,7 @@ type StatementLable struct {
 	CodeOffset          int
 	Block               *Block
 	Name                string
-	BackPatches         []*cg.JumpBackPatch
+	BackPatches         []*cg.Exit
 	Statement           *Statement
 }
 

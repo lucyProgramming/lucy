@@ -3,14 +3,13 @@ package ast
 import "fmt"
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
-	ret := []*VariableType{mkVoidType(e.Pos)}
 	call := e.Data.(*ExpressionFunctionCall)
 	t, es := call.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {
-		return ret
+		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_CLASS { // cast type
 		convertType := &ExpressionTypeConvertion{}
@@ -34,28 +33,27 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), t.TypeString()))
-		return ret
+		return nil
 	}
 	call.Func = t.Function
 	if t.Function.IsBuildin {
 		return e.checkBuildinFunctionCall(block, errs, t.Function, call.Args)
 	} else {
-		ret = e.checkFunctionCall(block, errs, t.Function, &call.Args)
-		return ret
+		return e.checkFunctionCall(block, errs, t.Function, &call.Args)
+
 	}
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args *CallArgs) []*VariableType {
 	callargsTypes := checkExpressions(block, *args, errs)
 	callargsTypes = checkRightValuesValid(callargsTypes, errs)
-	ret := []*VariableType{mkVoidType(e.Pos)}
 	var tf *Function
 	if f.TemplateFunction != nil {
 		length := len(*errs)
 		//rewrite
 		tf = e.checkTemplateFunctionCall(block, errs, callargsTypes, f)
 		if len(*errs) != length { // if no
-			return ret
+			return nil
 		}
 	}
 	if len(callargsTypes) > len(f.Typ.ParameterList) {
@@ -65,6 +63,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		*errs = append(*errs, fmt.Errorf(errmsg))
 	}
 	//trying to convert literal
+	var ret []*VariableType
 	convertLiteralExpressionsToNeeds(*args, f.Typ.needParameterTypes(), callargsTypes)
 	if f.TemplateFunction == nil {
 		ret = f.Typ.retTypes(e.Pos)
@@ -99,13 +98,6 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			}
 		}
 	}
-	if f.TemplateFunction != nil {
-		if tf.Block.Funcs == nil {
-			tf.Block.Funcs = make(map[string]*Function)
-		}
-		tf.Block.Funcs[tf.Name] = tf //incase recursively
-		tf.checkBlock(errs)
-	}
 	return ret
 }
 
@@ -116,7 +108,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	tArgs := []*VariableType{}
 	tIndexes := []int{}
 	for k, v := range f.Typ.ParameterList {
-		if v == nil || v.Typ == nil || v.Typ.Typ != VARIABLE_TYPE_T {
+		if v == nil || v.Typ == nil || v.Typ.haveT() == false {
 			continue
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
@@ -124,9 +116,9 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(e.Pos), k))
 			return
 		}
-		if v.Typ.canBeBindWith(argTypes[k]) == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot bind '%s' to '%s'",
-				errMsgPrefix(e.Pos), v.Typ.TypeString(), argTypes[k].TypeString()))
+		if err := v.Typ.canBeBindWith(argTypes[k]); err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %v",
+				errMsgPrefix(e.Pos), err))
 		}
 		name := v.Typ.Name
 		typeParameters[name] = v.Typ
@@ -137,7 +129,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	retTypes := []*VariableType{}
 	retIndexes := []int{}
 	for k, v := range f.Typ.ReturnList {
-		if v == nil || v.Typ == nil || v.Typ.Typ != VARIABLE_TYPE_T {
+		if v == nil || v.Typ == nil || v.Typ.haveT() == false {
 			continue
 		}
 		if len(tps) == 0 || tps[0] == nil {
@@ -145,9 +137,10 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(e.Pos), k))
 			continue
 		}
-		if v.Typ.canBeBindWith(tps[0]) == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot bind '%s' to '%s'",
-				errMsgPrefix(e.Pos), v.Typ.TypeString(), tps[0].TypeString()))
+		if err := v.Typ.canBeBindWith(tps[0]); err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %v",
+				errMsgPrefix(e.Pos), err))
+			return nil
 		}
 		name := v.Typ.Name
 		retTypes = append(retTypes, tps[0])
@@ -157,13 +150,14 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	}
 	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret, errs)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
-		t, es := f.clone(block)
+		cloneFunction, es := f.clone(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			return nil
 		}
-		t.TemplateFunction = nil
-		call.TemplateFunctionCallPair.Function = t
+		cloneFunction.TemplateFunction = nil
+		call.TemplateFunctionCallPair.Function = cloneFunction
+		// bind parameters
 		for k, v := range tArgs {
 			index := tIndexes[k]
 			pos := f.Typ.ParameterList[index].Pos //
@@ -180,6 +174,14 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 			call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Expression =
 				v.mkDefaultValueExpression()
 		}
+		//check this function
+		if cloneFunction.Block.Funcs == nil {
+			cloneFunction.Block.Funcs = make(map[string]*Function)
+		}
+		cloneFunction.Block.Funcs[cloneFunction.Name] = cloneFunction
+		cloneFunction.Block.inherit(&PackageBeenCompile.Block)
+		cloneFunction.checkParametersAndRetuns(errs)
+		cloneFunction.checkBlock(errs)
 	}
 	ret = call.TemplateFunctionCallPair.Function
 	// when all ok ,ret is not a template function any more

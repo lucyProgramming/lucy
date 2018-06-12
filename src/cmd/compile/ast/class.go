@@ -23,9 +23,9 @@ type Class struct {
 	SuperClass         *Class
 	InterfaceNames     []*NameWithPos
 	Interfaces         []*Class
-	SouceFile          string
-	Used               bool
 	LoadFromOutSide    bool
+	//Used               bool
+	//SourceFile          string
 }
 
 func (c *Class) IsInterface() bool {
@@ -68,7 +68,7 @@ func (c *Class) mkDefaultContruction() {
 	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
 }
 
-func (c *Class) checkIfClassCircularity() error {
+func (c *Class) checkIfClassHierarchyCircularity() error {
 	m := make(map[string]struct{})
 	arr := []string{}
 	is := false
@@ -119,7 +119,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 	if err != nil {
 		errs = append(errs, err)
 	} else {
-		err = c.checkIfClassCircularity()
+		err = c.checkIfClassHierarchyCircularity()
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -174,7 +174,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 		for _, vv := range v {
 			vv.Func.Block.inherit(&c.Block)
 			vv.Func.Block.InheritedAttribute.Function = vv.Func
-			vv.Func.checkParaMeterAndRetuns(&errs)
+			vv.Func.checkParametersAndRetuns(&errs)
 		}
 	}
 	return errs

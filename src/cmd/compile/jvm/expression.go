@@ -10,7 +10,7 @@ type MakeExpression struct {
 }
 
 func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.JumpBackPatch) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.Exit) {
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
@@ -268,7 +268,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 		currentStack++
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

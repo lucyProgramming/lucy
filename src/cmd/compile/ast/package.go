@@ -16,7 +16,7 @@ type Package struct {
 	Block                        Block // package always have a default block
 	Files                        map[string]*File
 	InitFunctions                []*Function
-	NErros2Stop                  int // number of errors should stop compile
+	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
 }
 
@@ -56,12 +56,12 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 }
 
 func (p *Package) shouldStop(errs []error) bool {
-	return (len(p.Errors) + len(errs)) >= p.NErros2Stop
+	return (len(p.Errors) + len(errs)) >= p.NErrors2Stop
 }
 
 func (p *Package) TypeCheck() []error {
-	if p.NErros2Stop <= 2 {
-		p.NErros2Stop = 10
+	if p.NErrors2Stop <= 2 {
+		p.NErrors2Stop = 10
 	}
 	p.Errors = []error{}
 	p.Errors = append(p.Errors, p.Block.checkConst()...)
@@ -72,7 +72,7 @@ func (p *Package) TypeCheck() []error {
 		}
 		v.Block.inherit(&p.Block)
 		v.Block.InheritedAttribute.Function = v
-		v.checkParaMeterAndRetuns(&p.Errors)
+		v.checkParametersAndRetuns(&p.Errors)
 		if p.shouldStop(nil) {
 			return p.Errors
 		}

@@ -26,7 +26,7 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	currenStack := uint16(1)
 	stack, es := m.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
-		backPatchEs(es, code.CodeLength)
+		backfillExit(es, code.CodeLength)
 		state.pushStack(class, e.Left.Value)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
@@ -46,7 +46,7 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	stack, es = m.build(class, code, e.Right, context, state)
 	if len(es) > 0 {
-		backPatchEs(es, code.CodeLength)
+		backfillExit(es, code.CodeLength)
 		state.pushStack(class, e.Right.Value)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)

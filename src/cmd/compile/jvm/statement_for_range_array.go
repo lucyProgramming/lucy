@@ -28,7 +28,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	context.MakeStackMap(code, state, code.CodeLength+11)
 	state.popStack(1)
 	code.CodeLength += 8
-	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+	s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	forState := (&StackMapState{}).FromLast(state)
 	defer func() {
 		state.addTop(forState) // add top
@@ -175,7 +175,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		k + start >= end,break loop,pop index on stack
 		check if need to break
 	*/
-	rangeend := (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)
+	rangeend := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	//load elements
 	if s.RangeAttr.IdentifierV != nil || s.RangeAttr.ExpressionV != nil {
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.Elements)...)
@@ -293,7 +293,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	}
 
 	//pop index on stack
-	backPatchEs([]*cg.JumpBackPatch{rangeend}, code.CodeLength) // jump to here
+	backfillExit([]*cg.Exit{rangeend}, code.CodeLength) // jump to here
 	forState.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 	context.MakeStackMap(code, forState, code.CodeLength)
 	forState.popStack(1)

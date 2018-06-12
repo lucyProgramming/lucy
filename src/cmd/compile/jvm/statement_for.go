@@ -27,11 +27,11 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		}
 	}
 	//condition
-	var firstExit *cg.JumpBackPatch
+	var firstExit *cg.Exit
 	if s.Condition != nil {
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			forState.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
@@ -39,8 +39,8 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
-		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
-		firstExit = (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
+		s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+		firstExit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	}
 	s.ContinueOPOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
@@ -53,7 +53,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	if s.Condition != nil {
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			forState.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
@@ -61,10 +61,10 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		if stack > maxstack {
 			maxstack = stack
 		}
-		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
+		s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 	}
 	if firstExit != nil {
-		backPatchEs([]*cg.JumpBackPatch{firstExit}, code.CodeLength)
+		backfillExit([]*cg.Exit{firstExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}
 	m.buildBlock(class, code, s.Block, context, forState)

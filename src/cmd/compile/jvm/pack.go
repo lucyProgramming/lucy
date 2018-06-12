@@ -97,66 +97,6 @@ func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeC
 }
 
 func (c *TypeConverter) putPrimitiveInObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
-	//	switch t.Typ {
-	//	case ast.VARIABLE_TYPE_BOOL:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      "java/lang/Boolean",
-	//			Method:     "valueOf",
-	//			Descriptor: "(Z)Ljava/lang/Boolean;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	case ast.VARIABLE_TYPE_BYTE:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      "java/lang/Byte",
-	//			Method:     "valueOf",
-	//			Descriptor: "(B)Ljava/lang/Byte;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	case ast.VARIABLE_TYPE_SHORT:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      "java/lang/Short",
-	//			Method:     "valueOf",
-	//			Descriptor: "(S)Ljava/lang/Short;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	case ast.VARIABLE_TYPE_ENUM:
-	//		fallthrough
-	//	case ast.VARIABLE_TYPE_INT:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      java_integer_class,
-	//			Method:     "valueOf",
-	//			Descriptor: "(I)Ljava/lang/Integer;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	case ast.VARIABLE_TYPE_FLOAT:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      java_float_class,
-	//			Method:     "valueOf",
-	//			Descriptor: "(F)Ljava/lang/Float;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	case ast.VARIABLE_TYPE_DOUBLE:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      java_double_class,
-	//			Method:     "valueOf",
-	//			Descriptor: "(D)Ljava/lang/Double;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	case ast.VARIABLE_TYPE_LONG:
-	//		code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//			Class:      java_long_class,
-	//			Method:     "valueOf",
-	//			Descriptor: "(J)Ljava/lang/Long;",
-	//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//		code.CodeLength += 3
-	//	}
 	copyOP(code, c.putPrimitiveInObjectBytes(class, t)...)
 }
 

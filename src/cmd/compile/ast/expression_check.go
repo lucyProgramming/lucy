@@ -288,7 +288,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			"this may be cause be compiler error,please contact the author",
 			errMsgPrefix(e.Pos), e.OpName()))
 	default:
-		panic(fmt.Sprintf("unhandled type inference:%s", e.OpName()))
+		panic(fmt.Sprintf("unhandled type:%v", e.OpName()))
 	}
 	return Types, errs
 }

@@ -32,7 +32,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		stack, es := m.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, vs.Values[0].Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -200,7 +200,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		//
 		stack, es := m.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

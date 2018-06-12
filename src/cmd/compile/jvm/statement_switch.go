@@ -60,16 +60,16 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	}
 	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
-	var exit *cg.JumpBackPatch
+	var exit *cg.Exit
 	size := jvmSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
 	for _, c := range s.StatmentSwitchCases {
 		if exit != nil {
-			backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+			backfillExit([]*cg.Exit{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
-		gotoBodyExits := []*cg.JumpBackPatch{}
+		gotoBodyExits := []*cg.Exit{}
 		for _, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.Values) > 1 {
 				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
@@ -97,7 +97,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
 					// consume result on stack
-					gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code))
+					gotoBodyExits = append(gotoBodyExits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 				}
 				continue
 			}
@@ -118,12 +118,12 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			state.pushStack(class, s.Condition.Value)
 			compare(s.Condition.Value)
 
-			gotoBodyExits = append(gotoBodyExits, (&cg.JumpBackPatch{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
+			gotoBodyExits = append(gotoBodyExits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
-		exit = (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)
+		exit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		// if match goto here
-		backPatchEs(gotoBodyExits, code.CodeLength)
+		backfillExit(gotoBodyExits, code.CodeLength)
 		//before block,pop off stack
 		context.MakeStackMap(code, state, code.CodeLength)
 		if size == 1 {
@@ -140,10 +140,10 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		if c.Block == nil || c.Block.DeadEnding == false {
 			s.BackPatchs = append(s.BackPatchs,
-				(&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
+				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
-	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+	backfillExit([]*cg.Exit{exit}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	if size == 1 {
 		code.Codes[code.CodeLength] = cg.OP_pop

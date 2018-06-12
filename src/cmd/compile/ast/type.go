@@ -414,9 +414,9 @@ func (v *VariableType) haveT() bool {
 	return false
 }
 
-func (v *VariableType) canBeBindWith(t *VariableType) bool {
+func (v *VariableType) canBeBindWith(t *VariableType) error {
 	if v.Typ == VARIABLE_TYPE_T {
-		return true
+		return nil
 	}
 	if v.Typ == VARIABLE_TYPE_ARRAY && t.Typ == VARIABLE_TYPE_ARRAY {
 		return v.ArrayType.canBeBindWith(t.ArrayType)
@@ -424,10 +424,14 @@ func (v *VariableType) canBeBindWith(t *VariableType) bool {
 	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 		return v.ArrayType.canBeBindWith(t.ArrayType)
 	}
-	if v.Typ == VARIABLE_TYPE_MAP {
-		return v.Map.K.canBeBindWith(t.Map.K) || v.Map.V.canBeBindWith(t.Map.V)
+	if v.Typ == VARIABLE_TYPE_MAP && t.Typ == VARIABLE_TYPE_MAP {
+		err := v.Map.K.canBeBindWith(t.Map.K)
+		if err != nil {
+			return err
+		}
+		return v.Map.V.canBeBindWith(t.Map.V)
 	}
-	return false
+	return fmt.Errorf("cannot bind '%s' to '%s'", t.TypeString(), v.TypeString())
 }
 
 func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {

@@ -56,7 +56,7 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		}
 		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Typ)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

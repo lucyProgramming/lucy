@@ -5,7 +5,7 @@ import "java/io";
 
 public fn getLucyRoot()->(path string , err error ){
 	envs := os.getEnvs();
-	if envs.contains("LUCYROOT") == false {
+	if envs.keyExists("LUCYROOT") == false {
 		err = new error("env variable LUCYROOT is not set");
 		return ;
 	}
@@ -14,14 +14,15 @@ public fn getLucyRoot()->(path string , err error ){
 
 public fn getLucyPath()->(paths []string, err error){
 	envs := os.getEnvs();
-	if envs.contains("LUCYROOT") == false {
+	if envs.keyExists("LUCYROOT") == false {
 		err = new error("env variable LUCYROOT is not set");
 		return ;
 	}
-	if envs.contains("LUCYPATH") == false {
+	if envs.keyExists("LUCYPATH") == false {
 		err = new error("env variable LUCYPATH is not set");
 		return ;
 	}
+	
 	ps := { envs["LUCYROOT"] -> true };
 	lucyPath := envs["LUCYPATH"];
 	osName := System.getProperty("os.name").toLowerCase();
@@ -34,12 +35,14 @@ public fn getLucyPath()->(paths []string, err error){
         		ps[v] = true;
         }
 	}
+	
 	paths = new []string(ps.size());
 	i := 0 ;
 	for k,_ := range ps {
 		paths[i] = k;
 		i++; 
 	}
+	
 }
 
 

@@ -44,7 +44,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		currentStack = 3 // stack is ... mapref mapref kref
 		stack, es := m.build(class, code, v.Right, context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Right.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

@@ -74,10 +74,10 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*ast.Expression)
-		var es []*cg.JumpBackPatch
+		var es []*cg.Exit
 		maxstack, es = m.build(class, code, ee, context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, ee.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

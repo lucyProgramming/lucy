@@ -43,7 +43,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := m.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, call.Args[0].Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -191,7 +191,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, variableType)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

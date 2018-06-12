@@ -64,7 +64,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		stack, es := m.build(class, code, v, context, state)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // bool value

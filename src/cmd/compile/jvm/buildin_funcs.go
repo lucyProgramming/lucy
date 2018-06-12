@@ -106,7 +106,7 @@ func (m *MakeExpression) mkBuildinLen(class *cg.ClassHighLevel, code *cg.Attribu
 	if 2 > maxstack {
 		maxstack = 2
 	}
-	exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_ifnull, code)
+	exit := (&cg.Exit{}).FromCode(cg.OP_ifnull, code)
 	//binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 3)
 	if call.Args[0].Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -140,7 +140,7 @@ func (m *MakeExpression) mkBuildinLen(class *cg.ClassHighLevel, code *cg.Attribu
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength+3)
+	backfillExit([]*cg.Exit{exit}, code.CodeLength+3)
 	state.pushStack(class, call.Args[0].Value)
 	context.MakeStackMap(code, state, code.CodeLength+3)
 	state.popStack(1)

@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxstack uint16) {
-	var es []*cg.JumpBackPatch
+	var es []*cg.Exit
 	conditionState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(conditionState)
 	for _, v := range s.PreExpressions {
@@ -25,7 +25,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	}
 	maxstack, es = m.MakeExpression.build(class, code, s.Condition, context, IfState)
 	if len(es) > 0 {
-		backPatchEs(es, code.CodeLength)
+		backfillExit(es, code.CodeLength)
 		IfState.pushStack(class, s.Condition.Value)
 		context.MakeStackMap(code, IfState, code.CodeLength)
 		IfState.popStack(1) // must be bool expression
@@ -37,7 +37,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	m.buildBlock(class, code, &s.Block, context, IfState)
 	conditionState.addTop(IfState)
 	if s.Block.DeadEnding == false {
-		s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+		s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	}
 	for _, v := range s.ElseIfList {
 		context.MakeStackMap(code, conditionState, code.CodeLength) // state is not change,all block var should be access from outside
@@ -50,7 +50,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		}
 		stack, es := m.MakeExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
-			backPatchEs(es, code.CodeLength)
+			backfillExit(es, code.CodeLength)
 			elseIfState.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, elseIfState, code.CodeLength)
 			elseIfState.popStack(1)
@@ -65,7 +65,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		m.buildBlock(class, code, v.Block, context, elseIfState)
 
 		if v.Block.DeadEnding == false {
-			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+			s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}
 		// when done
 		conditionState.addTop(elseIfState)
@@ -83,7 +83,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 		m.buildBlock(class, code, s.ElseBlock, context, elseState)
 		conditionState.addTop(elseState)
 		if s.ElseBlock.DeadEnding == false {
-			s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+			s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}
 	}
 	return

@@ -34,7 +34,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.CodeLength += 8
 	forState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(forState)
-	s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+	s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
 	if 2 > maxstack {
@@ -91,7 +91,6 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
-
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV != nil && s.RangeAttr.IdentifierV.Var.BeenCaptured {
@@ -115,10 +114,8 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	}
 
-	context.MakeStackMap(code, forState, code.CodeLength)
 	s.ContinueOPOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
-
 	blockState := (&StackMapState{}).FromLast(forState)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.K > 255 {
@@ -136,7 +133,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	if 5 > maxstack {
 		maxstack = 5
 	}
-	exit := (&cg.JumpBackPatch{}).FromCode(cg.OP_if_icmpge, code)
+	exit := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	if s.RangeAttr.IdentifierV != nil || s.RangeAttr.ExpressionV != nil {
 		// load k sets
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
@@ -248,13 +245,12 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 	}
 	// build block
-
 	m.buildBlock(class, code, s.Block, context, blockState)
 	defer forState.addTop(blockState)
 	if s.Block.DeadEnding == false {
 		jumpTo(cg.OP_goto, code, s.ContinueOPOffset)
 	}
-	backPatchEs([]*cg.JumpBackPatch{exit}, code.CodeLength)
+	backfillExit([]*cg.Exit{exit}, code.CodeLength)
 
 	{
 		forState.pushStack(class,
