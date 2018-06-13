@@ -7,7 +7,7 @@ import (
 func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *VariableType {
 	index := e.Data.(*ExpressionIndex)
 	t, es := index.Expression.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 
@@ -25,7 +25,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Variable
 	if t.Type == VARIABLE_TYPE_ARRAY ||
 		t.Type == VARIABLE_TYPE_JAVA_ARRAY {
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if indexType != nil {
@@ -46,7 +46,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Variable
 	ret := t.Map.V.Clone()
 	ret.Pos = e.Pos
 	indexType, es := index.Index.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 

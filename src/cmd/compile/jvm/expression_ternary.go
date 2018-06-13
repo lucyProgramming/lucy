@@ -9,10 +9,10 @@ func (makeExpression *MakeExpression) buildTernary(class *cg.ClassHighLevel, cod
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ternary := e.Data.(*ast.ExpressionTernary)
 	var es []*cg.Exit
-	maxStack, es = makeExpression.build(class, code, ternary.Condition, context, state)
+	maxStack, es = makeExpression.build(class, code, ternary.Selection, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
-		state.pushStack(class, ternary.Condition.ExpressionValue)
+		state.pushStack(class, ternary.Selection.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}

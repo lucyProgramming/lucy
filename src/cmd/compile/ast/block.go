@@ -7,7 +7,7 @@ import (
 )
 
 type Block struct {
-	DeadEnding                 bool // will execute to last statement
+	DeadEnding                 bool
 	Defers                     []*Defer
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
@@ -215,7 +215,7 @@ func (b *Block) checkUnUsedVariable() (es []error) {
 		if v.Used ||
 			v.IsGlobal ||
 			v.IsFunctionParameter ||
-			v.IsFunctionReturnVar ||
+			v.IsFunctionReturnVariable ||
 			v.Name == THIS {
 			continue
 		}

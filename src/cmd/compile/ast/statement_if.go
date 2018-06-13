@@ -21,7 +21,7 @@ func (s *StatementIF) check(father *Block) []error {
 	for _, v := range s.PreExpressions {
 		v.IsStatementExpression = true
 		_, es := v.check(&s.ConditionBlock)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 		if v.canBeUsedAsStatement() == false {
@@ -33,7 +33,7 @@ func (s *StatementIF) check(father *Block) []error {
 	}
 	if s.Condition != nil {
 		conditionType, es := s.Condition.checkSingleValueContextExpression(&s.ConditionBlock)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 		if s.Condition.canbeUsedAsCondition() == false {
@@ -55,7 +55,7 @@ func (s *StatementIF) check(father *Block) []error {
 				errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
 		}
 		conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 		if conditionType != nil && conditionType.Type != VARIABLE_TYPE_BOOL {

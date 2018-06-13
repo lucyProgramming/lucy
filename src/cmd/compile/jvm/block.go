@@ -33,7 +33,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 			makeClass.mkFieldDefaultValue(class, code, context, state)
 		}
 		//unCondition goto
-		if makeClass.statementIsUnConditionGoto(s) {
+		if makeClass.statementIsUnConditionGoTo(s) {
 			deadEnd = true
 			continue
 		}
@@ -75,7 +75,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 	return
 }
 
-func (makeClass *MakeClass) statementIsUnConditionGoto(s *ast.Statement) bool {
+func (makeClass *MakeClass) statementIsUnConditionGoTo(s *ast.Statement) bool {
 	return s.Type == ast.STATEMENT_TYPE_RETURN ||
 		s.Type == ast.STATEMENT_TYPE_GOTO ||
 		s.Type == ast.STATEMENT_TYPE_CONTINUE ||

@@ -142,7 +142,7 @@ func (f *Function) check(b *Block) []error {
 
 func (f *Function) clone() (ret *Function, es []error) {
 	ret, es = ParseFunctionHandler(f.SourceCodes, f.Pos)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		return ret, es
 	}
 	return ret, es
@@ -210,7 +210,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			}
 			f.HaveDefaultValue = true
 			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-			if errsNotEmpty(es) {
+			if errorsNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
 			if t != nil {
@@ -235,7 +235,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 
 	//handler return
 	for _, v := range f.Type.ReturnList {
-		v.IsFunctionReturnVar = true
+		v.IsFunctionReturnVariable = true
 		if len(v.Type.haveParameterType()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
@@ -259,7 +259,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			continue
 		}
 		t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
 		}

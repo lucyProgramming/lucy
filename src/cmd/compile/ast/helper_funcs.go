@@ -8,7 +8,7 @@ func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
-func errsNotEmpty(es []error) bool {
+func errorsNotEmpty(es []error) bool {
 	return es != nil && len(es) > 0
 }
 
@@ -34,7 +34,7 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Variable
 	ret := []*VariableType{}
 	for _, v := range es {
 		ts, e := v.check(block)
-		if errsNotEmpty(e) {
+		if errorsNotEmpty(e) {
 			*errs = append(*errs, e...)
 		}
 		if ts != nil {
@@ -120,7 +120,7 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 		*errs = append(*errs, err)
 		return err
 	}
-	is, err := c.Expression.constFold()
+	is, err := c.Expression.constantFold()
 	if err != nil {
 		*errs = append(*errs, err)
 		return err

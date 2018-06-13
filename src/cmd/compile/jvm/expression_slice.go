@@ -12,9 +12,9 @@ func (makeExpression *MakeExpression) buildSlice(class *cg.ClassHighLevel, code 
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	sliceOn := e.Data.(*ast.ExpressionSlice)
-	meta := ArrayMetas[sliceOn.Array.ExpressionValue.ArrayType.Type]
-	maxStack, _ = makeExpression.build(class, code, sliceOn.Array, context, state)
-	state.pushStack(class, sliceOn.Array.ExpressionValue)
+	meta := ArrayMetas[sliceOn.SliceOn.ExpressionValue.ArrayType.Type]
+	maxStack, _ = makeExpression.build(class, code, sliceOn.SliceOn, context, state)
+	state.pushStack(class, sliceOn.SliceOn.ExpressionValue)
 	// build start
 	stack, _ := makeExpression.build(class, code, sliceOn.Start, context, state)
 	if t := 1 + stack; t > maxStack {

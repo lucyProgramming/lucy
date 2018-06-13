@@ -30,7 +30,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	for _, v := range m.KeyValuePairs {
 		// map k
 		kType, es := v.Left.checkSingleValueContextExpression(block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if kType != nil {
@@ -55,7 +55,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 		}
 		// map v
 		vType, es := v.Right.checkSingleValueContextExpression(block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if vType == nil {

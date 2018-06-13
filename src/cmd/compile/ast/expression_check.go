@@ -8,7 +8,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 	if e == nil {
 		return nil, []error{}
 	}
-	_, err := e.constFold()
+	_, err := e.constantFold()
 	if err != nil {
 		return nil, []error{err}
 	}
@@ -230,7 +230,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			e.ExpressionValue = tt
 		}
 	case EXPRESSION_TYPE_CHECK_CAST:
-		tt := e.checkTypeConvertionExpression(block, &errs)
+		tt := e.checkTypeConversionExpression(block, &errs)
 		if tt != nil {
 			Types = []*VariableType{tt}
 			e.ExpressionValue = tt
@@ -310,7 +310,7 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
-		return f.Type.retTypes(e.Pos)
+		return f.Type.returnTypes(e.Pos)
 	}
 	return nil //
 }

@@ -32,7 +32,7 @@ func (ep *ExpressionParser) parseTernaryExpression() (*ast.Expression, error) {
 		return left, nil
 	}
 	ternary := &ast.ExpressionTernary{}
-	ternary.Condition = left
+	ternary.Selection = left
 	ternary.True = True
 	ternary.False = False
 	newe.Data = ternary

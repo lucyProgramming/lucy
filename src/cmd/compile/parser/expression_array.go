@@ -13,7 +13,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 	ep.parser.Next() // skip [
 	var err error
 	if ep.parser.token.Type != lex.TOKEN_RB {
-		arr := &ast.ExpressionArrayLiteral{}
+		arr := &ast.ExpressionArray{}
 		arr.Expressions, err = ep.parseExpressions()
 		if ep.parser.token.Type != lex.TOKEN_RB {
 			err = fmt.Errorf("%s '[' and ']' not match", ep.parser.errorMsgPrefix())
@@ -55,7 +55,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 		return ret, nil
 	}
 
-	arr := &ast.ExpressionArrayLiteral{}
+	arr := &ast.ExpressionArray{}
 	if t != nil {
 		arr.Type = &ast.VariableType{}
 		arr.Type.Type = ast.VARIABLE_TYPE_ARRAY
@@ -86,7 +86,7 @@ func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 				return es, err
 			}
 			arre := &ast.Expression{Type: ast.EXPRESSION_TYPE_ARRAY}
-			data := ast.ExpressionArrayLiteral{}
+			data := ast.ExpressionArray{}
 			data.Expressions = ees
 			arre.Data = data
 			es = append(es, arre)

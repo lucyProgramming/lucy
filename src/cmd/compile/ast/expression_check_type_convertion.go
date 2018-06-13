@@ -4,10 +4,10 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *VariableType {
 	conversion := e.Data.(*ExpressionTypeConversion)
 	t, es := conversion.Expression.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {

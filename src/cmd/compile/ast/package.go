@@ -9,7 +9,6 @@ import (
 )
 
 type Package struct {
-	TriggerPackageInitMethodName string
 	Name                         string
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
@@ -18,6 +17,7 @@ type Package struct {
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
+	TriggerPackageInitMethodName string
 }
 
 func (p *Package) loadBuildInPackage() error {
@@ -92,7 +92,7 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase1(&p.Block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)
 		}
 		if p.shouldStop(nil) {
@@ -107,7 +107,7 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase2(&p.Block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)
 		}
 		if p.shouldStop(nil) {

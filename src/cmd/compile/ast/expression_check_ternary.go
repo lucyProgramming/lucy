@@ -6,25 +6,25 @@ import (
 
 func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *VariableType {
 	ternary := e.Data.(*ExpressionTernary)
-	condition, es := ternary.Condition.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	condition, es := ternary.Selection.checkSingleValueContextExpression(block)
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if condition != nil {
 		if condition.Type != VARIABLE_TYPE_BOOL {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(e.Pos)))
 		}
-		if ternary.Condition.canbeUsedAsCondition() == false {
+		if ternary.Selection.canbeUsedAsCondition() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as condition",
 				errMsgPrefix(e.Pos), e.OpName()))
 		}
 	}
 	True, es := ternary.True.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	False, es := ternary.False.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if True != nil && False != nil && True.Equal(errs, False) == false {

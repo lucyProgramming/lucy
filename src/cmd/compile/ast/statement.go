@@ -197,7 +197,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 				errs = append(errs, err)
 			}
 			es := f.check(b)
-			if errsNotEmpty(es) {
+			if errorsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
 			f.IsClosureFunction = f.Closure.NotEmpty(f)
@@ -216,7 +216,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		errs = append(errs, err)
 	}
 	_, es := s.Expression.check(b)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	return errs

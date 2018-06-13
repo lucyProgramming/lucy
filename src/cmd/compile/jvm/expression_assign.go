@@ -67,7 +67,7 @@ func (makeExpression *MakeExpression) buildAssign(class *cg.ClassHighLevel, code
 	return
 }
 
-func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string,
+func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, className string,
 	stackTopType *ast.VariableType) (increment uint16) {
 	if op[0] == cg.OP_istore ||
 		op[0] == cg.OP_lstore ||
@@ -145,7 +145,7 @@ func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeC
 		}
 		return
 	}
-	if classname == java_hashmap_class { // it is a flag indicate  map destination
+	if className == java_hashmap_class { // it is a flag indicate  map destination
 		if jvmSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2

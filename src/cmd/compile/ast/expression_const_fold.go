@@ -6,8 +6,8 @@ import (
 
 func (e *Expression) getBinaryExpressionConstValue(f binaryConstFolder) (is bool, err error) {
 	bin := e.Data.(*ExpressionBinary)
-	is1, err1 := bin.Left.constFold()
-	is2, err2 := bin.Right.constFold()
+	is1, err1 := bin.Left.constantFold()
+	is2, err2 := bin.Right.constantFold()
 	if err1 != nil { //something is wrong
 		err = err1
 		return
@@ -26,7 +26,7 @@ func (e *Expression) getBinaryExpressionConstValue(f binaryConstFolder) (is bool
 
 type binaryConstFolder func(bin *ExpressionBinary) (is bool, err error)
 
-func (e *Expression) wrongOpErr(typ1, typ2 string) error {
+func (e *Expression) mkWrongOpErr(typ1, typ2 string) error {
 	return fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
 		errMsgPrefix(e.Pos),
 		e.OpName(),
@@ -34,14 +34,14 @@ func (e *Expression) wrongOpErr(typ1, typ2 string) error {
 		typ2)
 }
 
-func (e *Expression) constFold() (is bool, err error) {
+func (e *Expression) constantFold() (is bool, err error) {
 	if e.IsLiteral() {
 		return true, nil
 	}
 	// ~
 	if e.Type == EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*Expression)
-		is, err = ee.constFold()
+		is, err = ee.constantFold()
 		if err != nil || is == false {
 			return
 		}
@@ -65,7 +65,7 @@ func (e *Expression) constFold() (is bool, err error) {
 	// !
 	if e.Type == EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*Expression)
-		is, err = ee.constFold()
+		is, err = ee.constantFold()
 		if err != nil || is == false {
 			return
 		}
@@ -80,7 +80,7 @@ func (e *Expression) constFold() (is bool, err error) {
 	}
 	if e.Type == EXPRESSION_TYPE_NEGATIVE {
 		ee := e.Data.(*Expression)
-		is, err = ee.constFold()
+		is, err = ee.constantFold()
 		if err != nil || is == false {
 			return
 		}
@@ -112,7 +112,7 @@ func (e *Expression) constFold() (is bool, err error) {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.Type != EXPRESSION_TYPE_BOOL ||
 				bin.Right.Type != EXPRESSION_TYPE_BOOL {
-				err = e.wrongOpErr(bin.Left.OpName(), bin.Right.OpName())
+				err = e.mkWrongOpErr(bin.Left.OpName(), bin.Right.OpName())
 				return
 			}
 			is = true
@@ -225,7 +225,7 @@ func (e *Expression) constFold() (is bool, err error) {
 	}
 	if e.Type == EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*Expression)
-		is, err = ee.constFold()
+		is, err = ee.constantFold()
 		if err != nil {
 			return
 		}

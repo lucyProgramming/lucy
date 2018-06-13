@@ -5,18 +5,18 @@ import (
 )
 
 func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, err error) {
-	identifer := e.Data.(*ExpressionIdentifier)
-	if identifer.Name == NO_NAME_IDENTIFIER {
+	identifier := e.Data.(*ExpressionIdentifier)
+	if identifier.Name == NO_NAME_IDENTIFIER {
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
 			errMsgPrefix(e.Pos), NO_NAME_IDENTIFIER)
 	}
 	fromImport := false
-	d, err := block.searchByName(identifer.Name)
+	d, err := block.searchByName(identifier.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 	}
 	if d == nil {
-		i := PackageBeenCompile.getImport(e.Pos.Filename, identifer.Name)
+		i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
 		if i != nil {
 			fromImport = true
 			d, err = PackageBeenCompile.load(i.ImportName)
@@ -26,13 +26,13 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		}
 	}
 	if d == nil {
-		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifer.Name)
+		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifier.Name)
 	}
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
 		if fromImport == false && f.IsGlobal && f.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifer.Name, e.Pos, f.Pos)
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
@@ -60,7 +60,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
 		if fromImport == false && t.IsGlobal { // try from import
-			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
@@ -82,12 +82,12 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		t.Used = true
 		tt := t.Type.Clone()
 		tt.Pos = e.Pos
-		identifer.Variable = t
+		identifier.Variable = t
 		return tt, nil
 	case *Constant:
 		t := d.(*Constant)
 		if fromImport == false && t.IsGlobal { // try from import
-			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
@@ -113,7 +113,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 	case *Class:
 		c := d.(*Class)
 		if fromImport == false && c.IsGlobal { // try from import
-			i, should := shouldAccessFromImports(identifer.Name, e.Pos, c.Pos)
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
@@ -139,7 +139,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 	case *EnumName:
 		e := d.(*EnumName)
 		if fromImport == false { // try from import
-			i, should := shouldAccessFromImports(identifer.Name, e.Pos, e.Pos)
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, e.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
@@ -163,7 +163,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 			t.Type = VARIABLE_TYPE_ENUM
 			t.EnumName = e
 			t.Enum = e.Enum
-			identifer.EnumName = e
+			identifier.EnumName = e
 			return t, nil
 		}
 	case *Package:
@@ -174,5 +174,5 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		return t, nil
 	}
 	return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
-		errMsgPrefix(e.Pos), identifer.Name)
+		errMsgPrefix(e.Pos), identifier.Name)
 }

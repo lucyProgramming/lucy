@@ -9,7 +9,7 @@ import (
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*VariableType {
 	call := e.Data.(*ExpressionMethodCall)
 	object, es := call.Expression.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if object == nil {
@@ -52,7 +52,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
 				return []*VariableType{typeConversion.Type.Clone()}
 			}
-			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
+			return []*VariableType{e.checkTypeConversionExpression(block, errs)}
 		case *VariableType:
 			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Type = object.Package.Block.TypeAlias[call.Name]
@@ -66,7 +66,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos)))
 				return []*VariableType{typeConversion.Type}
 			}
-			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
+			return []*VariableType{e.checkTypeConversionExpression(block, errs)}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
 				errMsgPrefix(e.Pos), call.Name))
@@ -86,7 +86,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			}
 			matchKey := call.Name == common.MAP_METHOD_KEY_EXISTS
 			t, es := call.Args[0].checkSingleValueContextExpression(block)
-			if errsNotEmpty(es) {
+			if errorsNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
 			if t == nil {
@@ -114,7 +114,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			}
 			for _, v := range call.Args {
 				ts, es := v.check(block)
-				if errsNotEmpty(es) {
+				if errorsNotEmpty(es) {
 					*errs = append(*errs, es...)
 				}
 				for _, t := range ts {
@@ -191,7 +191,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			}
 			for _, e := range call.Args {
 				ts, es := e.check(block)
-				if errsNotEmpty(es) {
+				if errorsNotEmpty(es) {
 					*errs = append(*errs, es...)
 				}
 				for _, t := range ts {
@@ -235,7 +235,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Func.Type.retTypes(e.Pos)
+			return ms[0].Func.Type.returnTypes(e.Pos)
 		}
 		if len(ms) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
@@ -327,7 +327,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			}
 		}
 		call.Method = ms[0]
-		return ms[0].Func.Type.retTypes(e.Pos)
+		return ms[0].Func.Type.returnTypes(e.Pos)
 	}
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))

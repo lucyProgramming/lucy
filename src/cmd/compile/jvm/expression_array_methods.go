@@ -23,13 +23,13 @@ func (makeExpression *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHi
 }
 
 func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length) // ref type
 	}()
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.ExpressionValue)
 	switch call.Name {
 	case common.ARRAY_METHOD_CAP,
@@ -56,17 +56,17 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			currentStack := uint16(1)
 			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 0 {
 				stack, _ := makeExpression.build(class, code, v, context, nil)
-				if t := currentStack + stack; t > maxstack {
-					maxstack = t
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
 				}
 				multiValuePacker.storeArrayListAutoVar(code, context)
 				for kk, t := range v.ExpressionMultiValues {
 					currentStack = 1
-					if t := multiValuePacker.unPack(class, code, kk, t, context) + currentStack; t > maxstack {
-						maxstack = t
+					if t := multiValuePacker.unPack(class, code, kk, t, context) + currentStack; t > maxStack {
+						maxStack = t
 					}
-					if t := currentStack + jvmSize(t); t > maxstack {
-						maxstack = t
+					if t := currentStack + jvmSize(t); t > maxStack {
+						maxStack = t
 					}
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -85,8 +85,8 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1) // must be a logical expression
 			}
-			if t := stack + currentStack; t > maxstack {
-				maxstack = t
+			if t := stack + currentStack; t > maxStack {
+				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -108,15 +108,15 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			appendDescriptor := meta.appendAllDescriptor
 			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 				stack, _ := makeExpression.build(class, code, v, context, state)
-				if t := currentStack + stack; t > maxstack {
-					maxstack = t
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
 				}
 				multiValuePacker.storeArrayListAutoVar(code, context)
 				for kk, tt := range v.ExpressionMultiValues {
 					currentStack := uint16(1)
 					stack = multiValuePacker.unPack(class, code, kk, tt, context)
-					if t := currentStack + 2; t > maxstack {
-						maxstack = t
+					if t := currentStack + 2; t > maxStack {
+						maxStack = t
 					}
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -129,8 +129,8 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 				continue
 			}
 			stack, _ := makeExpression.build(class, code, v, context, state)
-			if t := stack + currentStack; t > maxstack {
-				maxstack = t
+			if t := stack + currentStack; t > maxStack {
+				maxStack = t
 			}
 			//get elements field
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual

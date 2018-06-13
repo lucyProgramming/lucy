@@ -43,7 +43,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd := &VariableDefinition{}
 			vd.Name = identifier.Name
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, false)
+			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, false)
 			continue
 		}
 		var variableType *VariableType
@@ -62,7 +62,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 			identifier.Variable = variable
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, variable)
-			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, true)
+			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, true)
 		} else { // should be no error
 			noNewVariable = false
 			vd := &VariableDefinition{}
@@ -85,7 +85,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 				continue
 			}
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, false)
+			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, false)
 			if e.IsPublic { // only use when is is global
 				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}
@@ -107,7 +107,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	t1 := bin.Left.getLeftValue(block, errs)
 	bin.Left.ExpressionValue = t1
 	t2, es := bin.Right.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t1 == nil || t2 == nil {

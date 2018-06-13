@@ -327,7 +327,7 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 				newe.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
-				slice.Array = left
+				slice.SliceOn = left
 				slice.End = end
 				left = newe
 				continue
@@ -358,7 +358,7 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
 				slice.Start = e
-				slice.Array = left
+				slice.SliceOn = left
 				slice.End = end
 				left = newe
 				continue

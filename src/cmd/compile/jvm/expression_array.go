@@ -11,7 +11,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
-	arr := e.Data.(*ast.ExpressionArrayLiteral)
+	arr := e.Data.(*ast.ExpressionArray)
 	//	new array ,
 	meta := ArrayMetas[e.ExpressionValue.ArrayType.Type]
 	code.Codes[code.CodeLength] = cg.OP_new

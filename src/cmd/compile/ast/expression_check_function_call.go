@@ -5,7 +5,7 @@ import "fmt"
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
 	call := e.Data.(*ExpressionFunctionCall)
 	t, es := call.Expression.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {
@@ -26,7 +26,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		e.Type = EXPRESSION_TYPE_CHECK_CAST
 		typeConversion.Expression = call.Args[0]
 		e.Data = typeConversion
-		e.checkTypeConvertionExpression(block, errs)
+		e.checkTypeConversionExpression(block, errs)
 		return ret
 	}
 	if t.Type != VARIABLE_TYPE_FUNCTION {
@@ -72,9 +72,9 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	var ret []*VariableType
 	convertLiteralExpressionsToNeeds(*args, f.Type.getParameterTypes(), callArgsTypes)
 	if f.TemplateFunction == nil {
-		ret = f.Type.retTypes(e.Pos)
+		ret = f.Type.returnTypes(e.Pos)
 	} else {
-		ret = tf.Type.retTypes(e.Pos)
+		ret = tf.Type.returnTypes(e.Pos)
 	}
 	{
 		f := f // override f
@@ -151,7 +151,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypes, ret, errs)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		cloneFunction, es := f.clone()
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 			return nil
 		}

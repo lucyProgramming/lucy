@@ -7,7 +7,7 @@ import (
 func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *VariableType {
 	ee := e.Data.(*Expression)
 	t, es := ee.checkSingleValueContextExpression(block)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 

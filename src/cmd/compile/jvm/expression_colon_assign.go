@@ -17,7 +17,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		currentStack := uint16(0)
 		if v.Name != ast.NO_NAME_IDENTIFIER && v.BeenCaptured {
 			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
-			if vs.IfDeclareBefore[0] {
+			if vs.IfDeclaredBefore[0] {
 				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				currentStack = 1
 				state.pushStack(class, obj)
@@ -53,7 +53,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		if v.IsGlobal {
 			storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, vs.Variables[0])
 		} else {
-			if vs.IfDeclareBefore[0] {
+			if vs.IfDeclaredBefore[0] {
 				makeExpression.MakeClass.storeLocalVar(class, code, vs.Variables[0])
 			} else {
 				v.LocalValOffset = code.MaxLocals
@@ -93,7 +93,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 			continue
 		}
 		//this variable not been captured,also not declared here
-		if vs.IfDeclareBefore[k] {
+		if vs.IfDeclaredBefore[k] {
 			if v.BeenCaptured {
 				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				stack := multiValuePacker.unPack(class, code, k, v.Type, context)

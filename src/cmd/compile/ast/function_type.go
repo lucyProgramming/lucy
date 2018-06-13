@@ -8,7 +8,7 @@ type FunctionType struct {
 type ParameterList []*VariableDefinition
 type ReturnList []*VariableDefinition
 
-func (ft FunctionType) retTypes(pos *Pos) []*VariableType {
+func (ft FunctionType) returnTypes(pos *Pos) []*VariableType {
 	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
 		t := &VariableType{}
 		t.Type = VARIABLE_TYPE_VOID // means no return;

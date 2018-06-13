@@ -8,7 +8,7 @@ import (
 	in array type must eqaul
 */
 func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
-	arr := e.Data.(*ExpressionArrayLiteral)
+	arr := e.Data.(*ExpressionArray)
 	if arr.Type == nil && len(arr.Expressions) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression, cannot inference it`s type ",
 			errMsgPrefix(e.Pos)))
@@ -25,7 +25,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	}
 	for _, v := range arr.Expressions {
 		ts, es := v.check(block)
-		if errsNotEmpty(es) {
+		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if ts != nil {

@@ -306,13 +306,13 @@ type ExpressionTypeAlias struct {
 }
 
 type ExpressionTernary struct {
-	Condition *Expression
+	Selection *Expression
 	True      *Expression
 	False     *Expression
 }
 
 type ExpressionSlice struct {
-	Array      *Expression
+	SliceOn    *Expression
 	Start, End *Expression
 }
 
@@ -493,9 +493,9 @@ type ExpressionMethodCall struct {
 }
 
 type ExpressionDeclareVariable struct {
-	Variables       []*VariableDefinition
-	Values          []*Expression
-	IfDeclareBefore []bool // used for colon assign
+	Variables        []*VariableDefinition
+	Values           []*Expression
+	IfDeclaredBefore []bool // used for colon assign
 }
 
 type ExpressionTypeConversion struct {
@@ -543,7 +543,7 @@ type ExpressionBinary struct {
 	Right *Expression
 }
 
-type ExpressionArrayLiteral struct {
+type ExpressionArray struct {
 	Type        *VariableType
 	Expressions []*Expression
 	Length      int

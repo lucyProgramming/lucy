@@ -44,7 +44,7 @@ func (c *Class) loadSelf() error {
 func (c *Class) check(father *Block) []error {
 	errs := c.checkPhase1(father)
 	es := c.checkPhase2(father)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	return errs
@@ -110,7 +110,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 	errs := c.Block.checkConst()
 	c.Block.InheritedAttribute.Class = c
 	es := c.resolveAllNames(father)
-	if errsNotEmpty(es) {
+	if errorsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	err := c.resolveFather(father)
