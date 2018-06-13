@@ -17,10 +17,10 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		}
 		maxStack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
 	case ast.STATEMENT_TYPE_IF:
-		s.StatementIf.BackPatchs = []*cg.Exit{} //could compile multi times
+		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = m.buildIfStatement(class, code, s.StatementIf, context, state)
-		if len(s.StatementIf.BackPatchs) > 0 {
-			backfillExit(s.StatementIf.BackPatchs, code.CodeLength)
+		if len(s.StatementIf.Exits) > 0 {
+			backfillExit(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_BLOCK: //new
@@ -64,11 +64,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_GOTO:
-		if s.StatementGoto.StatementLable.CodeOffsetGenerated {
-			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLable.CodeOffset)
+		if s.StatementGoto.StatementLabel.CodeOffsetGenerated {
+			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLabel.CodeOffset)
 		} else {
 			b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
-			s.StatementGoto.StatementLable.Exits = append(s.StatementGoto.StatementLable.Exits, b)
+			s.StatementGoto.StatementLabel.Exits = append(s.StatementGoto.StatementLabel.Exits, b)
 		}
 	case ast.STATEMENT_TYPE_LABLE:
 		s.StatementLabel.CodeOffsetGenerated = true

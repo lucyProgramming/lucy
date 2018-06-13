@@ -7,7 +7,7 @@ import (
 )
 
 type StatementFor struct {
-	RangeAttr        *StatementForRangeAttr
+	RangeAttr        *ForRangeAttr
 	Exits            []*cg.Exit
 	ContinueOPOffset int
 	Pos              *Pos
@@ -17,12 +17,12 @@ type StatementFor struct {
 	Block            *Block
 }
 
-type StatementForRangeAttr struct {
-	IdentifierK *ExpressionIdentifier
-	IdentifierV *ExpressionIdentifier
-	ExpressionK *Expression
-	ExpressionV *Expression
-	RangeOn     *Expression
+type ForRangeAttr struct {
+	IdentifierKey   *ExpressionIdentifier
+	IdentifierValue *ExpressionIdentifier
+	ExpressionKey   *Expression
+	ExpressionValue *Expression
+	RangeOn         *Expression
 }
 
 func (s *StatementFor) checkRange() []error {
@@ -70,18 +70,18 @@ func (s *StatementFor) checkRange() []error {
 	if len(lefts) == 2 {
 		modelKv = true
 	}
-	s.RangeAttr = &StatementForRangeAttr{}
+	s.RangeAttr = &ForRangeAttr{}
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
 		if modelKv {
 			if false == lefts[0].IsNoNameIdentifier() {
-				s.RangeAttr.ExpressionK = lefts[0]
+				s.RangeAttr.ExpressionKey = lefts[0]
 			}
 			if false == lefts[1].IsNoNameIdentifier() {
-				s.RangeAttr.ExpressionV = lefts[1]
+				s.RangeAttr.ExpressionValue = lefts[1]
 			}
 		} else {
 			if false == lefts[0].IsNoNameIdentifier() {
-				s.RangeAttr.ExpressionV = lefts[0]
+				s.RangeAttr.ExpressionValue = lefts[0]
 			}
 		}
 	}
@@ -133,7 +133,7 @@ func (s *StatementFor) checkRange() []error {
 				errs = append(errs, err)
 			}
 			identifierV.Var = vd
-			s.RangeAttr.IdentifierV = identifierV
+			s.RangeAttr.IdentifierValue = identifierV
 		}
 		if modelKv && identifierK.Name != NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
@@ -154,21 +154,21 @@ func (s *StatementFor) checkRange() []error {
 				errs = append(errs, err)
 			}
 			identifierK.Var = vd
-			s.RangeAttr.IdentifierK = identifierK
+			s.RangeAttr.IdentifierKey = identifierK
 		}
 	}
 
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
 		var tk *VariableType
-		if s.RangeAttr.ExpressionK != nil {
-			tk = s.RangeAttr.ExpressionK.getLeftValue(s.Block, &errs)
+		if s.RangeAttr.ExpressionKey != nil {
+			tk = s.RangeAttr.ExpressionKey.getLeftValue(s.Block, &errs)
 			if tk == nil {
 				return errs
 			}
 		}
 		var tv *VariableType
-		if s.RangeAttr.ExpressionV != nil {
-			tv = s.RangeAttr.ExpressionV.getLeftValue(s.Block, &errs)
+		if s.RangeAttr.ExpressionValue != nil {
+			tv = s.RangeAttr.ExpressionValue.getLeftValue(s.Block, &errs)
 			if tv == nil {
 				return errs
 			}
@@ -188,7 +188,7 @@ func (s *StatementFor) checkRange() []error {
 		if tk != nil {
 			if tk.Equal(&errs, tkk) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
-					errMsgPrefix(s.RangeAttr.ExpressionK.Pos), tk.TypeString(), tkk.TypeString())
+					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), tk.TypeString(), tkk.TypeString())
 				errs = append(errs, err)
 				return errs
 			}
@@ -196,7 +196,7 @@ func (s *StatementFor) checkRange() []error {
 		if tv != nil {
 			if tv.Equal(&errs, tvv) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
-					errMsgPrefix(s.RangeAttr.ExpressionK.Pos), tk.TypeString(), tkk.TypeString())
+					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), tk.TypeString(), tkk.TypeString())
 				errs = append(errs, err)
 				return errs
 			}

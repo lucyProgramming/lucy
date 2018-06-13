@@ -333,7 +333,7 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	identifier := string(bs)
-	if t, ok := keywordMap[identifier]; ok {
+	if t, ok := keywordsMap[identifier]; ok {
 		token.Type = t
 		token.Description = identifier
 		if token.Type == TOKEN_ELSE {

@@ -38,7 +38,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	m.buildBlock(class, code, &s.Block, context, IfState)
 	conditionState.addTop(IfState)
 	if s.Block.DeadEnding == false {
-		s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	}
 	for _, v := range s.ElseIfList {
 		context.MakeStackMap(code, conditionState, code.CodeLength) // state is not change,all block var should be access from outside
@@ -66,7 +66,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		m.buildBlock(class, code, v.Block, context, elseIfState)
 
 		if v.Block.DeadEnding == false {
-			s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}
 		// when done
 		conditionState.addTop(elseIfState)
@@ -84,7 +84,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		m.buildBlock(class, code, s.ElseBlock, context, elseState)
 		conditionState.addTop(elseState)
 		if s.ElseBlock.DeadEnding == false {
-			s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}
 	}
 	return

@@ -12,7 +12,7 @@ type StatementIF struct {
 	Block          Block
 	ElseIfList     []*StatementElseIf
 	ElseBlock      *Block
-	BackPatchs     []*cg.Exit
+	Exits          []*cg.Exit
 }
 
 func (s *StatementIF) check(father *Block) []error {

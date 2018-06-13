@@ -129,21 +129,21 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV != nil && s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createClosureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
-			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
+		if s.RangeAttr.IdentifierValue != nil && s.RangeAttr.IdentifierValue.Var.BeenCaptured {
+			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Var.Typ)
+			s.RangeAttr.IdentifierValue.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
-				storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+				storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierValue.Var.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
 		}
-		if s.RangeAttr.IdentifierK != nil && s.RangeAttr.IdentifierK.Var.BeenCaptured {
-			closure.createClosureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
-			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
+		if s.RangeAttr.IdentifierKey != nil && s.RangeAttr.IdentifierKey.Var.BeenCaptured {
+			closure.createClosureVar(class, code, s.RangeAttr.IdentifierKey.Var.Typ)
+			s.RangeAttr.IdentifierKey.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
-				storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+				storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierKey.Var.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
 		}
@@ -178,7 +178,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 	*/
 	rangeend := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	//load elements
-	if s.RangeAttr.IdentifierV != nil || s.RangeAttr.ExpressionV != nil {
+	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, autoVar.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
@@ -227,26 +227,26 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 	}
 	//current stack is 0
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
-		if s.RangeAttr.IdentifierV != nil {
-			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+		if s.RangeAttr.IdentifierValue != nil {
+			if s.RangeAttr.IdentifierValue.Var.BeenCaptured {
+				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierValue.Var.LocalValOffset)...)
 				copyOP(code,
 					loadSimpleVarOps(s.RangeAttr.RangeOn.Value.ArrayType.Typ,
 						autoVar.V)...)
-				m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
+				m.storeLocalVar(class, code, s.RangeAttr.IdentifierValue.Var)
 			} else {
-				s.RangeAttr.IdentifierV.Var.LocalValOffset = autoVar.V
+				s.RangeAttr.IdentifierValue.Var.LocalValOffset = autoVar.V
 			}
 		}
 
-		if s.RangeAttr.IdentifierK != nil {
-			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+		if s.RangeAttr.IdentifierKey != nil {
+			if s.RangeAttr.IdentifierKey.Var.BeenCaptured {
+				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierKey.Var.LocalValOffset)...)
 				copyOP(code,
 					loadSimpleVarOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
+				m.storeLocalVar(class, code, s.RangeAttr.IdentifierKey.Var)
 			} else {
-				s.RangeAttr.IdentifierK.Var.LocalValOffset = autoVar.K
+				s.RangeAttr.IdentifierKey.Var.LocalValOffset = autoVar.K
 			}
 		}
 	} else { // for k,v = range arr
@@ -254,7 +254,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 		//get ops,make ops ready
 		stackLength := len(blockState.Stacks)
 		stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
-			code, s.RangeAttr.ExpressionV, context, blockState)
+			code, s.RangeAttr.ExpressionValue, context, blockState)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -269,10 +269,10 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 		}
 		copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		blockState.popStack(len(blockState.Stacks) - stackLength)
-		if s.RangeAttr.ExpressionK != nil { // set to k
+		if s.RangeAttr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
-				code, s.RangeAttr.ExpressionK, context, blockState)
+				code, s.RangeAttr.ExpressionKey, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
 			}

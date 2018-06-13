@@ -4,7 +4,7 @@ import "fmt"
 
 type StatementGoto struct {
 	Name           string
-	StatementLable *StatementLabel
+	StatementLabel *StatementLabel
 }
 
 func (s *Statement) checkStatementGoto(b *Block) error {
@@ -13,6 +13,6 @@ func (s *Statement) checkStatementGoto(b *Block) error {
 		return fmt.Errorf("%s label named '%s' not found",
 			errMsgPrefix(s.Pos), s.StatementGoto.Name)
 	}
-	s.StatementGoto.StatementLable = label
-	return s.StatementGoto.StatementLable.Ready(s.Pos)
+	s.StatementGoto.StatementLabel = label
+	return s.StatementGoto.StatementLabel.Ready(s.Pos)
 }

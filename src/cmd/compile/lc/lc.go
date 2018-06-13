@@ -66,8 +66,8 @@ func (lc *LucyCompile) exit() {
 	}
 	lc.Errs = es
 	// sort errors
-	es = SortErrs(lc.Errs)
-	sort.Sort(SortErrs(es))
+	es = SortErrors(lc.Errs)
+	sort.Sort(SortErrors(es))
 	for _, v := range es {
 		fmt.Fprintln(os.Stderr, v)
 	}

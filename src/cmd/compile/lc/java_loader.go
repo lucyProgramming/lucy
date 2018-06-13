@@ -11,7 +11,7 @@ import (
 /*
 	lucy and java have no difference
 */
-func (loader *RealNameLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
+func (loader *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
 	astClass.InterfaceNames = make([]*ast.NameWithPos, len(c.Interfaces))
 	for k, v := range c.Interfaces {
 		astClass.InterfaceNames[k] = &ast.NameWithPos{
@@ -28,7 +28,7 @@ func (loader *RealNameLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) e
 	return nil
 }
 
-func (loader *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
+func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
 	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
 		//TODO:: support signature???

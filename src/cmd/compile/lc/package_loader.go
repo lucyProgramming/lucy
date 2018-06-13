@@ -11,7 +11,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type RealNameLoader struct {
+/*
+	load from file implementation
+*/
+type FileLoader struct {
 	caches map[string]interface{}
 }
 
@@ -29,7 +32,7 @@ type Resource struct {
 	name     string
 }
 
-func (loader *RealNameLoader) LoadName(resourceName string) (interface{}, error) {
+func (loader *FileLoader) LoadName(resourceName string) (interface{}, error) {
 	if loader.caches != nil && loader.caches[resourceName] != nil {
 		return loader.caches[resourceName], nil
 	}
@@ -135,7 +138,7 @@ func (loader *RealNameLoader) LoadName(resourceName string) (interface{}, error)
 	}
 
 }
-func (loader *RealNameLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
+func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	fis, err := ioutil.ReadDir(r.realPath)
 	if err != nil {
 		return nil, err
@@ -206,7 +209,7 @@ func (loader *RealNameLoader) loadLucyPackage(r *Resource) (*ast.Package, error)
 	return p, nil
 }
 
-func (loader *RealNameLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
+func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	fis, err := ioutil.ReadDir(r.realPath)
 	if err != nil {
 		return nil, err
@@ -231,7 +234,7 @@ func (loader *RealNameLoader) loadJavaPackage(r *Resource) (*ast.Package, error)
 	return ret, nil
 }
 
-func (loader *RealNameLoader) loadClass(r *Resource) (interface{}, error) {
+func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 	bs, err := ioutil.ReadFile(r.realPath)
 	if err != nil {
 		return nil, err

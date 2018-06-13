@@ -104,7 +104,7 @@ const (
 )
 
 var (
-	keywordMap = map[string]int{
+	keywordsMap = map[string]int{
 		"fn":         TOKEN_FUNCTION,
 		"enum":       TOKEN_ENUM,
 		"const":      TOKEN_CONST,

@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-type LoadResource interface {
+type LoadImport interface {
 	LoadName(resourceName string) (interface{}, error)
 }
 
@@ -24,7 +24,7 @@ const (
 
 var (
 	packageAliasReg      *regexp.Regexp
-	ResourceLoader       LoadResource
+	ImportsLoader        LoadImport
 	PackageBeenCompile   Package
 	buildInFunctionsMap  = make(map[string]*Function)
 	lucyBuildInPackage   *Package
@@ -44,7 +44,7 @@ func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {
 		return nil
 	}
-	c, err := ResourceLoader.LoadName(JAVA_STRING_CLASS)
+	c, err := ImportsLoader.LoadName(JAVA_STRING_CLASS)
 	if err != nil {
 		return err
 	}

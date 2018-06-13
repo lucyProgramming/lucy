@@ -145,7 +145,7 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if t, ok := p.LoadedPackages[resource]; ok {
 		return t, nil
 	}
-	t, err := ResourceLoader.LoadName(resource)
+	t, err := ImportsLoader.LoadName(resource)
 	if pp, ok := t.(*Package); ok && pp != nil {
 		PackageBeenCompile.LoadedPackages[resource] = pp
 		p.mkClassCache(pp)
@@ -165,7 +165,7 @@ func (p *Package) loadClass(className string) (*Class, error) {
 	if c, ok := p.loadedClasses[className]; ok && c != nil {
 		return c, nil
 	}
-	c, err := ResourceLoader.LoadName(className)
+	c, err := ImportsLoader.LoadName(className)
 	if err != nil {
 		return nil, err
 	}

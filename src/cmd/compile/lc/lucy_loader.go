@@ -9,7 +9,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
+func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_COMPILTER_AUTO); t != nil && len(t) > 0 {
 		return nil, nil
 	}
@@ -93,7 +93,7 @@ func (loader *RealNameLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	return astClass, nil
 }
 
-func (loader *RealNameLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
+func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	e := &ast.Enum{}
 	{
 		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
@@ -112,7 +112,7 @@ func (loader *RealNameLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	return e, nil
 }
 
-func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
+func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
