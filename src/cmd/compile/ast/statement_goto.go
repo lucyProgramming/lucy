@@ -4,7 +4,7 @@ import "fmt"
 
 type StatementGoto struct {
 	Name           string
-	StatementLable *StatementLable
+	StatementLable *StatementLabel
 }
 
 func (s *Statement) checkStatementGoto(b *Block) error {

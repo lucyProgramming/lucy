@@ -31,7 +31,7 @@ func (e *Expression) checkIdentiferExpression(block *Block) (t *VariableType, er
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
-		if fromImport == false && f.IsGlobal && f.IsBuildin == false { // try from import
+		if fromImport == false && f.IsGlobal && f.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, f.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Resource)

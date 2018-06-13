@@ -64,7 +64,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 	size := jvmSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
-	for _, c := range s.StatmentSwitchCases {
+	for _, c := range s.StatementSwitchCases {
 		if exit != nil {
 			backfillExit([]*cg.Exit{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -139,7 +139,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			state.addTop(ss)
 		}
 		if c.Block == nil || c.Block.DeadEnding == false {
-			s.BackPatchs = append(s.BackPatchs,
+			s.Exits = append(s.Exits,
 				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}

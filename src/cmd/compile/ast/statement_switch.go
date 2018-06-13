@@ -7,11 +7,11 @@ import (
 )
 
 type StatementSwitch struct {
-	Pos                 *Pos
-	Condition           *Expression //switch
-	StatmentSwitchCases []*StatmentSwitchCase
-	Default             *Block
-	BackPatchs          []*cg.Exit
+	Pos                  *Pos
+	Condition            *Expression //switch
+	StatementSwitchCases []*StatmentSwitchCase
+	Default              *Block
+	Exits                []*cg.Exit
 }
 
 type StatmentSwitchCase struct {
@@ -33,7 +33,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 			errMsgPrefix(conditionType.Pos)))
 		return errs
 	}
-	if len(s.StatmentSwitchCases) == 0 {
+	if len(s.StatementSwitchCases) == 0 {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
 			errMsgPrefix(s.Pos)))
 	}
@@ -46,7 +46,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
 	enumNamesMap := make(map[string]*Pos)
-	for _, v := range s.StatmentSwitchCases {
+	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
 			var byteValue byte
 			var shortValue int32

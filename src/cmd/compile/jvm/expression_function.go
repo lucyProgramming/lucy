@@ -26,16 +26,16 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	}
 
 	// function have captured vars
-	classname := m.newClassName("closureFunction_" + function.Name)
+	className := m.newClassName("closureFunction_" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
-	closureClass.Name = classname
+	closureClass.Name = className
 	closureClass.SuperClass = ast.LUCY_ROOT_CLASS
 	closureClass.AccessFlags = 0
 	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
 	m.mkClassDefaultContruction(closureClass, nil)
-	m.putClass(classname, closureClass)
+	m.putClass(className, closureClass)
 
 	method := &cg.MethodHighLevel{}
 	method.Name = function.Name
@@ -54,7 +54,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	maxStack = 2 // maxstack is 2 right now
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      classname,
+		Class:      className,
 		Method:     special_method_init,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -64,7 +64,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	// store  to,wait for call
 	function.VarOffSet = code.MaxLocals
 	code.MaxLocals++
-	state.appendLocals(class, state.newObjectVariableType(classname))
+	state.appendLocals(class, state.newObjectVariableType(className))
 	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
@@ -103,7 +103,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      classname,
+			Class:      className,
 			Field:      v.Name,
 			Descriptor: filed.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -142,7 +142,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      classname,
+			Class:      className,
 			Field:      v.Name,
 			Descriptor: filed.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

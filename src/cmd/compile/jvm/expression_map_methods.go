@@ -100,7 +100,6 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			if k != len(call.Args)-1 {
 				state.popStack(1)
 			}
-
 		}
 	case common.MAP_METHOD_REMOVEALL:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

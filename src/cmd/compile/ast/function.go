@@ -7,19 +7,19 @@ import (
 )
 
 type Function struct {
+	//ParameterAndRetrunListOK       bool
 	TemplateFunction               *TemplateFunction
 	TypeParameters                 map[string]*VariableType //typed parameters
-	ParameterAndRetrunListOK       bool
-	ClassMethod                    *cg.MethodHighLevel // make call from
+	ClassMethod                    *cg.MethodHighLevel      // make call from
 	ConstructionMethodCalledByUser bool
 	HaveDefaultValue               bool
 	DefaultValueStartAt            int
 	IsClosureFunction              bool
 	isGlobalVariableDefinition     bool
 	isPackageBlockFunction         bool
-	buildinFunctionChecker         buildFunctionChecker // used in build function
+	buildInFunctionChecker         buildFunctionChecker // used in build function
 	IsGlobal                       bool
-	IsBuildin                      bool
+	IsBuildIn                      bool
 	Used                           bool
 	AccessFlags                    uint16
 	Typ                            FunctionType
@@ -161,12 +161,12 @@ func (f *Function) mkLastRetrunStatement() {
 }
 
 func (f *Function) checkParametersAndRetuns(errs *[]error) {
-	errsLength := len(*errs)
-	defer func() {
-		if len(*errs) == errsLength {
-			f.ParameterAndRetrunListOK = true
-		}
-	}()
+	//errsLength := len(*errs)
+	//defer func() {
+	//	if len(*errs) == errsLength {
+	//		f.ParameterAndRetrunListOK = true
+	//	}
+	//}()
 	if f.Name == MAIN_FUNCTION_NAME {
 		errFunc := func() {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",

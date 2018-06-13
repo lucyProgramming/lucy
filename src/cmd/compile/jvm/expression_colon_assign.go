@@ -22,7 +22,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				currentStack = 1
 				state.pushStack(class, obj)
 			} else {
-				closure.createCloureVar(class, code, v.Typ)
+				closure.createClosureVar(class, code, v.Typ)
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				currentStack = 2
@@ -113,7 +113,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		currentStack := uint16(0)
 		if v.BeenCaptured {
 			code.MaxLocals++
-			stack := closure.createCloureVar(class, code, v.Typ)
+			stack := closure.createClosureVar(class, code, v.Typ)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -157,7 +157,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			continue
 		}
 		v := vs.Variables[index]
-		closure.createCloureVar(class, code, v.Typ)
+		closure.createClosureVar(class, code, v.Typ)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		{

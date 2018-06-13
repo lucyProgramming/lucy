@@ -12,9 +12,10 @@ type AutoVarForRangeArray struct {
 	V             uint16
 }
 
-func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	//build array expression
-	maxstack, _ = m.MakeExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
+	maxStack, _ = m.MakeExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
 
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -28,7 +29,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	context.MakeStackMap(code, state, code.CodeLength+11)
 	state.popStack(1)
 	code.CodeLength += 8
-	s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+	s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	forState := (&StackMapState{}).FromLast(state)
 	defer func() {
 		state.addTop(forState) // add top
@@ -65,8 +66,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	if s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		//get elements
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
-		if 2 > maxstack {
-			maxstack = 2
+		if 2 > maxStack {
+			maxStack = 2
 		}
 		meta := ArrayMetas[s.RangeAttr.RangeOn.Value.ArrayType.Typ]
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
@@ -109,8 +110,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	} else { // java_array
 		//get length
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
-		if 2 > maxstack {
-			maxstack = 2
+		if 2 > maxStack {
+			maxStack = 2
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_arraylength
 		code.CodeLength += 2
@@ -129,7 +130,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV != nil && s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			closure.createClosureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
 			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
@@ -138,7 +139,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.ArrayType.Typ).className))
 		}
 		if s.RangeAttr.IdentifierK != nil && s.RangeAttr.IdentifierK.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
+			closure.createClosureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
@@ -168,8 +169,8 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 	code.CodeLength += 2
 	// load end
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.End)...)
-	if 3 > maxstack {
-		maxstack = 3
+	if 3 > maxStack {
+		maxStack = 3
 	}
 	/*
 		k + start >= end,break loop,pop index on stack
@@ -254,17 +255,17 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 		stackLength := len(blockState.Stacks)
 		stack, remainStack, ops, target, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
 			code, s.RangeAttr.ExpressionV, context, blockState)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 		//load v
 		copyOP(code, loadSimpleVarOp(s.RangeAttr.RangeOn.Value.ArrayType.Typ,
 			autoVar.V)...)
-		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.ArrayType); t > maxstack {
-			maxstack = t
+		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.ArrayType); t > maxStack {
+			maxStack = t
 		}
-		if t := remainStack + jvmSize(target); t > maxstack {
-			maxstack = t
+		if t := remainStack + jvmSize(target); t > maxStack {
+			maxStack = t
 		}
 		copyOPLeftValue(class, code, ops, classname, name, descriptor)
 		blockState.popStack(len(blockState.Stacks) - stackLength)
@@ -272,11 +273,11 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel, cod
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _, classname, name, descriptor := m.MakeExpression.getLeftValue(class,
 				code, s.RangeAttr.ExpressionK, context, blockState)
-			if stack > maxstack {
-				maxstack = stack
+			if stack > maxStack {
+				maxStack = stack
 			}
-			if t := remainStack + 1; t > maxstack {
-				maxstack = t
+			if t := remainStack + 1; t > maxStack {
+				maxStack = t
 			}
 			// load k
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.K)...)

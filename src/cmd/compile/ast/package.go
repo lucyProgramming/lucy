@@ -28,8 +28,8 @@ func (p *Package) loadBuildinPackage() error {
 	if err != nil {
 		return err
 	}
-	lucyBuildinPackage = pp.(*Package)
-	p.Block.Outter = &lucyBuildinPackage.Block
+	lucyBuildInPackage = pp.(*Package)
+	p.Block.Outter = &lucyBuildInPackage.Block
 	return nil
 }
 
@@ -68,7 +68,7 @@ func (p *Package) TypeCheck() []error {
 	p.Errors = append(p.Errors, p.Block.checkConst()...)
 	//
 	for _, v := range p.Block.Funcs {
-		if v.IsBuildin {
+		if v.IsBuildIn {
 			continue
 		}
 		v.Block.inherit(&p.Block)
@@ -115,7 +115,7 @@ func (p *Package) TypeCheck() []error {
 		}
 	}
 	for _, v := range p.Block.Funcs {
-		if v.IsBuildin {
+		if v.IsBuildIn {
 			continue
 		}
 		if v.TemplateFunction != nil {

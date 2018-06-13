@@ -1,6 +1,6 @@
 package ast
 
-func (e *Expression) arithmeticBinayConstFolder(bin *ExpressionBinary) (is bool, err error) {
+func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool, err error) {
 	if bin.Left.isInteger() && bin.Right.isInteger() {
 		switch bin.Left.Typ {
 		case EXPRESSION_TYPE_BYTE:
@@ -104,7 +104,7 @@ func (e *Expression) arithmeticBinayConstFolder(bin *ExpressionBinary) (is bool,
 	return
 }
 
-func (e *Expression) relationBinayConstFolder(bin *ExpressionBinary) (is bool, err error) {
+func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, err error) {
 	// true == true  false == false
 	if bin.Left.Typ == EXPRESSION_TYPE_BOOL &&
 		bin.Right.Typ == EXPRESSION_TYPE_BOOL &&
@@ -232,13 +232,13 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 			value = byte(value1.(byte) * value2.(byte))
 		case EXPRESSION_TYPE_DIV:
 			if value2.(byte) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = byte(value1.(byte) / value2.(byte))
 			}
 		case EXPRESSION_TYPE_MOD:
 			if value2.(byte) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = byte(value1.(byte) % value2.(byte))
 			}
@@ -254,13 +254,13 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 			value = value1.(int32) * value2.(int32)
 		case EXPRESSION_TYPE_DIV:
 			if value2.(int32) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(int32) / value2.(int32)
 			}
 		case EXPRESSION_TYPE_MOD:
 			if value2.(int32) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(int32) % value2.(int32)
 			}
@@ -276,13 +276,13 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 			value = value1.(int32) * value2.(int32)
 		case EXPRESSION_TYPE_DIV:
 			if value2.(int32) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(int32) / value2.(int32)
 			}
 		case EXPRESSION_TYPE_MOD:
 			if value2.(int32) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(int32) % value2.(int32)
 			}
@@ -298,13 +298,13 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 			value = value1.(int64) * value2.(int64)
 		case EXPRESSION_TYPE_DIV:
 			if value2.(int64) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(int64) / value2.(int64)
 			}
 		case EXPRESSION_TYPE_MOD:
 			if value2.(int64) == 0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(int64) % value2.(int64)
 			}
@@ -320,7 +320,7 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 			value = value1.(float32) * value2.(float32)
 		case EXPRESSION_TYPE_DIV:
 			if value2.(float32) == 0.0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(float32) / value2.(float32)
 			}
@@ -336,7 +336,7 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 			value = value1.(float64) * value2.(float64)
 		case EXPRESSION_TYPE_DIV:
 			if value2.(float64) == 0.0 {
-				err = devisionByZeroErr(e.Pos)
+				err = divisionByZeroErr(e.Pos)
 			} else {
 				value = value1.(float64) / value2.(float64)
 			}

@@ -7,11 +7,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) getCaptureIdentiferLeftValue(
+func (m *MakeExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
-	target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
+	target *ast.VariableType, className, fieldName, fieldDescriptor string) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	target = identifier.Var.Typ
 	op = []byte{cg.OP_putfield}
@@ -31,8 +31,8 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 	state.pushStack(class, state.newObjectVariableType(meta.className))
 	maxStack = 1
 	remainStack = 1
-	classname = meta.className
-	fieldname = meta.fieldName
+	className = meta.className
+	fieldName = meta.fieldName
 	fieldDescriptor = meta.fieldDescriptor
 	return
 }
@@ -41,7 +41,7 @@ func (m *MakeExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
-	target *ast.VariableType, classname, name, descriptor string) {
+	target *ast.VariableType, className, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack, _ = m.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
@@ -69,7 +69,7 @@ func (m *MakeExpression) getMapLeftValue(
 	bs4[3] = cg.OP_pop
 	op = append(op, bs4...)
 	target = index.Expression.Value.Map.V
-	classname = java_hashmap_class
+	className = java_hashmap_class
 	return
 }
 
@@ -77,20 +77,20 @@ func (m *MakeExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
-	target *ast.VariableType, classname, name, descriptor string) {
+	target *ast.VariableType, className, name, descriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
 		if identifier.Var.IsGlobal {
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Var.Typ
-			classname = m.MakeClass.mainclass.Name
+			className = m.MakeClass.mainclass.Name
 			name = identifier.Name
 			descriptor = Descriptor.typeDescriptor(identifier.Var.Typ)
 			return
 		}
 		if identifier.Var.BeenCaptured {
-			return m.getCaptureIdentiferLeftValue(class, code, e, context, state)
+			return m.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
 		if identifier.Name == ast.NO_NAME_IDENTIFIER {
 			panic("this is not happening")
@@ -332,13 +332,13 @@ func (m *MakeExpression) getLeftValue(
 		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
 			target = dot.PackageVariable.Typ
-			classname = dot.Expression.Value.Package.Name + "/main"
+			className = dot.Expression.Value.Package.Name + "/main"
 			name = dot.PackageVariable.Name
 			descriptor = dot.PackageVariable.Descriptor
 			maxStack = 0
 			remainStack = 0
 		} else {
-			classname = dot.Expression.Value.Class.Name
+			className = dot.Expression.Value.Class.Name
 			target = dot.Field.VariableDefinition.Typ
 			name = dot.Name
 			if dot.Field.LoadFromOutSide {

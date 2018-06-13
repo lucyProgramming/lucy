@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Typ.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
 		code.MaxLocals += jvmSize(v.Typ)
@@ -15,15 +15,15 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		if v.BeenCaptured == false { // capture
 			continue
 		}
-		stack := closure.createCloureVar(class, code, v.Typ)
-		if stack > maxstack {
-			maxstack = stack
+		stack := closure.createClosureVar(class, code, v.Typ)
+		if stack > maxStack {
+			maxStack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		copyOP(code, loadSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
-		if t := 2 + jvmSize(v.Typ); t > maxstack {
-			maxstack = t
+		if t := 2 + jvmSize(v.Typ); t > maxStack {
+			maxStack = t
 		}
 		m.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
@@ -36,15 +36,15 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 		if v.BeenCaptured { //create closure object
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
-			stack := closure.createCloureVar(class, code, v.Typ)
-			if stack > maxstack {
-				maxstack = stack
+			stack := closure.createClosureVar(class, code, v.Typ)
+			if stack > maxStack {
+				maxStack = stack
 			}
 			// then load
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
-			if 2 > maxstack {
-				maxstack = 2
+			if 2 > maxStack {
+				maxStack = 2
 			}
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
@@ -61,8 +61,8 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		m.storeLocalVar(class, code, v)
 		if v.BeenCaptured {
@@ -174,7 +174,8 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	m.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }
-func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	if f.AutoVarForException != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -183,7 +184,7 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
 		state.appendLocals(class,
 			state.newObjectVariableType(java_throwable_class))
-		maxstack = 1
+		maxStack = 1
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
 		if len(f.Typ.ReturnList) > 1 {
@@ -195,7 +196,7 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 				f.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
 			state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		}
-		maxstack = 1
+		maxStack = 1
 	}
 	if f.AutoVarForMultiReturn != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -204,7 +205,7 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 		code.MaxLocals++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
 		state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
-		maxstack = 1
+		maxStack = 1
 	}
 
 	return

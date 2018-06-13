@@ -15,8 +15,8 @@ type AutoVarForRangeMap struct {
 }
 
 func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
-	maxstack, _ = m.MakeExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // map instance on stack
+	s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
+	maxStack, _ = m.MakeExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // map instance on stack
 	// if null skip
 	{
 		state.Stacks = append(state.Stacks,
@@ -34,11 +34,11 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.CodeLength += 8
 	forState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(forState)
-	s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+	s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
-	if 2 > maxstack {
-		maxstack = 2
+	if 2 > maxStack {
+		maxStack = 2
 	}
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -60,8 +60,8 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	// get length
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
-	if 3 > maxstack {
-		maxstack = 3
+	if 3 > maxStack {
+		maxStack = 3
 	}
 	var autoVar AutoVarForRangeMap
 	{
@@ -94,7 +94,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV != nil && s.RangeAttr.IdentifierV.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
+			closure.createClosureVar(class, code, s.RangeAttr.IdentifierV.Var.Typ)
 			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
@@ -104,7 +104,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 		if s.RangeAttr.IdentifierK != nil &&
 			s.RangeAttr.IdentifierK.Var.BeenCaptured {
-			closure.createCloureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
+			closure.createClosureVar(class, code, s.RangeAttr.IdentifierK.Var.Typ)
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
@@ -130,8 +130,8 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.CodeLength++
 	// load length
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
-	if 5 > maxstack {
-		maxstack = 5
+	if 5 > maxStack {
+		maxStack = 5
 	}
 	exit := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	if s.RangeAttr.IdentifierV != nil || s.RangeAttr.ExpressionV != nil {
@@ -218,13 +218,13 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		stackLength := len(blockState.Stacks)
 		stack, remainStack, op, _, classname, name, descriptor :=
 			m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionV, context, blockState)
-		if stack > maxstack { // this means  current stack is 0
-			maxstack = stack
+		if stack > maxStack { // this means  current stack is 0
+			maxStack = stack
 		}
 		copyOP(code,
 			loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
-		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.V); t > maxstack {
-			maxstack = t
+		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.V); t > maxStack {
+			maxStack = t
 		}
 		copyOPLeftValue(class, code, op, classname, name, descriptor)
 		forState.popStack(len(blockState.Stacks) - stackLength)
@@ -232,13 +232,13 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, op, _, classname, name, descriptor :=
 				m.MakeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionK, context, blockState)
-			if stack > maxstack { // this means  current stack is 0
-				maxstack = stack
+			if stack > maxStack { // this means  current stack is 0
+				maxStack = stack
 			}
 			copyOP(code,
 				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
-			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.K); t > maxstack {
-				maxstack = t
+			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.K); t > maxStack {
+				maxStack = t
 			}
 			copyOPLeftValue(class, code, op, classname, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)

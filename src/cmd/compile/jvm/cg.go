@@ -335,7 +335,7 @@ func (m *MakeClass) mkFuncs() {
 			})
 			continue
 		}
-		if f.IsBuildin { //
+		if f.IsBuildIn { //
 			continue
 		}
 		class := m.mainclass
@@ -354,7 +354,7 @@ func (m *MakeClass) mkFuncs() {
 		m.mainclass.AppendMethod(method)
 	}
 	for k, f := range m.p.Block.Funcs { // fisrt round
-		if f.IsBuildin || f.TemplateFunction != nil { //
+		if f.IsBuildIn || f.TemplateFunction != nil { //
 			continue
 		}
 		m.buildFunction(ms[k].Class, nil, ms[k], f)

@@ -36,7 +36,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return nil
 	}
 	call.Func = t.Function
-	if t.Function.IsBuildin {
+	if t.Function.IsBuildIn {
 		return e.checkBuildinFunctionCall(block, errs, t.Function, call.Args)
 	} else {
 		return e.checkFunctionCall(block, errs, t.Function, &call.Args)
@@ -45,13 +45,13 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args *CallArgs) []*VariableType {
-	callargsTypes := checkExpressions(block, *args, errs)
-	callargsTypes = checkRightValuesValid(callargsTypes, errs)
+	callArgsTypes := checkExpressions(block, *args, errs)
+	callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
 	var tf *Function
 	if f.TemplateFunction != nil {
 		length := len(*errs)
 		//rewrite
-		tf = e.checkTemplateFunctionCall(block, errs, callargsTypes, f)
+		tf = e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
 		if len(*errs) != length { // if no
 			return nil
 		}
@@ -62,15 +62,15 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 				errMsgPrefix(e.Pos)))
 		}
 	}
-	if len(callargsTypes) > len(f.Typ.ParameterList) {
-		errmsg := fmt.Sprintf("%s too many paramaters to call function '%s':\n", errMsgPrefix(e.Pos), f.Name)
-		errmsg += fmt.Sprintf("\thave %s\n", f.badParameterMsg(f.Name, callargsTypes))
-		errmsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
-		*errs = append(*errs, fmt.Errorf(errmsg))
+	if len(callArgsTypes) > len(f.Typ.ParameterList) {
+		errMsg := fmt.Sprintf("%s too many paramaters to call function '%s':\n", errMsgPrefix(e.Pos), f.Name)
+		errMsg += fmt.Sprintf("\thave %s\n", f.badParameterMsg(f.Name, callArgsTypes))
+		errMsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
+		*errs = append(*errs, fmt.Errorf(errMsg))
 	}
 	//trying to convert literal
 	var ret []*VariableType
-	convertLiteralExpressionsToNeeds(*args, f.Typ.needParameterTypes(), callargsTypes)
+	convertLiteralExpressionsToNeeds(*args, f.Typ.needParameterTypes(), callArgsTypes)
 	if f.TemplateFunction == nil {
 		ret = f.Typ.retTypes(e.Pos)
 	} else {
@@ -81,25 +81,25 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if f.TemplateFunction != nil {
 			f = tf
 		}
-		if len(callargsTypes) < len(f.Typ.ParameterList) {
-			if f.HaveDefaultValue && len(callargsTypes) >= f.DefaultValueStartAt {
-				for i := len(callargsTypes); i < len(f.Typ.ParameterList); i++ {
+		if len(callArgsTypes) < len(f.Typ.ParameterList) {
+			if f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
+				for i := len(callArgsTypes); i < len(f.Typ.ParameterList); i++ {
 					*args = append(*args, f.Typ.ParameterList[i].Expression)
 				}
 			} else { // no default value
-				errmsg := fmt.Sprintf("%s too few paramaters to call function '%s'\n", errMsgPrefix(e.Pos), f.Name)
-				errmsg += fmt.Sprintf("\thave %s\n", f.badParameterMsg(f.Name, callargsTypes))
-				errmsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
-				*errs = append(*errs, fmt.Errorf(errmsg))
+				errMsg := fmt.Sprintf("%s too few paramaters to call function '%s'\n", errMsgPrefix(e.Pos), f.Name)
+				errMsg += fmt.Sprintf("\thave %s\n", f.badParameterMsg(f.Name, callArgsTypes))
+				errMsg += fmt.Sprintf("\twant %s\n", f.readableMsg())
+				*errs = append(*errs, fmt.Errorf(errMsg))
 				return ret
 			}
 		}
 		for k, v := range f.Typ.ParameterList {
-			if k < len(callargsTypes) && callargsTypes[k] != nil {
-				if !v.Typ.Equal(errs, callargsTypes[k]) {
+			if k < len(callArgsTypes) && callArgsTypes[k] != nil {
+				if !v.Typ.Equal(errs, callArgsTypes[k]) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix((*args)[k].Pos),
-						callargsTypes[k].TypeString(), v.Typ.TypeString()))
+						callArgsTypes[k].TypeString(), v.Typ.TypeString()))
 				}
 			}
 		}
@@ -185,7 +185,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	ret = call.TemplateFunctionCallPair.Function
 	// when all ok ,ret is not a template function any more
 	if len(tps) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s to many typed parameter to call template function.",
+		*errs = append(*errs, fmt.Errorf("%s to many typed parameter to call template function",
 			errMsgPrefix(e.Pos)))
 	}
 	return ret

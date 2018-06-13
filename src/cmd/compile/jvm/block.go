@@ -11,7 +11,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	var deadend bool = false
 	for _, s := range b.Statements {
 		if deadend == true && s.Typ == ast.STATEMENT_TYPE_LABLE {
-			jumpForwards := len(s.StatmentLable.BackPatches) > 0 // jump forward
+			jumpForwards := len(s.StatmentLable.Exits) > 0 // jump forward
 			deadend = !jumpForwards
 			//continue compile block from this lable statment
 		}
@@ -53,7 +53,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}
 		if s.Typ == ast.STATEMENT_TYPE_SWITCH && s.StatementSwitch.Default != nil {
 			t := s.StatementSwitch.Default.DeadEnding
-			for _, v := range s.StatementSwitch.StatmentSwitchCases {
+			for _, v := range s.StatementSwitch.StatementSwitchCases {
 				if v.Block != nil {
 					t = t && v.Block.DeadEnding
 				} else {

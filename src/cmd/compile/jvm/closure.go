@@ -98,9 +98,9 @@ func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
 /*
 	create a closure var, inited and leave on stack
 */
-func (closure *Closure) createCloureVar(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, v *ast.VariableType) (maxstack uint16) {
-	maxstack = 2
+func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, v *ast.VariableType) (maxStack uint16) {
+	maxStack = 2
 	var meta *ClosureObjectMeta
 	switch v.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
@@ -144,7 +144,7 @@ func (closure *Closure) createCloureVar(class *cg.ClassHighLevel,
 	return
 }
 
-func (closure *Closure) storeLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) {
+func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) {
 	var meta *ClosureObjectMeta
 	switch v.Typ.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
@@ -186,10 +186,10 @@ func (closure *Closure) storeLocalCloureVar(class *cg.ClassHighLevel, code *cg.A
 /*
 	create a closure var on stack
 */
-func (closure *Closure) loadLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
+func (closure *Closure) loadLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxStack uint16) {
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 	closure.unPack(class, code, v.Typ)
-	maxstack = jvmSize(v.Typ)
+	maxStack = jvmSize(v.Typ)
 	return
 }
 

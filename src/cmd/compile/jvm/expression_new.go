@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	if e.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildNewArray(class, code, e, context, state)
 	}
@@ -32,9 +32,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	}
 	state.Stacks = append(state.Stacks, t, t)
 	code.CodeLength += 4
-	maxstack = 2
+	maxStack = 2
 	if n.Args != nil && len(n.Args) > 0 {
-		maxstack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context, state)
+		maxStack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {
@@ -59,8 +59,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.CodeLength += 3
 	return
 }
-func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
-	maxstack = 2
+func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context) (maxStack uint16) {
+	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -76,7 +77,7 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 }
 
 func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxstack uint16) {
+	context *Context, state *StackMapState) (maxStack uint16) {
 	dimensions := byte(0)
 	{
 		// get dimension
@@ -87,13 +88,13 @@ func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.At
 		}
 	}
 	n := e.Data.(*ast.ExpressionNew)
-	maxstack, _ = m.build(class, code, n.Args[0], context, state) // must be a integer
+	maxStack, _ = m.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
 		loadInt32(class, code, 0)
 		currentStack++
-		if currentStack > maxstack {
-			maxstack = currentStack
+		if currentStack > maxStack {
+			maxStack = currentStack
 		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_multianewarray

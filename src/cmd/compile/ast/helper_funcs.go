@@ -26,7 +26,7 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func devisionByZeroErr(pos *Pos) error {
+func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
 
@@ -88,24 +88,24 @@ func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) 
 }
 
 func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableType) error {
-	errmsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
+	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
-	errmsg += "\twant " + ms[0].Func.badParameterMsg(name, want) + "\n"
+	errMsg += "\twant " + ms[0].Func.badParameterMsg(name, want) + "\n"
 	for _, m := range ms {
-		errmsg += "\thave " + m.Func.readableMsg(name) + "\n"
+		errMsg += "\thave " + m.Func.readableMsg(name) + "\n"
 	}
-	return fmt.Errorf(errmsg)
+	return fmt.Errorf(errMsg)
 }
 
 func searchBuildIns(name string) interface{} {
 	var t interface{}
 	var ok bool
-	t, ok = buildinFunctionsMap[name]
+	t, ok = buildInFunctionsMap[name]
 	if ok {
 		return t
 	}
-	if lucyBuildinPackage != nil {
-		t, _ = lucyBuildinPackage.Block.NameExists(name)
+	if lucyBuildInPackage != nil {
+		t, _ = lucyBuildInPackage.Block.NameExists(name)
 		return t
 	}
 	return nil

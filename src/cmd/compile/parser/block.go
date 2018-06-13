@@ -442,7 +442,7 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		s := &ast.Statement{}
 		s.Pos = pos
 		s.Typ = ast.STATEMENT_TYPE_LABLE
-		lable := &ast.StatementLable{}
+		lable := &ast.StatementLabel{}
 		s.StatmentLable = lable
 		lable.Statement = s
 		lable.Name = e.Data.(*ast.ExpressionIdentifier).Name

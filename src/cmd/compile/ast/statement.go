@@ -33,7 +33,7 @@ type Statement struct {
 	StatementBreak    *StatementBreak
 	Block             *Block
 	StatementContinue *StatementContinue
-	StatmentLable     *StatementLable
+	StatmentLable     *StatementLabel
 	StatementGoto     *StatementGoto
 	Defer             *Defer
 	Class             *Class

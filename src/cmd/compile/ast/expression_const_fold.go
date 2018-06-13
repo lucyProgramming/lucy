@@ -132,7 +132,7 @@ func (e *Expression) constFold() (is bool, err error) {
 		e.Typ == EXPRESSION_TYPE_MUL ||
 		e.Typ == EXPRESSION_TYPE_DIV ||
 		e.Typ == EXPRESSION_TYPE_MOD {
-		is, err = e.getBinaryExpressionConstValue(e.arithmeticBinayConstFolder)
+		is, err = e.getBinaryExpressionConstValue(e.arithmeticBinaryConstFolder)
 		return
 	}
 	// <<  >>
@@ -247,7 +247,7 @@ func (e *Expression) constFold() (is bool, err error) {
 		e.Typ == EXPRESSION_TYPE_GT ||
 		e.Typ == EXPRESSION_TYPE_LE ||
 		e.Typ == EXPRESSION_TYPE_LT {
-		return e.getBinaryExpressionConstValue(e.relationBinayConstFolder)
+		return e.getBinaryExpressionConstValue(e.relationBinaryConstFolder)
 	}
 	return
 }

@@ -8,17 +8,17 @@ import (
 )
 
 func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxstack uint16) {
+	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxStack uint16) {
 	if context.function.NoReturnValue() { // no return value
 		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null // expect exception on stack
 			code.CodeLength++
-			if 1 > maxstack {
-				maxstack = 1
+			if 1 > maxStack {
+				maxStack = 1
 			}
 			stack := m.buildDefersForReturn(class, code, context, state, statementReturn)
-			if stack > maxstack {
-				maxstack = stack
+			if stack > maxStack {
+				maxStack = stack
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_return
@@ -29,7 +29,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if len(context.function.Typ.ReturnList) == 1 {
 		var es []*cg.Exit
 		if len(statementReturn.Expressions) > 0 {
-			maxstack, es = m.MakeExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack, es = m.MakeExpression.build(class, code, statementReturn.Expressions[0], context, state)
 			if len(es) > 0 {
 				backfillExit(es, code.CodeLength)
 				state.pushStack(class, statementReturn.Expressions[0].Value)
@@ -45,12 +45,12 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 			}
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			if 1 > maxstack {
-				maxstack = 1
+			if 1 > maxStack {
+				maxStack = 1
 			}
 			stack := m.buildDefersForReturn(class, code, context, state, statementReturn)
-			if stack > maxstack {
-				maxstack = stack
+			if stack > maxStack {
+				maxStack = stack
 			}
 			//restore the stack
 			if len(statementReturn.Expressions) > 0 { //restore stack
@@ -95,13 +95,13 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	//multi returns
 	if len(statementReturn.Expressions) > 0 {
 		if len(statementReturn.Expressions) == 1 {
-			maxstack, _ = m.MakeExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack, _ = m.MakeExpression.build(class, code, statementReturn.Expressions[0], context, state)
 		} else {
 			loadInt32(class, code, int32(len(context.function.Typ.ReturnList)))
 			code.Codes[code.CodeLength] = cg.OP_anewarray
 			class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			maxstack = 2 // max stack is 2
+			maxStack = 2 // max stack is 2
 			arrayListObject := state.newObjectVariableType(java_root_object_array)
 			state.pushStack(class, arrayListObject)
 			state.pushStack(class, arrayListObject)
@@ -111,8 +111,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				currentStack := uint16(1)
 				if v.MayHaveMultiValue() && len(v.Values) > 1 {
 					stack, _ := m.MakeExpression.build(class, code, v, context, state)
-					if t := currentStack + stack; t > maxstack {
-						maxstack = t
+					if t := currentStack + stack; t > maxStack {
+						maxStack = t
 					}
 					multiValuePacker.storeArrayListAutoVar(code, context)
 					for kk, _ := range v.Values {
@@ -121,12 +121,12 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 						code.CodeLength++
 						currentStack++
 						stack = multiValuePacker.unPackObject(class, code, kk, context)
-						if t := stack + currentStack; t > maxstack {
-							maxstack = t
+						if t := stack + currentStack; t > maxStack {
+							maxStack = t
 						}
 						loadInt32(class, code, index)
-						if t := currentStack + 2; t > maxstack {
-							maxstack = t
+						if t := currentStack + 2; t > maxStack {
+							maxStack = t
 						}
 						code.Codes[code.CodeLength] = cg.OP_swap
 						code.Codes[code.CodeLength+1] = cg.OP_aastore
@@ -145,8 +145,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 					context.MakeStackMap(code, state, code.CodeLength)
 					state.popStack(1) // must be bool expression
 				}
-				if t := stack + currentStack; t > maxstack {
-					maxstack = t
+				if t := stack + currentStack; t > maxStack {
+					maxStack = t
 				}
 				//convert to object
 				if v.Value.IsPointer() == false {
@@ -155,8 +155,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 				// append
 				loadInt32(class, code, index)
 
-				if t := currentStack + 2; t > maxstack {
-					maxstack = t
+				if t := currentStack + 2; t > maxStack {
+					maxStack = t
 				}
 				code.Codes[code.CodeLength] = cg.OP_swap
 				code.Codes[code.CodeLength+1] = cg.OP_aastore
@@ -173,12 +173,12 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		if 1 > maxstack {
-			maxstack = 1
+		if 1 > maxStack {
+			maxStack = 1
 		}
 		stack := m.buildDefersForReturn(class, code, context, state, statementReturn)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 		//restore the stack
 		if len(statementReturn.Expressions) > 0 {
@@ -193,8 +193,8 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		return
 	}
 	stack := m.buildReturnFromFunctionReturnList(class, code, context)
-	if stack > maxstack {
-		maxstack = stack
+	if stack > maxStack {
+		maxStack = stack
 	}
 	return
 }

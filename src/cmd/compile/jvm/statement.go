@@ -8,17 +8,17 @@ import (
 )
 
 func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
-	context *Context, state *StackMapState) (maxstack uint16) {
+	context *Context, state *StackMapState) (maxStack uint16) {
 	//fmt.Println(s.Pos)
 	switch s.Typ {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
 			return m.buildFunctionExpression(class, code, s.Expression, context, state)
 		}
-		maxstack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
+		maxStack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
 	case ast.STATEMENT_TYPE_IF:
 		s.StatementIf.BackPatchs = []*cg.Exit{} //could compile multi times
-		maxstack = m.buildIfStatement(class, code, s.StatementIf, context, state)
+		maxStack = m.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.BackPatchs) > 0 {
 			backfillExit(s.StatementIf.BackPatchs, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -33,10 +33,10 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		m.buildBlock(class, code, s.Block, context, ss)
 		state.addTop(ss)
 	case ast.STATEMENT_TYPE_FOR:
-		s.StatementFor.BackPatchs = []*cg.Exit{} //could compile multi times
-		maxstack = m.buildForStatement(class, code, s.StatementFor, context, state)
-		if len(s.StatementFor.BackPatchs) > 0 {
-			backfillExit(s.StatementFor.BackPatchs, code.CodeLength)
+		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
+		maxStack = m.buildForStatement(class, code, s.StatementFor, context, state)
+		if len(s.StatementFor.Exits) > 0 {
+			backfillExit(s.StatementFor.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
@@ -46,21 +46,21 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		m.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
-			s.StatementBreak.StatementFor.BackPatchs = append(s.StatementBreak.StatementFor.BackPatchs, b)
+			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, b)
 		} else { // switch
-			s.StatementBreak.StatementSwitch.BackPatchs = append(s.StatementBreak.StatementSwitch.BackPatchs, b)
+			s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, b)
 		}
 	case ast.STATEMENT_TYPE_RETURN:
-		maxstack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
+		maxStack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
 	case ast.STATEMENT_TYPE_SWITCH:
-		s.StatementSwitch.BackPatchs = []*cg.Exit{} //could compile multi times
-		maxstack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
-		if len(s.StatementSwitch.BackPatchs) > 0 {
+		s.StatementSwitch.Exits = []*cg.Exit{} //could compile multi times
+		maxStack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
+		if len(s.StatementSwitch.Exits) > 0 {
 			if code.CodeLength == context.LastStackMapOffset {
 				code.Codes[code.CodeLength] = cg.OP_nop
 				code.CodeLength++
 			}
-			backfillExit(s.StatementSwitch.BackPatchs, code.CodeLength)
+			backfillExit(s.StatementSwitch.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_GOTO:
@@ -68,14 +68,14 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLable.CodeOffset)
 		} else {
 			b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
-			s.StatementGoto.StatementLable.BackPatches = append(s.StatementGoto.StatementLable.BackPatches, b)
+			s.StatementGoto.StatementLable.Exits = append(s.StatementGoto.StatementLable.Exits, b)
 		}
 	case ast.STATEMENT_TYPE_LABLE:
 		s.StatmentLable.CodeOffsetGenerated = true
 		s.StatmentLable.CodeOffset = code.CodeLength
-		s.StatmentLable.BackPatches = []*cg.Exit{} //could compile multi times
-		if len(s.StatmentLable.BackPatches) > 0 {
-			backfillExit(s.StatmentLable.BackPatches, code.CodeLength) // back patch
+		s.StatmentLable.Exits = []*cg.Exit{} //could compile multi times
+		if len(s.StatmentLable.Exits) > 0 {
+			backfillExit(s.StatmentLable.Exits, code.CodeLength) // back patch
 		}
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled
@@ -88,7 +88,8 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 	}
 	return
 }
-func (m *MakeClass) buildDefers(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ds []*ast.Defer, state *StackMapState) {
+func (m *MakeClass) buildDefers(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, context *Context, ds []*ast.Defer, state *StackMapState) {
 	index := len(ds) - 1
 	for index >= 0 {
 		var ss *StackMapState

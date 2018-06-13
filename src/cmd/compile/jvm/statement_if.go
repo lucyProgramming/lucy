@@ -7,14 +7,15 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxStack uint16) {
 	var es []*cg.Exit
 	conditionState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(conditionState)
 	for _, v := range s.PreExpressions {
 		stack, _ := m.MakeExpression.build(class, code, v, context, conditionState)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 	}
 	var IfState *StackMapState
@@ -23,7 +24,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	} else {
 		IfState = conditionState
 	}
-	maxstack, es = m.MakeExpression.build(class, code, s.Condition, context, IfState)
+	maxStack, es = m.MakeExpression.build(class, code, s.Condition, context, IfState)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
 		IfState.pushStack(class, s.Condition.Value)
@@ -55,8 +56,8 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 			context.MakeStackMap(code, elseIfState, code.CodeLength)
 			elseIfState.popStack(1)
 		}
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_ifeq
 		codelength = code.CodeLength
@@ -72,7 +73,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel, code *cg.Attribut
 	}
 	context.MakeStackMap(code, conditionState, code.CodeLength)
 	binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codelength))
-	//s.BackPatchs = append(s.BackPatchs, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
+	//s.Exits = append(s.Exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	if s.ElseBlock != nil {
 		var elseState *StackMapState
 		if s.ElseBlock.HaveVariableDefinition() {

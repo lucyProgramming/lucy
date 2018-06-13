@@ -80,11 +80,11 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 	PackageBeenCompile.Block.Vars = make(map[string]*VariableDefinition)
 	PackageBeenCompile.Block.Funcs = make(map[string]*Function)
 	for _, v := range convertor.Funcs {
+		v.IsGlobal = true
 		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
-		v.IsGlobal = true
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range convertor.Classes {

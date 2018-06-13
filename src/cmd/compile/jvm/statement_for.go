@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	s *ast.StatementFor, context *Context, state *StackMapState) (maxstack uint16) {
+	s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	if s.RangeAttr != nil {
 		if s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_ARRAY ||
 			s.RangeAttr.RangeOn.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
@@ -22,8 +22,8 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 	//init
 	if s.Init != nil {
 		stack, _ := m.MakeExpression.build(class, code, s.Init, context, forState)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 	}
 	//condition
@@ -36,18 +36,18 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
-		s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 		firstExit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	}
 	s.ContinueOPOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	if s.Post != nil {
 		stack, _ := m.MakeExpression.build(class, code, s.Post, context, forState)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 	}
 	if s.Condition != nil {
@@ -58,10 +58,10 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
-		s.BackPatchs = append(s.BackPatchs, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 	}
 	if firstExit != nil {
 		backfillExit([]*cg.Exit{firstExit}, code.CodeLength)

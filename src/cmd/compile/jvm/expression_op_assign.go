@@ -72,7 +72,8 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	return
 
 }
-func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -81,17 +82,17 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING {
 		return m.buildStrPlusAssign(class, code, e, context, state)
 	}
-	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, _, className, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 	//left value must can be used as right value,
 	stack, _ := m.build(class, code, bin.Left, context, state) // load it`s value
-	if t := stack + remainStack; t > maxstack {
-		maxstack = t
+	if t := stack + remainStack; t > maxStack {
+		maxStack = t
 	}
 	state.pushStack(class, e.Value)
 	currentStack := jvmSize(e.Value) + remainStack // incase int -> long
 	stack, _ = m.build(class, code, bin.Right, context, state)
-	if t := currentStack + stack; t > maxstack {
-		maxstack = t
+	if t := currentStack + stack; t > maxStack {
+		maxStack = t
 	}
 	switch bin.Left.Value.Typ {
 	case ast.VARIABLE_TYPE_BYTE:
@@ -267,12 +268,12 @@ func (m *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 	}
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.Value)
-		if currentStack > maxstack {
-			maxstack = currentStack
+		currentStack += m.controlStack2FitAssign(code, op, className, bin.Left.Value)
+		if currentStack > maxStack {
+			maxStack = currentStack
 		}
 	}
 	//copy op
-	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	copyOPLeftValue(class, code, op, className, name, descriptor)
 	return
 }

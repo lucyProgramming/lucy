@@ -26,8 +26,8 @@ var (
 	packageAliasReg      *regexp.Regexp
 	ResourceLoader       LoadResource
 	PackageBeenCompile   Package
-	buildinFunctionsMap  = make(map[string]*Function)
-	lucyBuildinPackage   *Package
+	buildInFunctionsMap  = make(map[string]*Function)
+	lucyBuildInPackage   *Package
 	ParseFunctionHandler func(bs []byte, pos *Pos) (*Function, []error)
 	javaStringClass      *Class
 )

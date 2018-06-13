@@ -7,16 +7,16 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type StatementLable struct {
+type StatementLabel struct {
 	CodeOffsetGenerated bool
 	CodeOffset          int
 	Block               *Block
 	Name                string
-	BackPatches         []*cg.Exit
+	Exits               []*cg.Exit
 	Statement           *Statement
 }
 
-func (s *StatementLable) Ready(from *Pos) error {
+func (s *StatementLabel) Ready(from *Pos) error {
 	ss := []*Statement{}
 	for _, v := range s.Block.Statements {
 		if v.StatmentLable == s { // this is me

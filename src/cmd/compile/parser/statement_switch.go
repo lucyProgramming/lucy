@@ -48,7 +48,7 @@ func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 			b.parseStatementList(block, false)
 
 		}
-		s.StatmentSwitchCases = append(s.StatmentSwitchCases, &ast.StatmentSwitchCase{
+		s.StatementSwitchCases = append(s.StatementSwitchCases, &ast.StatmentSwitchCase{
 			Matches: es,
 			Block:   block,
 		})

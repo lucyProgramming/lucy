@@ -22,7 +22,7 @@ type Block struct {
 	Classes                    map[string]*Class
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
-	Lables                     map[string]*StatementLable
+	Labels                     map[string]*StatementLabel
 	Types                      map[string]*VariableType
 	Vars                       map[string]*VariableDefinition
 	ClosureFuncs               map[string]*Function //in "Funcs" too
@@ -79,11 +79,11 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 /*
 	search lable
 */
-func (b *Block) searchLabel(name string) *StatementLable {
+func (b *Block) searchLabel(name string) *StatementLabel {
 	bb := b
 	for bb != nil {
-		if bb.Lables != nil {
-			if l, ok := bb.Lables[name]; ok {
+		if bb.Labels != nil {
+			if l, ok := bb.Labels[name]; ok {
 				return l
 			}
 		}
@@ -257,6 +257,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	return b.insert(name, pos, d)
 }
 func (b *Block) insert(name string, pos *Pos, d interface{}) error {
+	//fmt.Println(name, pos)
 	// global var insert into block
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
@@ -333,10 +334,10 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errmsg)
 	}
-	if b.Lables == nil {
-		b.Lables = make(map[string]*StatementLable)
+	if b.Labels == nil {
+		b.Labels = make(map[string]*StatementLabel)
 	}
-	if l, ok := b.Lables[name]; ok {
+	if l, ok := b.Labels[name]; ok {
 		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
 		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
@@ -352,8 +353,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		return fmt.Errorf(errmsg)
 	}
 	// name exists in buildin, not allow
-	if lucyBuildinPackage != nil {
-		if _, exits := lucyBuildinPackage.Block.NameExists(name); exits {
+	if lucyBuildInPackage != nil {
+		if _, exits := lucyBuildInPackage.Block.NameExists(name); exits {
 			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
 		}
 	}
@@ -362,7 +363,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Classes[name] = d.(*Class)
 	case *Function:
 		t := d.(*Function)
-		if buildinFunctionsMap[t.Name] != nil {
+		if buildInFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
 				errMsgPrefix(pos), name)
 		}
@@ -383,8 +384,8 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		}
 	case *EnumName:
 		b.EnumNames[name] = d.(*EnumName)
-	case *StatementLable:
-		b.Lables[name] = d.(*StatementLable)
+	case *StatementLabel:
+		b.Labels[name] = d.(*StatementLabel)
 	case *VariableType:
 		b.Types[name] = d.(*VariableType)
 	default:

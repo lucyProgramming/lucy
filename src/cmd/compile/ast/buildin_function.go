@@ -11,8 +11,8 @@ func init() {
 }
 
 func registerBuildinFunctions() {
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
-		buildinFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
+		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			if len(e.TypedParameters) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
@@ -35,13 +35,13 @@ func registerBuildinFunctions() {
 				}
 			}
 		},
-		IsBuildin: true,
+		IsBuildIn: true,
 		Name:      common.BUILD_IN_FUNCTION_PRINT,
 	}
 	catchBuildFunction := &Function{}
-	catchBuildFunction.IsBuildin = true
+	catchBuildFunction.IsBuildIn = true
 	catchBuildFunction.Name = common.BUILD_IN_FUNCTION_CATCH
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = catchBuildFunction
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = catchBuildFunction
 	{
 		catchBuildFunction.Typ.ReturnList = make([]*VariableDefinition, 1)
 		catchBuildFunction.Typ.ReturnList[0] = &VariableDefinition{}
@@ -53,7 +53,7 @@ func registerBuildinFunctions() {
 		catchBuildFunction.Typ.ReturnList[0].Typ.Class.NotImportedYet = true
 		//class is going to make value by checker
 	}
-	catchBuildFunction.buildinFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+	catchBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 		if len(e.TypedParameters) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 				errMsgPrefix(pos)))
@@ -108,8 +108,8 @@ func registerBuildinFunctions() {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 		}
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
-		buildinFunctionChecker: func(ft *Function, e *ExpressionFunctionCall,
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
+		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall,
 			block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			if len(e.TypedParameters) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -134,22 +134,22 @@ func registerBuildinFunctions() {
 				return
 			}
 		},
-		IsBuildin: true,
+		IsBuildIn: true,
 		Name:      common.BUILD_IN_FUNCTION_PANIC,
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
-		buildinFunctionChecker: monitorChecker,
-		IsBuildin:              true,
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
+		buildInFunctionChecker: monitorChecker,
+		IsBuildIn:              true,
 		Name:                   common.BUILD_IN_FUNCTION_MONITORENTER,
 	}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
-		buildinFunctionChecker: monitorChecker,
-		IsBuildin:              true,
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
+		buildInFunctionChecker: monitorChecker,
+		IsBuildIn:              true,
 		Name:                   common.BUILD_IN_FUNCTION_MONITOREXIT,
 	}
 	// len
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_LEN] = &Function{
-		buildinFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_LEN] = &Function{
+		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			if len(e.TypedParameters) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
@@ -168,19 +168,19 @@ func registerBuildinFunctions() {
 				return
 			}
 		},
-		IsBuildin: true,
+		IsBuildIn: true,
 		Name:      common.BUILD_IN_FUNCTION_LEN,
 	}
-	lenFunction := buildinFunctionsMap[common.BUILD_IN_FUNCTION_LEN]
+	lenFunction := buildInFunctionsMap[common.BUILD_IN_FUNCTION_LEN]
 	lenFunction.Typ.ReturnList = make(ReturnList, 1)
 	lenFunction.Typ.ReturnList[0] = &VariableDefinition{}
 	lenFunction.Typ.ReturnList[0].Typ = &VariableType{}
 	lenFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_INT
 	// sprintf
 	sprintfBuildFunction := &Function{}
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_SPRINTF] = sprintfBuildFunction
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_SPRINTF] = sprintfBuildFunction
 	sprintfBuildFunction.Name = common.BUILD_IN_FUNCTION_SPRINTF
-	sprintfBuildFunction.IsBuildin = true
+	sprintfBuildFunction.IsBuildIn = true
 	{
 		sprintfBuildFunction.Typ.ReturnList = make([]*VariableDefinition, 1)
 		sprintfBuildFunction.Typ.ReturnList[0] = &VariableDefinition{}
@@ -188,7 +188,7 @@ func registerBuildinFunctions() {
 		sprintfBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
 		sprintfBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_STRING
 	}
-	sprintfBuildFunction.buildinFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	sprintfBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*VariableType, pos *Pos) {
 		if len(e.TypedParameters) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -221,8 +221,8 @@ func registerBuildinFunctions() {
 		e.Args = e.Args[1:]
 	}
 	// printf
-	buildinFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
-		buildinFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
+		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*VariableType, pos *Pos) {
 			if len(e.TypedParameters) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -277,7 +277,7 @@ func registerBuildinFunctions() {
 			e.Args = e.Args[1:]
 			meta.ArgsLength = len(args)
 		},
-		IsBuildin: true,
+		IsBuildIn: true,
 		Name:      common.BUILD_IN_FUNCTION_PRINTF,
 	}
 }

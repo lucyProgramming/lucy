@@ -92,7 +92,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 	return
 }
 
-func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -101,7 +102,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 	if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildMapIndex(class, code, e, context, state)
 	}
-	maxstack, _ = m.build(class, code, index.Expression, context, state)
+	maxStack, _ = m.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.Value)
 	currentStack := uint16(1)
 	if index.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
@@ -131,8 +132,8 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		currentStack = 3
 	}
 	stack, _ := m.build(class, code, index.Index, context, state)
-	if t := stack + currentStack; t > maxstack {
-		maxstack = t
+	if t := stack + currentStack; t > maxStack {
+		maxStack = t
 	}
 	if index.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		meta := ArrayMetas[e.Value.Typ]

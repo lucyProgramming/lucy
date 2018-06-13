@@ -24,7 +24,7 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	code.CodeLength += 3
 	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
 	maxStack = 2 // current stack is 2
-	currenStack := uint16(1)
+	currentStack := uint16(1)
 	stack, es := m.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
@@ -32,10 +32,10 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	if t := currenStack + stack; t > maxStack {
+	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := currenStack + m.stackTop2String(class, code, e.Left.Value, context, state); t > maxStack {
+	if t := currentStack + m.stackTop2String(class, code, e.Left.Value, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -52,10 +52,10 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	if t := currenStack + stack; t > maxStack {
+	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := currenStack + m.stackTop2String(class, code, e.Right.Value, context, state); t > maxStack {
+	if t := currentStack + m.stackTop2String(class, code, e.Right.Value, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

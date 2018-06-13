@@ -37,7 +37,7 @@ const (
 
 type VariableType struct {
 	haveTCalled bool
-	Tnames      []string
+	TNames      []string
 	Resolved    bool
 	Pos         *Pos
 	Typ         int
@@ -414,7 +414,7 @@ func (v *VariableType) TypeString() string {
 func (v *VariableType) haveT() (ret []string) {
 	defer func() {
 		v.haveTCalled = true
-		v.Tnames = ret
+		v.TNames = ret
 	}()
 	if v.Typ == VARIABLE_TYPE_T {
 		ret = []string{v.Name}

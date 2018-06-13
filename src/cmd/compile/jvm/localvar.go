@@ -16,7 +16,7 @@ func (m *MakeClass) loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCod
 
 func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxstack uint16) {
 	if v.BeenCaptured {
-		closure.storeLocalCloureVar(class, code, v)
+		closure.storeLocalClosureVar(class, code, v)
 		return
 	}
 	maxstack = jvmSize(v.Typ)

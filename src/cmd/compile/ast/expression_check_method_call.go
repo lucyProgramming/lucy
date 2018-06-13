@@ -38,33 +38,33 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		case *Class:
 			//object cast
 			class := d.(*Class)
-			typeConvertion := &ExpressionTypeConvertion{}
-			typeConvertion.Typ = &VariableType{}
-			typeConvertion.Typ.Typ = VARIABLE_TYPE_OBJECT
-			typeConvertion.Typ.Pos = e.Pos
-			typeConvertion.Typ.Class = class
+			typeConversion := &ExpressionTypeConvertion{}
+			typeConversion.Typ = &VariableType{}
+			typeConversion.Typ.Typ = VARIABLE_TYPE_OBJECT
+			typeConversion.Typ.Pos = e.Pos
+			typeConversion.Typ.Class = class
 			e.Typ = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
-				typeConvertion.Expression = call.Args[0]
+				typeConversion.Expression = call.Args[0]
 			}
-			e.Data = typeConvertion
+			e.Data = typeConversion
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
-				return []*VariableType{typeConvertion.Typ.Clone()}
+				return []*VariableType{typeConversion.Typ.Clone()}
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
 		case *VariableType:
-			typeConvertion := &ExpressionTypeConvertion{}
-			typeConvertion.Typ = object.Package.Block.Types[call.Name]
+			typeConversion := &ExpressionTypeConvertion{}
+			typeConversion.Typ = object.Package.Block.Types[call.Name]
 			e.Typ = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
-				typeConvertion.Expression = call.Args[0]
+				typeConversion.Expression = call.Args[0]
 			}
-			e.Data = typeConvertion
+			e.Data = typeConversion
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 					errMsgPrefix(e.Pos)))
-				return []*VariableType{typeConvertion.Typ}
+				return []*VariableType{typeConversion.Typ}
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
 		default:
@@ -84,7 +84,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 					errMsgPrefix(e.Pos), call.Name))
 				return []*VariableType{ret}
 			}
-			matchkey := call.Name == common.MAP_METHOD_KEY_EXISTS
+			matchKey := call.Name == common.MAP_METHOD_KEY_EXISTS
 			t, es := call.Args[0].checkSingleValueContextExpression(block)
 			if errsNotEmpty(es) {
 				*errs = append(*errs, es...)
@@ -92,7 +92,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			if t == nil {
 				return []*VariableType{ret}
 			}
-			if matchkey {
+			if matchKey {
 				if false == object.Map.K.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
@@ -249,7 +249,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
-	// call father`s contruction method
+	// call father`s construction method
 	if call.Name == SUPER_FIELD_NAME {
 		if block.InheritedAttribute.IsConstruction == false ||
 			block.IsFunctionTopBlock == false ||

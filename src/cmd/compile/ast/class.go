@@ -24,8 +24,6 @@ type Class struct {
 	InterfaceNames     []*NameWithPos
 	Interfaces         []*Class
 	LoadFromOutSide    bool
-	//Used               bool
-	//SourceFile          string
 }
 
 func (c *Class) IsInterface() bool {

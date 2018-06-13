@@ -28,7 +28,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		noErr = false
 	}
 	var err error
-	noNewVaraible := true
+	noNewVariable := true
 	declareVariableExpression := &ExpressionDeclareVariable{}
 	declareVariableExpression.Values = values
 	for k, v := range names {
@@ -64,7 +64,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, variable)
 			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, true)
 		} else { // should be no error
-			noNewVaraible = false
+			noNewVariable = false
 			vd := &VariableDefinition{}
 			if k < len(ts) {
 				vd.Typ = ts[k]
@@ -91,7 +91,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 		}
 	}
-	if noNewVaraible {
+	if noNewVariable {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 		noErr = false
 	}

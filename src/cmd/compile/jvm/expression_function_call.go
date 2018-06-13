@@ -8,7 +8,7 @@ import (
 func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Func.IsBuildin {
+	if call.Func.IsBuildIn {
 		return m.mkBuildinFunctionCall(class, code, e, context, state)
 	}
 	if call.Func.TemplateFunction != nil {
