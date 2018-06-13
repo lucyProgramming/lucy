@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseMapExprssion(needType bool) (*ast.Expression, error) {
 	var typ *ast.VariableType
 	var err error
 	if needType {
@@ -20,9 +20,9 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 		return nil, fmt.Errorf("expect '{',but '%s'", ep.parser.token.Description)
 	}
 	ep.Next() // skip {
-	ret := &ast.Expression{Typ: ast.EXPRESSION_TYPE_MAP}
+	ret := &ast.Expression{Type: ast.EXPRESSION_TYPE_MAP}
 	m := &ast.ExpressionMap{}
-	m.Typ = typ
+	m.Type = typ
 	ret.Data = m
 	for ep.parser.token.Type != lex.TOKEN_EOF && ep.parser.token.Type != lex.TOKEN_RC {
 		// key

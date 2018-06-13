@@ -55,7 +55,7 @@ func (s *StackMapState) addTop(absent *StackMapState) {
 
 func (s *StackMapState) newObjectVariableType(name string) *ast.VariableType {
 	ret := &ast.VariableType{}
-	ret.Typ = ast.VARIABLE_TYPE_OBJECT
+	ret.Type = ast.VARIABLE_TYPE_OBJECT
 	ret.Class = &ast.Class{}
 	ret.Class.Name = name
 	return ret
@@ -88,7 +88,7 @@ func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel,
 	t *ast.VariableType) (ret *cg.StackMapVerificationTypeInfo) {
 	ret = &cg.StackMapVerificationTypeInfo{}
-	switch t.Typ {
+	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -120,7 +120,7 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 			Index: class.Class.InsertClassConst(java_hashmap_class),
 		}
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[t.ArrayType.Typ]
+		meta := ArrayMetas[t.ArrayType.Type]
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(meta.className),
 		}

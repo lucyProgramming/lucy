@@ -31,28 +31,28 @@ var (
 func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
 	p := &Parser{}
 	p.filename = pos.Filename
-	p.nerr = 10
+	p.nErrors2Stop = 10
 	tops := []*ast.Node{}
 	p.tops = &tops
 	p.bs = bs
-	p.Function = &Function{
+	p.FunctionParser = &FunctionParser{
 		parser: p,
 	}
-	p.Block = &Block{
+	p.BlockParser = &BlockParser{
 		parser: p,
 	}
-	p.Expression = &Expression{
+	p.ExpressionParser = &ExpressionParser{
 		parser: p,
 	}
-	p.Class = &Class{
+	p.ClassParser = &ClassParser{
 		parser: p,
 	}
-	p.Interface = &Interface{
+	p.InterfaceParser = &InterfaceParser{
 		parser: p,
 	}
 	p.scanner = lex.New(p.bs, pos.StartLine, pos.StartColumn)
 	p.Next() // parse fn
-	f, err := p.Function.parse(true)
+	f, err := p.FunctionParser.parse(true)
 	if err != nil {
 		p.errs = append(p.errs, err)
 	}

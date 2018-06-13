@@ -7,10 +7,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
+func (b *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 	pos := b.parser.mkPos()
 	b.Next() // skip switch key word
-	condition, err := b.parser.Expression.parseExpression(false)
+	condition, err := b.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
 		return nil, err
@@ -31,7 +31,7 @@ func (b *Block) parseSwitch() (*ast.StatementSwitch, error) {
 	s.Condition = condition
 	for b.parser.token.Type != lex.TOKEN_EOF && b.parser.token.Type == lex.TOKEN_CASE {
 		b.Next() // skip case
-		es, err := b.parser.Expression.parseExpressions()
+		es, err := b.parser.ExpressionParser.parseExpressions()
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 			return s, err

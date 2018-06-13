@@ -5,16 +5,16 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	if e.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
-		return m.buildNewArray(class, code, e, context, state)
+	if e.Value.Type == ast.VARIABLE_TYPE_ARRAY {
+		return makeExpression.buildNewArray(class, code, e, context, state)
 	}
-	if e.Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
-		return m.buildNewJavaArray(class, code, e, context, state)
+	if e.Value.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
+		return makeExpression.buildNewJavaArray(class, code, e, context, state)
 	}
-	if e.Value.Typ == ast.VARIABLE_TYPE_MAP {
-		return m.buildNewMap(class, code, e, context)
+	if e.Value.Type == ast.VARIABLE_TYPE_MAP {
+		return makeExpression.buildNewMap(class, code, e, context)
 	}
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -24,7 +24,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	//new class
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	t := &cg.StackMapVerificationTypeInfo{}
 	t.Verify = &cg.StackMapUninitializedVariableInfo{
@@ -34,24 +34,24 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.CodeLength += 4
 	maxStack = 2
 	if n.Args != nil && len(n.Args) > 0 {
-		maxStack += m.buildCallArgs(class, code, n.Args, n.Construction.Func.Typ.ParameterList, context, state)
+		maxStack += makeExpression.buildCallArgs(class, code, n.Args, n.Construction.Func.Type.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      n.Typ.Class.Name,
+			Class:      n.Type.Class.Name,
 			Method:     special_method_init,
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
 		d := ""
-		if n.Typ.Class.LoadFromOutSide {
+		if n.Type.Class.LoadFromOutSide {
 			d = n.Construction.Func.Descriptor
 		} else {
 			d = Descriptor.methodDescriptor(n.Construction.Func)
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      n.Typ.Class.Name,
+			Class:      n.Type.Class.Name,
 			Method:     special_method_init,
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -59,7 +59,7 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.CodeLength += 3
 	return
 }
-func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
@@ -76,22 +76,22 @@ func (m *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.Attribut
 	return
 }
 
-func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	dimensions := byte(0)
 	{
 		// get dimension
 		t := e.Value
-		for t.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+		for t.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
 			dimensions++
 			t = t.ArrayType
 		}
 	}
 	n := e.Data.(*ast.ExpressionNew)
-	maxStack, _ = m.build(class, code, n.Args[0], context, state) // must be a integer
+	maxStack, _ = makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
-		loadInt32(class, code, 0)
+		loadInt(class, code, 0)
 		currentStack++
 		if currentStack > maxStack {
 			maxStack = currentStack
@@ -103,11 +103,11 @@ func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.At
 	code.CodeLength += 4
 	return
 }
-func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
-	meta := ArrayMetas[e.Value.ArrayType.Typ]
+	meta := ArrayMetas[e.Value.ArrayType.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -122,17 +122,17 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		defer state.popStack(2)
 	}
 	if n.IsConvertJavaArray2Array {
-		stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
+		stack, _ := makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
 	} else {
 		// get amount
-		stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
+		stack, _ := makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
-		switch e.Value.ArrayType.Typ {
+		switch e.Value.ArrayType.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -177,7 +177,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
+			meta := ArrayMetas[e.Value.ArrayType.ArrayType.Type]
 			class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_JAVA_ARRAY:

@@ -7,11 +7,11 @@ import (
 
 type SortErrors []error
 
-func (e SortErrors) Len() int {
-	return len(e)
+func (errs SortErrors) Len() int {
+	return len(errs)
 }
-func (e SortErrors) Less(i, j int) bool {
-	e1, e2 := e[i].Error(), e[j].Error()
+func (errs SortErrors) Less(i, j int) bool {
+	e1, e2 := errs[i].Error(), errs[j].Error()
 	e1s, e2s := strings.Split(e1, ":"), strings.Split(e2, ":")
 	if string(e1s[0]) < string(e2s[0]) {
 		return true
@@ -28,12 +28,12 @@ func (e SortErrors) Less(i, j int) bool {
 		return false
 	}
 	// line1 == line2
-	c1 := e.parseColumn(e1s[2])
-	c2 := e.parseColumn(e2s[2])
+	c1 := errs.parseColumn(e1s[2])
+	c2 := errs.parseColumn(e2s[2])
 	return c1 < c2
 }
 
-func (e SortErrors) parseColumn(s string) int {
+func (errs SortErrors) parseColumn(s string) int {
 	var ret int
 	for _, v := range []byte(s) {
 		if v >= '0' && v <= '9' {
@@ -45,6 +45,6 @@ func (e SortErrors) parseColumn(s string) int {
 	return ret
 }
 
-func (e SortErrors) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
+func (errs SortErrors) Swap(i, j int) {
+	errs[i], errs[j] = errs[j], errs[i]
 }

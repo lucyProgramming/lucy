@@ -9,9 +9,9 @@ import (
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
 	var names []*Expression
-	if bin.Left.Typ == EXPRESSION_TYPE_IDENTIFIER {
+	if bin.Left.Type == EXPRESSION_TYPE_IDENTIFIER {
 		names = append(names, bin.Left)
-	} else if bin.Left.Typ == EXPRESSION_TYPE_LIST {
+	} else if bin.Left.Type == EXPRESSION_TYPE_LIST {
 		names = bin.Left.Data.([]*Expression)
 	} else {
 		*errs = append(*errs, fmt.Errorf("%s no names on the left", errMsgPrefix(e.Pos)))
@@ -32,7 +32,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	declareVariableExpression := &ExpressionDeclareVariable{}
 	declareVariableExpression.Values = values
 	for k, v := range names {
-		if v.Typ != EXPRESSION_TYPE_IDENTIFIER {
+		if v.Type != EXPRESSION_TYPE_IDENTIFIER {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'",
 				errMsgPrefix(v.Pos), v.OpName()))
 			noErr = false
@@ -52,33 +52,33 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		if variable, ok := block.Variables[identifier.Name]; ok {
 			if variableType != nil {
-				if variable.Typ.Equal(errs, ts[k]) == false {
+				if variable.Type.Equal(errs, ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(ts[k].Pos),
-						variable.Typ.TypeString(),
+						variable.Type.TypeString(),
 						ts[k].TypeString()))
 					noErr = false
 				}
 			}
-			identifier.Var = variable
+			identifier.Variable = variable
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, variable)
 			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, true)
 		} else { // should be no error
 			noNewVariable = false
 			vd := &VariableDefinition{}
 			if k < len(ts) {
-				vd.Typ = ts[k]
+				vd.Type = ts[k]
 			}
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
-			vd.Typ = variableType
-			if vd.Typ == nil { // still cannot have type,we can have a void,that`s ok
-				vd.Typ = &VariableType{}
-				vd.Typ.Typ = VARIABLE_TYPE_VOID
-				vd.Typ.Pos = v.Pos
+			vd.Type = variableType
+			if vd.Type == nil { // still cannot have type,we can have a void,that`s ok
+				vd.Type = &VariableType{}
+				vd.Type.Type = VARIABLE_TYPE_VOID
+				vd.Type.Pos = v.Pos
 			}
-			err = block.insert(vd.Name, v.Pos, vd)
-			identifier.Var = vd
+			err = block.Insert(vd.Name, v.Pos, vd)
+			identifier.Variable = vd
 			if err != nil {
 				*errs = append(*errs, err)
 				noErr = false
@@ -119,8 +119,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		var  s string;
 		s += "11111111";
 	*/
-	if t1.Typ == VARIABLE_TYPE_STRING {
-		if t2.Typ != VARIABLE_TYPE_STRING || (e.Typ != EXPRESSION_TYPE_PLUS_ASSIGN) {
+	if t1.Type == VARIABLE_TYPE_STRING {
+		if t2.Type != VARIABLE_TYPE_STRING || (e.Type != EXPRESSION_TYPE_PLUS_ASSIGN) {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),
@@ -129,35 +129,35 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 		return ret
 	}
 	//number
-	if e.Typ == EXPRESSION_TYPE_PLUS_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_MINUS_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_MUL_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_DIV_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_MOD_ASSIGN {
+	if e.Type == EXPRESSION_TYPE_PLUS_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_MINUS_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_MUL_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_DIV_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_MOD_ASSIGN {
 		if t1.Equal(errs, t2) {
 			return ret
 		}
 		if t1.IsInteger() && t2.IsInteger() && bin.Right.IsLiteral() {
-			bin.Right.ConvertToNumber(t1.Typ)
+			bin.Right.ConvertToNumber(t1.Type)
 			return ret
 		}
 		if t1.IsFloat() && t2.IsFloat() && bin.Right.IsLiteral() {
-			bin.Right.ConvertToNumber(t1.Typ)
+			bin.Right.ConvertToNumber(t1.Type)
 			return ret
 		}
 
 	}
-	if e.Typ == EXPRESSION_TYPE_AND_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_OR_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_XOR_ASSIGN {
+	if e.Type == EXPRESSION_TYPE_AND_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_OR_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_XOR_ASSIGN {
 		if t1.IsInteger() && t1.Equal(errs, t2) {
 			return ret
 		}
 	}
-	if e.Typ == EXPRESSION_TYPE_LSH_ASSIGN ||
-		e.Typ == EXPRESSION_TYPE_RSH_ASSIGN {
+	if e.Type == EXPRESSION_TYPE_LSH_ASSIGN ||
+		e.Type == EXPRESSION_TYPE_RSH_ASSIGN {
 		if t1.IsInteger() && t2.IsInteger() {
-			if t2.Typ == VARIABLE_TYPE_LONG {
+			if t2.Type == VARIABLE_TYPE_LONG {
 				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
 			}
 			return ret
@@ -176,12 +176,12 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *VariableType {
 	bin := e.Data.(*ExpressionBinary)
 	lefts := make([]*Expression, 1)
-	if bin.Left.Typ == EXPRESSION_TYPE_LIST {
+	if bin.Left.Type == EXPRESSION_TYPE_LIST {
 		lefts = bin.Left.Data.([]*Expression)
 	} else {
 		lefts[0] = bin.Left
 		bin.Left = &Expression{}
-		bin.Left.Typ = EXPRESSION_TYPE_LIST
+		bin.Left.Type = EXPRESSION_TYPE_LIST
 		bin.Left.Data = lefts // rewrite to list anyway
 	}
 	values := bin.Right.Data.([]*Expression)
@@ -191,7 +191,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 	leftTypes := []*VariableType{}
 
 	for _, v := range lefts {
-		if v.Typ == EXPRESSION_TYPE_IDENTIFIER {
+		if v.Type == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifier)
 			if name.Name == NO_NAME_IDENTIFIER { // skip "_"
 				leftTypes = append(leftTypes, nil) // this is no assign situation

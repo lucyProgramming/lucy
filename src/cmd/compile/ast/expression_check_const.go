@@ -8,7 +8,7 @@ func (e *Expression) checkConst(block *Block) []error {
 		if err != nil {
 			continue
 		}
-		err = block.insert(c.Name, c.Pos, c)
+		err = block.Insert(c.Name, c.Pos, c)
 		if err != nil {
 			errs = append(errs, err)
 		}

@@ -5,64 +5,64 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ee := e.Data.(*ast.Expression)
 	// identifier  and not captured and type`s int
-	if t, ok := ee.Data.(*ast.ExpressionIdentifier); ee.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
+	if t, ok := ee.Data.(*ast.ExpressionIdentifier); ee.Type == ast.EXPRESSION_TYPE_IDENTIFIER &&
 		ok &&
-		t.Var.BeenCaptured == false &&
-		t.Var.Typ.Typ == ast.VARIABLE_TYPE_INT {
-		if t.Var.LocalValOffset > 255 { // early check
+		t.Variable.BeenCaptured == false &&
+		t.Variable.Type.Type == ast.VARIABLE_TYPE_INT {
+		if t.Variable.LocalValOffset > 255 { // early check
 			panic("over 255")
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
-				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
+			if e.Type == ast.EXPRESSION_TYPE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_DECREMENT {
+				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}
-		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_INCREMENT {
+		if e.Type == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_INCREMENT {
 			code.Codes[code.CodeLength] = cg.OP_iinc
-			code.Codes[code.CodeLength+1] = byte(t.Var.LocalValOffset)
+			code.Codes[code.CodeLength+1] = byte(t.Variable.LocalValOffset)
 			code.Codes[code.CodeLength+2] = 1
 			code.CodeLength += 3
 		} else { // --
 			code.Codes[code.CodeLength] = cg.OP_iinc
-			code.Codes[code.CodeLength+1] = byte(t.Var.LocalValOffset)
+			code.Codes[code.CodeLength+1] = byte(t.Variable.LocalValOffset)
 			code.Codes[code.CodeLength+2] = 255 // -1
 			code.CodeLength += 3
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
-			if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT { // decrement
-				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
+			if e.Type == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_PRE_DECREMENT { // decrement
+				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}
 		return
 	}
-	length := len(state.Stacks)
+	stackLength := len(state.Stacks)
 	defer func() {
-		state.popStack(len(state.Stacks) - length)
+		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	maxStack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context, state)
+	maxStack, remainStack, op, _, className, name, descriptor := makeExpression.getLeftValue(class, code, ee, context, state)
 	/*
 		left value must can be used as right value
 	*/
-	stack, _ := m.build(class, code, ee, context, state) // load it`s value
+	stack, _ := makeExpression.build(class, code, ee, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
 	currentStack := jvmSize(ee.Value) + remainStack
 	if e.IsStatementExpression == false {
-		if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
-			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
+		if e.Type == ast.EXPRESSION_TYPE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_DECREMENT {
+			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.Value)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
 		}
 	}
-	switch e.Value.Typ {
+	switch e.Value.Type {
 	case ast.VARIABLE_TYPE_BYTE:
 		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
@@ -142,15 +142,15 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
-		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT ||
-			e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
-			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
+		if e.Type == ast.EXPRESSION_TYPE_PRE_INCREMENT ||
+			e.Type == ast.EXPRESSION_TYPE_PRE_DECREMENT {
+			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.Value)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
 		}
 	}
 	//copy op
-	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
 	return
 }

@@ -5,38 +5,38 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
-	for _, v := range f.Typ.ParameterList { // insert into locals
+func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
+	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
-		code.MaxLocals += jvmSize(v.Typ)
-		state.appendLocals(class, v.Typ)
+		code.MaxLocals += jvmSize(v.Type)
+		state.appendLocals(class, v.Type)
 	}
-	for _, v := range f.Typ.ParameterList {
+	for _, v := range f.Type.ParameterList {
 		if v.BeenCaptured == false { // capture
 			continue
 		}
-		stack := closure.createClosureVar(class, code, v.Typ)
+		stack := closure.createClosureVar(class, code, v.Type)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		copyOP(code, loadSimpleVarOps(v.Typ.Typ, v.LocalValOffset)...)
-		if t := 2 + jvmSize(v.Typ); t > maxStack {
+		copyOP(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+		if t := 2 + jvmSize(v.Type); t > maxStack {
 			maxStack = t
 		}
-		m.storeLocalVar(class, code, v)
+		makeClass.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
-		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 	}
-	for _, v := range f.Typ.ReturnList {
+	for _, v := range f.Type.ReturnList {
 		currentStack := uint16(0)
 		if v.BeenCaptured { //create closure object
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
-			stack := closure.createClosureVar(class, code, v.Typ)
+			stack := closure.createClosureVar(class, code, v.Type)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -46,36 +46,36 @@ func (m *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel
 			if 2 > maxStack {
 				maxStack = 2
 			}
-			copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
 			state.pushStack(class,
-				state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
+				state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 		} else {
 			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(v.Typ)
+			code.MaxLocals += jvmSize(v.Type)
 		}
-		stack, es := m.MakeExpression.build(class, code, v.Expression, context, state)
+		stack, es := makeClass.makeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, v.Typ)
+			state.pushStack(class, v.Type)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		m.storeLocalVar(class, code, v)
+		makeClass.storeLocalVar(class, code, v)
 		if v.BeenCaptured {
 			state.popStack(1)
-			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
+			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 		} else {
-			state.appendLocals(class, v.Typ)
+			state.appendLocals(class, v.Type)
 		}
 	}
 	return
 }
 
-func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
+func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
 	context.class = astClass
 	context.function = f
@@ -100,7 +100,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 			state.Locals = append(state.Locals,
 				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(astClass.Name)))
 			// field default value
-			m.mkFieldDefaultValue(class, method.Code, context, state)
+			makeClass.mkFieldDefaultValue(class, method.Code, context, state)
 		} else {
 			method.Code.MaxLocals = 1
 			t := &cg.StackMapVerificationTypeInfo{}
@@ -114,7 +114,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
-		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_STRING, 0)...)
+		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_STRING, 0)...)
 		if 3 > code.MaxStack {
 			code.MaxStack = 3
 		}
@@ -125,11 +125,11 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 			Descriptor: meta.constructorFuncDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 1)...)
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 1)...)
 		{
 			// String[] java style
-			t := &ast.VariableType{Typ: ast.VARIABLE_TYPE_JAVA_ARRAY}
-			t.ArrayType = &ast.VariableType{Typ: ast.VARIABLE_TYPE_STRING}
+			t := &ast.VariableType{Type: ast.VARIABLE_TYPE_JAVA_ARRAY}
+			t.ArrayType = &ast.VariableType{Type: ast.VARIABLE_TYPE_STRING}
 			state.appendLocals(class, t)
 		}
 		method.Code.MaxLocals = 1
@@ -137,7 +137,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		method.Code.MaxLocals = 1
 		state.appendLocals(class, state.newObjectVariableType(class.Name))
 	}
-	if LucyMethodSignatureParser.Need(&f.Typ) {
+	if LucyMethodSignatureParser.Need(&f.Type) {
 		d := &cg.AttributeLucyMethodDescriptor{}
 		d.Descriptor = LucyMethodSignatureParser.Encode(f)
 		method.AttributeLucyMethodDescriptor = d
@@ -145,12 +145,12 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
-	if t := m.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
+	if t := makeClass.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
 	{
 		method.AttributeMethodParameters = &cg.AttributeMethodParameters{}
-		for _, v := range f.Typ.ParameterList {
+		for _, v := range f.Type.ParameterList {
 			p := &cg.MethodParameter{}
 			p.Name = v.Name
 			p.AccessFlags = cg.METHOD_PARAMETER_TYPE_ACC_MANDATED
@@ -159,7 +159,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	}
 	if f.NoReturnValue() == false {
 		method.AttributeLucyReturnListNames = &cg.AttributeMethodParameters{}
-		for _, v := range f.Typ.ReturnList {
+		for _, v := range f.Type.ReturnList {
 			p := &cg.MethodParameter{}
 			p.Name = v.Name
 			p.AccessFlags = cg.METHOD_PARAMETER_TYPE_ACC_MANDATED
@@ -168,31 +168,31 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		}
 	}
 
-	if t := m.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
+	if t := makeClass.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
-	m.buildBlock(class, method.Code, &f.Block, context, state)
+	makeClass.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }
-func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	if f.AutoVarForException != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
 		f.AutoVarForException.Offset = code.MaxLocals
 		code.MaxLocals++
-		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
 		state.appendLocals(class,
 			state.newObjectVariableType(java_throwable_class))
 		maxStack = 1
 	}
 	if f.AutoVarForReturnBecauseOfDefer != nil {
-		if len(f.Typ.ReturnList) > 1 {
+		if len(f.Type.ReturnList) > 1 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
 			f.AutoVarForReturnBecauseOfDefer.ForArrayList = code.MaxLocals
 			code.MaxLocals++
-			copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT,
+			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
 				f.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
 			state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		}
@@ -203,7 +203,7 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 		code.CodeLength++
 		f.AutoVarForMultiReturn.Offset = code.MaxLocals
 		code.MaxLocals++
-		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
 		state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		maxStack = 1
 	}
@@ -211,14 +211,14 @@ func (m *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.Attr
 	return
 }
 
-func (m *MakeClass) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
+func (makeClass *MakeClass) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
 	for _, v := range context.class.Fields {
 		if v.DefaultValue == nil || v.IsStatic() {
 			continue
 		}
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
-		stack, _ := m.MakeExpression.build(class, code, v.Expression, context, state)
+		stack, _ := makeClass.makeExpression.build(class, code, v.Expression, context, state)
 		if t := 1 + stack; t > code.MaxStack {
 			code.MaxStack = t
 		}
@@ -226,7 +226,7 @@ func (m *MakeClass) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.Attri
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,
 			Field:      v.Name,
-			Descriptor: Descriptor.typeDescriptor(v.Typ),
+			Descriptor: Descriptor.typeDescriptor(v.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}

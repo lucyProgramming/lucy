@@ -5,11 +5,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ternary := e.Data.(*ast.ExpressionTernary)
 	var es []*cg.Exit
-	maxStack, es = m.build(class, code, ternary.Condition, context, state)
+	maxStack, es = makeExpression.build(class, code, ternary.Condition, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
 		state.pushStack(class, ternary.Condition.Value)
@@ -18,7 +18,7 @@ func (m *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.Attribu
 	}
 	exit := (&cg.Exit{}).FromCode(cg.OP_ifeq, code)
 	//true part
-	stack, es := m.build(class, code, ternary.True, context, state)
+	stack, es := makeExpression.build(class, code, ternary.True, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
 		state.pushStack(class, ternary.True.Value)
@@ -31,7 +31,7 @@ func (m *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.Attribu
 	exit2 := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	context.MakeStackMap(code, state, code.CodeLength)
 	backfillExit([]*cg.Exit{exit}, code.CodeLength)
-	stack, es = m.build(class, code, ternary.False, context, state)
+	stack, es = makeExpression.build(class, code, ternary.False, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
 		state.pushStack(class, ternary.False.Value)

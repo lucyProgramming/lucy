@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -13,7 +13,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	}()
 	arr := e.Data.(*ast.ExpressionArrayLiteral)
 	//	new array ,
-	meta := ArrayMetas[e.Value.ArrayType.Typ]
+	meta := ArrayMetas[e.Value.ArrayType.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -27,8 +27,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		state.Stacks = append(state.Stacks, t, t)
 	}
 
-	loadInt32(class, code, int32(arr.Length))
-	switch e.Value.ArrayType.Typ {
+	loadInt(class, code, int32(arr.Length))
+	switch e.Value.ArrayType.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -72,20 +72,20 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		class.InsertClassConst(e.Value.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
+		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Type]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 	arrayObject := &ast.VariableType{}
-	arrayObject.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+	arrayObject.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 	arrayObject.ArrayType = e.Value.ArrayType
 	state.pushStack(class, arrayObject)
 
 	maxStack = 4
 
 	store := func() {
-		switch e.Value.ArrayType.Typ {
+		switch e.Value.ArrayType.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -117,7 +117,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	for _, v := range arr.Expressions {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			// stack top is array list
-			stack, _ := m.build(class, code, v, context, state)
+			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxStack {
 				maxStack = t
 			}
@@ -125,7 +125,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			for k, t := range v.Values {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
-				loadInt32(class, code, index) // load index
+				loadInt(class, code, index) // load index
 				stack := multiValuePacker.unPack(class, code, k, t, context)
 				if t := 5 + stack; t > maxStack {
 					maxStack = t
@@ -137,10 +137,10 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		loadInt32(class, code, index) // load index
+		loadInt(class, code, index) // load index
 		state.pushStack(class, arrayObject)
-		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-		stack, es := m.build(class, code, v, context, state)
+		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)

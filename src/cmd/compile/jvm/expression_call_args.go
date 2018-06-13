@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	args []*ast.Expression, parameters ast.ParameterList, context *Context, state *StackMapState) (maxStack uint16) {
 	currentStack := uint16(0)
 	stackLength := len(state.Stacks)
@@ -15,7 +15,7 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 	parameterIndex := 0
 	for _, e := range args {
 		if e.MayHaveMultiValue() && len(e.Values) > 1 {
-			stack, _ := m.build(class, code, e, context, state)
+			stack, _ := makeExpression.build(class, code, e, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -26,14 +26,14 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 					maxStack = t
 				}
 				currentStack += jvmSize(t)
-				state.pushStack(class, parameters[parameterIndex].Typ)
+				state.pushStack(class, parameters[parameterIndex].Type)
 				parameterIndex++
 			}
 			continue
 		}
-		stack, es := m.build(class, code, e, context, state)
+		stack, es := makeExpression.build(class, code, e, context, state)
 		if len(es) > 0 {
-			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_BOOL})
+			state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_BOOL})
 			backfillExit(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -41,8 +41,8 @@ func (m *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.Attrib
 		if t := stack + currentStack; t > maxStack {
 			maxStack = t
 		}
-		currentStack += jvmSize(parameters[parameterIndex].Typ)
-		state.pushStack(class, parameters[parameterIndex].Typ)
+		currentStack += jvmSize(parameters[parameterIndex].Type)
+		state.pushStack(class, parameters[parameterIndex].Type)
 		parameterIndex++
 	}
 	return

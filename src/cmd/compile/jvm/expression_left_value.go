@@ -7,17 +7,17 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) getCaptureIdentifierLeftValue(
+func (makeExpression *MakeExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
 	target *ast.VariableType, className, fieldName, fieldDescriptor string) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	target = identifier.Var.Typ
+	target = identifier.Variable.Type
 	op = []byte{cg.OP_putfield}
-	meta := closure.getMeta(identifier.Var.Typ.Typ)
-	if context.function.Closure.ClosureVariableExist(identifier.Var) { // capture var exits
-		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+	meta := closure.getMeta(identifier.Variable.Type.Type)
+	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
+		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,
@@ -26,7 +26,7 @@ func (m *MakeExpression) getCaptureIdentifierLeftValue(
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
-		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
+		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, identifier.Variable.LocalValOffset)...)
 	}
 	state.pushStack(class, state.newObjectVariableType(meta.className))
 	maxStack = 1
@@ -37,15 +37,15 @@ func (m *MakeExpression) getCaptureIdentifierLeftValue(
 	return
 }
 
-func (m *MakeExpression) getMapLeftValue(
+func (makeExpression *MakeExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
 	target *ast.VariableType, className, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack, _ = m.build(class, code, index.Expression, context, state)
+	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
-	stack, _ := m.build(class, code, index.Index, context, state)
+	stack, _ := makeExpression.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -73,29 +73,29 @@ func (m *MakeExpression) getMapLeftValue(
 	return
 }
 
-func (m *MakeExpression) getLeftValue(
+func (makeExpression *MakeExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
 	target *ast.VariableType, className, name, descriptor string) {
-	switch e.Typ {
+	switch e.Type {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
-		if identifier.Var.IsGlobal {
+		if identifier.Variable.IsGlobal {
 			op = []byte{cg.OP_putstatic}
-			target = identifier.Var.Typ
-			className = m.MakeClass.mainClass.Name
+			target = identifier.Variable.Type
+			className = makeExpression.MakeClass.mainClass.Name
 			name = identifier.Name
-			descriptor = Descriptor.typeDescriptor(identifier.Var.Typ)
+			descriptor = Descriptor.typeDescriptor(identifier.Variable.Type)
 			return
 		}
-		if identifier.Var.BeenCaptured {
-			return m.getCaptureIdentifierLeftValue(class, code, e, context, state)
+		if identifier.Variable.BeenCaptured {
+			return makeExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
 		if identifier.Name == ast.NO_NAME_IDENTIFIER {
 			panic("this is not happening")
 		}
-		switch identifier.Var.Typ.Typ {
+		switch identifier.Variable.Type.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -105,82 +105,82 @@ func (m *MakeExpression) getLeftValue(
 		case ast.VARIABLE_TYPE_ENUM:
 			fallthrough
 		case ast.VARIABLE_TYPE_INT:
-			if identifier.Var.LocalValOffset == 0 {
+			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_istore_0}
-			} else if identifier.Var.LocalValOffset == 1 {
+			} else if identifier.Variable.LocalValOffset == 1 {
 				op = []byte{cg.OP_istore_1}
-			} else if identifier.Var.LocalValOffset == 2 {
+			} else if identifier.Variable.LocalValOffset == 2 {
 				op = []byte{cg.OP_istore_2}
-			} else if identifier.Var.LocalValOffset == 3 {
+			} else if identifier.Variable.LocalValOffset == 3 {
 				op = []byte{cg.OP_istore_3}
-			} else if identifier.Var.LocalValOffset <= 255 {
-				op = []byte{cg.OP_istore, byte(identifier.Var.LocalValOffset)}
+			} else if identifier.Variable.LocalValOffset <= 255 {
+				op = []byte{cg.OP_istore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		case ast.VARIABLE_TYPE_FLOAT:
-			if identifier.Var.LocalValOffset == 0 {
+			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_fstore_0}
-			} else if identifier.Var.LocalValOffset == 1 {
+			} else if identifier.Variable.LocalValOffset == 1 {
 				op = []byte{cg.OP_fstore_1}
-			} else if identifier.Var.LocalValOffset == 2 {
+			} else if identifier.Variable.LocalValOffset == 2 {
 				op = []byte{cg.OP_fstore_2}
-			} else if identifier.Var.LocalValOffset == 3 {
+			} else if identifier.Variable.LocalValOffset == 3 {
 				op = []byte{cg.OP_fstore_3}
-			} else if identifier.Var.LocalValOffset <= 255 {
-				op = []byte{cg.OP_fstore, byte(identifier.Var.LocalValOffset)}
+			} else if identifier.Variable.LocalValOffset <= 255 {
+				op = []byte{cg.OP_fstore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		case ast.VARIABLE_TYPE_DOUBLE:
-			if identifier.Var.LocalValOffset == 0 {
+			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_dstore_0}
-			} else if identifier.Var.LocalValOffset == 1 {
+			} else if identifier.Variable.LocalValOffset == 1 {
 				op = []byte{cg.OP_dstore_1}
-			} else if identifier.Var.LocalValOffset == 2 {
+			} else if identifier.Variable.LocalValOffset == 2 {
 				op = []byte{cg.OP_dstore_2}
-			} else if identifier.Var.LocalValOffset == 3 {
+			} else if identifier.Variable.LocalValOffset == 3 {
 				op = []byte{cg.OP_dstore_3}
-			} else if identifier.Var.LocalValOffset <= 255 {
-				op = []byte{cg.OP_dstore, byte(identifier.Var.LocalValOffset)}
+			} else if identifier.Variable.LocalValOffset <= 255 {
+				op = []byte{cg.OP_dstore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		case ast.VARIABLE_TYPE_LONG:
-			if identifier.Var.LocalValOffset == 0 {
+			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_lstore_0}
-			} else if identifier.Var.LocalValOffset == 1 {
+			} else if identifier.Variable.LocalValOffset == 1 {
 				op = []byte{cg.OP_lstore_1}
-			} else if identifier.Var.LocalValOffset == 2 {
+			} else if identifier.Variable.LocalValOffset == 2 {
 				op = []byte{cg.OP_lstore_2}
-			} else if identifier.Var.LocalValOffset == 3 {
+			} else if identifier.Variable.LocalValOffset == 3 {
 				op = []byte{cg.OP_lstore_3}
-			} else if identifier.Var.LocalValOffset <= 255 {
-				op = []byte{cg.OP_lstore, byte(identifier.Var.LocalValOffset)}
+			} else if identifier.Variable.LocalValOffset <= 255 {
+				op = []byte{cg.OP_lstore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		default: // must be a object type
-			if identifier.Var.LocalValOffset == 0 {
+			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_astore_0}
-			} else if identifier.Var.LocalValOffset == 1 {
+			} else if identifier.Variable.LocalValOffset == 1 {
 				op = []byte{cg.OP_astore_1}
-			} else if identifier.Var.LocalValOffset == 2 {
+			} else if identifier.Variable.LocalValOffset == 2 {
 				op = []byte{cg.OP_astore_2}
-			} else if identifier.Var.LocalValOffset == 3 {
+			} else if identifier.Variable.LocalValOffset == 3 {
 				op = []byte{cg.OP_astore_3}
-			} else if identifier.Var.LocalValOffset <= 255 {
-				op = []byte{cg.OP_astore, byte(identifier.Var.LocalValOffset)}
+			} else if identifier.Variable.LocalValOffset <= 255 {
+				op = []byte{cg.OP_astore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		}
-		target = identifier.Var.Typ
+		target = identifier.Variable.Type
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
-			meta := ArrayMetas[index.Expression.Value.ArrayType.Typ]
-			maxStack, _ = m.build(class, code, index.Expression, context, state)
+		if index.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY {
+			meta := ArrayMetas[index.Expression.Value.ArrayType.Type]
+			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
@@ -202,10 +202,10 @@ func (m *MakeExpression) getLeftValue(
 				Descriptor: "I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+			state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+			state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 
-			stack, _ := m.build(class, code, index.Index, context, state)
+			stack, _ := makeExpression.build(class, code, index.Index, context, state)
 			if t := stack + 3; t > maxStack {
 				maxStack = t
 			}
@@ -216,7 +216,7 @@ func (m *MakeExpression) getLeftValue(
 			{
 				state.popStack(3)
 				state.pushStack(class, state.newObjectVariableType(meta.className))
-				state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+				state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 				context.MakeStackMap(code, state, code.CodeLength+6)
 				context.MakeStackMap(code, state, code.CodeLength+16)
 				state.popStack(2)
@@ -250,12 +250,12 @@ func (m *MakeExpression) getLeftValue(
 			code.CodeLength++
 			{
 				t := &ast.VariableType{}
-				t.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+				t.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 				t.ArrayType = index.Expression.Value.ArrayType
 				state.pushStack(class, t)
-				state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+				state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 			}
-			switch e.Value.Typ {
+			switch e.Value.Type {
 			case ast.VARIABLE_TYPE_BOOL:
 				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_BYTE:
@@ -285,19 +285,19 @@ func (m *MakeExpression) getLeftValue(
 			}
 			remainStack = 2 // [arrayref ,index]
 			target = e.Value
-		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
-			return m.getMapLeftValue(class, code, e, context, state)
+		} else if index.Expression.Value.Type == ast.VARIABLE_TYPE_MAP { // map
+			return makeExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
-			maxStack, _ = m.build(class, code, index.Expression, context, state)
+			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
-			stack, _ := m.build(class, code, index.Index, context, state)
+			stack, _ := makeExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
 			target = e.Value
 			remainStack = 2 // [objectref ,index]
-			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-			switch e.Value.Typ {
+			state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+			switch e.Value.Type {
 			case ast.VARIABLE_TYPE_BOOL:
 				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_BYTE:
@@ -329,9 +329,9 @@ func (m *MakeExpression) getLeftValue(
 		}
 	case ast.EXPRESSION_TYPE_SELECT:
 		dot := e.Data.(*ast.ExpressionSelection)
-		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
+		if dot.Expression.Value.Type == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
-			target = dot.PackageVariable.Typ
+			target = dot.PackageVariable.Type
 			className = dot.Expression.Value.Package.Name + "/main"
 			name = dot.PackageVariable.Name
 			descriptor = dot.PackageVariable.Descriptor
@@ -339,7 +339,7 @@ func (m *MakeExpression) getLeftValue(
 			remainStack = 0
 		} else {
 			className = dot.Expression.Value.Class.Name
-			target = dot.Field.VariableDefinition.Typ
+			target = dot.Field.VariableDefinition.Type
 			name = dot.Name
 			if dot.Field.LoadFromOutSide {
 				descriptor = dot.Field.Descriptor
@@ -349,7 +349,7 @@ func (m *MakeExpression) getLeftValue(
 			if dot.Field.IsStatic() {
 				op = []byte{cg.OP_putstatic}
 			} else {
-				maxStack, _ = m.build(class, code, dot.Expression, context, state)
+				maxStack, _ = makeExpression.build(class, code, dot.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, dot.Expression.Value)
 				op = []byte{cg.OP_putfield}

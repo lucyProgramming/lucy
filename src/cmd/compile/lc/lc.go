@@ -90,7 +90,7 @@ func (lc *LucyCompile) parseImports() {
 	}
 	is := make([]string, len(lc.Tops))
 	for k, v := range lc.Tops {
-		is[k] = v.Data.(*ast.Import).Resource
+		is[k] = v.Data.(*ast.Import).ImportName
 	}
 	bs, _ := json.Marshal(is)
 	fmt.Println(string(bs))

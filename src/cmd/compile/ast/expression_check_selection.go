@@ -16,15 +16,15 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 		return nil
 	}
 	// dot
-	if t.Typ != VARIABLE_TYPE_OBJECT &&
-		t.Typ != VARIABLE_TYPE_CLASS &&
-		t.Typ != VARIABLE_TYPE_PACKAGE {
+	if t.Type != VARIABLE_TYPE_OBJECT &&
+		t.Type != VARIABLE_TYPE_CLASS &&
+		t.Type != VARIABLE_TYPE_PACKAGE {
 		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'",
 			errMsgPrefix(e.Pos), selection.Name, t.TypeString()))
 		return nil
 	}
 	var err error
-	if t.Typ == VARIABLE_TYPE_PACKAGE {
+	if t.Type == VARIABLE_TYPE_PACKAGE {
 		d, ok := t.Package.Block.NameExists(selection.Name)
 		if ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
@@ -34,7 +34,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 		switch d.(type) {
 		case *VariableDefinition:
 			v := d.(*VariableDefinition)
-			tt := v.Typ.Clone()
+			tt := v.Type.Clone()
 			tt.Pos = e.Pos
 			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
 				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
@@ -45,7 +45,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 		case *Constant:
 			c := d.(*Constant)
 			e.fromConst(c) //
-			tt := c.Typ.Clone()
+			tt := c.Type.Clone()
 			tt.Pos = e.Pos
 			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
 				err = fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
@@ -56,7 +56,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			c := d.(*Class)
 			tt := &VariableType{}
 			tt.Pos = e.Pos
-			tt.Typ = VARIABLE_TYPE_CLASS
+			tt.Type = VARIABLE_TYPE_CLASS
 			tt.Class = c
 			if (c.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
 				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
@@ -73,14 +73,14 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			tt.Pos = e.Pos
 			tt.Enum = n.Enum
 			tt.EnumName = n
-			tt.Typ = VARIABLE_TYPE_ENUM
+			tt.Type = VARIABLE_TYPE_ENUM
 			selection.EnumName = n
 			return tt
 		}
 		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
 		*errs = append(*errs, err)
 		return nil
-	} else if t.Typ == VARIABLE_TYPE_OBJECT { // object
+	} else if t.Type == VARIABLE_TYPE_OBJECT { // object
 		if selection.Name == SUPER_FIELD_NAME {
 			if t.Class.Name == JAVA_ROOT_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
@@ -110,7 +110,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by objectref",
 					errMsgPrefix(e.Pos), selection.Name))
 			}
-			t := field.Typ.Clone()
+			t := field.Type.Clone()
 			t.Pos = e.Pos
 			selection.Field = field
 			return t
@@ -147,7 +147,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 					errMsgPrefix(e.Pos),
 					selection.Name))
 			}
-			t := field.Typ.Clone()
+			t := field.Type.Clone()
 			t.Pos = e.Pos
 			selection.Field = field
 			return t

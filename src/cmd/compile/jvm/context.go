@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	//	"runtime/debug"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -12,41 +10,41 @@ type Context struct {
 	lastStackMapState       *StackMapState
 	lastStackMapStateLocals []*cg.StackMapVerificationTypeInfo
 	lastStackMapStateStacks []*cg.StackMapVerificationTypeInfo
-	LastStackMapOffset      int
-	NotFirstStackMap        bool
+	lastStackMapOffset      int
+	notFirstStackMap        bool
 	function                *ast.Function
 	currentSourceFile       string
 	currentLineNUmber       int
 	Defer                   *ast.Defer
-	StackMapOffsets         []int
+	stackMapOffsets         []int
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
 	//fmt.Println(offset)
-	if context.LastStackMapOffset == offset && context.NotFirstStackMap {
+	if context.lastStackMapOffset == offset && context.notFirstStackMap {
 		//if state.isSame(context.lastStackMapStateLocals, context.lastStackMapStateStacks) {
 		//	return // no need
 		//} else {
 		code.AttributeStackMap.StackMaps = code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
-		context.StackMapOffsets = context.StackMapOffsets[0 : len(context.StackMapOffsets)-1]
-		context.LastStackMapOffset = context.StackMapOffsets[len(context.StackMapOffsets)-1]
+		context.stackMapOffsets = context.stackMapOffsets[0 : len(context.stackMapOffsets)-1]
+		context.lastStackMapOffset = context.stackMapOffsets[len(context.stackMapOffsets)-1]
 		//}
 	}
 	var delta uint16
-	if context.NotFirstStackMap == false {
+	if context.notFirstStackMap == false {
 		delta = uint16(offset)
 	} else {
-		delta = uint16(offset - context.LastStackMapOffset - 1)
+		delta = uint16(offset - context.lastStackMapOffset - 1)
 	}
 	defer func() {
-		context.LastStackMapOffset = offset // rewrite
+		context.lastStackMapOffset = offset // rewrite
 		context.lastStackMapStateLocals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
 		copy(context.lastStackMapStateLocals, state.Locals)
 		context.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
 		copy(context.lastStackMapStateStacks, state.Stacks)
-		context.NotFirstStackMap = true
+		context.notFirstStackMap = true
 		context.lastStackMapState = state
-		context.StackMapOffsets = append(context.StackMapOffsets, offset)
+		context.stackMapOffsets = append(context.stackMapOffsets, offset)
 	}()
 	if state == context.lastStackMapState {
 		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 { // same frame or same frame extended

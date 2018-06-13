@@ -7,11 +7,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, s *ast.StatementSwitch, context *Context, state *StackMapState) (maxstack uint16) {
+func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	s *ast.StatementSwitch, context *Context, state *StackMapState) (maxStack uint16) {
 	// if equal,leave 0 on stack
 	compare := func(t *ast.VariableType) {
 		state.popStack(2)
-		switch t.Typ {
+		switch t.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -45,7 +46,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		case ast.VARIABLE_TYPE_ARRAY:
 			context.MakeStackMap(code, state, code.CodeLength+7)
 			state.pushStack(class, &ast.VariableType{
-				Typ: ast.VARIABLE_TYPE_BOOL,
+				Type: ast.VARIABLE_TYPE_BOOL,
 			})
 			context.MakeStackMap(code, state, code.CodeLength+8)
 			state.popStack(1)
@@ -58,7 +59,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength += 8
 		}
 	}
-	maxstack, _ = m.MakeExpression.build(class, code, s.Condition, context, state)
+	maxStack, _ = makeClass.makeExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.Exit
 	size := jvmSize(s.Condition.Value)
@@ -72,9 +73,9 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.Values) > 1 {
-				stack, _ := m.MakeExpression.build(class, code, ee, context, state)
-				if t := currentStack + stack; t > maxstack {
-					maxstack = t
+				stack, _ := makeClass.makeExpression.build(class, code, ee, context, state)
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
 				}
 				multiValuePacker.storeArrayListAutoVar(code, context)
 				for kkk, ttt := range ee.Values {
@@ -87,12 +88,12 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 					code.CodeLength++
 					state.pushStack(class, s.Condition.Value)
 					currentStack += size
-					if currentStack > maxstack {
-						maxstack = currentStack
+					if currentStack > maxStack {
+						maxStack = currentStack
 					}
 					stack = multiValuePacker.unPack(class, code, kkk, ttt, context)
-					if t := stack + currentStack; t > maxstack {
-						maxstack = t
+					if t := stack + currentStack; t > maxStack {
+						maxStack = t
 					}
 					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
@@ -111,9 +112,9 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 			code.CodeLength++
 			currentStack += size
 			state.pushStack(class, s.Condition.Value)
-			stack, _ := m.MakeExpression.build(class, code, ee, context, state)
-			if t := currentStack + stack; t > maxstack {
-				maxstack = t
+			stack, _ := makeClass.makeExpression.build(class, code, ee, context, state)
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
 			}
 			state.pushStack(class, s.Condition.Value)
 			compare(s.Condition.Value)
@@ -135,7 +136,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		//block is here
 		if c.Block != nil {
 			ss := (&StackMapState{}).FromLast(state)
-			m.buildBlock(class, code, c.Block, context, ss)
+			makeClass.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
 		if c.Block == nil || c.Block.DeadEnding == false {
@@ -160,7 +161,7 @@ func (m *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.Attr
 		} else {
 			ss = state
 		}
-		m.buildBlock(class, code, s.Default, context, ss)
+		makeClass.buildBlock(class, code, s.Default, context, ss)
 		state.addTop(ss)
 	}
 	return

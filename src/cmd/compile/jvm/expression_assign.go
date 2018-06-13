@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -14,8 +14,8 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxStack, remainStack, op, target, className, name, descriptor := m.getLeftValue(class, code, left, context, state)
-	stack, es := m.build(class, code, right, context, state)
+	maxStack, remainStack, op, target, className, name, descriptor := makeExpression.getLeftValue(class, code, left, context, state)
+	stack, es := makeExpression.build(class, code, right, context, state)
 	if len(es) > 0 {
 		state.pushStack(class, right.Value)
 		context.MakeStackMap(code, state, code.CodeLength)
@@ -26,34 +26,34 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	}
 	currentStack := remainStack + jvmSize(target)
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, className, target)
+		currentStack += makeExpression.controlStack2FitAssign(code, op, className, target)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
 	}
-	copyOPLeftValue(class, code, op, className, name, descriptor)
+	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
 	return
 }
 
 // a,b,c = 122,fdfd2232,"hello";
-func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	rights := bin.Right.Data.([]*ast.Expression)
 	lefts := bin.Left.Data.([]*ast.Expression)
 	if e.IsStatementExpression == false || len(lefts) == 1 {
-		return m.buildExpressionAssign(class, code, e, context, state)
+		return makeExpression.buildExpressionAssign(class, code, e, context, state)
 	}
 	if len(rights) == 1 {
-		maxStack, _ = m.build(class, code, rights[0], context, state)
+		maxStack, _ = makeExpression.build(class, code, rights[0], context, state)
 	} else {
-		maxStack = m.buildExpressions(class, code, rights, context, state)
+		maxStack = makeExpression.buildExpressions(class, code, rights, context, state)
 	}
 	multiValuePacker.storeArrayListAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, target, className, name, descriptor :=
-			m.getLeftValue(class, code, v, context, state)
+			makeExpression.getLeftValue(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -61,13 +61,13 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}
-		copyOPLeftValue(class, code, op, className, name, descriptor)
+		copyOPLeftValueVersion(class, code, op, className, name, descriptor)
 		state.popStack(len(state.Stacks) - stackLength)
 	}
 	return
 }
 
-func (m *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string,
+func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, classname string,
 	stackTopType *ast.VariableType) (increment uint16) {
 	if op[0] == cg.OP_istore ||
 		op[0] == cg.OP_lstore ||

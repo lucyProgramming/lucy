@@ -8,7 +8,7 @@ import (
 )
 
 // []int{1,2,3}
-func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 	pos := ep.parser.mkPos()
 	ep.parser.Next() // skip [
 	var err error
@@ -21,7 +21,7 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 			ep.Next() // skip ]
 		}
 		return &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_ARRAY,
+			Type: ast.EXPRESSION_TYPE_ARRAY,
 			Data: arr,
 			Pos:  pos,
 		}, err
@@ -44,12 +44,12 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 		ep.Next() // skip )
 		ret := &ast.Expression{}
 		ret.Pos = pos
-		ret.Typ = ast.EXPRESSION_TYPE_CHECK_CAST
+		ret.Type = ast.EXPRESSION_TYPE_CHECK_CAST
 		data := &ast.ExpressionTypeConversion{}
-		data.Typ = &ast.VariableType{}
-		data.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
-		data.Typ.Pos = pos
-		data.Typ.ArrayType = t
+		data.Type = &ast.VariableType{}
+		data.Type.Type = ast.VARIABLE_TYPE_ARRAY
+		data.Type.Pos = pos
+		data.Type.ArrayType = t
 		data.Expression = e
 		ret.Data = data
 		return ret, nil
@@ -57,14 +57,14 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 
 	arr := &ast.ExpressionArrayLiteral{}
 	if t != nil {
-		arr.Typ = &ast.VariableType{}
-		arr.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
-		arr.Typ.ArrayType = t
-		arr.Typ.Pos = pos
+		arr.Type = &ast.VariableType{}
+		arr.Type.Type = ast.VARIABLE_TYPE_ARRAY
+		arr.Type.ArrayType = t
+		arr.Type.Pos = pos
 	}
 	arr.Expressions, err = ep.parseArrayValues()
 	return &ast.Expression{
-		Typ:  ast.EXPRESSION_TYPE_ARRAY,
+		Type: ast.EXPRESSION_TYPE_ARRAY,
 		Data: arr,
 		Pos:  pos,
 	}, err
@@ -72,7 +72,7 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 }
 
 //{1,2,3}  {{1,2,3},{456}}
-func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
+func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 	if ep.parser.token.Type != lex.TOKEN_LC {
 		return nil, fmt.Errorf("%s expect '{',but '%s'",
 			ep.parser.errorMsgPrefix(), ep.parser.token.Description)
@@ -85,7 +85,7 @@ func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 			if err != nil {
 				return es, err
 			}
-			arre := &ast.Expression{Typ: ast.EXPRESSION_TYPE_ARRAY}
+			arre := &ast.Expression{Type: ast.EXPRESSION_TYPE_ARRAY}
 			data := ast.ExpressionArrayLiteral{}
 			data.Expressions = ees
 			arre.Data = data
@@ -93,7 +93,7 @@ func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 		} else {
 			e, err := ep.parseExpression(false)
 			if e != nil {
-				if e.Typ == ast.EXPRESSION_TYPE_LIST {
+				if e.Type == ast.EXPRESSION_TYPE_LIST {
 					es = append(es, e.Data.([]*ast.Expression)...)
 				} else {
 					es = append(es, e)

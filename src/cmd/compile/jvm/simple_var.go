@@ -9,8 +9,8 @@ import (
 /*
 	store local var according on type and offset
 */
-func storeSimpleVarOps(t int, offset uint16) []byte {
-	switch t {
+func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
+	switch variableType {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -20,7 +20,7 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_istore_0}
 		case 1:
@@ -30,13 +30,13 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_istore_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_istore, byte(offset)}
+			return []byte{cg.OP_istore, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_LONG:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_lstore_0}
 		case 1:
@@ -46,13 +46,13 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_lstore_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_lstore, byte(offset)}
+			return []byte{cg.OP_lstore, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_FLOAT:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_fstore_0}
 		case 1:
@@ -62,13 +62,13 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_fstore_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_fstore, byte(offset)}
+			return []byte{cg.OP_fstore, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_DOUBLE:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_dstore_0}
 		case 1:
@@ -78,10 +78,10 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_dstore_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_dstore, byte(offset)}
+			return []byte{cg.OP_dstore, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		fallthrough
@@ -92,7 +92,7 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_astore_0}
 		case 1:
@@ -102,18 +102,18 @@ func storeSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_astore_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_astore, byte(offset)}
+			return []byte{cg.OP_astore, byte(variableOffset)}
 		}
 	default:
-		panic(fmt.Sprintf("typ:%v", t))
+		panic(fmt.Sprintf("typ:%v", variableType))
 	}
 }
 
-func loadSimpleVarOps(t int, offset uint16) []byte {
-	switch t {
+func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
+	switch variableType {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -123,7 +123,7 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_iload_0}
 		case 1:
@@ -133,13 +133,13 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_iload_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_iload, byte(offset)}
+			return []byte{cg.OP_iload, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_LONG:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_lload_0}
 		case 1:
@@ -149,13 +149,13 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_lload_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_lload, byte(offset)}
+			return []byte{cg.OP_lload, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_FLOAT:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_fload_0}
 		case 1:
@@ -165,13 +165,13 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_fload_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_fload, byte(offset)}
+			return []byte{cg.OP_fload, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_DOUBLE:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_dload_0}
 		case 1:
@@ -181,10 +181,10 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_dload_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_dload, byte(offset)}
+			return []byte{cg.OP_dload, byte(variableOffset)}
 		}
 	case ast.VARIABLE_TYPE_STRING:
 		fallthrough
@@ -193,7 +193,7 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
-		switch offset {
+		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_aload_0}
 		case 1:
@@ -203,12 +203,12 @@ func loadSimpleVarOps(t int, offset uint16) []byte {
 		case 3:
 			return []byte{cg.OP_aload_3}
 		default:
-			if offset > 255 {
+			if variableOffset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_aload, byte(offset)}
+			return []byte{cg.OP_aload, byte(variableOffset)}
 		}
 	default:
-		panic(fmt.Sprintf("typ:%d", t))
+		panic(fmt.Sprintf("typ:%d", variableType))
 	}
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type LoadImport interface {
-	LoadName(resourceName string) (interface{}, error)
+	LoadImport(importName string) (interface{}, error)
 }
 
 const (
@@ -44,7 +44,7 @@ func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {
 		return nil
 	}
-	c, err := ImportsLoader.LoadName(JAVA_STRING_CLASS)
+	c, err := ImportsLoader.LoadImport(JAVA_STRING_CLASS)
 	if err != nil {
 		return err
 	}

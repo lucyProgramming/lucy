@@ -2,17 +2,17 @@ package ast
 
 import "fmt"
 
-type StatementGoto struct {
+type StatementGoTo struct {
 	Name           string
 	StatementLabel *StatementLabel
 }
 
-func (s *Statement) checkStatementGoto(b *Block) error {
-	label := b.searchLabel(s.StatementGoto.Name)
+func (s *Statement) checkStatementGoTo(b *Block) error {
+	label := b.searchLabel(s.StatementGoTo.Name)
 	if label == nil {
 		return fmt.Errorf("%s label named '%s' not found",
-			errMsgPrefix(s.Pos), s.StatementGoto.Name)
+			errMsgPrefix(s.Pos), s.StatementGoTo.Name)
 	}
-	s.StatementGoto.StatementLabel = label
-	return s.StatementGoto.StatementLabel.Ready(s.Pos)
+	s.StatementGoTo.StatementLabel = label
+	return s.StatementGoTo.StatementLabel.Ready(s.Pos)
 }

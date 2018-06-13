@@ -30,9 +30,9 @@ func (s *StatementFor) checkRange() []error {
 	//
 	var rangeExpression *Expression
 	bin := s.Condition.Data.(*ExpressionBinary)
-	if bin.Right.Typ == EXPRESSION_TYPE_RANGE {
+	if bin.Right.Type == EXPRESSION_TYPE_RANGE {
 		rangeExpression = s.Condition.Data.(*Expression)
-	} else if bin.Right.Typ == EXPRESSION_TYPE_LIST {
+	} else if bin.Right.Type == EXPRESSION_TYPE_LIST {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
 			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right",
@@ -47,16 +47,16 @@ func (s *StatementFor) checkRange() []error {
 	if rangeOn == nil {
 		return errs
 	}
-	if rangeOn.Typ != VARIABLE_TYPE_ARRAY &&
-		rangeOn.Typ != VARIABLE_TYPE_JAVA_ARRAY &&
-		rangeOn.Typ != VARIABLE_TYPE_MAP {
+	if rangeOn.Type != VARIABLE_TYPE_ARRAY &&
+		rangeOn.Type != VARIABLE_TYPE_JAVA_ARRAY &&
+		rangeOn.Type != VARIABLE_TYPE_MAP {
 		errs = append(errs, fmt.Errorf("%s cannot have range on '%s'",
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
 	rangeExpression.Value = rangeOn
 	var lefts []*Expression
-	if bin.Left.Typ == EXPRESSION_TYPE_LIST {
+	if bin.Left.Type == EXPRESSION_TYPE_LIST {
 		lefts = bin.Left.Data.([]*Expression)
 	} else {
 		lefts = []*Expression{bin.Left}
@@ -71,7 +71,7 @@ func (s *StatementFor) checkRange() []error {
 		modelKv = true
 	}
 	s.RangeAttr = &ForRangeAttr{}
-	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
+	if s.Condition.Type == EXPRESSION_TYPE_ASSIGN {
 		if modelKv {
 			if false == lefts[0].IsNoNameIdentifier() {
 				s.RangeAttr.ExpressionKey = lefts[0]
@@ -87,20 +87,20 @@ func (s *StatementFor) checkRange() []error {
 	}
 	s.RangeAttr.RangeOn = rangeExpression
 	var err error
-	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
+	if s.Condition.Type == EXPRESSION_TYPE_COLON_ASSIGN {
 		if modelKv {
-			if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
+			if lefts[0].Type != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
 				return errs
 			}
-			if lefts[1].Typ != EXPRESSION_TYPE_IDENTIFIER {
+			if lefts[1].Type != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
 				return errs
 			}
 		} else {
-			if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
+			if lefts[0].Type != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
 				return errs
@@ -121,44 +121,44 @@ func (s *StatementFor) checkRange() []error {
 
 		if identifierV.Name != NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
-			if rangeOn.Typ == VARIABLE_TYPE_ARRAY || rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-				vd.Typ = rangeOn.ArrayType.Clone()
+			if rangeOn.Type == VARIABLE_TYPE_ARRAY || rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
+				vd.Type = rangeOn.ArrayType.Clone()
 			} else {
-				vd.Typ = rangeOn.Map.V.Clone()
+				vd.Type = rangeOn.Map.V.Clone()
 			}
 			vd.Pos = posV
 			vd.Name = identifierV.Name
-			err = s.Block.insert(identifierV.Name, s.Condition.Pos, vd)
+			err = s.Block.Insert(identifierV.Name, s.Condition.Pos, vd)
 			if err != nil {
 				errs = append(errs, err)
 			}
-			identifierV.Var = vd
+			identifierV.Variable = vd
 			s.RangeAttr.IdentifierValue = identifierV
 		}
 		if modelKv && identifierK.Name != NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
 			var vt *VariableType
-			if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
-				rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+			if rangeOn.Type == VARIABLE_TYPE_ARRAY ||
+				rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
 				vt = &VariableType{}
-				vt.Typ = VARIABLE_TYPE_INT
+				vt.Type = VARIABLE_TYPE_INT
 			} else {
 				vt = rangeOn.Map.K.Clone()
 				vt.Pos = rangeOn.Pos
 			}
 			vd.Name = identifierK.Name
-			vd.Typ = vt
+			vd.Type = vt
 			vd.Pos = posK
-			err = s.Block.insert(identifierK.Name, posK, vd)
+			err = s.Block.Insert(identifierK.Name, posK, vd)
 			if err != nil {
 				errs = append(errs, err)
 			}
-			identifierK.Var = vd
+			identifierK.Variable = vd
 			s.RangeAttr.IdentifierKey = identifierK
 		}
 	}
 
-	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
+	if s.Condition.Type == EXPRESSION_TYPE_ASSIGN {
 		var tk *VariableType
 		if s.RangeAttr.ExpressionKey != nil {
 			tk = s.RangeAttr.ExpressionKey.getLeftValue(s.Block, &errs)
@@ -175,10 +175,10 @@ func (s *StatementFor) checkRange() []error {
 		}
 		var tkk, tvv *VariableType
 
-		if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
-			rangeOn.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		if rangeOn.Type == VARIABLE_TYPE_ARRAY ||
+			rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
 			tkk = &VariableType{
-				Typ: VARIABLE_TYPE_INT,
+				Type: VARIABLE_TYPE_INT,
 			}
 			tvv = rangeOn.ArrayType
 		} else {
@@ -232,7 +232,7 @@ func (s *StatementFor) check(block *Block) []error {
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
-		if t != nil && t.Typ != VARIABLE_TYPE_BOOL {
+		if t != nil && t.Type != VARIABLE_TYPE_BOOL {
 			errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
 				errMsgPrefix(s.Condition.Pos), t.TypeString()))
 

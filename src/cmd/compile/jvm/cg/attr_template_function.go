@@ -7,7 +7,7 @@ import (
 type AttributeTemplateFunction struct {
 	Name string
 	/*
-		regenerate pos
+		reGenerate pos
 	*/
 	Filename    string
 	StartLine   uint16

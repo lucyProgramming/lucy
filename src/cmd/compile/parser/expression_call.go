@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
 	pos := ep.parser.mkPos()
 	ep.Next() // skip (
@@ -25,15 +25,15 @@ func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, e
 			ep.parser.token.Description)
 	}
 	var result ast.Expression
-	if e.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {
-		result.Typ = ast.EXPRESSION_TYPE_FUNCTION_CALL
+	if e.Type == ast.EXPRESSION_TYPE_IDENTIFIER {
+		result.Type = ast.EXPRESSION_TYPE_FUNCTION_CALL
 		call := &ast.ExpressionFunctionCall{}
 		call.Expression = e
 		call.Args = args
 		result.Data = call
 		result.Pos = ep.parser.mkPos()
-	} else if e.Typ == ast.EXPRESSION_TYPE_SELECT {
-		result.Typ = ast.EXPRESSION_TYPE_METHOD_CALL
+	} else if e.Type == ast.EXPRESSION_TYPE_SELECT {
+		result.Type = ast.EXPRESSION_TYPE_METHOD_CALL
 		call := &ast.ExpressionMethodCall{}
 		index := e.Data.(*ast.ExpressionSelection)
 		call.Expression = index.Expression
@@ -59,7 +59,7 @@ func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, e
 				ep.parser.consume(untils_gt)
 			}
 			ep.Next()
-			if result.Typ == ast.EXPRESSION_TYPE_FUNCTION_CALL {
+			if result.Type == ast.EXPRESSION_TYPE_FUNCTION_CALL {
 				result.Data.(*ast.ExpressionFunctionCall).TypedParameters = ts
 			} else {
 				result.Data.(*ast.ExpressionMethodCall).TypedParameters = ts

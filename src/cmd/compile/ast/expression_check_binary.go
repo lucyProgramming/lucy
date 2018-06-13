@@ -16,25 +16,25 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	}
 
 	// &&  ||
-	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
-		EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
+	if e.Type == EXPRESSION_TYPE_LOGICAL_OR ||
+		EXPRESSION_TYPE_LOGICAL_AND == e.Type {
 		result = &VariableType{
-			Typ: VARIABLE_TYPE_BOOL,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_BOOL,
+			Pos:  e.Pos,
 		}
 		if t1 == nil || t2 == nil {
 			return result
 		}
-		if t1.Typ != VARIABLE_TYPE_BOOL || t2.Typ != VARIABLE_TYPE_BOOL {
+		if t1.Type != VARIABLE_TYPE_BOOL || t2.Type != VARIABLE_TYPE_BOOL {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 
 		return result
 	}
 	// & |
-	if e.Typ == EXPRESSION_TYPE_OR ||
-		EXPRESSION_TYPE_AND == e.Typ ||
-		EXPRESSION_TYPE_XOR == e.Typ {
+	if e.Type == EXPRESSION_TYPE_OR ||
+		EXPRESSION_TYPE_AND == e.Type ||
+		EXPRESSION_TYPE_XOR == e.Type {
 		if t1 == nil || t2 == nil {
 			if t1 != nil {
 				tt := t1.Clone()
@@ -56,8 +56,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		return result
 	}
 
-	if e.Typ == EXPRESSION_TYPE_LSH ||
-		e.Typ == EXPRESSION_TYPE_RSH {
+	if e.Type == EXPRESSION_TYPE_LSH ||
+		e.Type == EXPRESSION_TYPE_RSH {
 		if t1 == nil || t2 == nil {
 			if t1 != nil {
 				tt := t1.Clone()
@@ -74,7 +74,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if false == t1.IsInteger() || t2.IsInteger() == false {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		} else {
-			if t2.Typ == VARIABLE_TYPE_LONG {
+			if t2.Type == VARIABLE_TYPE_LONG {
 				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
 			}
 		}
@@ -82,27 +82,27 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		result.Pos = e.Pos
 		return result
 	}
-	if e.Typ == EXPRESSION_TYPE_EQ ||
-		e.Typ == EXPRESSION_TYPE_NE ||
-		e.Typ == EXPRESSION_TYPE_GE ||
-		e.Typ == EXPRESSION_TYPE_GT ||
-		e.Typ == EXPRESSION_TYPE_LE ||
-		e.Typ == EXPRESSION_TYPE_LT {
+	if e.Type == EXPRESSION_TYPE_EQ ||
+		e.Type == EXPRESSION_TYPE_NE ||
+		e.Type == EXPRESSION_TYPE_GE ||
+		e.Type == EXPRESSION_TYPE_GT ||
+		e.Type == EXPRESSION_TYPE_LE ||
+		e.Type == EXPRESSION_TYPE_LT {
 		result = &VariableType{
-			Typ: VARIABLE_TYPE_BOOL,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_BOOL,
+			Pos:  e.Pos,
 		}
 		if t1 == nil || t2 == nil {
 			return result
 		}
 		//number
-		switch t1.Typ {
+		switch t1.Type {
 		case VARIABLE_TYPE_BOOL:
-			if t2.Typ != VARIABLE_TYPE_BOOL || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+			if t2.Type != VARIABLE_TYPE_BOOL || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_ENUM:
-			if t1.Equal(errs, t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+			if t1.Equal(errs, t2) == false || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_BYTE:
@@ -123,9 +123,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 						*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 					} else {
 						if bin.Left.IsLiteral() {
-							bin.Left.ConvertToNumber(t2.Typ)
+							bin.Left.ConvertToNumber(t2.Type)
 						} else {
-							bin.Right.ConvertToNumber(t1.Typ)
+							bin.Right.ConvertToNumber(t1.Type)
 						}
 					}
 				}
@@ -137,7 +137,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:
-			if t2.IsPointer() == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+			if t2.IsPointer() == false || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
@@ -150,7 +150,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VARIABLE_TYPE_ARRAY:
 			fallthrough
 		case VARIABLE_TYPE_OBJECT:
-			if t1.Equal(errs, t2) == false || (e.Typ != EXPRESSION_TYPE_EQ && e.Typ != EXPRESSION_TYPE_NE) {
+			if t1.Equal(errs, t2) == false || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
@@ -168,11 +168,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		return result
 	}
 	//
-	if e.Typ == EXPRESSION_TYPE_ADD ||
-		e.Typ == EXPRESSION_TYPE_SUB ||
-		e.Typ == EXPRESSION_TYPE_MUL ||
-		e.Typ == EXPRESSION_TYPE_DIV ||
-		e.Typ == EXPRESSION_TYPE_MOD {
+	if e.Type == EXPRESSION_TYPE_ADD ||
+		e.Type == EXPRESSION_TYPE_SUB ||
+		e.Type == EXPRESSION_TYPE_MUL ||
+		e.Type == EXPRESSION_TYPE_DIV ||
+		e.Type == EXPRESSION_TYPE_MOD {
 		if t1 == nil || t2 == nil {
 			if t1 != nil {
 				tt := t1.Clone()
@@ -187,12 +187,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return nil
 		}
 		//check string first
-		if t1.Typ == VARIABLE_TYPE_STRING || t2.Typ == VARIABLE_TYPE_STRING { // string is always ok
-			if e.Typ != EXPRESSION_TYPE_ADD {
+		if t1.Type == VARIABLE_TYPE_STRING || t2.Type == VARIABLE_TYPE_STRING { // string is always ok
+			if e.Type != EXPRESSION_TYPE_ADD {
 				*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 			result = &VariableType{}
-			result.Typ = VARIABLE_TYPE_STRING
+			result.Type = VARIABLE_TYPE_STRING
 			result.Pos = e.Pos
 			return result
 		}
@@ -203,9 +203,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 				} else {
 					if bin.Left.IsLiteral() {
-						bin.Left.ConvertToNumber(t2.Typ)
+						bin.Left.ConvertToNumber(t2.Type)
 					} else {
-						bin.Right.ConvertToNumber(t1.Typ)
+						bin.Right.ConvertToNumber(t1.Type)
 					}
 				}
 			}

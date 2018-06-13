@@ -1,7 +1,7 @@
 package lex
 
-func New(bs []byte, startLine, startColumn int) *LucyLexer {
-	lex := &LucyLexer{bs: bs}
+func New(bs []byte, startLine, startColumn int) *Lexer {
+	lex := &Lexer{bs: bs}
 	lex.end = len(bs)
 	lex.line = startLine
 	lex.column = startColumn

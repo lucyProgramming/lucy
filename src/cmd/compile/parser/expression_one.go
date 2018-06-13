@@ -7,13 +7,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch ep.parser.token.Type {
 	case lex.TOKEN_IDENTIFIER:
 		left = &ast.Expression{}
-		left.Typ = ast.EXPRESSION_TYPE_IDENTIFIER
+		left.Type = ast.EXPRESSION_TYPE_IDENTIFIER
 		identifier := &ast.ExpressionIdentifier{}
 		identifier.Name = ep.parser.token.Data.(string)
 		left.Data = identifier
@@ -21,69 +21,69 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		ep.Next()
 	case lex.TOKEN_TRUE:
 		left = &ast.Expression{}
-		left.Typ = ast.EXPRESSION_TYPE_BOOL
+		left.Type = ast.EXPRESSION_TYPE_BOOL
 		left.Data = true
 		left.Pos = ep.parser.mkPos()
 		ep.Next()
 	case lex.TOKEN_FALSE:
 		left = &ast.Expression{}
-		left.Typ = ast.EXPRESSION_TYPE_BOOL
+		left.Type = ast.EXPRESSION_TYPE_BOOL
 		left.Data = false
 		left.Pos = ep.parser.mkPos()
 		ep.Next()
 	case lex.TOKEN_LITERAL_BYTE:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_BYTE,
+			Type: ast.EXPRESSION_TYPE_BYTE,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LITERAL_SHORT:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_SHORT,
+			Type: ast.EXPRESSION_TYPE_SHORT,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LITERAL_INT:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_INT,
+			Type: ast.EXPRESSION_TYPE_INT,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LITERAL_LONG:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_LONG,
+			Type: ast.EXPRESSION_TYPE_LONG,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LITERAL_FLOAT:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_FLOAT,
+			Type: ast.EXPRESSION_TYPE_FLOAT,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LITERAL_DOUBLE:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_DOUBLE,
+			Type: ast.EXPRESSION_TYPE_DOUBLE,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LITERAL_STRING:
 		left = &ast.Expression{
-			Typ:  ast.EXPRESSION_TYPE_STRING,
+			Type: ast.EXPRESSION_TYPE_STRING,
 			Data: ep.parser.token.Data,
 			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_NULL:
 		left = &ast.Expression{
-			Typ: ast.EXPRESSION_TYPE_NULL,
-			Pos: ep.parser.mkPos(),
+			Type: ast.EXPRESSION_TYPE_NULL,
+			Pos:  ep.parser.mkPos(),
 		}
 		ep.Next()
 	case lex.TOKEN_LP:
@@ -106,7 +106,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newE.Typ = ast.EXPRESSION_TYPE_PRE_INCREMENT
+		newE.Type = ast.EXPRESSION_TYPE_PRE_INCREMENT
 		newE.Data = left
 		left = newE
 	case lex.TOKEN_DECREMENT:
@@ -117,7 +117,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newE.Typ = ast.EXPRESSION_TYPE_PRE_DECREMENT
+		newE.Type = ast.EXPRESSION_TYPE_PRE_DECREMENT
 		newE.Data = left
 		newE.Pos = pos
 		left = newE
@@ -129,7 +129,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newE.Typ = ast.EXPRESSION_TYPE_NOT
+		newE.Type = ast.EXPRESSION_TYPE_NOT
 		newE.Data = left
 		newE.Pos = pos
 		left = newE
@@ -141,7 +141,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newE.Typ = ast.EXPRESSION_TYPE_BITWISE_NOT
+		newE.Type = ast.EXPRESSION_TYPE_BITWISE_NOT
 		newE.Data = left
 		newE.Pos = pos
 		left = newE
@@ -153,7 +153,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newE.Typ = ast.EXPRESSION_TYPE_NEGATIVE
+		newE.Type = ast.EXPRESSION_TYPE_NEGATIVE
 		newE.Data = left
 		newE.Pos = pos
 		left = newE
@@ -189,11 +189,11 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		}
 		ep.Next()
 		left = &ast.Expression{
-			Pos: pos,
-			Typ: ast.EXPRESSION_TYPE_NEW,
+			Pos:  pos,
+			Type: ast.EXPRESSION_TYPE_NEW,
 			Data: &ast.ExpressionNew{
 				Args: es,
-				Typ:  t,
+				Type: t,
 			},
 		}
 
@@ -257,7 +257,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 			return nil, err
 		}
 		left = &ast.Expression{}
-		left.Typ = ast.EXPRESSION_TYPE_RANGE
+		left.Type = ast.EXPRESSION_TYPE_RANGE
 		left.Pos = pos
 		left.Data = e
 		return left, nil
@@ -290,11 +290,11 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 			}
 			newe := &ast.Expression{}
 			if ep.parser.token.Type == lex.TOKEN_INCREMENT {
-				newe.Typ = ast.EXPRESSION_TYPE_INCREMENT
+				newe.Type = ast.EXPRESSION_TYPE_INCREMENT
 			} else {
-				newe.Typ = ast.EXPRESSION_TYPE_DECREMENT
+				newe.Type = ast.EXPRESSION_TYPE_DECREMENT
 			}
-			if left.Typ != ast.EXPRESSION_TYPE_LIST {
+			if left.Type != ast.EXPRESSION_TYPE_LIST {
 				newe.Data = left
 				left = newe
 			} else {
@@ -323,7 +323,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				}
 				ep.Next() // skip ]
 				newe := &ast.Expression{}
-				newe.Typ = ast.EXPRESSION_TYPE_SLICE
+				newe.Type = ast.EXPRESSION_TYPE_SLICE
 				newe.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
@@ -353,7 +353,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				}
 				ep.Next() // skip ]
 				newe := &ast.Expression{}
-				newe.Typ = ast.EXPRESSION_TYPE_SLICE
+				newe.Type = ast.EXPRESSION_TYPE_SLICE
 				newe.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newe.Data = slice
@@ -368,7 +368,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 			}
 			newe := &ast.Expression{}
 			newe.Pos = pos
-			newe.Typ = ast.EXPRESSION_TYPE_INDEX
+			newe.Type = ast.EXPRESSION_TYPE_INDEX
 			index := &ast.ExpressionIndex{}
 			index.Expression = left
 			index.Index = e
@@ -384,7 +384,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 			if ep.parser.token.Type == lex.TOKEN_IDENTIFIER {
 				newe := &ast.Expression{}
 				newe.Pos = pos
-				newe.Typ = ast.EXPRESSION_TYPE_SELECT
+				newe.Type = ast.EXPRESSION_TYPE_SELECT
 				index := &ast.ExpressionSelection{}
 				index.Expression = left
 				index.Name = ep.parser.token.Data.(string)
@@ -404,9 +404,9 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				ep.Next() // skip  )
 				newe := &ast.Expression{}
 				newe.Pos = pos
-				newe.Typ = ast.EXPRESSION_TYPE_TYPE_ASSERT
+				newe.Type = ast.EXPRESSION_TYPE_TYPE_ASSERT
 				typeAssert := &ast.ExpressionTypeAssert{}
-				typeAssert.Typ = typ
+				typeAssert.Type = typ
 				typeAssert.Expression = left
 				newe.Data = typeAssert
 				left = newe

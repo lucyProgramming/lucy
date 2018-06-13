@@ -11,45 +11,45 @@ import (
 
 func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
 	p := &Parser{
-		bs:         bs,
-		tops:       tops,
-		filename:   filename,
-		onlyimport: onlyimport,
-		nerr:       nerr,
+		bs:           bs,
+		tops:         tops,
+		filename:     filename,
+		onlyImport:   onlyimport,
+		nErrors2Stop: nerr,
 	}
 	return p.Parse()
 }
 
 type Parser struct {
-	onlyimport bool
-	bs         []byte
-	lines      [][]byte
-	tops       *[]*ast.Node
-	scanner    *lex.LucyLexer
-	filename   string
-	lastToken  *lex.Token
-	token      *lex.Token
-	errs       []error
-	imports    map[string]*ast.Import
-	nerr       int
+	onlyImport   bool
+	bs           []byte
+	lines        [][]byte
+	tops         *[]*ast.Node
+	scanner      *lex.Lexer
+	filename     string
+	lastToken    *lex.Token
+	token        *lex.Token
+	errs         []error
+	imports      map[string]*ast.Import
+	nErrors2Stop int
 	// parsers
-	Expression *Expression
-	Function   *Function
-	Class      *Class
-	Block      *Block
-	Interface  *Interface
+	ExpressionParser *ExpressionParser
+	FunctionParser   *FunctionParser
+	ClassParser      *ClassParser
+	BlockParser      *BlockParser
+	InterfaceParser  *InterfaceParser
 }
 
 func (p *Parser) Parse() []error {
-	p.Expression = &Expression{p}
-	p.Function = &Function{}
-	p.Function.parser = p
-	p.Class = &Class{}
-	p.Class.parser = p
-	p.Interface = &Interface{}
-	p.Interface.parser = p
-	p.Block = &Block{}
-	p.Block.parser = p
+	p.ExpressionParser = &ExpressionParser{p}
+	p.FunctionParser = &FunctionParser{}
+	p.FunctionParser.parser = p
+	p.ClassParser = &ClassParser{}
+	p.ClassParser.parser = p
+	p.InterfaceParser = &InterfaceParser{}
+	p.InterfaceParser.parser = p
+	p.BlockParser = &BlockParser{}
+	p.BlockParser.parser = p
 	p.errs = []error{}
 	p.scanner = lex.New(p.bs, 1, 1)
 	p.lines = bytes.Split(p.bs, []byte("\n"))
@@ -61,7 +61,7 @@ func (p *Parser) Parse() []error {
 	if p.token.Type == lex.TOKEN_EOF {
 		return p.errs
 	}
-	if p.onlyimport { // only parse imports
+	if p.onlyImport { // only parse imports
 		return p.errs
 	}
 	ispublic := false
@@ -69,7 +69,7 @@ func (p *Parser) Parse() []error {
 		ispublic = false
 	}
 	for p.token.Type != lex.TOKEN_EOF {
-		if len(p.errs) > p.nerr {
+		if len(p.errs) > p.nErrors2Stop {
 			break
 		}
 		switch p.token.Type {
@@ -92,7 +92,7 @@ func (p *Parser) Parse() []error {
 			}
 			d := &ast.ExpressionDeclareVariable{Variables: vs, Values: es}
 			e := &ast.Expression{
-				Typ:      ast.EXPRESSION_TYPE_VAR,
+				Type:     ast.EXPRESSION_TYPE_VAR,
 				Data:     d,
 				Pos:      pos,
 				IsPublic: ispublic,
@@ -102,7 +102,7 @@ func (p *Parser) Parse() []error {
 			})
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
-			e, err := p.Expression.parseExpression(true)
+			e, err := p.ExpressionParser.parseExpression(true)
 			if err != nil {
 				p.consume(untils_semicolon)
 				p.Next()
@@ -129,7 +129,7 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_FUNCTION:
-			f, err := p.Function.parse(true)
+			f, err := p.FunctionParser.parse(true)
 			if err != nil {
 				p.consume(untils_rc)
 				p.Next()
@@ -146,8 +146,8 @@ func (p *Parser) Parse() []error {
 			resetProperty()
 		case lex.TOKEN_LC:
 			b := &ast.Block{}
-			p.Next()                            // skip {
-			p.Block.parseStatementList(b, true) // this function will lookup next
+			p.Next()                                  // skip {
+			p.BlockParser.parseStatementList(b, true) // this function will lookup next
 			if p.token.Type != lex.TOKEN_RC {
 				p.errs = append(p.errs, fmt.Errorf("%s expect '}', but '%s'",
 					p.errorMsgPrefix(), p.token.Description))
@@ -159,7 +159,7 @@ func (p *Parser) Parse() []error {
 			})
 			resetProperty()
 		case lex.TOKEN_CLASS:
-			c, err := p.Class.parse()
+			c, err := p.ClassParser.parse()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(untils_rc)
@@ -175,7 +175,7 @@ func (p *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TOKEN_INTERFACE:
-			c, err := p.Interface.parse()
+			c, err := p.InterfaceParser.parse()
 			if err != nil {
 				p.errs = append(p.errs, err)
 				p.consume(untils_rc)
@@ -352,7 +352,7 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 			vd.Name = v.Name
 			vd.Pos = v.Pos
 			if variableType != nil {
-				vd.Typ = variableType.Clone()
+				vd.Type = variableType.Clone()
 			}
 			vs[k] = vd
 		}
@@ -364,7 +364,7 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 	}
 	typ := p.token
 	p.Next() // skip = or :=
-	es, err := p.Expression.parseExpressions()
+	es, err := p.ExpressionParser.parseExpressions()
 	if err != nil {
 		return nil, nil, typ, err
 	}
@@ -403,7 +403,7 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
 		return fmt.Sprintf("%s:%d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
 	}
-	line, column := p.scanner.Pos()
+	line, column := p.scanner.GetPos()
 	return fmt.Sprintf("%s:%d:%d", p.filename, line, column)
 }
 
@@ -444,7 +444,7 @@ func (p *Parser) parseTypeaAlias() (*ast.ExpressionTypeAlias, error) {
 	}
 	p.Next() // skip =
 	var err error
-	ret.Typ, err = p.parseType()
+	ret.Type, err = p.parseType()
 	return ret, err
 }
 
@@ -463,7 +463,7 @@ func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
 		vs[k] = vd
 		vd.Name = v.Name
 		vd.Pos = v.Pos
-		vd.Typ = t.Clone()
+		vd.Type = t.Clone()
 	}
 	return vs, nil
 }
@@ -484,7 +484,7 @@ func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 			vd := &ast.VariableDefinition{}
 			vd.Name = v.Name
 			vd.Pos = v.Pos
-			vd.Typ = t.Clone()
+			vd.Type = t.Clone()
 			vs = append(vs, vd)
 		}
 		if p.token.Type != lex.TOKEN_COMMA { // not a commna

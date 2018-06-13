@@ -49,7 +49,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	var initExpression *ast.Expression
 	if p.token.Type == lex.TOKEN_ASSIGN { // first value defined here
 		p.Next() // skip assign
-		initExpression, err = p.Expression.parseExpression(false)
+		initExpression, err = p.ExpressionParser.parseExpression(false)
 		if err != nil {
 			p.errs = append(p.errs, err)
 			return nil, err

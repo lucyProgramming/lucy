@@ -7,18 +7,18 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) mkBuildInFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	switch call.Func.Name {
 	case common.BUILD_IN_FUNCTION_PRINT:
-		return m.mkBuildInPrint(class, code, e, context, state)
+		return makeExpression.mkBuildInPrint(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_PANIC:
-		return m.mkBuildinPanic(class, code, e, context, state)
+		return makeExpression.mkBuildInPanic(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_CATCH:
-		return m.mkBuildInCatch(class, code, e, context)
+		return makeExpression.mkBuildInCatch(class, code, e, context)
 	case common.BUILD_IN_FUNCTION_MONITORENTER, common.BUILD_IN_FUNCTION_MONITOREXIT:
-		maxStack, _ = m.build(class, code, call.Args[0], context, state)
+		maxStack, _ = makeExpression.build(class, code, call.Args[0], context, state)
 		if call.Func.Name == common.BUILD_IN_FUNCTION_MONITORENTER {
 			code.Codes[code.CodeLength] = cg.OP_monitorenter
 		} else { // monitor enter on exit
@@ -26,21 +26,21 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 		}
 		code.CodeLength++
 	case common.BUILD_IN_FUNCTION_PRINTF:
-		return m.mkBuildInPrintf(class, code, e, context, state)
+		return makeExpression.mkBuildInPrintf(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_SPRINTF:
-		return m.mkBuildInSprintf(class, code, e, context, state)
+		return makeExpression.mkBuildInSprintf(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_LEN:
-		return m.mkBuildInLen(class, code, e, context, state)
+		return makeExpression.mkBuildInLen(class, code, e, context, state)
 	default:
 		panic("unkown buildin function:" + call.Func.Name)
 	}
 	return
 }
 
-func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Args[0].Typ != ast.EXPRESSION_TYPE_NEW { // not new expression
+	if call.Args[0].Type != ast.EXPRESSION_TYPE_NEW { // not new expression
 		code.Codes[code.CodeLength] = cg.OP_new
 		className := call.Args[0].Value.Class.Name
 		class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -54,7 +54,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 			state.Stacks = append(state.Stacks, t)
 			state.Stacks = append(state.Stacks, t)
 		}
-		stack, _ := m.build(class, code, call.Args[0], context, state)
+		stack, _ := makeExpression.build(class, code, call.Args[0], context, state)
 		state.popStack(2)
 		maxStack = 2 + stack
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
@@ -65,7 +65,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
-		maxStack, _ = m.build(class, code, call.Args[0], context, state)
+		maxStack, _ = makeExpression.build(class, code, call.Args[0], context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
@@ -73,22 +73,22 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	if e.IsStatementExpression { // statement call
 		maxStack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
 		return
 	}
 	maxStack = 2
 	//load to stack
-	copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // load
+	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // load
 	//set 2 null
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
-	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // store
+	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // store
 	//check cast
 	code.Codes[code.CodeLength] = cg.OP_checkcast
 	if context.Defer.ExceptionClass != nil {
@@ -100,10 +100,10 @@ func (m *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxStack, _ = m.build(class, code, call.Args[0], context, state)
+	maxStack, _ = makeExpression.build(class, code, call.Args[0], context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	if 2 > maxStack {
@@ -111,11 +111,11 @@ func (m *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.Attribu
 	}
 	exit := (&cg.Exit{}).FromCode(cg.OP_ifnull, code)
 	//binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 3)
-	if call.Args[0].Value.Typ == ast.VARIABLE_TYPE_JAVA_ARRAY {
+	if call.Args[0].Value.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
-	} else if call.Args[0].Value.Typ == ast.VARIABLE_TYPE_ARRAY {
-		meta := ArrayMetas[call.Args[0].Value.ArrayType.Typ]
+	} else if call.Args[0].Value.Type == ast.VARIABLE_TYPE_ARRAY {
+		meta := ArrayMetas[call.Args[0].Value.ArrayType.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
@@ -124,7 +124,7 @@ func (m *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.Attribu
 		},
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else if call.Args[0].Value.Typ == ast.VARIABLE_TYPE_MAP {
+	} else if call.Args[0].Value.Type == ast.VARIABLE_TYPE_MAP {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
@@ -133,7 +133,7 @@ func (m *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.Attribu
 		},
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else if call.Args[0].Value.Typ == ast.VARIABLE_TYPE_STRING {
+	} else if call.Args[0].Value.Type == ast.VARIABLE_TYPE_STRING {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_string_class,
@@ -152,7 +152,7 @@ func (m *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.Attribu
 	code.Codes[code.CodeLength+3] = cg.OP_pop
 	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
 	code.CodeLength += 5
-	state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
+	state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
 	if e.IsStatementExpression {

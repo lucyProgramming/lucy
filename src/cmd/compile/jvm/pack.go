@@ -8,8 +8,8 @@ import (
 type TypeConverterAndPrimitivePacker struct {
 }
 
-func (TypeConverterAndPrimitivePacker) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
-	switch t.Typ {
+func (TypeConverterAndPrimitivePacker) getPrimitivesFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		c := "java/lang/Boolean"
 		code.Codes[code.CodeLength] = cg.OP_checkcast
@@ -102,7 +102,7 @@ func (c *TypeConverterAndPrimitivePacker) putPrimitiveInObject(class *cg.ClassHi
 
 func (TypeConverterAndPrimitivePacker) putPrimitiveInObjectBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
 	bs = make([]byte, 3)
-	switch t.Typ {
+	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -165,7 +165,7 @@ func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.Class
 	if t.IsPointer() == false {
 		panic("...")
 	}
-	switch t.Typ {
+	switch t.Type {
 	case ast.VARIABLE_TYPE_STRING:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -177,7 +177,7 @@ func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.Class
 			code.CodeLength += 3
 		}
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[t.ArrayType.Typ]
+		meta := ArrayMetas[t.ArrayType.Type]
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3

@@ -14,7 +14,7 @@ type Package struct {
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block
-	Files                        map[string]*File
+	Files                        map[string]*LucyFile
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
@@ -145,7 +145,7 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if t, ok := p.LoadedPackages[resource]; ok {
 		return t, nil
 	}
-	t, err := ImportsLoader.LoadName(resource)
+	t, err := ImportsLoader.LoadImport(resource)
 	if pp, ok := t.(*Package); ok && pp != nil {
 		PackageBeenCompile.LoadedPackages[resource] = pp
 		p.mkClassCache(pp)
@@ -165,7 +165,7 @@ func (p *Package) loadClass(className string) (*Class, error) {
 	if c, ok := p.loadedClasses[className]; ok && c != nil {
 		return c, nil
 	}
-	c, err := ImportsLoader.LoadName(className)
+	c, err := ImportsLoader.LoadImport(className)
 	if err != nil {
 		return nil, err
 	}
@@ -184,13 +184,13 @@ func (p *Package) mkClassCache(load *Package) {
 }
 
 //different for other file
-type File struct {
+type LucyFile struct {
 	Imports map[string]*Import // n
 }
 
 type Import struct {
 	AccessName string
-	Resource   string // full name
+	ImportName string // full name
 	Pos        *Pos
 	Used       bool
 }
@@ -206,8 +206,8 @@ func (i *Import) GetAccessName() (string, error) {
 	if i.AccessName != "" {
 		return i.AccessName, nil
 	}
-	name := i.Resource
-	if strings.Contains(i.Resource, "/") {
+	name := i.ImportName
+	if strings.Contains(i.ImportName, "/") {
 		name = name[strings.LastIndex(name, "/")+1:]
 		if name == "" {
 			return "", fmt.Errorf("no last element after/")

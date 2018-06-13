@@ -11,7 +11,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Variab
 		*errs = append(*errs, es...)
 	}
 	if condition != nil {
-		if condition.Typ != VARIABLE_TYPE_BOOL {
+		if condition.Type != VARIABLE_TYPE_BOOL {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(e.Pos)))
 		}
 		if ternary.Condition.canbeUsedAsCondition() == false {

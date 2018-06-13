@@ -9,15 +9,15 @@ import (
 */
 func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 	arr := e.Data.(*ExpressionArrayLiteral)
-	if arr.Typ == nil && len(arr.Expressions) == 0 {
+	if arr.Type == nil && len(arr.Expressions) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression, cannot inference it`s type ",
 			errMsgPrefix(e.Pos)))
 		return nil
 	}
 	noType := true
-	if arr.Typ != nil {
+	if arr.Type != nil {
 		noType = false
-		err := arr.Typ.resolve(block)
+		err := arr.Type.resolve(block)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
@@ -35,14 +35,14 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 			if t == nil {
 				continue
 			}
-			if noType && arr.Typ == nil {
+			if noType && arr.Type == nil {
 				if t.RightValueValid() && t.isTyped() {
 					tt := t.Clone()
 					tt.Pos = e.Pos
-					arr.Typ = &VariableType{}
-					arr.Typ.Typ = VARIABLE_TYPE_ARRAY
-					arr.Typ.ArrayType = tt
-					arr.Typ.Pos = e.Pos
+					arr.Type = &VariableType{}
+					arr.Type.Type = VARIABLE_TYPE_ARRAY
+					arr.Type.ArrayType = tt
+					arr.Type.Pos = e.Pos
 				} else {
 					if t.RightValueValid() {
 						*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
@@ -53,23 +53,23 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 					}
 				}
 			}
-			if arr.Typ != nil {
-				if arr.Typ.ArrayType.Equal(errs, t) == false {
+			if arr.Type != nil {
+				if arr.Type.ArrayType.Equal(errs, t) == false {
 					if noType {
 						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
-							errMsgPrefix(t.Pos), arr.Typ.ArrayType.TypeString(), t.TypeString()))
+							errMsgPrefix(t.Pos), arr.Type.ArrayType.TypeString(), t.TypeString()))
 					} else {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(t.Pos), t.TypeString(), arr.Typ.ArrayType.TypeString()))
+							errMsgPrefix(t.Pos), t.TypeString(), arr.Type.ArrayType.TypeString()))
 					}
 				}
 			}
 		}
 	}
-	if arr.Typ == nil {
+	if arr.Type == nil {
 		return nil
 	}
-	tt := arr.Typ.Clone()
+	tt := arr.Type.Clone()
 	tt.Pos = e.Pos
 	return tt
 }

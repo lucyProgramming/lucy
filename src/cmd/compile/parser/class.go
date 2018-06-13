@@ -8,22 +8,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-type Class struct {
+type ClassParser struct {
 	parser             *Parser
 	classDefinition    *ast.Class
 	isStatic           bool
 	accessControlToken *lex.Token
 }
 
-func (c *Class) Next() {
+func (c *ClassParser) Next() {
 	c.parser.Next()
 }
 
-func (c *Class) consume(m map[int]bool) {
+func (c *ClassParser) consume(m map[int]bool) {
 	c.parser.consume(m)
 }
 
-func (c *Class) parseClassName() (string, error) {
+func (c *ClassParser) parseClassName() (string, error) {
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 		err := fmt.Errorf("%s expect class`s name,but '%s'",
 			c.parser.errorMsgPrefix(), c.parser.token.Description)
@@ -45,7 +45,7 @@ func (c *Class) parseClassName() (string, error) {
 	return name, nil
 }
 
-func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
+func (c *ClassParser) parseInterfaces() ([]*ast.NameWithPos, error) {
 	ret := []*ast.NameWithPos{}
 	for c.parser.token.Type != lex.TOKEN_EOF {
 		pos := c.parser.mkPos()
@@ -66,7 +66,7 @@ func (c *Class) parseInterfaces() ([]*ast.NameWithPos, error) {
 	return ret, nil
 }
 
-func (c *Class) parse() (classDefinition *ast.Class, err error) {
+func (c *ClassParser) parse() (classDefinition *ast.Class, err error) {
 	defer c.resetProperty()
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
@@ -123,7 +123,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		return fmt.Errorf("%s not a valid token after 'static'", c.parser.errorMsgPrefix())
 	}
 	for c.parser.token.Type != lex.TOKEN_EOF {
-		if len(c.parser.errs) > c.parser.nerr {
+		if len(c.parser.errs) > c.parser.nErrors2Stop {
 			break
 		}
 		switch c.parser.token.Type {
@@ -179,7 +179,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			}
 			c.resetProperty()
 		case lex.TOKEN_FUNCTION:
-			f, err := c.parser.Function.parse(true)
+			f, err := c.parser.FunctionParser.parse(true)
 			if err != nil {
 				c.consume(untils_rc)
 				c.Next()
@@ -230,12 +230,12 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 	return
 }
 
-func (c *Class) resetProperty() {
+func (c *ClassParser) resetProperty() {
 	c.isStatic = false
 	c.accessControlToken = nil
 }
 
-func (c *Class) parseConst() error {
+func (c *ClassParser) parseConst() error {
 	pos := c.parser.mkPos()
 	vs, es, typ, err := c.parser.parseConstDefinition(false)
 	if err != nil {
@@ -271,7 +271,7 @@ func (c *Class) parseConst() error {
 	return nil
 }
 
-func (c *Class) parseField(errs *[]error) error {
+func (c *ClassParser) parseField(errs *[]error) error {
 	names, err := c.parser.parseNameList()
 	if err != nil {
 		return err
@@ -283,7 +283,7 @@ func (c *Class) parseField(errs *[]error) error {
 	var es []*ast.Expression
 	if c.parser.token.Type == lex.TOKEN_ASSIGN {
 		c.Next() // skip =
-		es, err = c.parser.Expression.parseExpressions()
+		es, err = c.parser.ExpressionParser.parseExpressions()
 		if err != nil {
 			*errs = append(*errs, err)
 		}
@@ -311,11 +311,11 @@ func (c *Class) parseField(errs *[]error) error {
 		f := &ast.ClassField{}
 		f.Name = v.Name
 		f.Pos = v.Pos
-		f.Typ = &ast.VariableType{}
+		f.Type = &ast.VariableType{}
 		if t == nil {
 			panic(11)
 		}
-		*f.Typ = *t
+		*f.Type = *t
 		f.AccessFlags = 0
 		if k < len(es) && es[k] != nil {
 			f.Expression = es[k]

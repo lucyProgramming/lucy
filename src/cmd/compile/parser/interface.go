@@ -8,22 +8,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-type Interface struct {
+type InterfaceParser struct {
 	parser             *Parser
 	classDefinition    *ast.Class
 	isStatic           bool
 	accessControlToken *lex.Token
 }
 
-func (c *Interface) Next() {
+func (c *InterfaceParser) Next() {
 	c.parser.Next()
 }
 
-func (c *Interface) consume(m map[int]bool) {
+func (c *InterfaceParser) consume(m map[int]bool) {
 	c.parser.consume(m)
 }
 
-func (c *Interface) parse() (classDefinition *ast.Class, err error) {
+func (c *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 	c.Next() // skip interface key word
 	classDefinition = &ast.Class{}
 	c.classDefinition = classDefinition
@@ -31,7 +31,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 	c.classDefinition.Block.IsClassBlock = true
 	c.classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
 	c.classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
-	c.classDefinition.Name, err = c.parser.Class.parseClassName()
+	c.classDefinition.Name, err = c.parser.ClassParser.parseClassName()
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 			c.parser.errs = append(c.parser.errs, err)
 			c.consume(untils_lc) //
 		} else {
-			t, err := c.parser.Class.parseClassName()
+			t, err := c.parser.ClassParser.parseClassName()
 			c.classDefinition.SuperClassName = t
 			if err != nil {
 				c.parser.errs = append(c.parser.errs, err)
@@ -53,7 +53,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 	}
 	if c.parser.token.Type == lex.TOKEN_IMPLEMENTS {
 		c.Next() // skip key word
-		c.classDefinition.InterfaceNames, err = c.parser.Class.parseInterfaces()
+		c.classDefinition.InterfaceNames, err = c.parser.ClassParser.parseInterfaces()
 		if err != nil {
 			c.consume(untils_lc)
 		}
@@ -65,7 +65,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 	}
 	c.Next()
 	for c.parser.token.Type != lex.TOKEN_EOF {
-		if len(c.parser.errs) > c.parser.nerr {
+		if len(c.parser.errs) > c.parser.nErrors2Stop {
 			break
 		}
 		switch c.parser.token.Type {
@@ -99,7 +99,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 			m := &ast.ClassMethod{}
 			m.Func = &ast.Function{}
 			m.Func.Name = name
-			m.Func.Typ = functionType
+			m.Func.Type = functionType
 			m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			if c.classDefinition.Methods == nil {
 				c.classDefinition.Methods = make(map[string][]*ast.ClassMethod)

@@ -10,7 +10,7 @@ import (
 //at least one name
 func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		err = fmt.Errorf("%s expect identifer,but '%s'",
+		err = fmt.Errorf("%s expect identifier,but '%s'",
 			p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err

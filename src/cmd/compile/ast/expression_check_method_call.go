@@ -15,7 +15,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	if object == nil {
 		return nil
 	}
-	if object.Typ == VARIABLE_TYPE_PACKAGE {
+	if object.Type == VARIABLE_TYPE_PACKAGE {
 		d, exists := object.Package.Block.NameExists(call.Name)
 		if exists == false {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' not found", errMsgPrefix(e.Pos), call.Name))
@@ -29,7 +29,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			//	return e.checkFunctionCall(block, errs, f, &call.Args)
 			//} else {
 			// convert to function call
-			e.Typ = EXPRESSION_TYPE_FUNCTION_CALL
+			e.Type = EXPRESSION_TYPE_FUNCTION_CALL
 			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
 			call.Func = f
 			e.Data = call
@@ -39,24 +39,24 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			//object cast
 			class := d.(*Class)
 			typeConversion := &ExpressionTypeConversion{}
-			typeConversion.Typ = &VariableType{}
-			typeConversion.Typ.Typ = VARIABLE_TYPE_OBJECT
-			typeConversion.Typ.Pos = e.Pos
-			typeConversion.Typ.Class = class
-			e.Typ = EXPRESSION_TYPE_CHECK_CAST
+			typeConversion.Type = &VariableType{}
+			typeConversion.Type.Type = VARIABLE_TYPE_OBJECT
+			typeConversion.Type.Pos = e.Pos
+			typeConversion.Type.Class = class
+			e.Type = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
 				typeConversion.Expression = call.Args[0]
 			}
 			e.Data = typeConversion
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
-				return []*VariableType{typeConversion.Typ.Clone()}
+				return []*VariableType{typeConversion.Type.Clone()}
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
 		case *VariableType:
 			typeConversion := &ExpressionTypeConversion{}
-			typeConversion.Typ = object.Package.Block.Types[call.Name]
-			e.Typ = EXPRESSION_TYPE_CHECK_CAST
+			typeConversion.Type = object.Package.Block.TypeAlias[call.Name]
+			e.Type = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
 				typeConversion.Expression = call.Args[0]
 			}
@@ -64,7 +64,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 					errMsgPrefix(e.Pos)))
-				return []*VariableType{typeConversion.Typ}
+				return []*VariableType{typeConversion.Type}
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
 		default:
@@ -73,12 +73,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			return nil
 		}
 	}
-	if object.Typ == VARIABLE_TYPE_MAP {
+	if object.Type == VARIABLE_TYPE_MAP {
 		switch call.Name {
 		case common.MAP_METHOD_KEY_EXISTS:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
-			ret.Typ = VARIABLE_TYPE_BOOL
+			ret.Type = VARIABLE_TYPE_BOOL
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s call '%s' expect one argument",
 					errMsgPrefix(e.Pos), call.Name))
@@ -107,7 +107,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		case common.MAP_METHOD_REMOVE:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
-			ret.Typ = VARIABLE_TYPE_VOID
+			ret.Type = VARIABLE_TYPE_VOID
 			if len(call.Args) == 0 {
 				*errs = append(*errs, fmt.Errorf("%s remove expect at last 1 argement",
 					errMsgPrefix(e.Pos)))
@@ -131,7 +131,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		case common.MAP_METHOD_REMOVEALL:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
-			ret.Typ = VARIABLE_TYPE_VOID
+			ret.Type = VARIABLE_TYPE_VOID
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s removeAll expect no arguments",
 					errMsgPrefix(e.Pos)))
@@ -140,7 +140,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		case common.MAP_METHOD_SIZE:
 			ret := &VariableType{}
 			ret.Pos = e.Pos
-			ret.Typ = VARIABLE_TYPE_INT
+			ret.Type = VARIABLE_TYPE_INT
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s too many argument to call '%s''",
 					errMsgPrefix(e.Pos), call.Name))
@@ -152,11 +152,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
-	if object.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+	if object.Type == VARIABLE_TYPE_JAVA_ARRAY {
 		switch call.Name {
 		case common.ARRAY_METHOD_SIZE:
 			t := &VariableType{}
-			t.Typ = VARIABLE_TYPE_INT
+			t.Type = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' expect no arguments",
@@ -170,14 +170,14 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 
-	if object.Typ == VARIABLE_TYPE_ARRAY {
+	if object.Type == VARIABLE_TYPE_ARRAY {
 		switch call.Name {
 		case common.ARRAY_METHOD_SIZE,
 			common.ARRAY_METHOD_CAP,   //for debug,remove when time is right
 			common.ARRAY_METHOD_START, //for debug,remove when time is right
 			common.ARRAY_METHOD_END:   //for debug,remove when time is right
 			t := &VariableType{}
-			t.Typ = VARIABLE_TYPE_INT
+			t.Type = VARIABLE_TYPE_INT
 			t.Pos = e.Pos
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
@@ -217,7 +217,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		return nil
 	}
 
-	if object.Typ == VARIABLE_TYPE_STRING {
+	if object.Type == VARIABLE_TYPE_STRING {
 		if err := loadJavaStringClass(e.Pos); err != nil {
 			*errs = append(*errs, err)
 			return nil
@@ -235,7 +235,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Func.Typ.retTypes(e.Pos)
+			return ms[0].Func.Type.retTypes(e.Pos)
 		}
 		if len(ms) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
@@ -244,7 +244,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		return nil
 	}
-	if object.Typ != VARIABLE_TYPE_OBJECT && object.Typ != VARIABLE_TYPE_CLASS {
+	if object.Type != VARIABLE_TYPE_OBJECT && object.Type != VARIABLE_TYPE_CLASS {
 		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
@@ -258,7 +258,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				errMsgPrefix(e.Pos)))
 			return nil
 		}
-		if object.Typ != VARIABLE_TYPE_OBJECT {
+		if object.Type != VARIABLE_TYPE_OBJECT {
 			*errs = append(*errs, fmt.Errorf("%s cannot call father`s constuction on '%s'",
 				errMsgPrefix(e.Pos), object.TypeString()))
 			return nil
@@ -286,7 +286,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			call.Method = ms[0]
 			call.Class = object.Class.SuperClass
 			ret := []*VariableType{&VariableType{}}
-			ret[0].Typ = VARIABLE_TYPE_VOID
+			ret[0].Type = VARIABLE_TYPE_VOID
 			ret[0].Pos = e.Pos
 			block.Statements[0].IsCallFatherConstructionStatement = true
 			return ret
@@ -309,7 +309,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	}
 	if matched {
 		if ms[0].IsStatic() {
-			if object.Typ != VARIABLE_TYPE_CLASS {
+			if object.Type != VARIABLE_TYPE_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
 					errMsgPrefix(e.Pos), call.Name))
 			}
@@ -321,13 +321,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 				ms[0].IsPublic() == false {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
-			if object.Typ != VARIABLE_TYPE_OBJECT {
+			if object.Type != VARIABLE_TYPE_OBJECT {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
 					errMsgPrefix(e.Pos), call.Name))
 			}
 		}
 		call.Method = ms[0]
-		return ms[0].Func.Typ.retTypes(e.Pos)
+		return ms[0].Func.Type.retTypes(e.Pos)
 	}
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))

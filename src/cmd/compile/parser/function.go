@@ -7,19 +7,19 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-type Function struct {
+type FunctionParser struct {
 	parser *Parser
 }
 
-func (p *Function) Next() {
+func (p *FunctionParser) Next() {
 	p.parser.Next()
 }
 
-func (p *Function) consume(untils map[int]bool) {
+func (p *FunctionParser) consume(untils map[int]bool) {
 	p.parser.consume(untils)
 }
 
-func (p *Function) parse(needName bool) (f *ast.Function, err error) {
+func (p *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
 	var offset int
 	//	if p.parser.token == nil {
@@ -44,7 +44,7 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 		f.Name = p.parser.token.Data.(string)
 		p.Next()
 	}
-	f.Typ, err = p.parser.parseFunctionType()
+	f.Type, err = p.parser.parseFunctionType()
 	if err != nil {
 		p.consume(untils_lc)
 	}
@@ -55,7 +55,7 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	}
 	f.Block.IsFunctionTopBlock = true
 	p.Next()
-	p.parser.Block.parseStatementList(&f.Block, false)
+	p.parser.BlockParser.parseStatementList(&f.Block, false)
 	if p.parser.token.Type != lex.TOKEN_RC {
 		err = fmt.Errorf("%s expect '}', but '%s'",
 			p.parser.errorMsgPrefix(), p.parser.token.Description)

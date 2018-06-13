@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *Expression) parseTernaryExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseTernaryExpression() (*ast.Expression, error) {
 	left, err := ep.parseLogicalOrExpression()
 	if err != nil {
 		return left, err
@@ -16,7 +16,7 @@ func (ep *Expression) parseTernaryExpression() (*ast.Expression, error) {
 	}
 	newe := &ast.Expression{}
 	newe.Pos = ep.parser.mkPos()
-	newe.Typ = ast.EXPRESSION_TYPE_TERNARY
+	newe.Type = ast.EXPRESSION_TYPE_TERNARY
 	ep.Next() // skip ?
 	True, err := ep.parseExpression(false)
 	if err != nil {

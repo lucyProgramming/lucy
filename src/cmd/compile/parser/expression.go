@@ -7,22 +7,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-type Expression struct {
+type ExpressionParser struct {
 	parser *Parser
 }
 
-func (ep *Expression) Next() {
+func (ep *ExpressionParser) Next() {
 	ep.parser.Next()
 }
 
-func (ep *Expression) parseExpressions() ([]*ast.Expression, error) {
+func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
 	for ep.parser.token.Type != lex.TOKEN_EOF {
 		e, err := ep.parseExpression(false)
 		if err != nil {
 			return es, err
 		}
-		if e.Typ == ast.EXPRESSION_TYPE_LIST {
+		if e.Type == ast.EXPRESSION_TYPE_LIST {
 			es = append(es, e.Data.([]*ast.Expression)...)
 		} else {
 			es = append(es, e)
@@ -37,7 +37,7 @@ func (ep *Expression) parseExpressions() ([]*ast.Expression, error) {
 }
 
 //parse assign expression
-func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
 	left, err := ep.parseTernaryExpression() //
 	if err != nil {
 		return nil, err
@@ -48,19 +48,19 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 		if err != nil {
 			return nil, err
 		}
-		if left.Typ == ast.EXPRESSION_TYPE_LIST {
+		if left.Type == ast.EXPRESSION_TYPE_LIST {
 			list := left.Data.([]*ast.Expression)
 			left.Data = append(list, left2)
 		} else {
 			newe := &ast.Expression{}
-			newe.Typ = ast.EXPRESSION_TYPE_LIST
+			newe.Type = ast.EXPRESSION_TYPE_LIST
 			list := []*ast.Expression{left, left2}
 			newe.Data = list
 			left = newe
 		}
 	}
 	mustBeOneExpression := func() {
-		if left.Typ == ast.EXPRESSION_TYPE_LIST {
+		if left.Type == ast.EXPRESSION_TYPE_LIST {
 			es := left.Data.([]*ast.Expression)
 			left = es[0]
 			if len(es) > 1 {
@@ -73,7 +73,7 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 		pos := ep.parser.mkPos()
 		ep.Next() // skip = :=
 		result := &ast.Expression{}
-		result.Typ = typ
+		result.Type = typ
 		bin := &ast.ExpressionBinary{}
 		result.Data = bin
 		bin.Left = left
@@ -84,7 +84,7 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 				return result, err
 			}
 			bin.Right = &ast.Expression{}
-			bin.Right.Typ = ast.EXPRESSION_TYPE_LIST
+			bin.Right.Type = ast.EXPRESSION_TYPE_LIST
 			bin.Right.Data = es
 		} else {
 			bin.Right, err = ep.parseExpression(false)
@@ -132,7 +132,7 @@ func (ep *Expression) parseExpression(statementLevel bool) (*ast.Expression, err
 	return left, nil
 }
 
-func (ep *Expression) parseTypeConvertionExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, error) {
 	t, err := ep.parser.parseType()
 	if err != nil {
 		return nil, err
@@ -151,9 +151,9 @@ func (ep *Expression) parseTypeConvertionExpression() (*ast.Expression, error) {
 	}
 	ep.Next() // skip )
 	return &ast.Expression{
-		Typ: ast.EXPRESSION_TYPE_CHECK_CAST,
+		Type: ast.EXPRESSION_TYPE_CHECK_CAST,
 		Data: &ast.ExpressionTypeConversion{
-			Typ:        t,
+			Type:       t,
 			Expression: e,
 		},
 		Pos: pos,

@@ -29,7 +29,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 		os.Exit(1)
 	}
 	errs = make([]error, 0)
-	PackageBeenCompile.Files = make(map[string]*File)
+	PackageBeenCompile.Files = make(map[string]*LucyFile)
 	conversion.Name = []string{}
 	conversion.Blocks = []*Block{}
 	conversion.Functions = make([]*Function, 0)
@@ -58,7 +58,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 		case *Import:
 			i := v.Data.(*Import)
 			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
-				PackageBeenCompile.Files[i.Pos.Filename] = &File{Imports: make(map[string]*Import)}
+				PackageBeenCompile.Files[i.Pos.Filename] = &LucyFile{Imports: make(map[string]*Import)}
 			}
 			PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();
@@ -75,20 +75,20 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 	redeclareErrors = conversion.redeclareErrors()
 	PackageBeenCompile.Block.Constants = make(map[string]*Constant)
 	for _, v := range conversion.Constants {
-		PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
+		PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 	}
 	PackageBeenCompile.Block.Variables = make(map[string]*VariableDefinition)
 	PackageBeenCompile.Block.Functions = make(map[string]*Function)
 	for _, v := range conversion.Functions {
 		v.IsGlobal = true
-		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
+		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range conversion.Classes {
-		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
+		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -96,29 +96,29 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range conversion.Enums {
-		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
+		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 	//after class inserted,then resolve type
 	for _, v := range conversion.TypeAlias {
-		err := v.Typ.resolve(&PackageBeenCompile.Block)
+		err := v.Type.resolve(&PackageBeenCompile.Block)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
-		if PackageBeenCompile.Block.Types == nil {
-			PackageBeenCompile.Block.Types = make(map[string]*VariableType)
+		if PackageBeenCompile.Block.TypeAlias == nil {
+			PackageBeenCompile.Block.TypeAlias = make(map[string]*VariableType)
 		}
-		v.Typ.Alias = v.Name
-		PackageBeenCompile.Block.Types[v.Name] = v.Typ
+		v.Type.Alias = v.Name
+		PackageBeenCompile.Block.TypeAlias[v.Name] = v.Type
 	}
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))
 		for k, v := range expressions {
 			s[k] = &Statement{
-				Typ:        STATEMENT_TYPE_EXPRESSION,
+				Type:       STATEMENT_TYPE_EXPRESSION,
 				Expression: v,
 			}
 		}

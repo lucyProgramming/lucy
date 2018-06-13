@@ -8,7 +8,7 @@ import (
 
 type Function struct {
 	TemplateFunction               *TemplateFunction
-	TypeParameters                 map[string]*VariableType //typed parameters
+	parameterType                  map[string]*VariableType //typed parameters
 	ClassMethod                    *cg.MethodHighLevel      // make call from
 	ConstructionMethodCalledByUser bool
 	HaveDefaultValue               bool
@@ -21,7 +21,7 @@ type Function struct {
 	IsBuildIn                      bool
 	Used                           bool
 	AccessFlags                    uint16
-	Typ                            FunctionType
+	Type                           FunctionType
 	Closure                        Closure
 	Name                           string // if name is nil string,means no name function
 	Block                          Block
@@ -50,8 +50,8 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 }
 
 func (f *Function) NoReturnValue() bool {
-	return len(f.Typ.ReturnList) == 0 ||
-		f.Typ.ReturnList[0].Typ.Typ == VARIABLE_TYPE_VOID
+	return len(f.Type.ReturnList) == 0 ||
+		f.Type.ReturnList[0].Type.Type == VARIABLE_TYPE_VOID
 }
 
 type AutoVarForException struct {
@@ -83,24 +83,24 @@ func (f *Function) readableMsg(name ...string) string {
 	} else {
 		s = "fn " + f.Name + "("
 	}
-	for k, v := range f.Typ.ParameterList {
+	for k, v := range f.Type.ParameterList {
 		s += " " + v.Name + " "
-		s += v.Typ.TypeString()
+		s += v.Type.TypeString()
 		if v.Expression != nil {
 			s += " = " + v.Expression.OpName()
 		}
 		s += " "
-		if k != len(f.Typ.ParameterList)-1 {
+		if k != len(f.Type.ParameterList)-1 {
 			s += ","
 		}
 	}
 	s += ")"
-	if len(f.Typ.ReturnList) > 0 && f.NoReturnValue() == false {
+	if len(f.Type.ReturnList) > 0 && f.NoReturnValue() == false {
 		s += "->( "
-		for k, v := range f.Typ.ReturnList {
+		for k, v := range f.Type.ReturnList {
 			s += " " + v.Name + " "
-			s += v.Typ.TypeString()
-			if k != len(f.Typ.ReturnList)-1 {
+			s += v.Type.TypeString()
+			if k != len(f.Type.ReturnList)-1 {
 				s += ","
 			}
 		}
@@ -149,10 +149,10 @@ func (f *Function) clone() (ret *Function, es []error) {
 }
 func (f *Function) mkLastRetrunStatement() {
 	if len(f.Block.Statements) == 0 ||
-		(f.Block.Statements[len(f.Block.Statements)-1].Typ != STATEMENT_TYPE_RETURN) {
+		(f.Block.Statements[len(f.Block.Statements)-1].Type != STATEMENT_TYPE_RETURN) {
 		s := &StatementReturn{}
 		f.Block.Statements = append(f.Block.Statements, &Statement{
-			Typ:             STATEMENT_TYPE_RETURN,
+			Type:            STATEMENT_TYPE_RETURN,
 			StatementReturn: s,
 			Pos:             f.Block.EndPos,
 		})
@@ -165,37 +165,37 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
 				errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
 		}
-		if len(f.Typ.ParameterList) != 1 {
+		if len(f.Type.ParameterList) != 1 {
 			errFunc()
 		} else { //
-			if f.Typ.ParameterList[0].Typ.Typ == VARIABLE_TYPE_ARRAY &&
-				f.Typ.ParameterList[0].Typ.ArrayType.Typ == VARIABLE_TYPE_STRING {
-				err := f.Block.insert(f.Typ.ParameterList[0].Name, f.Typ.ParameterList[0].Pos, f.Typ.ParameterList[0])
+			if f.Type.ParameterList[0].Type.Type == VARIABLE_TYPE_ARRAY &&
+				f.Type.ParameterList[0].Type.ArrayType.Type == VARIABLE_TYPE_STRING {
+				err := f.Block.Insert(f.Type.ParameterList[0].Name, f.Type.ParameterList[0].Pos, f.Type.ParameterList[0])
 				if err != nil {
 					*errs = append(*errs, err)
 				}
 			} else {
 				errFunc()
 			}
-			f.Typ.ParameterList[0].LocalValOffset = 1
-			f.Typ.ParameterList[0].IsFunctionParameter = true
+			f.Type.ParameterList[0].LocalValOffset = 1
+			f.Type.ParameterList[0].IsFunctionParameter = true
 		}
 
 		return
 	}
 	var err error
-	for k, v := range f.Typ.ParameterList {
+	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true
-		if len(v.Typ.haveT()) > 0 {
+		if len(v.Type.haveParameterType()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}
 		} else {
-			err = v.Typ.resolve(&f.Block)
+			err = v.Type.resolve(&f.Block)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			err = f.Block.insert(v.Name, v.Pos, v)
+			err = f.Block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
 				continue
@@ -214,9 +214,9 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				*errs = append(*errs, es...)
 			}
 			if t != nil {
-				if v.Typ.Equal(errs, t) == false {
+				if v.Type.Equal(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Typ.TypeString()))
+						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Type.TypeString()))
 					continue
 				}
 
@@ -226,7 +226,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 					errMsgPrefix(v.Expression.Pos)))
 				continue
 			}
-			if v.Expression.Typ == EXPRESSION_TYPE_NULL {
+			if v.Expression.Type == EXPRESSION_TYPE_NULL {
 				*errs = append(*errs, fmt.Errorf("%s cannot use 'null' as default value",
 					errMsgPrefix(v.Expression.Pos)))
 			}
@@ -234,18 +234,18 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 	}
 
 	//handler return
-	for _, v := range f.Typ.ReturnList {
+	for _, v := range f.Type.ReturnList {
 		v.IsFunctionReturnVar = true
-		if len(v.Typ.haveT()) > 0 {
+		if len(v.Type.haveParameterType()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}
 		} else {
-			err = v.Typ.resolve(&f.Block)
+			err = v.Type.resolve(&f.Block)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			err = f.Block.insert(v.Name, v.Pos, v)
+			err = f.Block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
 				continue
@@ -255,7 +255,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			continue
 		}
 		if v.Expression == nil {
-			v.Expression = v.Typ.mkDefaultValueExpression()
+			v.Expression = v.Type.mkDefaultValueExpression()
 			continue
 		}
 		t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
@@ -263,9 +263,9 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			*errs = append(*errs, es...)
 			continue
 		}
-		if t != nil && t.Equal(errs, v.Typ) == false {
+		if t != nil && t.Equal(errs, v.Type) == false {
 			err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
-				t.TypeString(), v.Typ.TypeString())
+				t.TypeString(), v.Type.TypeString())
 			*errs = append(*errs, err)
 		}
 	}

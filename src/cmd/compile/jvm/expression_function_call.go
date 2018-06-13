@@ -5,17 +5,17 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Func.IsBuildIn {
-		return m.mkBuildinFunctionCall(class, code, e, context, state)
+		return makeExpression.mkBuildInFunctionCall(class, code, e, context, state)
 	}
 	if call.Func.TemplateFunction != nil {
-		return m.buildTemplateFunctionCall(class, code, e, context, state)
+		return makeExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
 	if call.Func.IsClosureFunction == false {
-		maxStack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
+		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Func.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
@@ -27,7 +27,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		//closure function call
 		//load object
 		if context.function.Closure.ClosureFunctionExist(call.Func) {
-			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      class.Name,
@@ -36,11 +36,11 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
-			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSet)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSet)...)
 		}
 		state.pushStack(class, state.newObjectVariableType(call.Func.ClassMethod.Class.Name))
 		defer state.popStack(1)
-		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
+		stack := makeExpression.buildCallArgs(class, code, call.Args, call.Func.Type.ParameterList, context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}

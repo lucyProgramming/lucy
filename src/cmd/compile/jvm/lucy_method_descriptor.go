@@ -9,12 +9,12 @@ type LucyMethodSignature struct {
 
 func (signature *LucyMethodSignature) Need(functionType *ast.FunctionType) bool {
 	for _, v := range functionType.ParameterList {
-		if LucyFieldSignatureParser.Need(v.Typ) {
+		if LucyFieldSignatureParser.Need(v.Type) {
 			return true
 		}
 	}
 	for _, v := range functionType.ReturnList {
-		if LucyFieldSignatureParser.Need(v.Typ) {
+		if LucyFieldSignatureParser.Need(v.Type) {
 			return true
 		}
 	}
@@ -26,15 +26,15 @@ func (signature *LucyMethodSignature) Need(functionType *ast.FunctionType) bool 
 
 func (signature *LucyMethodSignature) Encode(f *ast.Function) (descriptor string) {
 	descriptor = "("
-	for _, v := range f.Typ.ParameterList {
-		descriptor += LucyFieldSignatureParser.Encode(v.Typ)
+	for _, v := range f.Type.ParameterList {
+		descriptor += LucyFieldSignatureParser.Encode(v.Type)
 	}
 	descriptor += ")"
 	if f.NoReturnValue() {
 		descriptor += "V"
 	} else {
-		for _, v := range f.Typ.ReturnList {
-			descriptor += LucyFieldSignatureParser.Encode(v.Typ)
+		for _, v := range f.Type.ReturnList {
+			descriptor += LucyFieldSignatureParser.Encode(v.Type)
 		}
 	}
 	return descriptor
@@ -44,14 +44,14 @@ func (signature *LucyMethodSignature) Encode(f *ast.Function) (descriptor string
 func (signature *LucyMethodSignature) Decode(f *ast.Function, bs []byte) error {
 	bs = bs[1:] // skip (
 	var err error
-	for i := 0; i < len(f.Typ.ParameterList); i++ {
-		bs, f.Typ.ParameterList[i].Typ, err = LucyFieldSignatureParser.Decode(bs)
+	for i := 0; i < len(f.Type.ParameterList); i++ {
+		bs, f.Type.ParameterList[i].Type, err = LucyFieldSignatureParser.Decode(bs)
 		if err != nil {
 			return err
 		}
 	}
 	bs = bs[1:] // skip )
-	f.Typ.ReturnList = []*ast.VariableDefinition{}
+	f.Type.ReturnList = []*ast.VariableDefinition{}
 	i := 1
 	for len(bs) > 0 {
 		var t *ast.VariableType
@@ -60,8 +60,8 @@ func (signature *LucyMethodSignature) Decode(f *ast.Function, bs []byte) error {
 			return err
 		}
 		vd := &ast.VariableDefinition{}
-		vd.Typ = t
-		f.Typ.ReturnList = append(f.Typ.ReturnList, vd)
+		vd.Type = t
+		f.Type.ReturnList = append(f.Type.ReturnList, vd)
 		i++
 	}
 

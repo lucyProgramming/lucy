@@ -7,10 +7,10 @@ import (
 )
 
 func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType) {
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ExpressionIdentifier)
-		d, _ := block.SearchByName(identifier.Name)
+		d, _ := block.searchByName(identifier.Name)
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
 				errMsgPrefix(e.Pos), identifier.Name))
@@ -23,8 +23,8 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					errMsgPrefix(e.Pos), THIS))
 			}
 			t := d.(*VariableDefinition)
-			identifier.Var = t
-			tt := identifier.Var.Typ.Clone()
+			identifier.Variable = t
+			tt := identifier.Variable.Type.Clone()
 			tt.Pos = e.Pos
 			return tt
 		default:
@@ -43,7 +43,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 		if t == nil {
 			return nil
 		}
-		if t.Typ == VARIABLE_TYPE_OBJECT {
+		if t.Type == VARIABLE_TYPE_OBJECT {
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -59,12 +59,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
-				tt := field.Typ.Clone()
+				tt := field.Type.Clone()
 				tt.Pos = e.Pos
 				return tt
 			}
 			return nil
-		} else if t.Typ == VARIABLE_TYPE_CLASS {
+		} else if t.Type == VARIABLE_TYPE_CLASS {
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -75,12 +75,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by instance",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
-				tt := field.Typ.Clone()
+				tt := field.Type.Clone()
 				tt.Pos = e.Pos
 				return tt
 			}
 			return nil
-		} else if t.Typ == VARIABLE_TYPE_PACKAGE {
+		} else if t.Type == VARIABLE_TYPE_PACKAGE {
 			variable, exists := t.Package.Block.NameExists(dot.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
@@ -93,7 +93,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				}
 				dot.PackageVariable = vd
-				tt := vd.Typ.Clone()
+				tt := vd.Type.Clone()
 				tt.Pos = e.Pos
 				return tt
 			} else {

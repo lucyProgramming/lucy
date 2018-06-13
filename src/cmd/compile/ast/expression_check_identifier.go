@@ -11,7 +11,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 			errMsgPrefix(e.Pos), NO_NAME_IDENTIFIER)
 	}
 	fromImport := false
-	d, err := block.SearchByName(identifer.Name)
+	d, err := block.searchByName(identifer.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 	}
@@ -19,7 +19,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifer.Name)
 		if i != nil {
 			fromImport = true
-			d, err = PackageBeenCompile.load(i.Resource)
+			d, err = PackageBeenCompile.load(i.ImportName)
 			if err != nil {
 				return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 			}
@@ -34,26 +34,26 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		if fromImport == false && f.IsGlobal && f.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, f.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Resource)
+				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
 				tt := &VariableType{}
 				tt.Pos = e.Pos
-				tt.Typ = VARIABLE_TYPE_PACKAGE
+				tt.Type = VARIABLE_TYPE_PACKAGE
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Typ = VARIABLE_TYPE_PACKAGE
+					tt.Type = VARIABLE_TYPE_PACKAGE
 				} else {
 					tt.Class = p.(*Class)
-					tt.Typ = VARIABLE_TYPE_OBJECT
+					tt.Type = VARIABLE_TYPE_OBJECT
 				}
 				return tt, nil
 			}
 		}
 		f.Used = true
 		tt := &VariableType{}
-		tt.Typ = VARIABLE_TYPE_FUNCTION
+		tt.Type = VARIABLE_TYPE_FUNCTION
 		tt.Pos = e.Pos
 		tt.Function = f
 		return tt, nil
@@ -62,34 +62,34 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Resource)
+				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
 				tt := &VariableType{}
 				tt.Pos = e.Pos
-				tt.Typ = VARIABLE_TYPE_PACKAGE
+				tt.Type = VARIABLE_TYPE_PACKAGE
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Typ = VARIABLE_TYPE_PACKAGE
+					tt.Type = VARIABLE_TYPE_PACKAGE
 				} else {
 					tt.Class = p.(*Class)
-					tt.Typ = VARIABLE_TYPE_OBJECT
+					tt.Type = VARIABLE_TYPE_OBJECT
 				}
 				return tt, nil
 			}
 		}
 		t.Used = true
-		tt := t.Typ.Clone()
+		tt := t.Type.Clone()
 		tt.Pos = e.Pos
-		identifer.Var = t
+		identifer.Variable = t
 		return tt, nil
 	case *Constant:
 		t := d.(*Constant)
 		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Resource)
+				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -97,17 +97,17 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 				tt.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Typ = VARIABLE_TYPE_PACKAGE
+					tt.Type = VARIABLE_TYPE_PACKAGE
 				} else {
 					tt.Class = p.(*Class)
-					tt.Typ = VARIABLE_TYPE_OBJECT
+					tt.Type = VARIABLE_TYPE_OBJECT
 				}
 				return tt, nil
 			}
 		}
 		t.Used = true
 		e.fromConst(t)
-		tt := t.Typ.Clone()
+		tt := t.Type.Clone()
 		tt.Pos = e.Pos
 		return tt, nil
 	case *Class:
@@ -115,7 +115,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		if fromImport == false && c.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, c.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Resource)
+				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -123,16 +123,16 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 				tt.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Typ = VARIABLE_TYPE_PACKAGE
+					tt.Type = VARIABLE_TYPE_PACKAGE
 				} else {
 					tt.Class = p.(*Class)
-					tt.Typ = VARIABLE_TYPE_OBJECT
+					tt.Type = VARIABLE_TYPE_OBJECT
 				}
 				return tt, nil
 			}
 		}
 		t := &VariableType{}
-		t.Typ = VARIABLE_TYPE_CLASS
+		t.Type = VARIABLE_TYPE_CLASS
 		t.Pos = e.Pos
 		t.Class = c
 		return t, nil
@@ -141,7 +141,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		if fromImport == false { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, e.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Resource)
+				p, err := PackageBeenCompile.load(i.ImportName)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -149,10 +149,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 				tt.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Typ = VARIABLE_TYPE_PACKAGE
+					tt.Type = VARIABLE_TYPE_PACKAGE
 				} else {
 					tt.Class = p.(*Class)
-					tt.Typ = VARIABLE_TYPE_OBJECT
+					tt.Type = VARIABLE_TYPE_OBJECT
 				}
 				return tt, nil
 			}
@@ -160,7 +160,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		if e != nil {
 			t := &VariableType{}
 			t.Pos = e.Pos
-			t.Typ = VARIABLE_TYPE_ENUM
+			t.Type = VARIABLE_TYPE_ENUM
 			t.EnumName = e
 			t.Enum = e.Enum
 			identifer.EnumName = e
@@ -169,7 +169,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 	case *Package:
 		t := &VariableType{}
 		t.Pos = e.Pos
-		t.Typ = VARIABLE_TYPE_PACKAGE
+		t.Type = VARIABLE_TYPE_PACKAGE
 		t.Package = d.(*Package)
 		return t, nil
 	}

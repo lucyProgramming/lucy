@@ -23,16 +23,16 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*Vari
 					return nil, false, fmt.Errorf("method '%s' not found", name)
 				}
 			}
-			if len(args) > len(m.Func.Typ.ParameterList) {
+			if len(args) > len(m.Func.Type.ParameterList) {
 				errMsg := fmt.Sprintf("too many paramaters to call function '%s':\n", name)
 				errMsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(name, args))
 				errMsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
 				return nil, false, fmt.Errorf(errMsg)
 			}
-			if len(args) < len(m.Func.Typ.ParameterList) {
+			if len(args) < len(m.Func.Type.ParameterList) {
 				if m.Func.HaveDefaultValue && len(args) >= m.Func.DefaultValueStartAt && callArgs != nil {
-					for i := len(args); i < len(m.Func.Typ.ParameterList); i++ {
-						*callArgs = append(*callArgs, m.Func.Typ.ParameterList[i].Expression)
+					for i := len(args); i < len(m.Func.Type.ParameterList); i++ {
+						*callArgs = append(*callArgs, m.Func.Type.ParameterList[i].Expression)
 					}
 				} else { // no default value
 					errMsg := fmt.Sprintf("too few paramaters to call function '%s'\n", name)
@@ -41,12 +41,12 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*Vari
 					return nil, false, fmt.Errorf(errMsg)
 				}
 			} else {
-				convertLiteralExpressionsToNeeds(*callArgs, m.Func.Typ.needParameterTypes(), args)
+				convertLiteralExpressionsToNeeds(*callArgs, m.Func.Type.getParameterTypes(), args)
 			}
-			for k, v := range m.Func.Typ.ParameterList {
+			for k, v := range m.Func.Type.ParameterList {
 				if k < len(args) {
-					if args[k] != nil && !v.Typ.Equal(errs, args[k]) {
-						errMsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Typ.TypeString())
+					if args[k] != nil && !v.Type.Equal(errs, args[k]) {
+						errMsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Type.TypeString())
 						errMsg += fmt.Sprintf("\thave %s\n", m.Func.badParameterMsg(m.Func.Name, args))
 						errMsg += fmt.Sprintf("\twant %s\n", m.Func.readableMsg())
 						return nil, false, fmt.Errorf(errMsg)
@@ -73,15 +73,15 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*Vari
 func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string,
 	args []*VariableType, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	for _, v := range c.Methods[name] {
-		if len(v.Func.Typ.ParameterList) != len(args) {
+		if len(v.Func.Type.ParameterList) != len(args) {
 			if fromSub == false || v.IsPublic() || v.IsProtected() {
 				ms = append(ms, v)
 			}
 			continue
 		}
 		noError := true
-		for kk, vv := range v.Func.Typ.ParameterList {
-			if args[kk] != nil && vv.Typ.Equal(errs, args[kk]) == false {
+		for kk, vv := range v.Func.Type.ParameterList {
+			if args[kk] != nil && vv.Type.Equal(errs, args[kk]) == false {
 				noError = false
 				ms = append(ms, v)
 				break

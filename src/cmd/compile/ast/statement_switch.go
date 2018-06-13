@@ -28,7 +28,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 	if conditionType == nil {
 		return errs
 	}
-	if conditionType.Typ == VARIABLE_TYPE_BOOL {
+	if conditionType.Type == VARIABLE_TYPE_BOOL {
 		errs = append(errs, fmt.Errorf("%s bool expression not allow for switch",
 			errMsgPrefix(conditionType.Pos)))
 		return errs
@@ -58,7 +58,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 			var enumName string
 			valueValid := false
 			valueFromExpression := func() {
-				switch e.Typ {
+				switch e.Type {
 				case EXPRESSION_TYPE_BYTE:
 					byteValue = e.Data.(byte)
 				case EXPRESSION_TYPE_SHORT:
@@ -87,7 +87,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
 				continue
 			}
-			if conditionType.Typ == VARIABLE_TYPE_ENUM {
+			if conditionType.Type == VARIABLE_TYPE_ENUM {
 				if t.EnumName == nil {
 					errs = append(errs, fmt.Errorf("%s enum value is not literal",
 						errMsgPrefix(e.Pos)))
@@ -116,7 +116,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
 					return errMsg
 				}
-				switch conditionType.Typ {
+				switch conditionType.Type {
 				case VARIABLE_TYPE_BYTE:
 					if first, ok := byteMap[byteValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
@@ -189,7 +189,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
 	}
-	if conditionType.Typ == VARIABLE_TYPE_ENUM &&
+	if conditionType.Type == VARIABLE_TYPE_ENUM &&
 		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
 		s.Default == nil {
 		//some enum are missing, not allow

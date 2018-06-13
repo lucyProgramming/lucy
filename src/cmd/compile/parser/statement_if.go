@@ -7,11 +7,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (b *Block) parseIf() (i *ast.StatementIF, err error) {
+func (b *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 	b.Next() // skip if
 
 	var e *ast.Expression
-	e, err = b.parser.Expression.parseExpression(false)
+	e, err = b.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
 		b.consume(untils_lc)
@@ -24,7 +24,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 			i.PreExpressions = append(i.PreExpressions, i.Condition)
 		}
 		b.Next() // skip ;
-		i.Condition, err = b.parser.Expression.parseExpression(false)
+		i.Condition, err = b.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 			b.consume(untils_lc)
@@ -77,12 +77,12 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	return i, err
 }
 
-func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
+func (b *BlockParser) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 	es = []*ast.StatementElseIf{}
 	var e *ast.Expression
 	for b.parser.token.Type == lex.TOKEN_ELSEIF {
 		b.Next() // skip elseif token
-		e, err = b.parser.Expression.parseExpression(false)
+		e, err = b.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 			return es, err

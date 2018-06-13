@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -14,9 +14,9 @@ func (m *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.Att
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
-	maxStack, _ = m.build(class, code, meta.Format, context, state)
+	maxStack, _ = makeExpression.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(java_string_class))
-	loadInt32(class, code, int32(meta.ArgsLength))
+	loadInt(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -26,14 +26,14 @@ func (m *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.Att
 	}
 
 	objectArray := &ast.VariableType{}
-	objectArray.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+	objectArray.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
 	state.pushStack(class, objectArray)
 	index := int32(0)
 	for _, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			currentStack = 2
-			stack, _ := m.build(class, code, v, context, state)
+			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -43,7 +43,7 @@ func (m *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.Att
 				currentStack = 2
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
-				loadInt32(class, code, index)
+				loadInt(class, code, index)
 				currentStack += 2
 				stack = multiValuePacker.unPackObject(class, code, kk, context)
 				if t := currentStack + stack; t > maxStack {
@@ -58,11 +58,11 @@ func (m *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.Att
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		loadInt32(class, code, index)
+		loadInt(class, code, index)
 		currentStack += 2
 		state.pushStack(class, objectArray)
-		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-		stack, es := m.build(class, code, v, context, state)
+		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)

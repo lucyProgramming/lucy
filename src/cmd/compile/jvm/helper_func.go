@@ -28,7 +28,7 @@ func copyOP(code *cg.AttributeCode, op ...byte) {
 	code.CodeLength += len(op)
 }
 
-func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname,
+func copyOPLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname,
 	name, descriptor string) {
 	if len(ops) == 0 {
 		return
@@ -46,7 +46,7 @@ func copyOPLeftValue(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byt
 	copyOP(code, ops[1:]...)
 }
 
-func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
+func loadInt(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	switch value {
 	case -1:
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -87,13 +87,13 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	}
 }
 
-func storeGlobalVar(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode,
+func storeGlobalVariable(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode,
 	v *ast.VariableDefinition) {
 	code.Codes[code.CodeLength] = cg.OP_putstatic
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      mainClass.Name,
 		Field:      v.Name,
-		Descriptor: Descriptor.typeDescriptor(v.Typ),
+		Descriptor: Descriptor.typeDescriptor(v.Type),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 }
@@ -102,7 +102,7 @@ func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
 	var b byte
 	b = 1
 	for _, v := range ft.ParameterList {
-		b += byte(jvmSize(v.Typ))
+		b += byte(jvmSize(v.Type))
 	}
 	return b
 }
@@ -111,7 +111,7 @@ func jvmSize(v *ast.VariableType) uint16 {
 	if v.RightValueValid() == false {
 		panic("right value is not valid:" + v.TypeString())
 	}
-	if v.Typ == ast.VARIABLE_TYPE_DOUBLE || ast.VARIABLE_TYPE_LONG == v.Typ {
+	if v.Type == ast.VARIABLE_TYPE_DOUBLE || ast.VARIABLE_TYPE_LONG == v.Type {
 		return 2
 	} else {
 		return 1
@@ -120,14 +120,14 @@ func jvmSize(v *ast.VariableType) uint16 {
 
 func nameTemplateFunction(f *ast.Function) string {
 	s := f.Name
-	for _, v := range f.Typ.ParameterList {
-		if v.Typ.IsPrimitive() {
-			s += fmt.Sprintf("_%s", v.Typ.TypeString())
+	for _, v := range f.Type.ParameterList {
+		if v.Type.IsPrimitive() {
+			s += fmt.Sprintf("_%s", v.Type.TypeString())
 			continue
 		}
-		switch v.Typ.Typ {
+		switch v.Type.Type {
 		case ast.VARIABLE_TYPE_OBJECT:
-			s += fmt.Sprintf("_%s", strings.Replace(v.Typ.Class.Name, "/", "_", -1))
+			s += fmt.Sprintf("_%s", strings.Replace(v.Type.Class.Name, "/", "_", -1))
 		case ast.VARIABLE_TYPE_MAP:
 			s += "_map"
 		case ast.VARIABLE_TYPE_ARRAY:
@@ -135,7 +135,7 @@ func nameTemplateFunction(f *ast.Function) string {
 		case ast.VARIABLE_TYPE_JAVA_ARRAY:
 			s += "_java_array"
 		case ast.VARIABLE_TYPE_ENUM:
-			s += fmt.Sprintf("_%s", strings.Replace(v.Typ.Enum.Name, "/", "_", -1))
+			s += fmt.Sprintf("_%s", strings.Replace(v.Type.Enum.Name, "/", "_", -1))
 		}
 	}
 	return s

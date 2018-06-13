@@ -48,7 +48,7 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Variable
 
 func mkVoidType(pos *Pos) *VariableType {
 	t := &VariableType{}
-	t.Typ = VARIABLE_TYPE_VOID // means no return;
+	t.Type = VARIABLE_TYPE_VOID // means no return;
 	t.Pos = pos
 	return t
 }
@@ -112,7 +112,7 @@ func searchBuildIns(name string) interface{} {
 }
 
 func checkConst(block *Block, c *Constant, errs *[]error) error {
-	if c.Typ != nil {
+	if c.Type != nil {
 		c.mkDefaultValue()
 	}
 	if c.Expression == nil {
@@ -133,15 +133,15 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	}
 	c.Value = c.Expression.Data
 	tt, _ := c.Expression.check(block)
-	if c.Typ != nil {
-		if c.Typ.Equal(errs, tt[0]) == false {
+	if c.Type != nil {
+		if c.Type.Equal(errs, tt[0]) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
-				errMsgPrefix(c.Pos), c.Typ.TypeString(), tt[0].TypeString())
+				errMsgPrefix(c.Pos), c.Type.TypeString(), tt[0].TypeString())
 			*errs = append(*errs, err)
 			return err
 		}
 	} else { // means use old typec
-		c.Typ = tt[0]
+		c.Type = tt[0]
 	}
 	return nil
 }
@@ -171,7 +171,7 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, c
 		if (needs[k].IsInteger() && checked[k].IsInteger()) ||
 			(needs[k].IsFloat() && checked[k].IsFloat()) {
 			pos := checked[k].Pos // keep pos
-			e.convertNumberLiteralTo(needs[k].Typ)
+			e.convertNumberLiteralTo(needs[k].Type)
 			*checked[k] = *needs[k]
 			checked[k].Pos = pos
 		}

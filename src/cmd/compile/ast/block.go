@@ -23,7 +23,7 @@ type Block struct {
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
 	Labels                     map[string]*StatementLabel
-	Types                      map[string]*VariableType
+	TypeAlias                  map[string]*VariableType
 	Variables                  map[string]*VariableDefinition
 	ClosureFunctions           map[string]*Function //in "Functions" too
 }
@@ -68,8 +68,8 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
-	if b.Types != nil {
-		if t, ok := b.Types[name]; ok {
+	if b.TypeAlias != nil {
+		if t, ok := b.TypeAlias[name]; ok {
 			return t, true
 		}
 	}
@@ -113,7 +113,7 @@ func (b *Block) searchType(name string) interface{} {
 			if t, ok := bb.Enums[name]; ok {
 				return t
 			}
-			if t, ok := bb.Types[name]; ok {
+			if t, ok := bb.TypeAlias[name]; ok {
 				return t
 			}
 		}
@@ -125,7 +125,7 @@ func (b *Block) searchType(name string) interface{} {
 /*
 	search rightValue
 */
-func (b *Block) SearchByName(name string) (interface{}, error) {
+func (b *Block) searchByName(name string) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			return t, nil
@@ -159,19 +159,19 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 		}
 	}
 	if b.IsFunctionTopBlock &&
-		len(b.InheritedAttribute.Function.TypeParameters) > 0 { // this is a template function
+		len(b.InheritedAttribute.Function.parameterType) > 0 { // this is a template function
 		return searchBuildIns(name), nil
 	}
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.SearchByName(name) // search by outter block
+	t, err := b.Outer.searchByName(name) // search by outter block
 	if err != nil {
 		return t, err
 	}
 	if t != nil { //
 		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionTopBlock &&
-			len(b.InheritedAttribute.Function.TypeParameters) > 0 { // template function
+			len(b.InheritedAttribute.Function.parameterType) > 0 { // template function
 			return nil, nil
 		}
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
@@ -251,7 +251,7 @@ func (b *Block) checkConst() []error {
 			continue
 		}
 		err := checkConst(b, c, &errs)
-		if err != nil && c.Typ == nil {
+		if err != nil && c.Type == nil {
 			delete(b.Constants, c.Name)
 		}
 	}
@@ -259,11 +259,8 @@ func (b *Block) checkConst() []error {
 }
 
 func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
-	return b.insert(name, pos, d)
-}
-func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	//fmt.Println(name, pos)
-	// global var insert into block
+	// global var Insert into block
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
 		if vv, ok := b.Variables[name]; ok {
@@ -348,10 +345,10 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
 		return fmt.Errorf(errMsg)
 	}
-	if b.Types == nil {
-		b.Types = make(map[string]*VariableType)
+	if b.TypeAlias == nil {
+		b.TypeAlias = make(map[string]*VariableType)
 	}
-	if t, ok := b.Types[name]; ok {
+	if t, ok := b.TypeAlias[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
@@ -382,7 +379,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		e := d.(*Enum)
 		b.Enums[name] = e
 		for _, v := range e.Enums {
-			err := b.insert(v.Name, v.Pos, v)
+			err := b.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				return err
 			}
@@ -392,7 +389,7 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	case *StatementLabel:
 		b.Labels[name] = d.(*StatementLabel)
 	case *VariableType:
-		b.Types[name] = d.(*VariableType)
+		b.TypeAlias[name] = d.(*VariableType)
 	default:
 		panic(d) // panic d
 	}

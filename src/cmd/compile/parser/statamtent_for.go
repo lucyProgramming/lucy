@@ -7,13 +7,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (b *Block) parseFor() (f *ast.StatementFor, err error) {
+func (b *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 	f = &ast.StatementFor{}
 	f.Pos = b.parser.mkPos()
 	f.Block = &ast.Block{}
 	b.Next()                                                                               // skip for
 	if b.parser.token.Type != lex.TOKEN_LC && b.parser.token.Type != lex.TOKEN_SEMICOLON { // not {
-		e, err := b.parser.Expression.parseExpression(true)
+		e, err := b.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
 		} else {
@@ -26,7 +26,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 		f.Condition = nil // mk nil
 		//condition
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-			e, err := b.parser.Expression.parseExpression(false)
+			e, err := b.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 				b.consume(untils_semicolon)
@@ -40,7 +40,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 		}
 		b.Next()
 		if b.parser.token.Type != lex.TOKEN_LC {
-			e, err := b.parser.Expression.parseExpression(true)
+			e, err := b.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 			}

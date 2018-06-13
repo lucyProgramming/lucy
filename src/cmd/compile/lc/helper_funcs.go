@@ -11,29 +11,29 @@ func parseMethodParameter(class *cg.Class, bs []byte, f *ast.Function) {
 	a := &cg.AttributeMethodParameters{}
 	a.FromBs(class, bs)
 	for k, v := range a.Parameters {
-		f.Typ.ParameterList[k].Name = v.Name
+		f.Type.ParameterList[k].Name = v.Name
 	}
 }
 func parseReturnListNames(class *cg.Class, bs []byte, f *ast.Function) {
 	a := &cg.AttributeMethodParameters{}
 	a.FromBs(class, bs)
 	for k, v := range a.Parameters {
-		f.Typ.ReturnList[k].Name = v.Name
+		f.Type.ReturnList[k].Name = v.Name
 	}
 }
 
 func loadEnumForFunction(f *ast.Function) error {
-	for _, v := range f.Typ.ParameterList {
-		if v.Typ.Typ == ast.VARIABLE_TYPE_ENUM {
-			err := loadEnumForVariableType(v.Typ)
+	for _, v := range f.Type.ParameterList {
+		if v.Type.Type == ast.VARIABLE_TYPE_ENUM {
+			err := loadEnumForVariableType(v.Type)
 			if err != nil {
 				return err
 			}
 		}
 	}
-	for _, v := range f.Typ.ReturnList {
-		if v.Typ.Typ == ast.VARIABLE_TYPE_ENUM {
-			err := loadEnumForVariableType(v.Typ)
+	for _, v := range f.Type.ReturnList {
+		if v.Type.Type == ast.VARIABLE_TYPE_ENUM {
+			err := loadEnumForVariableType(v.Type)
 			if err != nil {
 				return err
 			}
@@ -43,7 +43,7 @@ func loadEnumForFunction(f *ast.Function) error {
 }
 
 func loadEnumForVariableType(v *ast.VariableType) error {
-	t, err := loader.LoadName(v.Enum.Name)
+	t, err := loader.LoadImport(v.Enum.Name)
 	if err != nil {
 		return err
 	}

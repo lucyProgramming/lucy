@@ -39,7 +39,7 @@ func (e *Expression) constFold() (is bool, err error) {
 		return true, nil
 	}
 	// ~
-	if e.Typ == EXPRESSION_TYPE_BITWISE_NOT {
+	if e.Type == EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*Expression)
 		is, err = ee.constFold()
 		if err != nil || is == false {
@@ -50,8 +50,8 @@ func (e *Expression) constFold() (is bool, err error) {
 				errMsgPrefix(e.Pos))
 			return
 		}
-		e.Typ = ee.Typ
-		switch ee.Typ {
+		e.Type = ee.Type
+		switch ee.Type {
 		case EXPRESSION_TYPE_BYTE:
 			e.Data = ^ee.Data.(byte)
 		case EXPRESSION_TYPE_SHORT:
@@ -63,22 +63,22 @@ func (e *Expression) constFold() (is bool, err error) {
 		}
 	}
 	// !
-	if e.Typ == EXPRESSION_TYPE_NOT {
+	if e.Type == EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*Expression)
 		is, err = ee.constFold()
 		if err != nil || is == false {
 			return
 		}
-		if ee.Typ != EXPRESSION_TYPE_BOOL {
+		if ee.Type != EXPRESSION_TYPE_BOOL {
 			err = fmt.Errorf("%s cannot apply '!' on a non-bool expression",
 				errMsgPrefix(e.Pos))
 			return
 		}
-		e.Typ = EXPRESSION_TYPE_BOOL
+		e.Type = EXPRESSION_TYPE_BOOL
 		e.Data = !ee.Data.(bool)
 		return
 	}
-	if e.Typ == EXPRESSION_TYPE_NEGATIVE {
+	if e.Type == EXPRESSION_TYPE_NEGATIVE {
 		ee := e.Data.(*Expression)
 		is, err = ee.constFold()
 		if err != nil || is == false {
@@ -90,8 +90,8 @@ func (e *Expression) constFold() (is bool, err error) {
 				errMsgPrefix(e.Pos), ee.OpName())
 			return
 		}
-		e.Typ = ee.Typ
-		switch ee.Typ {
+		e.Type = ee.Type
+		switch ee.Type {
 		case EXPRESSION_TYPE_BYTE:
 			e.Data = -ee.Data.(byte)
 		case EXPRESSION_TYPE_SHORT:
@@ -108,16 +108,16 @@ func (e *Expression) constFold() (is bool, err error) {
 		return
 	}
 	// && and ||
-	if e.Typ == EXPRESSION_TYPE_LOGICAL_AND || e.Typ == EXPRESSION_TYPE_LOGICAL_OR {
+	if e.Type == EXPRESSION_TYPE_LOGICAL_AND || e.Type == EXPRESSION_TYPE_LOGICAL_OR {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
-			if bin.Left.Typ != EXPRESSION_TYPE_BOOL ||
-				bin.Right.Typ != EXPRESSION_TYPE_BOOL {
+			if bin.Left.Type != EXPRESSION_TYPE_BOOL ||
+				bin.Right.Type != EXPRESSION_TYPE_BOOL {
 				err = e.wrongOpErr(bin.Left.OpName(), bin.Right.OpName())
 				return
 			}
 			is = true
-			e.Typ = EXPRESSION_TYPE_BOOL
-			if e.Typ == EXPRESSION_TYPE_LOGICAL_AND {
+			e.Type = EXPRESSION_TYPE_BOOL
+			if e.Type == EXPRESSION_TYPE_LOGICAL_AND {
 				e.Data = bin.Left.Data.(bool) && bin.Right.Data.(bool)
 			} else {
 				e.Data = bin.Left.Data.(bool) || bin.Right.Data.(bool)
@@ -127,103 +127,103 @@ func (e *Expression) constFold() (is bool, err error) {
 		return e.getBinaryExpressionConstValue(f)
 	}
 	// + - * / % algebra arithmetic
-	if e.Typ == EXPRESSION_TYPE_ADD ||
-		e.Typ == EXPRESSION_TYPE_SUB ||
-		e.Typ == EXPRESSION_TYPE_MUL ||
-		e.Typ == EXPRESSION_TYPE_DIV ||
-		e.Typ == EXPRESSION_TYPE_MOD {
+	if e.Type == EXPRESSION_TYPE_ADD ||
+		e.Type == EXPRESSION_TYPE_SUB ||
+		e.Type == EXPRESSION_TYPE_MUL ||
+		e.Type == EXPRESSION_TYPE_DIV ||
+		e.Type == EXPRESSION_TYPE_MOD {
 		is, err = e.getBinaryExpressionConstValue(e.arithmeticBinaryConstFolder)
 		return
 	}
 	// <<  >>
-	if e.Typ == EXPRESSION_TYPE_LSH || e.Typ == EXPRESSION_TYPE_RSH {
+	if e.Type == EXPRESSION_TYPE_LSH || e.Type == EXPRESSION_TYPE_RSH {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.isInteger() == false || bin.Right.isInteger() == false {
 				return
 			}
-			switch bin.Left.Typ {
+			switch bin.Left.Type {
 			case EXPRESSION_TYPE_BYTE:
-				if e.Typ == EXPRESSION_TYPE_LSH {
+				if e.Type == EXPRESSION_TYPE_LSH {
 					e.Data = byte(bin.Left.Data.(byte) << bin.Right.getByteValue())
 				} else {
 					e.Data = byte(bin.Left.Data.(byte) >> bin.Right.getByteValue())
 				}
 			case EXPRESSION_TYPE_SHORT:
-				if e.Typ == EXPRESSION_TYPE_LSH {
+				if e.Type == EXPRESSION_TYPE_LSH {
 					e.Data = int32(bin.Left.Data.(int32) << bin.Right.getByteValue())
 				} else {
 					e.Data = int32(bin.Left.Data.(int32) >> bin.Right.getByteValue())
 				}
 			case EXPRESSION_TYPE_INT:
-				if e.Typ == EXPRESSION_TYPE_LSH {
+				if e.Type == EXPRESSION_TYPE_LSH {
 					e.Data = int32(bin.Left.Data.(int32) << bin.Right.getByteValue())
 				} else {
 					e.Data = int32(bin.Left.Data.(int32) >> bin.Right.getByteValue())
 				}
 			case EXPRESSION_TYPE_LONG:
-				if e.Typ == EXPRESSION_TYPE_LSH {
+				if e.Type == EXPRESSION_TYPE_LSH {
 					e.Data = int64(bin.Left.Data.(int64) << bin.Right.getByteValue())
 				} else {
 					e.Data = int64(bin.Left.Data.(int64) >> bin.Right.getByteValue())
 				}
 
 			}
-			e.Typ = bin.Left.Typ
+			e.Type = bin.Left.Type
 			return
 		}
 
 		return e.getBinaryExpressionConstValue(f)
 	}
 	// & | ^
-	if e.Typ == EXPRESSION_TYPE_AND ||
-		e.Typ == EXPRESSION_TYPE_OR ||
-		e.Typ == EXPRESSION_TYPE_XOR {
+	if e.Type == EXPRESSION_TYPE_AND ||
+		e.Type == EXPRESSION_TYPE_OR ||
+		e.Type == EXPRESSION_TYPE_XOR {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.isInteger() == false || bin.Right.isInteger() == false ||
-				bin.Left.Typ != bin.Right.Typ {
+				bin.Left.Type != bin.Right.Type {
 				return // not integer or type not equal
 			}
-			switch bin.Left.Typ {
+			switch bin.Left.Type {
 			case EXPRESSION_TYPE_BYTE:
-				if e.Typ == EXPRESSION_TYPE_AND {
+				if e.Type == EXPRESSION_TYPE_AND {
 					e.Data = bin.Left.Data.(byte) & bin.Right.Data.(byte)
-				} else if e.Typ == EXPRESSION_TYPE_OR {
+				} else if e.Type == EXPRESSION_TYPE_OR {
 					e.Data = bin.Left.Data.(byte) | bin.Right.Data.(byte)
 				} else {
 					e.Data = bin.Left.Data.(byte) ^ bin.Right.Data.(byte)
 				}
 			case EXPRESSION_TYPE_SHORT:
-				if e.Typ == EXPRESSION_TYPE_AND {
+				if e.Type == EXPRESSION_TYPE_AND {
 					e.Data = bin.Left.Data.(int32) & bin.Right.Data.(int32)
-				} else if e.Typ == EXPRESSION_TYPE_OR {
+				} else if e.Type == EXPRESSION_TYPE_OR {
 					e.Data = bin.Left.Data.(int32) | bin.Right.Data.(int32)
 				} else {
 					e.Data = bin.Left.Data.(int32) ^ bin.Right.Data.(int32)
 				}
 			case EXPRESSION_TYPE_INT:
-				if e.Typ == EXPRESSION_TYPE_AND {
+				if e.Type == EXPRESSION_TYPE_AND {
 					e.Data = bin.Left.Data.(int32) & bin.Right.Data.(int32)
-				} else if e.Typ == EXPRESSION_TYPE_OR {
+				} else if e.Type == EXPRESSION_TYPE_OR {
 					e.Data = bin.Left.Data.(int32) | bin.Right.Data.(int32)
 				} else {
 					e.Data = bin.Left.Data.(int32) ^ bin.Right.Data.(int32)
 				}
 			case EXPRESSION_TYPE_LONG:
-				if e.Typ == EXPRESSION_TYPE_AND {
+				if e.Type == EXPRESSION_TYPE_AND {
 					e.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
-				} else if e.Typ == EXPRESSION_TYPE_OR {
+				} else if e.Type == EXPRESSION_TYPE_OR {
 					e.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
 				} else {
 					e.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
 				}
 			}
 			is = true
-			e.Typ = bin.Left.Typ
+			e.Type = bin.Left.Type
 			return
 		}
 		return e.getBinaryExpressionConstValue(f)
 	}
-	if e.Typ == EXPRESSION_TYPE_NOT {
+	if e.Type == EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*Expression)
 		is, err = ee.constFold()
 		if err != nil {
@@ -232,21 +232,21 @@ func (e *Expression) constFold() (is bool, err error) {
 		if is == false {
 			return
 		}
-		if ee.Typ != EXPRESSION_TYPE_BOOL {
+		if ee.Type != EXPRESSION_TYPE_BOOL {
 			return false, fmt.Errorf("!(not) can only apply to bool expression")
 		}
 		is = true
-		e.Typ = EXPRESSION_TYPE_BOOL
+		e.Type = EXPRESSION_TYPE_BOOL
 		e.Data = !ee.Data.(bool)
 		return
 	}
 	//  == != > < >= <=
-	if e.Typ == EXPRESSION_TYPE_EQ ||
-		e.Typ == EXPRESSION_TYPE_NE ||
-		e.Typ == EXPRESSION_TYPE_GE ||
-		e.Typ == EXPRESSION_TYPE_GT ||
-		e.Typ == EXPRESSION_TYPE_LE ||
-		e.Typ == EXPRESSION_TYPE_LT {
+	if e.Type == EXPRESSION_TYPE_EQ ||
+		e.Type == EXPRESSION_TYPE_NE ||
+		e.Type == EXPRESSION_TYPE_GE ||
+		e.Type == EXPRESSION_TYPE_GT ||
+		e.Type == EXPRESSION_TYPE_LE ||
+		e.Type == EXPRESSION_TYPE_LT {
 		return e.getBinaryExpressionConstValue(e.relationBinaryConstFolder)
 	}
 	return
@@ -256,7 +256,7 @@ func (e *Expression) getByteValue() byte {
 	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_BYTE:
 		return e.Data.(byte)
 	case EXPRESSION_TYPE_SHORT:
@@ -276,7 +276,7 @@ func (e *Expression) getShortValue() int32 {
 	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_BYTE:
 		return int32(e.Data.(byte))
 	case EXPRESSION_TYPE_SHORT:
@@ -296,7 +296,7 @@ func (e *Expression) getIntValue() int32 {
 	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_BYTE:
 		return int32(e.Data.(byte))
 	case EXPRESSION_TYPE_SHORT:
@@ -317,7 +317,7 @@ func (e *Expression) getLongValue() int64 {
 	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_BYTE:
 		return int64(e.Data.(byte))
 	case EXPRESSION_TYPE_SHORT:
@@ -337,7 +337,7 @@ func (e *Expression) getFloatValue() float32 {
 	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_BYTE:
 		return float32(e.Data.(byte))
 	case EXPRESSION_TYPE_SHORT:
@@ -358,7 +358,7 @@ func (e *Expression) getDoubleValue() float64 {
 	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_BYTE:
 		return float64(e.Data.(byte))
 	case EXPRESSION_TYPE_SHORT:
@@ -382,21 +382,21 @@ func (e *Expression) convertNumberLiteralTo(t int) {
 	switch t {
 	case VARIABLE_TYPE_BYTE:
 		e.Data = e.getByteValue()
-		e.Typ = EXPRESSION_TYPE_BYTE
+		e.Type = EXPRESSION_TYPE_BYTE
 	case VARIABLE_TYPE_SHORT:
 		e.Data = e.getShortValue()
-		e.Typ = EXPRESSION_TYPE_SHORT
+		e.Type = EXPRESSION_TYPE_SHORT
 	case VARIABLE_TYPE_INT:
 		e.Data = e.getIntValue()
-		e.Typ = EXPRESSION_TYPE_INT
+		e.Type = EXPRESSION_TYPE_INT
 	case VARIABLE_TYPE_LONG:
 		e.Data = e.getLongValue()
-		e.Typ = EXPRESSION_TYPE_LONG
+		e.Type = EXPRESSION_TYPE_LONG
 	case VARIABLE_TYPE_FLOAT:
 		e.Data = e.getFloatValue()
-		e.Typ = EXPRESSION_TYPE_FLOAT
+		e.Type = EXPRESSION_TYPE_FLOAT
 	case VARIABLE_TYPE_DOUBLE:
 		e.Data = e.getDoubleValue()
-		e.Typ = EXPRESSION_TYPE_DOUBLE
+		e.Type = EXPRESSION_TYPE_DOUBLE
 	}
 }

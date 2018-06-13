@@ -7,18 +7,18 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
+func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxStack uint16) {
-	//fmt.Println(s.Pos)
-	switch s.Typ {
+	//fmt.Println(s.GetPos)
+	switch s.Type {
 	case ast.STATEMENT_TYPE_EXPRESSION:
-		if s.Expression.Typ == ast.EXPRESSION_TYPE_FUNCTION {
-			return m.buildFunctionExpression(class, code, s.Expression, context, state)
+		if s.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION {
+			return makeClass.buildFunctionExpression(class, code, s.Expression, context, state)
 		}
-		maxStack, _ = m.MakeExpression.build(class, code, s.Expression, context, state)
+		maxStack, _ = makeClass.makeExpression.build(class, code, s.Expression, context, state)
 	case ast.STATEMENT_TYPE_IF:
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = m.buildIfStatement(class, code, s.StatementIf, context, state)
+		maxStack = makeClass.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.Exits) > 0 {
 			backfillExit(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -30,20 +30,20 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		} else {
 			ss = state
 		}
-		m.buildBlock(class, code, s.Block, context, ss)
+		makeClass.buildBlock(class, code, s.Block, context, ss)
 		state.addTop(ss)
 	case ast.STATEMENT_TYPE_FOR:
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = m.buildForStatement(class, code, s.StatementFor, context, state)
+		maxStack = makeClass.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
 			backfillExit(s.StatementFor.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
-		m.buildDefers(class, code, context, s.StatementContinue.Defers, state)
+		makeClass.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueOPOffset)
 	case ast.STATEMENT_TYPE_BREAK:
-		m.buildDefers(class, code, context, s.StatementBreak.Defers, state)
+		makeClass.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
 			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, b)
@@ -51,12 +51,12 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, b)
 		}
 	case ast.STATEMENT_TYPE_RETURN:
-		maxStack = m.buildReturnStatement(class, code, s.StatementReturn, context, state)
+		maxStack = makeClass.buildReturnStatement(class, code, s.StatementReturn, context, state)
 	case ast.STATEMENT_TYPE_SWITCH:
 		s.StatementSwitch.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = m.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
+		maxStack = makeClass.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		if len(s.StatementSwitch.Exits) > 0 {
-			if code.CodeLength == context.LastStackMapOffset {
+			if code.CodeLength == context.lastStackMapOffset {
 				code.Codes[code.CodeLength] = cg.OP_nop
 				code.CodeLength++
 			}
@@ -64,11 +64,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_GOTO:
-		if s.StatementGoto.StatementLabel.CodeOffsetGenerated {
-			jumpTo(cg.OP_goto, code, s.StatementGoto.StatementLabel.CodeOffset)
+		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
+			jumpTo(cg.OP_goto, code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {
 			b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
-			s.StatementGoto.StatementLabel.Exits = append(s.StatementGoto.StatementLabel.Exits, b)
+			s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, b)
 		}
 	case ast.STATEMENT_TYPE_LABLE:
 		s.StatementLabel.CodeOffsetGenerated = true
@@ -82,13 +82,13 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
 	case ast.STATEMENT_TYPE_CLASS:
-		s.Class.Name = m.newClassName(s.Class.Name)
-		c := m.buildClass(s.Class)
-		m.putClass(c.Name, c)
+		s.Class.Name = makeClass.newClassName(s.Class.Name)
+		c := makeClass.buildClass(s.Class)
+		makeClass.putClass(c.Name, c)
 	}
 	return
 }
-func (m *MakeClass) buildDefers(class *cg.ClassHighLevel,
+func (makeClass *MakeClass) buildDefers(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context, ds []*ast.Defer, state *StackMapState) {
 	index := len(ds) - 1
 	for index >= 0 {
@@ -98,7 +98,7 @@ func (m *MakeClass) buildDefers(class *cg.ClassHighLevel,
 		} else {
 			ss = state
 		}
-		m.buildBlock(class, code, &ds[index].Block, context, ss)
+		makeClass.buildBlock(class, code, &ds[index].Block, context, ss)
 		index--
 		state.addTop(ss)
 	}

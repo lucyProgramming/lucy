@@ -27,24 +27,24 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			err = v.Typ.resolve(block)
+			err = v.Type.resolve(block)
 			if err != nil {
 				*errs = append(*errs, err)
 				noErr = false
 				continue
 			}
-			err = block.insert(v.Name, v.Pos, v)
+			err = block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
 				noErr = false
 				continue
 			}
 			if k < len(valueTypes) && valueTypes[k] != nil {
-				if vs.Variables[k].Typ.Equal(errs, valueTypes[k]) == false {
+				if vs.Variables[k].Type.Equal(errs, valueTypes[k]) == false {
 					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 						errMsgPrefix(valueTypes[k].Pos),
 						valueTypes[k].TypeString(),
-						v.Typ.TypeString())
+						v.Type.TypeString())
 					*errs = append(*errs, err)
 					noErr = false
 					continue
@@ -62,19 +62,19 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			err = v.Typ.resolve(block)
+			err = v.Type.resolve(block)
 			if err != nil {
 				*errs = append(*errs, err)
 				noErr = false
 				continue
 			}
-			err := block.insert(v.Name, v.Pos, v)
+			err := block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
 				noErr = false
 				continue
 			}
-			vs.Values = append(vs.Values, v.Typ.mkDefaultValueExpression())
+			vs.Values = append(vs.Values, v.Type.mkDefaultValueExpression())
 			if e.IsPublic {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}

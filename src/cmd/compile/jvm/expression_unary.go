@@ -7,12 +7,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 
-	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
-		maxStack, _ = m.build(class, code, e.Data.(*ast.Expression), context, state)
-		switch e.Value.Typ {
+	if e.Type == ast.EXPRESSION_TYPE_NEGATIVE {
+		maxStack, _ = makeExpression.build(class, code, e.Data.(*ast.Expression), context, state)
+		switch e.Value.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -29,13 +29,13 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_BITWISE_NOT {
+	if e.Type == ast.EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*ast.Expression)
-		maxStack, _ = m.build(class, code, ee, context, state)
+		maxStack, _ = makeExpression.build(class, code, ee, context, state)
 		if t := jvmSize(ee.Value) * 2; t > maxStack {
 			maxStack = t
 		}
-		switch e.Value.Typ {
+		switch e.Value.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			code.Codes[code.CodeLength] = cg.OP_bipush
 			code.Codes[code.CodeLength+1] = 255
@@ -72,10 +72,10 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 		}
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_NOT {
+	if e.Type == ast.EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.Exit
-		maxStack, es = m.build(class, code, ee, context, state)
+		maxStack, es = makeExpression.build(class, code, ee, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, ee.Value)

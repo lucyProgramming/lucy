@@ -6,7 +6,7 @@ type Constant struct {
 }
 
 func (c *Constant) mkDefaultValue() {
-	switch c.Typ.Typ {
+	switch c.Type.Type {
 	case VARIABLE_TYPE_BOOL:
 		c.Value = false
 	case VARIABLE_TYPE_BYTE:

@@ -8,19 +8,19 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-type Block struct {
+type BlockParser struct {
 	parser *Parser
 }
 
-func (b *Block) Next() {
+func (b *BlockParser) Next() {
 	b.parser.Next()
 }
 
-func (b *Block) consume(c map[int]bool) {
+func (b *BlockParser) consume(c map[int]bool) {
 	b.parser.consume(c)
 }
 
-func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
+func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 	block.Pos = b.parser.mkPos()
 	isDefer := false
 	reset := func() {
@@ -34,7 +34,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 	var err error
 	block.Statements = []*ast.Statement{}
 	for lex.TOKEN_EOF != b.parser.token.Type {
-		if len(b.parser.errs) > b.parser.nerr {
+		if len(b.parser.errs) > b.parser.nErrors2Stop {
 			block.EndPos = b.parser.mkPos()
 			break
 		}
@@ -59,16 +59,16 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			reset()
 		case lex.TOKEN_FUNCTION:
 			pos := b.parser.mkPos()
-			f, err := b.parser.Function.parse(true)
+			f, err := b.parser.FunctionParser.parse(true)
 			if err != nil {
 				b.parser.consume(untils_rc_semicolon)
 			}
 			f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			s.Type = ast.STATEMENT_TYPE_EXPRESSION
 			s.Expression = &ast.Expression{}
-			s.Expression.Typ = ast.EXPRESSION_TYPE_FUNCTION
+			s.Expression.Type = ast.EXPRESSION_TYPE_FUNCTION
 			s.Expression.Data = f
 			block.Statements = append(block.Statements, s)
 		case lex.TOKEN_VAR:
@@ -86,9 +86,9 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 						b.parser.errorMsgPrefix()))
 			}
 			s := &ast.Statement{
-				Typ: ast.STATEMENT_TYPE_EXPRESSION,
+				Type: ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: &ast.Expression{
-					Typ:  ast.EXPRESSION_TYPE_VAR,
+					Type: ast.EXPRESSION_TYPE_VAR,
 					Data: &ast.ExpressionDeclareVariable{Variables: vs, Values: es},
 					Pos:  pos,
 				},
@@ -110,7 +110,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				continue
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:         ast.STATEMENT_TYPE_IF,
+				Type:        ast.STATEMENT_TYPE_IF,
 				StatementIf: i,
 				Pos:         pos,
 			})
@@ -129,7 +129,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				continue
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:          ast.STATEMENT_TYPE_FOR,
+				Type:         ast.STATEMENT_TYPE_FOR,
 				StatementFor: f,
 				Pos:          pos,
 			})
@@ -142,7 +142,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				continue
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:             ast.STATEMENT_TYPE_SWITCH,
+				Type:            ast.STATEMENT_TYPE_SWITCH,
 				StatementSwitch: s,
 				Pos:             pos,
 			})
@@ -195,10 +195,10 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				}
 			}
 			r := &ast.Statement{}
-			r.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			r.Type = ast.STATEMENT_TYPE_EXPRESSION
 			r.Pos = pos
 			r.Expression = &ast.Expression{
-				Typ:  ast.EXPRESSION_TYPE_CONST,
+				Type: ast.EXPRESSION_TYPE_CONST,
 				Data: cs,
 				Pos:  pos,
 			}
@@ -220,7 +220,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			b.Next()
 			r := &ast.StatementReturn{}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:             ast.STATEMENT_TYPE_RETURN,
+				Type:            ast.STATEMENT_TYPE_RETURN,
 				StatementReturn: r,
 				Pos:             pos,
 			})
@@ -229,7 +229,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				continue
 			}
 			var es []*ast.Expression
-			es, err = b.parser.Expression.parseExpressions()
+			es, err = b.parser.ExpressionParser.parseExpressions()
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 				b.consume(untils_semicolon)
@@ -259,13 +259,13 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 					Block: newblock,
 				}
 				block.Statements = append(block.Statements, &ast.Statement{
-					Typ:   ast.STATEMENT_TYPE_DEFER,
+					Type:  ast.STATEMENT_TYPE_DEFER,
 					Defer: d,
 					Pos:   pos,
 				})
 			} else {
 				block.Statements = append(block.Statements, &ast.Statement{
-					Typ:   ast.STATEMENT_TYPE_BLOCK,
+					Type:  ast.STATEMENT_TYPE_BLOCK,
 					Block: &newblock,
 					Pos:   pos,
 				})
@@ -290,7 +290,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 					b.parser.errorMsgPrefix()))
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:             ast.STATEMENT_TYPE_RETURN,
+				Type:            ast.STATEMENT_TYPE_RETURN,
 				Pos:             pos,
 				StatementReturn: &ast.StatementReturn{},
 			})
@@ -309,7 +309,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:               ast.STATEMENT_TYPE_CONTINUE,
+				Type:              ast.STATEMENT_TYPE_CONTINUE,
 				StatementContinue: &ast.StatementContinue{},
 				Pos:               pos,
 			})
@@ -328,7 +328,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:            ast.STATEMENT_TYPE_BREAK,
+				Type:           ast.STATEMENT_TYPE_BREAK,
 				StatementBreak: &ast.StatementBreak{},
 				Pos:            pos,
 			})
@@ -348,11 +348,11 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.Next()
 				continue
 			}
-			s := &ast.StatementGoto{}
+			s := &ast.StatementGoTo{}
 			s.Name = b.parser.token.Data.(string)
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:           ast.STATEMENT_TYPE_GOTO,
-				StatementGoto: s,
+				Type:          ast.STATEMENT_TYPE_GOTO,
+				StatementGoTo: s,
 				Pos:           pos,
 			})
 			b.Next()
@@ -380,9 +380,9 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Typ = ast.STATEMENT_TYPE_EXPRESSION
+			s.Type = ast.STATEMENT_TYPE_EXPRESSION
 			s.Expression = &ast.Expression{}
-			s.Expression.Typ = ast.EXPRESSION_TYPE_TYPE_ALIAS
+			s.Expression.Type = ast.EXPRESSION_TYPE_TYPE_ALIAS
 			s.Expression.Data = alias
 			block.Statements = append(block.Statements, s)
 			b.Next()
@@ -391,9 +391,9 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			var class *ast.Class
 			var err error
 			if b.parser.token.Type == lex.TOKEN_CLASS {
-				class, err = b.parser.Class.parse()
+				class, err = b.parser.ClassParser.parse()
 			} else {
-				class, err = b.parser.Interface.parse()
+				class, err = b.parser.InterfaceParser.parse()
 			}
 			if err != nil {
 				b.consume(untils_rc)
@@ -402,7 +402,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Typ = ast.STATEMENT_TYPE_CLASS
+			s.Type = ast.STATEMENT_TYPE_CLASS
 			s.Class = class
 			block.Statements = append(block.Statements, s)
 		case lex.TOKEN_ENUM:
@@ -415,7 +415,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Typ = ast.STATEMENT_TYPE_ENUM
+			s.Type = ast.STATEMENT_TYPE_ENUM
 			s.Enum = e
 			block.Statements = append(block.Statements, s)
 		default:
@@ -425,16 +425,16 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 	return
 }
 
-func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
+func (b *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool) {
 	pos := b.parser.mkPos()
-	e, err := b.parser.Expression.parseExpression(true)
+	e, err := b.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
 		b.parser.consume(untils_semicolon)
 		b.Next()
 		return
 	}
-	if e.Typ == ast.EXPRESSION_TYPE_IDENTIFIER && b.parser.token.Type == lex.TOKEN_COLON {
+	if e.Type == ast.EXPRESSION_TYPE_IDENTIFIER && b.parser.token.Type == lex.TOKEN_COLON {
 		if isDefer {
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s defer mixup with statement lable has no meaning",
 				b.parser.errorMsgPrefix()))
@@ -442,7 +442,7 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		b.Next() // skip :
 		s := &ast.Statement{}
 		s.Pos = pos
-		s.Typ = ast.STATEMENT_TYPE_LABLE
+		s.Type = ast.STATEMENT_TYPE_LABLE
 		lable := &ast.StatementLabel{}
 		s.StatementLabel = lable
 		lable.Statement = s
@@ -458,17 +458,17 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		if isDefer {
 			d := &ast.Defer{}
 			d.Block.Statements = []*ast.Statement{&ast.Statement{
-				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
+				Type:       ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,
 				Pos:        pos,
 			}}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:   ast.STATEMENT_TYPE_DEFER,
+				Type:  ast.STATEMENT_TYPE_DEFER,
 				Defer: d,
 			})
 		} else {
 			block.Statements = append(block.Statements, &ast.Statement{
-				Typ:        ast.STATEMENT_TYPE_EXPRESSION,
+				Type:       ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,
 				Pos:        pos,
 			})

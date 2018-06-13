@@ -5,22 +5,22 @@ import (
 	"math"
 )
 
-type LucyLexer struct {
+type Lexer struct {
 	bs                   []byte
 	lastLine, lastColumn int
 	line, column         int
 	offset, end          int
 }
 
-func (lex *LucyLexer) Pos() (int, int) {
+func (lex *Lexer) GetPos() (int, int) {
 	return lex.line, lex.column
 }
 
-func (lex *LucyLexer) GetOffSet() int {
+func (lex *Lexer) GetOffSet() int {
 	return lex.offset
 }
 
-func (lex *LucyLexer) getChar() (c byte, eof bool) {
+func (lex *Lexer) getChar() (c byte, eof bool) {
 	if lex.offset == lex.end {
 		eof = true
 		return
@@ -44,28 +44,28 @@ func (lex *LucyLexer) getChar() (c byte, eof bool) {
 
 }
 
-func (lex *LucyLexer) unGetChar() {
+func (lex *Lexer) unGetChar() {
 	lex.offset--
 	lex.line, lex.column = lex.lastLine, lex.lastColumn
 }
 
-func (lex *LucyLexer) isLetter(c byte) bool {
+func (lex *Lexer) isLetter(c byte) bool {
 	return ('a' <= c && c <= 'z') ||
 		('A' <= c && c <= 'Z')
 }
-func (lex *LucyLexer) isDigit(c byte) bool {
+func (lex *Lexer) isDigit(c byte) bool {
 	return '0' <= c && c <= '9'
 }
-func (lex *LucyLexer) isOctal(c byte) bool {
+func (lex *Lexer) isOctal(c byte) bool {
 	return '0' <= c && c <= '7'
 }
-func (lex *LucyLexer) isHex(c byte) bool {
+func (lex *Lexer) isHex(c byte) bool {
 	return '0' <= c && c <= '9' ||
 		('a' <= c && c <= 'f') ||
 		('A' <= c && c <= 'F')
 }
 
-func (lex *LucyLexer) hexByte2Byte(c byte) byte {
+func (lex *Lexer) hexByte2Byte(c byte) byte {
 	if 'a' <= c && c <= 'f' {
 		return c - 'a' + 10
 	}
@@ -75,7 +75,7 @@ func (lex *LucyLexer) hexByte2Byte(c byte) byte {
 	return c - '0' //also valid for digit
 }
 
-func (lex *LucyLexer) parseInt(bs []byte) int64 {
+func (lex *Lexer) parseInt(bs []byte) int64 {
 	base := int64(10)
 	if bs[0] == '0' {
 		base = 8
@@ -91,7 +91,7 @@ func (lex *LucyLexer) parseInt(bs []byte) int64 {
 	return result
 }
 
-func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
+func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	integerPart := []byte{c}
 	isHex := false
 	isOctal := false
@@ -298,7 +298,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	return
 }
-func (lex *LucyLexer) looksLikeT(bs []byte) bool {
+func (lex *Lexer) looksLikeT(bs []byte) bool {
 	if len(bs) == 0 {
 		return false
 	}
@@ -314,7 +314,7 @@ func (lex *LucyLexer) looksLikeT(bs []byte) bool {
 	return true
 }
 
-func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
+func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column - 1 // c is readed
@@ -359,7 +359,7 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	return
 }
 
-func (lex *LucyLexer) tryLexElseIf() (is bool) {
+func (lex *Lexer) tryLexElseIf() (is bool) {
 	c, eof := lex.getChar()
 	for (c == ' ' || c == '\t' || c == '\r') && eof == false {
 		c, eof = lex.getChar()
@@ -388,7 +388,7 @@ func (lex *LucyLexer) tryLexElseIf() (is bool) {
 	return
 }
 
-func (lex *LucyLexer) lexString(endChar byte) (token *Token, err error) {
+func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column
@@ -497,7 +497,7 @@ func (lex *LucyLexer) lexString(endChar byte) (token *Token, err error) {
 	return
 }
 
-func (lex *LucyLexer) lexMultiLineComment() {
+func (lex *Lexer) lexMultiLineComment() {
 redo:
 	c, eof := lex.getChar()
 	if eof {
@@ -516,7 +516,7 @@ redo:
 	goto redo
 }
 
-func (lex *LucyLexer) Next() (token *Token, err error) {
+func (lex *Lexer) Next() (token *Token, err error) {
 redo:
 	token = &Token{}
 	var c byte

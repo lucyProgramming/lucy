@@ -9,12 +9,12 @@ type MakeExpression struct {
 	MakeClass *MakeClass
 }
 
-func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16, exits []*cg.Exit) {
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
-	switch e.Typ {
+	switch e.Type {
 	case ast.EXPRESSION_TYPE_TYPE_ALIAS:
 		return // handled at ast stage
 	case ast.EXPRESSION_TYPE_NULL:
@@ -35,7 +35,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		code.CodeLength += 2
 		maxStack = 1
 	case ast.EXPRESSION_TYPE_INT, ast.EXPRESSION_TYPE_SHORT:
-		loadInt32(class, code, e.Data.(int32))
+		loadInt(class, code, e.Data.(int32))
 		maxStack = 1
 	case ast.EXPRESSION_TYPE_LONG:
 		if e.Data.(int64) == 0 {
@@ -91,7 +91,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LOGICAL_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_LOGICAL_AND:
-		maxStack, exits = m.buildLogical(class, code, e, context, state)
+		maxStack, exits = makeExpression.buildLogical(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_OR:
 		fallthrough
 	case ast.EXPRESSION_TYPE_AND:
@@ -111,12 +111,12 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_DIV:
 		fallthrough
 	case ast.EXPRESSION_TYPE_MOD:
-		maxStack = m.buildArithmetic(class, code, e, context, state)
+		maxStack = makeExpression.buildArithmetic(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_ASSIGN:
-		maxStack = m.buildAssign(class, code, e, context, state)
+		maxStack = makeExpression.buildAssign(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_COLON_ASSIGN:
-		maxStack = m.buildColonAssign(class, code, e, context, state)
+		maxStack = makeExpression.buildColonAssign(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_PLUS_ASSIGN:
 		fallthrough
@@ -137,7 +137,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_RSH_ASSIGN:
 		fallthrough
 	case ast.EXPRESSION_TYPE_XOR_ASSIGN:
-		maxStack = m.buildOpAssign(class, code, e, context, state)
+		maxStack = makeExpression.buildOpAssign(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_EQ:
 		fallthrough
@@ -150,18 +150,18 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_LE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_LT:
-		maxStack = m.buildRelations(class, code, e, context, state)
+		maxStack = makeExpression.buildRelations(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_INDEX:
-		maxStack = m.buildIndex(class, code, e, context, state)
+		maxStack = makeExpression.buildIndex(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_SELECT:
-		maxStack = m.buildSelection(class, code, e, context, state)
+		maxStack = makeExpression.buildSelection(class, code, e, context, state)
 
 	//
 	case ast.EXPRESSION_TYPE_METHOD_CALL:
-		maxStack = m.buildMethodCall(class, code, e, context, state)
+		maxStack = makeExpression.buildMethodCall(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_FUNCTION_CALL:
-		maxStack = m.buildFunctionCall(class, code, e, context, state)
+		maxStack = makeExpression.buildFunctionCall(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_INCREMENT:
 		fallthrough
@@ -170,35 +170,35 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.EXPRESSION_TYPE_PRE_INCREMENT:
 		fallthrough
 	case ast.EXPRESSION_TYPE_PRE_DECREMENT:
-		maxStack = m.buildSelfIncrement(class, code, e, context, state)
+		maxStack = makeExpression.buildSelfIncrement(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_BITWISE_NOT:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
 	case ast.EXPRESSION_TYPE_NOT:
-		maxStack = m.buildUnary(class, code, e, context, state)
+		maxStack = makeExpression.buildUnary(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
-		maxStack = m.buildIdentifier(class, code, e, context)
+		maxStack = makeExpression.buildIdentifier(class, code, e, context)
 	case ast.EXPRESSION_TYPE_NEW:
-		maxStack = m.buildNew(class, code, e, context, state)
+		maxStack = makeExpression.buildNew(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_FUNCTION:
 	case ast.EXPRESSION_TYPE_CHECK_CAST: // []byte(str)
-		maxStack = m.buildTypeConvertion(class, code, e, context, state)
+		maxStack = makeExpression.buildTypeConvertion(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_CONST: // const will analyse at ast stage
 	case ast.EXPRESSION_TYPE_SLICE:
-		maxStack = m.buildSlice(class, code, e, context, state)
+		maxStack = makeExpression.buildSlice(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_ARRAY:
-		maxStack = m.buildArray(class, code, e, context, state)
+		maxStack = makeExpression.buildArray(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_MAP:
-		maxStack = m.buildMapLiteral(class, code, e, context, state)
+		maxStack = makeExpression.buildMapLiteral(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_VAR:
-		maxStack = m.buildVar(class, code, e, context, state)
+		maxStack = makeExpression.buildVar(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TYPE_ASSERT:
-		maxStack = m.buildTypeAssert(class, code, e, context, state)
+		maxStack = makeExpression.buildTypeAssert(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TERNARY:
-		maxStack = m.buildTernary(class, code, e, context, state)
+		maxStack = makeExpression.buildTernary(class, code, e, context, state)
 	default:
 		panic(e.OpName())
 	}
@@ -206,7 +206,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	return
 }
 
-func (m *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
+func (makeExpression *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
 	if len(e.Values) > 1 {
 		return 1
 	}
@@ -216,7 +216,7 @@ func (m *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
 	return jvmSize(e.Value)
 }
 
-func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	es []*ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := 0
 	for _, e := range es {
@@ -226,7 +226,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 		}
 		length++
 	}
-	loadInt32(class, code, int32(length))
+	loadInt(class, code, int32(length))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -242,7 +242,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 	for _, v := range es {
 		currentStack := uint16(1)
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
-			stack, _ := m.build(class, code, v, context, state)
+			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -255,7 +255,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
-				loadInt32(class, code, index)
+				loadInt(class, code, index)
 				code.Codes[code.CodeLength] = cg.OP_swap
 				code.Codes[code.CodeLength+1] = cg.OP_aastore
 				code.CodeLength += 2
@@ -266,7 +266,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack++
-		stack, es := m.build(class, code, v, context, state)
+		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)
@@ -279,7 +279,7 @@ func (m *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.Att
 		if v.Value.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Value)
 		}
-		loadInt32(class, code, index)
+		loadInt(class, code, index)
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.Codes[code.CodeLength+1] = cg.OP_aastore
 		code.CodeLength += 2

@@ -13,17 +13,17 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 	if t == nil {
 		return nil
 	}
-	err := conversion.Typ.resolve(block)
+	err := conversion.Type.resolve(block)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil
 	}
-	ret := conversion.Typ.Clone()
+	ret := conversion.Type.Clone()
 	ret.Pos = e.Pos
 
-	if t.IsNumber() && conversion.Typ.IsNumber() {
+	if t.IsNumber() && conversion.Type.IsNumber() {
 		if conversion.Expression.IsLiteral() {
-			conversion.Expression.convertNumberLiteralTo(conversion.Typ.Typ)
+			conversion.Expression.convertNumberLiteralTo(conversion.Type.Type)
 			//rewrite
 			pos := e.Pos
 			*e = *conversion.Expression
@@ -33,31 +33,31 @@ func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) 
 	}
 
 	// string([]byte)
-	if conversion.Typ.Typ == VARIABLE_TYPE_STRING &&
-		t.Typ == VARIABLE_TYPE_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
+	if conversion.Type.Type == VARIABLE_TYPE_STRING &&
+		t.Type == VARIABLE_TYPE_ARRAY && t.ArrayType.Type == VARIABLE_TYPE_BYTE {
 		return ret
 	}
 	// string(byte[])
-	if conversion.Typ.Typ == VARIABLE_TYPE_STRING &&
-		t.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
+	if conversion.Type.Type == VARIABLE_TYPE_STRING &&
+		t.Type == VARIABLE_TYPE_JAVA_ARRAY && t.ArrayType.Type == VARIABLE_TYPE_BYTE {
 		return ret
 	}
 
 	// []byte("hello world")
-	if conversion.Typ.Typ == VARIABLE_TYPE_ARRAY && conversion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
-		t.Typ == VARIABLE_TYPE_STRING {
+	if conversion.Type.Type == VARIABLE_TYPE_ARRAY && conversion.Type.ArrayType.Type == VARIABLE_TYPE_BYTE &&
+		t.Type == VARIABLE_TYPE_STRING {
 		return ret
 	}
 	// byte[]("hello world")
-	if conversion.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY && conversion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
-		t.Typ == VARIABLE_TYPE_STRING {
+	if conversion.Type.Type == VARIABLE_TYPE_JAVA_ARRAY && conversion.Type.ArrayType.Type == VARIABLE_TYPE_BYTE &&
+		t.Type == VARIABLE_TYPE_STRING {
 		return ret
 	}
-	if conversion.Typ.validForTypeAssert() && t.IsPointer() {
+	if conversion.Type.validForTypeAssertOrConversion() && t.IsPointer() {
 		return ret
 	}
 
 	*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s'",
-		errMsgPrefix(e.Pos), t.TypeString(), conversion.Typ.TypeString()))
+		errMsgPrefix(e.Pos), t.TypeString(), conversion.Type.TypeString()))
 	return ret
 }

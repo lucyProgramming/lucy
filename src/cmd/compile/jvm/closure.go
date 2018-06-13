@@ -102,7 +102,7 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, v *ast.VariableType) (maxStack uint16) {
 	maxStack = 2
 	var meta *ClosureObjectMeta
-	switch v.Typ {
+	switch v.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -146,7 +146,7 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 
 func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) {
 	var meta *ClosureObjectMeta
-	switch v.Typ.Typ {
+	switch v.Type.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -187,9 +187,9 @@ func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.
 	create a closure var on stack
 */
 func (closure *Closure) loadLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxStack uint16) {
-	copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-	closure.unPack(class, code, v.Typ)
-	maxStack = jvmSize(v.Typ)
+	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+	closure.unPack(class, code, v.Type)
+	maxStack = jvmSize(v.Type)
 	return
 }
 
@@ -197,7 +197,7 @@ func (closure *Closure) loadLocalCloureVar(class *cg.ClassHighLevel, code *cg.At
 	closure object is on stack
 */
 func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableType) {
-	switch v.Typ {
+	switch v.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:

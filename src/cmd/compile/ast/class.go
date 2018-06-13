@@ -58,7 +58,7 @@ func (c *Class) mkDefaultConstruction() {
 		c.Methods = make(map[string][]*ClassMethod)
 	}
 	m := &ClassMethod{}
-	m.IsConstructionMethod = true
+	//m.IsConstructionMethod = true
 	m.Func = &Function{}
 	m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Func.Pos = c.Pos
@@ -163,7 +163,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 			errs = append(errs, fmt.Errorf("%s super is special for access 'super'",
 				errMsgPrefix(v.Pos)))
 		}
-		err = v.Typ.resolve(b)
+		err = v.Type.resolve(b)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -201,7 +201,7 @@ func (c *Class) resolveFather(block *Block) error {
 		if i == nil {
 			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		r, err := PackageBeenCompile.load(i.Resource)
+		r, err := PackageBeenCompile.load(i.ImportName)
 		if err != nil {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}
@@ -222,14 +222,14 @@ func (c *Class) resolveFather(block *Block) error {
 		}
 	} else {
 		variableType := VariableType{}
-		variableType.Typ = VARIABLE_TYPE_NAME // naming
+		variableType.Type = VARIABLE_TYPE_NAME // naming
 		variableType.Name = c.SuperClassName
 		variableType.Pos = c.Pos
 		err := variableType.resolve(block)
 		if err != nil {
 			return err
 		}
-		if variableType.Typ != VARIABLE_TYPE_OBJECT {
+		if variableType.Type != VARIABLE_TYPE_OBJECT {
 			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		}
 		c.SuperClassName = variableType.Class.Name
@@ -249,7 +249,7 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 	errs := []error{}
 	for _, i := range c.InterfaceNames {
 		t := &VariableType{}
-		t.Typ = VARIABLE_TYPE_NAME
+		t.Type = VARIABLE_TYPE_NAME
 		t.Pos = i.Pos
 		t.Name = i.Name
 		err := t.resolve(block)
@@ -257,7 +257,7 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 			errs = append(errs, err)
 			continue
 		}
-		if t.Typ != VARIABLE_TYPE_OBJECT {
+		if t.Type != VARIABLE_TYPE_OBJECT {
 			errs = append(errs, fmt.Errorf("%s '%s' is not a class",
 				errMsgPrefix(i.Pos), i.Name))
 			continue
@@ -285,9 +285,9 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 		if fromSub == false || m.IsPrivate() == false {
 			continue
 		}
-		args := make([]*VariableType, len(m.Func.Typ.ParameterList))
-		for k, v := range m.Func.Typ.ParameterList {
-			args[k] = v.Typ
+		args := make([]*VariableType, len(m.Func.Type.ParameterList))
+		for k, v := range m.Func.Type.ParameterList {
+			args[k] = v.Type
 		}
 		_, match, _ := c.accessMethod(c.Pos, &errs, name, args, nil, false)
 		if match == false {
@@ -347,9 +347,9 @@ func (c *Class) checkFields() []error {
 				continue
 			}
 			ts, _ := v.Expression.check(&c.Block)
-			if v.Typ.Equal(&errs, ts[0]) == false {
+			if v.Type.Equal(&errs, ts[0]) == false {
 				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
-					errMsgPrefix(v.Pos), ts[0].TypeString(), v.Typ.TypeString()))
+					errMsgPrefix(v.Pos), ts[0].TypeString(), v.Type.TypeString()))
 				continue
 			}
 			v.DefaultValue = v.Expression.Data // copy default value
@@ -375,15 +375,15 @@ func (c *Class) checkMethods() []error {
 				vv.Func.Block.Variables[THIS] = &VariableDefinition{}
 				vv.Func.Block.Variables[THIS].Name = THIS
 				vv.Func.Block.Variables[THIS].Pos = vv.Func.Pos
-				vv.Func.Block.Variables[THIS].Typ = &VariableType{
-					Typ:   VARIABLE_TYPE_OBJECT,
+				vv.Func.Block.Variables[THIS].Type = &VariableType{
+					Type:  VARIABLE_TYPE_OBJECT,
 					Class: c,
 				}
 			}
 			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
 			if isConstruction && vv.Func.NoReturnValue() == false {
 				errs = append(errs, fmt.Errorf("%s construction method expect no return values",
-					errMsgPrefix(vv.Func.Typ.ParameterList[0].Pos)))
+					errMsgPrefix(vv.Func.Type.ParameterList[0].Pos)))
 			}
 			if c.IsInterface() == false {
 				vv.Func.Block.InheritedAttribute.IsConstruction = isConstruction

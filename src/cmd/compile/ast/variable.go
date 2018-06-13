@@ -11,6 +11,6 @@ type VariableDefinition struct {
 	Pos                 *Pos
 	Expression          *Expression
 	Name                string
-	Typ                 *VariableType
+	Type                *VariableType
 	Descriptor          string // jvm
 }

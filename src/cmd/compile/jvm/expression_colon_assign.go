@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	stackLength := len(state.Stacks)
@@ -16,13 +16,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		v := vs.Variables[0]
 		currentStack := uint16(0)
 		if v.Name != ast.NO_NAME_IDENTIFIER && v.BeenCaptured {
-			obj := state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className)
+			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			if vs.IfDeclareBefore[0] {
-				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				currentStack = 1
 				state.pushStack(class, obj)
 			} else {
-				closure.createClosureVar(class, code, v.Typ)
+				closure.createClosureVar(class, code, v.Type)
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				currentStack = 2
@@ -30,7 +30,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 				state.pushStack(class, obj)
 			}
 		}
-		stack, es := m.build(class, code, vs.Values[0], context, state)
+		stack, es := makeExpression.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, vs.Values[0].Value)
@@ -51,32 +51,32 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		maxStack += currentStack
 		if v.IsGlobal {
-			storeGlobalVar(class, m.MakeClass.mainClass, code, vs.Variables[0])
+			storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, vs.Variables[0])
 		} else {
 			if vs.IfDeclareBefore[0] {
-				m.MakeClass.storeLocalVar(class, code, vs.Variables[0])
+				makeExpression.MakeClass.storeLocalVar(class, code, vs.Variables[0])
 			} else {
 				v.LocalValOffset = code.MaxLocals
 				if v.BeenCaptured {
 					code.MaxLocals++
 				} else {
-					code.MaxLocals += jvmSize(v.Typ)
+					code.MaxLocals += jvmSize(v.Type)
 				}
-				m.MakeClass.storeLocalVar(class, code, v)
+				makeExpression.MakeClass.storeLocalVar(class, code, v)
 				if vs.Variables[0].BeenCaptured {
-					copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
+					copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 				} else {
-					state.appendLocals(class, v.Typ)
+					state.appendLocals(class, v.Type)
 				}
 			}
 		}
 		return
 	}
 	if len(vs.Values) == 1 {
-		maxStack, _ = m.build(class, code, vs.Values[0], context, state)
+		maxStack, _ = makeExpression.build(class, code, vs.Values[0], context, state)
 	} else {
-		maxStack = m.buildExpressions(class, code, vs.Values, context, state)
+		maxStack = makeExpression.buildExpressions(class, code, vs.Values, context, state)
 	}
 	multiValuePacker.storeArrayListAutoVar(code, context)
 	//first round
@@ -85,35 +85,35 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			continue
 		}
 		if v.IsGlobal {
-			stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
+			stack := multiValuePacker.unPack(class, code, k, v.Type, context)
 			if stack > maxStack {
 				maxStack = stack
 			}
-			storeGlobalVar(class, m.MakeClass.mainClass, code, v)
+			storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, v)
 			continue
 		}
 		//this variable not been captured,also not declared here
 		if vs.IfDeclareBefore[k] {
 			if v.BeenCaptured {
-				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
+				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+				stack := multiValuePacker.unPack(class, code, k, v.Type, context)
 				if t := 1 + stack; t > maxStack {
 					maxStack = t
 				}
 			} else {
-				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
+				stack := multiValuePacker.unPack(class, code, k, v.Type, context)
 				if stack > maxStack {
 					maxStack = stack
 				}
 			}
-			m.MakeClass.storeLocalVar(class, code, v)
+			makeExpression.MakeClass.storeLocalVar(class, code, v)
 			continue
 		}
 		v.LocalValOffset = code.MaxLocals
 		currentStack := uint16(0)
 		if v.BeenCaptured {
 			code.MaxLocals++
-			stack := closure.createClosureVar(class, code, v.Typ)
+			stack := closure.createClosureVar(class, code, v.Type)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -122,22 +122,22 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if 2 > maxStack {
 				maxStack = 2
 			}
-			copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
-			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className))
+			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 		} else {
-			code.MaxLocals += jvmSize(v.Typ)
-			state.appendLocals(class, v.Typ)
+			code.MaxLocals += jvmSize(v.Type)
+			state.appendLocals(class, v.Type)
 		}
-		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Typ, context); t > maxStack {
+		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Type, context); t > maxStack {
 			maxStack = t
 		}
-		m.MakeClass.storeLocalVar(class, code, v)
+		makeExpression.MakeClass.storeLocalVar(class, code, v)
 	}
 	return
 }
 
-func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	for _, v := range vs.Variables {
@@ -146,7 +146,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			code.MaxLocals++
 		} else {
 			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(v.Typ)
+			code.MaxLocals += jvmSize(v.Type)
 		}
 	}
 	index := len(vs.Variables) - 1
@@ -157,11 +157,11 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			continue
 		}
 		v := vs.Variables[index]
-		closure.createClosureVar(class, code, v.Typ)
+		closure.createClosureVar(class, code, v.Type)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		{
-			t := state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className)
+			t := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			state.pushStack(class, t)
 			state.pushStack(class, t)
 		}
@@ -171,7 +171,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 	index = 0
 	for _, v := range vs.Values {
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
-			stack, _ := m.build(class, code, vs.Values[0], context, state)
+			stack, _ := makeExpression.build(class, code, vs.Values[0], context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
@@ -181,24 +181,24 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 					maxstack = t
 				}
 				if vs.Variables[index].IsGlobal {
-					storeGlobalVar(class, m.MakeClass.mainClass, code, vs.Variables[index])
+					storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, vs.Variables[index])
 					index++
 					continue
 				}
-				m.MakeClass.storeLocalVar(class, code, vs.Variables[index])
+				makeExpression.MakeClass.storeLocalVar(class, code, vs.Variables[index])
 				if vs.Variables[index].BeenCaptured {
-					copyOP(code, storeSimpleVarOps(vs.Variables[index].Typ.Typ, vs.Variables[index].LocalValOffset)...)
+					copyOP(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
 					state.popStack(2)
-					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Typ.Typ).className))
+					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
 				} else {
-					state.appendLocals(class, vs.Variables[index].Typ)
+					state.appendLocals(class, vs.Variables[index].Type)
 				}
 				index++
 			}
 			continue
 		}
 		//
-		stack, es := m.build(class, code, vs.Values[0], context, state)
+		stack, es := makeExpression.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.Value)
@@ -209,17 +209,17 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			maxstack = t
 		}
 		if vs.Variables[index].IsGlobal {
-			storeGlobalVar(class, m.MakeClass.mainClass, code, vs.Variables[index])
+			storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, vs.Variables[index])
 			index++
 			continue
 		}
-		m.MakeClass.storeLocalVar(class, code, vs.Variables[index])
+		makeExpression.MakeClass.storeLocalVar(class, code, vs.Variables[index])
 		if vs.Variables[index].BeenCaptured {
-			copyOP(code, storeSimpleVarOps(vs.Variables[index].Typ.Typ, vs.Variables[index].LocalValOffset)...)
+			copyOP(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
 			state.popStack(2)
-			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Typ.Typ).className))
+			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
 		} else {
-			state.appendLocals(class, vs.Variables[index].Typ)
+			state.appendLocals(class, vs.Variables[index].Type)
 		}
 		index++
 	}

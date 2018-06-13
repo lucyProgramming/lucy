@@ -8,7 +8,7 @@ import (
 /*
 	function print
 */
-func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
@@ -22,7 +22,7 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 		code.CodeLength += 3
 		maxStack = 1
 	} else { // get stream from args
-		maxStack, _ = m.build(class, code, meta.Stream, context, state)
+		maxStack, _ = makeExpression.build(class, code, meta.Stream, context, state)
 	}
 	if len(call.Args) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -42,7 +42,7 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 
 	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
-		stack, es := m.build(class, code, call.Args[0], context, state)
+		stack, es := makeExpression.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, call.Args[0].Value)
@@ -52,7 +52,7 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
-		switch call.Args[0].Value.Typ {
+		switch call.Args[0].Value.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -164,7 +164,7 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
-			stack, _ := m.build(class, code, v, context, state)
+			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
@@ -174,10 +174,10 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
-				if t := currentStack + m.stackTop2String(class, code, tt, context, state); t > maxStack {
+				if t := currentStack + makeExpression.stackTop2String(class, code, tt, context, state); t > maxStack {
 					maxStack = t
 				}
-				if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
+				if tt.IsPointer() && tt.Type != ast.VARIABLE_TYPE_STRING {
 					if t := 2 + currentStack; t > maxStack {
 						maxStack = t
 					}
@@ -190,7 +190,7 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if v.MayHaveMultiValue() {
 			variableType = v.Values[0]
 		}
-		stack, es := m.build(class, code, v, context, state)
+		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, variableType)
@@ -200,7 +200,7 @@ func (m *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.Attri
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if t := currentStack + m.stackTop2String(class, code, variableType, context, state); t > maxStack {
+		if t := currentStack + makeExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
 			maxStack = t
 		}
 		app(k == len(call.Args)-1)

@@ -14,69 +14,69 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 	}
 
 	errs = []error{}
-	switch e.Typ {
+	switch e.Type {
 	case EXPRESSION_TYPE_NULL:
 		Types = []*VariableType{
 			{
-				Typ: VARIABLE_TYPE_NULL,
-				Pos: e.Pos,
+				Type: VARIABLE_TYPE_NULL,
+				Pos:  e.Pos,
 			},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_BOOL:
 		Types = []*VariableType{
 			{
-				Typ: VARIABLE_TYPE_BOOL,
-				Pos: e.Pos,
+				Type: VARIABLE_TYPE_BOOL,
+				Pos:  e.Pos,
 			},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_BYTE:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_BYTE,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_BYTE,
+			Pos:  e.Pos,
 		},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_SHORT:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_SHORT,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_SHORT,
+			Pos:  e.Pos,
 		},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_INT:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_INT,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_INT,
+			Pos:  e.Pos,
 		},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_FLOAT:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_FLOAT,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_FLOAT,
+			Pos:  e.Pos,
 		},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_DOUBLE:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_DOUBLE,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_DOUBLE,
+			Pos:  e.Pos,
 		},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_LONG:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_LONG,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_LONG,
+			Pos:  e.Pos,
 		},
 		}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_STRING:
 		Types = []*VariableType{{
-			Typ: VARIABLE_TYPE_STRING,
-			Pos: e.Pos,
+			Type: VARIABLE_TYPE_STRING,
+			Pos:  e.Pos,
 		}}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_IDENTIFIER:
@@ -310,7 +310,7 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
-		return f.Typ.retTypes(e.Pos)
+		return f.Type.retTypes(e.Pos)
 	}
 	return nil //
 }

@@ -24,7 +24,7 @@ const (
 type Statement struct {
 	Checked           bool // if checked
 	Pos               *Pos
-	Typ               int
+	Type              int
 	StatementIf       *StatementIF
 	Expression        *Expression
 	StatementFor      *StatementFor
@@ -34,7 +34,7 @@ type Statement struct {
 	Block             *Block
 	StatementContinue *StatementContinue
 	StatementLabel    *StatementLabel
-	StatementGoto     *StatementGoto
+	StatementGoTo     *StatementGoTo
 	Defer             *Defer
 	Class             *Class
 	Enum              *Enum
@@ -46,7 +46,7 @@ type Statement struct {
 }
 
 func (s *Statement) StatementName() string {
-	switch s.Typ {
+	switch s.Type {
 	case STATEMENT_TYPE_EXPRESSION:
 		return "expression statement"
 	case STATEMENT_TYPE_IF:
@@ -78,8 +78,8 @@ func (s *Statement) StatementName() string {
 }
 
 func (s *Statement) isVariableDefinition() bool {
-	return s.Typ == STATEMENT_TYPE_EXPRESSION &&
-		(s.Expression.Typ == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Typ == EXPRESSION_TYPE_VAR)
+	return s.Type == STATEMENT_TYPE_EXPRESSION &&
+		(s.Expression.Type == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Type == EXPRESSION_TYPE_VAR)
 }
 
 func (s *Statement) check(block *Block) []error { // b is father
@@ -87,7 +87,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 		s.Checked = true
 	}()
 	errs := []error{}
-	switch s.Typ {
+	switch s.Type {
 	case STATEMENT_TYPE_EXPRESSION:
 		return s.checkStatementExpression(block)
 	case STATEMENT_TYPE_IF:
@@ -135,7 +135,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 		}
 		return es
 	case STATEMENT_TYPE_GOTO:
-		err := s.checkStatementGoto(block)
+		err := s.checkStatementGoTo(block)
 		if err != nil {
 			return []error{err}
 		}
@@ -153,7 +153,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_LABLE:
 		// nothing to do
 	case STATEMENT_TYPE_CLASS:
-		err := block.insert(s.Class.Name, s.Pos, s.Class)
+		err := block.Insert(s.Class.Name, s.Pos, s.Class)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -163,7 +163,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 		if err != nil {
 			return []error{err}
 		}
-		err = block.insert(s.Enum.Name, s.Pos, s.Enum)
+		err = block.Insert(s.Enum.Name, s.Pos, s.Enum)
 		if err != nil {
 			return []error{err}
 		} else {
@@ -176,13 +176,13 @@ func (s *Statement) check(block *Block) []error { // b is father
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
 	//
-	if s.Expression.Typ == EXPRESSION_TYPE_TYPE_ALIAS { // special case
+	if s.Expression.Type == EXPRESSION_TYPE_TYPE_ALIAS { // special case
 		t := s.Expression.Data.(*ExpressionTypeAlias)
-		err := t.Typ.resolve(b)
+		err := t.Type.resolve(b)
 		if err != nil {
 			return []error{err}
 		}
-		err = b.insert(t.Name, t.Pos, t.Typ)
+		err = b.Insert(t.Name, t.Pos, t.Type)
 		if err != nil {
 			return []error{err}
 		}
@@ -190,9 +190,9 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	if s.Expression.canBeUsedAsStatement() {
 		s.Expression.IsStatementExpression = true
-		if s.Expression.Typ == EXPRESSION_TYPE_FUNCTION {
+		if s.Expression.Type == EXPRESSION_TYPE_FUNCTION {
 			f := s.Expression.Data.(*Function)
-			err := b.insert(f.Name, f.Pos, f)
+			err := b.Insert(f.Name, f.Pos, f)
 			if err != nil {
 				errs = append(errs, err)
 			}

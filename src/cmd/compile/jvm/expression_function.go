@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	function := e.Data.(*ast.Function)
 	if function.IsClosureFunction == false {
@@ -20,13 +20,13 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(function)
 		method.Code = &cg.AttributeCode{}
-		m.buildFunction(class, nil, method, function)
+		makeClass.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
 		return
 	}
 
 	// function have captured vars
-	className := m.newClassName("closureFunction_" + function.Name)
+	className := makeClass.newClassName("closureFunction_" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = className
 	closureClass.SuperClass = ast.LUCY_ROOT_CLASS
@@ -34,8 +34,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	m.mkClassDefaultConstruction(closureClass, nil)
-	m.putClass(className, closureClass)
+	makeClass.mkClassDefaultConstruction(closureClass, nil)
+	makeClass.putClass(className, closureClass)
 
 	method := &cg.MethodHighLevel{}
 	method.Name = function.Name
@@ -65,7 +65,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	function.VarOffSet = code.MaxLocals
 	code.MaxLocals++
 	state.appendLocals(class, state.newObjectVariableType(className))
-	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
+	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
 	total := len(function.Closure.Variables) + len(function.Closure.Functions)
@@ -75,7 +75,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		filed.Name = v.Name
-		meta := closure.getMeta(v.Typ.Typ)
+		meta := closure.getMeta(v.Type.Type)
 		filed.Descriptor = "L" + meta.className + ";"
 		closureClass.Fields[v.Name] = filed
 		if i != total-1 {
@@ -84,7 +84,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		}
 		if context.function.Closure.ClosureVariableExist(v) {
 			// I Know class at 0 offset
-			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -96,7 +96,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -123,7 +123,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		}
 		if context.function.Closure.ClosureFunctionExist(v) {
 			// I Know class at 0 offset
-			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -135,7 +135,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.VarOffSet)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.VarOffSet)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -151,7 +151,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	}
 	method.Code = &cg.AttributeCode{}
 	// build function
-	m.buildFunction(closureClass, nil, method, function)
+	makeClass.buildFunction(closureClass, nil, method, function)
 	return
 
 }

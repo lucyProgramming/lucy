@@ -24,7 +24,7 @@ func (p *Parser) parseImports() {
 	packageName := p.token.Data.(string)
 	p.Next()
 	i := &ast.Import{}
-	i.Resource = packageName
+	i.ImportName = packageName
 	i.Pos = p.mkPos()
 	if p.token.Type == lex.TOKEN_AS { // import "xxxxxxxxxxx" as yyy ;
 		p.Next() // skip as

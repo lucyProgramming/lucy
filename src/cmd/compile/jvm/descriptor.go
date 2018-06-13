@@ -15,14 +15,14 @@ func (m *Descript) methodDescriptor(f *ast.Function) string {
 		return "([Ljava/lang/String;)V"
 	}
 	s := "("
-	for _, v := range f.Typ.ParameterList {
-		s += m.typeDescriptor(v.Typ)
+	for _, v := range f.Type.ParameterList {
+		s += m.typeDescriptor(v.Type)
 	}
 	s += ")"
 	if f.NoReturnValue() {
 		s += "V"
-	} else if len(f.Typ.ReturnList) == 1 {
-		s += m.typeDescriptor(f.Typ.ReturnList[0].Typ)
+	} else if len(f.Type.ReturnList) == 1 {
+		s += m.typeDescriptor(f.Type.ReturnList[0].Type)
 	} else {
 		s += "[Ljava/lang/Object;" //always this type
 	}
@@ -30,7 +30,7 @@ func (m *Descript) methodDescriptor(f *ast.Function) string {
 }
 
 func (m *Descript) typeDescriptor(v *ast.VariableType) string {
-	switch v.Typ {
+	switch v.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		return "Z"
 	case ast.VARIABLE_TYPE_BYTE:
@@ -46,7 +46,7 @@ func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 	case ast.VARIABLE_TYPE_DOUBLE:
 		return "D"
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[v.ArrayType.Typ] // combination type
+		meta := ArrayMetas[v.ArrayType.Type] // combination type
 		return "L" + meta.className + ";"
 	case ast.VARIABLE_TYPE_STRING:
 		return "Ljava/lang/String;"
@@ -67,54 +67,54 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 	case 'V':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_VOID,
+			Type: ast.VARIABLE_TYPE_VOID,
 		}, nil
 	case 'B':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_BYTE,
+			Type: ast.VARIABLE_TYPE_BYTE,
 		}, nil
 	case 'D':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_DOUBLE,
+			Type: ast.VARIABLE_TYPE_DOUBLE,
 		}, nil
 	case 'F':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_FLOAT,
+			Type: ast.VARIABLE_TYPE_FLOAT,
 		}, nil
 	case 'I':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_INT,
+			Type: ast.VARIABLE_TYPE_INT,
 		}, nil
 	case 'J':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_LONG,
+			Type: ast.VARIABLE_TYPE_LONG,
 		}, nil
 	case 'S', 'C':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_SHORT,
+			Type: ast.VARIABLE_TYPE_SHORT,
 		}, nil
 	case 'Z':
 		bs = bs[1:]
 		return bs, &ast.VariableType{
-			Typ: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VARIABLE_TYPE_BOOL,
 		}, nil
 	case 'L':
 		bs = bs[1:]
 		index := bytes.Index(bs, []byte{';'}) // end token
 		t := &ast.VariableType{}
-		t.Typ = ast.VARIABLE_TYPE_OBJECT
+		t.Type = ast.VARIABLE_TYPE_OBJECT
 		t.Class = &ast.Class{}
 		t.Class.Name = string(bs[:index])
 		bs = bs[index+1:] // skip ;
 		t.Class.NotImportedYet = true
 		if t.Class.Name == java_string_class {
-			t.Typ = ast.VARIABLE_TYPE_STRING
+			t.Type = ast.VARIABLE_TYPE_STRING
 		}
 		return bs, t, nil
 	case '[':
@@ -124,7 +124,7 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 		bs, t, err = m.ParseType(bs)
 		ret := &ast.VariableType{}
 		if err == nil {
-			ret.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
+			ret.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 			ret.ArrayType = t
 		}
 		return bs, ret, err
@@ -143,7 +143,7 @@ func (m *Descript) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	for bs[0] != ')' {
 		vd := &ast.VariableDefinition{}
 		vd.Name = fmt.Sprintf("var_%d", i)
-		bs, vd.Typ, err = m.ParseType(bs)
+		bs, vd.Type, err = m.ParseType(bs)
 		if err != nil {
 			return t, err
 		}
@@ -153,7 +153,7 @@ func (m *Descript) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	bs = bs[1:] // skip )
 	vd := &ast.VariableDefinition{}
 	vd.Name = "returnValue"
-	_, vd.Typ, err = m.ParseType(bs)
+	_, vd.Type, err = m.ParseType(bs)
 	if err != nil {
 		return t, err
 	}
