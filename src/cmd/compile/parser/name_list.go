@@ -11,7 +11,7 @@ import (
 func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s expect identifer,but '%s'",
-			p.errorMsgPrefix(), p.token.Desp)
+			p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (p *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		p.Next()
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s not a 'identifier' after a comma,but '%s'",
-				p.errorMsgPrefix(), p.token.Desp)
+				p.errorMsgPrefix(), p.token.Description)
 			p.errs = append(p.errs, err)
 			return names, err
 		}

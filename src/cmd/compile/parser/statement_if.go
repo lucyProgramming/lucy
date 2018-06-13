@@ -34,7 +34,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 
 	if b.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
-			b.parser.errorMsgPrefix(), b.parser.token.Desp)
+			b.parser.errorMsgPrefix(), b.parser.token.Description)
 		b.parser.errs = append(b.parser.errs, err)
 		b.consume(untils_lc) // consume and next
 		b.Next()
@@ -43,7 +43,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 	b.parseStatementList(&i.Block, false)
 	if b.parser.token.Type != lex.TOKEN_RC {
 		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
-			b.parser.errorMsgPrefix(), b.parser.token.Desp))
+			b.parser.errorMsgPrefix(), b.parser.token.Description))
 		b.consume(untils_rc)
 	}
 	b.Next() // skip }
@@ -68,7 +68,7 @@ func (b *Block) parseIf() (i *ast.StatementIF, err error) {
 		b.parseStatementList(i.ElseBlock, false)
 		if b.parser.token.Type != lex.TOKEN_RC {
 			err = fmt.Errorf("%s expect '}', but '%s'",
-				b.parser.errorMsgPrefix(), b.parser.token.Desp)
+				b.parser.errorMsgPrefix(), b.parser.token.Description)
 			b.consume(untils_rc)
 		}
 		b.Next()
@@ -89,7 +89,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		}
 		if b.parser.token.Type != lex.TOKEN_LC {
 			err = fmt.Errorf("%s not '{' after a expression,but '%s'",
-				b.parser.errorMsgPrefix(), b.parser.token.Desp)
+				b.parser.errorMsgPrefix(), b.parser.token.Description)
 			b.parser.errs = append(b.parser.errs)
 			return es, err
 		}
@@ -102,7 +102,7 @@ func (b *Block) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		})
 		if b.parser.token.Type != lex.TOKEN_RC {
 			err = fmt.Errorf("%s expect '}', but '%s'",
-				b.parser.errorMsgPrefix(), b.parser.token.Desp)
+				b.parser.errorMsgPrefix(), b.parser.token.Description)
 			b.consume(untils_rc)
 		}
 		b.Next() // skip }

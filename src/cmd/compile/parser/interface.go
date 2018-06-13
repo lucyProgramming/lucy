@@ -59,7 +59,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s expect '{' but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err = fmt.Errorf("%s expect '{' but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Description)
 		c.parser.errs = append(c.parser.errs, err)
 		c.consume(untils_lc)
 	}
@@ -80,7 +80,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 			var name string
 			if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s expect function name,but '%s'",
-					c.parser.errorMsgPrefix(), c.parser.token.Desp))
+					c.parser.errorMsgPrefix(), c.parser.token.Description))
 				c.consume(untils_rc)
 				c.Next()
 				continue
@@ -107,7 +107,7 @@ func (c *Interface) parse() (classDefinition *ast.Class, err error) {
 			c.classDefinition.Methods[m.Func.Name] = append(c.classDefinition.Methods[m.Func.Name], m)
 		default:
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect token:%s", c.parser.errorMsgPrefix(),
-				c.parser.token.Desp))
+				c.parser.token.Description))
 			c.Next()
 		}
 	}

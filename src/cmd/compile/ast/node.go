@@ -22,7 +22,7 @@ type ConvertTops2Package struct {
 	TypeAlias []*ExpressionTypeAlias
 }
 
-func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareErrors []*RedeclareError, errs []error) {
+func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareErrors []*RedeclareError, errs []error) {
 	//
 	if err := PackageBeenCompile.loadBuildinPackage(); err != nil {
 		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
@@ -30,31 +30,31 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 	}
 	errs = make([]error, 0)
 	PackageBeenCompile.Files = make(map[string]*File)
-	convertor.Name = []string{}
-	convertor.Blocks = []*Block{}
-	convertor.Funcs = make([]*Function, 0)
-	convertor.Classes = make([]*Class, 0)
-	convertor.Enums = make([]*Enum, 0)
-	convertor.Vars = make([]*VariableDefinition, 0)
-	convertor.Consts = make([]*Const, 0)
+	conversion.Name = []string{}
+	conversion.Blocks = []*Block{}
+	conversion.Funcs = make([]*Function, 0)
+	conversion.Classes = make([]*Class, 0)
+	conversion.Enums = make([]*Enum, 0)
+	conversion.Vars = make([]*VariableDefinition, 0)
+	conversion.Consts = make([]*Const, 0)
 	expressions := []*Expression{}
 	for _, v := range t {
 		switch v.Data.(type) {
 		case *Block:
 			t := v.Data.(*Block)
-			convertor.Blocks = append(convertor.Blocks, t)
+			conversion.Blocks = append(conversion.Blocks, t)
 		case *Function:
 			t := v.Data.(*Function)
-			convertor.Funcs = append(convertor.Funcs, t)
+			conversion.Funcs = append(conversion.Funcs, t)
 		case *Enum:
 			t := v.Data.(*Enum)
-			convertor.Enums = append(convertor.Enums, t)
+			conversion.Enums = append(conversion.Enums, t)
 		case *Class:
 			t := v.Data.(*Class)
-			convertor.Classes = append(convertor.Classes, t)
+			conversion.Classes = append(conversion.Classes, t)
 		case *Const:
 			t := v.Data.(*Const)
-			convertor.Consts = append(convertor.Consts, t)
+			conversion.Consts = append(conversion.Consts, t)
 		case *Import:
 			i := v.Data.(*Import)
 			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
@@ -66,20 +66,20 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 			expressions = append(expressions, t)
 		case *ExpressionTypeAlias:
 			t := v.Data.(*ExpressionTypeAlias)
-			convertor.TypeAlias = append(convertor.TypeAlias, t)
+			conversion.TypeAlias = append(conversion.TypeAlias, t)
 		default:
 			panic("tops have unkown type")
 		}
 	}
-	errs = append(errs, checkEnum(convertor.Enums)...)
-	redeclareErrors = convertor.redeclareErrors()
+	errs = append(errs, checkEnum(conversion.Enums)...)
+	redeclareErrors = conversion.redeclareErrors()
 	PackageBeenCompile.Block.Consts = make(map[string]*Const)
-	for _, v := range convertor.Consts {
+	for _, v := range conversion.Consts {
 		PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 	}
 	PackageBeenCompile.Block.Vars = make(map[string]*VariableDefinition)
 	PackageBeenCompile.Block.Funcs = make(map[string]*Function)
-	for _, v := range convertor.Funcs {
+	for _, v := range conversion.Funcs {
 		v.IsGlobal = true
 		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
@@ -87,7 +87,7 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 		}
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
-	for _, v := range convertor.Classes {
+	for _, v := range conversion.Classes {
 		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
@@ -95,14 +95,14 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 	}
 	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
-	for _, v := range convertor.Enums {
+	for _, v := range conversion.Enums {
 		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 	//after class inserted,then resolve type
-	for _, v := range convertor.TypeAlias {
+	for _, v := range conversion.TypeAlias {
 		err := v.Typ.resolve(&PackageBeenCompile.Block)
 		if err != nil {
 			errs = append(errs, err)
@@ -125,17 +125,17 @@ func (convertor *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareE
 		b := &Block{}
 		b.Statements = s
 		b.isGlobalVariableDefinition = true
-		convertor.Blocks = append([]*Block{b}, convertor.Blocks...)
+		conversion.Blocks = append([]*Block{b}, conversion.Blocks...)
 	}
-	PackageBeenCompile.mkInitFunctions(convertor.Blocks)
+	PackageBeenCompile.mkInitFunctions(conversion.Blocks)
 	return
 }
 
-func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
+func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	ret := []*RedeclareError{}
 	m := make(map[string][]interface{})
 	//eums
-	for _, v := range convertor.Enums {
+	for _, v := range conversion.Enums {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -150,7 +150,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//const
-	for _, v := range convertor.Consts {
+	for _, v := range conversion.Consts {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -158,7 +158,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//vars
-	for _, v := range convertor.Vars {
+	for _, v := range conversion.Vars {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -166,7 +166,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//funcs
-	for _, v := range convertor.Funcs {
+	for _, v := range conversion.Funcs {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -174,7 +174,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//classes
-	for _, v := range convertor.Classes {
+	for _, v := range conversion.Classes {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -182,7 +182,7 @@ func (convertor *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	// type alias
-	for _, v := range convertor.TypeAlias {
+	for _, v := range conversion.TypeAlias {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {

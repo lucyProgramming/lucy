@@ -17,8 +17,8 @@ func registerBuildinFunctions() {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
 			}
-			meta := &BuildinFunctionPrintfMeta{}
-			e.BuildinFunctionMeta = meta
+			meta := &BuildInFunctionPrintfMeta{}
+			e.BuildInFunctionMeta = meta
 			if len(args) == 0 || args[0] == nil {
 				return // not error
 			}
@@ -214,8 +214,8 @@ func registerBuildinFunctions() {
 			*errs = append(*errs, err)
 			return
 		}
-		meta := &BuildinFunctionSprintfMeta{}
-		e.BuildinFunctionMeta = meta
+		meta := &BuildInFunctionSprintfMeta{}
+		e.BuildInFunctionMeta = meta
 		meta.Format = e.Args[0]
 		meta.ArgsLength = len(args) - 1
 		e.Args = e.Args[1:]
@@ -228,8 +228,8 @@ func registerBuildinFunctions() {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
 			}
-			meta := &BuildinFunctionPrintfMeta{}
-			e.BuildinFunctionMeta = meta
+			meta := &BuildInFunctionPrintfMeta{}
+			e.BuildInFunctionMeta = meta
 			if len(args) == 0 {
 				err := fmt.Errorf("%s '%s' expect one argument at least",
 					errMsgPrefix(pos), common.BUILD_IN_FUNCTION_PRINTF)

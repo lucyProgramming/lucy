@@ -72,7 +72,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 		meta := ArrayMetas[s.RangeAttr.RangeOn.Value.ArrayType.Typ]
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
@@ -92,7 +92,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Field:      "start",
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
@@ -101,7 +101,7 @@ func (m *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 		//get end
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Field:      "end",
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

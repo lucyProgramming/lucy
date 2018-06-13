@@ -12,11 +12,11 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	switch call.Func.Name {
 	case common.BUILD_IN_FUNCTION_PRINT:
-		return m.mkBuildinPrint(class, code, e, context, state)
+		return m.mkBuildInPrint(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_PANIC:
 		return m.mkBuildinPanic(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_CATCH:
-		return m.mkBuildinCatch(class, code, e, context)
+		return m.mkBuildInCatch(class, code, e, context)
 	case common.BUILD_IN_FUNCTION_MONITORENTER, common.BUILD_IN_FUNCTION_MONITOREXIT:
 		maxStack, _ = m.build(class, code, call.Args[0], context, state)
 		if call.Func.Name == common.BUILD_IN_FUNCTION_MONITORENTER {
@@ -26,11 +26,11 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 		}
 		code.CodeLength++
 	case common.BUILD_IN_FUNCTION_PRINTF:
-		return m.mkBuildinPrintf(class, code, e, context, state)
+		return m.mkBuildInPrintf(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_SPRINTF:
-		return m.mkBuildinSprintf(class, code, e, context, state)
+		return m.mkBuildInSprintf(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_LEN:
-		return m.mkBuildinLen(class, code, e, context, state)
+		return m.mkBuildInLen(class, code, e, context, state)
 	default:
 		panic("unkown buildin function:" + call.Func.Name)
 	}
@@ -73,7 +73,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildinCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (m *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	if e.IsStatementExpression { // statement call
 		maxStack = 1
@@ -100,7 +100,7 @@ func (m *MakeExpression) mkBuildinCatch(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildinLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (m *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	maxStack, _ = m.build(class, code, call.Args[0], context, state)
@@ -118,7 +118,7 @@ func (m *MakeExpression) mkBuildinLen(class *cg.ClassHighLevel, code *cg.Attribu
 		meta := ArrayMetas[call.Args[0].Value.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
 		},

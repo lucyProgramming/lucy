@@ -24,7 +24,7 @@ func (ep *Expression) parseTernaryExpression() (*ast.Expression, error) {
 	}
 	if ep.parser.token.Type != lex.TOKEN_COLON {
 		return left, fmt.Errorf("%s expect ':',but '%s'",
-			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+			ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 	}
 	ep.Next() // skip :
 	False, err := ep.parseExpression(false)

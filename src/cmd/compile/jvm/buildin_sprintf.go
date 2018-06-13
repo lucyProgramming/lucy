@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (m *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -13,7 +13,7 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 	}()
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionSprintfMeta)
+	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
 	maxStack, _ = m.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	loadInt32(class, code, int32(meta.ArgsLength))

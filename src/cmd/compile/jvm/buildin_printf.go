@@ -8,14 +8,14 @@ import (
 /*
 	function printf
 */
-func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (m *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionPrintfMeta)
+	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
 	if meta.Stream == nil {
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

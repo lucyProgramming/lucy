@@ -6,7 +6,7 @@ import (
 )
 
 type LoadResource interface {
-	LoadName(resouceName string) (interface{}, error)
+	LoadName(resourceName string) (interface{}, error)
 }
 
 const (

@@ -35,11 +35,11 @@ func (loader *RealNameLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	}
 	astClass := &ast.Class{}
 	{
-		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
-		astClass.Name = string(c.ConstPool[nameindex].Info)
+		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+		astClass.Name = string(c.ConstPool[nameIndex].Info)
 		if astClass.Name != ast.JAVA_ROOT_CLASS {
-			nameindex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
-			astClass.SuperClassName = string(c.ConstPool[nameindex].Info)
+			nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
+			astClass.SuperClassName = string(c.ConstPool[nameIndex].Info)
 		}
 	}
 	loader.loadInterfaces(astClass, c)

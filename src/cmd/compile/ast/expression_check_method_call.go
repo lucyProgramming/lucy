@@ -38,7 +38,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		case *Class:
 			//object cast
 			class := d.(*Class)
-			typeConversion := &ExpressionTypeConvertion{}
+			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Typ = &VariableType{}
 			typeConversion.Typ.Typ = VARIABLE_TYPE_OBJECT
 			typeConversion.Typ.Pos = e.Pos
@@ -54,7 +54,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			}
 			return []*VariableType{e.checkTypeConvertionExpression(block, errs)}
 		case *VariableType:
-			typeConversion := &ExpressionTypeConvertion{}
+			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Typ = object.Package.Block.Types[call.Name]
 			e.Typ = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
@@ -275,7 +275,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		}
 		args := checkExpressions(block, call.Args, errs)
 		args = checkRightValuesValid(args, errs)
-		ms, matched, err := object.Class.SuperClass.matchContructionFunction(e.Pos, errs, args, &call.Args)
+		ms, matched, err := object.Class.SuperClass.matchConstructionFunction(e.Pos, errs, args, &call.Args)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
@@ -288,7 +288,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 			ret := []*VariableType{&VariableType{}}
 			ret[0].Typ = VARIABLE_TYPE_VOID
 			ret[0].Pos = e.Pos
-			block.Statements[0].IsCallFatherContructionStatement = true
+			block.Statements[0].IsCallFatherConstructionStatement = true
 			return ret
 		}
 		if len(ms) == 0 {

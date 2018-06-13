@@ -15,7 +15,7 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, _, className, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -65,10 +65,10 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, classname, bin.Left.Value)
+		currentStack += m.controlStack2FitAssign(code, op, className, bin.Left.Value)
 	}
 	//copy op
-	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	copyOPLeftValue(class, code, op, className, name, descriptor)
 	return
 
 }

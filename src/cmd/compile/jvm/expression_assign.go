@@ -14,7 +14,7 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxStack, remainStack, op, target, classname, name, descriptor := m.getLeftValue(class, code, left, context, state)
+	maxStack, remainStack, op, target, className, name, descriptor := m.getLeftValue(class, code, left, context, state)
 	stack, es := m.build(class, code, right, context, state)
 	if len(es) > 0 {
 		state.pushStack(class, right.Value)
@@ -26,12 +26,12 @@ func (m *MakeExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *c
 	}
 	currentStack := remainStack + jvmSize(target)
 	if e.IsStatementExpression == false {
-		currentStack += m.controlStack2FitAssign(code, op, classname, target)
+		currentStack += m.controlStack2FitAssign(code, op, className, target)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
 	}
-	copyOPLeftValue(class, code, op, classname, name, descriptor)
+	copyOPLeftValue(class, code, op, className, name, descriptor)
 	return
 }
 
@@ -52,7 +52,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 	multiValuePacker.storeArrayListAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
-		stack, remainStack, op, target, classname, name, descriptor :=
+		stack, remainStack, op, target, className, name, descriptor :=
 			m.getLeftValue(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
@@ -61,7 +61,7 @@ func (m *MakeExpression) buildAssign(class *cg.ClassHighLevel, code *cg.Attribut
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}
-		copyOPLeftValue(class, code, op, classname, name, descriptor)
+		copyOPLeftValue(class, code, op, className, name, descriptor)
 		state.popStack(len(state.Stacks) - stackLength)
 	}
 	return

@@ -395,7 +395,7 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_NULL:
 		*ret += "null"
 	case VARIABLE_TYPE_NAME:
-		*ret += v.Name // resove wrong, but typeString is ok to return
+		*ret += v.Name // resolve wrong, but typeString is ok to return
 	case VARIABLE_TYPE_FUNCTION:
 		*ret += v.Function.readableMsg()
 	case VARIABLE_TYPE_T:

@@ -210,7 +210,7 @@ func (b *Block) checkUnUsedVariable() (es []error) {
 		if v.Used ||
 			v.IsGlobal ||
 			v.IsFunctionParameter ||
-			v.IsFunctionRetrunVar ||
+			v.IsFunctionReturnVar ||
 			v.Name == THIS {
 			continue
 		}
@@ -284,73 +284,73 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		b.Vars = make(map[string]*VariableDefinition)
 	}
 	if v, ok := b.Vars[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(v.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(v.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.Classes == nil {
 		b.Classes = make(map[string]*Class)
 	}
 	if c, ok := b.Classes[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.Funcs == nil {
 		b.Funcs = make(map[string]*Function)
 	}
 	if f, ok := b.Funcs[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.Consts == nil {
 		b.Consts = make(map[string]*Const)
 	}
 	if c, ok := b.Consts[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.Enums == nil {
 		b.Enums = make(map[string]*Enum)
 	}
 	if e, ok := b.Enums[name]; ok {
-		errmsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
+		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.EnumNames == nil {
 		b.EnumNames = make(map[string]*EnumName)
 	}
 	if en, ok := b.EnumNames[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.Labels == nil {
 		b.Labels = make(map[string]*StatementLabel)
 	}
 	if l, ok := b.Labels[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	if b.Types == nil {
 		b.Types = make(map[string]*VariableType)
 	}
 	if t, ok := b.Types[name]; ok {
-		errmsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 			errMsgPrefix(pos), name)
-		errmsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
-		return fmt.Errorf(errmsg)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
+		return fmt.Errorf(errMsg)
 	}
 	// name exists in buildin, not allow
 	if lucyBuildInPackage != nil {

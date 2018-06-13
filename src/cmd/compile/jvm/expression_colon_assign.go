@@ -17,7 +17,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		currentStack := uint16(0)
 		if v.Name != ast.NO_NAME_IDENTIFIER && v.BeenCaptured {
 			obj := state.newObjectVariableType(closure.getMeta(v.Typ.Typ).className)
-			if vs.IfDeclareBefor[0] {
+			if vs.IfDeclareBefore[0] {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				currentStack = 1
 				state.pushStack(class, obj)
@@ -51,9 +51,9 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		maxStack += currentStack
 		if v.IsGlobal {
-			storeGlobalVar(class, m.MakeClass.mainclass, code, vs.Variables[0])
+			storeGlobalVar(class, m.MakeClass.mainClass, code, vs.Variables[0])
 		} else {
-			if vs.IfDeclareBefor[0] {
+			if vs.IfDeclareBefore[0] {
 				m.MakeClass.storeLocalVar(class, code, vs.Variables[0])
 			} else {
 				v.LocalValOffset = code.MaxLocals
@@ -89,11 +89,11 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if stack > maxStack {
 				maxStack = stack
 			}
-			storeGlobalVar(class, m.MakeClass.mainclass, code, v)
+			storeGlobalVar(class, m.MakeClass.mainClass, code, v)
 			continue
 		}
 		//this variable not been captured,also not declared here
-		if vs.IfDeclareBefor[k] {
+		if vs.IfDeclareBefore[k] {
 			if v.BeenCaptured {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
@@ -181,7 +181,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 					maxstack = t
 				}
 				if vs.Variables[index].IsGlobal {
-					storeGlobalVar(class, m.MakeClass.mainclass, code, vs.Variables[index])
+					storeGlobalVar(class, m.MakeClass.mainClass, code, vs.Variables[index])
 					index++
 					continue
 				}
@@ -209,7 +209,7 @@ func (m *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 			maxstack = t
 		}
 		if vs.Variables[index].IsGlobal {
-			storeGlobalVar(class, m.MakeClass.mainclass, code, vs.Variables[index])
+			storeGlobalVar(class, m.MakeClass.mainClass, code, vs.Variables[index])
 			index++
 			continue
 		}

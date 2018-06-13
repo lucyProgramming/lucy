@@ -34,7 +34,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	m.mkClassDefaultContruction(closureClass, nil)
+	m.mkClassDefaultConstruction(closureClass, nil)
 	m.putClass(className, closureClass)
 
 	method := &cg.MethodHighLevel{}

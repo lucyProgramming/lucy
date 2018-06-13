@@ -45,7 +45,7 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 		ret := &ast.Expression{}
 		ret.Pos = pos
 		ret.Typ = ast.EXPRESSION_TYPE_CHECK_CAST
-		data := &ast.ExpressionTypeConvertion{}
+		data := &ast.ExpressionTypeConversion{}
 		data.Typ = &ast.VariableType{}
 		data.Typ.Typ = ast.VARIABLE_TYPE_ARRAY
 		data.Typ.Pos = pos
@@ -75,7 +75,7 @@ func (ep *Expression) parseArrayExpression() (*ast.Expression, error) {
 func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 	if ep.parser.token.Type != lex.TOKEN_LC {
 		return nil, fmt.Errorf("%s expect '{',but '%s'",
-			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+			ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 	}
 	ep.Next() // skip {
 	es := []*ast.Expression{}
@@ -110,7 +110,7 @@ func (ep *Expression) parseArrayValues() ([]*ast.Expression, error) {
 		}
 	}
 	if ep.parser.token.Type != lex.TOKEN_RC {
-		return es, fmt.Errorf("%s expect '}',but '%s'", ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+		return es, fmt.Errorf("%s expect '}',but '%s'", ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 	}
 	ep.Next()
 	return es, nil

@@ -8,7 +8,7 @@ import (
 type StatementIF struct {
 	PreExpressions []*Expression
 	Condition      *Expression
-	CondtionBlock  Block
+	ConditionBlock Block
 	Block          Block
 	ElseIfList     []*StatementElseIf
 	ElseBlock      *Block
@@ -16,11 +16,11 @@ type StatementIF struct {
 }
 
 func (s *StatementIF) check(father *Block) []error {
-	s.CondtionBlock.inherit(father)
+	s.ConditionBlock.inherit(father)
 	errs := []error{}
 	for _, v := range s.PreExpressions {
 		v.IsStatementExpression = true
-		_, es := v.check(&s.CondtionBlock)
+		_, es := v.check(&s.ConditionBlock)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
@@ -32,7 +32,7 @@ func (s *StatementIF) check(father *Block) []error {
 		}
 	}
 	if s.Condition != nil {
-		conditionType, es := s.Condition.checkSingleValueContextExpression(&s.CondtionBlock)
+		conditionType, es := s.Condition.checkSingleValueContextExpression(&s.ConditionBlock)
 		if errsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
@@ -46,10 +46,10 @@ func (s *StatementIF) check(father *Block) []error {
 		}
 	}
 
-	s.Block.inherit(&s.CondtionBlock)
+	s.Block.inherit(&s.ConditionBlock)
 	errs = append(errs, s.Block.checkStatements()...)
 	for _, v := range s.ElseIfList {
-		v.Block.inherit(&s.CondtionBlock)
+		v.Block.inherit(&s.ConditionBlock)
 		if v.Condition.canbeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
@@ -65,7 +65,7 @@ func (s *StatementIF) check(father *Block) []error {
 		errs = append(errs, v.Block.checkStatements()...)
 	}
 	if s.ElseBlock != nil {
-		s.ElseBlock.inherit(&s.CondtionBlock)
+		s.ElseBlock.inherit(&s.ConditionBlock)
 		errs = append(errs, s.ElseBlock.checkStatements()...)
 	}
 	return errs

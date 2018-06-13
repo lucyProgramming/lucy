@@ -32,7 +32,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		IfState.popStack(1) // must be bool expression
 	}
 	code.Codes[code.CodeLength] = cg.OP_ifeq
-	codelength := code.CodeLength
+	codeLength := code.CodeLength
 	exit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
 	m.buildBlock(class, code, &s.Block, context, IfState)
@@ -42,7 +42,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	}
 	for _, v := range s.ElseIfList {
 		context.MakeStackMap(code, conditionState, code.CodeLength) // state is not change,all block var should be access from outside
-		binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codelength))
+		binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codeLength))
 		var elseIfState *StackMapState
 		if v.Block.HaveVariableDefinition() {
 			elseIfState = (&StackMapState{}).FromLast(conditionState)
@@ -60,7 +60,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 			maxStack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_ifeq
-		codelength = code.CodeLength
+		codeLength = code.CodeLength
 		exit = code.Codes[code.CodeLength+1 : code.CodeLength+3]
 		code.CodeLength += 3
 		m.buildBlock(class, code, v.Block, context, elseIfState)
@@ -72,7 +72,7 @@ func (m *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		conditionState.addTop(elseIfState)
 	}
 	context.MakeStackMap(code, conditionState, code.CodeLength)
-	binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codelength))
+	binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codeLength))
 	//s.Exits = append(s.Exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	if s.ElseBlock != nil {
 		var elseState *StackMapState

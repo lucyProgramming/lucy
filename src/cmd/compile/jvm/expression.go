@@ -180,7 +180,7 @@ func (m *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		maxStack = m.buildUnary(class, code, e, context, state)
 	//
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
-		maxStack = m.buildIdentifer(class, code, e, context)
+		maxStack = m.buildIdentifier(class, code, e, context)
 	case ast.EXPRESSION_TYPE_NEW:
 		maxStack = m.buildNew(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_FUNCTION:

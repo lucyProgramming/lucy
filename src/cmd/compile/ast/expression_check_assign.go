@@ -43,7 +43,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd := &VariableDefinition{}
 			vd.Name = identifier.Name
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
+			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, false)
 			continue
 		}
 		var variableType *VariableType
@@ -62,7 +62,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 			identifier.Var = variable
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, variable)
-			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, true)
+			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, true)
 		} else { // should be no error
 			noNewVariable = false
 			vd := &VariableDefinition{}
@@ -85,7 +85,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 				continue
 			}
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclareBefor = append(declareVariableExpression.IfDeclareBefor, false)
+			declareVariableExpression.IfDeclareBefore = append(declareVariableExpression.IfDeclareBefore, false)
 			if e.IsPublic { // only use when is is global
 				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}

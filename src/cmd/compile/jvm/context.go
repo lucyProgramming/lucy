@@ -15,7 +15,7 @@ type Context struct {
 	LastStackMapOffset      int
 	NotFirstStackMap        bool
 	function                *ast.Function
-	currentSoureFile        string
+	currentSourceFile       string
 	currentLineNUmber       int
 	Defer                   *ast.Defer
 	StackMapOffsets         []int
@@ -107,12 +107,12 @@ func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos,
 	if pos == nil {
 		return
 	}
-	if pos.Filename != context.currentSoureFile {
+	if pos.Filename != context.currentSourceFile {
 		if class.SourceFiles == nil {
 			class.SourceFiles = make(map[string]struct{})
 		}
 		class.SourceFiles[pos.Filename] = struct{}{}
-		context.currentSoureFile = pos.Filename
+		context.currentSourceFile = pos.Filename
 		context.currentLineNUmber = pos.StartLine
 		code.MKLineNumber(pos.StartLine)
 		return

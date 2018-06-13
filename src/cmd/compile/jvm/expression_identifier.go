@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (m *MakeExpression) buildCapturedIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Var)
@@ -32,7 +32,7 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 	return
 }
 
-func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (m *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context) (maxstack uint16) {
 	if e.Value.Typ == ast.VARIABLE_TYPE_CLASS {
 		return
@@ -47,7 +47,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 	if identifier.Var.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      m.MakeClass.mainclass.Name,
+			Class:      m.MakeClass.mainClass.Name,
 			Field:      identifier.Name,
 			Descriptor: Descriptor.typeDescriptor(identifier.Var.Typ),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -56,7 +56,7 @@ func (m *MakeExpression) buildIdentifer(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	if identifier.Var.BeenCaptured {
-		return m.buildCapturedIdentifer(class, code, e, context)
+		return m.buildCapturedIdentifier(class, code, e, context)
 	}
 	switch identifier.Var.Typ.Typ {
 

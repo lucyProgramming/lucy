@@ -16,9 +16,9 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	if e.Value.Typ == ast.VARIABLE_TYPE_MAP {
 		return m.buildNewMap(class, code, e, context)
 	}
-	stacklength := len(state.Stacks)
+	stackLength := len(state.Stacks)
 	defer func() {
-		state.popStack(len(state.Stacks) - stacklength)
+		state.popStack(len(state.Stacks) - stackLength)
 	}()
 
 	//new class
@@ -109,7 +109,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.Value.ArrayType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxStack = 2
@@ -178,7 +178,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 		case ast.VARIABLE_TYPE_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
 			meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
-			class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VARIABLE_TYPE_JAVA_ARRAY:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -188,7 +188,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      meta.classname,
+		Class:      meta.className,
 		Method:     special_method_init,
 		Descriptor: meta.constructorFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

@@ -259,7 +259,7 @@ func (p *Parser) Parse() []error {
 			break
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except",
-				p.errorMsgPrefix(), p.token.Desp))
+				p.errorMsgPrefix(), p.token.Description))
 			p.consume(untils_semicolon)
 			resetProperty()
 		}
@@ -298,12 +298,12 @@ func (p *Parser) validAfterPublic(isPublic bool) {
 	if isPublic == false {
 		token = "private"
 	}
-	if p.token.Desp != "" {
+	if p.token.Description != "" {
 		err = fmt.Errorf("%s cannot have token:%s after '%s'",
-			p.errorMsgPrefix(), p.token.Desp, token)
+			p.errorMsgPrefix(), p.token.Description, token)
 	} else {
 		err = fmt.Errorf("%s cannot have token:%s after '%s'",
-			p.errorMsgPrefix(), p.token.Desp, token)
+			p.errorMsgPrefix(), p.token.Description, token)
 	}
 	p.errs = append(p.errs, err)
 }
@@ -384,7 +384,7 @@ func (p *Parser) Next() {
 		}
 		p.token = tok
 		if tok.Type != lex.TOKEN_CRLF {
-			if p.token.Desp != "" {
+			if p.token.Description != "" {
 				//	fmt.Println("#########", p.token.Type, p.token.Desp)
 			} else {
 				//fmt.Println("#########", p.token.Type, p.token.Data)
@@ -428,7 +428,7 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
 func (p *Parser) parseTypeaAlias() (*ast.ExpressionTypeAlias, error) {
 	p.Next() // skip type key word
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
-		err := fmt.Errorf("%s expect identifer,but %s", p.errorMsgPrefix(), p.token.Desp)
+		err := fmt.Errorf("%s expect identifer,but %s", p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -437,7 +437,7 @@ func (p *Parser) parseTypeaAlias() (*ast.ExpressionTypeAlias, error) {
 	ret.Name = p.token.Data.(string)
 	p.Next() // skip identifier
 	if p.token.Type != lex.TOKEN_ASSIGN {
-		err := fmt.Errorf("%s expect '=',but %s", p.errorMsgPrefix(), p.token.Desp)
+		err := fmt.Errorf("%s expect '=',but %s", p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}

@@ -179,7 +179,7 @@ func (TypeConverter) castPointerTypeToRealType(class *cg.ClassHighLevel, code *c
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_MAP:
 		code.Codes[code.CodeLength] = cg.OP_checkcast

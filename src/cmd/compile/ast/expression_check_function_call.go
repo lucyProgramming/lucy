@@ -12,20 +12,20 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return nil
 	}
 	if t.Typ == VARIABLE_TYPE_CLASS { // cast type
-		convertType := &ExpressionTypeConvertion{}
-		convertType.Typ = &VariableType{}
-		convertType.Typ.Typ = VARIABLE_TYPE_OBJECT
-		convertType.Typ.Class = t.Class
-		convertType.Typ.Pos = e.Pos
-		ret := []*VariableType{convertType.Typ}
+		typeConversion := &ExpressionTypeConversion{}
+		typeConversion.Typ = &VariableType{}
+		typeConversion.Typ.Typ = VARIABLE_TYPE_OBJECT
+		typeConversion.Typ.Class = t.Class
+		typeConversion.Typ.Pos = e.Pos
+		ret := []*VariableType{typeConversion.Typ}
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 				errMsgPrefix(e.Pos)))
 			return ret
 		}
 		e.Typ = EXPRESSION_TYPE_CHECK_CAST
-		convertType.Expression = call.Args[0]
-		e.Data = convertType
+		typeConversion.Expression = call.Args[0]
+		e.Data = typeConversion
 		e.checkTypeConvertionExpression(block, errs)
 		return ret
 	}
@@ -37,7 +37,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	}
 	call.Func = t.Function
 	if t.Function.IsBuildIn {
-		return e.checkBuildinFunctionCall(block, errs, t.Function, call.Args)
+		return e.checkBuildInFunctionCall(block, errs, t.Function, call.Args)
 	} else {
 		return e.checkFunctionCall(block, errs, t.Function, &call.Args)
 

@@ -26,7 +26,7 @@ func Main(files []string) {
 			os.Exit(1)
 		}
 	}
-	compiler.NerrsStopCompile = 10
+	compiler.NErrsStopCompile = 10
 	compiler.Errs = []error{}
 	compiler.Files = files
 	compiler.Init()
@@ -37,14 +37,14 @@ type LucyCompile struct {
 	Tops             []*ast.Node
 	Files            []string
 	Errs             []error
-	NerrsStopCompile int
+	NErrsStopCompile int
 	lucyPaths        []string
 	ClassPaths       []string
 	Maker            jvm.MakeClass
 }
 
 func (lc *LucyCompile) shouldExit() {
-	if len(lc.Errs) > lc.NerrsStopCompile {
+	if len(lc.Errs) > lc.NErrsStopCompile {
 		lc.exit()
 	}
 }
@@ -104,7 +104,7 @@ func (lc *LucyCompile) compile() {
 			continue
 		}
 		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs,
-			compileCommon.CompileFlags.OnlyImport, lc.NerrsStopCompile)...)
+			compileCommon.CompileFlags.OnlyImport, lc.NErrsStopCompile)...)
 		lc.shouldExit()
 	}
 	// parse import only

@@ -39,7 +39,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 		meta := ArrayMetas[call.Expression.Value.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Method:     call.Name,
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -70,7 +70,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					}
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      meta.classname,
+						Class:      meta.className,
 						Method:     appendName,
 						Descriptor: meta.appendDescriptor,
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -90,7 +90,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      meta.classname,
+				Class:      meta.className,
 				Method:     appendName,
 				Descriptor: appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -120,7 +120,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 					}
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual
 					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      meta.classname,
+						Class:      meta.className,
 						Method:     appendName,
 						Descriptor: appendDescriptor,
 					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -135,7 +135,7 @@ func (m *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg
 			//get elements field
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      meta.classname,
+				Class:      meta.className,
 				Method:     appendName,
 				Descriptor: appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])

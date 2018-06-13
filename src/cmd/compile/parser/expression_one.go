@@ -94,7 +94,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		}
 		if ep.parser.token.Type != lex.TOKEN_RP {
 			return nil, fmt.Errorf("%s '(' and ')' not matched, but '%s'",
-				ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+				ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 		}
 		ep.Next()
 	case lex.TOKEN_INCREMENT:
@@ -273,7 +273,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 		}
 	default:
 		err = fmt.Errorf("%s unkown begining of a expression, token:%s",
-			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+			ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 		return nil, err
 	}
 
@@ -412,7 +412,7 @@ func (ep *Expression) parseOneExpression(unary bool) (*ast.Expression, error) {
 				left = newe
 			} else {
 				return nil, fmt.Errorf("%s expect  'identifier' or '(',but '%s'",
-					ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+					ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 			}
 			continue
 		}

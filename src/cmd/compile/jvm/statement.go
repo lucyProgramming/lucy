@@ -71,11 +71,11 @@ func (m *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeC
 			s.StatementGoto.StatementLable.Exits = append(s.StatementGoto.StatementLable.Exits, b)
 		}
 	case ast.STATEMENT_TYPE_LABLE:
-		s.StatmentLable.CodeOffsetGenerated = true
-		s.StatmentLable.CodeOffset = code.CodeLength
-		s.StatmentLable.Exits = []*cg.Exit{} //could compile multi times
-		if len(s.StatmentLable.Exits) > 0 {
-			backfillExit(s.StatmentLable.Exits, code.CodeLength) // back patch
+		s.StatementLabel.CodeOffsetGenerated = true
+		s.StatementLabel.CodeOffset = code.CodeLength
+		s.StatementLabel.Exits = []*cg.Exit{} //could compile multi times
+		if len(s.StatementLabel.Exits) > 0 {
+			backfillExit(s.StatementLabel.Exits, code.CodeLength) // back patch
 		}
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled

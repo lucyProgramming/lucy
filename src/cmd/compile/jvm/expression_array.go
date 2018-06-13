@@ -15,7 +15,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	//	new array ,
 	meta := ArrayMetas[e.Value.ArrayType.Typ]
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 
@@ -74,7 +74,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Typ]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 	arrayObject := &ast.VariableType{}
@@ -156,7 +156,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      meta.classname,
+		Class:      meta.className,
 		Method:     special_method_init,
 		Descriptor: meta.constructorFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

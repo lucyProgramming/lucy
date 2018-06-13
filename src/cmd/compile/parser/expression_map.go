@@ -17,7 +17,7 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 		}
 	}
 	if ep.parser.token.Type != lex.TOKEN_LC {
-		return nil, fmt.Errorf("expect '{',but '%s'", ep.parser.token.Desp)
+		return nil, fmt.Errorf("expect '{',but '%s'", ep.parser.token.Description)
 	}
 	ep.Next() // skip {
 	ret := &ast.Expression{Typ: ast.EXPRESSION_TYPE_MAP}
@@ -33,7 +33,7 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 		// arrow
 		if ep.parser.token.Type != lex.TOKEN_ARROW {
 			return ret, fmt.Errorf("%s expect '->',but '%s'",
-				ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+				ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 		}
 		ep.Next()
 		// value
@@ -53,7 +53,7 @@ func (ep *Expression) parseMapExprssion(needType bool) (*ast.Expression, error) 
 	}
 	if ep.parser.token.Type != lex.TOKEN_RC {
 		return nil, fmt.Errorf("%s expect '}',but '%s'",
-			ep.parser.errorMsgPrefix(), ep.parser.token.Desp)
+			ep.parser.errorMsgPrefix(), ep.parser.token.Description)
 	}
 	ep.Next() // skip }
 	return ret, nil

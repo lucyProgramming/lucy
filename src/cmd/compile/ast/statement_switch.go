@@ -9,12 +9,12 @@ import (
 type StatementSwitch struct {
 	Pos                  *Pos
 	Condition            *Expression //switch
-	StatementSwitchCases []*StatmentSwitchCase
+	StatementSwitchCases []*StatementSwitchCase
 	Default              *Block
 	Exits                []*cg.Exit
 }
 
-type StatmentSwitchCase struct {
+type StatementSwitchCase struct {
 	Matches []*Expression
 	Block   *Block
 }
@@ -50,7 +50,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 		for _, e := range v.Matches {
 			var byteValue byte
 			var shortValue int32
-			var int32Vavlue int32
+			var int32Value int32
 			var int64Value int64
 			var floatValue float32
 			var doubleValue float64
@@ -64,7 +64,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 				case EXPRESSION_TYPE_SHORT:
 					shortValue = e.Data.(int32)
 				case EXPRESSION_TYPE_INT:
-					int32Vavlue = e.Data.(int32)
+					int32Value = e.Data.(int32)
 				case EXPRESSION_TYPE_LONG:
 					int64Value = e.Data.(int64)
 				case EXPRESSION_TYPE_FLOAT:
@@ -112,9 +112,9 @@ func (s *StatementSwitch) check(b *Block) []error {
 			}
 			if valueValid {
 				errMsg := func(first *Pos) string {
-					errmsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
-					errmsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
-					return errmsg
+					errMsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
+					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
+					return errMsg
 				}
 				switch conditionType.Typ {
 				case VARIABLE_TYPE_BYTE:
@@ -132,11 +132,11 @@ func (s *StatementSwitch) check(b *Block) []error {
 						shortMap[shortValue] = e.Pos
 					}
 				case VARIABLE_TYPE_INT:
-					if first, ok := int32Map[int32Vavlue]; ok {
+					if first, ok := int32Map[int32Value]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
-						int32Map[int32Vavlue] = e.Pos
+						int32Map[int32Value] = e.Pos
 					}
 				case VARIABLE_TYPE_LONG:
 					if first, ok := int64Map[int64Value]; ok {

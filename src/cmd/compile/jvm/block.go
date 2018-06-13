@@ -8,19 +8,19 @@ import (
 )
 
 func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
-	var deadend bool = false
+	var deadEnd bool = false
 	for _, s := range b.Statements {
-		if deadend == true && s.Typ == ast.STATEMENT_TYPE_LABLE {
-			jumpForwards := len(s.StatmentLable.Exits) > 0 // jump forward
-			deadend = !jumpForwards
-			//continue compile block from this lable statment
+		if deadEnd == true && s.Typ == ast.STATEMENT_TYPE_LABLE {
+			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
+			deadEnd = !jumpForwards
+			//continue compile block from this label statement
 		}
-		if deadend {
+		if deadEnd {
 			continue
 		}
-		maxstack := m.buildStatement(class, code, b, s, context, state)
-		if maxstack > code.MaxStack {
-			code.MaxStack = maxstack
+		maxStack := m.buildStatement(class, code, b, s, context, state)
+		if maxStack > code.MaxStack {
+			code.MaxStack = maxStack
 		}
 		if len(state.Stacks) > 0 {
 			for _, v := range state.Stacks {
@@ -28,18 +28,18 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			}
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
-		if s.IsCallFatherContructionStatement { // special case
+		if s.IsCallFatherConstructionStatement { // special case
 			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
 			m.mkFieldDefaultValue(class, code, context, state)
 		}
-		//uncondition goto
+		//unCondition goto
 		if m.statementIsUnConditionGoto(s) {
-			deadend = true
+			deadEnd = true
 			continue
 		}
-		//block deadend
+		//block deadEnd
 		if s.Typ == ast.STATEMENT_TYPE_BLOCK {
-			deadend = s.Block.DeadEnding
+			deadEnd = s.Block.DeadEnding
 			continue
 		}
 		if s.Typ == ast.STATEMENT_TYPE_IF && s.StatementIf.ElseBlock != nil {
@@ -48,7 +48,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 				t = t && v.Block.DeadEnding
 			}
 			t = t && s.StatementIf.ElseBlock.DeadEnding
-			deadend = t
+			deadEnd = t
 			continue
 		}
 		if s.Typ == ast.STATEMENT_TYPE_SWITCH && s.StatementSwitch.Default != nil {
@@ -63,7 +63,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 				}
 			}
 			t = t && s.StatementSwitch.Default.DeadEnding
-			deadend = t
+			deadEnd = t
 			continue
 		}
 	}
@@ -71,7 +71,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	if b.IsFunctionTopBlock == false && len(b.Defers) > 0 {
 		m.buildDefers(class, code, context, b.Defers, state)
 	}
-	b.DeadEnding = deadend
+	b.DeadEnding = deadEnd
 	return
 }
 

@@ -5,7 +5,7 @@ func New(bs []byte, startLine, startColumn int) *LucyLexer {
 	lex.end = len(bs)
 	lex.line = startLine
 	lex.column = startColumn
-	lex.lastline = startLine
-	lex.lastcolumn = startColumn
+	lex.lastLine = startLine
+	lex.lastColumn = startColumn
 	return lex
 }

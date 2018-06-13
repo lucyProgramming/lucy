@@ -19,7 +19,7 @@ type StatementLabel struct {
 func (s *StatementLabel) Ready(from *Pos) error {
 	ss := []*Statement{}
 	for _, v := range s.Block.Statements {
-		if v.StatmentLable == s { // this is me
+		if v.StatementLabel == s { // this is me
 			break
 		}
 		if v.isVariableDefinition() && v.Checked == false {

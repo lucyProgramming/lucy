@@ -5,59 +5,59 @@ import (
 )
 
 func (e *Expression) checkTypeConvertionExpression(block *Block, errs *[]error) *VariableType {
-	convertion := e.Data.(*ExpressionTypeConvertion)
-	t, es := convertion.Expression.checkSingleValueContextExpression(block)
+	conversion := e.Data.(*ExpressionTypeConversion)
+	t, es := conversion.Expression.checkSingleValueContextExpression(block)
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {
 		return nil
 	}
-	err := convertion.Typ.resolve(block)
+	err := conversion.Typ.resolve(block)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil
 	}
-	ret := convertion.Typ.Clone()
+	ret := conversion.Typ.Clone()
 	ret.Pos = e.Pos
 
-	if t.IsNumber() && convertion.Typ.IsNumber() {
-		if convertion.Expression.IsLiteral() {
-			convertion.Expression.convertNumberLiteralTo(convertion.Typ.Typ)
+	if t.IsNumber() && conversion.Typ.IsNumber() {
+		if conversion.Expression.IsLiteral() {
+			conversion.Expression.convertNumberLiteralTo(conversion.Typ.Typ)
 			//rewrite
 			pos := e.Pos
-			*e = *convertion.Expression
+			*e = *conversion.Expression
 			e.Pos = pos // keep pos
 		}
 		return ret
 	}
 
 	// string([]byte)
-	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
+	if conversion.Typ.Typ == VARIABLE_TYPE_STRING &&
 		t.Typ == VARIABLE_TYPE_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
 		return ret
 	}
 	// string(byte[])
-	if convertion.Typ.Typ == VARIABLE_TYPE_STRING &&
+	if conversion.Typ.Typ == VARIABLE_TYPE_STRING &&
 		t.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.ArrayType.Typ == VARIABLE_TYPE_BYTE {
 		return ret
 	}
 
 	// []byte("hello world")
-	if convertion.Typ.Typ == VARIABLE_TYPE_ARRAY && convertion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
+	if conversion.Typ.Typ == VARIABLE_TYPE_ARRAY && conversion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
 		t.Typ == VARIABLE_TYPE_STRING {
 		return ret
 	}
 	// byte[]("hello world")
-	if convertion.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY && convertion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
+	if conversion.Typ.Typ == VARIABLE_TYPE_JAVA_ARRAY && conversion.Typ.ArrayType.Typ == VARIABLE_TYPE_BYTE &&
 		t.Typ == VARIABLE_TYPE_STRING {
 		return ret
 	}
-	if convertion.Typ.validForTypeAssert() && t.IsPointer() {
+	if conversion.Typ.validForTypeAssert() && t.IsPointer() {
 		return ret
 	}
 
 	*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s'",
-		errMsgPrefix(e.Pos), t.TypeString(), convertion.Typ.TypeString()))
+		errMsgPrefix(e.Pos), t.TypeString(), conversion.Typ.TypeString()))
 	return ret
 }

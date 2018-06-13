@@ -22,7 +22,7 @@ func (ep *Expression) parseCallExpression(e *ast.Expression) (*ast.Expression, e
 	if ep.parser.token.Type != lex.TOKEN_RP {
 		return nil, fmt.Errorf("%s except ')' ,but '%s'",
 			ep.parser.errorMsgPrefix(),
-			ep.parser.token.Desp)
+			ep.parser.token.Description)
 	}
 	var result ast.Expression
 	if e.Typ == ast.EXPRESSION_TYPE_IDENTIFIER {

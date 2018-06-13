@@ -157,6 +157,6 @@ type Token struct {
 	StartColumn int
 	EndLine     int
 	EndColumn   int
-	Desp        string
+	Description string
 	Data        interface{}
 }

@@ -240,7 +240,7 @@ type Expression struct {
 }
 
 func (e *Expression) ConvertTo(t *VariableType) {
-	c := &ExpressionTypeConvertion{}
+	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
 	*c.Expression = *e // copy
 	c.Typ = t
@@ -265,7 +265,7 @@ func (e *Expression) ConvertToNumber(typ int) {
 	}
 }
 
-type ExpressionTypeAssert ExpressionTypeConvertion
+type ExpressionTypeAssert ExpressionTypeConversion
 
 /*
 	const
@@ -469,7 +469,7 @@ func (e *Expression) CallHasReturnValue() bool {
 type CallArgs []*Expression // f(1,2)　调用参数列表
 
 type ExpressionFunctionCall struct {
-	BuildinFunctionMeta      interface{} // for build function only
+	BuildInFunctionMeta      interface{} // for build function only
 	Expression               *Expression
 	Args                     CallArgs
 	Func                     *Function
@@ -493,12 +493,12 @@ type ExpressionMethodCall struct {
 }
 
 type ExpressionDeclareVariable struct {
-	Variables      []*VariableDefinition
-	Values         []*Expression
-	IfDeclareBefor []bool // used for colon assign
+	Variables       []*VariableDefinition
+	Values          []*Expression
+	IfDeclareBefore []bool // used for colon assign
 }
 
-type ExpressionTypeConvertion struct {
+type ExpressionTypeConversion struct {
 	Typ        *VariableType
 	Expression *Expression
 }

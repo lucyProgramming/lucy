@@ -48,7 +48,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			b.Next()
 			if validAfterDefer() == false {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s not a valid token '%s' after defer",
-					b.parser.errorMsgPrefix(), b.parser.token.Desp))
+					b.parser.errorMsgPrefix(), b.parser.token.Description))
 				reset()
 			}
 		case lex.TOKEN_IDENTIFIER:
@@ -158,7 +158,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s missing identifier after const,but '%s'",
-						b.parser.errorMsgPrefix(), b.parser.token.Desp))
+						b.parser.errorMsgPrefix(), b.parser.token.Description))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
@@ -239,7 +239,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s  no semicolon after return statement, but %s",
-						b.parser.errorMsgPrefix(), b.parser.token.Desp))
+						b.parser.errorMsgPrefix(), b.parser.token.Description))
 				continue
 			}
 			b.Next()
@@ -342,7 +342,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			if b.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s  missing identifier after goto statement, but '%s'",
-						b.parser.errorMsgPrefix(), b.parser.token.Desp))
+						b.parser.errorMsgPrefix(), b.parser.token.Description))
 				b.consume(untils_semicolon)
 				b.Next()
 				continue
@@ -358,7 +358,7 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON { // incase forget
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s  missing semicolon after goto statement,but '%s'",
-						b.parser.errorMsgPrefix(), b.parser.token.Desp))
+						b.parser.errorMsgPrefix(), b.parser.token.Description))
 			}
 			b.Next()
 		case lex.TOKEN_TYPE:
@@ -443,7 +443,7 @@ func (b *Block) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		s.Pos = pos
 		s.Typ = ast.STATEMENT_TYPE_LABLE
 		lable := &ast.StatementLabel{}
-		s.StatmentLable = lable
+		s.StatementLabel = lable
 		lable.Statement = s
 		lable.Name = e.Data.(*ast.ExpressionIdentifier).Name
 		block.Statements = append(block.Statements, s)

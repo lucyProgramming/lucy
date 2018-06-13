@@ -111,7 +111,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
 		meta := ArrayMetas[ast.VARIABLE_TYPE_STRING]
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_STRING, 0)...)
@@ -120,7 +120,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Method:     special_method_init,
 			Descriptor: meta.constructorFuncDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

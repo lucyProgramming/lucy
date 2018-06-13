@@ -14,9 +14,9 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 			errMsgPrefix(e.Pos)))
 		return nil
 	}
-	notyp := true
+	noType := true
 	if arr.Typ != nil {
-		notyp = false
+		noType = false
 		err := arr.Typ.resolve(block)
 		if err != nil {
 			*errs = append(*errs, err)
@@ -35,7 +35,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 			if t == nil {
 				continue
 			}
-			if notyp && arr.Typ == nil {
+			if noType && arr.Typ == nil {
 				if t.RightValueValid() && t.isTyped() {
 					tt := t.Clone()
 					tt.Pos = e.Pos
@@ -55,7 +55,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 			}
 			if arr.Typ != nil {
 				if arr.Typ.ArrayType.Equal(errs, t) == false {
-					if notyp {
+					if noType {
 						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
 							errMsgPrefix(t.Pos), arr.Typ.ArrayType.TypeString(), t.TypeString()))
 					} else {

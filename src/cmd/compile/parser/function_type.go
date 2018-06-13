@@ -11,7 +11,7 @@ import (
 func (p *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 	t = ast.FunctionType{}
 	if p.token.Type != lex.TOKEN_LP {
-		err = fmt.Errorf("%s fn declared wrong,missing (,but '%s'", p.errorMsgPrefix(), p.token.Desp)
+		err = fmt.Errorf("%s fn declared wrong,missing (,but '%s'", p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return
 	}
@@ -23,7 +23,7 @@ func (p *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		}
 	}
 	if p.token.Type != lex.TOKEN_RP { // not )
-		err = fmt.Errorf("%s fn declared wrong,missing ),but '%s'", p.errorMsgPrefix(), p.token.Desp)
+		err = fmt.Errorf("%s fn declared wrong,missing ),but '%s'", p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return
 	}
@@ -46,7 +46,7 @@ func (p *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 			}
 		}
 		if p.token.Type != lex.TOKEN_RP {
-			err = fmt.Errorf("%s fn declared wrong,expected ')',but '%s'", p.errorMsgPrefix(), p.token.Desp)
+			err = fmt.Errorf("%s fn declared wrong,expected ')',but '%s'", p.errorMsgPrefix(), p.token.Description)
 			p.errs = append(p.errs, err)
 			return
 		}

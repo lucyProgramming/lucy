@@ -113,7 +113,7 @@ func (c *ClassDecoder) parseConstPool() error {
 			p.Info = c.bs[1:9]
 			c.bs = c.bs[9:]
 			c.ret.ConstPool = append(c.ret.ConstPool, p, nil)
-			i++ // incrment twices
+			i++ // increment twice
 		case cg.CONSTANT_POOL_TAG_Class:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]

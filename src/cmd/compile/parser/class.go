@@ -26,7 +26,7 @@ func (c *Class) consume(m map[int]bool) {
 func (c *Class) parseClassName() (string, error) {
 	if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 		err := fmt.Errorf("%s expect class`s name,but '%s'",
-			c.parser.errorMsgPrefix(), c.parser.token.Desp)
+			c.parser.errorMsgPrefix(), c.parser.token.Description)
 		c.parser.errs = append(c.parser.errs, err)
 		return "", err
 	}
@@ -36,7 +36,7 @@ func (c *Class) parseClassName() (string, error) {
 		c.Next()
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err := fmt.Errorf("%s expect identifer,but '%s'", c.parser.errorMsgPrefix(),
-				c.parser.token.Desp)
+				c.parser.token.Description)
 			c.parser.errs = append(c.parser.errs, err)
 		}
 		name += "." + c.parser.token.Data.(string)
@@ -101,7 +101,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s expect '{' but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Desp)
+		err = fmt.Errorf("%s expect '{' but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Description)
 		c.parser.errs = append(c.parser.errs, err)
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (c *Class) parse() (classDefinition *ast.Class, err error) {
 			c.resetProperty()
 		default:
 			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s unexpect '%s'",
-				c.parser.errorMsgPrefix(), c.parser.token.Desp))
+				c.parser.errorMsgPrefix(), c.parser.token.Description))
 			c.Next()
 		}
 	}

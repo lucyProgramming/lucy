@@ -84,7 +84,7 @@ func (m *MakeExpression) getLeftValue(
 		if identifier.Var.IsGlobal {
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Var.Typ
-			className = m.MakeClass.mainclass.Name
+			className = m.MakeClass.mainClass.Name
 			name = identifier.Name
 			descriptor = Descriptor.typeDescriptor(identifier.Var.Typ)
 			return
@@ -186,7 +186,7 @@ func (m *MakeExpression) getLeftValue(
 			code.CodeLength++
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      meta.classname,
+				Class:      meta.className,
 				Field:      "end",
 				Descriptor: "I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -197,7 +197,7 @@ func (m *MakeExpression) getLeftValue(
 			code.CodeLength++
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      meta.classname,
+				Class:      meta.className,
 				Field:      "start",
 				Descriptor: "I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -215,7 +215,7 @@ func (m *MakeExpression) getLeftValue(
 			code.CodeLength++
 			{
 				state.popStack(3)
-				state.pushStack(class, state.newObjectVariableType(meta.classname))
+				state.pushStack(class, state.newObjectVariableType(meta.className))
 				state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 				context.MakeStackMap(code, state, code.CodeLength+6)
 				context.MakeStackMap(code, state, code.CodeLength+16)
@@ -241,7 +241,7 @@ func (m *MakeExpression) getLeftValue(
 			code.Codes[code.CodeLength+16] = cg.OP_swap
 			code.Codes[code.CodeLength+17] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      meta.classname,
+				Class:      meta.className,
 				Field:      "elements",
 				Descriptor: meta.elementsFieldDescriptor,
 			}, code.Codes[code.CodeLength+18:code.CodeLength+20])

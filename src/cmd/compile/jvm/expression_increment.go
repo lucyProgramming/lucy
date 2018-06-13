@@ -8,7 +8,7 @@ import (
 func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ee := e.Data.(*ast.Expression)
-	// identifer  and not captured and type`s int
+	// identifier  and not captured and type`s int
 	if t, ok := ee.Data.(*ast.ExpressionIdentifier); ee.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
 		ok &&
 		t.Var.BeenCaptured == false &&

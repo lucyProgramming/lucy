@@ -16,7 +16,7 @@ const (
 )
 
 type ArrayMeta struct {
-	classname                 string
+	className                 string
 	constructorFuncDescriptor string
 	sliceDescriptor           string
 	appendDescriptor          string
@@ -26,7 +26,7 @@ type ArrayMeta struct {
 
 func init() {
 	ArrayMetas[ast.VARIABLE_TYPE_BOOL] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayBool",
+		className:                 "lucy/deps/ArrayBool",
 		constructorFuncDescriptor: "([Z)V",
 		elementsFieldDescriptor:   "[Z",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayBool;",
@@ -34,7 +34,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayBool;)Llucy/deps/ArrayBool;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_BYTE] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayByte",
+		className:                 "lucy/deps/ArrayByte",
 		constructorFuncDescriptor: "([B)V",
 		elementsFieldDescriptor:   "[B",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayByte;",
@@ -42,7 +42,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayByte;)Llucy/deps/ArrayByte;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_SHORT] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayShort",
+		className:                 "lucy/deps/ArrayShort",
 		constructorFuncDescriptor: "([S)V",
 		elementsFieldDescriptor:   "[S",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayShort;",
@@ -50,7 +50,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayShort;)Llucy/deps/ArrayShort;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_INT] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayInt",
+		className:                 "lucy/deps/ArrayInt",
 		constructorFuncDescriptor: "([I)V",
 		elementsFieldDescriptor:   "[I",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayInt;",
@@ -58,7 +58,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayInt;)Llucy/deps/ArrayInt;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_LONG] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayLong",
+		className:                 "lucy/deps/ArrayLong",
 		constructorFuncDescriptor: "([J)V",
 		elementsFieldDescriptor:   "[J",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayLong;",
@@ -66,7 +66,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayLong;)Llucy/deps/ArrayLong;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_FLOAT] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayFloat",
+		className:                 "lucy/deps/ArrayFloat",
 		constructorFuncDescriptor: "([F)V",
 		elementsFieldDescriptor:   "[F",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayFloat;",
@@ -74,7 +74,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayFloat;)Llucy/deps/ArrayFloat;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_DOUBLE] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayDouble",
+		className:                 "lucy/deps/ArrayDouble",
 		constructorFuncDescriptor: "([D)V",
 		elementsFieldDescriptor:   "[D",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayDouble;",
@@ -82,7 +82,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayDouble;)Llucy/deps/ArrayDouble;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_STRING] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayString",
+		className:                 "lucy/deps/ArrayString",
 		constructorFuncDescriptor: "([Ljava/lang/String;)V",
 		elementsFieldDescriptor:   "[Ljava/lang/String;",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayString;",
@@ -90,7 +90,7 @@ func init() {
 		appendAllDescriptor:       "(Llucy/deps/ArrayString;)Llucy/deps/ArrayString;",
 	}
 	ArrayMetas[ast.VARIABLE_TYPE_OBJECT] = &ArrayMeta{
-		classname:                 "lucy/deps/ArrayObject",
+		className:                 "lucy/deps/ArrayObject",
 		constructorFuncDescriptor: "([Ljava/lang/Object;)V",
 		elementsFieldDescriptor:   "[Ljava/lang/Object;",
 		sliceDescriptor:           "(II)Llucy/deps/ArrayObject;",

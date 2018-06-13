@@ -18,7 +18,7 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 		class.InsertClassConst(assert.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else if assert.Typ.Typ == ast.VARIABLE_TYPE_ARRAY { // arrays
 		meta := ArrayMetas[assert.Typ.ArrayType.Typ]
-		class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
 		class.InsertClassConst(Descriptor.typeDescriptor(assert.Typ), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}

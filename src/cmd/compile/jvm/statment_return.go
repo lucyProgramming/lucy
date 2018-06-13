@@ -199,13 +199,14 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	return
 }
 
-func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context) (maxstack uint16) {
+func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, context *Context) (maxStack uint16) {
 	if context.function.NoReturnValue() { // when has no return,should not call this function
 		return
 	}
 	if len(context.function.Typ.ReturnList) == 1 {
 		m.loadLocalVar(class, code, context.function.Typ.ReturnList[0])
-		maxstack = jvmSize(context.function.Typ.ReturnList[0].Typ)
+		maxStack = jvmSize(context.function.Typ.ReturnList[0].Typ)
 		switch context.function.Typ.ReturnList[0].Typ.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
@@ -243,7 +244,7 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	maxstack = 1 // max stack is
+	maxStack = 1 // max stack is
 	index := int32(0)
 	for _, v := range context.function.Typ.ReturnList {
 		currentStack := uint16(1)
@@ -251,15 +252,15 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 		code.CodeLength++
 		currentStack++
 		m.loadLocalVar(class, code, v)
-		if t := currentStack + jvmSize(v.Typ); t > maxstack {
-			maxstack = t
+		if t := currentStack + jvmSize(v.Typ); t > maxStack {
+			maxStack = t
 		}
 		if v.Typ.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Typ)
 		}
 		loadInt32(class, code, index)
-		if 4 > maxstack {
-			maxstack = 4
+		if 4 > maxStack {
+			maxStack = 4
 		}
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.Codes[code.CodeLength+1] = cg.OP_aastore
@@ -272,7 +273,7 @@ func (m *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel, 
 }
 
 func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, ss *StackMapState,
-	statementReturn *ast.StatementReturn) (maxstack uint16) {
+	statementReturn *ast.StatementReturn) (maxStack uint16) {
 	if len(statementReturn.Defers) == 0 {
 		return
 	}
@@ -321,7 +322,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 			index--
 			continue
 		}
-		//expection that have been handled
+		//exception that have been handled
 		if len(statementReturn.Expressions) > 0 && len(context.function.Typ.ReturnList) > 1 {
 			//load when function have multi returns if read to end
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)

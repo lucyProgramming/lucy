@@ -27,7 +27,7 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      meta.classname,
+		Class:      meta.className,
 		Method:     "slice",
 		Descriptor: meta.sliceDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

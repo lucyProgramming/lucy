@@ -11,8 +11,8 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 			*errs = append(*errs, err)
 		}
 	}
-	var mapk *VariableType
-	var mapv *VariableType
+	var mapK *VariableType
+	var mapV *VariableType
 	noType := m.Typ == nil
 	if noType && len(m.KeyValuePairs) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type",
@@ -29,57 +29,57 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	}
 	for _, v := range m.KeyValuePairs {
 		// map k
-		ktype, es := v.Left.checkSingleValueContextExpression(block)
+		kType, es := v.Left.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		if ktype != nil {
-			rightValueValid := ktype.RightValueValid()
+		if kType != nil {
+			rightValueValid := kType.RightValueValid()
 			if false == rightValueValid {
 				*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
 			}
 			if noType && m.Typ.Map.K == nil {
-				if ktype.isTyped() == false {
+				if kType.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k", errMsgPrefix(v.Left.Pos)))
 				} else {
-					m.Typ.Map.K = ktype
-					mapk = m.Typ.Map.K
+					m.Typ.Map.K = kType
+					mapK = m.Typ.Map.K
 				}
 			}
-			if rightValueValid && mapk != nil {
-				if mapk.Equal(errs, ktype) == false {
+			if rightValueValid && mapK != nil {
+				if mapK.Equal(errs, kType) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(v.Left.Pos),
-						ktype.TypeString(), mapk.TypeString()))
+						kType.TypeString(), mapK.TypeString()))
 				}
 			}
 		}
 		// map v
-		vtype, es := v.Right.checkSingleValueContextExpression(block)
+		vType, es := v.Right.checkSingleValueContextExpression(block)
 		if errsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		if vtype == nil {
+		if vType == nil {
 			continue
 		}
-		if false == ktype.RightValueValid() {
+		if false == kType.RightValueValid() {
 			*errs = append(*errs, fmt.Errorf("%s k is not right value valid",
 				errMsgPrefix(v.Left.Pos)))
 			continue
 		}
 		if noType && m.Typ.Map.V == nil {
-			if vtype.isTyped() == false {
+			if vType.isTyped() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
 					errMsgPrefix(v.Left.Pos)))
 			} else {
-				m.Typ.Map.V = vtype
-				mapv = m.Typ.Map.V
+				m.Typ.Map.V = vType
+				mapV = m.Typ.Map.V
 			}
 		}
-		if mapv != nil {
-			if mapv.Equal(errs, vtype) == false {
+		if mapV != nil {
+			if mapV.Equal(errs, vType) == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(v.Right.Pos),
-					vtype.TypeString(), mapv.TypeString()))
+					vType.TypeString(), mapV.TypeString()))
 			}
 		}
 	}

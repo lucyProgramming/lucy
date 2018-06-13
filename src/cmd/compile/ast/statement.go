@@ -33,7 +33,7 @@ type Statement struct {
 	StatementBreak    *StatementBreak
 	Block             *Block
 	StatementContinue *StatementContinue
-	StatmentLable     *StatementLabel
+	StatementLabel    *StatementLabel
 	StatementGoto     *StatementGoto
 	Defer             *Defer
 	Class             *Class
@@ -42,7 +42,7 @@ type Statement struct {
 		this.super()
 		special case
 	*/
-	IsCallFatherContructionStatement bool
+	IsCallFatherConstructionStatement bool
 }
 
 func (s *Statement) StatementName() string {
@@ -60,7 +60,7 @@ func (s *Statement) StatementName() string {
 	case STATEMENT_TYPE_SWITCH:
 		return "switch statement"
 	case STATEMENT_TYPE_LABLE:
-		return "lable statement"
+		return "label statement"
 	case STATEMENT_TYPE_GOTO:
 		return "goto statement"
 	case STATEMENT_TYPE_DEFER:

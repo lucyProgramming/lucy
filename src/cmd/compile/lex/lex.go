@@ -7,7 +7,7 @@ import (
 
 type LucyLexer struct {
 	bs                   []byte
-	lastline, lastcolumn int
+	lastLine, lastColumn int
 	line, column         int
 	offset, end          int
 }
@@ -20,7 +20,7 @@ func (lex *LucyLexer) GetOffSet() int {
 	return lex.offset
 }
 
-func (lex *LucyLexer) getchar() (c byte, eof bool) {
+func (lex *LucyLexer) getChar() (c byte, eof bool) {
 	if lex.offset == lex.end {
 		eof = true
 		return
@@ -28,8 +28,8 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 	offset := lex.offset
 	lex.offset++
 	c = lex.bs[offset]
-	lex.lastline = lex.line
-	lex.lastcolumn = lex.column
+	lex.lastLine = lex.line
+	lex.lastColumn = lex.column
 	if c == '\n' {
 		lex.line++
 		lex.column = 1
@@ -44,9 +44,9 @@ func (lex *LucyLexer) getchar() (c byte, eof bool) {
 
 }
 
-func (lex *LucyLexer) ungetchar() {
+func (lex *LucyLexer) unGetChar() {
 	lex.offset--
-	lex.line, lex.column = lex.lastline, lex.lastcolumn
+	lex.line, lex.column = lex.lastLine, lex.lastColumn
 }
 
 func (lex *LucyLexer) isLetter(c byte) bool {
@@ -65,7 +65,7 @@ func (lex *LucyLexer) isHex(c byte) bool {
 		('A' <= c && c <= 'F')
 }
 
-func (lex *LucyLexer) hexbyte2Byte(c byte) byte {
+func (lex *LucyLexer) hexByte2Byte(c byte) byte {
 	if 'a' <= c && c <= 'f' {
 		return c - 'a' + 10
 	}
@@ -86,29 +86,29 @@ func (lex *LucyLexer) parseInt(bs []byte) int64 {
 	}
 	var result int64 = 0
 	for _, v := range bs {
-		result = result*base + int64(lex.hexbyte2Byte(v))
+		result = result*base + int64(lex.hexByte2Byte(v))
 	}
 	return result
 }
 
 func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
-	integerpart := []byte{c}
-	ishex := false
+	integerPart := []byte{c}
+	isHex := false
 	isOctal := false
 	if c == '0' { // enter when first char is '0'
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == 'x' || c == 'X' {
-			ishex = true
-			integerpart = append(integerpart, 'X')
+			isHex = true
+			integerPart = append(integerPart, 'X')
 		} else {
 			isOctal = true
-			lex.ungetchar()
+			lex.unGetChar()
 		}
 	}
-	c, eof = lex.getchar() //get next char
+	c, eof = lex.getChar() //get next char
 	for eof == false {
 		ok := false
-		if ishex {
+		if isHex {
 			ok = lex.isHex(c)
 		} else if isOctal {
 			if lex.isDigit(c) == true && lex.isOctal(c) == false { // integer but not octal
@@ -119,95 +119,95 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			ok = lex.isDigit(c)
 		}
 		if ok {
-			integerpart = append(integerpart, c)
-			c, eof = lex.getchar() // get next char
+			integerPart = append(integerPart, c)
+			c, eof = lex.getChar() // get next char
 		} else { // something that I cannot handle
-			lex.ungetchar()
+			lex.unGetChar()
 			break
 		}
 	}
-	c, eof = lex.getchar()
-	floatpart := []byte{}
-	isfloat := false // float or double
+	c, eof = lex.getChar()
+	floatPart := []byte{}
+	isFloat := false // float or double
 	if c == '.' {    // float numbers
-		isfloat = true
-		c, eof = lex.getchar()
+		isFloat = true
+		c, eof = lex.getChar()
 		for eof == false {
 			if lex.isDigit(c) {
-				floatpart = append(floatpart, c)
-				c, eof = lex.getchar()
+				floatPart = append(floatPart, c)
+				c, eof = lex.getChar()
 			} else {
-				lex.ungetchar()
+				lex.unGetChar()
 				break
 			}
 		}
 	} else {
-		lex.ungetchar()
+		lex.unGetChar()
 	}
-	if ishex && isfloat {
+	if isHex && isFloat {
 		token.Type = TOKEN_LITERAL_INT
 		token.Data = 0
 
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
-	isdouble := false
-	islong := false
+	isDouble := false
+	isLong := false
 	isShort := false
 	isByte := false
-	c, eof = lex.getchar()
+	c, eof = lex.getChar()
 	if c == 'l' || c == 'L' {
-		islong = true
+		isLong = true
 	} else if c == 'f' || c == 'F' {
-		isfloat = true
+		isFloat = true
 	} else if c == 's' || c == 'S' {
 		isShort = true
 	} else if c == 'd' || c == 'D' {
-		isdouble = true
+		isDouble = true
 	} else if c == 'b' || c == 'B' {
 		isByte = true
 	} else {
-		lex.ungetchar()
+		lex.unGetChar()
 	}
 	isScientificNotation := false
 	power := []byte{}
 	powerPositive := true
-	c, eof = lex.getchar()
+	c, eof = lex.getChar()
 	if (c == 'e' || c == 'E') && eof == false {
 		isScientificNotation = true
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if eof {
 			err = fmt.Errorf("unexpect EOF")
 		}
 		if c == '-' {
 			powerPositive = false
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		} else if lex.isDigit(c) { // nothing to do
 
 		} else if c == '+' { // default is true
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		} else {
 			err = fmt.Errorf("wrong format scientific notation")
 		}
 		if lex.isDigit(c) == false {
-			lex.ungetchar() //
+			lex.unGetChar() //
 			err = fmt.Errorf("wrong format scientific notation")
 		} else {
 			power = append(power, c)
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 			for eof == false && lex.isDigit(c) {
 				power = append(power, c)
-				c, eof = lex.getchar()
+				c, eof = lex.getChar()
 			}
-			lex.ungetchar()
+			lex.unGetChar()
 		}
 	} else {
-		lex.ungetchar()
+		lex.unGetChar()
 	}
-	if ishex && isScientificNotation {
+	if isHex && isScientificNotation {
 		token.Type = TOKEN_LITERAL_INT
 		token.Data = 0
-		token.Desp = "0"
+		token.Description = "0"
 		err = fmt.Errorf("mix up hex and seientific notation")
 		return
 	}
@@ -218,7 +218,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		index := len(bs) - 1
 		var fp float64
 		for index >= 0 {
-			fp = fp*0.1 + (float64(lex.hexbyte2Byte(bs[index])) / 10.0)
+			fp = fp*0.1 + (float64(lex.hexByte2Byte(bs[index])) / 10.0)
 			index--
 		}
 		return fp
@@ -226,9 +226,9 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	if isScientificNotation == false {
-		if isfloat {
-			value := parseFloat(floatpart) + float64(lex.parseInt(integerpart))
-			if isdouble {
+		if isFloat {
+			value := parseFloat(floatPart) + float64(lex.parseInt(integerPart))
+			if isDouble {
 				token.Type = TOKEN_LITERAL_DOUBLE
 				token.Data = value
 			} else {
@@ -236,8 +236,8 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 				token.Data = float32(value)
 			}
 		} else {
-			value := lex.parseInt(integerpart)
-			if islong {
+			value := lex.parseInt(integerPart)
+			if isLong {
 				token.Type = TOKEN_LITERAL_LONG
 				token.Data = value
 			} else if isByte {
@@ -260,7 +260,7 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		return
 	}
 	//scientific notation
-	if t := lex.parseInt(integerpart); t > 10 || t < 1 {
+	if t := lex.parseInt(integerPart); t > 10 || t < 1 {
 		err = fmt.Errorf("wrong format scientific notation")
 		token.Type = TOKEN_LITERAL_INT
 		token.Data = 0
@@ -268,30 +268,30 @@ func (lex *LucyLexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	p := int(lex.parseInt(power))
 	if powerPositive {
-		if p >= len(floatpart) { // int
-			integerpart = append(integerpart, floatpart...)
-			b := make([]byte, p-len(floatpart))
+		if p >= len(floatPart) { // int
+			integerPart = append(integerPart, floatPart...)
+			b := make([]byte, p-len(floatPart))
 			for k, _ := range b {
 				b[k] = '0'
 			}
-			integerpart = append(integerpart, b...)
-			value := lex.parseInt(integerpart)
+			integerPart = append(integerPart, b...)
+			value := lex.parseInt(integerPart)
 			token.Type = TOKEN_LITERAL_INT
 			token.Data = int32(value)
 		} else { // float
-			integerpart = append(integerpart, floatpart[0:p]...)
-			fmt.Println(floatpart[p:], parseFloat(floatpart[p:]))
-			value := float64(lex.parseInt(integerpart)) + parseFloat(floatpart[p:])
+			integerPart = append(integerPart, floatPart[0:p]...)
+			fmt.Println(floatPart[p:], parseFloat(floatPart[p:]))
+			value := float64(lex.parseInt(integerPart)) + parseFloat(floatPart[p:])
 			token.Type = TOKEN_LITERAL_FLOAT
 			token.Data = value
 		}
 	} else { // power is negative,must be float number
-		b := make([]byte, p-len(integerpart))
+		b := make([]byte, p-len(integerPart))
 		for k, _ := range b {
 			b[k] = '0'
 		}
-		b = append(b, integerpart...)
-		b = append(b, floatpart...)
+		b = append(b, integerPart...)
+		b = append(b, floatPart...)
 		value := parseFloat(b)
 		token.Type = TOKEN_LITERAL_FLOAT
 		token.Data = value
@@ -320,13 +320,13 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	token.StartColumn = lex.column - 1 // c is readed
 	bs := []byte{c}
 	token.Offset = lex.offset - 1 // readed
-	c, eof := lex.getchar()
+	c, eof := lex.getChar()
 	for eof == false {
 		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {
 			bs = append(bs, c)
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			break
 		}
 	}
@@ -335,23 +335,23 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 	identifier := string(bs)
 	if t, ok := keywordMap[identifier]; ok {
 		token.Type = t
-		token.Desp = identifier
+		token.Description = identifier
 		if token.Type == TOKEN_ELSE {
 			is := lex.tryLexElseIf()
 			if is {
 				token.Type = TOKEN_ELSEIF
-				token.Desp = "else if"
+				token.Description = "else if"
 			}
 		}
 	} else {
 		if lex.looksLikeT(bs) {
 			token.Type = TOKEN_T
 			token.Data = identifier
-			token.Desp = identifier
+			token.Description = identifier
 		} else {
 			token.Type = TOKEN_IDENTIFIER
 			token.Data = identifier
-			token.Desp = "identifer_" + identifier
+			token.Description = "identifier_" + identifier
 		}
 	}
 	token.EndLine = lex.line
@@ -360,49 +360,49 @@ func (lex *LucyLexer) lexIdentifier(c byte) (token *Token, err error) {
 }
 
 func (lex *LucyLexer) tryLexElseIf() (is bool) {
-	c, eof := lex.getchar()
+	c, eof := lex.getChar()
 	for (c == ' ' || c == '\t' || c == '\r') && eof == false {
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 	}
 	if eof {
 		return
 	}
 	if c != 'i' {
-		lex.ungetchar()
+		lex.unGetChar()
 		return
 	}
-	c, eof = lex.getchar()
+	c, eof = lex.getChar()
 	if c != 'f' {
-		lex.ungetchar()
-		lex.ungetchar()
+		lex.unGetChar()
+		lex.unGetChar()
 		return
 	}
-	c, eof = lex.getchar()
+	c, eof = lex.getChar()
 	if c != ' ' && c != '\t' && c != '\r' { // white list
-		lex.ungetchar()
-		lex.ungetchar()
-		lex.ungetchar()
+		lex.unGetChar()
+		lex.unGetChar()
+		lex.unGetChar()
 		return
 	}
 	is = true
 	return
 }
 
-func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
+func (lex *LucyLexer) lexString(endChar byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column
 	token.Type = TOKEN_LITERAL_STRING
 	bs := []byte{}
 	var c byte
-	c, eof := lex.getchar()
-	for c != endc && c != '\n' && eof == false {
+	c, eof := lex.getChar()
+	for c != endChar && c != '\n' && eof == false {
 		if c != '\\' {
 			bs = append(bs, c)
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 			continue
 		}
-		c, eof = lex.getchar() // get next char
+		c, eof = lex.getChar() // get next char
 		if eof {
 			err = fmt.Errorf("unexpected EOF")
 			break
@@ -410,37 +410,37 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
 		switch c {
 		case 'a':
 			bs = append(bs, '\a')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 'b':
 			bs = append(bs, '\b')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 'f':
 			bs = append(bs, '\f')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 'n':
 			bs = append(bs, '\n')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 'r':
 			bs = append(bs, '\r')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 't':
 			bs = append(bs, '\t')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 'v':
 			bs = append(bs, '\v')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case '\\':
 			bs = append(bs, '\\')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case '\'':
 			bs = append(bs, '\'')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case '"':
 			bs = append(bs, '"')
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case 'x':
 			var c1, c2 byte
-			c1, eof = lex.getchar() //skip 'x'
+			c1, eof = lex.getChar() //skip 'x'
 			if eof {
 				err = fmt.Errorf("unexpect EOF")
 				continue
@@ -449,19 +449,19 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
 				err = fmt.Errorf("unknown escape sequence")
 				continue
 			}
-			b := lex.hexbyte2Byte(c1)
-			c2, eof = lex.getchar()
+			b := lex.hexByte2Byte(c1)
+			c2, eof = lex.getChar()
 			if lex.isHex(c2) {
-				if t := b*16 + lex.hexbyte2Byte(c2); t < 127 { // only support standard ascii
+				if t := b*16 + lex.hexByte2Byte(c2); t < 127 { // only support standard ascii
 					b = t
 				} else {
-					lex.ungetchar()
+					lex.unGetChar()
 				}
 			} else { //not hex
-				lex.ungetchar()
+				lex.unGetChar()
 			}
 			bs = append(bs, b)
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		case '0', '1', '2', '3', '4', '5', '7':
 			// first char must be octal
 			b := byte(0)
@@ -470,19 +470,19 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
 					break
 				}
 				if lex.isOctal(c) == false {
-					lex.ungetchar()
+					lex.unGetChar()
 					break
 				}
-				if t := b*8 + lex.hexbyte2Byte(c); t > 127 { // only support standard ascii
-					lex.ungetchar()
+				if t := b*8 + lex.hexByte2Byte(c); t > 127 { // only support standard ascii
+					lex.unGetChar()
 					break
 				} else {
 					b = t
 				}
-				c, eof = lex.getchar()
+				c, eof = lex.getChar()
 			}
 			bs = append(bs, b)
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		default:
 			err = fmt.Errorf("unknown escape sequence")
 		}
@@ -493,23 +493,23 @@ func (lex *LucyLexer) lexString(endc byte) (token *Token, err error) {
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	token.Data = string(bs)
-	token.Desp = string(bs)
+	token.Description = string(bs)
 	return
 }
 
 func (lex *LucyLexer) lexMultiLineComment() {
 redo:
-	c, eof := lex.getchar()
+	c, eof := lex.getChar()
 	if eof {
 		return
 	}
 	for c != '*' && eof == false {
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 	}
 	if eof {
 		return
 	}
-	c, eof = lex.getchar()
+	c, eof = lex.getChar()
 	if eof || c == '/' {
 		return
 	}
@@ -522,20 +522,20 @@ redo:
 	var c byte
 	token.StartLine = lex.line
 	token.StartColumn = lex.column
-	c, eof := lex.getchar()
+	c, eof := lex.getChar()
 	if eof {
 		token.Type = TOKEN_EOF
-		token.Desp = "EOF"
+		token.Description = "EOF"
 		return
 	}
 	for c == ' ' || c == '\t' || c == '\r' {
 		token.StartLine = lex.line
 		token.StartColumn = lex.column
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 	}
 	if eof {
 		token.Type = TOKEN_EOF
-		token.Desp = "EOF"
+		token.Description = "EOF"
 		return
 	}
 	if lex.isLetter(c) || c == '_' || c == '$' {
@@ -549,213 +549,213 @@ redo:
 	switch c {
 	case '?':
 		token.Type = TOKEN_QUESTION
-		token.Desp = "?"
+		token.Description = "?"
 	case '(':
 		token.Type = TOKEN_LP
-		token.Desp = "("
+		token.Description = "("
 	case ')':
 		token.Type = TOKEN_RP
-		token.Desp = ")"
+		token.Description = ")"
 	case '{':
 		token.Type = TOKEN_LC
-		token.Desp = "{"
+		token.Description = "{"
 	case '}':
 		token.Type = TOKEN_RC
-		token.Desp = "}"
+		token.Description = "}"
 	case '[':
 		token.Type = TOKEN_LB
-		token.Desp = "["
+		token.Description = "["
 	case ']':
 		token.Type = TOKEN_RB
-		token.Desp = "]"
+		token.Description = "]"
 	case ';':
 		token.Type = TOKEN_SEMICOLON
-		token.Desp = ";"
+		token.Description = ";"
 	case ',':
 		token.Type = TOKEN_COMMA
-		token.Desp = ","
+		token.Description = ","
 	case '&':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '&' {
 			token.Type = TOKEN_LOGICAL_AND
-			token.Desp = "&&"
+			token.Description = "&&"
 		} else if c == '=' {
 			token.Type = TOKEN_AND_ASSIGN
-			token.Desp = "&="
+			token.Description = "&="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_AND
-			token.Desp = "&"
+			token.Description = "&"
 		}
 	case '|':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '|' {
 			token.Type = TOKEN_LOGICAL_OR
-			token.Desp = "||"
+			token.Description = "||"
 		} else if c == '=' {
 			token.Type = TOKEN_OR_ASSIGN
-			token.Desp = "|="
+			token.Description = "|="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_OR
-			token.Desp = "|"
+			token.Description = "|"
 		}
 	case '=':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_EQUAL
-			token.Desp = "=="
+			token.Description = "=="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_ASSIGN
-			token.Desp = "="
+			token.Description = "="
 		}
 	case '!':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_NE
-			token.Desp = "!="
+			token.Description = "!="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_NOT
-			token.Desp = "!"
+			token.Description = "!"
 		}
 	case '>':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_GE
-			token.Desp = ">="
+			token.Description = ">="
 		} else if c == '>' {
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 			if c == '=' {
 				token.Type = TOKEN_RSH_ASSIGN
-				token.Desp = ">>="
+				token.Description = ">>="
 			} else {
-				lex.ungetchar()
+				lex.unGetChar()
 				token.Type = TOKEN_RIGHT_SHIFT
-				token.Desp = ">>"
+				token.Description = ">>"
 			}
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_GT
-			token.Desp = ">"
+			token.Description = ">"
 		}
 	case '<':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_LE
-			token.Desp = "<="
+			token.Description = "<="
 		} else if c == '<' {
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 			if c == '=' {
 				token.Type = TOKEN_LSH_ASSIGN
-				token.Desp = "<<="
+				token.Description = "<<="
 			} else {
-				lex.ungetchar()
+				lex.unGetChar()
 				token.Type = TOKEN_LEFT_SHIFT
-				token.Desp = "<<"
+				token.Description = "<<"
 			}
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_LT
-			token.Desp = "<"
+			token.Description = "<"
 		}
 	case '^':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_XOR_ASSIGN
-			token.Desp = "^="
+			token.Description = "^="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_XOR
-			token.Desp = "^"
+			token.Description = "^"
 		}
 	case '~':
 		token.Type = TOKEN_BITWISE_NOT
-		token.Desp = "~"
+		token.Description = "~"
 	case '+':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '+' {
 			token.Type = TOKEN_INCREMENT
-			token.Desp = "++"
+			token.Description = "++"
 		} else if c == '=' {
 			token.Type = TOKEN_ADD_ASSIGN
-			token.Desp = "+="
+			token.Description = "+="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_ADD
-			token.Desp = "+"
+			token.Description = "+"
 		}
 	case '-':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '-' {
 			token.Type = TOKEN_DECREMENT
-			token.Desp = "--"
+			token.Description = "--"
 		} else if c == '=' {
 			token.Type = TOKEN_SUB_ASSIGN
-			token.Desp = "-="
+			token.Description = "-="
 		} else if c == '>' {
 			token.Type = TOKEN_ARROW
-			token.Desp = "->"
+			token.Description = "->"
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_SUB
-			token.Desp = "-"
+			token.Description = "-"
 		}
 	case '*':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_MUL_ASSIGN
-			token.Desp = "*="
+			token.Description = "*="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_MUL
-			token.Desp = "*"
+			token.Description = "*"
 		}
 	case '%':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_MOD_ASSIGN
-			token.Desp = "%="
+			token.Description = "%="
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_MOD
-			token.Desp = "%"
+			token.Description = "%"
 		}
 	case '/':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_DIV_ASSIGN
-			token.Desp = "/="
+			token.Description = "/="
 		} else if c == '/' {
 			for c != '\n' && eof == false {
-				c, eof = lex.getchar()
+				c, eof = lex.getChar()
 			}
 			goto redo
 		} else if c == '*' {
 			lex.lexMultiLineComment()
 			goto redo
 		} else {
-			lex.ungetchar()
+			lex.unGetChar()
 			token.Type = TOKEN_DIV
-			token.Desp = "/"
+			token.Description = "/"
 		}
 	case '\n':
 		token.Type = TOKEN_CRLF
-		token.Desp = "\n"
+		token.Description = "\n"
 	case '.':
 		token.Type = TOKEN_DOT
-		token.Desp = "."
+		token.Description = "."
 	case '`':
 		bs := []byte{}
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		for c != '`' && eof == false {
 			bs = append(bs, c)
-			c, eof = lex.getchar()
+			c, eof = lex.getChar()
 		}
 		token.Type = TOKEN_LITERAL_STRING
 		token.Data = string(bs)
-		token.Desp = string(bs)
+		token.Description = string(bs)
 	case '"':
 		return lex.lexString('"')
 	case '\'':
@@ -770,14 +770,14 @@ redo:
 		}
 		return
 	case ':':
-		c, eof = lex.getchar()
+		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TOKEN_COLON_ASSIGN
-			token.Desp = ":= "
+			token.Description = ":= "
 		} else {
 			token.Type = TOKEN_COLON
-			token.Desp = ":"
-			lex.ungetchar()
+			token.Description = ":"
+			lex.unGetChar()
 		}
 
 	default:

@@ -13,7 +13,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s expect 'identifier', but '%s'",
-			p.errorMsgPrefix(), p.token.Desp)
+			p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	p.Next() // skip enum name
 	if p.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			p.errorMsgPrefix(), p.token.Desp)
+			p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 	//first name
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s expect 'identifier',but '%s'",
-			p.errorMsgPrefix(), p.token.Desp)
+			p.errorMsgPrefix(), p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		names = append(names, ns...)
 	}
 	if p.token.Type != lex.TOKEN_RC {
-		err = fmt.Errorf("%s expect '}',but '%s'", p.token.Desp, p.token.Desp)
+		err = fmt.Errorf("%s expect '}',but '%s'", p.token.Description, p.token.Description)
 		p.errs = append(p.errs, err)
 		return nil, err
 	}

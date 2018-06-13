@@ -80,7 +80,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 		}}
 		e.Value = Types[0]
 	case EXPRESSION_TYPE_IDENTIFIER:
-		tt, err := e.checkIdentiferExpression(block)
+		tt, err := e.checkIdentifierExpression(block)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -304,10 +304,10 @@ func (e *Expression) mustBeOneValueContext(ts []*VariableType) (*VariableType, e
 	return ts[0], err
 }
 
-func (e *Expression) checkBuildinFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
-	callargsTypes := checkRightValuesValid(checkExpressions(block, args, errs), errs)
+func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Function, args []*Expression) []*VariableType {
+	callArgsTypes := checkRightValuesValid(checkExpressions(block, args, errs), errs)
 	length := len(*errs)
-	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callargsTypes, e.Pos)
+	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
 		return f.Typ.retTypes(e.Pos)

@@ -10,7 +10,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	vs := e.Data.(*ExpressionDeclareVariable)
 	noErr := true
 	var err error
-	vs.IfDeclareBefor = make([]bool, len(vs.Variables)) // all create this time
+	vs.IfDeclareBefore = make([]bool, len(vs.Variables)) // all create this time
 	if vs.Values != nil && len(vs.Values) > 0 {
 		valueTypes := checkRightValuesValid(checkExpressions(block, vs.Values, errs), errs)
 		if len(valueTypes) != len(vs.Variables) {

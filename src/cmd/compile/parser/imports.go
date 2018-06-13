@@ -17,7 +17,7 @@ func (p *Parser) parseImports() {
 	if p.token.Type != lex.TOKEN_LITERAL_STRING {
 		p.consume(untils_semicolon)
 		p.errs = append(p.errs, fmt.Errorf("%s expect 'string_literal' after import,but '%s'",
-			p.errorMsgPrefix(), p.token.Desp))
+			p.errorMsgPrefix(), p.token.Description))
 		p.parseImports()
 		return
 	}
@@ -30,7 +30,7 @@ func (p *Parser) parseImports() {
 		p.Next() // skip as
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			p.errs = append(p.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
-				p.errorMsgPrefix(), p.token.Desp))
+				p.errorMsgPrefix(), p.token.Description))
 			p.consume(untils_semicolon)
 			p.Next()
 			p.insertImports(i)
@@ -43,7 +43,7 @@ func (p *Parser) parseImports() {
 	}
 	if p.token.Type != lex.TOKEN_SEMICOLON {
 		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon, but '%s'",
-			p.errorMsgPrefix(), p.token.Desp))
+			p.errorMsgPrefix(), p.token.Description))
 		p.consume(untils_semicolon)
 		p.consume(untils_semicolon)
 		p.Next()

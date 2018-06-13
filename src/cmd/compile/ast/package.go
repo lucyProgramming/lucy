@@ -224,7 +224,7 @@ func (i *Import) GetAccessName() (string, error) {
 type RedeclareError struct {
 	Name      string
 	Positions []*Pos
-	Types     []string //varialbe or function
+	Types     []string
 }
 
 func (r *RedeclareError) Error() error {

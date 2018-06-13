@@ -50,7 +50,7 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 	}
 	if b.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			b.parser.errorMsgPrefix(), b.parser.token.Desp)
+			b.parser.errorMsgPrefix(), b.parser.token.Description)
 		b.parser.errs = append(b.parser.errs, err)
 		return
 	}

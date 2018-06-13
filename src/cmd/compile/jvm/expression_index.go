@@ -111,7 +111,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Field:      "end",
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -122,7 +122,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Field:      "start",
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -167,7 +167,7 @@ func (m *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.Attribute
 		code.Codes[code.CodeLength+16] = cg.OP_swap
 		code.Codes[code.CodeLength+17] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.classname,
+			Class:      meta.className,
 			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,
 		}, code.Codes[code.CodeLength+18:code.CodeLength+20])

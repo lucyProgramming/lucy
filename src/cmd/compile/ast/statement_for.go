@@ -7,7 +7,7 @@ import (
 )
 
 type StatementFor struct {
-	RangeAttr        *StatmentForRangeAttr
+	RangeAttr        *StatementForRangeAttr
 	Exits            []*cg.Exit
 	ContinueOPOffset int
 	Pos              *Pos
@@ -17,7 +17,7 @@ type StatementFor struct {
 	Block            *Block
 }
 
-type StatmentForRangeAttr struct {
+type StatementForRangeAttr struct {
 	IdentifierK *ExpressionIdentifier
 	IdentifierV *ExpressionIdentifier
 	ExpressionK *Expression
@@ -66,13 +66,13 @@ func (s *StatementFor) checkRange() []error {
 			errMsgPrefix(lefts[2].Pos)))
 		lefts = lefts[:2]
 	}
-	modelkv := false
+	modelKv := false
 	if len(lefts) == 2 {
-		modelkv = true
+		modelKv = true
 	}
-	s.RangeAttr = &StatmentForRangeAttr{}
+	s.RangeAttr = &StatementForRangeAttr{}
 	if s.Condition.Typ == EXPRESSION_TYPE_ASSIGN {
-		if modelkv {
+		if modelKv {
 			if false == lefts[0].IsNoNameIdentifier() {
 				s.RangeAttr.ExpressionK = lefts[0]
 			}
@@ -88,7 +88,7 @@ func (s *StatementFor) checkRange() []error {
 	s.RangeAttr.RangeOn = rangeExpression
 	var err error
 	if s.Condition.Typ == EXPRESSION_TYPE_COLON_ASSIGN {
-		if modelkv {
+		if modelKv {
 			if lefts[0].Typ != EXPRESSION_TYPE_IDENTIFIER {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
@@ -108,15 +108,15 @@ func (s *StatementFor) checkRange() []error {
 		}
 		var identifierK *ExpressionIdentifier
 		var identifierV *ExpressionIdentifier
-		var posk, posv *Pos
-		if modelkv {
+		var posK, posV *Pos
+		if modelKv {
 			identifierK = lefts[0].Data.(*ExpressionIdentifier)
 			identifierV = lefts[1].Data.(*ExpressionIdentifier)
-			posk = lefts[0].Pos
-			posv = lefts[1].Pos
+			posK = lefts[0].Pos
+			posV = lefts[1].Pos
 		} else {
 			identifierV = lefts[0].Data.(*ExpressionIdentifier)
-			posv = lefts[0].Pos
+			posV = lefts[0].Pos
 		}
 
 		if identifierV.Name != NO_NAME_IDENTIFIER {
@@ -126,7 +126,7 @@ func (s *StatementFor) checkRange() []error {
 			} else {
 				vd.Typ = rangeOn.Map.V.Clone()
 			}
-			vd.Pos = posv
+			vd.Pos = posV
 			vd.Name = identifierV.Name
 			err = s.Block.insert(identifierV.Name, s.Condition.Pos, vd)
 			if err != nil {
@@ -135,7 +135,7 @@ func (s *StatementFor) checkRange() []error {
 			identifierV.Var = vd
 			s.RangeAttr.IdentifierV = identifierV
 		}
-		if modelkv && identifierK.Name != NO_NAME_IDENTIFIER {
+		if modelKv && identifierK.Name != NO_NAME_IDENTIFIER {
 			vd := &VariableDefinition{}
 			var vt *VariableType
 			if rangeOn.Typ == VARIABLE_TYPE_ARRAY ||
@@ -148,8 +148,8 @@ func (s *StatementFor) checkRange() []error {
 			}
 			vd.Name = identifierK.Name
 			vd.Typ = vt
-			vd.Pos = posk
-			err = s.Block.insert(identifierK.Name, posk, vd)
+			vd.Pos = posK
+			err = s.Block.insert(identifierK.Name, posK, vd)
 			if err != nil {
 				errs = append(errs, err)
 			}

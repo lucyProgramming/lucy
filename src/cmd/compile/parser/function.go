@@ -33,7 +33,7 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	if needName {
 		if p.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err := fmt.Errorf("%s expect function name,but '%s'",
-				p.parser.errorMsgPrefix(), p.parser.token.Desp)
+				p.parser.errorMsgPrefix(), p.parser.token.Description)
 			p.parser.errs = append(p.parser.errs, err)
 			if p.parser.token.Type != lex.TOKEN_LC {
 				return nil, err
@@ -49,7 +49,7 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 		p.consume(untils_lc)
 	}
 	if p.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s except '{' but '%s'", p.parser.errorMsgPrefix(), p.parser.token.Desp)
+		err = fmt.Errorf("%s except '{' but '%s'", p.parser.errorMsgPrefix(), p.parser.token.Description)
 		p.parser.errs = append(p.parser.errs, err)
 		p.consume(untils_lc)
 	}
