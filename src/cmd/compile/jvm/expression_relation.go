@@ -8,18 +8,18 @@ import (
 )
 
 func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	if bin.Left.Value.IsNumber() { // in this case ,right must be a number type
-		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		maxStack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := jvmSize(bin.Left.Value) + stack; t > maxstack {
-			maxstack = t
+		if t := jvmSize(bin.Left.Value) + stack; t > maxStack {
+			maxStack = t
 		}
 		switch bin.Left.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -85,7 +85,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_BOOL ||
 		bin.Right.Value.Typ == ast.VARIABLE_TYPE_BOOL { // bool type
 		var es []*cg.Exit
-		maxstack, es = m.build(class, code, bin.Left, context, state)
+		maxStack, es = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -97,8 +97,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			context.MakeStackMap(code, state, code.CodeLength)
 			backfillExit(es, code.CodeLength)
 		}
-		if t := jvmSize(bin.Left.Value) + stack; t > maxstack {
-			maxstack = t
+		if t := jvmSize(bin.Left.Value) + stack; t > maxStack {
+			maxStack = t
 		}
 		state.popStack(2) // 2 bool value
 		context.MakeStackMap(code, state, code.CodeLength+7)
@@ -127,7 +127,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 		} else {
 			notNullExpression = bin.Right
 		}
-		maxstack, _ = m.build(class, code, notNullExpression, context, state)
+		maxStack, _ = m.build(class, code, notNullExpression, context, state)
 		if e.Typ == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 		} else { // ne
@@ -150,7 +150,7 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	//string compare
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_STRING ||
 		bin.Right.Value.Typ == ast.VARIABLE_TYPE_STRING {
-		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		maxStack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -160,8 +160,8 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 			Descriptor: "(Ljava/lang/String;)I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := 1 + stack; t > maxstack {
-			maxstack = t
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
 		}
 		state.popStack(1) // pop left string
 		context.MakeStackMap(code, state, code.CodeLength+7)
@@ -211,13 +211,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 
 	if bin.Left.Value.IsPointer() && bin.Right.Value.IsPointer() { //
 		stack, _ := m.build(class, code, bin.Left, context, state)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 		state.pushStack(class, bin.Left.Value)
 		stack, _ = m.build(class, code, bin.Right, context, state)
-		if t := stack + 1; t > maxstack {
-			maxstack = t
+		if t := stack + 1; t > maxStack {
+			maxStack = t
 		}
 		state.popStack(1) // pop bin left
 		context.MakeStackMap(code, state, code.CodeLength+7)
@@ -242,13 +242,13 @@ func (m *MakeExpression) buildRelations(class *cg.ClassHighLevel, code *cg.Attri
 	// enum
 	if bin.Left.Value.Typ == ast.VARIABLE_TYPE_ENUM {
 		stack, _ := m.build(class, code, bin.Left, context, state)
-		if stack > maxstack {
-			maxstack = stack
+		if stack > maxStack {
+			maxStack = stack
 		}
 		state.pushStack(class, bin.Left.Value)
 		stack, _ = m.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
-			maxstack = t
+		if t := stack + jvmSize(bin.Left.Value); t > maxStack {
+			maxStack = t
 		}
 		state.popStack(1) //
 		context.MakeStackMap(code, state, code.CodeLength+7)

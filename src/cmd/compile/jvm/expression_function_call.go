@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Func.IsBuildin {
 		return m.mkBuildinFunctionCall(class, code, e, context, state)
@@ -15,7 +15,7 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		return m.buildTemplateFunctionCall(class, code, e, context, state)
 	}
 	if call.Func.IsClosureFunction == false {
-		maxstack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
+		maxStack = m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Func.ClassMethod.Class.Name,
@@ -41,8 +41,8 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 		state.pushStack(class, state.newObjectVariableType(call.Func.ClassMethod.Class.Name))
 		defer state.popStack(1)
 		stack := m.buildCallArgs(class, code, call.Args, call.Func.Typ.ParameterList, context, state)
-		if t := 1 + stack; t > maxstack {
-			maxstack = t
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -71,12 +71,12 @@ func (m *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.At
 
 	if e.CallHasReturnValue() == false { // nothing
 	} else if len(e.Values) == 1 {
-		if t := jvmSize(e.Values[0]); t > maxstack {
-			maxstack = t
+		if t := jvmSize(e.Values[0]); t > maxStack {
+			maxStack = t
 		}
 	} else { // > 1
-		if 1 > maxstack {
-			maxstack = 1
+		if 1 > maxStack {
+			maxStack = 1
 		}
 	}
 	return

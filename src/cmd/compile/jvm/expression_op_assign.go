@@ -8,13 +8,14 @@ import (
 /*
 	s += "456";
 */
-func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -26,14 +27,14 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if t := remainStack + 2; t > maxstack {
-		maxstack = t
+	if t := remainStack + 2; t > maxStack {
+		maxStack = t
 	}
 	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
 	currentStack := remainStack + 1 //
 	stack, _ := m.build(class, code, bin.Left, context, state)
-	if t := currentStack + stack; t > maxstack {
-		maxstack = t
+	if t := currentStack + stack; t > maxStack {
+		maxStack = t
 	}
 	//append origin string
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -44,8 +45,8 @@ func (m *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.A
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	stack, _ = m.build(class, code, bin.Right, context, state)
-	if t := currentStack + stack; t > maxstack {
-		maxstack = t
+	if t := currentStack + stack; t > maxStack {
+		maxStack = t
 	}
 	//append right
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -37,8 +37,8 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		if v.Name == ast.NO_NAME_IDENTIFIER {
 			if jvmSize(vs.Values[0].Value) == 1 {
@@ -49,7 +49,7 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			code.CodeLength++
 			return
 		}
-		maxstack += currentStack
+		maxStack += currentStack
 		if v.IsGlobal {
 			storeGlobalVar(class, m.MakeClass.mainclass, code, vs.Variables[0])
 		} else {
@@ -74,9 +74,9 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		return
 	}
 	if len(vs.Values) == 1 {
-		maxstack, _ = m.build(class, code, vs.Values[0], context, state)
+		maxStack, _ = m.build(class, code, vs.Values[0], context, state)
 	} else {
-		maxstack = m.buildExpressions(class, code, vs.Values, context, state)
+		maxStack = m.buildExpressions(class, code, vs.Values, context, state)
 	}
 	multiValuePacker.storeArrayListAutoVar(code, context)
 	//first round
@@ -86,8 +86,8 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		}
 		if v.IsGlobal {
 			stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
-			if stack > maxstack {
-				maxstack = stack
+			if stack > maxStack {
+				maxStack = stack
 			}
 			storeGlobalVar(class, m.MakeClass.mainclass, code, v)
 			continue
@@ -97,13 +97,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			if v.BeenCaptured {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
-				if t := 1 + stack; t > maxstack {
-					maxstack = t
+				if t := 1 + stack; t > maxStack {
+					maxStack = t
 				}
 			} else {
 				stack := multiValuePacker.unPack(class, code, k, v.Typ, context)
-				if stack > maxstack {
-					maxstack = stack
+				if stack > maxStack {
+					maxStack = stack
 				}
 			}
 			m.MakeClass.storeLocalVar(class, code, v)
@@ -114,13 +114,13 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 		if v.BeenCaptured {
 			code.MaxLocals++
 			stack := closure.createCloureVar(class, code, v.Typ)
-			if stack > maxstack {
-				maxstack = stack
+			if stack > maxStack {
+				maxStack = stack
 			}
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
-			if 2 > maxstack {
-				maxstack = 2
+			if 2 > maxStack {
+				maxStack = 2
 			}
 			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
@@ -129,8 +129,8 @@ func (m *MakeExpression) buildColonAssign(class *cg.ClassHighLevel, code *cg.Att
 			code.MaxLocals += jvmSize(v.Typ)
 			state.appendLocals(class, v.Typ)
 		}
-		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Typ, context); t > maxstack {
-			maxstack = t
+		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Typ, context); t > maxStack {
+			maxStack = t
 		}
 		m.MakeClass.storeLocalVar(class, code, v)
 	}

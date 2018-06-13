@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 		return m.buildArrayMethodCall(class, code, e, context, state)
@@ -35,7 +35,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		}
 	}
 	if call.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
-		maxstack = m.buildCallArgs(class, code, call.Args, call.PackageFunction.Typ.ParameterList, context, state)
+		maxStack = m.buildCallArgs(class, code, call.Args, call.PackageFunction.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Expression.Value.Package.Name + "/main",
@@ -43,8 +43,8 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: call.PackageFunction.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := m.valueJvmSize(e); t > maxstack {
-			maxstack = t
+		if t := m.valueJvmSize(e); t > maxStack {
+			maxStack = t
 		}
 		pop(call.PackageFunction)
 		return
@@ -55,7 +55,7 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		d = Descriptor.methodDescriptor(call.Method.Func)
 	}
 	if call.Method.IsStatic() {
-		maxstack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
+		maxStack = m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,
@@ -63,14 +63,14 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := m.valueJvmSize(e); t > maxstack {
-			maxstack = t
+		if t := m.valueJvmSize(e); t > maxStack {
+			maxStack = t
 		}
 		pop(call.Method.Func)
 		return
 	}
 
-	maxstack, _ = m.build(class, code, call.Expression, context, state)
+	maxStack, _ = m.build(class, code, call.Expression, context, state)
 	// object ref
 	state.pushStack(class, call.Expression.Value)
 	defer state.popStack(1)
@@ -82,11 +82,11 @@ func (m *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.Attr
 		})
 	}
 	stack := m.buildCallArgs(class, code, call.Args, call.Method.Func.Typ.ParameterList, context, state)
-	if t := stack + 1; t > maxstack {
-		maxstack = t
+	if t := stack + 1; t > maxStack {
+		maxStack = t
 	}
-	if t := m.valueJvmSize(e); t > maxstack {
-		maxstack = t
+	if t := m.valueJvmSize(e); t > maxStack {
+		maxStack = t
 	}
 	if call.Name == ast.CONSTRUCTION_METHOD_NAME { // call father construction method
 		code.Codes[code.CodeLength] = cg.OP_invokespecial

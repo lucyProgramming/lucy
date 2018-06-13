@@ -103,7 +103,7 @@ func (m *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.At
 	return
 }
 func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxstack uint16) {
+	context *Context, state *StackMapState) (maxStack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.Value.ArrayType.Typ]
@@ -111,7 +111,7 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	class.InsertClassConst(meta.classname, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	maxstack = 2
+	maxStack = 2
 	{
 		t := &cg.StackMap_verification_type_info{}
 		unInit := &cg.StackMap_Uninitialized_variable_info{}
@@ -122,14 +122,14 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	if n.IsConvertJavaArray2Array {
 		stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
-		if t := 2 + stack; t > maxstack {
-			maxstack = t
+		if t := 2 + stack; t > maxStack {
+			maxStack = t
 		}
 	} else {
 		// get amount
 		stack, _ := m.build(class, code, n.Args[0], context, state) // must be a integer
-		if t := 2 + stack; t > maxstack {
-			maxstack = t
+		if t := 2 + stack; t > maxStack {
+			maxStack = t
 		}
 		switch e.Value.ArrayType.Typ {
 		case ast.VARIABLE_TYPE_BOOL:

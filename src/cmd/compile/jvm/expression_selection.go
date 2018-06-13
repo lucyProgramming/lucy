@@ -4,10 +4,10 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 func (m *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	dot := e.Data.(*ast.ExpressionSelection)
 	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_PACKAGE {
-		maxstack = jvmSize(e.Value)
+		maxStack = jvmSize(e.Value)
 		if dot.PackageVariable != nil {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -25,7 +25,7 @@ func (m *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.Attri
 	// check cast to super class
 	if dot.Name == ast.SUPER_FIELD_NAME {
 		if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_OBJECT {
-			maxstack, _ = m.build(class, code, dot.Expression, context, nil)
+			maxStack, _ = m.build(class, code, dot.Expression, context, nil)
 			code.Codes[code.CodeLength] = cg.OP_checkcast
 			class.InsertClassConst(e.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -33,7 +33,7 @@ func (m *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	if dot.Expression.Value.Typ == ast.VARIABLE_TYPE_CLASS {
-		maxstack = jvmSize(e.Value)
+		maxStack = jvmSize(e.Value)
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      dot.Expression.Value.Class.Name,
@@ -44,9 +44,9 @@ func (m *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.Attri
 		return
 	}
 	// object
-	maxstack, _ = m.build(class, code, dot.Expression, context, state)
-	if t := jvmSize(e.Value); t > maxstack {
-		maxstack = t
+	maxStack, _ = m.build(class, code, dot.Expression, context, state)
+	if t := jvmSize(e.Value); t > maxStack {
+		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

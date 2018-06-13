@@ -7,9 +7,9 @@ import (
 )
 
 func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = m.build(class, code, call.Expression, context, state)
+	maxStack, _ = m.build(class, code, call.Expression, context, state)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -20,8 +20,8 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 	case common.MAP_METHOD_KEY_EXISTS:
 		variableType := call.Args[0].Value
 		stack, _ := m.build(class, code, call.Args[0], context, state)
-		if t := 1 + stack; t > maxstack {
-			maxstack = t
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
 		}
 		if variableType.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, variableType)
@@ -54,8 +54,8 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			currentStack = 1
 			if v.MayHaveMultiValue() && len(v.Values) > 1 {
 				stack, _ := m.build(class, code, v, context, state)
-				if t := currentStack + stack; t > maxstack {
-					maxstack = t
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
 				}
 				multiValuePacker.storeArrayListAutoVar(code, context) // store to temp
 				for kk, tt := range v.Values {
@@ -68,8 +68,8 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 					}
 					//load
 					stack = multiValuePacker.unPack(class, code, kk, tt, context)
-					if t := stack + currentStack; t > maxstack {
-						maxstack = t
+					if t := stack + currentStack; t > maxStack {
+						maxStack = t
 					}
 					//remove
 					callRemove()
@@ -83,14 +83,14 @@ func (m *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.A
 			if k != len(call.Args)-1 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				currentStack++
-				if currentStack > maxstack {
-					maxstack = currentStack
+				if currentStack > maxStack {
+					maxStack = currentStack
 				}
 				state.pushStack(class, hashMapVerifyType)
 			}
 			stack, _ := m.build(class, code, v, context, state)
-			if t := stack + currentStack; t > maxstack {
-				maxstack = t
+			if t := stack + currentStack; t > maxStack {
+				maxStack = t
 			}
 			if variableType.IsPointer() == false {
 				typeConverter.putPrimitiveInObject(class, code, variableType)

@@ -6,24 +6,24 @@ import (
 )
 
 func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	slice := e.Data.(*ast.ExpressionSlice)
 	meta := ArrayMetas[slice.Array.Value.ArrayType.Typ]
-	maxstack, _ = m.build(class, code, slice.Array, context, state)
+	maxStack, _ = m.build(class, code, slice.Array, context, state)
 	state.pushStack(class, slice.Array.Value)
 	// build start
 	stack, _ := m.build(class, code, slice.Start, context, state)
-	if t := 1 + stack; t > maxstack {
-		maxstack = t
+	if t := 1 + stack; t > maxStack {
+		maxStack = t
 	}
 	state.pushStack(class, slice.Start.Value)
 	stack, _ = m.build(class, code, slice.End, context, state)
-	if t := 2 + stack; t > maxstack {
-		maxstack = t
+	if t := 2 + stack; t > maxStack {
+		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

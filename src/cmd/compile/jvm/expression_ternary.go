@@ -6,10 +6,10 @@ import (
 )
 
 func (m *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ternary := e.Data.(*ast.ExpressionTernary)
 	var es []*cg.Exit
-	maxstack, es = m.build(class, code, ternary.Condition, context, state)
+	maxStack, es = m.build(class, code, ternary.Condition, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
 		state.pushStack(class, ternary.Condition.Value)
@@ -25,8 +25,8 @@ func (m *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.Attribu
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	if stack > maxstack {
-		maxstack = stack
+	if stack > maxStack {
+		maxStack = stack
 	}
 	exit2 := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	context.MakeStackMap(code, state, code.CodeLength)
@@ -38,8 +38,8 @@ func (m *MakeExpression) buildTernary(class *cg.ClassHighLevel, code *cg.Attribu
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	if stack > maxstack {
-		maxstack = stack
+	if stack > maxStack {
+		maxStack = stack
 	}
 	state.pushStack(class, e.Value)
 	context.MakeStackMap(code, state, code.CodeLength)

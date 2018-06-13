@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Var)
 	if captured == false {
@@ -21,11 +22,11 @@ func (m *MakeExpression) buildCapturedIdentifer(class *cg.ClassHighLevel, code *
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	if 1 > maxstack {
-		maxstack = 1
+	if 1 > maxStack {
+		maxStack = 1
 	}
-	if t := jvmSize(identifier.Var.Typ); t > maxstack {
-		maxstack = t
+	if t := jvmSize(identifier.Var.Typ); t > maxStack {
+		maxStack = t
 	}
 
 	return

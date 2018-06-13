@@ -8,10 +8,10 @@ import (
 )
 
 func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 
 	if e.Typ == ast.EXPRESSION_TYPE_NEGATIVE {
-		maxstack, _ = m.build(class, code, e.Data.(*ast.Expression), context, state)
+		maxStack, _ = m.build(class, code, e.Data.(*ast.Expression), context, state)
 		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
@@ -31,9 +31,9 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*ast.Expression)
-		maxstack, _ = m.build(class, code, ee, context, state)
-		if t := jvmSize(ee.Value) * 2; t > maxstack {
-			maxstack = t
+		maxStack, _ = m.build(class, code, ee, context, state)
+		if t := jvmSize(ee.Value) * 2; t > maxStack {
+			maxStack = t
 		}
 		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -41,8 +41,8 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 			code.Codes[code.CodeLength+1] = 255
 			code.Codes[code.CodeLength+2] = cg.OP_ixor
 			code.CodeLength += 3
-			if 2 > maxstack {
-				maxstack = 2
+			if 2 > maxStack {
+				maxStack = 2
 			}
 		case ast.VARIABLE_TYPE_SHORT:
 			code.Codes[code.CodeLength] = cg.OP_sipush
@@ -50,24 +50,24 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 			code.Codes[code.CodeLength+2] = 255
 			code.Codes[code.CodeLength+3] = cg.OP_ixor
 			code.CodeLength += 4
-			if 2 > maxstack {
-				maxstack = 2
+			if 2 > maxStack {
+				maxStack = 2
 			}
 		case ast.VARIABLE_TYPE_INT:
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
 			class.InsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_ixor
 			code.CodeLength += 4
-			if 2 > maxstack {
-				maxstack = 2
+			if 2 > maxStack {
+				maxStack = 2
 			}
 		case ast.VARIABLE_TYPE_LONG:
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
 			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_lxor
 			code.CodeLength += 4
-			if 4 > maxstack {
-				maxstack = 4
+			if 4 > maxStack {
+				maxStack = 4
 			}
 		}
 		return
@@ -75,7 +75,7 @@ func (m *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.Attribute
 	if e.Typ == ast.EXPRESSION_TYPE_NOT {
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.Exit
-		maxstack, es = m.build(class, code, ee, context, state)
+		maxStack, es = m.build(class, code, ee, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, ee.Value)

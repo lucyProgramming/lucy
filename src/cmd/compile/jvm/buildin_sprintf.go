@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxstack uint16) {
+	context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -14,15 +14,15 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionSprintfMeta)
-	maxstack, _ = m.build(class, code, meta.Format, context, state)
+	maxStack, _ = m.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	currentStack := uint16(2)
-	if currentStack > maxstack {
-		maxstack = currentStack
+	if currentStack > maxStack {
+		maxStack = currentStack
 	}
 
 	objectArray := &ast.VariableType{}
@@ -34,8 +34,8 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			currentStack = 2
 			stack, _ := m.build(class, code, v, context, state)
-			if t := currentStack + stack; t > maxstack {
-				maxstack = t
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
 			}
 			// store in temp var
 			multiValuePacker.storeArrayListAutoVar(code, context)
@@ -46,8 +46,8 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 				loadInt32(class, code, index)
 				currentStack += 2
 				stack = multiValuePacker.unPackObject(class, code, kk, context)
-				if t := currentStack + stack; t > maxstack {
-					maxstack = t
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
 				}
 				code.Codes[code.CodeLength] = cg.OP_aastore
 				code.CodeLength++
@@ -70,8 +70,8 @@ func (m *MakeExpression) mkBuildinSprintf(class *cg.ClassHighLevel, code *cg.Att
 			state.popStack(1) // bool value
 		}
 		state.popStack(2)
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		if v.Value.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Value)

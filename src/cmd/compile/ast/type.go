@@ -470,7 +470,10 @@ func (v *VariableType) bindWithTypedParameters(typedParaMeters map[string]*Varia
 		*v = *t.Clone() // real bind
 		return nil
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY || v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+	if v.Typ == VARIABLE_TYPE_ARRAY {
+		return v.ArrayType.bindWithTypedParameters(typedParaMeters)
+	}
+	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
 		return v.ArrayType.bindWithTypedParameters(typedParaMeters)
 	}
 	if v.Typ == VARIABLE_TYPE_MAP {
@@ -494,23 +497,16 @@ func (v *VariableType) canBebindWithType(typedParaMeters map[string]*VariableTyp
 		return fmt.Errorf("'%s' is un typed", t.TypeString())
 	}
 	if v.Typ == VARIABLE_TYPE_T {
-
-		if _, ok := typedParaMeters[v.Name]; ok {
-			//  no need to check
-			//			errs := []error{}
-			//			if false == tt.Equal(&errs, t) {
-			//				return fmt.Errorf("'%s' already bind with '%s'", v.Name, tt.TypeString())
-			//			}
-		}
-		//bind from here
 		typedParaMeters[v.Name] = t
-		//		*v = *t.Clone()
 		return nil
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY || t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+	if v.Typ == VARIABLE_TYPE_ARRAY && t.Typ == VARIABLE_TYPE_ARRAY {
 		return v.ArrayType.canBebindWithType(typedParaMeters, t.ArrayType)
 	}
-	if v.Typ == VARIABLE_TYPE_MAP {
+	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return v.ArrayType.canBebindWithType(typedParaMeters, t.ArrayType)
+	}
+	if v.Typ == VARIABLE_TYPE_MAP && t.Typ == VARIABLE_TYPE_MAP {
 		err := v.Map.K.canBebindWithType(typedParaMeters, t.Map.K)
 		if err != nil {
 			return err

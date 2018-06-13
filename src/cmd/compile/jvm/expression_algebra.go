@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -14,11 +15,11 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 	if e.Typ == ast.EXPRESSION_TYPE_OR ||
 		e.Typ == ast.EXPRESSION_TYPE_AND ||
 		e.Typ == ast.EXPRESSION_TYPE_XOR {
-		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		maxStack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
-			maxstack = t
+		if t := stack + jvmSize(bin.Left.Value); t > maxStack {
+			maxStack = t
 		}
 		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -59,11 +60,11 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 			bin.Right.Value.Typ == ast.VARIABLE_TYPE_STRING {
 			return m.buildStrCat(class, code, bin, context, state)
 		}
-		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		maxStack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := jvmSize(bin.Left.Value) + stack; t > maxstack {
-			maxstack = t
+		if t := jvmSize(bin.Left.Value) + stack; t > maxStack {
+			maxStack = t
 		}
 		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -171,11 +172,11 @@ func (m *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.Attr
 
 	if e.Typ == ast.EXPRESSION_TYPE_LSH ||
 		e.Typ == ast.EXPRESSION_TYPE_RSH {
-		maxstack, _ = m.build(class, code, bin.Left, context, state)
+		maxStack, _ = m.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack, _ := m.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.Value); t > maxstack {
-			maxstack = t
+		if t := stack + jvmSize(bin.Left.Value); t > maxStack {
+			maxStack = t
 		}
 		switch e.Value.Typ {
 		case ast.VARIABLE_TYPE_BYTE:

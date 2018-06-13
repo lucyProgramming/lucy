@@ -7,7 +7,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	switch call.Func.Name {
 	case common.BUILD_IN_FUNCTION_PRINT:
@@ -17,7 +18,7 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 	case common.BUILD_IN_FUNCTION_CATCH:
 		return m.mkBuildinCatch(class, code, e, context)
 	case common.BUILD_IN_FUNCTION_MONITORENTER, common.BUILD_IN_FUNCTION_MONITOREXIT:
-		maxstack, _ = m.build(class, code, call.Args[0], context, state)
+		maxStack, _ = m.build(class, code, call.Args[0], context, state)
 		if call.Func.Name == common.BUILD_IN_FUNCTION_MONITORENTER {
 			code.Codes[code.CodeLength] = cg.OP_monitorenter
 		} else { // monitor enter on exit
@@ -37,7 +38,7 @@ func (m *MakeExpression) mkBuildinFunctionCall(class *cg.ClassHighLevel, code *c
 }
 
 func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxstack uint16) {
+	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Args[0].Typ != ast.EXPRESSION_TYPE_NEW { // not new expression
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -55,7 +56,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 		}
 		stack, _ := m.build(class, code, call.Args[0], context, state)
 		state.popStack(2)
-		maxstack = 2 + stack
+		maxStack = 2 + stack
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      className,
@@ -64,7 +65,7 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
-		maxstack, _ = m.build(class, code, call.Args[0], context, state)
+		maxStack, _ = m.build(class, code, call.Args[0], context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
@@ -72,15 +73,16 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildinCatch(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context) (maxStack uint16) {
 	if e.IsStatementExpression { // statement call
-		maxstack = 1
+		maxStack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
 		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
 		return
 	}
-	maxstack = 2
+	maxStack = 2
 	//load to stack
 	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // load
 	//set 2 null
@@ -98,13 +100,14 @@ func (m *MakeExpression) mkBuildinCatch(class *cg.ClassHighLevel, code *cg.Attri
 	return
 }
 
-func (m *MakeExpression) mkBuildinLen(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxstack, _ = m.build(class, code, call.Args[0], context, state)
+	maxStack, _ = m.build(class, code, call.Args[0], context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
-	if 2 > maxstack {
-		maxstack = 2
+	if 2 > maxStack {
+		maxStack = 2
 	}
 	exit := (&cg.Exit{}).FromCode(cg.OP_ifnull, code)
 	//binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 3)

@@ -6,17 +6,17 @@ import (
 )
 
 func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16, exits []*cg.Exit) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16, exits []*cg.Exit) {
 	exits = []*cg.Exit{}
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxstack, es := m.build(class, code, bin.Left, context, state)
+	maxStack, es := m.build(class, code, bin.Left, context, state)
 	if es != nil {
 		exits = append(exits, es...)
 	}
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
-	if 2 > maxstack { // dup increment stack
-		maxstack = 2
+	if 2 > maxStack { // dup increment stack
+		maxStack = 2
 	}
 	if e.Typ == ast.EXPRESSION_TYPE_LOGICAL_OR {
 		// at this point,value is clear,leave 1 on stack
@@ -31,8 +31,8 @@ func (m *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.Attribu
 	if es != nil {
 		exits = append(exits, es...)
 	}
-	if stack > maxstack {
-		maxstack = stack
+	if stack > maxStack {
+		maxStack = stack
 	}
 
 	return

@@ -8,7 +8,8 @@ import (
 /*
 	function printf
 */
-func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -23,14 +24,14 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 			Descriptor: "Ljava/io/PrintStream;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 1
+		maxStack = 1
 	} else { // get stream from args
-		maxstack, _ = m.build(class, code, meta.Stream, context, state)
+		maxStack, _ = m.build(class, code, meta.Stream, context, state)
 	}
 	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
 	stack, _ := m.build(class, code, meta.Format, context, state)
-	if t := 1 + stack; t > maxstack {
-		maxstack = t
+	if t := 1 + stack; t > maxStack {
+		maxStack = t
 	}
 	state.pushStack(class, state.newObjectVariableType(java_string_class))
 	loadInt32(class, code, int32(meta.ArgsLength))
@@ -38,8 +39,8 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	currentStack := uint16(3)
-	if currentStack > maxstack {
-		maxstack = currentStack
+	if currentStack > maxStack {
+		maxStack = currentStack
 	}
 	objectArray := &ast.VariableType{}
 	objectArray.Typ = ast.VARIABLE_TYPE_JAVA_ARRAY
@@ -51,8 +52,8 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			currentStack = 3
 			stack, _ := m.build(class, code, v, context, state)
-			if t := currentStack + stack; t > maxstack {
-				maxstack = t
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
 			}
 			// store in temp var
 			multiValuePacker.storeArrayListAutoVar(code, context)
@@ -63,8 +64,8 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 				loadInt32(class, code, index)
 				currentStack += 2
 				stack = multiValuePacker.unPackObject(class, code, kk, context)
-				if t := currentStack + stack; t > maxstack {
-					maxstack = t
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
 				}
 				code.Codes[code.CodeLength] = cg.OP_aastore
 				code.CodeLength++
@@ -87,8 +88,8 @@ func (m *MakeExpression) mkBuildinPrintf(class *cg.ClassHighLevel, code *cg.Attr
 			state.popStack(1) // bool value
 		}
 		state.popStack(2)
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		if v.Value.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Value)

@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ee := e.Data.(*ast.Expression)
 	// identifer  and not captured and type`s int
 	if t, ok := ee.Data.(*ast.ExpressionIdentifier); ee.Typ == ast.EXPRESSION_TYPE_IDENTIFIER &&
@@ -19,7 +19,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
-				maxstack = 1
+				maxStack = 1
 			}
 		}
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_INCREMENT {
@@ -36,7 +36,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT { // decrement
 				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
-				maxstack = 1
+				maxStack = 1
 			}
 		}
 		return
@@ -45,20 +45,20 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
-	maxstack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context, state)
+	maxStack, remainStack, op, _, classname, name, descriptor := m.getLeftValue(class, code, ee, context, state)
 	/*
 		left value must can be used as right value
 	*/
 	stack, _ := m.build(class, code, ee, context, state) // load it`s value
-	if t := stack + remainStack; t > maxstack {
-		maxstack = t
+	if t := stack + remainStack; t > maxStack {
+		maxStack = t
 	}
 	currentStack := jvmSize(ee.Value) + remainStack
 	if e.IsStatementExpression == false {
 		if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
 			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
-			if currentStack > maxstack {
-				maxstack = currentStack
+			if currentStack > maxStack {
+				maxStack = currentStack
 			}
 		}
 	}
@@ -69,8 +69,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
 		}
-		if t := currentStack + 1; t > maxstack { // last op will change stack
-			maxstack = t
+		if t := currentStack + 1; t > maxStack { // last op will change stack
+			maxStack = t
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.Codes[code.CodeLength+2] = cg.OP_i2b
@@ -81,8 +81,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
 		}
-		if t := currentStack + 1; t > maxstack { // last op will change stack
-			maxstack = t
+		if t := currentStack + 1; t > maxStack { // last op will change stack
+			maxStack = t
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.Codes[code.CodeLength+2] = cg.OP_i2s
@@ -93,8 +93,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
 		}
-		if t := currentStack + 1; t > maxstack { // last op will change stack
-			maxstack = t
+		if t := currentStack + 1; t > maxStack { // last op will change stack
+			maxStack = t
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.CodeLength += 2
@@ -107,8 +107,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if t := currentStack + 2; t > maxstack { // last op will change stack
-			maxstack = t
+		if t := currentStack + 2; t > maxStack { // last op will change stack
+			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_ladd
 		code.CodeLength++
@@ -121,8 +121,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			class.InsertFloatConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if t := currentStack + 1; t > maxstack { // last op will change stack
-			maxstack = t
+		if t := currentStack + 1; t > maxStack { // last op will change stack
+			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_fadd
 		code.CodeLength++
@@ -135,8 +135,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 			class.InsertDoubleConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if t := currentStack + 2; t > maxstack { // last op will change stack
-			maxstack = t
+		if t := currentStack + 2; t > maxStack { // last op will change stack
+			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_dadd
 		code.CodeLength++
@@ -145,8 +145,8 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT ||
 			e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT {
 			currentStack += m.controlStack2FitAssign(code, op, classname, e.Value)
-			if currentStack > maxstack {
-				maxstack = currentStack
+			if currentStack > maxStack {
+				maxStack = currentStack
 			}
 		}
 	}

@@ -10,7 +10,7 @@ import (
 func (m *MakeExpression) getCaptureIdentiferLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
-	maxstack, remainStack uint16, op []byte,
+	maxStack, remainStack uint16, op []byte,
 	target *ast.VariableType, classname, fieldname, fieldDescriptor string) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	target = identifier.Var.Typ
@@ -29,7 +29,7 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	}
 	state.pushStack(class, state.newObjectVariableType(meta.className))
-	maxstack = 1
+	maxStack = 1
 	remainStack = 1
 	classname = meta.className
 	fieldname = meta.fieldName
@@ -40,14 +40,14 @@ func (m *MakeExpression) getCaptureIdentiferLeftValue(
 func (m *MakeExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
-	maxstack, remainStack uint16, op []byte,
+	maxStack, remainStack uint16, op []byte,
 	target *ast.VariableType, classname, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxstack, _ = m.build(class, code, index.Expression, context, state)
+	maxStack, _ = m.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
 	stack, _ := m.build(class, code, index.Index, context, state)
-	if t := 1 + stack; t > maxstack {
-		maxstack = t
+	if t := 1 + stack; t > maxStack {
+		maxStack = t
 	}
 	if index.Index.Value.IsPointer() == false {
 		typeConverter.putPrimitiveInObject(class, code, index.Index.Value)
@@ -76,7 +76,7 @@ func (m *MakeExpression) getMapLeftValue(
 func (m *MakeExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
-	maxstack, remainStack uint16, op []byte,
+	maxStack, remainStack uint16, op []byte,
 	target *ast.VariableType, classname, name, descriptor string) {
 	switch e.Typ {
 	case ast.EXPRESSION_TYPE_IDENTIFIER:
@@ -180,7 +180,7 @@ func (m *MakeExpression) getLeftValue(
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Value.Typ == ast.VARIABLE_TYPE_ARRAY {
 			meta := ArrayMetas[index.Expression.Value.ArrayType.Typ]
-			maxstack, _ = m.build(class, code, index.Expression, context, state)
+			maxStack, _ = m.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
@@ -206,8 +206,8 @@ func (m *MakeExpression) getLeftValue(
 			state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 
 			stack, _ := m.build(class, code, index.Index, context, state)
-			if t := stack + 3; t > maxstack {
-				maxstack = t
+			if t := stack + 3; t > maxStack {
+				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_iadd
 			code.CodeLength++
@@ -288,11 +288,11 @@ func (m *MakeExpression) getLeftValue(
 		} else if index.Expression.Value.Typ == ast.VARIABLE_TYPE_MAP { // map
 			return m.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
-			maxstack, _ = m.build(class, code, index.Expression, context, state)
+			maxStack, _ = m.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
 			stack, _ := m.build(class, code, index.Index, context, state)
-			if t := stack + 1; t > maxstack {
-				maxstack = t
+			if t := stack + 1; t > maxStack {
+				maxStack = t
 			}
 			target = e.Value
 			remainStack = 2 // [objectref ,index]
@@ -335,7 +335,7 @@ func (m *MakeExpression) getLeftValue(
 			classname = dot.Expression.Value.Package.Name + "/main"
 			name = dot.PackageVariable.Name
 			descriptor = dot.PackageVariable.Descriptor
-			maxstack = 0
+			maxStack = 0
 			remainStack = 0
 		} else {
 			classname = dot.Expression.Value.Class.Name
@@ -349,7 +349,7 @@ func (m *MakeExpression) getLeftValue(
 			if dot.Field.IsStatic() {
 				op = []byte{cg.OP_putstatic}
 			} else {
-				maxstack, _ = m.build(class, code, dot.Expression, context, state)
+				maxStack, _ = m.build(class, code, dot.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, dot.Expression.Value)
 				op = []byte{cg.OP_putfield}

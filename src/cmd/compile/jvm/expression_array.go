@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -81,7 +82,7 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	arrayObject.ArrayType = e.Value.ArrayType
 	state.pushStack(class, arrayObject)
 
-	maxstack = 4
+	maxStack = 4
 
 	store := func() {
 		switch e.Value.ArrayType.Typ {
@@ -117,8 +118,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			// stack top is array list
 			stack, _ := m.build(class, code, v, context, state)
-			if t := 3 + stack; t > maxstack {
-				maxstack = t
+			if t := 3 + stack; t > maxStack {
+				maxStack = t
 			}
 			multiValuePacker.storeArrayListAutoVar(code, context)
 			for k, t := range v.Values {
@@ -126,8 +127,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 				code.CodeLength++
 				loadInt32(class, code, index) // load index
 				stack := multiValuePacker.unPack(class, code, k, t, context)
-				if t := 5 + stack; t > maxstack {
-					maxstack = t
+				if t := 5 + stack; t > maxStack {
+					maxStack = t
 				}
 				store()
 				index++
@@ -147,8 +148,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 			state.popStack(1) // must be a logical expression
 		}
 		state.popStack(2)
-		if t := 5 + stack; t > maxstack {
-			maxstack = t
+		if t := 5 + stack; t > maxStack {
+			maxStack = t
 		}
 		store()
 		index++

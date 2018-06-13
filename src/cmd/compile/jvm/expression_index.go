@@ -7,19 +7,20 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	maxstack, _ = m.build(class, code, index.Expression, context, state)
+	maxStack, _ = m.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
 	state.pushStack(class, index.Expression.Value)
 	stack, _ := m.build(class, code, index.Index, context, state)
-	if t := currentStack + stack; t > maxstack {
-		maxstack = t
+	if t := currentStack + stack; t > maxStack {
+		maxStack = t
 	}
 	currentStack = 2 // mapref kref
 	if index.Expression.Value.Map.K.IsPointer() == false {
@@ -40,8 +41,8 @@ func (m *MakeExpression) buildMapIndex(class *cg.ClassHighLevel, code *cg.Attrib
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
 		code.CodeLength++
-		if t := 1 + currentStack; t > maxstack {
-			maxstack = t
+		if t := 1 + currentStack; t > maxStack {
+			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		codeLength := code.CodeLength

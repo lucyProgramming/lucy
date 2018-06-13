@@ -7,9 +7,9 @@ import (
 )
 
 func (m *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxstack, _ = m.build(class, code, call.Expression, context, state)
+	maxStack, _ = m.build(class, code, call.Expression, context, state)
 	switch call.Name {
 	case common.ARRAY_METHOD_SIZE:
 		code.Codes[code.CodeLength] = cg.OP_arraylength

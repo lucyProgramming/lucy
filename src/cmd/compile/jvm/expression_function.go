@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	function := e.Data.(*ast.Function)
 	if function.IsClosureFunction == false {
 		function.Name = class.NewFunctionName(function.Name) // new a function name
@@ -51,7 +51,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	class.InsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	maxstack = 2 // maxstack is 2 right now
+	maxStack = 2 // maxstack is 2 right now
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      classname,
@@ -85,8 +85,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		if context.function.Closure.ClosureVariableExist(v) {
 			// I Know class at 0 offset
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
-			if 3 > maxstack {
-				maxstack = 3
+			if 3 > maxStack {
+				maxStack = 3
 			}
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -97,8 +97,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			code.CodeLength += 3
 		} else { // not exits
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
-			if 3 > maxstack {
-				maxstack = 3
+			if 3 > maxStack {
+				maxStack = 3
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
@@ -124,8 +124,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		if context.function.Closure.ClosureFunctionExist(v) {
 			// I Know class at 0 offset
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
-			if 3 > maxstack {
-				maxstack = 3
+			if 3 > maxStack {
+				maxStack = 3
 			}
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -136,8 +136,8 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			code.CodeLength += 3
 		} else { // not exits
 			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.VarOffSet)...)
-			if 3 > maxstack {
-				maxstack = 3
+			if 3 > maxStack {
+				maxStack = 3
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield

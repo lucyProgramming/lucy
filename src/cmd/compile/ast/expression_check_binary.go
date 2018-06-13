@@ -14,36 +14,40 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if errsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t1 == nil || t2 == nil {
-		if t1 != nil {
-			tt := t1.Clone()
-			tt.Pos = e.Pos
-			return tt
-		}
-		if t2 != nil {
-			tt := t2.Clone()
-			tt.Pos = e.Pos
-			return tt
-		}
-		return nil
-	}
 
 	// &&  ||
 	if e.Typ == EXPRESSION_TYPE_LOGICAL_OR ||
 		EXPRESSION_TYPE_LOGICAL_AND == e.Typ {
-		if t1.Typ != VARIABLE_TYPE_BOOL || t2.Typ != VARIABLE_TYPE_BOOL {
-			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
-		}
 		result = &VariableType{
 			Typ: VARIABLE_TYPE_BOOL,
 			Pos: e.Pos,
 		}
+		if t1 == nil || t2 == nil {
+			return result
+		}
+		if t1.Typ != VARIABLE_TYPE_BOOL || t2.Typ != VARIABLE_TYPE_BOOL {
+			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
+		}
+
 		return result
 	}
 	// & |
 	if e.Typ == EXPRESSION_TYPE_OR ||
 		EXPRESSION_TYPE_AND == e.Typ ||
 		EXPRESSION_TYPE_XOR == e.Typ {
+		if t1 == nil || t2 == nil {
+			if t1 != nil {
+				tt := t1.Clone()
+				tt.Pos = e.Pos
+				return tt
+			}
+			if t2 != nil {
+				tt := t2.Clone()
+				tt.Pos = e.Pos
+				return tt
+			}
+			return nil
+		}
 		if t1.IsInteger() == false || t1.Equal(errs, t2) == false {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
@@ -54,6 +58,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 
 	if e.Typ == EXPRESSION_TYPE_LSH ||
 		e.Typ == EXPRESSION_TYPE_RSH {
+		if t1 == nil || t2 == nil {
+			if t1 != nil {
+				tt := t1.Clone()
+				tt.Pos = e.Pos
+				return tt
+			}
+			if t2 != nil {
+				tt := t2.Clone()
+				tt.Pos = e.Pos
+				return tt
+			}
+			return nil
+		}
 		if false == t1.IsInteger() || t2.IsInteger() == false {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		} else {
@@ -71,6 +88,13 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Typ == EXPRESSION_TYPE_GT ||
 		e.Typ == EXPRESSION_TYPE_LE ||
 		e.Typ == EXPRESSION_TYPE_LT {
+		result = &VariableType{
+			Typ: VARIABLE_TYPE_BOOL,
+			Pos: e.Pos,
+		}
+		if t1 == nil || t2 == nil {
+			return result
+		}
 		//number
 		switch t1.Typ {
 		case VARIABLE_TYPE_BOOL:
@@ -140,11 +164,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				t1.TypeString(),
 				t2.TypeString()))
 		}
-		t := &VariableType{
-			Typ: VARIABLE_TYPE_BOOL,
-			Pos: e.Pos,
-		}
-		return t
+
+		return result
 	}
 	//
 	if e.Typ == EXPRESSION_TYPE_ADD ||
@@ -152,6 +173,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Typ == EXPRESSION_TYPE_MUL ||
 		e.Typ == EXPRESSION_TYPE_DIV ||
 		e.Typ == EXPRESSION_TYPE_MOD {
+		if t1 == nil || t2 == nil {
+			if t1 != nil {
+				tt := t1.Clone()
+				tt.Pos = e.Pos
+				return tt
+			}
+			if t2 != nil {
+				tt := t2.Clone()
+				tt.Pos = e.Pos
+				return tt
+			}
+			return nil
+		}
 		//check string first
 		if t1.Typ == VARIABLE_TYPE_STRING || t2.Typ == VARIABLE_TYPE_STRING { // string is always ok
 			if e.Typ != EXPRESSION_TYPE_ADD {

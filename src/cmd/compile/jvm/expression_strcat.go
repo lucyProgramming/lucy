@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary,
+	context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -22,7 +23,7 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
-	maxstack = 2 // current stack is 2
+	maxStack = 2 // current stack is 2
 	currenStack := uint16(1)
 	stack, es := m.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
@@ -31,11 +32,11 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	if t := currenStack + stack; t > maxstack {
-		maxstack = t
+	if t := currenStack + stack; t > maxStack {
+		maxStack = t
 	}
-	if t := currenStack + m.stackTop2String(class, code, e.Left.Value, context, state); t > maxstack {
-		maxstack = t
+	if t := currenStack + m.stackTop2String(class, code, e.Left.Value, context, state); t > maxStack {
+		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -51,11 +52,11 @@ func (m *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.Attribut
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	if t := currenStack + stack; t > maxstack {
-		maxstack = t
+	if t := currenStack + stack; t > maxStack {
+		maxStack = t
 	}
-	if t := currenStack + m.stackTop2String(class, code, e.Right.Value, context, state); t > maxstack {
-		maxstack = t
+	if t := currenStack + m.stackTop2String(class, code, e.Right.Value, context, state); t > maxStack {
+		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

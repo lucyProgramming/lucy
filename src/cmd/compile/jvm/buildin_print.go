@@ -8,7 +8,8 @@ import (
 /*
 	function print
 */
-func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildinFunctionMeta.(*ast.BuildinFunctionPrintfMeta)
 	if meta.Stream == nil {
@@ -19,9 +20,9 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			Descriptor: "Ljava/io/PrintStream;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = 1
+		maxStack = 1
 	} else { // get stream from args
-		maxstack, _ = m.build(class, code, meta.Stream, context, state)
+		maxStack, _ = m.build(class, code, meta.Stream, context, state)
 	}
 	if len(call.Args) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -48,8 +49,8 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		if t := 1 + stack; t > maxstack {
-			maxstack = t
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
 		}
 		switch call.Args[0].Value.Typ {
 		case ast.VARIABLE_TYPE_BOOL:
@@ -135,7 +136,7 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	maxstack = 3
+	maxStack = 3
 	currentStack := uint16(2)
 	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
 	app := func(isLast bool) {
@@ -164,21 +165,21 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 		var variableType *ast.VariableType
 		if v.MayHaveMultiValue() && len(v.Values) > 1 {
 			stack, _ := m.build(class, code, v, context, state)
-			if t := stack + currentStack; t > maxstack {
-				maxstack = t
+			if t := stack + currentStack; t > maxStack {
+				maxStack = t
 			}
 			multiValuePacker.storeArrayListAutoVar(code, context)
 			for kk, tt := range v.Values {
 				stack = multiValuePacker.unPack(class, code, kk, tt, context)
-				if t := stack + currentStack; t > maxstack {
-					maxstack = t
+				if t := stack + currentStack; t > maxStack {
+					maxStack = t
 				}
-				if t := currentStack + m.stackTop2String(class, code, tt, context, state); t > maxstack {
-					maxstack = t
+				if t := currentStack + m.stackTop2String(class, code, tt, context, state); t > maxStack {
+					maxStack = t
 				}
 				if tt.IsPointer() && tt.Typ != ast.VARIABLE_TYPE_STRING {
-					if t := 2 + currentStack; t > maxstack {
-						maxstack = t
+					if t := 2 + currentStack; t > maxStack {
+						maxStack = t
 					}
 				}
 				app(k == len(call.Args)-1 && kk == len(v.Values)-1) // last and last
@@ -196,11 +197,11 @@ func (m *MakeExpression) mkBuildinPrint(class *cg.ClassHighLevel, code *cg.Attri
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
-		if t := currentStack + m.stackTop2String(class, code, variableType, context, state); t > maxstack {
-			maxstack = t
+		if t := currentStack + m.stackTop2String(class, code, variableType, context, state); t > maxStack {
+			maxStack = t
 		}
 		app(k == len(call.Args)-1)
 	}

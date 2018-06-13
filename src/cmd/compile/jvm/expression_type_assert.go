@@ -8,9 +8,9 @@ import (
 )
 
 func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
-	maxstack, _ = m.build(class, code, assert.Expression, context, state)
+	maxStack, _ = m.build(class, code, assert.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof
@@ -59,8 +59,8 @@ func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.Attr
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	if 5 > maxstack {
-		maxstack = 5
+	if 5 > maxStack {
+		maxStack = 5
 	}
 	code.Codes[code.CodeLength] = cg.OP_aastore
 	code.CodeLength++

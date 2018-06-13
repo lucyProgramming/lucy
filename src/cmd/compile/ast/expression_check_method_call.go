@@ -24,17 +24,17 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
-			if f.TemplateFunction == nil {
-				call.PackageFunction = f
-				return e.checkFunctionCall(block, errs, f, &call.Args)
-			} else {
-				// convert to method call
-				e.Typ = EXPRESSION_TYPE_FUNCTION_CALL
-				call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
-				call.Func = f
-				e.Data = call
-				return e.checkFunctionCall(block, errs, f, &call.Args)
-			}
+			//if f.TemplateFunction == nil {
+			//	call.PackageFunction = f
+			//	return e.checkFunctionCall(block, errs, f, &call.Args)
+			//} else {
+			// convert to function call
+			e.Typ = EXPRESSION_TYPE_FUNCTION_CALL
+			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
+			call.Func = f
+			e.Data = call
+			return e.checkFunctionCall(block, errs, f, &call.Args)
+			//}
 		case *Class:
 			//object cast
 			class := d.(*Class)

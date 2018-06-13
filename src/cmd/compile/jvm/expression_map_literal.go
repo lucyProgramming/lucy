@@ -6,7 +6,7 @@ import (
 )
 
 func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -15,7 +15,7 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 	class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	maxstack = 2
+	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      java_hashmap_class,
@@ -34,8 +34,8 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 		currentStack := uint16(2)
 		state.pushStack(class, hashMapObject)
 		stack, _ := m.build(class, code, v.Left, context, state)
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		if v.Left.Value.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Left.Value)
@@ -50,8 +50,8 @@ func (m *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.Attr
 			state.popStack(1)
 		}
 		state.popStack(1) // @43 line
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		if v.Right.Value.IsPointer() == false {
 			typeConverter.putPrimitiveInObject(class, code, v.Right.Value)

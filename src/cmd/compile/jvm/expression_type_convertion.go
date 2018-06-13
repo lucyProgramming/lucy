@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	{
 		length := len(state.Stacks)
 		defer func() {
@@ -49,11 +49,11 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.CodeLength += 4
 	}
 	stack, _ := m.build(class, code, convertion.Expression, context, state)
-	maxstack = currentStack + stack
+	maxStack = currentStack + stack
 	if e.Value.IsNumber() {
 		m.numberTypeConverter(code, convertion.Expression.Value.Typ, convertion.Typ.Typ)
-		if t := jvmSize(convertion.Typ); t > maxstack {
-			maxstack = t
+		if t := jvmSize(convertion.Typ); t > maxStack {
+			maxStack = t
 		}
 		return
 	}
@@ -68,8 +68,8 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 			Descriptor: "()[B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if 3 > maxstack { // arraybyteref arraybyteref byte[]
-			maxstack = 3
+		if 3 > maxStack { // arraybyteref arraybyteref byte[]
+			maxStack = 3
 		}
 		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
@@ -92,8 +92,8 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 			Descriptor: "()[B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if 3 > maxstack { // arraybyteref arraybyteref byte[]
-			maxstack = 3
+		if 3 > maxStack { // arraybyteref arraybyteref byte[]
+			maxStack = 3
 		}
 		return
 	}
