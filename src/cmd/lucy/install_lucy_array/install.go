@@ -12,12 +12,12 @@ import (
 type InstallLucyArray struct {
 }
 
-func (i *InstallLucyArray) Help(command string) {
+func (installLucyArray *InstallLucyArray) Help(command string) {
 
 }
 
 type InstallType struct {
-	classname    string
+	className    string
 	typename     string
 	defaultValue string
 	imports      string
@@ -29,35 +29,35 @@ var (
 
 func init() {
 	installs = append(installs, &InstallType{
-		classname: "ArrayBool",
+		className: "ArrayBool",
 		typename:  "boolean",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayByte",
+		className: "ArrayByte",
 		typename:  "byte",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayShort",
+		className: "ArrayShort",
 		typename:  "short",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayInt",
+		className: "ArrayInt",
 		typename:  "int",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayLong",
+		className: "ArrayLong",
 		typename:  "long",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayFloat",
+		className: "ArrayFloat",
 		typename:  "float",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayDouble",
+		className: "ArrayDouble",
 		typename:  "double",
 	})
 	installs = append(installs, &InstallType{
-		classname: "ArrayObject",
+		className: "ArrayObject",
 		typename:  "Object",
 		imports: `
 		import java.lang.Object;
@@ -65,12 +65,12 @@ func init() {
 	})
 
 	installs = append(installs, &InstallType{
-		classname: "ArrayString",
+		className: "ArrayString",
 		typename:  "String",
 	})
 }
 
-func (r *InstallLucyArray) RunCommand(command string, args []string) {
+func (installLucyArray *InstallLucyArray) RunCommand(command string, args []string) {
 	path := os.Getenv("LUCYROOT")
 	if path == "" {
 		fmt.Println("env variable LUCYPATH is not set")
@@ -84,8 +84,8 @@ func (r *InstallLucyArray) RunCommand(command string, args []string) {
 		os.Exit(1)
 	}
 	for _, v := range installs {
-		javafile := v.classname + ".java"
-		t := strings.Replace(array_template, "ArrayTTT", v.classname, -1)
+		javafile := v.className + ".java"
+		t := strings.Replace(array_template, "ArrayTTT", v.className, -1)
 		t = strings.Replace(t, "TTT", v.typename, -1)
 		t = strings.Replace(t, "DEFAULT_INIT", v.defaultValue, -1)
 		t = strings.Replace(t, "IMPORTS", v.imports, -1)

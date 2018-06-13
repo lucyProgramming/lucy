@@ -2,7 +2,7 @@ package ast
 
 func (e *Expression) checkConst(block *Block) []error {
 	errs := []error{}
-	cs := e.Data.([]*Const)
+	cs := e.Data.([]*Constant)
 	for _, c := range cs {
 		err := checkConst(block, c, &errs)
 		if err != nil {

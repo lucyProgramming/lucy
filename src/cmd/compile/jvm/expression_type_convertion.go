@@ -25,8 +25,8 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
-		t := &cg.StackMap_verification_type_info{}
-		t.Verify = &cg.StackMap_Uninitialized_variable_info{
+		t := &cg.StackMapVerificationTypeInfo{}
+		t.Verify = &cg.StackMapUninitializedVariableInfo{
 			CodeOffset: uint16(code.CodeLength),
 		}
 		state.Stacks = append(state.Stacks, t, t)
@@ -41,8 +41,8 @@ func (m *MakeExpression) buildTypeConvertion(class *cg.ClassHighLevel, code *cg.
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
-		t := &cg.StackMap_verification_type_info{}
-		t.Verify = &cg.StackMap_Uninitialized_variable_info{
+		t := &cg.StackMapVerificationTypeInfo{}
+		t.Verify = &cg.StackMapUninitializedVariableInfo{
 			CodeOffset: uint16(code.CodeLength),
 		}
 		state.Stacks = append(state.Stacks, t, t)

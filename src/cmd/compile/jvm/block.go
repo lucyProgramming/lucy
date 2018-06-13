@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
-	var deadEnd bool = false
+	deadEnd := false
 	for _, s := range b.Statements {
 		if deadEnd == true && s.Typ == ast.STATEMENT_TYPE_LABLE {
 			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
@@ -58,7 +58,7 @@ func (m *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode,
 					t = t && v.Block.DeadEnding
 				} else {
 					//this will fallthrough
-					t = t && false
+					t = false
 					break
 				}
 			}

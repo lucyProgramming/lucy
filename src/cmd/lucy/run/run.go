@@ -178,9 +178,9 @@ func (r *Run) findPackageIn(packageName string) []string {
 /*
 	check package if need rebuild
 */
-func (r *Run) needCompile(lucypath string, packageName string) (meta *common.PackageMeta, need bool, lucyFiles []string, err error) {
+func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.PackageMeta, need bool, lucyFiles []string, err error) {
 	need = true
-	sourceFileDir := filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
+	sourceFileDir := filepath.Join(lucyPath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
 	fis, err := ioutil.ReadDir(sourceFileDir)
 	if err != nil { // shit happens
 		return
@@ -193,7 +193,7 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 		}
 	}
 	if len(lucyFiles) == 0 {
-		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucypath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
+		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucyPath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
 		return
 	}
 	if p, ok := r.PackagesCompiled[packageName]; ok {
@@ -202,7 +202,7 @@ func (r *Run) needCompile(lucypath string, packageName string) (meta *common.Pac
 	if r.Flags.forceReBuild {
 		return
 	}
-	destDir := filepath.Join(lucypath, "class", packageName)
+	destDir := filepath.Join(lucyPath, "class", packageName)
 	bs, err := ioutil.ReadFile(filepath.Join(destDir, common.LUCY_MAINTAIN_FILE))
 	if err != nil { // maintain file is missing
 		err = nil
@@ -327,7 +327,7 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 			err = fmt.Errorf("not 1 package named '%s' in $LUCYPATH", i)
 			return
 		}
-		if len(found) == 1 { // perfect found in lucypath
+		if len(found) == 1 { // perfect found in lucyPath
 			if i != common.CORE_PACAKGE {
 				lucyPackages = append(lucyPackages, i)
 			}
@@ -335,14 +335,14 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 		}
 		found = existInClassPath(i)
 		if len(found) > 1 {
-			errmsg := fmt.Sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n", i)
-			errmsg += formatPaths(r.classPaths)
-			return nil, fmt.Errorf(errmsg)
+			errMsg := fmt.Sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n", i)
+			errMsg += formatPaths(r.classPaths)
+			return nil, fmt.Errorf(errMsg)
 		}
 		if len(found) == 0 {
-			errmsg := fmt.Sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n", i)
-			errmsg += formatPaths(r.classPaths)
-			return nil, fmt.Errorf(errmsg)
+			errMsg := fmt.Sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n", i)
+			errMsg += formatPaths(r.classPaths)
+			return nil, fmt.Errorf(errMsg)
 		}
 	}
 	return
@@ -350,7 +350,7 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 
 func (r *Run) foundError(packageName string, founds []string) error {
 	if len(founds) == 0 {
-		return fmt.Errorf("package '%s' not found")
+		return fmt.Errorf("package '%s' not found", packageName)
 	}
 	if len(founds) > 1 {
 
@@ -358,20 +358,20 @@ func (r *Run) foundError(packageName string, founds []string) error {
 	return nil
 }
 
-func (r *Run) buildPackage(lucypath string, packageName string, importStack *ImportStack) (needBuild bool,
+func (r *Run) buildPackage(lucyPath string, packageName string, importStack *ImportStack) (needBuild bool,
 	meta *common.PackageMeta, err error) {
 	if p, ok := r.PackagesCompiled[packageName]; ok {
 		return false, p.meta, nil
 	}
-	if lucypath == "" {
+	if lucyPath == "" {
 		founds := r.findPackageIn(packageName)
 		err = r.foundError(packageName, founds)
 		if err != nil {
 			return false, nil, err
 		}
-		lucypath = founds[0]
+		lucyPath = founds[0]
 	}
-	meta, needBuild, lucyFiles, err := r.needCompile(lucypath, packageName)
+	meta, needBuild, lucyFiles, err := r.needCompile(lucyPath, packageName)
 	if err != nil {
 		err = fmt.Errorf("check if need compile,err:%v", err)
 		return
@@ -422,21 +422,21 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 	}
 	//build this package
 	//read  files
-	destDir := filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName)
+	destinationDir := filepath.Join(lucyPath, common.DIR_FOR_COMPILED_CLASS, packageName)
 	// mkdir all
-	finfo, _ := os.Stat(destDir)
+	finfo, _ := os.Stat(destinationDir)
 	if finfo == nil {
-		err = os.MkdirAll(destDir, 0755)
+		err = os.MkdirAll(destinationDir, 0755)
 		if err != nil {
 			return
 		}
 	}
 	//before compile delete old class and maintain.json
 	{
-		fis, _ := ioutil.ReadDir(destDir)
+		fis, _ := ioutil.ReadDir(destinationDir)
 		for _, f := range fis {
 			if strings.HasSuffix(f.Name(), ".class") || f.Name() == common.LUCY_MAINTAIN_FILE {
-				file := filepath.Join(destDir, f.Name())
+				file := filepath.Join(destinationDir, f.Name())
 				err := os.Remove(file)
 				if err != nil {
 					fmt.Printf("delete old compiled file[%s] failed,err:%v\n", file, err)
@@ -446,7 +446,7 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 	}
 	fmt.Println("compiling.... ", packageName) // compile this package
 	// cd to destDir
-	os.Chdir(destDir)
+	os.Chdir(destinationDir)
 	args := []string{"-package-name", packageName, "-jvm-version", strconv.Itoa(r.Flags.JvmVersion)}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
@@ -471,7 +471,7 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 	}
 	meta.CompileTime = time.Now().Unix()
 	meta.Imports = is
-	fis, err := ioutil.ReadDir(destDir)
+	fis, err := ioutil.ReadDir(destinationDir)
 	if err != nil {
 		return
 	}
@@ -485,7 +485,7 @@ func (r *Run) buildPackage(lucypath string, packageName string, importStack *Imp
 		return
 	}
 	err = ioutil.WriteFile(
-		filepath.Join(lucypath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
+		filepath.Join(lucyPath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
 		bs,
 		0644)
 	r.PackagesCompiled[packageName] = &PackageCompiled{

@@ -84,8 +84,8 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *VariableType, e
 		tt.Pos = e.Pos
 		identifer.Var = t
 		return tt, nil
-	case *Const:
-		t := d.(*Const)
+	case *Constant:
+		t := d.(*Constant)
 		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifer.Name, e.Pos, t.Pos)
 			if should {

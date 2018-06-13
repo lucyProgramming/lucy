@@ -10,7 +10,7 @@ func (m *MakeClass) loadLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCod
 		return closure.loadLocalCloureVar(class, code, v)
 	}
 	maxstack = jvmSize(v.Typ)
-	copyOP(code, loadSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
+	copyOP(code, loadSimpleVarOps(v.Typ.Typ, v.LocalValOffset)...)
 	return
 }
 
@@ -20,6 +20,6 @@ func (m *MakeClass) storeLocalVar(class *cg.ClassHighLevel, code *cg.AttributeCo
 		return
 	}
 	maxstack = jvmSize(v.Typ)
-	copyOP(code, storeSimpleVarOp(v.Typ.Typ, v.LocalValOffset)...)
+	copyOP(code, storeSimpleVarOps(v.Typ.Typ, v.LocalValOffset)...)
 	return
 }

@@ -10,8 +10,8 @@ import (
 type Context struct {
 	class                   *ast.Class
 	lastStackMapState       *StackMapState
-	lastStackMapStateLocals []*cg.StackMap_verification_type_info
-	lastStackMapStateStacks []*cg.StackMap_verification_type_info
+	lastStackMapStateLocals []*cg.StackMapVerificationTypeInfo
+	lastStackMapStateStacks []*cg.StackMapVerificationTypeInfo
 	LastStackMapOffset      int
 	NotFirstStackMap        bool
 	function                *ast.Function
@@ -40,9 +40,9 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	}
 	defer func() {
 		context.LastStackMapOffset = offset // rewrite
-		context.lastStackMapStateLocals = make([]*cg.StackMap_verification_type_info, len(state.Locals))
+		context.lastStackMapStateLocals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
 		copy(context.lastStackMapStateLocals, state.Locals)
-		context.lastStackMapStateStacks = make([]*cg.StackMap_verification_type_info, len(state.Stacks))
+		context.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
 		copy(context.lastStackMapStateStacks, state.Stacks)
 		context.NotFirstStackMap = true
 		context.lastStackMapState = state
@@ -52,24 +52,24 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 { // same frame or same frame extended
 			if delta <= 63 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-					&cg.StackMap_same_frame{FrameType: byte(delta)})
+					&cg.StackMapSameFrame{FrameType: byte(delta)})
 
 			} else {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-					&cg.StackMap_same_frame_extended{FrameType: 251, Delta: delta})
+					&cg.StackMapSameFrameExtended{FrameType: 251, Delta: delta})
 			}
 			return
 		}
 		if len(context.lastStackMapStateLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
 			if delta <= 64 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-					&cg.StackMap_same_locals_1_stack_item_frame{
+					&cg.StackMapSameLocals1StackItemFrame{
 						FrameType: byte(delta + 64),
 						Stack:     state.Stacks[0],
 					})
 			} else {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-					&cg.StackMap_same_locals_1_stack_item_frame_extended{
+					&cg.StackMapSameLocals1StackItemFrameExtended{
 						FrameType: 247,
 						Delta:     delta,
 						Stack:     state.Stacks[0],
@@ -80,10 +80,10 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		if len(context.lastStackMapStateLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
 			num := len(state.Locals) - len(context.lastStackMapStateLocals)
 			if num <= 3 {
-				appendFrame := &cg.StackMap_append_frame{}
+				appendFrame := &cg.StackMapAppendFrame{}
 				appendFrame.FrameType = byte(num + 251)
 				appendFrame.Delta = delta
-				appendFrame.Locals = make([]*cg.StackMap_verification_type_info, num)
+				appendFrame.Locals = make([]*cg.StackMapVerificationTypeInfo, num)
 				copy(appendFrame.Locals, state.Locals[len(state.Locals)-num:])
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, appendFrame)
 				return
@@ -91,12 +91,12 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		}
 	}
 	// full frame
-	fullFrame := &cg.StackMap_full_frame{}
+	fullFrame := &cg.StackMapFullFrame{}
 	fullFrame.FrameType = 255
 	fullFrame.Delta = delta
-	fullFrame.Locals = make([]*cg.StackMap_verification_type_info, len(state.Locals))
+	fullFrame.Locals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
 	copy(fullFrame.Locals, state.Locals)
-	fullFrame.Stacks = make([]*cg.StackMap_verification_type_info, len(state.Stacks))
+	fullFrame.Stacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
 	copy(fullFrame.Stacks, state.Stacks)
 	code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
 	return

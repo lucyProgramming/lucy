@@ -11,7 +11,7 @@ type StatementReturn struct {
 
 func (s *StatementReturn) mkDefers(b *Block) {
 	if b.IsFunctionTopBlock == false { // not top block
-		s.mkDefers(b.Outter) // recurvilly
+		s.mkDefers(b.Outer) // recurvilly
 	}
 	if b.Defers != nil {
 		s.Defers = append(s.Defers, b.Defers...)

@@ -11,8 +11,8 @@ import (
 func backfillExit(es []*cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
-		e.Bs[0] = byte(offset >> 8)
-		e.Bs[1] = byte(offset)
+		e.BranchBytes[0] = byte(offset >> 8)
+		e.BranchBytes[1] = byte(offset)
 	}
 }
 

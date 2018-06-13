@@ -270,7 +270,7 @@ type ExpressionTypeAssert ExpressionTypeConversion
 /*
 	const
 */
-func (e *Expression) fromConst(c *Const) {
+func (e *Expression) fromConst(c *Constant) {
 	switch c.Typ.Typ {
 	case VARIABLE_TYPE_BOOL:
 		e.Typ = EXPRESSION_TYPE_BOOL
@@ -466,7 +466,7 @@ func (e *Expression) CallHasReturnValue() bool {
 	return len(e.Values) >= 1 && e.Values[0].RightValueValid()
 }
 
-type CallArgs []*Expression // f(1,2)　调用参数列表
+type CallArgs []*Expression // f(1,2)
 
 type ExpressionFunctionCall struct {
 	BuildInFunctionMeta      interface{} // for build function only

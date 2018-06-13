@@ -14,41 +14,41 @@ type Block struct {
 	IsClassBlock               bool
 	Pos                        *Pos
 	EndPos                     *Pos
-	Outter                     *Block
+	Outer                      *Block
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
-	Consts                     map[string]*Const
-	Funcs                      map[string]*Function
+	Constants                  map[string]*Constant
+	Functions                  map[string]*Function
 	Classes                    map[string]*Class
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
 	Labels                     map[string]*StatementLabel
 	Types                      map[string]*VariableType
-	Vars                       map[string]*VariableDefinition
-	ClosureFuncs               map[string]*Function //in "Funcs" too
+	Variables                  map[string]*VariableDefinition
+	ClosureFunctions           map[string]*Function //in "Functions" too
 }
 
 func (b *Block) HaveVariableDefinition() bool {
-	if b.ClosureFuncs == nil && b.Vars == nil {
+	if b.ClosureFunctions == nil && b.Variables == nil {
 		return false
 	}
-	return len(b.ClosureFuncs) > 0 || len(b.Vars) > 0
+	return len(b.ClosureFunctions) > 0 || len(b.Variables) > 0
 }
 
 func (b *Block) NameExists(name string) (interface{}, bool) {
-	if b.Funcs != nil {
-		if t, ok := b.Funcs[name]; ok {
+	if b.Functions != nil {
+		if t, ok := b.Functions[name]; ok {
 			return t, true
 		}
 	}
 
-	if b.Vars != nil {
-		if t, ok := b.Vars[name]; ok {
+	if b.Variables != nil {
+		if t, ok := b.Variables[name]; ok {
 			return t, true
 		}
 	}
-	if b.Consts != nil {
-		if t, ok := b.Consts[name]; ok {
+	if b.Constants != nil {
+		if t, ok := b.Constants[name]; ok {
 			return t, true
 		}
 	}
@@ -73,11 +73,16 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
+	if b.Labels != nil { // should be useless
+		if t, ok := b.Labels[name]; ok {
+			return t, true
+		}
+	}
 	return nil, false
 }
 
 /*
-	search lable
+	search label
 */
 func (b *Block) searchLabel(name string) *StatementLabel {
 	bb := b
@@ -90,7 +95,7 @@ func (b *Block) searchLabel(name string) *StatementLabel {
 		if bb.IsFunctionTopBlock {
 			return nil
 		}
-		bb = bb.Outter
+		bb = bb.Outer
 	}
 	return nil
 }
@@ -112,7 +117,7 @@ func (b *Block) searchType(name string) interface{} {
 				return t
 			}
 		}
-		bb = bb.Outter
+		bb = bb.Outer
 	}
 	return nil
 }
@@ -121,18 +126,18 @@ func (b *Block) searchType(name string) interface{} {
 	search rightValue
 */
 func (b *Block) SearchByName(name string) (interface{}, error) {
-	if b.Funcs != nil {
-		if t, ok := b.Funcs[name]; ok {
+	if b.Functions != nil {
+		if t, ok := b.Functions[name]; ok {
 			return t, nil
 		}
 	}
-	if b.Vars != nil {
-		if t, ok := b.Vars[name]; ok {
+	if b.Variables != nil {
+		if t, ok := b.Variables[name]; ok {
 			return t, nil
 		}
 	}
-	if b.Consts != nil {
-		if t, ok := b.Consts[name]; ok {
+	if b.Constants != nil {
+		if t, ok := b.Constants[name]; ok {
 			return t, nil
 		}
 	}
@@ -157,10 +162,10 @@ func (b *Block) SearchByName(name string) (interface{}, error) {
 		len(b.InheritedAttribute.Function.TypeParameters) > 0 { // this is a template function
 		return searchBuildIns(name), nil
 	}
-	if b.Outter == nil {
+	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outter.SearchByName(name) // search by outter block
+	t, err := b.Outer.SearchByName(name) // search by outter block
 	if err != nil {
 		return t, err
 	}
@@ -200,13 +205,13 @@ func (b *Block) inherit(father *Block) {
 		panic("inherit  from self")
 	}
 	b.InheritedAttribute = father.InheritedAttribute
-	b.Outter = father
+	b.Outer = father
 
 }
 
 func (b *Block) checkUnUsedVariable() (es []error) {
 	es = []error{}
-	for _, v := range b.Vars {
+	for _, v := range b.Variables {
 		if v.Used ||
 			v.IsGlobal ||
 			v.IsFunctionParameter ||
@@ -237,17 +242,17 @@ func (b *Block) checkStatements() []error {
 
 func (b *Block) checkConst() []error {
 	errs := make([]error, 0)
-	for _, c := range b.Consts {
+	for _, c := range b.Constants {
 		if c.Name == NO_NAME_IDENTIFIER {
 			err := fmt.Errorf("%s '%s' is not a valid name",
 				errMsgPrefix(c.Pos), c.Name)
 			errs = append(errs, err)
-			delete(b.Consts, c.Name)
+			delete(b.Constants, c.Name)
 			continue
 		}
 		err := checkConst(b, c, &errs)
 		if err != nil && c.Typ == nil {
-			delete(b.Consts, c.Name)
+			delete(b.Constants, c.Name)
 		}
 	}
 	return errs
@@ -261,13 +266,13 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	// global var insert into block
 	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
-		if vv, ok := b.Vars[name]; ok {
-			errmsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
+		if vv, ok := b.Variables[name]; ok {
+			errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
 				errMsgPrefix(pos), name)
-			errmsg += fmt.Sprintf("\t%s", errMsgPrefix(vv.Pos))
-			return fmt.Errorf(errmsg)
+			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(vv.Pos))
+			return fmt.Errorf(errMsg)
 		}
-		b.Vars[name] = v
+		b.Variables[name] = v
 		v.IsGlobal = true // it`s global
 		return nil
 	}
@@ -280,10 +285,10 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 	if name == "_" {
 		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
-	if b.Vars == nil {
-		b.Vars = make(map[string]*VariableDefinition)
+	if b.Variables == nil {
+		b.Variables = make(map[string]*VariableDefinition)
 	}
-	if v, ok := b.Vars[name]; ok {
+	if v, ok := b.Variables[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(v.Pos))
@@ -298,19 +303,19 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errMsg)
 	}
-	if b.Funcs == nil {
-		b.Funcs = make(map[string]*Function)
+	if b.Functions == nil {
+		b.Functions = make(map[string]*Function)
 	}
-	if f, ok := b.Funcs[name]; ok {
+	if f, ok := b.Functions[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
 		return fmt.Errorf(errMsg)
 	}
-	if b.Consts == nil {
-		b.Consts = make(map[string]*Const)
+	if b.Constants == nil {
+		b.Constants = make(map[string]*Constant)
 	}
-	if c, ok := b.Consts[name]; ok {
+	if c, ok := b.Constants[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
@@ -367,12 +372,12 @@ func (b *Block) insert(name string, pos *Pos, d interface{}) error {
 			return fmt.Errorf("%s function named '%s' is buildin",
 				errMsgPrefix(pos), name)
 		}
-		b.Funcs[name] = t
-	case *Const:
-		b.Consts[name] = d.(*Const)
+		b.Functions[name] = t
+	case *Constant:
+		b.Constants[name] = d.(*Constant)
 	case *VariableDefinition:
 		t := d.(*VariableDefinition)
-		b.Vars[name] = t
+		b.Variables[name] = t
 	case *Enum:
 		e := d.(*Enum)
 		b.Enums[name] = e

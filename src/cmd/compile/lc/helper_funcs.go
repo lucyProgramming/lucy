@@ -50,7 +50,7 @@ func loadEnumForVariableType(v *ast.VariableType) error {
 	if tt, ok := t.(*ast.Enum); ok && tt != nil {
 		v.Enum = tt
 	} else {
-		return fmt.Errorf("'%s' is not a enum")
+		return fmt.Errorf("'%s' is not a enum", v.Enum.Name)
 	}
 	return nil
 }

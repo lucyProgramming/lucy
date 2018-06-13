@@ -187,7 +187,7 @@ func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
 		Typ: ast.VARIABLE_TYPE_NAME,
 	}
 	p.Next() // skip name identifier
-	for p.token.Type == lex.TOKEN_DOT && p.token.Type != lex.TOKEN_EOF {
+	for p.token.Type == lex.TOKEN_DOT {
 		p.Next() // skip .
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			return nil, fmt.Errorf("%s not a identifier after dot",

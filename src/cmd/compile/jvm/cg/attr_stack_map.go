@@ -27,69 +27,69 @@ func (a *AttributeStackMap) ToAttributeInfo(class *Class) *AttributeInfo {
 	return info
 }
 
-type StackMap_same_frame struct {
+type StackMapSameFrame struct {
 	FrameType byte
 }
 
-func (s *StackMap_same_frame) ToBytes() []byte {
+func (s *StackMapSameFrame) ToBytes() []byte {
 	return []byte{s.FrameType}
 }
 
-type StackMap_same_locals_1_stack_item_frame struct {
+type StackMapSameLocals1StackItemFrame struct {
 	FrameType byte
-	Stack     *StackMap_verification_type_info
+	Stack     *StackMapVerificationTypeInfo
 }
 
-func (s *StackMap_same_locals_1_stack_item_frame) ToBytes() []byte {
+func (s *StackMapSameLocals1StackItemFrame) ToBytes() []byte {
 	bs := []byte{s.FrameType}
 	bs = append(bs, s.Stack.ToBytes()...)
 	return bs
 }
 
-type StackMap_same_locals_1_stack_item_frame_extended struct {
+type StackMapSameLocals1StackItemFrameExtended struct {
 	FrameType byte
 	Delta     uint16
-	Stack     *StackMap_verification_type_info
+	Stack     *StackMapVerificationTypeInfo
 }
 
-func (s *StackMap_same_locals_1_stack_item_frame_extended) ToBytes() []byte {
+func (s *StackMapSameLocals1StackItemFrameExtended) ToBytes() []byte {
 	bs := make([]byte, 3)
 	bs[0] = s.FrameType
 	binary.BigEndian.PutUint16(bs[1:], s.Delta)
 	return append(bs, s.Stack.ToBytes()...)
 }
 
-type StackMap_chop_frame struct {
+type StackMapChopFrame struct {
 	FrameType byte
 	Delta     uint16
 }
 
-func (s *StackMap_chop_frame) ToBytes() []byte {
+func (s *StackMapChopFrame) ToBytes() []byte {
 	bs := make([]byte, 3)
 	bs[0] = s.FrameType
 	binary.BigEndian.PutUint16(bs[1:], s.Delta)
 	return bs
 }
 
-type StackMap_same_frame_extended struct {
+type StackMapSameFrameExtended struct {
 	FrameType byte
 	Delta     uint16
 }
 
-func (s *StackMap_same_frame_extended) ToBytes() []byte {
+func (s *StackMapSameFrameExtended) ToBytes() []byte {
 	bs := make([]byte, 3)
 	bs[0] = s.FrameType
 	binary.BigEndian.PutUint16(bs[1:], s.Delta)
 	return bs
 }
 
-type StackMap_append_frame struct {
+type StackMapAppendFrame struct {
 	FrameType byte
 	Delta     uint16
-	Locals    []*StackMap_verification_type_info
+	Locals    []*StackMapVerificationTypeInfo
 }
 
-func (s *StackMap_append_frame) ToBytes() []byte {
+func (s *StackMapAppendFrame) ToBytes() []byte {
 	bs := make([]byte, 3)
 	bs[0] = s.FrameType
 	binary.BigEndian.PutUint16(bs[1:], s.Delta)
@@ -99,14 +99,14 @@ func (s *StackMap_append_frame) ToBytes() []byte {
 	return bs
 }
 
-type StackMap_full_frame struct {
+type StackMapFullFrame struct {
 	FrameType byte
 	Delta     uint16
-	Locals    []*StackMap_verification_type_info
-	Stacks    []*StackMap_verification_type_info
+	Locals    []*StackMapVerificationTypeInfo
+	Stacks    []*StackMapVerificationTypeInfo
 }
 
-func (s *StackMap_full_frame) ToBytes() []byte {
+func (s *StackMapFullFrame) ToBytes() []byte {
 	bs := make([]byte, 5)
 	bs[0] = s.FrameType
 	binary.BigEndian.PutUint16(bs[1:], s.Delta)
@@ -123,21 +123,21 @@ func (s *StackMap_full_frame) ToBytes() []byte {
 	return bs
 }
 
-type StackMap_Top_variable_info struct{}
-type StackMap_Integer_variable_info struct{}
-type StackMap_Float_variable_info struct{}
-type StackMap_Long_variable_info struct{}
-type StackMap_Double_variable_info struct{}
-type StackMap_Null_variable_info struct{}
-type StackMap_UninitializedThis_variable_info struct{}
-type StackMap_Object_variable_info struct {
+type StackMapTopVariableInfo struct{}
+type StackMapIntegerVariableInfo struct{}
+type StackMapFloatVariableInfo struct{}
+type StackMapLongVariableInfo struct{}
+type StackMapDoubleVariableInfo struct{}
+type StackMapNullVariableInfo struct{}
+type StackMapUninitializedThisVariableInfo struct{}
+type StackMapObjectVariableInfo struct {
 	Index uint16
 }
-type StackMap_Uninitialized_variable_info struct {
+type StackMapUninitializedVariableInfo struct {
 	CodeOffset uint16
 }
 
-type StackMap_verification_type_info struct {
+type StackMapVerificationTypeInfo struct {
 	Verify interface{}
 }
 
@@ -150,20 +150,20 @@ type StackMap_verification_type_info struct {
 //		return true
 //	}
 //	// same as top
-//	if t1, ok := s.Verify.(*StackMap_Top_variable_info); ok && t1 != nil {
-//		if t2, ok := s2.Verify.(*StackMap_Top_variable_info); ok && t2 != nil {
+//	if t1, ok := s.Verify.(*StackMapTopVariableInfo); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMapTopVariableInfo); ok && t2 != nil {
 //			return true
 //		}
 //	}
 //	// same as int
-//	if t1, ok := s.Verify.(*StackMap_Integer_variable_info); ok && t1 != nil {
-//		if t2, ok := s2.Verify.(*StackMap_Integer_variable_info); ok && t2 != nil {
+//	if t1, ok := s.Verify.(*StackMapIntegerVariableInfo); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMapIntegerVariableInfo); ok && t2 != nil {
 //			return true
 //		}
 //	}
 //	// same as float
-//	if t1, ok := s.Verify.(*StackMap_Float_variable_info); ok && t1 != nil {
-//		if t2, ok := s2.Verify.(*StackMap_Float_variable_info); ok && t2 != nil {
+//	if t1, ok := s.Verify.(*StackMapFloatVariableInfo); ok && t1 != nil {
+//		if t2, ok := s2.Verify.(*StackMapFloatVariableInfo); ok && t2 != nil {
 //			return true
 //		}
 //	}
@@ -206,31 +206,31 @@ type StackMap_verification_type_info struct {
 //	return false
 //}
 
-func (s *StackMap_verification_type_info) ToBytes() []byte {
+func (s *StackMapVerificationTypeInfo) ToBytes() []byte {
 	switch s.Verify.(type) {
-	case *StackMap_Top_variable_info:
+	case *StackMapTopVariableInfo:
 		return []byte{0}
-	case *StackMap_Integer_variable_info:
+	case *StackMapIntegerVariableInfo:
 		return []byte{1}
-	case *StackMap_Float_variable_info:
+	case *StackMapFloatVariableInfo:
 		return []byte{2}
-	case *StackMap_Double_variable_info:
+	case *StackMapDoubleVariableInfo:
 		return []byte{3}
-	case *StackMap_Long_variable_info:
+	case *StackMapLongVariableInfo:
 		return []byte{4}
-	case *StackMap_Null_variable_info:
+	case *StackMapNullVariableInfo:
 		return []byte{5}
-	case *StackMap_UninitializedThis_variable_info:
+	case *StackMapUninitializedThisVariableInfo:
 		return []byte{6}
-	case *StackMap_Object_variable_info:
+	case *StackMapObjectVariableInfo:
 		bs := make([]byte, 3)
 		bs[0] = 7
-		binary.BigEndian.PutUint16(bs[1:], s.Verify.(*StackMap_Object_variable_info).Index)
+		binary.BigEndian.PutUint16(bs[1:], s.Verify.(*StackMapObjectVariableInfo).Index)
 		return bs
-	case *StackMap_Uninitialized_variable_info:
+	case *StackMapUninitializedVariableInfo:
 		bs := make([]byte, 3)
 		bs[0] = 8
-		binary.BigEndian.PutUint16(bs[1:], s.Verify.(*StackMap_Uninitialized_variable_info).CodeOffset)
+		binary.BigEndian.PutUint16(bs[1:], s.Verify.(*StackMapUninitializedVariableInfo).CodeOffset)
 		return bs
 	default:
 	}

@@ -1,15 +1,15 @@
 package ast
 
 type Closure struct {
-	Vars      map[*VariableDefinition]struct{}
+	Variables map[*VariableDefinition]struct{}
 	Functions map[*Function]struct{}
 }
 
 func (c *Closure) ClosureVariableExist(v *VariableDefinition) bool {
-	if c.Vars == nil {
+	if c.Variables == nil {
 		return false
 	}
-	_, ok := c.Vars[v]
+	_, ok := c.Variables[v]
 	return ok
 }
 
@@ -31,7 +31,7 @@ func (c *Closure) NotEmpty(f *Function) bool {
 		}
 		c.Functions = fs
 	}
-	if c.Vars != nil && len(c.Vars) > 0 {
+	if c.Variables != nil && len(c.Variables) > 0 {
 		f.IsClosureFunction = true // incase capture it self
 		filterOutNotClosureFunction()
 		return true
@@ -44,10 +44,10 @@ func (c *Closure) NotEmpty(f *Function) bool {
 }
 
 func (c *Closure) InsertVar(v *VariableDefinition) {
-	if c.Vars == nil {
-		c.Vars = make(map[*VariableDefinition]struct{})
+	if c.Variables == nil {
+		c.Variables = make(map[*VariableDefinition]struct{})
 	}
-	c.Vars[v] = struct{}{}
+	c.Variables[v] = struct{}{}
 	v.BeenCaptured = true
 }
 
@@ -59,7 +59,7 @@ func (c *Closure) InsertFunction(f *Function) {
 }
 
 func (c *Closure) Search(name string) interface{} {
-	for v, _ := range c.Vars {
+	for v, _ := range c.Variables {
 		if v.Name == name {
 			return v
 		}

@@ -17,7 +17,7 @@ func (m *MakeExpression) getCaptureIdentifierLeftValue(
 	op = []byte{cg.OP_putfield}
 	meta := closure.getMeta(identifier.Var.Typ.Typ)
 	if context.function.Closure.ClosureVariableExist(identifier.Var) { // capture var exits
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,
@@ -26,7 +26,7 @@ func (m *MakeExpression) getCaptureIdentifierLeftValue(
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	}
 	state.pushStack(class, state.newObjectVariableType(meta.className))
 	maxStack = 1

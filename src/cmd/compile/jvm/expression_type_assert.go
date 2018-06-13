@@ -9,29 +9,29 @@ import (
 
 func (m *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	assert := e.Data.(*ast.ExpressionTypeAssert)
-	maxStack, _ = m.build(class, code, assert.Expression, context, state)
+	assertOn := e.Data.(*ast.ExpressionTypeAssert)
+	maxStack, _ = m.build(class, code, assertOn.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof
-	if assert.Typ.Typ == ast.VARIABLE_TYPE_OBJECT {
-		class.InsertClassConst(assert.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	} else if assert.Typ.Typ == ast.VARIABLE_TYPE_ARRAY { // arrays
-		meta := ArrayMetas[assert.Typ.ArrayType.Typ]
+	if assertOn.Typ.Typ == ast.VARIABLE_TYPE_OBJECT {
+		class.InsertClassConst(assertOn.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	} else if assertOn.Typ.Typ == ast.VARIABLE_TYPE_ARRAY { // arrays
+		meta := ArrayMetas[assertOn.Typ.ArrayType.Typ]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
-		class.InsertClassConst(Descriptor.typeDescriptor(assert.Typ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(Descriptor.typeDescriptor(assertOn.Typ), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 
 	{
-		state.pushStack(class, assert.Expression.Value)
+		state.pushStack(class, assertOn.Expression.Value)
 		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
 		state.pushStack(class, &ast.VariableType{Typ: ast.VARIABLE_TYPE_INT})
-		state.pushStack(class, assert.Expression.Value)
+		state.pushStack(class, assertOn.Expression.Value)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(2)
 	}

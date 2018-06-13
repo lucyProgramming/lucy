@@ -149,7 +149,8 @@ func (p *Parser) Parse() []error {
 			p.Next()                            // skip {
 			p.Block.parseStatementList(b, true) // this function will lookup next
 			if p.token.Type != lex.TOKEN_RC {
-				p.errs = append(p.errs, fmt.Errorf("%s expect '}', but '%s'"))
+				p.errs = append(p.errs, fmt.Errorf("%s expect '}', but '%s'",
+					p.errorMsgPrefix(), p.token.Description))
 				p.consume(untils_rc)
 			}
 			p.Next() // skip }
@@ -223,7 +224,7 @@ func (p *Parser) Parse() []error {
 			}
 			for k, v := range vs {
 				if k < len(es) {
-					c := &ast.Const{}
+					c := &ast.Constant{}
 					c.VariableDefinition = *v
 					c.Expression = es[k]
 					if ispublic {

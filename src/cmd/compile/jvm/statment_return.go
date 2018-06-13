@@ -168,7 +168,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 	if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
-			copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
+			copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT,
 				context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -183,7 +183,7 @@ func (m *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.Attr
 		//restore the stack
 		if len(statementReturn.Expressions) > 0 {
 			copyOP(code,
-				loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
+				loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT,
 					context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
 		}
 	}
@@ -295,7 +295,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		}
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT,
+		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT,
 			context.function.AutoVarForException.Offset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
@@ -304,7 +304,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		ss.addTop(state)
 		context.Defer = nil
 		//if need throw
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
@@ -325,7 +325,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		//exception that have been handled
 		if len(statementReturn.Expressions) > 0 && len(context.function.Typ.ReturnList) > 1 {
 			//load when function have multi returns if read to end
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 			code.Codes[code.CodeLength+3] = cg.OP_goto

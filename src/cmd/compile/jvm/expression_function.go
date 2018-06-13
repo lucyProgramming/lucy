@@ -65,12 +65,12 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 	function.VarOffSet = code.MaxLocals
 	code.MaxLocals++
 	state.appendLocals(class, state.newObjectVariableType(className))
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
+	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
-	total := len(function.Closure.Vars) + len(function.Closure.Functions)
+	total := len(function.Closure.Variables) + len(function.Closure.Functions)
 	i := 0
-	for v, _ := range function.Closure.Vars {
+	for v, _ := range function.Closure.Variables {
 		filed := &cg.FieldHighLevel{}
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
@@ -84,7 +84,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		}
 		if context.function.Closure.ClosureVariableExist(v) {
 			// I Know class at 0 offset
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -96,7 +96,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -123,7 +123,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 		}
 		if context.function.Closure.ClosureFunctionExist(v) {
 			// I Know class at 0 offset
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -135,7 +135,7 @@ func (m *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.A
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.VarOffSet)...)
+			copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.VarOffSet)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}

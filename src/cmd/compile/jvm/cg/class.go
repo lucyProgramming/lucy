@@ -34,27 +34,27 @@ type Class struct {
 	TypeAlias              []*AttributeLucyTypeAlias
 	AttributeLucyEnum      *AttributeLucyEnum
 	//const caches
-	Utf8Consts               map[string]*ConstPool
-	IntConsts                map[int32]*ConstPool
-	LongConsts               map[int64]*ConstPool
-	FloatConsts              map[float32]*ConstPool
-	DoubleConsts             map[float64]*ConstPool
-	ClassConsts              map[string]*ConstPool
-	StringConsts             map[string]*ConstPool
-	FieldRefConsts           map[CONSTANT_Fieldref_info_high_level]*ConstPool
-	NameAndTypeConsts        map[CONSTANT_NameAndType_info_high_level]*ConstPool
-	MethodrefConsts          map[CONSTANT_Methodref_info_high_level]*ConstPool
-	InterfaceMethodrefConsts map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
+	Utf8Constants               map[string]*ConstPool
+	IntConstants                map[int32]*ConstPool
+	LongConstants               map[int64]*ConstPool
+	FloatConstants              map[float32]*ConstPool
+	DoubleConstants             map[float64]*ConstPool
+	ClassConstants              map[string]*ConstPool
+	StringConstants             map[string]*ConstPool
+	FieldRefConstants           map[CONSTANT_Fieldref_info_high_level]*ConstPool
+	NameAndTypeConstants        map[CONSTANT_NameAndType_info_high_level]*ConstPool
+	MethodrefConstants          map[CONSTANT_Methodref_info_high_level]*ConstPool
+	InterfaceMethodrefConstants map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
-	if c.InterfaceMethodrefConsts == nil {
-		c.InterfaceMethodrefConsts = make(map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool)
+	if c.InterfaceMethodrefConstants == nil {
+		c.InterfaceMethodrefConstants = make(map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.InterfaceMethodrefConsts[n]; ok {
+	if con, ok := c.InterfaceMethodrefConstants[n]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_InterfaceMethodref_info{
@@ -66,18 +66,18 @@ func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info
 	}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.InterfaceMethodrefConsts[n] = info
+	c.InterfaceMethodrefConstants[n] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint16 {
-	if c.MethodrefConsts == nil {
-		c.MethodrefConsts = make(map[CONSTANT_Methodref_info_high_level]*ConstPool)
+	if c.MethodrefConstants == nil {
+		c.MethodrefConstants = make(map[CONSTANT_Methodref_info_high_level]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.MethodrefConsts[n]; ok {
+	if con, ok := c.MethodrefConstants[n]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Methodref_info{
@@ -89,18 +89,18 @@ func (c *Class) InsertMethodrefConst(n CONSTANT_Methodref_info_high_level) uint1
 	}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.MethodrefConsts[n] = info
+	c.MethodrefConstants[n] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertNameAndType(n CONSTANT_NameAndType_info_high_level) uint16 {
-	if c.NameAndTypeConsts == nil {
-		c.NameAndTypeConsts = make(map[CONSTANT_NameAndType_info_high_level]*ConstPool)
+	if c.NameAndTypeConstants == nil {
+		c.NameAndTypeConstants = make(map[CONSTANT_NameAndType_info_high_level]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.NameAndTypeConsts[n]; ok {
+	if con, ok := c.NameAndTypeConstants[n]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_NameAndType_info{
@@ -109,17 +109,17 @@ func (c *Class) InsertNameAndType(n CONSTANT_NameAndType_info_high_level) uint16
 	}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.NameAndTypeConsts[n] = info
+	c.NameAndTypeConstants[n] = info
 	return info.selfIndex
 }
 func (c *Class) InsertFieldRefConst(f CONSTANT_Fieldref_info_high_level) uint16 {
-	if c.FieldRefConsts == nil {
-		c.FieldRefConsts = make(map[CONSTANT_Fieldref_info_high_level]*ConstPool)
+	if c.FieldRefConstants == nil {
+		c.FieldRefConstants = make(map[CONSTANT_Fieldref_info_high_level]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.FieldRefConsts[f]; ok {
+	if con, ok := c.FieldRefConstants[f]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Fieldref_info{
@@ -131,130 +131,130 @@ func (c *Class) InsertFieldRefConst(f CONSTANT_Fieldref_info_high_level) uint16 
 	}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.FieldRefConsts[f] = info
+	c.FieldRefConstants[f] = info
 	return info.selfIndex
 }
 func (c *Class) insertUtf8Const(s string) uint16 {
-	if c.Utf8Consts == nil {
-		c.Utf8Consts = make(map[string]*ConstPool)
+	if c.Utf8Constants == nil {
+		c.Utf8Constants = make(map[string]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.Utf8Consts[s]; ok {
+	if con, ok := c.Utf8Constants[s]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Utf8_info{uint16(len(s)), []byte(s)}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.Utf8Consts[s] = info
+	c.Utf8Constants[s] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertIntConst(i int32) uint16 {
-	if c.IntConsts == nil {
-		c.IntConsts = make(map[int32]*ConstPool)
+	if c.IntConstants == nil {
+		c.IntConstants = make(map[int32]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.IntConsts[i]; ok {
+	if con, ok := c.IntConstants[i]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Integer_info{i}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.IntConsts[i] = info
+	c.IntConstants[i] = info
 	return info.selfIndex
 }
 func (c *Class) InsertLongConst(i int64) uint16 {
-	if c.LongConsts == nil {
-		c.LongConsts = make(map[int64]*ConstPool)
+	if c.LongConstants == nil {
+		c.LongConstants = make(map[int64]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.LongConsts[i]; ok {
+	if con, ok := c.LongConstants[i]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Long_info{i}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info, nil)
-	c.LongConsts[i] = info
+	c.LongConstants[i] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertFloatConst(f float32) uint16 {
-	if c.FloatConsts == nil {
-		c.FloatConsts = make(map[float32]*ConstPool)
+	if c.FloatConstants == nil {
+		c.FloatConstants = make(map[float32]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.FloatConsts[f]; ok {
+	if con, ok := c.FloatConstants[f]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Float_info{f}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.FloatConsts[f] = info
+	c.FloatConstants[f] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertDoubleConst(f float64) uint16 {
-	if c.DoubleConsts == nil {
-		c.DoubleConsts = make(map[float64]*ConstPool)
+	if c.DoubleConstants == nil {
+		c.DoubleConstants = make(map[float64]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.DoubleConsts[f]; ok {
+	if con, ok := c.DoubleConstants[f]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Double_info{f}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info, nil)
-	c.DoubleConsts[f] = info
+	c.DoubleConstants[f] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertClassConst(name string) uint16 {
-	if c.ClassConsts == nil {
-		c.ClassConsts = make(map[string]*ConstPool)
+	if c.ClassConstants == nil {
+		c.ClassConstants = make(map[string]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.ClassConsts[name]; ok {
+	if con, ok := c.ClassConstants[name]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_Class_info{c.insertUtf8Const(name)}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.ClassConsts[name] = info
+	c.ClassConstants[name] = info
 	return info.selfIndex
 }
 
 func (c *Class) InsertStringConst(s string) uint16 {
-	if c.StringConsts == nil {
-		c.StringConsts = make(map[string]*ConstPool)
+	if c.StringConstants == nil {
+		c.StringConstants = make(map[string]*ConstPool)
 	}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}
-	if con, ok := c.StringConsts[s]; ok {
+	if con, ok := c.StringConstants[s]; ok {
 		return con.selfIndex
 	}
 	info := (&CONSTANT_String_info{c.insertUtf8Const(s)}).ToConstPool()
 	info.selfIndex = c.constPoolUint16Length()
 	c.ConstPool = append(c.ConstPool, info)
-	c.StringConsts[s] = info
+	c.StringConstants[s] = info
 	return info.selfIndex
 }
 
-func (high *ClassHighLevel) ToLow(jvmVersion int) *Class {
-	high.Class.fromHighLevel(high, jvmVersion)
-	return &high.Class
+func (classHighLevel *ClassHighLevel) ToLow(jvmVersion int) *Class {
+	classHighLevel.Class.fromHighLevel(classHighLevel, jvmVersion)
+	return &classHighLevel.Class
 }
 
 func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
@@ -280,8 +280,8 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 			field.Attributes = append(field.Attributes, f.AttributeConstantValue.ToAttributeInfo(c))
 		}
 		field.DescriptorIndex = c.insertUtf8Const(f.Descriptor)
-		if f.AttributeLucyFieldDescritor != nil {
-			field.Attributes = append(field.Attributes, f.AttributeLucyFieldDescritor.ToAttributeInfo(c))
+		if f.AttributeLucyFieldDescriptor != nil {
+			field.Attributes = append(field.Attributes, f.AttributeLucyFieldDescriptor.ToAttributeInfo(c))
 		}
 		if f.AttributeLucyConst != nil {
 			field.Attributes = append(field.Attributes, f.AttributeLucyConst.ToAttributeInfo(c))

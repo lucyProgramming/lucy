@@ -20,7 +20,7 @@ type Package struct {
 	Errors                       []error
 }
 
-func (p *Package) loadBuildinPackage() error {
+func (p *Package) loadBuildInPackage() error {
 	if p.Name == common.CORE_PACAKGE {
 		return nil
 	}
@@ -29,7 +29,7 @@ func (p *Package) loadBuildinPackage() error {
 		return err
 	}
 	lucyBuildInPackage = pp.(*Package)
-	p.Block.Outter = &lucyBuildInPackage.Block
+	p.Block.Outer = &lucyBuildInPackage.Block
 	return nil
 }
 
@@ -67,13 +67,13 @@ func (p *Package) TypeCheck() []error {
 	p.Errors = []error{}
 	p.Errors = append(p.Errors, p.Block.checkConst()...)
 	//
-	for _, v := range p.Block.Funcs {
+	for _, v := range p.Block.Functions {
 		if v.IsBuildIn {
 			continue
 		}
 		v.Block.inherit(&p.Block)
 		v.Block.InheritedAttribute.Function = v
-		v.checkParametersAndRetuns(&p.Errors)
+		v.checkParametersAndReturns(&p.Errors)
 		if p.shouldStop(nil) {
 			return p.Errors
 		}
@@ -114,7 +114,7 @@ func (p *Package) TypeCheck() []error {
 			return p.Errors
 		}
 	}
-	for _, v := range p.Block.Funcs {
+	for _, v := range p.Block.Functions {
 		if v.IsBuildIn {
 			continue
 		}

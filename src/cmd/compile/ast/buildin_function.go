@@ -7,10 +7,10 @@ import (
 )
 
 func init() {
-	registerBuildinFunctions()
+	registerBuildInFunctions()
 }
 
-func registerBuildinFunctions() {
+func registerBuildInFunctions() {
 	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
 			if len(e.TypedParameters) > 0 {
@@ -45,7 +45,7 @@ func registerBuildinFunctions() {
 	{
 		catchBuildFunction.Typ.ReturnList = make([]*VariableDefinition, 1)
 		catchBuildFunction.Typ.ReturnList[0] = &VariableDefinition{}
-		catchBuildFunction.Typ.ReturnList[0].Name = "retrunValue"
+		catchBuildFunction.Typ.ReturnList[0].Name = "returnValue"
 		catchBuildFunction.Typ.ReturnList[0].Typ = &VariableType{}
 		catchBuildFunction.Typ.ReturnList[0].Typ.Typ = VARIABLE_TYPE_OBJECT
 		catchBuildFunction.Typ.ReturnList[0].Typ.Class = &Class{}

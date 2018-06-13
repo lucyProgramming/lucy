@@ -11,17 +11,17 @@ func (m *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.Attribute
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	slice := e.Data.(*ast.ExpressionSlice)
-	meta := ArrayMetas[slice.Array.Value.ArrayType.Typ]
-	maxStack, _ = m.build(class, code, slice.Array, context, state)
-	state.pushStack(class, slice.Array.Value)
+	sliceOn := e.Data.(*ast.ExpressionSlice)
+	meta := ArrayMetas[sliceOn.Array.Value.ArrayType.Typ]
+	maxStack, _ = m.build(class, code, sliceOn.Array, context, state)
+	state.pushStack(class, sliceOn.Array.Value)
 	// build start
-	stack, _ := m.build(class, code, slice.Start, context, state)
+	stack, _ := m.build(class, code, sliceOn.Start, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, slice.Start.Value)
-	stack, _ = m.build(class, code, slice.End, context, state)
+	state.pushStack(class, sliceOn.Start.Value)
+	stack, _ = m.build(class, code, sliceOn.End, context, state)
 	if t := 2 + stack; t > maxStack {
 		maxStack = t
 	}

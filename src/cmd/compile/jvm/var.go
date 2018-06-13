@@ -2,11 +2,11 @@ package jvm
 
 var (
 	ArrayMetas                 = map[int]*ArrayMeta{}
-	typeConverter              TypeConverter
+	typeConverter              TypeConverterAndPrimitivePacker
 	Descriptor                 Descript
-	LucyMethodSignatureParser  LucyMethodSignatureParse
-	LucyFieldSignatureParser   LucyFieldSignatureParse
-	LucyTypeAliasParser        LucyTypeAliasParse
+	LucyMethodSignatureParser  LucyMethodSignature
+	LucyFieldSignatureParser   LucyFieldSignature
+	LucyTypeAliasParser        LucyTypeAlias
 	FunctionDefaultValueParser FunctionDefaultValueParse
 	multiValuePacker           MultiValuePacker
 )

@@ -11,7 +11,7 @@ func (ep *Expression) parseLogicalOrExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
-	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_OR) && ep.parser.token.Type != lex.TOKEN_EOF {
+	for ep.parser.token.Type == lex.TOKEN_LOGICAL_OR {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		e2, err := ep.parseLogicalAndExpression()
@@ -36,7 +36,7 @@ func (ep *Expression) parseLogicalAndExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
-	for (ep.parser.token.Type == lex.TOKEN_LOGICAL_AND) && ep.parser.token.Type != lex.TOKEN_EOF {
+	for ep.parser.token.Type == lex.TOKEN_LOGICAL_AND {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		e2, err := ep.parseOrExpression()
@@ -61,8 +61,7 @@ func (ep *Expression) parseOrExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_OR &&
-		ep.parser.token.Type != lex.TOKEN_EOF {
+	for ep.parser.token.Type == lex.TOKEN_OR {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		e2, err := ep.parseXorExpression()
@@ -88,8 +87,7 @@ func (ep *Expression) parseXorExpression() (*ast.Expression, error) {
 		return nil, err
 	}
 
-	for ep.parser.token.Type == lex.TOKEN_XOR &&
-		ep.parser.token.Type != lex.TOKEN_EOF {
+	for ep.parser.token.Type == lex.TOKEN_XOR {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		e2, err := ep.parseAndExpression()
@@ -114,8 +112,7 @@ func (ep *Expression) parseAndExpression() (*ast.Expression, error) {
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_AND &&
-		ep.parser.token.Type != lex.TOKEN_EOF {
+	for ep.parser.token.Type == lex.TOKEN_AND {
 		pos := ep.parser.mkPos()
 		ep.Next()
 		e2, err := ep.parseEqualExpression()

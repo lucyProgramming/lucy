@@ -8,7 +8,7 @@ import (
 	access method lucy style
 */
 func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*VariableType,
-	callArgs *CallArgs, fromsub bool) (ms []*ClassMethod, matched bool, err error) {
+	callArgs *CallArgs, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {
 		return nil, false, err
@@ -18,7 +18,7 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*Vari
 	}
 	if len(c.Methods[name]) > 0 {
 		for _, m := range c.Methods[name] {
-			if fromsub {
+			if fromSub {
 				if m.IsPrivate() { // break the looking
 					return nil, false, fmt.Errorf("method '%s' not found", name)
 				}

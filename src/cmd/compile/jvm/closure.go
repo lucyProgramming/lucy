@@ -187,7 +187,7 @@ func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.
 	create a closure var on stack
 */
 func (closure *Closure) loadLocalCloureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.VariableDefinition) (maxStack uint16) {
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+	copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 	closure.unPack(class, code, v.Typ)
 	maxStack = jvmSize(v.Typ)
 	return

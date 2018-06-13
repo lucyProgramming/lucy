@@ -252,19 +252,20 @@ func (c *Class) parseConst() error {
 				c.parser.errorMsgPrefix(pos), len(es), len(vs)))
 	}
 
-	if c.classDefinition.Block.Consts == nil {
-		c.classDefinition.Block.Consts = make(map[string]*ast.Const)
+	if c.classDefinition.Block.Constants == nil {
+		c.classDefinition.Block.Constants = make(map[string]*ast.Constant)
 	}
 	for k, v := range vs {
-		if _, ok := c.classDefinition.Block.Consts[v.Name]; ok {
-			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const %s alreay declared", v.Name))
+		if _, ok := c.classDefinition.Block.Constants[v.Name]; ok {
+			c.parser.errs = append(c.parser.errs, fmt.Errorf("%s const %s alreay declared",
+				c.parser.errorMsgPrefix(), v.Name))
 			continue
 		}
 		if k < len(es) {
-			t := &ast.Const{}
+			t := &ast.Constant{}
 			t.VariableDefinition = *v
 			t.Expression = es[k]
-			c.classDefinition.Block.Consts[v.Name] = t
+			c.classDefinition.Block.Constants[v.Name] = t
 		}
 	}
 	return nil

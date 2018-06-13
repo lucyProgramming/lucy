@@ -50,7 +50,7 @@ func (c *Class) check(father *Block) []error {
 	return errs
 }
 
-func (c *Class) mkDefaultContruction() {
+func (c *Class) mkDefaultConstruction() {
 	if c.Methods != nil && len(c.Methods[CONSTRUCTION_METHOD_NAME]) > 0 {
 		return
 	}
@@ -95,7 +95,7 @@ func (c *Class) checkIfClassHierarchyCircularity() error {
 	}
 	errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy\n",
 		errMsgPrefix(c.Pos), c.Name)
-	var tab string = "\t"
+	tab := "\t"
 	index := len(arr) - 1
 	for index >= 0 {
 		errMsg += tab + arr[index] + "\n"
@@ -105,7 +105,7 @@ func (c *Class) checkIfClassHierarchyCircularity() error {
 	return fmt.Errorf(errMsg)
 }
 func (c *Class) checkPhase1(father *Block) []error {
-	c.mkDefaultContruction()
+	c.mkDefaultConstruction()
 	c.Block.inherit(father)
 	errs := c.Block.checkConst()
 	c.Block.InheritedAttribute.Class = c
@@ -172,7 +172,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 		for _, vv := range v {
 			vv.Func.Block.inherit(&c.Block)
 			vv.Func.Block.InheritedAttribute.Function = vv.Func
-			vv.Func.checkParametersAndRetuns(&errs)
+			vv.Func.checkParametersAndReturns(&errs)
 		}
 	}
 	return errs
@@ -278,11 +278,11 @@ func (c *Class) suitableForInterfaces() []error {
 	}
 	return errs
 }
-func (c *Class) suitableForInterface(inter *Class, fromsub bool) []error {
+func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 	errs := []error{}
 	for name, v := range inter.Methods {
 		m := v[0]
-		if fromsub == false || m.IsPrivate() == false {
+		if fromSub == false || m.IsPrivate() == false {
 			continue
 		}
 		args := make([]*VariableType, len(m.Func.Typ.ParameterList))
@@ -369,13 +369,13 @@ func (c *Class) checkMethods() []error {
 				continue
 			}
 			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
-				if vv.Func.Block.Vars == nil {
-					vv.Func.Block.Vars = make(map[string]*VariableDefinition)
+				if vv.Func.Block.Variables == nil {
+					vv.Func.Block.Variables = make(map[string]*VariableDefinition)
 				}
-				vv.Func.Block.Vars[THIS] = &VariableDefinition{}
-				vv.Func.Block.Vars[THIS].Name = THIS
-				vv.Func.Block.Vars[THIS].Pos = vv.Func.Pos
-				vv.Func.Block.Vars[THIS].Typ = &VariableType{
+				vv.Func.Block.Variables[THIS] = &VariableDefinition{}
+				vv.Func.Block.Variables[THIS].Name = THIS
+				vv.Func.Block.Variables[THIS].Pos = vv.Func.Pos
+				vv.Func.Block.Variables[THIS].Typ = &VariableType{
 					Typ:   VARIABLE_TYPE_OBJECT,
 					Class: c,
 				}

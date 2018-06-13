@@ -6,19 +6,19 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
-type LucyFieldSignatureParse struct {
+type LucyFieldSignature struct {
 }
 
-func (l *LucyFieldSignatureParse) Need(variableType *ast.VariableType) bool {
+func (signature *LucyFieldSignature) Need(variableType *ast.VariableType) bool {
 	return variableType.Typ == ast.VARIABLE_TYPE_MAP ||
 		variableType.Typ == ast.VARIABLE_TYPE_ARRAY ||
 		variableType.Typ == ast.VARIABLE_TYPE_ENUM
 }
-func (l *LucyFieldSignatureParse) Encode(variableType *ast.VariableType) (d string) {
+func (signature *LucyFieldSignature) Encode(variableType *ast.VariableType) (d string) {
 	if variableType.Typ == ast.VARIABLE_TYPE_MAP {
 		d = "M" // start token of map
-		d += l.Encode(variableType.Map.K)
-		d += l.Encode(variableType.Map.V)
+		d += signature.Encode(variableType.Map.K)
+		d += signature.Encode(variableType.Map.V)
 		return d
 	}
 	if variableType.Typ == ast.VARIABLE_TYPE_ENUM {
@@ -28,22 +28,22 @@ func (l *LucyFieldSignatureParse) Encode(variableType *ast.VariableType) (d stri
 	}
 	if variableType.Typ == ast.VARIABLE_TYPE_ARRAY {
 		d = "]"
-		d += l.Encode(variableType.ArrayType)
+		d += signature.Encode(variableType.ArrayType)
 		return d
 	}
 	return Descriptor.typeDescriptor(variableType)
 }
-func (l *LucyFieldSignatureParse) Decode(bs []byte) ([]byte, *ast.VariableType, error) {
+func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.VariableType, error) {
 	var err error
 	if bs[0] == 'M' {
 		bs = bs[1:]
 		var kt *ast.VariableType
-		bs, kt, err = l.Decode(bs)
+		bs, kt, err = signature.Decode(bs)
 		if err != nil {
 			return bs, nil, err
 		}
 		var vt *ast.VariableType
-		bs, vt, err = l.Decode(bs)
+		bs, vt, err = signature.Decode(bs)
 		if err != nil {
 			return bs, nil, err
 		}
@@ -68,7 +68,7 @@ func (l *LucyFieldSignatureParse) Decode(bs []byte) ([]byte, *ast.VariableType, 
 		bs = bs[1:]
 		a := &ast.VariableType{}
 		a.Typ = ast.VARIABLE_TYPE_ARRAY
-		bs, a.ArrayType, err = l.Decode(bs)
+		bs, a.ArrayType, err = signature.Decode(bs)
 		return bs, a, err
 	}
 	return Descriptor.ParseType(bs)

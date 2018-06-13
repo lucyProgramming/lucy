@@ -6,8 +6,8 @@ import (
 )
 
 type StackMapState struct {
-	Locals []*cg.StackMap_verification_type_info
-	Stacks []*cg.StackMap_verification_type_info
+	Locals []*cg.StackMapVerificationTypeInfo
+	Stacks []*cg.StackMapVerificationTypeInfo
 }
 
 // same as last
@@ -39,12 +39,12 @@ func (s *StackMapState) addTop(absent *StackMapState) {
 	}
 	length := len(absent.Locals) - len(s.Locals)
 	oldLength := len(s.Locals)
-	t := &cg.StackMap_verification_type_info{}
-	t.Verify = &cg.StackMap_Top_variable_info{}
+	t := &cg.StackMapVerificationTypeInfo{}
+	t.Verify = &cg.StackMapTopVariableInfo{}
 	for i := 0; i < length; i++ {
 		tt := absent.Locals[i+oldLength].Verify
-		_, ok1 := tt.(*cg.StackMap_Double_variable_info)
-		_, ok2 := tt.(*cg.StackMap_Long_variable_info)
+		_, ok1 := tt.(*cg.StackMapDoubleVariableInfo)
+		_, ok2 := tt.(*cg.StackMapLongVariableInfo)
 		if ok1 || ok2 {
 			s.Locals = append(s.Locals, t, t)
 		} else {
@@ -80,14 +80,14 @@ func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType)
 	s.Stacks = append(s.Stacks, s.newStackMapVerificationTypeInfo(class, v))
 }
 func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
-	s.Locals = make([]*cg.StackMap_verification_type_info, len(last.Locals))
+	s.Locals = make([]*cg.StackMapVerificationTypeInfo, len(last.Locals))
 	copy(s.Locals, last.Locals)
 	return s
 }
 
 func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel,
-	t *ast.VariableType) (ret *cg.StackMap_verification_type_info) {
-	ret = &cg.StackMap_verification_type_info{}
+	t *ast.VariableType) (ret *cg.StackMapVerificationTypeInfo) {
+	ret = &cg.StackMapVerificationTypeInfo{}
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -98,35 +98,35 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
-		ret.Verify = &cg.StackMap_Integer_variable_info{}
+		ret.Verify = &cg.StackMapIntegerVariableInfo{}
 	case ast.VARIABLE_TYPE_LONG:
-		ret.Verify = &cg.StackMap_Long_variable_info{}
+		ret.Verify = &cg.StackMapLongVariableInfo{}
 	case ast.VARIABLE_TYPE_FLOAT:
-		ret.Verify = &cg.StackMap_Float_variable_info{}
+		ret.Verify = &cg.StackMapFloatVariableInfo{}
 	case ast.VARIABLE_TYPE_DOUBLE:
-		ret.Verify = &cg.StackMap_Double_variable_info{}
+		ret.Verify = &cg.StackMapDoubleVariableInfo{}
 	case ast.VARIABLE_TYPE_NULL:
-		ret.Verify = &cg.StackMap_Null_variable_info{}
+		ret.Verify = &cg.StackMapNullVariableInfo{}
 	case ast.VARIABLE_TYPE_STRING:
-		ret.Verify = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(java_string_class),
 		}
 	case ast.VARIABLE_TYPE_OBJECT:
-		ret.Verify = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(t.Class.Name),
 		}
 	case ast.VARIABLE_TYPE_MAP:
-		ret.Verify = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(java_hashmap_class),
 		}
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Typ]
-		ret.Verify = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(meta.className),
 		}
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		d := Descriptor.typeDescriptor(t)
-		ret.Verify = &cg.StackMap_Object_variable_info{
+		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(d),
 		}
 	}

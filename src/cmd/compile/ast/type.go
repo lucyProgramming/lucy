@@ -52,19 +52,19 @@ type VariableType struct {
 	Alias       string
 }
 
-func (v *VariableType) validForTypeAssert() bool {
-	if v.IsPointer() == false {
+func (variableType *VariableType) validForTypeAssert() bool {
+	if variableType.IsPointer() == false {
 		return false
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY && v.ArrayType.IsPrimitive() {
+	if variableType.Typ == VARIABLE_TYPE_ARRAY && variableType.ArrayType.IsPrimitive() {
 		return true
 	}
-	if v.Typ == VARIABLE_TYPE_OBJECT || v.Typ == VARIABLE_TYPE_STRING {
+	if variableType.Typ == VARIABLE_TYPE_OBJECT || variableType.Typ == VARIABLE_TYPE_STRING {
 		return true
 	}
-	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		if v.ArrayType.IsPointer() {
-			return v.ArrayType.validForTypeAssert()
+	if variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		if variableType.ArrayType.IsPointer() {
+			return variableType.ArrayType.validForTypeAssert()
 		} else {
 			return true
 		}
@@ -78,12 +78,12 @@ type Map struct {
 	V *VariableType
 }
 
-func (v *VariableType) mkDefaultValueExpression() *Expression {
+func (variableType *VariableType) mkDefaultValueExpression() *Expression {
 	var e Expression
 	e.IsCompileAuto = true
-	e.Pos = v.Pos
-	e.Value = v.Clone()
-	switch v.Typ {
+	e.Pos = variableType.Pos
+	e.Value = variableType.Clone()
+	switch variableType.Typ {
 	case VARIABLE_TYPE_BOOL:
 		e.Typ = EXPRESSION_TYPE_BOOL
 		e.Data = false
@@ -117,152 +117,152 @@ func (v *VariableType) mkDefaultValueExpression() *Expression {
 		e.Typ = EXPRESSION_TYPE_NULL
 	case VARIABLE_TYPE_ENUM:
 		e.Typ = EXPRESSION_TYPE_INT
-		e.Data = v.Enum.Enums[0].Value
+		e.Data = variableType.Enum.Enums[0].Value
 	}
 	return &e
 }
 
-func (v *VariableType) RightValueValid() bool {
-	return v.Typ == VARIABLE_TYPE_BOOL ||
-		v.IsNumber() ||
-		v.Typ == VARIABLE_TYPE_STRING ||
-		v.Typ == VARIABLE_TYPE_OBJECT ||
-		v.Typ == VARIABLE_TYPE_ARRAY ||
-		v.Typ == VARIABLE_TYPE_MAP ||
-		v.Typ == VARIABLE_TYPE_NULL ||
-		v.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
-		v.Typ == VARIABLE_TYPE_ENUM
+func (variableType *VariableType) RightValueValid() bool {
+	return variableType.Typ == VARIABLE_TYPE_BOOL ||
+		variableType.IsNumber() ||
+		variableType.Typ == VARIABLE_TYPE_STRING ||
+		variableType.Typ == VARIABLE_TYPE_OBJECT ||
+		variableType.Typ == VARIABLE_TYPE_ARRAY ||
+		variableType.Typ == VARIABLE_TYPE_MAP ||
+		variableType.Typ == VARIABLE_TYPE_NULL ||
+		variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
+		variableType.Typ == VARIABLE_TYPE_ENUM
 }
 
 /*
 	isTyped means can get type from this
 */
-func (v *VariableType) isTyped() bool {
-	return v.RightValueValid() && v.Typ != VARIABLE_TYPE_NULL
+func (variableType *VariableType) isTyped() bool {
+	return variableType.RightValueValid() && variableType.Typ != VARIABLE_TYPE_NULL
 }
 
 /*
 	deep clone
 */
-func (t *VariableType) Clone() *VariableType {
+func (variableType *VariableType) Clone() *VariableType {
 	ret := &VariableType{}
-	*ret = *t
+	*ret = *variableType
 	if ret.Typ == VARIABLE_TYPE_ARRAY ||
 		ret.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		ret.ArrayType = t.ArrayType.Clone()
+		ret.ArrayType = variableType.ArrayType.Clone()
 	}
 	if ret.Typ == VARIABLE_TYPE_MAP {
 		ret.Map = &Map{}
-		ret.Map.K = t.Map.K.Clone()
-		ret.Map.V = t.Map.V.Clone()
+		ret.Map.K = variableType.Map.K.Clone()
+		ret.Map.V = variableType.Map.V.Clone()
 	}
 	return ret
 }
 
-func (t *VariableType) resolve(block *Block, subPart ...bool) error {
-	if t == nil {
+func (variableType *VariableType) resolve(block *Block, subPart ...bool) error {
+	if variableType == nil {
 		return nil
 	}
-	if t.Resolved {
+	if variableType.Resolved {
 		return nil
 	}
-	t.Resolved = true
-	if t.Typ == VARIABLE_TYPE_T {
+	variableType.Resolved = true
+	if variableType.Typ == VARIABLE_TYPE_T {
 		if block.InheritedAttribute.Function.TypeParameters == nil ||
-			block.InheritedAttribute.Function.TypeParameters[t.Name] == nil {
+			block.InheritedAttribute.Function.TypeParameters[variableType.Name] == nil {
 			return fmt.Errorf("%s typed parameter '%s' not found",
-				errMsgPrefix(t.Pos), t.Name)
+				errMsgPrefix(variableType.Pos), variableType.Name)
 		}
-		pos := t.Pos
-		*t = *block.InheritedAttribute.Function.TypeParameters[t.Name]
-		t.Pos = pos // keep pos
+		pos := variableType.Pos
+		*variableType = *block.InheritedAttribute.Function.TypeParameters[variableType.Name]
+		variableType.Pos = pos // keep pos
 		return nil
 	}
-	if t.Typ == VARIABLE_TYPE_NAME { //
-		return t.resolveName(block, len(subPart) > 0)
+	if variableType.Typ == VARIABLE_TYPE_NAME { //
+		return variableType.resolveName(block, len(subPart) > 0)
 	}
-	if t.Typ == VARIABLE_TYPE_ARRAY ||
-		t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return t.ArrayType.resolve(block, true)
+	if variableType.Typ == VARIABLE_TYPE_ARRAY ||
+		variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return variableType.ArrayType.resolve(block, true)
 	}
-	if t.Typ == VARIABLE_TYPE_MAP {
+	if variableType.Typ == VARIABLE_TYPE_MAP {
 		var err error
-		if t.Map.K != nil {
-			err = t.Map.K.resolve(block, true)
+		if variableType.Map.K != nil {
+			err = variableType.Map.K.resolve(block, true)
 			if err != nil {
 				return err
 			}
 		}
-		if t.Map.V != nil {
-			return t.Map.V.resolve(block, true)
+		if variableType.Map.V != nil {
+			return variableType.Map.V.resolve(block, true)
 		}
 	}
 	return nil
 }
 
-func (t *VariableType) resolveNameFromImport() (d interface{}, err error) {
-	if strings.Contains(t.Name, ".") == false {
-		i := PackageBeenCompile.getImport(t.Pos.Filename, t.Name)
+func (variableType *VariableType) resolveNameFromImport() (d interface{}, err error) {
+	if strings.Contains(variableType.Name, ".") == false {
+		i := PackageBeenCompile.getImport(variableType.Pos.Filename, variableType.Name)
 		if i != nil {
 			return PackageBeenCompile.load(i.Resource)
 		}
-		return nil, fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
+		return nil, fmt.Errorf("%s type named '%s' not found", errMsgPrefix(variableType.Pos), variableType.Name)
 	}
-	packageAndName := strings.Split(t.Name, ".")
-	i := PackageBeenCompile.getImport(t.Pos.Filename, packageAndName[0])
+	packageAndName := strings.Split(variableType.Name, ".")
+	i := PackageBeenCompile.getImport(variableType.Pos.Filename, packageAndName[0])
 	if nil == i {
-		return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(t.Pos), packageAndName[0])
+		return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(variableType.Pos), packageAndName[0])
 	}
 	p, err := PackageBeenCompile.load(i.Resource)
 	if err != nil {
-		return nil, fmt.Errorf("%s %v", errMsgPrefix(t.Pos), err)
+		return nil, fmt.Errorf("%s %v", errMsgPrefix(variableType.Pos), err)
 	}
 	if pp, ok := p.(*Package); ok && pp != nil {
 		var exists bool
 		d, exists = pp.Block.NameExists(packageAndName[1])
 		if exists == false {
-			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(t.Pos), packageAndName[1])
+			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(variableType.Pos), packageAndName[1])
 		}
 		return d, err
 	} else {
-		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(t.Pos), packageAndName[0])
+		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(variableType.Pos), packageAndName[0])
 	}
 
 }
 
-func (t *VariableType) mkTypeFrom(d interface{}) error {
+func (variableType *VariableType) mkTypeFrom(d interface{}) error {
 	switch d.(type) {
 	case *Class:
 		dd := d.(*Class)
-		if t != nil {
-			t.Typ = VARIABLE_TYPE_OBJECT
-			t.Class = dd
+		if variableType != nil {
+			variableType.Typ = VARIABLE_TYPE_OBJECT
+			variableType.Class = dd
 			return nil
 		}
 	case *VariableType:
 		dd := d.(*VariableType)
 		if dd != nil {
 			tt := dd.Clone()
-			tt.Pos = t.Pos
-			*t = *tt
+			tt.Pos = variableType.Pos
+			*variableType = *tt
 			return nil
 		}
 	case *Enum:
 		dd := d.(*Enum)
 		if dd != nil {
-			t.Typ = VARIABLE_TYPE_ENUM
-			t.Enum = dd
+			variableType.Typ = VARIABLE_TYPE_ENUM
+			variableType.Enum = dd
 			return nil
 		}
 	}
-	return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(t.Pos), t.Name)
+	return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(variableType.Pos), variableType.Name)
 }
 
-func (t *VariableType) resolveName(block *Block, subPart bool) error {
+func (variableType *VariableType) resolveName(block *Block, subPart bool) error {
 	var err error
 	var d interface{}
-	if strings.Contains(t.Name, ".") == false {
-		d = block.searchType(t.Name)
+	if strings.Contains(variableType.Name, ".") == false {
+		d = block.searchType(variableType.Name)
 		loadFromImport := (d == nil)
 		if loadFromImport == false { // d is not nil
 			switch d.(type) {
@@ -287,74 +287,74 @@ func (t *VariableType) resolveName(block *Block, subPart bool) error {
 			}
 		}
 		if loadFromImport {
-			d, err = t.resolveNameFromImport()
+			d, err = variableType.resolveNameFromImport()
 			if err != nil {
 				return err
 			}
 		}
 	} else { // a.b  in type situation,must be package name
-		d, err = t.resolveNameFromImport()
+		d, err = variableType.resolveNameFromImport()
 		if err != nil {
 			return err
 		}
 	}
 	if d == nil {
-		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(t.Pos), t.Name)
+		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(variableType.Pos), variableType.Name)
 	}
-	err = t.mkTypeFrom(d)
+	err = variableType.mkTypeFrom(d)
 	if err != nil {
 		return err
 	}
-	if t.Typ == VARIABLE_TYPE_ENUM && subPart {
-		if t.Enum.Enums[0].Value != 0 {
+	if variableType.Typ == VARIABLE_TYPE_ENUM && subPart {
+		if variableType.Enum.Enums[0].Value != 0 {
 			return fmt.Errorf("%s enum named '%s' as subPart of a type,first enum value named by '%s' must have value '0'",
-				errMsgPrefix(t.Pos), t.Enum.Name, t.Enum.Enums[0].Name)
+				errMsgPrefix(variableType.Pos), variableType.Enum.Name, variableType.Enum.Enums[0].Name)
 		}
 	}
 	return nil
 }
 
-func (t *VariableType) IsNumber() bool {
-	return t.IsInteger() || t.IsFloat()
+func (variableType *VariableType) IsNumber() bool {
+	return variableType.IsInteger() || variableType.IsFloat()
 }
 
-func (t *VariableType) IsPointer() bool {
-	return t.Typ == VARIABLE_TYPE_OBJECT ||
-		t.Typ == VARIABLE_TYPE_ARRAY ||
-		t.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
-		t.Typ == VARIABLE_TYPE_MAP ||
-		t.Typ == VARIABLE_TYPE_STRING
+func (variableType *VariableType) IsPointer() bool {
+	return variableType.Typ == VARIABLE_TYPE_OBJECT ||
+		variableType.Typ == VARIABLE_TYPE_ARRAY ||
+		variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY ||
+		variableType.Typ == VARIABLE_TYPE_MAP ||
+		variableType.Typ == VARIABLE_TYPE_STRING
 
 }
 
-func (t *VariableType) IsInteger() bool {
-	return t.Typ == VARIABLE_TYPE_BYTE ||
-		t.Typ == VARIABLE_TYPE_SHORT ||
-		t.Typ == VARIABLE_TYPE_INT ||
-		t.Typ == VARIABLE_TYPE_LONG
+func (variableType *VariableType) IsInteger() bool {
+	return variableType.Typ == VARIABLE_TYPE_BYTE ||
+		variableType.Typ == VARIABLE_TYPE_SHORT ||
+		variableType.Typ == VARIABLE_TYPE_INT ||
+		variableType.Typ == VARIABLE_TYPE_LONG
 }
 
 /*
 	float or double
 */
-func (t *VariableType) IsFloat() bool {
-	return t.Typ == VARIABLE_TYPE_FLOAT ||
-		t.Typ == VARIABLE_TYPE_DOUBLE
+func (variableType *VariableType) IsFloat() bool {
+	return variableType.Typ == VARIABLE_TYPE_FLOAT ||
+		variableType.Typ == VARIABLE_TYPE_DOUBLE
 }
 
-func (v *VariableType) IsPrimitive() bool {
-	return v.IsNumber() ||
-		v.Typ == VARIABLE_TYPE_STRING ||
-		v.Typ == VARIABLE_TYPE_BOOL
+func (variableType *VariableType) IsPrimitive() bool {
+	return variableType.IsNumber() ||
+		variableType.Typ == VARIABLE_TYPE_STRING ||
+		variableType.Typ == VARIABLE_TYPE_BOOL
 }
 
 //可读的类型信息
-func (v *VariableType) typeString(ret *string) {
-	if v.Alias != "" {
-		*ret += v.Alias
+func (variableType *VariableType) typeString(ret *string) {
+	if variableType.Alias != "" {
+		*ret += variableType.Alias
 		return
 	}
-	switch v.Typ {
+	switch variableType.Typ {
 	case VARIABLE_TYPE_BOOL:
 		*ret += "bool"
 	case VARIABLE_TYPE_BYTE:
@@ -370,66 +370,66 @@ func (v *VariableType) typeString(ret *string) {
 	case VARIABLE_TYPE_DOUBLE:
 		*ret += "double"
 	case VARIABLE_TYPE_CLASS:
-		*ret += fmt.Sprintf("class(%s)", v.Class.Name)
+		*ret += fmt.Sprintf("class(%s)", variableType.Class.Name)
 	case VARIABLE_TYPE_ENUM:
-		*ret += "enum(" + v.Enum.Name + ")"
+		*ret += "enum(" + variableType.Enum.Name + ")"
 	case VARIABLE_TYPE_ARRAY:
 		*ret += "[]"
-		v.ArrayType.typeString(ret)
+		variableType.ArrayType.typeString(ret)
 	case VARIABLE_TYPE_VOID:
 		*ret += "void"
 	case VARIABLE_TYPE_STRING:
 		*ret += "string"
 	case VARIABLE_TYPE_OBJECT: // class name
-		*ret += "object@(" + v.Class.Name + ")"
+		*ret += "object@(" + variableType.Class.Name + ")"
 	case VARIABLE_TYPE_MAP:
 		*ret += "map{"
-		*ret += v.Map.K.TypeString()
+		*ret += variableType.Map.K.TypeString()
 		*ret += " -> "
-		*ret += v.Map.V.TypeString()
+		*ret += variableType.Map.V.TypeString()
 		*ret += "}"
 	case VARIABLE_TYPE_JAVA_ARRAY:
-		*ret += v.ArrayType.TypeString() + "[]"
+		*ret += variableType.ArrayType.TypeString() + "[]"
 	case VARIABLE_TYPE_PACKAGE:
-		*ret += v.Package.Name
+		*ret += variableType.Package.Name
 	case VARIABLE_TYPE_NULL:
 		*ret += "null"
 	case VARIABLE_TYPE_NAME:
-		*ret += v.Name // resolve wrong, but typeString is ok to return
+		*ret += variableType.Name // resolve wrong, but typeString is ok to return
 	case VARIABLE_TYPE_FUNCTION:
-		*ret += v.Function.readableMsg()
+		*ret += variableType.Function.readableMsg()
 	case VARIABLE_TYPE_T:
-		*ret += v.Name
+		*ret += variableType.Name
 	default:
-		panic(v.Typ)
+		panic(variableType.Typ)
 	}
 }
 
 //可读的类型信息
-func (v *VariableType) TypeString() string {
+func (variableType *VariableType) TypeString() string {
 	t := ""
-	v.typeString(&t)
+	variableType.typeString(&t)
 	return t
 }
-func (v *VariableType) haveT() (ret []string) {
+func (variableType *VariableType) haveT() (ret []string) {
 	defer func() {
-		v.haveTCalled = true
-		v.TNames = ret
+		variableType.haveTCalled = true
+		variableType.TNames = ret
 	}()
-	if v.Typ == VARIABLE_TYPE_T {
-		ret = []string{v.Name}
+	if variableType.Typ == VARIABLE_TYPE_T {
+		ret = []string{variableType.Name}
 		return
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY || v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		ret = v.ArrayType.haveT()
+	if variableType.Typ == VARIABLE_TYPE_ARRAY || variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		ret = variableType.ArrayType.haveT()
 		return
 	}
-	if v.Typ == VARIABLE_TYPE_MAP {
+	if variableType.Typ == VARIABLE_TYPE_MAP {
 		ret = []string{}
-		if t := v.Map.K.haveT(); t != nil {
+		if t := variableType.Map.K.haveT(); t != nil {
 			ret = append(ret, t...)
 		}
-		if t := v.Map.V.haveT(); t != nil {
+		if t := variableType.Map.V.haveT(); t != nil {
 			ret = append(ret, t...)
 		}
 		return
@@ -437,23 +437,23 @@ func (v *VariableType) haveT() (ret []string) {
 	return nil
 }
 
-func (v *VariableType) canBeBindWithTypedParameters(typedParaMeters map[string]*VariableType) error {
-	if v.Typ == VARIABLE_TYPE_T {
-		_, ok := typedParaMeters[v.Name]
+func (variableType *VariableType) canBeBindWithTypedParameters(typedParaMeters map[string]*VariableType) error {
+	if variableType.Typ == VARIABLE_TYPE_T {
+		_, ok := typedParaMeters[variableType.Name]
 		if ok == false {
-			return fmt.Errorf("typed parameter '%s' not found", v.Name)
+			return fmt.Errorf("typed parameter '%s' not found", variableType.Name)
 		}
 		return nil
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY || v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return v.ArrayType.canBeBindWithTypedParameters(typedParaMeters)
+	if variableType.Typ == VARIABLE_TYPE_ARRAY || variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return variableType.ArrayType.canBeBindWithTypedParameters(typedParaMeters)
 	}
-	if v.Typ == VARIABLE_TYPE_MAP {
-		err := v.Map.K.canBeBindWithTypedParameters(typedParaMeters)
+	if variableType.Typ == VARIABLE_TYPE_MAP {
+		err := variableType.Map.K.canBeBindWithTypedParameters(typedParaMeters)
 		if err != nil {
 			return err
 		}
-		return v.Map.V.canBeBindWithTypedParameters(typedParaMeters)
+		return variableType.Map.V.canBeBindWithTypedParameters(typedParaMeters)
 	}
 	return fmt.Errorf("not T") // looks impossible
 }
@@ -461,27 +461,27 @@ func (v *VariableType) canBeBindWithTypedParameters(typedParaMeters map[string]*
 /*
 	if there is error,this function will crash
 */
-func (v *VariableType) bindWithTypedParameters(typedParaMeters map[string]*VariableType) error {
-	if v.Typ == VARIABLE_TYPE_T {
-		t, ok := typedParaMeters[v.Name]
+func (variableType *VariableType) bindWithTypedParameters(typedParaMeters map[string]*VariableType) error {
+	if variableType.Typ == VARIABLE_TYPE_T {
+		t, ok := typedParaMeters[variableType.Name]
 		if ok == false {
-			panic(fmt.Sprintf("typed parameter '%s' not found", v.Name))
+			panic(fmt.Sprintf("typed parameter '%s' not found", variableType.Name))
 		}
-		*v = *t.Clone() // real bind
+		*variableType = *t.Clone() // real bind
 		return nil
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY {
-		return v.ArrayType.bindWithTypedParameters(typedParaMeters)
+	if variableType.Typ == VARIABLE_TYPE_ARRAY {
+		return variableType.ArrayType.bindWithTypedParameters(typedParaMeters)
 	}
-	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return v.ArrayType.bindWithTypedParameters(typedParaMeters)
+	if variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return variableType.ArrayType.bindWithTypedParameters(typedParaMeters)
 	}
-	if v.Typ == VARIABLE_TYPE_MAP {
-		err := v.Map.K.bindWithTypedParameters(typedParaMeters)
+	if variableType.Typ == VARIABLE_TYPE_MAP {
+		err := variableType.Map.K.bindWithTypedParameters(typedParaMeters)
 		if err != nil {
 			return err
 		}
-		return v.Map.V.bindWithTypedParameters(typedParaMeters)
+		return variableType.Map.V.bindWithTypedParameters(typedParaMeters)
 	}
 	panic("not T")
 }
@@ -489,63 +489,63 @@ func (v *VariableType) bindWithTypedParameters(typedParaMeters map[string]*Varia
 /*
 
  */
-func (v *VariableType) canBebindWithType(typedParaMeters map[string]*VariableType, t *VariableType) error {
+func (variableType *VariableType) canBebindWithType(typedParaMeters map[string]*VariableType, t *VariableType) error {
 	if t.RightValueValid() == false {
 		return fmt.Errorf("'%s' is not right value valid", t.TypeString())
 	}
 	if t.Typ == VARIABLE_TYPE_NULL {
 		return fmt.Errorf("'%s' is un typed", t.TypeString())
 	}
-	if v.Typ == VARIABLE_TYPE_T {
-		typedParaMeters[v.Name] = t
+	if variableType.Typ == VARIABLE_TYPE_T {
+		typedParaMeters[variableType.Name] = t
 		return nil
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY && t.Typ == VARIABLE_TYPE_ARRAY {
-		return v.ArrayType.canBebindWithType(typedParaMeters, t.ArrayType)
+	if variableType.Typ == VARIABLE_TYPE_ARRAY && t.Typ == VARIABLE_TYPE_ARRAY {
+		return variableType.ArrayType.canBebindWithType(typedParaMeters, t.ArrayType)
 	}
-	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return v.ArrayType.canBebindWithType(typedParaMeters, t.ArrayType)
+	if variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY && t.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return variableType.ArrayType.canBebindWithType(typedParaMeters, t.ArrayType)
 	}
-	if v.Typ == VARIABLE_TYPE_MAP && t.Typ == VARIABLE_TYPE_MAP {
-		err := v.Map.K.canBebindWithType(typedParaMeters, t.Map.K)
+	if variableType.Typ == VARIABLE_TYPE_MAP && t.Typ == VARIABLE_TYPE_MAP {
+		err := variableType.Map.K.canBebindWithType(typedParaMeters, t.Map.K)
 		if err != nil {
 			return err
 		}
-		return v.Map.V.canBebindWithType(typedParaMeters, t.Map.V)
+		return variableType.Map.V.canBebindWithType(typedParaMeters, t.Map.V)
 	}
-	return fmt.Errorf("cannot bind '%s' to '%s'", t.TypeString(), v.TypeString())
+	return fmt.Errorf("cannot bind '%s' to '%s'", t.TypeString(), variableType.TypeString())
 }
 
-func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
-	if v == assignMent { // equal
+func (variableType *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
+	if variableType == assignMent { // equal
 		return true
 	}
-	if v.IsPrimitive() && assignMent.IsPrimitive() {
-		return v.Typ == assignMent.Typ
+	if variableType.IsPrimitive() && assignMent.IsPrimitive() {
+		return variableType.Typ == assignMent.Typ
 	}
-	if v.IsPointer() && assignMent.Typ == VARIABLE_TYPE_NULL {
+	if variableType.IsPointer() && assignMent.Typ == VARIABLE_TYPE_NULL {
 		return true
 	}
-	if v.Typ == VARIABLE_TYPE_OBJECT && v.Class.Name == JAVA_ROOT_CLASS &&
+	if variableType.Typ == VARIABLE_TYPE_OBJECT && variableType.Class.Name == JAVA_ROOT_CLASS &&
 		assignMent.IsPointer() {
 		return true
 	}
-	if v.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
-		return v.ArrayType.Equal(errs, assignMent.ArrayType)
+	if variableType.Typ == VARIABLE_TYPE_ARRAY && assignMent.Typ == VARIABLE_TYPE_ARRAY {
+		return variableType.ArrayType.Equal(errs, assignMent.ArrayType)
 	}
-	if v.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
-		return v.ArrayType.Equal(errs, assignMent.ArrayType)
+	if variableType.Typ == VARIABLE_TYPE_JAVA_ARRAY && assignMent.Typ == VARIABLE_TYPE_JAVA_ARRAY {
+		return variableType.ArrayType.Equal(errs, assignMent.ArrayType)
 	}
 
-	if v.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
-		return v.Enum.Name == assignMent.Enum.Name
+	if variableType.Typ == VARIABLE_TYPE_ENUM && assignMent.Typ == VARIABLE_TYPE_ENUM {
+		return variableType.Enum.Name == assignMent.Enum.Name
 	}
-	if v.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
-		return v.Map.K.Equal(errs, assignMent.Map.K) && v.Map.V.Equal(errs, assignMent.Map.V)
+	if variableType.Typ == VARIABLE_TYPE_MAP && assignMent.Typ == VARIABLE_TYPE_MAP {
+		return variableType.Map.K.Equal(errs, assignMent.Map.K) && variableType.Map.V.Equal(errs, assignMent.Map.V)
 	}
-	if v.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
-		if v.Class.NotImportedYet {
-			if err := v.Class.loadSelf(); err != nil {
+	if variableType.Typ == VARIABLE_TYPE_OBJECT && assignMent.Typ == VARIABLE_TYPE_OBJECT { // object
+		if variableType.Class.NotImportedYet {
+			if err := variableType.Class.loadSelf(); err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
 				return false
 			}
@@ -556,14 +556,14 @@ func (v *VariableType) Equal(errs *[]error, assignMent *VariableType) bool {
 				return false
 			}
 		}
-		if v.Class.IsInterface() {
-			i, err := assignMent.Class.implemented(v.Class.Name)
+		if variableType.Class.IsInterface() {
+			i, err := assignMent.Class.implemented(variableType.Class.Name)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
 			}
 			return i
 		} else { // class
-			has, err := assignMent.Class.haveSuper(v.Class.Name)
+			has, err := assignMent.Class.haveSuper(variableType.Class.Name)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assignMent.Pos), err))
 			}

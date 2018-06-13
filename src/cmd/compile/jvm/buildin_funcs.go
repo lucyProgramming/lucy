@@ -47,8 +47,8 @@ func (m *MakeExpression) mkBuildinPanic(class *cg.ClassHighLevel, code *cg.Attri
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		{
-			t := &cg.StackMap_verification_type_info{}
-			tt := &cg.StackMap_Uninitialized_variable_info{}
+			t := &cg.StackMapVerificationTypeInfo{}
+			tt := &cg.StackMapUninitializedVariableInfo{}
 			tt.CodeOffset = uint16(code.CodeLength - 4)
 			t.Verify = tt
 			state.Stacks = append(state.Stacks, t)
@@ -79,16 +79,16 @@ func (m *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.Attri
 		maxStack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
+		copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...)
 		return
 	}
 	maxStack = 2
 	//load to stack
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // load
+	copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // load
 	//set 2 null
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // store
+	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForException.Offset)...) // store
 	//check cast
 	code.Codes[code.CodeLength] = cg.OP_checkcast
 	if context.Defer.ExceptionClass != nil {

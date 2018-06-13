@@ -82,7 +82,7 @@ func (p *Parser) parseReturnList() (vs []*ast.VariableDefinition, err error) {
 	return vs, nil
 }
 func (p *Parser) parseReturnLists() (vs []*ast.VariableDefinition, err error) {
-	for p.token.Type == lex.TOKEN_IDENTIFIER && p.token.Type != lex.TOKEN_EOF {
+	for p.token.Type == lex.TOKEN_IDENTIFIER {
 		v, err := p.parseReturnList()
 		if v != nil {
 			vs = append(vs, v...)

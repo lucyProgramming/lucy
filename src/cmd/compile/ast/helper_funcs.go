@@ -111,7 +111,7 @@ func searchBuildIns(name string) interface{} {
 	return nil
 }
 
-func checkConst(block *Block, c *Const, errs *[]error) error {
+func checkConst(block *Block, c *Constant, errs *[]error) error {
 	if c.Typ != nil {
 		c.mkDefaultValue()
 	}

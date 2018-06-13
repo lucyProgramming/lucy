@@ -7,7 +7,6 @@ import (
 )
 
 type Function struct {
-	//ParameterAndRetrunListOK       bool
 	TemplateFunction               *TemplateFunction
 	TypeParameters                 map[string]*VariableType //typed parameters
 	ClassMethod                    *cg.MethodHighLevel      // make call from
@@ -133,7 +132,7 @@ func (f *Function) checkBlock(errs *[]error) {
 func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Block.inherit(b)
-	f.checkParametersAndRetuns(&errs)
+	f.checkParametersAndReturns(&errs)
 	f.Block.InheritedAttribute.Function = f
 	if f.TemplateFunction == nil {
 		f.checkBlock(&errs)
@@ -160,13 +159,7 @@ func (f *Function) mkLastRetrunStatement() {
 	}
 }
 
-func (f *Function) checkParametersAndRetuns(errs *[]error) {
-	//errsLength := len(*errs)
-	//defer func() {
-	//	if len(*errs) == errsLength {
-	//		f.ParameterAndRetrunListOK = true
-	//	}
-	//}()
+func (f *Function) checkParametersAndReturns(errs *[]error) {
 	if f.Name == MAIN_FUNCTION_NAME {
 		errFunc := func() {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",

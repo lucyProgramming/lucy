@@ -9,19 +9,19 @@ type TemplateFunction struct {
 }
 
 type TemplateFunctionCallPair struct {
-	typedParameters map[string]*VariableType
-	Generated       *cg.MethodHighLevel
-	Function        *Function
-	ClassName       string
+	typeParameters map[string]*VariableType
+	Generated      *cg.MethodHighLevel
+	Function       *Function
+	ClassName      string
 }
 
 func (t *TemplateFunction) callPairExists(typedParameters map[string]*VariableType, errs *[]error) *TemplateFunctionCallPair {
 	f := func(p *TemplateFunctionCallPair) *TemplateFunctionCallPair {
-		if len(p.typedParameters) != len(typedParameters) {
+		if len(p.typeParameters) != len(typedParameters) {
 			return nil
 		}
 		for kk, vv := range typedParameters {
-			t, ok := p.typedParameters[kk]
+			t, ok := p.typeParameters[kk]
 			if ok == false {
 				// not found
 				return nil
@@ -41,13 +41,13 @@ func (t *TemplateFunction) callPairExists(typedParameters map[string]*VariableTy
 	return nil
 }
 
-func (t *TemplateFunction) insert(typedParameters map[string]*VariableType, f *Function, errs *[]error) *TemplateFunctionCallPair {
-	if t := t.callPairExists(typedParameters, errs); t != nil {
+func (t *TemplateFunction) insert(typeParameters map[string]*VariableType, f *Function, errs *[]error) *TemplateFunctionCallPair {
+	if t := t.callPairExists(typeParameters, errs); t != nil {
 		return t
 	}
 	ret := &TemplateFunctionCallPair{
-		typedParameters: typedParameters,
-		Function:        f,
+		typeParameters: typeParameters,
+		Function:       f,
 	}
 	t.Pairs = append(t.Pairs, ret)
 	return ret

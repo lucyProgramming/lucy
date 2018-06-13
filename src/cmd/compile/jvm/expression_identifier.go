@@ -10,9 +10,9 @@ func (m *MakeExpression) buildCapturedIdentifier(class *cg.ClassHighLevel, code 
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Var)
 	if captured == false {
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, identifier.Var.LocalValOffset)...)
 	} else {
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 		meta := closure.getMeta(identifier.Var.Typ.Typ)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

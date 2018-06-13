@@ -84,13 +84,13 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	}
 	code.Codes[code.CodeLength] = cg.OP_arraylength
 	code.CodeLength++
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
+	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
+	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
+	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
 	// k set to 0
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
-	copyOP(code, storeSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
+	copyOP(code, storeSimpleVarOps(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 	//handle captured vars
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV != nil && s.RangeAttr.IdentifierV.Var.BeenCaptured {
@@ -98,7 +98,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			s.RangeAttr.IdentifierV.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+				storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierV.Var.Typ.Typ).className))
 		}
@@ -108,7 +108,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			s.RangeAttr.IdentifierK.Var.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code,
-				storeSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+				storeSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierK.Var.Typ.Typ).className))
 		}
@@ -125,18 +125,18 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 	// load k
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
+	copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	// load length
-	copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
+	copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, autoVar.Length)...)
 	if 5 > maxStack {
 		maxStack = 5
 	}
 	exit := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	if s.RangeAttr.IdentifierV != nil || s.RangeAttr.ExpressionV != nil {
 		// load k sets
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 		// swap
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
@@ -144,7 +144,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
 		// load  map object
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, autoVar.MapObject)...)
 		// swap
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
@@ -163,7 +163,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		autoVar.V = code.MaxLocals
 		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
 		//store to V
-		copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
+		copyOP(code, storeSimpleVarOps(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
 		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_pop
@@ -173,9 +173,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	// store to k,if need
 	if s.RangeAttr.IdentifierK != nil || s.RangeAttr.ExpressionK != nil {
 		// load k sets
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, autoVar.KeySets)...)
 		// load k
-		copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
+		copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
 		if s.RangeAttr.RangeOn.Value.Map.K.IsPointer() == false {
@@ -185,7 +185,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 		autoVar.K = code.MaxLocals
 		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.K)
-		copyOP(code, storeSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
+		copyOP(code, storeSimpleVarOps(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
 		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.K)
 	}
 
@@ -194,9 +194,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 	if s.Condition.Typ == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierV != nil {
 			if s.RangeAttr.IdentifierV.Var.BeenCaptured {
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
+				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierV.Var.LocalValOffset)...)
 				copyOP(code,
-					loadSimpleVarOp(s.RangeAttr.IdentifierV.Var.Typ.Typ,
+					loadSimpleVarOps(s.RangeAttr.IdentifierV.Var.Typ.Typ,
 						autoVar.V)...)
 				m.storeLocalVar(class, code, s.RangeAttr.IdentifierV.Var)
 			} else {
@@ -205,9 +205,9 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 		}
 		if s.RangeAttr.IdentifierK != nil {
 			if s.RangeAttr.IdentifierK.Var.BeenCaptured {
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
+				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierK.Var.LocalValOffset)...)
 				copyOP(code,
-					loadSimpleVarOp(s.RangeAttr.IdentifierK.Var.Typ.Typ, autoVar.K)...)
+					loadSimpleVarOps(s.RangeAttr.IdentifierK.Var.Typ.Typ, autoVar.K)...)
 				m.storeLocalVar(class, code, s.RangeAttr.IdentifierK.Var)
 			} else {
 				s.RangeAttr.IdentifierK.Var.LocalValOffset = autoVar.K
@@ -222,7 +222,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 			maxStack = stack
 		}
 		copyOP(code,
-			loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
+			loadSimpleVarOps(s.RangeAttr.RangeOn.Value.Map.V.Typ, autoVar.V)...)
 		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.V); t > maxStack {
 			maxStack = t
 		}
@@ -236,7 +236,7 @@ func (m *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLevel, code 
 				maxStack = stack
 			}
 			copyOP(code,
-				loadSimpleVarOp(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
+				loadSimpleVarOps(s.RangeAttr.RangeOn.Value.Map.K.Typ, autoVar.K)...)
 			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.K); t > maxStack {
 				maxStack = t
 			}

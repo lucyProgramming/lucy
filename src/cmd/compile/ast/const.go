@@ -1,11 +1,11 @@
 package ast
 
-type Const struct {
+type Constant struct {
 	VariableDefinition
 	Value interface{} // value base on type
 }
 
-func (c *Const) mkDefaultValue() {
+func (c *Constant) mkDefaultValue() {
 	switch c.Typ.Typ {
 	case VARIABLE_TYPE_BOOL:
 		c.Value = false

@@ -50,7 +50,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		if k < len(ts) && ts[k] != nil {
 			variableType = ts[k]
 		}
-		if variable, ok := block.Vars[identifier.Name]; ok {
+		if variable, ok := block.Variables[identifier.Name]; ok {
 			if variableType != nil {
 				if variable.Typ.Equal(errs, ts[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",

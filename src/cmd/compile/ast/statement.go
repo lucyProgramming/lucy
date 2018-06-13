@@ -26,7 +26,7 @@ type Statement struct {
 	Pos               *Pos
 	Typ               int
 	StatementIf       *StatementIF
-	Expression        *Expression // expression statment like a=123
+	Expression        *Expression
 	StatementFor      *StatementFor
 	StatementReturn   *StatementReturn
 	StatementSwitch   *StatementSwitch
@@ -202,10 +202,10 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 			}
 			f.IsClosureFunction = f.Closure.NotEmpty(f)
 			if f.IsClosureFunction {
-				if b.ClosureFuncs == nil {
-					b.ClosureFuncs = make(map[string]*Function)
+				if b.ClosureFunctions == nil {
+					b.ClosureFunctions = make(map[string]*Function)
 				}
-				b.ClosureFuncs[f.Name] = f
+				b.ClosureFunctions[f.Name] = f
 			}
 			return errs
 		}

@@ -18,7 +18,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.Typ == ast.EXPRESSION_TYPE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_DECREMENT {
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
+				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}
@@ -35,7 +35,7 @@ func (m *MakeExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.A
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.Typ == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Typ == ast.EXPRESSION_TYPE_PRE_DECREMENT { // decrement
-				copyOP(code, loadSimpleVarOp(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
+				copyOP(code, loadSimpleVarOps(ast.VARIABLE_TYPE_INT, t.Var.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}

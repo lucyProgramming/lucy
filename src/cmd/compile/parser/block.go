@@ -185,9 +185,9 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 					fmt.Errorf("%s cannot assign '%d' values to '%d' destination",
 						b.parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
 			}
-			cs := make([]*ast.Const, len(vs))
+			cs := make([]*ast.Constant, len(vs))
 			for k, v := range vs {
-				c := &ast.Const{}
+				c := &ast.Constant{}
 				c.VariableDefinition = *v
 				cs[k] = c
 				if k < len(es) {
@@ -249,7 +249,8 @@ func (b *Block) parseStatementList(block *ast.Block, isGlobal bool) {
 			b.Next() // skip {
 			b.parseStatementList(&newblock, false)
 			if b.parser.token.Type != lex.TOKEN_RC {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'"))
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+					b.parser.errorMsgPrefix(), b.parser.token.Description))
 				b.consume(untils_rc)
 			}
 			b.Next()

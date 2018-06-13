@@ -26,8 +26,8 @@ func (m *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCo
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(n.Typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
-	t := &cg.StackMap_verification_type_info{}
-	t.Verify = &cg.StackMap_Uninitialized_variable_info{
+	t := &cg.StackMapVerificationTypeInfo{}
+	t.Verify = &cg.StackMapUninitializedVariableInfo{
 		CodeOffset: uint16(code.CodeLength),
 	}
 	state.Stacks = append(state.Stacks, t, t)
@@ -114,8 +114,8 @@ func (m *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.Attrib
 	code.CodeLength += 4
 	maxStack = 2
 	{
-		t := &cg.StackMap_verification_type_info{}
-		unInit := &cg.StackMap_Uninitialized_variable_info{}
+		t := &cg.StackMapVerificationTypeInfo{}
+		unInit := &cg.StackMapUninitializedVariableInfo{}
 		unInit.CodeOffset = uint16(code.CodeLength - 4)
 		t.Verify = unInit
 		state.Stacks = append(state.Stacks, t, t) // 2 for dup

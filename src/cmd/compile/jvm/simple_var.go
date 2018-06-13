@@ -9,7 +9,7 @@ import (
 /*
 	store local var according on type and offset
 */
-func storeSimpleVarOp(t int, offset uint16) []byte {
+func storeSimpleVarOps(t int, offset uint16) []byte {
 	switch t {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
@@ -112,7 +112,7 @@ func storeSimpleVarOp(t int, offset uint16) []byte {
 	}
 }
 
-func loadSimpleVarOp(t int, offset uint16) []byte {
+func loadSimpleVarOps(t int, offset uint16) []byte {
 	switch t {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough

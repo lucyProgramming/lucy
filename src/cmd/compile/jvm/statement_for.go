@@ -27,7 +27,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		}
 	}
 	//condition
-	var firstExit *cg.Exit
+	var firstTimeExit *cg.Exit
 	if s.Condition != nil {
 		stack, es := m.MakeExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
@@ -40,7 +40,7 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 			maxStack = stack
 		}
 		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
-		firstExit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
+		firstTimeExit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	}
 	s.ContinueOPOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
@@ -63,8 +63,8 @@ func (m *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.Attribu
 		}
 		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 	}
-	if firstExit != nil {
-		backfillExit([]*cg.Exit{firstExit}, code.CodeLength)
+	if firstTimeExit != nil {
+		backfillExit([]*cg.Exit{firstTimeExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}
 	m.buildBlock(class, code, s.Block, context, forState)

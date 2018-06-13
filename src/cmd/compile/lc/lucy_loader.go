@@ -116,9 +116,9 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
-	pack.Block.Vars = make(map[string]*ast.VariableDefinition)
-	pack.Block.Consts = make(map[string]*ast.Const)
-	pack.Block.Funcs = make(map[string]*ast.Function)
+	pack.Block.Variables = make(map[string]*ast.VariableDefinition)
+	pack.Block.Constants = make(map[string]*ast.Constant)
+	pack.Block.Functions = make(map[string]*ast.Function)
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
@@ -131,7 +131,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		}
 		if len(f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_CONST)) > 0 {
 			//const
-			cos := &ast.Const{}
+			cos := &ast.Constant{}
 			cos.Name = name
 			cos.AccessFlags = f.AccessFlags
 			cos.Typ = typ
@@ -159,7 +159,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 				valueIndex = binary.BigEndian.Uint16(c.ConstPool[valueIndex].Info) // const_string_info
 				cos.Value = string(c.ConstPool[valueIndex].Info)                   // utf 8
 			}
-			pack.Block.Consts[name] = cos
+			pack.Block.Constants[name] = cos
 		} else {
 			//global vars
 			vd := &ast.VariableDefinition{}
@@ -168,7 +168,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			vd.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
 			vd.Typ = typ
 			vd.IsGlobal = true
-			pack.Block.Vars[name] = vd
+			pack.Block.Variables[name] = vd
 			if t := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
 				index := binary.BigEndian.Uint16(t[0].Info)
 				_, vd.Typ, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
@@ -224,7 +224,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 		function.ClassMethod.Class = mainClassName
 		function.ClassMethod.Descriptor = function.Descriptor
 		function.IsGlobal = true
-		pack.Block.Funcs[name] = function
+		pack.Block.Functions[name] = function
 	}
 	if pack.Block.Types == nil {
 		pack.Block.Types = make(map[string]*ast.VariableType)
@@ -256,7 +256,7 @@ func (loader *RealNameLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) 
 			return es[0]
 		}
 		f.TemplateFunction = &ast.TemplateFunction{}
-		pack.Block.Funcs[attr.Name] = f
+		pack.Block.Functions[attr.Name] = f
 	}
 	return nil
 }

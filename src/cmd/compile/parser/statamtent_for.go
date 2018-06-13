@@ -57,7 +57,8 @@ func (b *Block) parseFor() (f *ast.StatementFor, err error) {
 	b.Next() // skip {
 	b.parseStatementList(f.Block, false)
 	if b.parser.token.Type != lex.TOKEN_RC {
-		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'"))
+		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+			b.parser.errorMsgPrefix(), b.parser.token.Description))
 		b.consume(untils_rc)
 	}
 	b.Next() // }

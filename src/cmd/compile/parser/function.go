@@ -57,7 +57,8 @@ func (p *Function) parse(needName bool) (f *ast.Function, err error) {
 	p.Next()
 	p.parser.Block.parseStatementList(&f.Block, false)
 	if p.parser.token.Type != lex.TOKEN_RC {
-		err = fmt.Errorf("%s expect '}', but '%s'")
+		err = fmt.Errorf("%s expect '}', but '%s'",
+			p.parser.errorMsgPrefix(), p.parser.token.Description)
 	} else {
 		f.SourceCode = p.parser.bs[offset : p.parser.token.Offset+1]
 		p.Next()

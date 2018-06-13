@@ -100,9 +100,9 @@ func (test *Test) testDir(dir string, prefix string) {
 			if line != nil && len(line) > 0 && (line[0] == 'n' || line[0] == 'N') {
 				os.Exit(0) // exit normally
 			}
-			fmt.Println("fail\n")
+			fmt.Println("fail")
 		} else {
-			fmt.Println("ok\n")
+			fmt.Println("ok")
 		}
 	}
 	// test sub directory recursively

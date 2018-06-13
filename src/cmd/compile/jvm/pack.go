@@ -5,10 +5,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type TypeConverter struct {
+type TypeConverterAndPrimitivePacker struct {
 }
 
-func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverterAndPrimitivePacker) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
 		c := "java/lang/Boolean"
@@ -96,11 +96,11 @@ func (TypeConverter) getFromObject(class *cg.ClassHighLevel, code *cg.AttributeC
 	}
 }
 
-func (c *TypeConverter) putPrimitiveInObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (c *TypeConverterAndPrimitivePacker) putPrimitiveInObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	copyOP(code, c.putPrimitiveInObjectBytes(class, t)...)
 }
 
-func (TypeConverter) putPrimitiveInObjectBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
+func (TypeConverterAndPrimitivePacker) putPrimitiveInObjectBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
 	bs = make([]byte, 3)
 	switch t.Typ {
 	case ast.VARIABLE_TYPE_BOOL:
@@ -161,7 +161,7 @@ func (TypeConverter) putPrimitiveInObjectBytes(class *cg.ClassHighLevel, t *ast.
 	return
 }
 
-func (TypeConverter) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	if t.IsPointer() == false {
 		panic("...")
 	}

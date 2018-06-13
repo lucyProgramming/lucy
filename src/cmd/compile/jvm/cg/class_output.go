@@ -12,7 +12,7 @@ func (c *Class) OutPut(dest io.Writer) error {
 	if err != nil {
 		return err
 	}
-	// minorversion
+	// minor version
 	bs2 := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs2, uint16(c.MinorVersion))
 	_, err = dest.Write(bs2)

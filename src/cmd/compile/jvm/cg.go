@@ -103,7 +103,7 @@ func (m *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 }
 
 func (m *MakeClass) mkConsts() {
-	for k, v := range m.p.Block.Consts {
+	for k, v := range m.p.Block.Constants {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
@@ -128,7 +128,7 @@ func (m *MakeClass) mkTypes() {
 }
 
 func (m *MakeClass) mkVars() {
-	for k, v := range m.p.Block.Vars {
+	for k, v := range m.p.Block.Variables {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= v.AccessFlags
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
@@ -137,8 +137,8 @@ func (m *MakeClass) mkVars() {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		if LucyFieldSignatureParser.Need(v.Typ) {
-			f.AttributeLucyFieldDescritor = &cg.AttributeLucyFieldDescriptor{}
-			f.AttributeLucyFieldDescritor.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
+			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
+			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
 		}
 		f.Name = v.Name
 		m.mainClass.Fields[k] = f
@@ -220,7 +220,7 @@ func (m *MakeClass) mkInitFunctions() {
 	trigger.Code.CodeLength = 1
 	trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
 	m.mainClass.AppendMethod(trigger)
-	m.mainClass.TriggerClinit = trigger
+	m.mainClass.TriggerPackageInitMethod = trigger
 }
 func (m *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.VariableType, v interface{}) (index uint16) {
 	switch t.Typ {
@@ -275,7 +275,7 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		if LucyFieldSignatureParser.Need(v.Typ) {
 			t := &cg.AttributeLucyFieldDescriptor{}
 			t.Descriptor = LucyFieldSignatureParser.Encode(v.Typ)
-			f.AttributeLucyFieldDescritor = t
+			f.AttributeLucyFieldDescriptor = t
 		}
 		class.Fields[v.Name] = f
 	}
@@ -324,7 +324,7 @@ func (m *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 
 func (m *MakeClass) mkFuncs() {
 	ms := make(map[string]*cg.MethodHighLevel)
-	for k, f := range m.p.Block.Funcs { // fisrt round
+	for k, f := range m.p.Block.Functions { // fisrt round
 		if f.TemplateFunction != nil {
 			m.mainClass.TemplateFunctions = append(m.mainClass.TemplateFunctions, &cg.AttributeTemplateFunction{
 				Name:        f.Name,
@@ -353,7 +353,7 @@ func (m *MakeClass) mkFuncs() {
 		method.Code = &cg.AttributeCode{}
 		m.mainClass.AppendMethod(method)
 	}
-	for k, f := range m.p.Block.Funcs { // fisrt round
+	for k, f := range m.p.Block.Functions { // fisrt round
 		if f.IsBuildIn || f.TemplateFunction != nil { //
 			continue
 		}

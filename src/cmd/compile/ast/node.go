@@ -13,18 +13,18 @@ type Node struct {
 type ConvertTops2Package struct {
 	Name      []string //package name
 	Blocks    []*Block
-	Funcs     []*Function
+	Functions []*Function
 	Classes   []*Class
 	Enums     []*Enum
-	Vars      []*VariableDefinition
-	Consts    []*Const
+	Variables []*VariableDefinition
+	Constants []*Constant
 	Import    []*Import
 	TypeAlias []*ExpressionTypeAlias
 }
 
 func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareErrors []*RedeclareError, errs []error) {
 	//
-	if err := PackageBeenCompile.loadBuildinPackage(); err != nil {
+	if err := PackageBeenCompile.loadBuildInPackage(); err != nil {
 		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
 		os.Exit(1)
 	}
@@ -32,11 +32,11 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 	PackageBeenCompile.Files = make(map[string]*File)
 	conversion.Name = []string{}
 	conversion.Blocks = []*Block{}
-	conversion.Funcs = make([]*Function, 0)
+	conversion.Functions = make([]*Function, 0)
 	conversion.Classes = make([]*Class, 0)
 	conversion.Enums = make([]*Enum, 0)
-	conversion.Vars = make([]*VariableDefinition, 0)
-	conversion.Consts = make([]*Const, 0)
+	conversion.Variables = make([]*VariableDefinition, 0)
+	conversion.Constants = make([]*Constant, 0)
 	expressions := []*Expression{}
 	for _, v := range t {
 		switch v.Data.(type) {
@@ -45,16 +45,16 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 			conversion.Blocks = append(conversion.Blocks, t)
 		case *Function:
 			t := v.Data.(*Function)
-			conversion.Funcs = append(conversion.Funcs, t)
+			conversion.Functions = append(conversion.Functions, t)
 		case *Enum:
 			t := v.Data.(*Enum)
 			conversion.Enums = append(conversion.Enums, t)
 		case *Class:
 			t := v.Data.(*Class)
 			conversion.Classes = append(conversion.Classes, t)
-		case *Const:
-			t := v.Data.(*Const)
-			conversion.Consts = append(conversion.Consts, t)
+		case *Constant:
+			t := v.Data.(*Constant)
+			conversion.Constants = append(conversion.Constants, t)
 		case *Import:
 			i := v.Data.(*Import)
 			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
@@ -73,13 +73,13 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 	}
 	errs = append(errs, checkEnum(conversion.Enums)...)
 	redeclareErrors = conversion.redeclareErrors()
-	PackageBeenCompile.Block.Consts = make(map[string]*Const)
-	for _, v := range conversion.Consts {
+	PackageBeenCompile.Block.Constants = make(map[string]*Constant)
+	for _, v := range conversion.Constants {
 		PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 	}
-	PackageBeenCompile.Block.Vars = make(map[string]*VariableDefinition)
-	PackageBeenCompile.Block.Funcs = make(map[string]*Function)
-	for _, v := range conversion.Funcs {
+	PackageBeenCompile.Block.Variables = make(map[string]*VariableDefinition)
+	PackageBeenCompile.Block.Functions = make(map[string]*Function)
+	for _, v := range conversion.Functions {
 		v.IsGlobal = true
 		err := PackageBeenCompile.Block.insert(v.Name, v.Pos, v)
 		if err != nil {
@@ -150,7 +150,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//const
-	for _, v := range conversion.Consts {
+	for _, v := range conversion.Constants {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -158,7 +158,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//vars
-	for _, v := range conversion.Vars {
+	for _, v := range conversion.Variables {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -166,7 +166,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//funcs
-	for _, v := range conversion.Funcs {
+	for _, v := range conversion.Functions {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -200,8 +200,8 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		r.Types = make([]string, len(v))
 		for kk, vv := range v {
 			switch vv.(type) {
-			case *Const:
-				t := vv.(*Const)
+			case *Constant:
+				t := vv.(*Constant)
 				r.Positions[kk] = t.Pos
 				r.Types[kk] = "const"
 			case *Enum:

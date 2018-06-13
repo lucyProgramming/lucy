@@ -20,8 +20,8 @@ func (m *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.Attribute
 	code.CodeLength += 4
 
 	{
-		t := &cg.StackMap_verification_type_info{}
-		tt := &cg.StackMap_Uninitialized_variable_info{}
+		t := &cg.StackMapVerificationTypeInfo{}
+		tt := &cg.StackMapUninitializedVariableInfo{}
 		tt.CodeOffset = uint16(code.CodeLength - 4)
 		t.Verify = tt
 		state.Stacks = append(state.Stacks, t, t)

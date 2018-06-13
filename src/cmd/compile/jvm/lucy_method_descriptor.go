@@ -4,10 +4,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
-type LucyMethodSignatureParse struct {
+type LucyMethodSignature struct {
 }
 
-func (parser *LucyMethodSignatureParse) Need(functionType *ast.FunctionType) bool {
+func (signature *LucyMethodSignature) Need(functionType *ast.FunctionType) bool {
 	for _, v := range functionType.ParameterList {
 		if LucyFieldSignatureParser.Need(v.Typ) {
 			return true
@@ -24,7 +24,7 @@ func (parser *LucyMethodSignatureParse) Need(functionType *ast.FunctionType) boo
 	return false
 }
 
-func (parser *LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor string) {
+func (signature *LucyMethodSignature) Encode(f *ast.Function) (descriptor string) {
 	descriptor = "("
 	for _, v := range f.Typ.ParameterList {
 		descriptor += LucyFieldSignatureParser.Encode(v.Typ)
@@ -41,7 +41,7 @@ func (parser *LucyMethodSignatureParse) Encode(f *ast.Function) (descriptor stri
 }
 
 //rewrite types
-func (parser *LucyMethodSignatureParse) Decode(f *ast.Function, bs []byte) error {
+func (signature *LucyMethodSignature) Decode(f *ast.Function, bs []byte) error {
 	bs = bs[1:] // skip (
 	var err error
 	for i := 0; i < len(f.Typ.ParameterList); i++ {
