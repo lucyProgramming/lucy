@@ -25,7 +25,7 @@ func registerBuildInFunctions() {
 			if args[0].Type == VARIABLE_TYPE_OBJECT {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {
-					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].ExpressionMultiValues)
 					if err != nil {
 						*errs = append(*errs, err)
 					} else {
@@ -209,7 +209,7 @@ func registerBuildInFunctions() {
 			*errs = append(*errs, err)
 			return
 		}
-		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].ExpressionMultiValues)
 		if err != nil {
 			*errs = append(*errs, err)
 			return
@@ -242,7 +242,7 @@ func registerBuildInFunctions() {
 			if args[0].Type == VARIABLE_TYPE_OBJECT {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {
-					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].ExpressionMultiValues)
 					if err != nil {
 						*errs = append(*errs, err)
 						return
@@ -268,7 +268,7 @@ func registerBuildInFunctions() {
 				*errs = append(*errs, err)
 				return
 			}
-			_, err := e.Args[0].mustBeOneValueContext(e.Args[0].Values)
+			_, err := e.Args[0].mustBeOneValueContext(e.Args[0].ExpressionMultiValues)
 			if err != nil {
 				*errs = append(*errs, err)
 				return

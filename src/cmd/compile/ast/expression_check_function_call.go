@@ -110,7 +110,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	argTypes []*VariableType, f *Function) (ret *Function) {
 	call := e.Data.(*ExpressionFunctionCall)
-	parameterType := make(map[string]*VariableType)
+	parameterTypes := make(map[string]*VariableType)
 	for k, v := range f.Type.ParameterList {
 		if v == nil || v.Type == nil || len(v.Type.haveParameterType()) == 0 {
 			continue
@@ -120,7 +120,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(e.Pos), k))
 			return
 		}
-		if err := v.Type.canBeBindWithType(parameterType, argTypes[k]); err != nil {
+		if err := v.Type.canBeBindWithType(parameterTypes, argTypes[k]); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v",
 				errMsgPrefix(argTypes[k].Pos), err))
 			return
@@ -133,7 +133,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		if len(tps) == 0 || tps[0] == nil {
 			//trying already have
-			if err := v.Type.canBeBindWithTypedParameters(parameterType); err == nil {
+			if err := v.Type.canBeBindWithTypedParameters(parameterTypes); err == nil {
 				//very good no error
 				continue
 			}
@@ -141,14 +141,14 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(e.Pos), k))
 			return
 		}
-		if err := v.Type.canBeBindWithType(parameterType, tps[0]); err != nil {
+		if err := v.Type.canBeBindWithType(parameterTypes, tps[0]); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v",
 				errMsgPrefix(tps[0].Pos), err))
 			return nil
 		}
 		tps = tps[1:]
 	}
-	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterType, ret, errs)
+	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypes, ret, errs)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		cloneFunction, es := f.clone()
 		if errsNotEmpty(es) {
@@ -157,15 +157,15 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		cloneFunction.TemplateFunction = nil
 		call.TemplateFunctionCallPair.Function = cloneFunction
-		cloneFunction.parameterType = parameterType
+		cloneFunction.parameterTypes = parameterTypes
 		for _, v := range cloneFunction.Type.ParameterList {
 			if len(v.Type.haveParameterType()) > 0 {
-				v.Type.bindWithTypedParameters(parameterType)
+				v.Type.bindWithTypedParameters(parameterTypes)
 			}
 		}
 		for _, v := range cloneFunction.Type.ReturnList {
 			if len(v.Type.haveParameterType()) > 0 {
-				v.Type.bindWithTypedParameters(parameterType)
+				v.Type.bindWithTypedParameters(parameterTypes)
 			}
 		}
 		//check this function

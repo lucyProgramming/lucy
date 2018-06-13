@@ -62,10 +62,10 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	// store  to,wait for call
-	function.VarOffSet = code.MaxLocals
+	function.ClosureVariableOffSet = code.MaxLocals
 	code.MaxLocals++
 	state.appendLocals(class, state.newObjectVariableType(className))
-	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, function.VarOffSet)...)
+	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, function.ClosureVariableOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
 	total := len(function.Closure.Variables) + len(function.Closure.Functions)
@@ -135,7 +135,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.VarOffSet)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.ClosureVariableOffSet)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}

@@ -331,7 +331,7 @@ func (makeClass *MakeClass) mkGlobalFunctions() {
 				Filename:    f.Pos.Filename,
 				StartLine:   uint16(f.Pos.StartLine),
 				StartColumn: uint16(f.Pos.StartColumn),
-				Code:        string(f.SourceCode),
+				Code:        string(f.SourceCodes),
 			})
 			continue
 		}

@@ -36,7 +36,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
-			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, call.Func.VarOffSet)...)
+			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, call.Func.ClosureVariableOffSet)...)
 		}
 		state.pushStack(class, state.newObjectVariableType(call.Func.ClassMethod.Class.Name))
 		defer state.popStack(1)
@@ -56,8 +56,8 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 	if e.IsStatementExpression {
 		if e.CallHasReturnValue() == false {
 			// nothing to do
-		} else if len(e.Values) == 1 {
-			if 2 == jvmSize(e.Values[0]) {
+		} else if len(e.ExpressionMultiValues) == 1 {
+			if 2 == jvmSize(e.ExpressionMultiValues[0]) {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop
@@ -70,8 +70,8 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 	}
 
 	if e.CallHasReturnValue() == false { // nothing
-	} else if len(e.Values) == 1 {
-		if t := jvmSize(e.Values[0]); t > maxStack {
+	} else if len(e.ExpressionMultiValues) == 1 {
+		if t := jvmSize(e.ExpressionMultiValues[0]); t > maxStack {
 			maxStack = t
 		}
 	} else { // > 1

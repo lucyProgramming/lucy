@@ -20,7 +20,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 	// if null skip
 	{
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.RangeOn.Value))
+			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.RangeOn.ExpressionValue))
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(1) // pop
@@ -155,16 +155,16 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if s.RangeAttr.RangeOn.Value.Map.V.IsPointer() == false {
-			typeConverter.getPrimitivesFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+		if s.RangeAttr.RangeOn.ExpressionValue.Map.V.IsPointer() == false {
+			typeConverter.getPrimitivesFromObject(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		} else {
-			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.V)
+			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		}
 		autoVar.V = code.MaxLocals
-		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.V)
+		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		//store to V
-		copyOP(code, storeLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.V.Type, autoVar.V)...)
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
+		copyOP(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.V.Type, autoVar.V)...)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
@@ -178,15 +178,15 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.KeySetsK)...)
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
-		if s.RangeAttr.RangeOn.Value.Map.K.IsPointer() == false {
-			typeConverter.getPrimitivesFromObject(class, code, s.RangeAttr.RangeOn.Value.Map.K)
+		if s.RangeAttr.RangeOn.ExpressionValue.Map.K.IsPointer() == false {
+			typeConverter.getPrimitivesFromObject(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 		} else {
-			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.Value.Map.K)
+			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 		}
 		autoVar.K = code.MaxLocals
-		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.Value.Map.K)
-		copyOP(code, storeLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.K.Type, autoVar.K)...)
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.K)
+		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K)
+		copyOP(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.K.Type, autoVar.K)...)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 	}
 
 	// store k and v into user defined variable
@@ -222,8 +222,8 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 			maxStack = stack
 		}
 		copyOP(code,
-			loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.V.Type, autoVar.V)...)
-		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.V); t > maxStack {
+			loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.V.Type, autoVar.V)...)
+		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V); t > maxStack {
 			maxStack = t
 		}
 		copyOPLeftValueVersion(class, code, op, classname, name, descriptor)
@@ -236,8 +236,8 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 				maxStack = stack
 			}
 			copyOP(code,
-				loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.K.Type, autoVar.K)...)
-			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.Value.Map.K); t > maxStack {
+				loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.K.Type, autoVar.K)...)
+			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K); t > maxStack {
 				maxStack = t
 			}
 			copyOPLeftValueVersion(class, code, op, classname, name, descriptor)

@@ -34,11 +34,11 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 
 func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context) (maxstack uint16) {
-	if e.Value.Type == ast.VARIABLE_TYPE_CLASS {
+	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_CLASS {
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	if e.Value.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
+	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
 		loadInt(class, code, identifier.EnumName.Value)
 		maxstack = 1
 		return

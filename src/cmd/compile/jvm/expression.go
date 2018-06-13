@@ -207,13 +207,13 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 }
 
 func (makeExpression *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
-	if len(e.Values) > 1 {
+	if len(e.ExpressionMultiValues) > 1 {
 		return 1
 	}
-	if e.Value.RightValueValid() == false {
+	if e.ExpressionValue.RightValueValid() == false {
 		return 0
 	}
-	return jvmSize(e.Value)
+	return jvmSize(e.ExpressionValue)
 }
 
 func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
@@ -221,7 +221,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 	length := 0
 	for _, e := range es {
 		if e.MayHaveMultiValue() {
-			length += len(e.Values)
+			length += len(e.ExpressionMultiValues)
 			continue
 		}
 		length++
@@ -241,12 +241,12 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 	index := int32(0)
 	for _, v := range es {
 		currentStack := uint16(1)
-		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			for kk, _ := range v.Values {
+			for kk, _ := range v.ExpressionMultiValues {
 				currentStack = 1
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
@@ -269,15 +269,15 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, v.Value)
+			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if v.Value.IsPointer() == false {
-			typeConverter.putPrimitiveInObject(class, code, v.Value)
+		if v.ExpressionValue.IsPointer() == false {
+			typeConverter.putPrimitiveInObject(class, code, v.ExpressionValue)
 		}
 		loadInt(class, code, index)
 		code.Codes[code.CodeLength] = cg.OP_swap

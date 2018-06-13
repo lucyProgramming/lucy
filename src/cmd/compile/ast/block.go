@@ -159,7 +159,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		}
 	}
 	if b.IsFunctionTopBlock &&
-		len(b.InheritedAttribute.Function.parameterType) > 0 { // this is a template function
+		len(b.InheritedAttribute.Function.parameterTypes) > 0 { // this is a template function
 		return searchBuildIns(name), nil
 	}
 	if b.Outer == nil {
@@ -171,7 +171,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 	}
 	if t != nil { //
 		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionTopBlock &&
-			len(b.InheritedAttribute.Function.parameterType) > 0 { // template function
+			len(b.InheritedAttribute.Function.parameterTypes) > 0 { // template function
 			return nil, nil
 		}
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable

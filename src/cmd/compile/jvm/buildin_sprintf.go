@@ -31,7 +31,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	state.pushStack(class, objectArray)
 	index := int32(0)
 	for _, v := range call.Args {
-		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			currentStack = 2
 			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
@@ -39,7 +39,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 			}
 			// store in temp var
 			multiValuePacker.storeArrayListAutoVar(code, context)
-			for kk, _ := range v.Values {
+			for kk, _ := range v.ExpressionMultiValues {
 				currentStack = 2
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
@@ -65,7 +65,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, v.Value)
+			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // bool value
 		}
@@ -73,8 +73,8 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if v.Value.IsPointer() == false {
-			typeConverter.putPrimitiveInObject(class, code, v.Value)
+		if v.ExpressionValue.IsPointer() == false {
+			typeConverter.putPrimitiveInObject(class, code, v.ExpressionValue)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++

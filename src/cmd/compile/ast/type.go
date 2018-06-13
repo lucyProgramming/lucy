@@ -82,7 +82,7 @@ func (variableType *VariableType) mkDefaultValueExpression() *Expression {
 	var e Expression
 	e.IsCompileAuto = true
 	e.Pos = variableType.Pos
-	e.Value = variableType.Clone()
+	e.ExpressionValue = variableType.Clone()
 	switch variableType.Type {
 	case VARIABLE_TYPE_BOOL:
 		e.Type = EXPRESSION_TYPE_BOOL
@@ -168,13 +168,13 @@ func (variableType *VariableType) resolve(block *Block, subPart ...bool) error {
 	}
 	variableType.Resolved = true
 	if variableType.Type == VARIABLE_TYPE_T {
-		if block.InheritedAttribute.Function.parameterType == nil ||
-			block.InheritedAttribute.Function.parameterType[variableType.Name] == nil {
+		if block.InheritedAttribute.Function.parameterTypes == nil ||
+			block.InheritedAttribute.Function.parameterTypes[variableType.Name] == nil {
 			return fmt.Errorf("%s parameterd type '%s' not found",
 				errMsgPrefix(variableType.Pos), variableType.Name)
 		}
 		pos := variableType.Pos
-		*variableType = *block.InheritedAttribute.Function.parameterType[variableType.Name]
+		*variableType = *block.InheritedAttribute.Function.parameterTypes[variableType.Name]
 		variableType.Pos = pos // keep pos
 		return nil
 	}

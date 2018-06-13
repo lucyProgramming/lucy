@@ -7,46 +7,46 @@ import (
 )
 
 type Function struct {
-	TemplateFunction               *TemplateFunction
-	parameterType                  map[string]*VariableType //typed parameters
-	ClassMethod                    *cg.MethodHighLevel      // make call from
-	ConstructionMethodCalledByUser bool
-	HaveDefaultValue               bool
-	DefaultValueStartAt            int
-	IsClosureFunction              bool
-	isGlobalVariableDefinition     bool
-	isPackageBlockFunction         bool
-	buildInFunctionChecker         buildFunctionChecker // used in build function
-	IsGlobal                       bool
-	IsBuildIn                      bool
-	Used                           bool
-	AccessFlags                    uint16
-	Type                           FunctionType
-	Closure                        Closure
-	Name                           string // if name is nil string,means no name function
-	Block                          Block
-	Pos                            *Pos
-	Descriptor                     string
-	AutoVarForException            *AutoVarForException
-	AutoVarForReturnBecauseOfDefer *AutoVarForReturnBecauseOfDefer
-	AutoVarForMultiReturn          *AutoVarForMultiReturn
-	VarOffSet                      uint16 // for closure
-	SourceCode                     []byte // source code for T
+	TemplateFunction                    *TemplateFunction
+	parameterTypes                      map[string]*VariableType //typed parameters
+	ClassMethod                         *cg.MethodHighLevel      // make call from
+	ConstructionMethodCalledByUser      bool
+	HaveDefaultValue                    bool
+	DefaultValueStartAt                 int
+	IsClosureFunction                   bool
+	isGlobalVariableDefinition          bool
+	isPackageBlockFunction              bool
+	buildInFunctionChecker              buildFunctionChecker // used in build function
+	IsGlobal                            bool
+	IsBuildIn                           bool
+	Used                                bool
+	AccessFlags                         uint16
+	Type                                FunctionType
+	Closure                             Closure
+	Name                                string // if name is nil string,means no name function
+	Block                               Block
+	Pos                                 *Pos
+	Descriptor                          string
+	AutoVariableForException            *AutoVariableForException
+	AutoVariableForReturnBecauseOfDefer *AutoVariableForReturnBecauseOfDefer
+	AutoVariableForMultiReturn          *AutoVariableForMultiReturn
+	ClosureVariableOffSet               uint16 // for closure
+	SourceCodes                         []byte // source code for T
 }
 
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos)
 
 type buildFunctionChecker CallChecker
 
-type AutoVarForReturnBecauseOfDefer struct {
+type AutoVariableForReturnBecauseOfDefer struct {
 	ForArrayList uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
-	if f.AutoVarForReturnBecauseOfDefer != nil {
+	if f.AutoVariableForReturnBecauseOfDefer != nil {
 		return
 	}
-	f.AutoVarForReturnBecauseOfDefer = &AutoVarForReturnBecauseOfDefer{}
+	f.AutoVariableForReturnBecauseOfDefer = &AutoVariableForReturnBecauseOfDefer{}
 }
 
 func (f *Function) NoReturnValue() bool {
@@ -54,25 +54,25 @@ func (f *Function) NoReturnValue() bool {
 		f.Type.ReturnList[0].Type.Type == VARIABLE_TYPE_VOID
 }
 
-type AutoVarForException struct {
+type AutoVariableForException struct {
 	Offset uint16
 }
 
 func (f *Function) mkAutoVarForException() {
-	if f.AutoVarForException != nil {
+	if f.AutoVariableForException != nil {
 		return
 	}
-	f.AutoVarForException = &AutoVarForException{}
+	f.AutoVariableForException = &AutoVariableForException{}
 }
 
 func (f *Function) mkAutoVarForMultiReturn() {
-	if f.AutoVarForMultiReturn != nil {
+	if f.AutoVariableForMultiReturn != nil {
 		return
 	}
-	f.AutoVarForMultiReturn = &AutoVarForMultiReturn{}
+	f.AutoVariableForMultiReturn = &AutoVariableForMultiReturn{}
 }
 
-type AutoVarForMultiReturn struct {
+type AutoVariableForMultiReturn struct {
 	Offset uint16
 }
 
@@ -141,7 +141,7 @@ func (f *Function) check(b *Block) []error {
 }
 
 func (f *Function) clone() (ret *Function, es []error) {
-	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
+	ret, es = ParseFunctionHandler(f.SourceCodes, f.Pos)
 	if errsNotEmpty(es) {
 		return ret, es
 	}

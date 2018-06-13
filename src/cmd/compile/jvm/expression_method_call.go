@@ -8,20 +8,20 @@ import (
 func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY {
+	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
 		return makeExpression.buildArrayMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.Value.Type == ast.VARIABLE_TYPE_MAP {
+	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP {
 		return makeExpression.buildMapMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.Value.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
+	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
 		return makeExpression.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
 
 	pop := func(f *ast.Function) {
 		if e.IsStatementExpression && f.NoReturnValue() == false {
-			if len(e.Values) == 1 {
-				if jvmSize(e.Values[0]) == 1 {
+			if len(e.ExpressionMultiValues) == 1 {
+				if jvmSize(e.ExpressionMultiValues[0]) == 1 {
 					code.Codes[code.CodeLength] = cg.OP_pop
 					code.CodeLength++
 				} else {
@@ -34,11 +34,11 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			}
 		}
 	}
-	if call.Expression.Value.Type == ast.VARIABLE_TYPE_PACKAGE {
+	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
 		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.PackageFunction.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Expression.Value.Package.Name + "/main",
+			Class:      call.Expression.ExpressionValue.Package.Name + "/main",
 			Method:     call.Name,
 			Descriptor: call.PackageFunction.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -72,7 +72,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 
 	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
 	// object ref
-	state.pushStack(class, call.Expression.Value)
+	state.pushStack(class, call.Expression.ExpressionValue)
 	defer state.popStack(1)
 	if call.Name == ast.CONSTRUCTION_METHOD_NAME {
 		state.popStack(1)

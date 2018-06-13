@@ -12,7 +12,7 @@ func (makeExpression *MakeExpression) buildTernary(class *cg.ClassHighLevel, cod
 	maxStack, es = makeExpression.build(class, code, ternary.Condition, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
-		state.pushStack(class, ternary.Condition.Value)
+		state.pushStack(class, ternary.Condition.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
@@ -21,7 +21,7 @@ func (makeExpression *MakeExpression) buildTernary(class *cg.ClassHighLevel, cod
 	stack, es := makeExpression.build(class, code, ternary.True, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
-		state.pushStack(class, ternary.True.Value)
+		state.pushStack(class, ternary.True.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
@@ -34,14 +34,14 @@ func (makeExpression *MakeExpression) buildTernary(class *cg.ClassHighLevel, cod
 	stack, es = makeExpression.build(class, code, ternary.False, context, state)
 	if len(es) > 0 {
 		backfillExit(es, code.CodeLength)
-		state.pushStack(class, ternary.False.Value)
+		state.pushStack(class, ternary.False.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
 	if stack > maxStack {
 		maxStack = stack
 	}
-	state.pushStack(class, e.Value)
+	state.pushStack(class, e.ExpressionValue)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
 	backfillExit([]*cg.Exit{exit2}, code.CodeLength)

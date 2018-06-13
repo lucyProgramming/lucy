@@ -53,16 +53,16 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
-	currentStack := jvmSize(ee.Value) + remainStack
+	currentStack := jvmSize(ee.ExpressionValue) + remainStack
 	if e.IsStatementExpression == false {
 		if e.Type == ast.EXPRESSION_TYPE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_DECREMENT {
-			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.Value)
+			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.ExpressionValue)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
 		}
 	}
-	switch e.Value.Type {
+	switch e.ExpressionValue.Type {
 	case ast.VARIABLE_TYPE_BYTE:
 		if e.IsSelfIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
@@ -144,7 +144,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 	if e.IsStatementExpression == false {
 		if e.Type == ast.EXPRESSION_TYPE_PRE_INCREMENT ||
 			e.Type == ast.EXPRESSION_TYPE_PRE_DECREMENT {
-			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.Value)
+			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.ExpressionValue)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}

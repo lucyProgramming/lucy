@@ -17,14 +17,14 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
-	state.pushStack(class, index.Expression.Value)
+	state.pushStack(class, index.Expression.ExpressionValue)
 	stack, _ := makeExpression.build(class, code, index.Index, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
 	currentStack = 2 // mapref kref
-	if index.Expression.Value.Map.K.IsPointer() == false {
-		typeConverter.putPrimitiveInObject(class, code, index.Expression.Value.Map.K)
+	if index.Expression.ExpressionValue.Map.K.IsPointer() == false {
+		typeConverter.putPrimitiveInObject(class, code, index.Expression.ExpressionValue.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -34,10 +34,10 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.popStack(1)
-	if index.Expression.Value.Map.V.Type == ast.VARIABLE_TYPE_ENUM {
-		typeConverter.getPrimitivesFromObject(class, code, index.Expression.Value.Map.V)
-	} else if index.Expression.Value.Map.V.IsPointer() {
-		typeConverter.castPointerTypeToRealType(class, code, index.Expression.Value.Map.V)
+	if index.Expression.ExpressionValue.Map.V.Type == ast.VARIABLE_TYPE_ENUM {
+		typeConverter.getPrimitivesFromObject(class, code, index.Expression.ExpressionValue.Map.V)
+	} else if index.Expression.ExpressionValue.Map.V.IsPointer() {
+		typeConverter.castPointerTypeToRealType(class, code, index.Expression.ExpressionValue.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
 		code.CodeLength++
@@ -47,7 +47,7 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		codeLength := code.CodeLength
 		code.CodeLength += 3
-		switch index.Expression.Value.Map.V.Type {
+		switch index.Expression.ExpressionValue.Map.V.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -81,10 +81,10 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 			state.popStack(1) // pop java_root_class ref
 		}
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
-		typeConverter.getPrimitivesFromObject(class, code, index.Expression.Value.Map.V)
+		typeConverter.getPrimitivesFromObject(class, code, index.Expression.ExpressionValue.Map.V)
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 		{
-			state.pushStack(class, e.Value)
+			state.pushStack(class, e.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
@@ -99,14 +99,14 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	if index.Expression.Value.Type == ast.VARIABLE_TYPE_MAP {
+	if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP {
 		return makeExpression.buildMapIndex(class, code, e, context, state)
 	}
 	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
-	state.pushStack(class, index.Expression.Value)
+	state.pushStack(class, index.Expression.ExpressionValue)
 	currentStack := uint16(1)
-	if index.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY {
-		meta := ArrayMetas[e.Value.Type]
+	if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+		meta := ArrayMetas[e.ExpressionValue.Type]
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -135,8 +135,8 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 	if t := stack + currentStack; t > maxStack {
 		maxStack = t
 	}
-	if index.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY {
-		meta := ArrayMetas[e.Value.Type]
+	if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+		meta := ArrayMetas[e.ExpressionValue.Type]
 		// stack arrayref  end start index
 		code.Codes[code.CodeLength] = cg.OP_iadd
 		code.CodeLength++
@@ -175,7 +175,7 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
 	}
-	switch e.Value.Type {
+	switch e.ExpressionValue.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:
@@ -205,8 +205,8 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 	}
 	code.CodeLength++
 	if index.Expression.Type == ast.VARIABLE_TYPE_ARRAY &&
-		e.Value.IsPointer() && e.Value.Type != ast.VARIABLE_TYPE_STRING {
-		typeConverter.castPointerTypeToRealType(class, code, e.Value)
+		e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VARIABLE_TYPE_STRING {
+		typeConverter.castPointerTypeToRealType(class, code, e.ExpressionValue)
 	}
 	return
 }

@@ -12,7 +12,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 
 	if e.Type == ast.EXPRESSION_TYPE_NEGATIVE {
 		maxStack, _ = makeExpression.build(class, code, e.Data.(*ast.Expression), context, state)
-		switch e.Value.Type {
+		switch e.ExpressionValue.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -32,10 +32,10 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 	if e.Type == ast.EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*ast.Expression)
 		maxStack, _ = makeExpression.build(class, code, ee, context, state)
-		if t := jvmSize(ee.Value) * 2; t > maxStack {
+		if t := jvmSize(ee.ExpressionValue) * 2; t > maxStack {
 			maxStack = t
 		}
-		switch e.Value.Type {
+		switch e.ExpressionValue.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			code.Codes[code.CodeLength] = cg.OP_bipush
 			code.Codes[code.CodeLength+1] = 255
@@ -78,12 +78,12 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 		maxStack, es = makeExpression.build(class, code, ee, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, ee.Value)
+			state.pushStack(class, ee.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, ee.Value)
+		state.pushStack(class, ee.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_ifne

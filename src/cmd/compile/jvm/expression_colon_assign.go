@@ -33,7 +33,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		stack, es := makeExpression.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, vs.Values[0].Value)
+			state.pushStack(class, vs.Values[0].ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
@@ -41,7 +41,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		if v.Name == ast.NO_NAME_IDENTIFIER {
-			if jvmSize(vs.Values[0].Value) == 1 {
+			if jvmSize(vs.Values[0].ExpressionValue) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2
@@ -170,12 +170,12 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 	}
 	index = 0
 	for _, v := range vs.Values {
-		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			stack, _ := makeExpression.build(class, code, vs.Values[0], context, state)
 			if t := currentStack + stack; t > maxstack {
 				maxstack = t
 			}
-			for kk, tt := range v.Values {
+			for kk, tt := range v.ExpressionMultiValues {
 				stack = multiValuePacker.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxstack {
 					maxstack = t
@@ -201,7 +201,7 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 		stack, es := makeExpression.build(class, code, vs.Values[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, v.Value)
+			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}

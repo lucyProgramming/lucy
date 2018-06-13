@@ -18,7 +18,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 	state.pushStack(class, hashMapVerifyType)
 	switch call.Name {
 	case common.MAP_METHOD_KEY_EXISTS:
-		variableType := call.Args[0].Value
+		variableType := call.Args[0].ExpressionValue
 		stack, _ := makeExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
@@ -52,15 +52,15 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 		}
 		for k, v := range call.Args {
 			currentStack = 1
-			if v.MayHaveMultiValue() && len(v.Values) > 1 {
+			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 				stack, _ := makeExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
 				multiValuePacker.storeArrayListAutoVar(code, context) // store to temp
-				for kk, tt := range v.Values {
+				for kk, tt := range v.ExpressionMultiValues {
 					currentStack = 1
-					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
+					if k != len(call.Args)-1 || kk != len(v.ExpressionMultiValues)-1 {
 						code.Codes[code.CodeLength] = cg.OP_dup
 						code.CodeLength++
 						currentStack++
@@ -73,13 +73,13 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 					}
 					//remove
 					callRemove()
-					if k != len(call.Args)-1 || kk != len(v.Values)-1 {
+					if k != len(call.Args)-1 || kk != len(v.ExpressionMultiValues)-1 {
 						state.popStack(1)
 					}
 				}
 				continue
 			}
-			variableType := v.Value
+			variableType := v.ExpressionValue
 			if k != len(call.Args)-1 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				currentStack++

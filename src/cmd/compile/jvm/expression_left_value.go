@@ -49,15 +49,15 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	if index.Index.Value.IsPointer() == false {
-		typeConverter.putPrimitiveInObject(class, code, index.Index.Value)
+	if index.Index.ExpressionValue.IsPointer() == false {
+		typeConverter.putPrimitiveInObject(class, code, index.Index.ExpressionValue)
 	}
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
 	remainStack = 2
 	op = []byte{}
-	if index.Expression.Value.Map.V.IsPointer() == false {
+	if index.Expression.ExpressionValue.Map.V.IsPointer() == false {
 		op = append(op,
-			typeConverter.putPrimitiveInObjectBytes(class, index.Expression.Value.Map.V)...)
+			typeConverter.putPrimitiveInObjectBytes(class, index.Expression.ExpressionValue.Map.V)...)
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
@@ -68,7 +68,7 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	op = append(op, bs4...)
-	target = index.Expression.Value.Map.V
+	target = index.Expression.ExpressionValue.Map.V
 	className = java_hashmap_class
 	return
 }
@@ -178,10 +178,10 @@ func (makeExpression *MakeExpression) getLeftValue(
 		target = identifier.Variable.Type
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY {
-			meta := ArrayMetas[index.Expression.Value.ArrayType.Type]
+		if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+			meta := ArrayMetas[index.Expression.ExpressionValue.ArrayType.Type]
 			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
-			state.pushStack(class, index.Expression.Value)
+			state.pushStack(class, index.Expression.ExpressionValue)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 			code.Codes[code.CodeLength] = cg.OP_getfield
@@ -251,11 +251,11 @@ func (makeExpression *MakeExpression) getLeftValue(
 			{
 				t := &ast.VariableType{}
 				t.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
-				t.ArrayType = index.Expression.Value.ArrayType
+				t.ArrayType = index.Expression.ExpressionValue.ArrayType
 				state.pushStack(class, t)
 				state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 			}
-			switch e.Value.Type {
+			switch e.ExpressionValue.Type {
 			case ast.VARIABLE_TYPE_BOOL:
 				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_BYTE:
@@ -284,20 +284,20 @@ func (makeExpression *MakeExpression) getLeftValue(
 				op = []byte{cg.OP_aastore}
 			}
 			remainStack = 2 // [arrayref ,index]
-			target = e.Value
-		} else if index.Expression.Value.Type == ast.VARIABLE_TYPE_MAP { // map
+			target = e.ExpressionValue
+		} else if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP { // map
 			return makeExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
 			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
-			state.pushStack(class, index.Expression.Value)
+			state.pushStack(class, index.Expression.ExpressionValue)
 			stack, _ := makeExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
-			target = e.Value
+			target = e.ExpressionValue
 			remainStack = 2 // [objectref ,index]
 			state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
-			switch e.Value.Type {
+			switch e.ExpressionValue.Type {
 			case ast.VARIABLE_TYPE_BOOL:
 				op = []byte{cg.OP_bastore}
 			case ast.VARIABLE_TYPE_BYTE:
@@ -329,16 +329,16 @@ func (makeExpression *MakeExpression) getLeftValue(
 		}
 	case ast.EXPRESSION_TYPE_SELECT:
 		dot := e.Data.(*ast.ExpressionSelection)
-		if dot.Expression.Value.Type == ast.VARIABLE_TYPE_PACKAGE {
+		if dot.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}
 			target = dot.PackageVariable.Type
-			className = dot.Expression.Value.Package.Name + "/main"
+			className = dot.Expression.ExpressionValue.Package.Name + "/main"
 			name = dot.PackageVariable.Name
 			descriptor = dot.PackageVariable.Descriptor
 			maxStack = 0
 			remainStack = 0
 		} else {
-			className = dot.Expression.Value.Class.Name
+			className = dot.Expression.ExpressionValue.Class.Name
 			target = dot.Field.VariableDefinition.Type
 			name = dot.Name
 			if dot.Field.LoadFromOutSide {
@@ -351,7 +351,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			} else {
 				maxStack, _ = makeExpression.build(class, code, dot.Expression, context, state)
 				remainStack = 1
-				state.pushStack(class, dot.Expression.Value)
+				state.pushStack(class, dot.Expression.ExpressionValue)
 				op = []byte{cg.OP_putfield}
 			}
 		}

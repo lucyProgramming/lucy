@@ -13,7 +13,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	}()
 	arr := e.Data.(*ast.ExpressionArrayLiteral)
 	//	new array ,
-	meta := ArrayMetas[e.Value.ArrayType.Type]
+	meta := ArrayMetas[e.ExpressionValue.ArrayType.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -28,7 +28,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	}
 
 	loadInt(class, code, int32(arr.Length))
-	switch e.Value.ArrayType.Type {
+	switch e.ExpressionValue.ArrayType.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -69,23 +69,23 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(e.Value.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(e.ExpressionValue.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_ARRAY:
-		meta := ArrayMetas[e.Value.ArrayType.ArrayType.Type]
+		meta := ArrayMetas[e.ExpressionValue.ArrayType.ArrayType.Type]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 	arrayObject := &ast.VariableType{}
 	arrayObject.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
-	arrayObject.ArrayType = e.Value.ArrayType
+	arrayObject.ArrayType = e.ExpressionValue.ArrayType
 	state.pushStack(class, arrayObject)
 
 	maxStack = 4
 
 	store := func() {
-		switch e.Value.ArrayType.Type {
+		switch e.ExpressionValue.ArrayType.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -115,14 +115,14 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	}
 	var index int32 = 0
 	for _, v := range arr.Expressions {
-		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			// stack top is array list
 			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxStack {
 				maxStack = t
 			}
 			multiValuePacker.storeArrayListAutoVar(code, context)
-			for k, t := range v.Values {
+			for k, t := range v.ExpressionMultiValues {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				loadInt(class, code, index) // load index
@@ -143,7 +143,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, v.Value)
+			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // must be a logical expression
 		}

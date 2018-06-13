@@ -60,7 +60,7 @@ func (p *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 		err = fmt.Errorf("%s expect '}', but '%s'",
 			p.parser.errorMsgPrefix(), p.parser.token.Description)
 	} else {
-		f.SourceCode = p.parser.bs[offset : p.parser.token.Offset+1]
+		f.SourceCodes = p.parser.bs[offset : p.parser.token.Offset+1]
 		p.Next()
 	}
 

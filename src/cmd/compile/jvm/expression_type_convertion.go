@@ -33,10 +33,10 @@ func (makeExpression *MakeExpression) buildTypeConvertion(class *cg.ClassHighLev
 		code.CodeLength += 4
 	}
 	// string
-	if (conversion.Type.Type == ast.VARIABLE_TYPE_STRING && conversion.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY &&
-		conversion.Expression.Value.ArrayType.Type == ast.VARIABLE_TYPE_BYTE) ||
-		(conversion.Type.Type == ast.VARIABLE_TYPE_STRING && conversion.Expression.Value.Type == ast.VARIABLE_TYPE_JAVA_ARRAY &&
-			conversion.Expression.Value.ArrayType.Type == ast.VARIABLE_TYPE_BYTE) {
+	if (conversion.Type.Type == ast.VARIABLE_TYPE_STRING && conversion.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY &&
+		conversion.Expression.ExpressionValue.ArrayType.Type == ast.VARIABLE_TYPE_BYTE) ||
+		(conversion.Type.Type == ast.VARIABLE_TYPE_STRING && conversion.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_JAVA_ARRAY &&
+			conversion.Expression.ExpressionValue.ArrayType.Type == ast.VARIABLE_TYPE_BYTE) {
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -50,8 +50,8 @@ func (makeExpression *MakeExpression) buildTypeConvertion(class *cg.ClassHighLev
 	}
 	stack, _ := makeExpression.build(class, code, conversion.Expression, context, state)
 	maxStack = currentStack + stack
-	if e.Value.IsNumber() {
-		makeExpression.numberTypeConverter(code, conversion.Expression.Value.Type, conversion.Type.Type)
+	if e.ExpressionValue.IsNumber() {
+		makeExpression.numberTypeConverter(code, conversion.Expression.ExpressionValue.Type, conversion.Type.Type)
 		if t := jvmSize(conversion.Type); t > maxStack {
 			maxStack = t
 		}
@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildTypeConvertion(class *cg.ClassHighLev
 	}
 	//  []byte("hello world")
 	if conversion.Type.Type == ast.VARIABLE_TYPE_ARRAY && conversion.Type.ArrayType.Type == ast.VARIABLE_TYPE_BYTE &&
-		conversion.Expression.Value.Type == ast.VARIABLE_TYPE_STRING {
+		conversion.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -83,7 +83,7 @@ func (makeExpression *MakeExpression) buildTypeConvertion(class *cg.ClassHighLev
 	}
 	// byte[]("hello world")
 	if conversion.Type.Type == ast.VARIABLE_TYPE_JAVA_ARRAY && conversion.Type.ArrayType.Type == ast.VARIABLE_TYPE_BYTE &&
-		conversion.Expression.Value.Type == ast.VARIABLE_TYPE_STRING {
+		conversion.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -99,8 +99,8 @@ func (makeExpression *MakeExpression) buildTypeConvertion(class *cg.ClassHighLev
 	}
 	//  string(['h','e'])
 	if conversion.Type.Type == ast.VARIABLE_TYPE_STRING &&
-		conversion.Expression.Value.Type == ast.VARIABLE_TYPE_ARRAY &&
-		conversion.Expression.Value.ArrayType.Type == ast.VARIABLE_TYPE_BYTE {
+		conversion.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY &&
+		conversion.Expression.ExpressionValue.ArrayType.Type == ast.VARIABLE_TYPE_BYTE {
 		meta := ArrayMetas[ast.VARIABLE_TYPE_BYTE]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -120,8 +120,8 @@ func (makeExpression *MakeExpression) buildTypeConvertion(class *cg.ClassHighLev
 	}
 	//  string(byte[])
 	if conversion.Type.Type == ast.VARIABLE_TYPE_STRING &&
-		conversion.Expression.Value.Type == ast.VARIABLE_TYPE_JAVA_ARRAY &&
-		conversion.Expression.Value.ArrayType.Type == ast.VARIABLE_TYPE_BYTE {
+		conversion.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_JAVA_ARRAY &&
+		conversion.Expression.ExpressionValue.ArrayType.Type == ast.VARIABLE_TYPE_BYTE {
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_string_class,

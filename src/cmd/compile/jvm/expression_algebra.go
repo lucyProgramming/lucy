@@ -16,12 +16,12 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		e.Type == ast.EXPRESSION_TYPE_AND ||
 		e.Type == ast.EXPRESSION_TYPE_XOR {
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, bin.Left.Value)
+		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.Value); t > maxStack {
+		if t := stack + jvmSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}
-		switch e.Value.Type {
+		switch e.ExpressionValue.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			fallthrough
 		case ast.VARIABLE_TYPE_SHORT:
@@ -56,17 +56,17 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		e.Type == ast.EXPRESSION_TYPE_DIV ||
 		e.Type == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
-		if bin.Left.Value.Type == ast.VARIABLE_TYPE_STRING ||
-			bin.Right.Value.Type == ast.VARIABLE_TYPE_STRING {
+		if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING ||
+			bin.Right.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
 			return makeExpression.buildStrCat(class, code, bin, context, state)
 		}
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, e.Value)
+		state.pushStack(class, e.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := jvmSize(bin.Left.Value) + stack; t > maxStack {
+		if t := jvmSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t
 		}
-		switch e.Value.Type {
+		switch e.ExpressionValue.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
@@ -173,12 +173,12 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 	if e.Type == ast.EXPRESSION_TYPE_LSH ||
 		e.Type == ast.EXPRESSION_TYPE_RSH {
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, bin.Left.Value)
+		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.Value); t > maxStack {
+		if t := stack + jvmSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}
-		switch e.Value.Type {
+		switch e.ExpressionValue.Type {
 		case ast.VARIABLE_TYPE_BYTE:
 			if e.Type == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl

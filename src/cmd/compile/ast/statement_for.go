@@ -54,7 +54,7 @@ func (s *StatementFor) checkRange() []error {
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
-	rangeExpression.Value = rangeOn
+	rangeExpression.ExpressionValue = rangeOn
 	var lefts []*Expression
 	if bin.Left.Type == EXPRESSION_TYPE_LIST {
 		lefts = bin.Left.Data.([]*Expression)

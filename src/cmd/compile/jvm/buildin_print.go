@@ -45,14 +45,14 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 		stack, es := makeExpression.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, call.Args[0].Value)
+			state.pushStack(class, call.Args[0].ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
-		switch call.Args[0].Value.Type {
+		switch call.Args[0].ExpressionValue.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -163,13 +163,13 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 	}
 	for k, v := range call.Args {
 		var variableType *ast.VariableType
-		if v.MayHaveMultiValue() && len(v.Values) > 1 {
+		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
 			multiValuePacker.storeArrayListAutoVar(code, context)
-			for kk, tt := range v.Values {
+			for kk, tt := range v.ExpressionMultiValues {
 				stack = multiValuePacker.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
@@ -182,13 +182,13 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 						maxStack = t
 					}
 				}
-				app(k == len(call.Args)-1 && kk == len(v.Values)-1) // last and last
+				app(k == len(call.Args)-1 && kk == len(v.ExpressionMultiValues)-1) // last and last
 			}
 			continue
 		}
-		variableType = v.Value
+		variableType = v.ExpressionValue
 		if v.MayHaveMultiValue() {
-			variableType = v.Values[0]
+			variableType = v.ExpressionMultiValues[0]
 		}
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {

@@ -62,9 +62,9 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 	maxStack, _ = makeClass.makeExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.Exit
-	size := jvmSize(s.Condition.Value)
+	size := jvmSize(s.Condition.ExpressionValue)
 	currentStack := size
-	state.pushStack(class, s.Condition.Value)
+	state.pushStack(class, s.Condition.ExpressionValue)
 	for _, c := range s.StatementSwitchCases {
 		if exit != nil {
 			backfillExit([]*cg.Exit{exit}, code.CodeLength)
@@ -72,13 +72,13 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 		}
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
-			if ee.MayHaveMultiValue() && len(ee.Values) > 1 {
+			if ee.MayHaveMultiValue() && len(ee.ExpressionMultiValues) > 1 {
 				stack, _ := makeClass.makeExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
 				multiValuePacker.storeArrayListAutoVar(code, context)
-				for kkk, ttt := range ee.Values {
+				for kkk, ttt := range ee.ExpressionMultiValues {
 					currentStack = size
 					if size == 1 {
 						code.Codes[code.CodeLength] = cg.OP_dup
@@ -86,7 +86,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 						code.Codes[code.CodeLength] = cg.OP_dup2
 					}
 					code.CodeLength++
-					state.pushStack(class, s.Condition.Value)
+					state.pushStack(class, s.Condition.ExpressionValue)
 					currentStack += size
 					if currentStack > maxStack {
 						maxStack = currentStack
@@ -95,8 +95,8 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}
-					state.pushStack(class, s.Condition.Value)
-					compare(s.Condition.Value)
+					state.pushStack(class, s.Condition.ExpressionValue)
+					compare(s.Condition.ExpressionValue)
 					// consume result on stack
 					matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 				}
@@ -111,13 +111,13 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 			}
 			code.CodeLength++
 			currentStack += size
-			state.pushStack(class, s.Condition.Value)
+			state.pushStack(class, s.Condition.ExpressionValue)
 			stack, _ := makeClass.makeExpression.build(class, code, ee, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			state.pushStack(class, s.Condition.Value)
-			compare(s.Condition.Value)
+			state.pushStack(class, s.Condition.ExpressionValue)
+			compare(s.Condition.ExpressionValue)
 
 			matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}

@@ -26,12 +26,12 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.CodeLength += 4
 
 	{
-		state.pushStack(class, assertOn.Expression.Value)
+		state.pushStack(class, assertOn.Expression.ExpressionValue)
 		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
 		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
-		state.pushStack(class, assertOn.Expression.Value)
+		state.pushStack(class, assertOn.Expression.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(2)
 	}

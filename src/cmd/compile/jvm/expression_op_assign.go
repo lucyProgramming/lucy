@@ -65,7 +65,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.Value)
+		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
 	}
 	//copy op
 	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
@@ -79,7 +79,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		state.popStack(len(state.Stacks) - length)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	if bin.Left.Value.Type == ast.VARIABLE_TYPE_STRING {
+	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
 		return makeExpression.buildStrPlusAssign(class, code, e, context, state)
 	}
 	maxStack, remainStack, op, _, className, name, descriptor := makeExpression.getLeftValue(class, code, bin.Left, context, state)
@@ -88,13 +88,13 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, e.Value)
-	currentStack := jvmSize(e.Value) + remainStack // incase int -> long
+	state.pushStack(class, e.ExpressionValue)
+	currentStack := jvmSize(e.ExpressionValue) + remainStack // incase int -> long
 	stack, _ = makeExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	switch bin.Left.Value.Type {
+	switch bin.Left.ExpressionValue.Type {
 	case ast.VARIABLE_TYPE_BYTE:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
@@ -268,7 +268,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		}
 	}
 	if e.IsStatementExpression == false {
-		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.Value)
+		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}

@@ -11,7 +11,7 @@ type MultiValuePacker struct {
 */
 func (a *MultiValuePacker) buildLoadArrayListAutoVar(code *cg.AttributeCode, context *Context) (maxStack uint16) {
 	maxStack = 1
-	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVarForMultiReturn.Offset)...)
+	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForMultiReturn.Offset)...)
 	return
 }
 
@@ -20,7 +20,7 @@ func (a *MultiValuePacker) buildLoadArrayListAutoVar(code *cg.AttributeCode, con
 */
 func (a *MultiValuePacker) storeArrayListAutoVar(code *cg.AttributeCode, context *Context) {
 	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
-		context.function.AutoVarForMultiReturn.Offset)...)
+		context.function.AutoVariableForMultiReturn.Offset)...)
 
 }
 

@@ -176,34 +176,34 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 }
 func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
-	if f.AutoVarForException != nil {
+	if f.AutoVariableForException != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		f.AutoVarForException.Offset = code.MaxLocals
+		f.AutoVariableForException.Offset = code.MaxLocals
 		code.MaxLocals++
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForException.Offset)...)
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVariableForException.Offset)...)
 		state.appendLocals(class,
 			state.newObjectVariableType(java_throwable_class))
 		maxStack = 1
 	}
-	if f.AutoVarForReturnBecauseOfDefer != nil {
+	if f.AutoVariableForReturnBecauseOfDefer != nil {
 		if len(f.Type.ReturnList) > 1 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			f.AutoVarForReturnBecauseOfDefer.ForArrayList = code.MaxLocals
+			f.AutoVariableForReturnBecauseOfDefer.ForArrayList = code.MaxLocals
 			code.MaxLocals++
 			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
-				f.AutoVarForReturnBecauseOfDefer.ForArrayList)...)
+				f.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
 			state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		}
 		maxStack = 1
 	}
-	if f.AutoVarForMultiReturn != nil {
+	if f.AutoVariableForMultiReturn != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		f.AutoVarForMultiReturn.Offset = code.MaxLocals
+		f.AutoVariableForMultiReturn.Offset = code.MaxLocals
 		code.MaxLocals++
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVarForMultiReturn.Offset)...)
+		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVariableForMultiReturn.Offset)...)
 		state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		maxStack = 1
 	}
