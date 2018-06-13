@@ -286,7 +286,7 @@ func (m *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.Attr
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}
 		e.StartPc = uint16(statementReturn.Defers[index].StartPc)
-		e.Endpc = uint16(code.CodeLength)
+		e.EndPc = uint16(code.CodeLength)
 		e.HandlerPc = uint16(code.CodeLength)
 		if statementReturn.Defers[index].ExceptionClass == nil {
 			e.CatchType = class.Class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS)

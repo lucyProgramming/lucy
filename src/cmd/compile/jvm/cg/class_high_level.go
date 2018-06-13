@@ -18,7 +18,7 @@ type ClassHighLevel struct {
 	Interfaces        []string
 	Fields            map[string]*FieldHighLevel
 	Methods           map[string][]*MethodHighLevel
-	TriggerCLinit     *MethodHighLevel
+	TriggerClinit     *MethodHighLevel
 	TemplateFunctions []*AttributeTemplateFunction
 }
 

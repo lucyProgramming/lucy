@@ -17,7 +17,7 @@ type AttributeCode struct {
 
 type ExceptionTable struct {
 	StartPc   uint16
-	Endpc     uint16
+	EndPc     uint16
 	HandlerPc uint16
 	CatchType uint16
 }
@@ -79,7 +79,7 @@ func (a *AttributeCode) mkExceptions() []byte {
 		b := make([]byte, 8*len(a.Exceptions))
 		for k, v := range a.Exceptions {
 			binary.BigEndian.PutUint16(b[k*8:], v.StartPc)
-			binary.BigEndian.PutUint16(b[k*8+2:], v.Endpc)
+			binary.BigEndian.PutUint16(b[k*8+2:], v.EndPc)
 			binary.BigEndian.PutUint16(b[k*8+4:], v.HandlerPc)
 			binary.BigEndian.PutUint16(b[k*8+6:], v.CatchType)
 		}

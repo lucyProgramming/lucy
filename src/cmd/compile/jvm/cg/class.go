@@ -17,7 +17,7 @@ const (
 )
 
 type Class struct {
-	dest                   io.Writer
+	destination            io.Writer
 	magic                  uint32 //0xCAFEBABE
 	MinorVersion           uint16
 	MajorVersion           uint16

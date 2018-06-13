@@ -6,7 +6,7 @@ import (
 )
 
 func (c *Class) OutPut(dest io.Writer) error {
-	c.dest = dest
+	c.destination = dest
 	//magic number
 	_, err := dest.Write([]byte{0xca, 0xfe, 0xba, 0xbe})
 	if err != nil {
@@ -93,23 +93,23 @@ func (c *Class) writeMethods() error {
 	var err error
 	bs2 := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs2, uint16(len(c.Methods)))
-	_, err = c.dest.Write(bs2)
+	_, err = c.destination.Write(bs2)
 	if err != nil {
 		return err
 	}
 	for _, v := range c.Methods {
 		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
 		binary.BigEndian.PutUint16(bs2, v.NameIndex)
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
 		binary.BigEndian.PutUint16(bs2, v.DescriptorIndex)
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
@@ -126,23 +126,23 @@ func (c *Class) writeFields() error {
 	var err error
 	bs2 := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs2, uint16(len(c.Fields)))
-	_, err = c.dest.Write(bs2)
+	_, err = c.destination.Write(bs2)
 	if err != nil {
 		return err
 	}
 	for _, v := range c.Fields {
 		binary.BigEndian.PutUint16(bs2, uint16(v.AccessFlags))
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
 		binary.BigEndian.PutUint16(bs2, v.NameIndex)
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
 		binary.BigEndian.PutUint16(bs2, v.DescriptorIndex)
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
@@ -158,23 +158,23 @@ func (c *Class) writeFields() error {
 func (c *Class) writeAttributeInfo(as []*AttributeInfo) error {
 	bs2 := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs2, uint16(len(as)))
-	_, err := c.dest.Write(bs2)
+	_, err := c.destination.Write(bs2)
 	if err != nil {
 		return err
 	}
 	bs4 := make([]byte, 4)
 	for _, v := range as {
 		binary.BigEndian.PutUint16(bs2, v.NameIndex)
-		_, err = c.dest.Write(bs2)
+		_, err = c.destination.Write(bs2)
 		if err != nil {
 			return err
 		}
 		binary.BigEndian.PutUint32(bs4, v.attributeLength)
-		_, err = c.dest.Write(bs4)
+		_, err = c.destination.Write(bs4)
 		if err != nil {
 			return err
 		}
-		_, err = c.dest.Write(v.Info)
+		_, err = c.destination.Write(v.Info)
 		if err != nil {
 			return err
 		}

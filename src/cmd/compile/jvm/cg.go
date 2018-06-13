@@ -220,7 +220,7 @@ func (m *MakeClass) mkInitFunctions() {
 	trigger.Code.CodeLength = 1
 	trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
 	m.mainClass.AppendMethod(trigger)
-	m.mainClass.TriggerCLinit = trigger
+	m.mainClass.TriggerClinit = trigger
 }
 func (m *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.VariableType, v interface{}) (index uint16) {
 	switch t.Typ {
