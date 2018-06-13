@@ -5,7 +5,7 @@ import (
 )
 
 /*
-	in array type must eqaul
+	in array type must equal
 */
 func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*VariableType {
 	assert := e.Data.(*ExpressionTypeAssert)

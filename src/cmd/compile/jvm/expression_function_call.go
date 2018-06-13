@@ -64,7 +64,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 			}
 			code.CodeLength++
 		} else { // > 1
-			code.Codes[code.CodeLength] = cg.OP_pop // arraylist object on stack
+			code.Codes[code.CodeLength] = cg.OP_pop // array list object on stack
 			code.CodeLength++
 		}
 	}

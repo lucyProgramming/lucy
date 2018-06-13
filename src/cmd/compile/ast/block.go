@@ -165,7 +165,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchByName(name) // search by outter block
+	t, err := b.Outer.searchByName(name) // search by outer block
 	if err != nil {
 		return t, err
 	}
@@ -354,7 +354,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
 		return fmt.Errorf(errMsg)
 	}
-	// name exists in buildin, not allow
+	// name exists in buildIn, not allow
 	if lucyBuildInPackage != nil {
 		if _, exits := lucyBuildInPackage.Block.NameExists(name); exits {
 			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)

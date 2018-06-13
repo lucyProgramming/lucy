@@ -184,7 +184,7 @@ func registerBuildInFunctions() {
 	{
 		sprintfBuildFunction.Type.ReturnList = make([]*VariableDefinition, 1)
 		sprintfBuildFunction.Type.ReturnList[0] = &VariableDefinition{}
-		sprintfBuildFunction.Type.ReturnList[0].Name = "retrunValue"
+		sprintfBuildFunction.Type.ReturnList[0].Name = "returnValue"
 		sprintfBuildFunction.Type.ReturnList[0].Type = &VariableType{}
 		sprintfBuildFunction.Type.ReturnList[0].Type.Type = VARIABLE_TYPE_STRING
 	}

@@ -7,29 +7,29 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
-type Descript struct {
+type Description struct {
 }
 
-func (m *Descript) methodDescriptor(f *ast.Function) string {
+func (description *Description) methodDescriptor(f *ast.Function) string {
 	if f.Name == ast.MAIN_FUNCTION_NAME {
 		return "([Ljava/lang/String;)V"
 	}
 	s := "("
 	for _, v := range f.Type.ParameterList {
-		s += m.typeDescriptor(v.Type)
+		s += description.typeDescriptor(v.Type)
 	}
 	s += ")"
 	if f.NoReturnValue() {
 		s += "V"
 	} else if len(f.Type.ReturnList) == 1 {
-		s += m.typeDescriptor(f.Type.ReturnList[0].Type)
+		s += description.typeDescriptor(f.Type.ReturnList[0].Type)
 	} else {
 		s += "[Ljava/lang/Object;" //always this type
 	}
 	return s
 }
 
-func (m *Descript) typeDescriptor(v *ast.VariableType) string {
+func (description *Description) typeDescriptor(v *ast.VariableType) string {
 	switch v.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		return "Z"
@@ -57,12 +57,12 @@ func (m *Descript) typeDescriptor(v *ast.VariableType) string {
 	case ast.VARIABLE_TYPE_MAP:
 		return "L" + java_hashmap_class + ";"
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
-		return "[" + m.typeDescriptor(v.ArrayType)
+		return "[" + description.typeDescriptor(v.ArrayType)
 	}
 	panic("unhandle type signature")
 }
 
-func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
+func (description *Description) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 	switch bs[0] {
 	case 'V':
 		bs = bs[1:]
@@ -121,7 +121,7 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 		bs = bs[1:]
 		var t *ast.VariableType
 		var err error
-		bs, t, err = m.ParseType(bs)
+		bs, t, err = description.ParseType(bs)
 		ret := &ast.VariableType{}
 		if err == nil {
 			ret.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
@@ -132,7 +132,7 @@ func (m *Descript) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {
 	return bs, nil, fmt.Errorf("unkown type:%v", string(bs))
 }
 
-func (m *Descript) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
+func (description *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	t := ast.FunctionType{}
 	if bs[0] != '(' {
 		return t, fmt.Errorf("function descriptor does not start with '('")
@@ -143,7 +143,7 @@ func (m *Descript) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	for bs[0] != ')' {
 		vd := &ast.VariableDefinition{}
 		vd.Name = fmt.Sprintf("var_%d", i)
-		bs, vd.Type, err = m.ParseType(bs)
+		bs, vd.Type, err = description.ParseType(bs)
 		if err != nil {
 			return t, err
 		}
@@ -153,7 +153,7 @@ func (m *Descript) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	bs = bs[1:] // skip )
 	vd := &ast.VariableDefinition{}
 	vd.Name = "returnValue"
-	_, vd.Type, err = m.ParseType(bs)
+	_, vd.Type, err = description.ParseType(bs)
 	if err != nil {
 		return t, err
 	}

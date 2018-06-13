@@ -218,7 +218,7 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_MAP:
 		return "map_literal"
 	case EXPRESSION_TYPE_CHECK_CAST:
-		return "convertion of type"
+		return "conversion of type"
 	case EXPRESSION_TYPE_TYPE_ASSERT:
 		return "type assert"
 	case EXPRESSION_TYPE_TYPE_ALIAS:
@@ -325,7 +325,7 @@ func (e *Expression) IsLiteral() bool {
 /*
 	valid for condition
 */
-func (e *Expression) canbeUsedAsCondition() bool {
+func (e *Expression) canBeUsedAsCondition() bool {
 	return e.Type == EXPRESSION_TYPE_NULL ||
 		e.Type == EXPRESSION_TYPE_BOOL ||
 		e.Type == EXPRESSION_TYPE_BYTE ||

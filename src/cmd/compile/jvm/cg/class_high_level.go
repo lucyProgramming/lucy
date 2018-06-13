@@ -9,7 +9,7 @@ import (
 type ClassHighLevel struct {
 	Class Class
 	/*
-		one class file can be compile form multi souce file
+		one class file can be compile form multi source file
 	*/
 	SourceFiles              map[string]struct{}
 	Name                     string

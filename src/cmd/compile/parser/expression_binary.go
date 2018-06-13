@@ -18,14 +18,14 @@ func (ep *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) 
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
-		newe.Type = ast.EXPRESSION_TYPE_LOGICAL_OR
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
+		newExpression.Type = ast.EXPRESSION_TYPE_LOGICAL_OR
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -43,14 +43,14 @@ func (ep *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error)
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
-		newe.Type = ast.EXPRESSION_TYPE_LOGICAL_AND
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
+		newExpression.Type = ast.EXPRESSION_TYPE_LOGICAL_AND
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -68,14 +68,14 @@ func (ep *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
-		newe.Type = ast.EXPRESSION_TYPE_OR
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
+		newExpression.Type = ast.EXPRESSION_TYPE_OR
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -94,14 +94,14 @@ func (ep *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
-		newe.Type = ast.EXPRESSION_TYPE_XOR
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
+		newExpression.Type = ast.EXPRESSION_TYPE_XOR
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -119,14 +119,14 @@ func (ep *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
-		newe.Type = ast.EXPRESSION_TYPE_AND
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
+		newExpression.Type = ast.EXPRESSION_TYPE_AND
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -147,18 +147,18 @@ func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
 		if typ == lex.TOKEN_EQUAL {
-			newe.Type = ast.EXPRESSION_TYPE_EQ
+			newExpression.Type = ast.EXPRESSION_TYPE_EQ
 		} else {
-			newe.Type = ast.EXPRESSION_TYPE_NE
+			newExpression.Type = ast.EXPRESSION_TYPE_NE
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -179,22 +179,22 @@ func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
 		if typ == lex.TOKEN_GT {
-			newe.Type = ast.EXPRESSION_TYPE_GT
+			newExpression.Type = ast.EXPRESSION_TYPE_GT
 		} else if typ == lex.TOKEN_GE {
-			newe.Type = ast.EXPRESSION_TYPE_GE
+			newExpression.Type = ast.EXPRESSION_TYPE_GE
 		} else if typ == lex.TOKEN_LT {
-			newe.Type = ast.EXPRESSION_TYPE_LT
+			newExpression.Type = ast.EXPRESSION_TYPE_LT
 		} else {
-			newe.Type = ast.EXPRESSION_TYPE_LE
+			newExpression.Type = ast.EXPRESSION_TYPE_LE
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -216,18 +216,18 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
 		if typ == lex.TOKEN_LEFT_SHIFT {
-			newe.Type = ast.EXPRESSION_TYPE_LSH
+			newExpression.Type = ast.EXPRESSION_TYPE_LSH
 		} else {
-			newe.Type = ast.EXPRESSION_TYPE_RSH
+			newExpression.Type = ast.EXPRESSION_TYPE_RSH
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -248,18 +248,18 @@ func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
 		if typ == lex.TOKEN_ADD {
-			newe.Type = ast.EXPRESSION_TYPE_ADD
+			newExpression.Type = ast.EXPRESSION_TYPE_ADD
 		} else {
-			newe.Type = ast.EXPRESSION_TYPE_SUB
+			newExpression.Type = ast.EXPRESSION_TYPE_SUB
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }
@@ -281,20 +281,20 @@ func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		newe := &ast.Expression{}
-		newe.Pos = pos
+		newExpression := &ast.Expression{}
+		newExpression.Pos = pos
 		if typ == lex.TOKEN_MUL {
-			newe.Type = ast.EXPRESSION_TYPE_MUL
+			newExpression.Type = ast.EXPRESSION_TYPE_MUL
 		} else if typ == lex.TOKEN_DIV {
-			newe.Type = ast.EXPRESSION_TYPE_DIV
+			newExpression.Type = ast.EXPRESSION_TYPE_DIV
 		} else {
-			newe.Type = ast.EXPRESSION_TYPE_MOD
+			newExpression.Type = ast.EXPRESSION_TYPE_MOD
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
-		newe.Data = binary
-		e = newe
+		newExpression.Data = binary
+		e = newExpression
 	}
 	return e, nil
 }

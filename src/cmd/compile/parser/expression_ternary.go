@@ -14,9 +14,9 @@ func (ep *ExpressionParser) parseTernaryExpression() (*ast.Expression, error) {
 	if ep.parser.token.Type != lex.TOKEN_QUESTION {
 		return left, nil
 	}
-	newe := &ast.Expression{}
-	newe.Pos = ep.parser.mkPos()
-	newe.Type = ast.EXPRESSION_TYPE_TERNARY
+	newExpression := &ast.Expression{}
+	newExpression.Pos = ep.parser.mkPos()
+	newExpression.Type = ast.EXPRESSION_TYPE_TERNARY
 	ep.Next() // skip ?
 	True, err := ep.parseExpression(false)
 	if err != nil {
@@ -35,6 +35,6 @@ func (ep *ExpressionParser) parseTernaryExpression() (*ast.Expression, error) {
 	ternary.Selection = left
 	ternary.True = True
 	ternary.False = False
-	newe.Data = ternary
-	return newe, nil
+	newExpression.Data = ternary
+	return newExpression, nil
 }

@@ -245,9 +245,9 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			b.Next()
 		case lex.TOKEN_LC:
 			pos := b.parser.mkPos()
-			newblock := ast.Block{}
+			newBlock := ast.Block{}
 			b.Next() // skip {
-			b.parseStatementList(&newblock, false)
+			b.parseStatementList(&newBlock, false)
 			if b.parser.token.Type != lex.TOKEN_RC {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					b.parser.errorMsgPrefix(), b.parser.token.Description))
@@ -256,7 +256,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			b.Next()
 			if isDefer {
 				d := &ast.Defer{
-					Block: newblock,
+					Block: newBlock,
 				}
 				block.Statements = append(block.Statements, &ast.Statement{
 					Type:  ast.STATEMENT_TYPE_DEFER,
@@ -266,7 +266,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			} else {
 				block.Statements = append(block.Statements, &ast.Statement{
 					Type:  ast.STATEMENT_TYPE_BLOCK,
-					Block: &newblock,
+					Block: &newBlock,
 					Pos:   pos,
 				})
 			}
@@ -356,7 +356,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				Pos:           pos,
 			})
 			b.Next()
-			if b.parser.token.Type != lex.TOKEN_SEMICOLON { // incase forget
+			if b.parser.token.Type != lex.TOKEN_SEMICOLON { // in case forget
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s  missing semicolon after goto statement,but '%s'",
 						b.parser.errorMsgPrefix(), b.parser.token.Description))
@@ -443,13 +443,13 @@ func (b *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool) {
 		s := &ast.Statement{}
 		s.Pos = pos
 		s.Type = ast.STATEMENT_TYPE_LABLE
-		lable := &ast.StatementLabel{}
-		s.StatementLabel = lable
-		lable.Statement = s
-		lable.Name = e.Data.(*ast.ExpressionIdentifier).Name
+		label := &ast.StatementLabel{}
+		s.StatementLabel = label
+		label.Statement = s
+		label.Name = e.Data.(*ast.ExpressionIdentifier).Name
 		block.Statements = append(block.Statements, s)
-		lable.Block = block
-		block.Insert(lable.Name, e.Pos, lable) // insert first,so this label can be found before it is checked
+		label.Block = block
+		block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
 	} else {
 		if b.parser.token.Type != lex.TOKEN_SEMICOLON {
 			b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression",

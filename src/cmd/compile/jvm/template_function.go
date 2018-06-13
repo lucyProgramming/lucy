@@ -6,7 +6,7 @@ import (
 )
 
 func (makeExpression *MakeExpression) buildTemplateFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.TemplateFunctionCallPair.Generated == nil {
 		method := &cg.MethodHighLevel{}
@@ -25,7 +25,7 @@ func (makeExpression *MakeExpression) buildTemplateFunctionCall(class *cg.ClassH
 		call.TemplateFunctionCallPair.Generated = method
 
 	}
-	maxstack = makeExpression.buildCallArgs(class, code, call.Args,
+	maxStack = makeExpression.buildCallArgs(class, code, call.Args,
 		call.TemplateFunctionCallPair.Function.Type.ParameterList, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

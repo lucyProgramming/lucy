@@ -262,12 +262,12 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 		left.Data = e
 		return left, nil
 	case lex.TOKEN_MAP:
-		left, err = ep.parseMapExprssion(true)
+		left, err = ep.parseMapExpression(true)
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_LC:
-		left, err = ep.parseMapExprssion(false)
+		left, err = ep.parseMapExpression(false)
 		if err != nil {
 			return left, err
 		}
@@ -288,20 +288,20 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 			if unary {
 				return left, nil
 			}
-			newe := &ast.Expression{}
+			newExpression := &ast.Expression{}
 			if ep.parser.token.Type == lex.TOKEN_INCREMENT {
-				newe.Type = ast.EXPRESSION_TYPE_INCREMENT
+				newExpression.Type = ast.EXPRESSION_TYPE_INCREMENT
 			} else {
-				newe.Type = ast.EXPRESSION_TYPE_DECREMENT
+				newExpression.Type = ast.EXPRESSION_TYPE_DECREMENT
 			}
 			if left.Type != ast.EXPRESSION_TYPE_LIST {
-				newe.Data = left
-				left = newe
+				newExpression.Data = left
+				left = newExpression
 			} else {
 				list := left.Data.([]*ast.Expression)
-				newe.Data = list[len(list)-1]
+				newExpression.Data = list[len(list)-1]
 			}
-			newe.Pos = ep.parser.mkPos()
+			newExpression.Pos = ep.parser.mkPos()
 			ep.Next()
 			continue
 		}
@@ -322,14 +322,14 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 					return nil, fmt.Errorf("%s '[' and ']' not match", ep.parser.errorMsgPrefix())
 				}
 				ep.Next() // skip ]
-				newe := &ast.Expression{}
-				newe.Type = ast.EXPRESSION_TYPE_SLICE
-				newe.Pos = ep.parser.mkPos()
+				newExpression := &ast.Expression{}
+				newExpression.Type = ast.EXPRESSION_TYPE_SLICE
+				newExpression.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
-				newe.Data = slice
+				newExpression.Data = slice
 				slice.SliceOn = left
 				slice.End = end
-				left = newe
+				left = newExpression
 				continue
 			}
 			e, err := ep.parseExpression(false)
@@ -352,28 +352,28 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 					return nil, fmt.Errorf("%s '[' and ']' not match", ep.parser.errorMsgPrefix())
 				}
 				ep.Next() // skip ]
-				newe := &ast.Expression{}
-				newe.Type = ast.EXPRESSION_TYPE_SLICE
-				newe.Pos = ep.parser.mkPos()
+				newExpression := &ast.Expression{}
+				newExpression.Type = ast.EXPRESSION_TYPE_SLICE
+				newExpression.Pos = ep.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
-				newe.Data = slice
+				newExpression.Data = slice
 				slice.Start = e
 				slice.SliceOn = left
 				slice.End = end
-				left = newe
+				left = newExpression
 				continue
 			}
 			if ep.parser.token.Type != lex.TOKEN_RB {
 				return nil, fmt.Errorf("%s '[' and ']' not match", ep.parser.errorMsgPrefix())
 			}
-			newe := &ast.Expression{}
-			newe.Pos = pos
-			newe.Type = ast.EXPRESSION_TYPE_INDEX
+			newExpression := &ast.Expression{}
+			newExpression.Pos = pos
+			newExpression.Type = ast.EXPRESSION_TYPE_INDEX
 			index := &ast.ExpressionIndex{}
 			index.Expression = left
 			index.Index = e
-			newe.Data = index
-			left = newe
+			newExpression.Data = index
+			left = newExpression
 			ep.Next()
 			continue
 		}
@@ -382,14 +382,14 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 			pos := ep.parser.mkPos()
 			ep.parser.Next() // skip .
 			if ep.parser.token.Type == lex.TOKEN_IDENTIFIER {
-				newe := &ast.Expression{}
-				newe.Pos = pos
-				newe.Type = ast.EXPRESSION_TYPE_SELECT
+				newExpression := &ast.Expression{}
+				newExpression.Pos = pos
+				newExpression.Type = ast.EXPRESSION_TYPE_SELECT
 				index := &ast.ExpressionSelection{}
 				index.Expression = left
 				index.Name = ep.parser.token.Data.(string)
-				newe.Data = index
-				left = newe
+				newExpression.Data = index
+				left = newExpression
 				ep.Next()
 			} else if ep.parser.token.Type == lex.TOKEN_LP { //  a.(xxx)
 				//
@@ -402,14 +402,14 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 					return nil, fmt.Errorf("%s '(' and ')' not match", ep.parser.errorMsgPrefix())
 				}
 				ep.Next() // skip  )
-				newe := &ast.Expression{}
-				newe.Pos = pos
-				newe.Type = ast.EXPRESSION_TYPE_TYPE_ASSERT
+				newExpression := &ast.Expression{}
+				newExpression.Pos = pos
+				newExpression.Type = ast.EXPRESSION_TYPE_TYPE_ASSERT
 				typeAssert := &ast.ExpressionTypeAssert{}
 				typeAssert.Type = typ
 				typeAssert.Expression = left
-				newe.Data = typeAssert
-				left = newe
+				newExpression.Data = typeAssert
+				left = newExpression
 			} else {
 				return nil, fmt.Errorf("%s expect  'identifier' or '(',but '%s'",
 					ep.parser.errorMsgPrefix(), ep.parser.token.Description)
@@ -418,11 +418,11 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 		}
 		// aa()
 		if ep.parser.token.Type == lex.TOKEN_LP {
-			newe, err := ep.parseCallExpression(left)
+			newExpression, err := ep.parseCallExpression(left)
 			if err != nil {
 				return nil, err
 			}
-			left = newe
+			left = newExpression
 			continue
 		}
 	}

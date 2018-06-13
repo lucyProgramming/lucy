@@ -125,7 +125,7 @@ func (f *Function) badParameterMsg(name string, args []*VariableType) string {
 }
 
 func (f *Function) checkBlock(errs *[]error) {
-	f.mkLastRetrunStatement()
+	f.mkLastReturnStatement()
 	*errs = append(*errs, f.Block.checkStatements()...)
 }
 
@@ -147,7 +147,7 @@ func (f *Function) clone() (ret *Function, es []error) {
 	}
 	return ret, es
 }
-func (f *Function) mkLastRetrunStatement() {
+func (f *Function) mkLastReturnStatement() {
 	if len(f.Block.Statements) == 0 ||
 		(f.Block.Statements[len(f.Block.Statements)-1].Type != STATEMENT_TYPE_RETURN) {
 		s := &StatementReturn{}

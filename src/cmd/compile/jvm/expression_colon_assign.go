@@ -138,7 +138,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 }
 
 func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	vs := e.Data.(*ast.ExpressionDeclareVariable)
 	for _, v := range vs.Variables {
 		if v.BeenCaptured {
@@ -172,13 +172,13 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 	for _, v := range vs.Values {
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			stack, _ := makeExpression.build(class, code, vs.Values[0], context, state)
-			if t := currentStack + stack; t > maxstack {
-				maxstack = t
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
 			}
 			for kk, tt := range v.ExpressionMultiValues {
 				stack = multiValuePacker.unPack(class, code, kk, tt, context)
-				if t := stack + currentStack; t > maxstack {
-					maxstack = t
+				if t := stack + currentStack; t > maxStack {
+					maxStack = t
 				}
 				if vs.Variables[index].IsGlobal {
 					storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, vs.Variables[index])
@@ -205,8 +205,8 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
-		if t := currentStack + stack; t > maxstack {
-			maxstack = t
+		if t := currentStack + stack; t > maxStack {
+			maxStack = t
 		}
 		if vs.Variables[index].IsGlobal {
 			storeGlobalVariable(class, makeExpression.MakeClass.mainClass, code, vs.Variables[index])

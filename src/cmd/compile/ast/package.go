@@ -200,7 +200,7 @@ type Import struct {
 	import "github.com/std" as std should access by std.Println
 */
 func (i *Import) GetAccessName() (string, error) {
-	if i.AccessName == "_" { //special case _ is a identifer
+	if i.AccessName == "_" { //special case _ is a identifier
 		return "", fmt.Errorf("'_' is not legal package name")
 	}
 	if i.AccessName != "" {

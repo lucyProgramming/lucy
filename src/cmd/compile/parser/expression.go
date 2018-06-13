@@ -52,11 +52,11 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 			list := left.Data.([]*ast.Expression)
 			left.Data = append(list, left2)
 		} else {
-			newe := &ast.Expression{}
-			newe.Type = ast.EXPRESSION_TYPE_LIST
+			newExpression := &ast.Expression{}
+			newExpression.Type = ast.EXPRESSION_TYPE_LIST
 			list := []*ast.Expression{left, left2}
-			newe.Data = list
-			left = newe
+			newExpression.Data = list
+			left = newExpression
 		}
 	}
 	mustBeOneExpression := func() {

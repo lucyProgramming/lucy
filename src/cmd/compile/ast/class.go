@@ -139,13 +139,13 @@ func (c *Class) checkPhase2(father *Block) []error {
 	}
 	for _, ms := range c.Methods {
 		if len(ms) > 1 {
-			errmsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
+			errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
 				errMsgPrefix(ms[0].Func.Pos),
 				ms[0].Func.Name, len(ms))
 			for _, v := range ms {
-				errmsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Func.Pos))
+				errMsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Func.Pos))
 			}
-			errs = append(errs, errors.New(errmsg))
+			errs = append(errs, errors.New(errMsg))
 		}
 	}
 	errs = append(errs, c.checkMethods()...)

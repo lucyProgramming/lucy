@@ -12,7 +12,7 @@ func main() {
 	flag.BoolVar(&common.CompileFlags.DisableCheckUnUsedVariable, "disable-check-unused-variable",
 		false, "disable check unused variable")
 	flag.StringVar(&common.CompileFlags.PackageName, "package-name", "", "package name")
-	flag.IntVar(&common.CompileFlags.JvmVersion, "jvm-version", 54, "jvm major verion")
+	flag.IntVar(&common.CompileFlags.JvmVersion, "jvm-version", 54, "jvm major version")
 	flag.Parse()
 	lc.Main(flag.Args())
 

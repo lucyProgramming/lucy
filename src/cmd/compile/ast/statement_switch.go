@@ -106,7 +106,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					continue
 				}
 			}
-			if e.canbeUsedAsCondition() == false {
+			if e.canBeUsedAsCondition() == false {
 				errs = append(errs, fmt.Errorf("%s expression cannot use as condition",
 					errMsgPrefix(e.Pos)))
 			}

@@ -32,7 +32,7 @@ func (c *Closure) NotEmpty(f *Function) bool {
 		c.Functions = fs
 	}
 	if c.Variables != nil && len(c.Variables) > 0 {
-		f.IsClosureFunction = true // incase capture it self
+		f.IsClosureFunction = true // in case capture it self
 		filterOutNotClosureFunction()
 		return true
 	}

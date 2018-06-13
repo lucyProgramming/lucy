@@ -216,7 +216,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 	} else { // for k,v  = range xxx
 		// store v
 		stackLength := len(blockState.Stacks)
-		stack, remainStack, op, _, classname, name, descriptor :=
+		stack, remainStack, op, _, className, name, descriptor :=
 			makeClass.makeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionValue, context, blockState)
 		if stack > maxStack { // this means  current stack is 0
 			maxStack = stack
@@ -226,11 +226,11 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V); t > maxStack {
 			maxStack = t
 		}
-		copyOPLeftValueVersion(class, code, op, classname, name, descriptor)
+		copyOPLeftValueVersion(class, code, op, className, name, descriptor)
 		forState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil {
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, op, _, classname, name, descriptor :=
+			stack, remainStack, op, _, className, name, descriptor :=
 				makeClass.makeExpression.getLeftValue(class, code, s.RangeAttr.ExpressionKey, context, blockState)
 			if stack > maxStack { // this means  current stack is 0
 				maxStack = stack
@@ -240,7 +240,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 			if t := remainStack + jvmSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K); t > maxStack {
 				maxStack = t
 			}
-			copyOPLeftValueVersion(class, code, op, classname, name, descriptor)
+			copyOPLeftValueVersion(class, code, op, className, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}

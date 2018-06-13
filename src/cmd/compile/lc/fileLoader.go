@@ -186,8 +186,8 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	e := &ast.Enum{}
 	{
-		nameindex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
-		e.Name = string(c.ConstPool[nameindex].Info)
+		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+		e.Name = string(c.ConstPool[nameIndex].Info)
 	}
 	e.AccessFlags = c.AccessFlag
 	for _, v := range c.Fields {

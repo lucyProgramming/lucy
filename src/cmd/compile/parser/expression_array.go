@@ -85,11 +85,11 @@ func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 			if err != nil {
 				return es, err
 			}
-			arre := &ast.Expression{Type: ast.EXPRESSION_TYPE_ARRAY}
+			arrayExpression := &ast.Expression{Type: ast.EXPRESSION_TYPE_ARRAY}
 			data := ast.ExpressionArray{}
 			data.Expressions = ees
-			arre.Data = data
-			es = append(es, arre)
+			arrayExpression.Data = data
+			es = append(es, arrayExpression)
 		} else {
 			e, err := ep.parseExpression(false)
 			if e != nil {

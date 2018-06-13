@@ -51,7 +51,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	class.InsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-	maxStack = 2 // maxstack is 2 right now
+	maxStack = 2 // maxStack is 2 right now
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      className,

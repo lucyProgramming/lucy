@@ -3,7 +3,7 @@ package jvm
 var (
 	ArrayMetas                 = map[int]*ArrayMeta{}
 	typeConverter              TypeConverterAndPrimitivePacker
-	Descriptor                 Descript
+	Descriptor                 Description
 	LucyMethodSignatureParser  LucyMethodSignature
 	LucyFieldSignatureParser   LucyFieldSignature
 	LucyTypeAliasParser        LucyTypeAlias

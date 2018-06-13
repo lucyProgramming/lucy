@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseMapExprssion(needType bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseMapExpression(needType bool) (*ast.Expression, error) {
 	var typ *ast.VariableType
 	var err error
 	if needType {

@@ -324,7 +324,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 
 func (makeClass *MakeClass) mkGlobalFunctions() {
 	ms := make(map[string]*cg.MethodHighLevel)
-	for k, f := range makeClass.Package.Block.Functions { // fisrt round
+	for k, f := range makeClass.Package.Block.Functions { // first round
 		if f.TemplateFunction != nil {
 			makeClass.mainClass.TemplateFunctions = append(makeClass.mainClass.TemplateFunctions, &cg.AttributeTemplateFunction{
 				Name:        f.Name,
@@ -353,7 +353,7 @@ func (makeClass *MakeClass) mkGlobalFunctions() {
 		method.Code = &cg.AttributeCode{}
 		makeClass.mainClass.AppendMethod(method)
 	}
-	for k, f := range makeClass.Package.Block.Functions { // fisrt round
+	for k, f := range makeClass.Package.Block.Functions { // first round
 		if f.IsBuildIn || f.TemplateFunction != nil { //
 			continue
 		}

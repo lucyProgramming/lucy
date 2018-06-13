@@ -33,14 +33,14 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 }
 
 func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context) (maxstack uint16) {
+	context *Context) (maxStack uint16) {
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_CLASS {
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
 		loadInt(class, code, identifier.EnumName.Value)
-		maxstack = 1
+		maxStack = 1
 		return
 	}
 
@@ -52,7 +52,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxstack = jvmSize(identifier.Variable.Type)
+		maxStack = jvmSize(identifier.Variable.Type)
 		return
 	}
 	if identifier.Variable.BeenCaptured {
@@ -88,7 +88,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		} else {
 			panic("over 255")
 		}
-		maxstack = 1
+		maxStack = 1
 	case ast.VARIABLE_TYPE_FLOAT:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_fload_0
@@ -109,7 +109,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		} else {
 			panic("over 255")
 		}
-		maxstack = 1
+		maxStack = 1
 	case ast.VARIABLE_TYPE_DOUBLE:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_dload_0
@@ -130,7 +130,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		} else {
 			panic("over 255")
 		}
-		maxstack = 2
+		maxStack = 2
 	case ast.VARIABLE_TYPE_LONG:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_lload_0
@@ -151,7 +151,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		} else {
 			panic("over 255")
 		}
-		maxstack = 2
+		maxStack = 2
 	default: // object types
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_aload_0
@@ -172,7 +172,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		} else {
 			panic("over 255")
 		}
-		maxstack = 1
+		maxStack = 1
 	}
 	return
 }

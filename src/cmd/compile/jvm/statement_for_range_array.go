@@ -176,7 +176,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		k + start >= end,break loop,pop index on stack
 		check if need to break
 	*/
-	rangeend := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
+	rangeEnd := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	//load elements
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, autoVar.Elements)...)
@@ -253,7 +253,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		// store v
 		//get ops,make ops ready
 		stackLength := len(blockState.Stacks)
-		stack, remainStack, ops, target, classname, name, descriptor := makeClass.makeExpression.getLeftValue(class,
+		stack, remainStack, ops, target, className, name, descriptor := makeClass.makeExpression.getLeftValue(class,
 			code, s.RangeAttr.ExpressionValue, context, blockState)
 		if stack > maxStack {
 			maxStack = stack
@@ -267,11 +267,11 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		if t := remainStack + jvmSize(target); t > maxStack {
 			maxStack = t
 		}
-		copyOPLeftValueVersion(class, code, ops, classname, name, descriptor)
+		copyOPLeftValueVersion(class, code, ops, className, name, descriptor)
 		blockState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, ops, _, classname, name, descriptor := makeClass.makeExpression.getLeftValue(class,
+			stack, remainStack, ops, _, className, name, descriptor := makeClass.makeExpression.getLeftValue(class,
 				code, s.RangeAttr.ExpressionKey, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
@@ -281,7 +281,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			}
 			// load k
 			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-			copyOPLeftValueVersion(class, code, ops, classname, name, descriptor)
+			copyOPLeftValueVersion(class, code, ops, className, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}
@@ -294,7 +294,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	}
 
 	//pop index on stack
-	backfillExit([]*cg.Exit{rangeend}, code.CodeLength) // jump to here
+	backfillExit([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
 	forState.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 	context.MakeStackMap(code, forState, code.CodeLength)
 	forState.popStack(1)
