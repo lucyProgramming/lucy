@@ -7,7 +7,7 @@ type MethodHighLevel struct {
 	Descriptor                            string
 	AccessFlags                           uint16
 	Code                                  *AttributeCode
-	AttributeLucyMethodDescritor          *AttributeLucyMethodDescriptor
+	AttributeLucyMethodDescriptor         *AttributeLucyMethodDescriptor
 	AttributeLucyTriggerPackageInitMethod *AttributeLucyTriggerPackageInitMethod
 	AttributeDefaultParameters            *AttributeDefaultParameters
 	AttributeMethodParameters             *AttributeMethodParameters

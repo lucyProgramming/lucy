@@ -140,7 +140,7 @@ func (m *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class,
 	if LucyMethodSignatureParser.Need(&f.Typ) {
 		d := &cg.AttributeLucyMethodDescriptor{}
 		d.Descriptor = LucyMethodSignatureParser.Encode(f)
-		method.AttributeLucyMethodDescritor = d
+		method.AttributeLucyMethodDescriptor = d
 	}
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)

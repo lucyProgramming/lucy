@@ -23,20 +23,20 @@ const (
 )
 
 type ConstPool struct {
-	selfindex uint16 // using when it`s self
+	selfIndex uint16 // using when it`s self
 	Tag       uint8
 	Info      []byte
 }
 
 type CONSTANT_Class_info struct {
-	nameindex uint16
+	nameIndex uint16
 }
 
 func (c *CONSTANT_Class_info) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = CONSTANT_POOL_TAG_Class
 	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, c.nameindex)
+	binary.BigEndian.PutUint16(p.Info, c.nameIndex)
 	return p
 }
 
