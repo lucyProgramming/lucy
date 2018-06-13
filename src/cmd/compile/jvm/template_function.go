@@ -8,7 +8,7 @@ import (
 func (m *MakeExpression) buildTemplateFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxstack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated == nil {
+	if call.TemplateFunctionCallPair.Generated == nil {
 		method := &cg.MethodHighLevel{}
 		method.Class = class
 		method.Name = class.NewFunctionName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
@@ -22,16 +22,16 @@ func (m *MakeExpression) buildTemplateFunctionCall(class *cg.ClassHighLevel, cod
 		call.TemplateFunctionCallPair.Function.ClassMethod = method
 		//build function
 		m.MakeClass.buildFunction(class, nil, method, call.TemplateFunctionCallPair.Function)
-		call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated = method
+		call.TemplateFunctionCallPair.Generated = method
 
 	}
 	maxstack = m.buildCallArgs(class, code, call.Args,
 		call.TemplateFunctionCallPair.Function.Typ.ParameterList, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Class.Name,
-		Method:     call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Name,
-		Descriptor: call.TemplateFunctionCallPair.TemplateFunctionCallPairGenerated.Descriptor,
+		Class:      call.TemplateFunctionCallPair.Generated.Class.Name,
+		Method:     call.TemplateFunctionCallPair.Generated.Name,
+		Descriptor: call.TemplateFunctionCallPair.Generated.Descriptor,
 	},
 		code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

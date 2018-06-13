@@ -178,10 +178,3 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, c
 	}
 	return errs
 }
-
-//func oneAnyTypeParameterChecker(ft *Function, e *ExpressionFunctionCall,
-//	block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-//	if len(args) != 1 {
-//		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
-//	}
-//}

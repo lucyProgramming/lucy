@@ -146,9 +146,6 @@ func (f *Function) clone() (ret *Function, es []error) {
 	if errsNotEmpty(es) {
 		return ret, es
 	}
-	//	ret.Block.inherit(block)
-	//ret.checkParametersAndRetuns(&es)
-	//ret.Block.InheritedAttribute.Function = ret
 	return ret, es
 }
 func (f *Function) mkLastRetrunStatement() {
@@ -196,7 +193,7 @@ func (f *Function) checkParametersAndRetuns(errs *[]error) {
 	var err error
 	for k, v := range f.Typ.ParameterList {
 		v.IsFunctionParameter = true
-		if v.Typ.haveT() {
+		if len(v.Typ.haveT()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}
@@ -246,7 +243,7 @@ func (f *Function) checkParametersAndRetuns(errs *[]error) {
 	//handler return
 	for _, v := range f.Typ.ReturnList {
 		v.IsFunctionRetrunVar = true
-		if v.Typ.haveT() {
+		if len(v.Typ.haveT()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}

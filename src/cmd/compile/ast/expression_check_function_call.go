@@ -55,6 +55,12 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if len(*errs) != length { // if no
 			return nil
 		}
+	} else { // not template function
+		call := e.Data.(*ExpressionFunctionCall)
+		if len(call.TypedParameters) > 0 {
+			*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
+				errMsgPrefix(e.Pos)))
+		}
 	}
 	if len(callargsTypes) > len(f.Typ.ParameterList) {
 		errmsg := fmt.Sprintf("%s too many paramaters to call function '%s':\n", errMsgPrefix(e.Pos), f.Name)
@@ -104,51 +110,49 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	argTypes []*VariableType, f *Function) (ret *Function) {
 	call := e.Data.(*ExpressionFunctionCall)
-	typeParameters := make(map[string]*VariableType)
-	tArgs := []*VariableType{}
-	tIndexes := []int{}
+	typedParameters := make(map[string]*VariableType)
 	for k, v := range f.Typ.ParameterList {
-		if v == nil || v.Typ == nil || v.Typ.haveT() == false {
+		if v == nil || v.Typ == nil || len(v.Typ.haveT()) == 0 {
 			continue
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
+			//			//trying already have
+			//			if err := v.Typ.canBeBindWithTypedParameters(typedParameters); err == nil {
+			//				continue
+			//			}
 			*errs = append(*errs, fmt.Errorf("%s missing typed parameter,index at %d",
 				errMsgPrefix(e.Pos), k))
 			return
 		}
-		if err := v.Typ.canBeBindWith(argTypes[k]); err != nil {
+		if err := v.Typ.canBebindWithType(typedParameters, argTypes[k]); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v",
-				errMsgPrefix(e.Pos), err))
+				errMsgPrefix(argTypes[k].Pos), err))
+			return
 		}
-		name := v.Typ.Name
-		typeParameters[name] = v.Typ
-		tArgs = append(tArgs, argTypes[k])
-		tIndexes = append(tIndexes, k)
 	}
 	tps := call.TypedParameters
-	retTypes := []*VariableType{}
-	retIndexes := []int{}
 	for k, v := range f.Typ.ReturnList {
-		if v == nil || v.Typ == nil || v.Typ.haveT() == false {
+		if v == nil || v.Typ == nil || len(v.Typ.haveT()) == 0 {
 			continue
 		}
 		if len(tps) == 0 || tps[0] == nil {
+			//trying already have
+			if err := v.Typ.canBeBindWithTypedParameters(typedParameters); err == nil {
+				//very good no error
+				continue
+			}
 			*errs = append(*errs, fmt.Errorf("%s missing typed return value,index at %d",
 				errMsgPrefix(e.Pos), k))
-			continue
+			return
 		}
-		if err := v.Typ.canBeBindWith(tps[0]); err != nil {
+		if err := v.Typ.canBebindWithType(typedParameters, tps[0]); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v",
-				errMsgPrefix(e.Pos), err))
+				errMsgPrefix(tps[0].Pos), err))
 			return nil
 		}
-		name := v.Typ.Name
-		retTypes = append(retTypes, tps[0])
-		typeParameters[name] = tps[0]
-		retIndexes = append(retIndexes, k)
 		tps = tps[1:]
 	}
-	call.TemplateFunctionCallPair = f.TemplateFunction.insert(tArgs, retTypes, ret, errs)
+	call.TemplateFunctionCallPair = f.TemplateFunction.insert(typedParameters, ret, errs)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		cloneFunction, es := f.clone()
 		if errsNotEmpty(es) {
@@ -157,22 +161,16 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		cloneFunction.TemplateFunction = nil
 		call.TemplateFunctionCallPair.Function = cloneFunction
-		// bind parameters
-		for k, v := range tArgs {
-			index := tIndexes[k]
-			pos := f.Typ.ParameterList[index].Pos //
-			*call.TemplateFunctionCallPair.Function.Typ.ParameterList[index].Typ =
-				*v
-			call.TemplateFunctionCallPair.Function.Typ.ParameterList[index].Typ.Pos = pos
+		cloneFunction.TypeParameters = typedParameters
+		for _, v := range cloneFunction.Typ.ParameterList {
+			if len(v.Typ.haveT()) > 0 {
+				v.Typ.bindWithTypedParameters(typedParameters)
+			}
 		}
-		for k, v := range retTypes {
-			index := retIndexes[k]
-			pos := f.Typ.ReturnList[index].Pos //
-			*call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Typ =
-				*v
-			call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Typ.Pos = pos
-			call.TemplateFunctionCallPair.Function.Typ.ReturnList[index].Expression =
-				v.mkDefaultValueExpression()
+		for _, v := range cloneFunction.Typ.ReturnList {
+			if len(v.Typ.haveT()) > 0 {
+				v.Typ.bindWithTypedParameters(typedParameters)
+			}
 		}
 		//check this function
 		if cloneFunction.Block.Funcs == nil {

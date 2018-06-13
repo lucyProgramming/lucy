@@ -178,7 +178,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		} else {
 			*errs = append(*errs, e.wrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
-
 		result = t1.Clone()
 		result.Pos = e.Pos
 		return result

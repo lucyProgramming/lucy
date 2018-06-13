@@ -468,14 +468,12 @@ func (e *Expression) CallHasReturnValue() bool {
 
 type CallArgs []*Expression // f(1,2)　调用参数列表
 
-type TypedParameters []*VariableType
-
 type ExpressionFunctionCall struct {
 	BuildinFunctionMeta      interface{} // for build function only
 	Expression               *Expression
 	Args                     CallArgs
 	Func                     *Function
-	TypedParameters          TypedParameters // for template function
+	TypedParameters          []*VariableType // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 }
 
@@ -491,7 +489,7 @@ type ExpressionMethodCall struct {
 	Name            string
 	Method          *ClassMethod
 	PackageFunction *Function // Expression is package
-	TypedParameters TypedParameters
+	TypedParameters []*VariableType
 }
 
 type ExpressionDeclareVariable struct {

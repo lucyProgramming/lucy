@@ -9,29 +9,25 @@ type TemplateFunction struct {
 }
 
 type TemplateFunctionCallPair struct {
-	Args                              []*VariableType
-	Returns                           []*VariableType
-	TemplateFunctionCallPairGenerated *cg.MethodHighLevel
-	Function                          *Function
-	ClassName                         string
+	typedParameters map[string]*VariableType
+	Generated       *cg.MethodHighLevel
+	Function        *Function
+	ClassName       string
 }
 
-func (t *TemplateFunction) callPairExists(Args []*VariableType,
-	Returns []*VariableType, errs *[]error) *TemplateFunctionCallPair {
+func (t *TemplateFunction) callPairExists(typedParameters map[string]*VariableType, errs *[]error) *TemplateFunctionCallPair {
 	f := func(p *TemplateFunctionCallPair) *TemplateFunctionCallPair {
-		if len(p.Args) != len(Args) {
+		if len(p.typedParameters) != len(typedParameters) {
 			return nil
 		}
-		if len(p.Returns) != len(Returns) {
-			return nil
-		}
-		for k, v := range p.Args {
-			if false == v.Equal(errs, Args[k]) {
+		for kk, vv := range typedParameters {
+			t, ok := p.typedParameters[kk]
+			if ok == false {
+				// not found
 				return nil
 			}
-		}
-		for k, v := range p.Returns {
-			if false == v.Equal(errs, Args[k]) {
+			if vv.Equal(errs, t) == false {
+				// not equal
 				return nil
 			}
 		}
@@ -45,15 +41,13 @@ func (t *TemplateFunction) callPairExists(Args []*VariableType,
 	return nil
 }
 
-func (t *TemplateFunction) insert(Args []*VariableType,
-	Returns []*VariableType, f *Function, errs *[]error) *TemplateFunctionCallPair {
-	if t := t.callPairExists(Args, Returns, errs); t != nil {
+func (t *TemplateFunction) insert(typedParameters map[string]*VariableType, f *Function, errs *[]error) *TemplateFunctionCallPair {
+	if t := t.callPairExists(typedParameters, errs); t != nil {
 		return t
 	}
 	ret := &TemplateFunctionCallPair{
-		Args:     Args,
-		Returns:  Returns,
-		Function: f,
+		typedParameters: typedParameters,
+		Function:        f,
 	}
 	t.Pairs = append(t.Pairs, ret)
 	return ret
