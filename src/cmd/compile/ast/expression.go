@@ -473,7 +473,7 @@ type ExpressionFunctionCall struct {
 	Expression               *Expression
 	Args                     CallArgs
 	Func                     *Function
-	TypedParameters          []*VariableType // for template function
+	ParameterTypes           []*VariableType // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 }
 
@@ -489,12 +489,12 @@ type ExpressionMethodCall struct {
 	Name            string
 	Method          *ClassMethod
 	PackageFunction *Function // Expression is package
-	TypedParameters []*VariableType
+	ParameterTypes  []*VariableType
 }
 
 type ExpressionDeclareVariable struct {
 	Variables        []*VariableDefinition
-	Values           []*Expression
+	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
 }
 

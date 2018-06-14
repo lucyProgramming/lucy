@@ -437,23 +437,23 @@ func (variableType *VariableType) haveParameterType() (ret []string) {
 	return nil
 }
 
-func (variableType *VariableType) canBeBindWithTypedParameters(typedParaMeters map[string]*VariableType) error {
+func (variableType *VariableType) canBeBindWithTypedParameters(parameterTypes map[string]*VariableType) error {
 	if variableType.Type == VARIABLE_TYPE_T {
-		_, ok := typedParaMeters[variableType.Name]
+		_, ok := parameterTypes[variableType.Name]
 		if ok == false {
 			return fmt.Errorf("typed parameter '%s' not found", variableType.Name)
 		}
 		return nil
 	}
 	if variableType.Type == VARIABLE_TYPE_ARRAY || variableType.Type == VARIABLE_TYPE_JAVA_ARRAY {
-		return variableType.ArrayType.canBeBindWithTypedParameters(typedParaMeters)
+		return variableType.ArrayType.canBeBindWithTypedParameters(parameterTypes)
 	}
 	if variableType.Type == VARIABLE_TYPE_MAP {
-		err := variableType.Map.K.canBeBindWithTypedParameters(typedParaMeters)
+		err := variableType.Map.K.canBeBindWithTypedParameters(parameterTypes)
 		if err != nil {
 			return err
 		}
-		return variableType.Map.V.canBeBindWithTypedParameters(typedParaMeters)
+		return variableType.Map.V.canBeBindWithTypedParameters(parameterTypes)
 	}
 	return fmt.Errorf("not T") // looks impossible
 }
@@ -461,9 +461,9 @@ func (variableType *VariableType) canBeBindWithTypedParameters(typedParaMeters m
 /*
 	if there is error,this function will crash
 */
-func (variableType *VariableType) bindWithTypedParameters(typedParaMeters map[string]*VariableType) error {
+func (variableType *VariableType) bindWithTypedParameters(parameterTypes map[string]*VariableType) error {
 	if variableType.Type == VARIABLE_TYPE_T {
-		t, ok := typedParaMeters[variableType.Name]
+		t, ok := parameterTypes[variableType.Name]
 		if ok == false {
 			panic(fmt.Sprintf("typed parameter '%s' not found", variableType.Name))
 		}
@@ -471,17 +471,17 @@ func (variableType *VariableType) bindWithTypedParameters(typedParaMeters map[st
 		return nil
 	}
 	if variableType.Type == VARIABLE_TYPE_ARRAY {
-		return variableType.ArrayType.bindWithTypedParameters(typedParaMeters)
+		return variableType.ArrayType.bindWithTypedParameters(parameterTypes)
 	}
 	if variableType.Type == VARIABLE_TYPE_JAVA_ARRAY {
-		return variableType.ArrayType.bindWithTypedParameters(typedParaMeters)
+		return variableType.ArrayType.bindWithTypedParameters(parameterTypes)
 	}
 	if variableType.Type == VARIABLE_TYPE_MAP {
-		err := variableType.Map.K.bindWithTypedParameters(typedParaMeters)
+		err := variableType.Map.K.bindWithTypedParameters(parameterTypes)
 		if err != nil {
 			return err
 		}
-		return variableType.Map.V.bindWithTypedParameters(typedParaMeters)
+		return variableType.Map.V.bindWithTypedParameters(parameterTypes)
 	}
 	panic("not T")
 }
@@ -489,7 +489,7 @@ func (variableType *VariableType) bindWithTypedParameters(typedParaMeters map[st
 /*
 
  */
-func (variableType *VariableType) canBeBindWithType(typedParaMeters map[string]*VariableType, t *VariableType) error {
+func (variableType *VariableType) canBeBindWithType(parameterTypes map[string]*VariableType, t *VariableType) error {
 	if t.RightValueValid() == false {
 		return fmt.Errorf("'%s' is not right value valid", t.TypeString())
 	}
@@ -497,21 +497,21 @@ func (variableType *VariableType) canBeBindWithType(typedParaMeters map[string]*
 		return fmt.Errorf("'%s' is un typed", t.TypeString())
 	}
 	if variableType.Type == VARIABLE_TYPE_T {
-		typedParaMeters[variableType.Name] = t
+		parameterTypes[variableType.Name] = t
 		return nil
 	}
 	if variableType.Type == VARIABLE_TYPE_ARRAY && t.Type == VARIABLE_TYPE_ARRAY {
-		return variableType.ArrayType.canBeBindWithType(typedParaMeters, t.ArrayType)
+		return variableType.ArrayType.canBeBindWithType(parameterTypes, t.ArrayType)
 	}
 	if variableType.Type == VARIABLE_TYPE_JAVA_ARRAY && t.Type == VARIABLE_TYPE_JAVA_ARRAY {
-		return variableType.ArrayType.canBeBindWithType(typedParaMeters, t.ArrayType)
+		return variableType.ArrayType.canBeBindWithType(parameterTypes, t.ArrayType)
 	}
 	if variableType.Type == VARIABLE_TYPE_MAP && t.Type == VARIABLE_TYPE_MAP {
-		err := variableType.Map.K.canBeBindWithType(typedParaMeters, t.Map.K)
+		err := variableType.Map.K.canBeBindWithType(parameterTypes, t.Map.K)
 		if err != nil {
 			return err
 		}
-		return variableType.Map.V.canBeBindWithType(typedParaMeters, t.Map.V)
+		return variableType.Map.V.canBeBindWithType(parameterTypes, t.Map.V)
 	}
 	return fmt.Errorf("cannot bind '%s' to '%s'", t.TypeString(), variableType.TypeString())
 }

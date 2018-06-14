@@ -13,7 +13,7 @@ func init() {
 func registerBuildInFunctions() {
 	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-			if len(e.TypedParameters) > 0 {
+			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
 			}
@@ -54,7 +54,7 @@ func registerBuildInFunctions() {
 		//class is going to make value by checker
 	}
 	catchBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-		if len(e.TypedParameters) > 0 {
+		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 				errMsgPrefix(pos)))
 		}
@@ -111,7 +111,7 @@ func registerBuildInFunctions() {
 	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall,
 			block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-			if len(e.TypedParameters) > 0 {
+			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
 			}
@@ -150,7 +150,7 @@ func registerBuildInFunctions() {
 	// len
 	buildInFunctionsMap[common.BUILD_IN_FUNCTION_LEN] = &Function{
 		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos) {
-			if len(e.TypedParameters) > 0 {
+			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
 			}
@@ -190,7 +190,7 @@ func registerBuildInFunctions() {
 	}
 	sprintfBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*VariableType, pos *Pos) {
-		if len(e.TypedParameters) > 0 {
+		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 				errMsgPrefix(pos)))
 		}
@@ -224,7 +224,7 @@ func registerBuildInFunctions() {
 	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*VariableType, pos *Pos) {
-			if len(e.TypedParameters) > 0 {
+			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
 			}
@@ -284,7 +284,7 @@ func registerBuildInFunctions() {
 
 func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 	args []*VariableType, pos *Pos) {
-	if len(e.TypedParameters) > 0 {
+	if len(e.ParameterTypes) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 			errMsgPrefix(pos)))
 	}

@@ -89,7 +89,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				Type: ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: &ast.Expression{
 					Type: ast.EXPRESSION_TYPE_VAR,
-					Data: &ast.ExpressionDeclareVariable{Variables: vs, Values: es},
+					Data: &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es},
 					Pos:  pos,
 				},
 				Pos: pos,
@@ -349,7 +349,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				continue
 			}
 			s := &ast.StatementGoTo{}
-			s.Name = b.parser.token.Data.(string)
+			s.LabelName = b.parser.token.Data.(string)
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:          ast.STATEMENT_TYPE_GOTO,
 				StatementGoTo: s,

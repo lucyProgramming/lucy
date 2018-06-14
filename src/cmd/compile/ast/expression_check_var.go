@@ -11,8 +11,8 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	noErr := true
 	var err error
 	vs.IfDeclaredBefore = make([]bool, len(vs.Variables)) // all create this time
-	if vs.Values != nil && len(vs.Values) > 0 {
-		valueTypes := checkRightValuesValid(checkExpressions(block, vs.Values, errs), errs)
+	if vs.InitValues != nil && len(vs.InitValues) > 0 {
+		valueTypes := checkRightValuesValid(checkExpressions(block, vs.InitValues, errs), errs)
 		if len(valueTypes) != len(vs.Variables) {
 			noErr = false
 			*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
@@ -74,7 +74,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			vs.Values = append(vs.Values, v.Type.mkDefaultValueExpression())
+			vs.InitValues = append(vs.InitValues, v.Type.mkDefaultValueExpression())
 			if e.IsPublic {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}

@@ -30,7 +30,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	var err error
 	noNewVariable := true
 	declareVariableExpression := &ExpressionDeclareVariable{}
-	declareVariableExpression.Values = values
+	declareVariableExpression.InitValues = values
 	for k, v := range names {
 		if v.Type != EXPRESSION_TYPE_IDENTIFIER {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'",

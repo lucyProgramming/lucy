@@ -57,7 +57,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 	} else { // not template function
 		call := e.Data.(*ExpressionFunctionCall)
-		if len(call.TypedParameters) > 0 {
+		if len(call.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
 				errMsgPrefix(e.Pos)))
 		}
@@ -126,7 +126,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 			return
 		}
 	}
-	tps := call.TypedParameters
+	tps := call.ParameterTypes
 	for k, v := range f.Type.ReturnList {
 		if v == nil || v.Type == nil || len(v.Type.haveParameterType()) == 0 {
 			continue

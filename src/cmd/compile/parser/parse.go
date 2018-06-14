@@ -90,7 +90,7 @@ func (p *Parser) Parse() []error {
 					fmt.Errorf("%s use '=' to initialize value",
 						p.errorMsgPrefix()))
 			}
-			d := &ast.ExpressionDeclareVariable{Variables: vs, Values: es}
+			d := &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es}
 			e := &ast.Expression{
 				Type:     ast.EXPRESSION_TYPE_VAR,
 				Data:     d,

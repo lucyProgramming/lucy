@@ -30,10 +30,10 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 				state.pushStack(class, obj)
 			}
 		}
-		stack, es := makeExpression.build(class, code, vs.Values[0], context, state)
+		stack, es := makeExpression.build(class, code, vs.InitValues[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
-			state.pushStack(class, vs.Values[0].ExpressionValue)
+			state.pushStack(class, vs.InitValues[0].ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
@@ -41,7 +41,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		if v.Name == ast.NO_NAME_IDENTIFIER {
-			if jvmSize(vs.Values[0].ExpressionValue) == 1 {
+			if jvmSize(vs.InitValues[0].ExpressionValue) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2
@@ -73,10 +73,10 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		}
 		return
 	}
-	if len(vs.Values) == 1 {
-		maxStack, _ = makeExpression.build(class, code, vs.Values[0], context, state)
+	if len(vs.InitValues) == 1 {
+		maxStack, _ = makeExpression.build(class, code, vs.InitValues[0], context, state)
 	} else {
-		maxStack = makeExpression.buildExpressions(class, code, vs.Values, context, state)
+		maxStack = makeExpression.buildExpressions(class, code, vs.InitValues, context, state)
 	}
 	multiValuePacker.storeArrayListAutoVar(code, context)
 	//first round
@@ -169,9 +169,9 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 		index--
 	}
 	index = 0
-	for _, v := range vs.Values {
+	for _, v := range vs.InitValues {
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
-			stack, _ := makeExpression.build(class, code, vs.Values[0], context, state)
+			stack, _ := makeExpression.build(class, code, vs.InitValues[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -198,7 +198,7 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 			continue
 		}
 		//
-		stack, es := makeExpression.build(class, code, vs.Values[0], context, state)
+		stack, es := makeExpression.build(class, code, vs.InitValues[0], context, state)
 		if len(es) > 0 {
 			backfillExit(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)

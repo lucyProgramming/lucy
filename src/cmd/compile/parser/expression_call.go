@@ -60,9 +60,9 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 			}
 			ep.Next()
 			if result.Type == ast.EXPRESSION_TYPE_FUNCTION_CALL {
-				result.Data.(*ast.ExpressionFunctionCall).TypedParameters = ts
+				result.Data.(*ast.ExpressionFunctionCall).ParameterTypes = ts
 			} else {
-				result.Data.(*ast.ExpressionMethodCall).TypedParameters = ts
+				result.Data.(*ast.ExpressionMethodCall).ParameterTypes = ts
 			}
 		}
 	}
