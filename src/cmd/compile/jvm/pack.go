@@ -102,16 +102,15 @@ func (c *TypeConverterAndPrimitivePacker) packPrimitives(class *cg.ClassHighLeve
 
 func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
 	bs = make([]byte, 3)
+	bs[0] = cg.OP_invokestatic
 	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
-		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Boolean",
 			Method:     "valueOf",
 			Descriptor: "(Z)Ljava/lang/Boolean;",
 		}, bs[1:3])
 	case ast.VARIABLE_TYPE_BYTE:
-		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Byte",
 			Method:     "valueOf",
@@ -119,17 +118,15 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 		}, bs[1:3])
 
 	case ast.VARIABLE_TYPE_SHORT:
-		bs[0] = cg.OP_invokestatic
+
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Short",
 			Method:     "valueOf",
 			Descriptor: "(S)Ljava/lang/Short;",
 		}, bs[1:3])
-
 	case ast.VARIABLE_TYPE_ENUM:
 		fallthrough
 	case ast.VARIABLE_TYPE_INT:
-		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_integer_class,
 			Method:     "valueOf",
@@ -137,21 +134,18 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 		}, bs[1:3])
 
 	case ast.VARIABLE_TYPE_FLOAT:
-		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_float_class,
 			Method:     "valueOf",
 			Descriptor: "(F)Ljava/lang/Float;",
 		}, bs[1:3])
 	case ast.VARIABLE_TYPE_DOUBLE:
-		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_double_class,
 			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/Double;",
 		}, bs[1:3])
 	case ast.VARIABLE_TYPE_LONG:
-		bs[0] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_long_class,
 			Method:     "valueOf",
@@ -165,28 +159,24 @@ func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.Class
 	if t.IsPointer() == false {
 		panic("...")
 	}
+	code.Codes[code.CodeLength] = cg.OP_checkcast
 	switch t.Type {
 	case ast.VARIABLE_TYPE_STRING:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_OBJECT:
 		if t.Class.Name != ast.JAVA_ROOT_CLASS {
-			code.Codes[code.CodeLength] = cg.OP_checkcast
 			class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	case ast.VARIABLE_TYPE_ARRAY:
 		meta := ArrayMetas[t.ArrayType.Type]
-		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_MAP:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
-		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
