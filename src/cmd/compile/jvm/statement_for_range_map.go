@@ -156,7 +156,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		if s.RangeAttr.RangeOn.ExpressionValue.Map.V.IsPointer() == false {
-			typeConverter.getPrimitivesFromObject(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
+			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		} else {
 			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		}
@@ -179,7 +179,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
 		if s.RangeAttr.RangeOn.ExpressionValue.Map.K.IsPointer() == false {
-			typeConverter.getPrimitivesFromObject(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
+			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 		} else {
 			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 		}

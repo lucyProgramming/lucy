@@ -74,7 +74,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		if v.ExpressionValue.IsPointer() == false {
-			typeConverter.putPrimitiveInObject(class, code, v.ExpressionValue)
+			typeConverter.packPrimitives(class, code, v.ExpressionValue)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++

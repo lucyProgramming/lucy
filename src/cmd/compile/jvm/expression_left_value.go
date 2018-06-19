@@ -50,14 +50,14 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 		maxStack = t
 	}
 	if index.Index.ExpressionValue.IsPointer() == false {
-		typeConverter.putPrimitiveInObject(class, code, index.Index.ExpressionValue)
+		typeConverter.packPrimitives(class, code, index.Index.ExpressionValue)
 	}
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
 	remainStack = 2
 	op = []byte{}
 	if index.Expression.ExpressionValue.Map.V.IsPointer() == false {
 		op = append(op,
-			typeConverter.putPrimitiveInObjectBytes(class, index.Expression.ExpressionValue.Map.V)...)
+			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.V)...)
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual

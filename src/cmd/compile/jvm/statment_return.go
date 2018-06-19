@@ -150,7 +150,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 				}
 				//convert to object
 				if v.ExpressionValue.IsPointer() == false {
-					typeConverter.putPrimitiveInObject(class, code, v.ExpressionValue)
+					typeConverter.packPrimitives(class, code, v.ExpressionValue)
 				}
 				// append
 				loadInt(class, code, index)
@@ -256,7 +256,7 @@ func (makeClass *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHig
 			maxStack = t
 		}
 		if v.Type.IsPointer() == false {
-			typeConverter.putPrimitiveInObject(class, code, v.Type)
+			typeConverter.packPrimitives(class, code, v.Type)
 		}
 		loadInt(class, code, index)
 		if 4 > maxStack {

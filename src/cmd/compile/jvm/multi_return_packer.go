@@ -28,7 +28,7 @@ func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCo
 	k int, typ *ast.VariableType, context *Context) (maxStack uint16) {
 	maxStack = a.unPackObject(class, code, k, context)
 	if typ.IsPointer() == false {
-		typeConverter.getPrimitivesFromObject(class, code, typ)
+		typeConverter.unPackPrimitives(class, code, typ)
 		if t := jvmSize(typ); t > maxStack {
 			maxStack = t
 		}

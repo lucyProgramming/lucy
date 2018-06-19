@@ -70,7 +70,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	typeConverter.putPrimitiveInObject(class, code, &ast.VariableType{Type: ast.VARIABLE_TYPE_BOOL})
+	typeConverter.packPrimitives(class, code, &ast.VariableType{Type: ast.VARIABLE_TYPE_BOOL})
 	code.Codes[code.CodeLength] = cg.OP_iconst_1
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap

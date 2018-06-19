@@ -8,7 +8,7 @@ import (
 type TypeConverterAndPrimitivePacker struct {
 }
 
-func (TypeConverterAndPrimitivePacker) getPrimitivesFromObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
 	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		c := "java/lang/Boolean"
@@ -96,11 +96,11 @@ func (TypeConverterAndPrimitivePacker) getPrimitivesFromObject(class *cg.ClassHi
 	}
 }
 
-func (c *TypeConverterAndPrimitivePacker) putPrimitiveInObject(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
-	copyOP(code, c.putPrimitiveInObjectBytes(class, t)...)
+func (c *TypeConverterAndPrimitivePacker) packPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+	copyOP(code, c.packPrimitivesBytes(class, t)...)
 }
 
-func (TypeConverterAndPrimitivePacker) putPrimitiveInObjectBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
+func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
 	bs = make([]byte, 3)
 	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:

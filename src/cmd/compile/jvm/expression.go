@@ -277,7 +277,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		if v.ExpressionValue.IsPointer() == false {
-			typeConverter.putPrimitiveInObject(class, code, v.ExpressionValue)
+			typeConverter.packPrimitives(class, code, v.ExpressionValue)
 		}
 		loadInt(class, code, index)
 		code.Codes[code.CodeLength] = cg.OP_swap
