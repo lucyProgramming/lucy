@@ -2,7 +2,7 @@ package ast
 
 import "fmt"
 
-type Defer struct {
+type StatementDefer struct {
 	allowCatch     bool        // if in function top block
 	StartPc        int         // for jvm
 	StackMapState  interface{} // *jvm.StackMapState
@@ -10,7 +10,7 @@ type Defer struct {
 	ExceptionClass *Class
 }
 
-func (d *Defer) registerExceptionClass(c *Class) error {
+func (d *StatementDefer) registerExceptionClass(c *Class) error {
 	if d.ExceptionClass != nil {
 		return fmt.Errorf("exception class already registed as '%s'",
 			d.ExceptionClass.Name)

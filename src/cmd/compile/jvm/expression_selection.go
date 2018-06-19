@@ -13,7 +13,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      selection.Expression.ExpressionValue.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
-				Descriptor: selection.PackageVariable.Descriptor,
+				Descriptor: selection.PackageVariable.JvmDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}

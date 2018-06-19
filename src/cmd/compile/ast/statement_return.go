@@ -5,7 +5,7 @@ import (
 )
 
 type StatementReturn struct {
-	Defers      []*Defer
+	Defers      []*StatementDefer
 	Expressions []*Expression
 }
 

@@ -8,5 +8,5 @@ type InheritedAttribute struct {
 	ForBreak        interface{} // for or switch statement
 	Function        *Function
 	Class           *Class
-	Defer           *Defer
+	Defer           *StatementDefer
 }

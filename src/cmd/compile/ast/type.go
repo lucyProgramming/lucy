@@ -516,56 +516,56 @@ func (variableType *VariableType) canBeBindWithType(parameterTypes map[string]*V
 	return fmt.Errorf("cannot bind '%s' to '%s'", t.TypeString(), variableType.TypeString())
 }
 
-func (variableType *VariableType) Equal(errs *[]error, assign *VariableType) bool {
-	if variableType == assign { // equal
+func (variableType *VariableType) Equal(errs *[]error, compareTo *VariableType) bool {
+	if variableType == compareTo { // equal
 		return true
 	}
-	if variableType.IsPrimitive() && assign.IsPrimitive() {
-		return variableType.Type == assign.Type
+	if variableType.IsPrimitive() && compareTo.IsPrimitive() {
+		return variableType.Type == compareTo.Type
 	}
-	if variableType.IsPointer() && assign.Type == VARIABLE_TYPE_NULL {
+	if variableType.IsPointer() && compareTo.Type == VARIABLE_TYPE_NULL {
 		return true
 	}
 	if variableType.Type == VARIABLE_TYPE_OBJECT && variableType.Class.Name == JAVA_ROOT_CLASS &&
-		assign.IsPointer() {
+		compareTo.IsPointer() {
 		return true
 	}
-	if variableType.Type == VARIABLE_TYPE_ARRAY && assign.Type == VARIABLE_TYPE_ARRAY {
-		return variableType.ArrayType.Equal(errs, assign.ArrayType)
+	if variableType.Type == VARIABLE_TYPE_ARRAY && compareTo.Type == VARIABLE_TYPE_ARRAY {
+		return variableType.ArrayType.Equal(errs, compareTo.ArrayType)
 	}
-	if variableType.Type == VARIABLE_TYPE_JAVA_ARRAY && assign.Type == VARIABLE_TYPE_JAVA_ARRAY {
-		return variableType.ArrayType.Equal(errs, assign.ArrayType)
+	if variableType.Type == VARIABLE_TYPE_JAVA_ARRAY && compareTo.Type == VARIABLE_TYPE_JAVA_ARRAY {
+		return variableType.ArrayType.Equal(errs, compareTo.ArrayType)
 	}
 
-	if variableType.Type == VARIABLE_TYPE_ENUM && assign.Type == VARIABLE_TYPE_ENUM {
-		return variableType.Enum.Name == assign.Enum.Name
+	if variableType.Type == VARIABLE_TYPE_ENUM && compareTo.Type == VARIABLE_TYPE_ENUM {
+		return variableType.Enum.Name == compareTo.Enum.Name
 	}
-	if variableType.Type == VARIABLE_TYPE_MAP && assign.Type == VARIABLE_TYPE_MAP {
-		return variableType.Map.K.Equal(errs, assign.Map.K) && variableType.Map.V.Equal(errs, assign.Map.V)
+	if variableType.Type == VARIABLE_TYPE_MAP && compareTo.Type == VARIABLE_TYPE_MAP {
+		return variableType.Map.K.Equal(errs, compareTo.Map.K) && variableType.Map.V.Equal(errs, compareTo.Map.V)
 	}
-	if variableType.Type == VARIABLE_TYPE_OBJECT && assign.Type == VARIABLE_TYPE_OBJECT { // object
+	if variableType.Type == VARIABLE_TYPE_OBJECT && compareTo.Type == VARIABLE_TYPE_OBJECT { // object
 		if variableType.Class.NotImportedYet {
 			if err := variableType.Class.loadSelf(); err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assign.Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
 				return false
 			}
 		}
-		if assign.Class.NotImportedYet {
-			if err := assign.Class.loadSelf(); err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assign.Pos), err))
+		if compareTo.Class.NotImportedYet {
+			if err := compareTo.Class.loadSelf(); err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
 				return false
 			}
 		}
 		if variableType.Class.IsInterface() {
-			i, err := assign.Class.implemented(variableType.Class.Name)
+			i, err := compareTo.Class.implemented(variableType.Class.Name)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assign.Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
 			}
 			return i
 		} else { // class
-			has, err := assign.Class.haveSuper(variableType.Class.Name)
+			has, err := compareTo.Class.haveSuper(variableType.Class.Name)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(assign.Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
 			}
 			return has
 		}

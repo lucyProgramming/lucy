@@ -8,7 +8,7 @@ import (
 
 type Block struct {
 	DeadEnding                 bool
-	Defers                     []*Defer
+	Defers                     []*StatementDefer
 	isGlobalVariableDefinition bool
 	IsFunctionTopBlock         bool
 	IsClassBlock               bool

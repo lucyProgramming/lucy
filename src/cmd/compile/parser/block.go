@@ -255,7 +255,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			}
 			b.Next()
 			if isDefer {
-				d := &ast.Defer{
+				d := &ast.StatementDefer{
 					Block: newBlock,
 				}
 				block.Statements = append(block.Statements, &ast.Statement{
@@ -456,7 +456,7 @@ func (b *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool) {
 				b.parser.errorMsgPrefix(e.Pos)))
 		}
 		if isDefer {
-			d := &ast.Defer{}
+			d := &ast.StatementDefer{}
 			d.Block.Statements = []*ast.Statement{&ast.Statement{
 				Type:       ast.STATEMENT_TYPE_EXPRESSION,
 				Expression: e,

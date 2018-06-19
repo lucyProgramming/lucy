@@ -15,7 +15,7 @@ type Context struct {
 	function                *ast.Function
 	currentSourceFile       string
 	currentLineNUmber       int
-	Defer                   *ast.Defer
+	Defer                   *ast.StatementDefer
 	stackMapOffsets         []int
 }
 

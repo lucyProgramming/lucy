@@ -89,7 +89,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 	return
 }
 func (makeClass *MakeClass) buildDefers(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, context *Context, ds []*ast.Defer, state *StackMapState) {
+	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, state *StackMapState) {
 	index := len(ds) - 1
 	for index >= 0 {
 		var ss *StackMapState

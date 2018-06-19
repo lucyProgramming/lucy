@@ -64,7 +64,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		f := &ast.ClassField{}
 		f.LoadFromOutSide = true
 		f.AccessFlags = v.AccessFlags
-		f.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
@@ -121,7 +121,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
-		f.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.LoadFromOutSide = true
 		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
@@ -255,7 +255,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			vd := &ast.VariableDefinition{}
 			vd.Name = name
 			vd.AccessFlags = f.AccessFlags
-			vd.Descriptor = string(c.ConstPool[f.DescriptorIndex].Info)
+			vd.JvmDescriptor = string(c.ConstPool[f.DescriptorIndex].Info)
 			vd.Type = typ
 			vd.IsGlobal = true
 			pack.Block.Variables[name] = vd

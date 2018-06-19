@@ -12,5 +12,5 @@ type VariableDefinition struct {
 	Expression               *Expression
 	Name                     string
 	Type                     *VariableType
-	Descriptor               string // jvm
+	JvmDescriptor            string // jvm
 }

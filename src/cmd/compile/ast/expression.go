@@ -420,11 +420,11 @@ func (e *Expression) IsSelfIncrement() bool {
 		e.Type == EXPRESSION_TYPE_PRE_INCREMENT
 }
 
-func (e *Expression) isListAndMoreThanIElements(i int) bool {
+func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	if e.Type != EXPRESSION_TYPE_LIST {
 		return false
 	}
-	return len(e.Data.([]*Expression)) > i
+	return len(e.Data.([]*Expression)) > n
 }
 
 func (e *Expression) HaveOnlyOneValue() bool {

@@ -148,7 +148,7 @@ func (e *Expression) check(block *Block) (Types []*VariableType, errs []error) {
 			Types = []*VariableType{tt}
 		}
 		e.ExpressionValue = tt
-		if e.Data.(*ExpressionBinary).Left.isListAndMoreThanIElements(1) {
+		if e.Data.(*ExpressionBinary).Left.isListAndMoreThanNElements(1) {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case EXPRESSION_TYPE_INCREMENT:

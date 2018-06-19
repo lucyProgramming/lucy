@@ -334,7 +334,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			target = dot.PackageVariable.Type
 			className = dot.Expression.ExpressionValue.Package.Name + "/main"
 			name = dot.PackageVariable.Name
-			descriptor = dot.PackageVariable.Descriptor
+			descriptor = dot.PackageVariable.JvmDescriptor
 			maxStack = 0
 			remainStack = 0
 		} else {
@@ -342,7 +342,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			target = dot.Field.VariableDefinition.Type
 			name = dot.Name
 			if dot.Field.LoadFromOutSide {
-				descriptor = dot.Field.Descriptor
+				descriptor = dot.Field.JvmDescriptor
 			} else {
 				descriptor = Descriptor.typeDescriptor(target)
 			}

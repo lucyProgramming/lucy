@@ -35,7 +35,7 @@ type Statement struct {
 	StatementContinue *StatementContinue
 	StatementLabel    *StatementLabel
 	StatementGoTo     *StatementGoTo
-	Defer             *Defer
+	Defer             *StatementDefer
 	Class             *Class
 	Enum              *Enum
 	/*
@@ -97,7 +97,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_SWITCH:
 		return s.StatementSwitch.check(block)
 	case STATEMENT_TYPE_BREAK:
-		s.StatementBreak.Defers = make([]*Defer, len(block.Defers))
+		s.StatementBreak.Defers = make([]*StatementDefer, len(block.Defers))
 		copy(s.StatementBreak.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
@@ -113,7 +113,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 			}
 		}
 	case STATEMENT_TYPE_CONTINUE:
-		s.StatementContinue.Defers = make([]*Defer, len(block.Defers))
+		s.StatementContinue.Defers = make([]*StatementDefer, len(block.Defers))
 		copy(s.StatementContinue.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",

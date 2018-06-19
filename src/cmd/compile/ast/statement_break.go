@@ -1,7 +1,7 @@
 package ast
 
 type StatementBreak struct {
-	Defers          []*Defer
+	Defers          []*StatementDefer
 	StatementFor    *StatementFor
 	StatementSwitch *StatementSwitch
 }
