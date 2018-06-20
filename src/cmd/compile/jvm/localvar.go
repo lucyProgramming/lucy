@@ -6,7 +6,7 @@ import (
 )
 
 func (makeClass *MakeClass) loadLocalVar(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, v *ast.VariableDefinition) (maxStack uint16) {
+	code *cg.AttributeCode, v *ast.Variable) (maxStack uint16) {
 	if v.BeenCaptured {
 		return closure.loadLocalClosureVar(class, code, v)
 	}
@@ -16,7 +16,7 @@ func (makeClass *MakeClass) loadLocalVar(class *cg.ClassHighLevel,
 }
 
 func (makeClass *MakeClass) storeLocalVar(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, v *ast.VariableDefinition) (maxStack uint16) {
+	code *cg.AttributeCode, v *ast.Variable) (maxStack uint16) {
 	if v.BeenCaptured {
 		closure.storeLocalClosureVar(class, code, v)
 		return

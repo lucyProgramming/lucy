@@ -46,12 +46,12 @@ func (p *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 	}
 	f.Type, err = p.parser.parseFunctionType()
 	if err != nil {
-		p.consume(untils_lc)
+		p.consume(untilLc)
 	}
 	if p.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s except '{' but '%s'", p.parser.errorMsgPrefix(), p.parser.token.Description)
 		p.parser.errs = append(p.parser.errs, err)
-		p.consume(untils_lc)
+		p.consume(untilLc)
 	}
 	f.Block.IsFunctionBlock = true
 	p.Next()

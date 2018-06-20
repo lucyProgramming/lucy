@@ -29,13 +29,14 @@ func (b *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 			e, err := b.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
-				b.consume(untils_semicolon)
+				b.consume(untilSemicolon)
 			} else {
 				f.Condition = e
 			}
 			if b.parser.token.Type != lex.TOKEN_SEMICOLON {
-				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after expression", b.parser.errorMsgPrefix()))
-				b.consume(untils_lc)
+				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s missing semicolon after expression",
+					b.parser.errorMsgPrefix()))
+				b.consume(untilLc)
 			}
 		}
 		b.Next()
@@ -59,7 +60,7 @@ func (b *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 	if b.parser.token.Type != lex.TOKEN_RC {
 		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 			b.parser.errorMsgPrefix(), b.parser.token.Description))
-		b.consume(untils_rc)
+		b.consume(untilRc)
 	}
 	b.Next() // }
 	return f, nil

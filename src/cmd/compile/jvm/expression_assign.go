@@ -68,7 +68,7 @@ func (makeExpression *MakeExpression) buildAssign(class *cg.ClassHighLevel, code
 }
 
 func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, className string,
-	stackTopType *ast.VariableType) (increment uint16) {
+	stackTopType *ast.Type) (increment uint16) {
 	if op[0] == cg.OP_istore ||
 		op[0] == cg.OP_lstore ||
 		op[0] == cg.OP_fstore ||

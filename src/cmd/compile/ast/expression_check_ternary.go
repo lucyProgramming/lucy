@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 	ternary := e.Data.(*ExpressionTernary)
 	condition, es := ternary.Selection.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {

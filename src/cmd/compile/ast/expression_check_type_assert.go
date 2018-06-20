@@ -7,7 +7,7 @@ import (
 /*
 	in array type must equal
 */
-func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*VariableType {
+func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	assert := e.Data.(*ExpressionTypeAssert)
 	object, es := assert.Expression.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
@@ -26,11 +26,11 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*VariableTyp
 		*errs = append(*errs, err)
 		return nil
 	}
-	ret := make([]*VariableType, 2)
-	ret[0] = &VariableType{}
+	ret := make([]*Type, 2)
+	ret[0] = &Type{}
 	ret[0] = assert.Type.Clone()
 	ret[0].Pos = e.Pos
-	ret[1] = &VariableType{}
+	ret[1] = &Type{}
 	ret[1].Pos = e.Pos
 	ret[1].Type = VARIABLE_TYPE_BOOL // if  assert is ok
 	if assert.Type.validForTypeAssertOrConversion() == false {

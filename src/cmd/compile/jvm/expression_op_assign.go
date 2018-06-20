@@ -171,101 +171,80 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 	case ast.VARIABLE_TYPE_INT:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_isub
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_imul
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_idiv
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_irem
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_AND_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iand
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_OR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ior
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_LSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishl
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_RSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ishr
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_XOR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ixor
-			code.CodeLength++
 		}
+		code.CodeLength++
 	case ast.VARIABLE_TYPE_LONG:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ladd
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lsub
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lmul
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ldiv
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lrem
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_AND_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_land
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_OR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lor
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_LSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lshl
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_RSH_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lshr
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_XOR_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lxor
-			code.CodeLength++
 		}
+		code.CodeLength++
 	case ast.VARIABLE_TYPE_FLOAT:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ladd
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lsub
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_lmul
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ldiv
-			code.CodeLength++
 		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_frem
-			code.CodeLength++
 		}
+		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_dadd
-			code.CodeLength++
+
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_dsub
-			code.CodeLength++
+
 		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_dmul
-			code.CodeLength++
+
 		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ddiv
-			code.CodeLength++
+
 		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_drem
-			code.CodeLength++
+
 		}
+		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
 		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)

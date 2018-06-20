@@ -39,7 +39,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		state.popStack(1)
 
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.VariableType{
+		state.pushStack(class, &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
@@ -102,7 +102,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		state.popStack(2) // 2 bool value
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.VariableType{
+		state.pushStack(class, &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
@@ -134,7 +134,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		}
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.VariableType{
+		state.pushStack(class, &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
@@ -165,7 +165,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		state.popStack(1) // pop left string
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.VariableType{
+		state.pushStack(class, &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
@@ -221,7 +221,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		state.popStack(1) // pop bin left
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.VariableType{
+		state.pushStack(class, &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
@@ -252,7 +252,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		state.popStack(1) //
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_BOOL})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_BOOL})
 		context.MakeStackMap(code, state, code.CodeLength+8) //result on stack
 		if e.Type == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpeq

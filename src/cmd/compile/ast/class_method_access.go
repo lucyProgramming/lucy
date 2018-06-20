@@ -7,7 +7,7 @@ import (
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*VariableType,
+func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []*Type,
 	callArgs *CallArgs, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {
@@ -70,8 +70,8 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, args []*Vari
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string,
-	args []*VariableType, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessMethodAsJava(from *Position, errs *[]error, name string,
+	args []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	for _, v := range c.Methods[name] {
 		if len(v.Func.Type.ParameterList) != len(args) {
 			if fromSub == false || v.IsPublic() || v.IsProtected() {
@@ -112,7 +112,7 @@ func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string,
 	return append(ms, ms_...), false, nil // methods have the same name
 }
 
-func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, args []*VariableType,
+func (c *Class) matchConstructionFunction(from *Position, errs *[]error, args []*Type,
 	callArgs *CallArgs) (ms []*ClassMethod, matched bool, err error) {
 	return c.accessMethod(from, errs, CONSTRUCTION_METHOD_NAME, args, callArgs, false)
 }

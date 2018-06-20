@@ -88,7 +88,7 @@ func loadInt(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 }
 
 func storeGlobalVariable(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode,
-	v *ast.VariableDefinition) {
+	v *ast.Variable) {
 	code.Codes[code.CodeLength] = cg.OP_putstatic
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      mainClass.Name,
@@ -107,7 +107,7 @@ func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
 	return b
 }
 
-func jvmSize(v *ast.VariableType) uint16 {
+func jvmSize(v *ast.Type) uint16 {
 	if v.RightValueValid() == false {
 		panic("right value is not valid:" + v.TypeString())
 	}

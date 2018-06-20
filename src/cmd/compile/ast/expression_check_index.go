@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 	index := e.Data.(*ExpressionIndex)
 	t, es := index.Expression.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {

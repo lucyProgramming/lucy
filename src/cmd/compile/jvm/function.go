@@ -128,8 +128,8 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 1)...)
 		{
 			// String[] java style
-			t := &ast.VariableType{Type: ast.VARIABLE_TYPE_JAVA_ARRAY}
-			t.ArrayType = &ast.VariableType{Type: ast.VARIABLE_TYPE_STRING}
+			t := &ast.Type{Type: ast.VARIABLE_TYPE_JAVA_ARRAY}
+			t.ArrayType = &ast.Type{Type: ast.VARIABLE_TYPE_STRING}
 			state.appendLocals(class, t)
 		}
 		method.Code.MaxLocals = 1

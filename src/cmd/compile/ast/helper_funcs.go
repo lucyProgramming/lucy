@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func errMsgPrefix(pos *Pos) string {
+func errMsgPrefix(pos *Position) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
@@ -26,12 +26,12 @@ func checkEnum(enums []*Enum) []error {
 	return ret
 }
 
-func divisionByZeroErr(pos *Pos) error {
+func divisionByZeroErr(pos *Position) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
 
-func checkExpressions(block *Block, es []*Expression, errs *[]error) []*VariableType {
-	ret := []*VariableType{}
+func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
+	ret := []*Type{}
 	for _, v := range es {
 		ts, e := v.check(block)
 		if errorsNotEmpty(e) {
@@ -46,15 +46,15 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Variable
 	return ret
 }
 
-func mkVoidType(pos *Pos) *VariableType {
-	t := &VariableType{}
+func mkVoidType(pos *Position) *Type {
+	t := &Type{}
 	t.Type = VARIABLE_TYPE_VOID // means no return;
 	t.Pos = pos
 	return t
 }
 
-func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableType) {
-	ret = []*VariableType{}
+func checkRightValuesValid(ts []*Type, errs *[]error) (ret []*Type) {
+	ret = []*Type{}
 	for _, v := range ts {
 		ret = append(ret, v)
 		if v == nil {
@@ -71,7 +71,7 @@ func checkRightValuesValid(ts []*VariableType, errs *[]error) (ret []*VariableTy
 /*
 	when access from global,should check if access from package
 */
-func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) {
+func shouldAccessFromImports(name string, from *Position, have *Position) (*Import, bool) {
 	if have == nil { // incase buildin types
 		return nil, false
 	}
@@ -87,7 +87,7 @@ func shouldAccessFromImports(name string, from *Pos, have *Pos) (*Import, bool) 
 	return i, have.StartLine < from.StartLine
 }
 
-func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*VariableType) error {
+func msNotMatchError(pos *Position, name string, ms []*ClassMethod, want []*Type) error {
 	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
 	errMsg += "\twant " + ms[0].Func.badParameterMsg(name, want) + "\n"
@@ -146,7 +146,7 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	return nil
 }
 
-func convertLiteralExpressionsToNeeds(es []*Expression, needs []*VariableType, checked []*VariableType) []error {
+func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, checked []*Type) []error {
 	errs := []error{}
 	if len(es) == 0 {
 		return errs

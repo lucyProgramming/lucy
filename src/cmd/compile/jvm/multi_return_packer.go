@@ -25,7 +25,7 @@ func (a *MultiValuePacker) storeArrayListAutoVar(code *cg.AttributeCode, context
 }
 
 func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	k int, typ *ast.VariableType, context *Context) (maxStack uint16) {
+	k int, typ *ast.Type, context *Context) (maxStack uint16) {
 	maxStack = a.unPackObject(class, code, k, context)
 	if typ.IsPointer() == false {
 		typeConverter.unPackPrimitives(class, code, typ)

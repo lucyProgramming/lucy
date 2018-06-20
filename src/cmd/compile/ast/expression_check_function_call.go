@@ -2,7 +2,7 @@ package ast
 
 import "fmt"
 
-func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*VariableType {
+func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionFunctionCall)
 	t, es := call.Expression.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
@@ -13,11 +13,11 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	}
 	if t.Type == VARIABLE_TYPE_CLASS { // cast type
 		typeConversion := &ExpressionTypeConversion{}
-		typeConversion.Type = &VariableType{}
+		typeConversion.Type = &Type{}
 		typeConversion.Type.Type = VARIABLE_TYPE_OBJECT
 		typeConversion.Type.Class = t.Class
 		typeConversion.Type.Pos = e.Pos
-		ret := []*VariableType{typeConversion.Type}
+		ret := []*Type{typeConversion.Type}
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 				errMsgPrefix(e.Pos)))
@@ -44,7 +44,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	}
 }
 
-func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args *CallArgs) []*VariableType {
+func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args *CallArgs) []*Type {
 	callArgsTypes := checkExpressions(block, *args, errs)
 	callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
 	var tf *Function
@@ -69,7 +69,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		*errs = append(*errs, fmt.Errorf(errMsg))
 	}
 	//trying to convert literal
-	var ret []*VariableType
+	var ret []*Type
 	convertLiteralExpressionsToNeeds(*args, f.Type.getParameterTypes(), callArgsTypes)
 	if f.TemplateFunction == nil {
 		ret = f.Type.returnTypes(e.Pos)
@@ -108,9 +108,9 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 }
 
 func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
-	argTypes []*VariableType, f *Function) (ret *Function) {
+	argTypes []*Type, f *Function) (ret *Function) {
 	call := e.Data.(*ExpressionFunctionCall)
-	parameterTypes := make(map[string]*VariableType)
+	parameterTypes := make(map[string]*Type)
 	for k, v := range f.Type.ParameterList {
 		if v == nil || v.Type == nil || len(v.Type.haveParameterType()) == 0 {
 			continue
@@ -133,7 +133,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		if len(tps) == 0 || tps[0] == nil {
 			//trying already have
-			if err := v.Type.canBeBindWithTypedParameters(parameterTypes); err == nil {
+			if err := v.Type.canBeBindWithParameterTypes(parameterTypes); err == nil {
 				//very good no error
 				continue
 			}
@@ -160,12 +160,12 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		cloneFunction.parameterTypes = parameterTypes
 		for _, v := range cloneFunction.Type.ParameterList {
 			if len(v.Type.haveParameterType()) > 0 {
-				v.Type.bindWithTypedParameters(parameterTypes)
+				v.Type.bindWithParameterTypes(parameterTypes)
 			}
 		}
 		for _, v := range cloneFunction.Type.ReturnList {
 			if len(v.Type.haveParameterType()) > 0 {
-				v.Type.bindWithTypedParameters(parameterTypes)
+				v.Type.bindWithParameterTypes(parameterTypes)
 			}
 		}
 		//check this function

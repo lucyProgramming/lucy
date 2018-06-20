@@ -25,7 +25,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 		maxStack = currentStack
 	}
 
-	objectArray := &ast.VariableType{}
+	objectArray := &ast.Type{}
 	objectArray.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
 	state.pushStack(class, objectArray)
@@ -61,7 +61,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 		loadInt(class, code, index)
 		currentStack += 2
 		state.pushStack(class, objectArray)
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)

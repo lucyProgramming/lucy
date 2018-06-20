@@ -14,7 +14,7 @@ func (b *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 	e, err = b.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
-		b.consume(untils_lc)
+		b.consume(untilLc)
 		b.Next()
 	}
 	i = &ast.StatementIF{}
@@ -27,7 +27,7 @@ func (b *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 		i.Condition, err = b.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			b.parser.errs = append(b.parser.errs, err)
-			b.consume(untils_lc)
+			b.consume(untilLc)
 			b.Next()
 		}
 	}
@@ -36,7 +36,7 @@ func (b *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
 			b.parser.errorMsgPrefix(), b.parser.token.Description)
 		b.parser.errs = append(b.parser.errs, err)
-		b.consume(untils_lc) // consume and next
+		b.consume(untilLc) // consume and next
 		b.Next()
 	}
 	b.Next() //skip {
@@ -44,7 +44,7 @@ func (b *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 	if b.parser.token.Type != lex.TOKEN_RC {
 		b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 			b.parser.errorMsgPrefix(), b.parser.token.Description))
-		b.consume(untils_rc)
+		b.consume(untilRc)
 	}
 	b.Next() // skip }
 	//fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -69,7 +69,7 @@ func (b *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 		if b.parser.token.Type != lex.TOKEN_RC {
 			err = fmt.Errorf("%s expect '}', but '%s'",
 				b.parser.errorMsgPrefix(), b.parser.token.Description)
-			b.consume(untils_rc)
+			b.consume(untilRc)
 		}
 		b.Next()
 
@@ -103,7 +103,7 @@ func (b *BlockParser) parseElseIfList() (es []*ast.StatementElseIf, err error) {
 		if b.parser.token.Type != lex.TOKEN_RC {
 			err = fmt.Errorf("%s expect '}', but '%s'",
 				b.parser.errorMsgPrefix(), b.parser.token.Description)
-			b.consume(untils_rc)
+			b.consume(untilRc)
 		}
 		b.Next() // skip }
 	}

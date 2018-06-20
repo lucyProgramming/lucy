@@ -6,7 +6,7 @@ import (
 )
 
 //代表语法数的一个节点
-type Node struct {
+type Top struct {
 	Data interface{}
 }
 
@@ -16,26 +16,26 @@ type ConvertTops2Package struct {
 	Functions []*Function
 	Classes   []*Class
 	Enums     []*Enum
-	Variables []*VariableDefinition
+	Variables []*Variable
 	Constants []*Constant
-	Import    []*Import
+	Imports   []*Import
 	TypeAlias []*ExpressionTypeAlias
 }
 
-func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclareErrors []*RedeclareError, errs []error) {
+func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareErrors []*RedeclareError, errs []error) {
 	//
 	if err := PackageBeenCompile.loadBuildInPackage(); err != nil {
 		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
 		os.Exit(1)
 	}
 	errs = make([]error, 0)
-	PackageBeenCompile.Files = make(map[string]*LucyFile)
+	PackageBeenCompile.Files = make(map[string]*SourceFile)
 	conversion.Name = []string{}
 	conversion.Blocks = []*Block{}
 	conversion.Functions = make([]*Function, 0)
 	conversion.Classes = make([]*Class, 0)
 	conversion.Enums = make([]*Enum, 0)
-	conversion.Variables = make([]*VariableDefinition, 0)
+	conversion.Variables = make([]*Variable, 0)
 	conversion.Constants = make([]*Constant, 0)
 	expressions := []*Expression{}
 	for _, v := range t {
@@ -58,7 +58,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 		case *Import:
 			i := v.Data.(*Import)
 			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
-				PackageBeenCompile.Files[i.Pos.Filename] = &LucyFile{Imports: make(map[string]*Import)}
+				PackageBeenCompile.Files[i.Pos.Filename] = &SourceFile{Imports: make(map[string]*Import)}
 			}
 			PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();
@@ -68,7 +68,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 			t := v.Data.(*ExpressionTypeAlias)
 			conversion.TypeAlias = append(conversion.TypeAlias, t)
 		default:
-			panic("tops have unkown type")
+			panic("tops have unKnow  type")
 		}
 	}
 	errs = append(errs, checkEnum(conversion.Enums)...)
@@ -77,7 +77,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 	for _, v := range conversion.Constants {
 		PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 	}
-	PackageBeenCompile.Block.Variables = make(map[string]*VariableDefinition)
+	PackageBeenCompile.Block.Variables = make(map[string]*Variable)
 	PackageBeenCompile.Block.Functions = make(map[string]*Function)
 	for _, v := range conversion.Functions {
 		v.IsGlobal = true
@@ -109,7 +109,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Node) (redeclare
 			continue
 		}
 		if PackageBeenCompile.Block.TypeAlias == nil {
-			PackageBeenCompile.Block.TypeAlias = make(map[string]*VariableType)
+			PackageBeenCompile.Block.TypeAlias = make(map[string]*Type)
 		}
 		v.Type.Alias = v.Name
 		PackageBeenCompile.Block.TypeAlias[v.Name] = v.Type
@@ -196,7 +196,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 		r := &RedeclareError{}
 		r.Name = k
-		r.Positions = make([]*Pos, len(v))
+		r.Positions = make([]*Position, len(v))
 		r.Types = make([]string, len(v))
 		for kk, vv := range v {
 			switch vv.(type) {

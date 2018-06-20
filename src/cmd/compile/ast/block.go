@@ -7,15 +7,15 @@ import (
 )
 
 type Block struct {
-	DeadEnding                 bool
+	WillNotExecuteToEnd        bool
 	Defers                     []*StatementDefer
 	isGlobalVariableDefinition bool
 	IsFunctionBlock            bool
 	IsClassBlock               bool
 	IsForBlock                 bool
 	IsSwitchStatementTopBlock  bool
-	Pos                        *Pos
-	EndPos                     *Pos
+	Pos                        *Position
+	EndPos                     *Position
 	Outer                      *Block
 	InheritedAttribute         InheritedAttribute
 	Statements                 []*Statement
@@ -25,8 +25,8 @@ type Block struct {
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
 	Labels                     map[string]*StatementLabel
-	TypeAlias                  map[string]*VariableType
-	Variables                  map[string]*VariableDefinition
+	TypeAlias                  map[string]*Type
+	Variables                  map[string]*Variable
 	ClosureFunctions           map[string]*Function //in "Functions" too
 
 }
@@ -89,7 +89,7 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 */
 func (b *Block) searchLabel(name string) *StatementLabel {
 	bb := b
-	for bb != nil {
+	for {
 		if bb.Labels != nil {
 			if l, ok := bb.Labels[name]; ok {
 				return l
@@ -173,11 +173,11 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		return t, err
 	}
 	if t != nil { //
-		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionBlock &&
+		if _, ok := t.(*Variable); ok && b.IsFunctionBlock &&
 			len(b.InheritedAttribute.Function.parameterTypes) > 0 { // template function
 			return nil, nil
 		}
-		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
+		if v, ok := t.(*Variable); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false { // 	b.InheritedAttribute.Function.IsGlobal == false  no need to check
 				if v.Name == THIS {
@@ -243,7 +243,7 @@ func (b *Block) checkStatements() []error {
 	return errs
 }
 
-func (b *Block) checkConst() []error {
+func (b *Block) checkConstants() []error {
 	errs := make([]error, 0)
 	for _, c := range b.Constants {
 		if c.Name == NO_NAME_IDENTIFIER {
@@ -261,10 +261,10 @@ func (b *Block) checkConst() []error {
 	return errs
 }
 
-func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
+func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 	//fmt.Println(name, pos)
 	// global var Insert into block
-	if v, ok := d.(*VariableDefinition); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
+	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
 		if vv, ok := b.Variables[name]; ok {
 			errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
@@ -286,7 +286,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
 	if b.Variables == nil {
-		b.Variables = make(map[string]*VariableDefinition)
+		b.Variables = make(map[string]*Variable)
 	}
 	if v, ok := b.Variables[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
@@ -349,7 +349,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		return fmt.Errorf(errMsg)
 	}
 	if b.TypeAlias == nil {
-		b.TypeAlias = make(map[string]*VariableType)
+		b.TypeAlias = make(map[string]*Type)
 	}
 	if t, ok := b.TypeAlias[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
@@ -375,8 +375,8 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		b.Functions[name] = t
 	case *Constant:
 		b.Constants[name] = d.(*Constant)
-	case *VariableDefinition:
-		t := d.(*VariableDefinition)
+	case *Variable:
+		t := d.(*Variable)
 		b.Variables[name] = t
 	case *Enum:
 		e := d.(*Enum)
@@ -391,8 +391,8 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		b.EnumNames[name] = d.(*EnumName)
 	case *StatementLabel:
 		b.Labels[name] = d.(*StatementLabel)
-	case *VariableType:
-		b.TypeAlias[name] = d.(*VariableType)
+	case *Type:
+		b.TypeAlias[name] = d.(*Type)
 	default:
 		panic(d) // panic d
 	}

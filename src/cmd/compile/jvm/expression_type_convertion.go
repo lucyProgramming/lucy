@@ -305,7 +305,7 @@ func (makeExpression *MakeExpression) numberTypeConverter(code *cg.AttributeCode
 }
 
 func (makeExpression *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	typ *ast.VariableType, context *Context, state *StackMapState) (maxstack uint16) {
+	typ *ast.Type, context *Context, state *StackMapState) (maxstack uint16) {
 	if typ.Type == ast.VARIABLE_TYPE_STRING {
 		return
 	}
@@ -373,7 +373,7 @@ func (makeExpression *MakeExpression) stackTop2String(class *cg.ClassHighLevel, 
 			state.pushStack(class, typ)
 			context.MakeStackMap(code, state, code.CodeLength+10)
 			state.popStack(1)
-			state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_STRING})
+			state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_STRING})
 			context.MakeStackMap(code, state, code.CodeLength+13)
 			state.popStack(1)
 		}

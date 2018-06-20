@@ -1,7 +1,7 @@
 package ast
 
 type Constant struct {
-	VariableDefinition
+	Variable
 	Value interface{} // value base on type
 }
 

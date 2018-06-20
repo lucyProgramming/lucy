@@ -5,14 +5,14 @@ import "fmt"
 type EnumName struct {
 	Enum  *Enum
 	Name  string
-	Pos   *Pos
+	Pos   *Position
 	Value int32 // int32 is bigger enough
 }
 
 type Enum struct {
 	AccessFlags uint16
 	Name        string
-	Pos         *Pos
+	Pos         *Position
 	Enums       []*EnumName
 	Init        *Expression //should be a int expression
 	Used        bool

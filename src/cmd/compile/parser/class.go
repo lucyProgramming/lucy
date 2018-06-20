@@ -83,7 +83,7 @@ func (c *ClassParser) parse() (classDefinition *ast.Class, err error) {
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 			c.parser.errs = append(c.parser.errs, err)
-			c.consume(untils_lc) //
+			c.consume(untilLc) //
 		} else {
 			t, err := c.parseClassName()
 			c.classDefinition.SuperClassName = t
@@ -97,7 +97,7 @@ func (c *ClassParser) parse() (classDefinition *ast.Class, err error) {
 		c.Next() // skip key word
 		c.classDefinition.InterfaceNames, err = c.parseInterfaces()
 		if err != nil {
-			c.consume(untils_lc)
+			c.consume(untilLc)
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
@@ -165,7 +165,7 @@ func (c *ClassParser) parse() (classDefinition *ast.Class, err error) {
 		case lex.TOKEN_IDENTIFIER:
 			err = c.parseField(&c.parser.errs)
 			if err != nil {
-				c.consume(untils_semicolon)
+				c.consume(untilSemicolon)
 				c.Next()
 			}
 			c.resetProperty()
@@ -173,7 +173,7 @@ func (c *ClassParser) parse() (classDefinition *ast.Class, err error) {
 			c.Next()
 			err := c.parseConst()
 			if err != nil {
-				c.consume(untils_semicolon)
+				c.consume(untilSemicolon)
 				c.Next()
 				continue
 			}
@@ -181,7 +181,7 @@ func (c *ClassParser) parse() (classDefinition *ast.Class, err error) {
 		case lex.TOKEN_FUNCTION:
 			f, err := c.parser.FunctionParser.parse(true)
 			if err != nil {
-				c.consume(untils_rc)
+				c.consume(untilRc)
 				c.Next()
 				c.resetProperty()
 				continue
@@ -263,7 +263,7 @@ func (c *ClassParser) parseConst() error {
 		}
 		if k < len(es) {
 			t := &ast.Constant{}
-			t.VariableDefinition = *v
+			t.Variable = *v
 			t.Expression = es[k]
 			c.classDefinition.Block.Constants[v.Name] = t
 		}
@@ -311,7 +311,7 @@ func (c *ClassParser) parseField(errs *[]error) error {
 		f := &ast.ClassField{}
 		f.Name = v.Name
 		f.Pos = v.Pos
-		f.Type = &ast.VariableType{}
+		f.Type = &ast.Type{}
 		if t == nil {
 			panic(11)
 		}

@@ -12,16 +12,3 @@ func (a *AttributeRuntimeVisibleAnnotation) ToAttributeInfo(class *Class) *Attri
 
 	return ret
 }
-
-type Annotation struct {
-	Type              string
-	ElementValuePairs []*ElementValuePair
-}
-type ElementValuePair struct {
-	ElementName string
-	Value       ElementValue
-}
-
-type ElementValue struct {
-	Tag byte
-}

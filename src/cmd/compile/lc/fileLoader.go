@@ -206,7 +206,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
-	pack.Block.Variables = make(map[string]*ast.VariableDefinition)
+	pack.Block.Variables = make(map[string]*ast.Variable)
 	pack.Block.Constants = make(map[string]*ast.Constant)
 	pack.Block.Functions = make(map[string]*ast.Function)
 	for _, f := range c.Fields {
@@ -252,7 +252,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			pack.Block.Constants[name] = cos
 		} else {
 			//global vars
-			vd := &ast.VariableDefinition{}
+			vd := &ast.Variable{}
 			vd.Name = name
 			vd.AccessFlags = f.AccessFlags
 			vd.JvmDescriptor = string(c.ConstPool[f.DescriptorIndex].Info)
@@ -317,7 +317,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		pack.Block.Functions[name] = function
 	}
 	if pack.Block.TypeAlias == nil {
-		pack.Block.TypeAlias = make(map[string]*ast.VariableType)
+		pack.Block.TypeAlias = make(map[string]*ast.Type)
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
 		index := binary.BigEndian.Uint16(v.Info)
@@ -337,7 +337,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION) {
 		attr := &cg.AttributeTemplateFunction{}
 		attr.FromBytes(c, v.Info)
-		f, es := ParseFunctionHandler([]byte(attr.Code), &ast.Pos{
+		f, es := ParseFunctionHandler([]byte(attr.Code), &ast.Position{
 			Filename:    attr.Filename,
 			StartLine:   int(attr.StartLine),
 			StartColumn: int(attr.StartColumn),

@@ -15,7 +15,7 @@ func (p *Parser) parseImports() {
 	}
 	p.Next()
 	if p.token.Type != lex.TOKEN_LITERAL_STRING {
-		p.consume(untils_semicolon)
+		p.consume(untilSemicolon)
 		p.errs = append(p.errs, fmt.Errorf("%s expect 'string_literal' after import,but '%s'",
 			p.errorMsgPrefix(), p.token.Description))
 		p.parseImports()
@@ -31,7 +31,7 @@ func (p *Parser) parseImports() {
 		if p.token.Type != lex.TOKEN_IDENTIFIER {
 			p.errs = append(p.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
 				p.errorMsgPrefix(), p.token.Description))
-			p.consume(untils_semicolon)
+			p.consume(untilSemicolon)
 			p.Next()
 			p.insertImports(i)
 			p.parseImports()
@@ -44,8 +44,8 @@ func (p *Parser) parseImports() {
 	if p.token.Type != lex.TOKEN_SEMICOLON {
 		p.errs = append(p.errs, fmt.Errorf("%s expect semicolon, but '%s'",
 			p.errorMsgPrefix(), p.token.Description))
-		p.consume(untils_semicolon)
-		p.consume(untils_semicolon)
+		p.consume(untilSemicolon)
+		p.consume(untilSemicolon)
 		p.Next()
 		p.insertImports(i)
 		p.parseImports()
@@ -72,7 +72,7 @@ func (p *Parser) insertImports(im *ast.Import) {
 		return
 	}
 	p.imports[access] = im
-	*p.tops = append(*p.tops, &ast.Node{
+	*p.tops = append(*p.tops, &ast.Top{
 		Data: im,
 	})
 }

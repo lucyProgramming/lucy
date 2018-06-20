@@ -127,8 +127,8 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		currentStack = 3
 	}
 	stack, _ := makeExpression.build(class, code, index.Index, context, state)

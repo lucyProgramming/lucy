@@ -40,13 +40,13 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		identifier := v.Data.(*ExpressionIdentifier)
 		if identifier.Name == NO_NAME_IDENTIFIER {
-			vd := &VariableDefinition{}
+			vd := &Variable{}
 			vd.Name = identifier.Name
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
 			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, false)
 			continue
 		}
-		var variableType *VariableType
+		var variableType *Type
 		if k < len(ts) && ts[k] != nil {
 			variableType = ts[k]
 		}
@@ -65,7 +65,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, true)
 		} else { // should be no error
 			noNewVariable = false
-			vd := &VariableDefinition{}
+			vd := &Variable{}
 			if k < len(ts) {
 				vd.Type = ts[k]
 			}
@@ -73,7 +73,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd.Pos = v.Pos
 			vd.Type = variableType
 			if vd.Type == nil { // still cannot have type,we can have a void,that`s ok
-				vd.Type = &VariableType{}
+				vd.Type = &Type{}
 				vd.Type.Type = VARIABLE_TYPE_VOID
 				vd.Type.Pos = v.Pos
 			}
@@ -102,7 +102,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	e.Data = declareVariableExpression
 }
 
-func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *VariableType) {
+func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
 	bin := e.Data.(*ExpressionBinary)
 	t1 := bin.Left.getLeftValue(block, errs)
 	bin.Left.ExpressionValue = t1
@@ -173,7 +173,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Va
 	return ret
 }
 
-func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	bin := e.Data.(*ExpressionBinary)
 	lefts := make([]*Expression, 1)
 	if bin.Left.Type == EXPRESSION_TYPE_LIST {
@@ -188,8 +188,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Variabl
 	valueTypes := checkRightValuesValid(
 		checkExpressions(block, values, errs),
 		errs)
-	leftTypes := []*VariableType{}
-
+	leftTypes := []*Type{}
 	for _, v := range lefts {
 		if v.Type == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifier)

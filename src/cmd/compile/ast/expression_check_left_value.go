@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType) {
+func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 	switch e.Type {
 	case EXPRESSION_TYPE_IDENTIFIER:
 		identifier := e.Data.(*ExpressionIdentifier)
@@ -17,23 +17,24 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 			return nil
 		}
 		switch d.(type) {
-		case *VariableDefinition:
+		case *Variable:
 			if identifier.Name == THIS {
 				*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
 					errMsgPrefix(e.Pos), THIS))
 			}
-			t := d.(*VariableDefinition)
+			t := d.(*Variable)
 			identifier.Variable = t
-			tt := identifier.Variable.Type.Clone()
-			tt.Pos = e.Pos
-			return tt
+			ret = identifier.Variable.Type.Clone()
+			ret.Pos = e.Pos
+			return ret
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier named '%s' is not variable",
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil
 		}
 	case EXPRESSION_TYPE_INDEX:
-		return e.checkIndexExpression(block, errs)
+		ret = e.checkIndexExpression(block, errs)
+		return ret
 	case EXPRESSION_TYPE_SELECT:
 		dot := e.Data.(*ExpressionSelection)
 		t, es := dot.Expression.checkSingleValueContextExpression(block)
@@ -59,9 +60,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
-				tt := field.Type.Clone()
-				tt.Pos = e.Pos
-				return tt
+				ret = field.Type.Clone()
+				ret.Pos = e.Pos
+				return ret
 			}
 			return nil
 		} else if t.Type == VARIABLE_TYPE_CLASS {
@@ -75,9 +76,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by instance",
 						errMsgPrefix(e.Pos), dot.Name))
 				}
-				tt := field.Type.Clone()
-				tt.Pos = e.Pos
-				return tt
+				ret = field.Type.Clone()
+				ret.Pos = e.Pos
+				return ret
 			}
 			return nil
 		} else if t.Type == VARIABLE_TYPE_PACKAGE {
@@ -87,15 +88,15 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (t *VariableType)
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			}
-			if vd, ok := variable.(*VariableDefinition); ok && vd != nil {
+			if vd, ok := variable.(*Variable); ok && vd != nil {
 				if vd.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				}
 				dot.PackageVariable = vd
-				tt := vd.Type.Clone()
-				tt.Pos = e.Pos
-				return tt
+				ret = vd.Type.Clone()
+				ret.Pos = e.Pos
+				return ret
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))

@@ -7,9 +7,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) {
+func (p *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 	var err error
-	var ret *ast.VariableType
+	var ret *ast.Type
 	switch p.token.Type {
 	case lex.TOKEN_LB:
 		pos := p.mkPos()
@@ -22,7 +22,7 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 				return nil, err
 			}
 			p.Next() //skip ]
-			ret = &ast.VariableType{
+			ret = &ast.Type{
 				Pos:       pos,
 				Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
 				ArrayType: pre[0],
@@ -42,63 +42,63 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 		if err != nil {
 			return nil, err
 		}
-		ret = &ast.VariableType{}
+		ret = &ast.Type{}
 		ret.Pos = pos
 		ret.Type = ast.VARIABLE_TYPE_ARRAY
 		ret.ArrayType = t
 	case lex.TOKEN_BOOL:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 			Pos:  pos,
 		}
 	case lex.TOKEN_BYTE:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_BYTE,
 			Pos:  pos,
 		}
 	case lex.TOKEN_SHORT:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_SHORT,
 			Pos:  pos,
 		}
 	case lex.TOKEN_INT:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_INT,
 			Pos:  pos,
 		}
 	case lex.TOKEN_FLOAT:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_FLOAT,
 			Pos:  pos,
 		}
 	case lex.TOKEN_DOUBLE:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_DOUBLE,
 			Pos:  pos,
 		}
 	case lex.TOKEN_LONG:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_LONG,
 			Pos:  pos,
 		}
 	case lex.TOKEN_STRING:
 		pos := p.mkPos()
 		p.Next()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_STRING,
 			Pos:  pos,
 		}
@@ -113,7 +113,7 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 				p.errorMsgPrefix(), p.token.Description)
 		}
 		p.Next() // skip {
-		var k, v *ast.VariableType
+		var k, v *ast.Type
 		k, err = p.parseType()
 		if err != nil {
 			return nil, err
@@ -136,14 +136,14 @@ func (p *Parser) parseType(pre ...*ast.VariableType) (*ast.VariableType, error) 
 			K: k,
 			V: v,
 		}
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_MAP,
 			Map:  m,
 			Pos:  pos,
 		}
 	case lex.TOKEN_T:
 		pos := p.mkPos()
-		ret = &ast.VariableType{
+		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_T,
 			Pos:  pos,
 			Name: p.token.Data.(string),
@@ -180,9 +180,9 @@ func (p *Parser) isValidTypeBegin() bool {
 		p.token.Type == lex.TOKEN_T
 
 }
-func (p *Parser) parseIdentifierType() (*ast.VariableType, error) {
+func (p *Parser) parseIdentifierType() (*ast.Type, error) {
 	name := p.token.Data.(string)
-	ret := &ast.VariableType{
+	ret := &ast.Type{
 		Pos:  p.mkPos(),
 		Type: ast.VARIABLE_TYPE_NAME,
 	}

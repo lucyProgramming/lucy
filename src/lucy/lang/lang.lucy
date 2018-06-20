@@ -2,7 +2,7 @@
 import "java/lang/Object" as javaRootClass;
 
 /*
-	root object for lucy default object
+	root object for lucy language default object
 */
 public class Lucy extends javaRootClass {
 	
@@ -11,12 +11,7 @@ public class Lucy extends javaRootClass {
 
  
 
-
-
-public fn copy(dest T,src T , start int = -1 , end int = -1) {
-	if start == -1 {
-		start = 0;
-	}
+public fn copy(dest T,src T , start int = 0 , end int = -1) {
 	if end == -1 {
 		end = src.size();
 	}
@@ -24,6 +19,13 @@ public fn copy(dest T,src T , start int = -1 , end int = -1) {
 		dest[i] = src[i] ; 
 	}
 }
+
+
+
+
+
+
+
 
 
 

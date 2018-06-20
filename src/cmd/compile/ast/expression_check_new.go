@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	no := e.Data.(*ExpressionNew)
 	err := no.Type.resolve(block)
 	if err != nil {
@@ -32,7 +32,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 			errMsgPrefix(e.Pos), no.Type.Class.Name))
 		return nil
 	}
-	ret := &VariableType{}
+	ret := &Type{}
 	*ret = *no.Type
 	ret.Type = VARIABLE_TYPE_OBJECT
 	ret.Pos = e.Pos
@@ -56,7 +56,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *VariableTy
 }
 
 func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
-	errs *[]error) *VariableType {
+	errs *[]error) *Type {
 	if len(newMap.Args) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s new map expect no arguments",
 			errMsgPrefix(newMap.Args[0].Pos)))
@@ -67,12 +67,12 @@ func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
 }
 
 func (e *Expression) checkNewJavaArrayExpression(block *Block, newArray *ExpressionNew,
-	errs *[]error) *VariableType {
+	errs *[]error) *Type {
 	return e.checkNewArrayExpression(block, newArray, errs)
 }
 
 func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew,
-	errs *[]error) *VariableType {
+	errs *[]error) *Type {
 	ret := newArray.Type.Clone() // clone the type
 	ret.Pos = e.Pos
 	if len(newArray.Args) != 1 { // 0 and 1 is accept

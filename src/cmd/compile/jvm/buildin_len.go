@@ -58,7 +58,7 @@ func (makeExpression *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength+3] = cg.OP_pop
 	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
 	code.CodeLength += 5
-	state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+	state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
 	if e.IsStatementExpression {

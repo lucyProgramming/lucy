@@ -1,6 +1,6 @@
 package ast
 
-type VariableDefinition struct {
+type Variable struct {
 	LocalValOffset           uint16
 	IsGlobal                 bool
 	IsFunctionParameter      bool
@@ -8,9 +8,9 @@ type VariableDefinition struct {
 	BeenCaptured             bool
 	Used                     bool   // use as right value
 	AccessFlags              uint16 // public private or protected
-	Pos                      *Pos
+	Pos                      *Position
 	Expression               *Expression
 	Name                     string
-	Type                     *VariableType
+	Type                     *Type
 	JvmDescriptor            string // jvm
 }

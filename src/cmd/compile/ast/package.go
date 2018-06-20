@@ -13,7 +13,7 @@ type Package struct {
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block
-	Files                        map[string]*LucyFile
+	Files                        map[string]*SourceFile
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
@@ -35,9 +35,6 @@ func (p *Package) loadBuildInPackage() error {
 
 func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
-		return nil
-	}
-	if _, ok := p.Files[file]; ok == false {
 		return nil
 	}
 	return p.Files[file].Imports[accessName]
@@ -65,7 +62,7 @@ func (p *Package) TypeCheck() []error {
 		p.NErrors2Stop = 10
 	}
 	p.Errors = []error{}
-	p.Errors = append(p.Errors, p.Block.checkConst()...)
+	p.Errors = append(p.Errors, p.Block.checkConstants()...)
 	//
 	for _, v := range p.Block.Functions {
 		if v.IsBuildIn {
@@ -83,6 +80,7 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
+		v.mkDefaultConstruction()
 	}
 	for _, v := range p.Block.Classes {
 		err := v.resolveFather(&p.Block)
@@ -184,14 +182,14 @@ func (p *Package) mkClassCache(load *Package) {
 }
 
 //different for other file
-type LucyFile struct {
+type SourceFile struct {
 	Imports map[string]*Import // n
 }
 
 type Import struct {
 	AccessName string
 	ImportName string // full name
-	Pos        *Pos
+	Pos        *Position
 	Used       bool
 }
 
@@ -223,7 +221,7 @@ func (i *Import) GetAccessName() (string, error) {
 
 type RedeclareError struct {
 	Name      string
-	Positions []*Pos
+	Positions []*Position
 	Types     []string
 }
 

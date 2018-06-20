@@ -12,7 +12,7 @@ type Class struct {
 	FatherNameResolved bool
 	NotImportedYet     bool // not imported
 	Name               string
-	Pos                *Pos
+	Pos                *Position
 	IsJava             bool //class found in CLASSPATH
 	IsGlobal           bool
 	Block              Block
@@ -105,9 +105,8 @@ func (c *Class) checkIfClassHierarchyCircularity() error {
 	return fmt.Errorf(errMsg)
 }
 func (c *Class) checkPhase1(father *Block) []error {
-	c.mkDefaultConstruction()
 	c.Block.inherit(father)
-	errs := c.Block.checkConst()
+	errs := c.Block.checkConstants()
 	c.Block.InheritedAttribute.Class = c
 	es := c.resolveAllNames(father)
 	if errorsNotEmpty(es) {
@@ -221,7 +220,7 @@ func (c *Class) resolveFather(block *Block) error {
 			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		}
 	} else {
-		variableType := VariableType{}
+		variableType := Type{}
 		variableType.Type = VARIABLE_TYPE_NAME // naming
 		variableType.Name = c.SuperClassName
 		variableType.Pos = c.Pos
@@ -248,7 +247,7 @@ func (c *Class) resolveFather(block *Block) error {
 func (c *Class) resolveInterfaces(block *Block) []error {
 	errs := []error{}
 	for _, i := range c.InterfaceNames {
-		t := &VariableType{}
+		t := &Type{}
 		t.Type = VARIABLE_TYPE_NAME
 		t.Pos = i.Pos
 		t.Name = i.Name
@@ -285,7 +284,7 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 		if fromSub == false || m.IsPrivate() == false {
 			continue
 		}
-		args := make([]*VariableType, len(m.Func.Type.ParameterList))
+		args := make([]*Type, len(m.Func.Type.ParameterList))
 		for k, v := range m.Func.Type.ParameterList {
 			args[k] = v.Type
 		}
@@ -370,12 +369,12 @@ func (c *Class) checkMethods() []error {
 			}
 			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
 				if vv.Func.Block.Variables == nil {
-					vv.Func.Block.Variables = make(map[string]*VariableDefinition)
+					vv.Func.Block.Variables = make(map[string]*Variable)
 				}
-				vv.Func.Block.Variables[THIS] = &VariableDefinition{}
+				vv.Func.Block.Variables[THIS] = &Variable{}
 				vv.Func.Block.Variables[THIS].Name = THIS
 				vv.Func.Block.Variables[THIS].Pos = vv.Func.Pos
-				vv.Func.Block.Variables[THIS].Type = &VariableType{
+				vv.Func.Block.Variables[THIS].Type = &Type{
 					Type:  VARIABLE_TYPE_OBJECT,
 					Class: c,
 				}
@@ -386,7 +385,7 @@ func (c *Class) checkMethods() []error {
 					errMsgPrefix(vv.Func.Type.ParameterList[0].Pos)))
 			}
 			if c.IsInterface() == false {
-				vv.Func.Block.InheritedAttribute.IsConstruction = isConstruction
+				vv.Func.Block.InheritedAttribute.IsConstructionMethod = isConstruction
 				vv.Func.checkBlock(&errs)
 			}
 		}

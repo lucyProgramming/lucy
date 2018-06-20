@@ -8,7 +8,7 @@ import (
 )
 
 func (ep *ExpressionParser) parseMapExpression(needType bool) (*ast.Expression, error) {
-	var typ *ast.VariableType
+	var typ *ast.Type
 	var err error
 	if needType {
 		typ, err = ep.parser.parseType()

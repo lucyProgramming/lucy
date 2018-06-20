@@ -4,15 +4,15 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	m := e.Data.(*ExpressionMap)
 	if m.Type != nil {
 		if err := m.Type.resolve(block); err != nil {
 			*errs = append(*errs, err)
 		}
 	}
-	var mapK *VariableType
-	var mapV *VariableType
+	var mapK *Type
+	var mapV *Type
 	noType := m.Type == nil
 	if noType && len(m.KeyValuePairs) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s map literal has no type, no initiational values,cannot inference it`s type",
@@ -20,7 +20,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 		return nil
 	}
 	if m.Type == nil {
-		m.Type = &VariableType{}
+		m.Type = &Type{}
 		m.Type.Pos = e.Pos
 		m.Type.Type = VARIABLE_TYPE_MAP
 	}
@@ -85,13 +85,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *VariableTy
 	}
 
 	if m.Type.Map.K == nil {
-		m.Type.Map.K = &VariableType{
+		m.Type.Map.K = &Type{
 			Type: VARIABLE_TYPE_VOID,
 			Pos:  e.Pos,
 		}
 	}
 	if m.Type.Map.V == nil {
-		m.Type.Map.V = &VariableType{
+		m.Type.Map.V = &Type{
 			Type: VARIABLE_TYPE_VOID,
 			Pos:  e.Pos,
 		}

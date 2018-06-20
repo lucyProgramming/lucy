@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *Type {
 	conversion := e.Data.(*ExpressionTypeConversion)
 	t, es := conversion.Expression.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {

@@ -16,7 +16,7 @@ type StatementLabel struct {
 	Statement           *Statement
 }
 
-func (s *StatementLabel) Ready(from *Pos) error {
+func (s *StatementLabel) Ready(from *Position) error {
 	ss := []*Statement{}
 	for _, v := range s.Block.Statements {
 		if v.StatementLabel == s { // this is me

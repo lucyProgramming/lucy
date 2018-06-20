@@ -27,10 +27,10 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 
 	{
 		state.pushStack(class, assertOn.Expression.ExpressionValue)
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		state.pushStack(class, assertOn.Expression.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(2)
@@ -70,7 +70,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	typeConverter.packPrimitives(class, code, &ast.VariableType{Type: ast.VARIABLE_TYPE_BOOL})
+	typeConverter.packPrimitives(class, code, &ast.Type{Type: ast.VARIABLE_TYPE_BOOL})
 	code.Codes[code.CodeLength] = cg.OP_iconst_1
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap

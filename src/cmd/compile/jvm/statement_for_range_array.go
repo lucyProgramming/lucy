@@ -38,7 +38,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	{
 		// else
 		if s.RangeAttr.RangeOn.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
-			t := &ast.VariableType{}
+			t := &ast.Type{}
 			t.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 			t.ArrayType = s.RangeAttr.RangeOn.ExpressionValue.ArrayType
 			autoVar.Elements = code.MaxLocals
@@ -52,15 +52,15 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		// start
 		autoVar.Start = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		forState.appendLocals(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		//end
 		autoVar.End = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		forState.appendLocals(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		// K
 		autoVar.K = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		forState.appendLocals(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 	}
 
 	if s.RangeAttr.RangeOn.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
@@ -80,7 +80,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		if s.RangeAttr.RangeOn.ExpressionValue.ArrayType.IsPointer() &&
 			s.RangeAttr.RangeOn.ExpressionValue.ArrayType.Type != ast.VARIABLE_TYPE_STRING {
 			code.Codes[code.CodeLength] = cg.OP_checkcast
-			t := &ast.VariableType{}
+			t := &ast.Type{}
 			t.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 			t.ArrayType = s.RangeAttr.RangeOn.ExpressionValue.ArrayType
 			class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -289,13 +289,13 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	// build block
 	makeClass.buildBlock(class, code, s.Block, context, blockState)
 	defer forState.addTop(blockState)
-	if s.Block.DeadEnding == false {
+	if s.Block.WillNotExecuteToEnd == false {
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
 	}
 
 	//pop index on stack
 	fillOffsetForExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
-	forState.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+	forState.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 	context.MakeStackMap(code, forState, code.CodeLength)
 	forState.popStack(1)
 	code.Codes[code.CodeLength] = cg.OP_pop

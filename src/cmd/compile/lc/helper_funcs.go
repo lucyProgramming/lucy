@@ -42,7 +42,7 @@ func loadEnumForFunction(f *ast.Function) error {
 	return nil
 }
 
-func loadEnumForVariableType(v *ast.VariableType) error {
+func loadEnumForVariableType(v *ast.Type) error {
 	t, err := loader.LoadImport(v.Enum.Name)
 	if err != nil {
 		return err

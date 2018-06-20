@@ -23,7 +23,7 @@ const (
 
 type Statement struct {
 	Checked           bool // if checked
-	Pos               *Pos
+	Pos               *Position
 	Type              int
 	StatementIf       *StatementIF
 	Expression        *Expression

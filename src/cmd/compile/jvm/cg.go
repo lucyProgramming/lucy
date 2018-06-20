@@ -222,7 +222,7 @@ func (makeClass *MakeClass) mkInitFunctions() {
 	makeClass.mainClass.AppendMethod(trigger)
 	makeClass.mainClass.TriggerPackageInitMethod = trigger
 }
-func (makeClass *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.VariableType, v interface{}) (index uint16) {
+func (makeClass *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {
 	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		if v.(bool) {

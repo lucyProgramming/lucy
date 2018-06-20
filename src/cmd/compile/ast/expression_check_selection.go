@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *VariableType) {
+func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type {
 	selection := e.Data.(*ExpressionSelection)
 	t, es := selection.Expression.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
@@ -32,8 +32,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			return nil
 		}
 		switch d.(type) {
-		case *VariableDefinition:
-			v := d.(*VariableDefinition)
+		case *Variable:
+			v := d.(*Variable)
 			tt := v.Type.Clone()
 			tt.Pos = e.Pos
 			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
@@ -54,7 +54,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			return tt
 		case *Class:
 			c := d.(*Class)
-			tt := &VariableType{}
+			tt := &Type{}
 			tt.Pos = e.Pos
 			tt.Type = VARIABLE_TYPE_CLASS
 			tt.Class = c
@@ -69,7 +69,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
-			tt := &VariableType{}
+			tt := &Type{}
 			tt.Pos = e.Pos
 			tt.Enum = n.Enum
 			tt.EnumName = n

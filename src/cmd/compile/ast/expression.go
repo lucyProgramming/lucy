@@ -232,14 +232,14 @@ type Expression struct {
 	Type                  int
 	IsPublic              bool // only for global var definition
 	IsCompileAuto         bool // compile auto expression
-	ExpressionValue       *VariableType
-	ExpressionMultiValues []*VariableType
-	Pos                   *Pos
+	ExpressionValue       *Type
+	ExpressionMultiValues []*Type
+	Pos                   *Position
 	Data                  interface{}
 	IsStatementExpression bool
 }
 
-func (e *Expression) ConvertTo(t *VariableType) {
+func (e *Expression) ConvertTo(t *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
 	*c.Expression = *e // copy
@@ -253,12 +253,12 @@ func (e *Expression) ConvertTo(t *VariableType) {
 func (e *Expression) ConvertToNumber(typ int) {
 	if e.IsLiteral() {
 		e.convertNumberLiteralTo(typ)
-		e.ExpressionValue = &VariableType{
+		e.ExpressionValue = &Type{
 			Type: typ,
 			Pos:  e.Pos,
 		}
 	} else {
-		e.ConvertTo(&VariableType{
+		e.ConvertTo(&Type{
 			Pos:  e.Pos,
 			Type: typ,
 		})
@@ -301,8 +301,8 @@ func (e *Expression) fromConst(c *Constant) {
 
 type ExpressionTypeAlias struct {
 	Name string
-	Type *VariableType
-	Pos  *Pos
+	Type *Type
+	Pos  *Position
 }
 
 type ExpressionTernary struct {
@@ -312,7 +312,7 @@ type ExpressionTernary struct {
 }
 
 type ExpressionSlice struct {
-	SliceOn    *Expression
+	Array      *Expression
 	Start, End *Expression
 }
 
@@ -473,7 +473,7 @@ type ExpressionFunctionCall struct {
 	Expression               *Expression
 	Args                     CallArgs
 	Func                     *Function
-	ParameterTypes           []*VariableType // for template function
+	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 }
 
@@ -489,23 +489,23 @@ type ExpressionMethodCall struct {
 	Name            string
 	Method          *ClassMethod
 	PackageFunction *Function // Expression is package
-	ParameterTypes  []*VariableType
+	ParameterTypes  []*Type
 }
 
 type ExpressionDeclareVariable struct {
-	Variables        []*VariableDefinition
+	Variables        []*Variable
 	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
 }
 
 type ExpressionTypeConversion struct {
-	Type       *VariableType
+	Type       *Type
 	Expression *Expression
 }
 
 type ExpressionIdentifier struct {
 	Name     string
-	Variable *VariableDefinition
+	Variable *Variable
 	Function *Function
 	EnumName *EnumName
 	Class    *Class
@@ -518,20 +518,20 @@ type ExpressionIndex struct {
 type ExpressionSelection struct {
 	Expression      *Expression
 	Name            string
-	Field           *ClassField         // expression is class or object
-	PackageVariable *VariableDefinition // expression is package
-	PackageEnumName *EnumName           // expression is package
+	Field           *ClassField // expression is class or object
+	PackageVariable *Variable   // expression is package
+	PackageEnumName *EnumName   // expression is package
 }
 
 type ExpressionNew struct {
-	Type                     *VariableType
+	Type                     *Type
 	Args                     CallArgs
 	Construction             *ClassMethod
 	IsConvertJavaArray2Array bool
 }
 
 type ExpressionMap struct {
-	Type          *VariableType
+	Type          *Type
 	KeyValuePairs []*ExpressionBinary
 }
 
@@ -544,7 +544,7 @@ type ExpressionBinary struct {
 }
 
 type ExpressionArray struct {
-	Type        *VariableType
+	Type        *Type
 	Expressions []*Expression
 	Length      int
 }

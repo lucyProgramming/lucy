@@ -36,13 +36,13 @@ func (s *StatementIF) check(father *Block) []error {
 		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
-		if s.Condition.canBeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
-		}
 		if conditionType != nil && conditionType.Type != VARIABLE_TYPE_BOOL {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 				errMsgPrefix(s.Condition.Pos)))
+		}
+		if s.Condition.canBeUsedAsCondition() == false {
+			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
+				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
 	}
 

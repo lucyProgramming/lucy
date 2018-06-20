@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	ee := e.Data.(*Expression)
 	t, es := ee.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
@@ -13,12 +13,12 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 
 	if t == nil {
 		if e.Type == EXPRESSION_TYPE_NOT {
-			return &VariableType{
+			return &Type{
 				Type: EXPRESSION_TYPE_BOOL,
 				Pos:  e.Pos,
 			}
 		} else {
-			return &VariableType{
+			return &Type{
 				Type: EXPRESSION_TYPE_INT,
 				Pos:  e.Pos,
 			}
@@ -46,7 +46,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Variable
 	ret.Pos = e.Pos
 	return ret
 }
-func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type {
 	ee := e.Data.(*Expression)
 	t := ee.getLeftValue(block, errs)
 	ee.ExpressionValue = t

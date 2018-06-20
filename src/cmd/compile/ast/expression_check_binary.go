@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *VariableType) {
+func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *Type) {
 	bin := e.Data.(*ExpressionBinary)
 	t1, es := bin.Left.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
@@ -18,7 +18,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	// &&  ||
 	if e.Type == EXPRESSION_TYPE_LOGICAL_OR ||
 		EXPRESSION_TYPE_LOGICAL_AND == e.Type {
-		result = &VariableType{
+		result = &Type{
 			Type: VARIABLE_TYPE_BOOL,
 			Pos:  e.Pos,
 		}
@@ -88,7 +88,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Type == EXPRESSION_TYPE_GT ||
 		e.Type == EXPRESSION_TYPE_LE ||
 		e.Type == EXPRESSION_TYPE_LT {
-		result = &VariableType{
+		result = &Type{
 			Type: VARIABLE_TYPE_BOOL,
 			Pos:  e.Pos,
 		}
@@ -191,7 +191,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if e.Type != EXPRESSION_TYPE_ADD {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
-			result = &VariableType{}
+			result = &Type{}
 			result.Type = VARIABLE_TYPE_STRING
 			result.Pos = e.Pos
 			return result

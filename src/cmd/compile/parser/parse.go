@@ -9,7 +9,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func Parse(tops *[]*ast.Node, filename string, bs []byte, onlyimport bool, nerr int) []error {
+func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyimport bool, nerr int) []error {
 	p := &Parser{
 		bs:           bs,
 		tops:         tops,
@@ -24,7 +24,7 @@ type Parser struct {
 	onlyImport   bool
 	bs           []byte
 	lines        [][]byte
-	tops         *[]*ast.Node
+	tops         *[]*ast.Top
 	scanner      *lex.Lexer
 	filename     string
 	lastToken    *lex.Token
@@ -81,7 +81,7 @@ func (p *Parser) Parse() []error {
 			p.Next() // skip var key word
 			vs, es, typ, err := p.parseConstDefinition(true)
 			if err != nil {
-				p.consume(untils_semicolon)
+				p.consume(untilSemicolon)
 				p.Next()
 				continue
 			}
@@ -97,33 +97,33 @@ func (p *Parser) Parse() []error {
 				Pos:      pos,
 				IsPublic: ispublic,
 			}
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: e,
 			})
 			resetProperty()
 		case lex.TOKEN_IDENTIFIER:
 			e, err := p.ExpressionParser.parseExpression(true)
 			if err != nil {
-				p.consume(untils_semicolon)
+				p.consume(untilSemicolon)
 				p.Next()
 				continue
 			}
 			e.IsPublic = ispublic
 			p.validStatementEnding(e.Pos)
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: e,
 			})
 			resetProperty()
 		case lex.TOKEN_ENUM:
 			e, err := p.parseEnum(ispublic)
 			if err != nil {
-				p.consume(untils_rc)
+				p.consume(untilRc)
 				p.Next()
 				resetProperty()
 				continue
 			}
 			if e != nil {
-				*p.tops = append(*p.tops, &ast.Node{
+				*p.tops = append(*p.tops, &ast.Top{
 					Data: e,
 				})
 			}
@@ -131,7 +131,7 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_FUNCTION:
 			f, err := p.FunctionParser.parse(true)
 			if err != nil {
-				p.consume(untils_rc)
+				p.consume(untilRc)
 				p.Next()
 				continue
 			}
@@ -140,7 +140,7 @@ func (p *Parser) Parse() []error {
 			} else {
 				f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			}
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: f,
 			})
 			resetProperty()
@@ -151,10 +151,10 @@ func (p *Parser) Parse() []error {
 			if p.token.Type != lex.TOKEN_RC {
 				p.errs = append(p.errs, fmt.Errorf("%s expect '}', but '%s'",
 					p.errorMsgPrefix(), p.token.Description))
-				p.consume(untils_rc)
+				p.consume(untilRc)
 			}
 			p.Next() // skip }
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: b,
 			})
 			resetProperty()
@@ -162,12 +162,12 @@ func (p *Parser) Parse() []error {
 			c, err := p.ClassParser.parse()
 			if err != nil {
 				p.errs = append(p.errs, err)
-				p.consume(untils_rc)
+				p.consume(untilRc)
 				p.Next()
 				resetProperty()
 				continue
 			}
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: c,
 			})
 			if ispublic {
@@ -178,12 +178,12 @@ func (p *Parser) Parse() []error {
 			c, err := p.InterfaceParser.parse()
 			if err != nil {
 				p.errs = append(p.errs, err)
-				p.consume(untils_rc)
+				p.consume(untilRc)
 				p.Next()
 				resetProperty()
 				continue
 			}
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: c,
 			})
 			if ispublic {
@@ -199,14 +199,14 @@ func (p *Parser) Parse() []error {
 			p.Next() // skip const key word
 			vs, es, typ, err := p.parseConstDefinition(false)
 			if err != nil {
-				p.consume(untils_semicolon)
+				p.consume(untilSemicolon)
 				p.Next()
 				resetProperty()
 				continue
 			}
 			if p.validStatementEnding() == false { //assume missing ; not big deal
 				p.Next()
-				p.consume(untils_semicolon)
+				p.consume(untilSemicolon)
 				resetProperty()
 				continue
 			}
@@ -225,14 +225,14 @@ func (p *Parser) Parse() []error {
 			for k, v := range vs {
 				if k < len(es) {
 					c := &ast.Constant{}
-					c.VariableDefinition = *v
+					c.Variable = *v
 					c.Expression = es[k]
 					if ispublic {
 						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
 						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
 					}
-					*p.tops = append(*p.tops, &ast.Node{
+					*p.tops = append(*p.tops, &ast.Top{
 						Data: c,
 					})
 				}
@@ -247,12 +247,12 @@ func (p *Parser) Parse() []error {
 		case lex.TOKEN_TYPE:
 			a, err := p.parseTypeaAlias()
 			if err != nil {
-				p.consume(untils_semicolon)
+				p.consume(untilSemicolon)
 				p.Next()
 				resetProperty()
 				continue
 			}
-			*p.tops = append(*p.tops, &ast.Node{
+			*p.tops = append(*p.tops, &ast.Top{
 				Data: a,
 			})
 
@@ -261,15 +261,15 @@ func (p *Parser) Parse() []error {
 		default:
 			p.errs = append(p.errs, fmt.Errorf("%s token(%s) is not except",
 				p.errorMsgPrefix(), p.token.Description))
-			p.consume(untils_semicolon)
+			p.consume(untilSemicolon)
 			resetProperty()
 		}
 	}
 	return p.errs
 }
 
-func (p *Parser) parseTypes() ([]*ast.VariableType, error) {
-	ret := []*ast.VariableType{}
+func (p *Parser) parseTypes() ([]*ast.Type, error) {
+	ret := []*ast.Type{}
 	for p.token.Type != lex.TOKEN_EOF {
 		t, err := p.parseType()
 		if err != nil {
@@ -308,7 +308,7 @@ func (p *Parser) validAfterPublic(isPublic bool) {
 	}
 	p.errs = append(p.errs, err)
 }
-func (p *Parser) validStatementEnding(pos ...*ast.Pos) bool {
+func (p *Parser) validStatementEnding(pos ...*ast.Position) bool {
 	if p.token.Type == lex.TOKEN_SEMICOLON ||
 		(p.lastToken != nil && p.lastToken.Type == lex.TOKEN_RC) {
 		return true
@@ -321,8 +321,8 @@ func (p *Parser) validStatementEnding(pos ...*ast.Pos) bool {
 	return false
 }
 
-func (p *Parser) mkPos() *ast.Pos {
-	return &ast.Pos{
+func (p *Parser) mkPos() *ast.Position {
+	return &ast.Position{
 		Filename:    p.filename,
 		StartLine:   p.token.StartLine,
 		StartColumn: p.token.StartColumn,
@@ -331,12 +331,12 @@ func (p *Parser) mkPos() *ast.Pos {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition, []*ast.Expression, *lex.Token, error) {
+func (p *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*ast.Expression, *lex.Token, error) {
 	names, err := p.parseNameList()
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	var variableType *ast.VariableType
+	var variableType *ast.Type
 	//trying to parse type
 	if p.isValidTypeBegin() || needType {
 		variableType, err = p.parseType()
@@ -345,10 +345,10 @@ func (p *Parser) parseConstDefinition(needType bool) ([]*ast.VariableDefinition,
 			return nil, nil, nil, err
 		}
 	}
-	f := func() []*ast.VariableDefinition {
-		vs := make([]*ast.VariableDefinition, len(names))
+	f := func() []*ast.Variable {
+		vs := make([]*ast.Variable, len(names))
 		for k, v := range names {
-			vd := &ast.VariableDefinition{}
+			vd := &ast.Variable{}
 			vd.Name = v.Name
 			vd.Pos = v.Pos
 			if variableType != nil {
@@ -399,7 +399,7 @@ func (p *Parser) Next() {
 /*
 	errorMsgPrefix(pos) only receive one argument
 */
-func (p *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
+func (p *Parser) errorMsgPrefix(pos ...*ast.Position) string {
 	if len(pos) > 0 {
 		return fmt.Sprintf("%s:%d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
 	}
@@ -420,7 +420,7 @@ func (p *Parser) consume(untils map[int]bool) {
 	}
 }
 
-func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Pos) {
+func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Position) {
 	pos.Filename = p.filename
 	pos.StartLine = t.StartLine
 	pos.StartColumn = t.StartColumn
@@ -448,7 +448,7 @@ func (p *Parser) parseTypeaAlias() (*ast.ExpressionTypeAlias, error) {
 	return ret, err
 }
 
-func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
+func (p *Parser) parseTypedName() (vs []*ast.Variable, err error) {
 	names, err := p.parseNameList()
 	if err != nil {
 		return nil, err
@@ -457,9 +457,9 @@ func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
 	if err != nil {
 		return nil, err
 	}
-	vs = make([]*ast.VariableDefinition, len(names))
+	vs = make([]*ast.Variable, len(names))
 	for k, v := range names {
-		vd := &ast.VariableDefinition{}
+		vd := &ast.Variable{}
 		vs[k] = vd
 		vd.Name = v.Name
 		vd.Pos = v.Pos
@@ -469,8 +469,8 @@ func (p *Parser) parseTypedName() (vs []*ast.VariableDefinition, err error) {
 }
 
 // a,b int or int,bool  c xxx
-func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
-	vs = []*ast.VariableDefinition{}
+func (p *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
+	vs = []*ast.Variable{}
 	for p.token.Type != lex.TOKEN_EOF {
 		ns, err := p.parseNameList()
 		if err != nil {
@@ -481,7 +481,7 @@ func (p *Parser) parseTypedNames() (vs []*ast.VariableDefinition, err error) {
 			return vs, err
 		}
 		for _, v := range ns {
-			vd := &ast.VariableDefinition{}
+			vd := &ast.Variable{}
 			vd.Name = v.Name
 			vd.Pos = v.Pos
 			vd.Type = t.Clone()

@@ -60,7 +60,7 @@ func (p *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 	return t, err
 }
 
-func (p *Parser) parseReturnList() (returnList []*ast.VariableDefinition, err error) {
+func (p *Parser) parseReturnList() (returnList []*ast.Variable, err error) {
 	returnList, err = p.parseTypedName()
 	if p.token.Type != lex.TOKEN_ASSIGN {
 		return
@@ -86,7 +86,7 @@ func (p *Parser) parseReturnList() (returnList []*ast.VariableDefinition, err er
 	}
 	return returnList, nil
 }
-func (p *Parser) parseReturnLists() (returnList []*ast.VariableDefinition, err error) {
+func (p *Parser) parseReturnLists() (returnList []*ast.Variable, err error) {
 	for p.token.Type == lex.TOKEN_IDENTIFIER {
 		v, err := p.parseReturnList()
 		if v != nil {

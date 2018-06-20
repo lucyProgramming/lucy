@@ -37,7 +37,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	code.CodeLength += 3
 	makeClass.buildBlock(class, code, &s.Block, context, IfState)
 	conditionState.addTop(IfState)
-	if s.Block.DeadEnding == false {
+	if s.Block.WillNotExecuteToEnd == false {
 		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	}
 	for _, v := range s.ElseIfList {
@@ -65,7 +65,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		code.CodeLength += 3
 		makeClass.buildBlock(class, code, v.Block, context, elseIfState)
 
-		if v.Block.DeadEnding == false {
+		if v.Block.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}
 		// when done
@@ -83,7 +83,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		}
 		makeClass.buildBlock(class, code, s.ElseBlock, context, elseState)
 		conditionState.addTop(elseState)
-		if s.ElseBlock.DeadEnding == false {
+		if s.ElseBlock.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}
 	}

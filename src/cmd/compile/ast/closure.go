@@ -1,11 +1,11 @@
 package ast
 
 type Closure struct {
-	Variables map[*VariableDefinition]struct{}
+	Variables map[*Variable]struct{}
 	Functions map[*Function]struct{}
 }
 
-func (c *Closure) ClosureVariableExist(v *VariableDefinition) bool {
+func (c *Closure) ClosureVariableExist(v *Variable) bool {
 	if c.Variables == nil {
 		return false
 	}
@@ -43,9 +43,9 @@ func (c *Closure) NotEmpty(f *Function) bool {
 	return true
 }
 
-func (c *Closure) InsertVar(v *VariableDefinition) {
+func (c *Closure) InsertVar(v *Variable) {
 	if c.Variables == nil {
-		c.Variables = make(map[*VariableDefinition]struct{})
+		c.Variables = make(map[*Variable]struct{})
 	}
 	c.Variables[v] = struct{}{}
 	v.BeenCaptured = true

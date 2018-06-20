@@ -5,7 +5,7 @@ import (
 )
 
 type ClassField struct {
-	VariableDefinition
+	Variable
 	Class           *Class
 	LoadFromOutSide bool
 	DefaultValue    interface{} // value base on type

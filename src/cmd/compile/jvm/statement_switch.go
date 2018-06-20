@@ -10,7 +10,7 @@ import (
 func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	s *ast.StatementSwitch, context *Context, state *StackMapState) (maxStack uint16) {
 	// if equal,leave 0 on stack
-	compare := func(t *ast.VariableType) {
+	compare := func(t *ast.Type) {
 		state.popStack(2)
 		switch t.Type {
 		case ast.VARIABLE_TYPE_BYTE:
@@ -45,7 +45,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 			fallthrough
 		case ast.VARIABLE_TYPE_ARRAY:
 			context.MakeStackMap(code, state, code.CodeLength+7)
-			state.pushStack(class, &ast.VariableType{
+			state.pushStack(class, &ast.Type{
 				Type: ast.VARIABLE_TYPE_BOOL,
 			})
 			context.MakeStackMap(code, state, code.CodeLength+8)
@@ -139,7 +139,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 			makeClass.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if c.Block == nil || c.Block.DeadEnding == false {
+		if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits,
 				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}

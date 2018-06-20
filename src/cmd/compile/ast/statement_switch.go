@@ -7,7 +7,7 @@ import (
 )
 
 type StatementSwitch struct {
-	Pos                  *Pos
+	Pos                  *Position
 	Condition            *Expression //switch
 	StatementSwitchCases []*StatementSwitchCase
 	Default              *Block
@@ -38,14 +38,14 @@ func (s *StatementSwitch) check(b *Block) []error {
 			errMsgPrefix(s.Pos)))
 	}
 
-	byteMap := make(map[byte]*Pos)
-	shortMap := make(map[int32]*Pos)
-	int32Map := make(map[int32]*Pos)
-	int64Map := make(map[int64]*Pos)
-	floatMap := make(map[float32]*Pos)
-	doubleMap := make(map[float64]*Pos)
-	stringMap := make(map[string]*Pos)
-	enumNamesMap := make(map[string]*Pos)
+	byteMap := make(map[byte]*Position)
+	shortMap := make(map[int32]*Position)
+	int32Map := make(map[int32]*Position)
+	int64Map := make(map[int64]*Position)
+	floatMap := make(map[float32]*Position)
+	doubleMap := make(map[float64]*Position)
+	stringMap := make(map[string]*Position)
+	enumNamesMap := make(map[string]*Position)
 	enumPackageName := ""
 	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
@@ -116,7 +116,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					errMsgPrefix(e.Pos)))
 			}
 			if valueValid {
-				errMsg := func(first *Pos) string {
+				errMsg := func(first *Position) string {
 					errMsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
 					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
 					return errMsg

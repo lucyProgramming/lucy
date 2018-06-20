@@ -8,8 +8,8 @@ import (
 
 type Function struct {
 	TemplateFunction                    *TemplateFunction
-	parameterTypes                      map[string]*VariableType //typed parameters
-	ClassMethod                         *cg.MethodHighLevel      // make call from
+	parameterTypes                      map[string]*Type    //typed parameters
+	ClassMethod                         *cg.MethodHighLevel // make call from
 	ConstructionMethodCalledByUser      bool
 	HaveDefaultValue                    bool
 	DefaultValueStartAt                 int
@@ -25,7 +25,7 @@ type Function struct {
 	Closure                             Closure
 	Name                                string // if name is nil string,means no name function
 	Block                               Block
-	Pos                                 *Pos
+	Pos                                 *Position
 	Descriptor                          string
 	AutoVariableForException            *AutoVariableForException
 	AutoVariableForReturnBecauseOfDefer *AutoVariableForReturnBecauseOfDefer
@@ -34,7 +34,7 @@ type Function struct {
 	SourceCodes                         []byte // source code for T
 }
 
-type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*VariableType, pos *Pos)
+type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position)
 
 type buildFunctionChecker CallChecker
 
@@ -112,7 +112,7 @@ func (f *Function) readableMsg(name ...string) string {
 /*
 	no need return list
 */
-func (f *Function) badParameterMsg(name string, args []*VariableType) string {
+func (f *Function) badParameterMsg(name string, args []*Type) string {
 	s := "fn " + name + "("
 	for k, v := range args {
 		s += " " + v.TypeString() + " "

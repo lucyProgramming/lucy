@@ -7,7 +7,7 @@ import (
 /*
 	in array type must equal
 */
-func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
+func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 	arr := e.Data.(*ExpressionArray)
 	if arr.Type == nil && len(arr.Expressions) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression, cannot inference it`s type ",
@@ -39,7 +39,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *VariableType {
 				if t.RightValueValid() && t.isTyped() {
 					tt := t.Clone()
 					tt.Pos = e.Pos
-					arr.Type = &VariableType{}
+					arr.Type = &Type{}
 					arr.Type.Type = VARIABLE_TYPE_ARRAY
 					arr.Type.ArrayType = tt
 					arr.Type.Pos = e.Pos

@@ -67,8 +67,8 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 	{
 		autoVar.Length = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
-		t := &ast.VariableType{}
+		forState.appendLocals(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		t := &ast.Type{}
 		t.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 		t.ArrayType = forState.newObjectVariableType(java_root_class)
 		autoVar.KeySets = code.MaxLocals
@@ -79,7 +79,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		forState.appendLocals(class, forState.newObjectVariableType(java_hashmap_class))
 		autoVar.KeySetsK = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		forState.appendLocals(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 
 	}
 	code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -247,14 +247,14 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 	// build block
 	makeClass.buildBlock(class, code, s.Block, context, blockState)
 	defer forState.addTop(blockState)
-	if s.Block.DeadEnding == false {
+	if s.Block.WillNotExecuteToEnd == false {
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
 	}
 	fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength)
 
 	{
 		forState.pushStack(class,
-			&ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+			&ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		context.MakeStackMap(code, forState, code.CodeLength)
 		forState.popStack(1)
 	}

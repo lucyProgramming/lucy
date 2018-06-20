@@ -61,7 +61,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			pos := b.parser.mkPos()
 			f, err := b.parser.FunctionParser.parse(true)
 			if err != nil {
-				b.parser.consume(untils_rc_semicolon)
+				b.parser.consume(untilRcAndSemicolon)
 			}
 			f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			s := &ast.Statement{}
@@ -76,7 +76,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			b.Next() // skip var key word
 			vs, es, typ, err := b.parser.parseConstDefinition(true)
 			if err != nil {
-				b.consume(untils_semicolon)
+				b.consume(untilSemicolon)
 				b.Next()
 				continue
 			}
@@ -105,7 +105,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			pos := b.parser.mkPos()
 			i, err := b.parseIf()
 			if err != nil {
-				b.consume(untils_rc)
+				b.consume(untilRc)
 				b.Next()
 				continue
 			}
@@ -124,7 +124,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			pos := b.parser.mkPos()
 			f, err := b.parseFor()
 			if err != nil {
-				b.consume(untils_rc)
+				b.consume(untilRc)
 				b.Next()
 				continue
 			}
@@ -138,7 +138,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			pos := b.parser.mkPos()
 			s, err := b.parseSwitch()
 			if err != nil {
-				b.consume(untils_rc)
+				b.consume(untilRc)
 				b.Next()
 				continue
 			}
@@ -160,13 +160,13 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s missing identifier after const,but '%s'",
 						b.parser.errorMsgPrefix(), b.parser.token.Description))
-				b.consume(untils_semicolon)
+				b.consume(untilSemicolon)
 				b.Next()
 				continue
 			}
 			vs, es, typ, err := b.parser.parseConstDefinition(false)
 			if err != nil {
-				b.consume(untils_rc_semicolon)
+				b.consume(untilRcAndSemicolon)
 				b.Next()
 				continue
 			}
@@ -179,7 +179,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s missing semicolon after const declaration",
 						b.parser.errorMsgPrefix()))
-				b.consume(untils_rc_semicolon)
+				b.consume(untilRcAndSemicolon)
 			}
 			if len(vs) != len(es) {
 				b.parser.errs = append(b.parser.errs,
@@ -189,7 +189,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			cs := make([]*ast.Constant, len(vs))
 			for k, v := range vs {
 				c := &ast.Constant{}
-				c.VariableDefinition = *v
+				c.Variable = *v
 				cs[k] = c
 				if k < len(es) {
 					cs[k].Expression = es[k] // assignment
@@ -233,7 +233,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			es, err = b.parser.ExpressionParser.parseExpressions()
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
-				b.consume(untils_semicolon)
+				b.consume(untilSemicolon)
 				b.Next()
 			}
 			r.Expressions = es
@@ -252,7 +252,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			if b.parser.token.Type != lex.TOKEN_RC {
 				b.parser.errs = append(b.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					b.parser.errorMsgPrefix(), b.parser.token.Description))
-				b.consume(untils_rc)
+				b.consume(untilRc)
 			}
 			b.Next()
 			if isDefer {
@@ -345,7 +345,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.parser.errs = append(b.parser.errs,
 					fmt.Errorf("%s  missing identifier after goto statement, but '%s'",
 						b.parser.errorMsgPrefix(), b.parser.token.Description))
-				b.consume(untils_semicolon)
+				b.consume(untilSemicolon)
 				b.Next()
 				continue
 			}
@@ -372,7 +372,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			}
 			alias, err := b.parser.parseTypeaAlias()
 			if err != nil {
-				b.consume(untils_semicolon)
+				b.consume(untilSemicolon)
 				b.Next()
 				continue
 			}
@@ -397,7 +397,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				class, err = b.parser.InterfaceParser.parse()
 			}
 			if err != nil {
-				b.consume(untils_rc)
+				b.consume(untilRc)
 				b.Next()
 				continue
 			}
@@ -410,7 +410,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			pos := b.parser.mkPos()
 			e, err := b.parser.parseEnum(false)
 			if err != nil {
-				b.consume(untils_rc)
+				b.consume(untilRc)
 				b.Next()
 				continue
 			}
@@ -431,7 +431,7 @@ func (b *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool) {
 	e, err := b.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		b.parser.errs = append(b.parser.errs, err)
-		b.parser.consume(untils_semicolon)
+		b.parser.consume(untilSemicolon)
 		b.Next()
 		return
 	}

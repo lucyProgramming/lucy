@@ -50,13 +50,13 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 		ep.Next() // skip <
 		ts, err := ep.parser.parseTypes()
 		if err != nil {
-			ep.parser.consume(untils_gt)
+			ep.parser.consume(untilGt)
 			ep.Next()
 		} else {
 			if ep.parser.token.Type != lex.TOKEN_GT {
 				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s '<' and '>' not match",
 					ep.parser.errorMsgPrefix()))
-				ep.parser.consume(untils_gt)
+				ep.parser.consume(untilGt)
 			}
 			ep.Next()
 			if result.Type == ast.EXPRESSION_TYPE_FUNCTION_CALL {

@@ -28,7 +28,7 @@ type StackMapState struct {
 //	return true
 //}
 
-func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.VariableType) {
+func (s *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.Type) {
 	s.Locals = append(s.Locals,
 		s.newStackMapVerificationTypeInfo(class, v))
 }
@@ -53,8 +53,8 @@ func (s *StackMapState) addTop(absent *StackMapState) {
 	}
 }
 
-func (s *StackMapState) newObjectVariableType(name string) *ast.VariableType {
-	ret := &ast.VariableType{}
+func (s *StackMapState) newObjectVariableType(name string) *ast.Type {
+	ret := &ast.Type{}
 	ret.Type = ast.VARIABLE_TYPE_OBJECT
 	ret.Class = &ast.Class{}
 	ret.Class.Name = name
@@ -73,7 +73,7 @@ func (s *StackMapState) popStack(pop int) {
 	}
 	s.Stacks = s.Stacks[:len(s.Stacks)-pop]
 }
-func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.VariableType) {
+func (s *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.Type) {
 	if s == nil {
 		panic("s is nil")
 	}
@@ -86,7 +86,7 @@ func (s *StackMapState) FromLast(last *StackMapState) *StackMapState {
 }
 
 func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel,
-	t *ast.VariableType) (ret *cg.StackMapVerificationTypeInfo) {
+	t *ast.Type) (ret *cg.StackMapVerificationTypeInfo) {
 	ret = &cg.StackMapVerificationTypeInfo{}
 	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:

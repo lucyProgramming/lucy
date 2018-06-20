@@ -8,7 +8,7 @@ import (
 type TypeConverterAndPrimitivePacker struct {
 }
 
-func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
 	switch t.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		c := "java/lang/Boolean"
@@ -96,11 +96,11 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel
 	}
 }
 
-func (c *TypeConverterAndPrimitivePacker) packPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (c *TypeConverterAndPrimitivePacker) packPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
 	copyOP(code, c.packPrimitivesBytes(class, t)...)
 }
 
-func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLevel, t *ast.VariableType) (bs []byte) {
+func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLevel, t *ast.Type) (bs []byte) {
 	bs = make([]byte, 3)
 	bs[0] = cg.OP_invokestatic
 	switch t.Type {
@@ -152,7 +152,7 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 	return
 }
 
-func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.VariableType) {
+func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
 	if t.IsPointer() == false {
 		panic("...")
 	}

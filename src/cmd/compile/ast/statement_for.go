@@ -10,7 +10,7 @@ type StatementFor struct {
 	RangeAttr          *ForRangeAttr
 	Exits              []*cg.Exit
 	ContinueCodeOffset int
-	Pos                *Pos
+	Pos                *Position
 	Init               *Expression
 	Condition          *Expression
 	After              *Expression
@@ -108,7 +108,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 		var identifierK *ExpressionIdentifier
 		var identifierV *ExpressionIdentifier
-		var posK, posV *Pos
+		var posK, posV *Position
 		if modelKv {
 			identifierK = lefts[0].Data.(*ExpressionIdentifier)
 			identifierV = lefts[1].Data.(*ExpressionIdentifier)
@@ -120,7 +120,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 
 		if identifierV.Name != NO_NAME_IDENTIFIER {
-			vd := &VariableDefinition{}
+			vd := &Variable{}
 			if rangeOn.Type == VARIABLE_TYPE_ARRAY || rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
 				vd.Type = rangeOn.ArrayType.Clone()
 			} else {
@@ -136,11 +136,11 @@ func (s *StatementFor) checkRange() []error {
 			s.RangeAttr.IdentifierValue = identifierV
 		}
 		if modelKv && identifierK.Name != NO_NAME_IDENTIFIER {
-			vd := &VariableDefinition{}
-			var vt *VariableType
+			vd := &Variable{}
+			var vt *Type
 			if rangeOn.Type == VARIABLE_TYPE_ARRAY ||
 				rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
-				vt = &VariableType{}
+				vt = &Type{}
 				vt.Type = VARIABLE_TYPE_INT
 			} else {
 				vt = rangeOn.Map.K.Clone()
@@ -159,25 +159,25 @@ func (s *StatementFor) checkRange() []error {
 	}
 
 	if s.Condition.Type == EXPRESSION_TYPE_ASSIGN {
-		var tk *VariableType
+		var tk *Type
 		if s.RangeAttr.ExpressionKey != nil {
 			tk = s.RangeAttr.ExpressionKey.getLeftValue(s.Block, &errs)
 			if tk == nil {
 				return errs
 			}
 		}
-		var tv *VariableType
+		var tv *Type
 		if s.RangeAttr.ExpressionValue != nil {
 			tv = s.RangeAttr.ExpressionValue.getLeftValue(s.Block, &errs)
 			if tv == nil {
 				return errs
 			}
 		}
-		var tkk, tvv *VariableType
+		var tkk, tvv *Type
 
 		if rangeOn.Type == VARIABLE_TYPE_ARRAY ||
 			rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
-			tkk = &VariableType{
+			tkk = &Type{
 				Type: VARIABLE_TYPE_INT,
 			}
 			tvv = rangeOn.ArrayType

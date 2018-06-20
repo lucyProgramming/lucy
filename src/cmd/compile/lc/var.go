@@ -7,7 +7,7 @@ import (
 var (
 	compiler             LucyCompile
 	loader               FileLoader
-	ParseFunctionHandler func(bs []byte, pos *ast.Pos) (*ast.Function, []error)
+	ParseFunctionHandler func(bs []byte, pos *ast.Position) (*ast.Function, []error)
 )
 
 func init() {

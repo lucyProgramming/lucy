@@ -51,15 +51,15 @@ func (signature *LucyMethodSignature) Decode(f *ast.Function, bs []byte) error {
 		}
 	}
 	bs = bs[1:] // skip )
-	f.Type.ReturnList = []*ast.VariableDefinition{}
+	f.Type.ReturnList = []*ast.Variable{}
 	i := 1
 	for len(bs) > 0 {
-		var t *ast.VariableType
+		var t *ast.Type
 		bs, t, err = LucyFieldSignatureParser.Decode(bs)
 		if err != nil {
 			return err
 		}
-		vd := &ast.VariableDefinition{}
+		vd := &ast.Variable{}
 		vd.Type = t
 		f.Type.ReturnList = append(f.Type.ReturnList, vd)
 		i++

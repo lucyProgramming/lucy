@@ -8,14 +8,14 @@ import (
 )
 
 func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
-	deadEnd := false
+	willNotExecuteToEnd := false
 	for _, s := range b.Statements {
-		if deadEnd == true && s.Type == ast.STATEMENT_TYPE_LABLE {
+		if willNotExecuteToEnd == true && s.Type == ast.STATEMENT_TYPE_LABLE {
 			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
-			deadEnd = !jumpForwards
+			willNotExecuteToEnd = !jumpForwards
 			//continue compile block from this label statement
 		}
-		if deadEnd {
+		if willNotExecuteToEnd {
 			continue
 		}
 		maxStack := makeClass.buildStatement(class, code, b, s, context, state)
@@ -34,36 +34,36 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 		//unCondition goto
 		if makeClass.statementIsUnConditionGoTo(s) {
-			deadEnd = true
+			willNotExecuteToEnd = true
 			continue
 		}
 		//block deadEnd
 		if s.Type == ast.STATEMENT_TYPE_BLOCK {
-			deadEnd = s.Block.DeadEnding
+			willNotExecuteToEnd = s.Block.WillNotExecuteToEnd
 			continue
 		}
 		if s.Type == ast.STATEMENT_TYPE_IF && s.StatementIf.ElseBlock != nil {
-			t := s.StatementIf.Block.DeadEnding
+			t := s.StatementIf.Block.WillNotExecuteToEnd
 			for _, v := range s.StatementIf.ElseIfList {
-				t = t && v.Block.DeadEnding
+				t = t && v.Block.WillNotExecuteToEnd
 			}
-			t = t && s.StatementIf.ElseBlock.DeadEnding
-			deadEnd = t
+			t = t && s.StatementIf.ElseBlock.WillNotExecuteToEnd
+			willNotExecuteToEnd = t
 			continue
 		}
 		if s.Type == ast.STATEMENT_TYPE_SWITCH && s.StatementSwitch.Default != nil {
-			t := s.StatementSwitch.Default.DeadEnding
+			t := s.StatementSwitch.Default.WillNotExecuteToEnd
 			for _, v := range s.StatementSwitch.StatementSwitchCases {
 				if v.Block != nil {
-					t = t && v.Block.DeadEnding
+					t = t && v.Block.WillNotExecuteToEnd
 				} else {
 					//this will fallthrough
 					t = false
 					break
 				}
 			}
-			t = t && s.StatementSwitch.Default.DeadEnding
-			deadEnd = t
+			t = t && s.StatementSwitch.Default.WillNotExecuteToEnd
+			willNotExecuteToEnd = t
 			continue
 		}
 	}
@@ -71,7 +71,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
 		makeClass.buildDefers(class, code, context, b.Defers, state)
 	}
-	b.DeadEnding = deadEnd
+	b.WillNotExecuteToEnd = willNotExecuteToEnd
 	return
 }
 

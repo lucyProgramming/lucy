@@ -10,29 +10,29 @@ func init() {
 }
 
 var (
-	untils_lc = map[int]bool{
+	untilLc = map[int]bool{
 		lex.TOKEN_LC: true,
 	}
-	untils_gt = map[int]bool{
+	untilGt = map[int]bool{
 		lex.TOKEN_GT: true,
 	}
-	untils_rc = map[int]bool{
+	untilRc = map[int]bool{
 		lex.TOKEN_RC: true,
 	}
-	untils_semicolon = map[int]bool{
+	untilSemicolon = map[int]bool{
 		lex.TOKEN_SEMICOLON: true,
 	}
-	untils_rc_semicolon = map[int]bool{
+	untilRcAndSemicolon = map[int]bool{
 		lex.TOKEN_RC:        true,
 		lex.TOKEN_SEMICOLON: true,
 	}
 )
 
-func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
+func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 	p := &Parser{}
 	p.filename = pos.Filename
 	p.nErrors2Stop = 10
-	tops := []*ast.Node{}
+	tops := []*ast.Top{}
 	p.tops = &tops
 	p.bs = bs
 	p.FunctionParser = &FunctionParser{

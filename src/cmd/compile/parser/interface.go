@@ -41,7 +41,7 @@ func (c *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 		if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s class`s father must be a identifier", c.parser.errorMsgPrefix())
 			c.parser.errs = append(c.parser.errs, err)
-			c.consume(untils_lc) //
+			c.consume(untilLc) //
 		} else {
 			t, err := c.parser.ClassParser.parseClassName()
 			c.classDefinition.SuperClassName = t
@@ -55,13 +55,13 @@ func (c *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 		c.Next() // skip key word
 		c.classDefinition.InterfaceNames, err = c.parser.ClassParser.parseInterfaces()
 		if err != nil {
-			c.consume(untils_lc)
+			c.consume(untilLc)
 		}
 	}
 	if c.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s expect '{' but '%s'", c.parser.errorMsgPrefix(), c.parser.token.Description)
 		c.parser.errs = append(c.parser.errs, err)
-		c.consume(untils_lc)
+		c.consume(untilLc)
 	}
 	c.Next()
 	for c.parser.token.Type != lex.TOKEN_EOF {
@@ -81,7 +81,7 @@ func (c *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 			if c.parser.token.Type != lex.TOKEN_IDENTIFIER {
 				c.parser.errs = append(c.parser.errs, fmt.Errorf("%s expect function name,but '%s'",
 					c.parser.errorMsgPrefix(), c.parser.token.Description))
-				c.consume(untils_rc)
+				c.consume(untilRc)
 				c.Next()
 				continue
 			}
@@ -89,7 +89,7 @@ func (c *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 			c.Next() // skip name
 			functionType, err := c.parser.parseFunctionType()
 			if err != nil {
-				c.consume(untils_rc)
+				c.consume(untilRc)
 				c.Next()
 				continue
 			}

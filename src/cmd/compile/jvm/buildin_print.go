@@ -162,7 +162,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 		}
 	}
 	for k, v := range call.Args {
-		var variableType *ast.VariableType
+		var variableType *ast.Type
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			stack, _ := makeExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {

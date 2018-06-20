@@ -77,7 +77,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	arrayObject := &ast.VariableType{}
+	arrayObject := &ast.Type{}
 	arrayObject.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
 	arrayObject.ArrayType = e.ExpressionValue.ArrayType
 	state.pushStack(class, arrayObject)
@@ -139,7 +139,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		loadInt(class, code, index) // load index
 		state.pushStack(class, arrayObject)
-		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)

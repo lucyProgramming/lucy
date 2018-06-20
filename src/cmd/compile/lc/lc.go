@@ -34,7 +34,7 @@ func Main(files []string) {
 }
 
 type LucyCompile struct {
-	Tops             []*ast.Node
+	Tops             []*ast.Top
 	Files            []string
 	Errs             []error
 	NErrsStopCompile int
