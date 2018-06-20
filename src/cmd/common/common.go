@@ -46,7 +46,7 @@ func GetLucyPaths() ([]string, error) {
 	} else { // unix style
 		lps = strings.Split(lp, ":")
 	}
-	lucypaths := []string{}
+	lucyPaths := []string{}
 	for _, v := range lps {
 		if v == "" {
 			continue
@@ -56,20 +56,20 @@ func GetLucyPaths() ([]string, error) {
 				LUCY_PATH_ENV_KEY, LUCY_PATH_ENV_KEY)
 			os.Exit(1)
 		}
-		lucypaths = append(lucypaths, v)
+		lucyPaths = append(lucyPaths, v)
 	}
-	lucypaths = append(lucypaths, root)
-	lucypathMap := make(map[string]struct{})
-	for _, v := range lucypaths {
-		lucypathMap[v] = struct{}{}
+	lucyPaths = append(lucyPaths, root)
+	lucyPathMap := make(map[string]struct{})
+	for _, v := range lucyPaths {
+		lucyPathMap[v] = struct{}{}
 	}
-	lucypaths = make([]string, len(lucypathMap))
+	lucyPaths = make([]string, len(lucyPathMap))
 	i := 0
-	for k, _ := range lucypathMap {
-		lucypaths[i] = k
+	for k, _ := range lucyPathMap {
+		lucyPaths[i] = k
 		i++
 	}
-	return lucypaths, nil
+	return lucyPaths, nil
 }
 
 func GetLucyRoot() (string, error) {

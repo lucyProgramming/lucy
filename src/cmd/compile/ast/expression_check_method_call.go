@@ -31,7 +31,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			// convert to function call
 			e.Type = EXPRESSION_TYPE_FUNCTION_CALL
 			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
-			call.Func = f
+			call.Function = f
 			e.Data = call
 			return e.checkFunctionCall(block, errs, f, &call.Args)
 			//}
@@ -128,7 +128,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				}
 			}
 			return []*Type{ret}
-		case common.MAP_METHOD_REMOVEALL:
+		case common.MAP_METHOD_REMOVE_ALL:
 			ret := &Type{}
 			ret.Pos = e.Pos
 			ret.Type = VARIABLE_TYPE_VOID

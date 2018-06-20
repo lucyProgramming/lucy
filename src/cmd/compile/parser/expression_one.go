@@ -204,48 +204,48 @@ func (ep *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, err
 		}
 	// bool(xxx)
 	case lex.TOKEN_BOOL:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 		//
 	case lex.TOKEN_BYTE:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_SHORT:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_INT:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_LONG:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_FLOAT:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_DOUBLE:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_STRING:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TOKEN_T:
-		left, err = ep.parseTypeConvertionExpression()
+		left, err = ep.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}

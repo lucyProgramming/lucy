@@ -10,13 +10,13 @@ const (
 	// lucy attribute
 	ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR     = "LucyFieldDescriptor"
 	ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR    = "LucyMethodDescriptor"
-	ATTRIBUTE_NAME_LUCY_COMPILTER_AUTO       = "LucyCompilerAuto"
+	ATTRIBUTE_NAME_LUCY_COMPILER_AUTO        = "LucyCompilerAuto"
 	ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT = "LucyTriggerPackageInitMethod"
 	ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS   = "LucyDefaultParameters"
 	ATTRIBUTE_NAME_LUCY_TYPE_ALIAS           = "LucyTypeAlias"
 	ATTRIBUTE_NAME_LUCY_ENUM                 = "LucyEnum"
 	ATTRIBUTE_NAME_LUCY_CONST                = "LucyConst" // indicate a package const
 	ATTRIBUTE_NAME_METHOD_PARAMETERS         = "MethodParameters"
-	ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES     = "LucyReturnListName"
+	ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES    = "LucyReturnListName"
 	ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION    = "LucyTemplateFunction"
 )

@@ -8,7 +8,7 @@ import (
 func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
-		code.MaxLocals += jvmSize(v.Type)
+		code.MaxLocals += jvmSlotSize(v.Type)
 		state.appendLocals(class, v.Type)
 	}
 	for _, v := range f.Type.ParameterList {
@@ -21,14 +21,14 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		copyOP(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
-		if t := 2 + jvmSize(v.Type); t > maxStack {
+		copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+		if t := 2 + jvmSlotSize(v.Type); t > maxStack {
 			maxStack = t
 		}
 		makeClass.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 	}
 	for _, v := range f.Type.ReturnList {
@@ -46,13 +46,13 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 			if 2 > maxStack {
 				maxStack = 2
 			}
-			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
 			state.pushStack(class,
 				state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 		} else {
 			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(v.Type)
+			code.MaxLocals += jvmSlotSize(v.Type)
 		}
 		stack, es := makeClass.makeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
@@ -114,7 +114,7 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
-		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_STRING, 0)...)
+		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_STRING, 0)...)
 		if 3 > code.MaxStack {
 			code.MaxStack = 3
 		}
@@ -125,7 +125,7 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 			Descriptor: meta.constructorFuncDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 1)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 1)...)
 		{
 			// String[] java style
 			t := &ast.Type{Type: ast.VARIABLE_TYPE_JAVA_ARRAY}
@@ -181,7 +181,7 @@ func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		f.AutoVariableForException.Offset = code.MaxLocals
 		code.MaxLocals++
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVariableForException.Offset)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVariableForException.Offset)...)
 		state.appendLocals(class,
 			state.newObjectVariableType(java_throwable_class))
 		maxStack = 1
@@ -192,7 +192,7 @@ func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code 
 			code.CodeLength++
 			f.AutoVariableForReturnBecauseOfDefer.ForArrayList = code.MaxLocals
 			code.MaxLocals++
-			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+			copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
 				f.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
 			state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		}
@@ -203,7 +203,7 @@ func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		f.AutoVariableForMultiReturn.Offset = code.MaxLocals
 		code.MaxLocals++
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVariableForMultiReturn.Offset)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, f.AutoVariableForMultiReturn.Offset)...)
 		state.appendLocals(class, state.newObjectVariableType(java_root_object_array))
 		maxStack = 1
 	}

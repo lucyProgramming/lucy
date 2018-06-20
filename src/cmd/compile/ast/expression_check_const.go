@@ -1,6 +1,6 @@
 package ast
 
-func (e *Expression) checkConst(block *Block) []error {
+func (e *Expression) checkConstant(block *Block) []error {
 	errs := []error{}
 	cs := e.Data.([]*Constant)
 	for _, c := range cs {

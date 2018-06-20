@@ -10,7 +10,7 @@ import (
 func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
 	willNotExecuteToEnd := false
 	for _, s := range b.Statements {
-		if willNotExecuteToEnd == true && s.Type == ast.STATEMENT_TYPE_LABLE {
+		if willNotExecuteToEnd == true && s.Type == ast.STATEMENT_TYPE_LABEL {
 			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
 			willNotExecuteToEnd = !jumpForwards
 			//continue compile block from this label statement
@@ -69,6 +69,8 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 	}
 	// if b.IsFunctionTopBlock == true must a return at end
 	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
+		code.Codes[code.CodeLength] = cg.OP_aconst_null
+		code.CodeLength++
 		makeClass.buildDefers(class, code, context, b.Defers, state)
 	}
 	b.WillNotExecuteToEnd = willNotExecuteToEnd

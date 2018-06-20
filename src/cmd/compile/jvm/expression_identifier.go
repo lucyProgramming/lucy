@@ -10,9 +10,9 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Variable)
 	if captured == false {
-		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, identifier.Variable.LocalValOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, identifier.Variable.LocalValOffset)...)
 	} else {
-		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 		meta := closure.getMeta(identifier.Variable.Type.Type)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -25,7 +25,7 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 	if 1 > maxStack {
 		maxStack = 1
 	}
-	if t := jvmSize(identifier.Variable.Type); t > maxStack {
+	if t := jvmSlotSize(identifier.Variable.Type); t > maxStack {
 		maxStack = t
 	}
 
@@ -39,7 +39,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
-		loadInt(class, code, identifier.EnumName.Value)
+		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1
 		return
 	}
@@ -52,7 +52,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		maxStack = jvmSize(identifier.Variable.Type)
+		maxStack = jvmSlotSize(identifier.Variable.Type)
 		return
 	}
 	if identifier.Variable.BeenCaptured {

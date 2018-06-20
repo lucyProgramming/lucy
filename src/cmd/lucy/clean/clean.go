@@ -13,7 +13,7 @@ import (
 )
 
 type Clean struct {
-	lucypaths []string
+	lucyPaths []string
 }
 
 func (c *Clean) Help(command string) {
@@ -28,17 +28,17 @@ func (c *Clean) RunCommand(command string, args []string) {
 	if runtime.GOOS == "windows" {
 		for _, v := range strings.Split(os.Getenv(common.LUCY_PATH_ENV_KEY), ";") { // windows style
 			if v != "" {
-				c.lucypaths = append(c.lucypaths, v)
+				c.lucyPaths = append(c.lucyPaths, v)
 			}
 		}
 	} else {
 		for _, v := range strings.Split(os.Getenv(common.LUCY_PATH_ENV_KEY), ":") { // unix style
 			if v != "" {
-				c.lucypaths = append(c.lucypaths, v)
+				c.lucyPaths = append(c.lucyPaths, v)
 			}
 		}
 	}
-	for _, v := range c.lucypaths {
+	for _, v := range c.lucyPaths {
 		if v == "" {
 			continue
 		}
@@ -47,18 +47,18 @@ func (c *Clean) RunCommand(command string, args []string) {
 			return
 		}
 	}
-	if len(c.lucypaths) == 0 {
+	if len(c.lucyPaths) == 0 {
 		fmt.Printf("env variable  '%s' not set\n", common.LUCY_PATH_ENV_KEY)
 		return
 	}
-	for _, v := range c.lucypaths {
+	for _, v := range c.lucyPaths {
 		fmt.Println("clean:", v)
 		c.cleanPath(filepath.Join(v, common.DIR_FOR_COMPILED_CLASS))
 	}
 }
 
 /*
-	don`t delete directory,incase directory have some other files
+	don`t delete directory,in case directory have some other files
 */
 func (c *Clean) cleanPath(path string) {
 	fis, err := ioutil.ReadDir(path)

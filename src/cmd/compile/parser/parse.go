@@ -9,12 +9,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyimport bool, nerr int) []error {
+func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyImport bool, nerr int) []error {
 	p := &Parser{
 		bs:           bs,
 		tops:         tops,
 		filename:     filename,
-		onlyImport:   onlyimport,
+		onlyImport:   onlyImport,
 		nErrors2Stop: nerr,
 	}
 	return p.Parse()
@@ -64,9 +64,9 @@ func (p *Parser) Parse() []error {
 	if p.onlyImport { // only parse imports
 		return p.errs
 	}
-	ispublic := false
+	isPublic := false
 	resetProperty := func() {
-		ispublic = false
+		isPublic = false
 	}
 	for p.token.Type != lex.TOKEN_EOF {
 		if len(p.errs) > p.nErrors2Stop {
@@ -95,7 +95,7 @@ func (p *Parser) Parse() []error {
 				Type:     ast.EXPRESSION_TYPE_VAR,
 				Data:     d,
 				Pos:      pos,
-				IsPublic: ispublic,
+				IsPublic: isPublic,
 			}
 			*p.tops = append(*p.tops, &ast.Top{
 				Data: e,
@@ -108,14 +108,14 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
-			e.IsPublic = ispublic
+			e.IsPublic = isPublic
 			p.validStatementEnding(e.Pos)
 			*p.tops = append(*p.tops, &ast.Top{
 				Data: e,
 			})
 			resetProperty()
 		case lex.TOKEN_ENUM:
-			e, err := p.parseEnum(ispublic)
+			e, err := p.parseEnum(isPublic)
 			if err != nil {
 				p.consume(untilRc)
 				p.Next()
@@ -135,7 +135,7 @@ func (p *Parser) Parse() []error {
 				p.Next()
 				continue
 			}
-			if ispublic {
+			if isPublic {
 				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			} else {
 				f.AccessFlags |= cg.ACC_METHOD_PRIVATE
@@ -170,7 +170,7 @@ func (p *Parser) Parse() []error {
 			*p.tops = append(*p.tops, &ast.Top{
 				Data: c,
 			})
-			if ispublic {
+			if isPublic {
 				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			resetProperty()
@@ -186,14 +186,14 @@ func (p *Parser) Parse() []error {
 			*p.tops = append(*p.tops, &ast.Top{
 				Data: c,
 			})
-			if ispublic {
+			if isPublic {
 				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			resetProperty()
 		case lex.TOKEN_PUBLIC:
-			ispublic = true
+			isPublic = true
 			p.Next()
-			p.validAfterPublic(ispublic)
+			p.validAfterPublic(isPublic)
 			continue
 		case lex.TOKEN_CONST:
 			p.Next() // skip const key word
@@ -227,7 +227,7 @@ func (p *Parser) Parse() []error {
 					c := &ast.Constant{}
 					c.Variable = *v
 					c.Expression = es[k]
-					if ispublic {
+					if isPublic {
 						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
 					} else {
 						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
@@ -240,12 +240,12 @@ func (p *Parser) Parse() []error {
 			resetProperty()
 			continue
 		case lex.TOKEN_PRIVATE: //is a default attribute
-			ispublic = false
+			isPublic = false
 			p.Next()
-			p.validAfterPublic(ispublic)
+			p.validAfterPublic(isPublic)
 			continue
 		case lex.TOKEN_TYPE:
-			a, err := p.parseTypeaAlias()
+			a, err := p.parseTypeAlias()
 			if err != nil {
 				p.consume(untilSemicolon)
 				p.Next()
@@ -384,7 +384,7 @@ func (p *Parser) Next() {
 			continue
 		}
 		p.token = tok
-		if tok.Type != lex.TOKEN_CRLF {
+		if tok.Type != lex.TOKEN_LF {
 			if p.token.Description != "" {
 				//	fmt.Println("#########", p.token.Type, p.token.Desp)
 			} else {
@@ -407,13 +407,13 @@ func (p *Parser) errorMsgPrefix(pos ...*ast.Position) string {
 	return fmt.Sprintf("%s:%d:%d", p.filename, line, column)
 }
 
-func (p *Parser) consume(untils map[int]bool) {
-	if len(untils) == 0 {
+func (p *Parser) consume(until map[int]bool) {
+	if len(until) == 0 {
 		panic("no token to consume")
 	}
 	var ok bool
 	for p.token.Type != lex.TOKEN_EOF {
-		if _, ok = untils[p.token.Type]; ok {
+		if _, ok = until[p.token.Type]; ok {
 			return
 		}
 		p.Next()
@@ -426,7 +426,7 @@ func (p *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Position) {
 	pos.StartColumn = t.StartColumn
 }
 
-func (p *Parser) parseTypeaAlias() (*ast.ExpressionTypeAlias, error) {
+func (p *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	p.Next() // skip type key word
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
 		err := fmt.Errorf("%s expect identifer,but %s", p.errorMsgPrefix(), p.token.Description)
@@ -487,7 +487,7 @@ func (p *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 			vd.Type = t.Clone()
 			vs = append(vs, vd)
 		}
-		if p.token.Type != lex.TOKEN_COMMA { // not a commna
+		if p.token.Type != lex.TOKEN_COMMA { // not a comma
 			break
 		} else {
 			p.Next()

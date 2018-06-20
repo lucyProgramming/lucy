@@ -8,7 +8,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
+func (p *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 	p.Next() // skip enum
 
 	if p.token.Type != lex.TOKEN_IDENTIFIER {
@@ -56,7 +56,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		}
 	}
 	if p.token.Type == lex.TOKEN_COMMA {
-		p.Next() // skip ,should be a identifier after  commna
+		p.Next() // skip ,should be a identifier after  comma
 		ns, err := p.parseNameList()
 		if err != nil {
 			return nil, err
@@ -78,7 +78,7 @@ func (p *Parser) parseEnum(ispublic bool) (e *ast.Enum, err error) {
 		e.Enums = append(e.Enums, t)
 	}
 	e.AccessFlags = 0
-	if ispublic {
+	if isPublic {
 		e.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	}
 	return e, err

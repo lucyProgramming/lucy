@@ -19,9 +19,9 @@ type StatementSwitchCase struct {
 	Block   *Block
 }
 
-func (s *StatementSwitch) check(b *Block) []error {
+func (s *StatementSwitch) check(block *Block) []error {
 	errs := []error{}
-	conditionType, es := s.Condition.checkSingleValueContextExpression(b)
+	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -76,7 +76,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 					stringValue = e.Data.(string)
 				}
 			}
-			t, es := e.checkSingleValueContextExpression(b)
+			t, es := e.checkSingleValueContextExpression(block)
 			if errorsNotEmpty(es) {
 				errs = append(errs, es...)
 			}
@@ -182,14 +182,14 @@ func (s *StatementSwitch) check(b *Block) []error {
 			}
 		}
 		if v.Block != nil {
-			v.Block.inherit(b)
+			v.Block.inherit(block)
 			v.Block.InheritedAttribute.StatementSwitch = s
 			v.Block.InheritedAttribute.ForBreak = s
 			errs = append(errs, v.Block.checkStatements()...)
 		}
 	}
 	if s.Default != nil {
-		s.Default.inherit(b)
+		s.Default.inherit(block)
 		s.Default.InheritedAttribute.StatementSwitch = s
 		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
@@ -211,7 +211,6 @@ func (s *StatementSwitch) check(b *Block) []error {
 			} else {
 				errMsg += fmt.Sprintf("\t\tcase %s.%s:\n", enumPackageName, v.Name)
 			}
-
 		}
 		errs = append(errs, fmt.Errorf(errMsg))
 	}

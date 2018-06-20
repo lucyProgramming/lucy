@@ -8,47 +8,47 @@ import (
 func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Func.IsBuildIn {
+	if call.Function.IsBuildIn {
 		return makeExpression.mkBuildInFunctionCall(class, code, e, context, state)
 	}
-	if call.Func.TemplateFunction != nil {
+	if call.Function.TemplateFunction != nil {
 		return makeExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
-	if call.Func.IsClosureFunction == false {
-		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Func.Type.ParameterList, context, state)
+	if call.Function.IsClosureFunction == false {
+		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Func.ClassMethod.Class.Name,
-			Method:     call.Func.ClassMethod.Name,
-			Descriptor: call.Func.ClassMethod.Descriptor,
+			Class:      call.Function.ClassMethod.Class.Name,
+			Method:     call.Function.ClassMethod.Name,
+			Descriptor: call.Function.ClassMethod.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
 		//closure function call
 		//load object
-		if context.function.Closure.ClosureFunctionExist(call.Func) {
-			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		if context.function.Closure.ClosureFunctionExist(call.Function) {
+			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      class.Name,
-				Field:      call.Func.Name,
-				Descriptor: "L" + call.Func.ClassMethod.Class.Name + ";",
+				Field:      call.Function.Name,
+				Descriptor: "L" + call.Function.ClassMethod.Class.Name + ";",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
-			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, call.Func.ClosureVariableOffSet)...)
+			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, call.Function.ClosureVariableOffSet)...)
 		}
-		state.pushStack(class, state.newObjectVariableType(call.Func.ClassMethod.Class.Name))
+		state.pushStack(class, state.newObjectVariableType(call.Function.ClassMethod.Class.Name))
 		defer state.popStack(1)
-		stack := makeExpression.buildCallArgs(class, code, call.Args, call.Func.Type.ParameterList, context, state)
+		stack := makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Func.ClassMethod.Class.Name,
-			Method:     call.Func.Name,
-			Descriptor: call.Func.ClassMethod.Descriptor,
+			Class:      call.Function.ClassMethod.Class.Name,
+			Method:     call.Function.Name,
+			Descriptor: call.Function.ClassMethod.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
@@ -57,7 +57,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 		if e.CallHasReturnValue() == false {
 			// nothing to do
 		} else if len(e.ExpressionMultiValues) == 1 {
-			if 2 == jvmSize(e.ExpressionMultiValues[0]) {
+			if 2 == jvmSlotSize(e.ExpressionMultiValues[0]) {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop
@@ -71,7 +71,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 
 	if e.CallHasReturnValue() == false { // nothing
 	} else if len(e.ExpressionMultiValues) == 1 {
-		if t := jvmSize(e.ExpressionMultiValues[0]); t > maxStack {
+		if t := jvmSlotSize(e.ExpressionMultiValues[0]); t > maxStack {
 			maxStack = t
 		}
 	} else { // > 1

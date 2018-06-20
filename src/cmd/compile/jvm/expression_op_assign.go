@@ -68,7 +68,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
 	}
 	//copy op
-	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
+	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
 	return
 
 }
@@ -89,7 +89,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		maxStack = t
 	}
 	state.pushStack(class, e.ExpressionValue)
-	currentStack := jvmSize(e.ExpressionValue) + remainStack // incase int -> long
+	currentStack := jvmSlotSize(e.ExpressionValue) + remainStack // incase int -> long
 	stack, _ = makeExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
@@ -253,6 +253,6 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		}
 	}
 	//copy op
-	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
+	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
 	return
 }

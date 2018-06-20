@@ -164,7 +164,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		}
 		e.ExpressionValue = tt
 	case EXPRESSION_TYPE_CONST: // no return value
-		errs = e.checkConst(block)
+		errs = e.checkConstant(block)
 		Types = []*Type{mkVoidType(e.Pos)}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_VAR:

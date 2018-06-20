@@ -37,6 +37,9 @@ func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
 		return nil
 	}
+	if _, ok := p.Files[file]; ok == false {
+		return nil
+	}
 	return p.Files[file].Imports[accessName]
 }
 

@@ -14,30 +14,33 @@ const (
 	STATEMENT_TYPE_RETURN
 	STATEMENT_TYPE_BREAK
 	STATEMENT_TYPE_SWITCH
-	STATEMENT_TYPE_LABLE
+	STATEMENT_TYPE_SWITCH_TEMPLATE
+	STATEMENT_TYPE_LABEL
 	STATEMENT_TYPE_GOTO
 	STATEMENT_TYPE_DEFER
 	STATEMENT_TYPE_CLASS
 	STATEMENT_TYPE_ENUM
+	STATEMENT_TYPE_NOP
 )
 
 type Statement struct {
-	Checked           bool // if checked
-	Pos               *Position
-	Type              int
-	StatementIf       *StatementIF
-	Expression        *Expression
-	StatementFor      *StatementFor
-	StatementReturn   *StatementReturn
-	StatementSwitch   *StatementSwitch
-	StatementBreak    *StatementBreak
-	Block             *Block
-	StatementContinue *StatementContinue
-	StatementLabel    *StatementLabel
-	StatementGoTo     *StatementGoTo
-	Defer             *StatementDefer
-	Class             *Class
-	Enum              *Enum
+	Checked                 bool // if checked
+	Pos                     *Position
+	Type                    int
+	StatementIf             *StatementIF
+	Expression              *Expression
+	StatementFor            *StatementFor
+	StatementReturn         *StatementReturn
+	StatementSwitch         *StatementSwitch
+	StatementSwitchTemplate *StatementSwitchTemplate
+	StatementBreak          *StatementBreak
+	Block                   *Block
+	StatementContinue       *StatementContinue
+	StatementLabel          *StatementLabel
+	StatementGoTo           *StatementGoTo
+	Defer                   *StatementDefer
+	Class                   *Class
+	Enum                    *Enum
 	/*
 		this.super()
 		special case
@@ -59,7 +62,7 @@ func (s *Statement) StatementName() string {
 		return "break statement"
 	case STATEMENT_TYPE_SWITCH:
 		return "switch statement"
-	case STATEMENT_TYPE_LABLE:
+	case STATEMENT_TYPE_LABEL:
 		return "label statement"
 	case STATEMENT_TYPE_GOTO:
 		return "goto statement"
@@ -73,6 +76,10 @@ func (s *Statement) StatementName() string {
 		return "class"
 	case STATEMENT_TYPE_ENUM:
 		return "enum"
+	case STATEMENT_TYPE_NOP:
+		return "nop"
+	case STATEMENT_TYPE_SWITCH_TEMPLATE:
+		return "switch template"
 	}
 	return ""
 }
@@ -142,14 +149,14 @@ func (s *Statement) check(block *Block) []error { // b is father
 		block.InheritedAttribute.Function.mkAutoVarForException()
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		s.Defer.allowCatch = block.IsFunctionBlock
+		//s.Defer.allowCatch = block.IsFunctionBlock
 		es := s.Defer.Block.checkStatements()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
 	case STATEMENT_TYPE_BLOCK:
 		s.Block.inherit(block)
 		return s.Block.checkStatements()
-	case STATEMENT_TYPE_LABLE:
+	case STATEMENT_TYPE_LABEL:
 		// nothing to do
 	case STATEMENT_TYPE_CLASS:
 		err := block.Insert(s.Class.Name, s.Pos, s.Class)
@@ -168,6 +175,10 @@ func (s *Statement) check(block *Block) []error { // b is father
 		} else {
 			return nil
 		}
+	case STATEMENT_TYPE_NOP:
+		//nop
+	case STATEMENT_TYPE_SWITCH_TEMPLATE:
+		return s.StatementSwitchTemplate.check(block, s)
 	}
 	return nil
 }

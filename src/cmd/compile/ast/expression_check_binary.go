@@ -133,7 +133,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_STRING:
-			if t1.Equal(errs, t2) == false {
+			if t2.Type != VARIABLE_TYPE_STRING {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VARIABLE_TYPE_NULL:

@@ -62,7 +62,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 	maxStack, _ = makeClass.makeExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.Exit
-	size := jvmSize(s.Condition.ExpressionValue)
+	size := jvmSlotSize(s.Condition.ExpressionValue)
 	currentStack := size
 	state.pushStack(class, s.Condition.ExpressionValue)
 	for _, c := range s.StatementSwitchCases {

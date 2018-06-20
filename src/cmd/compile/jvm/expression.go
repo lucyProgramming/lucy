@@ -35,7 +35,7 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 		code.CodeLength += 2
 		maxStack = 1
 	case ast.EXPRESSION_TYPE_INT, ast.EXPRESSION_TYPE_SHORT:
-		loadInt(class, code, e.Data.(int32))
+		loadInt32(class, code, e.Data.(int32))
 		maxStack = 1
 	case ast.EXPRESSION_TYPE_LONG:
 		if e.Data.(int64) == 0 {
@@ -213,7 +213,7 @@ func (makeExpression *MakeExpression) valueJvmSize(e *ast.Expression) (size uint
 	if e.ExpressionValue.RightValueValid() == false {
 		return 0
 	}
-	return jvmSize(e.ExpressionValue)
+	return jvmSlotSize(e.ExpressionValue)
 }
 
 func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
@@ -226,7 +226,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 		}
 		length++
 	}
-	loadInt(class, code, int32(length))
+	loadInt32(class, code, int32(length))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -255,7 +255,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
-				loadInt(class, code, index)
+				loadInt32(class, code, index)
 				code.Codes[code.CodeLength] = cg.OP_swap
 				code.Codes[code.CodeLength+1] = cg.OP_aastore
 				code.CodeLength += 2
@@ -279,7 +279,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 		if v.ExpressionValue.IsPointer() == false {
 			typeConverter.packPrimitives(class, code, v.ExpressionValue)
 		}
-		loadInt(class, code, index)
+		loadInt32(class, code, index)
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.Codes[code.CodeLength+1] = cg.OP_aastore
 		code.CodeLength += 2

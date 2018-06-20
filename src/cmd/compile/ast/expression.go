@@ -230,7 +230,7 @@ func (e *Expression) OpName() string {
 
 type Expression struct {
 	Type                  int
-	IsPublic              bool // only for global var definition
+	IsPublic              bool // only for global variable definition
 	IsCompileAuto         bool // compile auto expression
 	ExpressionValue       *Type
 	ExpressionMultiValues []*Type
@@ -472,7 +472,7 @@ type ExpressionFunctionCall struct {
 	BuildInFunctionMeta      interface{} // for build function only
 	Expression               *Expression
 	Args                     CallArgs
-	Func                     *Function
+	Function                 *Function
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 }

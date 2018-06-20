@@ -3,6 +3,7 @@ package jvm
 import (
 	//"fmt"
 	//"fmt"
+	"encoding/binary"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -24,14 +25,14 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_BLOCK: //new
-		var ss *StackMapState
+		var blockState *StackMapState
 		if s.Block.HaveVariableDefinition() {
-			ss = (&StackMapState{}).FromLast(state)
+			blockState = (&StackMapState{}).FromLast(state)
 		} else {
-			ss = state
+			blockState = state
 		}
-		makeClass.buildBlock(class, code, s.Block, context, ss)
-		state.addTop(ss)
+		makeClass.buildBlock(class, code, s.Block, context, blockState)
+		state.addTop(blockState)
 	case ast.STATEMENT_TYPE_FOR:
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = makeClass.buildForStatement(class, code, s.StatementFor, context, state)
@@ -40,10 +41,18 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
-		makeClass.buildDefers(class, code, context, s.StatementContinue.Defers, state)
+		if len(s.StatementContinue.Defers) > 0 {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			makeClass.buildDefers(class, code, context, s.StatementContinue.Defers, state)
+		}
 		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.STATEMENT_TYPE_BREAK:
-		makeClass.buildDefers(class, code, context, s.StatementBreak.Defers, state)
+		if len(s.StatementBreak.Defers) > 0 {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			makeClass.buildDefers(class, code, context, s.StatementBreak.Defers, state)
+		}
 		b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
 			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, b)
@@ -70,7 +79,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 			b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 			s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, b)
 		}
-	case ast.STATEMENT_TYPE_LABLE:
+	case ast.STATEMENT_TYPE_LABEL:
 		s.StatementLabel.CodeOffsetGenerated = true
 		s.StatementLabel.CodeOffset = code.CodeLength
 		s.StatementLabel.Exits = []*cg.Exit{} //could compile multi times
@@ -88,18 +97,70 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 	}
 	return
 }
+
 func (makeClass *MakeClass) buildDefers(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, state *StackMapState) {
+	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, from *StackMapState) {
 	index := len(ds) - 1
-	for index >= 0 {
-		var ss *StackMapState
-		if ds[index].Block.HaveVariableDefinition() {
-			ss = (&StackMapState{}).FromLast(state)
+	for index >= 0 { // build defer,cannot have return statement is defer
+		state := ds[index].StackMapState.(*StackMapState)
+		state = (&StackMapState{}).FromLast(state) // clone
+		state.addTop(from)
+		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
+		context.MakeStackMap(code, state, code.CodeLength)
+		e := &cg.ExceptionTable{}
+		e.StartPc = uint16(ds[index].StartPc)
+		e.EndPc = uint16(code.CodeLength)
+		e.HandlerPc = uint16(code.CodeLength)
+		if ds[index].ExceptionClass == nil {
+			e.CatchType = class.Class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS)
 		} else {
-			ss = state
+			e.CatchType = class.Class.InsertClassConst(ds[index].ExceptionClass.Name) // custom class
 		}
-		makeClass.buildBlock(class, code, &ds[index].Block, context, ss)
+		code.Exceptions = append(code.Exceptions, e)
+		//expect exception on stack
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+			context.function.AutoVariableForException.Offset)...) // this code will make stack is empty
+		state.popStack(1)
+		// build block
+		context.Defer = ds[index]
+		makeClass.buildBlock(class, code, &ds[index].Block, context, state)
+		from.addTop(state)
+		context.Defer = nil
+		if index > 0 {
+			index--
+			continue
+		}
+		//if need throw
+		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForException.Offset)...)
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
+		context.MakeStackMap(code, state, code.CodeLength+6)
+		context.MakeStackMap(code, state, code.CodeLength+7)
+		state.popStack(1)
+		code.Codes[code.CodeLength] = cg.OP_ifnonnull
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+		code.Codes[code.CodeLength+3] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4) // goto pop
+		code.Codes[code.CodeLength+6] = cg.OP_athrow
+		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
+		code.CodeLength += 8
 		index--
-		state.addTop(ss)
 	}
 }
+
+//func (makeClass *MakeClass) buildDefers(class *cg.ClassHighLevel,
+//	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, state *StackMapState) {
+//	index := len(ds) - 1
+//	for index >= 0 {
+//		var ss *StackMapState
+//		if ds[index].Block.HaveVariableDefinition() {
+//			ss = (&StackMapState{}).FromLast(state)
+//		} else {
+//			ss = state
+//		}
+//		makeClass.buildBlock(class, code, &ds[index].Block, context, ss)
+//		index--
+//		state.addTop(ss)
+//	}
+//}

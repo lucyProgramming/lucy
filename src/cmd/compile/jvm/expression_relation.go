@@ -18,7 +18,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := jvmSize(bin.Left.ExpressionValue) + stack; t > maxStack {
+		if t := jvmSlotSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t
 		}
 		switch bin.Left.ExpressionValue.Type {
@@ -97,7 +97,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			context.MakeStackMap(code, state, code.CodeLength)
 			fillOffsetForExits(es, code.CodeLength)
 		}
-		if t := jvmSize(bin.Left.ExpressionValue) + stack; t > maxStack {
+		if t := jvmSlotSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t
 		}
 		state.popStack(2) // 2 bool value
@@ -148,8 +148,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 	}
 
 	//string compare
-	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING ||
-		bin.Right.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
+	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
@@ -247,7 +246,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ = makeExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.ExpressionValue); t > maxStack {
+		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}
 		state.popStack(1) //

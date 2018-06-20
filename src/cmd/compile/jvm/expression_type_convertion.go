@@ -52,7 +52,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	maxStack = currentStack + stack
 	if e.ExpressionValue.IsNumber() {
 		makeExpression.numberTypeConverter(code, conversion.Expression.ExpressionValue.Type, conversion.Type.Type)
-		if t := jvmSize(conversion.Type); t > maxStack {
+		if t := jvmSlotSize(conversion.Type); t > maxStack {
 			maxStack = t
 		}
 		return
@@ -309,7 +309,7 @@ func (makeExpression *MakeExpression) stackTop2String(class *cg.ClassHighLevel, 
 	if typ.Type == ast.VARIABLE_TYPE_STRING {
 		return
 	}
-	maxstack = jvmSize(typ)
+	maxstack = jvmSlotSize(typ)
 	switch typ.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

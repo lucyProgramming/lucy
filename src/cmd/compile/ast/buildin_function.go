@@ -58,8 +58,7 @@ func registerBuildInFunctions() {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 				errMsgPrefix(pos)))
 		}
-		if block.InheritedAttribute.Defer == nil ||
-			block.InheritedAttribute.Defer.allowCatch == false {
+		if block.InheritedAttribute.Defer == nil {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
 				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
 			return
@@ -137,15 +136,15 @@ func registerBuildInFunctions() {
 		IsBuildIn: true,
 		Name:      common.BUILD_IN_FUNCTION_PANIC,
 	}
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITORENTER] = &Function{
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITOR_ENTER] = &Function{
 		buildInFunctionChecker: monitorChecker,
 		IsBuildIn:              true,
-		Name:                   common.BUILD_IN_FUNCTION_MONITORENTER,
+		Name:                   common.BUILD_IN_FUNCTION_MONITOR_ENTER,
 	}
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITOREXIT] = &Function{
+	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITOR_EXIT] = &Function{
 		buildInFunctionChecker: monitorChecker,
 		IsBuildIn:              true,
-		Name:                   common.BUILD_IN_FUNCTION_MONITOREXIT,
+		Name:                   common.BUILD_IN_FUNCTION_MONITOR_EXIT,
 	}
 	// len
 	buildInFunctionsMap[common.BUILD_IN_FUNCTION_LEN] = &Function{

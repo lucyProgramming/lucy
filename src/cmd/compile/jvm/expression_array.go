@@ -27,7 +27,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		state.Stacks = append(state.Stacks, t, t)
 	}
 
-	loadInt(class, code, int32(arr.Length))
+	loadInt32(class, code, int32(arr.Length))
 	switch e.ExpressionValue.ArrayType.Type {
 	case ast.VARIABLE_TYPE_BOOL:
 		code.Codes[code.CodeLength] = cg.OP_newarray
@@ -125,7 +125,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 			for k, t := range v.ExpressionMultiValues {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
-				loadInt(class, code, index) // load index
+				loadInt32(class, code, index) // load index
 				stack := multiValuePacker.unPack(class, code, k, t, context)
 				if t := 5 + stack; t > maxStack {
 					maxStack = t
@@ -137,7 +137,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		loadInt(class, code, index) // load index
+		loadInt32(class, code, index) // load index
 		state.pushStack(class, arrayObject)
 		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
 		stack, es := makeExpression.build(class, code, v, context, state)

@@ -11,7 +11,7 @@ type ReturnList []*Variable
 func (ft FunctionType) returnTypes(pos *Position) []*Type {
 	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
 		t := &Type{}
-		t.Type = VARIABLE_TYPE_VOID // means no return;
+		t.Type = VARIABLE_TYPE_VOID // means no return ;
 		t.Pos = pos
 		return []*Type{t}
 	}

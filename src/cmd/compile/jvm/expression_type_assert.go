@@ -45,7 +45,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.Codes[code.CodeLength+9] = cg.OP_iconst_0
 	code.Codes[code.CodeLength+10] = cg.OP_aconst_null
 	code.CodeLength += 11
-	loadInt(class, code, 2)
+	loadInt32(class, code, 2)
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

@@ -188,9 +188,9 @@ func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.
 */
 func (closure *Closure) loadLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	v *ast.Variable) (maxStack uint16) {
-	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+	copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 	closure.unPack(class, code, v.Type)
-	maxStack = jvmSize(v.Type)
+	maxStack = jvmSlotSize(v.Type)
 	return
 }
 

@@ -32,7 +32,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 	if e.Type == ast.EXPRESSION_TYPE_BITWISE_NOT {
 		ee := e.Data.(*ast.Expression)
 		maxStack, _ = makeExpression.build(class, code, ee, context, state)
-		if t := jvmSize(ee.ExpressionValue) * 2; t > maxStack {
+		if t := jvmSlotSize(ee.ExpressionValue) * 2; t > maxStack {
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {

@@ -18,7 +18,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.ExpressionValue); t > maxStack {
+		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {
@@ -63,7 +63,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := jvmSize(bin.Left.ExpressionValue) + stack; t > maxStack {
+		if t := jvmSlotSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {
@@ -175,7 +175,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSize(bin.Left.ExpressionValue); t > maxStack {
+		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {

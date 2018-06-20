@@ -10,8 +10,8 @@ func (makeClass *MakeClass) loadLocalVar(class *cg.ClassHighLevel,
 	if v.BeenCaptured {
 		return closure.loadLocalClosureVar(class, code, v)
 	}
-	maxStack = jvmSize(v.Type)
-	copyOP(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+	maxStack = jvmSlotSize(v.Type)
+	copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
 	return
 }
 
@@ -21,7 +21,7 @@ func (makeClass *MakeClass) storeLocalVar(class *cg.ClassHighLevel,
 		closure.storeLocalClosureVar(class, code, v)
 		return
 	}
-	maxStack = jvmSize(v.Type)
-	copyOP(code, storeLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+	maxStack = jvmSlotSize(v.Type)
+	copyOPs(code, storeLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
 	return
 }

@@ -45,10 +45,10 @@ func (a *AttributeCode) ToAttributeInfo(class *Class) *AttributeInfo {
 /*
 	mk line number attribute
 */
-func (a *AttributeCode) MKLineNumber(lineno int) {
+func (a *AttributeCode) MKLineNumber(lineNumber int) {
 	line := &AttributeLinePc{}
 	line.startPc = uint16(a.CodeLength)
-	line.lineNumber = uint16(lineno)
+	line.lineNumber = uint16(lineNumber)
 	a.LineNumbers.lineNumbers = append(a.LineNumbers.lineNumbers, line)
 }
 

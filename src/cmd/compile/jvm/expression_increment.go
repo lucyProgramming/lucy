@@ -18,7 +18,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		}
 		if e.IsStatementExpression == false { //  need it`s value
 			if e.Type == ast.EXPRESSION_TYPE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_DECREMENT {
-				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
+				copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}
@@ -35,7 +35,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		}
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.Type == ast.EXPRESSION_TYPE_PRE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_PRE_DECREMENT { // decrement
-				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
+				copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}
@@ -53,7 +53,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
-	currentStack := jvmSize(ee.ExpressionValue) + remainStack
+	currentStack := jvmSlotSize(ee.ExpressionValue) + remainStack
 	if e.IsStatementExpression == false {
 		if e.Type == ast.EXPRESSION_TYPE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_DECREMENT {
 			currentStack += makeExpression.controlStack2FitAssign(code, op, className, e.ExpressionValue)
@@ -151,6 +151,6 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		}
 	}
 	//copy op
-	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
+	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
 	return
 }

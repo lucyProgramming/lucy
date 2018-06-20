@@ -24,7 +24,7 @@ const (
 	TOKEN_RB             // ]
 	TOKEN_PASS           // pass
 	TOKEN_SEMICOLON      // ;
-	TOKEN_CRLF           // enter
+	TOKEN_LF             // enter
 	TOKEN_COMMA          // ,
 	TOKEN_LOGICAL_AND    // &&
 	TOKEN_LOGICAL_OR     // ||

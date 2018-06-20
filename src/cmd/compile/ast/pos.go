@@ -5,7 +5,7 @@ type Position struct {
 	StartLine   int
 	StartColumn int
 	//EndLint int
-	//EndCloumn int
+	//EndColumn int
 	/*
 		offset at bs , for special use
 	*/

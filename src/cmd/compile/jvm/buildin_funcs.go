@@ -9,16 +9,16 @@ import (
 func (makeExpression *MakeExpression) mkBuildInFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	switch call.Func.Name {
+	switch call.Function.Name {
 	case common.BUILD_IN_FUNCTION_PRINT:
 		return makeExpression.mkBuildInPrint(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_PANIC:
 		return makeExpression.mkBuildInPanic(class, code, e, context, state)
 	case common.BUILD_IN_FUNCTION_CATCH:
 		return makeExpression.mkBuildInCatch(class, code, e, context)
-	case common.BUILD_IN_FUNCTION_MONITORENTER, common.BUILD_IN_FUNCTION_MONITOREXIT:
+	case common.BUILD_IN_FUNCTION_MONITOR_ENTER, common.BUILD_IN_FUNCTION_MONITOR_EXIT:
 		maxStack, _ = makeExpression.build(class, code, call.Args[0], context, state)
-		if call.Func.Name == common.BUILD_IN_FUNCTION_MONITORENTER {
+		if call.Function.Name == common.BUILD_IN_FUNCTION_MONITOR_ENTER {
 			code.Codes[code.CodeLength] = cg.OP_monitorenter
 		} else { // monitor enter on exit
 			code.Codes[code.CodeLength] = cg.OP_monitorexit
@@ -31,7 +31,7 @@ func (makeExpression *MakeExpression) mkBuildInFunctionCall(class *cg.ClassHighL
 	case common.BUILD_IN_FUNCTION_LEN:
 		return makeExpression.mkBuildInLen(class, code, e, context, state)
 	default:
-		panic("unKnow buildIn function:" + call.Func.Name)
+		panic("unKnow buildIn function:" + call.Function.Name)
 	}
 	return
 }

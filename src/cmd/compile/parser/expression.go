@@ -132,7 +132,7 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 	return left, nil
 }
 
-func (ep *ExpressionParser) parseTypeConvertionExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, error) {
 	t, err := ep.parser.parseType()
 	if err != nil {
 		return nil, err

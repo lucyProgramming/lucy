@@ -80,8 +80,8 @@ func (classHighLevel *ClassHighLevel) InsertInterfaceMethodrefConst(fr CONSTANT_
 func (classHighLevel *ClassHighLevel) InsertFieldRefConst(fr CONSTANT_Fieldref_info_high_level, location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertFieldRefConst(fr))
 }
-func (classHighLevel *ClassHighLevel) InsertClassConst(classname string, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertClassConst(classname))
+func (classHighLevel *ClassHighLevel) InsertClassConst(className string, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertClassConst(className))
 }
 func (classHighLevel *ClassHighLevel) InsertIntConst(i int32, location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertIntConst(i))

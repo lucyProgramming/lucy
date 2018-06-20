@@ -742,7 +742,7 @@ redo:
 			token.Description = "/"
 		}
 	case '\n':
-		token.Type = TOKEN_CRLF
+		token.Type = TOKEN_LF
 		token.Description = "\n"
 	case '.':
 		token.Type = TOKEN_DOT

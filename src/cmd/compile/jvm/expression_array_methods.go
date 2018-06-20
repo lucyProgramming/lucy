@@ -55,7 +55,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 		for _, v := range call.Args {
 			currentStack := uint16(1)
 			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 0 {
-				stack, _ := makeExpression.build(class, code, v, context, nil)
+				stack, _ := makeExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -65,7 +65,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 					if t := multiValuePacker.unPack(class, code, kk, t, context) + currentStack; t > maxStack {
 						maxStack = t
 					}
-					if t := currentStack + jvmSize(t); t > maxStack {
+					if t := currentStack + jvmSlotSize(t); t > maxStack {
 						maxStack = t
 					}
 					code.Codes[code.CodeLength] = cg.OP_invokevirtual

@@ -21,7 +21,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 	pop := func(f *ast.Function) {
 		if e.IsStatementExpression && f.NoReturnValue() == false {
 			if len(e.ExpressionMultiValues) == 1 {
-				if jvmSize(e.ExpressionMultiValues[0]) == 1 {
+				if jvmSlotSize(e.ExpressionMultiValues[0]) == 1 {
 					code.Codes[code.CodeLength] = cg.OP_pop
 					code.CodeLength++
 				} else {

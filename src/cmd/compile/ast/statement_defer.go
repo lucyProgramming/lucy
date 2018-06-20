@@ -3,7 +3,7 @@ package ast
 import "fmt"
 
 type StatementDefer struct {
-	allowCatch     bool        // if in function top block
+	//allowCatch     bool        // if in function top block
 	StartPc        int         // for jvm
 	StackMapState  interface{} // *jvm.StackMapState
 	Block          Block

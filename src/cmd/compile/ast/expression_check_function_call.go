@@ -35,7 +35,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			call.Expression.OpName(), t.TypeString()))
 		return nil
 	}
-	call.Func = t.Function
+	call.Function = t.Function
 	if t.Function.IsBuildIn {
 		return e.checkBuildInFunctionCall(block, errs, t.Function, call.Args)
 	} else {

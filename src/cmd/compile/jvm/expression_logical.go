@@ -34,6 +34,5 @@ func (makeExpression *MakeExpression) buildLogical(class *cg.ClassHighLevel, cod
 	if stack > maxStack {
 		maxStack = stack
 	}
-
 	return
 }

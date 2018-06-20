@@ -87,7 +87,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			code.CodeLength += 3
 		}
 
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Elements)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Elements)...)
 		//get start
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.Codes[code.CodeLength+1] = cg.OP_getfield
@@ -97,7 +97,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+2:code.CodeLength+4])
 		code.CodeLength += 4
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
 		//get end
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -106,7 +106,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.End)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.End)...)
 	} else { // java_array
 		//get length
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -115,17 +115,17 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_arraylength
 		code.CodeLength += 2
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.End)...)
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Elements)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.End)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_JAVA_ARRAY, autoVar.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
-		copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
+		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
 	}
 
 	// k set to  -1
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
-	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
+	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
 
 	//handle captured vars
 	if s.Condition.Type == ast.EXPRESSION_TYPE_COLON_ASSIGN {
@@ -133,7 +133,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Variable.Type)
 			s.RangeAttr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
-			copyOP(code,
+			copyOPs(code,
 				storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.ExpressionValue.ArrayType.Type).className))
@@ -142,7 +142,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierKey.Variable.Type)
 			s.RangeAttr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
-			copyOP(code,
+			copyOPs(code,
 				storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(ast.VARIABLE_TYPE_INT).className))
@@ -160,15 +160,15 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 	// load start
-	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
+	copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.Start)...)
 	// load k
-	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
+	copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
 	// mk index
 	code.Codes[code.CodeLength] = cg.OP_iadd
 	code.Codes[code.CodeLength+1] = cg.OP_dup
 	code.CodeLength += 2
 	// load end
-	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.End)...)
+	copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.End)...)
 	if 3 > maxStack {
 		maxStack = 3
 	}
@@ -179,7 +179,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	rangeEnd := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
 	//load elements
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
-		copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, autoVar.Elements)...)
+		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, autoVar.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
 		// load value
@@ -214,9 +214,9 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		code.CodeLength++
 		// v
 		autoVar.V = code.MaxLocals
-		code.MaxLocals += jvmSize(s.RangeAttr.RangeOn.ExpressionValue.ArrayType)
+		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.ArrayType)
 		//store to v tmp
-		copyOP(code,
+		copyOPs(code,
 			storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.ArrayType.Type,
 				autoVar.V)...)
 
@@ -229,8 +229,8 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	if s.Condition.Type == ast.EXPRESSION_TYPE_COLON_ASSIGN {
 		if s.RangeAttr.IdentifierValue != nil {
 			if s.RangeAttr.IdentifierValue.Variable.BeenCaptured {
-				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
-				copyOP(code,
+				copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
+				copyOPs(code,
 					loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.ArrayType.Type,
 						autoVar.V)...)
 				makeClass.storeLocalVar(class, code, s.RangeAttr.IdentifierValue.Variable)
@@ -241,8 +241,8 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 
 		if s.RangeAttr.IdentifierKey != nil {
 			if s.RangeAttr.IdentifierKey.Variable.BeenCaptured {
-				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
-				copyOP(code,
+				copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
+				copyOPs(code,
 					loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
 				makeClass.storeLocalVar(class, code, s.RangeAttr.IdentifierKey.Variable)
 			} else {
@@ -259,15 +259,15 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			maxStack = stack
 		}
 		//load v
-		copyOP(code, loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.ArrayType.Type,
+		copyOPs(code, loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.ArrayType.Type,
 			autoVar.V)...)
-		if t := remainStack + jvmSize(s.RangeAttr.RangeOn.ExpressionValue.ArrayType); t > maxStack {
+		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.ArrayType); t > maxStack {
 			maxStack = t
 		}
-		if t := remainStack + jvmSize(target); t > maxStack {
+		if t := remainStack + jvmSlotSize(target); t > maxStack {
 			maxStack = t
 		}
-		copyOPLeftValueVersion(class, code, ops, className, name, descriptor)
+		copyOPsLeftValueVersion(class, code, ops, className, name, descriptor)
 		blockState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
@@ -280,8 +280,8 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 				maxStack = t
 			}
 			// load k
-			copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-			copyOPLeftValueVersion(class, code, ops, className, name, descriptor)
+			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
+			copyOPsLeftValueVersion(class, code, ops, className, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}

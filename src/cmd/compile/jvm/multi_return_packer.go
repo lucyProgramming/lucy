@@ -9,17 +9,8 @@ type MultiValuePacker struct {
 /*
 	stack is 1
 */
-func (a *MultiValuePacker) buildLoadArrayListAutoVar(code *cg.AttributeCode, context *Context) (maxStack uint16) {
-	maxStack = 1
-	copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForMultiReturn.Offset)...)
-	return
-}
-
-/*
-	stack is 1
-*/
 func (a *MultiValuePacker) storeArrayListAutoVar(code *cg.AttributeCode, context *Context) {
-	copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
 		context.function.AutoVariableForMultiReturn.Offset)...)
 
 }
@@ -29,7 +20,7 @@ func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCo
 	maxStack = a.unPackObject(class, code, k, context)
 	if typ.IsPointer() == false {
 		typeConverter.unPackPrimitives(class, code, typ)
-		if t := jvmSize(typ); t > maxStack {
+		if t := jvmSlotSize(typ); t > maxStack {
 			maxStack = t
 		}
 	} else {
@@ -43,12 +34,14 @@ func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCo
 */
 func (a *MultiValuePacker) unPackObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	k int, context *Context) (maxStack uint16) {
-	maxStack = 2
-	a.buildLoadArrayListAutoVar(code, context) // local array list on stack
 	if k > 127 {
 		panic("over 127")
 	}
-	loadInt(class, code, int32(k))
+	maxStack = 2
+	//a.buildLoadArrayListAutoVar(code, context) // local array list on stack
+	copyOPs(code,
+		loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForMultiReturn.Offset)...)
+	loadInt32(class, code, int32(k))
 	code.Codes[code.CodeLength] = cg.OP_aaload
 	code.CodeLength++
 	return

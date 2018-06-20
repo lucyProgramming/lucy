@@ -84,17 +84,17 @@ func (installLucyArray *InstallLucyArray) RunCommand(command string, args []stri
 		os.Exit(1)
 	}
 	for _, v := range installs {
-		javafile := v.className + ".java"
+		javaFile := v.className + ".java"
 		t := strings.Replace(array_template, "ArrayTTT", v.className, -1)
 		t = strings.Replace(t, "TTT", v.typename, -1)
 		t = strings.Replace(t, "DEFAULT_INIT", v.defaultValue, -1)
 		t = strings.Replace(t, "IMPORTS", v.imports, -1)
-		err := ioutil.WriteFile(javafile, []byte(t), 0644)
+		err := ioutil.WriteFile(javaFile, []byte(t), 0644)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(2)
 		}
-		cmd := exec.Command("javac", javafile)
+		cmd := exec.Command("javac", javaFile)
 		out, err := cmd.Output()
 		if err != nil {
 			fmt.Println(err)

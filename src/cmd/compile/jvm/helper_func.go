@@ -21,14 +21,14 @@ func jumpTo(op byte, code *cg.AttributeCode, to int) {
 	fillOffsetForExits([]*cg.Exit{b}, to)
 }
 
-func copyOP(code *cg.AttributeCode, op ...byte) {
+func copyOPs(code *cg.AttributeCode, op ...byte) {
 	for k, v := range op {
 		code.Codes[code.CodeLength+k] = v
 	}
 	code.CodeLength += len(op)
 }
 
-func copyOPLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, className,
+func copyOPsLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, className,
 	name, descriptor string) {
 	if len(ops) == 0 {
 		return
@@ -43,10 +43,10 @@ func copyOPLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, op
 		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
 	}
-	copyOP(code, ops[1:]...)
+	copyOPs(code, ops[1:]...)
 }
 
-func loadInt(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
+func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	switch value {
 	case -1:
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -99,15 +99,18 @@ func storeGlobalVariable(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel,
 }
 
 func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
-	var b byte
+	var b uint16
 	b = 1
 	for _, v := range ft.ParameterList {
-		b += byte(jvmSize(v.Type))
+		b += jvmSlotSize(v.Type)
 	}
-	return b
+	if b > 255 {
+		panic("over 255")
+	}
+	return byte(b)
 }
 
-func jvmSize(v *ast.Type) uint16 {
+func jvmSlotSize(v *ast.Type) uint16 {
 	if v.RightValueValid() == false {
 		panic("right value is not valid:" + v.TypeString())
 	}

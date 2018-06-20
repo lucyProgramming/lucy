@@ -91,7 +91,7 @@ func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel
 	maxStack, _ = makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
-		loadInt(class, code, 0)
+		loadInt32(class, code, 0)
 		currentStack++
 		if currentStack > maxStack {
 			maxStack = currentStack

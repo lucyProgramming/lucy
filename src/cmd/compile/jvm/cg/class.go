@@ -317,7 +317,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 				info.Attributes = append(info.Attributes, m.AttributeCompilerAuto.ToAttributeInfo(c))
 			}
 			if m.AttributeLucyReturnListNames != nil {
-				t := m.AttributeLucyReturnListNames.ToAttributeInfo(c, ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES)
+				t := m.AttributeLucyReturnListNames.ToAttributeInfo(c, ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES)
 				if t != nil {
 					info.Attributes = append(info.Attributes, t)
 				}

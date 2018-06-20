@@ -18,7 +18,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		if v.Name != ast.NO_NAME_IDENTIFIER && v.BeenCaptured {
 			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			if vs.IfDeclaredBefore[0] {
-				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				currentStack = 1
 				state.pushStack(class, obj)
 			} else {
@@ -41,7 +41,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		if v.Name == ast.NO_NAME_IDENTIFIER {
-			if jvmSize(vs.InitValues[0].ExpressionValue) == 1 {
+			if jvmSlotSize(vs.InitValues[0].ExpressionValue) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2
@@ -60,11 +60,11 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 				if v.BeenCaptured {
 					code.MaxLocals++
 				} else {
-					code.MaxLocals += jvmSize(v.Type)
+					code.MaxLocals += jvmSlotSize(v.Type)
 				}
 				makeExpression.MakeClass.storeLocalVar(class, code, v)
 				if vs.Variables[0].BeenCaptured {
-					copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+					copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 				} else {
 					state.appendLocals(class, v.Type)
@@ -95,7 +95,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		//this variable not been captured,also not declared here
 		if vs.IfDeclaredBefore[k] {
 			if v.BeenCaptured {
-				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 				stack := multiValuePacker.unPack(class, code, k, v.Type, context)
 				if t := 1 + stack; t > maxStack {
 					maxStack = t
@@ -122,11 +122,11 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 			if 2 > maxStack {
 				maxStack = 2
 			}
-			copyOP(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
 			currentStack = 1
 			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 		} else {
-			code.MaxLocals += jvmSize(v.Type)
+			code.MaxLocals += jvmSlotSize(v.Type)
 			state.appendLocals(class, v.Type)
 		}
 		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Type, context); t > maxStack {
@@ -146,7 +146,7 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 			code.MaxLocals++
 		} else {
 			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSize(v.Type)
+			code.MaxLocals += jvmSlotSize(v.Type)
 		}
 	}
 	index := len(vs.Variables) - 1
@@ -187,7 +187,7 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 				}
 				makeExpression.MakeClass.storeLocalVar(class, code, vs.Variables[index])
 				if vs.Variables[index].BeenCaptured {
-					copyOP(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
+					copyOPs(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
 					state.popStack(2)
 					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
 				} else {
@@ -215,7 +215,7 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 		}
 		makeExpression.MakeClass.storeLocalVar(class, code, vs.Variables[index])
 		if vs.Variables[index].BeenCaptured {
-			copyOP(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
+			copyOPs(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
 			state.popStack(2)
 			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
 		} else {

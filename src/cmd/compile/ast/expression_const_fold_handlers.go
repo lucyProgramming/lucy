@@ -24,15 +24,12 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 			case EXPRESSION_TYPE_BYTE:
 				e.Data, is, err = e.numberTypeAlgebra(EXPRESSION_TYPE_SHORT, bin.Left.Data.(int32), int32(bin.Right.Data.(byte)))
 				e.Type = EXPRESSION_TYPE_SHORT
-
 			case EXPRESSION_TYPE_SHORT:
 				e.Data, is, err = e.numberTypeAlgebra(EXPRESSION_TYPE_SHORT, bin.Left.Data.(int32), bin.Right.Data.(int32))
 				e.Type = EXPRESSION_TYPE_SHORT
-
 			case EXPRESSION_TYPE_INT:
 				e.Data, is, err = e.numberTypeAlgebra(EXPRESSION_TYPE_INT, bin.Left.Data.(int32), bin.Right.Data.(int32))
 				e.Type = EXPRESSION_TYPE_INT
-
 			case EXPRESSION_TYPE_LONG:
 				e.Data, is, err = e.numberTypeAlgebra(EXPRESSION_TYPE_LONG, int64(bin.Left.Data.(int32)), bin.Right.Data.(int64))
 				e.Type = EXPRESSION_TYPE_LONG

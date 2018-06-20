@@ -72,7 +72,7 @@ func checkRightValuesValid(ts []*Type, errs *[]error) (ret []*Type) {
 	when access from global,should check if access from package
 */
 func shouldAccessFromImports(name string, from *Position, have *Position) (*Import, bool) {
-	if have == nil { // incase buildin types
+	if have == nil { // in case buildIn types
 		return nil, false
 	}
 	// different file

@@ -25,7 +25,7 @@ func (makeExpression *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, co
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				currentStack += jvmSize(t)
+				currentStack += jvmSlotSize(t)
 				state.pushStack(class, parameters[parameterIndex].Type)
 				parameterIndex++
 			}
@@ -41,7 +41,7 @@ func (makeExpression *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, co
 		if t := stack + currentStack; t > maxStack {
 			maxStack = t
 		}
-		currentStack += jvmSize(parameters[parameterIndex].Type)
+		currentStack += jvmSlotSize(parameters[parameterIndex].Type)
 		state.pushStack(class, parameters[parameterIndex].Type)
 		parameterIndex++
 	}

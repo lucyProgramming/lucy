@@ -100,7 +100,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 				state.popStack(1)
 			}
 		}
-	case common.MAP_METHOD_REMOVEALL:
+	case common.MAP_METHOD_REMOVE_ALL:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,

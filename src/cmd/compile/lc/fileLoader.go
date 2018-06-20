@@ -87,7 +87,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Func)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Func)
 		}
 		if astClass.Methods[m.Func.Name] == nil {
@@ -100,7 +100,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 }
 
 func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
-	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_COMPILTER_AUTO); t != nil && len(t) > 0 {
+	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_COMPILER_AUTO); t != nil && len(t) > 0 {
 		return nil, nil
 	}
 	//name
@@ -167,7 +167,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Func)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Func)
 		}
 		err = loadEnumForFunction(m.Func)
@@ -306,7 +306,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, function)
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURNLIST_NAMES); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, function)
 		}
 		function.ClassMethod = &cg.MethodHighLevel{}

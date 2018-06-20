@@ -24,14 +24,14 @@ func (makeExpression *MakeExpression) buildExpressionAssign(class *cg.ClassHighL
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t
 	}
-	currentStack := remainStack + jvmSize(target)
+	currentStack := remainStack + jvmSlotSize(target)
 	if e.IsStatementExpression == false {
 		currentStack += makeExpression.controlStack2FitAssign(code, op, className, target)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
 	}
-	copyOPLeftValueVersion(class, code, op, className, name, descriptor)
+	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
 	return
 }
 
@@ -61,7 +61,7 @@ func (makeExpression *MakeExpression) buildAssign(class *cg.ClassHighLevel, code
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}
-		copyOPLeftValueVersion(class, code, op, className, name, descriptor)
+		copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
 		state.popStack(len(state.Stacks) - stackLength)
 	}
 	return
@@ -94,7 +94,7 @@ func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeC
 		op[0] == cg.OP_astore_1 ||
 		op[0] == cg.OP_astore_2 ||
 		op[0] == cg.OP_astore_3 {
-		if jvmSize(stackTopType) == 1 {
+		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
 		} else {
@@ -105,7 +105,7 @@ func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeC
 		return
 	}
 	if op[0] == cg.OP_putstatic {
-		if jvmSize(stackTopType) == 1 {
+		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
 		} else {
@@ -116,7 +116,7 @@ func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeC
 		return
 	}
 	if op[0] == cg.OP_putfield {
-		if jvmSize(stackTopType) == 1 {
+		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
 		} else {
@@ -134,7 +134,7 @@ func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeC
 		op[0] == cg.OP_bastore ||
 		op[0] == cg.OP_castore ||
 		op[0] == cg.OP_sastore {
-		if jvmSize(stackTopType) == 1 {
+		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2
 			code.CodeLength++
@@ -146,7 +146,7 @@ func (makeExpression *MakeExpression) controlStack2FitAssign(code *cg.AttributeC
 		return
 	}
 	if className == java_hashmap_class { // it is a flag indicate  map destination
-		if jvmSize(stackTopType) == 1 {
+		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2
 			code.CodeLength++

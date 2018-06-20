@@ -7,51 +7,131 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (b *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
-	pos := b.parser.mkPos()
-	b.Next() // skip switch key word
-	condition, err := b.parser.ExpressionParser.parseExpression(false)
+func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.StatementSwitchTemplate, error) {
+	condition, err := blockParser.parser.parseType()
 	if err != nil {
-		b.parser.errs = append(b.parser.errs, err)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
-	if b.parser.token.Type != lex.TOKEN_LC {
+	if blockParser.parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			b.parser.errorMsgPrefix(), b.parser.token.Description)
-		b.parser.errs = append(b.parser.errs, err)
+			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
-	b.Next() // skip {  , must be case
-	if b.parser.token.Type != lex.TOKEN_CASE {
+	blockParser.Next() // skip {  , must be case
+	if blockParser.parser.token.Type != lex.TOKEN_CASE {
 		err = fmt.Errorf("%s expect 'case',but '%s'",
-			b.parser.errorMsgPrefix(), b.parser.token.Description)
-		b.parser.errs = append(b.parser.errs, err)
+			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
+		return nil, err
+	}
+	s := &ast.StatementSwitchTemplate{}
+	s.Pos = pos
+	s.Condition = condition
+	for blockParser.parser.token.Type == lex.TOKEN_CASE {
+		blockParser.Next() // skip case
+		ts, err := blockParser.parser.parseTypes()
+		if err != nil {
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
+			return s, err
+		}
+		if blockParser.parser.token.Type != lex.TOKEN_COLON {
+			err = fmt.Errorf("%s expect ':',but '%s'",
+				blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
+			return s, err
+		}
+		blockParser.Next() // skip :
+		var block *ast.Block
+		if blockParser.parser.token.Type != lex.TOKEN_CASE &&
+			blockParser.parser.token.Type != lex.TOKEN_DEFAULT &&
+			blockParser.parser.token.Type != lex.TOKEN_RC {
+			block = &ast.Block{}
+			block.IsSwitchStatementTopBlock = true
+			blockParser.parseStatementList(block, false)
+
+		}
+		s.StatementSwitchCases = append(s.StatementSwitchCases, &ast.StatementSwitchTemplateCase{
+			Matches: ts,
+			Block:   block,
+		})
+	}
+	//default value
+	if blockParser.parser.token.Type == lex.TOKEN_DEFAULT {
+		blockParser.Next() // skip default key word
+		if blockParser.parser.token.Type != lex.TOKEN_COLON {
+			err = fmt.Errorf("%s missing clon after default",
+				blockParser.parser.errorMsgPrefix())
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
+		} else {
+			blockParser.Next()
+		}
+		if blockParser.parser.token.Type != lex.TOKEN_RC {
+			block := ast.Block{}
+			block.IsSwitchStatementTopBlock = true
+			blockParser.parseStatementList(&block, false)
+			s.Default = &block
+		}
+	}
+	if blockParser.parser.token.Type != lex.TOKEN_RC {
+		err = fmt.Errorf("%s expect '}',but '%s'",
+			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
+		return s, err
+	}
+	blockParser.Next() //  skip }
+	return s, nil
+}
+
+func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
+	pos := blockParser.parser.mkPos()
+	blockParser.Next() // skip switch key word
+	if blockParser.parser.token.Type == lex.TOKEN_T {
+		return blockParser.parseSwitchTemplate(pos)
+	}
+	condition, err := blockParser.parser.ExpressionParser.parseExpression(false)
+	if err != nil {
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
+		return nil, err
+	}
+	if blockParser.parser.token.Type != lex.TOKEN_LC {
+		err = fmt.Errorf("%s expect '{',but '%s'",
+			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
+		return nil, err
+	}
+	blockParser.Next() // skip {  , must be case
+	if blockParser.parser.token.Type != lex.TOKEN_CASE {
+		err = fmt.Errorf("%s expect 'case',but '%s'",
+			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
 	s := &ast.StatementSwitch{}
 	s.Pos = pos
 	s.Condition = condition
-	for b.parser.token.Type == lex.TOKEN_CASE {
-		b.Next() // skip case
-		es, err := b.parser.ExpressionParser.parseExpressions()
+	for blockParser.parser.token.Type == lex.TOKEN_CASE {
+		blockParser.Next() // skip case
+		es, err := blockParser.parser.ExpressionParser.parseExpressions()
 		if err != nil {
-			b.parser.errs = append(b.parser.errs, err)
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return s, err
 		}
-		if b.parser.token.Type != lex.TOKEN_COLON {
+		if blockParser.parser.token.Type != lex.TOKEN_COLON {
 			err = fmt.Errorf("%s expect ':',but '%s'",
-				b.parser.errorMsgPrefix(), b.parser.token.Description)
-			b.parser.errs = append(b.parser.errs, err)
+				blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return s, err
 		}
-		b.Next() // skip :
+		blockParser.Next() // skip :
 		var block *ast.Block
-		if b.parser.token.Type != lex.TOKEN_CASE &&
-			b.parser.token.Type != lex.TOKEN_DEFAULT &&
-			b.parser.token.Type != lex.TOKEN_RC {
+		if blockParser.parser.token.Type != lex.TOKEN_CASE &&
+			blockParser.parser.token.Type != lex.TOKEN_DEFAULT &&
+			blockParser.parser.token.Type != lex.TOKEN_RC {
 			block = &ast.Block{}
 			block.IsSwitchStatementTopBlock = true
-			b.parseStatementList(block, false)
+			blockParser.parseStatementList(block, false)
 
 		}
 		s.StatementSwitchCases = append(s.StatementSwitchCases, &ast.StatementSwitchCase{
@@ -60,28 +140,28 @@ func (b *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 		})
 	}
 	//default value
-	if b.parser.token.Type == lex.TOKEN_DEFAULT {
-		b.Next() // skip default key word
-		if b.parser.token.Type != lex.TOKEN_COLON {
+	if blockParser.parser.token.Type == lex.TOKEN_DEFAULT {
+		blockParser.Next() // skip default key word
+		if blockParser.parser.token.Type != lex.TOKEN_COLON {
 			err = fmt.Errorf("%s missing clon after default",
-				b.parser.errorMsgPrefix())
-			b.parser.errs = append(b.parser.errs, err)
+				blockParser.parser.errorMsgPrefix())
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		} else {
-			b.Next()
+			blockParser.Next()
 		}
-		if b.parser.token.Type != lex.TOKEN_RC {
+		if blockParser.parser.token.Type != lex.TOKEN_RC {
 			block := ast.Block{}
 			block.IsSwitchStatementTopBlock = true
-			b.parseStatementList(&block, false)
+			blockParser.parseStatementList(&block, false)
 			s.Default = &block
 		}
 	}
-	if b.parser.token.Type != lex.TOKEN_RC {
+	if blockParser.parser.token.Type != lex.TOKEN_RC {
 		err = fmt.Errorf("%s expect '}',but '%s'",
-			b.parser.errorMsgPrefix(), b.parser.token.Description)
-		b.parser.errs = append(b.parser.errs, err)
+			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return s, err
 	}
-	b.Next() //  skip }
+	blockParser.Next() //  skip }
 	return s, nil
 }

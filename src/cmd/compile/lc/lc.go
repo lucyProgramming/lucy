@@ -11,7 +11,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
-	//	"gitee.com/yuyang-fine/lucy/src/cmd/compile/optimizer"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
 )
 

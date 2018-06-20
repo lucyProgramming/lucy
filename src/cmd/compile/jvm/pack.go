@@ -97,7 +97,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel
 }
 
 func (c *TypeConverterAndPrimitivePacker) packPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
-	copyOP(code, c.packPrimitivesBytes(class, t)...)
+	copyOPs(code, c.packPrimitivesBytes(class, t)...)
 }
 
 func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLevel, t *ast.Type) (bs []byte) {

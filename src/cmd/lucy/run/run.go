@@ -185,11 +185,11 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 	if err != nil { // shit happens
 		return
 	}
-	fism := make(map[string]os.FileInfo)
+	fisM := make(map[string]os.FileInfo)
 	for _, v := range fis {
 		if strings.HasSuffix(v.Name(), ".lucy") {
 			lucyFiles = append(lucyFiles, filepath.Join(sourceFileDir, v.Name()))
-			fism[v.Name()] = v
+			fisM[v.Name()] = v
 		}
 	}
 	if len(lucyFiles) == 0 {
@@ -202,8 +202,8 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 	if r.Flags.forceReBuild {
 		return
 	}
-	destDir := filepath.Join(lucyPath, "class", packageName)
-	bs, err := ioutil.ReadFile(filepath.Join(destDir, common.LUCY_MAINTAIN_FILE))
+	destinationDir := filepath.Join(lucyPath, "class", packageName)
+	bs, err := ioutil.ReadFile(filepath.Join(destinationDir, common.LUCY_MAINTAIN_FILE))
 	if err != nil { // maintain file is missing
 		err = nil
 		return
@@ -215,7 +215,7 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 		return
 	}
 	// new or add
-	for _, v := range fism {
+	for _, v := range fisM {
 		if meta.CompiledFrom == nil {
 			return
 		}
@@ -228,21 +228,21 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 	}
 	// file missing
 	for f := range meta.CompiledFrom {
-		_, ok := fism[f]
+		_, ok := fisM[f]
 		if ok == false {
 			return
 		}
 	}
 	// if class file is missing
-	fis, err = ioutil.ReadDir(destDir)
-	fism = make(map[string]os.FileInfo)
+	fis, err = ioutil.ReadDir(destinationDir)
+	fisM = make(map[string]os.FileInfo)
 	for _, v := range fis {
 		if strings.HasSuffix(v.Name(), ".class") {
-			fism[v.Name()] = v
+			fisM[v.Name()] = v
 		}
 	}
 	for _, v := range meta.Classes {
-		_, ok := fism[v]
+		_, ok := fisM[v]
 		if ok == false {
 			return
 		}
@@ -423,9 +423,9 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 	//build this package
 	//read  files
 	destinationDir := filepath.Join(lucyPath, common.DIR_FOR_COMPILED_CLASS, packageName)
-	// mkdir all
-	finfo, _ := os.Stat(destinationDir)
-	if finfo == nil {
+	// mkDir all
+	fileInfo, _ := os.Stat(destinationDir)
+	if fileInfo == nil {
 		err = os.MkdirAll(destinationDir, 0755)
 		if err != nil {
 			return

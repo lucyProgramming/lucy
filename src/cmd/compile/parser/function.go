@@ -15,8 +15,8 @@ func (p *FunctionParser) Next() {
 	p.parser.Next()
 }
 
-func (p *FunctionParser) consume(untils map[int]bool) {
-	p.parser.consume(untils)
+func (p *FunctionParser) consume(until map[int]bool) {
+	p.parser.consume(until)
 }
 
 func (p *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
