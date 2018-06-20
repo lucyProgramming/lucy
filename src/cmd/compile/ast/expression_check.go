@@ -205,7 +205,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		fallthrough
 	case EXPRESSION_TYPE_NEGATIVE:
 		fallthrough
-	case EXPRESSION_TYPE_BITWISE_NOT:
+	case EXPRESSION_TYPE_BIT_NOT:
 		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
 			Types = []*Type{tt}

@@ -108,11 +108,11 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 			errs = append(errs, err)
 			continue
 		}
-		if PackageBeenCompile.Block.TypeAlias == nil {
-			PackageBeenCompile.Block.TypeAlias = make(map[string]*Type)
+		if PackageBeenCompile.Block.TypeAliases == nil {
+			PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
 		}
 		v.Type.Alias = v.Name
-		PackageBeenCompile.Block.TypeAlias[v.Name] = v.Type
+		PackageBeenCompile.Block.TypeAliases[v.Name] = v.Type
 	}
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))

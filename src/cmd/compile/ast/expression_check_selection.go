@@ -24,7 +24,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		return nil
 	}
 	var err error
-	if t.Type == VARIABLE_TYPE_PACKAGE {
+	switch t.Type {
+	case VARIABLE_TYPE_PACKAGE:
 		d, ok := t.Package.Block.NameExists(selection.Name)
 		if ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
@@ -80,7 +81,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
 		*errs = append(*errs, err)
 		return nil
-	} else if t.Type == VARIABLE_TYPE_OBJECT { // object
+	case VARIABLE_TYPE_OBJECT:
 		if selection.Name == SUPER_FIELD_NAME {
 			if t.Class.Name == JAVA_ROOT_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
@@ -115,7 +116,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			selection.Field = field
 			return t
 		}
-	} else { // class
+	case VARIABLE_TYPE_CLASS:
 		if selection.Name == SUPER_FIELD_NAME {
 			if t.Class.Name == JAVA_ROOT_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",

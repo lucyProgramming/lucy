@@ -55,9 +55,9 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	state.pushStack(class, state.newObjectVariableType(java_root_class))
 	remainStack = 2
 	op = []byte{}
-	if index.Expression.ExpressionValue.Map.V.IsPointer() == false {
+	if index.Expression.ExpressionValue.Map.Value.IsPointer() == false {
 		op = append(op,
-			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.V)...)
+			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.Value)...)
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
@@ -68,7 +68,7 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	op = append(op, bs4...)
-	target = index.Expression.ExpressionValue.Map.V
+	target = index.Expression.ExpressionValue.Map.Value
 	className = java_hashmap_class
 	return
 }

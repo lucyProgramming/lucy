@@ -12,7 +12,6 @@ type MultiValuePacker struct {
 func (a *MultiValuePacker) storeArrayListAutoVar(code *cg.AttributeCode, context *Context) {
 	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
 		context.function.AutoVariableForMultiReturn.Offset)...)
-
 }
 
 func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,

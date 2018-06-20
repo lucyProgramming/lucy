@@ -215,7 +215,7 @@ func (i *Import) GetAccessName() (string, error) {
 		}
 	}
 	//check if legal
-	if false == packageAliasReg.Match([]byte(name)) {
+	if false == packageAccessNameReg.Match([]byte(name)) {
 		return "", fmt.Errorf("%s is not legal package name", name)
 	}
 	i.AccessName = name

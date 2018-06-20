@@ -6,15 +6,15 @@ import (
 )
 
 //||
-func (ep *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) {
-	e, err := ep.parseLogicalAndExpression()
+func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseLogicalAndExpression()
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_LOGICAL_OR {
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseLogicalAndExpression()
+	for expressionParser.parser.token.Type == lex.TOKEN_LOGICAL_OR {
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseLogicalAndExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -31,15 +31,15 @@ func (ep *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) 
 }
 
 // &&
-func (ep *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error) {
-	e, err := ep.parseOrExpression()
+func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseOrExpression()
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_LOGICAL_AND {
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseOrExpression()
+	for expressionParser.parser.token.Type == lex.TOKEN_LOGICAL_AND {
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseOrExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -56,15 +56,15 @@ func (ep *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error)
 }
 
 //  |
-func (ep *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
-	e, err := ep.parseXorExpression()
+func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseXorExpression()
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_OR {
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseXorExpression()
+	for expressionParser.parser.token.Type == lex.TOKEN_OR {
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseXorExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -81,16 +81,16 @@ func (ep *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
 }
 
 // ^
-func (ep *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
-	e, err := ep.parseAndExpression()
+func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseAndExpression()
 	if err != nil {
 		return nil, err
 	}
 
-	for ep.parser.token.Type == lex.TOKEN_XOR {
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseAndExpression()
+	for expressionParser.parser.token.Type == lex.TOKEN_XOR {
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseAndExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -107,15 +107,15 @@ func (ep *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
 }
 
 // &
-func (ep *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
-	e, err := ep.parseEqualExpression()
+func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseEqualExpression()
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_AND {
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseEqualExpression()
+	for expressionParser.parser.token.Type == lex.TOKEN_AND {
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseEqualExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -132,18 +132,18 @@ func (ep *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
 }
 
 // == and !=
-func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
-	e, err := ep.parseRelationExpression()
+func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseRelationExpression()
 	if err != nil {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_EQUAL ||
-		ep.parser.token.Type == lex.TOKEN_NE) && ep.parser.token.Type != lex.TOKEN_EOF {
-		typ = ep.parser.token.Type
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseRelationExpression()
+	for (expressionParser.parser.token.Type == lex.TOKEN_EQUAL ||
+		expressionParser.parser.token.Type == lex.TOKEN_NE) && expressionParser.parser.token.Type != lex.TOKEN_EOF {
+		typ = expressionParser.parser.token.Type
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseRelationExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -164,18 +164,18 @@ func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
 }
 
 // > < >= <=
-func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
-	e, err := ep.parseShiftExpression()
+func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseShiftExpression()
 	if err != nil {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_GT || ep.parser.token.Type == lex.TOKEN_GE ||
-		ep.parser.token.Type == lex.TOKEN_LT || ep.parser.token.Type == lex.TOKEN_LE) && ep.parser.token.Type != lex.TOKEN_EOF {
-		typ = ep.parser.token.Type
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseShiftExpression()
+	for (expressionParser.parser.token.Type == lex.TOKEN_GT || expressionParser.parser.token.Type == lex.TOKEN_GE ||
+		expressionParser.parser.token.Type == lex.TOKEN_LT || expressionParser.parser.token.Type == lex.TOKEN_LE) && expressionParser.parser.token.Type != lex.TOKEN_EOF {
+		typ = expressionParser.parser.token.Type
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseShiftExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -200,19 +200,19 @@ func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
 }
 
 // << >>
-func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
-	e, err := ep.parseAddExpression()
+func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseAddExpression()
 	if err != nil {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_LEFT_SHIFT ||
-		ep.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) &&
-		ep.parser.token.Type != lex.TOKEN_EOF {
-		typ = ep.parser.token.Type
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseAddExpression()
+	for (expressionParser.parser.token.Type == lex.TOKEN_LEFT_SHIFT ||
+		expressionParser.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) &&
+		expressionParser.parser.token.Type != lex.TOKEN_EOF {
+		typ = expressionParser.parser.token.Type
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseAddExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -233,18 +233,18 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 }
 
 // + -
-func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
-	e, err := ep.parseMulExpression()
+func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseMulExpression()
 	if err != nil {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_ADD || ep.parser.token.Type == lex.TOKEN_SUB) &&
-		ep.parser.token.Type != lex.TOKEN_EOF {
-		typ = ep.parser.token.Type
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseMulExpression()
+	for (expressionParser.parser.token.Type == lex.TOKEN_ADD || expressionParser.parser.token.Type == lex.TOKEN_SUB) &&
+		expressionParser.parser.token.Type != lex.TOKEN_EOF {
+		typ = expressionParser.parser.token.Type
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseMulExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -265,19 +265,19 @@ func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
 }
 
 // * / %
-func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
-	e, err := ep.parseOneExpression(false)
+func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
+	e, err := expressionParser.parseOneExpression(false)
 	if err != nil {
 		return nil, err
 	}
 	var typ int
-	for (ep.parser.token.Type == lex.TOKEN_MUL ||
-		ep.parser.token.Type == lex.TOKEN_DIV ||
-		ep.parser.token.Type == lex.TOKEN_MOD) && ep.parser.token.Type != lex.TOKEN_EOF {
-		typ = ep.parser.token.Type
-		pos := ep.parser.mkPos()
-		ep.Next()
-		e2, err := ep.parseOneExpression(false)
+	for (expressionParser.parser.token.Type == lex.TOKEN_MUL ||
+		expressionParser.parser.token.Type == lex.TOKEN_DIV ||
+		expressionParser.parser.token.Type == lex.TOKEN_MOD) && expressionParser.parser.token.Type != lex.TOKEN_EOF {
+		typ = expressionParser.parser.token.Type
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next()
+		e2, err := expressionParser.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}

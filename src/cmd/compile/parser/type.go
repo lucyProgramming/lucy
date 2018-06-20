@@ -7,21 +7,21 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (p *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
+func (parser *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 	var err error
 	var ret *ast.Type
-	switch p.token.Type {
+	switch parser.token.Type {
 	case lex.TOKEN_LB:
-		pos := p.mkPos()
+		pos := parser.mkPos()
 		if len(pre) > 0 {
-			p.Next()
-			if p.token.Type != lex.TOKEN_RB {
+			parser.Next()
+			if parser.token.Type != lex.TOKEN_RB {
 				// [ and ] not match
-				err = fmt.Errorf("%s '[' and ']' not match", p.errorMsgPrefix())
-				p.errs = append(p.errs, err)
+				err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
+				parser.errs = append(parser.errs, err)
 				return nil, err
 			}
-			p.Next() //skip ]
+			parser.Next() //skip ]
 			ret = &ast.Type{
 				Pos:       pos,
 				Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
@@ -29,16 +29,16 @@ func (p *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 			}
 			break
 		}
-		p.Next()
-		if p.token.Type != lex.TOKEN_RB {
+		parser.Next()
+		if parser.token.Type != lex.TOKEN_RB {
 			// [ and ] not match
-			err = fmt.Errorf("%s '[' and ']' not match", p.errorMsgPrefix())
-			p.errs = append(p.errs, err)
+			err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
+			parser.errs = append(parser.errs, err)
 			return nil, err
 		}
 		//lookahead
-		p.Next() //skip ]
-		t, err := p.parseType()
+		parser.Next() //skip ]
+		t, err := parser.parseType()
 		if err != nil {
 			return nil, err
 		}
@@ -47,94 +47,94 @@ func (p *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 		ret.Type = ast.VARIABLE_TYPE_ARRAY
 		ret.ArrayType = t
 	case lex.TOKEN_BOOL:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_BOOL,
 			Pos:  pos,
 		}
 	case lex.TOKEN_BYTE:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_BYTE,
 			Pos:  pos,
 		}
 	case lex.TOKEN_SHORT:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_SHORT,
 			Pos:  pos,
 		}
 	case lex.TOKEN_INT:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_INT,
 			Pos:  pos,
 		}
 	case lex.TOKEN_FLOAT:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_FLOAT,
 			Pos:  pos,
 		}
 	case lex.TOKEN_DOUBLE:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_DOUBLE,
 			Pos:  pos,
 		}
 	case lex.TOKEN_LONG:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_LONG,
 			Pos:  pos,
 		}
 	case lex.TOKEN_STRING:
-		pos := p.mkPos()
-		p.Next()
+		pos := parser.mkPos()
+		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_STRING,
 			Pos:  pos,
 		}
 	case lex.TOKEN_IDENTIFIER:
-		ret, err = p.parseIdentifierType()
+		ret, err = parser.parseIdentifierType()
 
 	case lex.TOKEN_MAP:
-		pos := p.mkPos()
-		p.Next() // skip map key word
-		if p.token.Type != lex.TOKEN_LC {
+		pos := parser.mkPos()
+		parser.Next() // skip map key word
+		if parser.token.Type != lex.TOKEN_LC {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
-				p.errorMsgPrefix(), p.token.Description)
+				parser.errorMsgPrefix(), parser.token.Description)
 		}
-		p.Next() // skip {
+		parser.Next() // skip {
 		var k, v *ast.Type
-		k, err = p.parseType()
+		k, err = parser.parseType()
 		if err != nil {
 			return nil, err
 		}
-		if p.token.Type != lex.TOKEN_ARROW {
+		if parser.token.Type != lex.TOKEN_ARROW {
 			return nil, fmt.Errorf("%s expect '->',but '%s'",
-				p.errorMsgPrefix(), p.token.Description)
+				parser.errorMsgPrefix(), parser.token.Description)
 		}
-		p.Next() // skip ->
-		v, err := p.parseType()
+		parser.Next() // skip ->
+		v, err := parser.parseType()
 		if err != nil {
 			return nil, err
 		}
-		if p.token.Type != lex.TOKEN_RC {
+		if parser.token.Type != lex.TOKEN_RC {
 			return nil, fmt.Errorf("%s expect '}',but '%s'",
-				p.errorMsgPrefix(), p.token.Description)
+				parser.errorMsgPrefix(), parser.token.Description)
 		}
-		p.Next()
+		parser.Next()
 		m := &ast.Map{
-			K: k,
-			V: v,
+			Key:   k,
+			Value: v,
 		}
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_MAP,
@@ -142,59 +142,59 @@ func (p *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 			Pos:  pos,
 		}
 	case lex.TOKEN_T:
-		pos := p.mkPos()
+		pos := parser.mkPos()
 		ret = &ast.Type{
 			Type: ast.VARIABLE_TYPE_T,
 			Pos:  pos,
-			Name: p.token.Data.(string),
+			Name: parser.token.Data.(string),
 		}
-		p.Next()
+		parser.Next()
 	default:
 		err = fmt.Errorf("%s unkown type,begining token is '%s'",
-			p.errorMsgPrefix(), p.token.Description)
+			parser.errorMsgPrefix(), parser.token.Description)
 	}
 	if err != nil {
-		p.errs = append(p.errs, err)
+		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	if p.token.Type == lex.TOKEN_LB {
-		return p.parseType(ret)
+	if parser.token.Type == lex.TOKEN_LB {
+		return parser.parseType(ret)
 	} else {
 		return ret, err
 	}
 
 }
 
-func (p *Parser) isValidTypeBegin() bool {
-	return p.token.Type == lex.TOKEN_LB ||
-		p.token.Type == lex.TOKEN_BOOL ||
-		p.token.Type == lex.TOKEN_BYTE ||
-		p.token.Type == lex.TOKEN_SHORT ||
-		p.token.Type == lex.TOKEN_INT ||
-		p.token.Type == lex.TOKEN_FLOAT ||
-		p.token.Type == lex.TOKEN_DOUBLE ||
-		p.token.Type == lex.TOKEN_LONG ||
-		p.token.Type == lex.TOKEN_STRING ||
-		p.token.Type == lex.TOKEN_MAP ||
-		p.token.Type == lex.TOKEN_IDENTIFIER ||
-		p.token.Type == lex.TOKEN_T
+func (parser *Parser) isValidTypeBegin() bool {
+	return parser.token.Type == lex.TOKEN_LB ||
+		parser.token.Type == lex.TOKEN_BOOL ||
+		parser.token.Type == lex.TOKEN_BYTE ||
+		parser.token.Type == lex.TOKEN_SHORT ||
+		parser.token.Type == lex.TOKEN_INT ||
+		parser.token.Type == lex.TOKEN_FLOAT ||
+		parser.token.Type == lex.TOKEN_DOUBLE ||
+		parser.token.Type == lex.TOKEN_LONG ||
+		parser.token.Type == lex.TOKEN_STRING ||
+		parser.token.Type == lex.TOKEN_MAP ||
+		parser.token.Type == lex.TOKEN_IDENTIFIER ||
+		parser.token.Type == lex.TOKEN_T
 
 }
-func (p *Parser) parseIdentifierType() (*ast.Type, error) {
-	name := p.token.Data.(string)
+func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
+	name := parser.token.Data.(string)
 	ret := &ast.Type{
-		Pos:  p.mkPos(),
+		Pos:  parser.mkPos(),
 		Type: ast.VARIABLE_TYPE_NAME,
 	}
-	p.Next() // skip name identifier
-	for p.token.Type == lex.TOKEN_DOT {
-		p.Next() // skip .
-		if p.token.Type != lex.TOKEN_IDENTIFIER {
+	parser.Next() // skip name identifier
+	for parser.token.Type == lex.TOKEN_DOT {
+		parser.Next() // skip .
+		if parser.token.Type != lex.TOKEN_IDENTIFIER {
 			return nil, fmt.Errorf("%s not a identifier after dot",
-				p.errorMsgPrefix())
+				parser.errorMsgPrefix())
 		}
-		name += "." + p.token.Data.(string)
-		p.Next() // if
+		name += "." + parser.token.Data.(string)
+		parser.Next() // if
 	}
 	ret.Name = name
 	return ret, nil

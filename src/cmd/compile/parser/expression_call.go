@@ -7,22 +7,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
-	pos := ep.parser.mkPos()
-	ep.Next() // skip (
+	pos := expressionParser.parser.mkPos()
+	expressionParser.Next() // skip (
 	args := []*ast.Expression{}
-	if ep.parser.token.Type != lex.TOKEN_RP { //a(123)
-		args, err = ep.parseExpressions()
+	if expressionParser.parser.token.Type != lex.TOKEN_RP { //a(123)
+		args, err = expressionParser.parseExpressions()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if ep.parser.token.Type != lex.TOKEN_RP {
+	if expressionParser.parser.token.Type != lex.TOKEN_RP {
 		return nil, fmt.Errorf("%s except ')' ,but '%s'",
-			ep.parser.errorMsgPrefix(),
-			ep.parser.token.Description)
+			expressionParser.parser.errorMsgPrefix(),
+			expressionParser.parser.token.Description)
 	}
 	var result ast.Expression
 	if e.Type == ast.EXPRESSION_TYPE_IDENTIFIER {
@@ -31,7 +31,7 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 		call.Expression = e
 		call.Args = args
 		result.Data = call
-		result.Pos = ep.parser.mkPos()
+		result.Pos = expressionParser.parser.mkPos()
 	} else if e.Type == ast.EXPRESSION_TYPE_SELECT {
 		result.Type = ast.EXPRESSION_TYPE_METHOD_CALL
 		call := &ast.ExpressionMethodCall{}
@@ -40,25 +40,25 @@ func (ep *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Express
 		call.Args = args
 		call.Name = index.Name
 		result.Data = call
-		result.Pos = ep.parser.mkPos()
+		result.Pos = expressionParser.parser.mkPos()
 	} else {
 		return nil, fmt.Errorf("%s can`t make call on '%s'",
-			ep.parser.errorMsgPrefix(), e.OpName())
+			expressionParser.parser.errorMsgPrefix(), e.OpName())
 	}
-	ep.Next() // skip )
-	if ep.parser.token.Type == lex.TOKEN_LT {
-		ep.Next() // skip <
-		ts, err := ep.parser.parseTypes()
+	expressionParser.Next() // skip )
+	if expressionParser.parser.token.Type == lex.TOKEN_LT {
+		expressionParser.Next() // skip <
+		ts, err := expressionParser.parser.parseTypes()
 		if err != nil {
-			ep.parser.consume(untilGt)
-			ep.Next()
+			expressionParser.parser.consume(untilGt)
+			expressionParser.Next()
 		} else {
-			if ep.parser.token.Type != lex.TOKEN_GT {
-				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s '<' and '>' not match",
-					ep.parser.errorMsgPrefix()))
-				ep.parser.consume(untilGt)
+			if expressionParser.parser.token.Type != lex.TOKEN_GT {
+				expressionParser.parser.errs = append(expressionParser.parser.errs, fmt.Errorf("%s '<' and '>' not match",
+					expressionParser.parser.errorMsgPrefix()))
+				expressionParser.parser.consume(untilGt)
 			}
-			ep.Next()
+			expressionParser.Next()
 			if result.Type == ast.EXPRESSION_TYPE_FUNCTION_CALL {
 				result.Data.(*ast.ExpressionFunctionCall).ParameterTypes = ts
 			} else {

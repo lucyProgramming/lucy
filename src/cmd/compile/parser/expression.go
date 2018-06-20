@@ -11,14 +11,14 @@ type ExpressionParser struct {
 	parser *Parser
 }
 
-func (ep *ExpressionParser) Next() {
-	ep.parser.Next()
+func (expressionParser *ExpressionParser) Next() {
+	expressionParser.parser.Next()
 }
 
-func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
-	for ep.parser.token.Type != lex.TOKEN_EOF {
-		e, err := ep.parseExpression(false)
+	for expressionParser.parser.token.Type != lex.TOKEN_EOF {
+		e, err := expressionParser.parseExpression(false)
 		if err != nil {
 			return es, err
 		}
@@ -27,24 +27,24 @@ func (ep *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 		} else {
 			es = append(es, e)
 		}
-		if ep.parser.token.Type != lex.TOKEN_COMMA {
+		if expressionParser.parser.token.Type != lex.TOKEN_COMMA {
 			break
 		}
 		// == ,
-		ep.Next() // skip ,
+		expressionParser.Next() // skip ,
 	}
 	return es, nil
 }
 
 //parse assign expression
-func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
-	left, err := ep.parseTernaryExpression() //
+func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
+	left, err := expressionParser.parseTernaryExpression() //
 	if err != nil {
 		return nil, err
 	}
-	for ep.parser.token.Type == lex.TOKEN_COMMA && statementLevel { // read more
-		ep.Next()                                 //  skip comma
-		left2, err := ep.parseTernaryExpression() //
+	for expressionParser.parser.token.Type == lex.TOKEN_COMMA && statementLevel { // read more
+		expressionParser.Next()                                 //  skip comma
+		left2, err := expressionParser.parseTernaryExpression() //
 		if err != nil {
 			return nil, err
 		}
@@ -64,14 +64,14 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 			es := left.Data.([]*ast.Expression)
 			left = es[0]
 			if len(es) > 1 {
-				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s expect one expression on left",
-					ep.parser.errorMsgPrefix(es[1].Pos)))
+				expressionParser.parser.errs = append(expressionParser.parser.errs, fmt.Errorf("%s expect one expression on left",
+					expressionParser.parser.errorMsgPrefix(es[1].Pos)))
 			}
 		}
 	}
 	mkExpression := func(typ int, multi bool) (*ast.Expression, error) {
-		pos := ep.parser.mkPos()
-		ep.Next() // skip = :=
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next() // skip = :=
 		result := &ast.Expression{}
 		result.Type = typ
 		bin := &ast.ExpressionBinary{}
@@ -79,7 +79,7 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 		bin.Left = left
 		result.Pos = pos
 		if multi {
-			es, err := ep.parseExpressions()
+			es, err := expressionParser.parseExpressions()
 			if err != nil {
 				return result, err
 			}
@@ -87,12 +87,12 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 			bin.Right.Type = ast.EXPRESSION_TYPE_LIST
 			bin.Right.Data = es
 		} else {
-			bin.Right, err = ep.parseExpression(false)
+			bin.Right, err = expressionParser.parseExpression(false)
 		}
 		return result, err
 	}
 	// := += -= *= /= %=
-	switch ep.parser.token.Type {
+	switch expressionParser.parser.token.Type {
 	case lex.TOKEN_ASSIGN:
 		return mkExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
 	case lex.TOKEN_COLON_ASSIGN:
@@ -132,24 +132,24 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 	return left, nil
 }
 
-func (ep *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, error) {
-	t, err := ep.parser.parseType()
+func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, error) {
+	t, err := expressionParser.parser.parseType()
 	if err != nil {
 		return nil, err
 	}
-	if ep.parser.token.Type != lex.TOKEN_LP {
-		return nil, fmt.Errorf("%s not '(' after a type", ep.parser.errorMsgPrefix())
+	if expressionParser.parser.token.Type != lex.TOKEN_LP {
+		return nil, fmt.Errorf("%s not '(' after a type", expressionParser.parser.errorMsgPrefix())
 	}
-	pos := ep.parser.mkPos()
-	ep.Next() // skip (
-	e, err := ep.parseExpression(false)
+	pos := expressionParser.parser.mkPos()
+	expressionParser.Next() // skip (
+	e, err := expressionParser.parseExpression(false)
 	if err != nil {
 		return nil, err
 	}
-	if ep.parser.token.Type != lex.TOKEN_RP {
-		return nil, fmt.Errorf("%s '(' and ')' not match", ep.parser.errorMsgPrefix())
+	if expressionParser.parser.token.Type != lex.TOKEN_RP {
+		return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
 	}
-	ep.Next() // skip )
+	expressionParser.Next() // skip )
 	return &ast.Expression{
 		Type: ast.EXPRESSION_TYPE_CHECK_CAST,
 		Data: &ast.ExpressionTypeConversion{

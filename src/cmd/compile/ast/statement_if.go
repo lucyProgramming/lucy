@@ -45,7 +45,6 @@ func (s *StatementIF) check(father *Block) []error {
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
 	}
-
 	s.Block.inherit(&s.ConditionBlock)
 	errs = append(errs, s.Block.checkStatements()...)
 	for _, v := range s.ElseIfList {

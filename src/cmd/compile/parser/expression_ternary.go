@@ -6,28 +6,28 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseTernaryExpression() (*ast.Expression, error) {
-	left, err := ep.parseLogicalOrExpression()
+func (expressionParser *ExpressionParser) parseTernaryExpression() (*ast.Expression, error) {
+	left, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, err
 	}
-	if ep.parser.token.Type != lex.TOKEN_QUESTION {
+	if expressionParser.parser.token.Type != lex.TOKEN_QUESTION {
 		return left, nil
 	}
 	newExpression := &ast.Expression{}
-	newExpression.Pos = ep.parser.mkPos()
+	newExpression.Pos = expressionParser.parser.mkPos()
 	newExpression.Type = ast.EXPRESSION_TYPE_TERNARY
-	ep.Next() // skip ?
-	True, err := ep.parseExpression(false)
+	expressionParser.Next() // skip ?
+	True, err := expressionParser.parseExpression(false)
 	if err != nil {
 		return left, nil
 	}
-	if ep.parser.token.Type != lex.TOKEN_COLON {
+	if expressionParser.parser.token.Type != lex.TOKEN_COLON {
 		return left, fmt.Errorf("%s expect ':',but '%s'",
-			ep.parser.errorMsgPrefix(), ep.parser.token.Description)
+			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
-	ep.Next() // skip :
-	False, err := ep.parseExpression(false)
+	expressionParser.Next() // skip :
+	False, err := expressionParser.parseExpression(false)
 	if err != nil {
 		return left, nil
 	}

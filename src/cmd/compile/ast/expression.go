@@ -71,7 +71,7 @@ const (
 	//
 	EXPRESSION_TYPE_NEGATIVE
 	EXPRESSION_TYPE_NOT
-	EXPRESSION_TYPE_BITWISE_NOT
+	EXPRESSION_TYPE_BIT_NOT
 	//
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NEW
@@ -195,7 +195,7 @@ func (e *Expression) OpName() string {
 		return "ternary(?:)"
 	case EXPRESSION_TYPE_NOT:
 		return "not(!)"
-	case EXPRESSION_TYPE_BITWISE_NOT:
+	case EXPRESSION_TYPE_BIT_NOT:
 		return "~"
 	case EXPRESSION_TYPE_IDENTIFIER:
 		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifier).Name)
@@ -364,7 +364,7 @@ func (e *Expression) canBeUsedAsCondition() bool {
 		e.Type == EXPRESSION_TYPE_PRE_DECREMENT ||
 		e.Type == EXPRESSION_TYPE_NEGATIVE ||
 		e.Type == EXPRESSION_TYPE_NOT ||
-		e.Type == EXPRESSION_TYPE_BITWISE_NOT ||
+		e.Type == EXPRESSION_TYPE_BIT_NOT ||
 		e.Type == EXPRESSION_TYPE_IDENTIFIER ||
 		e.Type == EXPRESSION_TYPE_NEW ||
 		e.Type == EXPRESSION_TYPE_CHECK_CAST ||

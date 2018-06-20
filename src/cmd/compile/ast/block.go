@@ -25,7 +25,7 @@ type Block struct {
 	Enums                      map[string]*Enum
 	EnumNames                  map[string]*EnumName
 	Labels                     map[string]*StatementLabel
-	TypeAlias                  map[string]*Type
+	TypeAliases                map[string]*Type
 	Variables                  map[string]*Variable
 	ClosureFunctions           map[string]*Function //in "Functions" too
 
@@ -71,8 +71,8 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
-	if b.TypeAlias != nil {
-		if t, ok := b.TypeAlias[name]; ok {
+	if b.TypeAliases != nil {
+		if t, ok := b.TypeAliases[name]; ok {
 			return t, true
 		}
 	}
@@ -116,7 +116,7 @@ func (b *Block) searchType(name string) interface{} {
 			if t, ok := bb.Enums[name]; ok {
 				return t
 			}
-			if t, ok := bb.TypeAlias[name]; ok {
+			if t, ok := bb.TypeAliases[name]; ok {
 				return t
 			}
 		}
@@ -260,31 +260,37 @@ func (b *Block) checkConstants() []error {
 	}
 	return errs
 }
-
-func (b *Block) Insert(name string, pos *Position, d interface{}) error {
-	//fmt.Println(name, pos)
-	// global var Insert into block
-	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
-		b := PackageBeenCompile.Block
-		if vv, ok := b.Variables[name]; ok {
-			errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
-				errMsgPrefix(pos), name)
-			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(vv.Pos))
-			return fmt.Errorf(errMsg)
-		}
-		b.Variables[name] = v
-		v.IsGlobal = true // it`s global
-		return nil
+func (b *Block) checkTypeElementIfInserted(name string, pos *Position) error {
+	if b.Classes == nil {
+		b.Classes = make(map[string]*Class)
 	}
-	if name == "" {
-		return fmt.Errorf("%s name is null string", errMsgPrefix(pos))
+	if c, ok := b.Classes[name]; ok {
+		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
+			errMsgPrefix(pos), name)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
+		return fmt.Errorf(errMsg)
 	}
-	if name == THIS {
-		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)
+	if b.Enums == nil {
+		b.Enums = make(map[string]*Enum)
 	}
-	if name == "_" {
-		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
+	if e, ok := b.Enums[name]; ok {
+		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
+			errMsgPrefix(pos), name)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
+		return fmt.Errorf(errMsg)
 	}
+	if b.TypeAliases == nil {
+		b.TypeAliases = make(map[string]*Type)
+	}
+	if t, ok := b.TypeAliases[name]; ok {
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+			errMsgPrefix(pos), name)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
+		return fmt.Errorf(errMsg)
+	}
+	return nil
+}
+func (b *Block) checkRightValueElementInserted(name string, pos *Position) error {
 	if b.Variables == nil {
 		b.Variables = make(map[string]*Variable)
 	}
@@ -321,15 +327,6 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errMsg)
 	}
-	if b.Enums == nil {
-		b.Enums = make(map[string]*Enum)
-	}
-	if e, ok := b.Enums[name]; ok {
-		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
-		return fmt.Errorf(errMsg)
-	}
 	if b.EnumNames == nil {
 		b.EnumNames = make(map[string]*EnumName)
 	}
@@ -339,23 +336,32 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errMsg)
 	}
-	if b.Labels == nil {
-		b.Labels = make(map[string]*StatementLabel)
+	return nil
+}
+
+func (b *Block) Insert(name string, pos *Position, d interface{}) error {
+	//fmt.Println(name, pos)
+	// global var Insert into block
+	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
+		b := PackageBeenCompile.Block
+		if vv, ok := b.Variables[name]; ok {
+			errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
+				errMsgPrefix(pos), name)
+			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(vv.Pos))
+			return fmt.Errorf(errMsg)
+		}
+		b.Variables[name] = v
+		v.IsGlobal = true // it`s global
+		return nil
 	}
-	if l, ok := b.Labels[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
-		return fmt.Errorf(errMsg)
+	if name == "" {
+		return fmt.Errorf("%s name is null string", errMsgPrefix(pos))
 	}
-	if b.TypeAlias == nil {
-		b.TypeAlias = make(map[string]*Type)
+	if name == THIS {
+		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)
 	}
-	if t, ok := b.TypeAlias[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
-		return fmt.Errorf(errMsg)
+	if name == "_" {
+		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
 	// name exists in buildIn, not allow
 	if lucyBuildInPackage != nil {
@@ -365,8 +371,20 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 	}
 	switch d.(type) {
 	case *Class:
+		err := b.checkRightValueElementInserted(name, pos)
+		if err != nil {
+			return err
+		}
+		err = b.checkTypeElementIfInserted(name, pos)
+		if err != nil {
+			return err
+		}
 		b.Classes[name] = d.(*Class)
 	case *Function:
+		err := b.checkRightValueElementInserted(name, pos)
+		if err != nil {
+			return err
+		}
 		t := d.(*Function)
 		if buildInFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
@@ -374,11 +392,23 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		}
 		b.Functions[name] = t
 	case *Constant:
+		err := b.checkRightValueElementInserted(name, pos)
+		if err != nil {
+			return err
+		}
 		b.Constants[name] = d.(*Constant)
 	case *Variable:
+		err := b.checkRightValueElementInserted(name, pos)
+		if err != nil {
+			return err
+		}
 		t := d.(*Variable)
 		b.Variables[name] = t
 	case *Enum:
+		err := b.checkTypeElementIfInserted(name, pos)
+		if err != nil {
+			return err
+		}
 		e := d.(*Enum)
 		b.Enums[name] = e
 		for _, v := range e.Enums {
@@ -388,11 +418,28 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 			}
 		}
 	case *EnumName:
+		err := b.checkRightValueElementInserted(name, pos)
+		if err != nil {
+			return err
+		}
 		b.EnumNames[name] = d.(*EnumName)
 	case *StatementLabel:
+		if b.Labels == nil {
+			b.Labels = make(map[string]*StatementLabel)
+		}
+		if l, ok := b.Labels[name]; ok {
+			errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+				errMsgPrefix(pos), name)
+			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
+			return fmt.Errorf(errMsg)
+		}
 		b.Labels[name] = d.(*StatementLabel)
 	case *Type:
-		b.TypeAlias[name] = d.(*Type)
+		err := b.checkTypeElementIfInserted(name, pos)
+		if err != nil {
+			return err
+		}
+		b.TypeAliases[name] = d.(*Type)
 	default:
 		panic(d) // panic d
 	}

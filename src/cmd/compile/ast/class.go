@@ -59,10 +59,10 @@ func (c *Class) mkDefaultConstruction() {
 	}
 	m := &ClassMethod{}
 	//m.IsConstructionMethod = true
-	m.Func = &Function{}
-	m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	m.Func.Pos = c.Pos
-	m.Func.Block.IsFunctionBlock = true
+	m.Function = &Function{}
+	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	m.Function.Pos = c.Pos
+	m.Function.Block.IsFunctionBlock = true
 	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
 }
 
@@ -139,10 +139,10 @@ func (c *Class) checkPhase2(father *Block) []error {
 	for _, ms := range c.Methods {
 		if len(ms) > 1 {
 			errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
-				errMsgPrefix(ms[0].Func.Pos),
-				ms[0].Func.Name, len(ms))
+				errMsgPrefix(ms[0].Function.Pos),
+				ms[0].Function.Name, len(ms))
 			for _, v := range ms {
-				errMsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Func.Pos))
+				errMsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Function.Pos))
 			}
 			errs = append(errs, errors.New(errMsg))
 		}
@@ -169,9 +169,9 @@ func (c *Class) resolveAllNames(b *Block) []error {
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
-			vv.Func.Block.inherit(&c.Block)
-			vv.Func.Block.InheritedAttribute.Function = vv.Func
-			vv.Func.checkParametersAndReturns(&errs)
+			vv.Function.Block.inherit(&c.Block)
+			vv.Function.Block.InheritedAttribute.Function = vv.Function
+			vv.Function.checkParametersAndReturns(&errs)
 		}
 	}
 	return errs
@@ -284,14 +284,14 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 		if fromSub == false || m.IsPrivate() == false {
 			continue
 		}
-		args := make([]*Type, len(m.Func.Type.ParameterList))
-		for k, v := range m.Func.Type.ParameterList {
+		args := make([]*Type, len(m.Function.Type.ParameterList))
+		for k, v := range m.Function.Type.ParameterList {
 			args[k] = v.Type
 		}
 		_, match, _ := c.accessMethod(c.Pos, &errs, name, args, nil, false)
 		if match == false {
 			err := fmt.Errorf("%s class named '%s' does not implement '%s',missing method '%s'",
-				errMsgPrefix(c.Pos), c.Name, inter.Name, m.Func.readableMsg())
+				errMsgPrefix(c.Pos), c.Name, inter.Name, m.Function.readableMsg())
 			errs = append(errs, err)
 		}
 	}
@@ -367,26 +367,26 @@ func (c *Class) checkMethods() []error {
 			if c.IsInterface() {
 				continue
 			}
-			if vv.Func.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
-				if vv.Func.Block.Variables == nil {
-					vv.Func.Block.Variables = make(map[string]*Variable)
+			if vv.Function.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
+				if vv.Function.Block.Variables == nil {
+					vv.Function.Block.Variables = make(map[string]*Variable)
 				}
-				vv.Func.Block.Variables[THIS] = &Variable{}
-				vv.Func.Block.Variables[THIS].Name = THIS
-				vv.Func.Block.Variables[THIS].Pos = vv.Func.Pos
-				vv.Func.Block.Variables[THIS].Type = &Type{
+				vv.Function.Block.Variables[THIS] = &Variable{}
+				vv.Function.Block.Variables[THIS].Name = THIS
+				vv.Function.Block.Variables[THIS].Pos = vv.Function.Pos
+				vv.Function.Block.Variables[THIS].Type = &Type{
 					Type:  VARIABLE_TYPE_OBJECT,
 					Class: c,
 				}
 			}
 			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
-			if isConstruction && vv.Func.NoReturnValue() == false {
+			if isConstruction && vv.Function.NoReturnValue() == false {
 				errs = append(errs, fmt.Errorf("%s construction method expect no return values",
-					errMsgPrefix(vv.Func.Type.ParameterList[0].Pos)))
+					errMsgPrefix(vv.Function.Type.ParameterList[0].Pos)))
 			}
 			if c.IsInterface() == false {
-				vv.Func.Block.InheritedAttribute.IsConstructionMethod = isConstruction
-				vv.Func.checkBlock(&errs)
+				vv.Function.Block.InheritedAttribute.IsConstructionMethod = isConstruction
+				vv.Function.checkBlock(&errs)
 			}
 		}
 	}

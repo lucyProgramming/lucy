@@ -94,6 +94,8 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		s.Class.Name = makeClass.newClassName(s.Class.Name)
 		c := makeClass.buildClass(s.Class)
 		makeClass.putClass(c.Name, c)
+	case ast.STATEMENT_TYPE_NOP:
+		// nop
 	}
 	return
 }

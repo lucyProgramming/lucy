@@ -89,7 +89,7 @@ func (s *Statement) isVariableDefinition() bool {
 		(s.Expression.Type == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Type == EXPRESSION_TYPE_VAR)
 }
 
-func (s *Statement) check(block *Block) []error { // b is father
+func (s *Statement) check(block *Block) []error { // block is father
 	defer func() {
 		s.Checked = true
 	}()
@@ -118,7 +118,6 @@ func (s *Statement) check(block *Block) []error { // b is father
 			}
 			s.StatementBreak.mkDefers(block)
 		}
-
 	case STATEMENT_TYPE_CONTINUE:
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
@@ -176,7 +175,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 			return nil
 		}
 	case STATEMENT_TYPE_NOP:
-		//nop
+		//nop , should be never execute to here
 	case STATEMENT_TYPE_SWITCH_TEMPLATE:
 		return s.StatementSwitchTemplate.check(block, s)
 	}

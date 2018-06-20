@@ -55,7 +55,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
 		case *Type:
 			typeConversion := &ExpressionTypeConversion{}
-			typeConversion.Type = object.Package.Block.TypeAlias[call.Name]
+			typeConversion.Type = object.Package.Block.TypeAliases[call.Name]
 			e.Type = EXPRESSION_TYPE_CHECK_CAST
 			if len(call.Args) >= 1 {
 				typeConversion.Expression = call.Args[0]
@@ -93,14 +93,14 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				return []*Type{ret}
 			}
 			if matchKey {
-				if false == object.Map.K.Equal(errs, t) {
+				if false == object.Map.Key.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.Key.TypeString()))
 				}
 			} else {
-				if false == object.Map.V.Equal(errs, t) {
+				if false == object.Map.Value.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(e.Pos), t.TypeString(), object.Map.V.TypeString()))
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.Value.TypeString()))
 				}
 			}
 			return []*Type{ret}
@@ -121,9 +121,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					if t == nil {
 						continue
 					}
-					if object.Map.K.Equal(errs, t) == false {
+					if object.Map.Key.Equal(errs, t) == false {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for key",
-							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
+							errMsgPrefix(e.Pos), t.TypeString(), object.Map.Key.TypeString()))
 					}
 				}
 			}
@@ -235,7 +235,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Func.Type.returnTypes(e.Pos)
+			return ms[0].Function.Type.returnTypes(e.Pos)
 		}
 		if len(ms) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
@@ -327,7 +327,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 		}
 		call.Method = ms[0]
-		return ms[0].Func.Type.returnTypes(e.Pos)
+		return ms[0].Function.Type.returnTypes(e.Pos)
 	}
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))

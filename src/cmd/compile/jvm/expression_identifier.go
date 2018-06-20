@@ -59,7 +59,6 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		return makeExpression.buildCapturedIdentifier(class, code, e, context)
 	}
 	switch identifier.Variable.Type.Type {
-
 	case ast.VARIABLE_TYPE_BOOL:
 		fallthrough
 	case ast.VARIABLE_TYPE_BYTE:

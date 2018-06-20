@@ -8,95 +8,95 @@ import (
 )
 
 //(a,b int)->(total int)
-func (p *Parser) parseFunctionType() (t ast.FunctionType, err error) {
+func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 	t = ast.FunctionType{}
-	if p.token.Type != lex.TOKEN_LP {
+	if parser.token.Type != lex.TOKEN_LP {
 		err = fmt.Errorf("%s fn declared wrong,missing '(',but '%s'",
-			p.errorMsgPrefix(), p.token.Description)
-		p.errs = append(p.errs, err)
+			parser.errorMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
 		return
 	}
-	p.Next()                          // skip (
-	if p.token.Type != lex.TOKEN_RP { // not (
-		t.ParameterList, err = p.parseReturnLists()
+	parser.Next()                          // skip (
+	if parser.token.Type != lex.TOKEN_RP { // not (
+		t.ParameterList, err = parser.parseReturnLists()
 		if err != nil {
 			return t, err
 		}
 	}
-	if p.token.Type != lex.TOKEN_RP { // not )
+	if parser.token.Type != lex.TOKEN_RP { // not )
 		err = fmt.Errorf("%s fn declared wrong,missing ')',but '%s'",
-			p.errorMsgPrefix(), p.token.Description)
-		p.errs = append(p.errs, err)
+			parser.errorMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
 
 		return
 	}
-	p.Next()
-	if p.token.Type == lex.TOKEN_ARROW { // ->
-		p.Next() // skip ->
-		if p.token.Type != lex.TOKEN_LP {
+	parser.Next()
+	if parser.token.Type == lex.TOKEN_ARROW { // ->
+		parser.Next() // skip ->
+		if parser.token.Type != lex.TOKEN_LP {
 			err = fmt.Errorf("%s fn declared wrong, not '(' after '->'",
-				p.errorMsgPrefix())
-			p.errs = append(p.errs, err)
+				parser.errorMsgPrefix())
+			parser.errs = append(parser.errs, err)
 			return
 		}
-		p.Next() // skip (
-		if p.token.Type != lex.TOKEN_RP {
-			t.ReturnList, err = p.parseReturnLists()
+		parser.Next() // skip (
+		if parser.token.Type != lex.TOKEN_RP {
+			t.ReturnList, err = parser.parseReturnLists()
 			if err != nil { // skip until next (,continue to analyse
-				p.consume(map[int]bool{
+				parser.consume(map[int]bool{
 					lex.TOKEN_RP: true,
 				})
-				p.Next()
+				parser.Next()
 			}
 		}
-		if p.token.Type != lex.TOKEN_RP {
+		if parser.token.Type != lex.TOKEN_RP {
 			err = fmt.Errorf("%s fn declared wrong,expected ')',but '%s'",
-				p.errorMsgPrefix(), p.token.Description)
-			p.errs = append(p.errs, err)
+				parser.errorMsgPrefix(), parser.token.Description)
+			parser.errs = append(parser.errs, err)
 			return
 		}
-		p.Next()
+		parser.Next()
 	}
 	return t, err
 }
 
-func (p *Parser) parseReturnList() (returnList []*ast.Variable, err error) {
-	returnList, err = p.parseTypedName()
-	if p.token.Type != lex.TOKEN_ASSIGN {
+func (parser *Parser) parseReturnList() (returnList []*ast.Variable, err error) {
+	returnList, err = parser.parseTypedName()
+	if parser.token.Type != lex.TOKEN_ASSIGN {
 		return
 	}
-	p.Next() // skip =
+	parser.Next() // skip =
 	for k, v := range returnList {
 		var er error
-		v.Expression, er = p.ExpressionParser.parseExpression(false)
+		v.Expression, er = parser.ExpressionParser.parseExpression(false)
 		if er != nil {
-			p.errs = append(p.errs, err)
-			p.consume(map[int]bool{
+			parser.errs = append(parser.errs, err)
+			parser.consume(map[int]bool{
 				lex.TOKEN_COMMA: true,
 			})
 			err = er
-			p.Next()
+			parser.Next()
 			continue
 		}
-		if p.token.Type != lex.TOKEN_COMMA || k == len(returnList)-1 {
+		if parser.token.Type != lex.TOKEN_COMMA || k == len(returnList)-1 {
 			break
 		} else {
-			p.Next() // skip ,
+			parser.Next() // skip ,
 		}
 	}
 	return returnList, nil
 }
-func (p *Parser) parseReturnLists() (returnList []*ast.Variable, err error) {
-	for p.token.Type == lex.TOKEN_IDENTIFIER {
-		v, err := p.parseReturnList()
+func (parser *Parser) parseReturnLists() (returnList []*ast.Variable, err error) {
+	for parser.token.Type == lex.TOKEN_IDENTIFIER {
+		v, err := parser.parseReturnList()
 		if v != nil {
 			returnList = append(returnList, v...)
 		}
 		if err != nil {
 			break
 		}
-		if p.token.Type == lex.TOKEN_COMMA {
-			p.Next()
+		if parser.token.Type == lex.TOKEN_COMMA {
+			parser.Next()
 		} else {
 			break
 		}

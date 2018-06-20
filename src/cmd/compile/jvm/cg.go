@@ -120,7 +120,7 @@ func (makeClass *MakeClass) mkGlobalConstants() {
 	}
 }
 func (makeClass *MakeClass) mkGlobalTypeAlias() {
-	for name, v := range makeClass.Package.Block.TypeAlias {
+	for name, v := range makeClass.Package.Block.TypeAliases {
 		t := &cg.AttributeLucyTypeAlias{}
 		t.Alias = LucyTypeAliasParser.Encode(name, v)
 		makeClass.mainClass.Class.TypeAlias = append(makeClass.mainClass.Class.TypeAlias, t)
@@ -286,17 +286,17 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		vv := v[0]
 		method := &cg.MethodHighLevel{}
-		method.Name = vv.Func.Name
-		method.AccessFlags = vv.Func.AccessFlags
+		method.Name = vv.Function.Name
+		method.AccessFlags = vv.Function.AccessFlags
 		if c.IsInterface() {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			method.AccessFlags |= cg.ACC_METHOD_ABSTRACT
 		}
 		method.Class = class
-		method.Descriptor = Descriptor.methodDescriptor(vv.Func)
+		method.Descriptor = Descriptor.methodDescriptor(vv.Function)
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
-			makeClass.buildFunction(class, nil, method, vv.Func)
+			makeClass.buildFunction(class, nil, method, vv.Function)
 		}
 		class.AppendMethod(method)
 	}
@@ -305,14 +305,14 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		if t := c.Methods[ast.CONSTRUCTION_METHOD_NAME]; t != nil && len(t) > 0 {
 			method := &cg.MethodHighLevel{}
 			method.Name = "<init>"
-			method.AccessFlags = t[0].Func.AccessFlags
+			method.AccessFlags = t[0].Function.AccessFlags
 			method.Class = class
-			method.Descriptor = Descriptor.methodDescriptor(t[0].Func)
+			method.Descriptor = Descriptor.methodDescriptor(t[0].Function)
 			method.IsConstruction = true
 			method.Code = &cg.AttributeCode{}
-			makeClass.buildFunction(class, c, method, t[0].Func)
+			makeClass.buildFunction(class, c, method, t[0].Function)
 			class.AppendMethod(method)
-			if len(t[0].Func.Type.ParameterList) > 0 {
+			if len(t[0].Function.Type.ParameterList) > 0 {
 				makeClass.mkClassDefaultConstruction(class, c)
 			}
 		} else {

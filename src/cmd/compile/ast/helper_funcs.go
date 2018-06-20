@@ -90,9 +90,9 @@ func shouldAccessFromImports(name string, from *Position, have *Position) (*Impo
 func msNotMatchError(pos *Position, name string, ms []*ClassMethod, want []*Type) error {
 	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
-	errMsg += "\twant " + ms[0].Func.badParameterMsg(name, want) + "\n"
+	errMsg += "\twant " + ms[0].Function.badParameterMsg(name, want) + "\n"
 	for _, m := range ms {
-		errMsg += "\thave " + m.Func.readableMsg(name) + "\n"
+		errMsg += "\thave " + m.Function.readableMsg(name) + "\n"
 	}
 	return fmt.Errorf(errMsg)
 }

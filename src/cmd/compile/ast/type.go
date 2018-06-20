@@ -36,20 +36,19 @@ const (
 )
 
 type Type struct {
-	haveParameterTypeCalled bool
-	TNames                  []string
-	Resolved                bool
-	Pos                     *Position
-	Type                    int
-	Name                    string
-	ArrayType               *Type
-	Class                   *Class
-	Enum                    *Enum
-	EnumName                *EnumName
-	Function                *Function
-	Map                     *Map
-	Package                 *Package
-	Alias                   string
+	TNames    []string
+	Resolved  bool
+	Pos       *Position
+	Type      int
+	Name      string
+	ArrayType *Type
+	Class     *Class
+	Enum      *Enum
+	EnumName  *EnumName
+	Function  *Function
+	Map       *Map
+	Package   *Package
+	Alias     string
 }
 
 func (typ *Type) validForTypeAssertOrConversion() bool {
@@ -74,8 +73,8 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 }
 
 type Map struct {
-	K *Type
-	V *Type
+	Key   *Type
+	Value *Type
 }
 
 func (typ *Type) mkDefaultValueExpression() *Expression {
@@ -153,8 +152,8 @@ func (typ *Type) Clone() *Type {
 	}
 	if ret.Type == VARIABLE_TYPE_MAP {
 		ret.Map = &Map{}
-		ret.Map.K = typ.Map.K.Clone()
-		ret.Map.V = typ.Map.V.Clone()
+		ret.Map.Key = typ.Map.Key.Clone()
+		ret.Map.Value = typ.Map.Value.Clone()
 	}
 	return ret
 }
@@ -170,7 +169,7 @@ func (typ *Type) resolve(block *Block, subPart ...bool) error {
 	if typ.Type == VARIABLE_TYPE_T {
 		if block.InheritedAttribute.Function.parameterTypes == nil ||
 			block.InheritedAttribute.Function.parameterTypes[typ.Name] == nil {
-			return fmt.Errorf("%s parameterd type '%s' not found",
+			return fmt.Errorf("%s parameter type '%s' not found",
 				errMsgPrefix(typ.Pos), typ.Name)
 		}
 		pos := typ.Pos
@@ -187,14 +186,14 @@ func (typ *Type) resolve(block *Block, subPart ...bool) error {
 	}
 	if typ.Type == VARIABLE_TYPE_MAP {
 		var err error
-		if typ.Map.K != nil {
-			err = typ.Map.K.resolve(block, true)
+		if typ.Map.Key != nil {
+			err = typ.Map.Key.resolve(block, true)
 			if err != nil {
 				return err
 			}
 		}
-		if typ.Map.V != nil {
-			return typ.Map.V.resolve(block, true)
+		if typ.Map.Value != nil {
+			return typ.Map.Value.resolve(block, true)
 		}
 	}
 	return nil
@@ -206,26 +205,31 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 		if i != nil {
 			return PackageBeenCompile.load(i.ImportName)
 		}
-		return nil, fmt.Errorf("%s type named '%s' not found", errMsgPrefix(typ.Pos), typ.Name)
+		return nil, fmt.Errorf("%s type named '%s' not found",
+			errMsgPrefix(typ.Pos), typ.Name)
 	}
 	packageAndName := strings.Split(typ.Name, ".")
 	i := PackageBeenCompile.getImport(typ.Pos.Filename, packageAndName[0])
 	if nil == i {
-		return nil, fmt.Errorf("%s package '%s' not imported", errMsgPrefix(typ.Pos), packageAndName[0])
+		return nil, fmt.Errorf("%s package '%s' not imported",
+			errMsgPrefix(typ.Pos), packageAndName[0])
 	}
 	p, err := PackageBeenCompile.load(i.ImportName)
 	if err != nil {
-		return nil, fmt.Errorf("%s %v", errMsgPrefix(typ.Pos), err)
+		return nil, fmt.Errorf("%s %v",
+			errMsgPrefix(typ.Pos), err)
 	}
 	if pp, ok := p.(*Package); ok && pp != nil {
 		var exists bool
 		d, exists = pp.Block.NameExists(packageAndName[1])
 		if exists == false {
-			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(typ.Pos), packageAndName[1])
+			err = fmt.Errorf("%s '%s' not found",
+				errMsgPrefix(typ.Pos), packageAndName[1])
 		}
 		return d, err
 	} else {
-		return nil, fmt.Errorf("%s '%s' is not a package", errMsgPrefix(typ.Pos), packageAndName[0])
+		return nil, fmt.Errorf("%s '%s' is not a package",
+			errMsgPrefix(typ.Pos), packageAndName[0])
 	}
 
 }
@@ -255,7 +259,8 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("%s name '%s' is not a type", errMsgPrefix(typ.Pos), typ.Name)
+	return fmt.Errorf("%s name '%s' is not a type",
+		errMsgPrefix(typ.Pos), typ.Name)
 }
 
 func (typ *Type) resolveName(block *Block, subPart bool) error {
@@ -385,9 +390,9 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "object@(" + typ.Class.Name + ")"
 	case VARIABLE_TYPE_MAP:
 		*ret += "map{"
-		*ret += typ.Map.K.TypeString()
+		*ret += typ.Map.Key.TypeString()
 		*ret += " -> "
-		*ret += typ.Map.V.TypeString()
+		*ret += typ.Map.Value.TypeString()
 		*ret += "}"
 	case VARIABLE_TYPE_JAVA_ARRAY:
 		*ret += typ.ArrayType.TypeString() + "[]"
@@ -413,10 +418,13 @@ func (typ *Type) TypeString() string {
 	return t
 }
 func (typ *Type) haveParameterType() (ret []string) {
+	ret = []string{}
 	defer func() {
-		typ.haveParameterTypeCalled = true
 		typ.TNames = ret
 	}()
+	if typ.TNames != nil {
+		return typ.TNames
+	}
 	if typ.Type == VARIABLE_TYPE_T {
 		ret = []string{typ.Name}
 		return
@@ -427,10 +435,10 @@ func (typ *Type) haveParameterType() (ret []string) {
 	}
 	if typ.Type == VARIABLE_TYPE_MAP {
 		ret = []string{}
-		if t := typ.Map.K.haveParameterType(); t != nil {
+		if t := typ.Map.Key.haveParameterType(); t != nil {
 			ret = append(ret, t...)
 		}
-		if t := typ.Map.V.haveParameterType(); t != nil {
+		if t := typ.Map.Value.haveParameterType(); t != nil {
 			ret = append(ret, t...)
 		}
 		return
@@ -450,11 +458,11 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 		return typ.ArrayType.canBeBindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VARIABLE_TYPE_MAP {
-		err := typ.Map.K.canBeBindWithParameterTypes(parameterTypes)
+		err := typ.Map.Key.canBeBindWithParameterTypes(parameterTypes)
 		if err != nil {
 			return err
 		}
-		return typ.Map.V.canBeBindWithParameterTypes(parameterTypes)
+		return typ.Map.Value.canBeBindWithParameterTypes(parameterTypes)
 	}
 	return fmt.Errorf("not T") // looks impossible
 }
@@ -475,11 +483,11 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 		return typ.ArrayType.bindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VARIABLE_TYPE_MAP {
-		err := typ.Map.K.bindWithParameterTypes(parameterTypes)
+		err := typ.Map.Key.bindWithParameterTypes(parameterTypes)
 		if err != nil {
 			return err
 		}
-		return typ.Map.V.bindWithParameterTypes(parameterTypes)
+		return typ.Map.Value.bindWithParameterTypes(parameterTypes)
 	}
 	panic("not T")
 }
@@ -505,11 +513,11 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 		return typ.ArrayType.canBeBindWithType(mkParameterTypes, bind.ArrayType)
 	}
 	if typ.Type == VARIABLE_TYPE_MAP && bind.Type == VARIABLE_TYPE_MAP {
-		err := typ.Map.K.canBeBindWithType(mkParameterTypes, bind.Map.K)
+		err := typ.Map.Key.canBeBindWithType(mkParameterTypes, bind.Map.Key)
 		if err != nil {
 			return err
 		}
-		return typ.Map.V.canBeBindWithType(mkParameterTypes, bind.Map.V)
+		return typ.Map.Value.canBeBindWithType(mkParameterTypes, bind.Map.Value)
 	}
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())
 }
@@ -539,7 +547,7 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 		return typ.Enum.Name == compareTo.Enum.Name
 	}
 	if typ.Type == VARIABLE_TYPE_MAP && compareTo.Type == VARIABLE_TYPE_MAP {
-		return typ.Map.K.Equal(errs, compareTo.Map.K) && typ.Map.V.Equal(errs, compareTo.Map.V)
+		return typ.Map.Key.Equal(errs, compareTo.Map.Key) && typ.Map.Value.Equal(errs, compareTo.Map.Value)
 	}
 	if typ.Type == VARIABLE_TYPE_OBJECT && compareTo.Type == VARIABLE_TYPE_OBJECT { // object
 		if typ.Class.NotImportedYet {

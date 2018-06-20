@@ -172,15 +172,19 @@ const (
 	OP_i2l byte = 0x85 //将栈顶 int 型数值强制转换成 long 型数值并将结果压入栈顶。
 	OP_i2f byte = 0x86 //将栈顶 int 型数值强制转换成 float 型数值并将结果压入栈顶。
 	OP_i2d byte = 0x87 //将栈顶 int 型数值强制转换成 double 型数值并将结果压入栈顶。
+	//
 	OP_l2i byte = 0x88 // 将栈顶 long 型数值强制转换成 int 型数值并将结果压入栈顶。
 	OP_l2f byte = 0x89 //将栈顶 long 型数值强制转换成 float 型数值并将结果压入栈顶。
 	OP_l2d byte = 0x8a //将栈顶 long 型数值强制转换成 double 型数值并将结果压入栈顶。
+	//
 	OP_f2i byte = 0x8b //将栈顶 float 型数值强制转换成 int 型数值并将结果压入栈顶。
 	OP_f2l byte = 0x8c //将栈顶 float 型数值强制转换成 long 型数值并将结果压入栈顶。
 	OP_f2d byte = 0x8d //将栈顶float型数值强制转换成double型数值并将结果压入栈顶。
+	//
 	OP_d2i byte = 0x8e //将栈顶 double 型数值强制转换成 int 型数值并将结果压入栈顶。
 	OP_d2l byte = 0x8f //将栈顶 double 型数值强制转换成 long 型数值并将结果压入栈顶。
 	OP_d2f byte = 0x90 //将栈顶double型数值强制转换成float型数值并将结果压入栈 顶。
+	//
 	OP_i2b byte = 0x91 //将栈顶 int 型数值强制转换成 byte 型数值并将结果压入栈顶。
 	OP_i2c byte = 0x92 //将栈顶 int 型数值强制转换成 char 型数值并将结果压入栈顶。
 	OP_i2s byte = 0x93 //将栈顶 int 型数值强制转换成 short 型数值并将结果压入栈顶。
@@ -204,6 +208,7 @@ const (
 	OP_if_icmpge byte = 0xa2 //比较栈顶两 int 型数值大小，当结果大于等于 0 时跳转。
 	OP_if_icmpgt byte = 0xa3 //比较栈顶两 int 型数值大小，当结果大于 0 时跳转
 	OP_if_icmple byte = 0xa4 //比较栈顶两 int 型数值大小，当结果小于等于 0 时跳转。
+	//
 	OP_if_acmpeq byte = 0xa5 //比较栈顶两引用型数值，当结果相等时跳转。
 	OP_if_acmpne byte = 0xa6 //比较栈顶两引用型数值，当结果不相等时跳转。
 	//

@@ -43,7 +43,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		return tt
 	}
 	// map
-	ret := t.Map.V.Clone()
+	ret := t.Map.Value.Clone()
 	ret.Pos = e.Pos
 	indexType, es := index.Index.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
@@ -53,9 +53,9 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 	if indexType == nil {
 		return ret
 	}
-	if t.Map.K.Equal(errs, indexType) == false {
+	if t.Map.Key.Equal(errs, indexType) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-			errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.K.TypeString()))
+			errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.Key.TypeString()))
 	}
 	return ret
 

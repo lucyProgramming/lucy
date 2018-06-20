@@ -11,57 +11,57 @@ type FunctionParser struct {
 	parser *Parser
 }
 
-func (p *FunctionParser) Next() {
-	p.parser.Next()
+func (functionParser *FunctionParser) Next() {
+	functionParser.parser.Next()
 }
 
-func (p *FunctionParser) consume(until map[int]bool) {
-	p.parser.consume(until)
+func (functionParser *FunctionParser) consume(until map[int]bool) {
+	functionParser.parser.consume(until)
 }
 
-func (p *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
+func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
 	var offset int
 	//	if p.parser.token == nil {
 	//		offset = 0 // template function
 	//	} else {
-	offset = p.parser.token.Offset
+	offset = functionParser.parser.token.Offset
 	//	}
 
-	p.Next() // skip fn key word
-	f.Pos = p.parser.mkPos()
+	functionParser.Next() // skip fn key word
+	f.Pos = functionParser.parser.mkPos()
 	if needName {
-		if p.parser.token.Type != lex.TOKEN_IDENTIFIER {
+		if functionParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err := fmt.Errorf("%s expect function name,but '%s'",
-				p.parser.errorMsgPrefix(), p.parser.token.Description)
-			p.parser.errs = append(p.parser.errs, err)
-			if p.parser.token.Type != lex.TOKEN_LC {
+				functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+			functionParser.parser.errs = append(functionParser.parser.errs, err)
+			if functionParser.parser.token.Type != lex.TOKEN_LC {
 				return nil, err
 			}
 		}
 	}
-	if p.parser.token.Type == lex.TOKEN_IDENTIFIER {
-		f.Name = p.parser.token.Data.(string)
-		p.Next()
+	if functionParser.parser.token.Type == lex.TOKEN_IDENTIFIER {
+		f.Name = functionParser.parser.token.Data.(string)
+		functionParser.Next()
 	}
-	f.Type, err = p.parser.parseFunctionType()
+	f.Type, err = functionParser.parser.parseFunctionType()
 	if err != nil {
-		p.consume(untilLc)
+		functionParser.consume(untilLc)
 	}
-	if p.parser.token.Type != lex.TOKEN_LC {
-		err = fmt.Errorf("%s except '{' but '%s'", p.parser.errorMsgPrefix(), p.parser.token.Description)
-		p.parser.errs = append(p.parser.errs, err)
-		p.consume(untilLc)
+	if functionParser.parser.token.Type != lex.TOKEN_LC {
+		err = fmt.Errorf("%s except '{' but '%s'", functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+		functionParser.parser.errs = append(functionParser.parser.errs, err)
+		functionParser.consume(untilLc)
 	}
 	f.Block.IsFunctionBlock = true
-	p.Next()
-	p.parser.BlockParser.parseStatementList(&f.Block, false)
-	if p.parser.token.Type != lex.TOKEN_RC {
+	functionParser.Next()
+	functionParser.parser.BlockParser.parseStatementList(&f.Block, false)
+	if functionParser.parser.token.Type != lex.TOKEN_RC {
 		err = fmt.Errorf("%s expect '}', but '%s'",
-			p.parser.errorMsgPrefix(), p.parser.token.Description)
+			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 	} else {
-		f.SourceCodes = p.parser.bs[offset : p.parser.token.Offset+1]
-		p.Next()
+		f.SourceCodes = functionParser.parser.bs[offset : functionParser.parser.token.Offset+1]
+		functionParser.Next()
 	}
 
 	return f, err

@@ -16,10 +16,12 @@ type StatementSwitchTemplateCase struct {
 
 func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (errs []error) {
 	errs = []error{}
+	TName := s.Condition.Name
 	if err := s.Condition.resolve(block); err != nil {
 		errs = append(errs, err)
 		return
 	}
+
 	var match *Type
 	var matchBlock *Block
 	typesChecked := []*Type{}
@@ -56,8 +58,8 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 	}
 	if match == nil {
 		if s.Default == nil {
-			errs = append(errs, fmt.Errorf("%s '%s' has no match",
-				errMsgPrefix(s.Pos), s.Condition.TypeString()))
+			errs = append(errs, fmt.Errorf("%s parameter type named '%s',resolve as '%s' has no match",
+				errMsgPrefix(s.Pos), TName, s.Condition.TypeString()))
 			return
 		}
 		statement.Type = STATEMENT_TYPE_BLOCK

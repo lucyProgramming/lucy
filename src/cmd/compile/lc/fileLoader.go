@@ -75,25 +75,25 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	astClass.Methods = make(map[string][]*ast.ClassMethod)
 	for _, v := range c.Methods {
 		m := &ast.ClassMethod{}
-		m.Func = &ast.Function{}
+		m.Function = &ast.Function{}
 		m.LoadFromOutSide = true
-		m.Func.Name = string(c.ConstPool[v.NameIndex].Info)
-		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
-		m.Func.AccessFlags = v.AccessFlags
-		m.Func.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
+		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.AccessFlags = v.AccessFlags
+		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
-			parseMethodParameter(c, t[0].Info, m.Func)
+			parseMethodParameter(c, t[0].Info, m.Function)
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
-			parseReturnListNames(c, t[0].Info, m.Func)
+			parseReturnListNames(c, t[0].Info, m.Function)
 		}
-		if astClass.Methods[m.Func.Name] == nil {
-			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
+		if astClass.Methods[m.Function.Name] == nil {
+			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}
 		} else {
-			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
+			astClass.Methods[m.Function.Name] = append(astClass.Methods[m.Function.Name], m)
 		}
 	}
 	return astClass, nil
@@ -143,18 +143,18 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	astClass.Methods = make(map[string][]*ast.ClassMethod)
 	for _, v := range c.Methods {
 		m := &ast.ClassMethod{}
-		m.Func = &ast.Function{}
-		m.Func.Name = string(c.ConstPool[v.NameIndex].Info)
-		m.Func.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function = &ast.Function{}
+		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
+		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
-		m.Func.AccessFlags = v.AccessFlags
+		m.Function.AccessFlags = v.AccessFlags
 		m.LoadFromOutSide = true
-		m.Func.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
-			err = jvm.LucyMethodSignatureParser.Decode(m.Func, c.ConstPool[index].Info)
+			err = jvm.LucyMethodSignatureParser.Decode(m.Function, c.ConstPool[index].Info)
 			if err != nil {
 				return nil, err
 			}
@@ -162,22 +162,22 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS); t != nil && len(t) > 0 {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBytes(t[0].Info)
-			jvm.FunctionDefaultValueParser.Decode(c, m.Func, dp)
+			jvm.FunctionDefaultValueParser.Decode(c, m.Function, dp)
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
-			parseMethodParameter(c, t[0].Info, m.Func)
+			parseMethodParameter(c, t[0].Info, m.Function)
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
-			parseReturnListNames(c, t[0].Info, m.Func)
+			parseReturnListNames(c, t[0].Info, m.Function)
 		}
-		err = loadEnumForFunction(m.Func)
+		err = loadEnumForFunction(m.Function)
 		if err != nil {
 			return nil, err
 		}
-		if astClass.Methods[m.Func.Name] == nil {
-			astClass.Methods[m.Func.Name] = []*ast.ClassMethod{m}
+		if astClass.Methods[m.Function.Name] == nil {
+			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}
 		} else {
-			astClass.Methods[m.Func.Name] = append(astClass.Methods[m.Func.Name], m)
+			astClass.Methods[m.Function.Name] = append(astClass.Methods[m.Function.Name], m)
 		}
 	}
 	return astClass, nil
@@ -316,8 +316,8 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function.IsGlobal = true
 		pack.Block.Functions[name] = function
 	}
-	if pack.Block.TypeAlias == nil {
-		pack.Block.TypeAlias = make(map[string]*ast.Type)
+	if pack.Block.TypeAliases == nil {
+		pack.Block.TypeAliases = make(map[string]*ast.Type)
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
 		index := binary.BigEndian.Uint16(v.Info)
@@ -326,7 +326,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			return err
 		}
 		typ.Alias = name
-		pack.Block.TypeAlias[name] = typ
+		pack.Block.TypeAliases[name] = typ
 		if typ.Type == ast.VARIABLE_TYPE_ENUM {
 			err = loadEnumForVariableType(typ)
 			if err != nil {

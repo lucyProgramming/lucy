@@ -23,8 +23,8 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 		maxStack = t
 	}
 	currentStack = 2 // mapref kref
-	if index.Expression.ExpressionValue.Map.K.IsPointer() == false {
-		typeConverter.packPrimitives(class, code, index.Expression.ExpressionValue.Map.K)
+	if index.Expression.ExpressionValue.Map.Key.IsPointer() == false {
+		typeConverter.packPrimitives(class, code, index.Expression.ExpressionValue.Map.Key)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -34,10 +34,10 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.popStack(1)
-	if index.Expression.ExpressionValue.Map.V.Type == ast.VARIABLE_TYPE_ENUM {
-		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.V)
-	} else if index.Expression.ExpressionValue.Map.V.IsPointer() {
-		typeConverter.castPointerTypeToRealType(class, code, index.Expression.ExpressionValue.Map.V)
+	if index.Expression.ExpressionValue.Map.Value.Type == ast.VARIABLE_TYPE_ENUM {
+		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.Value)
+	} else if index.Expression.ExpressionValue.Map.Value.IsPointer() {
+		typeConverter.castPointerTypeToRealType(class, code, index.Expression.ExpressionValue.Map.Value)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
 		code.CodeLength++
@@ -47,7 +47,7 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		codeLength := code.CodeLength
 		code.CodeLength += 3
-		switch index.Expression.ExpressionValue.Map.V.Type {
+		switch index.Expression.ExpressionValue.Map.Value.Type {
 		case ast.VARIABLE_TYPE_BOOL:
 			fallthrough
 		case ast.VARIABLE_TYPE_BYTE:
@@ -81,7 +81,7 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 			state.popStack(1) // pop java_root_class ref
 		}
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
-		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.V)
+		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.Value)
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 		{
 			state.pushStack(class, e.ExpressionValue)

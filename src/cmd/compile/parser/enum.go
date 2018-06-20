@@ -8,67 +8,67 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (p *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
-	p.Next() // skip enum
+func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
+	parser.Next() // skip enum
 
-	if p.token.Type != lex.TOKEN_IDENTIFIER {
+	if parser.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s expect 'identifier', but '%s'",
-			p.errorMsgPrefix(), p.token.Description)
-		p.errs = append(p.errs, err)
+			parser.errorMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
 	enumName := &ast.NameWithPos{
-		Name: p.token.Data.(string),
-		Pos:  p.mkPos(),
+		Name: parser.token.Data.(string),
+		Pos:  parser.mkPos(),
 	}
-	p.Next() // skip enum name
-	if p.token.Type != lex.TOKEN_LC {
+	parser.Next() // skip enum name
+	if parser.token.Type != lex.TOKEN_LC {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			p.errorMsgPrefix(), p.token.Description)
-		p.errs = append(p.errs, err)
+			parser.errorMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	p.Next() // skip {
+	parser.Next() // skip {
 	e = &ast.Enum{}
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
 	//first name
-	if p.token.Type != lex.TOKEN_IDENTIFIER {
+	if parser.token.Type != lex.TOKEN_IDENTIFIER {
 		err = fmt.Errorf("%s expect 'identifier',but '%s'",
-			p.errorMsgPrefix(), p.token.Description)
-		p.errs = append(p.errs, err)
+			parser.errorMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
 	names := []*ast.NameWithPos{
 		&ast.NameWithPos{
-			Name: p.token.Data.(string),
-			Pos:  p.mkPos(),
+			Name: parser.token.Data.(string),
+			Pos:  parser.mkPos(),
 		},
 	}
-	p.Next()
+	parser.Next()
 	var initExpression *ast.Expression
-	if p.token.Type == lex.TOKEN_ASSIGN { // first value defined here
-		p.Next() // skip assign
-		initExpression, err = p.ExpressionParser.parseExpression(false)
+	if parser.token.Type == lex.TOKEN_ASSIGN { // first value defined here
+		parser.Next() // skip assign
+		initExpression, err = parser.ExpressionParser.parseExpression(false)
 		if err != nil {
-			p.errs = append(p.errs, err)
+			parser.errs = append(parser.errs, err)
 			return nil, err
 		}
 	}
-	if p.token.Type == lex.TOKEN_COMMA {
-		p.Next() // skip ,should be a identifier after  comma
-		ns, err := p.parseNameList()
+	if parser.token.Type == lex.TOKEN_COMMA {
+		parser.Next() // skip ,should be a identifier after  comma
+		ns, err := parser.parseNameList()
 		if err != nil {
 			return nil, err
 		}
 		names = append(names, ns...)
 	}
-	if p.token.Type != lex.TOKEN_RC {
-		err = fmt.Errorf("%s expect '}',but '%s'", p.token.Description, p.token.Description)
-		p.errs = append(p.errs, err)
+	if parser.token.Type != lex.TOKEN_RC {
+		err = fmt.Errorf("%s expect '}',but '%s'", parser.token.Description, parser.token.Description)
+		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	p.Next() // skip }
+	parser.Next() // skip }
 	e.Init = initExpression
 	for _, v := range names {
 		t := &ast.EnumName{}

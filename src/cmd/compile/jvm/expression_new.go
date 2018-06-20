@@ -34,7 +34,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 	code.CodeLength += 4
 	maxStack = 2
 	if n.Args != nil && len(n.Args) > 0 {
-		maxStack += makeExpression.buildCallArgs(class, code, n.Args, n.Construction.Func.Type.ParameterList, context, state)
+		maxStack += makeExpression.buildCallArgs(class, code, n.Args, n.Construction.Function.Type.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {
@@ -46,9 +46,9 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 	} else {
 		d := ""
 		if n.Type.Class.LoadFromOutSide {
-			d = n.Construction.Func.Descriptor
+			d = n.Construction.Function.Descriptor
 		} else {
-			d = Descriptor.methodDescriptor(n.Construction.Func)
+			d = Descriptor.methodDescriptor(n.Construction.Function)
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      n.Type.Class.Name,

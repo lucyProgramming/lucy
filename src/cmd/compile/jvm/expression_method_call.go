@@ -50,12 +50,12 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 		return
 	}
 
-	d := call.Method.Func.Descriptor
+	d := call.Method.Function.Descriptor
 	if call.Class.LoadFromOutSide == false {
-		d = Descriptor.methodDescriptor(call.Method.Func)
+		d = Descriptor.methodDescriptor(call.Method.Function)
 	}
 	if call.Method.IsStatic() {
-		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Method.Func.Type.ParameterList, context, state)
+		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,
@@ -66,7 +66,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 		if t := makeExpression.valueJvmSize(e); t > maxStack {
 			maxStack = t
 		}
-		pop(call.Method.Func)
+		pop(call.Method.Function)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			Verify: v,
 		})
 	}
-	stack := makeExpression.buildCallArgs(class, code, call.Args, call.Method.Func.Type.ParameterList, context, state)
+	stack := makeExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}
@@ -105,7 +105,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			Method:     call.Name,
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = interfaceMethodArgsCount(&call.Method.Func.Type)
+		code.Codes[code.CodeLength+3] = interfaceMethodArgsCount(&call.Method.Function.Type)
 		code.Codes[code.CodeLength+4] = 0
 		code.CodeLength += 5
 	} else {
@@ -117,6 +117,6 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	pop(call.Method.Func)
+	pop(call.Method.Function)
 	return
 }

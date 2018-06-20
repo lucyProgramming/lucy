@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	packageAliasReg      *regexp.Regexp
+	packageAccessNameReg *regexp.Regexp
 	ImportsLoader        LoadImport
 	PackageBeenCompile   Package
 	buildInFunctionsMap  = make(map[string]*Function)
@@ -34,7 +34,7 @@ var (
 
 func init() {
 	var err error
-	packageAliasReg, err = regexp.Compile(`^[a-zA-Z][[a-zA-Z1-9\_]+$`)
+	packageAccessNameReg, err = regexp.Compile(`^[a-zA-Z][[a-zA-Z1-9\_]+$`)
 	if err != nil {
 		panic(err)
 	}

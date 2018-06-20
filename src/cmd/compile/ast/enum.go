@@ -2,13 +2,6 @@ package ast
 
 import "fmt"
 
-type EnumName struct {
-	Enum  *Enum
-	Name  string
-	Pos   *Position
-	Value int32 // int32 is bigger enough
-}
-
 type Enum struct {
 	AccessFlags uint16
 	Name        string
@@ -16,6 +9,12 @@ type Enum struct {
 	Enums       []*EnumName
 	Init        *Expression //should be a int expression
 	Used        bool
+}
+type EnumName struct {
+	Enum  *Enum
+	Name  string
+	Pos   *Position
+	Value int32 // int32 is bigger enough
 }
 
 func (e *Enum) check() (err error) {

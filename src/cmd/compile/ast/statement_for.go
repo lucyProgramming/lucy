@@ -124,7 +124,7 @@ func (s *StatementFor) checkRange() []error {
 			if rangeOn.Type == VARIABLE_TYPE_ARRAY || rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
 				vd.Type = rangeOn.ArrayType.Clone()
 			} else {
-				vd.Type = rangeOn.Map.V.Clone()
+				vd.Type = rangeOn.Map.Value.Clone()
 			}
 			vd.Pos = posV
 			vd.Name = identifierV.Name
@@ -143,7 +143,7 @@ func (s *StatementFor) checkRange() []error {
 				vt = &Type{}
 				vt.Type = VARIABLE_TYPE_INT
 			} else {
-				vt = rangeOn.Map.K.Clone()
+				vt = rangeOn.Map.Key.Clone()
 				vt.Pos = rangeOn.Pos
 			}
 			vd.Name = identifierK.Name
@@ -182,8 +182,8 @@ func (s *StatementFor) checkRange() []error {
 			}
 			tvv = rangeOn.ArrayType
 		} else {
-			tkk = rangeOn.Map.K
-			tvv = rangeOn.Map.V
+			tkk = rangeOn.Map.Key
+			tvv = rangeOn.Map.Value
 		}
 		if tk != nil {
 			if tk.Equal(&errs, tkk) == false {
