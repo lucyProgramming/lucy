@@ -121,6 +121,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		if ok {
 			integerPart = append(integerPart, c)
 			c, eof = lex.getChar() // get next char
+			continue
 		} else { // something that I cannot handle
 			lex.unGetChar()
 			break
@@ -147,7 +148,6 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	if isHex && isFloat {
 		token.Type = TOKEN_LITERAL_INT
 		token.Data = 0
-
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
@@ -182,13 +182,14 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		if c == '-' {
 			powerPositive = false
 			c, eof = lex.getChar()
-		} else if lex.isDigit(c) { // nothing to do
-
+		} else if lex.isDigit(c) {
+			// nothing to do
 		} else if c == '+' { // default is true
 			c, eof = lex.getChar()
 		} else {
 			err = fmt.Errorf("wrong format scientific notation")
 		}
+
 		if lex.isDigit(c) == false {
 			lex.unGetChar() //
 			err = fmt.Errorf("wrong format scientific notation")
@@ -317,9 +318,9 @@ func (lex *Lexer) looksLikeT(bs []byte) bool {
 func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
-	token.StartColumn = lex.column - 1 // c is readed
+	token.StartColumn = lex.column - 1 // c is read
 	bs := []byte{c}
-	token.Offset = lex.offset - 1 // readed
+	token.Offset = lex.offset - 1 // read
 	c, eof := lex.getChar()
 	for eof == false {
 		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {

@@ -17,8 +17,8 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if selection.EnumName != nil {
-			loadInt(class, code, selection.EnumName.Value)
+		if selection.PackageEnumName != nil {
+			loadInt(class, code, selection.PackageEnumName.Value)
 		}
 		return
 	}

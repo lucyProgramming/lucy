@@ -24,7 +24,7 @@ type ExceptionTable struct {
 
 func (a *AttributeCode) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.NameIndex = class.insertUtf8Const("Code")
+	ret.NameIndex = class.InsertUtf8Const("Code")
 	ret.Info = make([]byte, 8)
 	binary.BigEndian.PutUint16(ret.Info[0:2], a.MaxStack)
 	binary.BigEndian.PutUint16(ret.Info[2:4], a.MaxLocals)

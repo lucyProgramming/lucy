@@ -520,7 +520,7 @@ type ExpressionSelection struct {
 	Name            string
 	Field           *ClassField         // expression is class or object
 	PackageVariable *VariableDefinition // expression is package
-	EnumName        *EnumName           // expression is package
+	PackageEnumName *EnumName           // expression is package
 }
 
 type ExpressionNew struct {

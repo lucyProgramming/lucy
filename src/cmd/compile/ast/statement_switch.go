@@ -46,6 +46,7 @@ func (s *StatementSwitch) check(b *Block) []error {
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
 	enumNamesMap := make(map[string]*Pos)
+	enumPackageName := ""
 	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
 			var byteValue byte
@@ -93,6 +94,10 @@ func (s *StatementSwitch) check(b *Block) []error {
 						errMsgPrefix(e.Pos)))
 					continue
 				} else {
+					if e.ExpressionValue.Type == VARIABLE_TYPE_PACKAGE &&
+						enumPackageName == "" {
+						enumPackageName = e.ExpressionValue.Package.Name
+					}
 					enumName = t.EnumName.Name
 					valueValid = true
 				}
@@ -201,7 +206,12 @@ func (s *StatementSwitch) check(b *Block) []error {
 			if ok {
 				continue
 			}
-			errMsg += fmt.Sprintf("\t\tcase %v:\n", v.Name)
+			if enumPackageName == "" {
+				errMsg += fmt.Sprintf("\t\tcase %s:\n", v.Name)
+			} else {
+				errMsg += fmt.Sprintf("\t\tcase %s.%s:\n", enumPackageName, v.Name)
+			}
+
 		}
 		errs = append(errs, fmt.Errorf(errMsg))
 	}

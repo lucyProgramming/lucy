@@ -10,8 +10,10 @@ type Block struct {
 	DeadEnding                 bool
 	Defers                     []*StatementDefer
 	isGlobalVariableDefinition bool
-	IsFunctionTopBlock         bool
+	IsFunctionBlock            bool
 	IsClassBlock               bool
+	IsForBlock                 bool
+	IsSwitchStatementTopBlock  bool
 	Pos                        *Pos
 	EndPos                     *Pos
 	Outer                      *Block
@@ -26,6 +28,7 @@ type Block struct {
 	TypeAlias                  map[string]*VariableType
 	Variables                  map[string]*VariableDefinition
 	ClosureFunctions           map[string]*Function //in "Functions" too
+
 }
 
 func (b *Block) HaveVariableDefinition() bool {
@@ -92,7 +95,7 @@ func (b *Block) searchLabel(name string) *StatementLabel {
 				return l
 			}
 		}
-		if bb.IsFunctionTopBlock {
+		if bb.IsFunctionBlock {
 			return nil
 		}
 		bb = bb.Outer
@@ -158,7 +161,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 			return v, nil
 		}
 	}
-	if b.IsFunctionTopBlock &&
+	if b.IsFunctionBlock &&
 		len(b.InheritedAttribute.Function.parameterTypes) > 0 { // this is a template function
 		return searchBuildIns(name), nil
 	}
@@ -170,12 +173,12 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		return t, err
 	}
 	if t != nil { //
-		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionTopBlock &&
+		if _, ok := t.(*VariableDefinition); ok && b.IsFunctionBlock &&
 			len(b.InheritedAttribute.Function.parameterTypes) > 0 { // template function
 			return nil, nil
 		}
 		if v, ok := t.(*VariableDefinition); ok && v.IsGlobal == false { // not a global variable
-			if b.IsFunctionTopBlock &&
+			if b.IsFunctionBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false { // 	b.InheritedAttribute.Function.IsGlobal == false  no need to check
 				if v.Name == THIS {
 					return nil, nil // capture this not allow
@@ -189,7 +192,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 		}
 		// if it is a function
 		if f, ok := t.(*Function); ok && f.IsGlobal == false {
-			if b.IsFunctionTopBlock {
+			if b.IsFunctionBlock {
 				b.InheritedAttribute.Function.Closure.InsertFunction(f)
 			}
 			if b.IsClassBlock && f.IsClosureFunction {

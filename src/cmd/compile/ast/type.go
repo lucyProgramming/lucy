@@ -323,7 +323,8 @@ func (variableType *VariableType) IsPointer() bool {
 		variableType.Type == VARIABLE_TYPE_ARRAY ||
 		variableType.Type == VARIABLE_TYPE_JAVA_ARRAY ||
 		variableType.Type == VARIABLE_TYPE_MAP ||
-		variableType.Type == VARIABLE_TYPE_STRING
+		variableType.Type == VARIABLE_TYPE_STRING ||
+		variableType.Type == VARIABLE_TYPE_NULL
 
 }
 

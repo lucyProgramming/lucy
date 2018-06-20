@@ -8,7 +8,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func backfillExit(es []*cg.Exit, to int) {
+func fillOffsetForExits(es []*cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
 		e.BranchBytes[0] = byte(offset >> 8)
@@ -18,7 +18,7 @@ func backfillExit(es []*cg.Exit, to int) {
 
 func jumpTo(op byte, code *cg.AttributeCode, to int) {
 	b := (&cg.Exit{}).FromCode(op, code)
-	backfillExit([]*cg.Exit{b}, to)
+	fillOffsetForExits([]*cg.Exit{b}, to)
 }
 
 func copyOP(code *cg.AttributeCode, op ...byte) {
@@ -28,7 +28,7 @@ func copyOP(code *cg.AttributeCode, op ...byte) {
 	code.CodeLength += len(op)
 }
 
-func copyOPLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, classname,
+func copyOPLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, className,
 	name, descriptor string) {
 	if len(ops) == 0 {
 		return
@@ -37,7 +37,7 @@ func copyOPLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, op
 	code.CodeLength++
 	if ops[0] == cg.OP_putstatic || ops[0] == cg.OP_putfield {
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      classname,
+			Class:      className,
 			Field:      name,
 			Descriptor: descriptor,
 		}, code.Codes[code.CodeLength:code.CodeLength+2])

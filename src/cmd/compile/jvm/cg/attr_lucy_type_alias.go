@@ -8,9 +8,9 @@ type AttributeLucyTypeAlias struct {
 
 func (a *AttributeLucyTypeAlias) ToAttributeInfo(class *Class) *AttributeInfo {
 	ret := &AttributeInfo{}
-	ret.NameIndex = class.insertUtf8Const(ATTRIBUTE_NAME_LUCY_TYPE_ALIAS)
+	ret.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_LUCY_TYPE_ALIAS)
 	ret.Info = make([]byte, 2)
 	ret.attributeLength = 2
-	binary.BigEndian.PutUint16(ret.Info, class.insertUtf8Const(a.Alias))
+	binary.BigEndian.PutUint16(ret.Info, class.InsertUtf8Const(a.Alias))
 	return ret
 }

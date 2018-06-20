@@ -20,7 +20,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = makeClass.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.Exits) > 0 {
-			backfillExit(s.StatementIf.Exits, code.CodeLength)
+			fillOffsetForExits(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_BLOCK: //new
@@ -36,12 +36,12 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = makeClass.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
-			backfillExit(s.StatementFor.Exits, code.CodeLength)
+			fillOffsetForExits(s.StatementFor.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_CONTINUE:
 		makeClass.buildDefers(class, code, context, s.StatementContinue.Defers, state)
-		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueOPOffset)
+		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.STATEMENT_TYPE_BREAK:
 		makeClass.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
@@ -60,7 +60,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 				code.Codes[code.CodeLength] = cg.OP_nop
 				code.CodeLength++
 			}
-			backfillExit(s.StatementSwitch.Exits, code.CodeLength)
+			fillOffsetForExits(s.StatementSwitch.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.STATEMENT_TYPE_GOTO:
@@ -75,7 +75,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		s.StatementLabel.CodeOffset = code.CodeLength
 		s.StatementLabel.Exits = []*cg.Exit{} //could compile multi times
 		if len(s.StatementLabel.Exits) > 0 {
-			backfillExit(s.StatementLabel.Exits, code.CodeLength) // back patch
+			fillOffsetForExits(s.StatementLabel.Exits, code.CodeLength) // back patch
 		}
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.STATEMENT_TYPE_DEFER: // nothing to do  ,defer will do after block is compiled

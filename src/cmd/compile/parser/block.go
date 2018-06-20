@@ -128,6 +128,7 @@ func (b *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				b.Next()
 				continue
 			}
+			f.Block.IsForBlock = true
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:         ast.STATEMENT_TYPE_FOR,
 				StatementFor: f,

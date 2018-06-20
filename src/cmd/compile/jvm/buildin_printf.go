@@ -82,7 +82,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 		state.pushStack(class, &ast.VariableType{Type: ast.VARIABLE_TYPE_INT})
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // bool value

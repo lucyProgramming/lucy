@@ -53,7 +53,7 @@ func (p *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 		p.parser.errs = append(p.parser.errs, err)
 		p.consume(untils_lc)
 	}
-	f.Block.IsFunctionTopBlock = true
+	f.Block.IsFunctionBlock = true
 	p.Next()
 	p.parser.BlockParser.parseStatementList(&f.Block, false)
 	if p.parser.token.Type != lex.TOKEN_RC {

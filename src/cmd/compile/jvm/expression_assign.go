@@ -19,7 +19,7 @@ func (makeExpression *MakeExpression) buildExpressionAssign(class *cg.ClassHighL
 	if len(es) > 0 {
 		state.pushStack(class, right.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
-		backfillExit(es, code.CodeLength)
+		fillOffsetForExits(es, code.CodeLength)
 	}
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t

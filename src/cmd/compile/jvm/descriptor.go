@@ -59,7 +59,7 @@ func (description *Description) typeDescriptor(v *ast.VariableType) string {
 	case ast.VARIABLE_TYPE_JAVA_ARRAY:
 		return "[" + description.typeDescriptor(v.ArrayType)
 	}
-	panic("unhandle type signature")
+	panic("unHandle type signature")
 }
 
 func (description *Description) ParseType(bs []byte) ([]byte, *ast.VariableType, error) {

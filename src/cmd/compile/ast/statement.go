@@ -97,8 +97,6 @@ func (s *Statement) check(block *Block) []error { // b is father
 	case STATEMENT_TYPE_SWITCH:
 		return s.StatementSwitch.check(block)
 	case STATEMENT_TYPE_BREAK:
-		s.StatementBreak.Defers = make([]*StatementDefer, len(block.Defers))
-		copy(s.StatementBreak.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
 		} else {
@@ -111,10 +109,10 @@ func (s *Statement) check(block *Block) []error { // b is father
 			} else {
 				s.StatementBreak.StatementSwitch = block.InheritedAttribute.ForBreak.(*StatementSwitch)
 			}
+			s.StatementBreak.mkDefers(block)
 		}
+
 	case STATEMENT_TYPE_CONTINUE:
-		s.StatementContinue.Defers = make([]*StatementDefer, len(block.Defers))
-		copy(s.StatementContinue.Defers, block.Defers)
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.StatementName())}
@@ -124,6 +122,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 				errMsgPrefix(s.Pos), s.StatementName())}
 		}
 		s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
+		s.StatementContinue.mkDefers(block)
 	case STATEMENT_TYPE_RETURN:
 		if block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
@@ -143,7 +142,7 @@ func (s *Statement) check(block *Block) []error { // b is father
 		block.InheritedAttribute.Function.mkAutoVarForException()
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		s.Defer.allowCatch = block.IsFunctionTopBlock
+		s.Defer.allowCatch = block.IsFunctionBlock
 		es := s.Defer.Block.checkStatements()
 		block.Defers = append(block.Defers, s.Defer)
 		return es

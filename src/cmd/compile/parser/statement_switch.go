@@ -29,7 +29,7 @@ func (b *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 	s := &ast.StatementSwitch{}
 	s.Pos = pos
 	s.Condition = condition
-	for b.parser.token.Type != lex.TOKEN_EOF && b.parser.token.Type == lex.TOKEN_CASE {
+	for b.parser.token.Type == lex.TOKEN_CASE {
 		b.Next() // skip case
 		es, err := b.parser.ExpressionParser.parseExpressions()
 		if err != nil {
@@ -43,8 +43,11 @@ func (b *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 		}
 		b.Next() // skip :
 		var block *ast.Block
-		if b.parser.token.Type != lex.TOKEN_CASE && b.parser.token.Type != lex.TOKEN_DEFAULT {
+		if b.parser.token.Type != lex.TOKEN_CASE &&
+			b.parser.token.Type != lex.TOKEN_DEFAULT &&
+			b.parser.token.Type != lex.TOKEN_RC {
 			block = &ast.Block{}
+			block.IsSwitchStatementTopBlock = true
 			b.parseStatementList(block, false)
 
 		}
@@ -62,9 +65,12 @@ func (b *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 		} else {
 			b.Next()
 		}
-		block := ast.Block{}
-		b.parseStatementList(&block, false)
-		s.Default = &block
+		if b.parser.token.Type != lex.TOKEN_RC {
+			block := ast.Block{}
+			block.IsSwitchStatementTopBlock = true
+			b.parseStatementList(&block, false)
+			s.Default = &block
+		}
 	}
 	if b.parser.token.Type != lex.TOKEN_RC {
 		err = fmt.Errorf("%s expect '}',but '%s'", b.parser.errorMsgPrefix(), b.parser.token.Description)

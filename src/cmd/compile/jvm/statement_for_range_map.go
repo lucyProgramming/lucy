@@ -114,7 +114,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		}
 	}
 
-	s.ContinueOPOffset = code.CodeLength
+	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	blockState := (&StackMapState{}).FromLast(forState)
 	code.Codes[code.CodeLength] = cg.OP_iinc
@@ -248,9 +248,9 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 	makeClass.buildBlock(class, code, s.Block, context, blockState)
 	defer forState.addTop(blockState)
 	if s.Block.DeadEnding == false {
-		jumpTo(cg.OP_goto, code, s.ContinueOPOffset)
+		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
 	}
-	backfillExit([]*cg.Exit{exit}, code.CodeLength)
+	fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength)
 
 	{
 		forState.pushStack(class,

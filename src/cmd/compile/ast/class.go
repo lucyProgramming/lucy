@@ -62,7 +62,7 @@ func (c *Class) mkDefaultConstruction() {
 	m.Func = &Function{}
 	m.Func.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Func.Pos = c.Pos
-	m.Func.Block.IsFunctionTopBlock = true
+	m.Func.Block.IsFunctionBlock = true
 	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
 }
 

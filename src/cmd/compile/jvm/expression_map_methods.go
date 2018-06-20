@@ -27,13 +27,12 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 			typeConverter.packPrimitives(class, code, variableType)
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		code.CodeLength++
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_hashmap_class,
 			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
-		}, code.Codes[code.CodeLength:code.CodeLength+2])
-		code.CodeLength += 2
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 		if e.IsStatementExpression {
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++

@@ -116,9 +116,7 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 			Method:     "valueOf",
 			Descriptor: "(B)Ljava/lang/Byte;",
 		}, bs[1:3])
-
 	case ast.VARIABLE_TYPE_SHORT:
-
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/Short",
 			Method:     "valueOf",
@@ -132,7 +130,6 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 			Method:     "valueOf",
 			Descriptor: "(I)Ljava/lang/Integer;",
 		}, bs[1:3])
-
 	case ast.VARIABLE_TYPE_FLOAT:
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      java_float_class,

@@ -74,7 +74,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) (t *V
 			tt.Enum = n.Enum
 			tt.EnumName = n
 			tt.Type = VARIABLE_TYPE_ENUM
-			selection.EnumName = n
+			selection.PackageEnumName = n
 			return tt
 		}
 		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)

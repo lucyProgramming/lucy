@@ -32,7 +32,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 		}
 		stack, es := makeExpression.build(class, code, vs.InitValues[0], context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, vs.InitValues[0].ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -200,7 +200,7 @@ func (makeExpression *MakeExpression) buildVar(class *cg.ClassHighLevel, code *c
 		//
 		stack, es := makeExpression.build(class, code, vs.InitValues[0], context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

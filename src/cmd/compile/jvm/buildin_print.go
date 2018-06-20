@@ -44,7 +44,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := makeExpression.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, call.Args[0].ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -139,7 +139,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 	maxStack = 3
 	currentStack := uint16(2)
 	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
-	app := func(isLast bool) {
+	appendString := func(isLast bool) {
 		//
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -182,7 +182,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 						maxStack = t
 					}
 				}
-				app(k == len(call.Args)-1 && kk == len(v.ExpressionMultiValues)-1) // last and last
+				appendString(k == len(call.Args)-1 && kk == len(v.ExpressionMultiValues)-1) // last and last
 			}
 			continue
 		}
@@ -192,7 +192,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 		}
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, variableType)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -203,7 +203,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 		if t := currentStack + makeExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
 			maxStack = t
 		}
-		app(k == len(call.Args)-1)
+		appendString(k == len(call.Args)-1)
 	}
 	// toString
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

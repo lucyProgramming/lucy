@@ -252,7 +252,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*V
 	// call father`s construction method
 	if call.Name == SUPER_FIELD_NAME {
 		if block.InheritedAttribute.IsConstruction == false ||
-			block.IsFunctionTopBlock == false ||
+			block.IsFunctionBlock == false ||
 			block.InheritedAttribute.StatementOffset != 0 {
 			*errs = append(*errs, fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
 				errMsgPrefix(e.Pos)))

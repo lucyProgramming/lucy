@@ -16,7 +16,7 @@ func (a *AttributeStackMap) ToAttributeInfo(class *Class) *AttributeInfo {
 		return nil
 	}
 	info := &AttributeInfo{}
-	info.NameIndex = class.insertUtf8Const(ATTRIBUTE_NAME_STACK_MAP)
+	info.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_STACK_MAP)
 	bs := make([]byte, 2)
 	binary.BigEndian.PutUint16(bs, uint16(len(a.StackMaps)))
 	for _, v := range a.StackMaps {

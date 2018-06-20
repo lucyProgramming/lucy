@@ -46,7 +46,7 @@ func (p *Package) getImport(file string, accessName string) *Import {
 func (p *Package) mkInitFunctions(bs []*Block) {
 	p.InitFunctions = make([]*Function, len(bs))
 	for k, b := range bs {
-		b.IsFunctionTopBlock = true
+		b.IsFunctionBlock = true
 		f := &Function{}
 		f.Block = *b
 		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition

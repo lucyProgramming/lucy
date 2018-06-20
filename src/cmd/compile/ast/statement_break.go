@@ -5,3 +5,20 @@ type StatementBreak struct {
 	StatementFor    *StatementFor
 	StatementSwitch *StatementSwitch
 }
+
+func (s *StatementBreak) mkDefers(block *Block) {
+	if s.StatementFor != nil {
+		if block.IsForBlock {
+			s.Defers = append(s.Defers, block.Defers...)
+			return
+		}
+		s.mkDefers(block.Outer)
+		return
+	}
+	// switch
+	if block.IsSwitchStatementTopBlock {
+		s.Defers = append(s.Defers, block.Defers...)
+		return
+	}
+	s.mkDefers(block.Outer)
+}

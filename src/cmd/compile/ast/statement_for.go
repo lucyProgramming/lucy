@@ -7,14 +7,14 @@ import (
 )
 
 type StatementFor struct {
-	RangeAttr        *ForRangeAttr
-	Exits            []*cg.Exit
-	ContinueOPOffset int
-	Pos              *Pos
-	Init             *Expression
-	Condition        *Expression
-	Post             *Expression
-	Block            *Block
+	RangeAttr          *ForRangeAttr
+	Exits              []*cg.Exit
+	ContinueCodeOffset int
+	Pos                *Pos
+	Init               *Expression
+	Condition          *Expression
+	After              *Expression
+	Block              *Block
 }
 
 type ForRangeAttr struct {
@@ -210,7 +210,7 @@ func (s *StatementFor) check(block *Block) []error {
 	s.Block.InheritedAttribute.StatementFor = s
 	s.Block.InheritedAttribute.ForBreak = s
 	errs := []error{}
-	if s.Init == nil && s.Post == nil && s.Condition != nil && s.Condition.canBeUsedForRange() { // for k,v := range arr
+	if s.Init == nil && s.After == nil && s.Condition != nil && s.Condition.canBeUsedForRange() { // for k,v := range arr
 		return s.checkRange()
 	}
 	if s.Init != nil {
@@ -238,12 +238,12 @@ func (s *StatementFor) check(block *Block) []error {
 
 		}
 	}
-	if s.Post != nil {
-		s.Post.IsStatementExpression = true
-		if s.Post.canBeUsedAsStatement() == false {
-			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Post.Pos)))
+	if s.After != nil {
+		s.After.IsStatementExpression = true
+		if s.After.canBeUsedAsStatement() == false {
+			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.After.Pos)))
 		}
-		_, es := s.Post.check(s.Block)
+		_, es := s.After.check(s.Block)
 		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}

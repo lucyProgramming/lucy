@@ -77,7 +77,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 		var es []*cg.Exit
 		maxStack, es = makeExpression.build(class, code, ee, context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, ee.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

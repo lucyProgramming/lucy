@@ -89,13 +89,13 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		state.pushStack(class, bin.Left.ExpressionValue)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 		}
 		stack, es := makeExpression.build(class, code, bin.Right, context, state)
 		state.pushStack(class, bin.Right.ExpressionValue)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 		}
 		if t := jvmSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t

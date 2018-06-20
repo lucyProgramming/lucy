@@ -13,7 +13,7 @@ func (a *AttributeLineNumber) ToAttributeInfo(class *Class) *AttributeInfo {
 		return nil
 	}
 	ret := &AttributeInfo{}
-	ret.NameIndex = class.insertUtf8Const("LineNumberTable")
+	ret.NameIndex = class.InsertUtf8Const("LineNumberTable")
 	ret.Info = make([]byte, 2)
 	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.lineNumbers)))
 	for _, v := range a.lineNumbers {

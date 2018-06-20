@@ -26,7 +26,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	}
 	maxStack, es = makeClass.makeExpression.build(class, code, s.Condition, context, IfState)
 	if len(es) > 0 {
-		backfillExit(es, code.CodeLength)
+		fillOffsetForExits(es, code.CodeLength)
 		IfState.pushStack(class, s.Condition.ExpressionValue)
 		context.MakeStackMap(code, IfState, code.CodeLength)
 		IfState.popStack(1) // must be bool expression
@@ -51,7 +51,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		}
 		stack, es := makeClass.makeExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			elseIfState.pushStack(class, s.Condition.ExpressionValue)
 			context.MakeStackMap(code, elseIfState, code.CodeLength)
 			elseIfState.popStack(1)

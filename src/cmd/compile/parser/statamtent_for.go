@@ -44,7 +44,7 @@ func (b *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 			if err != nil {
 				b.parser.errs = append(b.parser.errs, err)
 			}
-			f.Post = e
+			f.After = e
 		}
 
 	}

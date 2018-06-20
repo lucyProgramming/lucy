@@ -68,7 +68,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 	}
 	// if b.IsFunctionTopBlock == true must a return at end
-	if b.IsFunctionTopBlock == false && len(b.Defers) > 0 {
+	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
 		makeClass.buildDefers(class, code, context, b.Defers, state)
 	}
 	b.DeadEnding = deadEnd

@@ -67,7 +67,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 	state.pushStack(class, s.Condition.ExpressionValue)
 	for _, c := range s.StatementSwitchCases {
 		if exit != nil {
-			backfillExit([]*cg.Exit{exit}, code.CodeLength)
+			fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		matches := []*cg.Exit{}
@@ -124,7 +124,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 		// should be goto next,here is no match
 		exit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		// if match goto here
-		backfillExit(matches, code.CodeLength)
+		fillOffsetForExits(matches, code.CodeLength)
 		//before block,pop off stack
 		context.MakeStackMap(code, state, code.CodeLength)
 		if size == 1 {
@@ -144,7 +144,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
-	backfillExit([]*cg.Exit{exit}, code.CodeLength)
+	fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	if size == 1 {
 		code.Codes[code.CodeLength] = cg.OP_pop

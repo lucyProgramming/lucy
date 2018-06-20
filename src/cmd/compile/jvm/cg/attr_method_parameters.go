@@ -40,15 +40,15 @@ func (a *AttributeMethodParameters) ToAttributeInfo(class *Class, attrName ...st
 	ret := &AttributeInfo{}
 
 	if len(attrName) > 0 {
-		ret.NameIndex = class.insertUtf8Const(attrName[0])
+		ret.NameIndex = class.InsertUtf8Const(attrName[0])
 	} else {
-		ret.NameIndex = class.insertUtf8Const(ATTRIBUTE_NAME_METHOD_PARAMETERS)
+		ret.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_METHOD_PARAMETERS)
 	}
 	ret.attributeLength = uint32(len(a.Parameters)*4 + 1)
 	ret.Info = make([]byte, ret.attributeLength)
 	ret.Info[0] = byte(len(a.Parameters))
 	for k, v := range a.Parameters {
-		binary.BigEndian.PutUint16(ret.Info[4*k+1:], class.insertUtf8Const(v.Name))
+		binary.BigEndian.PutUint16(ret.Info[4*k+1:], class.InsertUtf8Const(v.Name))
 		binary.BigEndian.PutUint16(ret.Info[4*k+3:], v.AccessFlags)
 	}
 	return ret

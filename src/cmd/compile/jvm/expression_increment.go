@@ -16,7 +16,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		if t.Variable.LocalValOffset > 255 { // early check
 			panic("over 255")
 		}
-		if e.IsStatementExpression == false { // I still need it`s value
+		if e.IsStatementExpression == false { //  need it`s value
 			if e.Type == ast.EXPRESSION_TYPE_INCREMENT || e.Type == ast.EXPRESSION_TYPE_DECREMENT {
 				copyOP(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, t.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1

@@ -23,11 +23,11 @@ func (t *TemplateFunction) callPairExists(parameterTypes map[string]*VariableTyp
 		for kk, vv := range parameterTypes {
 			t, ok := p.parameterTypes[kk]
 			if ok == false {
-				// not found
+				//not found
 				return nil
 			}
 			if vv.Equal(errs, t) == false {
-				// not equal
+				//not equal
 				return nil
 			}
 		}

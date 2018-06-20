@@ -51,7 +51,6 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 			if delta <= 63 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 					&cg.StackMapSameFrame{FrameType: byte(delta)})
-
 			} else {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 					&cg.StackMapSameFrameExtended{FrameType: 251, Delta: delta})

@@ -10,7 +10,7 @@ type StatementReturn struct {
 }
 
 func (s *StatementReturn) mkDefers(b *Block) {
-	if b.IsFunctionTopBlock == false { // not top block
+	if b.IsFunctionBlock == false { // not top block
 		s.mkDefers(b.Outer) // recursive
 	}
 	if b.Defers != nil {

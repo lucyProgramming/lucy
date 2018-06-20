@@ -56,7 +56,7 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 		}
 		stack, es := makeClass.makeExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
-			backfillExit(es, code.CodeLength)
+			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.Type)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
