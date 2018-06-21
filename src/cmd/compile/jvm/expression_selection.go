@@ -23,7 +23,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 		return
 	}
 	// check cast to super class
-	if selection.Name == ast.SUPER_FIELD_NAME {
+	if selection.Name == ast.SUPER {
 		if selection.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_OBJECT {
 			maxStack, _ = makeExpression.build(class, code, selection.Expression, context, state)
 			code.Codes[code.CodeLength] = cg.OP_checkcast

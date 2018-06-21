@@ -312,11 +312,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Code = &cg.AttributeCode{}
 			makeClass.buildFunction(class, c, method, t[0].Function)
 			class.AppendMethod(method)
-			if len(t[0].Function.Type.ParameterList) > 0 {
-				makeClass.mkClassDefaultConstruction(class, c)
-			}
-		} else {
-			makeClass.mkClassDefaultConstruction(class, c)
+
 		}
 	}
 	return class
@@ -412,7 +408,7 @@ func (makeClass *MakeClass) mkClassDefaultConstruction(class *cg.ClassHighLevel,
 	}
 	method.Code.CodeLength = 4
 	if astClass != nil {
-		makeClass.mkFieldDefaultValue(class, method.Code, &Context{class: astClass}, nil)
+		makeClass.mkNonStaticFieldDefaultValue(class, method.Code, &Context{class: astClass}, nil)
 	}
 	method.Code.Codes[method.Code.CodeLength] = cg.OP_return
 	method.Code.CodeLength += 1

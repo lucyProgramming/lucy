@@ -68,7 +68,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
 	}
 	//copy op
-	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+	copyLeftValueOps(class, code, op, className, name, descriptor)
 	return
 
 }
@@ -253,6 +253,6 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		}
 	}
 	//copy op
-	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+	copyLeftValueOps(class, code, op, className, name, descriptor)
 	return
 }

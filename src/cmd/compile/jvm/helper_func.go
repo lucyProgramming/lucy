@@ -28,7 +28,7 @@ func copyOPs(code *cg.AttributeCode, op ...byte) {
 	code.CodeLength += len(op)
 }
 
-func copyOPsLeftValueVersion(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, className,
+func copyLeftValueOps(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, className,
 	name, descriptor string) {
 	if len(ops) == 0 {
 		return

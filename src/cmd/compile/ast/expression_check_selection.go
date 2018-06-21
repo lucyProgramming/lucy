@@ -82,7 +82,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		*errs = append(*errs, err)
 		return nil
 	case VARIABLE_TYPE_OBJECT:
-		if selection.Name == SUPER_FIELD_NAME {
+		if selection.Name == SUPER {
 			if t.Class.Name == JAVA_ROOT_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
 					errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
@@ -117,7 +117,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return t
 		}
 	case VARIABLE_TYPE_CLASS:
-		if selection.Name == SUPER_FIELD_NAME {
+		if selection.Name == SUPER {
 			if t.Class.Name == JAVA_ROOT_CLASS {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
 					errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))

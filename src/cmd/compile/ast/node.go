@@ -29,7 +29,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 		os.Exit(1)
 	}
 	errs = make([]error, 0)
-	PackageBeenCompile.Files = make(map[string]*SourceFile)
+	PackageBeenCompile.Files = make(map[string]*LucySourceFile)
 	conversion.Name = []string{}
 	conversion.Blocks = []*Block{}
 	conversion.Functions = make([]*Function, 0)
@@ -58,7 +58,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 		case *Import:
 			i := v.Data.(*Import)
 			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
-				PackageBeenCompile.Files[i.Pos.Filename] = &SourceFile{Imports: make(map[string]*Import)}
+				PackageBeenCompile.Files[i.Pos.Filename] = &LucySourceFile{Imports: make(map[string]*Import)}
 			}
 			PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();

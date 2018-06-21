@@ -31,7 +31,7 @@ func (makeExpression *MakeExpression) buildExpressionAssign(class *cg.ClassHighL
 			maxStack = currentStack
 		}
 	}
-	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+	copyLeftValueOps(class, code, op, className, name, descriptor)
 	return
 }
 
@@ -61,7 +61,7 @@ func (makeExpression *MakeExpression) buildAssign(class *cg.ClassHighLevel, code
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}
-		copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+		copyLeftValueOps(class, code, op, className, name, descriptor)
 		state.popStack(len(state.Stacks) - stackLength)
 	}
 	return

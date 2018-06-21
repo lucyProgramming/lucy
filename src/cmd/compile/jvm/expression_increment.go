@@ -64,7 +64,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 	}
 	switch e.ExpressionValue.Type {
 	case ast.VARIABLE_TYPE_BYTE:
-		if e.IsSelfIncrement() {
+		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -76,7 +76,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength+2] = cg.OP_i2b
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_SHORT:
-		if e.IsSelfIncrement() {
+		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -88,7 +88,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength+2] = cg.OP_i2s
 		code.CodeLength += 3
 	case ast.VARIABLE_TYPE_INT:
-		if e.IsSelfIncrement() {
+		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -99,7 +99,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.CodeLength += 2
 	case ast.VARIABLE_TYPE_LONG:
-		if e.IsSelfIncrement() {
+		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_lconst_1
 			code.CodeLength++
 		} else {
@@ -113,7 +113,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_ladd
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_FLOAT:
-		if e.IsSelfIncrement() {
+		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_fconst_1
 			code.CodeLength++
 		} else {
@@ -127,7 +127,7 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_fadd
 		code.CodeLength++
 	case ast.VARIABLE_TYPE_DOUBLE:
-		if e.IsSelfIncrement() {
+		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_dconst_1
 			code.CodeLength++
 		} else {
@@ -151,6 +151,6 @@ func (makeExpression *MakeExpression) buildSelfIncrement(class *cg.ClassHighLeve
 		}
 	}
 	//copy op
-	copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+	copyLeftValueOps(class, code, op, className, name, descriptor)
 	return
 }

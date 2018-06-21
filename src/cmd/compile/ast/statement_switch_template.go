@@ -21,7 +21,6 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 		errs = append(errs, err)
 		return
 	}
-
 	var match *Type
 	var matchBlock *Block
 	typesChecked := []*Type{}
@@ -41,7 +40,7 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 				continue
 			}
 			if checkIfAlreadyExist(typesChecked, tt) {
-				errs = append(errs, fmt.Errorf("%s '%s' already exist",
+				errs = append(errs, fmt.Errorf("%s match '%s' already exist",
 					errMsgPrefix(tt.Pos), tt.TypeString()))
 				return
 			}

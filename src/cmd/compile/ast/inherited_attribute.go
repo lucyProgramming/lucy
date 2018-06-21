@@ -9,4 +9,5 @@ type InheritedAttribute struct {
 	Function             *Function
 	Class                *Class
 	Defer                *StatementDefer
+	ClassMethod          *ClassMethod
 }

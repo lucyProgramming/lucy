@@ -86,27 +86,10 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 	}()
 	state := &StackMapState{}
 	if method.IsConstruction { // construction method
-		if f.ConstructionMethodCalledByUser == false {
-			method.Code.Codes[method.Code.CodeLength] = cg.OP_aload_0
-			method.Code.Codes[method.Code.CodeLength+1] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      class.SuperClass,
-				Method:     special_method_init,
-				Descriptor: "()V",
-			}, method.Code.Codes[method.Code.CodeLength+2:method.Code.CodeLength+4])
-			method.Code.CodeLength += 4
-			method.Code.MaxStack = 1
-			method.Code.MaxLocals = 1
-			state.Locals = append(state.Locals,
-				state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(astClass.Name)))
-			// field default value
-			makeClass.mkFieldDefaultValue(class, method.Code, context, state)
-		} else {
-			method.Code.MaxLocals = 1
-			t := &cg.StackMapVerificationTypeInfo{}
-			t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
-			state.Locals = append(state.Locals, t)
-		}
+		method.Code.MaxLocals = 1
+		t := &cg.StackMapVerificationTypeInfo{}
+		t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
+		state.Locals = append(state.Locals, t)
 	} else if f.Name == ast.MAIN_FUNCTION_NAME { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -211,17 +194,25 @@ func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code 
 	return
 }
 
-func (makeClass *MakeClass) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
+func (makeClass *MakeClass) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
 	for _, v := range context.class.Fields {
-		if v.DefaultValue == nil || v.IsStatic() {
+		if v.IsStatic() || v.Expression == nil {
 			continue
 		}
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
-		stack, _ := makeClass.makeExpression.build(class, code, v.Expression, context, state)
+		state.pushStack(class, state.newObjectVariableType(class.Name))
+		stack, es := makeClass.makeExpression.build(class, code, v.Expression, context, state)
+		if len(es) > 0 {
+			state.pushStack(class, v.Expression.ExpressionValue)
+			context.MakeStackMap(code, state, code.CodeLength)
+			state.popStack(1)
+			fillOffsetForExits(es, code.CodeLength)
+		}
 		if t := 1 + stack; t > code.MaxStack {
 			code.MaxStack = t
 		}
+		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_putfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,

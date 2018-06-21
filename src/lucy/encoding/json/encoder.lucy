@@ -14,6 +14,7 @@ class Encoder {
 	format bool ; 
 
 	public fn Encoder(x Object,format bool ) {
+		this.super();
 		this.x = x;
 		if x != null {
 			this.c = x.getClass();

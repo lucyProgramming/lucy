@@ -223,7 +223,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 			Types = []*Type{tt}
 			e.ExpressionValue = tt
 		}
-	case EXPRESSION_TYPE_SELECT:
+	case EXPRESSION_TYPE_SELECTION:
 		tt := e.checkSelectionExpression(block, &errs)
 		if tt != nil {
 			Types = []*Type{tt}

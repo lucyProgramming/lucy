@@ -7,7 +7,7 @@ import (
 )
 
 type Block struct {
-	WillNotExecuteToEnd        bool
+	WillNotExecuteToEnd        bool // should analyse at ast stage
 	Defers                     []*StatementDefer
 	isGlobalVariableDefinition bool
 	IsFunctionBlock            bool
@@ -231,6 +231,9 @@ func (b *Block) checkUnUsedVariable() (es []error) {
 func (b *Block) checkStatements() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
+		if s.isStaticFieldDefaultValue {
+			continue
+		}
 		b.InheritedAttribute.StatementOffset = k
 		errs = append(errs, s.check(b)...)
 		if PackageBeenCompile.shouldStop(errs) {
@@ -260,7 +263,7 @@ func (b *Block) checkConstants() []error {
 	}
 	return errs
 }
-func (b *Block) checkTypeElementIfInserted(name string, pos *Position) error {
+func (b *Block) checkTypeExist(name string, pos *Position) error {
 	if b.Classes == nil {
 		b.Classes = make(map[string]*Class)
 	}
@@ -290,7 +293,7 @@ func (b *Block) checkTypeElementIfInserted(name string, pos *Position) error {
 	}
 	return nil
 }
-func (b *Block) checkRightValueElementInserted(name string, pos *Position) error {
+func (b *Block) checkRightValueExist(name string, pos *Position) error {
 	if b.Variables == nil {
 		b.Variables = make(map[string]*Variable)
 	}
@@ -371,17 +374,17 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 	}
 	switch d.(type) {
 	case *Class:
-		err := b.checkRightValueElementInserted(name, pos)
+		err := b.checkRightValueExist(name, pos)
 		if err != nil {
 			return err
 		}
-		err = b.checkTypeElementIfInserted(name, pos)
+		err = b.checkTypeExist(name, pos)
 		if err != nil {
 			return err
 		}
 		b.Classes[name] = d.(*Class)
 	case *Function:
-		err := b.checkRightValueElementInserted(name, pos)
+		err := b.checkRightValueExist(name, pos)
 		if err != nil {
 			return err
 		}
@@ -392,20 +395,20 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		}
 		b.Functions[name] = t
 	case *Constant:
-		err := b.checkRightValueElementInserted(name, pos)
+		err := b.checkRightValueExist(name, pos)
 		if err != nil {
 			return err
 		}
 		b.Constants[name] = d.(*Constant)
 	case *Variable:
-		err := b.checkRightValueElementInserted(name, pos)
+		err := b.checkRightValueExist(name, pos)
 		if err != nil {
 			return err
 		}
 		t := d.(*Variable)
 		b.Variables[name] = t
 	case *Enum:
-		err := b.checkTypeElementIfInserted(name, pos)
+		err := b.checkTypeExist(name, pos)
 		if err != nil {
 			return err
 		}
@@ -418,7 +421,7 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 			}
 		}
 	case *EnumName:
-		err := b.checkRightValueElementInserted(name, pos)
+		err := b.checkRightValueExist(name, pos)
 		if err != nil {
 			return err
 		}
@@ -435,7 +438,7 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		}
 		b.Labels[name] = d.(*StatementLabel)
 	case *Type:
-		err := b.checkTypeElementIfInserted(name, pos)
+		err := b.checkTypeExist(name, pos)
 		if err != nil {
 			return err
 		}

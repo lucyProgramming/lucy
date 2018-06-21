@@ -267,7 +267,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		if t := remainStack + jvmSlotSize(target); t > maxStack {
 			maxStack = t
 		}
-		copyOPsLeftValueVersion(class, code, ops, className, name, descriptor)
+		copyLeftValueOps(class, code, ops, className, name, descriptor)
 		blockState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
@@ -281,7 +281,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			}
 			// load k
 			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_INT, autoVar.K)...)
-			copyOPsLeftValueVersion(class, code, ops, className, name, descriptor)
+			copyLeftValueOps(class, code, ops, className, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}

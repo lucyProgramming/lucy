@@ -24,6 +24,15 @@ type Class struct {
 	InterfaceNames     []*NameWithPos
 	Interfaces         []*Class
 	LoadFromOutSide    bool
+	StaticBlocks       []*Block
+}
+
+func (c *Class) HaveStaticsCodes() bool {
+	s := 0
+	for _, v := range c.StaticBlocks {
+		s += len(v.Statements)
+	}
+	return s > 0
 }
 
 func (c *Class) IsInterface() bool {
@@ -41,6 +50,7 @@ func (c *Class) loadSelf() error {
 	*c = *cc
 	return nil
 }
+
 func (c *Class) check(father *Block) []error {
 	errs := c.checkPhase1(father)
 	es := c.checkPhase2(father)
@@ -51,18 +61,41 @@ func (c *Class) check(father *Block) []error {
 }
 
 func (c *Class) mkDefaultConstruction() {
-	if c.Methods != nil && len(c.Methods[CONSTRUCTION_METHOD_NAME]) > 0 {
+	if c.Methods == nil {
+		c.Methods = make(map[string][]*ClassMethod)
+	}
+	if len(c.Methods[CONSTRUCTION_METHOD_NAME]) > 0 {
 		return
 	}
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
 	}
 	m := &ClassMethod{}
-	//m.IsConstructionMethod = true
+	m.isCompilerAuto = true
 	m.Function = &Function{}
 	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
+	{
+		e := &Expression{}
+		e.Type = EXPRESSION_TYPE_METHOD_CALL
+		e.Pos = c.Pos
+		call := &ExpressionMethodCall{}
+		call.Name = SUPER
+		call.Expression = &Expression{
+			Type: EXPRESSION_TYPE_IDENTIFIER,
+			Data: &ExpressionIdentifier{
+				Name: THIS,
+			},
+			Pos: c.Pos,
+		}
+		e.Data = call
+		m.Function.Block.Statements = make([]*Statement, 1)
+		m.Function.Block.Statements[0] = &Statement{
+			Type:       STATEMENT_TYPE_EXPRESSION,
+			Expression: e,
+		}
+	}
 	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
 }
 
@@ -88,7 +121,6 @@ func (c *Class) checkIfClassHierarchyCircularity() error {
 			panic("class is nil")
 		}
 		class = class.SuperClass
-
 	}
 	if is == false {
 		return nil
@@ -136,6 +168,7 @@ func (c *Class) checkPhase2(father *Block) []error {
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
+	c.mkClassInitMethod()
 	for _, ms := range c.Methods {
 		if len(ms) > 1 {
 			errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
@@ -154,11 +187,43 @@ func (c *Class) checkPhase2(father *Block) []error {
 	return errs
 }
 
+func (c *Class) mkClassInitMethod() {
+	if c.HaveStaticsCodes() == false {
+		return // no need
+	}
+	method := &ClassMethod{}
+	method.Function = &Function{}
+	method.Function.Type.ParameterList = make(ParameterList, 0)
+	method.Function.Type.ReturnList = make(ReturnList, 0)
+	f := method.Function
+	f.Pos = c.Pos
+	f.Block.Statements = make([]*Statement, len(c.StaticBlocks))
+	for k, _ := range f.Block.Statements {
+		s := &Statement{}
+		s.Type = STATEMENT_TYPE_BLOCK
+		s.Block = c.StaticBlocks[k]
+		f.Block.Statements[k] = s
+	}
+	f.mkLastReturnStatement()
+	f.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	f.AccessFlags |= cg.ACC_METHOD_STATIC
+	f.AccessFlags |= cg.ACC_METHOD_FINAL
+	f.Name = CLASS_INIT_METHOD
+	f.Block.IsFunctionBlock = true
+	if c.Methods == nil {
+		c.Methods = make(map[string][]*ClassMethod)
+	}
+	f.Block.inherit(&c.Block)
+	f.Block.InheritedAttribute.Function = f
+	f.Block.InheritedAttribute.ClassMethod = method
+	c.Methods[f.Name] = []*ClassMethod{method}
+}
+
 func (c *Class) resolveAllNames(b *Block) []error {
 	errs := []error{}
 	var err error
 	for _, v := range c.Fields {
-		if v.Name == SUPER_FIELD_NAME {
+		if v.Name == SUPER {
 			errs = append(errs, fmt.Errorf("%s super is special for access 'super'",
 				errMsgPrefix(v.Pos)))
 		}
@@ -169,8 +234,21 @@ func (c *Class) resolveAllNames(b *Block) []error {
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
+			if vv.Function.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
+				if vv.Function.Block.Variables == nil {
+					vv.Function.Block.Variables = make(map[string]*Variable)
+				}
+				vv.Function.Block.Variables[THIS] = &Variable{}
+				vv.Function.Block.Variables[THIS].Name = THIS
+				vv.Function.Block.Variables[THIS].Pos = vv.Function.Pos
+				vv.Function.Block.Variables[THIS].Type = &Type{
+					Type:  VARIABLE_TYPE_OBJECT,
+					Class: c,
+				}
+			}
 			vv.Function.Block.inherit(&c.Block)
 			vv.Function.Block.InheritedAttribute.Function = vv.Function
+			vv.Function.Block.InheritedAttribute.ClassMethod = vv
 			vv.Function.checkParametersAndReturns(&errs)
 		}
 	}
@@ -338,20 +416,75 @@ func (c *Class) implemented(inter string) (bool, error) {
 
 func (c *Class) checkFields() []error {
 	errs := []error{}
+	ss := []*Statement{}
 	for _, v := range c.Fields {
 		if v.Expression != nil {
-			if v.Expression.IsLiteral() == false {
-				errs = append(errs, fmt.Errorf("%s field default value must be literal",
-					errMsgPrefix(v.Pos)))
-				continue
+			t, es := v.Expression.checkSingleValueContextExpression(&c.Block)
+			if errorsNotEmpty(es) {
+				errs = append(errs, es...)
 			}
-			ts, _ := v.Expression.check(&c.Block)
-			if v.Type.Equal(&errs, ts[0]) == false {
+			if v.Type.Equal(&errs, t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
-					errMsgPrefix(v.Pos), ts[0].TypeString(), v.Type.TypeString()))
+					errMsgPrefix(v.Pos), t.TypeString(), v.Type.TypeString()))
 				continue
 			}
-			v.DefaultValue = v.Expression.Data // copy default value
+			//TODO:: should check or not ???
+			//if t.Type == VARIABLE_TYPE_NULL {
+			//	errs = append(errs, fmt.Errorf("%s pointer types default value is '%s' already",
+			//		errMsgPrefix(v.Pos), t.TypeString()))
+			//	continue
+			//}
+			if v.IsStatic() && v.Expression.IsLiteral() {
+				v.DefaultValue = v.Expression.Data
+				continue
+			}
+			if v.IsStatic() == false {
+				// nothing to do
+				continue
+			}
+			bin := &ExpressionBinary{}
+			bin.Right = &Expression{
+				Type: EXPRESSION_TYPE_LIST,
+				Data: []*Expression{v.Expression},
+			}
+			{
+				selection := &ExpressionSelection{}
+				selection.Expression = &Expression{}
+				selection.Expression.ExpressionValue = &Type{
+					Type:  VARIABLE_TYPE_CLASS,
+					Class: c,
+				}
+				selection.Name = v.Name
+				selection.Field = v
+				left := &Expression{
+					Type: EXPRESSION_TYPE_SELECTION,
+					Data: selection,
+				}
+				left.ExpressionValue = v.Type
+				bin.Left = &Expression{
+					Type: EXPRESSION_TYPE_LIST,
+					Data: []*Expression{left},
+				}
+			}
+			e := &Expression{
+				Type: EXPRESSION_TYPE_ASSIGN,
+				Data: bin,
+				IsStatementExpression: true,
+			}
+			ss = append(ss, &Statement{
+				Type:                      STATEMENT_TYPE_EXPRESSION,
+				Expression:                e,
+				isStaticFieldDefaultValue: true,
+			})
+		}
+	}
+	if len(ss) > 0 {
+		b := &Block{}
+		b.Statements = ss
+		if c.StaticBlocks != nil {
+			c.StaticBlocks = append([]*Block{b}, c.StaticBlocks...)
+		} else {
+			c.StaticBlocks = []*Block{b}
 		}
 	}
 	return errs
@@ -367,19 +500,12 @@ func (c *Class) checkMethods() []error {
 			if c.IsInterface() {
 				continue
 			}
-			if vv.Function.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // bind this
-				if vv.Function.Block.Variables == nil {
-					vv.Function.Block.Variables = make(map[string]*Variable)
-				}
-				vv.Function.Block.Variables[THIS] = &Variable{}
-				vv.Function.Block.Variables[THIS].Name = THIS
-				vv.Function.Block.Variables[THIS].Pos = vv.Function.Pos
-				vv.Function.Block.Variables[THIS].Type = &Type{
-					Type:  VARIABLE_TYPE_OBJECT,
-					Class: c,
-				}
-			}
 			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
+			if isConstruction &&
+				vv.IsFirstStatementCallFatherConstruction() == false {
+				errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",
+					errMsgPrefix(vv.Function.Pos)))
+			}
 			if isConstruction && vv.Function.NoReturnValue() == false {
 				errs = append(errs, fmt.Errorf("%s construction method expect no return values",
 					errMsgPrefix(vv.Function.Type.ParameterList[0].Pos)))

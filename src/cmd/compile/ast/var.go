@@ -18,8 +18,9 @@ const (
 	DEFAULT_EXCEPTION_CLASS  = "java/lang/Exception"
 	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
 	JAVA_STRING_CLASS        = "java/lang/String"
-	SUPER_FIELD_NAME         = "super"
+	SUPER                    = "super"
 	CONSTRUCTION_METHOD_NAME = "<init>"
+	CLASS_INIT_METHOD        = "<clinit>"
 )
 
 var (

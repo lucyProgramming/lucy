@@ -9,6 +9,5 @@ func (a *AttributeRuntimeVisibleAnnotation) ToAttributeInfo(class *Class) *Attri
 		return nil
 	}
 	ret := &AttributeInfo{}
-
 	return ret
 }

@@ -226,7 +226,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Value); t > maxStack {
 			maxStack = t
 		}
-		copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+		copyLeftValueOps(class, code, op, className, name, descriptor)
 		forState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil {
 			stackLength := len(blockState.Stacks)
@@ -240,7 +240,7 @@ func (makeClass *MakeClass) buildForRangeStatementForMap(class *cg.ClassHighLeve
 			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Key); t > maxStack {
 				maxStack = t
 			}
-			copyOPsLeftValueVersion(class, code, op, className, name, descriptor)
+			copyLeftValueOps(class, code, op, className, name, descriptor)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}

@@ -13,7 +13,7 @@ type Package struct {
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block
-	Files                        map[string]*SourceFile
+	Files                        map[string]*LucySourceFile
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
@@ -185,7 +185,7 @@ func (p *Package) mkClassCache(load *Package) {
 }
 
 //different for other file
-type SourceFile struct {
+type LucySourceFile struct {
 	Imports map[string]*Import // n
 }
 

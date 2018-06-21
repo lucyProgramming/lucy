@@ -10,7 +10,6 @@ type Function struct {
 	TemplateFunction                    *TemplateFunction
 	parameterTypes                      map[string]*Type    //typed parameters
 	ClassMethod                         *cg.MethodHighLevel // make call from
-	ConstructionMethodCalledByUser      bool
 	HaveDefaultValue                    bool
 	DefaultValueStartAt                 int
 	IsClosureFunction                   bool
@@ -31,7 +30,7 @@ type Function struct {
 	AutoVariableForReturnBecauseOfDefer *AutoVariableForReturnBecauseOfDefer
 	AutoVariableForMultiReturn          *AutoVariableForMultiReturn
 	ClosureVariableOffSet               uint16 // for closure
-	SourceCodes                         []byte // source code for T
+	SourceCodes                         []byte // source code for template function
 }
 
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position)

@@ -384,7 +384,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 			if expressionParser.parser.token.Type == lex.TOKEN_IDENTIFIER {
 				newExpression := &ast.Expression{}
 				newExpression.Pos = pos
-				newExpression.Type = ast.EXPRESSION_TYPE_SELECT
+				newExpression.Type = ast.EXPRESSION_TYPE_SELECTION
 				index := &ast.ExpressionSelection{}
 				index.Expression = left
 				index.Name = expressionParser.parser.token.Data.(string)

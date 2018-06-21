@@ -35,7 +35,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 	case EXPRESSION_TYPE_INDEX:
 		ret = e.checkIndexExpression(block, errs)
 		return ret
-	case EXPRESSION_TYPE_SELECT:
+	case EXPRESSION_TYPE_SELECTION:
 		dot := e.Data.(*ExpressionSelection)
 		t, es := dot.Expression.checkSingleValueContextExpression(block)
 		if errorsNotEmpty(es) {
@@ -44,7 +44,8 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 		if t == nil {
 			return nil
 		}
-		if t.Type == VARIABLE_TYPE_OBJECT {
+		switch t.Type {
+		case VARIABLE_TYPE_OBJECT:
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -65,7 +66,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 				return ret
 			}
 			return nil
-		} else if t.Type == VARIABLE_TYPE_CLASS {
+		case VARIABLE_TYPE_CLASS:
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -81,7 +82,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 				return ret
 			}
 			return nil
-		} else if t.Type == VARIABLE_TYPE_PACKAGE {
+		case VARIABLE_TYPE_PACKAGE:
 			variable, exists := t.Package.Block.NameExists(dot.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
@@ -102,7 +103,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			}
-		} else {
+		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
 				errMsgPrefix(e.Pos),
 				dot.Expression.OpName()))

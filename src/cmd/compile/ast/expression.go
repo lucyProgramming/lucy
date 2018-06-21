@@ -58,8 +58,8 @@ const (
 	//
 
 	//
-	EXPRESSION_TYPE_INDEX  // a["b"]
-	EXPRESSION_TYPE_SELECT //a.b
+	EXPRESSION_TYPE_INDEX     // a["b"]
+	EXPRESSION_TYPE_SELECTION //a.b
 	//
 	EXPRESSION_TYPE_METHOD_CALL
 	EXPRESSION_TYPE_FUNCTION_CALL
@@ -172,7 +172,7 @@ func (e *Expression) OpName() string {
 	case EXPRESSION_TYPE_INDEX: // a["b"]
 		t := e.Data.(*ExpressionIndex)
 		return fmt.Sprintf("%s[%s]", t.Expression.OpName(), t.Index.OpName())
-	case EXPRESSION_TYPE_SELECT: //a.b
+	case EXPRESSION_TYPE_SELECTION: //a.b
 		t := e.Data.(*ExpressionSelection)
 		return fmt.Sprintf("%s.%s", t.Expression.OpName(), t.Name)
 	case EXPRESSION_TYPE_METHOD_CALL:
@@ -355,7 +355,7 @@ func (e *Expression) canBeUsedAsCondition() bool {
 		e.Type == EXPRESSION_TYPE_LE ||
 		e.Type == EXPRESSION_TYPE_LT ||
 		e.Type == EXPRESSION_TYPE_INDEX ||
-		e.Type == EXPRESSION_TYPE_SELECT ||
+		e.Type == EXPRESSION_TYPE_SELECTION ||
 		e.Type == EXPRESSION_TYPE_METHOD_CALL ||
 		e.Type == EXPRESSION_TYPE_FUNCTION_CALL ||
 		e.Type == EXPRESSION_TYPE_INCREMENT ||
@@ -415,7 +415,7 @@ func (e *Expression) isFloat() bool {
 /*
 	check out this expression is increment or decrement
 */
-func (e *Expression) IsSelfIncrement() bool {
+func (e *Expression) IsIncrement() bool {
 	return e.Type == EXPRESSION_TYPE_INCREMENT ||
 		e.Type == EXPRESSION_TYPE_PRE_INCREMENT
 }

@@ -56,6 +56,7 @@ class Decoder {
 	tree JsonSyntaxTreeNode ; 
 
 	public fn Decoder(x Object,bs []byte) {
+		this.super();
 		this.x = x;
 		this.bs = bs;
 	}

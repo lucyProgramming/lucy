@@ -5,6 +5,7 @@ import (
 )
 
 type ClassMethod struct {
+	isCompilerAuto  bool // compile auto method
 	Function        *Function
 	LoadFromOutSide bool
 }
@@ -22,4 +23,23 @@ func (m *ClassMethod) IsStatic() bool {
 
 func (m *ClassMethod) IsPrivate() bool {
 	return (m.Function.AccessFlags & cg.ACC_METHOD_PRIVATE) != 0
+}
+
+func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
+	if len(m.Function.Block.Statements) == 0 {
+		return false
+	}
+	s := m.Function.Block.Statements[0]
+	if s.Type != STATEMENT_TYPE_EXPRESSION {
+		return false
+	}
+	e := s.Expression
+	if e.Type != EXPRESSION_TYPE_METHOD_CALL {
+		return false
+	}
+	call := s.Expression.Data.(*ExpressionMethodCall)
+	if call.Expression.isThis() == false || call.Name != SUPER {
+		return false
+	}
+	return true
 }

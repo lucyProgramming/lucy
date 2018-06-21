@@ -24,17 +24,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
-			//if f.TemplateFunction == nil {
-			//	call.PackageFunction = f
-			//	return e.checkFunctionCall(block, errs, f, &call.Args)
-			//} else {
-			// convert to function call
 			e.Type = EXPRESSION_TYPE_FUNCTION_CALL
 			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
 			call.Function = f
 			e.Data = call
 			return e.checkFunctionCall(block, errs, f, &call.Args)
-			//}
 		case *Class:
 			//object cast
 			class := d.(*Class)
@@ -250,7 +244,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	}
 	// call father`s construction method
-	if call.Name == SUPER_FIELD_NAME {
+	if call.Name == SUPER {
 		if block.InheritedAttribute.IsConstructionMethod == false ||
 			block.IsFunctionBlock == false ||
 			block.InheritedAttribute.StatementOffset != 0 {
@@ -280,9 +274,15 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
 		}
+		if block.InheritedAttribute.ClassMethod.isCompilerAuto && matched == false {
+			//
+			*errs = append(*errs, fmt.Errorf("%s compile auto constuction method cannnot match appropriate father`s constuction",
+				errMsgPrefix(e.Pos)))
+			return nil
+		}
 		if matched {
 			call.Name = "<init>"
-			block.InheritedAttribute.Function.ConstructionMethodCalledByUser = true
+			//block.InheritedAttribute.Function.ConstructionMethodCalledByUser = true
 			call.Method = ms[0]
 			call.Class = object.Class.SuperClass
 			ret := []*Type{&Type{}}

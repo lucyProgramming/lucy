@@ -24,23 +24,24 @@ const (
 )
 
 type Statement struct {
-	Checked                 bool // if checked
-	Pos                     *Position
-	Type                    int
-	StatementIf             *StatementIF
-	Expression              *Expression
-	StatementFor            *StatementFor
-	StatementReturn         *StatementReturn
-	StatementSwitch         *StatementSwitch
-	StatementSwitchTemplate *StatementSwitchTemplate
-	StatementBreak          *StatementBreak
-	Block                   *Block
-	StatementContinue       *StatementContinue
-	StatementLabel          *StatementLabel
-	StatementGoTo           *StatementGoTo
-	Defer                   *StatementDefer
-	Class                   *Class
-	Enum                    *Enum
+	isStaticFieldDefaultValue bool
+	Checked                   bool // if checked
+	Pos                       *Position
+	Type                      int
+	StatementIf               *StatementIF
+	Expression                *Expression
+	StatementFor              *StatementFor
+	StatementReturn           *StatementReturn
+	StatementSwitch           *StatementSwitch
+	StatementSwitchTemplate   *StatementSwitchTemplate
+	StatementBreak            *StatementBreak
+	Block                     *Block
+	StatementContinue         *StatementContinue
+	StatementLabel            *StatementLabel
+	StatementGoTo             *StatementGoTo
+	Defer                     *StatementDefer
+	Class                     *Class
+	Enum                      *Enum
 	/*
 		this.super()
 		special case

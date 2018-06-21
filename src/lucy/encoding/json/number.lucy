@@ -9,6 +9,7 @@ class Number {
 	public e []byte ;  
 
 	public fn Number(){
+		this.super();
 		this.integerPart = []byte{} ; 
 		this.floatPart = []byte{} ; 
 		this.e = []byte{} ; 

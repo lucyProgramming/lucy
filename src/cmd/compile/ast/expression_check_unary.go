@@ -10,7 +10,6 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-
 	if t == nil {
 		if e.Type == EXPRESSION_TYPE_NOT {
 			return &Type{

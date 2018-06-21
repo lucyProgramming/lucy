@@ -30,7 +30,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 		if s.IsCallFatherConstructionStatement { // special case
 			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
-			makeClass.mkFieldDefaultValue(class, code, context, state)
+			makeClass.mkNonStaticFieldDefaultValue(class, code, context, state)
 		}
 		//unCondition goto
 		if makeClass.statementIsUnConditionGoTo(s) {

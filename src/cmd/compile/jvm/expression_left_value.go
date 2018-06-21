@@ -327,7 +327,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			}
 			return
 		}
-	case ast.EXPRESSION_TYPE_SELECT:
+	case ast.EXPRESSION_TYPE_SELECTION:
 		dot := e.Data.(*ast.ExpressionSelection)
 		if dot.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
 			op = []byte{cg.OP_putstatic}

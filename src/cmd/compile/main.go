@@ -15,5 +15,4 @@ func main() {
 	flag.IntVar(&common.CompileFlags.JvmVersion, "jvm-version", 54, "jvm major version")
 	flag.Parse()
 	lc.Main(flag.Args())
-
 }

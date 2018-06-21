@@ -54,7 +54,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 		functionParser.consume(untilLc)
 	}
 	f.Block.IsFunctionBlock = true
-	functionParser.Next()
+	functionParser.Next() // skip {
 	functionParser.parser.BlockParser.parseStatementList(&f.Block, false)
 	if functionParser.parser.token.Type != lex.TOKEN_RC {
 		err = fmt.Errorf("%s expect '}', but '%s'",

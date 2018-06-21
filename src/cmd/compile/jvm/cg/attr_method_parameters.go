@@ -38,7 +38,6 @@ func (a *AttributeMethodParameters) ToAttributeInfo(class *Class, attrName ...st
 		return nil
 	}
 	ret := &AttributeInfo{}
-
 	if len(attrName) > 0 {
 		ret.NameIndex = class.InsertUtf8Const(attrName[0])
 	} else {

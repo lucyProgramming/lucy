@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -10,7 +9,7 @@ import (
 
 type ClassParser struct {
 	parser             *Parser
-	classDefinition    *ast.Class
+	ret                *ast.Class
 	isStatic           bool
 	accessControlToken *lex.Token
 }
@@ -69,24 +68,25 @@ func (classParser *ClassParser) parseInterfaces() ([]*ast.NameWithPos, error) {
 func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) {
 	defer classParser.resetProperty()
 	classDefinition = &ast.Class{}
-	classParser.classDefinition = classDefinition
+	classParser.ret = classDefinition
 	classParser.Next() // skip class key word
-	classParser.classDefinition.Pos = classParser.parser.mkPos()
-	classParser.classDefinition.Name, err = classParser.parseClassName()
-	classParser.classDefinition.Block.IsClassBlock = true
+	classParser.ret.Pos = classParser.parser.mkPos()
+	classParser.ret.Name, err = classParser.parseClassName()
+	classParser.ret.Block.IsClassBlock = true
 	if err != nil {
 		return nil, err
 	}
 	if classParser.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
+		//classParser.ret.HaveExtends = true
 		classParser.Next() // skip extends
-		classParser.classDefinition.Pos = classParser.parser.mkPos()
+		classParser.ret.Pos = classParser.parser.mkPos()
 		if classParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
 			err = fmt.Errorf("%s class`s father must be a identifier", classParser.parser.errorMsgPrefix())
 			classParser.parser.errs = append(classParser.parser.errs, err)
 			classParser.consume(untilLc) //
 		} else {
 			t, err := classParser.parseClassName()
-			classParser.classDefinition.SuperClassName = t
+			classParser.ret.SuperClassName = t
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
 				return nil, err
@@ -95,7 +95,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	}
 	if classParser.parser.token.Type == lex.TOKEN_IMPLEMENTS {
 		classParser.Next() // skip key word
-		classParser.classDefinition.InterfaceNames, err = classParser.parseInterfaces()
+		classParser.ret.InterfaceNames, err = classParser.parseInterfaces()
 		if err != nil {
 			classParser.consume(untilLc)
 		}
@@ -117,7 +117,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	}
 	validAfterStatic := func(token *lex.Token) error {
 		if token.Type == lex.TOKEN_IDENTIFIER ||
-			token.Type == lex.TOKEN_FUNCTION {
+			token.Type == lex.TOKEN_FUNCTION || token.Type == lex.TOKEN_LC {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'static'", classParser.parser.errorMsgPrefix())
@@ -136,10 +136,24 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		case lex.TOKEN_STATIC:
 			classParser.isStatic = true
 			classParser.Next()
+			if classParser.parser.token.Type == lex.TOKEN_LC {
+				classParser.Next() // skip {
+				block := &ast.Block{}
+				classParser.parser.BlockParser.parseStatementList(block, false)
+				if classParser.parser.token.Type != lex.TOKEN_RC {
+					classParser.parser.errs = append(classParser.parser.errs,
+						fmt.Errorf("%s expect '}' , but '%s'", classParser.parser.errorMsgPrefix(), classParser.parser.token.Description))
+				} else {
+					classParser.Next() // skip }
+					classParser.ret.StaticBlocks = append(classParser.ret.StaticBlocks, block)
+				}
+				continue
+			}
 			err := validAfterStatic(classParser.parser.token)
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
 			}
+
 		//access private
 		case lex.TOKEN_PUBLIC:
 			classParser.accessControlToken = classParser.parser.token
@@ -186,8 +200,8 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.resetProperty()
 				continue
 			}
-			if classParser.classDefinition.Methods == nil {
-				classParser.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
+			if classParser.ret.Methods == nil {
+				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == "" {
 				classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s method has no name", classParser.parser.errorMsgPrefix(f.Pos)))
@@ -213,13 +227,13 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				f.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
 
-			if classParser.classDefinition.Methods == nil {
-				classParser.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
+			if classParser.ret.Methods == nil {
+				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
-			if f.Name == classParser.classDefinition.Name {
+			if f.Name == classParser.ret.Name {
 				f.Name = ast.CONSTRUCTION_METHOD_NAME
 			}
-			classParser.classDefinition.Methods[f.Name] = append(classParser.classDefinition.Methods[f.Name], m)
+			classParser.ret.Methods[f.Name] = append(classParser.ret.Methods[f.Name], m)
 			classParser.resetProperty()
 		default:
 			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s unexpect '%s'",
@@ -252,11 +266,11 @@ func (classParser *ClassParser) parseConst() error {
 				classParser.parser.errorMsgPrefix(pos), len(es), len(vs)))
 	}
 
-	if classParser.classDefinition.Block.Constants == nil {
-		classParser.classDefinition.Block.Constants = make(map[string]*ast.Constant)
+	if classParser.ret.Block.Constants == nil {
+		classParser.ret.Block.Constants = make(map[string]*ast.Constant)
 	}
 	for k, v := range vs {
-		if _, ok := classParser.classDefinition.Block.Constants[v.Name]; ok {
+		if _, ok := classParser.ret.Block.Constants[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s const %s alreay declared",
 				classParser.parser.errorMsgPrefix(), v.Name))
 			continue
@@ -265,7 +279,7 @@ func (classParser *ClassParser) parseConst() error {
 			t := &ast.Constant{}
 			t.Variable = *v
 			t.Expression = es[k]
-			classParser.classDefinition.Block.Constants[v.Name] = t
+			classParser.ret.Block.Constants[v.Name] = t
 		}
 	}
 	return nil
@@ -293,8 +307,8 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		*errs = append(*errs, fmt.Errorf("%s missing senicolon after field definition",
 			classParser.parser.errorMsgPrefix()))
 	}
-	if classParser.classDefinition.Fields == nil {
-		classParser.classDefinition.Fields = make(map[string]*ast.ClassField)
+	if classParser.ret.Fields == nil {
+		classParser.ret.Fields = make(map[string]*ast.ClassField)
 	}
 	if es != nil && len(es) != len(names) {
 		err := fmt.Errorf("%s cannot assign %d values to %d destinations",
@@ -302,7 +316,7 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		*errs = append(*errs, err)
 	}
 	for k, v := range names {
-		if _, ok := classParser.classDefinition.Fields[v.Name]; ok {
+		if _, ok := classParser.ret.Fields[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
 					classParser.parser.errorMsgPrefix(), v.Name))
@@ -335,7 +349,7 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
 		}
-		classParser.classDefinition.Fields[v.Name] = f
+		classParser.ret.Fields[v.Name] = f
 	}
 	return nil
 }
