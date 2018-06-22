@@ -154,6 +154,11 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 			return t, nil
 		}
 	}
+	if b.TypeAliases != nil {
+		if t, ok := b.TypeAliases[name]; ok {
+			return t, nil
+		}
+	}
 	// search closure
 	if b.InheritedAttribute.Function != nil {
 		v := b.InheritedAttribute.Function.Closure.Search(name)
@@ -263,37 +268,8 @@ func (b *Block) checkConstants() []error {
 	}
 	return errs
 }
-func (b *Block) checkTypeExist(name string, pos *Position) error {
-	if b.Classes == nil {
-		b.Classes = make(map[string]*Class)
-	}
-	if c, ok := b.Classes[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
-		return fmt.Errorf(errMsg)
-	}
-	if b.Enums == nil {
-		b.Enums = make(map[string]*Enum)
-	}
-	if e, ok := b.Enums[name]; ok {
-		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
-		return fmt.Errorf(errMsg)
-	}
-	if b.TypeAliases == nil {
-		b.TypeAliases = make(map[string]*Type)
-	}
-	if t, ok := b.TypeAliases[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
-		return fmt.Errorf(errMsg)
-	}
-	return nil
-}
-func (b *Block) checkRightValueExist(name string, pos *Position) error {
+
+func (b *Block) checkNameExist(name string, pos *Position) error {
 	if b.Variables == nil {
 		b.Variables = make(map[string]*Variable)
 	}
@@ -339,6 +315,24 @@ func (b *Block) checkRightValueExist(name string, pos *Position) error {
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errMsg)
 	}
+	if b.TypeAliases == nil {
+		b.TypeAliases = make(map[string]*Type)
+	}
+	if t, ok := b.TypeAliases[name]; ok {
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+			errMsgPrefix(pos), name)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
+		return fmt.Errorf(errMsg)
+	}
+	if b.Enums == nil {
+		b.Enums = make(map[string]*Enum)
+	}
+	if e, ok := b.Enums[name]; ok {
+		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
+			errMsgPrefix(pos), name)
+		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
+		return fmt.Errorf(errMsg)
+	}
 	return nil
 }
 
@@ -374,17 +368,14 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 	}
 	switch d.(type) {
 	case *Class:
-		err := b.checkRightValueExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}
-		err = b.checkTypeExist(name, pos)
-		if err != nil {
-			return err
-		}
+
 		b.Classes[name] = d.(*Class)
 	case *Function:
-		err := b.checkRightValueExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}
@@ -395,20 +386,20 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		}
 		b.Functions[name] = t
 	case *Constant:
-		err := b.checkRightValueExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}
 		b.Constants[name] = d.(*Constant)
 	case *Variable:
-		err := b.checkRightValueExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}
 		t := d.(*Variable)
 		b.Variables[name] = t
 	case *Enum:
-		err := b.checkTypeExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}
@@ -421,7 +412,7 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 			}
 		}
 	case *EnumName:
-		err := b.checkRightValueExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}
@@ -438,7 +429,7 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 		}
 		b.Labels[name] = d.(*StatementLabel)
 	case *Type:
-		err := b.checkTypeExist(name, pos)
+		err := b.checkNameExist(name, pos)
 		if err != nil {
 			return err
 		}

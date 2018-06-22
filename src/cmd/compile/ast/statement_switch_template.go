@@ -24,10 +24,9 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 	var match *Type
 	var matchBlock *Block
 	typesChecked := []*Type{}
-	es := []error{}
 	checkIfAlreadyExist := func(ts []*Type, t *Type) bool {
 		for _, v := range ts {
-			if v.Equal(&es, t) {
+			if v.StrictEqual(t) {
 				return true
 			}
 		}
@@ -44,7 +43,7 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 					errMsgPrefix(tt.Pos), tt.TypeString()))
 				return
 			}
-			if s.Condition.Equal(&es, tt) == false {
+			if s.Condition.StrictEqual(tt) == false {
 				continue
 			}
 			// found
@@ -63,6 +62,7 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 		}
 		statement.Type = STATEMENT_TYPE_BLOCK
 		statement.Block = s.Default
+		statement.Block.inherit(block)
 		return statement.Block.checkStatements()
 	}
 	// let`s reWrite
@@ -71,6 +71,7 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 	} else {
 		statement.Type = STATEMENT_TYPE_BLOCK
 		statement.Block = matchBlock
+		statement.Block.inherit(block)
 		return append(errs, statement.Block.checkStatements()...)
 	}
 	return

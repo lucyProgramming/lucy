@@ -578,3 +578,28 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 	}
 	return false
 }
+
+func (typ *Type) StrictEqual(compareTo *Type) bool {
+	if typ.Type != compareTo.Type {
+		return false
+	}
+	if typ.IsPrimitive() {
+		return typ.Type == compareTo.Type
+	}
+	if typ.Type == VARIABLE_TYPE_ARRAY || typ.Type == VARIABLE_TYPE_JAVA_ARRAY {
+		return typ.ArrayType.StrictEqual(compareTo.ArrayType)
+	}
+	if typ.Type == VARIABLE_TYPE_MAP {
+		if false == typ.Map.Key.StrictEqual(compareTo.Map.Key) {
+			return false
+		}
+		return typ.Map.Value.StrictEqual(compareTo.Map.Value)
+	}
+	if typ.Type == VARIABLE_TYPE_ENUM {
+		return typ.Enum.Name == compareTo.Enum.Name
+	}
+	if typ.Type == VARIABLE_TYPE_OBJECT {
+		return typ.Class.Name == compareTo.Class.Name
+	}
+	return false
+}
