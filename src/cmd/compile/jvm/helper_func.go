@@ -125,12 +125,12 @@ func nameTemplateFunction(f *ast.Function) string {
 	s := f.Name
 	for _, v := range f.Type.ParameterList {
 		if v.Type.IsPrimitive() {
-			s += fmt.Sprintf("_%s", v.Type.TypeString())
+			s += fmt.Sprintf("$%s", v.Type.TypeString())
 			continue
 		}
 		switch v.Type.Type {
 		case ast.VARIABLE_TYPE_OBJECT:
-			s += fmt.Sprintf("_%s", strings.Replace(v.Type.Class.Name, "/", "_", -1))
+			s += fmt.Sprintf("$%s", strings.Replace(v.Type.Class.Name, "/", "$", -1))
 		case ast.VARIABLE_TYPE_MAP:
 			s += "_map"
 		case ast.VARIABLE_TYPE_ARRAY:
@@ -138,7 +138,7 @@ func nameTemplateFunction(f *ast.Function) string {
 		case ast.VARIABLE_TYPE_JAVA_ARRAY:
 			s += "_java_array"
 		case ast.VARIABLE_TYPE_ENUM:
-			s += fmt.Sprintf("_%s", strings.Replace(v.Type.Enum.Name, "/", "_", -1))
+			s += fmt.Sprintf("$%s", strings.Replace(v.Type.Enum.Name, "/", "$", -1))
 		}
 	}
 	return s
