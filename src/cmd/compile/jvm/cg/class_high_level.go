@@ -34,7 +34,7 @@ func (classHighLevel *ClassHighLevel) NewFunctionName(prefix string) string {
 		return prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
-		name := fmt.Sprintf("%s_%d", prefix, i)
+		name := fmt.Sprintf("%s$%d", prefix, i)
 		if _, ok := classHighLevel.Methods[name]; ok == false {
 			return name
 		}

@@ -7,28 +7,29 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (parser *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
+func (parser *Parser) parseType() (*ast.Type, error) {
 	var err error
 	var ret *ast.Type
 	switch parser.token.Type {
 	case lex.TOKEN_LB:
+
+		//if len(pre) > 0 {
+		//	parser.Next()
+		//	if parser.token.Type != lex.TOKEN_RB {
+		//		// [ and ] not match
+		//		err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
+		//		parser.errs = append(parser.errs, err)
+		//		return nil, err
+		//	}
+		//	parser.Next() //skip ]
+		//	ret = &ast.Type{
+		//		Pos:       pos,
+		//		Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
+		//		ArrayType: pre[0],
+		//	}
+		//	break
+		//}
 		pos := parser.mkPos()
-		if len(pre) > 0 {
-			parser.Next()
-			if parser.token.Type != lex.TOKEN_RB {
-				// [ and ] not match
-				err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
-				parser.errs = append(parser.errs, err)
-				return nil, err
-			}
-			parser.Next() //skip ]
-			ret = &ast.Type{
-				Pos:       pos,
-				Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
-				ArrayType: pre[0],
-			}
-			break
-		}
 		parser.Next()
 		if parser.token.Type != lex.TOKEN_RB {
 			// [ and ] not match
@@ -168,11 +169,24 @@ func (parser *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	if parser.token.Type == lex.TOKEN_LB {
-		return parser.parseType(ret)
-	} else {
-		return ret, err
+	for parser.token.Type == lex.TOKEN_LB {
+		pos := parser.mkPos()
+		parser.Next() // skip [
+		if parser.token.Type != lex.TOKEN_RB {
+			err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
+			parser.errs = append(parser.errs, err)
+			return ret, err
+		}
+		parser.Next() // skip ]
+		newRet := &ast.Type{
+			Pos:       pos,
+			Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
+			ArrayType: ret,
+		}
+		ret = newRet
 	}
+	return ret, err
+
 }
 
 func (parser *Parser) isValidTypeBegin() bool {

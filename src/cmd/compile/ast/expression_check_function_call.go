@@ -29,23 +29,61 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		e.checkTypeConversionExpression(block, errs)
 		return ret
 	}
-	if t.Type != VARIABLE_TYPE_FUNCTION {
+	if t.Type != VARIABLE_TYPE_FUNCTION && t.Type != VARIABLE_TYPE_FUNCTION_POINTER {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), t.TypeString()))
 		return nil
 	}
+	if t.Type == VARIABLE_TYPE_FUNCTION_POINTER {
+		return e.checkFunctionPointerCall(block, errs, t.FunctionType, call)
+	}
 	call.Function = t.Function
 	if t.Function.IsBuildIn {
-		return e.checkBuildInFunctionCall(block, errs, t.Function, call.Args)
+		return e.checkBuildInFunctionCall(block, errs, t.Function, call)
 	} else {
-		return e.checkFunctionCall(block, errs, t.Function, &call.Args)
-
+		return e.checkFunctionCall(block, errs, t.Function, call)
 	}
 }
 
-func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, args *CallArgs) []*Type {
-	callArgsTypes := checkExpressions(block, *args, errs)
+func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
+	callArgsTypes := checkExpressions(block, call.Args, errs)
+	callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
+	if len(call.ParameterTypes) > 0 {
+		*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
+			errMsgPrefix(e.Pos)))
+	}
+
+	if len(callArgsTypes) > len(ft.ParameterList) {
+		errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(e.Pos))
+		errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(callArgsTypes))
+		errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(ft.ParameterList))
+		*errs = append(*errs, fmt.Errorf(errMsg))
+	}
+	//trying to convert literal
+	var ret []*Type
+	convertLiteralExpressionsToNeeds(call.Args, ft.getParameterTypes(), callArgsTypes)
+	if len(callArgsTypes) < len(ft.ParameterList) {
+		errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(e.Pos))
+		errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(callArgsTypes))
+		errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(ft.ParameterList))
+		*errs = append(*errs, fmt.Errorf(errMsg))
+		return ret
+	}
+	for k, v := range ft.ParameterList {
+		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
+			if !v.Type.Equal(errs, callArgsTypes[k]) {
+				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					errMsgPrefix((call.Args)[k].Pos),
+					callArgsTypes[k].TypeString(), v.Type.TypeString()))
+			}
+		}
+	}
+	return ret
+}
+
+func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
+	callArgsTypes := checkExpressions(block, call.Args, errs)
 	callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
 	var tf *Function
 	if f.TemplateFunction != nil {
@@ -56,7 +94,6 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			return nil
 		}
 	} else { // not template function
-		call := e.Data.(*ExpressionFunctionCall)
 		if len(call.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
 				errMsgPrefix(e.Pos)))
@@ -70,7 +107,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	}
 	//trying to convert literal
 	var ret []*Type
-	convertLiteralExpressionsToNeeds(*args, f.Type.getParameterTypes(), callArgsTypes)
+	convertLiteralExpressionsToNeeds(call.Args, f.Type.getParameterTypes(), callArgsTypes)
 	if f.TemplateFunction == nil {
 		ret = f.Type.returnTypes(e.Pos)
 	} else {
@@ -84,7 +121,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if len(callArgsTypes) < len(f.Type.ParameterList) {
 			if f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 				for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
-					*args = append(*args, f.Type.ParameterList[i].Expression)
+					call.Args = append(call.Args, f.Type.ParameterList[i].Expression)
 				}
 			} else { // no default value
 				errMsg := fmt.Sprintf("%s too few paramaters to call function '%s'\n", errMsgPrefix(e.Pos), f.Name)
@@ -98,7 +135,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			if k < len(callArgsTypes) && callArgsTypes[k] != nil {
 				if !v.Type.Equal(errs, callArgsTypes[k]) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix((*args)[k].Pos),
+						errMsgPrefix((callArgsTypes)[k].Pos),
 						callArgsTypes[k].TypeString(), v.Type.TypeString()))
 				}
 			}

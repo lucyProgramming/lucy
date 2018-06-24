@@ -146,6 +146,32 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	return nil
 }
 
+func functionPointerCallWant(ts ParameterList) string {
+	s := "("
+	for k, v := range ts {
+		s += " " + v.Name + " "
+		s += v.Type.TypeString()
+		s += " "
+		if k != len(ts)-1 {
+			s += ","
+		}
+	}
+	s += ")"
+	return s
+}
+
+func functionPointerCallHave(ts []*Type) string {
+	s := "("
+	for k, v := range ts {
+		s += " " + v.Name + " "
+		s += v.TypeString()
+		if k != len(ts)-1 {
+			s += ","
+		}
+	}
+	s += ")"
+	return s
+}
 func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, checked []*Type) []error {
 	errs := []error{}
 	if len(es) == 0 {
@@ -154,7 +180,6 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, checked [
 	if len(es) != len(checked) || len(es) != len(needs) { // means multi return
 		return errs
 	}
-
 	for k, e := range es {
 		if e.IsLiteral() == false {
 			continue

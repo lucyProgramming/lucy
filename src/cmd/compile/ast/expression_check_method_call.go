@@ -28,7 +28,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
 			call.Function = f
 			e.Data = call
-			return e.checkFunctionCall(block, errs, f, &call.Args)
+			return e.checkFunctionCall(block, errs, f, call)
 		case *Class:
 			//object cast
 			class := d.(*Class)

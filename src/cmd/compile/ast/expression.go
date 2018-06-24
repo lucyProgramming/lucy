@@ -475,6 +475,7 @@ type ExpressionFunctionCall struct {
 	Function                 *Function
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
+	FunctionPointer          *FunctionType
 }
 
 func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *ExpressionFunctionCall {

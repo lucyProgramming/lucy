@@ -20,7 +20,7 @@ type MakeClass struct {
 
 func (makeClass *MakeClass) newClassName(prefix string) (autoName string) {
 	for i := 0; i < math.MaxInt16; i++ {
-		autoName = fmt.Sprintf("%s_%d", prefix, i)
+		autoName = fmt.Sprintf("%s$%d", prefix, i)
 		if _, exists := makeClass.Package.Block.NameExists(autoName); exists {
 			continue
 		}
