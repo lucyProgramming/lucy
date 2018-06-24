@@ -22,12 +22,7 @@ func (functionParser *FunctionParser) consume(until map[int]bool) {
 func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
 	var offset int
-	//	if p.parser.token == nil {
-	//		offset = 0 // template function
-	//	} else {
 	offset = functionParser.parser.token.Offset
-	//	}
-
 	functionParser.Next() // skip fn key word
 	f.Pos = functionParser.parser.mkPos()
 	if needName {

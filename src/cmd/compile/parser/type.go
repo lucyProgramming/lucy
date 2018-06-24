@@ -149,6 +149,17 @@ func (parser *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 			Name: parser.token.Data.(string),
 		}
 		parser.Next()
+	case lex.TOKEN_FUNCTION:
+		pos := parser.mkPos()
+		ft, err := parser.parseFunctionType()
+		if err != nil {
+			return nil, err
+		}
+		ret = &ast.Type{
+			Type:         ast.VARIABLE_TYPE_FUNCTION_POINTER,
+			Pos:          pos,
+			FunctionType: &ft,
+		}
 	default:
 		err = fmt.Errorf("%s unkown type,begining token is '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
@@ -162,7 +173,6 @@ func (parser *Parser) parseType(pre ...*ast.Type) (*ast.Type, error) {
 	} else {
 		return ret, err
 	}
-
 }
 
 func (parser *Parser) isValidTypeBegin() bool {

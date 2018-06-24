@@ -11,6 +11,8 @@ type ClassParser struct {
 	parser             *Parser
 	ret                *ast.Class
 	isStatic           bool
+	isVolatile         bool
+	isSynchronized     bool
 	accessControlToken *lex.Token
 }
 
@@ -110,10 +112,23 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	validAfterPublic := func(keyWord string, token *lex.Token) error {
 		if token.Type == lex.TOKEN_IDENTIFIER ||
 			token.Type == lex.TOKEN_FUNCTION ||
-			token.Type == lex.TOKEN_STATIC {
+			token.Type == lex.TOKEN_STATIC ||
+			token.Type == lex.TOKEN_SYNCHRONIZED {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after '%s'", classParser.parser.errorMsgPrefix(), keyWord)
+	}
+	validAfterVolatile := func(token *lex.Token) error {
+		if token.Type == lex.TOKEN_IDENTIFIER {
+			return nil
+		}
+		return fmt.Errorf("%s not a valid token after 'volatile'", classParser.parser.errorMsgPrefix())
+	}
+	validAfterSynchronized := func(token *lex.Token) error {
+		if token.Type == lex.TOKEN_FUNCTION {
+			return nil
+		}
+		return fmt.Errorf("%s not a valid token after 'synchronized'", classParser.parser.errorMsgPrefix())
 	}
 	validAfterStatic := func(token *lex.Token) error {
 		if token.Type == lex.TOKEN_IDENTIFIER ||
@@ -153,7 +168,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
 			}
-
 		//access private
 		case lex.TOKEN_PUBLIC:
 			classParser.accessControlToken = classParser.parser.token
@@ -176,6 +190,12 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
 			}
+		case lex.TOKEN_VOLATILE:
+			classParser.isVolatile = true
+			classParser.Next()
+			if err := validAfterVolatile(classParser.parser.token); err != nil {
+				classParser.parser.errs = append(classParser.parser.errs, err)
+			}
 		case lex.TOKEN_IDENTIFIER:
 			err = classParser.parseField(&classParser.parser.errs)
 			if err != nil {
@@ -192,6 +212,12 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				continue
 			}
 			classParser.resetProperty()
+		case lex.TOKEN_SYNCHRONIZED:
+			classParser.isSynchronized = true
+			classParser.Next()
+			if err := validAfterSynchronized(classParser.parser.token); err != nil {
+				classParser.parser.errs = append(classParser.parser.errs, err)
+			}
 		case lex.TOKEN_FUNCTION:
 			f, err := classParser.parser.FunctionParser.parse(true)
 			if err != nil {
@@ -223,10 +249,12 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			} else {
 				m.Function.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			}
+			if classParser.isSynchronized {
+				m.Function.AccessFlags |= cg.ACC_METHOD_SYNCHRONIZED
+			}
 			if classParser.isStatic {
 				f.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
-
 			if classParser.ret.Methods == nil {
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
@@ -246,6 +274,8 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 
 func (classParser *ClassParser) resetProperty() {
 	classParser.isStatic = false
+	classParser.isVolatile = false
+	classParser.isSynchronized = false
 	classParser.accessControlToken = nil
 }
 
@@ -348,6 +378,9 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 			default: // private
 				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
+		}
+		if classParser.isVolatile {
+			f.AccessFlags |= cg.ACC_FIELD_VOLATILE
 		}
 		classParser.ret.Fields[v.Name] = f
 	}

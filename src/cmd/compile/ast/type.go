@@ -23,8 +23,8 @@ const (
 	VARIABLE_TYPE_ARRAY
 	VARIABLE_TYPE_JAVA_ARRAY
 	VARIABLE_TYPE_FUNCTION
+	VARIABLE_TYPE_FUNCTION_POINTER
 	VARIABLE_TYPE_ENUM
-
 	VARIABLE_TYPE_CLASS
 
 	VARIABLE_TYPE_NAME
@@ -36,19 +36,20 @@ const (
 )
 
 type Type struct {
-	TNames    []string
-	Resolved  bool
-	Pos       *Position
-	Type      int
-	Name      string
-	ArrayType *Type
-	Class     *Class
-	Enum      *Enum
-	EnumName  *EnumName
-	Function  *Function
-	Map       *Map
-	Package   *Package
-	Alias     string
+	TNames       []string
+	Resolved     bool
+	Pos          *Position
+	Type         int
+	Name         string
+	ArrayType    *Type
+	Class        *Class
+	Enum         *Enum
+	EnumName     *EnumName
+	Function     *Function
+	FunctionType *FunctionType
+	Map          *Map
+	Package      *Package
+	Alias        string
 }
 
 func (typ *Type) validForTypeAssertOrConversion() bool {
@@ -575,6 +576,33 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 			}
 			return has
 		}
+	}
+	if typ.Type == VARIABLE_TYPE_FUNCTION_POINTER && compareTo.Type == VARIABLE_TYPE_FUNCTION_POINTER {
+		if len(typ.FunctionType.ParameterList) != len(compareTo.FunctionType.ParameterList) {
+			return false
+		}
+		if len(typ.FunctionType.ReturnList) != len(compareTo.FunctionType.ReturnList) {
+			return false
+		}
+		for k, v := range typ.FunctionType.ParameterList {
+			//TODO :: force to equal or not ???
+			if v.Name != compareTo.FunctionType.ParameterList[k].Name {
+				return false
+			}
+			if false == v.Type.StrictEqual(compareTo.FunctionType.ParameterList[k].Type) {
+				return false
+			}
+		}
+		for k, v := range typ.FunctionType.ReturnList {
+			//TODO ::  force to equal or not ???
+			if v.Name != compareTo.FunctionType.ReturnList[k].Name {
+				return false
+			}
+			if false == v.Type.StrictEqual(compareTo.FunctionType.ReturnList[k].Type) {
+				return false
+			}
+		}
+		return true
 	}
 	return false
 }

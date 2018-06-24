@@ -239,11 +239,6 @@ func (parser *Parser) Parse() []error {
 			}
 			resetProperty()
 			continue
-		case lex.TOKEN_PRIVATE: //is a default attribute
-			isPublic = false
-			parser.Next()
-			parser.validAfterPublic(isPublic)
-			continue
 		case lex.TOKEN_TYPE:
 			a, err := parser.parseTypeAlias()
 			if err != nil {
