@@ -280,9 +280,15 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		if tt != nil {
 			Types = []*Type{tt}
 		}
-	case EXPRESSION_TYPE_FUNCTION:
-		errs = append(errs, fmt.Errorf("%s cannot use function as  a expression",
-			errMsgPrefix(e.Pos)))
+	case EXPRESSION_TYPE_FUNCTION_LITERAL:
+		f := e.Data.(*Function)
+		errs = f.check(block)
+		Types = make([]*Type, 1)
+		Types[0] = &Type{
+			Type:         VARIABLE_TYPE_FUNCTION,
+			Pos:          e.Pos,
+			FunctionType: &f.Type,
+		}
 	case EXPRESSION_TYPE_LIST:
 		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 			"this may be cause be compiler error,please contact the author",

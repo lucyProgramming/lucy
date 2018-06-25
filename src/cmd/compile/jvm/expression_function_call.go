@@ -5,6 +5,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+func (makeExpression *MakeExpression) buildFunctionPointerCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+
+	panic(1)
+}
 func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
@@ -14,6 +19,15 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 	if call.Function.TemplateFunction != nil {
 		return makeExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
+	if call.Expression.ExpressionValue.FunctionType != nil {
+		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
+	}
+
+	//if call.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {
+	//	makeExpression.MakeClass.buildFunctionExpression(class, code, call.Expression, context, state)
+	//}
+	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+
 	if call.Function.IsClosureFunction == false {
 		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

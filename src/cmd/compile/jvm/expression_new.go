@@ -48,7 +48,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 		if n.Type.Class.LoadFromOutSide {
 			d = n.Construction.Function.Descriptor
 		} else {
-			d = Descriptor.methodDescriptor(n.Construction.Function)
+			d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      n.Type.Class.Name,

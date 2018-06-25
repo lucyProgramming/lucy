@@ -25,14 +25,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 			expressionParser.parser.token.Description)
 	}
 	var result ast.Expression
-	if e.Type == ast.EXPRESSION_TYPE_IDENTIFIER {
-		result.Type = ast.EXPRESSION_TYPE_FUNCTION_CALL
-		call := &ast.ExpressionFunctionCall{}
-		call.Expression = e
-		call.Args = args
-		result.Data = call
-		result.Pos = expressionParser.parser.mkPos()
-	} else if e.Type == ast.EXPRESSION_TYPE_SELECTION {
+	if e.Type == ast.EXPRESSION_TYPE_SELECTION {
 		result.Type = ast.EXPRESSION_TYPE_METHOD_CALL
 		call := &ast.ExpressionMethodCall{}
 		index := e.Data.(*ast.ExpressionSelection)
@@ -42,8 +35,12 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 		result.Data = call
 		result.Pos = expressionParser.parser.mkPos()
 	} else {
-		return nil, fmt.Errorf("%s can`t make call on '%s'",
-			expressionParser.parser.errorMsgPrefix(), e.OpName())
+		result.Type = ast.EXPRESSION_TYPE_FUNCTION_CALL
+		call := &ast.ExpressionFunctionCall{}
+		call.Expression = e
+		call.Args = args
+		result.Data = call
+		result.Pos = expressionParser.parser.mkPos()
 	}
 	expressionParser.Next() // skip )
 	if expressionParser.parser.token.Type == lex.TOKEN_LT {

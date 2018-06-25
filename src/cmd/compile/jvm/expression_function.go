@@ -7,7 +7,11 @@ import (
 
 func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+
 	function := e.Data.(*ast.Function)
+	if function.Name == "" {
+		function.Name = function.NameLiteralFunction()
+	}
 	if function.IsClosureFunction == false {
 		function.Name = class.NewFunctionName(function.Name) // new a function name
 		method := &cg.MethodHighLevel{}
@@ -18,7 +22,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
 		function.ClassMethod = method
 		method.Class = class
-		method.Descriptor = Descriptor.methodDescriptor(function)
+		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
 		makeClass.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
@@ -35,13 +39,12 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
 	makeClass.mkClassDefaultConstruction(closureClass, nil)
-	makeClass.putClass(className, closureClass)
-
+	makeClass.putClass(closureClass)
 	method := &cg.MethodHighLevel{}
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	method.Descriptor = Descriptor.methodDescriptor(function)
+	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 	method.Class = closureClass
 	function.ClassMethod = method
 

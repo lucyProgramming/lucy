@@ -23,7 +23,7 @@ const (
 	VARIABLE_TYPE_ARRAY
 	VARIABLE_TYPE_JAVA_ARRAY
 	VARIABLE_TYPE_FUNCTION
-	VARIABLE_TYPE_FUNCTION_POINTER
+	//VARIABLE_TYPE_FUNCTION_POINTER
 	VARIABLE_TYPE_ENUM
 	VARIABLE_TYPE_CLASS
 
@@ -131,7 +131,8 @@ func (typ *Type) RightValueValid() bool {
 		typ.Type == VARIABLE_TYPE_MAP ||
 		typ.Type == VARIABLE_TYPE_NULL ||
 		typ.Type == VARIABLE_TYPE_JAVA_ARRAY ||
-		typ.Type == VARIABLE_TYPE_ENUM
+		typ.Type == VARIABLE_TYPE_ENUM ||
+		typ.Type == VARIABLE_TYPE_FUNCTION
 }
 
 /*
@@ -577,28 +578,34 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 			return has
 		}
 	}
-	if typ.Type == VARIABLE_TYPE_FUNCTION_POINTER && compareTo.Type == VARIABLE_TYPE_FUNCTION_POINTER {
-		if len(typ.FunctionType.ParameterList) != len(compareTo.FunctionType.ParameterList) {
+	if typ.Type == VARIABLE_TYPE_FUNCTION && compareTo.Type == VARIABLE_TYPE_FUNCTION {
+		var compareToFunctionType *FunctionType
+		if compareTo.FunctionType != nil {
+			compareToFunctionType = compareTo.FunctionType
+		} else {
+			compareToFunctionType = &compareTo.Function.Type
+		}
+		if len(typ.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) {
 			return false
 		}
-		if len(typ.FunctionType.ReturnList) != len(compareTo.FunctionType.ReturnList) {
+		if len(typ.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {
 			return false
 		}
 		for k, v := range typ.FunctionType.ParameterList {
 			//TODO :: force to equal or not ???
-			if v.Name != compareTo.FunctionType.ParameterList[k].Name {
+			if v.Name != compareToFunctionType.ParameterList[k].Name {
 				return false
 			}
-			if false == v.Type.StrictEqual(compareTo.FunctionType.ParameterList[k].Type) {
+			if false == v.Type.StrictEqual(compareToFunctionType.ParameterList[k].Type) {
 				return false
 			}
 		}
 		for k, v := range typ.FunctionType.ReturnList {
 			//TODO ::  force to equal or not ???
-			if v.Name != compareTo.FunctionType.ReturnList[k].Name {
+			if v.Name != compareToFunctionType.ReturnList[k].Name {
 				return false
 			}
-			if false == v.Type.StrictEqual(compareTo.FunctionType.ReturnList[k].Type) {
+			if false == v.Type.StrictEqual(compareToFunctionType.ReturnList[k].Type) {
 				return false
 			}
 		}

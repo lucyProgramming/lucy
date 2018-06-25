@@ -128,7 +128,7 @@ func (b *Block) searchType(name string) interface{} {
 /*
 	search rightValue
 */
-func (b *Block) searchByName(name string) (interface{}, error) {
+func (b *Block) searchRightValue(name string) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			return t, nil
@@ -173,7 +173,7 @@ func (b *Block) searchByName(name string) (interface{}, error) {
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchByName(name) // search by outer block
+	t, err := b.Outer.searchRightValue(name) // search by outer block
 	if err != nil {
 		return t, err
 	}

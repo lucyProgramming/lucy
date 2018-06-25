@@ -76,7 +76,7 @@ const (
 	EXPRESSION_TYPE_IDENTIFIER
 	EXPRESSION_TYPE_NEW
 	EXPRESSION_TYPE_LIST
-	EXPRESSION_TYPE_FUNCTION
+	EXPRESSION_TYPE_FUNCTION_LITERAL
 	EXPRESSION_TYPE_VAR
 	EXPRESSION_TYPE_CONST
 	EXPRESSION_TYPE_CHECK_CAST // []byte(str)
@@ -205,7 +205,7 @@ func (e *Expression) OpName() string {
 		return "new"
 	case EXPRESSION_TYPE_LIST:
 		return "expression_list"
-	case EXPRESSION_TYPE_FUNCTION:
+	case EXPRESSION_TYPE_FUNCTION_LITERAL:
 		return "function_literal"
 	case EXPRESSION_TYPE_CONST:
 		return "const"
@@ -378,7 +378,7 @@ func (e *Expression) canBeUsedAsStatement() bool {
 		e.Type == EXPRESSION_TYPE_ASSIGN ||
 		e.Type == EXPRESSION_TYPE_FUNCTION_CALL ||
 		e.Type == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Type == EXPRESSION_TYPE_FUNCTION ||
+		e.Type == EXPRESSION_TYPE_FUNCTION_LITERAL ||
 		e.Type == EXPRESSION_TYPE_PLUS_ASSIGN ||
 		e.Type == EXPRESSION_TYPE_MINUS_ASSIGN ||
 		e.Type == EXPRESSION_TYPE_MUL_ASSIGN ||
@@ -497,6 +497,24 @@ type ExpressionDeclareVariable struct {
 	Variables        []*Variable
 	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
+}
+
+func (e *ExpressionDeclareVariable) insertFunctionPointer() {
+	for k, v := range e.Variables {
+		if v.Name == NO_NAME_IDENTIFIER {
+			continue
+		}
+		if e.IfDeclaredBefore[k] {
+			continue
+		}
+		if v.Type.Type != VARIABLE_TYPE_FUNCTION {
+			continue
+		}
+		v.Type.Function = nil
+		v.Type.FunctionType.Name = v.Name
+		PackageBeenCompile.FunctionPointers = append(PackageBeenCompile.FunctionPointers,
+			v.Type.FunctionType)
+	}
 }
 
 type ExpressionTypeConversion struct {

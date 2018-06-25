@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
@@ -51,26 +50,9 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				reset()
 			}
-		case lex.TOKEN_IDENTIFIER:
+		case lex.TOKEN_IDENTIFIER, lex.TOKEN_LP, lex.TOKEN_FUNCTION:
 			blockParser.parseExpressionStatement(block, isDefer)
 			reset()
-		case lex.TOKEN_LP:
-			blockParser.parseExpressionStatement(block, isDefer)
-			reset()
-		case lex.TOKEN_FUNCTION:
-			pos := blockParser.parser.mkPos()
-			f, err := blockParser.parser.FunctionParser.parse(true)
-			if err != nil {
-				blockParser.parser.consume(untilRcAndSemicolon)
-			}
-			f.AccessFlags |= cg.ACC_METHOD_PRIVATE
-			s := &ast.Statement{}
-			s.Pos = pos
-			s.Type = ast.STATEMENT_TYPE_EXPRESSION
-			s.Expression = &ast.Expression{}
-			s.Expression.Type = ast.EXPRESSION_TYPE_FUNCTION
-			s.Expression.Data = f
-			block.Statements = append(block.Statements, s)
 		case lex.TOKEN_VAR:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next() // skip var key word

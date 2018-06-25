@@ -157,7 +157,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			return nil, err
 		}
 		ret = &ast.Type{
-			Type:         ast.VARIABLE_TYPE_FUNCTION_POINTER,
+			Type:         ast.VARIABLE_TYPE_FUNCTION,
 			Pos:          pos,
 			FunctionType: &ft,
 		}

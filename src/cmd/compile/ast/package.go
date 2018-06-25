@@ -3,9 +3,8 @@ package ast
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
+	"strings"
 )
 
 type Package struct {
@@ -18,6 +17,7 @@ type Package struct {
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
 	TriggerPackageInitMethodName string
+	FunctionPointers             []*FunctionType
 }
 
 func (p *Package) loadBuildInPackage() error {

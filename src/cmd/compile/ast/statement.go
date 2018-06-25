@@ -200,7 +200,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	if s.Expression.canBeUsedAsStatement() {
 		s.Expression.IsStatementExpression = true
-		if s.Expression.Type == EXPRESSION_TYPE_FUNCTION {
+		if s.Expression.Type == EXPRESSION_TYPE_FUNCTION_LITERAL {
 			f := s.Expression.Data.(*Function)
 			err := b.Insert(f.Name, f.Pos, f)
 			if err != nil {

@@ -10,19 +10,16 @@ import (
 type Description struct {
 }
 
-func (description *Description) methodDescriptor(f *ast.Function) string {
-	if f.Name == ast.MAIN_FUNCTION_NAME {
-		return "([Ljava/lang/String;)V"
-	}
+func (description *Description) methodDescriptor(f *ast.FunctionType) string {
 	s := "("
-	for _, v := range f.Type.ParameterList {
+	for _, v := range f.ParameterList {
 		s += description.typeDescriptor(v.Type)
 	}
 	s += ")"
 	if f.NoReturnValue() {
 		s += "V"
-	} else if len(f.Type.ReturnList) == 1 {
-		s += description.typeDescriptor(f.Type.ReturnList[0].Type)
+	} else if len(f.ReturnList) == 1 {
+		s += description.typeDescriptor(f.ReturnList[0].Type)
 	} else {
 		s += "[Ljava/lang/Object;" //always this type
 	}

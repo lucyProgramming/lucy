@@ -33,6 +33,11 @@ type Function struct {
 	SourceCodes                         []byte // source code for template function
 }
 
+func (f *Function) NameLiteralFunction() string {
+	//TODO:: rewrite this function
+	return "literal"
+}
+
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position)
 
 type buildFunctionChecker CallChecker
@@ -49,8 +54,7 @@ func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
 }
 
 func (f *Function) NoReturnValue() bool {
-	return len(f.Type.ReturnList) == 0 ||
-		f.Type.ReturnList[0].Type.Type == VARIABLE_TYPE_VOID
+	return f.Type.NoReturnValue()
 }
 
 type AutoVariableForException struct {

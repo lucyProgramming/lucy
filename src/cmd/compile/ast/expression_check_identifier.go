@@ -11,7 +11,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 			errMsgPrefix(e.Pos), NO_NAME_IDENTIFIER)
 	}
 	fromImport := false
-	d, err := block.searchByName(identifier.Name)
+	d, err := block.searchRightValue(identifier.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 	}

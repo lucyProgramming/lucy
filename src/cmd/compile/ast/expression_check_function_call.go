@@ -1,6 +1,8 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionFunctionCall)
@@ -29,13 +31,13 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		e.checkTypeConversionExpression(block, errs)
 		return ret
 	}
-	if t.Type != VARIABLE_TYPE_FUNCTION && t.Type != VARIABLE_TYPE_FUNCTION_POINTER {
+	if t.Type != VARIABLE_TYPE_FUNCTION {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), t.TypeString()))
 		return nil
 	}
-	if t.Type == VARIABLE_TYPE_FUNCTION_POINTER {
+	if t.FunctionType != nil {
 		return e.checkFunctionPointerCall(block, errs, t.FunctionType, call)
 	}
 	call.Function = t.Function

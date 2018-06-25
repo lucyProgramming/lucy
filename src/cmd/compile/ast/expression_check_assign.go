@@ -100,6 +100,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	// no error,rewrite data
 	e.Data = declareVariableExpression
+	declareVariableExpression.insertFunctionPointer()
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {

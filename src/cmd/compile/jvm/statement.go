@@ -13,7 +13,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 	//fmt.Println(s.GetPos)
 	switch s.Type {
 	case ast.STATEMENT_TYPE_EXPRESSION:
-		if s.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION {
+		if s.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {
 			return makeClass.buildFunctionExpression(class, code, s.Expression, context, state)
 		}
 		maxStack, _ = makeClass.makeExpression.build(class, code, s.Expression, context, state)
@@ -93,7 +93,7 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 	case ast.STATEMENT_TYPE_CLASS:
 		s.Class.Name = makeClass.newClassName(s.Class.Name)
 		c := makeClass.buildClass(s.Class)
-		makeClass.putClass(c.Name, c)
+		makeClass.putClass(c)
 	case ast.STATEMENT_TYPE_NOP:
 		// nop
 	}

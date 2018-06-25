@@ -11,8 +11,6 @@ type AttributeBootstrapMethods struct {
 func (a *AttributeBootstrapMethods) ToAttributeInfo() *AttributeInfo {
 	ret := &AttributeInfo{}
 	ret.Info = make([]byte, 2)
-	//ret.NameIndex =                ""
-
 	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.methods)))
 	for _, v := range a.methods {
 		bs := make([]byte, 4+len(v.bootStrapMethodArguments)*2)

@@ -34,7 +34,11 @@ func (makeClass *MakeClass) newClassName(prefix string) (autoName string) {
 	panic("new class name overflow")
 }
 
-func (makeClass *MakeClass) putClass(name string, class *cg.ClassHighLevel) {
+func (makeClass *MakeClass) putClass(class *cg.ClassHighLevel) {
+	if class.Name == "" {
+		panic("missing name")
+	}
+	name := class.Name
 	if name == makeClass.mainClass.Name {
 		panic("cannot have main class`s name")
 	}
@@ -63,6 +67,7 @@ func (makeClass *MakeClass) Make(p *ast.Package) {
 	makeClass.mkGlobalConstants()
 	makeClass.mkGlobalTypeAlias()
 	makeClass.mkGlobalVariables()
+	makeClass.mkFunctionPointers()
 	makeClass.mkGlobalFunctions()
 	makeClass.mkInitFunctions()
 	for _, v := range p.Block.Classes {
@@ -74,6 +79,26 @@ func (makeClass *MakeClass) Make(p *ast.Package) {
 	err := makeClass.DumpClass()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
+	}
+}
+
+func (makeClass *MakeClass) mkFunctionPointers() {
+	for _, v := range makeClass.Package.FunctionPointers {
+		class := &cg.ClassHighLevel{}
+		if v.Name == "" {
+			panic("missing name")
+		}
+		class.Name = makeClass.newClassName(v.Name)
+		class.AccessFlags |= cg.ACC_CLASS_INTERFACE
+		class.AccessFlags |= cg.ACC_CLASS_PUBLIC
+		class.AccessFlags |= cg.ACC_METHOD_FINAL
+		method := &cg.MethodHighLevel{}
+		method.AccessFlags |= cg.ACC_METHOD_FINAL
+		method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		method.Name = v.Name
+		method.Descriptor = Descriptor.methodDescriptor(v)
+		class.AppendMethod(method)
+		makeClass.putClass(class)
 	}
 }
 
@@ -294,7 +319,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.AccessFlags |= cg.ACC_METHOD_ABSTRACT
 		}
 		method.Class = class
-		method.Descriptor = Descriptor.methodDescriptor(vv.Function)
+		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
 			makeClass.buildFunction(class, nil, method, vv.Function)
@@ -308,7 +333,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Name = "<init>"
 			method.AccessFlags = t[0].Function.AccessFlags
 			method.Class = class
-			method.Descriptor = Descriptor.methodDescriptor(t[0].Function)
+			method.Descriptor = Descriptor.methodDescriptor(&t[0].Function.Type)
 			method.IsConstruction = true
 			method.Code = &cg.AttributeCode{}
 			makeClass.buildFunction(class, c, method, t[0].Function)
@@ -339,7 +364,11 @@ func (makeClass *MakeClass) mkGlobalFunctions() {
 		method := &cg.MethodHighLevel{}
 		method.Class = class
 		method.Name = f.Name
-		method.Descriptor = Descriptor.methodDescriptor(f)
+		if f.Name == ast.MAIN_FUNCTION_NAME {
+			method.Descriptor = "([Ljava/lang/String;)V"
+		} else {
+			method.Descriptor = Descriptor.methodDescriptor(&f.Type)
+		}
 		method.AccessFlags = 0
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
