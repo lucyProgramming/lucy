@@ -74,11 +74,16 @@ func (classHighLevel *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
 	}
 }
 
-func (classHighLevel *ClassHighLevel) InsertInterfaceMethodrefConst(fr CONSTANT_InterfaceMethodref_info_high_level, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertInterfaceMethodrefConst(fr))
+func (classHighLevel *ClassHighLevel) InsertInterfaceMethodrefConst(constant CONSTANT_InterfaceMethodref_info_high_level, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertInterfaceMethodrefConst(constant))
 }
-func (classHighLevel *ClassHighLevel) InsertFieldRefConst(fr CONSTANT_Fieldref_info_high_level, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertFieldRefConst(fr))
+
+func (classHighLevel *ClassHighLevel) InsertMethodTypeConst(constant CONSTANT_MethodType_info_high_level, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertMethodTypeConst(constant))
+}
+
+func (classHighLevel *ClassHighLevel) InsertFieldRefConst(constant CONSTANT_Fieldref_info_high_level, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertFieldRefConst(constant))
 }
 func (classHighLevel *ClassHighLevel) InsertClassConst(className string, location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertClassConst(className))
@@ -87,16 +92,16 @@ func (classHighLevel *ClassHighLevel) InsertIntConst(i int32, location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertIntConst(i))
 }
 
-func (classHighLevel *ClassHighLevel) InsertLongConst(i int64, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertLongConst(i))
+func (classHighLevel *ClassHighLevel) InsertLongConst(value int64, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertLongConst(value))
 }
 
-func (classHighLevel *ClassHighLevel) InsertFloatConst(f float32, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertFloatConst(f))
+func (classHighLevel *ClassHighLevel) InsertFloatConst(value float32, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertFloatConst(value))
 }
 
-func (classHighLevel *ClassHighLevel) InsertDoubleConst(d float64, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertDoubleConst(d))
+func (classHighLevel *ClassHighLevel) InsertDoubleConst(value float64, location []byte) {
+	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertDoubleConst(value))
 }
 
 /*

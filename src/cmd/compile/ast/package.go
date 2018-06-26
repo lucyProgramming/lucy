@@ -17,7 +17,7 @@ type Package struct {
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
 	TriggerPackageInitMethodName string
-	FunctionPointers             []*FunctionType
+	//FunctionPointers             []*FunctionType
 }
 
 func (p *Package) loadBuildInPackage() error {

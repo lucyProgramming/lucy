@@ -83,23 +83,23 @@ func (makeClass *MakeClass) Make(p *ast.Package) {
 }
 
 func (makeClass *MakeClass) mkFunctionPointers() {
-	for _, v := range makeClass.Package.FunctionPointers {
-		class := &cg.ClassHighLevel{}
-		if v.Name == "" {
-			panic("missing name")
-		}
-		class.Name = makeClass.newClassName(v.Name)
-		class.AccessFlags |= cg.ACC_CLASS_INTERFACE
-		class.AccessFlags |= cg.ACC_CLASS_PUBLIC
-		class.AccessFlags |= cg.ACC_METHOD_FINAL
-		method := &cg.MethodHighLevel{}
-		method.AccessFlags |= cg.ACC_METHOD_FINAL
-		method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-		method.Name = v.Name
-		method.Descriptor = Descriptor.methodDescriptor(v)
-		class.AppendMethod(method)
-		makeClass.putClass(class)
-	}
+	//for _, v := range makeClass.Package.FunctionPointers {
+	//	class := &cg.ClassHighLevel{}
+	//	if v.Name == "" {
+	//		panic("missing name")
+	//	}
+	//	class.Name = makeClass.newClassName(v.Name)
+	//	class.AccessFlags |= cg.ACC_CLASS_INTERFACE
+	//	class.AccessFlags |= cg.ACC_CLASS_PUBLIC
+	//	class.AccessFlags |= cg.ACC_METHOD_FINAL
+	//	method := &cg.MethodHighLevel{}
+	//	method.AccessFlags |= cg.ACC_METHOD_FINAL
+	//	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	//	method.Name = v.Name
+	//	method.Descriptor = Descriptor.methodDescriptor(v)
+	//	class.AppendMethod(method)
+	//	makeClass.putClass(class)
+	//}
 }
 
 func (makeClass *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {

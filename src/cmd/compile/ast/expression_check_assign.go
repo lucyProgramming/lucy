@@ -40,10 +40,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		}
 		identifier := v.Data.(*ExpressionIdentifier)
 		if identifier.Name == NO_NAME_IDENTIFIER {
-			vd := &Variable{}
-			vd.Name = identifier.Name
-			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, false)
 			continue
 		}
 		var variableType *Type
@@ -100,7 +96,6 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	// no error,rewrite data
 	e.Data = declareVariableExpression
-	declareVariableExpression.insertFunctionPointer()
 }
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {

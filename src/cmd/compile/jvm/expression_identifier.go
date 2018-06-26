@@ -37,7 +37,11 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_CLASS {
 		return
 	}
+	//if e.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
+	//	return
+	//}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
+
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1

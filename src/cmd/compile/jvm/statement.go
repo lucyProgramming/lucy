@@ -1,16 +1,15 @@
 package jvm
 
 import (
-	//"fmt"
-	//"fmt"
 	"encoding/binary"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxStack uint16) {
-	//fmt.Println(s.GetPos)
+	fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.STATEMENT_TYPE_EXPRESSION:
 		if s.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {

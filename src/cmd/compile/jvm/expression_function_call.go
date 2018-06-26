@@ -23,10 +23,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
 
-	//if call.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {
-	//	makeExpression.MakeClass.buildFunctionExpression(class, code, call.Expression, context, state)
-	//}
-	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	//maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
 
 	if call.Function.IsClosureFunction == false {
 		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)

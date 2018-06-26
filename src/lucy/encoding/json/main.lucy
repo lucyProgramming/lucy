@@ -79,9 +79,6 @@ fn main(args []string) {
 
 
 
-
-	var bol int ; 
-
 }
 
 

@@ -499,23 +499,24 @@ type ExpressionDeclareVariable struct {
 	IfDeclaredBefore []bool // used for colon assign
 }
 
-func (e *ExpressionDeclareVariable) insertFunctionPointer() {
-	for k, v := range e.Variables {
-		if v.Name == NO_NAME_IDENTIFIER {
-			continue
-		}
-		if e.IfDeclaredBefore[k] {
-			continue
-		}
-		if v.Type.Type != VARIABLE_TYPE_FUNCTION {
-			continue
-		}
-		v.Type.Function = nil
-		v.Type.FunctionType.Name = v.Name
-		PackageBeenCompile.FunctionPointers = append(PackageBeenCompile.FunctionPointers,
-			v.Type.FunctionType)
-	}
-}
+//
+//func (e *ExpressionDeclareVariable) insertFunctionPointer() {
+//	for k, v := range e.Variables {
+//		if v.Name == NO_NAME_IDENTIFIER {
+//			continue
+//		}
+//		if e.IfDeclaredBefore[k] {
+//			continue
+//		}
+//		if v.Type.Type != VARIABLE_TYPE_FUNCTION {
+//			continue
+//		}
+//		v.Type.Function = nil
+//		v.Type.FunctionType.Name = v.Name
+//		PackageBeenCompile.FunctionPointers = append(PackageBeenCompile.FunctionPointers,
+//			v.Type.FunctionType)
+//	}
+//}
 
 type ExpressionTypeConversion struct {
 	Type       *Type
