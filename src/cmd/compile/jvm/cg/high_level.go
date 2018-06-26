@@ -22,3 +22,6 @@ type CONSTANT_Fieldref_info_high_level struct {
 	Field      string
 	Descriptor string
 }
+type CONSTANT_MethodType_info_high_level struct {
+	Descriptor string
+}

@@ -45,6 +45,26 @@ type Class struct {
 	NameAndTypeConstants        map[CONSTANT_NameAndType_info_high_level]*ConstPool
 	MethodrefConstants          map[CONSTANT_Methodref_info_high_level]*ConstPool
 	InterfaceMethodrefConstants map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
+	MethodTypeConstants         map[CONSTANT_MethodType_info_high_level]*ConstPool
+}
+
+func (c *Class) InsertMethodTypeConst(n CONSTANT_MethodType_info_high_level) uint16 {
+	if c.MethodTypeConstants == nil {
+		c.MethodTypeConstants = make(map[CONSTANT_MethodType_info_high_level]*ConstPool)
+	}
+	if len(c.ConstPool) == 0 {
+		c.ConstPool = []*ConstPool{nil}
+	}
+	if con, ok := c.MethodTypeConstants[n]; ok {
+		return con.selfIndex
+	}
+	info := (&CONSTANT_MethodType_info{
+		descriptorIndex: c.InsertUtf8Const(n.Descriptor),
+	}).ToConstPool()
+	info.selfIndex = c.constPoolUint16Length()
+	c.ConstPool = append(c.ConstPool, info)
+	c.MethodTypeConstants[n] = info
+	return info.selfIndex
 }
 
 func (c *Class) InsertInterfaceMethodrefConst(n CONSTANT_InterfaceMethodref_info_high_level) uint16 {
