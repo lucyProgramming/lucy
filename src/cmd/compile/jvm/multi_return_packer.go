@@ -9,7 +9,7 @@ type MultiValuePacker struct {
 /*
 	stack is 1
 */
-func (a *MultiValuePacker) storeArrayListAutoVar(code *cg.AttributeCode, context *Context) {
+func (a *MultiValuePacker) storeMultiValueAutoVar(code *cg.AttributeCode, context *Context) {
 	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
 		context.function.AutoVariableForMultiReturn.Offset)...)
 }

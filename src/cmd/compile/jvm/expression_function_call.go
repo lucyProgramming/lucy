@@ -7,12 +7,43 @@ import (
 
 func (makeExpression *MakeExpression) buildFunctionPointerCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-
-	panic(1)
+	call := e.Data.(*ast.ExpressionFunctionCall)
+	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	if len(call.Expression.ExpressionValue.FunctionType.ParameterList) > 0 {
+		makeExpression.buildCallArgs(class, code, call.Args, call.Expression.ExpressionValue.FunctionType.ParameterList, context, state)
+	}
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      "java/lang/invoke/MethodHandle",
+		Method:     "invoke",
+		Descriptor: Descriptor.methodDescriptor(call.Expression.ExpressionValue.FunctionType),
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	if e.IsStatementExpression {
+		if call.Expression.ExpressionValue.FunctionType.NoReturnValue() == false {
+			if len(call.Expression.ExpressionValue.FunctionType.ReturnList) == 1 {
+				if jvmSlotSize(call.Expression.ExpressionValue.FunctionType.ReturnList[0].Type) == 1 {
+					code.Codes[code.CodeLength] = cg.OP_pop
+					code.CodeLength++
+				} else {
+					code.Codes[code.CodeLength] = cg.OP_pop2
+					code.CodeLength++
+				}
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_pop
+				code.CodeLength++
+			}
+		}
+		return
+	}
+	return
 }
 func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
+	if call.Expression.ExpressionValue.FunctionType != nil {
+		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
+	}
 	if call.Function.IsBuildIn {
 		return makeExpression.mkBuildInFunctionCall(class, code, e, context, state)
 	}
@@ -22,8 +53,9 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 	if call.Expression.ExpressionValue.FunctionType != nil {
 		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
-
-	//maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	if call.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {
+		maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	}
 
 	if call.Function.IsClosureFunction == false {
 		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)

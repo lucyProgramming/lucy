@@ -77,7 +77,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				multiValuePacker.storeArrayListAutoVar(code, context)
+				multiValuePacker.storeMultiValueAutoVar(code, context)
 				for kkk, ttt := range ee.ExpressionMultiValues {
 					currentStack = size
 					if size == 1 {

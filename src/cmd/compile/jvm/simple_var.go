@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -88,6 +89,8 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 	case ast.VARIABLE_TYPE_STRING:
 		fallthrough
 	case ast.VARIABLE_TYPE_OBJECT:
+		fallthrough
+	case ast.VARIABLE_TYPE_FUNCTION:
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
 		fallthrough
@@ -191,6 +194,8 @@ func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
 	case ast.VARIABLE_TYPE_OBJECT:
 		fallthrough
 	case ast.VARIABLE_TYPE_MAP:
+		fallthrough
+	case ast.VARIABLE_TYPE_FUNCTION:
 		fallthrough
 	case ast.VARIABLE_TYPE_ARRAY:
 		switch variableOffset {

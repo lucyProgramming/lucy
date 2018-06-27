@@ -77,6 +77,7 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 
 func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
+	context.lastStackMapOffset = -1
 	context.class = astClass
 	context.function = f
 	method.Code.Codes = make([]byte, 65536)

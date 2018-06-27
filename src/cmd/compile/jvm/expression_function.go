@@ -7,8 +7,79 @@ import (
 
 func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-
 	function := e.Data.(*ast.Function)
+	defer func(function *ast.Function) {
+		if e.IsStatementExpression {
+			return
+		}
+		if function.IsClosureFunction {
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles",
+				Method:     "lookup",
+				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertClassConst(function.ClassMethod.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertStringConst(function.ClassMethod.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+				Descriptor: function.ClassMethod.Descriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles$Lookup",
+				Method:     "findVirtual",
+				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			if 4 > maxStack {
+				maxStack = 4
+			}
+			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, function.ClosureVariableOffSet)...)
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandle",
+				Method:     "bindTo",
+				Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles",
+				Method:     "lookup",
+				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertClassConst(function.ClassMethod.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertStringConst(function.ClassMethod.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+				Descriptor: function.ClassMethod.Descriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles$Lookup",
+				Method:     "findStatic",
+				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			if 4 > maxStack {
+				maxStack = 4
+			}
+		}
+	}(function)
 	if function.Name == "" {
 		function.Name = function.NameLiteralFunction()
 	}

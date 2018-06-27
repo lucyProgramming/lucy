@@ -444,8 +444,11 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
 	} else {
 		if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
-			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression",
-				blockParser.parser.errorMsgPrefix(e.Pos)))
+			if blockParser.parser.lastToken != nil && blockParser.parser.lastToken.Type == lex.TOKEN_RC {
+			} else {
+				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression",
+					blockParser.parser.errorMsgPrefix(e.Pos)))
+			}
 		}
 		if isDefer {
 			d := &ast.StatementDefer{}

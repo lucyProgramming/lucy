@@ -56,7 +56,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 				maxStack = t
 			}
 			// store in temp var
-			multiValuePacker.storeArrayListAutoVar(code, context)
+			multiValuePacker.storeMultiValueAutoVar(code, context)
 			for kk, _ := range v.ExpressionMultiValues {
 				currentStack = 3
 				code.Codes[code.CodeLength] = cg.OP_dup

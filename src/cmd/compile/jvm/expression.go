@@ -185,8 +185,13 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 		maxStack = makeExpression.buildNew(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_FUNCTION_LITERAL:
 		maxStack = makeExpression.MakeClass.buildFunctionExpression(class, code, e, context, state)
+		// pack to methodhandle
+		//		{
+		//			f := e.ex
+		//		}
 	case ast.EXPRESSION_TYPE_CHECK_CAST: // []byte(str)
 		maxStack = makeExpression.buildTypeConversion(class, code, e, context, state)
+
 	case ast.EXPRESSION_TYPE_CONST: // const will analyse at ast stage
 	case ast.EXPRESSION_TYPE_SLICE:
 		maxStack = makeExpression.buildSlice(class, code, e, context, state)
@@ -200,11 +205,9 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 		maxStack = makeExpression.buildTypeAssert(class, code, e, context, state)
 	case ast.EXPRESSION_TYPE_TERNARY:
 		maxStack = makeExpression.buildTernary(class, code, e, context, state)
-
 	default:
 		panic(e.OpName())
 	}
-
 	return
 }
 

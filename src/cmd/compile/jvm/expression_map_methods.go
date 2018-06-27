@@ -56,7 +56,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				multiValuePacker.storeArrayListAutoVar(code, context) // store to temp
+				multiValuePacker.storeMultiValueAutoVar(code, context) // store to temp
 				for kk, tt := range v.ExpressionMultiValues {
 					currentStack = 1
 					if k != len(call.Args)-1 || kk != len(v.ExpressionMultiValues)-1 {

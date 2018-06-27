@@ -114,7 +114,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}
-					multiValuePacker.storeArrayListAutoVar(code, context)
+					multiValuePacker.storeMultiValueAutoVar(code, context)
 					for kk, _ := range v.ExpressionMultiValues {
 						currentStack := uint16(1)
 						code.Codes[code.CodeLength] = cg.OP_dup // dup array list

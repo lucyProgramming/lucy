@@ -200,26 +200,6 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	if s.Expression.canBeUsedAsStatement() {
 		s.Expression.IsStatementExpression = true
-		if s.Expression.Type == EXPRESSION_TYPE_FUNCTION_LITERAL {
-			f := s.Expression.Data.(*Function)
-			err := b.Insert(f.Name, f.Pos, f)
-			if err != nil {
-				errs = append(errs, err)
-			}
-			es := f.check(b)
-			if errorsNotEmpty(es) {
-				errs = append(errs, es...)
-			}
-			f.IsClosureFunction = f.Closure.NotEmpty(f)
-			if f.IsClosureFunction {
-				if b.ClosureFunctions == nil {
-					b.ClosureFunctions = make(map[string]*Function)
-				}
-				b.ClosureFunctions[f.Name] = f
-			}
-			return errs
-		}
-
 	} else {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())

@@ -49,7 +49,7 @@ func (makeExpression *MakeExpression) buildAssign(class *cg.ClassHighLevel, code
 	} else {
 		maxStack = makeExpression.buildExpressions(class, code, rights, context, state)
 	}
-	multiValuePacker.storeArrayListAutoVar(code, context)
+	multiValuePacker.storeMultiValueAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, target, className, name, descriptor :=

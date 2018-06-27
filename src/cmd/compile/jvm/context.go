@@ -7,31 +7,30 @@ import (
 
 type Context struct {
 	class                   *ast.Class
-	lastStackMapState       *StackMapState
-	lastStackMapStateLocals []*cg.StackMapVerificationTypeInfo
-	lastStackMapStateStacks []*cg.StackMapVerificationTypeInfo
-	lastStackMapOffset      int
-	notFirstStackMap        bool
 	function                *ast.Function
 	currentSourceFile       string
 	currentLineNUmber       int
 	Defer                   *ast.StatementDefer
+	lastStackMapState       *StackMapState
+	lastStackMapStateLocals []*cg.StackMapVerificationTypeInfo
+	lastStackMapStateStacks []*cg.StackMapVerificationTypeInfo
+	lastStackMapOffset      int
 	stackMapOffsets         []int
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
-	//fmt.Println(offset)
-	if context.lastStackMapOffset == offset && context.notFirstStackMap {
-		//if state.isSame(context.lastStackMapStateLocals, context.lastStackMapStateStacks) {
-		//	return // no need
-		//} else {
+
+	if context.lastStackMapOffset == offset {
 		code.AttributeStackMap.StackMaps = code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
 		context.stackMapOffsets = context.stackMapOffsets[0 : len(context.stackMapOffsets)-1]
-		context.lastStackMapOffset = context.stackMapOffsets[len(context.stackMapOffsets)-1]
-		//}
+		if len(context.stackMapOffsets) > 0 {
+			context.lastStackMapOffset = context.stackMapOffsets[len(context.stackMapOffsets)-1]
+		} else {
+			context.lastStackMapOffset = 0
+		}
 	}
 	var delta uint16
-	if context.notFirstStackMap == false {
+	if context.lastStackMapOffset == 0 {
 		delta = uint16(offset)
 	} else {
 		delta = uint16(offset - context.lastStackMapOffset - 1)
@@ -42,7 +41,6 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		copy(context.lastStackMapStateLocals, state.Locals)
 		context.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
 		copy(context.lastStackMapStateStacks, state.Stacks)
-		context.notFirstStackMap = true
 		context.lastStackMapState = state
 		context.stackMapOffsets = append(context.stackMapOffsets, offset)
 	}()

@@ -116,12 +116,12 @@ func (e *Expression) constantFold() (is bool, err error) {
 				return
 			}
 			is = true
-			e.Type = EXPRESSION_TYPE_BOOL
 			if e.Type == EXPRESSION_TYPE_LOGICAL_AND {
 				e.Data = bin.Left.Data.(bool) && bin.Right.Data.(bool)
 			} else {
 				e.Data = bin.Left.Data.(bool) || bin.Right.Data.(bool)
 			}
+			e.Type = EXPRESSION_TYPE_BOOL
 			return
 		}
 		return e.getBinaryExpressionConstValue(f)
@@ -166,7 +166,6 @@ func (e *Expression) constantFold() (is bool, err error) {
 				} else {
 					e.Data = int64(bin.Left.Data.(int64) >> bin.Right.getByteValue())
 				}
-
 			}
 			e.Type = bin.Left.Type
 			return

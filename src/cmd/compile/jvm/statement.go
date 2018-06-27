@@ -2,19 +2,16 @@ package jvm
 
 import (
 	"encoding/binary"
-	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxStack uint16) {
-	fmt.Println(s.Pos)
+	//fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.STATEMENT_TYPE_EXPRESSION:
-		if s.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {
-			return makeClass.buildFunctionExpression(class, code, s.Expression, context, state)
-		}
 		maxStack, _ = makeClass.makeExpression.build(class, code, s.Expression, context, state)
 	case ast.STATEMENT_TYPE_IF:
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times

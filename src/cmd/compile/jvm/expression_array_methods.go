@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				multiValuePacker.storeArrayListAutoVar(code, context)
+				multiValuePacker.storeMultiValueAutoVar(code, context)
 				for kk, t := range v.ExpressionMultiValues {
 					currentStack = 1
 					if t := multiValuePacker.unPack(class, code, kk, t, context) + currentStack; t > maxStack {
@@ -111,7 +111,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				multiValuePacker.storeArrayListAutoVar(code, context)
+				multiValuePacker.storeMultiValueAutoVar(code, context)
 				for kk, tt := range v.ExpressionMultiValues {
 					currentStack := uint16(1)
 					stack = multiValuePacker.unPack(class, code, kk, tt, context)

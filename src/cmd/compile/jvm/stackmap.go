@@ -115,6 +115,10 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(t.Class.Name),
 		}
+	case ast.VARIABLE_TYPE_FUNCTION:
+		ret.Verify = &cg.StackMapObjectVariableInfo{
+			Index: class.Class.InsertClassConst(java_method_handle_class),
+		}
 	case ast.VARIABLE_TYPE_MAP:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(java_hashmap_class),
@@ -129,6 +133,8 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(d),
 		}
+	default:
+		panic(1)
 	}
 	return ret
 }

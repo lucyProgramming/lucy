@@ -437,9 +437,6 @@ func (makeClass *MakeClass) mkClassDefaultConstruction(class *cg.ClassHighLevel,
 		method.Code.MaxStack = 1
 	}
 	method.Code.CodeLength = 4
-	if astClass != nil {
-		makeClass.mkNonStaticFieldDefaultValue(class, method.Code, &Context{class: astClass}, nil)
-	}
 	method.Code.Codes[method.Code.CodeLength] = cg.OP_return
 	method.Code.CodeLength += 1
 	method.Code.MaxLocals = 1

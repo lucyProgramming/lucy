@@ -19,7 +19,7 @@ func (makeExpression *MakeExpression) buildCallArgs(class *cg.ClassHighLevel, co
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			multiValuePacker.storeArrayListAutoVar(code, context)
+			multiValuePacker.storeMultiValueAutoVar(code, context)
 			for k, t := range e.ExpressionMultiValues {
 				stack = multiValuePacker.unPack(class, code, k, t, context)
 				if t := currentStack + stack; t > maxStack {

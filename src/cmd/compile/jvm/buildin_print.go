@@ -168,7 +168,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
-			multiValuePacker.storeArrayListAutoVar(code, context)
+			multiValuePacker.storeMultiValueAutoVar(code, context)
 			for kk, tt := range v.ExpressionMultiValues {
 				stack = multiValuePacker.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxStack {

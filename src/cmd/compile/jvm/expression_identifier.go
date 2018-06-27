@@ -25,10 +25,10 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 	if 1 > maxStack {
 		maxStack = 1
 	}
+	closure.unPack(class, code, identifier.Variable.Type)
 	if t := jvmSlotSize(identifier.Variable.Type); t > maxStack {
 		maxStack = t
 	}
-
 	return
 }
 
@@ -37,17 +37,12 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_CLASS {
 		return
 	}
-	//if e.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
-	//	return
-	//}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-
 	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1
 		return
 	}
-
 	if identifier.Variable.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

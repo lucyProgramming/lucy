@@ -78,7 +78,7 @@ func (makeExpression *MakeExpression) buildColonAssign(class *cg.ClassHighLevel,
 	} else {
 		maxStack = makeExpression.buildExpressions(class, code, vs.InitValues, context, state)
 	}
-	multiValuePacker.storeArrayListAutoVar(code, context)
+	multiValuePacker.storeMultiValueAutoVar(code, context)
 	//first round
 	for k, v := range vs.Variables {
 		if v.Name == ast.NO_NAME_IDENTIFIER {
