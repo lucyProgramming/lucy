@@ -102,6 +102,8 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	case VariableTypeDouble:
 		e.Type = ExpressionTypeDouble
 		e.Data = float64(0)
+	case VariableTypeFunction:
+		fallthrough
 	case VariableTypeString:
 		fallthrough
 	case VariableTypeObject:
@@ -154,6 +156,14 @@ func (typ *Type) Clone() *Type {
 		ret.Map.Key = typ.Map.Key.Clone()
 		ret.Map.Value = typ.Map.Value.Clone()
 	}
+	//if ret.Type == VariableTypeFunction {
+	//	ret.FunctionType = &FunctionType{}
+	//	ret.FunctionType.ParameterList = make(ParameterList, len(typ.FunctionType.ParameterList))
+	//	ret.FunctionType.ReturnList = make(ReturnList, len(typ.FunctionType.ReturnList))
+	//	for k, _ := range ret.FunctionType.ParameterList {
+	//		ret.FunctionType.ParameterList[k] = typ.FunctionType.ParameterList[k].Type.Clone()
+	//	}
+	//}
 	return ret
 }
 

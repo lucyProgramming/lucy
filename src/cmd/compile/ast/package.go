@@ -20,10 +20,10 @@ type Package struct {
 }
 
 func (p *Package) loadBuildInPackage() error {
-	if p.Name == common.CORE_PACAKGE {
+	if p.Name == common.CorePackage {
 		return nil
 	}
-	pp, err := p.load(common.CORE_PACAKGE)
+	pp, err := p.load(common.CorePackage)
 	if err != nil {
 		return err
 	}

@@ -72,7 +72,7 @@ func (test *Test) RunCommand(command string, args []string) {
 		os.Exit(7)
 	}
 	test.lucyCommandAt = filepath.Join(test.LucyRoot, "bin", "lucy")
-	test.testDir(filepath.Join(dirs[0], common.DIR_FOR_LUCY_SOURCE_FILES), test.packageName+"/"+"test")
+	test.testDir(filepath.Join(dirs[0], common.DirForLucySourceFile), test.packageName+"/"+"test")
 }
 
 func (test *Test) testDir(dir string, prefix string) {

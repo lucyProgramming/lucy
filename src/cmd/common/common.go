@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	VERSION                   = "0.01"
-	LUCY_ROOT_ENV_KEY         = "LUCYROOT"
-	LUCY_PATH_ENV_KEY         = "LUCYPATH"
-	LUCY_MAINTAIN_FILE        = "maintain.json"
-	DIR_FOR_COMPILED_CLASS    = "class" // sub directory of compiled class
-	DIR_FOR_LUCY_SOURCE_FILES = "src"   // sub directory of source files
-	CORE_PACAKGE              = "lucy/lang"
+	VERSION                = "0.01"
+	LucyRootEnvVariableKey = "LUCYROOT"
+	LucyPathEnvVariableKey = "LUCYPATH"
+	LucyMaintainFile       = "maintain.json"
+	DirForCompiledClass    = "class" // sub directory of compiled class
+	DirForLucySourceFile   = "src"   // sub directory of source files
+	CorePackage            = "lucy/lang"
 )
 
 func GetClassPaths() []string {
@@ -36,9 +36,9 @@ func GetLucyPaths() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	lp := os.Getenv(LUCY_PATH_ENV_KEY)
+	lp := os.Getenv(LucyPathEnvVariableKey)
 	if lp == "" {
-		return nil, fmt.Errorf("env variable %s not set", LUCY_PATH_ENV_KEY)
+		return nil, fmt.Errorf("env variable %s not set", LucyPathEnvVariableKey)
 	}
 	var lps []string
 	if runtime.GOOS == "windows" {
@@ -53,7 +53,7 @@ func GetLucyPaths() ([]string, error) {
 		}
 		if false == filepath.IsAbs(v) {
 			fmt.Printf("env variable %s=%s is not absolute",
-				LUCY_PATH_ENV_KEY, LUCY_PATH_ENV_KEY)
+				LucyPathEnvVariableKey, LucyPathEnvVariableKey)
 			os.Exit(1)
 		}
 		lucyPaths = append(lucyPaths, v)
@@ -73,13 +73,13 @@ func GetLucyPaths() ([]string, error) {
 }
 
 func GetLucyRoot() (string, error) {
-	r := os.Getenv(LUCY_ROOT_ENV_KEY)
+	r := os.Getenv(LucyRootEnvVariableKey)
 	if r == "" {
-		return "", fmt.Errorf("env variable %s not set", LUCY_ROOT_ENV_KEY)
+		return "", fmt.Errorf("env variable %s not set", LucyRootEnvVariableKey)
 	}
 	if false == filepath.IsAbs(r) {
 		return "", fmt.Errorf("env variable %s=%s is not absolute",
-			LUCY_ROOT_ENV_KEY, r)
+			LucyRootEnvVariableKey, r)
 	}
 	return r, nil
 }
@@ -87,7 +87,7 @@ func GetLucyRoot() (string, error) {
 func FindLucyPackageDirectory(packageName string, paths []string) []string {
 	ret := []string{}
 	for _, v := range paths {
-		f, err := os.Stat(filepath.Join(v, DIR_FOR_LUCY_SOURCE_FILES, packageName))
+		f, err := os.Stat(filepath.Join(v, DirForLucySourceFile, packageName))
 		if err == nil && f.IsDir() {
 			ret = append(ret, v)
 		}

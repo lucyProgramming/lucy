@@ -21,18 +21,18 @@ func (c *Clean) Help(command string) {
 }
 
 func (c *Clean) RunCommand(command string, args []string) {
-	if os.Getenv(common.LUCY_PATH_ENV_KEY) == "" {
-		fmt.Printf("env variable  '%s' not set\n", common.LUCY_PATH_ENV_KEY)
+	if os.Getenv(common.LucyPathEnvVariableKey) == "" {
+		fmt.Printf("env variable  '%s' not set\n", common.LucyPathEnvVariableKey)
 		return
 	}
 	if runtime.GOOS == "windows" {
-		for _, v := range strings.Split(os.Getenv(common.LUCY_PATH_ENV_KEY), ";") { // windows style
+		for _, v := range strings.Split(os.Getenv(common.LucyPathEnvVariableKey), ";") { // windows style
 			if v != "" {
 				c.lucyPaths = append(c.lucyPaths, v)
 			}
 		}
 	} else {
-		for _, v := range strings.Split(os.Getenv(common.LUCY_PATH_ENV_KEY), ":") { // unix style
+		for _, v := range strings.Split(os.Getenv(common.LucyPathEnvVariableKey), ":") { // unix style
 			if v != "" {
 				c.lucyPaths = append(c.lucyPaths, v)
 			}
@@ -48,12 +48,12 @@ func (c *Clean) RunCommand(command string, args []string) {
 		}
 	}
 	if len(c.lucyPaths) == 0 {
-		fmt.Printf("env variable  '%s' not set\n", common.LUCY_PATH_ENV_KEY)
+		fmt.Printf("env variable  '%s' not set\n", common.LucyPathEnvVariableKey)
 		return
 	}
 	for _, v := range c.lucyPaths {
 		fmt.Println("clean:", v)
-		c.cleanPath(filepath.Join(v, common.DIR_FOR_COMPILED_CLASS))
+		c.cleanPath(filepath.Join(v, common.DirForCompiledClass))
 	}
 }
 
@@ -71,7 +71,7 @@ func (c *Clean) cleanPath(path string) {
 			c.cleanPath(filepath.Join(path, v.Name()))
 		}
 	}
-	bs, err := ioutil.ReadFile(filepath.Join(path, common.LUCY_MAINTAIN_FILE))
+	bs, err := ioutil.ReadFile(filepath.Join(path, common.LucyMaintainFile))
 	if err != nil {
 		return
 	}
@@ -83,5 +83,5 @@ func (c *Clean) cleanPath(path string) {
 	for _, v := range meta.Classes {
 		os.Remove(filepath.Join(path, v))
 	}
-	os.Remove(filepath.Join(path, common.LUCY_MAINTAIN_FILE))
+	os.Remove(filepath.Join(path, common.LucyMaintainFile))
 }

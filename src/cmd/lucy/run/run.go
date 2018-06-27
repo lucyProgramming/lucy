@@ -98,9 +98,9 @@ func (r *Run) RunCommand(command string, args []string) {
 	r.MainPackageLucyPath = founds[0]
 	//
 	{
-		_, _, err = r.buildPackage("", common.CORE_PACAKGE, &ImportStack{})
+		_, _, err = r.buildPackage("", common.CorePackage, &ImportStack{})
 		if err != nil {
-			fmt.Printf("build  buildin package '%s' failed,err:%v\n", common.CORE_PACAKGE, err)
+			fmt.Printf("build  buildin package '%s' failed,err:%v\n", common.CorePackage, err)
 			os.Exit(3)
 		}
 	}
@@ -120,7 +120,7 @@ func (r *Run) RunCommand(command string, args []string) {
 		classpath[v] = struct{}{}
 	}
 	for _, v := range r.LucyPaths {
-		classpath[filepath.Join(v, common.DIR_FOR_COMPILED_CLASS)] = struct{}{}
+		classpath[filepath.Join(v, common.DirForCompiledClass)] = struct{}{}
 	}
 	classpath[filepath.Join(r.LucyRoot, "lib")] = struct{}{}
 	classPathArray := make([]string, len(classpath))
@@ -166,7 +166,7 @@ func (r *Run) RunCommand(command string, args []string) {
 func (r *Run) findPackageIn(packageName string) []string {
 	pathHavePackage := []string{}
 	for _, v := range r.LucyPaths {
-		dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
+		dir := filepath.Join(v, common.DirForLucySourceFile, packageName)
 		f, err := os.Stat(dir)
 		if err == nil && f.IsDir() {
 			pathHavePackage = append(pathHavePackage, v)
@@ -180,7 +180,7 @@ func (r *Run) findPackageIn(packageName string) []string {
 */
 func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.PackageMeta, need bool, lucyFiles []string, err error) {
 	need = true
-	sourceFileDir := filepath.Join(lucyPath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName)
+	sourceFileDir := filepath.Join(lucyPath, common.DirForLucySourceFile, packageName)
 	fis, err := ioutil.ReadDir(sourceFileDir)
 	if err != nil { // shit happens
 		return
@@ -193,7 +193,7 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 		}
 	}
 	if len(lucyFiles) == 0 {
-		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucyPath, common.DIR_FOR_LUCY_SOURCE_FILES, packageName))
+		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucyPath, common.DirForLucySourceFile, packageName))
 		return
 	}
 	if p, ok := r.PackagesCompiled[packageName]; ok {
@@ -203,7 +203,7 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 		return
 	}
 	destinationDir := filepath.Join(lucyPath, "class", packageName)
-	bs, err := ioutil.ReadFile(filepath.Join(destinationDir, common.LUCY_MAINTAIN_FILE))
+	bs, err := ioutil.ReadFile(filepath.Join(destinationDir, common.LucyMaintainFile))
 	if err != nil { // maintain file is missing
 		err = nil
 		return
@@ -305,7 +305,7 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 	}
 	existInLucyPath := func(name string) (found []string) {
 		for _, v := range r.LucyPaths {
-			dir := filepath.Join(v, common.DIR_FOR_LUCY_SOURCE_FILES, name)
+			dir := filepath.Join(v, common.DirForLucySourceFile, name)
 			//fmt.Println(dir)
 			f, _ := os.Stat(dir)
 			if f != nil && f.IsDir() {
@@ -328,7 +328,7 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 			return
 		}
 		if len(found) == 1 { // perfect found in lucyPath
-			if i != common.CORE_PACAKGE {
+			if i != common.CorePackage {
 				lucyPackages = append(lucyPackages, i)
 			}
 			continue
@@ -422,7 +422,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 	}
 	//build this package
 	//read  files
-	destinationDir := filepath.Join(lucyPath, common.DIR_FOR_COMPILED_CLASS, packageName)
+	destinationDir := filepath.Join(lucyPath, common.DirForCompiledClass, packageName)
 	// mkDir all
 	fileInfo, _ := os.Stat(destinationDir)
 	if fileInfo == nil {
@@ -435,7 +435,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 	{
 		fis, _ := ioutil.ReadDir(destinationDir)
 		for _, f := range fis {
-			if strings.HasSuffix(f.Name(), ".class") || f.Name() == common.LUCY_MAINTAIN_FILE {
+			if strings.HasSuffix(f.Name(), ".class") || f.Name() == common.LucyMaintainFile {
 				file := filepath.Join(destinationDir, f.Name())
 				err := os.Remove(file)
 				if err != nil {
@@ -485,7 +485,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 		return
 	}
 	err = ioutil.WriteFile(
-		filepath.Join(lucyPath, common.DIR_FOR_COMPILED_CLASS, packageName, common.LUCY_MAINTAIN_FILE),
+		filepath.Join(lucyPath, common.DirForCompiledClass, packageName, common.LucyMaintainFile),
 		bs,
 		0644)
 	r.PackagesCompiled[packageName] = &PackageCompiled{
