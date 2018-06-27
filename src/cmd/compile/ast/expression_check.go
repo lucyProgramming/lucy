@@ -283,9 +283,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	case EXPRESSION_TYPE_FUNCTION_LITERAL:
 		f := e.Data.(*Function)
 		errs = f.check(block)
-		//if e.IsStatementExpression {
 		f.IsClosureFunction = f.Closure.NotEmpty(f)
-		//}
 		if f.Name != "" {
 			err := block.Insert(f.Name, f.Pos, f)
 			if err != nil {

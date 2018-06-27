@@ -17,16 +17,13 @@ const (
 	VARIABLE_TYPE_DOUBLE
 	//ref types
 	VARIABLE_TYPE_STRING
-
 	VARIABLE_TYPE_OBJECT
 	VARIABLE_TYPE_MAP
 	VARIABLE_TYPE_ARRAY
 	VARIABLE_TYPE_JAVA_ARRAY
 	VARIABLE_TYPE_FUNCTION
-	//VARIABLE_TYPE_FUNCTION_POINTER
 	VARIABLE_TYPE_ENUM
 	VARIABLE_TYPE_CLASS
-
 	VARIABLE_TYPE_NAME
 	VARIABLE_TYPE_T
 	VARIABLE_TYPE_VOID
@@ -579,32 +576,18 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 		}
 	}
 	if typ.Type == VARIABLE_TYPE_FUNCTION && compareTo.Type == VARIABLE_TYPE_FUNCTION {
-		var compareToFunctionType *FunctionType
-		if compareTo.FunctionType != nil {
-			compareToFunctionType = compareTo.FunctionType
-		} else {
-			compareToFunctionType = &compareTo.Function.Type
-		}
-		if len(typ.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) {
-			return false
-		}
-		if len(typ.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {
+
+		compareToFunctionType := compareTo.FunctionType
+		if len(typ.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) ||
+			len(typ.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {
 			return false
 		}
 		for k, v := range typ.FunctionType.ParameterList {
-			//TODO :: force to equal or not ???
-			if v.Name != compareToFunctionType.ParameterList[k].Name {
-				return false
-			}
 			if false == v.Type.StrictEqual(compareToFunctionType.ParameterList[k].Type) {
 				return false
 			}
 		}
 		for k, v := range typ.FunctionType.ReturnList {
-			//TODO ::  force to equal or not ???
-			if v.Name != compareToFunctionType.ReturnList[k].Name {
-				return false
-			}
 			if false == v.Type.StrictEqual(compareToFunctionType.ReturnList[k].Type) {
 				return false
 			}
