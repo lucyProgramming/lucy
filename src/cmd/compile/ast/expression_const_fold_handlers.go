@@ -112,7 +112,7 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 		return
 	}
 	// null == null or null != nil
-	if bin.Left.Type == EXPRESSION_TYPE_NULL && bin.Right.Type == EXPRESSION_TYPE_NULL &&
+	if bin.Left.Type == ExpressionNull && bin.Right.Type == ExpressionNull &&
 		(e.Type == EXPRESSION_TYPE_EQ || e.Type == EXPRESSION_TYPE_NE) {
 		e.Data = e.Type == EXPRESSION_TYPE_EQ
 		is = true

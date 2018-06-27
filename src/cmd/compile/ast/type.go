@@ -111,7 +111,7 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	case VariableTypeMap:
 		fallthrough
 	case VariableTypeArray:
-		e.Type = EXPRESSION_TYPE_NULL
+		e.Type = ExpressionNull
 	case VariableTypeEnum:
 		e.Type = EXPRESSION_TYPE_INT
 		e.Data = typ.Enum.Enums[0].Value

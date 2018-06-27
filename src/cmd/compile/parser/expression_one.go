@@ -82,7 +82,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		expressionParser.Next()
 	case lex.TOKEN_NULL:
 		left = &ast.Expression{
-			Type: ast.EXPRESSION_TYPE_NULL,
+			Type: ast.ExpressionNull,
 			Pos:  expressionParser.parser.mkPos(),
 		}
 		expressionParser.Next()

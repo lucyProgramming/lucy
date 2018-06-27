@@ -229,7 +229,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 					errMsgPrefix(v.Expression.Pos)))
 				continue
 			}
-			if v.Expression.Type == EXPRESSION_TYPE_NULL {
+			if v.Expression.Type == ExpressionNull {
 				*errs = append(*errs, fmt.Errorf("%s cannot use 'null' as default value",
 					errMsgPrefix(v.Expression.Pos)))
 			}

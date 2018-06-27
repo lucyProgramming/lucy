@@ -15,7 +15,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 
 	errs = []error{}
 	switch e.Type {
-	case EXPRESSION_TYPE_NULL:
+	case ExpressionNull:
 		Types = []*Type{
 			{
 				Type: VariableTypeNull,

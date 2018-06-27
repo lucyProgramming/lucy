@@ -7,7 +7,7 @@ import (
 const (
 	_ = iota // start with 1
 	//null
-	EXPRESSION_TYPE_NULL
+	ExpressionNull
 	// bool
 	EXPRESSION_TYPE_BOOL
 	// int types
@@ -199,7 +199,7 @@ func (e *Expression) OpName() string {
 		return "~"
 	case EXPRESSION_TYPE_IDENTIFIER:
 		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifier).Name)
-	case EXPRESSION_TYPE_NULL:
+	case ExpressionNull:
 		return "null"
 	case EXPRESSION_TYPE_NEW:
 		return "new"
@@ -326,7 +326,7 @@ func (e *Expression) IsLiteral() bool {
 	valid for condition
 */
 func (e *Expression) canBeUsedAsCondition() bool {
-	return e.Type == EXPRESSION_TYPE_NULL ||
+	return e.Type == ExpressionNull ||
 		e.Type == EXPRESSION_TYPE_BOOL ||
 		e.Type == EXPRESSION_TYPE_BYTE ||
 		e.Type == EXPRESSION_TYPE_SHORT ||

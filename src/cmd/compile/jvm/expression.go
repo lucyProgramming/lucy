@@ -17,7 +17,7 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	switch e.Type {
 	case ast.EXPRESSION_TYPE_TYPE_ALIAS:
 		return // handled at ast stage
-	case ast.EXPRESSION_TYPE_NULL:
+	case ast.ExpressionNull:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
 		maxStack = 1
