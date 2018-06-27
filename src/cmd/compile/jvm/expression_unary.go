@@ -10,7 +10,7 @@ import (
 func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 
-	if e.Type == ast.EXPRESSION_TYPE_NEGATIVE {
+	if e.Type == ast.ExpressionTypeNegative {
 		maxStack, _ = makeExpression.build(class, code, e.Data.(*ast.Expression), context, state)
 		switch e.ExpressionValue.Type {
 		case ast.VariableTypeByte:
@@ -29,7 +29,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		return
 	}
-	if e.Type == ast.EXPRESSION_TYPE_BIT_NOT {
+	if e.Type == ast.ExpressionTypeBitNot {
 		ee := e.Data.(*ast.Expression)
 		maxStack, _ = makeExpression.build(class, code, ee, context, state)
 		if t := jvmSlotSize(ee.ExpressionValue) * 2; t > maxStack {
@@ -72,7 +72,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 		}
 		return
 	}
-	if e.Type == ast.EXPRESSION_TYPE_NOT {
+	if e.Type == ast.ExpressionTypeNot {
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.Exit
 		maxStack, es = makeExpression.build(class, code, ee, context, state)

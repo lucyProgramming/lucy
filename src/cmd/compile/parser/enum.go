@@ -11,7 +11,7 @@ import (
 func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 	parser.Next() // skip enum
 
-	if parser.token.Type != lex.TOKEN_IDENTIFIER {
+	if parser.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect 'identifier', but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
@@ -22,7 +22,7 @@ func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 		Pos:  parser.mkPos(),
 	}
 	parser.Next() // skip enum name
-	if parser.token.Type != lex.TOKEN_LC {
+	if parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
@@ -33,7 +33,7 @@ func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
 	//first name
-	if parser.token.Type != lex.TOKEN_IDENTIFIER {
+	if parser.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect 'identifier',but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
@@ -47,7 +47,7 @@ func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 	}
 	parser.Next()
 	var initExpression *ast.Expression
-	if parser.token.Type == lex.TOKEN_ASSIGN { // first value defined here
+	if parser.token.Type == lex.TokenAssign { // first value defined here
 		parser.Next() // skip assign
 		initExpression, err = parser.ExpressionParser.parseExpression(false)
 		if err != nil {
@@ -55,7 +55,7 @@ func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 			return nil, err
 		}
 	}
-	if parser.token.Type == lex.TOKEN_COMMA {
+	if parser.token.Type == lex.TokenComma {
 		parser.Next() // skip ,should be a identifier after  comma
 		ns, err := parser.parseNameList()
 		if err != nil {
@@ -63,7 +63,7 @@ func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 		}
 		names = append(names, ns...)
 	}
-	if parser.token.Type != lex.TOKEN_RC {
+	if parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}',but '%s'", parser.token.Description, parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err

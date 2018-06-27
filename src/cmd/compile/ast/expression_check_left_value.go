@@ -8,7 +8,7 @@ import (
 
 func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 	switch e.Type {
-	case EXPRESSION_TYPE_IDENTIFIER:
+	case ExpressionTypeIdentifier:
 		identifier := e.Data.(*ExpressionIdentifier)
 		d, _ := block.searchRightValue(identifier.Name)
 		if d == nil {
@@ -32,10 +32,10 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil
 		}
-	case EXPRESSION_TYPE_INDEX:
+	case ExpressionTypeIndex:
 		ret = e.checkIndexExpression(block, errs)
 		return ret
-	case EXPRESSION_TYPE_SELECTION:
+	case ExpressionTypeSelection:
 		dot := e.Data.(*ExpressionSelection)
 		t, es := dot.Expression.checkSingleValueContextExpression(block)
 		if errorsNotEmpty(es) {

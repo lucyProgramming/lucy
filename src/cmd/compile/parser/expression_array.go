@@ -12,16 +12,16 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	pos := expressionParser.parser.mkPos()
 	expressionParser.parser.Next() // skip [
 	var err error
-	if expressionParser.parser.token.Type != lex.TOKEN_RB {
+	if expressionParser.parser.token.Type != lex.TokenRb {
 		arr := &ast.ExpressionArray{}
 		arr.Expressions, err = expressionParser.parseExpressions()
-		if expressionParser.parser.token.Type != lex.TOKEN_RB {
+		if expressionParser.parser.token.Type != lex.TokenRb {
 			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 		} else {
 			expressionParser.Next() // skip ]
 		}
 		return &ast.Expression{
-			Type: ast.EXPRESSION_TYPE_ARRAY,
+			Type: ast.ExpressionTypeArray,
 			Data: arr,
 			Pos:  pos,
 		}, err
@@ -31,20 +31,20 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	if err != nil {
 		return nil, err
 	}
-	if expressionParser.parser.token.Type == lex.TOKEN_LP { // []byte("1111111111")
+	if expressionParser.parser.token.Type == lex.TokenLp { // []byte("1111111111")
 		expressionParser.Next() // skip (
 		e, err := expressionParser.parseExpression(false)
 		if err != nil {
 			return nil, err
 		}
-		if expressionParser.parser.token.Type != lex.TOKEN_RP {
+		if expressionParser.parser.token.Type != lex.TokenRp {
 			return nil, fmt.Errorf("%s '(' and  ')' not match",
 				expressionParser.parser.errorMsgPrefix())
 		}
 		expressionParser.Next() // skip )
 		ret := &ast.Expression{}
 		ret.Pos = pos
-		ret.Type = ast.EXPRESSION_TYPE_CHECK_CAST
+		ret.Type = ast.ExpressionTypeCheckCast
 		data := &ast.ExpressionTypeConversion{}
 		data.Type = &ast.Type{}
 		data.Type.Type = ast.VariableTypeArray
@@ -64,7 +64,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	}
 	arr.Expressions, err = expressionParser.parseArrayValues()
 	return &ast.Expression{
-		Type: ast.EXPRESSION_TYPE_ARRAY,
+		Type: ast.ExpressionTypeArray,
 		Data: arr,
 		Pos:  pos,
 	}, err
@@ -73,19 +73,19 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 
 //{1,2,3}  {{1,2,3},{456}}
 func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
-	if expressionParser.parser.token.Type != lex.TOKEN_LC {
+	if expressionParser.parser.token.Type != lex.TokenLc {
 		return nil, fmt.Errorf("%s expect '{',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
 	expressionParser.Next() // skip {
 	es := []*ast.Expression{}
-	for expressionParser.parser.token.Type != lex.TOKEN_EOF && expressionParser.parser.token.Type != lex.TOKEN_RC {
-		if expressionParser.parser.token.Type == lex.TOKEN_LC {
+	for expressionParser.parser.token.Type != lex.TokenEof && expressionParser.parser.token.Type != lex.TokenRc {
+		if expressionParser.parser.token.Type == lex.TokenLc {
 			ees, err := expressionParser.parseArrayValues()
 			if err != nil {
 				return es, err
 			}
-			arrayExpression := &ast.Expression{Type: ast.EXPRESSION_TYPE_ARRAY}
+			arrayExpression := &ast.Expression{Type: ast.ExpressionTypeArray}
 			data := ast.ExpressionArray{}
 			data.Expressions = ees
 			arrayExpression.Data = data
@@ -93,7 +93,7 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 		} else {
 			e, err := expressionParser.parseExpression(false)
 			if e != nil {
-				if e.Type == ast.EXPRESSION_TYPE_LIST {
+				if e.Type == ast.ExpressionTypeList {
 					es = append(es, e.Data.([]*ast.Expression)...)
 				} else {
 					es = append(es, e)
@@ -103,13 +103,13 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 				return es, err
 			}
 		}
-		if expressionParser.parser.token.Type == lex.TOKEN_COMMA {
+		if expressionParser.parser.token.Type == lex.TokenComma {
 			expressionParser.Next() // skip ,
 		} else {
 			break
 		}
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_RC {
+	if expressionParser.parser.token.Type != lex.TokenRc {
 		return es, fmt.Errorf("%s expect '}',but '%s'", expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
 	expressionParser.Next()

@@ -17,17 +17,17 @@ func (expressionParser *ExpressionParser) Next() {
 
 func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
-	for expressionParser.parser.token.Type != lex.TOKEN_EOF {
+	for expressionParser.parser.token.Type != lex.TokenEof {
 		e, err := expressionParser.parseExpression(false)
 		if err != nil {
 			return es, err
 		}
-		if e.Type == ast.EXPRESSION_TYPE_LIST {
+		if e.Type == ast.ExpressionTypeList {
 			es = append(es, e.Data.([]*ast.Expression)...)
 		} else {
 			es = append(es, e)
 		}
-		if expressionParser.parser.token.Type != lex.TOKEN_COMMA {
+		if expressionParser.parser.token.Type != lex.TokenComma {
 			break
 		}
 		// == ,
@@ -42,25 +42,25 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	if err != nil {
 		return nil, err
 	}
-	for expressionParser.parser.token.Type == lex.TOKEN_COMMA && statementLevel { // read more
+	for expressionParser.parser.token.Type == lex.TokenComma && statementLevel { // read more
 		expressionParser.Next()                                 //  skip comma
 		left2, err := expressionParser.parseTernaryExpression() //
 		if err != nil {
 			return nil, err
 		}
-		if left.Type == ast.EXPRESSION_TYPE_LIST {
+		if left.Type == ast.ExpressionTypeList {
 			list := left.Data.([]*ast.Expression)
 			left.Data = append(list, left2)
 		} else {
 			newExpression := &ast.Expression{}
-			newExpression.Type = ast.EXPRESSION_TYPE_LIST
+			newExpression.Type = ast.ExpressionTypeList
 			list := []*ast.Expression{left, left2}
 			newExpression.Data = list
 			left = newExpression
 		}
 	}
 	mustBeOneExpression := func() {
-		if left.Type == ast.EXPRESSION_TYPE_LIST {
+		if left.Type == ast.ExpressionTypeList {
 			es := left.Data.([]*ast.Expression)
 			left = es[0]
 			if len(es) > 1 {
@@ -84,7 +84,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 				return result, err
 			}
 			bin.Right = &ast.Expression{}
-			bin.Right.Type = ast.EXPRESSION_TYPE_LIST
+			bin.Right.Type = ast.ExpressionTypeList
 			bin.Right.Data = es
 		} else {
 			bin.Right, err = expressionParser.parseExpression(false)
@@ -93,40 +93,40 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	}
 	// := += -= *= /= %=
 	switch expressionParser.parser.token.Type {
-	case lex.TOKEN_ASSIGN:
-		return mkExpression(ast.EXPRESSION_TYPE_ASSIGN, true)
-	case lex.TOKEN_COLON_ASSIGN:
-		return mkExpression(ast.EXPRESSION_TYPE_COLON_ASSIGN, true)
-	case lex.TOKEN_ADD_ASSIGN:
+	case lex.TokenAssign:
+		return mkExpression(ast.ExpressionTypeAssign, true)
+	case lex.TokenColonAssign:
+		return mkExpression(ast.ExpressionTypeColonAssign, true)
+	case lex.TokenAddAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_PLUS_ASSIGN, false)
-	case lex.TOKEN_SUB_ASSIGN:
+		return mkExpression(ast.ExpressionTypePlusAssign, false)
+	case lex.TokenSubAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_MINUS_ASSIGN, false)
-	case lex.TOKEN_MUL_ASSIGN:
+		return mkExpression(ast.ExpressionTypeMinusAssign, false)
+	case lex.TokenMulAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_MUL_ASSIGN, false)
-	case lex.TOKEN_DIV_ASSIGN:
+		return mkExpression(ast.ExpressionTypeMulAssign, false)
+	case lex.TokenDivAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_DIV_ASSIGN, false)
-	case lex.TOKEN_MOD_ASSIGN:
+		return mkExpression(ast.ExpressionTypeDivAssign, false)
+	case lex.TokenModAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_MOD_ASSIGN, false)
-	case lex.TOKEN_LSH_ASSIGN:
+		return mkExpression(ast.ExpressionTypeModAssign, false)
+	case lex.TokenLshAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_LSH_ASSIGN, false)
-	case lex.TOKEN_RSH_ASSIGN:
+		return mkExpression(ast.ExpressionTypeLshAssign, false)
+	case lex.TokenRshAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_RSH_ASSIGN, false)
-	case lex.TOKEN_AND_ASSIGN:
+		return mkExpression(ast.ExpressionTypeRshAssign, false)
+	case lex.TokenAndAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_AND_ASSIGN, false)
-	case lex.TOKEN_OR_ASSIGN:
+		return mkExpression(ast.ExpressionTypeAndAssign, false)
+	case lex.TokenOrAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_OR_ASSIGN, false)
-	case lex.TOKEN_XOR_ASSIGN:
+		return mkExpression(ast.ExpressionTypeOrAssign, false)
+	case lex.TokenXorAssign:
 		mustBeOneExpression()
-		return mkExpression(ast.EXPRESSION_TYPE_XOR_ASSIGN, false)
+		return mkExpression(ast.ExpressionTypeXorAssign, false)
 
 	}
 	return left, nil
@@ -137,7 +137,7 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	if err != nil {
 		return nil, err
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_LP {
+	if expressionParser.parser.token.Type != lex.TokenLp {
 		return nil, fmt.Errorf("%s not '(' after a type", expressionParser.parser.errorMsgPrefix())
 	}
 	pos := expressionParser.parser.mkPos()
@@ -146,12 +146,12 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	if err != nil {
 		return nil, err
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_RP {
+	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
 	}
 	expressionParser.Next() // skip )
 	return &ast.Expression{
-		Type: ast.EXPRESSION_TYPE_CHECK_CAST,
+		Type: ast.ExpressionTypeCheckCast,
 		Data: &ast.ExpressionTypeConversion{
 			Type:       t,
 			Expression: e,

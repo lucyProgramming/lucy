@@ -30,9 +30,9 @@ func (s *StatementFor) checkRange() []error {
 	//
 	var rangeExpression *Expression
 	bin := s.Condition.Data.(*ExpressionBinary)
-	if bin.Right.Type == EXPRESSION_TYPE_RANGE {
+	if bin.Right.Type == ExpressionTypeRange {
 		rangeExpression = s.Condition.Data.(*Expression)
-	} else if bin.Right.Type == EXPRESSION_TYPE_LIST {
+	} else if bin.Right.Type == ExpressionTypeList {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
 			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right",
@@ -56,7 +56,7 @@ func (s *StatementFor) checkRange() []error {
 	}
 	rangeExpression.ExpressionValue = rangeOn
 	var lefts []*Expression
-	if bin.Left.Type == EXPRESSION_TYPE_LIST {
+	if bin.Left.Type == ExpressionTypeList {
 		lefts = bin.Left.Data.([]*Expression)
 	} else {
 		lefts = []*Expression{bin.Left}
@@ -71,7 +71,7 @@ func (s *StatementFor) checkRange() []error {
 		modelKv = true
 	}
 	s.RangeAttr = &ForRangeAttr{}
-	if s.Condition.Type == EXPRESSION_TYPE_ASSIGN {
+	if s.Condition.Type == ExpressionTypeAssign {
 		if modelKv {
 			if false == lefts[0].IsNoNameIdentifier() {
 				s.RangeAttr.ExpressionKey = lefts[0]
@@ -87,20 +87,20 @@ func (s *StatementFor) checkRange() []error {
 	}
 	s.RangeAttr.RangeOn = rangeExpression
 	var err error
-	if s.Condition.Type == EXPRESSION_TYPE_COLON_ASSIGN {
+	if s.Condition.Type == ExpressionTypeColonAssign {
 		if modelKv {
-			if lefts[0].Type != EXPRESSION_TYPE_IDENTIFIER {
+			if lefts[0].Type != ExpressionTypeIdentifier {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
 				return errs
 			}
-			if lefts[1].Type != EXPRESSION_TYPE_IDENTIFIER {
+			if lefts[1].Type != ExpressionTypeIdentifier {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
 				return errs
 			}
 		} else {
-			if lefts[0].Type != EXPRESSION_TYPE_IDENTIFIER {
+			if lefts[0].Type != ExpressionTypeIdentifier {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
 					errMsgPrefix(lefts[0].Pos)))
 				return errs
@@ -158,7 +158,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 	}
 
-	if s.Condition.Type == EXPRESSION_TYPE_ASSIGN {
+	if s.Condition.Type == ExpressionTypeAssign {
 		var tk *Type
 		if s.RangeAttr.ExpressionKey != nil {
 			tk = s.RangeAttr.ExpressionKey.getLeftValue(s.Block, &errs)

@@ -87,7 +87,7 @@ func (s *Statement) StatementName() string {
 
 func (s *Statement) isVariableDefinition() bool {
 	return s.Type == StatementTypeExpression &&
-		(s.Expression.Type == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Type == EXPRESSION_TYPE_VAR)
+		(s.Expression.Type == ExpressionTypeColonAssign || s.Expression.Type == ExpressionTypeVar)
 }
 
 func (s *Statement) check(block *Block) []error { // block is father
@@ -186,7 +186,7 @@ func (s *Statement) check(block *Block) []error { // block is father
 func (s *Statement) checkStatementExpression(b *Block) []error {
 	errs := []error{}
 	//
-	if s.Expression.Type == EXPRESSION_TYPE_TYPE_ALIAS { // special case
+	if s.Expression.Type == ExpressionTypeTypeAlias { // special case
 		t := s.Expression.Data.(*ExpressionTypeAlias)
 		err := t.Type.resolve(b)
 		if err != nil {

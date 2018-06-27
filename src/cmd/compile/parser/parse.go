@@ -54,11 +54,11 @@ func (parser *Parser) Parse() []error {
 	parser.scanner = lex.New(parser.bs, 1, 1)
 	parser.lines = bytes.Split(parser.bs, []byte("\n"))
 	parser.Next()
-	if parser.token.Type == lex.TOKEN_EOF {
+	if parser.token.Type == lex.TokenEof {
 		return nil
 	}
 	parser.parseImports() // next is called
-	if parser.token.Type == lex.TOKEN_EOF {
+	if parser.token.Type == lex.TokenEof {
 		return parser.errs
 	}
 	if parser.onlyImport { // only parse imports
@@ -68,15 +68,15 @@ func (parser *Parser) Parse() []error {
 	resetProperty := func() {
 		isPublic = false
 	}
-	for parser.token.Type != lex.TOKEN_EOF {
+	for parser.token.Type != lex.TokenEof {
 		if len(parser.errs) > parser.nErrors2Stop {
 			break
 		}
 		switch parser.token.Type {
-		case lex.TOKEN_SEMICOLON: // empty statement, no big deal
+		case lex.TokenSemicolon: // empty statement, no big deal
 			parser.Next()
 			continue
-		case lex.TOKEN_VAR:
+		case lex.TokenVar:
 			pos := parser.mkPos()
 			parser.Next() // skip var key word
 			vs, es, typ, err := parser.parseConstDefinition(true)
@@ -85,14 +85,14 @@ func (parser *Parser) Parse() []error {
 				parser.Next()
 				continue
 			}
-			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TokenAssign {
 				parser.errs = append(parser.errs,
 					fmt.Errorf("%s use '=' to initialize value",
 						parser.errorMsgPrefix()))
 			}
 			d := &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es}
 			e := &ast.Expression{
-				Type:     ast.EXPRESSION_TYPE_VAR,
+				Type:     ast.ExpressionTypeVar,
 				Data:     d,
 				Pos:      pos,
 				IsPublic: isPublic,
@@ -101,7 +101,7 @@ func (parser *Parser) Parse() []error {
 				Data: e,
 			})
 			resetProperty()
-		case lex.TOKEN_IDENTIFIER:
+		case lex.TokenIdentifier:
 			e, err := parser.ExpressionParser.parseExpression(true)
 			if err != nil {
 				parser.consume(untilSemicolon)
@@ -114,7 +114,7 @@ func (parser *Parser) Parse() []error {
 				Data: e,
 			})
 			resetProperty()
-		case lex.TOKEN_ENUM:
+		case lex.TokenEnum:
 			e, err := parser.parseEnum(isPublic)
 			if err != nil {
 				parser.consume(untilRc)
@@ -128,7 +128,7 @@ func (parser *Parser) Parse() []error {
 				})
 			}
 			resetProperty()
-		case lex.TOKEN_FUNCTION:
+		case lex.TokenFunction:
 			f, err := parser.FunctionParser.parse(true)
 			if err != nil {
 				parser.consume(untilRc)
@@ -144,11 +144,11 @@ func (parser *Parser) Parse() []error {
 				Data: f,
 			})
 			resetProperty()
-		case lex.TOKEN_LC:
+		case lex.TokenLc:
 			b := &ast.Block{}
 			parser.Next()                                  // skip {
 			parser.BlockParser.parseStatementList(b, true) // this function will lookup next
-			if parser.token.Type != lex.TOKEN_RC {
+			if parser.token.Type != lex.TokenRc {
 				parser.errs = append(parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					parser.errorMsgPrefix(), parser.token.Description))
 				parser.consume(untilRc)
@@ -158,7 +158,7 @@ func (parser *Parser) Parse() []error {
 				Data: b,
 			})
 			resetProperty()
-		case lex.TOKEN_CLASS:
+		case lex.TokenClass:
 			c, err := parser.ClassParser.parse()
 			if err != nil {
 				parser.errs = append(parser.errs, err)
@@ -174,7 +174,7 @@ func (parser *Parser) Parse() []error {
 				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			resetProperty()
-		case lex.TOKEN_INTERFACE:
+		case lex.TokenInterface:
 			c, err := parser.InterfaceParser.parse()
 			if err != nil {
 				parser.errs = append(parser.errs, err)
@@ -190,12 +190,12 @@ func (parser *Parser) Parse() []error {
 				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			resetProperty()
-		case lex.TOKEN_PUBLIC:
+		case lex.TokenPublic:
 			isPublic = true
 			parser.Next()
 			parser.validAfterPublic(isPublic)
 			continue
-		case lex.TOKEN_CONST:
+		case lex.TokenConst:
 			parser.Next() // skip const key word
 			vs, es, typ, err := parser.parseConstDefinition(false)
 			if err != nil {
@@ -211,7 +211,7 @@ func (parser *Parser) Parse() []error {
 				continue
 			}
 			// const a := 1 is wrong,
-			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TokenAssign {
 				parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':=' for const definition",
 					parser.errorMsgPrefix()))
 				resetProperty()
@@ -239,7 +239,7 @@ func (parser *Parser) Parse() []error {
 			}
 			resetProperty()
 			continue
-		case lex.TOKEN_TYPE:
+		case lex.TokenType:
 			a, err := parser.parseTypeAlias()
 			if err != nil {
 				parser.consume(untilSemicolon)
@@ -251,7 +251,7 @@ func (parser *Parser) Parse() []error {
 				Data: a,
 			})
 
-		case lex.TOKEN_EOF:
+		case lex.TokenEof:
 			break
 		default:
 			parser.errs = append(parser.errs, fmt.Errorf("%s token(%s) is not except",
@@ -265,13 +265,13 @@ func (parser *Parser) Parse() []error {
 
 func (parser *Parser) parseTypes() ([]*ast.Type, error) {
 	ret := []*ast.Type{}
-	for parser.token.Type != lex.TOKEN_EOF {
+	for parser.token.Type != lex.TokenEof {
 		t, err := parser.parseType()
 		if err != nil {
 			return ret, err
 		}
 		ret = append(ret, t)
-		if parser.token.Type != lex.TOKEN_COMMA {
+		if parser.token.Type != lex.TokenComma {
 			break
 		}
 		parser.Next() // skip ,
@@ -280,13 +280,13 @@ func (parser *Parser) parseTypes() ([]*ast.Type, error) {
 }
 
 func (parser *Parser) validAfterPublic(isPublic bool) {
-	if parser.token.Type == lex.TOKEN_FUNCTION ||
-		parser.token.Type == lex.TOKEN_CLASS ||
-		parser.token.Type == lex.TOKEN_ENUM ||
-		parser.token.Type == lex.TOKEN_IDENTIFIER ||
-		parser.token.Type == lex.TOKEN_INTERFACE ||
-		parser.token.Type == lex.TOKEN_CONST ||
-		parser.token.Type == lex.TOKEN_VAR {
+	if parser.token.Type == lex.TokenFunction ||
+		parser.token.Type == lex.TokenClass ||
+		parser.token.Type == lex.TokenEnum ||
+		parser.token.Type == lex.TokenIdentifier ||
+		parser.token.Type == lex.TokenInterface ||
+		parser.token.Type == lex.TokenConst ||
+		parser.token.Type == lex.TokenVar {
 		return
 	}
 	var err error
@@ -304,8 +304,8 @@ func (parser *Parser) validAfterPublic(isPublic bool) {
 	parser.errs = append(parser.errs, err)
 }
 func (parser *Parser) validStatementEnding(pos ...*ast.Position) bool {
-	if parser.token.Type == lex.TOKEN_SEMICOLON ||
-		(parser.lastToken != nil && parser.lastToken.Type == lex.TOKEN_RC) {
+	if parser.token.Type == lex.TokenSemicolon ||
+		(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
 		return true
 	}
 	if len(pos) > 0 {
@@ -353,8 +353,8 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 		}
 		return vs
 	}
-	if parser.token.Type != lex.TOKEN_ASSIGN &&
-		parser.token.Type != lex.TOKEN_COLON_ASSIGN {
+	if parser.token.Type != lex.TokenAssign &&
+		parser.token.Type != lex.TokenColonAssign {
 		return f(), nil, nil, err
 	}
 	typ := parser.token
@@ -379,7 +379,7 @@ func (parser *Parser) Next() {
 			continue
 		}
 		parser.token = tok
-		if tok.Type != lex.TOKEN_LF {
+		if tok.Type != lex.TokenLf {
 			if parser.token.Description != "" {
 				//	fmt.Println("#########", p.token.Type, p.token.Desp)
 			} else {
@@ -407,7 +407,7 @@ func (parser *Parser) consume(until map[int]bool) {
 		panic("no token to consume")
 	}
 	var ok bool
-	for parser.token.Type != lex.TOKEN_EOF {
+	for parser.token.Type != lex.TokenEof {
 		if _, ok = until[parser.token.Type]; ok {
 			return
 		}
@@ -423,7 +423,7 @@ func (parser *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Position) {
 
 func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	parser.Next() // skip type key word
-	if parser.token.Type != lex.TOKEN_IDENTIFIER {
+	if parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect identifer,but %s", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
@@ -432,7 +432,7 @@ func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	ret.Pos = parser.mkPos()
 	ret.Name = parser.token.Data.(string)
 	parser.Next() // skip identifier
-	if parser.token.Type != lex.TOKEN_ASSIGN {
+	if parser.token.Type != lex.TokenAssign {
 		err := fmt.Errorf("%s expect '=',but %s", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
@@ -466,7 +466,7 @@ func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
 // a,b int or int,bool  c xxx
 func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 	vs = []*ast.Variable{}
-	for parser.token.Type != lex.TOKEN_EOF {
+	for parser.token.Type != lex.TokenEof {
 		ns, err := parser.parseNameList()
 		if err != nil {
 			return vs, err
@@ -482,7 +482,7 @@ func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 			vd.Type = t.Clone()
 			vs = append(vs, vd)
 		}
-		if parser.token.Type != lex.TOKEN_COMMA { // not a comma
+		if parser.token.Type != lex.TokenComma { // not a comma
 			break
 		} else {
 			parser.Next()

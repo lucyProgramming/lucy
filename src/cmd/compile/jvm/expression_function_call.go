@@ -53,7 +53,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 	if call.Expression.ExpressionValue.FunctionType != nil {
 		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
-	if call.Expression.Type == ast.EXPRESSION_TYPE_FUNCTION_LITERAL {
+	if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
 		maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
 	}
 

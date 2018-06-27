@@ -34,7 +34,7 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 		return false
 	}
 	e := s.Expression
-	if e.Type != EXPRESSION_TYPE_METHOD_CALL {
+	if e.Type != ExpressionTypeMethodCall {
 		return false
 	}
 	call := s.Expression.Data.(*ExpressionMethodCall)

@@ -11,31 +11,31 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {
-		if e.Type == EXPRESSION_TYPE_NOT {
+		if e.Type == ExpressionTypeNot {
 			return &Type{
-				Type: EXPRESSION_TYPE_BOOL,
+				Type: ExpressionTypeBool,
 				Pos:  e.Pos,
 			}
 		} else {
 			return &Type{
-				Type: EXPRESSION_TYPE_INT,
+				Type: ExpressionTypeInt,
 				Pos:  e.Pos,
 			}
 		}
 	}
-	if e.Type == EXPRESSION_TYPE_NOT {
+	if e.Type == ExpressionTypeNot {
 		if t.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
 				errMsgPrefix(t.Pos)))
 		}
 	}
-	if e.Type == EXPRESSION_TYPE_NEGATIVE {
+	if e.Type == ExpressionTypeNegative {
 		if t.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'",
 				errMsgPrefix(e.Pos), t.TypeString()))
 		}
 	}
-	if e.Type == EXPRESSION_TYPE_BIT_NOT {
+	if e.Type == ExpressionTypeBitNot {
 		if t.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
 				errMsgPrefix(e.Pos), t.TypeString()))

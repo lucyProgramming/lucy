@@ -11,20 +11,20 @@ func init() {
 
 var (
 	untilLc = map[int]bool{
-		lex.TOKEN_LC: true,
+		lex.TokenLc: true,
 	}
 	untilGt = map[int]bool{
-		lex.TOKEN_GT: true,
+		lex.TokenGt: true,
 	}
 	untilRc = map[int]bool{
-		lex.TOKEN_RC: true,
+		lex.TokenRc: true,
 	}
 	untilSemicolon = map[int]bool{
-		lex.TOKEN_SEMICOLON: true,
+		lex.TokenSemicolon: true,
 	}
 	untilRcAndSemicolon = map[int]bool{
-		lex.TOKEN_RC:        true,
-		lex.TOKEN_SEMICOLON: true,
+		lex.TokenRc:        true,
+		lex.TokenSemicolon: true,
 	}
 )
 

@@ -26,23 +26,23 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		isDefer = false
 	}
 	validAfterDefer := func() bool {
-		return blockParser.parser.token.Type == lex.TOKEN_IDENTIFIER ||
-			blockParser.parser.token.Type == lex.TOKEN_LP ||
-			blockParser.parser.token.Type == lex.TOKEN_LC
+		return blockParser.parser.token.Type == lex.TokenIdentifier ||
+			blockParser.parser.token.Type == lex.TokenLp ||
+			blockParser.parser.token.Type == lex.TokenLc
 	}
 	var err error
 	block.Statements = []*ast.Statement{}
-	for lex.TOKEN_EOF != blockParser.parser.token.Type {
+	for lex.TokenEof != blockParser.parser.token.Type {
 		if len(blockParser.parser.errs) > blockParser.parser.nErrors2Stop {
 			block.EndPos = blockParser.parser.mkPos()
 			break
 		}
 		switch blockParser.parser.token.Type {
-		case lex.TOKEN_SEMICOLON:
+		case lex.TokenSemicolon:
 			reset()
 			blockParser.Next() // look up next
 			continue
-		case lex.TOKEN_DEFER:
+		case lex.TokenDefer:
 			isDefer = true
 			blockParser.Next()
 			if validAfterDefer() == false {
@@ -50,10 +50,10 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				reset()
 			}
-		case lex.TOKEN_IDENTIFIER, lex.TOKEN_LP, lex.TOKEN_FUNCTION:
+		case lex.TokenIdentifier, lex.TokenLp, lex.TokenFunction:
 			blockParser.parseExpressionStatement(block, isDefer)
 			reset()
-		case lex.TOKEN_VAR:
+		case lex.TokenVar:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next() // skip var key word
 			vs, es, typ, err := blockParser.parser.parseConstDefinition(true)
@@ -62,7 +62,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 				continue
 			}
-			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TokenAssign {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s use '=' to initialize value",
 						blockParser.parser.errorMsgPrefix()))
@@ -70,7 +70,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			s := &ast.Statement{
 				Type: ast.StatementTypeExpression,
 				Expression: &ast.Expression{
-					Type: ast.EXPRESSION_TYPE_VAR,
+					Type: ast.ExpressionTypeVar,
 					Data: &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es},
 					Pos:  pos,
 				},
@@ -83,7 +83,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 						blockParser.parser.errorMsgPrefix()))
 			}
 			reset()
-		case lex.TOKEN_IF:
+		case lex.TokenIf:
 			pos := blockParser.parser.mkPos()
 			i, err := blockParser.parseIf()
 			if err != nil {
@@ -102,7 +102,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 						blockParser.parser.errorMsgPrefix()))
 			}
 			reset()
-		case lex.TOKEN_FOR:
+		case lex.TokenFor:
 			pos := blockParser.parser.mkPos()
 			f, err := blockParser.parseFor()
 			if err != nil {
@@ -116,7 +116,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementFor: f,
 				Pos:          pos,
 			})
-		case lex.TOKEN_SWITCH:
+		case lex.TokenSwitch:
 			pos := blockParser.parser.mkPos()
 			s, err := blockParser.parseSwitch()
 			if err != nil {
@@ -138,7 +138,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				})
 			}
 
-		case lex.TOKEN_CONST:
+		case lex.TokenConst:
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s defer mixup with const definition not allow",
@@ -147,7 +147,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			pos := blockParser.parser.mkPos()
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
+			if blockParser.parser.token.Type != lex.TokenIdentifier {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s missing identifier after const,but '%s'",
 						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
@@ -161,12 +161,12 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 				continue
 			}
-			if typ != nil && typ.Type != lex.TOKEN_ASSIGN {
+			if typ != nil && typ.Type != lex.TokenAssign {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’",
 						blockParser.parser.errorMsgPrefix(vs[0].Pos)))
 			}
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s missing semicolon after const declaration",
 						blockParser.parser.errorMsgPrefix()))
@@ -190,13 +190,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			r.Type = ast.StatementTypeExpression
 			r.Pos = pos
 			r.Expression = &ast.Expression{
-				Type: ast.EXPRESSION_TYPE_CONST,
+				Type: ast.ExpressionTypeConst,
 				Data: cs,
 				Pos:  pos,
 			}
 			block.Statements = append(block.Statements, r)
 			blockParser.Next()
-		case lex.TOKEN_RETURN:
+		case lex.TokenReturn:
 			pos := blockParser.parser.mkPos()
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs,
@@ -216,7 +216,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementReturn: r,
 				Pos:             pos,
 			})
-			if blockParser.parser.token.Type == lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type == lex.TokenSemicolon {
 				blockParser.Next()
 				continue
 			}
@@ -228,19 +228,19 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 			}
 			r.Expressions = es
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s  no semicolon after return statement, but %s",
 						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				continue
 			}
 			blockParser.Next()
-		case lex.TOKEN_LC:
+		case lex.TokenLc:
 			pos := blockParser.parser.mkPos()
 			newBlock := ast.Block{}
 			blockParser.Next() // skip {
 			blockParser.parseStatementList(&newBlock, false)
-			if blockParser.parser.token.Type != lex.TOKEN_RC {
+			if blockParser.parser.token.Type != lex.TokenRc {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				blockParser.consume(untilRc)
@@ -263,7 +263,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				})
 			}
 			reset()
-		case lex.TOKEN_PASS:
+		case lex.TokenPass:
 			pos := blockParser.parser.mkPos()
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs,
@@ -277,7 +277,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 						blockParser.parser.errorMsgPrefix()))
 			}
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon after 'skip'",
 					blockParser.parser.errorMsgPrefix()))
 			}
@@ -286,7 +286,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				Pos:             pos,
 				StatementReturn: &ast.StatementReturn{},
 			})
-		case lex.TOKEN_CONTINUE:
+		case lex.TokenContinue:
 			pos := blockParser.parser.mkPos()
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement not allow",
@@ -294,7 +294,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				reset()
 			}
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon after 'continue'",
 					blockParser.parser.errorMsgPrefix()))
 			} else {
@@ -305,7 +305,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementContinue: &ast.StatementContinue{},
 				Pos:               pos,
 			})
-		case lex.TOKEN_BREAK:
+		case lex.TokenBreak:
 			pos := blockParser.parser.mkPos()
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement 'break' not allow",
@@ -313,7 +313,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				reset()
 			}
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon after 'break'",
 					blockParser.parser.errorMsgPrefix()))
 			} else {
@@ -324,7 +324,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementBreak: &ast.StatementBreak{},
 				Pos:            pos,
 			})
-		case lex.TOKEN_GOTO:
+		case lex.TokenGoto:
 			pos := blockParser.parser.mkPos()
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement 'goto' not allow",
@@ -332,7 +332,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				reset()
 			}
 			blockParser.Next() // skip goto key word
-			if blockParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
+			if blockParser.parser.token.Type != lex.TokenIdentifier {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s  missing identifier after goto statement, but '%s'",
 						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
@@ -348,13 +348,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				Pos:           pos,
 			})
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON { // in case forget
+			if blockParser.parser.token.Type != lex.TokenSemicolon { // in case forget
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s  missing semicolon after goto statement,but '%s'",
 						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 			}
 			blockParser.Next()
-		case lex.TOKEN_TYPE:
+		case lex.TokenType:
 			pos := blockParser.parser.mkPos()
 			if isDefer {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement 'type' not allow",
@@ -367,22 +367,22 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 				continue
 			}
-			if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
+			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon", blockParser.parser.errorMsgPrefix()))
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
 			s.Type = ast.StatementTypeExpression
 			s.Expression = &ast.Expression{}
-			s.Expression.Type = ast.EXPRESSION_TYPE_TYPE_ALIAS
+			s.Expression.Type = ast.ExpressionTypeTypeAlias
 			s.Expression.Data = alias
 			block.Statements = append(block.Statements, s)
 			blockParser.Next()
-		case lex.TOKEN_CLASS, lex.TOKEN_INTERFACE:
+		case lex.TokenClass, lex.TokenInterface:
 			pos := blockParser.parser.mkPos()
 			var class *ast.Class
 			var err error
-			if blockParser.parser.token.Type == lex.TOKEN_CLASS {
+			if blockParser.parser.token.Type == lex.TokenClass {
 				class, err = blockParser.parser.ClassParser.parse()
 			} else {
 				class, err = blockParser.parser.InterfaceParser.parse()
@@ -397,7 +397,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			s.Type = ast.StatementTypeClass
 			s.Class = class
 			block.Statements = append(block.Statements, s)
-		case lex.TOKEN_ENUM:
+		case lex.TokenEnum:
 			pos := blockParser.parser.mkPos()
 			e, err := blockParser.parser.parseEnum(false)
 			if err != nil {
@@ -426,7 +426,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		blockParser.Next()
 		return
 	}
-	if e.Type == ast.EXPRESSION_TYPE_IDENTIFIER && blockParser.parser.token.Type == lex.TOKEN_COLON {
+	if e.Type == ast.ExpressionTypeIdentifier && blockParser.parser.token.Type == lex.TokenColon {
 		if isDefer {
 			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement lable has no meaning",
 				blockParser.parser.errorMsgPrefix()))
@@ -443,8 +443,8 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		label.Block = block
 		block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
 	} else {
-		if blockParser.parser.token.Type != lex.TOKEN_SEMICOLON {
-			if blockParser.parser.lastToken != nil && blockParser.parser.lastToken.Type == lex.TOKEN_RC {
+		if blockParser.parser.token.Type != lex.TokenSemicolon {
+			if blockParser.parser.lastToken != nil && blockParser.parser.lastToken.Type == lex.TokenRc {
 			} else {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s missing semicolon afete a statement expression",
 					blockParser.parser.errorMsgPrefix(e.Pos)))

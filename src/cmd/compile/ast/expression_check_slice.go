@@ -10,7 +10,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if slice.Start == nil {
 		slice.Start = &Expression{}
 		slice.Start.Pos = e.Pos
-		slice.Start.Type = EXPRESSION_TYPE_INT
+		slice.Start.Type = ExpressionTypeInt
 		slice.Start.Data = int32(0)
 	}
 
@@ -29,7 +29,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if slice.End == nil {
 		slice.End = &Expression{}
 		slice.End.Pos = e.Pos
-		slice.End.Type = EXPRESSION_TYPE_INT
+		slice.End.Type = ExpressionTypeInt
 		slice.End.Data = int32(-1) // special  , end == arr.end
 	}
 	endT, es := slice.End.checkSingleValueContextExpression(block)

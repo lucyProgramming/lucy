@@ -156,7 +156,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		lex.unGetChar()
 	}
 	if isHex && isFloat {
-		token.Type = TOKEN_LITERAL_INT
+		token.Type = TokenLiteralInt
 		token.Data = 0
 		err = fmt.Errorf("mix up float and hex")
 		return
@@ -216,7 +216,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		lex.unGetChar()
 	}
 	if isHex && isScientificNotation {
-		token.Type = TOKEN_LITERAL_INT
+		token.Type = TokenLiteralInt
 		token.Data = 0
 		token.Description = "0"
 		err = fmt.Errorf("mix up hex and seientific notation")
@@ -240,31 +240,31 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		if isFloat {
 			value := parseFloat(floatPart) + float64(lex.parseInt(integerPart))
 			if isDouble {
-				token.Type = TOKEN_LITERAL_DOUBLE
+				token.Type = TokenLiteralDouble
 				token.Data = value
 			} else {
-				token.Type = TOKEN_LITERAL_FLOAT
+				token.Type = TokenLiteralFloat
 				token.Data = float32(value)
 			}
 		} else {
 			value := lex.parseInt(integerPart)
 			if isLong {
-				token.Type = TOKEN_LITERAL_LONG
+				token.Type = TokenLiteralLong
 				token.Data = value
 			} else if isByte {
-				token.Type = TOKEN_LITERAL_BYTE
+				token.Type = TokenLiteralByte
 				token.Data = byte(value)
 				if int32(value) > math.MaxUint8 {
 					err = fmt.Errorf("max byte is %v", math.MaxUint8)
 				}
 			} else if isShort {
-				token.Type = TOKEN_LITERAL_SHORT
+				token.Type = TokenLiteralShort
 				token.Data = int32(value)
 				if int32(value) > math.MaxInt16 {
 					err = fmt.Errorf("max short is %v", math.MaxInt16)
 				}
 			} else {
-				token.Type = TOKEN_LITERAL_INT
+				token.Type = TokenLiteralInt
 				token.Data = int32(value)
 			}
 		}
@@ -273,7 +273,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	//scientific notation
 	if t := lex.parseInt(integerPart); t > 10 || t < 1 {
 		err = fmt.Errorf("wrong format scientific notation")
-		token.Type = TOKEN_LITERAL_INT
+		token.Type = TokenLiteralInt
 		token.Data = 0
 		return
 	}
@@ -287,13 +287,13 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			}
 			integerPart = append(integerPart, b...)
 			value := lex.parseInt(integerPart)
-			token.Type = TOKEN_LITERAL_INT
+			token.Type = TokenLiteralInt
 			token.Data = int32(value)
 		} else { // float
 			integerPart = append(integerPart, floatPart[0:p]...)
 			fmt.Println(floatPart[p:], parseFloat(floatPart[p:]))
 			value := float64(lex.parseInt(integerPart)) + parseFloat(floatPart[p:])
-			token.Type = TOKEN_LITERAL_FLOAT
+			token.Type = TokenLiteralFloat
 			token.Data = value
 		}
 	} else { // power is negative,must be float number
@@ -304,7 +304,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		b = append(b, integerPart...)
 		b = append(b, floatPart...)
 		value := parseFloat(b)
-		token.Type = TOKEN_LITERAL_FLOAT
+		token.Type = TokenLiteralFloat
 		token.Data = value
 	}
 	return
@@ -347,20 +347,20 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 	if t, ok := keywordsMap[identifier]; ok {
 		token.Type = t
 		token.Description = identifier
-		if token.Type == TOKEN_ELSE {
+		if token.Type == TokenElse {
 			is := lex.tryLexElseIf()
 			if is {
-				token.Type = TOKEN_ELSEIF
+				token.Type = TokenElseif
 				token.Description = "else if"
 			}
 		}
 	} else {
 		if lex.looksLikeT(bs) {
-			token.Type = TOKEN_T
+			token.Type = TokenTemplate
 			token.Data = identifier
 			token.Description = identifier
 		} else {
-			token.Type = TOKEN_IDENTIFIER
+			token.Type = TokenIdentifier
 			token.Data = identifier
 			token.Description = "identifier_" + identifier
 		}
@@ -403,7 +403,7 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column
-	token.Type = TOKEN_LITERAL_STRING
+	token.Type = TokenLiteralString
 	bs := []byte{}
 	var c byte
 	c, eof := lex.getChar()
@@ -535,7 +535,7 @@ redo:
 	token.StartColumn = lex.column
 	c, eof := lex.getChar()
 	if eof {
-		token.Type = TOKEN_EOF
+		token.Type = TokenEof
 		token.Description = "EOF"
 		return
 	}
@@ -545,7 +545,7 @@ redo:
 		c, eof = lex.getChar()
 	}
 	if eof {
-		token.Type = TOKEN_EOF
+		token.Type = TokenEof
 		token.Description = "EOF"
 		return
 	}
@@ -559,184 +559,184 @@ redo:
 	token.Offset = lex.offset
 	switch c {
 	case '?':
-		token.Type = TOKEN_QUESTION
+		token.Type = TokenQuestion
 		token.Description = "?"
 	case '(':
-		token.Type = TOKEN_LP
+		token.Type = TokenLp
 		token.Description = "("
 	case ')':
-		token.Type = TOKEN_RP
+		token.Type = TokenRp
 		token.Description = ")"
 	case '{':
-		token.Type = TOKEN_LC
+		token.Type = TokenLc
 		token.Description = "{"
 	case '}':
-		token.Type = TOKEN_RC
+		token.Type = TokenRc
 		token.Description = "}"
 	case '[':
-		token.Type = TOKEN_LB
+		token.Type = TokenLb
 		token.Description = "["
 	case ']':
-		token.Type = TOKEN_RB
+		token.Type = TokenRb
 		token.Description = "]"
 	case ';':
-		token.Type = TOKEN_SEMICOLON
+		token.Type = TokenSemicolon
 		token.Description = ";"
 	case ',':
-		token.Type = TOKEN_COMMA
+		token.Type = TokenComma
 		token.Description = ","
 	case '&':
 		c, eof = lex.getChar()
 		if c == '&' {
-			token.Type = TOKEN_LOGICAL_AND
+			token.Type = TokenLogicalAnd
 			token.Description = "&&"
 		} else if c == '=' {
-			token.Type = TOKEN_AND_ASSIGN
+			token.Type = TokenAndAssign
 			token.Description = "&="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_AND
+			token.Type = TokenAnd
 			token.Description = "&"
 		}
 	case '|':
 		c, eof = lex.getChar()
 		if c == '|' {
-			token.Type = TOKEN_LOGICAL_OR
+			token.Type = TokenLogicalOr
 			token.Description = "||"
 		} else if c == '=' {
-			token.Type = TOKEN_OR_ASSIGN
+			token.Type = TokenOrAssign
 			token.Description = "|="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_OR
+			token.Type = TokenOr
 			token.Description = "|"
 		}
 	case '=':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_EQUAL
+			token.Type = TokenEqual
 			token.Description = "=="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_ASSIGN
+			token.Type = TokenAssign
 			token.Description = "="
 		}
 	case '!':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_NE
+			token.Type = TokenNe
 			token.Description = "!="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_NOT
+			token.Type = TokenNot
 			token.Description = "!"
 		}
 	case '>':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_GE
+			token.Type = TokenGe
 			token.Description = ">="
 		} else if c == '>' {
 			c, eof = lex.getChar()
 			if c == '=' {
-				token.Type = TOKEN_RSH_ASSIGN
+				token.Type = TokenRshAssign
 				token.Description = ">>="
 			} else {
 				lex.unGetChar()
-				token.Type = TOKEN_RIGHT_SHIFT
+				token.Type = TokenRsh
 				token.Description = ">>"
 			}
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_GT
+			token.Type = TokenGt
 			token.Description = ">"
 		}
 	case '<':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_LE
+			token.Type = TokenLe
 			token.Description = "<="
 		} else if c == '<' {
 			c, eof = lex.getChar()
 			if c == '=' {
-				token.Type = TOKEN_LSH_ASSIGN
+				token.Type = TokenLshAssign
 				token.Description = "<<="
 			} else {
 				lex.unGetChar()
-				token.Type = TOKEN_LEFT_SHIFT
+				token.Type = TokenLsh
 				token.Description = "<<"
 			}
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_LT
+			token.Type = TokenLt
 			token.Description = "<"
 		}
 	case '^':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_XOR_ASSIGN
+			token.Type = TokenXorAssign
 			token.Description = "^="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_XOR
+			token.Type = TokenXor
 			token.Description = "^"
 		}
 	case '~':
-		token.Type = TOKEN_BITWISE_NOT
+		token.Type = TokenBitNot
 		token.Description = "~"
 	case '+':
 		c, eof = lex.getChar()
 		if c == '+' {
-			token.Type = TOKEN_INCREMENT
+			token.Type = TokenIncrement
 			token.Description = "++"
 		} else if c == '=' {
-			token.Type = TOKEN_ADD_ASSIGN
+			token.Type = TokenAddAssign
 			token.Description = "+="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_ADD
+			token.Type = TokenAdd
 			token.Description = "+"
 		}
 	case '-':
 		c, eof = lex.getChar()
 		if c == '-' {
-			token.Type = TOKEN_DECREMENT
+			token.Type = TokenDecrement
 			token.Description = "--"
 		} else if c == '=' {
-			token.Type = TOKEN_SUB_ASSIGN
+			token.Type = TokenSubAssign
 			token.Description = "-="
 		} else if c == '>' {
-			token.Type = TOKEN_ARROW
+			token.Type = TokenArrow
 			token.Description = "->"
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_SUB
+			token.Type = TokenSub
 			token.Description = "-"
 		}
 	case '*':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_MUL_ASSIGN
+			token.Type = TokenMulAssign
 			token.Description = "*="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_MUL
+			token.Type = TokenMul
 			token.Description = "*"
 		}
 	case '%':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_MOD_ASSIGN
+			token.Type = TokenModAssign
 			token.Description = "%="
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_MOD
+			token.Type = TokenMod
 			token.Description = "%"
 		}
 	case '/':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_DIV_ASSIGN
+			token.Type = TokenDivAssign
 			token.Description = "/="
 		} else if c == '/' {
 			for c != '\n' && eof == false {
@@ -748,14 +748,14 @@ redo:
 			goto redo
 		} else {
 			lex.unGetChar()
-			token.Type = TOKEN_DIV
+			token.Type = TokenDiv
 			token.Description = "/"
 		}
 	case '\n':
-		token.Type = TOKEN_LF
+		token.Type = TokenLf
 		token.Description = "\n"
 	case '.':
-		token.Type = TOKEN_DOT
+		token.Type = TokenSelection
 		token.Description = "."
 	case '`':
 		bs := []byte{}
@@ -764,7 +764,7 @@ redo:
 			bs = append(bs, c)
 			c, eof = lex.getChar()
 		}
-		token.Type = TOKEN_LITERAL_STRING
+		token.Type = TokenLiteralString
 		token.Data = string(bs)
 		token.Description = string(bs)
 	case '"':
@@ -775,7 +775,7 @@ redo:
 			if t := []byte(token.Data.(string)); len(t) != 1 {
 				err = fmt.Errorf("expect one char")
 			} else { // correct token
-				token.Type = TOKEN_LITERAL_BYTE
+				token.Type = TokenLiteralByte
 				token.Data = byte([]byte(t)[0])
 			}
 		}
@@ -783,10 +783,10 @@ redo:
 	case ':':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TOKEN_COLON_ASSIGN
+			token.Type = TokenColonAssign
 			token.Description = ":= "
 		} else {
-			token.Type = TOKEN_COLON
+			token.Type = TokenColon
 			token.Description = ":"
 			lex.unGetChar()
 		}

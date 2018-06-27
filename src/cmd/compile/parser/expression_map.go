@@ -16,22 +16,22 @@ func (expressionParser *ExpressionParser) parseMapExpression(needType bool) (*as
 			return nil, err
 		}
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_LC {
+	if expressionParser.parser.token.Type != lex.TokenLc {
 		return nil, fmt.Errorf("expect '{',but '%s'", expressionParser.parser.token.Description)
 	}
 	expressionParser.Next() // skip {
-	ret := &ast.Expression{Type: ast.EXPRESSION_TYPE_MAP}
+	ret := &ast.Expression{Type: ast.ExpressionTypeMap}
 	m := &ast.ExpressionMap{}
 	m.Type = typ
 	ret.Data = m
-	for expressionParser.parser.token.Type != lex.TOKEN_EOF && expressionParser.parser.token.Type != lex.TOKEN_RC {
+	for expressionParser.parser.token.Type != lex.TokenEof && expressionParser.parser.token.Type != lex.TokenRc {
 		// key
 		k, err := expressionParser.parseExpression(false)
 		if err != nil {
 			return ret, err
 		}
 		// arrow
-		if expressionParser.parser.token.Type != lex.TOKEN_ARROW {
+		if expressionParser.parser.token.Type != lex.TokenArrow {
 			return ret, fmt.Errorf("%s expect '->',but '%s'",
 				expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		}
@@ -45,13 +45,13 @@ func (expressionParser *ExpressionParser) parseMapExpression(needType bool) (*as
 			Left:  k,
 			Right: v,
 		})
-		if expressionParser.parser.token.Type == lex.TOKEN_COMMA {
+		if expressionParser.parser.token.Type == lex.TokenComma {
 			expressionParser.Next() // read next  key value pair
 		} else {
 			break
 		}
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_RC {
+	if expressionParser.parser.token.Type != lex.TokenRc {
 		return nil, fmt.Errorf("%s expect '}',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}

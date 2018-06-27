@@ -26,16 +26,16 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	functionParser.Next() // skip fn key word
 	f.Pos = functionParser.parser.mkPos()
 	if needName {
-		if functionParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
+		if functionParser.parser.token.Type != lex.TokenIdentifier {
 			err := fmt.Errorf("%s expect function name,but '%s'",
 				functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 			functionParser.parser.errs = append(functionParser.parser.errs, err)
-			if functionParser.parser.token.Type != lex.TOKEN_LC {
+			if functionParser.parser.token.Type != lex.TokenLc {
 				return nil, err
 			}
 		}
 	}
-	if functionParser.parser.token.Type == lex.TOKEN_IDENTIFIER {
+	if functionParser.parser.token.Type == lex.TokenIdentifier {
 		f.Name = functionParser.parser.token.Data.(string)
 		functionParser.Next()
 	}
@@ -43,7 +43,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	if err != nil {
 		functionParser.consume(untilLc)
 	}
-	if functionParser.parser.token.Type != lex.TOKEN_LC {
+	if functionParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s except '{' but '%s'", functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilLc)
@@ -51,7 +51,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	f.Block.IsFunctionBlock = true
 	functionParser.Next() // skip {
 	functionParser.parser.BlockParser.parseStatementList(&f.Block, false)
-	if functionParser.parser.token.Type != lex.TOKEN_RC {
+	if functionParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}', but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 	} else {

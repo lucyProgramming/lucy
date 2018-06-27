@@ -7,221 +7,221 @@ import (
 const (
 	_ = iota // start with 1
 	//null
-	ExpressionNull
+	ExpressionTypeNull
 	// bool
-	EXPRESSION_TYPE_BOOL
+	ExpressionTypeBool
 	// int types
-	EXPRESSION_TYPE_BYTE
-	EXPRESSION_TYPE_SHORT
-	EXPRESSION_TYPE_INT
-	EXPRESSION_TYPE_LONG
-	EXPRESSION_TYPE_FLOAT
-	EXPRESSION_TYPE_DOUBLE
+	ExpressionTypeByte
+	ExpressionTypeShort
+	ExpressionTypeInt
+	ExpressionTypeLong
+	ExpressionTypeFloat
+	ExpressionTypeDouble
 
-	EXPRESSION_TYPE_STRING
-	EXPRESSION_TYPE_ARRAY // []bool{false,true}
+	ExpressionTypeString
+	ExpressionTypeArray // []bool{false,true}
 	//binary expression
-	EXPRESSION_TYPE_LOGICAL_OR
-	EXPRESSION_TYPE_LOGICAL_AND
+	ExpressionTypeLogicalOr
+	ExpressionTypeLogicalAnd
 	//
-	EXPRESSION_TYPE_OR
-	EXPRESSION_TYPE_AND
-	EXPRESSION_TYPE_XOR
-	EXPRESSION_TYPE_LSH
-	EXPRESSION_TYPE_RSH
-	EXPRESSION_TYPE_ADD
-	EXPRESSION_TYPE_SUB
-	EXPRESSION_TYPE_MUL
-	EXPRESSION_TYPE_DIV
-	EXPRESSION_TYPE_MOD
+	ExpressionTypeOr
+	ExpressionTypeAnd
+	ExpressionTypeXor
+	ExpressionTypeLsh
+	ExpressionTypeRsh
+	ExpressionTypeAdd
+	ExpressionTypeSub
+	ExpressionTypeMul
+	ExpressionTypeDiv
+	ExpressionTypeMod
 	//
-	EXPRESSION_TYPE_ASSIGN
-	EXPRESSION_TYPE_COLON_ASSIGN
+	ExpressionTypeAssign
+	ExpressionTypeColonAssign
 	//
-	EXPRESSION_TYPE_PLUS_ASSIGN
-	EXPRESSION_TYPE_MINUS_ASSIGN
-	EXPRESSION_TYPE_MUL_ASSIGN
-	EXPRESSION_TYPE_DIV_ASSIGN
-	EXPRESSION_TYPE_MOD_ASSIGN
-	EXPRESSION_TYPE_AND_ASSIGN
-	EXPRESSION_TYPE_OR_ASSIGN
-	EXPRESSION_TYPE_XOR_ASSIGN
-	EXPRESSION_TYPE_LSH_ASSIGN
-	EXPRESSION_TYPE_RSH_ASSIGN
+	ExpressionTypePlusAssign
+	ExpressionTypeMinusAssign
+	ExpressionTypeMulAssign
+	ExpressionTypeDivAssign
+	ExpressionTypeModAssign
+	ExpressionTypeAndAssign
+	ExpressionTypeOrAssign
+	ExpressionTypeXorAssign
+	ExpressionTypeLshAssign
+	ExpressionTypeRshAssign
 	//
-	EXPRESSION_TYPE_EQ
-	EXPRESSION_TYPE_NE
-	EXPRESSION_TYPE_GE
-	EXPRESSION_TYPE_GT
-	EXPRESSION_TYPE_LE
-	EXPRESSION_TYPE_LT
+	ExpressionTypeEq
+	ExpressionTypeNe
+	ExpressionTypeGe
+	ExpressionTypeGt
+	ExpressionTypeLe
+	ExpressionTypeLt
 	//
 
 	//
-	EXPRESSION_TYPE_INDEX     // a["b"]
-	EXPRESSION_TYPE_SELECTION //a.b
+	ExpressionTypeIndex     // a["b"]
+	ExpressionTypeSelection //a.b
 	//
-	EXPRESSION_TYPE_METHOD_CALL
-	EXPRESSION_TYPE_FUNCTION_CALL
+	ExpressionTypeMethodCall
+	ExpressionTypeFunctionCall
 	//
-	EXPRESSION_TYPE_INCREMENT
-	EXPRESSION_TYPE_DECREMENT
-	EXPRESSION_TYPE_PRE_INCREMENT
-	EXPRESSION_TYPE_PRE_DECREMENT
+	ExpressionTypeIncrement
+	ExpressionTypeDecrement
+	ExpressionTypePrefixIncrement
+	ExpressionTypePrefixDecrement
 	//
-	EXPRESSION_TYPE_NEGATIVE
-	EXPRESSION_TYPE_NOT
-	EXPRESSION_TYPE_BIT_NOT
+	ExpressionTypeNegative
+	ExpressionTypeNot
+	ExpressionTypeBitNot
 	//
-	EXPRESSION_TYPE_IDENTIFIER
-	EXPRESSION_TYPE_NEW
-	EXPRESSION_TYPE_LIST
-	EXPRESSION_TYPE_FUNCTION_LITERAL
-	EXPRESSION_TYPE_VAR
-	EXPRESSION_TYPE_CONST
-	EXPRESSION_TYPE_CHECK_CAST // []byte(str)
+	ExpressionTypeIdentifier
+	ExpressionTypeNew
+	ExpressionTypeList
+	ExpressionTypeFunctionLiteral
+	ExpressionTypeVar
+	ExpressionTypeConst
+	ExpressionTypeCheckCast // []byte(str)
 
-	EXPRESSION_TYPE_RANGE // for range
-	EXPRESSION_TYPE_SLICE // arr[0:2]
-	EXPRESSION_TYPE_MAP   // map literal
-	EXPRESSION_TYPE_TYPE_ALIAS
-	EXPRESSION_TYPE_TYPE_ASSERT
-	EXPRESSION_TYPE_TERNARY
+	ExpressionTypeRange // for range
+	ExpressionTypeSlice // arr[0:2]
+	ExpressionTypeMap   // map literal
+	ExpressionTypeTypeAlias
+	ExpressionTypeTypeAssert
+	ExpressionTypeTernary
 )
 
 func (e *Expression) OpName() string {
 	switch e.Type {
-	case EXPRESSION_TYPE_BOOL:
+	case ExpressionTypeBool:
 		return fmt.Sprintf("%v", e.Data.(bool))
-	case EXPRESSION_TYPE_BYTE:
+	case ExpressionTypeByte:
 		return fmt.Sprintf("%v", e.Data.(byte))
-	case EXPRESSION_TYPE_SHORT:
+	case ExpressionTypeShort:
 		return fmt.Sprintf("%vs", e.Data.(int32))
-	case EXPRESSION_TYPE_INT:
+	case ExpressionTypeInt:
 		return fmt.Sprintf("%v", e.Data.(int32))
-	case EXPRESSION_TYPE_LONG:
+	case ExpressionTypeLong:
 		return fmt.Sprintf("%vL", e.Data.(int64))
-	case EXPRESSION_TYPE_FLOAT:
+	case ExpressionTypeFloat:
 		return fmt.Sprintf("%vf", e.Data.(float32))
-	case EXPRESSION_TYPE_DOUBLE:
+	case ExpressionTypeDouble:
 		return fmt.Sprintf("%vd", e.Data.(float64))
-	case EXPRESSION_TYPE_STRING:
+	case ExpressionTypeString:
 		return fmt.Sprintf("\"%v\"", e.Data)
-	case EXPRESSION_TYPE_ARRAY:
+	case ExpressionTypeArray:
 		return "array_literal"
-	case EXPRESSION_TYPE_LOGICAL_OR:
+	case ExpressionTypeLogicalOr:
 		return "||"
-	case EXPRESSION_TYPE_LOGICAL_AND:
+	case ExpressionTypeLogicalAnd:
 		return "&&"
-	case EXPRESSION_TYPE_OR:
+	case ExpressionTypeOr:
 		return "|"
-	case EXPRESSION_TYPE_AND:
+	case ExpressionTypeAnd:
 		return "&"
-	case EXPRESSION_TYPE_XOR:
+	case ExpressionTypeXor:
 		return "^"
-	case EXPRESSION_TYPE_LSH:
+	case ExpressionTypeLsh:
 		return "<<"
-	case EXPRESSION_TYPE_RSH:
+	case ExpressionTypeRsh:
 		return ">>"
-	case EXPRESSION_TYPE_ASSIGN:
+	case ExpressionTypeAssign:
 		return "="
-	case EXPRESSION_TYPE_COLON_ASSIGN:
+	case ExpressionTypeColonAssign:
 		return ":="
-	case EXPRESSION_TYPE_PLUS_ASSIGN:
+	case ExpressionTypePlusAssign:
 		return "+="
-	case EXPRESSION_TYPE_MINUS_ASSIGN:
+	case ExpressionTypeMinusAssign:
 		return "-="
-	case EXPRESSION_TYPE_MUL_ASSIGN:
+	case ExpressionTypeMulAssign:
 		return "*="
-	case EXPRESSION_TYPE_DIV_ASSIGN:
+	case ExpressionTypeDivAssign:
 		return "/="
-	case EXPRESSION_TYPE_MOD_ASSIGN:
+	case ExpressionTypeModAssign:
 		return "%="
-	case EXPRESSION_TYPE_AND_ASSIGN:
+	case ExpressionTypeAndAssign:
 		return "&="
-	case EXPRESSION_TYPE_OR_ASSIGN:
+	case ExpressionTypeOrAssign:
 		return "|="
-	case EXPRESSION_TYPE_LSH_ASSIGN:
+	case ExpressionTypeLshAssign:
 		return "<<="
-	case EXPRESSION_TYPE_RSH_ASSIGN:
+	case ExpressionTypeRshAssign:
 		return ">>="
-	case EXPRESSION_TYPE_XOR_ASSIGN:
+	case ExpressionTypeXorAssign:
 		return "^="
-	case EXPRESSION_TYPE_EQ:
+	case ExpressionTypeEq:
 		return "=="
-	case EXPRESSION_TYPE_NE:
+	case ExpressionTypeNe:
 		return "!="
-	case EXPRESSION_TYPE_GE:
+	case ExpressionTypeGe:
 		return ">="
-	case EXPRESSION_TYPE_GT:
+	case ExpressionTypeGt:
 		return ">"
-	case EXPRESSION_TYPE_LE:
+	case ExpressionTypeLe:
 		return "<="
-	case EXPRESSION_TYPE_LT:
+	case ExpressionTypeLt:
 		return "<"
-	case EXPRESSION_TYPE_ADD:
+	case ExpressionTypeAdd:
 		return "+"
-	case EXPRESSION_TYPE_SUB:
+	case ExpressionTypeSub:
 		return "-"
-	case EXPRESSION_TYPE_MUL:
+	case ExpressionTypeMul:
 		return "*"
-	case EXPRESSION_TYPE_DIV:
+	case ExpressionTypeDiv:
 		return "/"
-	case EXPRESSION_TYPE_MOD:
+	case ExpressionTypeMod:
 		return "%"
-	case EXPRESSION_TYPE_INDEX: // a["b"]
+	case ExpressionTypeIndex: // a["b"]
 		t := e.Data.(*ExpressionIndex)
 		return fmt.Sprintf("%s[%s]", t.Expression.OpName(), t.Index.OpName())
-	case EXPRESSION_TYPE_SELECTION: //a.b
+	case ExpressionTypeSelection: //a.b
 		t := e.Data.(*ExpressionSelection)
 		return fmt.Sprintf("%s.%s", t.Expression.OpName(), t.Name)
-	case EXPRESSION_TYPE_METHOD_CALL:
+	case ExpressionTypeMethodCall:
 		t := e.Data.(*ExpressionMethodCall)
 		return fmt.Sprintf("%s.%s()", t.Expression.OpName(), t.Name)
-	case EXPRESSION_TYPE_FUNCTION_CALL:
+	case ExpressionTypeFunctionCall:
 		t := e.Data.(*ExpressionFunctionCall)
 		return fmt.Sprintf("function_call(%s)", t.Expression.OpName())
-	case EXPRESSION_TYPE_INCREMENT:
+	case ExpressionTypeIncrement:
 		return "++"
-	case EXPRESSION_TYPE_DECREMENT:
+	case ExpressionTypeDecrement:
 		return "--"
-	case EXPRESSION_TYPE_PRE_INCREMENT:
+	case ExpressionTypePrefixIncrement:
 		return "++"
-	case EXPRESSION_TYPE_PRE_DECREMENT:
+	case ExpressionTypePrefixDecrement:
 		return "--"
-	case EXPRESSION_TYPE_NEGATIVE:
+	case ExpressionTypeNegative:
 		return "negative(-)"
-	case EXPRESSION_TYPE_TERNARY:
+	case ExpressionTypeTernary:
 		return "ternary(?:)"
-	case EXPRESSION_TYPE_NOT:
+	case ExpressionTypeNot:
 		return "not(!)"
-	case EXPRESSION_TYPE_BIT_NOT:
+	case ExpressionTypeBitNot:
 		return "~"
-	case EXPRESSION_TYPE_IDENTIFIER:
+	case ExpressionTypeIdentifier:
 		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifier).Name)
-	case ExpressionNull:
+	case ExpressionTypeNull:
 		return "null"
-	case EXPRESSION_TYPE_NEW:
+	case ExpressionTypeNew:
 		return "new"
-	case EXPRESSION_TYPE_LIST:
+	case ExpressionTypeList:
 		return "expression_list"
-	case EXPRESSION_TYPE_FUNCTION_LITERAL:
+	case ExpressionTypeFunctionLiteral:
 		return "function_literal"
-	case EXPRESSION_TYPE_CONST:
+	case ExpressionTypeConst:
 		return "const"
-	case EXPRESSION_TYPE_VAR:
+	case ExpressionTypeVar:
 		return "var"
-	case EXPRESSION_TYPE_RANGE:
+	case ExpressionTypeRange:
 		return "range"
-	case EXPRESSION_TYPE_SLICE:
+	case ExpressionTypeSlice:
 		return "slice"
-	case EXPRESSION_TYPE_MAP:
+	case ExpressionTypeMap:
 		return "map_literal"
-	case EXPRESSION_TYPE_CHECK_CAST:
+	case ExpressionTypeCheckCast:
 		return "conversion of type"
-	case EXPRESSION_TYPE_TYPE_ASSERT:
+	case ExpressionTypeTypeAssert:
 		return "type assert"
-	case EXPRESSION_TYPE_TYPE_ALIAS:
+	case ExpressionTypeTypeAlias:
 		return "type alias"
 	default:
 		return fmt.Sprintf("op[%d](missing handle)", e.Type)
@@ -245,7 +245,7 @@ func (e *Expression) ConvertTo(t *Type) {
 	*c.Expression = *e // copy
 	c.Type = t
 	e.ExpressionValue = t
-	e.Type = EXPRESSION_TYPE_CHECK_CAST
+	e.Type = ExpressionTypeCheckCast
 	e.IsCompileAuto = true
 	e.Data = c
 }
@@ -273,28 +273,28 @@ type ExpressionTypeAssert ExpressionTypeConversion
 func (e *Expression) fromConst(c *Constant) {
 	switch c.Type.Type {
 	case VariableTypeBool:
-		e.Type = EXPRESSION_TYPE_BOOL
+		e.Type = ExpressionTypeBool
 		e.Data = c.Value.(bool)
 	case VariableTypeByte:
-		e.Type = EXPRESSION_TYPE_BYTE
+		e.Type = ExpressionTypeByte
 		e.Data = c.Value.(byte)
 	case VariableTypeShort:
-		e.Type = EXPRESSION_TYPE_SHORT
+		e.Type = ExpressionTypeShort
 		e.Data = c.Value.(int32)
 	case VariableTypeInt:
-		e.Type = EXPRESSION_TYPE_INT
+		e.Type = ExpressionTypeInt
 		e.Data = c.Value.(int32)
 	case VariableTypeLong:
-		e.Type = EXPRESSION_TYPE_LONG
+		e.Type = ExpressionTypeLong
 		e.Data = c.Value.(int64)
 	case VariableTypeFloat:
-		e.Type = EXPRESSION_TYPE_FLOAT
+		e.Type = ExpressionTypeFloat
 		e.Data = c.Value.(float32)
 	case VariableTypeDouble:
-		e.Type = EXPRESSION_TYPE_DOUBLE
+		e.Type = ExpressionTypeDouble
 		e.Data = c.Value.(float64)
 	case VariableTypeString:
-		e.Type = EXPRESSION_TYPE_STRING
+		e.Type = ExpressionTypeString
 		e.Data = c.Value.(string)
 	}
 }
@@ -317,8 +317,8 @@ type ExpressionSlice struct {
 }
 
 func (e *Expression) IsLiteral() bool {
-	return e.Type == EXPRESSION_TYPE_BOOL ||
-		e.Type == EXPRESSION_TYPE_STRING ||
+	return e.Type == ExpressionTypeBool ||
+		e.Type == ExpressionTypeString ||
 		e.isNumber()
 }
 
@@ -326,75 +326,75 @@ func (e *Expression) IsLiteral() bool {
 	valid for condition
 */
 func (e *Expression) canBeUsedAsCondition() bool {
-	return e.Type == ExpressionNull ||
-		e.Type == EXPRESSION_TYPE_BOOL ||
-		e.Type == EXPRESSION_TYPE_BYTE ||
-		e.Type == EXPRESSION_TYPE_SHORT ||
-		e.Type == EXPRESSION_TYPE_INT ||
-		e.Type == EXPRESSION_TYPE_LONG ||
-		e.Type == EXPRESSION_TYPE_FLOAT ||
-		e.Type == EXPRESSION_TYPE_DOUBLE ||
-		e.Type == EXPRESSION_TYPE_STRING ||
-		e.Type == EXPRESSION_TYPE_ARRAY ||
-		e.Type == EXPRESSION_TYPE_LOGICAL_OR ||
-		e.Type == EXPRESSION_TYPE_LOGICAL_AND ||
-		e.Type == EXPRESSION_TYPE_OR ||
-		e.Type == EXPRESSION_TYPE_AND ||
-		e.Type == EXPRESSION_TYPE_XOR ||
-		e.Type == EXPRESSION_TYPE_LSH ||
-		e.Type == EXPRESSION_TYPE_RSH ||
-		e.Type == EXPRESSION_TYPE_ADD ||
-		e.Type == EXPRESSION_TYPE_SUB ||
-		e.Type == EXPRESSION_TYPE_MUL ||
-		e.Type == EXPRESSION_TYPE_DIV ||
-		e.Type == EXPRESSION_TYPE_MOD ||
-		e.Type == EXPRESSION_TYPE_EQ ||
-		e.Type == EXPRESSION_TYPE_NE ||
-		e.Type == EXPRESSION_TYPE_GE ||
-		e.Type == EXPRESSION_TYPE_GT ||
-		e.Type == EXPRESSION_TYPE_LE ||
-		e.Type == EXPRESSION_TYPE_LT ||
-		e.Type == EXPRESSION_TYPE_INDEX ||
-		e.Type == EXPRESSION_TYPE_SELECTION ||
-		e.Type == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Type == EXPRESSION_TYPE_FUNCTION_CALL ||
-		e.Type == EXPRESSION_TYPE_INCREMENT ||
-		e.Type == EXPRESSION_TYPE_DECREMENT ||
-		e.Type == EXPRESSION_TYPE_PRE_INCREMENT ||
-		e.Type == EXPRESSION_TYPE_PRE_DECREMENT ||
-		e.Type == EXPRESSION_TYPE_NEGATIVE ||
-		e.Type == EXPRESSION_TYPE_NOT ||
-		e.Type == EXPRESSION_TYPE_BIT_NOT ||
-		e.Type == EXPRESSION_TYPE_IDENTIFIER ||
-		e.Type == EXPRESSION_TYPE_NEW ||
-		e.Type == EXPRESSION_TYPE_CHECK_CAST ||
-		e.Type == EXPRESSION_TYPE_SLICE ||
-		e.Type == EXPRESSION_TYPE_MAP ||
-		e.Type == EXPRESSION_TYPE_TERNARY
+	return e.Type == ExpressionTypeNull ||
+		e.Type == ExpressionTypeBool ||
+		e.Type == ExpressionTypeByte ||
+		e.Type == ExpressionTypeShort ||
+		e.Type == ExpressionTypeInt ||
+		e.Type == ExpressionTypeLong ||
+		e.Type == ExpressionTypeFloat ||
+		e.Type == ExpressionTypeDouble ||
+		e.Type == ExpressionTypeString ||
+		e.Type == ExpressionTypeArray ||
+		e.Type == ExpressionTypeLogicalOr ||
+		e.Type == ExpressionTypeLogicalAnd ||
+		e.Type == ExpressionTypeOr ||
+		e.Type == ExpressionTypeAnd ||
+		e.Type == ExpressionTypeXor ||
+		e.Type == ExpressionTypeLsh ||
+		e.Type == ExpressionTypeRsh ||
+		e.Type == ExpressionTypeAdd ||
+		e.Type == ExpressionTypeSub ||
+		e.Type == ExpressionTypeMul ||
+		e.Type == ExpressionTypeDiv ||
+		e.Type == ExpressionTypeMod ||
+		e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe ||
+		e.Type == ExpressionTypeGe ||
+		e.Type == ExpressionTypeGt ||
+		e.Type == ExpressionTypeLe ||
+		e.Type == ExpressionTypeLt ||
+		e.Type == ExpressionTypeIndex ||
+		e.Type == ExpressionTypeSelection ||
+		e.Type == ExpressionTypeMethodCall ||
+		e.Type == ExpressionTypeFunctionCall ||
+		e.Type == ExpressionTypeIncrement ||
+		e.Type == ExpressionTypeDecrement ||
+		e.Type == ExpressionTypePrefixIncrement ||
+		e.Type == ExpressionTypePrefixDecrement ||
+		e.Type == ExpressionTypeNegative ||
+		e.Type == ExpressionTypeNot ||
+		e.Type == ExpressionTypeBitNot ||
+		e.Type == ExpressionTypeIdentifier ||
+		e.Type == ExpressionTypeNew ||
+		e.Type == ExpressionTypeCheckCast ||
+		e.Type == ExpressionTypeSlice ||
+		e.Type == ExpressionTypeMap ||
+		e.Type == ExpressionTypeTernary
 }
 
 func (e *Expression) canBeUsedAsStatement() bool {
-	return e.Type == EXPRESSION_TYPE_COLON_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_FUNCTION_CALL ||
-		e.Type == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Type == EXPRESSION_TYPE_FUNCTION_LITERAL ||
-		e.Type == EXPRESSION_TYPE_PLUS_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_MINUS_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_MUL_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_DIV_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_MOD_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_AND_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_OR_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_XOR_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_LSH_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_RSH_ASSIGN ||
-		e.Type == EXPRESSION_TYPE_INCREMENT ||
-		e.Type == EXPRESSION_TYPE_DECREMENT ||
-		e.Type == EXPRESSION_TYPE_PRE_INCREMENT ||
-		e.Type == EXPRESSION_TYPE_PRE_DECREMENT ||
-		e.Type == EXPRESSION_TYPE_VAR ||
-		e.Type == EXPRESSION_TYPE_CONST
+	return e.Type == ExpressionTypeColonAssign ||
+		e.Type == ExpressionTypeAssign ||
+		e.Type == ExpressionTypeFunctionCall ||
+		e.Type == ExpressionTypeMethodCall ||
+		e.Type == ExpressionTypeFunctionLiteral ||
+		e.Type == ExpressionTypePlusAssign ||
+		e.Type == ExpressionTypeMinusAssign ||
+		e.Type == ExpressionTypeMulAssign ||
+		e.Type == ExpressionTypeDivAssign ||
+		e.Type == ExpressionTypeModAssign ||
+		e.Type == ExpressionTypeAndAssign ||
+		e.Type == ExpressionTypeOrAssign ||
+		e.Type == ExpressionTypeXorAssign ||
+		e.Type == ExpressionTypeLshAssign ||
+		e.Type == ExpressionTypeRshAssign ||
+		e.Type == ExpressionTypeIncrement ||
+		e.Type == ExpressionTypeDecrement ||
+		e.Type == ExpressionTypePrefixIncrement ||
+		e.Type == ExpressionTypePrefixDecrement ||
+		e.Type == ExpressionTypeVar ||
+		e.Type == ExpressionTypeConst
 }
 
 func (e *Expression) isNumber() bool {
@@ -402,26 +402,26 @@ func (e *Expression) isNumber() bool {
 }
 
 func (e *Expression) isInteger() bool {
-	return e.Type == EXPRESSION_TYPE_BYTE ||
-		e.Type == EXPRESSION_TYPE_SHORT ||
-		e.Type == EXPRESSION_TYPE_INT ||
-		e.Type == EXPRESSION_TYPE_LONG
+	return e.Type == ExpressionTypeByte ||
+		e.Type == ExpressionTypeShort ||
+		e.Type == ExpressionTypeInt ||
+		e.Type == ExpressionTypeLong
 }
 func (e *Expression) isFloat() bool {
-	return e.Type == EXPRESSION_TYPE_FLOAT ||
-		e.Type == EXPRESSION_TYPE_DOUBLE
+	return e.Type == ExpressionTypeFloat ||
+		e.Type == ExpressionTypeDouble
 }
 
 /*
 	check out this expression is increment or decrement
 */
 func (e *Expression) IsIncrement() bool {
-	return e.Type == EXPRESSION_TYPE_INCREMENT ||
-		e.Type == EXPRESSION_TYPE_PRE_INCREMENT
+	return e.Type == ExpressionTypeIncrement ||
+		e.Type == ExpressionTypePrefixIncrement
 }
 
 func (e *Expression) isListAndMoreThanNElements(n int) bool {
-	if e.Type != EXPRESSION_TYPE_LIST {
+	if e.Type != ExpressionTypeList {
 		return false
 	}
 	return len(e.Data.([]*Expression)) > n
@@ -439,16 +439,16 @@ func (e *Expression) HaveOnlyOneValue() bool {
 	k,v = range arr
 */
 func (e *Expression) canBeUsedForRange() bool {
-	if e.Type != EXPRESSION_TYPE_ASSIGN && e.Type != EXPRESSION_TYPE_COLON_ASSIGN {
+	if e.Type != ExpressionTypeAssign && e.Type != ExpressionTypeColonAssign {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
-	if bin.Right.Type == EXPRESSION_TYPE_RANGE {
+	if bin.Right.Type == ExpressionTypeRange {
 		return true
 	}
-	if bin.Right.Type == EXPRESSION_TYPE_LIST {
+	if bin.Right.Type == ExpressionTypeList {
 		t := bin.Right.Data.([]*Expression)
-		if len(t) == 1 && t[0].Type == EXPRESSION_TYPE_RANGE {
+		if len(t) == 1 && t[0].Type == ExpressionTypeRange {
 			// bin.Right = t[0] // override
 			return true
 		}
@@ -457,9 +457,9 @@ func (e *Expression) canBeUsedForRange() bool {
 }
 
 func (e *Expression) MayHaveMultiValue() bool {
-	return e.Type == EXPRESSION_TYPE_FUNCTION_CALL ||
-		e.Type == EXPRESSION_TYPE_METHOD_CALL ||
-		e.Type == EXPRESSION_TYPE_TYPE_ASSERT
+	return e.Type == ExpressionTypeFunctionCall ||
+		e.Type == ExpressionTypeMethodCall ||
+		e.Type == ExpressionTypeTypeAssert
 }
 
 func (e *Expression) CallHasReturnValue() bool {
@@ -551,14 +551,14 @@ type ExpressionArray struct {
 }
 
 func (e *Expression) isThis() bool {
-	if e.Type != EXPRESSION_TYPE_IDENTIFIER {
+	if e.Type != ExpressionTypeIdentifier {
 		return false
 	}
 	return e.Data.(*ExpressionIdentifier).Name == THIS
 }
 
 func (e *Expression) IsNoNameIdentifier() bool {
-	if e.Type != EXPRESSION_TYPE_IDENTIFIER {
+	if e.Type != ExpressionTypeIdentifier {
 		return false
 	}
 	return e.Data.(*ExpressionIdentifier).Name == NoNameIdentifier

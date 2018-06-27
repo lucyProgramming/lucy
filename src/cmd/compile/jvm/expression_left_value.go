@@ -79,7 +79,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 	maxStack, remainStack uint16, op []byte,
 	target *ast.Type, className, name, descriptor string) {
 	switch e.Type {
-	case ast.EXPRESSION_TYPE_IDENTIFIER:
+	case ast.ExpressionTypeIdentifier:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
 		if identifier.Variable.IsGlobal {
 			op = []byte{cg.OP_putstatic}
@@ -176,7 +176,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			}
 		}
 		target = identifier.Variable.Type
-	case ast.EXPRESSION_TYPE_INDEX:
+	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 			meta := ArrayMetas[index.Expression.ExpressionValue.ArrayType.Type]
@@ -327,7 +327,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			}
 			return
 		}
-	case ast.EXPRESSION_TYPE_SELECTION:
+	case ast.ExpressionTypeSelection:
 		dot := e.Data.(*ast.ExpressionSelection)
 		if dot.Expression.ExpressionValue.Type == ast.VariableTypePackage {
 			op = []byte{cg.OP_putstatic}

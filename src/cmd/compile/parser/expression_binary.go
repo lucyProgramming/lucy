@@ -11,7 +11,7 @@ func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expre
 	if err != nil {
 		return nil, err
 	}
-	for expressionParser.parser.token.Type == lex.TOKEN_LOGICAL_OR {
+	for expressionParser.parser.token.Type == lex.TokenLogicalOr {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		e2, err := expressionParser.parseLogicalAndExpression()
@@ -20,7 +20,7 @@ func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expre
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Type = ast.EXPRESSION_TYPE_LOGICAL_OR
+		newExpression.Type = ast.ExpressionTypeLogicalOr
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
@@ -36,7 +36,7 @@ func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expr
 	if err != nil {
 		return nil, err
 	}
-	for expressionParser.parser.token.Type == lex.TOKEN_LOGICAL_AND {
+	for expressionParser.parser.token.Type == lex.TokenLogicalAnd {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		e2, err := expressionParser.parseOrExpression()
@@ -45,7 +45,7 @@ func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expr
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Type = ast.EXPRESSION_TYPE_LOGICAL_AND
+		newExpression.Type = ast.ExpressionTypeLogicalAnd
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
@@ -61,7 +61,7 @@ func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, 
 	if err != nil {
 		return nil, err
 	}
-	for expressionParser.parser.token.Type == lex.TOKEN_OR {
+	for expressionParser.parser.token.Type == lex.TokenOr {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		e2, err := expressionParser.parseXorExpression()
@@ -70,7 +70,7 @@ func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, 
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Type = ast.EXPRESSION_TYPE_OR
+		newExpression.Type = ast.ExpressionTypeOr
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
@@ -87,7 +87,7 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 		return nil, err
 	}
 
-	for expressionParser.parser.token.Type == lex.TOKEN_XOR {
+	for expressionParser.parser.token.Type == lex.TokenXor {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		e2, err := expressionParser.parseAndExpression()
@@ -96,7 +96,7 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Type = ast.EXPRESSION_TYPE_XOR
+		newExpression.Type = ast.ExpressionTypeXor
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
@@ -112,7 +112,7 @@ func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression,
 	if err != nil {
 		return nil, err
 	}
-	for expressionParser.parser.token.Type == lex.TOKEN_AND {
+	for expressionParser.parser.token.Type == lex.TokenAnd {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		e2, err := expressionParser.parseEqualExpression()
@@ -121,7 +121,7 @@ func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Type = ast.EXPRESSION_TYPE_AND
+		newExpression.Type = ast.ExpressionTypeAnd
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
 		binary.Right = e2
@@ -138,8 +138,8 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TOKEN_EQUAL ||
-		expressionParser.parser.token.Type == lex.TOKEN_NE) && expressionParser.parser.token.Type != lex.TOKEN_EOF {
+	for (expressionParser.parser.token.Type == lex.TokenEqual ||
+		expressionParser.parser.token.Type == lex.TokenNe) && expressionParser.parser.token.Type != lex.TokenEof {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -149,10 +149,10 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		if typ == lex.TOKEN_EQUAL {
-			newExpression.Type = ast.EXPRESSION_TYPE_EQ
+		if typ == lex.TokenEqual {
+			newExpression.Type = ast.ExpressionTypeEq
 		} else {
-			newExpression.Type = ast.EXPRESSION_TYPE_NE
+			newExpression.Type = ast.ExpressionTypeNe
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
@@ -170,8 +170,8 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TOKEN_GT || expressionParser.parser.token.Type == lex.TOKEN_GE ||
-		expressionParser.parser.token.Type == lex.TOKEN_LT || expressionParser.parser.token.Type == lex.TOKEN_LE) && expressionParser.parser.token.Type != lex.TOKEN_EOF {
+	for (expressionParser.parser.token.Type == lex.TokenGt || expressionParser.parser.token.Type == lex.TokenGe ||
+		expressionParser.parser.token.Type == lex.TokenLt || expressionParser.parser.token.Type == lex.TokenLe) && expressionParser.parser.token.Type != lex.TokenEof {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -181,14 +181,14 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		if typ == lex.TOKEN_GT {
-			newExpression.Type = ast.EXPRESSION_TYPE_GT
-		} else if typ == lex.TOKEN_GE {
-			newExpression.Type = ast.EXPRESSION_TYPE_GE
-		} else if typ == lex.TOKEN_LT {
-			newExpression.Type = ast.EXPRESSION_TYPE_LT
+		if typ == lex.TokenGt {
+			newExpression.Type = ast.ExpressionTypeGt
+		} else if typ == lex.TokenGe {
+			newExpression.Type = ast.ExpressionTypeGe
+		} else if typ == lex.TokenLt {
+			newExpression.Type = ast.ExpressionTypeLt
 		} else {
-			newExpression.Type = ast.EXPRESSION_TYPE_LE
+			newExpression.Type = ast.ExpressionTypeLe
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
@@ -206,9 +206,9 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TOKEN_LEFT_SHIFT ||
-		expressionParser.parser.token.Type == lex.TOKEN_RIGHT_SHIFT) &&
-		expressionParser.parser.token.Type != lex.TOKEN_EOF {
+	for (expressionParser.parser.token.Type == lex.TokenLsh ||
+		expressionParser.parser.token.Type == lex.TokenRsh) &&
+		expressionParser.parser.token.Type != lex.TokenEof {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -218,10 +218,10 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		if typ == lex.TOKEN_LEFT_SHIFT {
-			newExpression.Type = ast.EXPRESSION_TYPE_LSH
+		if typ == lex.TokenLsh {
+			newExpression.Type = ast.ExpressionTypeLsh
 		} else {
-			newExpression.Type = ast.EXPRESSION_TYPE_RSH
+			newExpression.Type = ast.ExpressionTypeRsh
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
@@ -239,8 +239,8 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TOKEN_ADD || expressionParser.parser.token.Type == lex.TOKEN_SUB) &&
-		expressionParser.parser.token.Type != lex.TOKEN_EOF {
+	for (expressionParser.parser.token.Type == lex.TokenAdd || expressionParser.parser.token.Type == lex.TokenSub) &&
+		expressionParser.parser.token.Type != lex.TokenEof {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -250,10 +250,10 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		if typ == lex.TOKEN_ADD {
-			newExpression.Type = ast.EXPRESSION_TYPE_ADD
+		if typ == lex.TokenAdd {
+			newExpression.Type = ast.ExpressionTypeAdd
 		} else {
-			newExpression.Type = ast.EXPRESSION_TYPE_SUB
+			newExpression.Type = ast.ExpressionTypeSub
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e
@@ -271,9 +271,9 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TOKEN_MUL ||
-		expressionParser.parser.token.Type == lex.TOKEN_DIV ||
-		expressionParser.parser.token.Type == lex.TOKEN_MOD) && expressionParser.parser.token.Type != lex.TOKEN_EOF {
+	for (expressionParser.parser.token.Type == lex.TokenMul ||
+		expressionParser.parser.token.Type == lex.TokenDiv ||
+		expressionParser.parser.token.Type == lex.TokenMod) && expressionParser.parser.token.Type != lex.TokenEof {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -283,12 +283,12 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		if typ == lex.TOKEN_MUL {
-			newExpression.Type = ast.EXPRESSION_TYPE_MUL
-		} else if typ == lex.TOKEN_DIV {
-			newExpression.Type = ast.EXPRESSION_TYPE_DIV
+		if typ == lex.TokenMul {
+			newExpression.Type = ast.ExpressionTypeMul
+		} else if typ == lex.TokenDiv {
+			newExpression.Type = ast.ExpressionTypeDiv
 		} else {
-			newExpression.Type = ast.EXPRESSION_TYPE_MOD
+			newExpression.Type = ast.ExpressionTypeMod
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = e

@@ -82,25 +82,25 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	e.ExpressionValue = typ.Clone()
 	switch typ.Type {
 	case VariableTypeBool:
-		e.Type = EXPRESSION_TYPE_BOOL
+		e.Type = ExpressionTypeBool
 		e.Data = false
 	case VariableTypeByte:
-		e.Type = EXPRESSION_TYPE_BYTE
+		e.Type = ExpressionTypeByte
 		e.Data = byte(0)
 	case VariableTypeShort:
-		e.Type = EXPRESSION_TYPE_INT
+		e.Type = ExpressionTypeInt
 		e.Data = int32(0)
 	case VariableTypeInt:
-		e.Type = EXPRESSION_TYPE_INT
+		e.Type = ExpressionTypeInt
 		e.Data = int32(0)
 	case VariableTypeLong:
-		e.Type = EXPRESSION_TYPE_LONG
+		e.Type = ExpressionTypeLong
 		e.Data = int64(0)
 	case VariableTypeFloat:
-		e.Type = EXPRESSION_TYPE_FLOAT
+		e.Type = ExpressionTypeFloat
 		e.Data = float32(0)
 	case VariableTypeDouble:
-		e.Type = EXPRESSION_TYPE_DOUBLE
+		e.Type = ExpressionTypeDouble
 		e.Data = float64(0)
 	case VariableTypeString:
 		fallthrough
@@ -111,9 +111,9 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	case VariableTypeMap:
 		fallthrough
 	case VariableTypeArray:
-		e.Type = ExpressionNull
+		e.Type = ExpressionTypeNull
 	case VariableTypeEnum:
-		e.Type = EXPRESSION_TYPE_INT
+		e.Type = ExpressionTypeInt
 		e.Data = typ.Enum.Enums[0].Value
 	}
 	return &e

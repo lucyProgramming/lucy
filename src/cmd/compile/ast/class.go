@@ -78,12 +78,12 @@ func (c *Class) mkDefaultConstruction() {
 	m.Function.Block.IsFunctionBlock = true
 	{
 		e := &Expression{}
-		e.Type = EXPRESSION_TYPE_METHOD_CALL
+		e.Type = ExpressionTypeMethodCall
 		e.Pos = c.Pos
 		call := &ExpressionMethodCall{}
 		call.Name = SUPER
 		call.Expression = &Expression{
-			Type: EXPRESSION_TYPE_IDENTIFIER,
+			Type: ExpressionTypeIdentifier,
 			Data: &ExpressionIdentifier{
 				Name: THIS,
 			},
@@ -444,7 +444,7 @@ func (c *Class) checkFields() []error {
 			}
 			bin := &ExpressionBinary{}
 			bin.Right = &Expression{
-				Type: EXPRESSION_TYPE_LIST,
+				Type: ExpressionTypeList,
 				Data: []*Expression{v.Expression},
 			}
 			{
@@ -457,17 +457,17 @@ func (c *Class) checkFields() []error {
 				selection.Name = v.Name
 				selection.Field = v
 				left := &Expression{
-					Type: EXPRESSION_TYPE_SELECTION,
+					Type: ExpressionTypeSelection,
 					Data: selection,
 				}
 				left.ExpressionValue = v.Type
 				bin.Left = &Expression{
-					Type: EXPRESSION_TYPE_LIST,
+					Type: ExpressionTypeList,
 					Data: []*Expression{left},
 				}
 			}
 			e := &Expression{
-				Type: EXPRESSION_TYPE_ASSIGN,
+				Type: ExpressionTypeAssign,
 				Data: bin,
 				IsStatementExpression: true,
 			}

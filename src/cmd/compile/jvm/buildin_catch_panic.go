@@ -8,7 +8,7 @@ import (
 func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Args[0].Type != ast.EXPRESSION_TYPE_NEW { // not new expression
+	if call.Args[0].Type != ast.ExpressionTypeNew { // not new expression
 		code.Codes[code.CodeLength] = cg.OP_new
 		className := call.Args[0].ExpressionValue.Class.Name
 		class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])

@@ -43,8 +43,8 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.EXPRESSION_TYPE_GT || e.Type == ast.EXPRESSION_TYPE_LE { // > and <=
-			if e.Type == ast.EXPRESSION_TYPE_GT {
+		if e.Type == ast.ExpressionTypeGt || e.Type == ast.ExpressionTypeLe { // > and <=
+			if e.Type == ast.ExpressionTypeGt {
 				code.Codes[code.CodeLength] = cg.OP_ifgt
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ifle
@@ -55,8 +55,8 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
 			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 			code.CodeLength += 8
-		} else if e.Type == ast.EXPRESSION_TYPE_LT || e.Type == ast.EXPRESSION_TYPE_GE { // < and >=
-			if e.Type == ast.EXPRESSION_TYPE_LT {
+		} else if e.Type == ast.ExpressionTypeLt || e.Type == ast.ExpressionTypeGe { // < and >=
+			if e.Type == ast.ExpressionTypeLt {
 				code.Codes[code.CodeLength] = cg.OP_iflt
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ifge
@@ -68,7 +68,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 			code.CodeLength += 8
 		} else {
-			if e.Type == ast.EXPRESSION_TYPE_EQ {
+			if e.Type == ast.ExpressionTypeEq {
 				code.Codes[code.CodeLength] = cg.OP_ifeq
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ifne
@@ -106,7 +106,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.EXPRESSION_TYPE_EQ {
+		if e.Type == ast.ExpressionTypeEq {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpne
@@ -128,7 +128,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			notNullExpression = bin.Right
 		}
 		maxStack, _ = makeExpression.build(class, code, notNullExpression, context, state)
-		if e.Type == ast.EXPRESSION_TYPE_EQ {
+		if e.Type == ast.ExpressionTypeEq {
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 		} else { // ne
 			code.Codes[code.CodeLength] = cg.OP_ifnonnull
@@ -168,8 +168,8 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.EXPRESSION_TYPE_GT || e.Type == ast.EXPRESSION_TYPE_LE { // > and <=
-			if e.Type == ast.EXPRESSION_TYPE_GT {
+		if e.Type == ast.ExpressionTypeGt || e.Type == ast.ExpressionTypeLe { // > and <=
+			if e.Type == ast.ExpressionTypeGt {
 				code.Codes[code.CodeLength] = cg.OP_ifgt
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ifle
@@ -180,8 +180,8 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
 			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 			code.CodeLength += 8
-		} else if e.Type == ast.EXPRESSION_TYPE_LT || e.Type == ast.EXPRESSION_TYPE_GE { // < and >=
-			if e.Type == ast.EXPRESSION_TYPE_LT {
+		} else if e.Type == ast.ExpressionTypeLt || e.Type == ast.ExpressionTypeGe { // < and >=
+			if e.Type == ast.ExpressionTypeLt {
 				code.Codes[code.CodeLength] = cg.OP_iflt
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ifge
@@ -193,7 +193,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 			code.CodeLength += 8
 		} else {
-			if e.Type == ast.EXPRESSION_TYPE_EQ {
+			if e.Type == ast.ExpressionTypeEq {
 				code.Codes[code.CodeLength] = cg.OP_ifeq
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ifne
@@ -224,7 +224,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.EXPRESSION_TYPE_EQ {
+		if e.Type == ast.ExpressionTypeEq {
 			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
 		} else { // ne
 			code.Codes[code.CodeLength] = cg.OP_if_acmpne
@@ -253,7 +253,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeBool})
 		context.MakeStackMap(code, state, code.CodeLength+8) //result on stack
-		if e.Type == ast.EXPRESSION_TYPE_EQ {
+		if e.Type == ast.ExpressionTypeEq {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpne

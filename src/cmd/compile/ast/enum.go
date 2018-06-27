@@ -20,12 +20,12 @@ type EnumName struct {
 func (e *Enum) check() (err error) {
 	if e.Init == nil {
 		e.Init = &Expression{}
-		e.Init.Type = EXPRESSION_TYPE_INT
+		e.Init.Type = ExpressionTypeInt
 		e.Init.Data = int32(0)
 		e.Init.Pos = e.Pos
 	}
 	is, err := e.Init.constantFold()
-	if err != nil || is == false || e.Init.Type != EXPRESSION_TYPE_INT {
+	if err != nil || is == false || e.Init.Type != ExpressionTypeInt {
 		if err == nil {
 			err = fmt.Errorf("%s enum type must inited by integer_expression",
 				errMsgPrefix(e.Pos))

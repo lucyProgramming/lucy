@@ -35,10 +35,10 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 	if err != nil {
 		return nil, err
 	}
-	if interfaceParser.parser.token.Type == lex.TOKEN_EXTENDS { // parse father expression
+	if interfaceParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		interfaceParser.Next() // skip extends
 		interfaceParser.classDefinition.Pos = interfaceParser.parser.mkPos()
-		if interfaceParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
+		if interfaceParser.parser.token.Type != lex.TokenIdentifier {
 			err = fmt.Errorf("%s class`s father must be a identifier", interfaceParser.parser.errorMsgPrefix())
 			interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
 			interfaceParser.consume(untilLc) //
@@ -51,34 +51,34 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 			}
 		}
 	}
-	if interfaceParser.parser.token.Type == lex.TOKEN_IMPLEMENTS {
+	if interfaceParser.parser.token.Type == lex.TokenImplements {
 		interfaceParser.Next() // skip key word
 		interfaceParser.classDefinition.InterfaceNames, err = interfaceParser.parser.ClassParser.parseInterfaces()
 		if err != nil {
 			interfaceParser.consume(untilLc)
 		}
 	}
-	if interfaceParser.parser.token.Type != lex.TOKEN_LC {
+	if interfaceParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{' but '%s'", interfaceParser.parser.errorMsgPrefix(), interfaceParser.parser.token.Description)
 		interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
 		interfaceParser.consume(untilLc)
 	}
 	interfaceParser.Next()
-	for interfaceParser.parser.token.Type != lex.TOKEN_EOF {
+	for interfaceParser.parser.token.Type != lex.TokenEof {
 		if len(interfaceParser.parser.errs) > interfaceParser.parser.nErrors2Stop {
 			break
 		}
 		switch interfaceParser.parser.token.Type {
-		case lex.TOKEN_RC:
+		case lex.TokenRc:
 			interfaceParser.Next()
 			return
-		case lex.TOKEN_SEMICOLON:
+		case lex.TokenSemicolon:
 			interfaceParser.Next()
 			continue
-		case lex.TOKEN_FUNCTION:
+		case lex.TokenFunction:
 			interfaceParser.Next() /// skip key word
 			var name string
-			if interfaceParser.parser.token.Type != lex.TOKEN_IDENTIFIER {
+			if interfaceParser.parser.token.Type != lex.TokenIdentifier {
 				interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s expect function name,but '%s'",
 					interfaceParser.parser.errorMsgPrefix(), interfaceParser.parser.token.Description))
 				interfaceParser.consume(untilRc)

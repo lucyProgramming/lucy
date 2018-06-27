@@ -60,19 +60,19 @@ func (s *StatementSwitch) check(block *Block) []error {
 			valueValid := false
 			valueFromExpression := func() {
 				switch e.Type {
-				case EXPRESSION_TYPE_BYTE:
+				case ExpressionTypeByte:
 					byteValue = e.Data.(byte)
-				case EXPRESSION_TYPE_SHORT:
+				case ExpressionTypeShort:
 					shortValue = e.Data.(int32)
-				case EXPRESSION_TYPE_INT:
+				case ExpressionTypeInt:
 					int32Value = e.Data.(int32)
-				case EXPRESSION_TYPE_LONG:
+				case ExpressionTypeLong:
 					int64Value = e.Data.(int64)
-				case EXPRESSION_TYPE_FLOAT:
+				case ExpressionTypeFloat:
 					floatValue = e.Data.(float32)
-				case EXPRESSION_TYPE_DOUBLE:
+				case ExpressionTypeDouble:
 					doubleValue = e.Data.(float64)
-				case EXPRESSION_TYPE_STRING:
+				case ExpressionTypeString:
 					stringValue = e.Data.(string)
 				}
 			}

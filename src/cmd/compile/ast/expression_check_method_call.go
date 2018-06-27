@@ -24,7 +24,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
-			e.Type = EXPRESSION_TYPE_FUNCTION_CALL
+			e.Type = ExpressionTypeFunctionCall
 			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
 			call.Function = f
 			e.Data = call
@@ -37,7 +37,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			typeConversion.Type.Type = VariableTypeObject
 			typeConversion.Type.Pos = e.Pos
 			typeConversion.Type.Class = class
-			e.Type = EXPRESSION_TYPE_CHECK_CAST
+			e.Type = ExpressionTypeCheckCast
 			if len(call.Args) >= 1 {
 				typeConversion.Expression = call.Args[0]
 			}
@@ -50,7 +50,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		case *Type:
 			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Type = object.Package.Block.TypeAliases[call.Name]
-			e.Type = EXPRESSION_TYPE_CHECK_CAST
+			e.Type = ExpressionTypeCheckCast
 			if len(call.Args) >= 1 {
 				typeConversion.Expression = call.Args[0]
 			}

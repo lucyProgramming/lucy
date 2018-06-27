@@ -18,7 +18,7 @@ func (makeExpression *MakeExpression) buildLogical(class *cg.ClassHighLevel, cod
 	if 2 > maxStack { // dup increment stack
 		maxStack = 2
 	}
-	if e.Type == ast.EXPRESSION_TYPE_LOGICAL_OR {
+	if e.Type == ast.ExpressionTypeLogicalOr {
 		// at this point,value is clear,leave 1 on stack
 		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifne, code))
 	} else { //  &&

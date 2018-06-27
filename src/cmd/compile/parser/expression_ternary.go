@@ -11,18 +11,18 @@ func (expressionParser *ExpressionParser) parseTernaryExpression() (*ast.Express
 	if err != nil {
 		return left, err
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_QUESTION {
+	if expressionParser.parser.token.Type != lex.TokenQuestion {
 		return left, nil
 	}
 	newExpression := &ast.Expression{}
 	newExpression.Pos = expressionParser.parser.mkPos()
-	newExpression.Type = ast.EXPRESSION_TYPE_TERNARY
+	newExpression.Type = ast.ExpressionTypeTernary
 	expressionParser.Next() // skip ?
 	True, err := expressionParser.parseExpression(false)
 	if err != nil {
 		return left, nil
 	}
-	if expressionParser.parser.token.Type != lex.TOKEN_COLON {
+	if expressionParser.parser.token.Type != lex.TokenColon {
 		return left, fmt.Errorf("%s expect ':',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}

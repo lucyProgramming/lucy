@@ -12,21 +12,21 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 	pos := expressionParser.parser.mkPos()
 	expressionParser.Next() // skip (
 	args := []*ast.Expression{}
-	if expressionParser.parser.token.Type != lex.TOKEN_RP { //a(123)
+	if expressionParser.parser.token.Type != lex.TokenRp { //a(123)
 		args, err = expressionParser.parseExpressions()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if expressionParser.parser.token.Type != lex.TOKEN_RP {
+	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s except ')' ,but '%s'",
 			expressionParser.parser.errorMsgPrefix(),
 			expressionParser.parser.token.Description)
 	}
 	var result ast.Expression
-	if e.Type == ast.EXPRESSION_TYPE_SELECTION {
-		result.Type = ast.EXPRESSION_TYPE_METHOD_CALL
+	if e.Type == ast.ExpressionTypeSelection {
+		result.Type = ast.ExpressionTypeMethodCall
 		call := &ast.ExpressionMethodCall{}
 		index := e.Data.(*ast.ExpressionSelection)
 		call.Expression = index.Expression
@@ -35,7 +35,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 		result.Data = call
 		result.Pos = expressionParser.parser.mkPos()
 	} else {
-		result.Type = ast.EXPRESSION_TYPE_FUNCTION_CALL
+		result.Type = ast.ExpressionTypeFunctionCall
 		call := &ast.ExpressionFunctionCall{}
 		call.Expression = e
 		call.Args = args
@@ -43,20 +43,20 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 		result.Pos = expressionParser.parser.mkPos()
 	}
 	expressionParser.Next() // skip )
-	if expressionParser.parser.token.Type == lex.TOKEN_LT {
+	if expressionParser.parser.token.Type == lex.TokenLt {
 		expressionParser.Next() // skip <
 		ts, err := expressionParser.parser.parseTypes()
 		if err != nil {
 			expressionParser.parser.consume(untilGt)
 			expressionParser.Next()
 		} else {
-			if expressionParser.parser.token.Type != lex.TOKEN_GT {
+			if expressionParser.parser.token.Type != lex.TokenGt {
 				expressionParser.parser.errs = append(expressionParser.parser.errs, fmt.Errorf("%s '<' and '>' not match",
 					expressionParser.parser.errorMsgPrefix()))
 				expressionParser.parser.consume(untilGt)
 			}
 			expressionParser.Next()
-			if result.Type == ast.EXPRESSION_TYPE_FUNCTION_CALL {
+			if result.Type == ast.ExpressionTypeFunctionCall {
 				result.Data.(*ast.ExpressionFunctionCall).ParameterTypes = ts
 			} else {
 				result.Data.(*ast.ExpressionMethodCall).ParameterTypes = ts

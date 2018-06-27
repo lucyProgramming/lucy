@@ -96,151 +96,151 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 	}
 	switch bin.Left.ExpressionValue.Type {
 	case ast.VariableTypeByte:
-		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
+		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_iadd
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_isub
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_imul
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_idiv
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_irem
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_AND_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeAndAssign {
 			code.Codes[code.CodeLength] = cg.OP_iand
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_OR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeOrAssign {
 			code.Codes[code.CodeLength] = cg.OP_ior
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_LSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeLshAssign {
 			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_RSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeRshAssign {
 			code.Codes[code.CodeLength] = cg.OP_ishr
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeXorAssign {
 			code.Codes[code.CodeLength] = cg.OP_ixor
 			code.CodeLength++
 		}
 	case ast.VariableTypeShort:
-		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
+		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_iadd
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_isub
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_imul
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_idiv
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_irem
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_AND_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeAndAssign {
 			code.Codes[code.CodeLength] = cg.OP_iand
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_OR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeOrAssign {
 			code.Codes[code.CodeLength] = cg.OP_ior
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_LSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeLshAssign {
 			code.Codes[code.CodeLength] = cg.OP_ishl
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
-		} else if e.Type == ast.EXPRESSION_TYPE_RSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeRshAssign {
 			code.Codes[code.CodeLength] = cg.OP_ishr
 			code.CodeLength++
-		} else if e.Type == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeXorAssign {
 			code.Codes[code.CodeLength] = cg.OP_ixor
 			code.CodeLength++
 		}
 
 	case ast.VariableTypeInt:
-		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
+		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_iadd
-		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_isub
-		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_imul
-		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_idiv
-		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_irem
-		} else if e.Type == ast.EXPRESSION_TYPE_AND_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeAndAssign {
 			code.Codes[code.CodeLength] = cg.OP_iand
-		} else if e.Type == ast.EXPRESSION_TYPE_OR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeOrAssign {
 			code.Codes[code.CodeLength] = cg.OP_ior
-		} else if e.Type == ast.EXPRESSION_TYPE_LSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeLshAssign {
 			code.Codes[code.CodeLength] = cg.OP_ishl
-		} else if e.Type == ast.EXPRESSION_TYPE_RSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeRshAssign {
 			code.Codes[code.CodeLength] = cg.OP_ishr
-		} else if e.Type == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeXorAssign {
 			code.Codes[code.CodeLength] = cg.OP_ixor
 		}
 		code.CodeLength++
 	case ast.VariableTypeLong:
-		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
+		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_ladd
-		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_lsub
-		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_lmul
-		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_ldiv
-		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_lrem
-		} else if e.Type == ast.EXPRESSION_TYPE_AND_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeAndAssign {
 			code.Codes[code.CodeLength] = cg.OP_land
-		} else if e.Type == ast.EXPRESSION_TYPE_OR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeOrAssign {
 			code.Codes[code.CodeLength] = cg.OP_lor
-		} else if e.Type == ast.EXPRESSION_TYPE_LSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeLshAssign {
 			code.Codes[code.CodeLength] = cg.OP_lshl
-		} else if e.Type == ast.EXPRESSION_TYPE_RSH_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeRshAssign {
 			code.Codes[code.CodeLength] = cg.OP_lshr
-		} else if e.Type == ast.EXPRESSION_TYPE_XOR_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeXorAssign {
 			code.Codes[code.CodeLength] = cg.OP_lxor
 		}
 		code.CodeLength++
 	case ast.VariableTypeFloat:
-		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
+		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_ladd
-		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_lsub
-		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_lmul
-		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_ldiv
-		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_frem
 		}
 		code.CodeLength++
 	case ast.VariableTypeDouble:
-		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
+		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_dadd
 
-		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_dsub
 
-		} else if e.Type == ast.EXPRESSION_TYPE_MUL_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_dmul
 
-		} else if e.Type == ast.EXPRESSION_TYPE_DIV_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_ddiv
 
-		} else if e.Type == ast.EXPRESSION_TYPE_MOD_ASSIGN {
+		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_drem
 
 		}

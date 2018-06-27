@@ -9,12 +9,12 @@ import (
 
 //imports,always call next
 func (parser *Parser) parseImports() {
-	if parser.token.Type != lex.TOKEN_IMPORT {
+	if parser.token.Type != lex.TokenImport {
 		// not a import
 		return
 	}
 	parser.Next()
-	if parser.token.Type != lex.TOKEN_LITERAL_STRING {
+	if parser.token.Type != lex.TokenLiteralString {
 		parser.consume(untilSemicolon)
 		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'string_literal' after import,but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description))
@@ -26,9 +26,9 @@ func (parser *Parser) parseImports() {
 	i := &ast.Import{}
 	i.ImportName = packageName
 	i.Pos = parser.mkPos()
-	if parser.token.Type == lex.TOKEN_AS { // import "xxxxxxxxxxx" as yyy ;
+	if parser.token.Type == lex.TokenAs { // import "xxxxxxxxxxx" as yyy ;
 		parser.Next() // skip as
-		if parser.token.Type != lex.TOKEN_IDENTIFIER {
+		if parser.token.Type != lex.TokenIdentifier {
 			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolon)
@@ -41,7 +41,7 @@ func (parser *Parser) parseImports() {
 			parser.Next() // skip identifier
 		}
 	}
-	if parser.token.Type != lex.TOKEN_SEMICOLON {
+	if parser.token.Type != lex.TokenSemicolon {
 		parser.errs = append(parser.errs, fmt.Errorf("%s expect semicolon, but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description))
 		parser.consume(untilSemicolon)
