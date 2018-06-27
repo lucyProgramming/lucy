@@ -259,7 +259,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == classParser.ret.Name {
-				f.Name = ast.CONSTRUCTION_METHOD_NAME
+				f.Name = ast.ConstructionMethodName
 			}
 			classParser.ret.Methods[f.Name] = append(classParser.ret.Methods[f.Name], m)
 			classParser.resetProperty()

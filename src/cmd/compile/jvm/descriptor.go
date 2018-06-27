@@ -28,32 +28,32 @@ func (description *Description) methodDescriptor(f *ast.FunctionType) string {
 
 func (description *Description) typeDescriptor(v *ast.Type) string {
 	switch v.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		return "Z"
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		return "B"
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		return "S"
-	case ast.VARIABLE_TYPE_INT, ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeInt, ast.VariableTypeEnum:
 		return "I"
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		return "J"
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		return "F"
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		return "D"
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeArray:
 		meta := ArrayMetas[v.ArrayType.Type] // combination type
 		return "L" + meta.className + ";"
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		return "Ljava/lang/String;"
-	case ast.VARIABLE_TYPE_VOID:
+	case ast.VariableTypeVoid:
 		return "V"
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		return "L" + v.Class.Name + ";"
-	case ast.VARIABLE_TYPE_MAP:
-		return "L" + java_hashmap_class + ";"
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VariableTypeMap:
+		return "L" + javaHashMapClass + ";"
+	case ast.VariableTypeJavaArray:
 		return "[" + description.typeDescriptor(v.ArrayType)
 	}
 	panic("unHandle type signature")
@@ -64,54 +64,54 @@ func (description *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) 
 	case 'V':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_VOID,
+			Type: ast.VariableTypeVoid,
 		}, nil
 	case 'B':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BYTE,
+			Type: ast.VariableTypeByte,
 		}, nil
 	case 'D':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_DOUBLE,
+			Type: ast.VariableTypeDouble,
 		}, nil
 	case 'F':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_FLOAT,
+			Type: ast.VariableTypeFloat,
 		}, nil
 	case 'I':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_INT,
+			Type: ast.VariableTypeInt,
 		}, nil
 	case 'J':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_LONG,
+			Type: ast.VariableTypeLong,
 		}, nil
 	case 'S', 'C':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_SHORT,
+			Type: ast.VariableTypeShort,
 		}, nil
 	case 'Z':
 		bs = bs[1:]
 		return bs, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 		}, nil
 	case 'L':
 		bs = bs[1:]
 		index := bytes.Index(bs, []byte{';'}) // end token
 		t := &ast.Type{}
-		t.Type = ast.VARIABLE_TYPE_OBJECT
+		t.Type = ast.VariableTypeObject
 		t.Class = &ast.Class{}
 		t.Class.Name = string(bs[:index])
 		bs = bs[index+1:] // skip ;
 		t.Class.NotImportedYet = true
-		if t.Class.Name == java_string_class {
-			t.Type = ast.VARIABLE_TYPE_STRING
+		if t.Class.Name == javaStringClass {
+			t.Type = ast.VariableTypeString
 		}
 		return bs, t, nil
 	case '[':
@@ -121,7 +121,7 @@ func (description *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) 
 		bs, t, err = description.ParseType(bs)
 		ret := &ast.Type{}
 		if err == nil {
-			ret.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
+			ret.Type = ast.VariableTypeJavaArray
 			ret.ArrayType = t
 		}
 		return bs, ret, err

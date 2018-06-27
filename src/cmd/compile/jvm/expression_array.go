@@ -29,56 +29,60 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 
 	loadInt32(class, code, int32(arr.Length))
 	switch e.ExpressionValue.ArrayType.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_INT
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_LONG
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_FLOAT
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
 		code.CodeLength += 2
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeMap:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeFunction:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VariableTypeObject:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(e.ExpressionValue.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeArray:
 		meta := ArrayMetas[e.ExpressionValue.ArrayType.ArrayType.Type]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 	arrayObject := &ast.Type{}
-	arrayObject.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
+	arrayObject.Type = ast.VariableTypeJavaArray
 	arrayObject.ArrayType = e.ExpressionValue.ArrayType
 	state.pushStack(class, arrayObject)
 
@@ -86,29 +90,31 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 
 	store := func() {
 		switch e.ExpressionValue.ArrayType.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			code.Codes[code.CodeLength] = cg.OP_bastore
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			code.Codes[code.CodeLength] = cg.OP_sastore
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_iastore
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_lastore
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_fastore
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_dastore
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeFunction:
 			fallthrough
-		case ast.VARIABLE_TYPE_STRING:
+		case ast.VariableTypeMap:
 			fallthrough
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeString:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeObject:
+			fallthrough
+		case ast.VariableTypeArray:
 			code.Codes[code.CodeLength] = cg.OP_aastore
 		}
 		code.CodeLength++
@@ -139,7 +145,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		loadInt32(class, code, index) // load index
 		state.pushStack(class, arrayObject)
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
@@ -157,7 +163,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.className,
-		Method:     special_method_init,
+		Method:     specialMethodInit,
 		Descriptor: meta.constructorFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

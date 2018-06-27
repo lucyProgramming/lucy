@@ -13,10 +13,10 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	if t == nil {
 		return nil
 	}
-	if t.Type == VARIABLE_TYPE_CLASS { // cast type
+	if t.Type == VariableTypeClass { // cast type
 		typeConversion := &ExpressionTypeConversion{}
 		typeConversion.Type = &Type{}
-		typeConversion.Type.Type = VARIABLE_TYPE_OBJECT
+		typeConversion.Type.Type = VariableTypeObject
 		typeConversion.Type.Class = t.Class
 		typeConversion.Type.Pos = e.Pos
 		ret := []*Type{typeConversion.Type}
@@ -31,7 +31,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		e.checkTypeConversionExpression(block, errs)
 		return ret
 	}
-	if t.Type != VARIABLE_TYPE_FUNCTION {
+	if t.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), t.TypeString()))

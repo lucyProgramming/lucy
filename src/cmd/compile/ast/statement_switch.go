@@ -28,7 +28,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 	if conditionType == nil {
 		return errs
 	}
-	if conditionType.Type == VARIABLE_TYPE_BOOL {
+	if conditionType.Type == VariableTypeBool {
 		errs = append(errs, fmt.Errorf("%s bool expression not allow for switch",
 			errMsgPrefix(conditionType.Pos)))
 		return errs
@@ -88,13 +88,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
 				continue
 			}
-			if conditionType.Type == VARIABLE_TYPE_ENUM {
+			if conditionType.Type == VariableTypeEnum {
 				if t.EnumName == nil {
 					errs = append(errs, fmt.Errorf("%s enum value is not literal",
 						errMsgPrefix(e.Pos)))
 					continue
 				} else {
-					if e.ExpressionValue.Type == VARIABLE_TYPE_PACKAGE &&
+					if e.ExpressionValue.Type == VariableTypePackage &&
 						enumPackageName == "" {
 						enumPackageName = e.ExpressionValue.Package.Name
 					}
@@ -122,56 +122,56 @@ func (s *StatementSwitch) check(block *Block) []error {
 					return errMsg
 				}
 				switch conditionType.Type {
-				case VARIABLE_TYPE_BYTE:
+				case VariableTypeByte:
 					if first, ok := byteMap[byteValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						byteMap[byteValue] = e.Pos
 					}
-				case VARIABLE_TYPE_SHORT:
+				case VariableTypeShort:
 					if first, ok := shortMap[shortValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						shortMap[shortValue] = e.Pos
 					}
-				case VARIABLE_TYPE_INT:
+				case VariableTypeInt:
 					if first, ok := int32Map[int32Value]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						int32Map[int32Value] = e.Pos
 					}
-				case VARIABLE_TYPE_LONG:
+				case VariableTypeLong:
 					if first, ok := int64Map[int64Value]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						int64Map[int64Value] = e.Pos
 					}
-				case VARIABLE_TYPE_FLOAT:
+				case VariableTypeFloat:
 					if first, found := floatMap[floatValue]; found {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						floatMap[floatValue] = e.Pos
 					}
-				case VARIABLE_TYPE_DOUBLE:
+				case VariableTypeDouble:
 					if first, found := doubleMap[doubleValue]; found {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						doubleMap[doubleValue] = e.Pos
 					}
-				case VARIABLE_TYPE_STRING:
+				case VariableTypeString:
 					if first, ok := stringMap[stringValue]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
 					} else {
 						stringMap[stringValue] = e.Pos
 					}
-				case VARIABLE_TYPE_ENUM:
+				case VariableTypeEnum:
 					if first, ok := enumNamesMap[enumName]; ok {
 						errs = append(errs, fmt.Errorf(errMsg(first)))
 						continue // no check body
@@ -194,7 +194,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
 	}
-	if conditionType.Type == VARIABLE_TYPE_ENUM &&
+	if conditionType.Type == VariableTypeEnum &&
 		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
 		s.Default == nil {
 		//some enum are missing, not allow

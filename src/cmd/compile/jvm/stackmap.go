@@ -55,7 +55,7 @@ func (s *StackMapState) addTop(absent *StackMapState) {
 
 func (s *StackMapState) newObjectVariableType(name string) *ast.Type {
 	ret := &ast.Type{}
-	ret.Type = ast.VARIABLE_TYPE_OBJECT
+	ret.Type = ast.VariableTypeObject
 	ret.Class = &ast.Class{}
 	ret.Class.Name = name
 	return ret
@@ -89,46 +89,46 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 	t *ast.Type) (ret *cg.StackMapVerificationTypeInfo) {
 	ret = &cg.StackMapVerificationTypeInfo{}
 	switch t.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		ret.Verify = &cg.StackMapIntegerVariableInfo{}
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		ret.Verify = &cg.StackMapLongVariableInfo{}
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		ret.Verify = &cg.StackMapFloatVariableInfo{}
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		ret.Verify = &cg.StackMapDoubleVariableInfo{}
-	case ast.VARIABLE_TYPE_NULL:
+	case ast.VariableTypeNull:
 		ret.Verify = &cg.StackMapNullVariableInfo{}
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(java_string_class),
+			Index: class.Class.InsertClassConst(javaStringClass),
 		}
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(t.Class.Name),
 		}
-	case ast.VARIABLE_TYPE_FUNCTION:
+	case ast.VariableTypeFunction:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(java_method_handle_class),
+			Index: class.Class.InsertClassConst(javaMethodHandleClass),
 		}
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeMap:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(java_hashmap_class),
+			Index: class.Class.InsertClassConst(javaHashMapClass),
 		}
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeArray:
 		meta := ArrayMetas[t.ArrayType.Type]
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(meta.className),
 		}
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VariableTypeJavaArray:
 		d := Descriptor.typeDescriptor(t)
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(d),

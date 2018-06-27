@@ -10,7 +10,7 @@ import (
 func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
 	willNotExecuteToEnd := false
 	for _, s := range b.Statements {
-		if willNotExecuteToEnd == true && s.Type == ast.STATEMENT_TYPE_LABEL {
+		if willNotExecuteToEnd == true && s.Type == ast.StatementTypeLabel {
 			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
 			willNotExecuteToEnd = !jumpForwards
 			//continue compile block from this label statement
@@ -38,11 +38,11 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 			continue
 		}
 		//block deadEnd
-		if s.Type == ast.STATEMENT_TYPE_BLOCK {
+		if s.Type == ast.StatementTypeBlock {
 			willNotExecuteToEnd = s.Block.WillNotExecuteToEnd
 			continue
 		}
-		if s.Type == ast.STATEMENT_TYPE_IF && s.StatementIf.ElseBlock != nil {
+		if s.Type == ast.StatementTypeIf && s.StatementIf.ElseBlock != nil {
 			t := s.StatementIf.Block.WillNotExecuteToEnd
 			for _, v := range s.StatementIf.ElseIfList {
 				t = t && v.Block.WillNotExecuteToEnd
@@ -51,7 +51,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 			willNotExecuteToEnd = t
 			continue
 		}
-		if s.Type == ast.STATEMENT_TYPE_SWITCH && s.StatementSwitch.Default != nil {
+		if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != nil {
 			t := s.StatementSwitch.Default.WillNotExecuteToEnd
 			for _, v := range s.StatementSwitch.StatementSwitchCases {
 				if v.Block != nil {
@@ -78,8 +78,8 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 }
 
 func (makeClass *MakeClass) statementIsUnConditionGoTo(s *ast.Statement) bool {
-	return s.Type == ast.STATEMENT_TYPE_RETURN ||
-		s.Type == ast.STATEMENT_TYPE_GOTO ||
-		s.Type == ast.STATEMENT_TYPE_CONTINUE ||
-		s.Type == ast.STATEMENT_TYPE_BREAK
+	return s.Type == ast.StatementTypeReturn ||
+		s.Type == ast.StatementTypeGoto ||
+		s.Type == ast.StatementTypeContinue ||
+		s.Type == ast.StatementTypeBreak
 }

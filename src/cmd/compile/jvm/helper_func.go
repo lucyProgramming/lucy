@@ -114,7 +114,7 @@ func jvmSlotSize(v *ast.Type) uint16 {
 	if v.RightValueValid() == false {
 		panic("right value is not valid:" + v.TypeString())
 	}
-	if v.Type == ast.VARIABLE_TYPE_DOUBLE || ast.VARIABLE_TYPE_LONG == v.Type {
+	if v.Type == ast.VariableTypeDouble || ast.VariableTypeLong == v.Type {
 		return 2
 	} else {
 		return 1
@@ -129,15 +129,15 @@ func nameTemplateFunction(f *ast.Function) string {
 			continue
 		}
 		switch v.Type.Type {
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeObject:
 			s += fmt.Sprintf("$%s", strings.Replace(v.Type.Class.Name, "/", "$", -1))
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeMap:
 			s += "_map"
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeArray:
 			s += "_array"
-		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		case ast.VariableTypeJavaArray:
 			s += "_java_array"
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			s += fmt.Sprintf("$%s", strings.Replace(v.Type.Enum.Name, "/", "$", -1))
 		}
 	}

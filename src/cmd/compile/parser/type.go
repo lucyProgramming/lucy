@@ -45,62 +45,62 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 		ret = &ast.Type{}
 		ret.Pos = pos
-		ret.Type = ast.VARIABLE_TYPE_ARRAY
+		ret.Type = ast.VariableTypeArray
 		ret.ArrayType = t
 	case lex.TOKEN_BOOL:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 			Pos:  pos,
 		}
 	case lex.TOKEN_BYTE:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_BYTE,
+			Type: ast.VariableTypeByte,
 			Pos:  pos,
 		}
 	case lex.TOKEN_SHORT:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_SHORT,
+			Type: ast.VariableTypeShort,
 			Pos:  pos,
 		}
 	case lex.TOKEN_INT:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_INT,
+			Type: ast.VariableTypeInt,
 			Pos:  pos,
 		}
 	case lex.TOKEN_FLOAT:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_FLOAT,
+			Type: ast.VariableTypeFloat,
 			Pos:  pos,
 		}
 	case lex.TOKEN_DOUBLE:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_DOUBLE,
+			Type: ast.VariableTypeDouble,
 			Pos:  pos,
 		}
 	case lex.TOKEN_LONG:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_LONG,
+			Type: ast.VariableTypeLong,
 			Pos:  pos,
 		}
 	case lex.TOKEN_STRING:
 		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_STRING,
+			Type: ast.VariableTypeString,
 			Pos:  pos,
 		}
 	case lex.TOKEN_IDENTIFIER:
@@ -138,14 +138,14 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Value: v,
 		}
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_MAP,
+			Type: ast.VariableTypeMap,
 			Map:  m,
 			Pos:  pos,
 		}
 	case lex.TOKEN_T:
 		pos := parser.mkPos()
 		ret = &ast.Type{
-			Type: ast.VARIABLE_TYPE_T,
+			Type: ast.VariableTypeTemplate,
 			Pos:  pos,
 			Name: parser.token.Data.(string),
 		}
@@ -157,7 +157,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			return nil, err
 		}
 		ret = &ast.Type{
-			Type:         ast.VARIABLE_TYPE_FUNCTION,
+			Type:         ast.VariableTypeFunction,
 			Pos:          pos,
 			FunctionType: &ft,
 		}
@@ -180,7 +180,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.Next() // skip ]
 		newRet := &ast.Type{
 			Pos:       pos,
-			Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
+			Type:      ast.VariableTypeJavaArray,
 			ArrayType: ret,
 		}
 		ret = newRet
@@ -208,7 +208,7 @@ func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 	name := parser.token.Data.(string)
 	ret := &ast.Type{
 		Pos:  parser.mkPos(),
-		Type: ast.VARIABLE_TYPE_NAME,
+		Type: ast.VariableTypeName,
 	}
 	parser.Next() // skip name identifier
 	for parser.token.Type == lex.TOKEN_DOT {

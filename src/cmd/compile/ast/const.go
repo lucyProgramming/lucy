@@ -7,21 +7,21 @@ type Constant struct {
 
 func (c *Constant) mkDefaultValue() {
 	switch c.Type.Type {
-	case VARIABLE_TYPE_BOOL:
+	case VariableTypeBool:
 		c.Value = false
-	case VARIABLE_TYPE_BYTE:
+	case VariableTypeByte:
 		c.Value = byte(0)
-	case VARIABLE_TYPE_SHORT:
+	case VariableTypeShort:
 		c.Value = int32(0)
-	case VARIABLE_TYPE_INT:
+	case VariableTypeInt:
 		c.Value = int32(0)
-	case VARIABLE_TYPE_LONG:
+	case VariableTypeLong:
 		c.Value = int64(0)
-	case VARIABLE_TYPE_FLOAT:
+	case VariableTypeFloat:
 		c.Value = float32(0)
-	case VARIABLE_TYPE_DOUBLE:
+	case VariableTypeDouble:
 		c.Value = float64(0)
-	case VARIABLE_TYPE_STRING:
+	case VariableTypeString:
 		c.Value = ""
 	}
 }

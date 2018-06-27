@@ -6,9 +6,9 @@ import (
 
 func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error) {
 	identifier := e.Data.(*ExpressionIdentifier)
-	if identifier.Name == NO_NAME_IDENTIFIER {
+	if identifier.Name == NoNameIdentifier {
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
-			errMsgPrefix(e.Pos), NO_NAME_IDENTIFIER)
+			errMsgPrefix(e.Pos), NoNameIdentifier)
 	}
 	fromImport := false
 	d, err := block.searchRightValue(identifier.Name)
@@ -40,20 +40,20 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				}
 				tt := &Type{}
 				tt.Pos = e.Pos
-				tt.Type = VARIABLE_TYPE_PACKAGE
+				tt.Type = VariableTypePackage
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Type = VARIABLE_TYPE_PACKAGE
+					tt.Type = VariableTypePackage
 				} else {
 					tt.Class = p.(*Class)
-					tt.Type = VARIABLE_TYPE_OBJECT
+					tt.Type = VariableTypeObject
 				}
 				return tt, nil
 			}
 		}
 		f.Used = true
 		tt := &Type{}
-		tt.Type = VARIABLE_TYPE_FUNCTION
+		tt.Type = VariableTypeFunction
 		tt.Pos = e.Pos
 		tt.Function = f
 		return tt, nil
@@ -68,13 +68,13 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				}
 				tt := &Type{}
 				tt.Pos = e.Pos
-				tt.Type = VARIABLE_TYPE_PACKAGE
+				tt.Type = VariableTypePackage
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Type = VARIABLE_TYPE_PACKAGE
+					tt.Type = VariableTypePackage
 				} else {
 					tt.Class = p.(*Class)
-					tt.Type = VARIABLE_TYPE_OBJECT
+					tt.Type = VariableTypeObject
 				}
 				return tt, nil
 			}
@@ -97,10 +97,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				tt.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Type = VARIABLE_TYPE_PACKAGE
+					tt.Type = VariableTypePackage
 				} else {
 					tt.Class = p.(*Class)
-					tt.Type = VARIABLE_TYPE_OBJECT
+					tt.Type = VariableTypeObject
 				}
 				return tt, nil
 			}
@@ -123,16 +123,16 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				tt.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Type = VARIABLE_TYPE_PACKAGE
+					tt.Type = VariableTypePackage
 				} else {
 					tt.Class = p.(*Class)
-					tt.Type = VARIABLE_TYPE_OBJECT
+					tt.Type = VariableTypeObject
 				}
 				return tt, nil
 			}
 		}
 		t := &Type{}
-		t.Type = VARIABLE_TYPE_CLASS
+		t.Type = VariableTypeClass
 		t.Pos = e.Pos
 		t.Class = c
 		return t, nil
@@ -149,10 +149,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				tt.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
 					tt.Package = pp
-					tt.Type = VARIABLE_TYPE_PACKAGE
+					tt.Type = VariableTypePackage
 				} else {
 					tt.Class = p.(*Class)
-					tt.Type = VARIABLE_TYPE_OBJECT
+					tt.Type = VariableTypeObject
 				}
 				return tt, nil
 			}
@@ -160,7 +160,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		if e != nil {
 			t := &Type{}
 			t.Pos = e.Pos
-			t.Type = VARIABLE_TYPE_ENUM
+			t.Type = VariableTypeEnum
 			t.EnumName = e
 			t.Enum = e.Enum
 			identifier.EnumName = e
@@ -169,7 +169,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 	case *Package:
 		t := &Type{}
 		t.Pos = e.Pos
-		t.Type = VARIABLE_TYPE_PACKAGE
+		t.Type = VariableTypePackage
 		t.Package = d.(*Package)
 		return t, nil
 	}

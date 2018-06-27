@@ -6,7 +6,7 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	selection := e.Data.(*ast.ExpressionSelection)
-	if selection.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
+	if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
 		maxStack = jvmSlotSize(e.ExpressionValue)
 		if selection.PackageVariable != nil {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
@@ -24,7 +24,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 	}
 	// check cast to super class
 	if selection.Name == ast.SUPER {
-		if selection.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_OBJECT {
+		if selection.Expression.ExpressionValue.Type == ast.VariableTypeObject {
 			maxStack, _ = makeExpression.build(class, code, selection.Expression, context, state)
 			code.Codes[code.CodeLength] = cg.OP_checkcast
 			class.InsertClassConst(e.ExpressionValue.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -32,7 +32,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 		}
 		return
 	}
-	if selection.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_CLASS {
+	if selection.Expression.ExpressionValue.Type == ast.VariableTypeClass {
 		maxStack = jvmSlotSize(e.ExpressionValue)
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

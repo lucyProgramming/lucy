@@ -70,7 +70,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 		//closure function call
 		//load object
 		if context.function.Closure.ClosureFunctionExist(call.Function) {
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      class.Name,
@@ -79,7 +79,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, call.Function.ClosureVariableOffSet)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, call.Function.ClosureVariableOffSet)...)
 		}
 		state.pushStack(class, state.newObjectVariableType(call.Function.ClassMethod.Class.Name))
 		defer state.popStack(1)

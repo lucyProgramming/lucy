@@ -62,31 +62,33 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 			makeClass.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		}
 		switch context.function.Type.ReturnList[0].Type.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_ireturn
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_lreturn
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_freturn
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_dreturn
-		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		case ast.VariableTypeFunction:
 			fallthrough
-		case ast.VARIABLE_TYPE_STRING:
+		case ast.VariableTypeJavaArray:
 			fallthrough
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeString:
 			fallthrough
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeObject:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeMap:
+			fallthrough
+		case ast.VariableTypeArray:
 			code.Codes[code.CodeLength] = cg.OP_areturn
 		}
 		code.CodeLength++
@@ -99,10 +101,10 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 		} else {
 			loadInt32(class, code, int32(len(context.function.Type.ReturnList)))
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			maxStack = 2 // max stack is 2
-			arrayListObject := state.newObjectVariableType(java_root_object_array)
+			arrayListObject := state.newObjectVariableType(javaRootObjectArray)
 			state.pushStack(class, arrayListObject)
 			state.pushStack(class, arrayListObject)
 			defer state.popStack(2)
@@ -168,7 +170,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 	if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
-			copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 				context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -183,7 +185,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 		//restore the stack
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code,
-				loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+				loadLocalVariableOps(ast.VariableTypeObject,
 					context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
 		}
 	}
@@ -208,31 +210,33 @@ func (makeClass *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHig
 		makeClass.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		maxStack = jvmSlotSize(context.function.Type.ReturnList[0].Type)
 		switch context.function.Type.ReturnList[0].Type.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_ireturn
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_lreturn
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_freturn
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_dreturn
-		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		case ast.VariableTypeFunction:
 			fallthrough
-		case ast.VARIABLE_TYPE_STRING:
+		case ast.VariableTypeJavaArray:
 			fallthrough
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeString:
 			fallthrough
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeObject:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeMap:
+			fallthrough
+		case ast.VariableTypeArray:
 			code.Codes[code.CodeLength] = cg.OP_areturn
 		}
 		code.CodeLength++
@@ -242,7 +246,7 @@ func (makeClass *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHig
 	//new a array list
 	loadInt32(class, code, int32(len(context.function.Type.ReturnList)))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxStack = 1 // max stack is
 	index := int32(0)
@@ -282,20 +286,20 @@ func (makeClass *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code 
 		state := statementReturn.Defers[index].StackMapState.(*StackMapState)
 		state = (&StackMapState{}).FromLast(state) // clone
 		state.addTop(from)
-		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
+		state.pushStack(class, state.newObjectVariableType(throwableClass))
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}
 		e.StartPc = uint16(statementReturn.Defers[index].StartPc)
 		e.EndPc = uint16(code.CodeLength)
 		e.HandlerPc = uint16(code.CodeLength)
 		if statementReturn.Defers[index].ExceptionClass == nil {
-			e.CatchType = class.Class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS)
+			e.CatchType = class.Class.InsertClassConst(ast.DefaultExceptionClass)
 		} else {
 			e.CatchType = class.Class.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom class
 		}
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
-		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 			context.function.AutoVariableForException.Offset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
@@ -308,10 +312,10 @@ func (makeClass *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code 
 			continue
 		}
 		//if need throw
-		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForException.Offset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		state.pushStack(class, state.newObjectVariableType(java_throwable_class))
+		state.pushStack(class, state.newObjectVariableType(throwableClass))
 		context.MakeStackMap(code, state, code.CodeLength+6)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(1)
@@ -326,7 +330,7 @@ func (makeClass *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code 
 		//exception that have been handled
 		if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
 			//load when function have multi returns if read to end
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 			code.Codes[code.CodeLength+3] = cg.OP_goto

@@ -19,13 +19,13 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Type == EXPRESSION_TYPE_LOGICAL_OR ||
 		EXPRESSION_TYPE_LOGICAL_AND == e.Type {
 		result = &Type{
-			Type: VARIABLE_TYPE_BOOL,
+			Type: VariableTypeBool,
 			Pos:  e.Pos,
 		}
 		if t1 == nil || t2 == nil {
 			return result
 		}
-		if t1.Type != VARIABLE_TYPE_BOOL || t2.Type != VARIABLE_TYPE_BOOL {
+		if t1.Type != VariableTypeBool || t2.Type != VariableTypeBool {
 			*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 
@@ -74,8 +74,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if false == t1.IsInteger() || t2.IsInteger() == false {
 			*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 		} else {
-			if t2.Type == VARIABLE_TYPE_LONG {
-				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
+			if t2.Type == VariableTypeLong {
+				bin.Right.ConvertToNumber(VariableTypeInt)
 			}
 		}
 		result = t1.Clone()
@@ -89,7 +89,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Type == EXPRESSION_TYPE_LE ||
 		e.Type == EXPRESSION_TYPE_LT {
 		result = &Type{
-			Type: VARIABLE_TYPE_BOOL,
+			Type: VariableTypeBool,
 			Pos:  e.Pos,
 		}
 		if t1 == nil || t2 == nil {
@@ -97,25 +97,25 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		//number
 		switch t1.Type {
-		case VARIABLE_TYPE_BOOL:
-			if t2.Type != VARIABLE_TYPE_BOOL || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
+		case VariableTypeBool:
+			if t2.Type != VariableTypeBool || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
-		case VARIABLE_TYPE_ENUM:
+		case VariableTypeEnum:
 			if t1.Equal(errs, t2) == false || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
-		case VARIABLE_TYPE_BYTE:
+		case VariableTypeByte:
 			fallthrough
-		case VARIABLE_TYPE_SHORT:
+		case VariableTypeShort:
 			fallthrough
-		case VARIABLE_TYPE_INT:
+		case VariableTypeInt:
 			fallthrough
-		case VARIABLE_TYPE_FLOAT:
+		case VariableTypeFloat:
 			fallthrough
-		case VARIABLE_TYPE_LONG:
+		case VariableTypeLong:
 			fallthrough
-		case VARIABLE_TYPE_DOUBLE:
+		case VariableTypeDouble:
 			if (t1.IsInteger() && t2.IsInteger()) ||
 				(t1.IsFloat() && t2.IsFloat()) {
 				if t1.Equal(errs, t2) == false {
@@ -132,24 +132,24 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			} else {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
-		case VARIABLE_TYPE_STRING:
-			if t2.Type != VARIABLE_TYPE_STRING {
+		case VariableTypeString:
+			if t2.Type != VariableTypeString {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
-		case VARIABLE_TYPE_NULL:
+		case VariableTypeNull:
 			if t2.IsPointer() == false || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.OpName(),
 					t2.TypeString()))
 			}
-		case VARIABLE_TYPE_MAP:
+		case VariableTypeMap:
 			fallthrough
-		case VARIABLE_TYPE_JAVA_ARRAY:
+		case VariableTypeJavaArray:
 			fallthrough
-		case VARIABLE_TYPE_ARRAY:
+		case VariableTypeArray:
 			fallthrough
-		case VARIABLE_TYPE_OBJECT:
+		case VariableTypeObject:
 			if t1.Equal(errs, t2) == false || (e.Type != EXPRESSION_TYPE_EQ && e.Type != EXPRESSION_TYPE_NE) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
@@ -187,12 +187,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return nil
 		}
 		//check string first
-		if t1.Type == VARIABLE_TYPE_STRING || t2.Type == VARIABLE_TYPE_STRING { // string is always ok
+		if t1.Type == VariableTypeString || t2.Type == VariableTypeString { // string is always ok
 			if e.Type != EXPRESSION_TYPE_ADD {
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 			result = &Type{}
-			result.Type = VARIABLE_TYPE_STRING
+			result.Type = VariableTypeString
 			result.Pos = e.Pos
 			return result
 		}

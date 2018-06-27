@@ -254,7 +254,7 @@ func (b *Block) checkStatements() []error {
 func (b *Block) checkConstants() []error {
 	errs := make([]error, 0)
 	for _, c := range b.Constants {
-		if c.Name == NO_NAME_IDENTIFIER {
+		if c.Name == NoNameIdentifier {
 			err := fmt.Errorf("%s '%s' is not a valid name",
 				errMsgPrefix(c.Pos), c.Name)
 			errs = append(errs, err)

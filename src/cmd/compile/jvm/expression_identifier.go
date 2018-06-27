@@ -10,9 +10,9 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Variable)
 	if captured == false {
-		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, identifier.Variable.LocalValOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
 	} else {
-		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 		meta := closure.getMeta(identifier.Variable.Type.Type)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -34,11 +34,11 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 
 func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context) (maxStack uint16) {
-	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_CLASS {
+	if e.ExpressionValue.Type == ast.VariableTypeClass {
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM && identifier.EnumName != nil { // not a var
+	if e.ExpressionValue.Type == ast.VariableTypeEnum && identifier.EnumName != nil { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1
 		return
@@ -58,15 +58,15 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		return makeExpression.buildCapturedIdentifier(class, code, e, context)
 	}
 	switch identifier.Variable.Type.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_iload_0
 			code.CodeLength++
@@ -87,7 +87,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 			panic("over 255")
 		}
 		maxStack = 1
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_fload_0
 			code.CodeLength++
@@ -108,7 +108,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 			panic("over 255")
 		}
 		maxStack = 1
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_dload_0
 			code.CodeLength++
@@ -129,7 +129,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 			panic("over 255")
 		}
 		maxStack = 2
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		if identifier.Variable.LocalValOffset == 0 {
 			code.Codes[code.CodeLength] = cg.OP_lload_0
 			code.CodeLength++

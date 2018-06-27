@@ -24,7 +24,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 	if e.Type == EXPRESSION_TYPE_NOT {
-		if t.Type != VARIABLE_TYPE_BOOL {
+		if t.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
 				errMsgPrefix(t.Pos)))
 		}

@@ -47,9 +47,9 @@ func (s *StatementFor) checkRange() []error {
 	if rangeOn == nil {
 		return errs
 	}
-	if rangeOn.Type != VARIABLE_TYPE_ARRAY &&
-		rangeOn.Type != VARIABLE_TYPE_JAVA_ARRAY &&
-		rangeOn.Type != VARIABLE_TYPE_MAP {
+	if rangeOn.Type != VariableTypeArray &&
+		rangeOn.Type != VariableTypeJavaArray &&
+		rangeOn.Type != VariableTypeMap {
 		errs = append(errs, fmt.Errorf("%s cannot have range on '%s'",
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
@@ -119,9 +119,9 @@ func (s *StatementFor) checkRange() []error {
 			posV = lefts[0].Pos
 		}
 
-		if identifierV.Name != NO_NAME_IDENTIFIER {
+		if identifierV.Name != NoNameIdentifier {
 			vd := &Variable{}
-			if rangeOn.Type == VARIABLE_TYPE_ARRAY || rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
+			if rangeOn.Type == VariableTypeArray || rangeOn.Type == VariableTypeJavaArray {
 				vd.Type = rangeOn.ArrayType.Clone()
 			} else {
 				vd.Type = rangeOn.Map.Value.Clone()
@@ -135,13 +135,13 @@ func (s *StatementFor) checkRange() []error {
 			identifierV.Variable = vd
 			s.RangeAttr.IdentifierValue = identifierV
 		}
-		if modelKv && identifierK.Name != NO_NAME_IDENTIFIER {
+		if modelKv && identifierK.Name != NoNameIdentifier {
 			vd := &Variable{}
 			var vt *Type
-			if rangeOn.Type == VARIABLE_TYPE_ARRAY ||
-				rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
+			if rangeOn.Type == VariableTypeArray ||
+				rangeOn.Type == VariableTypeJavaArray {
 				vt = &Type{}
-				vt.Type = VARIABLE_TYPE_INT
+				vt.Type = VariableTypeInt
 			} else {
 				vt = rangeOn.Map.Key.Clone()
 				vt.Pos = rangeOn.Pos
@@ -175,10 +175,10 @@ func (s *StatementFor) checkRange() []error {
 		}
 		var tkk, tvv *Type
 
-		if rangeOn.Type == VARIABLE_TYPE_ARRAY ||
-			rangeOn.Type == VARIABLE_TYPE_JAVA_ARRAY {
+		if rangeOn.Type == VariableTypeArray ||
+			rangeOn.Type == VariableTypeJavaArray {
 			tkk = &Type{
-				Type: VARIABLE_TYPE_INT,
+				Type: VariableTypeInt,
 			}
 			tvv = rangeOn.ArrayType
 		} else {
@@ -232,7 +232,7 @@ func (s *StatementFor) check(block *Block) []error {
 		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
-		if t != nil && t.Type != VARIABLE_TYPE_BOOL {
+		if t != nil && t.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
 				errMsgPrefix(s.Condition.Pos), t.TypeString()))
 

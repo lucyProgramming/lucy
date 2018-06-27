@@ -379,22 +379,22 @@ func (e *Expression) convertNumberLiteralTo(t int) {
 		panic("...")
 	}
 	switch t {
-	case VARIABLE_TYPE_BYTE:
+	case VariableTypeByte:
 		e.Data = e.getByteValue()
 		e.Type = EXPRESSION_TYPE_BYTE
-	case VARIABLE_TYPE_SHORT:
+	case VariableTypeShort:
 		e.Data = e.getShortValue()
 		e.Type = EXPRESSION_TYPE_SHORT
-	case VARIABLE_TYPE_INT:
+	case VariableTypeInt:
 		e.Data = e.getIntValue()
 		e.Type = EXPRESSION_TYPE_INT
-	case VARIABLE_TYPE_LONG:
+	case VariableTypeLong:
 		e.Data = e.getLongValue()
 		e.Type = EXPRESSION_TYPE_LONG
-	case VARIABLE_TYPE_FLOAT:
+	case VariableTypeFloat:
 		e.Data = e.getFloatValue()
 		e.Type = EXPRESSION_TYPE_FLOAT
-	case VARIABLE_TYPE_DOUBLE:
+	case VariableTypeDouble:
 		e.Data = e.getDoubleValue()
 		e.Type = EXPRESSION_TYPE_DOUBLE
 	}

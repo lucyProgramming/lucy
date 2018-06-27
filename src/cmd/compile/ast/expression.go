@@ -272,28 +272,28 @@ type ExpressionTypeAssert ExpressionTypeConversion
 */
 func (e *Expression) fromConst(c *Constant) {
 	switch c.Type.Type {
-	case VARIABLE_TYPE_BOOL:
+	case VariableTypeBool:
 		e.Type = EXPRESSION_TYPE_BOOL
 		e.Data = c.Value.(bool)
-	case VARIABLE_TYPE_BYTE:
+	case VariableTypeByte:
 		e.Type = EXPRESSION_TYPE_BYTE
 		e.Data = c.Value.(byte)
-	case VARIABLE_TYPE_SHORT:
+	case VariableTypeShort:
 		e.Type = EXPRESSION_TYPE_SHORT
 		e.Data = c.Value.(int32)
-	case VARIABLE_TYPE_INT:
+	case VariableTypeInt:
 		e.Type = EXPRESSION_TYPE_INT
 		e.Data = c.Value.(int32)
-	case VARIABLE_TYPE_LONG:
+	case VariableTypeLong:
 		e.Type = EXPRESSION_TYPE_LONG
 		e.Data = c.Value.(int64)
-	case VARIABLE_TYPE_FLOAT:
+	case VariableTypeFloat:
 		e.Type = EXPRESSION_TYPE_FLOAT
 		e.Data = c.Value.(float32)
-	case VARIABLE_TYPE_DOUBLE:
+	case VariableTypeDouble:
 		e.Type = EXPRESSION_TYPE_DOUBLE
 		e.Data = c.Value.(float64)
-	case VARIABLE_TYPE_STRING:
+	case VariableTypeString:
 		e.Type = EXPRESSION_TYPE_STRING
 		e.Data = c.Value.(string)
 	}
@@ -561,5 +561,5 @@ func (e *Expression) IsNoNameIdentifier() bool {
 	if e.Type != EXPRESSION_TYPE_IDENTIFIER {
 		return false
 	}
-	return e.Data.(*ExpressionIdentifier).Name == NO_NAME_IDENTIFIER
+	return e.Data.(*ExpressionIdentifier).Name == NoNameIdentifier
 }

@@ -7,7 +7,7 @@ type FunctionType struct {
 
 func (ft *FunctionType) NoReturnValue() bool {
 	return len(ft.ReturnList) == 0 ||
-		ft.ReturnList[0].Type.Type == VARIABLE_TYPE_VOID
+		ft.ReturnList[0].Type.Type == VariableTypeVoid
 }
 
 type ParameterList []*Variable
@@ -16,7 +16,7 @@ type ReturnList []*Variable
 func (ft FunctionType) returnTypes(pos *Position) []*Type {
 	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
 		t := &Type{}
-		t.Type = VARIABLE_TYPE_VOID // means no return ;
+		t.Type = VariableTypeVoid // means no return ;
 		t.Pos = pos
 		return []*Type{t}
 	}

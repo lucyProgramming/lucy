@@ -65,31 +65,33 @@ func init() {
 
 func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
 	switch t {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		meta = closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		meta = closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		meta = closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		meta = closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY: //[]int
+	case ast.VariableTypeArray: //[]int
 		fallthrough
-	case ast.VARIABLE_TYPE_JAVA_ARRAY: // java array int[]
+	case ast.VariableTypeJavaArray: // java array int[]
 		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeFunction:
+		fallthrough
+	case ast.VariableTypeMap:
 		meta = closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
 	}
 	return
@@ -103,31 +105,33 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 	maxStack = 2
 	var meta *ClosureObjectMeta
 	switch v.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		meta = closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		meta = closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		meta = closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		meta = closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY: //[]int
+	case ast.VariableTypeFunction:
 		fallthrough
-	case ast.VARIABLE_TYPE_JAVA_ARRAY: // java array int[]
+	case ast.VariableTypeArray: //[]int
 		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeJavaArray: // java array int[]
+		fallthrough
+	case ast.VariableTypeMap:
 		meta = closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
 	}
 	code.Codes[code.CodeLength] = cg.OP_new
@@ -137,7 +141,7 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.className,
-		Method:     special_method_init,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -147,31 +151,33 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.Variable) {
 	var meta *ClosureObjectMeta
 	switch v.Type.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		meta = closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		meta = closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		meta = closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		meta = closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeFunction:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeMap:
 		fallthrough
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VariableTypeArray:
+		fallthrough
+	case ast.VariableTypeJavaArray:
 		meta = closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
 	}
 	code.Codes[code.CodeLength] = cg.OP_putfield
@@ -188,7 +194,7 @@ func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.
 */
 func (closure *Closure) loadLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	v *ast.Variable) (maxStack uint16) {
-	copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 	closure.unPack(class, code, v.Type)
 	maxStack = jvmSlotSize(v.Type)
 	return
@@ -199,15 +205,15 @@ func (closure *Closure) loadLocalClosureVar(class *cg.ClassHighLevel, code *cg.A
 */
 func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.Type) {
 	switch v.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		meta := closure.ClosureObjectMetas[CLOSURE_INT_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -217,7 +223,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		meta := closure.ClosureObjectMetas[CLOSURE_LONG_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -227,7 +233,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		meta := closure.ClosureObjectMetas[CLOSURE_FLOAT_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -237,7 +243,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		meta := closure.ClosureObjectMetas[CLOSURE_DOUBLE_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -247,7 +253,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		meta := closure.ClosureObjectMetas[CLOSURE_STRING_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -256,14 +262,15 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeFunction:
 		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeMap:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VariableTypeArray:
+		fallthrough
+	case ast.VariableTypeJavaArray:
 		meta := closure.ClosureObjectMetas[CLOSURE_OBJECT_CLASS]
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{

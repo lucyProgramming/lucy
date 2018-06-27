@@ -10,7 +10,7 @@ type MultiValuePacker struct {
 	stack is 1
 */
 func (a *MultiValuePacker) storeMultiValueAutoVar(code *cg.AttributeCode, context *Context) {
-	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT,
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 		context.function.AutoVariableForMultiReturn.Offset)...)
 }
 
@@ -39,7 +39,7 @@ func (a *MultiValuePacker) unPackObject(class *cg.ClassHighLevel, code *cg.Attri
 	maxStack = 2
 	//a.buildLoadArrayListAutoVar(code, context) // local array list on stack
 	copyOPs(code,
-		loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForMultiReturn.Offset)...)
+		loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForMultiReturn.Offset)...)
 	loadInt32(class, code, int32(k))
 	code.Codes[code.CodeLength] = cg.OP_aaload
 	code.CodeLength++

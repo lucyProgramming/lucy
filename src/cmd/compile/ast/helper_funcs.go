@@ -48,7 +48,7 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
 
 func mkVoidType(pos *Position) *Type {
 	t := &Type{}
-	t.Type = VARIABLE_TYPE_VOID // means no return;
+	t.Type = VariableTypeVoid // means no return;
 	t.Pos = pos
 	return t
 }

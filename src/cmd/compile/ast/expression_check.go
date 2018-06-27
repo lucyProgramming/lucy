@@ -18,7 +18,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	case EXPRESSION_TYPE_NULL:
 		Types = []*Type{
 			{
-				Type: VARIABLE_TYPE_NULL,
+				Type: VariableTypeNull,
 				Pos:  e.Pos,
 			},
 		}
@@ -26,56 +26,56 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	case EXPRESSION_TYPE_BOOL:
 		Types = []*Type{
 			{
-				Type: VARIABLE_TYPE_BOOL,
+				Type: VariableTypeBool,
 				Pos:  e.Pos,
 			},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_BYTE:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_BYTE,
+			Type: VariableTypeByte,
 			Pos:  e.Pos,
 		},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_SHORT:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_SHORT,
+			Type: VariableTypeShort,
 			Pos:  e.Pos,
 		},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_INT:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_INT,
+			Type: VariableTypeInt,
 			Pos:  e.Pos,
 		},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_FLOAT:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_FLOAT,
+			Type: VariableTypeFloat,
 			Pos:  e.Pos,
 		},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_DOUBLE:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_DOUBLE,
+			Type: VariableTypeDouble,
 			Pos:  e.Pos,
 		},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_LONG:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_LONG,
+			Type: VariableTypeLong,
 			Pos:  e.Pos,
 		},
 		}
 		e.ExpressionValue = Types[0]
 	case EXPRESSION_TYPE_STRING:
 		Types = []*Type{{
-			Type: VARIABLE_TYPE_STRING,
+			Type: VariableTypeString,
 			Pos:  e.Pos,
 		}}
 		e.ExpressionValue = Types[0]
@@ -292,7 +292,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		}
 		Types = make([]*Type, 1)
 		Types[0] = &Type{
-			Type:         VARIABLE_TYPE_FUNCTION,
+			Type:         VariableTypeFunction,
 			Pos:          e.Pos,
 			FunctionType: &f.Type,
 		}

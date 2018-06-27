@@ -30,7 +30,7 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 		return false
 	}
 	s := m.Function.Block.Statements[0]
-	if s.Type != STATEMENT_TYPE_EXPRESSION {
+	if s.Type != StatementTypeExpression {
 		return false
 	}
 	e := s.Expression

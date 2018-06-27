@@ -58,7 +58,7 @@ func (makeClass *MakeClass) Make(p *ast.Package) {
 	mainClass.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	mainClass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
-	mainClass.SuperClass = ast.JAVA_ROOT_CLASS
+	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
 	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
 	makeClass.mkClassDefaultConstruction(makeClass.mainClass, nil)
@@ -67,7 +67,6 @@ func (makeClass *MakeClass) Make(p *ast.Package) {
 	makeClass.mkGlobalConstants()
 	makeClass.mkGlobalTypeAlias()
 	makeClass.mkGlobalVariables()
-	makeClass.mkFunctionPointers()
 	makeClass.mkGlobalFunctions()
 	makeClass.mkInitFunctions()
 	for _, v := range p.Block.Classes {
@@ -82,33 +81,13 @@ func (makeClass *MakeClass) Make(p *ast.Package) {
 	}
 }
 
-func (makeClass *MakeClass) mkFunctionPointers() {
-	//for _, v := range makeClass.Package.FunctionPointers {
-	//	class := &cg.ClassHighLevel{}
-	//	if v.Name == "" {
-	//		panic("missing name")
-	//	}
-	//	class.Name = makeClass.newClassName(v.Name)
-	//	class.AccessFlags |= cg.ACC_CLASS_INTERFACE
-	//	class.AccessFlags |= cg.ACC_CLASS_PUBLIC
-	//	class.AccessFlags |= cg.ACC_METHOD_FINAL
-	//	method := &cg.MethodHighLevel{}
-	//	method.AccessFlags |= cg.ACC_METHOD_FINAL
-	//	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	//	method.Name = v.Name
-	//	method.Descriptor = Descriptor.methodDescriptor(v)
-	//	class.AppendMethod(method)
-	//	makeClass.putClass(class)
-	//}
-}
-
 func (makeClass *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = e.Name
 	class.SourceFiles = make(map[string]struct{})
 	class.SourceFiles[e.Pos.Filename] = struct{}{}
 	class.AccessFlags = e.AccessFlags
-	class.SuperClass = ast.JAVA_ROOT_CLASS
+	class.SuperClass = ast.JavaRootClass
 	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Class.AttributeLucyEnum = &cg.AttributeLucyEnum{}
 	for _, v := range e.Enums {
@@ -250,25 +229,25 @@ func (makeClass *MakeClass) mkInitFunctions() {
 }
 func (makeClass *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {
 	switch t.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		if v.(bool) {
 			index = c.Class.InsertIntConst(1)
 		} else {
 			index = c.Class.InsertIntConst(0)
 		}
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		index = c.Class.InsertIntConst(int32(v.(byte)))
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		index = c.Class.InsertIntConst(v.(int32))
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		index = c.Class.InsertLongConst(v.(int64))
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		index = c.Class.InsertFloatConst(v.(float32))
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		index = c.Class.InsertDoubleConst(v.(float64))
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		index = c.Class.InsertStringConst(v.(string))
 	}
 	return
@@ -307,7 +286,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	}
 
 	for k, v := range c.Methods {
-		if k == ast.CONSTRUCTION_METHOD_NAME && c.IsInterface() == false {
+		if k == ast.ConstructionMethodName && c.IsInterface() == false {
 			continue
 		}
 		vv := v[0]
@@ -328,7 +307,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	}
 	if c.IsInterface() == false {
 		//construction
-		if t := c.Methods[ast.CONSTRUCTION_METHOD_NAME]; t != nil && len(t) > 0 {
+		if t := c.Methods[ast.ConstructionMethodName]; t != nil && len(t) > 0 {
 			method := &cg.MethodHighLevel{}
 			method.Name = "<init>"
 			method.AccessFlags = t[0].Function.AccessFlags
@@ -364,14 +343,14 @@ func (makeClass *MakeClass) mkGlobalFunctions() {
 		method := &cg.MethodHighLevel{}
 		method.Class = class
 		method.Name = f.Name
-		if f.Name == ast.MAIN_FUNCTION_NAME {
+		if f.Name == ast.MainFunctionName {
 			method.Descriptor = "([Ljava/lang/String;)V"
 		} else {
 			method.Descriptor = Descriptor.methodDescriptor(&f.Type)
 		}
 		method.AccessFlags = 0
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
-		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MAIN_FUNCTION_NAME {
+		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MainFunctionName {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 		}
 		ms[k] = method
@@ -418,7 +397,7 @@ func (makeClass *MakeClass) DumpClass() error {
 */
 func (makeClass *MakeClass) mkClassDefaultConstruction(class *cg.ClassHighLevel, astClass *ast.Class) {
 	method := &cg.MethodHighLevel{}
-	method.Name = special_method_init
+	method.Name = specialMethodInit
 	method.Descriptor = "()V"
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	method.Code = &cg.AttributeCode{}
@@ -430,7 +409,7 @@ func (makeClass *MakeClass) mkClassDefaultConstruction(class *cg.ClassHighLevel,
 	method.Code.Codes[1] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      class.SuperClass,
-		Method:     special_method_init,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, method.Code.Codes[2:4])
 	if 1 > method.Code.MaxStack {

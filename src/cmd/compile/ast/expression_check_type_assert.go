@@ -32,7 +32,7 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	ret[0].Pos = e.Pos
 	ret[1] = &Type{}
 	ret[1].Pos = e.Pos
-	ret[1].Type = VARIABLE_TYPE_BOOL // if  assert is ok
+	ret[1].Type = VariableTypeBool // if  assert is ok
 	if assert.Type.validForTypeAssertOrConversion() == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for type assertion",
 			errMsgPrefix(e.Pos), assert.Type.TypeString()))

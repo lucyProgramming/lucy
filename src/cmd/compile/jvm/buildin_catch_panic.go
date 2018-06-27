@@ -28,7 +28,7 @@ func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, c
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      className,
-			Method:     special_method_init,
+			Method:     specialMethodInit,
 			Descriptor: "(Ljava/lang/Throwable;)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -47,22 +47,22 @@ func (makeExpression *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, c
 		maxStack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForException.Offset)...)
+		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...)
 		return
 	}
 	maxStack = 2
 	//load to stack
-	copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForException.Offset)...) // load
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...) // load
 	//set 2 null
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, context.function.AutoVariableForException.Offset)...) // store
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...) // store
 	//check cast
 	code.Codes[code.CodeLength] = cg.OP_checkcast
 	if context.Defer.ExceptionClass != nil {
 		class.InsertClassConst(context.Defer.ExceptionClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
-		class.InsertClassConst(ast.DEFAULT_EXCEPTION_CLASS, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(ast.DefaultExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
 	code.CodeLength += 3
 	return

@@ -12,15 +12,15 @@ import (
 */
 func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 	switch variableType {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_istore_0}
@@ -36,7 +36,7 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_istore, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_lstore_0}
@@ -52,7 +52,7 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_lstore, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_fstore_0}
@@ -68,7 +68,7 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_fstore, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_dstore_0}
@@ -84,17 +84,17 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_dstore, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VariableTypeJavaArray:
 		fallthrough
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_FUNCTION:
+	case ast.VariableTypeFunction:
 		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeMap:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeArray:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_astore_0}
@@ -117,15 +117,15 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 
 func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
 	switch variableType {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		fallthrough
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		fallthrough
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_iload_0}
@@ -141,7 +141,7 @@ func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_iload, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_lload_0}
@@ -157,7 +157,7 @@ func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_lload, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_fload_0}
@@ -173,7 +173,7 @@ func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_fload, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_dload_0}
@@ -189,15 +189,15 @@ func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
 			}
 			return []byte{cg.OP_dload, byte(variableOffset)}
 		}
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeMap:
 		fallthrough
-	case ast.VARIABLE_TYPE_FUNCTION:
+	case ast.VariableTypeFunction:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeArray:
 		switch variableOffset {
 		case 0:
 			return []byte{cg.OP_aload_0}

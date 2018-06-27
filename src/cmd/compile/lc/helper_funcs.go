@@ -24,7 +24,7 @@ func parseReturnListNames(class *cg.Class, bs []byte, f *ast.Function) {
 
 func loadEnumForFunction(f *ast.Function) error {
 	for _, v := range f.Type.ParameterList {
-		if v.Type.Type == ast.VARIABLE_TYPE_ENUM {
+		if v.Type.Type == ast.VariableTypeEnum {
 			err := loadEnumForVariableType(v.Type)
 			if err != nil {
 				return err
@@ -32,7 +32,7 @@ func loadEnumForFunction(f *ast.Function) error {
 		}
 	}
 	for _, v := range f.Type.ReturnList {
-		if v.Type.Type == ast.VARIABLE_TYPE_ENUM {
+		if v.Type.Type == ast.VariableTypeEnum {
 			err := loadEnumForVariableType(v.Type)
 			if err != nil {
 				return err

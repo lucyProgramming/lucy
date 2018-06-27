@@ -14,9 +14,9 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof
-	if assertOn.Type.Type == ast.VARIABLE_TYPE_OBJECT {
+	if assertOn.Type.Type == ast.VariableTypeObject {
 		class.InsertClassConst(assertOn.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	} else if assertOn.Type.Type == ast.VARIABLE_TYPE_ARRAY { // arrays
+	} else if assertOn.Type.Type == ast.VariableTypeArray { // arrays
 		meta := ArrayMetas[assertOn.Type.ArrayType.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
@@ -27,10 +27,10 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 
 	{
 		state.pushStack(class, assertOn.Expression.ExpressionValue)
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		state.pushStack(class, assertOn.Expression.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(2)
@@ -47,7 +47,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.CodeLength += 11
 	loadInt32(class, code, 2)
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 
 	// store object
@@ -70,7 +70,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap
 	code.CodeLength++
-	typeConverter.packPrimitives(class, code, &ast.Type{Type: ast.VARIABLE_TYPE_BOOL})
+	typeConverter.packPrimitives(class, code, &ast.Type{Type: ast.VariableTypeBool})
 	code.Codes[code.CodeLength] = cg.OP_iconst_1
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_swap

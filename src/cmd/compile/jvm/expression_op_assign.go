@@ -22,15 +22,15 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
-		Method:     special_method_init,
+		Class:      javaStringBuilderClass,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if t := remainStack + 2; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
+	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	currentStack := remainStack + 1 //
 	stack, _ := makeExpression.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
@@ -39,7 +39,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	//append origin string
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
+		Class:      javaStringBuilderClass,
 		Method:     `append`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -51,7 +51,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	//append right
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
+		Class:      javaStringBuilderClass,
 		Method:     `append`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	// tostring
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
+		Class:      javaStringBuilderClass,
 		Method:     `toString`,
 		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -79,7 +79,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		state.popStack(len(state.Stacks) - length)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
+	if bin.Left.ExpressionValue.Type == ast.VariableTypeString {
 		return makeExpression.buildStrPlusAssign(class, code, e, context, state)
 	}
 	maxStack, remainStack, op, _, className, name, descriptor := makeExpression.getLeftValue(class, code, bin.Left, context, state)
@@ -95,7 +95,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		maxStack = t
 	}
 	switch bin.Left.ExpressionValue.Type {
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
@@ -131,7 +131,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 			code.Codes[code.CodeLength] = cg.OP_ixor
 			code.CodeLength++
 		}
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
@@ -168,7 +168,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 			code.CodeLength++
 		}
 
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_iadd
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
@@ -191,7 +191,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 			code.Codes[code.CodeLength] = cg.OP_ixor
 		}
 		code.CodeLength++
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ladd
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
@@ -214,7 +214,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 			code.Codes[code.CodeLength] = cg.OP_lxor
 		}
 		code.CodeLength++
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_ladd
 		} else if e.Type == ast.EXPRESSION_TYPE_MINUS_ASSIGN {
@@ -227,7 +227,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 			code.Codes[code.CodeLength] = cg.OP_frem
 		}
 		code.CodeLength++
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		if e.Type == ast.EXPRESSION_TYPE_PLUS_ASSIGN {
 			code.Codes[code.CodeLength] = cg.OP_dadd
 

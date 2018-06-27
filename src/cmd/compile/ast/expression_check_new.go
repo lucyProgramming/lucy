@@ -11,18 +11,18 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, err)
 		return nil
 	}
-	if no.Type.Type == VARIABLE_TYPE_MAP {
+	if no.Type.Type == VariableTypeMap {
 		return e.checkNewMapExpression(block, no, errs)
 	}
-	if no.Type.Type == VARIABLE_TYPE_ARRAY {
+	if no.Type.Type == VariableTypeArray {
 		return e.checkNewArrayExpression(block, no, errs)
 	}
-	if no.Type.Type == VARIABLE_TYPE_JAVA_ARRAY {
+	if no.Type.Type == VariableTypeJavaArray {
 		return e.checkNewJavaArrayExpression(block, no, errs)
 	}
 
 	// new object
-	if no.Type.Type != VARIABLE_TYPE_OBJECT {
+	if no.Type.Type != VariableTypeObject {
 		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'",
 			errMsgPrefix(e.Pos), no.Type.TypeString()))
 		return nil
@@ -34,7 +34,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	}
 	ret := &Type{}
 	*ret = *no.Type
-	ret.Type = VARIABLE_TYPE_OBJECT
+	ret.Type = VariableTypeObject
 	ret.Pos = e.Pos
 	args := checkExpressions(block, no.Args, errs)
 	ms, matched, err := no.Type.Class.matchConstructionFunction(e.Pos, errs, args, &no.Args)
@@ -89,7 +89,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	if amount == nil {
 		return ret
 	}
-	if amount.Type != VARIABLE_TYPE_INT {
+	if amount.Type != VariableTypeInt {
 		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
 			errMsgPrefix(amount.Pos), amount.TypeString()))
 	}

@@ -36,7 +36,7 @@ func (s *StatementIF) check(father *Block) []error {
 		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
-		if conditionType != nil && conditionType.Type != VARIABLE_TYPE_BOOL {
+		if conditionType != nil && conditionType.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 				errMsgPrefix(s.Condition.Pos)))
 		}
@@ -57,7 +57,7 @@ func (s *StatementIF) check(father *Block) []error {
 		if errorsNotEmpty(es) {
 			errs = append(errs, es...)
 		}
-		if conditionType != nil && conditionType.Type != VARIABLE_TYPE_BOOL {
+		if conditionType != nil && conditionType.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 				errMsgPrefix(s.Condition.Pos)))
 		}

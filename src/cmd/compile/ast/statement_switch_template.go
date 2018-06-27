@@ -60,16 +60,16 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 				errMsgPrefix(s.Pos), TName, s.Condition.TypeString()))
 			return
 		}
-		statement.Type = STATEMENT_TYPE_BLOCK
+		statement.Type = StatementTypeBlock
 		statement.Block = s.Default
 		statement.Block.inherit(block)
 		return statement.Block.checkStatements()
 	}
 	// let`s reWrite
 	if matchBlock == nil {
-		statement.Type = STATEMENT_TYPE_NOP
+		statement.Type = StatementTypeNop
 	} else {
-		statement.Type = STATEMENT_TYPE_BLOCK
+		statement.Type = StatementTypeBlock
 		statement.Block = matchBlock
 		statement.Block.inherit(block)
 		return append(errs, statement.Block.checkStatements()...)

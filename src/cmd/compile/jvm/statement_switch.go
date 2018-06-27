@@ -13,40 +13,42 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 	compare := func(t *ast.Type) {
 		state.popStack(2)
 		switch t.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_isub
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_lcmp
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_fcmpg
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_dcmpg
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_STRING:
+		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_string_class,
+				Class:      javaStringClass,
 				Method:     "compareTo",
 				Descriptor: "(Ljava/lang/String;)I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeFunction:
 			fallthrough
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeObject:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeMap:
+			fallthrough
+		case ast.VariableTypeArray:
 			context.MakeStackMap(code, state, code.CodeLength+7)
 			state.pushStack(class, &ast.Type{
-				Type: ast.VARIABLE_TYPE_BOOL,
+				Type: ast.VariableTypeBool,
 			})
 			context.MakeStackMap(code, state, code.CodeLength+8)
 			state.popStack(1)

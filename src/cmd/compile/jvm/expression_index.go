@@ -28,13 +28,13 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_hashmap_class,
+		Class:      javaHashMapClass,
 		Method:     "get",
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.popStack(1)
-	if index.Expression.ExpressionValue.Map.Value.Type == ast.VARIABLE_TYPE_ENUM {
+	if index.Expression.ExpressionValue.Map.Value.Type == ast.VariableTypeEnum {
 		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.Value)
 	} else if index.Expression.ExpressionValue.Map.Value.IsPointer() {
 		typeConverter.castPointerTypeToRealType(class, code, index.Expression.ExpressionValue.Map.Value)
@@ -48,25 +48,25 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 		codeLength := code.CodeLength
 		code.CodeLength += 3
 		switch index.Expression.ExpressionValue.Map.Value.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_iconst_0
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_lconst_0
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_fconst_0
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.Codes[code.CodeLength+1] = cg.OP_dconst_0
 			code.CodeLength += 2
@@ -76,7 +76,7 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 		code.CodeLength += 3
 		// no null goto here
 		{
-			state.pushStack(class, state.newObjectVariableType(java_root_class))
+			state.pushStack(class, state.newObjectVariableType(javaRootClass))
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // pop java_root_class ref
 		}
@@ -99,13 +99,13 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP {
+	if index.Expression.ExpressionValue.Type == ast.VariableTypeMap {
 		return makeExpression.buildMapIndex(class, code, e, context, state)
 	}
 	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.ExpressionValue)
 	currentStack := uint16(1)
-	if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+	if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 		meta := ArrayMetas[e.ExpressionValue.Type]
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
@@ -127,15 +127,15 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 			Descriptor: "I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		currentStack = 3
 	}
 	stack, _ := makeExpression.build(class, code, index.Index, context, state)
 	if t := stack + currentStack; t > maxStack {
 		maxStack = t
 	}
-	if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+	if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 		meta := ArrayMetas[e.ExpressionValue.Type]
 		// stack arrayref  end start index
 		code.Codes[code.CodeLength] = cg.OP_iadd
@@ -154,12 +154,12 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 		code.Codes[code.CodeLength+6] = cg.OP_pop // incase stack over flow
 		code.Codes[code.CodeLength+7] = cg.OP_pop
 		code.Codes[code.CodeLength+8] = cg.OP_new
-		class.InsertClassConst(java_index_out_of_range_exception_class, code.Codes[code.CodeLength+9:code.CodeLength+11])
+		class.InsertClassConst(javaIndexOutOfRangeExceptionClass, code.Codes[code.CodeLength+9:code.CodeLength+11])
 		code.Codes[code.CodeLength+11] = cg.OP_dup
 		code.Codes[code.CodeLength+12] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_index_out_of_range_exception_class,
-			Method:     special_method_init,
+			Class:      javaIndexOutOfRangeExceptionClass,
+			Method:     specialMethodInit,
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+13:code.CodeLength+15])
 		code.Codes[code.CodeLength+15] = cg.OP_athrow
@@ -176,36 +176,39 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 	}
 	switch e.ExpressionValue.Type {
-	case ast.VARIABLE_TYPE_BOOL:
+	case ast.VariableTypeBool:
 		fallthrough
-	case ast.VARIABLE_TYPE_BYTE:
+	case ast.VariableTypeByte:
 		code.Codes[code.CodeLength] = cg.OP_baload
-	case ast.VARIABLE_TYPE_SHORT:
+	case ast.VariableTypeShort:
 		code.Codes[code.CodeLength] = cg.OP_saload
-	case ast.VARIABLE_TYPE_ENUM:
+	case ast.VariableTypeEnum:
 		fallthrough
-	case ast.VARIABLE_TYPE_INT:
+	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_iaload
-	case ast.VARIABLE_TYPE_LONG:
+	case ast.VariableTypeLong:
 		code.Codes[code.CodeLength] = cg.OP_laload
-	case ast.VARIABLE_TYPE_FLOAT:
+	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_faload
-	case ast.VARIABLE_TYPE_DOUBLE:
+	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_daload
-	case ast.VARIABLE_TYPE_STRING:
+	case ast.VariableTypeString:
 		fallthrough
-	case ast.VARIABLE_TYPE_OBJECT:
+	case ast.VariableTypeObject:
 		fallthrough
-	case ast.VARIABLE_TYPE_MAP:
+	case ast.VariableTypeMap:
 		fallthrough
-	case ast.VARIABLE_TYPE_ARRAY:
+	case ast.VariableTypeArray:
 		fallthrough
-	case ast.VARIABLE_TYPE_JAVA_ARRAY:
+	case ast.VariableTypeFunction:
+		fallthrough
+	case ast.VariableTypeJavaArray:
 		code.Codes[code.CodeLength] = cg.OP_aaload
+
 	}
 	code.CodeLength++
-	if index.Expression.Type == ast.VARIABLE_TYPE_ARRAY &&
-		e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VARIABLE_TYPE_STRING {
+	if index.Expression.Type == ast.VariableTypeArray &&
+		e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VariableTypeString {
 		typeConverter.castPointerTypeToRealType(class, code, e.ExpressionValue)
 	}
 	return

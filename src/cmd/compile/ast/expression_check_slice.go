@@ -23,8 +23,8 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
 			errMsgPrefix(slice.Start.Pos), startT.TypeString()))
 	}
-	if startT != nil && startT.Type == VARIABLE_TYPE_LONG {
-		slice.Start.ConvertToNumber(VARIABLE_TYPE_INT)
+	if startT != nil && startT.Type == VariableTypeLong {
+		slice.Start.ConvertToNumber(VariableTypeInt)
 	}
 	if slice.End == nil {
 		slice.End = &Expression{}
@@ -40,8 +40,8 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'",
 			errMsgPrefix(slice.End.Pos), endT.TypeString()))
 	}
-	if endT != nil && endT.Type == VARIABLE_TYPE_LONG {
-		slice.End.ConvertToNumber(VARIABLE_TYPE_INT)
+	if endT != nil && endT.Type == VariableTypeLong {
+		slice.End.ConvertToNumber(VariableTypeInt)
 	}
 
 	t, es := slice.Array.checkSingleValueContextExpression(block)
@@ -51,7 +51,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if t == nil {
 		return nil
 	}
-	if t.Type != VARIABLE_TYPE_ARRAY {
+	if t.Type != VariableTypeArray {
 		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
 			errMsgPrefix(slice.Array.Pos), t.TypeString()))
 	}

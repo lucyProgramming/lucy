@@ -28,12 +28,12 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 	} else { // get stream from args
 		maxStack, _ = makeExpression.build(class, code, meta.Stream, context, state)
 	}
-	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
+	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	stack, _ := makeExpression.build(class, code, meta.Format, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, state.newObjectVariableType(java_string_class))
+	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -43,8 +43,8 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 		maxStack = currentStack
 	}
 	objectArray := &ast.Type{}
-	objectArray.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
-	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
+	objectArray.Type = ast.VariableTypeJavaArray
+	objectArray.ArrayType = state.newObjectVariableType(javaRootClass)
 	state.pushStack(class, objectArray)
 
 	index := int32(0)
@@ -79,7 +79,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 		loadInt32(class, code, index)
 		currentStack += 2
 		state.pushStack(class, objectArray)
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
@@ -100,7 +100,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_print_stream_class,
+		Class:      javaPrintStreamClass,
 		Method:     "printf",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;",
 	},

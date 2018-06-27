@@ -45,7 +45,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 			return nil
 		}
 		switch t.Type {
-		case VARIABLE_TYPE_OBJECT:
+		case VariableTypeObject:
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -66,7 +66,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 				return ret
 			}
 			return nil
-		case VARIABLE_TYPE_CLASS:
+		case VariableTypeClass:
 			field, err := t.Class.accessField(dot.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -82,7 +82,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 				return ret
 			}
 			return nil
-		case VARIABLE_TYPE_PACKAGE:
+		case VariableTypePackage:
 			variable, exists := t.Package.Block.NameExists(dot.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",

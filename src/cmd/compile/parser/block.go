@@ -68,7 +68,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 						blockParser.parser.errorMsgPrefix()))
 			}
 			s := &ast.Statement{
-				Type: ast.STATEMENT_TYPE_EXPRESSION,
+				Type: ast.StatementTypeExpression,
 				Expression: &ast.Expression{
 					Type: ast.EXPRESSION_TYPE_VAR,
 					Data: &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es},
@@ -92,7 +92,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				continue
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:        ast.STATEMENT_TYPE_IF,
+				Type:        ast.StatementTypeIf,
 				StatementIf: i,
 				Pos:         pos,
 			})
@@ -112,7 +112,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			f.Block.IsForBlock = true
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:         ast.STATEMENT_TYPE_FOR,
+				Type:         ast.StatementTypeFor,
 				StatementFor: f,
 				Pos:          pos,
 			})
@@ -126,13 +126,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			if _, ok := s.(*ast.StatementSwitch); ok {
 				block.Statements = append(block.Statements, &ast.Statement{
-					Type:            ast.STATEMENT_TYPE_SWITCH,
+					Type:            ast.StatementTypeSwitch,
 					StatementSwitch: s.(*ast.StatementSwitch),
 					Pos:             pos,
 				})
 			} else {
 				block.Statements = append(block.Statements, &ast.Statement{
-					Type: ast.STATEMENT_TYPE_SWITCH_TEMPLATE,
+					Type: ast.StatementTypeSwitchTemplate,
 					StatementSwitchTemplate: s.(*ast.StatementSwitchTemplate),
 					Pos: pos,
 				})
@@ -187,7 +187,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				}
 			}
 			r := &ast.Statement{}
-			r.Type = ast.STATEMENT_TYPE_EXPRESSION
+			r.Type = ast.StatementTypeExpression
 			r.Pos = pos
 			r.Expression = &ast.Expression{
 				Type: ast.EXPRESSION_TYPE_CONST,
@@ -212,7 +212,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next()
 			r := &ast.StatementReturn{}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:            ast.STATEMENT_TYPE_RETURN,
+				Type:            ast.StatementTypeReturn,
 				StatementReturn: r,
 				Pos:             pos,
 			})
@@ -251,13 +251,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					Block: newBlock,
 				}
 				block.Statements = append(block.Statements, &ast.Statement{
-					Type:  ast.STATEMENT_TYPE_DEFER,
+					Type:  ast.StatementTypeDefer,
 					Defer: d,
 					Pos:   pos,
 				})
 			} else {
 				block.Statements = append(block.Statements, &ast.Statement{
-					Type:  ast.STATEMENT_TYPE_BLOCK,
+					Type:  ast.StatementTypeBlock,
 					Block: &newBlock,
 					Pos:   pos,
 				})
@@ -282,7 +282,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					blockParser.parser.errorMsgPrefix()))
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:            ast.STATEMENT_TYPE_RETURN,
+				Type:            ast.StatementTypeReturn,
 				Pos:             pos,
 				StatementReturn: &ast.StatementReturn{},
 			})
@@ -301,7 +301,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:              ast.STATEMENT_TYPE_CONTINUE,
+				Type:              ast.StatementTypeContinue,
 				StatementContinue: &ast.StatementContinue{},
 				Pos:               pos,
 			})
@@ -320,7 +320,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:           ast.STATEMENT_TYPE_BREAK,
+				Type:           ast.StatementTypeBreak,
 				StatementBreak: &ast.StatementBreak{},
 				Pos:            pos,
 			})
@@ -343,7 +343,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			s := &ast.StatementGoTo{}
 			s.LabelName = blockParser.parser.token.Data.(string)
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:          ast.STATEMENT_TYPE_GOTO,
+				Type:          ast.StatementTypeGoto,
 				StatementGoTo: s,
 				Pos:           pos,
 			})
@@ -372,7 +372,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Type = ast.STATEMENT_TYPE_EXPRESSION
+			s.Type = ast.StatementTypeExpression
 			s.Expression = &ast.Expression{}
 			s.Expression.Type = ast.EXPRESSION_TYPE_TYPE_ALIAS
 			s.Expression.Data = alias
@@ -394,7 +394,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Type = ast.STATEMENT_TYPE_CLASS
+			s.Type = ast.StatementTypeClass
 			s.Class = class
 			block.Statements = append(block.Statements, s)
 		case lex.TOKEN_ENUM:
@@ -407,7 +407,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			s := &ast.Statement{}
 			s.Pos = pos
-			s.Type = ast.STATEMENT_TYPE_ENUM
+			s.Type = ast.StatementTypeEnum
 			s.Enum = e
 			block.Statements = append(block.Statements, s)
 		default:
@@ -434,7 +434,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		blockParser.Next() // skip :
 		s := &ast.Statement{}
 		s.Pos = pos
-		s.Type = ast.STATEMENT_TYPE_LABEL
+		s.Type = ast.StatementTypeLabel
 		label := &ast.StatementLabel{}
 		s.StatementLabel = label
 		label.Statement = s
@@ -453,17 +453,17 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		if isDefer {
 			d := &ast.StatementDefer{}
 			d.Block.Statements = []*ast.Statement{&ast.Statement{
-				Type:       ast.STATEMENT_TYPE_EXPRESSION,
+				Type:       ast.StatementTypeExpression,
 				Expression: e,
 				Pos:        pos,
 			}}
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:  ast.STATEMENT_TYPE_DEFER,
+				Type:  ast.StatementTypeDefer,
 				Defer: d,
 			})
 		} else {
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:       ast.STATEMENT_TYPE_EXPRESSION,
+				Type:       ast.StatementTypeExpression,
 				Expression: e,
 				Pos:        pos,
 			})

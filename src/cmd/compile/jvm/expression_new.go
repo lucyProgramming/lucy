@@ -7,13 +7,13 @@ import (
 
 func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+	if e.ExpressionValue.Type == ast.VariableTypeArray {
 		return makeExpression.buildNewArray(class, code, e, context, state)
 	}
-	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
+	if e.ExpressionValue.Type == ast.VariableTypeJavaArray {
 		return makeExpression.buildNewJavaArray(class, code, e, context, state)
 	}
-	if e.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP {
+	if e.ExpressionValue.Type == ast.VariableTypeMap {
 		return makeExpression.buildNewMap(class, code, e, context)
 	}
 	stackLength := len(state.Stacks)
@@ -40,7 +40,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 	if n.Construction == nil {
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      n.Type.Class.Name,
-			Method:     special_method_init,
+			Method:     specialMethodInit,
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
@@ -52,7 +52,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      n.Type.Class.Name,
-			Method:     special_method_init,
+			Method:     specialMethodInit,
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
@@ -63,13 +63,13 @@ func (makeExpression *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_hashmap_class,
-		Method:     special_method_init,
+		Class:      javaHashMapClass,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -82,7 +82,7 @@ func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel
 	{
 		// get dimension
 		t := e.ExpressionValue
-		for t.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
+		for t.Type == ast.VariableTypeJavaArray {
 			dimensions++
 			t = t.ArrayType
 		}
@@ -133,54 +133,58 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 			maxStack = t
 		}
 		switch e.ExpressionValue.ArrayType.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_INT
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_LONG
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_FLOAT
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_STRING:
+		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(java_string_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeMap:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeFunction:
+			code.Codes[code.CodeLength] = cg.OP_anewarray
+			class.InsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VariableTypeObject:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
 			class.InsertClassConst(e.ExpressionValue.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
 			meta := ArrayMetas[e.ExpressionValue.ArrayType.ArrayType.Type]
 			class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		case ast.VariableTypeJavaArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
 			class.InsertClassConst(Descriptor.typeDescriptor(e.ExpressionValue.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -189,7 +193,7 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.className,
-		Method:     special_method_init,
+		Method:     specialMethodInit,
 		Descriptor: meta.constructorFuncDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

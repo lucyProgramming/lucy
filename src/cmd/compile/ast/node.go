@@ -118,7 +118,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 		s := make([]*Statement, len(expressions))
 		for k, v := range expressions {
 			s[k] = &Statement{
-				Type:       STATEMENT_TYPE_EXPRESSION,
+				Type:       StatementTypeExpression,
 				Expression: v,
 			}
 		}

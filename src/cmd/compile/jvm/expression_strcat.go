@@ -12,17 +12,17 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_string_builder_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaStringBuilderClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
-		Method:     special_method_init,
+		Class:      javaStringBuilderClass,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
+	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	maxStack = 2 // current stack is 2
 	currentStack := uint16(1)
 	stack, es := makeExpression.build(class, code, e.Left, context, state)
@@ -40,7 +40,7 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
+		Class:      javaStringBuilderClass,
 		Method:     "append",
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -60,14 +60,14 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
+		Class:      javaStringBuilderClass,
 		Method:     "append",
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
+		Class:      javaStringBuilderClass,
 		Method:     `toString`,
 		Descriptor: "()Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

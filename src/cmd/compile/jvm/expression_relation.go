@@ -22,17 +22,17 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 			maxStack = t
 		}
 		switch bin.Left.ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_isub
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_lcmp
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_fcmpl
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_dcmpl
 		}
 		code.CodeLength++
@@ -40,7 +40,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		if e.Type == ast.EXPRESSION_TYPE_GT || e.Type == ast.EXPRESSION_TYPE_LE { // > and <=
@@ -82,8 +82,8 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		return
 	}
-	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_BOOL ||
-		bin.Right.ExpressionValue.Type == ast.VARIABLE_TYPE_BOOL { // bool type
+	if bin.Left.ExpressionValue.Type == ast.VariableTypeBool ||
+		bin.Right.ExpressionValue.Type == ast.VariableTypeBool { // bool type
 		var es []*cg.Exit
 		maxStack, es = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
@@ -103,7 +103,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		state.popStack(2) // 2 bool value
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		if e.Type == ast.EXPRESSION_TYPE_EQ {
@@ -119,10 +119,10 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		code.CodeLength += 8
 		return
 	}
-	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_NULL ||
-		bin.Right.ExpressionValue.Type == ast.VARIABLE_TYPE_NULL { // must not null-null
+	if bin.Left.ExpressionValue.Type == ast.VariableTypeNull ||
+		bin.Right.ExpressionValue.Type == ast.VariableTypeNull { // must not null-null
 		var notNullExpression *ast.Expression
-		if bin.Left.ExpressionValue.Type != ast.VARIABLE_TYPE_NULL {
+		if bin.Left.ExpressionValue.Type != ast.VariableTypeNull {
 			notNullExpression = bin.Left
 		} else {
 			notNullExpression = bin.Right
@@ -135,7 +135,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
@@ -148,13 +148,13 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 	}
 
 	//string compare
-	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
+	if bin.Left.ExpressionValue.Type == ast.VariableTypeString {
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
 		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_string_class,
+			Class:      javaStringClass,
 			Method:     "compareTo",
 			Descriptor: "(Ljava/lang/String;)I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -165,7 +165,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		state.popStack(1) // pop left string
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		if e.Type == ast.EXPRESSION_TYPE_GT || e.Type == ast.EXPRESSION_TYPE_LE { // > and <=
@@ -221,7 +221,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		state.popStack(1) // pop bin left
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{
-			Type: ast.VARIABLE_TYPE_BOOL,
+			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		if e.Type == ast.EXPRESSION_TYPE_EQ {
@@ -239,7 +239,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 	}
 
 	// enum
-	if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_ENUM {
+	if bin.Left.ExpressionValue.Type == ast.VariableTypeEnum {
 		stack, _ := makeExpression.build(class, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
@@ -251,7 +251,7 @@ func (makeExpression *MakeExpression) buildRelations(class *cg.ClassHighLevel, c
 		}
 		state.popStack(1) //
 		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_BOOL})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeBool})
 		context.MakeStackMap(code, state, code.CodeLength+8) //result on stack
 		if e.Type == ast.EXPRESSION_TYPE_EQ {
 			code.Codes[code.CodeLength] = cg.OP_if_icmpeq

@@ -233,13 +233,13 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 	}
 	loadInt32(class, code, int32(length))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst(java_root_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if 1 > maxStack {
 		maxStack = 1
 	}
 
-	arrayListObject := state.newObjectVariableType(java_root_object_array)
+	arrayListObject := state.newObjectVariableType(javaRootObjectArray)
 	state.pushStack(class, arrayListObject)
 	state.pushStack(class, arrayListObject)
 	defer state.popStack(2)

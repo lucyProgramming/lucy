@@ -16,16 +16,16 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		return nil
 	}
 	// dot
-	if t.Type != VARIABLE_TYPE_OBJECT &&
-		t.Type != VARIABLE_TYPE_CLASS &&
-		t.Type != VARIABLE_TYPE_PACKAGE {
+	if t.Type != VariableTypeObject &&
+		t.Type != VariableTypeClass &&
+		t.Type != VariableTypePackage {
 		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'",
 			errMsgPrefix(e.Pos), selection.Name, t.TypeString()))
 		return nil
 	}
 	var err error
 	switch t.Type {
-	case VARIABLE_TYPE_PACKAGE:
+	case VariableTypePackage:
 		d, ok := t.Package.Block.NameExists(selection.Name)
 		if ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
@@ -57,7 +57,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			c := d.(*Class)
 			tt := &Type{}
 			tt.Pos = e.Pos
-			tt.Type = VARIABLE_TYPE_CLASS
+			tt.Type = VariableTypeClass
 			tt.Class = c
 			if (c.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
 				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
@@ -74,18 +74,18 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			tt.Pos = e.Pos
 			tt.Enum = n.Enum
 			tt.EnumName = n
-			tt.Type = VARIABLE_TYPE_ENUM
+			tt.Type = VariableTypeEnum
 			selection.PackageEnumName = n
 			return tt
 		}
 		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
 		*errs = append(*errs, err)
 		return nil
-	case VARIABLE_TYPE_OBJECT:
+	case VariableTypeObject:
 		if selection.Name == SUPER {
-			if t.Class.Name == JAVA_ROOT_CLASS {
+			if t.Class.Name == JavaRootClass {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
-					errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
+					errMsgPrefix(e.Pos), JavaRootClass))
 				return t
 			}
 			err = t.Class.loadSuperClass()
@@ -116,11 +116,11 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			selection.Field = field
 			return t
 		}
-	case VARIABLE_TYPE_CLASS:
+	case VariableTypeClass:
 		if selection.Name == SUPER {
-			if t.Class.Name == JAVA_ROOT_CLASS {
+			if t.Class.Name == JavaRootClass {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
-					errMsgPrefix(e.Pos), JAVA_ROOT_CLASS))
+					errMsgPrefix(e.Pos), JavaRootClass))
 				return t
 			}
 			err = t.Class.loadSuperClass()

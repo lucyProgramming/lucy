@@ -64,7 +64,7 @@ func (c *Class) mkDefaultConstruction() {
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
 	}
-	if len(c.Methods[CONSTRUCTION_METHOD_NAME]) > 0 {
+	if len(c.Methods[ConstructionMethodName]) > 0 {
 		return
 	}
 	if c.Methods == nil {
@@ -92,11 +92,11 @@ func (c *Class) mkDefaultConstruction() {
 		e.Data = call
 		m.Function.Block.Statements = make([]*Statement, 1)
 		m.Function.Block.Statements[0] = &Statement{
-			Type:       STATEMENT_TYPE_EXPRESSION,
+			Type:       StatementTypeExpression,
 			Expression: e,
 		}
 	}
-	c.Methods[CONSTRUCTION_METHOD_NAME] = []*ClassMethod{m}
+	c.Methods[ConstructionMethodName] = []*ClassMethod{m}
 }
 
 func (c *Class) checkIfClassHierarchyCircularity() error {
@@ -104,7 +104,7 @@ func (c *Class) checkIfClassHierarchyCircularity() error {
 	arr := []string{}
 	is := false
 	class := c
-	for class.Name != JAVA_ROOT_CLASS {
+	for class.Name != JavaRootClass {
 		_, ok := m[class.Name]
 		if ok {
 			arr = append(arr, class.Name)
@@ -200,7 +200,7 @@ func (c *Class) mkClassInitMethod() {
 	f.Block.Statements = make([]*Statement, len(c.StaticBlocks))
 	for k, _ := range f.Block.Statements {
 		s := &Statement{}
-		s.Type = STATEMENT_TYPE_BLOCK
+		s.Type = StatementTypeBlock
 		s.Block = c.StaticBlocks[k]
 		f.Block.Statements[k] = s
 	}
@@ -208,7 +208,7 @@ func (c *Class) mkClassInitMethod() {
 	f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	f.AccessFlags |= cg.ACC_METHOD_STATIC
 	f.AccessFlags |= cg.ACC_METHOD_FINAL
-	f.Name = CLASS_INIT_METHOD
+	f.Name = ClassInitMethod
 	f.Block.IsFunctionBlock = true
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
@@ -242,7 +242,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 				vv.Function.Block.Variables[THIS].Name = THIS
 				vv.Function.Block.Variables[THIS].Pos = vv.Function.Pos
 				vv.Function.Block.Variables[THIS].Type = &Type{
-					Type:  VARIABLE_TYPE_OBJECT,
+					Type:  VariableTypeObject,
 					Class: c,
 				}
 			}
@@ -262,9 +262,9 @@ func (c *Class) resolveFather(block *Block) error {
 	defer func() {
 		if c.SuperClassName == "" {
 			if c.IsInterface() == false {
-				c.SuperClassName = LUCY_ROOT_CLASS
+				c.SuperClassName = LucyRootClass
 			} else {
-				c.SuperClassName = JAVA_ROOT_CLASS
+				c.SuperClassName = JavaRootClass
 			}
 		}
 		c.FatherNameResolved = true
@@ -299,25 +299,25 @@ func (c *Class) resolveFather(block *Block) error {
 		}
 	} else {
 		variableType := Type{}
-		variableType.Type = VARIABLE_TYPE_NAME // naming
+		variableType.Type = VariableTypeName // naming
 		variableType.Name = c.SuperClassName
 		variableType.Pos = c.Pos
 		err := variableType.resolve(block)
 		if err != nil {
 			return err
 		}
-		if variableType.Type != VARIABLE_TYPE_OBJECT {
+		if variableType.Type != VariableTypeObject {
 			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		}
 		c.SuperClassName = variableType.Class.Name
 		c.SuperClass = variableType.Class
 	}
 	if c.IsInterface() {
-		if c.SuperClass.Name == JAVA_ROOT_CLASS {
+		if c.SuperClass.Name == JavaRootClass {
 			//nothing
 		} else {
 			return fmt.Errorf("%s interface`s super-class must be '%s'",
-				errMsgPrefix(c.Pos), JAVA_ROOT_CLASS)
+				errMsgPrefix(c.Pos), JavaRootClass)
 		}
 	}
 	return nil
@@ -326,7 +326,7 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 	errs := []error{}
 	for _, i := range c.InterfaceNames {
 		t := &Type{}
-		t.Type = VARIABLE_TYPE_NAME
+		t.Type = VariableTypeName
 		t.Pos = i.Pos
 		t.Name = i.Name
 		err := t.resolve(block)
@@ -334,7 +334,7 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 			errs = append(errs, err)
 			continue
 		}
-		if t.Type != VARIABLE_TYPE_OBJECT {
+		if t.Type != VariableTypeObject {
 			errs = append(errs, fmt.Errorf("%s '%s' is not a class",
 				errMsgPrefix(i.Pos), i.Name))
 			continue
@@ -384,7 +384,7 @@ func (c *Class) haveSuper(superclassName string) (bool, error) {
 	if c.Name == superclassName {
 		return true, nil
 	}
-	if c.Name == JAVA_ROOT_CLASS {
+	if c.Name == JavaRootClass {
 		return false, nil
 	}
 	err = c.loadSuperClass()
@@ -404,7 +404,7 @@ func (c *Class) implemented(inter string) (bool, error) {
 			return true, nil
 		}
 	}
-	if c.Name == JAVA_ROOT_CLASS {
+	if c.Name == JavaRootClass {
 		return false, nil
 	}
 	err = c.loadSuperClass()
@@ -451,7 +451,7 @@ func (c *Class) checkFields() []error {
 				selection := &ExpressionSelection{}
 				selection.Expression = &Expression{}
 				selection.Expression.ExpressionValue = &Type{
-					Type:  VARIABLE_TYPE_CLASS,
+					Type:  VariableTypeClass,
 					Class: c,
 				}
 				selection.Name = v.Name
@@ -472,7 +472,7 @@ func (c *Class) checkFields() []error {
 				IsStatementExpression: true,
 			}
 			ss = append(ss, &Statement{
-				Type:                      STATEMENT_TYPE_EXPRESSION,
+				Type:                      StatementTypeExpression,
 				Expression:                e,
 				isStaticFieldDefaultValue: true,
 			})
@@ -500,7 +500,7 @@ func (c *Class) checkMethods() []error {
 			if c.IsInterface() {
 				continue
 			}
-			isConstruction := (name == CONSTRUCTION_METHOD_NAME)
+			isConstruction := (name == ConstructionMethodName)
 			if isConstruction &&
 				vv.IsFirstStatementCallFatherConstruction() == false {
 				errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",
@@ -523,7 +523,7 @@ func (c *Class) loadSuperClass() error {
 	if c.SuperClass != nil {
 		return nil
 	}
-	if c.Name == JAVA_ROOT_CLASS {
+	if c.Name == JavaRootClass {
 		return fmt.Errorf("root class already")
 	}
 	class, err := PackageBeenCompile.loadClass(c.SuperClassName)

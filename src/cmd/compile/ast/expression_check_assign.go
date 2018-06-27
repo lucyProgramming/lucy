@@ -39,7 +39,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			continue
 		}
 		identifier := v.Data.(*ExpressionIdentifier)
-		if identifier.Name == NO_NAME_IDENTIFIER {
+		if identifier.Name == NoNameIdentifier {
 			vd := &Variable{}
 			vd.Name = identifier.Name
 			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
@@ -74,7 +74,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd.Type = variableType
 			if vd.Type == nil { // still cannot have type,we can have a void,that`s ok
 				vd.Type = &Type{}
-				vd.Type.Type = VARIABLE_TYPE_VOID
+				vd.Type.Type = VariableTypeVoid
 				vd.Type.Pos = v.Pos
 			}
 			err = block.Insert(vd.Name, v.Pos, vd)
@@ -119,8 +119,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		var  s string;
 		s += "11111111";
 	*/
-	if t1.Type == VARIABLE_TYPE_STRING {
-		if t2.Type != VARIABLE_TYPE_STRING || (e.Type != EXPRESSION_TYPE_PLUS_ASSIGN) {
+	if t1.Type == VariableTypeString {
+		if t2.Type != VariableTypeString || (e.Type != EXPRESSION_TYPE_PLUS_ASSIGN) {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),
@@ -157,8 +157,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	if e.Type == EXPRESSION_TYPE_LSH_ASSIGN ||
 		e.Type == EXPRESSION_TYPE_RSH_ASSIGN {
 		if t1.IsInteger() && t2.IsInteger() {
-			if t2.Type == VARIABLE_TYPE_LONG {
-				bin.Right.ConvertToNumber(VARIABLE_TYPE_INT)
+			if t2.Type == VariableTypeLong {
+				bin.Right.ConvertToNumber(VariableTypeInt)
 			}
 			return ret
 		}
@@ -192,7 +192,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	for _, v := range lefts {
 		if v.Type == EXPRESSION_TYPE_IDENTIFIER {
 			name := v.Data.(*ExpressionIdentifier)
-			if name.Name == NO_NAME_IDENTIFIER { // skip "_"
+			if name.Name == NoNameIdentifier { // skip "_"
 				leftTypes = append(leftTypes, nil) // this is no assign situation
 				continue
 			}

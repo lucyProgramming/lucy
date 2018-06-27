@@ -40,7 +40,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 		state.popStack(len(state.Stacks) - length)
 	}()
 
-	state.pushStack(class, state.newObjectVariableType(java_print_stream_class))
+	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	if len(call.Args) == 1 && call.Args[0].HaveOnlyOneValue() {
 		stack, es := makeExpression.build(class, code, call.Args[0], context, state)
 		if len(es) > 0 {
@@ -53,7 +53,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 			maxStack = t
 		}
 		switch call.Args[0].ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -61,13 +61,13 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				Descriptor: "(Z)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -75,7 +75,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				Descriptor: "(I)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -83,7 +83,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				Descriptor: "(J)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -91,7 +91,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				Descriptor: "(F)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -99,7 +99,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				Descriptor: "(D)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_STRING:
+		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -107,13 +107,15 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				Descriptor: "(Ljava/lang/String;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VARIABLE_TYPE_JAVA_ARRAY:
+		case ast.VariableTypeFunction:
 			fallthrough
-		case ast.VARIABLE_TYPE_OBJECT:
+		case ast.VariableTypeJavaArray:
 			fallthrough
-		case ast.VARIABLE_TYPE_ARRAY:
+		case ast.VariableTypeObject:
 			fallthrough
-		case ast.VARIABLE_TYPE_MAP:
+		case ast.VariableTypeArray:
+			fallthrough
+		case ast.VariableTypeMap:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -126,19 +128,19 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 	}
 
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_string_builder_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaStringBuilderClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_builder_class,
-		Method:     special_method_init,
+		Class:      javaStringBuilderClass,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxStack = 3
 	currentStack := uint16(2)
-	state.pushStack(class, state.newObjectVariableType(java_string_builder_class))
+	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	appendString := func(isLast bool) {
 		//
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -177,7 +179,7 @@ func (makeExpression *MakeExpression) mkBuildInPrint(class *cg.ClassHighLevel, c
 				if t := currentStack + makeExpression.stackTop2String(class, code, tt, context, state); t > maxStack {
 					maxStack = t
 				}
-				if tt.IsPointer() && tt.Type != ast.VARIABLE_TYPE_STRING {
+				if tt.IsPointer() && tt.Type != ast.VariableTypeString {
 					if t := 2 + currentStack; t > maxStack {
 						maxStack = t
 					}

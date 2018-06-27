@@ -22,7 +22,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	if m.Type == nil {
 		m.Type = &Type{}
 		m.Type.Pos = e.Pos
-		m.Type.Type = VARIABLE_TYPE_MAP
+		m.Type.Type = VariableTypeMap
 	}
 	if m.Type.Map == nil {
 		m.Type.Map = &Map{}
@@ -86,13 +86,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 
 	if m.Type.Map.Key == nil {
 		m.Type.Map.Key = &Type{
-			Type: VARIABLE_TYPE_VOID,
+			Type: VariableTypeVoid,
 			Pos:  e.Pos,
 		}
 	}
 	if m.Type.Map.Value == nil {
 		m.Type.Map.Value = &Type{
-			Type: VARIABLE_TYPE_VOID,
+			Type: VariableTypeVoid,
 			Pos:  e.Pos,
 		}
 	}

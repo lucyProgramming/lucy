@@ -22,13 +22,13 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			fallthrough
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			if e.Type == ast.EXPRESSION_TYPE_AND {
 				code.Codes[code.CodeLength] = cg.OP_iand
 			} else if e.Type == ast.EXPRESSION_TYPE_OR {
@@ -36,9 +36,9 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ixor
 			}
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			fallthrough
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			if e.Type == ast.EXPRESSION_TYPE_AND {
 				code.Codes[code.CodeLength] = cg.OP_land
 			} else if e.Type == ast.EXPRESSION_TYPE_OR {
@@ -56,8 +56,8 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		e.Type == ast.EXPRESSION_TYPE_DIV ||
 		e.Type == ast.EXPRESSION_TYPE_MOD {
 		//handle string first
-		if bin.Left.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING ||
-			bin.Right.ExpressionValue.Type == ast.VARIABLE_TYPE_STRING {
+		if bin.Left.ExpressionValue.Type == ast.VariableTypeString ||
+			bin.Right.ExpressionValue.Type == ast.VariableTypeString {
 			return makeExpression.buildStrCat(class, code, bin, context, state)
 		}
 		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
@@ -67,7 +67,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_iadd
@@ -89,7 +89,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 				code.CodeLength++
 			}
 
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_iadd
@@ -110,7 +110,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 				code.Codes[code.CodeLength] = cg.OP_irem
 				code.CodeLength++
 			}
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_iadd
@@ -124,7 +124,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 				code.Codes[code.CodeLength] = cg.OP_irem
 			}
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_fadd
@@ -138,7 +138,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 				code.Codes[code.CodeLength] = cg.OP_frem
 			}
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_dadd
@@ -152,7 +152,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 				code.Codes[code.CodeLength] = cg.OP_drem
 			}
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			switch e.Type {
 			case ast.EXPRESSION_TYPE_ADD:
 				code.Codes[code.CodeLength] = cg.OP_ladd
@@ -179,7 +179,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			if e.Type == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
@@ -187,7 +187,7 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 			}
 			code.Codes[code.CodeLength+1] = cg.OP_i2b
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			if e.Type == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
@@ -195,14 +195,14 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 			}
 			code.Codes[code.CodeLength+1] = cg.OP_i2s
 			code.CodeLength += 2
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			if e.Type == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
 			}
 			code.CodeLength++
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			if e.Type == ast.EXPRESSION_TYPE_LSH {
 				code.Codes[code.CodeLength] = cg.OP_lshl
 			} else {

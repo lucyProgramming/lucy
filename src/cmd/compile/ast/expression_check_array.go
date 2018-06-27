@@ -40,7 +40,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 					tt := t.Clone()
 					tt.Pos = e.Pos
 					arr.Type = &Type{}
-					arr.Type.Type = VARIABLE_TYPE_ARRAY
+					arr.Type.Type = VariableTypeArray
 					arr.Type.ArrayType = tt
 					arr.Type.Pos = e.Pos
 				} else {

@@ -21,7 +21,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				len(vs.Variables)))
 		}
 		for k, v := range vs.Variables {
-			if v.Name == NO_NAME_IDENTIFIER {
+			if v.Name == NoNameIdentifier {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
 				noErr = false
@@ -56,7 +56,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 		}
 	} else {
 		for _, v := range vs.Variables {
-			if v.Name == NO_NAME_IDENTIFIER {
+			if v.Name == NoNameIdentifier {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
 				noErr = false

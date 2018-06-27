@@ -6,21 +6,21 @@ import (
 
 const (
 	_ = iota
-	STATEMENT_TYPE_EXPRESSION
-	STATEMENT_TYPE_IF
-	STATEMENT_TYPE_BLOCK
-	STATEMENT_TYPE_FOR
-	STATEMENT_TYPE_CONTINUE
-	STATEMENT_TYPE_RETURN
-	STATEMENT_TYPE_BREAK
-	STATEMENT_TYPE_SWITCH
-	STATEMENT_TYPE_SWITCH_TEMPLATE
-	STATEMENT_TYPE_LABEL
-	STATEMENT_TYPE_GOTO
-	STATEMENT_TYPE_DEFER
-	STATEMENT_TYPE_CLASS
-	STATEMENT_TYPE_ENUM
-	STATEMENT_TYPE_NOP
+	StatementTypeExpression
+	StatementTypeIf
+	StatementTypeBlock
+	StatementTypeFor
+	StatementTypeContinue
+	StatementTypeReturn
+	StatementTypeBreak
+	StatementTypeSwitch
+	StatementTypeSwitchTemplate
+	StatementTypeLabel
+	StatementTypeGoto
+	StatementTypeDefer
+	StatementTypeClass
+	StatementTypeEnum
+	StatementTypeNop
 )
 
 type Statement struct {
@@ -51,42 +51,42 @@ type Statement struct {
 
 func (s *Statement) StatementName() string {
 	switch s.Type {
-	case STATEMENT_TYPE_EXPRESSION:
+	case StatementTypeExpression:
 		return "expression statement"
-	case STATEMENT_TYPE_IF:
+	case StatementTypeIf:
 		return "if statement"
-	case STATEMENT_TYPE_FOR:
+	case StatementTypeFor:
 		return "for statement"
-	case STATEMENT_TYPE_CONTINUE:
+	case StatementTypeContinue:
 		return "continue statement"
-	case STATEMENT_TYPE_BREAK:
+	case StatementTypeBreak:
 		return "break statement"
-	case STATEMENT_TYPE_SWITCH:
+	case StatementTypeSwitch:
 		return "switch statement"
-	case STATEMENT_TYPE_LABEL:
+	case StatementTypeLabel:
 		return "label statement"
-	case STATEMENT_TYPE_GOTO:
+	case StatementTypeGoto:
 		return "goto statement"
-	case STATEMENT_TYPE_DEFER:
+	case StatementTypeDefer:
 		return "defer statement"
-	case STATEMENT_TYPE_BLOCK:
+	case StatementTypeBlock:
 		return "block statement"
-	case STATEMENT_TYPE_RETURN:
+	case StatementTypeReturn:
 		return "return statement"
-	case STATEMENT_TYPE_CLASS:
+	case StatementTypeClass:
 		return "class"
-	case STATEMENT_TYPE_ENUM:
+	case StatementTypeEnum:
 		return "enum"
-	case STATEMENT_TYPE_NOP:
+	case StatementTypeNop:
 		return "nop"
-	case STATEMENT_TYPE_SWITCH_TEMPLATE:
+	case StatementTypeSwitchTemplate:
 		return "switch template"
 	}
 	return ""
 }
 
 func (s *Statement) isVariableDefinition() bool {
-	return s.Type == STATEMENT_TYPE_EXPRESSION &&
+	return s.Type == StatementTypeExpression &&
 		(s.Expression.Type == EXPRESSION_TYPE_COLON_ASSIGN || s.Expression.Type == EXPRESSION_TYPE_VAR)
 }
 
@@ -96,15 +96,15 @@ func (s *Statement) check(block *Block) []error { // block is father
 	}()
 	errs := []error{}
 	switch s.Type {
-	case STATEMENT_TYPE_EXPRESSION:
+	case StatementTypeExpression:
 		return s.checkStatementExpression(block)
-	case STATEMENT_TYPE_IF:
+	case StatementTypeIf:
 		return s.StatementIf.check(block)
-	case STATEMENT_TYPE_FOR:
+	case StatementTypeFor:
 		return s.StatementFor.check(block)
-	case STATEMENT_TYPE_SWITCH:
+	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
-	case STATEMENT_TYPE_BREAK:
+	case StatementTypeBreak:
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
 			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
 		} else {
@@ -119,7 +119,7 @@ func (s *Statement) check(block *Block) []error { // block is father
 			}
 			s.StatementBreak.mkDefers(block)
 		}
-	case STATEMENT_TYPE_CONTINUE:
+	case StatementTypeContinue:
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s '%s' can`t in this scope",
 				errMsgPrefix(s.Pos), s.StatementName())}
@@ -130,7 +130,7 @@ func (s *Statement) check(block *Block) []error { // block is father
 		}
 		s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
 		s.StatementContinue.mkDefers(block)
-	case STATEMENT_TYPE_RETURN:
+	case StatementTypeReturn:
 		if block.InheritedAttribute.Defer != nil {
 			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
 				errMsgPrefix(s.Pos), s.StatementName())}
@@ -140,12 +140,12 @@ func (s *Statement) check(block *Block) []error { // block is father
 			block.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
 		}
 		return es
-	case STATEMENT_TYPE_GOTO:
+	case StatementTypeGoto:
 		err := s.checkStatementGoTo(block)
 		if err != nil {
 			return []error{err}
 		}
-	case STATEMENT_TYPE_DEFER:
+	case StatementTypeDefer:
 		block.InheritedAttribute.Function.mkAutoVarForException()
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
@@ -153,18 +153,18 @@ func (s *Statement) check(block *Block) []error { // block is father
 		es := s.Defer.Block.checkStatements()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
-	case STATEMENT_TYPE_BLOCK:
+	case StatementTypeBlock:
 		s.Block.inherit(block)
 		return s.Block.checkStatements()
-	case STATEMENT_TYPE_LABEL:
+	case StatementTypeLabel:
 		// nothing to do
-	case STATEMENT_TYPE_CLASS:
+	case StatementTypeClass:
 		err := block.Insert(s.Class.Name, s.Pos, s.Class)
 		if err != nil {
 			errs = append(errs, err)
 		}
 		return append(errs, s.Class.check(block)...)
-	case STATEMENT_TYPE_ENUM:
+	case StatementTypeEnum:
 		err := s.Enum.check()
 		if err != nil {
 			return []error{err}
@@ -175,9 +175,9 @@ func (s *Statement) check(block *Block) []error { // block is father
 		} else {
 			return nil
 		}
-	case STATEMENT_TYPE_NOP:
+	case StatementTypeNop:
 		//nop , should be never execute to here
-	case STATEMENT_TYPE_SWITCH_TEMPLATE:
+	case StatementTypeSwitchTemplate:
 		return s.StatementSwitchTemplate.check(block, s)
 	}
 	return nil

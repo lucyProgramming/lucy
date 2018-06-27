@@ -14,10 +14,10 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	hashMapVerifyType := state.newObjectVariableType(java_hashmap_class)
+	hashMapVerifyType := state.newObjectVariableType(javaHashMapClass)
 	state.pushStack(class, hashMapVerifyType)
 	switch call.Name {
-	case common.MAP_METHOD_KEY_EXISTS:
+	case common.MapMethodKeyExists:
 		variableType := call.Args[0].ExpressionValue
 		stack, _ := makeExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
@@ -28,7 +28,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_hashmap_class,
+			Class:      javaHashMapClass,
 			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -37,12 +37,12 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++
 		}
-	case common.MAP_METHOD_REMOVE:
+	case common.MapMethodRemove:
 		currentStack := uint16(1)
 		callRemove := func() {
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_hashmap_class,
+				Class:      javaHashMapClass,
 				Method:     "remove",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -100,18 +100,18 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 				state.popStack(1)
 			}
 		}
-	case common.MAP_METHOD_REMOVE_ALL:
+	case common.MapMethodRemoveAll:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_hashmap_class,
+			Class:      javaHashMapClass,
 			Method:     "clear",
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	case common.MAP_METHOD_SIZE:
+	case common.MapMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_hashmap_class,
+			Class:      javaHashMapClass,
 			Method:     "size",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

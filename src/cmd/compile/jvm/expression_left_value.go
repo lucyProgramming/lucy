@@ -17,7 +17,7 @@ func (makeExpression *MakeExpression) getCaptureIdentifierLeftValue(
 	op = []byte{cg.OP_putfield}
 	meta := closure.getMeta(identifier.Variable.Type.Type)
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
-		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,
@@ -26,7 +26,7 @@ func (makeExpression *MakeExpression) getCaptureIdentifierLeftValue(
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
-		copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, identifier.Variable.LocalValOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
 	}
 	state.pushStack(class, state.newObjectVariableType(meta.className))
 	maxStack = 1
@@ -44,7 +44,7 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	target *ast.Type, className, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
-	state.pushStack(class, state.newObjectVariableType(java_hashmap_class))
+	state.pushStack(class, state.newObjectVariableType(javaHashMapClass))
 	stack, _ := makeExpression.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
@@ -52,7 +52,7 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	if index.Index.ExpressionValue.IsPointer() == false {
 		typeConverter.packPrimitives(class, code, index.Index.ExpressionValue)
 	}
-	state.pushStack(class, state.newObjectVariableType(java_root_class))
+	state.pushStack(class, state.newObjectVariableType(javaRootClass))
 	remainStack = 2
 	op = []byte{}
 	if index.Expression.ExpressionValue.Map.Value.IsPointer() == false {
@@ -62,14 +62,14 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_hashmap_class,
+		Class:      javaHashMapClass,
 		Method:     "put",
 		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	op = append(op, bs4...)
 	target = index.Expression.ExpressionValue.Map.Value
-	className = java_hashmap_class
+	className = javaHashMapClass
 	return
 }
 
@@ -92,19 +92,19 @@ func (makeExpression *MakeExpression) getLeftValue(
 		if identifier.Variable.BeenCaptured {
 			return makeExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
-		if identifier.Name == ast.NO_NAME_IDENTIFIER {
+		if identifier.Name == ast.NoNameIdentifier {
 			panic("this is not happening")
 		}
 		switch identifier.Variable.Type.Type {
-		case ast.VARIABLE_TYPE_BOOL:
+		case ast.VariableTypeBool:
 			fallthrough
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_ENUM:
+		case ast.VariableTypeEnum:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_istore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
@@ -118,7 +118,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			} else {
 				panic("over 255")
 			}
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_fstore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
@@ -132,7 +132,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			} else {
 				panic("over 255")
 			}
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_dstore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
@@ -146,7 +146,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			} else {
 				panic("over 255")
 			}
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			if identifier.Variable.LocalValOffset == 0 {
 				op = []byte{cg.OP_lstore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
@@ -178,7 +178,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 		target = identifier.Variable.Type
 	case ast.EXPRESSION_TYPE_INDEX:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+		if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 			meta := ArrayMetas[index.Expression.ExpressionValue.ArrayType.Type]
 			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.ExpressionValue)
@@ -202,8 +202,8 @@ func (makeExpression *MakeExpression) getLeftValue(
 				Descriptor: "I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
-			state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
+			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 
 			stack, _ := makeExpression.build(class, code, index.Index, context, state)
 			if t := stack + 3; t > maxStack {
@@ -216,7 +216,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			{
 				state.popStack(3)
 				state.pushStack(class, state.newObjectVariableType(meta.className))
-				state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+				state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 				context.MakeStackMap(code, state, code.CodeLength+6)
 				context.MakeStackMap(code, state, code.CodeLength+16)
 				state.popStack(2)
@@ -228,12 +228,12 @@ func (makeExpression *MakeExpression) getLeftValue(
 			code.Codes[code.CodeLength+6] = cg.OP_pop // incase stack over flow
 			code.Codes[code.CodeLength+7] = cg.OP_pop
 			code.Codes[code.CodeLength+8] = cg.OP_new
-			class.InsertClassConst(java_index_out_of_range_exception_class, code.Codes[code.CodeLength+9:code.CodeLength+11])
+			class.InsertClassConst(javaIndexOutOfRangeExceptionClass, code.Codes[code.CodeLength+9:code.CodeLength+11])
 			code.Codes[code.CodeLength+11] = cg.OP_dup
 			code.Codes[code.CodeLength+12] = cg.OP_invokespecial
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      java_index_out_of_range_exception_class,
-				Method:     special_method_init,
+				Class:      javaIndexOutOfRangeExceptionClass,
+				Method:     specialMethodInit,
 				Descriptor: "()V",
 			}, code.Codes[code.CodeLength+13:code.CodeLength+15])
 			code.Codes[code.CodeLength+15] = cg.OP_athrow
@@ -250,42 +250,42 @@ func (makeExpression *MakeExpression) getLeftValue(
 			code.CodeLength++
 			{
 				t := &ast.Type{}
-				t.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
+				t.Type = ast.VariableTypeJavaArray
 				t.ArrayType = index.Expression.ExpressionValue.ArrayType
 				state.pushStack(class, t)
-				state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+				state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			}
 			switch e.ExpressionValue.Type {
-			case ast.VARIABLE_TYPE_BOOL:
+			case ast.VariableTypeBool:
 				op = []byte{cg.OP_bastore}
-			case ast.VARIABLE_TYPE_BYTE:
+			case ast.VariableTypeByte:
 				op = []byte{cg.OP_bastore}
-			case ast.VARIABLE_TYPE_SHORT:
+			case ast.VariableTypeShort:
 				op = []byte{cg.OP_sastore}
-			case ast.VARIABLE_TYPE_ENUM:
+			case ast.VariableTypeEnum:
 				fallthrough
-			case ast.VARIABLE_TYPE_INT:
+			case ast.VariableTypeInt:
 				op = []byte{cg.OP_iastore}
-			case ast.VARIABLE_TYPE_LONG:
+			case ast.VariableTypeLong:
 				op = []byte{cg.OP_lastore}
-			case ast.VARIABLE_TYPE_FLOAT:
+			case ast.VariableTypeFloat:
 				op = []byte{cg.OP_fastore}
-			case ast.VARIABLE_TYPE_DOUBLE:
+			case ast.VariableTypeDouble:
 				op = []byte{cg.OP_dastore}
-			case ast.VARIABLE_TYPE_STRING:
+			case ast.VariableTypeString:
 				fallthrough
-			case ast.VARIABLE_TYPE_OBJECT:
+			case ast.VariableTypeObject:
 				fallthrough
-			case ast.VARIABLE_TYPE_MAP:
+			case ast.VariableTypeMap:
 				fallthrough
-			case ast.VARIABLE_TYPE_ARRAY:
+			case ast.VariableTypeArray:
 				fallthrough
-			case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			case ast.VariableTypeJavaArray:
 				op = []byte{cg.OP_aastore}
 			}
 			remainStack = 2 // [arrayref ,index]
 			target = e.ExpressionValue
-		} else if index.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP { // map
+		} else if index.Expression.ExpressionValue.Type == ast.VariableTypeMap { // map
 			return makeExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
 			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
@@ -296,40 +296,40 @@ func (makeExpression *MakeExpression) getLeftValue(
 			}
 			target = e.ExpressionValue
 			remainStack = 2 // [objectref ,index]
-			state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			switch e.ExpressionValue.Type {
-			case ast.VARIABLE_TYPE_BOOL:
+			case ast.VariableTypeBool:
 				op = []byte{cg.OP_bastore}
-			case ast.VARIABLE_TYPE_BYTE:
+			case ast.VariableTypeByte:
 				op = []byte{cg.OP_bastore}
-			case ast.VARIABLE_TYPE_SHORT:
+			case ast.VariableTypeShort:
 				op = []byte{cg.OP_sastore}
-			case ast.VARIABLE_TYPE_ENUM:
+			case ast.VariableTypeEnum:
 				fallthrough
-			case ast.VARIABLE_TYPE_INT:
+			case ast.VariableTypeInt:
 				op = []byte{cg.OP_iastore}
-			case ast.VARIABLE_TYPE_LONG:
+			case ast.VariableTypeLong:
 				op = []byte{cg.OP_lastore}
-			case ast.VARIABLE_TYPE_FLOAT:
+			case ast.VariableTypeFloat:
 				op = []byte{cg.OP_fastore}
-			case ast.VARIABLE_TYPE_DOUBLE:
+			case ast.VariableTypeDouble:
 				op = []byte{cg.OP_dastore}
-			case ast.VARIABLE_TYPE_STRING:
+			case ast.VariableTypeString:
 				fallthrough
-			case ast.VARIABLE_TYPE_OBJECT:
+			case ast.VariableTypeObject:
 				fallthrough
-			case ast.VARIABLE_TYPE_MAP:
+			case ast.VariableTypeMap:
 				fallthrough
-			case ast.VARIABLE_TYPE_ARRAY:
+			case ast.VariableTypeArray:
 				fallthrough
-			case ast.VARIABLE_TYPE_JAVA_ARRAY:
+			case ast.VariableTypeJavaArray:
 				op = []byte{cg.OP_aastore}
 			}
 			return
 		}
 	case ast.EXPRESSION_TYPE_SELECTION:
 		dot := e.Data.(*ast.ExpressionSelection)
-		if dot.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
+		if dot.Expression.ExpressionValue.Type == ast.VariableTypePackage {
 			op = []byte{cg.OP_putstatic}
 			target = dot.PackageVariable.Type
 			className = dot.Expression.ExpressionValue.Package.Name + "/main"

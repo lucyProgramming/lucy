@@ -49,7 +49,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	{
 		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
 		astClass.Name = string(c.ConstPool[nameIndex].Info)
-		if astClass.Name != ast.JAVA_ROOT_CLASS {
+		if astClass.Name != ast.JavaRootClass {
 			nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
 			astClass.SuperClassName = string(c.ConstPool[nameIndex].Info)
 		}
@@ -108,7 +108,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	{
 		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
 		astClass.Name = string(c.ConstPool[nameIndex].Info)
-		if astClass.Name != ast.JAVA_ROOT_CLASS {
+		if astClass.Name != ast.JavaRootClass {
 			nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
 			astClass.SuperClassName = string(c.ConstPool[nameIndex].Info)
 		}
@@ -134,7 +134,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 				return nil, err
 			}
 		}
-		if f.Type.Type == ast.VARIABLE_TYPE_ENUM {
+		if f.Type.Type == ast.VariableTypeEnum {
 			loadEnumForVariableType(f.Type)
 		}
 		f.AccessFlags = v.AccessFlags
@@ -231,21 +231,21 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			}
 			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
 			switch cos.Type.Type {
-			case ast.VARIABLE_TYPE_BOOL:
+			case ast.VariableTypeBool:
 				cos.Value = binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info) != 0
-			case ast.VARIABLE_TYPE_BYTE:
+			case ast.VariableTypeByte:
 				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_SHORT:
+			case ast.VariableTypeShort:
 				fallthrough
-			case ast.VARIABLE_TYPE_INT:
+			case ast.VariableTypeInt:
 				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_LONG:
+			case ast.VariableTypeLong:
 				cos.Value = int64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_FLOAT:
+			case ast.VariableTypeFloat:
 				cos.Value = float32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_DOUBLE:
+			case ast.VariableTypeDouble:
 				cos.Value = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
-			case ast.VARIABLE_TYPE_STRING:
+			case ast.VariableTypeString:
 				valueIndex = binary.BigEndian.Uint16(c.ConstPool[valueIndex].Info) // const_string_info
 				cos.Value = string(c.ConstPool[valueIndex].Info)                   // utf 8
 			}
@@ -266,7 +266,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 					return err
 				}
 			}
-			if typ.Type == ast.VARIABLE_TYPE_ENUM {
+			if typ.Type == ast.VariableTypeEnum {
 				loadEnumForVariableType(typ)
 			}
 		}
@@ -280,7 +280,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			continue
 		}
 		name := string(c.ConstPool[m.NameIndex].Info)
-		if name == ast.MAIN_FUNCTION_NAME {
+		if name == ast.MainFunctionName {
 			// this is main function
 			continue
 		}
@@ -327,7 +327,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		}
 		typ.Alias = name
 		pack.Block.TypeAliases[name] = typ
-		if typ.Type == ast.VARIABLE_TYPE_ENUM {
+		if typ.Type == ast.VariableTypeEnum {
 			err = loadEnumForVariableType(typ)
 			if err != nil {
 				return err

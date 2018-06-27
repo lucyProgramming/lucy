@@ -33,24 +33,24 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 	}
 
 	// string([]byte)
-	if conversion.Type.Type == VARIABLE_TYPE_STRING &&
-		t.Type == VARIABLE_TYPE_ARRAY && t.ArrayType.Type == VARIABLE_TYPE_BYTE {
+	if conversion.Type.Type == VariableTypeString &&
+		t.Type == VariableTypeArray && t.ArrayType.Type == VariableTypeByte {
 		return ret
 	}
 	// string(byte[])
-	if conversion.Type.Type == VARIABLE_TYPE_STRING &&
-		t.Type == VARIABLE_TYPE_JAVA_ARRAY && t.ArrayType.Type == VARIABLE_TYPE_BYTE {
+	if conversion.Type.Type == VariableTypeString &&
+		t.Type == VariableTypeJavaArray && t.ArrayType.Type == VariableTypeByte {
 		return ret
 	}
 
 	// []byte("hello world")
-	if conversion.Type.Type == VARIABLE_TYPE_ARRAY && conversion.Type.ArrayType.Type == VARIABLE_TYPE_BYTE &&
-		t.Type == VARIABLE_TYPE_STRING {
+	if conversion.Type.Type == VariableTypeArray && conversion.Type.ArrayType.Type == VariableTypeByte &&
+		t.Type == VariableTypeString {
 		return ret
 	}
 	// byte[]("hello world")
-	if conversion.Type.Type == VARIABLE_TYPE_JAVA_ARRAY && conversion.Type.ArrayType.Type == VARIABLE_TYPE_BYTE &&
-		t.Type == VARIABLE_TYPE_STRING {
+	if conversion.Type.Type == VariableTypeJavaArray && conversion.Type.ArrayType.Type == VariableTypeByte &&
+		t.Type == VariableTypeString {
 		return ret
 	}
 	if conversion.Type.validForTypeAssertOrConversion() && t.IsPointer() {

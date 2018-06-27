@@ -12,20 +12,20 @@ func (makeExpression *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, 
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(java_hashmap_class, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_hashmap_class,
-		Method:     special_method_init,
+		Class:      javaHashMapClass,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	values := e.Data.(*ast.ExpressionMap).KeyValuePairs
 
-	hashMapObject := state.newObjectVariableType(java_hashmap_class)
+	hashMapObject := state.newObjectVariableType(javaHashMapClass)
 	state.pushStack(class, hashMapObject)
 
 	for _, v := range values {
@@ -40,7 +40,7 @@ func (makeExpression *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, 
 		if v.Left.ExpressionValue.IsPointer() == false {
 			typeConverter.packPrimitives(class, code, v.Left.ExpressionValue)
 		}
-		state.pushStack(class, state.newObjectVariableType(java_root_class))
+		state.pushStack(class, state.newObjectVariableType(javaRootClass))
 		currentStack = 3 // stack is ... mapref mapref kref
 		stack, es := makeExpression.build(class, code, v.Right, context, state)
 		if len(es) > 0 {
@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, 
 		// put in hashmap
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      java_hashmap_class,
+			Class:      javaHashMapClass,
 			Method:     "put",
 			Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

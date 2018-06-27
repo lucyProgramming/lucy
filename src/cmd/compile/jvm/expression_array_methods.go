@@ -11,7 +11,7 @@ func (makeExpression *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHi
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
 	switch call.Name {
-	case common.ARRAY_METHOD_SIZE:
+	case common.ArrayMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
 		if e.IsStatementExpression {
@@ -32,10 +32,10 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.ExpressionValue)
 	switch call.Name {
-	case common.ARRAY_METHOD_CAP,
-		common.ARRAY_METHOD_SIZE,
-		common.ARRAY_METHOD_START,
-		common.ARRAY_METHOD_END:
+	case common.ArrayMethodCap,
+		common.ArrayMethodSize,
+		common.ArrayMethodStart,
+		common.ArrayMethodEnd:
 		meta := ArrayMetas[call.Expression.ExpressionValue.ArrayType.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -48,7 +48,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++
 		}
-	case common.ARRAY_METHOD_APPEND:
+	case common.ArrayMethodAppend:
 		meta := ArrayMetas[call.Expression.ExpressionValue.ArrayType.Type]
 		appendName := "append"
 		appendDescriptor := meta.appendDescriptor
@@ -100,7 +100,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			code.Codes[code.CodeLength] = cg.OP_pop
 			code.CodeLength++
 		}
-	case common.ARRAY_METHOD_APPEND_ALL:
+	case common.ArrayMethodAppendAll:
 		meta := ArrayMetas[call.Expression.ExpressionValue.ArrayType.Type]
 		for _, v := range call.Args {
 			currentStack := uint16(1)

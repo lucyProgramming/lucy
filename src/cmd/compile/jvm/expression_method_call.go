@@ -8,13 +8,13 @@ import (
 func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_ARRAY {
+	if call.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 		return makeExpression.buildArrayMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_MAP {
+	if call.Expression.ExpressionValue.Type == ast.VariableTypeMap {
 		return makeExpression.buildMapMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_JAVA_ARRAY {
+	if call.Expression.ExpressionValue.Type == ast.VariableTypeJavaArray {
 		return makeExpression.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
 
@@ -34,7 +34,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			}
 		}
 	}
-	if call.Expression.ExpressionValue.Type == ast.VARIABLE_TYPE_PACKAGE {
+	if call.Expression.ExpressionValue.Type == ast.VariableTypePackage {
 		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.PackageFunction.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -74,7 +74,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 	// object ref
 	state.pushStack(class, call.Expression.ExpressionValue)
 	defer state.popStack(1)
-	if call.Name == ast.CONSTRUCTION_METHOD_NAME {
+	if call.Name == ast.ConstructionMethodName {
 		state.popStack(1)
 		v := &cg.StackMapUninitializedThisVariableInfo{} // make it right
 		state.Stacks = append(state.Stacks, &cg.StackMapVerificationTypeInfo{
@@ -88,7 +88,7 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 	if t := makeExpression.valueJvmSize(e); t > maxStack {
 		maxStack = t
 	}
-	if call.Name == ast.CONSTRUCTION_METHOD_NAME { // call father construction method
+	if call.Name == ast.ConstructionMethodName { // call father construction method
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,

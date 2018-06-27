@@ -25,7 +25,7 @@ type ArrayMeta struct {
 }
 
 func init() {
-	ArrayMetas[ast.VARIABLE_TYPE_BOOL] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeBool] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayBool",
 		constructorFuncDescriptor: "([Z)V",
 		elementsFieldDescriptor:   "[Z",
@@ -33,7 +33,7 @@ func init() {
 		appendDescriptor:          "(Z)Llucy/deps/ArrayBool;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayBool;)Llucy/deps/ArrayBool;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_BYTE] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeByte] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayByte",
 		constructorFuncDescriptor: "([B)V",
 		elementsFieldDescriptor:   "[B",
@@ -41,7 +41,7 @@ func init() {
 		appendDescriptor:          "(B)Llucy/deps/ArrayByte;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayByte;)Llucy/deps/ArrayByte;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_SHORT] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeShort] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayShort",
 		constructorFuncDescriptor: "([S)V",
 		elementsFieldDescriptor:   "[S",
@@ -49,7 +49,7 @@ func init() {
 		appendDescriptor:          "(S)Llucy/deps/ArrayShort;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayShort;)Llucy/deps/ArrayShort;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_INT] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeInt] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayInt",
 		constructorFuncDescriptor: "([I)V",
 		elementsFieldDescriptor:   "[I",
@@ -57,7 +57,7 @@ func init() {
 		appendDescriptor:          "(I)Llucy/deps/ArrayInt;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayInt;)Llucy/deps/ArrayInt;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_LONG] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeLong] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayLong",
 		constructorFuncDescriptor: "([J)V",
 		elementsFieldDescriptor:   "[J",
@@ -65,7 +65,7 @@ func init() {
 		appendDescriptor:          "(J)Llucy/deps/ArrayLong;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayLong;)Llucy/deps/ArrayLong;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_FLOAT] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeFloat] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayFloat",
 		constructorFuncDescriptor: "([F)V",
 		elementsFieldDescriptor:   "[F",
@@ -73,7 +73,7 @@ func init() {
 		appendDescriptor:          "(F)Llucy/deps/ArrayFloat;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayFloat;)Llucy/deps/ArrayFloat;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_DOUBLE] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeDouble] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayDouble",
 		constructorFuncDescriptor: "([D)V",
 		elementsFieldDescriptor:   "[D",
@@ -81,7 +81,7 @@ func init() {
 		appendDescriptor:          "(D)Llucy/deps/ArrayDouble;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayDouble;)Llucy/deps/ArrayDouble;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_STRING] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeString] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayString",
 		constructorFuncDescriptor: "([Ljava/lang/String;)V",
 		elementsFieldDescriptor:   "[Ljava/lang/String;",
@@ -89,7 +89,7 @@ func init() {
 		appendDescriptor:          "(Ljava/lang/String;)Llucy/deps/ArrayString;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayString;)Llucy/deps/ArrayString;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_OBJECT] = &ArrayMeta{
+	ArrayMetas[ast.VariableTypeObject] = &ArrayMeta{
 		className:                 "lucy/deps/ArrayObject",
 		constructorFuncDescriptor: "([Ljava/lang/Object;)V",
 		elementsFieldDescriptor:   "[Ljava/lang/Object;",
@@ -97,9 +97,10 @@ func init() {
 		appendDescriptor:          "(Ljava/lang/Object;)Llucy/deps/ArrayObject;",
 		appendAllDescriptor:       "(Llucy/deps/ArrayObject;)Llucy/deps/ArrayObject;",
 	}
-	ArrayMetas[ast.VARIABLE_TYPE_ARRAY] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]
-	ArrayMetas[ast.VARIABLE_TYPE_MAP] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]
-	ArrayMetas[ast.VARIABLE_TYPE_JAVA_ARRAY] = ArrayMetas[ast.VARIABLE_TYPE_OBJECT]
-	ArrayMetas[ast.VARIABLE_TYPE_ENUM] = ArrayMetas[ast.VARIABLE_TYPE_INT]
+	ArrayMetas[ast.VariableTypeArray] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeMap] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeJavaArray] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeFunction] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeEnum] = ArrayMetas[ast.VariableTypeInt]
 
 }

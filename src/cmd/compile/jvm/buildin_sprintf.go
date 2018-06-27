@@ -15,7 +15,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
 	maxStack, _ = makeExpression.build(class, code, meta.Format, context, state)
-	state.pushStack(class, state.newObjectVariableType(java_string_class))
+	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -26,8 +26,8 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	}
 
 	objectArray := &ast.Type{}
-	objectArray.Type = ast.VARIABLE_TYPE_JAVA_ARRAY
-	objectArray.ArrayType = state.newObjectVariableType(java_root_class)
+	objectArray.Type = ast.VariableTypeJavaArray
+	objectArray.ArrayType = state.newObjectVariableType(javaRootClass)
 	state.pushStack(class, objectArray)
 	index := int32(0)
 	for _, v := range call.Args {
@@ -61,7 +61,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 		loadInt32(class, code, index)
 		currentStack += 2
 		state.pushStack(class, objectArray)
-		state.pushStack(class, &ast.Type{Type: ast.VARIABLE_TYPE_INT})
+		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		stack, es := makeExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
@@ -82,7 +82,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      java_string_class,
+		Class:      javaStringClass,
 		Method:     "format",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;",
 	},

@@ -13,17 +13,17 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 	if e.Type == ast.EXPRESSION_TYPE_NEGATIVE {
 		maxStack, _ = makeExpression.build(class, code, e.Data.(*ast.Expression), context, state)
 		switch e.ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			fallthrough
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			fallthrough
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_ineg
-		case ast.VARIABLE_TYPE_FLOAT:
+		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_fneg
-		case ast.VARIABLE_TYPE_DOUBLE:
+		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_dneg
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_lneg
 		}
 		code.CodeLength++
@@ -36,7 +36,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 			maxStack = t
 		}
 		switch e.ExpressionValue.Type {
-		case ast.VARIABLE_TYPE_BYTE:
+		case ast.VariableTypeByte:
 			code.Codes[code.CodeLength] = cg.OP_bipush
 			code.Codes[code.CodeLength+1] = 255
 			code.Codes[code.CodeLength+2] = cg.OP_ixor
@@ -44,7 +44,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 			if 2 > maxStack {
 				maxStack = 2
 			}
-		case ast.VARIABLE_TYPE_SHORT:
+		case ast.VariableTypeShort:
 			code.Codes[code.CodeLength] = cg.OP_sipush
 			code.Codes[code.CodeLength+1] = 255
 			code.Codes[code.CodeLength+2] = 255
@@ -53,7 +53,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 			if 2 > maxStack {
 				maxStack = 2
 			}
-		case ast.VARIABLE_TYPE_INT:
+		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
 			class.InsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_ixor
@@ -61,7 +61,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 			if 2 > maxStack {
 				maxStack = 2
 			}
-		case ast.VARIABLE_TYPE_LONG:
+		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
 			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_lxor

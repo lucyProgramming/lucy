@@ -18,7 +18,7 @@ func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error
 			return c.Fields[name], nil
 		}
 	}
-	if c.Name == JAVA_ROOT_CLASS { // root class
+	if c.Name == JavaRootClass { // root class
 		return nil, notFoundErr
 	}
 	err = c.loadSuperClass()

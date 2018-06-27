@@ -10,25 +10,25 @@ func (makeExpression *MakeExpression) mkBuildInFunctionCall(class *cg.ClassHighL
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	switch call.Function.Name {
-	case common.BUILD_IN_FUNCTION_PRINT:
+	case common.BuildInFunctionPrint:
 		return makeExpression.mkBuildInPrint(class, code, e, context, state)
-	case common.BUILD_IN_FUNCTION_PANIC:
+	case common.BuildInFunctionPanic:
 		return makeExpression.mkBuildInPanic(class, code, e, context, state)
-	case common.BUILD_IN_FUNCTION_CATCH:
+	case common.BuildInFunctionCatch:
 		return makeExpression.mkBuildInCatch(class, code, e, context)
-	case common.BUILD_IN_FUNCTION_MONITOR_ENTER, common.BUILD_IN_FUNCTION_MONITOR_EXIT:
+	case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
 		maxStack, _ = makeExpression.build(class, code, call.Args[0], context, state)
-		if call.Function.Name == common.BUILD_IN_FUNCTION_MONITOR_ENTER {
+		if call.Function.Name == common.BuildInFunctionMonitorEnter {
 			code.Codes[code.CodeLength] = cg.OP_monitorenter
 		} else { // monitor enter on exit
 			code.Codes[code.CodeLength] = cg.OP_monitorexit
 		}
 		code.CodeLength++
-	case common.BUILD_IN_FUNCTION_PRINTF:
+	case common.BuildInFunctionPrintf:
 		return makeExpression.mkBuildInPrintf(class, code, e, context, state)
-	case common.BUILD_IN_FUNCTION_SPRINTF:
+	case common.BuildInFunctionSprintf:
 		return makeExpression.mkBuildInSprintf(class, code, e, context, state)
-	case common.BUILD_IN_FUNCTION_LEN:
+	case common.BuildInFunctionLen:
 		return makeExpression.mkBuildInLen(class, code, e, context, state)
 	default:
 		panic("unKnow buildIn function:" + call.Function.Name)

@@ -152,10 +152,10 @@ func (f *Function) clone() (ret *Function, es []error) {
 }
 func (f *Function) mkLastReturnStatement() {
 	if len(f.Block.Statements) == 0 ||
-		(f.Block.Statements[len(f.Block.Statements)-1].Type != STATEMENT_TYPE_RETURN) {
+		(f.Block.Statements[len(f.Block.Statements)-1].Type != StatementTypeReturn) {
 		s := &StatementReturn{}
 		f.Block.Statements = append(f.Block.Statements, &Statement{
-			Type:            STATEMENT_TYPE_RETURN,
+			Type:            StatementTypeReturn,
 			StatementReturn: s,
 			Pos:             f.Block.EndPos,
 		})
@@ -163,16 +163,16 @@ func (f *Function) mkLastReturnStatement() {
 }
 
 func (f *Function) checkParametersAndReturns(errs *[]error) {
-	if f.Name == MAIN_FUNCTION_NAME {
+	if f.Name == MainFunctionName {
 		errFunc := func() {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
-				errMsgPrefix(f.Pos), MAIN_FUNCTION_NAME))
+				errMsgPrefix(f.Pos), MainFunctionName))
 		}
 		if len(f.Type.ParameterList) != 1 {
 			errFunc()
 		} else { //
-			if f.Type.ParameterList[0].Type.Type == VARIABLE_TYPE_ARRAY &&
-				f.Type.ParameterList[0].Type.ArrayType.Type == VARIABLE_TYPE_STRING {
+			if f.Type.ParameterList[0].Type.Type == VariableTypeArray &&
+				f.Type.ParameterList[0].Type.ArrayType.Type == VariableTypeString {
 				err := f.Block.Insert(f.Type.ParameterList[0].Name, f.Type.ParameterList[0].Pos, f.Type.ParameterList[0])
 				if err != nil {
 					*errs = append(*errs, err)

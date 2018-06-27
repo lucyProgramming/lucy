@@ -10,17 +10,17 @@ type LoadImport interface {
 }
 
 const (
-	MAIN_FUNCTION_NAME       = "main"
-	THIS                     = "this"
-	NO_NAME_IDENTIFIER       = "_"
-	LUCY_ROOT_CLASS          = "lucy/lang/Lucy"
-	JAVA_ROOT_CLASS          = "java/lang/Object"
-	DEFAULT_EXCEPTION_CLASS  = "java/lang/Exception"
-	JAVA_THROWABLE_CLASS     = "java/lang/Throwable"
-	JAVA_STRING_CLASS        = "java/lang/String"
-	SUPER                    = "super"
-	CONSTRUCTION_METHOD_NAME = "<init>"
-	CLASS_INIT_METHOD        = "<clinit>"
+	MainFunctionName       = "main"
+	THIS                   = "this"
+	NoNameIdentifier       = "_"
+	LucyRootClass          = "lucy/lang/Lucy"
+	JavaRootClass          = "java/lang/Object"
+	DefaultExceptionClass  = "java/lang/Exception"
+	JavaThrowableClass     = "java/lang/Throwable"
+	JavaStringClass        = "java/lang/String"
+	SUPER                  = "super"
+	ConstructionMethodName = "<init>"
+	ClassInitMethod        = "<clinit>"
 )
 
 var (
@@ -45,7 +45,7 @@ func loadJavaStringClass(pos *Position) error {
 	if javaStringClass != nil {
 		return nil
 	}
-	c, err := ImportsLoader.LoadImport(JAVA_STRING_CLASS)
+	c, err := ImportsLoader.LoadImport(JavaStringClass)
 	if err != nil {
 		return err
 	}
@@ -54,6 +54,6 @@ func loadJavaStringClass(pos *Position) error {
 		return nil
 	} else {
 		return fmt.Errorf("%s '%s' is not class",
-			errMsgPrefix(pos), JAVA_STRING_CLASS)
+			errMsgPrefix(pos), JavaStringClass)
 	}
 }

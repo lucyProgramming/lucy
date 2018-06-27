@@ -11,7 +11,7 @@ func init() {
 }
 
 func registerBuildInFunctions() {
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINT] = &Function{
+	buildInFunctionsMap[common.BuildInFunctionPrint] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -22,7 +22,7 @@ func registerBuildInFunctions() {
 			if len(args) == 0 || args[0] == nil {
 				return // not error
 			}
-			if args[0].Type == VARIABLE_TYPE_OBJECT {
+			if args[0].Type == VariableTypeObject {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {
 					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].ExpressionMultiValues)
@@ -36,20 +36,20 @@ func registerBuildInFunctions() {
 			}
 		},
 		IsBuildIn: true,
-		Name:      common.BUILD_IN_FUNCTION_PRINT,
+		Name:      common.BuildInFunctionPrint,
 	}
 	catchBuildFunction := &Function{}
 	catchBuildFunction.IsBuildIn = true
-	catchBuildFunction.Name = common.BUILD_IN_FUNCTION_CATCH
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_CATCH] = catchBuildFunction
+	catchBuildFunction.Name = common.BuildInFunctionCatch
+	buildInFunctionsMap[common.BuildInFunctionCatch] = catchBuildFunction
 	{
 		catchBuildFunction.Type.ReturnList = make([]*Variable, 1)
 		catchBuildFunction.Type.ReturnList[0] = &Variable{}
 		catchBuildFunction.Type.ReturnList[0].Name = "returnValue"
 		catchBuildFunction.Type.ReturnList[0].Type = &Type{}
-		catchBuildFunction.Type.ReturnList[0].Type.Type = VARIABLE_TYPE_OBJECT
+		catchBuildFunction.Type.ReturnList[0].Type.Type = VariableTypeObject
 		catchBuildFunction.Type.ReturnList[0].Type.Class = &Class{}
-		catchBuildFunction.Type.ReturnList[0].Type.Class.Name = DEFAULT_EXCEPTION_CLASS
+		catchBuildFunction.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
 		catchBuildFunction.Type.ReturnList[0].Type.Class.NotImportedYet = true
 		//class is going to make value by checker
 	}
@@ -60,19 +60,19 @@ func registerBuildInFunctions() {
 		}
 		if block.InheritedAttribute.Defer == nil {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
-				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
+				errMsgPrefix(pos), common.BuildInFunctionCatch))
 			return
 		}
 		if len(args) > 1 {
 			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect at most 1 argument",
-				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
+				errMsgPrefix(pos), common.BuildInFunctionCatch))
 			return
 		}
 		if len(args) == 0 {
 			// make default exception class
 			// load java/lang/Exception this is default exception level to catch
 			if block.InheritedAttribute.Defer.ExceptionClass == nil {
-				c, err := ImportsLoader.LoadImport(DEFAULT_EXCEPTION_CLASS)
+				c, err := ImportsLoader.LoadImport(DefaultExceptionClass)
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s load exception class failed,err:%v",
 						errMsgPrefix(pos), err))
@@ -92,14 +92,14 @@ func registerBuildInFunctions() {
 		if args[0] == nil {
 			return
 		}
-		if args[0].Type != VARIABLE_TYPE_OBJECT {
+		if args[0].Type != VariableTypeObject {
 			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect a object ref argument",
-				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_CATCH))
+				errMsgPrefix(pos), common.BuildInFunctionCatch))
 			return
 		}
-		if has, _ := args[0].Class.haveSuper(JAVA_THROWABLE_CLASS); has == false {
+		if has, _ := args[0].Class.haveSuper(JavaThrowableClass); has == false {
 			*errs = append(*errs, fmt.Errorf("%s '%s' does not have super-class '%s'",
-				errMsgPrefix(pos), args[0].Class.Name, JAVA_THROWABLE_CLASS))
+				errMsgPrefix(pos), args[0].Class.Name, JavaThrowableClass))
 			return
 		}
 		err := block.InheritedAttribute.Defer.registerExceptionClass(args[0].Class)
@@ -107,7 +107,7 @@ func registerBuildInFunctions() {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 		}
 	}
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PANIC] = &Function{
+	buildInFunctionsMap[common.BuildInFunctionPanic] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall,
 			block *Block, errs *[]error, args []*Type, pos *Position) {
 			if len(e.ParameterTypes) > 0 {
@@ -122,32 +122,32 @@ func registerBuildInFunctions() {
 			if len(args) == 0 || args[0] == nil {
 				return
 			}
-			if args[0].Type != VARIABLE_TYPE_OBJECT {
+			if args[0].Type != VariableTypeObject {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
 					errMsgPrefix(pos), args[0].TypeString()))
 				return
 			}
-			if have, _ := args[0].Class.haveSuper(JAVA_THROWABLE_CLASS); have == false {
+			if have, _ := args[0].Class.haveSuper(JavaThrowableClass); have == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
 					errMsgPrefix(pos), args[0].TypeString()))
 				return
 			}
 		},
 		IsBuildIn: true,
-		Name:      common.BUILD_IN_FUNCTION_PANIC,
+		Name:      common.BuildInFunctionPanic,
 	}
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITOR_ENTER] = &Function{
+	buildInFunctionsMap[common.BuildInFunctionMonitorEnter] = &Function{
 		buildInFunctionChecker: monitorChecker,
 		IsBuildIn:              true,
-		Name:                   common.BUILD_IN_FUNCTION_MONITOR_ENTER,
+		Name:                   common.BuildInFunctionMonitorEnter,
 	}
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_MONITOR_EXIT] = &Function{
+	buildInFunctionsMap[common.BuildInFunctionMonitorExit] = &Function{
 		buildInFunctionChecker: monitorChecker,
 		IsBuildIn:              true,
-		Name:                   common.BUILD_IN_FUNCTION_MONITOR_EXIT,
+		Name:                   common.BuildInFunctionMonitorExit,
 	}
 	// len
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_LEN] = &Function{
+	buildInFunctionsMap[common.BuildInFunctionLen] = &Function{
 		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -160,32 +160,32 @@ func registerBuildInFunctions() {
 			if args[0] == nil {
 				return
 			}
-			if args[0].Type != VARIABLE_TYPE_ARRAY && args[0].Type != VARIABLE_TYPE_JAVA_ARRAY &&
-				args[0].Type != VARIABLE_TYPE_MAP && args[0].Type != VARIABLE_TYPE_STRING {
+			if args[0].Type != VariableTypeArray && args[0].Type != VariableTypeJavaArray &&
+				args[0].Type != VariableTypeMap && args[0].Type != VariableTypeString {
 				*errs = append(*errs, fmt.Errorf("%s len expect 'array' or 'map' or 'string' argument",
 					errMsgPrefix(pos)))
 				return
 			}
 		},
 		IsBuildIn: true,
-		Name:      common.BUILD_IN_FUNCTION_LEN,
+		Name:      common.BuildInFunctionLen,
 	}
-	lenFunction := buildInFunctionsMap[common.BUILD_IN_FUNCTION_LEN]
+	lenFunction := buildInFunctionsMap[common.BuildInFunctionLen]
 	lenFunction.Type.ReturnList = make(ReturnList, 1)
 	lenFunction.Type.ReturnList[0] = &Variable{}
 	lenFunction.Type.ReturnList[0].Type = &Type{}
-	lenFunction.Type.ReturnList[0].Type.Type = VARIABLE_TYPE_INT
+	lenFunction.Type.ReturnList[0].Type.Type = VariableTypeInt
 	// sprintf
 	sprintfBuildFunction := &Function{}
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_SPRINTF] = sprintfBuildFunction
-	sprintfBuildFunction.Name = common.BUILD_IN_FUNCTION_SPRINTF
+	buildInFunctionsMap[common.BuildInFunctionSprintf] = sprintfBuildFunction
+	sprintfBuildFunction.Name = common.BuildInFunctionSprintf
 	sprintfBuildFunction.IsBuildIn = true
 	{
 		sprintfBuildFunction.Type.ReturnList = make([]*Variable, 1)
 		sprintfBuildFunction.Type.ReturnList[0] = &Variable{}
 		sprintfBuildFunction.Type.ReturnList[0].Name = "returnValue"
 		sprintfBuildFunction.Type.ReturnList[0].Type = &Type{}
-		sprintfBuildFunction.Type.ReturnList[0].Type.Type = VARIABLE_TYPE_STRING
+		sprintfBuildFunction.Type.ReturnList[0].Type.Type = VariableTypeString
 	}
 	sprintfBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*Type, pos *Position) {
@@ -195,16 +195,16 @@ func registerBuildInFunctions() {
 		}
 		if len(args) == 0 {
 			err := fmt.Errorf("%s '%s' expect one argument at lease",
-				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_SPRINTF)
+				errMsgPrefix(pos), common.BuildInFunctionSprintf)
 			*errs = append(*errs, err)
 			return
 		}
 		if args[0] == nil {
 			return
 		}
-		if args[0].Type != VARIABLE_TYPE_STRING {
+		if args[0].Type != VariableTypeString {
 			err := fmt.Errorf("%s '%s' first argument must be string",
-				errMsgPrefix(pos), common.BUILD_IN_FUNCTION_SPRINTF)
+				errMsgPrefix(pos), common.BuildInFunctionSprintf)
 			*errs = append(*errs, err)
 			return
 		}
@@ -220,7 +220,7 @@ func registerBuildInFunctions() {
 		e.Args = e.Args[1:]
 	}
 	// printf
-	buildInFunctionsMap[common.BUILD_IN_FUNCTION_PRINTF] = &Function{
+	buildInFunctionsMap[common.BuildInFunctionPrintf] = &Function{
 		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*Type, pos *Position) {
 			if len(e.ParameterTypes) > 0 {
@@ -231,14 +231,14 @@ func registerBuildInFunctions() {
 			e.BuildInFunctionMeta = meta
 			if len(args) == 0 {
 				err := fmt.Errorf("%s '%s' expect one argument at least",
-					errMsgPrefix(pos), common.BUILD_IN_FUNCTION_PRINTF)
+					errMsgPrefix(pos), common.BuildInFunctionPrintf)
 				*errs = append(*errs, err)
 				return
 			}
 			if args[0] == nil {
 				return
 			}
-			if args[0].Type == VARIABLE_TYPE_OBJECT {
+			if args[0].Type == VariableTypeObject {
 				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
 				if have {
 					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].ExpressionMultiValues)
@@ -261,7 +261,7 @@ func registerBuildInFunctions() {
 			if args[0] == nil {
 				return
 			}
-			if args[0].Type != VARIABLE_TYPE_STRING {
+			if args[0].Type != VariableTypeString {
 				err := fmt.Errorf("%s format must be string",
 					errMsgPrefix(pos))
 				*errs = append(*errs, err)
@@ -277,7 +277,7 @@ func registerBuildInFunctions() {
 			meta.ArgsLength = len(args)
 		},
 		IsBuildIn: true,
-		Name:      common.BUILD_IN_FUNCTION_PRINTF,
+		Name:      common.BuildInFunctionPrintf,
 	}
 }
 
@@ -294,7 +294,7 @@ func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *
 	if args[0] == nil {
 		return
 	}
-	if args[0].IsPointer() == false || args[0].Type == VARIABLE_TYPE_STRING {
+	if args[0].IsPointer() == false || args[0].Type == VariableTypeString {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not valid type to call",
 			errMsgPrefix(pos), args[0].TypeString()))
 		return

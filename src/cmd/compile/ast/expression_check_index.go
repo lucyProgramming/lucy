@@ -14,24 +14,24 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 	if t == nil {
 		return nil
 	}
-	if t.Type != VARIABLE_TYPE_ARRAY &&
-		t.Type != VARIABLE_TYPE_MAP &&
-		t.Type != VARIABLE_TYPE_JAVA_ARRAY {
+	if t.Type != VariableTypeArray &&
+		t.Type != VariableTypeMap &&
+		t.Type != VariableTypeJavaArray {
 		*errs = append(*errs, fmt.Errorf("%s cannot have 'index' on '%s'",
 			errMsgPrefix(e.Pos), t.TypeString()))
 		return nil
 	}
 	// array
-	if t.Type == VARIABLE_TYPE_ARRAY ||
-		t.Type == VARIABLE_TYPE_JAVA_ARRAY {
+	if t.Type == VariableTypeArray ||
+		t.Type == VariableTypeJavaArray {
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		if errorsNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if indexType != nil {
 			if indexType.IsInteger() {
-				if indexType.Type == VARIABLE_TYPE_LONG {
-					index.Index.ConvertToNumber(VARIABLE_TYPE_INT) //  convert to int
+				if indexType.Type == VariableTypeLong {
+					index.Index.ConvertToNumber(VariableTypeInt) //  convert to int
 				}
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",

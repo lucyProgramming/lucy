@@ -10,23 +10,23 @@ type LucyFieldSignature struct {
 }
 
 func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {
-	return variableType.Type == ast.VARIABLE_TYPE_MAP ||
-		variableType.Type == ast.VARIABLE_TYPE_ARRAY ||
-		variableType.Type == ast.VARIABLE_TYPE_ENUM
+	return variableType.Type == ast.VariableTypeMap ||
+		variableType.Type == ast.VariableTypeArray ||
+		variableType.Type == ast.VariableTypeEnum
 }
 func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
-	if variableType.Type == ast.VARIABLE_TYPE_MAP {
+	if variableType.Type == ast.VariableTypeMap {
 		d = "M" // start token of map
 		d += signature.Encode(variableType.Map.Key)
 		d += signature.Encode(variableType.Map.Value)
 		return d
 	}
-	if variableType.Type == ast.VARIABLE_TYPE_ENUM {
+	if variableType.Type == ast.VariableTypeEnum {
 		d = "E"
 		d += variableType.Enum.Name + ";"
 		return d
 	}
-	if variableType.Type == ast.VARIABLE_TYPE_ARRAY {
+	if variableType.Type == ast.VariableTypeArray {
 		d = "]"
 		d += signature.Encode(variableType.ArrayType)
 		return d
@@ -48,7 +48,7 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 			return bs, nil, err
 		}
 		m := &ast.Type{}
-		m.Type = ast.VARIABLE_TYPE_MAP
+		m.Type = ast.VariableTypeMap
 		m.Map = &ast.Map{}
 		m.Map.Key = kt
 		m.Map.Value = vt
@@ -57,7 +57,7 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 	if bs[0] == 'E' {
 		bs = bs[1:]
 		a := &ast.Type{}
-		a.Type = ast.VARIABLE_TYPE_ENUM
+		a.Type = ast.VariableTypeEnum
 		index := bytes.Index(bs, []byte{';'})
 		a.Enum = &ast.Enum{}
 		a.Enum.Name = string(bs[:index])
@@ -67,7 +67,7 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 	if bs[0] == ']' {
 		bs = bs[1:]
 		a := &ast.Type{}
-		a.Type = ast.VARIABLE_TYPE_ARRAY
+		a.Type = ast.VariableTypeArray
 		bs, a.ArrayType, err = signature.Decode(bs)
 		return bs, a, err
 	}

@@ -41,7 +41,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 			if 4 > maxStack {
 				maxStack = 4
 			}
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, function.ClosureVariableOffSet)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/lang/invoke/MethodHandle",
@@ -104,7 +104,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	className := makeClass.newClassName("closureFunction_" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = className
-	closureClass.SuperClass = ast.LUCY_ROOT_CLASS
+	closureClass.SuperClass = ast.LucyRootClass
 	closureClass.AccessFlags = 0
 	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
@@ -129,7 +129,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      className,
-		Method:     special_method_init,
+		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -139,7 +139,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	function.ClosureVariableOffSet = code.MaxLocals
 	code.MaxLocals++
 	state.appendLocals(class, state.newObjectVariableType(className))
-	copyOPs(code, storeLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, function.ClosureVariableOffSet)...)
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
 	total := len(function.Closure.Variables) + len(function.Closure.Functions)
@@ -158,7 +158,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 		}
 		if context.function.Closure.ClosureVariableExist(v) {
 			// I Know class at 0 offset
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -170,7 +170,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.LocalValOffset)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -197,7 +197,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 		}
 		if context.function.Closure.ClosureFunctionExist(v) {
 			// I Know class at 0 offset
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, 0)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
@@ -209,7 +209,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else { // not exits
-			copyOPs(code, loadLocalVariableOps(ast.VARIABLE_TYPE_OBJECT, v.ClosureVariableOffSet)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.ClosureVariableOffSet)...)
 			if 3 > maxStack {
 				maxStack = 3
 			}
