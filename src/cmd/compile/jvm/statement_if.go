@@ -75,14 +75,14 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codeLength))
 	//s.Exits = append(s.Exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	if s.ElseBlock != nil {
-		var elseState *StackMapState
+		var elseBlockState *StackMapState
 		if s.ElseBlock.HaveVariableDefinition() {
-			elseState = (&StackMapState{}).FromLast(conditionState)
+			elseBlockState = (&StackMapState{}).FromLast(conditionState)
 		} else {
-			elseState = conditionState
+			elseBlockState = conditionState
 		}
-		makeClass.buildBlock(class, code, s.ElseBlock, context, elseState)
-		conditionState.addTop(elseState)
+		makeClass.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
+		conditionState.addTop(elseBlockState)
 		if s.ElseBlock.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 		}

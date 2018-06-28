@@ -167,11 +167,11 @@ func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.Class
 			code.CodeLength += 3
 		}
 	case ast.VariableTypeArray:
-		meta := ArrayMetas[t.ArrayType.Type]
+		meta := ArrayMetas[t.Array.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeMap:
-		class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
 		class.InsertClassConst(JvmDescriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])

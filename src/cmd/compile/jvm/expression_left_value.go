@@ -44,7 +44,7 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	target *ast.Type, className, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
-	state.pushStack(class, state.newObjectVariableType(javaHashMapClass))
+	state.pushStack(class, state.newObjectVariableType(javaMapClass))
 	stack, _ := makeExpression.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
@@ -62,14 +62,14 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaHashMapClass,
+		Class:      javaMapClass,
 		Method:     "put",
 		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	op = append(op, bs4...)
 	target = index.Expression.ExpressionValue.Map.Value
-	className = javaHashMapClass
+	className = javaMapClass
 	return
 }
 
@@ -179,7 +179,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
-			meta := ArrayMetas[index.Expression.ExpressionValue.ArrayType.Type]
+			meta := ArrayMetas[index.Expression.ExpressionValue.Array.Type]
 			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.ExpressionValue)
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -251,7 +251,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			{
 				t := &ast.Type{}
 				t.Type = ast.VariableTypeJavaArray
-				t.ArrayType = index.Expression.ExpressionValue.ArrayType
+				t.Array = index.Expression.ExpressionValue.Array
 				state.pushStack(class, t)
 				state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			}

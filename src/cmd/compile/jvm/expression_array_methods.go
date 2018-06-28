@@ -36,7 +36,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 		common.ArrayMethodSize,
 		common.ArrayMethodStart,
 		common.ArrayMethodEnd:
-		meta := ArrayMetas[call.Expression.ExpressionValue.ArrayType.Type]
+		meta := ArrayMetas[call.Expression.ExpressionValue.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
@@ -49,7 +49,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			code.CodeLength++
 		}
 	case common.ArrayMethodAppend:
-		meta := ArrayMetas[call.Expression.ExpressionValue.ArrayType.Type]
+		meta := ArrayMetas[call.Expression.ExpressionValue.Array.Type]
 		appendName := "append"
 		appendDescriptor := meta.appendDescriptor
 		for _, v := range call.Args {
@@ -101,7 +101,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			code.CodeLength++
 		}
 	case common.ArrayMethodAppendAll:
-		meta := ArrayMetas[call.Expression.ExpressionValue.ArrayType.Type]
+		meta := ArrayMetas[call.Expression.ExpressionValue.Array.Type]
 		for _, v := range call.Args {
 			currentStack := uint16(1)
 			appendName := "append"

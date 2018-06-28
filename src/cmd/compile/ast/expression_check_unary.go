@@ -16,12 +16,14 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 				Type: ExpressionTypeBool,
 				Pos:  e.Pos,
 			}
-		} else {
-			return &Type{
-				Type: ExpressionTypeInt,
-				Pos:  e.Pos,
-			}
 		}
+		//else {
+		//	return &Type{
+		//		Type: ExpressionTypeInt,
+		//		Pos:  e.Pos,
+		//	}
+		//}
+		return nil
 	}
 	if e.Type == ExpressionTypeNot {
 		if t.Type != VariableTypeBool {

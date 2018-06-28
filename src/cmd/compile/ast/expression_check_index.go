@@ -38,7 +38,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 					errMsgPrefix(e.Pos), indexType.TypeString()))
 			}
 		}
-		tt := t.ArrayType.Clone()
+		tt := t.Array.Clone()
 		tt.Pos = e.Pos
 		return tt
 	}

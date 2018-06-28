@@ -14,11 +14,12 @@ func (s *StatementBreak) mkDefers(block *Block) {
 		}
 		s.mkDefers(block.Outer)
 		return
+	} else {
+		// switch
+		if block.IsSwitchStatementTopBlock {
+			s.Defers = append(s.Defers, block.Defers...)
+			return
+		}
+		s.mkDefers(block.Outer)
 	}
-	// switch
-	if block.IsSwitchStatementTopBlock {
-		s.Defers = append(s.Defers, block.Defers...)
-		return
-	}
-	s.mkDefers(block.Outer)
 }

@@ -21,7 +21,7 @@ func (makeExpression *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, cod
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
 	} else if call.Args[0].ExpressionValue.Type == ast.VariableTypeArray {
-		meta := ArrayMetas[call.Args[0].ExpressionValue.ArrayType.Type]
+		meta := ArrayMetas[call.Args[0].ExpressionValue.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
@@ -33,7 +33,7 @@ func (makeExpression *MakeExpression) mkBuildInLen(class *cg.ClassHighLevel, cod
 	} else if call.Args[0].ExpressionValue.Type == ast.VariableTypeMap {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaHashMapClass,
+			Class:      javaMapClass,
 			Method:     "size",
 			Descriptor: "()I",
 		},

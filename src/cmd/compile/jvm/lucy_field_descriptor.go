@@ -28,7 +28,7 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	}
 	if variableType.Type == ast.VariableTypeArray {
 		d = "]"
-		d += signature.Encode(variableType.ArrayType)
+		d += signature.Encode(variableType.Array)
 		return d
 	}
 	return JvmDescriptor.typeDescriptor(variableType)
@@ -64,11 +64,21 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 		bs = bs[index+1:]
 		return bs, a, nil
 	}
+	if bs[0] == '(' {
+		a := &ast.Type{}
+		a.Type = ast.VariableTypeFunction
+		a.FunctionType = &ast.FunctionType{}
+		bs, err = LucyMethodSignatureParser.Decode(a.FunctionType, bs)
+		if err != nil {
+			return bs, nil, err
+		}
+		return bs, a, nil
+	}
 	if bs[0] == ']' {
 		bs = bs[1:]
 		a := &ast.Type{}
 		a.Type = ast.VariableTypeArray
-		bs, a.ArrayType, err = signature.Decode(bs)
+		bs, a.Array, err = signature.Decode(bs)
 		return bs, a, err
 	}
 	return JvmDescriptor.ParseType(bs)

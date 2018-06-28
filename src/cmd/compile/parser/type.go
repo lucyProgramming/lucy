@@ -46,7 +46,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		ret = &ast.Type{}
 		ret.Pos = pos
 		ret.Type = ast.VariableTypeArray
-		ret.ArrayType = t
+		ret.Array = t
 	case lex.TokenBool:
 		pos := parser.mkPos()
 		parser.Next()
@@ -180,9 +180,9 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 		parser.Next() // skip ]
 		newRet := &ast.Type{
-			Pos:       pos,
-			Type:      ast.VariableTypeJavaArray,
-			ArrayType: ret,
+			Pos:   pos,
+			Type:  ast.VariableTypeJavaArray,
+			Array: ret,
 		}
 		ret = newRet
 	}

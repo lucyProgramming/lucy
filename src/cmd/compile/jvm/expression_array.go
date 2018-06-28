@@ -13,7 +13,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	}()
 	arr := e.Data.(*ast.ExpressionArray)
 	//	new array ,
-	meta := ArrayMetas[e.ExpressionValue.ArrayType.Type]
+	meta := ArrayMetas[e.ExpressionValue.Array.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -28,7 +28,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	}
 
 	loadInt32(class, code, int32(arr.Length))
-	switch e.ExpressionValue.ArrayType.Type {
+	switch e.ExpressionValue.Array.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -61,7 +61,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		code.CodeLength += 2
 	case ast.VariableTypeMap:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeString:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -73,23 +73,23 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		code.CodeLength += 3
 	case ast.VariableTypeObject:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(e.ExpressionValue.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(e.ExpressionValue.Array.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeArray:
-		meta := ArrayMetas[e.ExpressionValue.ArrayType.ArrayType.Type]
+		meta := ArrayMetas[e.ExpressionValue.Array.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 	arrayObject := &ast.Type{}
 	arrayObject.Type = ast.VariableTypeJavaArray
-	arrayObject.ArrayType = e.ExpressionValue.ArrayType
+	arrayObject.Array = e.ExpressionValue.Array
 	state.pushStack(class, arrayObject)
 
 	maxStack = 4
 
 	store := func() {
-		switch e.ExpressionValue.ArrayType.Type {
+		switch e.ExpressionValue.Array.Type {
 		case ast.VariableTypeBool:
 			fallthrough
 		case ast.VariableTypeByte:

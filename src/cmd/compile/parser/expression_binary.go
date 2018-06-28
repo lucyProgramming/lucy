@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-//||
+// ||
 func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) {
 	e, err := expressionParser.parseLogicalAndExpression()
 	if err != nil {

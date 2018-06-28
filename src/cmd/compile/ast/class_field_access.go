@@ -9,7 +9,7 @@ func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error
 	if err != nil {
 		return
 	}
-	notFoundErr := fmt.Errorf("field '%s' not found", name)
+	notFoundErr := fmt.Errorf("field or method named '%s' not found", name)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].IsPrivate() {
 			// private field

@@ -14,7 +14,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	hashMapVerifyType := state.newObjectVariableType(javaHashMapClass)
+	hashMapVerifyType := state.newObjectVariableType(javaMapClass)
 	state.pushStack(class, hashMapVerifyType)
 	switch call.Name {
 	case common.MapMethodKeyExists:
@@ -28,7 +28,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaHashMapClass,
+			Class:      javaMapClass,
 			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -42,7 +42,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 		callRemove := func() {
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      javaHashMapClass,
+				Class:      javaMapClass,
 				Method:     "remove",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -103,7 +103,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 	case common.MapMethodRemoveAll:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaHashMapClass,
+			Class:      javaMapClass,
 			Method:     "clear",
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -111,7 +111,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 	case common.MapMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaHashMapClass,
+			Class:      javaMapClass,
 			Method:     "size",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

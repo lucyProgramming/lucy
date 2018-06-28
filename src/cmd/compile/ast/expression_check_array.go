@@ -41,7 +41,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 					tt.Pos = e.Pos
 					arr.Type = &Type{}
 					arr.Type.Type = VariableTypeArray
-					arr.Type.ArrayType = tt
+					arr.Type.Array = tt
 					arr.Type.Pos = e.Pos
 				} else {
 					if t.RightValueValid() {
@@ -54,13 +54,13 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 				}
 			}
 			if arr.Type != nil {
-				if arr.Type.ArrayType.Equal(errs, t) == false {
+				if arr.Type.Array.Equal(errs, t) == false {
 					if noType {
 						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
-							errMsgPrefix(t.Pos), arr.Type.ArrayType.TypeString(), t.TypeString()))
+							errMsgPrefix(t.Pos), arr.Type.Array.TypeString(), t.TypeString()))
 					} else {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(t.Pos), t.TypeString(), arr.Type.ArrayType.TypeString()))
+							errMsgPrefix(t.Pos), t.TypeString(), arr.Type.Array.TypeString()))
 					}
 				}
 			}

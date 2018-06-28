@@ -193,7 +193,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			errFunc()
 		} else { //
 			if f.Type.ParameterList[0].Type.Type == VariableTypeArray &&
-				f.Type.ParameterList[0].Type.ArrayType.Type == VariableTypeString {
+				f.Type.ParameterList[0].Type.Array.Type == VariableTypeString {
 				err := f.Block.Insert(f.Type.ParameterList[0].Name, f.Type.ParameterList[0].Pos, f.Type.ParameterList[0])
 				if err != nil {
 					*errs = append(*errs, err)

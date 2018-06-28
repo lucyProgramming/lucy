@@ -38,7 +38,7 @@ type Type struct {
 	Pos          *Position
 	Type         int
 	Name         string
-	ArrayType    *Type
+	Array        *Type
 	Class        *Class
 	Enum         *Enum
 	EnumName     *EnumName
@@ -53,15 +53,15 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 	if typ.IsPointer() == false {
 		return false
 	}
-	if typ.Type == VariableTypeArray && typ.ArrayType.IsPrimitive() {
+	if typ.Type == VariableTypeArray && typ.Array.IsPrimitive() {
 		return true
 	}
 	if typ.Type == VariableTypeObject || typ.Type == VariableTypeString {
 		return true
 	}
 	if typ.Type == VariableTypeJavaArray {
-		if typ.ArrayType.IsPointer() {
-			return typ.ArrayType.validForTypeAssertOrConversion()
+		if typ.Array.IsPointer() {
+			return typ.Array.validForTypeAssertOrConversion()
 		} else {
 			return true
 		}
@@ -149,21 +149,13 @@ func (typ *Type) Clone() *Type {
 	*ret = *typ
 	if ret.Type == VariableTypeArray ||
 		ret.Type == VariableTypeJavaArray {
-		ret.ArrayType = typ.ArrayType.Clone()
+		ret.Array = typ.Array.Clone()
 	}
 	if ret.Type == VariableTypeMap {
 		ret.Map = &Map{}
 		ret.Map.Key = typ.Map.Key.Clone()
 		ret.Map.Value = typ.Map.Value.Clone()
 	}
-	//if ret.Type == VariableTypeFunction {
-	//	ret.FunctionType = &FunctionType{}
-	//	ret.FunctionType.ParameterList = make(ParameterList, len(typ.FunctionType.ParameterList))
-	//	ret.FunctionType.ReturnList = make(ReturnList, len(typ.FunctionType.ReturnList))
-	//	for k, _ := range ret.FunctionType.ParameterList {
-	//		ret.FunctionType.ParameterList[k] = typ.FunctionType.ParameterList[k].Type.Clone()
-	//	}
-	//}
 	return ret
 }
 
@@ -191,7 +183,7 @@ func (typ *Type) resolve(block *Block, subPart ...bool) error {
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
-		return typ.ArrayType.resolve(block, true)
+		return typ.Array.resolve(block, true)
 	}
 	if typ.Type == VariableTypeMap {
 		var err error
@@ -391,7 +383,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "enum(" + typ.Enum.Name + ")"
 	case VariableTypeArray:
 		*ret += "[]"
-		typ.ArrayType.typeString(ret)
+		typ.Array.typeString(ret)
 	case VariableTypeVoid:
 		*ret += "void"
 	case VariableTypeString:
@@ -405,7 +397,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += typ.Map.Value.TypeString()
 		*ret += "}"
 	case VariableTypeJavaArray:
-		*ret += typ.ArrayType.TypeString() + "[]"
+		*ret += typ.Array.TypeString() + "[]"
 	case VariableTypePackage:
 		*ret += typ.Package.Name
 	case VariableTypeNull:
@@ -460,7 +452,7 @@ func (typ *Type) haveParameterType() (ret []string) {
 		return
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		ret = typ.ArrayType.haveParameterType()
+		ret = typ.Array.haveParameterType()
 		return
 	}
 	if typ.Type == VariableTypeMap {
@@ -485,7 +477,7 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 		return nil
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		return typ.ArrayType.canBeBindWithParameterTypes(parameterTypes)
+		return typ.Array.canBeBindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
 		err := typ.Map.Key.canBeBindWithParameterTypes(parameterTypes)
@@ -510,7 +502,7 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 		return nil
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		return typ.ArrayType.bindWithParameterTypes(parameterTypes)
+		return typ.Array.bindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
 		err := typ.Map.Key.bindWithParameterTypes(parameterTypes)
@@ -537,10 +529,10 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 		return nil
 	}
 	if typ.Type == VariableTypeArray && bind.Type == VariableTypeArray {
-		return typ.ArrayType.canBeBindWithType(mkParameterTypes, bind.ArrayType)
+		return typ.Array.canBeBindWithType(mkParameterTypes, bind.Array)
 	}
 	if typ.Type == VariableTypeJavaArray && bind.Type == VariableTypeJavaArray {
-		return typ.ArrayType.canBeBindWithType(mkParameterTypes, bind.ArrayType)
+		return typ.Array.canBeBindWithType(mkParameterTypes, bind.Array)
 	}
 	if typ.Type == VariableTypeMap && bind.Type == VariableTypeMap {
 		err := typ.Map.Key.canBeBindWithType(mkParameterTypes, bind.Map.Key)
@@ -567,10 +559,10 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 		return true
 	}
 	if typ.Type == VariableTypeArray && compareTo.Type == VariableTypeArray {
-		return typ.ArrayType.Equal(errs, compareTo.ArrayType)
+		return typ.Array.Equal(errs, compareTo.Array)
 	}
 	if typ.Type == VariableTypeJavaArray && compareTo.Type == VariableTypeJavaArray {
-		return typ.ArrayType.Equal(errs, compareTo.ArrayType)
+		return typ.Array.Equal(errs, compareTo.Array)
 	}
 
 	if typ.Type == VariableTypeEnum && compareTo.Type == VariableTypeEnum {
@@ -636,7 +628,7 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 		return typ.Type == compareTo.Type
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		return typ.ArrayType.StrictEqual(compareTo.ArrayType)
+		return typ.Array.StrictEqual(compareTo.Array)
 	}
 	if typ.Type == VariableTypeMap {
 		if false == typ.Map.Key.StrictEqual(compareTo.Map.Key) {

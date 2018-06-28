@@ -122,7 +122,7 @@ func (s *StatementFor) checkRange() []error {
 		if identifierV.Name != NoNameIdentifier {
 			vd := &Variable{}
 			if rangeOn.Type == VariableTypeArray || rangeOn.Type == VariableTypeJavaArray {
-				vd.Type = rangeOn.ArrayType.Clone()
+				vd.Type = rangeOn.Array.Clone()
 			} else {
 				vd.Type = rangeOn.Map.Value.Clone()
 			}
@@ -180,7 +180,7 @@ func (s *StatementFor) checkRange() []error {
 			tkk = &Type{
 				Type: VariableTypeInt,
 			}
-			tvv = rangeOn.ArrayType
+			tvv = rangeOn.Array
 		} else {
 			tkk = rangeOn.Map.Key
 			tvv = rangeOn.Map.Value

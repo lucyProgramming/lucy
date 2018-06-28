@@ -63,12 +63,12 @@ func (makeExpression *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaHashMapClass,
+		Class:      javaMapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -84,7 +84,7 @@ func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel
 		t := e.ExpressionValue
 		for t.Type == ast.VariableTypeJavaArray {
 			dimensions++
-			t = t.ArrayType
+			t = t.Array
 		}
 	}
 	n := e.Data.(*ast.ExpressionNew)
@@ -107,7 +107,7 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 	context *Context, state *StackMapState) (maxStack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
-	meta := ArrayMetas[e.ExpressionValue.ArrayType.Type]
+	meta := ArrayMetas[e.ExpressionValue.Array.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -132,7 +132,7 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
-		switch e.ExpressionValue.ArrayType.Type {
+		switch e.ExpressionValue.Array.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
@@ -169,7 +169,7 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 			code.CodeLength += 3
 		case ast.VariableTypeMap:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeFunction:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -177,16 +177,16 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 			code.CodeLength += 3
 		case ast.VariableTypeObject:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(e.ExpressionValue.ArrayType.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(e.ExpressionValue.Array.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			meta := ArrayMetas[e.ExpressionValue.ArrayType.ArrayType.Type]
+			meta := ArrayMetas[e.ExpressionValue.Array.Array.Type]
 			class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeJavaArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(JvmDescriptor.typeDescriptor(e.ExpressionValue.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(JvmDescriptor.typeDescriptor(e.ExpressionValue.Array), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}

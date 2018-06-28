@@ -12,20 +12,20 @@ func (makeExpression *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, 
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(javaHashMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaHashMapClass,
+		Class:      javaMapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	values := e.Data.(*ast.ExpressionMap).KeyValuePairs
 
-	hashMapObject := state.newObjectVariableType(javaHashMapClass)
+	hashMapObject := state.newObjectVariableType(javaMapClass)
 	state.pushStack(class, hashMapObject)
 
 	for _, v := range values {
@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildMapLiteral(class *cg.ClassHighLevel, 
 		// put in hashmap
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaHashMapClass,
+			Class:      javaMapClass,
 			Method:     "put",
 			Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

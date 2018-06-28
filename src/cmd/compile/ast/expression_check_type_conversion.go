@@ -34,22 +34,22 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 
 	// string([]byte)
 	if conversion.Type.Type == VariableTypeString &&
-		t.Type == VariableTypeArray && t.ArrayType.Type == VariableTypeByte {
+		t.Type == VariableTypeArray && t.Array.Type == VariableTypeByte {
 		return ret
 	}
 	// string(byte[])
 	if conversion.Type.Type == VariableTypeString &&
-		t.Type == VariableTypeJavaArray && t.ArrayType.Type == VariableTypeByte {
+		t.Type == VariableTypeJavaArray && t.Array.Type == VariableTypeByte {
 		return ret
 	}
 
 	// []byte("hello world")
-	if conversion.Type.Type == VariableTypeArray && conversion.Type.ArrayType.Type == VariableTypeByte &&
+	if conversion.Type.Type == VariableTypeArray && conversion.Type.Array.Type == VariableTypeByte &&
 		t.Type == VariableTypeString {
 		return ret
 	}
 	// byte[]("hello world")
-	if conversion.Type.Type == VariableTypeJavaArray && conversion.Type.ArrayType.Type == VariableTypeByte &&
+	if conversion.Type.Type == VariableTypeJavaArray && conversion.Type.Array.Type == VariableTypeByte &&
 		t.Type == VariableTypeString {
 		return ret
 	}

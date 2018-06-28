@@ -154,7 +154,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
-			err = jvm.LucyMethodSignatureParser.Decode(m.Function, c.ConstPool[index].Info)
+			_, err = jvm.LucyMethodSignatureParser.Decode(&m.Function.Type, c.ConstPool[index].Info)
 			if err != nil {
 				return nil, err
 			}
@@ -294,7 +294,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		}
 		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
-			err = jvm.LucyMethodSignatureParser.Decode(function, c.ConstPool[index].Info)
+			_, err = jvm.LucyMethodSignatureParser.Decode(&function.Type, c.ConstPool[index].Info)
 			if err != nil {
 				return err
 			}

@@ -34,21 +34,21 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			}
 		}
 	}
-	if call.Expression.ExpressionValue.Type == ast.VariableTypePackage {
-		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.PackageFunction.Type.ParameterList, context, state)
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Expression.ExpressionValue.Package.Name + "/main",
-			Method:     call.Name,
-			Descriptor: call.PackageFunction.Descriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		if t := makeExpression.valueJvmSize(e); t > maxStack {
-			maxStack = t
-		}
-		pop(call.PackageFunction)
-		return
-	}
+	//if call.Expression.ExpressionValue.Type == ast.VariableTypePackage {
+	//	maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.PackageFunction.Type.ParameterList, context, state)
+	//	code.Codes[code.CodeLength] = cg.OP_invokestatic
+	//	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	//		Class:      call.Expression.ExpressionValue.Package.Name + "/main",
+	//		Method:     call.Name,
+	//		Descriptor: call.PackageFunction.Descriptor,
+	//	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	//	code.CodeLength += 3
+	//	if t := makeExpression.valueJvmSize(e); t > maxStack {
+	//		maxStack = t
+	//	}
+	//	pop(call.PackageFunction)
+	//	return
+	//}
 
 	d := call.Method.Function.Descriptor
 	if call.Class.LoadFromOutSide == false {

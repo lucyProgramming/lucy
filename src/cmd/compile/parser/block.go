@@ -46,8 +46,9 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			isDefer = true
 			blockParser.Next()
 			if validAfterDefer() == false {
-				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s not a valid token '%s' after defer",
-					blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
+				blockParser.parser.errs = append(blockParser.parser.errs,
+					fmt.Errorf("%s not a valid token '%s' after defer",
+						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				reset()
 			}
 		case lex.TokenIdentifier, lex.TokenLp, lex.TokenFunction:

@@ -44,7 +44,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 	}
 	objectArray := &ast.Type{}
 	objectArray.Type = ast.VariableTypeJavaArray
-	objectArray.ArrayType = state.newObjectVariableType(javaRootClass)
+	objectArray.Array = state.newObjectVariableType(javaRootClass)
 	state.pushStack(class, objectArray)
 
 	index := int32(0)

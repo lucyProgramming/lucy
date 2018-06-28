@@ -9,7 +9,7 @@ public fn readFile(filepath string)->(bs []byte,err error){
 }
 
 public fn writeFile( filepath string , bs []byte){
-		 
+		
 }
 
 	

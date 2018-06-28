@@ -121,10 +121,10 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 		}
 	case ast.VariableTypeMap:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(javaHashMapClass),
+			Index: class.Class.InsertClassConst(javaMapClass),
 		}
 	case ast.VariableTypeArray:
-		meta := ArrayMetas[t.ArrayType.Type]
+		meta := ArrayMetas[t.Array.Type]
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(meta.className),
 		}

@@ -17,7 +17,7 @@ const (
 	javaStringClass                   = "java/lang/String"
 	javaMethodHandleClass             = "java/lang/invoke/MethodHandle"
 	javaRootClass                     = "java/lang/Object"
-	javaHashMapClass                  = "java/util/HashMap"
+	javaMapClass                      = "java/util/HashMap"
 	javaIntegerClass                  = "java/lang/Integer"
 	javaFloatClass                    = "java/lang/Float"
 	javaDoubleClass                   = "java/lang/Double"

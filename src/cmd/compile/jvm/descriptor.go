@@ -43,7 +43,7 @@ func (description *JvmDescription) typeDescriptor(v *ast.Type) string {
 	case ast.VariableTypeDouble:
 		return "D"
 	case ast.VariableTypeArray:
-		meta := ArrayMetas[v.ArrayType.Type] // combination type
+		meta := ArrayMetas[v.Array.Type] // combination type
 		return "L" + meta.className + ";"
 	case ast.VariableTypeString:
 		return "Ljava/lang/String;"
@@ -52,9 +52,11 @@ func (description *JvmDescription) typeDescriptor(v *ast.Type) string {
 	case ast.VariableTypeObject:
 		return "L" + v.Class.Name + ";"
 	case ast.VariableTypeMap:
-		return "L" + javaHashMapClass + ";"
+		return "L" + javaMapClass + ";"
+	case ast.VariableTypeFunction:
+		return "L" + javaMethodHandleClass + ";"
 	case ast.VariableTypeJavaArray:
-		return "[" + description.typeDescriptor(v.ArrayType)
+		return "[" + description.typeDescriptor(v.Array)
 	}
 	panic("unHandle type signature")
 }
@@ -122,7 +124,7 @@ func (description *JvmDescription) ParseType(bs []byte) ([]byte, *ast.Type, erro
 		ret := &ast.Type{}
 		if err == nil {
 			ret.Type = ast.VariableTypeJavaArray
-			ret.ArrayType = t
+			ret.Array = t
 		}
 		return bs, ret, err
 	}

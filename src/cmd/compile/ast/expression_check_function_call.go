@@ -74,7 +74,7 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 	}
 	for k, v := range ft.ParameterList {
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
-			if !v.Type.Equal(errs, callArgsTypes[k]) {
+			if false == v.Type.Equal(errs, callArgsTypes[k]) {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix((call.Args)[k].Pos),
 					callArgsTypes[k].TypeString(), v.Type.TypeString()))

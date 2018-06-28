@@ -190,14 +190,14 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				}
 				for _, t := range ts {
 					if call.Name == common.ArrayMethodAppend {
-						if object.ArrayType.Equal(errs, t) == false {
+						if object.Array.Equal(errs, t) == false {
 							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-								errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString(), call.Name))
+								errMsgPrefix(t.Pos), t.TypeString(), object.Array.TypeString(), call.Name))
 						}
 					} else {
 						if object.Equal(errs, t) == false {
 							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-								errMsgPrefix(t.Pos), t.TypeString(), object.ArrayType.TypeString(), call.Name))
+								errMsgPrefix(t.Pos), t.TypeString(), object.Array.TypeString(), call.Name))
 						}
 					}
 				}
@@ -302,6 +302,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 	call.Class = object.Class
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
+	if len(call.ParameterTypes) > 0 {
+		*errs = append(*errs, fmt.Errorf("%s method call expect no parameter types",
+			errMsgPrefix(e.Pos)))
+	}
 	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, args, &call.Args, false)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))

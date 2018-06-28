@@ -113,7 +113,7 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 		{
 			// String[] java style
 			t := &ast.Type{Type: ast.VariableTypeJavaArray}
-			t.ArrayType = &ast.Type{Type: ast.VariableTypeString}
+			t.Array = &ast.Type{Type: ast.VariableTypeString}
 			state.appendLocals(class, t)
 		}
 		method.Code.MaxLocals = 1
@@ -123,7 +123,7 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 	}
 	if LucyMethodSignatureParser.Need(&f.Type) {
 		d := &cg.AttributeLucyMethodDescriptor{}
-		d.Descriptor = LucyMethodSignatureParser.Encode(f)
+		d.Descriptor = LucyMethodSignatureParser.Encode(&f.Type)
 		method.AttributeLucyMethodDescriptor = d
 	}
 	if f.HaveDefaultValue {

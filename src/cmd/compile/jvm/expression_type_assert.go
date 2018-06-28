@@ -17,7 +17,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 	if assertOn.Type.Type == ast.VariableTypeObject {
 		class.InsertClassConst(assertOn.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else if assertOn.Type.Type == ast.VariableTypeArray { // arrays
-		meta := ArrayMetas[assertOn.Type.ArrayType.Type]
+		meta := ArrayMetas[assertOn.Type.Array.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
 		class.InsertClassConst(JvmDescriptor.typeDescriptor(assertOn.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])

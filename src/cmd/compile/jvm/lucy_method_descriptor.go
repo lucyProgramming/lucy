@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
@@ -24,46 +25,60 @@ func (signature *LucyMethodSignature) Need(functionType *ast.FunctionType) bool 
 	return false
 }
 
-func (signature *LucyMethodSignature) Encode(f *ast.Function) (descriptor string) {
+func (signature *LucyMethodSignature) Encode(ft *ast.FunctionType) (descriptor string) {
 	descriptor = "("
-	for _, v := range f.Type.ParameterList {
+	for _, v := range ft.ParameterList {
 		descriptor += LucyFieldSignatureParser.Encode(v.Type)
 	}
 	descriptor += ")"
-	if f.NoReturnValue() {
+	if ft.NoReturnValue() {
 		descriptor += "V"
 	} else {
-		for _, v := range f.Type.ReturnList {
+		descriptor += "("
+		for _, v := range ft.ReturnList {
 			descriptor += LucyFieldSignatureParser.Encode(v.Type)
 		}
+		descriptor += ")"
 	}
 	return descriptor
 }
 
 //rewrite types
-func (signature *LucyMethodSignature) Decode(f *ast.Function, bs []byte) error {
+func (signature *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte, error) {
 	bs = bs[1:] // skip (
 	var err error
-	for i := 0; i < len(f.Type.ParameterList); i++ {
-		bs, f.Type.ParameterList[i].Type, err = LucyFieldSignatureParser.Decode(bs)
+	for i := 0; i < len(ft.ParameterList); i++ {
+		bs, ft.ParameterList[i].Type, err = LucyFieldSignatureParser.Decode(bs)
 		if err != nil {
-			return err
+			return bs, err
 		}
 	}
 	bs = bs[1:] // skip )
-	f.Type.ReturnList = []*ast.Variable{}
-	i := 1
-	for len(bs) > 0 {
-		var t *ast.Type
-		bs, t, err = LucyFieldSignatureParser.Decode(bs)
-		if err != nil {
-			return err
+	if bs[0] == '(' {
+		ft.ReturnList = []*ast.Variable{}
+		bs = bs[1:]
+		for bs[0] != ')' {
+			v := &ast.Variable{}
+			bs, t, err := LucyFieldSignatureParser.Decode(bs)
+			if err != nil {
+				return bs, err
+			}
+			v.Type = t
+			ft.ReturnList = append(ft.ReturnList, v)
 		}
-		vd := &ast.Variable{}
-		vd.Type = t
-		f.Type.ReturnList = append(f.Type.ReturnList, vd)
-		i++
+		bs = bs[1:] // skip )
+	} else if bs[0] == 'V' {
+		bs = bs[1:]
+		ft.ReturnList = make([]*ast.Variable, 1)
+		ft.ReturnList[0] = &ast.Variable{
+			Name: "returnValue",
+			Type: &ast.Type{
+				Type: ast.VariableTypeVoid,
+			},
+		}
+	} else {
+		return bs, fmt.Errorf("function type format wrong")
 	}
 
-	return nil
+	return bs, nil
 }

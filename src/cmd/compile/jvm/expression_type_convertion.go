@@ -19,7 +19,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
 	if conversion.Type.Type == ast.VariableTypeArray &&
-		conversion.Type.ArrayType.Type == ast.VariableTypeByte {
+		conversion.Type.Array.Type == ast.VariableTypeByte {
 		currentStack = 2
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -34,9 +34,9 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	}
 	// string
 	if (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.ExpressionValue.Type == ast.VariableTypeArray &&
-		conversion.Expression.ExpressionValue.ArrayType.Type == ast.VariableTypeByte) ||
+		conversion.Expression.ExpressionValue.Array.Type == ast.VariableTypeByte) ||
 		(conversion.Type.Type == ast.VariableTypeString && conversion.Expression.ExpressionValue.Type == ast.VariableTypeJavaArray &&
-			conversion.Expression.ExpressionValue.ArrayType.Type == ast.VariableTypeByte) {
+			conversion.Expression.ExpressionValue.Array.Type == ast.VariableTypeByte) {
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -58,7 +58,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 		return
 	}
 	//  []byte("hello world")
-	if conversion.Type.Type == ast.VariableTypeArray && conversion.Type.ArrayType.Type == ast.VariableTypeByte &&
+	if conversion.Type.Type == ast.VariableTypeArray && conversion.Type.Array.Type == ast.VariableTypeByte &&
 		conversion.Expression.ExpressionValue.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -82,7 +82,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 		return
 	}
 	// byte[]("hello world")
-	if conversion.Type.Type == ast.VariableTypeJavaArray && conversion.Type.ArrayType.Type == ast.VariableTypeByte &&
+	if conversion.Type.Type == ast.VariableTypeJavaArray && conversion.Type.Array.Type == ast.VariableTypeByte &&
 		conversion.Expression.ExpressionValue.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -100,7 +100,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	//  string(['h','e'])
 	if conversion.Type.Type == ast.VariableTypeString &&
 		conversion.Expression.ExpressionValue.Type == ast.VariableTypeArray &&
-		conversion.Expression.ExpressionValue.ArrayType.Type == ast.VariableTypeByte {
+		conversion.Expression.ExpressionValue.Array.Type == ast.VariableTypeByte {
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -121,7 +121,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	//  string(byte[])
 	if conversion.Type.Type == ast.VariableTypeString &&
 		conversion.Expression.ExpressionValue.Type == ast.VariableTypeJavaArray &&
-		conversion.Expression.ExpressionValue.ArrayType.Type == ast.VariableTypeByte {
+		conversion.Expression.ExpressionValue.Array.Type == ast.VariableTypeByte {
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,
@@ -144,7 +144,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	if conversion.Type.Type == ast.VariableTypeObject {
 		class.InsertClassConst(conversion.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else if conversion.Type.Type == ast.VariableTypeArray { // arrays
-		meta := ArrayMetas[conversion.Type.ArrayType.Type]
+		meta := ArrayMetas[conversion.Type.Array.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
 		class.InsertClassConst(JvmDescriptor.typeDescriptor(conversion.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])

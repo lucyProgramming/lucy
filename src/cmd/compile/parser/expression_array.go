@@ -49,7 +49,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		data.Type = &ast.Type{}
 		data.Type.Type = ast.VariableTypeArray
 		data.Type.Pos = pos
-		data.Type.ArrayType = t
+		data.Type.Array = t
 		data.Expression = e
 		ret.Data = data
 		return ret, nil
@@ -59,7 +59,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	if t != nil {
 		arr.Type = &ast.Type{}
 		arr.Type.Type = ast.VariableTypeArray
-		arr.Type.ArrayType = t
+		arr.Type.Array = t
 		arr.Type.Pos = pos
 	}
 	arr.Expressions, err = expressionParser.parseArrayValues()

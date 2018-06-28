@@ -487,13 +487,13 @@ func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *Exp
 }
 
 type ExpressionMethodCall struct {
-	Class           *Class //
-	Expression      *Expression
-	Args            CallArgs
-	Name            string
-	Method          *ClassMethod
-	PackageFunction *Function // Expression is package
-	ParameterTypes  []*Type
+	Class          *Class //
+	Expression     *Expression
+	Args           CallArgs
+	Name           string
+	Method         *ClassMethod
+	ParameterTypes []*Type
+	//PackageFunction *Function // Expression is package
 }
 
 type ExpressionDeclareVariable struct {
