@@ -43,12 +43,16 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		maxStack = 1
 		return
 	}
+	if identifier.Function != nil {
+		return makeExpression.MakeClass.packFunction2MethodHandle(class, code, identifier.Function, context)
+	}
+
 	if identifier.Variable.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      makeExpression.MakeClass.mainClass.Name,
 			Field:      identifier.Name,
-			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
+			Descriptor: JvmDescriptor.typeDescriptor(identifier.Variable.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		maxStack = jvmSlotSize(identifier.Variable.Type)

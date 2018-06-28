@@ -16,7 +16,7 @@ func (makeExpression *MakeExpression) buildFunctionPointerCall(class *cg.ClassHi
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/invoke/MethodHandle",
 		Method:     "invoke",
-		Descriptor: Descriptor.methodDescriptor(call.Expression.ExpressionValue.FunctionType),
+		Descriptor: JvmDescriptor.methodDescriptor(call.Expression.ExpressionValue.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression {
@@ -41,7 +41,7 @@ func (makeExpression *MakeExpression) buildFunctionPointerCall(class *cg.ClassHi
 func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Expression.ExpressionValue.FunctionType != nil {
+	if call.Function == nil {
 		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
 	if call.Function.IsBuildIn {
@@ -49,9 +49,6 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 	}
 	if call.Function.TemplateFunction != nil {
 		return makeExpression.buildTemplateFunctionCall(class, code, e, context, state)
-	}
-	if call.Expression.ExpressionValue.FunctionType != nil {
-		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
 	if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
 		maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)

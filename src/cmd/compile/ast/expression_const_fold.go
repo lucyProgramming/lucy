@@ -39,7 +39,7 @@ func (e *Expression) constantFold() (is bool, err error) {
 		return true, nil
 	}
 	// ~
-	if e.Type == ExpressionTypeBitNot {
+	if e.Type == ExpressionTypeBitwiseNot {
 		ee := e.Data.(*Expression)
 		is, err = ee.constantFold()
 		if err != nil || is == false {

@@ -31,7 +31,7 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 		d += signature.Encode(variableType.ArrayType)
 		return d
 	}
-	return Descriptor.typeDescriptor(variableType)
+	return JvmDescriptor.typeDescriptor(variableType)
 }
 func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error) {
 	var err error
@@ -71,5 +71,5 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 		bs, a.ArrayType, err = signature.Decode(bs)
 		return bs, a, err
 	}
-	return Descriptor.ParseType(bs)
+	return JvmDescriptor.ParseType(bs)
 }

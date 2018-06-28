@@ -25,6 +25,11 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		left.Data = true
 		left.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next()
+	case lex.TokenGlobal:
+		left = &ast.Expression{}
+		left.Type = ast.ExpressionTypeGlobal
+		left.Pos = expressionParser.parser.mkPos()
+		expressionParser.Next()
 	case lex.TokenFalse:
 		left = &ast.Expression{}
 		left.Type = ast.ExpressionTypeBool
@@ -141,7 +146,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		if err != nil {
 			return nil, err
 		}
-		newE.Type = ast.ExpressionTypeBitNot
+		newE.Type = ast.ExpressionTypeBitwiseNot
 		newE.Data = left
 		newE.Pos = pos
 		left = newE

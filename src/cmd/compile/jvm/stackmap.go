@@ -129,7 +129,7 @@ func (s *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel
 			Index: class.Class.InsertClassConst(meta.className),
 		}
 	case ast.VariableTypeJavaArray:
-		d := Descriptor.typeDescriptor(t)
+		d := JvmDescriptor.typeDescriptor(t)
 		ret.Verify = &cg.StackMapObjectVariableInfo{
 			Index: class.Class.InsertClassConst(d),
 		}

@@ -83,7 +83,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			t := &ast.Type{}
 			t.Type = ast.VariableTypeJavaArray
 			t.ArrayType = s.RangeAttr.RangeOn.ExpressionValue.ArrayType
-			class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(JvmDescriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 

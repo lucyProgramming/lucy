@@ -47,6 +47,7 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 	for k, b := range bs {
 		b.IsFunctionBlock = true
 		f := &Function{}
+		f.Pos = b.Pos
 		f.Block = *b
 		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition
 		p.InitFunctions[k] = f
@@ -106,7 +107,7 @@ func (p *Package) TypeCheck() []error {
 		}
 	}
 	for _, v := range p.Block.Classes {
-		es := v.checkPhase2(&p.Block)
+		es := v.checkPhase2()
 		if errorsNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)
 		}

@@ -9,6 +9,9 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 	if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
 		maxStack = jvmSlotSize(e.ExpressionValue)
 		if selection.PackageVariable != nil {
+			if selection.PackageVariable.JvmDescriptor == "" {
+				selection.PackageVariable.JvmDescriptor = JvmDescriptor.typeDescriptor(e.ExpressionValue)
+			}
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      selection.Expression.ExpressionValue.Package.Name + "/main",
@@ -32,13 +35,66 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 		}
 		return
 	}
+	if selection.Method != nil { // pack to method handle
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/invoke/MethodHandles",
+			Method:     "lookup",
+			Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertClassConst(selection.Expression.ExpressionValue.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+			Descriptor: JvmDescriptor.methodDescriptor(&selection.Method.Function.Type),
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		if selection.Method.IsStatic() {
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles$Lookup",
+				Method:     "findStatic",
+				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		} else {
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles$Lookup",
+				Method:     "findVirtual",
+				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		}
+		code.CodeLength += 3
+		if 4 > maxStack {
+			maxStack = 4
+		}
+		if selection.Expression.ExpressionValue.Type == ast.VariableTypeObject {
+			stack, _ := makeExpression.build(class, code, selection.Expression, context, state)
+			if stack > maxStack {
+				maxStack = stack
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandle",
+				Method:     "bindTo",
+				Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
+		return
+
+	}
 	if selection.Expression.ExpressionValue.Type == ast.VariableTypeClass {
 		maxStack = jvmSlotSize(e.ExpressionValue)
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      selection.Expression.ExpressionValue.Class.Name,
 			Field:      selection.Name,
-			Descriptor: Descriptor.typeDescriptor(e.ExpressionValue),
+			Descriptor: JvmDescriptor.typeDescriptor(e.ExpressionValue),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
@@ -52,7 +108,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      selection.Expression.ExpressionValue.Class.Name,
 		Field:      selection.Name,
-		Descriptor: Descriptor.typeDescriptor(e.ExpressionValue),
+		Descriptor: JvmDescriptor.typeDescriptor(e.ExpressionValue),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return

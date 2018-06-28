@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"path/filepath"
 )
 
 type Class struct {
@@ -53,7 +54,7 @@ func (c *Class) loadSelf() error {
 
 func (c *Class) check(father *Block) []error {
 	errs := c.checkPhase1(father)
-	es := c.checkPhase2(father)
+	es := c.checkPhase2()
 	if errorsNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -161,15 +162,29 @@ func (c *Class) checkPhase1(father *Block) []error {
 	return errs
 }
 
-func (c *Class) checkPhase2(father *Block) []error {
+func (c *Class) checkPhase2() []error {
 	errs := []error{}
 	c.Block.InheritedAttribute.Class = c
+	c.Block.InheritedAttribute.ClassAndFunctionNames = append(c.Block.InheritedAttribute.ClassAndFunctionNames, filepath.Base(c.Name))
+	defer func() {
+		c.Block.InheritedAttribute.ClassAndFunctionNames =
+			c.Block.InheritedAttribute.ClassAndFunctionNames[:len(c.Block.InheritedAttribute.ClassAndFunctionNames)-1]
+	}()
 	errs = append(errs, c.checkFields()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
 	c.mkClassInitMethod()
-	for _, ms := range c.Methods {
+	for name, ms := range c.Methods {
+		if c.Fields != nil && c.Fields[name] != nil {
+			f := c.Fields[name]
+			errMsg := fmt.Sprintf("%s class method named '%s' already declared as field,at:\n",
+				errMsgPrefix(ms[0].Function.Pos),
+			)
+			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
+			errs = append(errs, errors.New(errMsg))
+			continue
+		}
 		if len(ms) > 1 {
 			errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
 				errMsgPrefix(ms[0].Function.Pos),
@@ -180,6 +195,7 @@ func (c *Class) checkPhase2(father *Block) []error {
 			errs = append(errs, errors.New(errMsg))
 		}
 	}
+
 	errs = append(errs, c.checkMethods()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs

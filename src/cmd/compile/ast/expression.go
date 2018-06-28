@@ -71,7 +71,7 @@ const (
 	//
 	ExpressionTypeNegative
 	ExpressionTypeNot
-	ExpressionTypeBitNot
+	ExpressionTypeBitwiseNot
 	//
 	ExpressionTypeIdentifier
 	ExpressionTypeNew
@@ -87,6 +87,7 @@ const (
 	ExpressionTypeTypeAlias
 	ExpressionTypeTypeAssert
 	ExpressionTypeTernary
+	ExpressionTypeGlobal
 )
 
 func (e *Expression) OpName() string {
@@ -195,7 +196,7 @@ func (e *Expression) OpName() string {
 		return "ternary(?:)"
 	case ExpressionTypeNot:
 		return "not(!)"
-	case ExpressionTypeBitNot:
+	case ExpressionTypeBitwiseNot:
 		return "~"
 	case ExpressionTypeIdentifier:
 		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifier).Name)
@@ -223,6 +224,8 @@ func (e *Expression) OpName() string {
 		return "type assert"
 	case ExpressionTypeTypeAlias:
 		return "type alias"
+	case ExpressionTypeGlobal:
+		return "global"
 	default:
 		return fmt.Sprintf("op[%d](missing handle)", e.Type)
 	}
@@ -364,7 +367,7 @@ func (e *Expression) canBeUsedAsCondition() bool {
 		e.Type == ExpressionTypePrefixDecrement ||
 		e.Type == ExpressionTypeNegative ||
 		e.Type == ExpressionTypeNot ||
-		e.Type == ExpressionTypeBitNot ||
+		e.Type == ExpressionTypeBitwiseNot ||
 		e.Type == ExpressionTypeIdentifier ||
 		e.Type == ExpressionTypeNew ||
 		e.Type == ExpressionTypeCheckCast ||
@@ -509,7 +512,6 @@ type ExpressionIdentifier struct {
 	Variable *Variable
 	Function *Function
 	EnumName *EnumName
-	Class    *Class
 }
 
 type ExpressionIndex struct {
@@ -519,9 +521,10 @@ type ExpressionIndex struct {
 type ExpressionSelection struct {
 	Expression      *Expression
 	Name            string
-	Field           *ClassField // expression is class or object
-	PackageVariable *Variable   // expression is package
-	PackageEnumName *EnumName   // expression is package
+	Field           *ClassField  // expression is class or object
+	Method          *ClassMethod // pack to method handle
+	PackageVariable *Variable    // expression is package
+	PackageEnumName *EnumName    // expression is package
 }
 
 type ExpressionNew struct {

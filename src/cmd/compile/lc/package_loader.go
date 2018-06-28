@@ -2,10 +2,10 @@ package lc
 
 const (
 	_ = iota
-	RESOURCE_KIND_JAVA_CLASS
-	RESOURCE_KIND_JAVA_PACKAGE
-	RESOURCE_KIND_LUCY_CLASS
-	RESOURCE_KIND_LUCY_PACKAGE
+	ResourceKindJavaClass
+	ResourceKindJavaPackage
+	ResourceKindLucyClass
+	ResourceKindLucyPackage
 )
 
 type Resource struct {

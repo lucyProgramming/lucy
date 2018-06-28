@@ -54,8 +54,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		f.Used = true
 		tt := &Type{}
 		tt.Type = VariableTypeFunction
+		tt.FunctionType = &f.Type
 		tt.Pos = e.Pos
 		tt.Function = f
+		identifier.Function = f
 		return tt, nil
 	case *Variable:
 		t := d.(*Variable)

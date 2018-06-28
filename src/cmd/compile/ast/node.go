@@ -120,9 +120,11 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 			s[k] = &Statement{
 				Type:       StatementTypeExpression,
 				Expression: v,
+				Pos:        v.Pos,
 			}
 		}
 		b := &Block{}
+		b.Pos = expressions[0].Pos
 		b.Statements = s
 		b.isGlobalVariableDefinition = true
 		conversion.Blocks = append([]*Block{b}, conversion.Blocks...)

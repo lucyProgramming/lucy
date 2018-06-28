@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"strings"
 )
 
 type Function struct {
@@ -34,8 +35,14 @@ type Function struct {
 }
 
 func (f *Function) NameLiteralFunction() string {
-	//TODO:: rewrite this function
-	return "literal"
+	if f.Name != "" {
+		return f.Name
+	}
+	var t []string
+	if f.Name != "" {
+		t = append(f.Block.InheritedAttribute.ClassAndFunctionNames, f.Name)
+	}
+	return strings.Join(t, "$")
 }
 
 type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position)
@@ -129,6 +136,20 @@ func (f *Function) badParameterMsg(name string, args []*Type) string {
 
 func (f *Function) checkBlock(errs *[]error) {
 	f.mkLastReturnStatement()
+	if f.Name == "" {
+		f.Name = fmt.Sprintf("literal$%d", f.Pos.StartLine)
+		t := strings.Join(f.Block.InheritedAttribute.ClassAndFunctionNames, "$")
+		f.Block.InheritedAttribute.ClassAndFunctionNames =
+			append(f.Block.InheritedAttribute.ClassAndFunctionNames, f.Name)
+		f.Name = t + "$" + f.Name
+	} else {
+		f.Block.InheritedAttribute.ClassAndFunctionNames =
+			append(f.Block.InheritedAttribute.ClassAndFunctionNames, f.Name)
+	}
+	defer func() {
+		f.Block.InheritedAttribute.ClassAndFunctionNames =
+			f.Block.InheritedAttribute.ClassAndFunctionNames[:len(f.Block.InheritedAttribute.ClassAndFunctionNames)-1]
+	}()
 	*errs = append(*errs, f.Block.checkStatements()...)
 }
 

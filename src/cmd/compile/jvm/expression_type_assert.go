@@ -20,7 +20,7 @@ func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, 
 		meta := ArrayMetas[assertOn.Type.ArrayType.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
-		class.InsertClassConst(Descriptor.typeDescriptor(assertOn.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(JvmDescriptor.typeDescriptor(assertOn.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4

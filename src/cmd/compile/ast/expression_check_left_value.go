@@ -90,7 +90,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 				return nil
 			}
 			if vd, ok := variable.(*Variable); ok && vd != nil {
-				if vd.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
+				if vd.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && t.Package.Name != PackageBeenCompile.Name {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				}

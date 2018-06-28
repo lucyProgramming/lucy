@@ -8,25 +8,25 @@ import (
 
 func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type {
 	selection := e.Data.(*ExpressionSelection)
-	t, es := selection.Expression.checkSingleValueContextExpression(block)
+	on, es := selection.Expression.checkSingleValueContextExpression(block)
 	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t == nil {
+	if on == nil {
 		return nil
 	}
 	// dot
-	if t.Type != VariableTypeObject &&
-		t.Type != VariableTypeClass &&
-		t.Type != VariableTypePackage {
+	if on.Type != VariableTypeObject &&
+		on.Type != VariableTypeClass &&
+		on.Type != VariableTypePackage {
 		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'",
-			errMsgPrefix(e.Pos), selection.Name, t.TypeString()))
+			errMsgPrefix(e.Pos), selection.Name, on.TypeString()))
 		return nil
 	}
 	var err error
-	switch t.Type {
+	switch on.Type {
 	case VariableTypePackage:
-		d, ok := t.Package.Block.NameExists(selection.Name)
+		d, ok := on.Package.Block.NameExists(selection.Name)
 		if ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
 			*errs = append(*errs, err)
@@ -37,7 +37,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			v := d.(*Variable)
 			tt := v.Type.Clone()
 			tt.Pos = e.Pos
-			if (v.AccessFlags & cg.ACC_FIELD_PUBLIC) == 0 {
+			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -48,7 +48,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			e.fromConst(c) //
 			tt := c.Type.Clone()
 			tt.Pos = e.Pos
-			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 {
+			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && on.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -59,14 +59,14 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			tt.Pos = e.Pos
 			tt.Type = VariableTypeClass
 			tt.Class = c
-			if (c.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
+			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			return tt
 		case *EnumName:
 			n := d.(*EnumName)
-			if (n.Enum.AccessFlags & cg.ACC_CLASS_PUBLIC) == 0 {
+			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -83,22 +83,36 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		return nil
 	case VariableTypeObject:
 		if selection.Name == SUPER {
-			if t.Class.Name == JavaRootClass {
+			if on.Class.Name == JavaRootClass {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
 					errMsgPrefix(e.Pos), JavaRootClass))
-				return t
+				return on
 			}
-			err = t.Class.loadSuperClass()
+			err = on.Class.loadSuperClass()
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
-				return t
+				return on
 			}
-			t := t.Clone()
+			t := on.Clone()
 			t.Pos = e.Pos
 			t.Class = t.Class.SuperClass
 			return t
 		}
-		field, err := t.Class.accessField(selection.Name, false)
+		if len(on.Class.Methods[selection.Name]) >= 1 {
+			method := on.Class.Methods[selection.Name][0]
+			selection.Method = method
+			t := &Type{}
+			t.Type = VariableTypeFunction
+			t.Pos = e.Pos
+			if method.IsStatic() {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,should access by className",
+					errMsgPrefix(e.Pos),
+					selection.Name))
+			}
+			t.FunctionType = &method.Function.Type
+			return t
+		}
+		field, err := on.Class.accessField(selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
@@ -108,7 +122,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 					selection.Name))
 			}
 			if field.IsStatic() {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by objectref",
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by className",
 					errMsgPrefix(e.Pos), selection.Name))
 			}
 			t := field.Type.Clone()
@@ -118,33 +132,47 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		}
 	case VariableTypeClass:
 		if selection.Name == SUPER {
-			if t.Class.Name == JavaRootClass {
+			if on.Class.Name == JavaRootClass {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
 					errMsgPrefix(e.Pos), JavaRootClass))
-				return t
+				return on
 			}
-			err = t.Class.loadSuperClass()
+			err = on.Class.loadSuperClass()
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
-				return t
+				return on
 			}
-			tt := t.Clone()
+			tt := on.Clone()
 			tt.Pos = e.Pos
 			tt.Class = tt.Class.SuperClass
 			return tt
 		}
-		field, err := t.Class.accessField(selection.Name, false)
+		if len(on.Class.Methods[selection.Name]) >= 1 {
+			method := on.Class.Methods[selection.Name][0]
+			selection.Method = method
+			t := &Type{}
+			t.Type = VariableTypeFunction
+			t.Pos = e.Pos
+			if method.IsStatic() == false {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,should access by object ref",
+					errMsgPrefix(e.Pos),
+					selection.Name))
+			}
+			t.FunctionType = &method.Function.Type
+			return t
+		}
+		field, err := on.Class.accessField(selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 		}
 		if field != nil {
-			if field.IsPublic() == false && t.Class != block.InheritedAttribute.Class {
+			if field.IsPublic() == false && on.Class != block.InheritedAttribute.Class {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public",
 					errMsgPrefix(e.Pos),
 					selection.Name))
 			}
 			if field.IsStatic() == false {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by className",
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by object ref",
 					errMsgPrefix(e.Pos),
 					selection.Name))
 			}

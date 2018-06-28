@@ -37,15 +37,15 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			call.Expression.OpName(), t.TypeString()))
 		return nil
 	}
-	if t.FunctionType != nil {
-		return e.checkFunctionPointerCall(block, errs, t.FunctionType, call)
+	if t.Function != nil {
+		call.Function = t.Function
+		if t.Function.IsBuildIn {
+			return e.checkBuildInFunctionCall(block, errs, t.Function, call)
+		} else {
+			return e.checkFunctionCall(block, errs, t.Function, call)
+		}
 	}
-	call.Function = t.Function
-	if t.Function.IsBuildIn {
-		return e.checkBuildInFunctionCall(block, errs, t.Function, call)
-	} else {
-		return e.checkFunctionCall(block, errs, t.Function, call)
-	}
+	return e.checkFunctionPointerCall(block, errs, t.FunctionType, call)
 }
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {

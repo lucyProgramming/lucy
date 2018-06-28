@@ -66,7 +66,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		f.AccessFlags = v.AccessFlags
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
-		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
+		_, f.Type, err = jvm.JvmDescriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
 		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		m.Function.AccessFlags = v.AccessFlags
-		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.Type, err = jvm.JvmDescriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.LoadFromOutSide = true
-		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
+		_, f.Type, err = jvm.JvmDescriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -145,7 +145,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m := &ast.ClassMethod{}
 		m.Function = &ast.Function{}
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
-		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.Type, err = jvm.JvmDescriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -215,7 +215,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if len(constValue) > 1 {
 			return fmt.Errorf("constant value length greater than  1 at class 'main'  field '%s'", name)
 		}
-		_, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+		_, typ, err := jvm.JvmDescriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
 		if err != nil {
 			return err
 		}
@@ -225,7 +225,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			cos.Name = name
 			cos.AccessFlags = f.AccessFlags
 			cos.Type = typ
-			_, cos.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+			_, cos.Type, err = jvm.JvmDescriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
 			if err != nil {
 				return err
 			}
@@ -288,7 +288,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function.Name = name
 		function.AccessFlags = m.AccessFlags
 		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
-		function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
+		function.Type, err = jvm.JvmDescriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
 			return err
 		}
@@ -431,7 +431,7 @@ func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	ret.Block.Classes = make(map[string]*ast.Class)
 	for _, v := range fis {
 		var rr Resource
-		rr.kind = RESOURCE_KIND_JAVA_CLASS
+		rr.kind = ResourceKindJavaClass
 		if strings.HasSuffix(v.Name(), ".class") == false || strings.Contains(v.Name(), "$") {
 			continue
 		}
@@ -453,7 +453,7 @@ func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 		return nil, err
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
-	if r.kind == RESOURCE_KIND_LUCY_CLASS {
+	if r.kind == ResourceKindLucyClass {
 		if t := c.AttributeGroupedByName[cg.ATTRIBUTE_NAME_LUCY_ENUM]; len(t) > 0 {
 			return loader.loadLucyEnum(c)
 		} else {
@@ -473,7 +473,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err := os.Stat(p)
 		if err == nil && f.IsDir() { // directory is package
 			realPaths = append(realPaths, &Resource{
-				kind:     RESOURCE_KIND_LUCY_PACKAGE,
+				kind:     ResourceKindLucyPackage,
 				realPath: p,
 				name:     importName,
 			})
@@ -482,7 +482,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err = os.Stat(p)
 		if err == nil && f.IsDir() == false { // class file
 			realPaths = append(realPaths, &Resource{
-				kind:     RESOURCE_KIND_LUCY_CLASS,
+				kind:     ResourceKindLucyClass,
 				realPath: p,
 				name:     importName,
 			})
@@ -493,7 +493,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err := os.Stat(p)
 		if err == nil && f.IsDir() { // directory is package
 			realPaths = append(realPaths, &Resource{
-				kind:     RESOURCE_KIND_JAVA_PACKAGE,
+				kind:     ResourceKindJavaPackage,
 				realPath: p,
 				name:     importName,
 			})
@@ -502,7 +502,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err = os.Stat(p)
 		if err == nil && f.IsDir() == false { // directory is package
 			realPaths = append(realPaths, &Resource{
-				kind:     RESOURCE_KIND_JAVA_CLASS,
+				kind:     ResourceKindJavaClass,
 				realPath: p,
 				name:     importName,
 			})
@@ -524,36 +524,36 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		errMsg := "not 1 resource named '" + importName + "' present:\n"
 		for _, v := range realPathMap {
 			switch v[0].kind {
-			case RESOURCE_KIND_JAVA_CLASS:
+			case ResourceKindJavaClass:
 				errMsg += fmt.Sprintf("\t in '%s' is a java class\n", v[0].realPath)
-			case RESOURCE_KIND_JAVA_PACKAGE:
+			case ResourceKindJavaPackage:
 				errMsg += fmt.Sprintf("\t in '%s' is a java package\n", v[0].realPath)
-			case RESOURCE_KIND_LUCY_CLASS:
+			case ResourceKindLucyClass:
 				errMsg += fmt.Sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
-			case RESOURCE_KIND_LUCY_PACKAGE:
+			case ResourceKindLucyPackage:
 				errMsg += fmt.Sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
 			}
 		}
 		return nil, fmt.Errorf(errMsg)
 	}
-	if realPaths[0].kind == RESOURCE_KIND_LUCY_CLASS {
+	if realPaths[0].kind == ResourceKindLucyClass {
 		if filepath.Base(realPaths[0].realPath) == mainClassName {
 			return nil, fmt.Errorf("%s is special class for global variable and other things", mainClassName)
 		}
 	}
-	if realPaths[0].kind == RESOURCE_KIND_JAVA_CLASS {
+	if realPaths[0].kind == ResourceKindJavaClass {
 		class, err := loader.loadClass(realPaths[0])
 		if class != nil {
 			loader.caches[importName] = class
 		}
 		return class, err
-	} else if realPaths[0].kind == RESOURCE_KIND_LUCY_CLASS {
+	} else if realPaths[0].kind == ResourceKindLucyClass {
 		t, err := loader.loadClass(realPaths[0])
 		if t != nil {
 			loader.caches[importName] = t
 		}
 		return t, err
-	} else if realPaths[0].kind == RESOURCE_KIND_JAVA_PACKAGE {
+	} else if realPaths[0].kind == ResourceKindJavaPackage {
 		p, err := loader.loadJavaPackage(realPaths[0])
 		if p != nil {
 			loader.caches[importName] = p

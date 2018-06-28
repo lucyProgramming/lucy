@@ -172,7 +172,7 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	case ast.ExpressionTypePrefixDecrement:
 		maxStack = makeExpression.buildSelfIncrement(class, code, e, context, state)
 	//
-	case ast.ExpressionTypeBitNot:
+	case ast.ExpressionTypeBitwiseNot:
 		fallthrough
 	case ast.ExpressionTypeNegative:
 		fallthrough
@@ -185,10 +185,6 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 		maxStack = makeExpression.buildNew(class, code, e, context, state)
 	case ast.ExpressionTypeFunctionLiteral:
 		maxStack = makeExpression.MakeClass.buildFunctionExpression(class, code, e, context, state)
-		// pack to methodhandle
-		//		{
-		//			f := e.ex
-		//		}
 	case ast.ExpressionTypeCheckCast: // []byte(str)
 		maxStack = makeExpression.buildTypeConversion(class, code, e, context, state)
 

@@ -147,7 +147,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 		meta := ArrayMetas[conversion.Type.ArrayType.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
-		class.InsertClassConst(Descriptor.typeDescriptor(conversion.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(JvmDescriptor.typeDescriptor(conversion.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	}
 	code.CodeLength += 3
 	return

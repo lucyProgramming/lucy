@@ -29,7 +29,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		return
 	}
-	if e.Type == ast.ExpressionTypeBitNot {
+	if e.Type == ast.ExpressionTypeBitwiseNot {
 		ee := e.Data.(*ast.Expression)
 		maxStack, _ = makeExpression.build(class, code, ee, context, state)
 		if t := jvmSlotSize(ee.ExpressionValue) * 2; t > maxStack {

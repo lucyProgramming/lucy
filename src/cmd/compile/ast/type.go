@@ -413,7 +413,27 @@ func (typ *Type) typeString(ret *string) {
 	case VariableTypeName:
 		*ret += typ.Name // resolve wrong, but typeString is ok to return
 	case VariableTypeFunction:
-		*ret += typ.Function.readableMsg()
+		s := "fn ("
+		for k, v := range typ.FunctionType.ParameterList {
+			if v.Name != "" {
+				s += v.Name + " "
+			}
+			s += v.Type.TypeString()
+			if k != len(typ.FunctionType.ParameterList)-1 {
+				s += " , "
+			}
+		}
+		if len(typ.FunctionType.ReturnList) > 0 {
+			s += " ) -> ( "
+			for k, v := range typ.FunctionType.ReturnList {
+				s += v.Type.TypeString()
+				if k != len(typ.FunctionType.ReturnList)-1 {
+					s += ","
+				}
+			}
+		}
+		s += ")"
+		*ret += s
 	case VariableTypeTemplate:
 		*ret += typ.Name
 	default:

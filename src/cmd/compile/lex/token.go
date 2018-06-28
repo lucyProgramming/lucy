@@ -103,6 +103,7 @@ const (
 	TokenVolatile      //volatile
 	TokenSynchronized  // synchronized
 	TokenEof           // end of file
+	TokenGlobal        // global
 )
 
 var (
@@ -151,6 +152,7 @@ var (
 		"map":          TokenMap,
 		"volatile":     TokenVolatile,
 		"synchronized": TokenSynchronized,
+		"global":       TokenGlobal,
 	}
 )
 

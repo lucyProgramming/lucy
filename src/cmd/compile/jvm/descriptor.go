@@ -7,10 +7,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
-type Description struct {
+type JvmDescription struct {
 }
 
-func (description *Description) methodDescriptor(f *ast.FunctionType) string {
+func (description *JvmDescription) methodDescriptor(f *ast.FunctionType) string {
 	s := "("
 	for _, v := range f.ParameterList {
 		s += description.typeDescriptor(v.Type)
@@ -26,7 +26,7 @@ func (description *Description) methodDescriptor(f *ast.FunctionType) string {
 	return s
 }
 
-func (description *Description) typeDescriptor(v *ast.Type) string {
+func (description *JvmDescription) typeDescriptor(v *ast.Type) string {
 	switch v.Type {
 	case ast.VariableTypeBool:
 		return "Z"
@@ -59,7 +59,7 @@ func (description *Description) typeDescriptor(v *ast.Type) string {
 	panic("unHandle type signature")
 }
 
-func (description *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) {
+func (description *JvmDescription) ParseType(bs []byte) ([]byte, *ast.Type, error) {
 	switch bs[0] {
 	case 'V':
 		bs = bs[1:]
@@ -129,7 +129,7 @@ func (description *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) 
 	return bs, nil, fmt.Errorf("unkown type:%v", string(bs))
 }
 
-func (description *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
+func (description *JvmDescription) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	t := ast.FunctionType{}
 	if bs[0] != '(' {
 		return t, fmt.Errorf("function descriptor does not start with '('")

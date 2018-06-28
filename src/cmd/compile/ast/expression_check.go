@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
+func (e *Expression) check(block *Block) (ValueTypes []*Type, errs []error) {
 	if e == nil {
 		return nil, []error{}
 	}
@@ -12,73 +12,72 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	if err != nil {
 		return nil, []error{err}
 	}
-
 	errs = []error{}
 	switch e.Type {
 	case ExpressionTypeNull:
-		Types = []*Type{
+		ValueTypes = []*Type{
 			{
 				Type: VariableTypeNull,
 				Pos:  e.Pos,
 			},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeBool:
-		Types = []*Type{
+		ValueTypes = []*Type{
 			{
 				Type: VariableTypeBool,
 				Pos:  e.Pos,
 			},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeByte:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeByte,
 			Pos:  e.Pos,
 		},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeShort:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeShort,
 			Pos:  e.Pos,
 		},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeInt:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeInt,
 			Pos:  e.Pos,
 		},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeFloat:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeFloat,
 			Pos:  e.Pos,
 		},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeDouble:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeDouble,
 			Pos:  e.Pos,
 		},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeLong:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeLong,
 			Pos:  e.Pos,
 		},
 		}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeString:
-		Types = []*Type{{
+		ValueTypes = []*Type{{
 			Type: VariableTypeString,
 			Pos:  e.Pos,
 		}}
-		e.ExpressionValue = Types[0]
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeIdentifier:
 		tt, err := e.checkIdentifierExpression(block)
 		if err != nil {
@@ -86,7 +85,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		}
 		if tt != nil {
 			e.ExpressionValue = tt
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		//binaries
 	case ExpressionTypeLogicalOr:
@@ -126,26 +125,26 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	case ExpressionTypeMod:
 		tt := e.checkBinaryExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 	case ExpressionTypeMap:
 		tt := e.checkMapExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 	case ExpressionTypeColonAssign:
 		e.checkColonAssignExpression(block, &errs)
 		e.ExpressionValue = mkVoidType(e.Pos)
-		Types = []*Type{e.ExpressionValue}
+		ValueTypes = []*Type{e.ExpressionValue}
 		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case ExpressionTypeAssign:
 		tt := e.checkAssignExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 		if e.Data.(*ExpressionBinary).Left.isListAndMoreThanNElements(1) {
@@ -160,85 +159,85 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	case ExpressionTypePrefixDecrement:
 		tt := e.checkIncrementExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 	case ExpressionTypeConst: // no return value
 		errs = e.checkConstant(block)
-		Types = []*Type{mkVoidType(e.Pos)}
-		e.ExpressionValue = Types[0]
+		ValueTypes = []*Type{mkVoidType(e.Pos)}
+		e.ExpressionValue = ValueTypes[0]
 	case ExpressionTypeVar:
 		e.checkVarExpression(block, &errs)
-		Types = []*Type{mkVoidType(e.Pos)}
-		e.ExpressionValue = Types[0]
+		ValueTypes = []*Type{mkVoidType(e.Pos)}
+		e.ExpressionValue = ValueTypes[0]
 		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case ExpressionTypeFunctionCall:
-		Types = e.checkFunctionCallExpression(block, &errs)
-		e.ExpressionMultiValues = Types
-		if len(Types) > 0 {
-			e.ExpressionValue = Types[0]
+		ValueTypes = e.checkFunctionCallExpression(block, &errs)
+		e.ExpressionMultiValues = ValueTypes
+		if len(ValueTypes) > 0 {
+			e.ExpressionValue = ValueTypes[0]
 		}
-		if len(Types) > 1 {
+		if len(ValueTypes) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case ExpressionTypeMethodCall:
-		Types = e.checkMethodCallExpression(block, &errs)
-		e.ExpressionMultiValues = Types
-		if len(Types) > 0 {
-			e.ExpressionValue = Types[0]
+		ValueTypes = e.checkMethodCallExpression(block, &errs)
+		e.ExpressionMultiValues = ValueTypes
+		if len(ValueTypes) > 0 {
+			e.ExpressionValue = ValueTypes[0]
 		}
-		if len(Types) > 1 {
+		if len(ValueTypes) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case ExpressionTypeTypeAssert:
-		Types = e.checkTypeAssert(block, &errs)
-		e.ExpressionMultiValues = Types
-		if len(Types) > 0 {
-			e.ExpressionValue = Types[0]
+		ValueTypes = e.checkTypeAssert(block, &errs)
+		e.ExpressionMultiValues = ValueTypes
+		if len(ValueTypes) > 0 {
+			e.ExpressionValue = ValueTypes[0]
 		}
-		if len(Types) > 1 {
+		if len(ValueTypes) > 1 {
 			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case ExpressionTypeNot:
 		fallthrough
 	case ExpressionTypeNegative:
 		fallthrough
-	case ExpressionTypeBitNot:
+	case ExpressionTypeBitwiseNot:
 		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 	case ExpressionTypeTernary:
 		tt := e.checkTernaryExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 	case ExpressionTypeIndex:
 		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 			e.ExpressionValue = tt
 		}
 	case ExpressionTypeSelection:
 		tt := e.checkSelectionExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 			e.ExpressionValue = tt
 		}
 	case ExpressionTypeCheckCast:
 		tt := e.checkTypeConversionExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 			e.ExpressionValue = tt
 		}
 	case ExpressionTypeNew:
 		tt := e.checkNewExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 			e.ExpressionValue = tt
 		}
 	case ExpressionTypePlusAssign:
@@ -262,7 +261,7 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 	case ExpressionTypeXorAssign:
 		tt := e.checkOpAssignExpression(block, &errs)
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
 	case ExpressionTypeRange:
@@ -272,13 +271,13 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		tt := e.checkSlice(block, &errs)
 		e.ExpressionValue = tt
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 	case ExpressionTypeArray:
 		tt := e.checkArray(block, &errs)
 		e.ExpressionValue = tt
 		if tt != nil {
-			Types = []*Type{tt}
+			ValueTypes = []*Type{tt}
 		}
 	case ExpressionTypeFunctionLiteral:
 		f := e.Data.(*Function)
@@ -290,8 +289,8 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 				errs = append(errs, err)
 			}
 		}
-		Types = make([]*Type, 1)
-		Types[0] = &Type{
+		ValueTypes = make([]*Type, 1)
+		ValueTypes[0] = &Type{
 			Type:         VariableTypeFunction,
 			Pos:          e.Pos,
 			FunctionType: &f.Type,
@@ -300,10 +299,18 @@ func (e *Expression) check(block *Block) (Types []*Type, errs []error) {
 		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 			"this may be cause be compiler error,please contact the author",
 			errMsgPrefix(e.Pos), e.OpName()))
+	case ExpressionTypeGlobal:
+		ValueTypes = make([]*Type, 1)
+		ValueTypes[0] = &Type{
+			Type:    VariableTypePackage,
+			Pos:     e.Pos,
+			Package: &PackageBeenCompile,
+		}
+		e.ExpressionValue = ValueTypes[0]
 	default:
 		panic(fmt.Sprintf("unhandled type:%v", e.OpName()))
 	}
-	return Types, errs
+	return ValueTypes, errs
 }
 
 func (e *Expression) mustBeOneValueContext(ts []*Type) (*Type, error) {

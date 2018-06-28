@@ -48,7 +48,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 		if n.Type.Class.LoadFromOutSide {
 			d = n.Construction.Function.Descriptor
 		} else {
-			d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
+			d = JvmDescriptor.methodDescriptor(&n.Construction.Function.Type)
 		}
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      n.Type.Class.Name,
@@ -98,7 +98,7 @@ func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel
 		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_multianewarray
-	class.InsertClassConst(Descriptor.typeDescriptor(e.ExpressionValue), code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(JvmDescriptor.typeDescriptor(e.ExpressionValue), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = dimensions
 	code.CodeLength += 4
 	return
@@ -186,7 +186,7 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 			code.CodeLength += 3
 		case ast.VariableTypeJavaArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(Descriptor.typeDescriptor(e.ExpressionValue.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(JvmDescriptor.typeDescriptor(e.ExpressionValue.ArrayType), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}

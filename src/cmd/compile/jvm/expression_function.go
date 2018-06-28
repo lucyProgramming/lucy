@@ -5,6 +5,68 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+func (makeClass *MakeClass) packFunction2MethodHandle(class *cg.ClassHighLevel, code *cg.AttributeCode, function *ast.Function, context *Context) (maxStack uint16) {
+	code.Codes[code.CodeLength] = cg.OP_invokestatic
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      "java/lang/invoke/MethodHandles",
+		Method:     "lookup",
+		Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_ldc_w
+	class.InsertClassConst(function.ClassMethod.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_ldc_w
+	class.InsertStringConst(function.ClassMethod.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_ldc_w
+	class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+		Descriptor: function.ClassMethod.Descriptor,
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	if function.IsClosureFunction {
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/invoke/MethodHandles$Lookup",
+			Method:     "findVirtual",
+			Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	} else {
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/invoke/MethodHandles$Lookup",
+			Method:     "findStatic",
+			Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	}
+	code.CodeLength += 3
+	if 4 > maxStack {
+		maxStack = 4
+	}
+	if function.IsClosureFunction {
+		if context.function.Closure.ClosureFunctionExist(function) {
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      class.Name,
+				Field:      function.Name,
+				Descriptor: "L" + function.ClassMethod.Class.Name + ";",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else {
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/invoke/MethodHandle",
+			Method:     "bindTo",
+			Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	}
+
+	return
+}
+
 func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	function := e.Data.(*ast.Function)
@@ -12,72 +74,9 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 		if e.IsStatementExpression {
 			return
 		}
-		if function.IsClosureFunction {
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/invoke/MethodHandles",
-				Method:     "lookup",
-				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertClassConst(function.ClassMethod.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertStringConst(function.ClassMethod.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
-				Descriptor: function.ClassMethod.Descriptor,
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/invoke/MethodHandles$Lookup",
-				Method:     "findVirtual",
-				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			if 4 > maxStack {
-				maxStack = 4
-			}
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/invoke/MethodHandle",
-				Method:     "bindTo",
-				Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/invoke/MethodHandles",
-				Method:     "lookup",
-				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertClassConst(function.ClassMethod.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertStringConst(function.ClassMethod.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
-				Descriptor: function.ClassMethod.Descriptor,
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/invoke/MethodHandles$Lookup",
-				Method:     "findStatic",
-				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			if 4 > maxStack {
-				maxStack = 4
-			}
+		stack := makeClass.packFunction2MethodHandle(class, code, function, context)
+		if stack > maxStack {
+			maxStack = stack
 		}
 	}(function)
 	if function.Name == "" {
@@ -93,7 +92,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
 		function.ClassMethod = method
 		method.Class = class
-		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
+		method.Descriptor = JvmDescriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
 		makeClass.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
@@ -101,7 +100,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	}
 
 	// function have captured vars
-	className := makeClass.newClassName("closureFunction_" + function.Name)
+	className := makeClass.newClassName("closureFunction$" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = className
 	closureClass.SuperClass = ast.LucyRootClass
@@ -115,7 +114,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
+	method.Descriptor = JvmDescriptor.methodDescriptor(&function.Type)
 	method.Class = closureClass
 	function.ClassMethod = method
 

@@ -86,7 +86,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			target = identifier.Variable.Type
 			className = makeExpression.MakeClass.mainClass.Name
 			name = identifier.Name
-			descriptor = Descriptor.typeDescriptor(identifier.Variable.Type)
+			descriptor = JvmDescriptor.typeDescriptor(identifier.Variable.Type)
 			return
 		}
 		if identifier.Variable.BeenCaptured {
@@ -328,30 +328,33 @@ func (makeExpression *MakeExpression) getLeftValue(
 			return
 		}
 	case ast.ExpressionTypeSelection:
-		dot := e.Data.(*ast.ExpressionSelection)
-		if dot.Expression.ExpressionValue.Type == ast.VariableTypePackage {
+		selection := e.Data.(*ast.ExpressionSelection)
+		if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
 			op = []byte{cg.OP_putstatic}
-			target = dot.PackageVariable.Type
-			className = dot.Expression.ExpressionValue.Package.Name + "/main"
-			name = dot.PackageVariable.Name
-			descriptor = dot.PackageVariable.JvmDescriptor
+			target = selection.PackageVariable.Type
+			className = selection.Expression.ExpressionValue.Package.Name + "/main"
+			name = selection.PackageVariable.Name
+			if selection.PackageVariable.JvmDescriptor == "" {
+				selection.PackageVariable.JvmDescriptor = JvmDescriptor.typeDescriptor(e.ExpressionValue)
+			}
+			descriptor = selection.PackageVariable.JvmDescriptor
 			maxStack = 0
 			remainStack = 0
 		} else {
-			className = dot.Expression.ExpressionValue.Class.Name
-			target = dot.Field.Variable.Type
-			name = dot.Name
-			if dot.Field.LoadFromOutSide {
-				descriptor = dot.Field.JvmDescriptor
+			className = selection.Expression.ExpressionValue.Class.Name
+			target = selection.Field.Variable.Type
+			name = selection.Name
+			if selection.Field.LoadFromOutSide {
+				descriptor = selection.Field.JvmDescriptor
 			} else {
-				descriptor = Descriptor.typeDescriptor(target)
+				descriptor = JvmDescriptor.typeDescriptor(target)
 			}
-			if dot.Field.IsStatic() {
+			if selection.Field.IsStatic() {
 				op = []byte{cg.OP_putstatic}
 			} else {
-				maxStack, _ = makeExpression.build(class, code, dot.Expression, context, state)
+				maxStack, _ = makeExpression.build(class, code, selection.Expression, context, state)
 				remainStack = 1
-				state.pushStack(class, dot.Expression.ExpressionValue)
+				state.pushStack(class, selection.Expression.ExpressionValue)
 				op = []byte{cg.OP_putfield}
 			}
 		}
