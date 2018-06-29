@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	captured := context.function.Closure.ClosureVariableExist(identifier.Variable)
@@ -32,7 +32,7 @@ func (makeExpression *MakeExpression) buildCapturedIdentifier(class *cg.ClassHig
 	return
 }
 
-func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context) (maxStack uint16) {
 	if e.ExpressionValue.Type == ast.VariableTypeClass {
 		return
@@ -44,13 +44,13 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		return
 	}
 	if identifier.Function != nil {
-		return makeExpression.MakeClass.packFunction2MethodHandle(class, code, identifier.Function, context)
+		return buildExpression.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
 	}
 
 	if identifier.Variable.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      makeExpression.MakeClass.mainClass.Name,
+			Class:      buildExpression.BuildPackage.mainClass.Name,
 			Field:      identifier.Name,
 			Descriptor: JvmDescriptor.typeDescriptor(identifier.Variable.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildIdentifier(class *cg.ClassHighLevel, 
 		return
 	}
 	if identifier.Variable.BeenCaptured {
-		return makeExpression.buildCapturedIdentifier(class, code, e, context)
+		return buildExpression.buildCapturedIdentifier(class, code, e, context)
 	}
 	switch identifier.Variable.Type.Type {
 	case ast.VariableTypeBool:

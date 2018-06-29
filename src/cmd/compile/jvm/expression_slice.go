@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -13,15 +13,15 @@ func (makeExpression *MakeExpression) buildSlice(class *cg.ClassHighLevel, code 
 	}()
 	slice := e.Data.(*ast.ExpressionSlice)
 	meta := ArrayMetas[slice.Array.ExpressionValue.Array.Type]
-	maxStack, _ = makeExpression.build(class, code, slice.Array, context, state)
+	maxStack, _ = buildExpression.build(class, code, slice.Array, context, state)
 	state.pushStack(class, slice.Array.ExpressionValue)
 	// build start
-	stack, _ := makeExpression.build(class, code, slice.Start, context, state)
+	stack, _ := buildExpression.build(class, code, slice.Start, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
 	state.pushStack(class, slice.Start.ExpressionValue)
-	stack, _ = makeExpression.build(class, code, slice.End, context, state)
+	stack, _ = buildExpression.build(class, code, slice.End, context, state)
 	if t := 2 + stack; t > maxStack {
 		maxStack = t
 	}

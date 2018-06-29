@@ -132,16 +132,16 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 		return err
 	}
 	c.Value = c.Expression.Data
-	tt, _ := c.Expression.check(block)
+	t, _ := c.Expression.checkSingleValueContextExpression(block)
 	if c.Type != nil {
-		if c.Type.Equal(errs, tt[0]) == false {
+		if c.Type.Equal(errs, t) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
-				errMsgPrefix(c.Pos), c.Type.TypeString(), tt[0].TypeString())
+				errMsgPrefix(c.Pos), c.Type.TypeString(), t)
 			*errs = append(*errs, err)
 			return err
 		}
 	} else { // means use old typec
-		c.Type = tt[0]
+		c.Type = t
 	}
 	return nil
 }
@@ -163,7 +163,9 @@ func functionPointerCallWant(ts ParameterList) string {
 func functionPointerCallHave(ts []*Type) string {
 	s := "("
 	for k, v := range ts {
-		s += " " + v.Name + " "
+		if v.Name != "" {
+			s += " " + v.Name + " "
+		}
 		s += v.TypeString()
 		if k != len(ts)-1 {
 			s += ","
@@ -172,6 +174,7 @@ func functionPointerCallHave(ts []*Type) string {
 	s += ")"
 	return s
 }
+
 func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, checked []*Type) []error {
 	errs := []error{}
 	if len(es) == 0 {

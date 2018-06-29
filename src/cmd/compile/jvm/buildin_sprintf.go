@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -14,7 +14,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
-	maxStack, _ = makeExpression.build(class, code, meta.Format, context, state)
+	maxStack, _ = buildExpression.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -24,7 +24,6 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	if currentStack > maxStack {
 		maxStack = currentStack
 	}
-
 	objectArray := &ast.Type{}
 	objectArray.Type = ast.VariableTypeJavaArray
 	objectArray.Array = state.newObjectVariableType(javaRootClass)
@@ -33,7 +32,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 	for _, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			currentStack = 2
-			stack, _ := makeExpression.build(class, code, v, context, state)
+			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -62,7 +61,7 @@ func (makeExpression *MakeExpression) mkBuildInSprintf(class *cg.ClassHighLevel,
 		currentStack += 2
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack, es := makeExpression.build(class, code, v, context, state)
+		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)

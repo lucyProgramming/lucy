@@ -7,15 +7,15 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
+func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	//fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.StatementTypeExpression:
-		maxStack, _ = makeClass.makeExpression.build(class, code, s.Expression, context, state)
+		maxStack, _ = buildPackage.BuildExpression.build(class, code, s.Expression, context, state)
 	case ast.StatementTypeIf:
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = makeClass.buildIfStatement(class, code, s.StatementIf, context, state)
+		maxStack = buildPackage.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.Exits) > 0 {
 			fillOffsetForExits(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -27,11 +27,11 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		} else {
 			blockState = state
 		}
-		makeClass.buildBlock(class, code, s.Block, context, blockState)
+		buildPackage.buildBlock(class, code, s.Block, context, blockState)
 		state.addTop(blockState)
 	case ast.StatementTypeFor:
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = makeClass.buildForStatement(class, code, s.StatementFor, context, state)
+		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
 			fillOffsetForExits(s.StatementFor.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -40,14 +40,14 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		if len(s.StatementContinue.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			makeClass.buildDefers(class, code, context, s.StatementContinue.Defers, state)
+			buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		}
 		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.StatementTypeBreak:
 		if len(s.StatementBreak.Defers) > 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			makeClass.buildDefers(class, code, context, s.StatementBreak.Defers, state)
+			buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		}
 		b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
@@ -56,10 +56,10 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 			s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, b)
 		}
 	case ast.StatementTypeReturn:
-		maxStack = makeClass.buildReturnStatement(class, code, s.StatementReturn, context, state)
+		maxStack = buildPackage.buildReturnStatement(class, code, s.StatementReturn, context, state)
 	case ast.StatementTypeSwitch:
 		s.StatementSwitch.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = makeClass.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
+		maxStack = buildPackage.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		if len(s.StatementSwitch.Exits) > 0 {
 			if code.CodeLength == context.lastStackMapOffset {
 				code.Codes[code.CodeLength] = cg.OP_nop
@@ -87,16 +87,16 @@ func (makeClass *MakeClass) buildStatement(class *cg.ClassHighLevel, code *cg.At
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
 	case ast.StatementTypeClass:
-		s.Class.Name = makeClass.newClassName(s.Class.Name)
-		c := makeClass.buildClass(s.Class)
-		makeClass.putClass(c)
+		s.Class.Name = buildPackage.newClassName(s.Class.Name)
+		c := buildPackage.buildClass(s.Class)
+		buildPackage.putClass(c)
 	case ast.StatementTypeNop:
 		// nop
 	}
 	return
 }
 
-func (makeClass *MakeClass) buildDefers(class *cg.ClassHighLevel,
+func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, from *StackMapState) {
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
@@ -121,7 +121,7 @@ func (makeClass *MakeClass) buildDefers(class *cg.ClassHighLevel,
 		state.popStack(1)
 		// build block
 		context.Defer = ds[index]
-		makeClass.buildBlock(class, code, &ds[index].Block, context, state)
+		buildPackage.buildBlock(class, code, &ds[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
 		if index > 0 {

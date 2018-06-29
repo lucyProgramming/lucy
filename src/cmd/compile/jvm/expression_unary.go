@@ -7,11 +7,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 
 	if e.Type == ast.ExpressionTypeNegative {
-		maxStack, _ = makeExpression.build(class, code, e.Data.(*ast.Expression), context, state)
+		maxStack, _ = buildExpression.build(class, code, e.Data.(*ast.Expression), context, state)
 		switch e.ExpressionValue.Type {
 		case ast.VariableTypeByte:
 			fallthrough
@@ -31,7 +31,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 	}
 	if e.Type == ast.ExpressionTypeBitwiseNot {
 		ee := e.Data.(*ast.Expression)
-		maxStack, _ = makeExpression.build(class, code, ee, context, state)
+		maxStack, _ = buildExpression.build(class, code, ee, context, state)
 		if t := jvmSlotSize(ee.ExpressionValue) * 2; t > maxStack {
 			maxStack = t
 		}
@@ -75,7 +75,7 @@ func (makeExpression *MakeExpression) buildUnary(class *cg.ClassHighLevel, code 
 	if e.Type == ast.ExpressionTypeNot {
 		ee := e.Data.(*ast.Expression)
 		var es []*cg.Exit
-		maxStack, es = makeExpression.build(class, code, ee, context, state)
+		maxStack, es = buildExpression.build(class, code, ee, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, ee.ExpressionValue)

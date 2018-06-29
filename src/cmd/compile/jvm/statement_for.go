@@ -5,14 +5,14 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	if s.RangeAttr != nil {
 		if s.RangeAttr.RangeOn.ExpressionValue.Type == ast.VariableTypeArray ||
 			s.RangeAttr.RangeOn.ExpressionValue.Type == ast.VariableTypeJavaArray {
-			return makeClass.buildForRangeStatementForArray(class, code, s, context, state)
+			return buildPackage.buildForRangeStatementForArray(class, code, s, context, state)
 		} else { // for map
-			return makeClass.buildForRangeStatementForMap(class, code, s, context, state)
+			return buildPackage.buildForRangeStatementForMap(class, code, s, context, state)
 		}
 	}
 	forState := (&StackMapState{}).FromLast(state)
@@ -21,7 +21,7 @@ func (makeClass *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg
 	}()
 	//init
 	if s.Init != nil {
-		stack, _ := makeClass.makeExpression.build(class, code, s.Init, context, forState)
+		stack, _ := buildPackage.BuildExpression.build(class, code, s.Init, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -29,7 +29,7 @@ func (makeClass *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg
 	//condition
 	var firstTimeExit *cg.Exit
 	if s.Condition != nil {
-		stack, es := makeClass.makeExpression.build(class, code, s.Condition, context, forState)
+		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			forState.pushStack(class, s.Condition.ExpressionValue)
@@ -45,13 +45,13 @@ func (makeClass *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	if s.After != nil {
-		stack, _ := makeClass.makeExpression.build(class, code, s.After, context, forState)
+		stack, _ := buildPackage.BuildExpression.build(class, code, s.After, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
 	}
 	if s.Condition != nil {
-		stack, es := makeClass.makeExpression.build(class, code, s.Condition, context, forState)
+		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			forState.pushStack(class, s.Condition.ExpressionValue)
@@ -67,7 +67,7 @@ func (makeClass *MakeClass) buildForStatement(class *cg.ClassHighLevel, code *cg
 		fillOffsetForExits([]*cg.Exit{firstTimeExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}
-	makeClass.buildBlock(class, code, s.Block, context, forState)
+	buildPackage.buildBlock(class, code, s.Block, context, forState)
 	if s.Block.WillNotExecuteToEnd == false {
 
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)

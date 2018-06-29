@@ -21,7 +21,7 @@ func (blockParser *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 	i.Condition = e
 	for blockParser.parser.token.Type == lex.TokenSemicolon {
 		if i.Condition != nil {
-			i.PreExpressions = append(i.PreExpressions, i.Condition)
+			i.PrefixExpressions = append(i.PrefixExpressions, i.Condition)
 		}
 		blockParser.Next() // skip ;
 		i.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)

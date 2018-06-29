@@ -53,10 +53,13 @@ func (signature *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([
 			return bs, err
 		}
 	}
+	if bs[0] != ')' {
+		return bs, fmt.Errorf("function type format wrong")
+	}
 	bs = bs[1:] // skip )
 	if bs[0] == '(' {
-		ft.ReturnList = []*ast.Variable{}
 		bs = bs[1:]
+		ft.ReturnList = []*ast.Variable{}
 		for bs[0] != ')' {
 			v := &ast.Variable{}
 			bs, t, err := LucyFieldSignatureParser.Decode(bs)
@@ -68,7 +71,7 @@ func (signature *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([
 		}
 		bs = bs[1:] // skip )
 	} else if bs[0] == 'V' {
-		bs = bs[1:]
+		bs = bs[1:] // skip V
 		ft.ReturnList = make([]*ast.Variable, 1)
 		ft.ReturnList[0] = &ast.Variable{
 			Name: "returnValue",

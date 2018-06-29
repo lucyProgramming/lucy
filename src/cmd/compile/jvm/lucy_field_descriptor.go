@@ -12,7 +12,8 @@ type LucyFieldSignature struct {
 func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {
 	return variableType.Type == ast.VariableTypeMap ||
 		variableType.Type == ast.VariableTypeArray ||
-		variableType.Type == ast.VariableTypeEnum
+		variableType.Type == ast.VariableTypeEnum ||
+		variableType.Type == ast.VariableTypeFunction
 }
 func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	if variableType.Type == ast.VariableTypeMap {
@@ -30,6 +31,9 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 		d = "]"
 		d += signature.Encode(variableType.Array)
 		return d
+	}
+	if variableType.Type == ast.VariableTypeFunction {
+		d = LucyMethodSignatureParser.Encode(variableType.FunctionType)
 	}
 	return JvmDescriptor.typeDescriptor(variableType)
 }

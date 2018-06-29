@@ -23,7 +23,7 @@ func (a *AttributeDefaultParameters) ToAttributeInfo(class *Class) *AttributeInf
 		return nil
 	}
 	info := &AttributeInfo{}
-	info.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS)
+	info.NameIndex = class.InsertUtf8Const(AttributeNameLucyDefaultParameters)
 	info.attributeLength = uint32(2 * (1 + len(a.Constants)))
 	info.Info = make([]byte, info.attributeLength)
 	binary.BigEndian.PutUint16(info.Info, a.Start)

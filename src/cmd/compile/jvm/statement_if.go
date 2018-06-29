@@ -7,13 +7,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
+func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxStack uint16) {
 	var es []*cg.Exit
 	conditionState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(conditionState)
-	for _, v := range s.PreExpressions {
-		stack, _ := makeClass.makeExpression.build(class, code, v, context, conditionState)
+	for _, v := range s.PrefixExpressions {
+		stack, _ := buildPackage.BuildExpression.build(class, code, v, context, conditionState)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -24,7 +24,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	} else {
 		IfState = conditionState
 	}
-	maxStack, es = makeClass.makeExpression.build(class, code, s.Condition, context, IfState)
+	maxStack, es = buildPackage.BuildExpression.build(class, code, s.Condition, context, IfState)
 	if len(es) > 0 {
 		fillOffsetForExits(es, code.CodeLength)
 		IfState.pushStack(class, s.Condition.ExpressionValue)
@@ -35,7 +35,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 	codeLength := code.CodeLength
 	exit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
-	makeClass.buildBlock(class, code, &s.Block, context, IfState)
+	buildPackage.buildBlock(class, code, &s.Block, context, IfState)
 	conditionState.addTop(IfState)
 	if s.Block.WillNotExecuteToEnd == false {
 		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
@@ -49,7 +49,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		} else {
 			elseIfState = conditionState
 		}
-		stack, es := makeClass.makeExpression.build(class, code, v.Condition, context, elseIfState)
+		stack, es := buildPackage.BuildExpression.build(class, code, v.Condition, context, elseIfState)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			elseIfState.pushStack(class, s.Condition.ExpressionValue)
@@ -63,7 +63,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		codeLength = code.CodeLength
 		exit = code.Codes[code.CodeLength+1 : code.CodeLength+3]
 		code.CodeLength += 3
-		makeClass.buildBlock(class, code, v.Block, context, elseIfState)
+		buildPackage.buildBlock(class, code, v.Block, context, elseIfState)
 
 		if v.Block.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
@@ -81,7 +81,7 @@ func (makeClass *MakeClass) buildIfStatement(class *cg.ClassHighLevel,
 		} else {
 			elseBlockState = conditionState
 		}
-		makeClass.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
+		buildPackage.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
 		conditionState.addTop(elseBlockState)
 		if s.ElseBlock.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))

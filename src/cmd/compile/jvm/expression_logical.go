@@ -5,11 +5,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16, exits []*cg.Exit) {
 	exits = []*cg.Exit{}
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack, es := makeExpression.build(class, code, bin.Left, context, state)
+	maxStack, es := buildExpression.build(class, code, bin.Left, context, state)
 	if es != nil {
 		exits = append(exits, es...)
 	}
@@ -27,7 +27,7 @@ func (makeExpression *MakeExpression) buildLogical(class *cg.ClassHighLevel, cod
 	}
 	code.Codes[code.CodeLength] = cg.OP_pop // pop 0
 	code.CodeLength++
-	stack, es := makeExpression.build(class, code, bin.Right, context, state)
+	stack, es := buildExpression.build(class, code, bin.Right, context, state)
 	if es != nil {
 		exits = append(exits, es...)
 	}

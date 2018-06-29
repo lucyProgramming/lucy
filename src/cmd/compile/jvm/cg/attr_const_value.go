@@ -10,7 +10,7 @@ type AttributeConstantValue struct {
 
 func (a *AttributeConstantValue) ToAttributeInfo(class *Class) *AttributeInfo {
 	info := &AttributeInfo{}
-	info.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_CONST_VALUE)
+	info.NameIndex = class.InsertUtf8Const(AttributeNameConstValue)
 	info.attributeLength = 2
 	info.Info = make([]byte, 2)
 	binary.BigEndian.PutUint16(info.Info, a.Index)

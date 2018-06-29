@@ -1,22 +1,22 @@
 package cg
 
 const (
-	CONSTANT_POOL_MAX_SIZE            = 65536
-	CLASS_MAGIC                uint32 = 0xcafebabe
-	ATTRIBUTE_NAME_SOURCE_FILE        = "SourceFile"
-	ATTRIBUTE_NAME_CONST_VALUE        = "ConstantValue"
-	ATTRIBUTE_NAME_STACK_MAP          = "StackMapTable"
-	ATTRIBUTE_NAME_SIGNATURE          = "Signature"
+	ConstantPoolMaxSize                  = 65536
+	ClassMagic                    uint32 = 0xcafebabe
+	AttributeNameSourceFile              = "SourceFile"
+	AttributeNameConstValue              = "ConstantValue"
+	AttributeNameStackMap                = "StackMapTable"
+	AttributeNameSignature               = "Signature"
+	AttributeNameMethodParameters        = "MethodParameters"
 	// lucy attribute
-	ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR     = "LucyFieldDescriptor"
-	ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR    = "LucyMethodDescriptor"
-	ATTRIBUTE_NAME_LUCY_COMPILER_AUTO        = "LucyCompilerAuto"
-	ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT = "LucyTriggerPackageInitMethod"
-	ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS   = "LucyDefaultParameters"
-	ATTRIBUTE_NAME_LUCY_TYPE_ALIAS           = "LucyTypeAlias"
-	ATTRIBUTE_NAME_LUCY_ENUM                 = "LucyEnum"
-	ATTRIBUTE_NAME_LUCY_CONST                = "LucyConst" // indicate a package const
-	ATTRIBUTE_NAME_METHOD_PARAMETERS         = "MethodParameters"
-	ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES    = "LucyReturnListName"
-	ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION    = "LucyTemplateFunction"
+	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
+	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
+	AttributeNameLucyCompilerAuto       = "LucyCompilerAuto"
+	AttributeNameLucyTriggerPackageInit = "LucyTriggerPackageInitMethod"
+	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"
+	AttributeNameLucyTypeAlias          = "LucyTypeAlias"
+	AttributeNameLucyEnum               = "LucyEnum"
+	AttributeNameLucyConst              = "LucyConst" // indicate a package const
+	AttributeNameLucyReturnListNames    = "LucyReturnListName"
+	AttributeNameLucyTemplateFunction   = "LucyTemplateFunction"
 )

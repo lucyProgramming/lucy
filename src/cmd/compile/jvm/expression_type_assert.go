@@ -7,10 +7,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	assertOn := e.Data.(*ast.ExpressionTypeAssert)
-	maxStack, _ = makeExpression.build(class, code, assertOn.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, assertOn.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof

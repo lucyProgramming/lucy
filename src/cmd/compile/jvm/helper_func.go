@@ -87,17 +87,6 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	}
 }
 
-func storeGlobalVariable(class *cg.ClassHighLevel, mainClass *cg.ClassHighLevel, code *cg.AttributeCode,
-	v *ast.Variable) {
-	code.Codes[code.CodeLength] = cg.OP_putstatic
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      mainClass.Name,
-		Field:      v.Name,
-		Descriptor: JvmDescriptor.typeDescriptor(v.Type),
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-}
-
 func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
 	var b uint16
 	b = 1

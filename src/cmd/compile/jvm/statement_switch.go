@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	s *ast.StatementSwitch, context *Context, state *StackMapState) (maxStack uint16) {
 	// if equal,leave 0 on stack
 	compare := func(t *ast.Type) {
@@ -61,7 +61,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 			code.CodeLength += 8
 		}
 	}
-	maxStack, _ = makeClass.makeExpression.build(class, code, s.Condition, context, state)
+	maxStack, _ = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.Exit
 	size := jvmSlotSize(s.Condition.ExpressionValue)
@@ -75,7 +75,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.ExpressionMultiValues) > 1 {
-				stack, _ := makeClass.makeExpression.build(class, code, ee, context, state)
+				stack, _ := buildPackage.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -114,7 +114,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 			code.CodeLength++
 			currentStack += size
 			state.pushStack(class, s.Condition.ExpressionValue)
-			stack, _ := makeClass.makeExpression.build(class, code, ee, context, state)
+			stack, _ := buildPackage.BuildExpression.build(class, code, ee, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -138,7 +138,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 		//block is here
 		if c.Block != nil {
 			ss := (&StackMapState{}).FromLast(state)
-			makeClass.buildBlock(class, code, c.Block, context, ss)
+			buildPackage.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
 		if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
@@ -163,7 +163,7 @@ func (makeClass *MakeClass) buildSwitchStatement(class *cg.ClassHighLevel, code 
 		} else {
 			ss = state
 		}
-		makeClass.buildBlock(class, code, s.Default, context, ss)
+		buildPackage.buildBlock(class, code, s.Default, context, ss)
 		state.addTop(ss)
 	}
 	return

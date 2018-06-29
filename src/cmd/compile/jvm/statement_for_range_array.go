@@ -12,10 +12,10 @@ type AutoVariableForRangeArray struct {
 	V             uint16
 }
 
-func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLevel,
+func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	//build array expression
-	maxStack, _ = makeClass.makeExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
+	maxStack, _ = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
 
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
@@ -210,6 +210,8 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 			code.Codes[code.CodeLength] = cg.OP_aaload
 		case ast.VariableTypeJavaArray:
 			code.Codes[code.CodeLength] = cg.OP_aaload
+		case ast.VariableTypeFunction:
+			code.Codes[code.CodeLength] = cg.OP_aaload
 		}
 		code.CodeLength++
 		// v
@@ -233,7 +235,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 				copyOPs(code,
 					loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Array.Type,
 						autoVar.V)...)
-				makeClass.storeLocalVar(class, code, s.RangeAttr.IdentifierValue.Variable)
+				buildPackage.storeLocalVar(class, code, s.RangeAttr.IdentifierValue.Variable)
 			} else {
 				s.RangeAttr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
@@ -244,7 +246,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-				makeClass.storeLocalVar(class, code, s.RangeAttr.IdentifierKey.Variable)
+				buildPackage.storeLocalVar(class, code, s.RangeAttr.IdentifierKey.Variable)
 			} else {
 				s.RangeAttr.IdentifierKey.Variable.LocalValOffset = autoVar.K
 			}
@@ -253,7 +255,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		// store v
 		//get ops,make ops ready
 		stackLength := len(blockState.Stacks)
-		stack, remainStack, ops, target, className, name, descriptor := makeClass.makeExpression.getLeftValue(class,
+		stack, remainStack, ops, target, className, name, descriptor := buildPackage.BuildExpression.getLeftValue(class,
 			code, s.RangeAttr.ExpressionValue, context, blockState)
 		if stack > maxStack {
 			maxStack = stack
@@ -271,7 +273,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 		blockState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, ops, _, className, name, descriptor := makeClass.makeExpression.getLeftValue(class,
+			stack, remainStack, ops, _, className, name, descriptor := buildPackage.BuildExpression.getLeftValue(class,
 				code, s.RangeAttr.ExpressionKey, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
@@ -287,7 +289,7 @@ func (makeClass *MakeClass) buildForRangeStatementForArray(class *cg.ClassHighLe
 	}
 
 	// build block
-	makeClass.buildBlock(class, code, s.Block, context, blockState)
+	buildPackage.buildBlock(class, code, s.Block, context, blockState)
 	defer forState.addTop(blockState)
 	if s.Block.WillNotExecuteToEnd == false {
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)

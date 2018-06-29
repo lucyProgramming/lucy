@@ -42,7 +42,7 @@ func (loader *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error
 
 func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	//name
-	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_SIGNATURE); t != nil && len(t) > 0 {
+	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameSignature); t != nil && len(t) > 0 {
 		//TODO:: support signature???
 	}
 	astClass := &ast.Class{}
@@ -84,10 +84,10 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Function)
 		}
 		if astClass.Methods[m.Function.Name] == nil {
@@ -100,7 +100,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 }
 
 func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
-	if t := c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_COMPILER_AUTO); t != nil && len(t) > 0 {
+	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyCompilerAuto); t != nil && len(t) > 0 {
 		return nil, nil
 	}
 	//name
@@ -127,7 +127,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, f.Type, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
 			if err != nil {
@@ -152,22 +152,22 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m.Function.AccessFlags = v.AccessFlags
 		m.LoadFromOutSide = true
 		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&m.Function.Type, c.ConstPool[index].Info)
 			if err != nil {
 				return nil, err
 			}
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_DEFAULT_PARAMETERS); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != nil && len(t) > 0 {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBytes(t[0].Info)
 			jvm.FunctionDefaultValueParser.Decode(c, m.Function, dp)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Function)
 		}
 		err = loadEnumForFunction(m.Function)
@@ -195,7 +195,7 @@ func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 		name := string(c.ConstPool[v.NameIndex].Info)
 		en.Name = name
 		en.Enum = e
-		constValue := v.AttributeGroupedByName[cg.ATTRIBUTE_NAME_CONST_VALUE][0] // must have this attribute
+		constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
 		en.Value = int32(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
 		e.Enums = append(e.Enums, en)
 	}
@@ -211,7 +211,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	pack.Block.Functions = make(map[string]*ast.Function)
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
-		constValue := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_CONST_VALUE)
+		constValue := f.AttributeGroupedByName.GetByName(cg.AttributeNameConstValue)
 		if len(constValue) > 1 {
 			return fmt.Errorf("constant value length greater than  1 at class 'main'  field '%s'", name)
 		}
@@ -219,7 +219,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if err != nil {
 			return err
 		}
-		if len(f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_CONST)) > 0 {
+		if len(f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyConst)) > 0 {
 			//const
 			cos := &ast.Constant{}
 			cos.Name = name
@@ -259,7 +259,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			vd.Type = typ
 			vd.IsGlobal = true
 			pack.Block.Variables[name] = vd
-			if t := f.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_FIELD_DESCRIPTOR); t != nil && len(t) > 0 {
+			if t := f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != nil && len(t) > 0 {
 				index := binary.BigEndian.Uint16(t[0].Info)
 				_, vd.Type, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
 				if err != nil {
@@ -272,7 +272,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		}
 	}
 	for _, m := range c.Methods {
-		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TRIGGER_PACKAGE_INIT); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != nil && len(t) > 0 {
 			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
 			continue
 		}
@@ -292,7 +292,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if err != nil {
 			return err
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_METHOD_DESCRIPTOR); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&function.Type, c.ConstPool[index].Info)
 			if err != nil {
@@ -303,10 +303,10 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if err != nil {
 			return err
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_METHOD_PARAMETERS); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, function)
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_RETURN_LIST_NAMES); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, function)
 		}
 		function.ClassMethod = &cg.MethodHighLevel{}
@@ -319,7 +319,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	if pack.Block.TypeAliases == nil {
 		pack.Block.TypeAliases = make(map[string]*ast.Type)
 	}
-	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TYPE_ALIAS) {
+	for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTypeAlias) {
 		index := binary.BigEndian.Uint16(v.Info)
 		name, typ, err := jvm.LucyTypeAliasParser.Decode(c.ConstPool[index].Info)
 		if err != nil {
@@ -334,7 +334,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			}
 		}
 	}
-	for _, v := range c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION) {
+	for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTemplateFunction) {
 		attr := &cg.AttributeTemplateFunction{}
 		attr.FromBytes(c, v.Info)
 		f, es := ParseFunctionHandler([]byte(attr.Code), &ast.Position{
@@ -402,7 +402,7 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 		if err != nil {
 			return nil, fmt.Errorf("decode class failed,err:%v", err)
 		}
-		if len(c.AttributeGroupedByName.GetByName(cg.ATTRIBUTE_NAME_LUCY_ENUM)) > 0 {
+		if len(c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyEnum)) > 0 {
 			e, err := loader.loadLucyEnum(c)
 			if err != nil {
 				return nil, err
@@ -454,7 +454,7 @@ func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
 	if r.kind == ResourceKindLucyClass {
-		if t := c.AttributeGroupedByName[cg.ATTRIBUTE_NAME_LUCY_ENUM]; len(t) > 0 {
+		if t := c.AttributeGroupedByName[cg.AttributeNameLucyEnum]; len(t) > 0 {
 			return loader.loadLucyEnum(c)
 		} else {
 			return loader.loadAsLucy(c)

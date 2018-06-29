@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
@@ -15,9 +15,9 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 	if e.Type == ast.ExpressionTypeOr ||
 		e.Type == ast.ExpressionTypeAnd ||
 		e.Type == ast.ExpressionTypeXor {
-		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
+		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
-		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
+		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}
@@ -58,11 +58,11 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 		//handle string first
 		if bin.Left.ExpressionValue.Type == ast.VariableTypeString ||
 			bin.Right.ExpressionValue.Type == ast.VariableTypeString {
-			return makeExpression.buildStrCat(class, code, bin, context, state)
+			return buildExpression.buildStrCat(class, code, bin, context, state)
 		}
-		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
+		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.ExpressionValue)
-		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
+		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -172,9 +172,9 @@ func (makeExpression *MakeExpression) buildArithmetic(class *cg.ClassHighLevel, 
 
 	if e.Type == ast.ExpressionTypeLsh ||
 		e.Type == ast.ExpressionTypeRsh {
-		maxStack, _ = makeExpression.build(class, code, bin.Left, context, state)
+		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.ExpressionValue)
-		stack, _ := makeExpression.build(class, code, bin.Right, context, state)
+		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
 			maxStack = t
 		}

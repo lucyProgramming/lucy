@@ -5,17 +5,17 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.Expression.ExpressionValue.Type == ast.VariableTypeArray {
-		return makeExpression.buildArrayMethodCall(class, code, e, context, state)
+		return buildExpression.buildArrayMethodCall(class, code, e, context, state)
 	}
 	if call.Expression.ExpressionValue.Type == ast.VariableTypeMap {
-		return makeExpression.buildMapMethodCall(class, code, e, context, state)
+		return buildExpression.buildMapMethodCall(class, code, e, context, state)
 	}
 	if call.Expression.ExpressionValue.Type == ast.VariableTypeJavaArray {
-		return makeExpression.buildJavaArrayMethodCall(class, code, e, context, state)
+		return buildExpression.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
 
 	pop := func(f *ast.Function) {
@@ -34,28 +34,13 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			}
 		}
 	}
-	//if call.Expression.ExpressionValue.Type == ast.VariableTypePackage {
-	//	maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.PackageFunction.Type.ParameterList, context, state)
-	//	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	//	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-	//		Class:      call.Expression.ExpressionValue.Package.Name + "/main",
-	//		Method:     call.Name,
-	//		Descriptor: call.PackageFunction.Descriptor,
-	//	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	//	code.CodeLength += 3
-	//	if t := makeExpression.valueJvmSize(e); t > maxStack {
-	//		maxStack = t
-	//	}
-	//	pop(call.PackageFunction)
-	//	return
-	//}
 
 	d := call.Method.Function.Descriptor
 	if call.Class.LoadFromOutSide == false {
 		d = JvmDescriptor.methodDescriptor(&call.Method.Function.Type)
 	}
 	if call.Method.IsStatic() {
-		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
+		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,
@@ -63,14 +48,14 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := makeExpression.valueJvmSize(e); t > maxStack {
+		if t := buildExpression.expressionValueJvmSize(e); t > maxStack {
 			maxStack = t
 		}
 		pop(call.Method.Function)
 		return
 	}
 
-	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	// object ref
 	state.pushStack(class, call.Expression.ExpressionValue)
 	defer state.popStack(1)
@@ -81,11 +66,11 @@ func (makeExpression *MakeExpression) buildMethodCall(class *cg.ClassHighLevel, 
 			Verify: v,
 		})
 	}
-	stack := makeExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
+	stack := buildExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}
-	if t := makeExpression.valueJvmSize(e); t > maxStack {
+	if t := buildExpression.expressionValueJvmSize(e); t > maxStack {
 		maxStack = t
 	}
 	if call.Name == ast.ConstructionMethodName { // call father construction method

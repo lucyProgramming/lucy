@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
+func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
 	willNotExecuteToEnd := false
 	for _, s := range b.Statements {
 		if willNotExecuteToEnd == true && s.Type == ast.StatementTypeLabel {
@@ -18,7 +18,7 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 		if willNotExecuteToEnd {
 			continue
 		}
-		maxStack := makeClass.buildStatement(class, code, b, s, context, state)
+		maxStack := buildPackage.buildStatement(class, code, b, s, context, state)
 		if maxStack > code.MaxStack {
 			code.MaxStack = maxStack
 		}
@@ -30,10 +30,10 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 		}
 		if s.IsCallFatherConstructionStatement { // special case
 			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
-			makeClass.mkNonStaticFieldDefaultValue(class, code, context, state)
+			buildPackage.mkNonStaticFieldDefaultValue(class, code, context, state)
 		}
 		//unCondition goto
-		if makeClass.statementIsUnConditionGoTo(s) {
+		if buildPackage.statementIsUnConditionGoTo(s) {
 			willNotExecuteToEnd = true
 			continue
 		}
@@ -71,13 +71,13 @@ func (makeClass *MakeClass) buildBlock(class *cg.ClassHighLevel, code *cg.Attrib
 	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		makeClass.buildDefers(class, code, context, b.Defers, state)
+		buildPackage.buildDefers(class, code, context, b.Defers, state)
 	}
 	b.WillNotExecuteToEnd = willNotExecuteToEnd
 	return
 }
 
-func (makeClass *MakeClass) statementIsUnConditionGoTo(s *ast.Statement) bool {
+func (buildPackage *BuildPackage) statementIsUnConditionGoTo(s *ast.Statement) bool {
 	return s.Type == ast.StatementTypeReturn ||
 		s.Type == ast.StatementTypeGoto ||
 		s.Type == ast.StatementTypeContinue ||

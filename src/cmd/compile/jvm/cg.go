@@ -11,21 +11,21 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type MakeClass struct {
-	Package        *ast.Package
-	classes        map[string]*cg.ClassHighLevel
-	mainClass      *cg.ClassHighLevel
-	makeExpression MakeExpression
+type BuildPackage struct {
+	Package         *ast.Package
+	classes         map[string]*cg.ClassHighLevel
+	mainClass       *cg.ClassHighLevel
+	BuildExpression BuildExpression
 }
 
-func (makeClass *MakeClass) newClassName(prefix string) (autoName string) {
+func (buildPackage *BuildPackage) newClassName(prefix string) (autoName string) {
 	for i := 0; i < math.MaxInt16; i++ {
 		autoName = fmt.Sprintf("%s$%d", prefix, i)
-		if _, exists := makeClass.Package.Block.NameExists(autoName); exists {
+		if _, exists := buildPackage.Package.Block.NameExists(autoName); exists {
 			continue
 		}
-		autoName = makeClass.Package.Name + "/" + autoName
-		if makeClass.classes != nil && makeClass.classes[autoName] != nil {
+		autoName = buildPackage.Package.Name + "/" + autoName
+		if buildPackage.classes != nil && buildPackage.classes[autoName] != nil {
 			continue
 		} else {
 			return autoName
@@ -34,54 +34,54 @@ func (makeClass *MakeClass) newClassName(prefix string) (autoName string) {
 	panic("new class name overflow")
 }
 
-func (makeClass *MakeClass) putClass(class *cg.ClassHighLevel) {
+func (buildPackage *BuildPackage) putClass(class *cg.ClassHighLevel) {
 	if class.Name == "" {
 		panic("missing name")
 	}
 	name := class.Name
-	if name == makeClass.mainClass.Name {
+	if name == buildPackage.mainClass.Name {
 		panic("cannot have main class`s name")
 	}
-	if makeClass.classes == nil {
-		makeClass.classes = make(map[string]*cg.ClassHighLevel)
+	if buildPackage.classes == nil {
+		buildPackage.classes = make(map[string]*cg.ClassHighLevel)
 	}
-	if _, ok := makeClass.classes[name]; ok {
+	if _, ok := buildPackage.classes[name]; ok {
 		panic(fmt.Sprintf("name:'%s' already been token", name))
 	}
-	makeClass.classes[name] = class
+	buildPackage.classes[name] = class
 }
 
-func (makeClass *MakeClass) Make(p *ast.Package) {
-	makeClass.Package = p
+func (buildPackage *BuildPackage) Make(p *ast.Package) {
+	buildPackage.Package = p
 	mainClass := &cg.ClassHighLevel{}
-	makeClass.mainClass = mainClass
+	buildPackage.mainClass = mainClass
 	mainClass.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	mainClass.AccessFlags |= cg.ACC_CLASS_FINAL
 	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
 	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
-	makeClass.mkClassDefaultConstruction(makeClass.mainClass, nil)
-	makeClass.makeExpression.MakeClass = makeClass
-	makeClass.classes = make(map[string]*cg.ClassHighLevel)
-	makeClass.mkGlobalConstants()
-	makeClass.mkGlobalTypeAlias()
-	makeClass.mkGlobalVariables()
-	makeClass.mkGlobalFunctions()
-	makeClass.mkInitFunctions()
+	buildPackage.mkClassDefaultConstruction(buildPackage.mainClass, nil)
+	buildPackage.BuildExpression.BuildPackage = buildPackage
+	buildPackage.classes = make(map[string]*cg.ClassHighLevel)
+	buildPackage.mkGlobalConstants()
+	buildPackage.mkGlobalTypeAlias()
+	buildPackage.mkGlobalVariables()
+	buildPackage.mkGlobalFunctions()
+	buildPackage.mkInitFunctions()
 	for _, v := range p.Block.Classes {
-		makeClass.classes[v.Name] = makeClass.buildClass(v)
+		buildPackage.classes[v.Name] = buildPackage.buildClass(v)
 	}
 	for _, v := range p.Block.Enums {
-		makeClass.classes[v.Name] = makeClass.mkEnum(v)
+		buildPackage.classes[v.Name] = buildPackage.mkEnum(v)
 	}
-	err := makeClass.DumpClass()
+	err := buildPackage.DumpClass()
 	if err != nil {
 		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
 	}
 }
 
-func (makeClass *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
+func (buildPackage *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = e.Name
 	class.SourceFiles = make(map[string]struct{})
@@ -106,8 +106,8 @@ func (makeClass *MakeClass) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	return class
 }
 
-func (makeClass *MakeClass) mkGlobalConstants() {
-	for k, v := range makeClass.Package.Block.Constants {
+func (buildPackage *BuildPackage) mkGlobalConstants() {
+	for k, v := range buildPackage.Package.Block.Constants {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
@@ -117,22 +117,22 @@ func (makeClass *MakeClass) mkGlobalConstants() {
 		}
 		f.Name = v.Name
 		f.AttributeConstantValue = &cg.AttributeConstantValue{}
-		f.AttributeConstantValue.Index = makeClass.insertDefaultValue(makeClass.mainClass, v.Type, v.Value)
+		f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(buildPackage.mainClass, v.Type, v.Value)
 		f.AttributeLucyConst = &cg.AttributeLucyConst{}
 		f.Descriptor = JvmDescriptor.typeDescriptor(v.Type)
-		makeClass.mainClass.Fields[k] = f
+		buildPackage.mainClass.Fields[k] = f
 	}
 }
-func (makeClass *MakeClass) mkGlobalTypeAlias() {
-	for name, v := range makeClass.Package.Block.TypeAliases {
+func (buildPackage *BuildPackage) mkGlobalTypeAlias() {
+	for name, v := range buildPackage.Package.Block.TypeAliases {
 		t := &cg.AttributeLucyTypeAlias{}
 		t.Alias = LucyTypeAliasParser.Encode(name, v)
-		makeClass.mainClass.Class.TypeAlias = append(makeClass.mainClass.Class.TypeAlias, t)
+		buildPackage.mainClass.Class.TypeAlias = append(buildPackage.mainClass.Class.TypeAlias, t)
 	}
 }
 
-func (makeClass *MakeClass) mkGlobalVariables() {
-	for k, v := range makeClass.Package.Block.Variables {
+func (buildPackage *BuildPackage) mkGlobalVariables() {
+	for k, v := range buildPackage.Package.Block.Variables {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= v.AccessFlags
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
@@ -146,14 +146,14 @@ func (makeClass *MakeClass) mkGlobalVariables() {
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
 		}
 		f.Name = v.Name
-		makeClass.mainClass.Fields[k] = f
+		buildPackage.mainClass.Fields[k] = f
 	}
 }
 
-func (makeClass *MakeClass) mkInitFunctions() {
-	if len(makeClass.Package.InitFunctions) == 0 {
+func (buildPackage *BuildPackage) mkInitFunctions() {
+	if len(buildPackage.Package.InitFunctions) == 0 {
 		needTrigger := false
-		for _, v := range makeClass.Package.LoadedPackages {
+		for _, v := range buildPackage.Package.LoadedPackages {
 			if v.TriggerPackageInitMethodName != "" {
 				needTrigger = true
 				break
@@ -164,18 +164,18 @@ func (makeClass *MakeClass) mkInitFunctions() {
 		}
 	}
 	blockMethods := []*cg.MethodHighLevel{}
-	for _, v := range makeClass.Package.InitFunctions {
+	for _, v := range buildPackage.Package.InitFunctions {
 		method := &cg.MethodHighLevel{}
 		blockMethods = append(blockMethods, method)
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
-		method.Name = makeClass.mainClass.NewFunctionName("block")
-		method.Class = makeClass.mainClass
+		method.Name = buildPackage.mainClass.NewFunctionName("block")
+		method.Class = buildPackage.mainClass
 		method.Descriptor = "()V"
 		method.Code = &cg.AttributeCode{}
-		makeClass.buildFunction(makeClass.mainClass, nil, method, v)
-		makeClass.mainClass.AppendMethod(method)
+		buildPackage.buildFunction(buildPackage.mainClass, nil, method, v)
+		buildPackage.mainClass.AppendMethod(method)
 	}
 	method := &cg.MethodHighLevel{}
 	method.AccessFlags |= cg.ACC_METHOD_STATIC
@@ -184,12 +184,12 @@ func (makeClass *MakeClass) mkInitFunctions() {
 	codes := make([]byte, 65536)
 	codeLength := int(0)
 	method.Code = &cg.AttributeCode{}
-	for _, v := range makeClass.Package.LoadedPackages {
+	for _, v := range buildPackage.Package.LoadedPackages {
 		if v.TriggerPackageInitMethodName == "" {
 			continue
 		}
 		codes[codeLength] = cg.OP_invokestatic
-		makeClass.mainClass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		buildPackage.mainClass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      v.Name + "/main", // main class
 			Method:     v.TriggerPackageInitMethodName,
 			Descriptor: "()V",
@@ -198,8 +198,8 @@ func (makeClass *MakeClass) mkInitFunctions() {
 	}
 	for _, v := range blockMethods {
 		codes[codeLength] = cg.OP_invokestatic
-		makeClass.mainClass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      makeClass.mainClass.Name,
+		buildPackage.mainClass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      buildPackage.mainClass.Name,
 			Method:     v.Name,
 			Descriptor: "()V",
 		}, codes[codeLength+1:codeLength+3])
@@ -210,11 +210,11 @@ func (makeClass *MakeClass) mkInitFunctions() {
 	codes = codes[0:codeLength]
 	method.Code.Codes = codes
 	method.Code.CodeLength = codeLength
-	makeClass.mainClass.AppendMethod(method)
+	buildPackage.mainClass.AppendMethod(method)
 
 	// trigger init
 	trigger := &cg.MethodHighLevel{}
-	trigger.Name = makeClass.mainClass.NewFunctionName("triggerPackageInit")
+	trigger.Name = buildPackage.mainClass.NewFunctionName("triggerPackageInit")
 	trigger.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
 	trigger.AccessFlags |= cg.ACC_METHOD_STATIC
@@ -224,10 +224,10 @@ func (makeClass *MakeClass) mkInitFunctions() {
 	trigger.Code.Codes[0] = cg.OP_return
 	trigger.Code.CodeLength = 1
 	trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
-	makeClass.mainClass.AppendMethod(trigger)
-	makeClass.mainClass.TriggerPackageInitMethod = trigger
+	buildPackage.mainClass.AppendMethod(trigger)
+	buildPackage.mainClass.TriggerPackageInitMethod = trigger
 }
-func (makeClass *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {
+func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		if v.(bool) {
@@ -252,7 +252,7 @@ func (makeClass *MakeClass) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type
 	}
 	return
 }
-func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
+func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
 	class.SourceFiles = make(map[string]struct{})
@@ -274,7 +274,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		f.AccessFlags = v.AccessFlags
 		if v.IsStatic() && v.DefaultValue != nil {
 			f.AttributeConstantValue = &cg.AttributeConstantValue{}
-			f.AttributeConstantValue.Index = makeClass.insertDefaultValue(class, v.Type, v.DefaultValue)
+			f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(class, v.Type, v.DefaultValue)
 		}
 		f.Descriptor = JvmDescriptor.typeDescriptor(v.Type)
 		if LucyFieldSignatureParser.Need(v.Type) {
@@ -301,7 +301,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		method.Descriptor = JvmDescriptor.methodDescriptor(&vv.Function.Type)
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
-			makeClass.buildFunction(class, nil, method, vv.Function)
+			buildPackage.buildFunction(class, nil, method, vv.Function)
 		}
 		class.AppendMethod(method)
 	}
@@ -315,7 +315,7 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Descriptor = JvmDescriptor.methodDescriptor(&t[0].Function.Type)
 			method.IsConstruction = true
 			method.Code = &cg.AttributeCode{}
-			makeClass.buildFunction(class, c, method, t[0].Function)
+			buildPackage.buildFunction(class, c, method, t[0].Function)
 			class.AppendMethod(method)
 
 		}
@@ -323,11 +323,11 @@ func (makeClass *MakeClass) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	return class
 }
 
-func (makeClass *MakeClass) mkGlobalFunctions() {
+func (buildPackage *BuildPackage) mkGlobalFunctions() {
 	ms := make(map[string]*cg.MethodHighLevel)
-	for k, f := range makeClass.Package.Block.Functions { // first round
+	for k, f := range buildPackage.Package.Block.Functions { // first round
 		if f.TemplateFunction != nil {
-			makeClass.mainClass.TemplateFunctions = append(makeClass.mainClass.TemplateFunctions, &cg.AttributeTemplateFunction{
+			buildPackage.mainClass.TemplateFunctions = append(buildPackage.mainClass.TemplateFunctions, &cg.AttributeTemplateFunction{
 				Name:        f.Name,
 				Filename:    f.Pos.Filename,
 				StartLine:   uint16(f.Pos.StartLine),
@@ -339,7 +339,7 @@ func (makeClass *MakeClass) mkGlobalFunctions() {
 		if f.IsBuildIn { //
 			continue
 		}
-		class := makeClass.mainClass
+		class := buildPackage.mainClass
 		method := &cg.MethodHighLevel{}
 		method.Class = class
 		method.Name = f.Name
@@ -356,28 +356,28 @@ func (makeClass *MakeClass) mkGlobalFunctions() {
 		ms[k] = method
 		f.ClassMethod = method
 		method.Code = &cg.AttributeCode{}
-		makeClass.mainClass.AppendMethod(method)
+		buildPackage.mainClass.AppendMethod(method)
 	}
-	for k, f := range makeClass.Package.Block.Functions { // first round
+	for k, f := range buildPackage.Package.Block.Functions { // first round
 		if f.IsBuildIn || f.TemplateFunction != nil { //
 			continue
 		}
-		makeClass.buildFunction(ms[k].Class, nil, ms[k], f)
+		buildPackage.buildFunction(ms[k].Class, nil, ms[k], f)
 	}
 }
 
-func (makeClass *MakeClass) DumpClass() error {
+func (buildPackage *BuildPackage) DumpClass() error {
 	//dump main class
 	f, err := os.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
-	if err := makeClass.mainClass.ToLow(common.CompileFlags.JvmVersion).OutPut(f); err != nil {
+	if err := buildPackage.mainClass.ToLow(common.CompileFlags.JvmVersion).OutPut(f); err != nil {
 		f.Close()
 		return err
 	}
 	f.Close()
-	for _, c := range makeClass.classes {
+	for _, c := range buildPackage.classes {
 		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
 			return err
@@ -395,7 +395,7 @@ func (makeClass *MakeClass) DumpClass() error {
 /*
 	make a default construction
 */
-func (makeClass *MakeClass) mkClassDefaultConstruction(class *cg.ClassHighLevel, astClass *ast.Class) {
+func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHighLevel, astClass *ast.Class) {
 	method := &cg.MethodHighLevel{}
 	method.Name = specialMethodInit
 	method.Descriptor = "()V"
@@ -420,4 +420,15 @@ func (makeClass *MakeClass) mkClassDefaultConstruction(class *cg.ClassHighLevel,
 	method.Code.CodeLength += 1
 	method.Code.MaxLocals = 1
 	class.AppendMethod(method)
+}
+
+func (buildPackage *BuildPackage) storeGlobalVariable(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	v *ast.Variable) {
+	code.Codes[code.CodeLength] = cg.OP_putstatic
+	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		Class:      buildPackage.mainClass.Name,
+		Field:      v.Name,
+		Descriptor: JvmDescriptor.typeDescriptor(v.Type),
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
 }

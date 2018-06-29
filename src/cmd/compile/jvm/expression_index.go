@@ -7,18 +7,18 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
+func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
 	state.pushStack(class, index.Expression.ExpressionValue)
-	stack, _ := makeExpression.build(class, code, index.Index, context, state)
+	stack, _ := buildExpression.build(class, code, index.Index, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -92,7 +92,7 @@ func (makeExpression *MakeExpression) buildMapIndex(class *cg.ClassHighLevel,
 	return
 }
 
-func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -100,9 +100,9 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
 	if index.Expression.ExpressionValue.Type == ast.VariableTypeMap {
-		return makeExpression.buildMapIndex(class, code, e, context, state)
+		return buildExpression.buildMapIndex(class, code, e, context, state)
 	}
-	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.ExpressionValue)
 	currentStack := uint16(1)
 	if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
@@ -131,7 +131,7 @@ func (makeExpression *MakeExpression) buildIndex(class *cg.ClassHighLevel, code 
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		currentStack = 3
 	}
-	stack, _ := makeExpression.build(class, code, index.Index, context, state)
+	stack, _ := buildExpression.build(class, code, index.Index, context, state)
 	if t := stack + currentStack; t > maxStack {
 		maxStack = t
 	}

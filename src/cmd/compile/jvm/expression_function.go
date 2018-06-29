@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) packFunction2MethodHandle(class *cg.ClassHighLevel, code *cg.AttributeCode, function *ast.Function, context *Context) (maxStack uint16) {
+func (buildPackage *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighLevel, code *cg.AttributeCode, function *ast.Function, context *Context) (maxStack uint16) {
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/invoke/MethodHandles",
@@ -67,14 +67,14 @@ func (makeClass *MakeClass) packFunction2MethodHandle(class *cg.ClassHighLevel, 
 	return
 }
 
-func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	function := e.Data.(*ast.Function)
 	defer func(function *ast.Function) {
 		if e.IsStatementExpression {
 			return
 		}
-		stack := makeClass.packFunction2MethodHandle(class, code, function, context)
+		stack := buildPackage.packFunction2MethodHandle(class, code, function, context)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -94,13 +94,13 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 		method.Class = class
 		method.Descriptor = JvmDescriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
-		makeClass.buildFunction(class, nil, method, function)
+		buildPackage.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
 		return
 	}
 
 	// function have captured vars
-	className := makeClass.newClassName("closureFunction$" + function.Name)
+	className := buildPackage.newClassName("closureFunction$" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = className
 	closureClass.SuperClass = ast.LucyRootClass
@@ -108,8 +108,8 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	makeClass.mkClassDefaultConstruction(closureClass, nil)
-	makeClass.putClass(closureClass)
+	buildPackage.mkClassDefaultConstruction(closureClass, nil)
+	buildPackage.putClass(closureClass)
 	method := &cg.MethodHighLevel{}
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
@@ -224,7 +224,7 @@ func (makeClass *MakeClass) buildFunctionExpression(class *cg.ClassHighLevel, co
 	}
 	method.Code = &cg.AttributeCode{}
 	// build function
-	makeClass.buildFunction(closureClass, nil, method, function)
+	buildPackage.buildFunction(closureClass, nil, method, function)
 	return
 
 }

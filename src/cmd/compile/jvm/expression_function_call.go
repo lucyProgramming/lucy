@@ -5,12 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildFunctionPointerCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	if len(call.Expression.ExpressionValue.FunctionType.ParameterList) > 0 {
-		makeExpression.buildCallArgs(class, code, call.Args, call.Expression.ExpressionValue.FunctionType.ParameterList, context, state)
+		buildExpression.buildCallArgs(class, code, call.Args, call.Expression.ExpressionValue.FunctionType.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -38,24 +38,24 @@ func (makeExpression *MakeExpression) buildFunctionPointerCall(class *cg.ClassHi
 	}
 	return
 }
-func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Function == nil {
-		return makeExpression.buildFunctionPointerCall(class, code, e, context, state)
+		return buildExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
 	if call.Function.IsBuildIn {
-		return makeExpression.mkBuildInFunctionCall(class, code, e, context, state)
+		return buildExpression.mkBuildInFunctionCall(class, code, e, context, state)
 	}
 	if call.Function.TemplateFunction != nil {
-		return makeExpression.buildTemplateFunctionCall(class, code, e, context, state)
+		return buildExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
 	if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
-		maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+		maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	}
 
 	if call.Function.IsClosureFunction == false {
-		maxStack = makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
+		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Function.ClassMethod.Class.Name,
@@ -80,7 +80,7 @@ func (makeExpression *MakeExpression) buildFunctionCall(class *cg.ClassHighLevel
 		}
 		state.pushStack(class, state.newObjectVariableType(call.Function.ClassMethod.Class.Name))
 		defer state.popStack(1)
-		stack := makeExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
+		stack := buildExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}

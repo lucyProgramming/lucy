@@ -41,7 +41,7 @@ func (a *AttributeMethodParameters) ToAttributeInfo(class *Class, attrName ...st
 	if len(attrName) > 0 {
 		ret.NameIndex = class.InsertUtf8Const(attrName[0])
 	} else {
-		ret.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_METHOD_PARAMETERS)
+		ret.NameIndex = class.InsertUtf8Const(AttributeNameMethodParameters)
 	}
 	ret.attributeLength = uint32(len(a.Parameters)*4 + 1)
 	ret.Info = make([]byte, ret.attributeLength)

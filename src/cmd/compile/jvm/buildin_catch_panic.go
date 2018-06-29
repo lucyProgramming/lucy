@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (buildExpression *BuildExpression) mkBuildInPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Args[0].Type != ast.ExpressionTypeNew { // not new expression
@@ -22,7 +22,7 @@ func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, c
 			state.Stacks = append(state.Stacks, t)
 			state.Stacks = append(state.Stacks, t)
 		}
-		stack, _ := makeExpression.build(class, code, call.Args[0], context, state)
+		stack, _ := buildExpression.build(class, code, call.Args[0], context, state)
 		state.popStack(2)
 		maxStack = 2 + stack
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
@@ -33,7 +33,7 @@ func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, c
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
-		maxStack, _ = makeExpression.build(class, code, call.Args[0], context, state)
+		maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
@@ -41,7 +41,7 @@ func (makeExpression *MakeExpression) mkBuildInPanic(class *cg.ClassHighLevel, c
 	return
 }
 
-func (makeExpression *MakeExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	if e.IsStatementExpression { // statement call
 		maxStack = 1

@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary,
+func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.ExpressionBinary,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -25,7 +25,7 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	maxStack = 2 // current stack is 2
 	currentStack := uint16(1)
-	stack, es := makeExpression.build(class, code, e.Left, context, state)
+	stack, es := buildExpression.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
 		fillOffsetForExits(es, code.CodeLength)
 		state.pushStack(class, e.Left.ExpressionValue)
@@ -35,7 +35,7 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := currentStack + makeExpression.stackTop2String(class, code, e.Left.ExpressionValue, context, state); t > maxStack {
+	if t := currentStack + buildExpression.stackTop2String(class, code, e.Left.ExpressionValue, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -45,7 +45,7 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, es = makeExpression.build(class, code, e.Right, context, state)
+	stack, es = buildExpression.build(class, code, e.Right, context, state)
 	if len(es) > 0 {
 		fillOffsetForExits(es, code.CodeLength)
 		state.pushStack(class, e.Right.ExpressionValue)
@@ -55,7 +55,7 @@ func (makeExpression *MakeExpression) buildStrCat(class *cg.ClassHighLevel, code
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := currentStack + makeExpression.stackTop2String(class, code, e.Right.ExpressionValue, context, state); t > maxStack {
+	if t := currentStack + buildExpression.stackTop2String(class, code, e.Right.ExpressionValue, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

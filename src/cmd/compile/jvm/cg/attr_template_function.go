@@ -25,7 +25,7 @@ func (a *AttributeTemplateFunction) FromBytes(class *Class, bs []byte) {
 
 func (a *AttributeTemplateFunction) ToAttributeInfo(class *Class) *AttributeInfo {
 	info := &AttributeInfo{}
-	info.NameIndex = class.InsertUtf8Const(ATTRIBUTE_NAME_LUCY_TEMPLATE_FUNCTION)
+	info.NameIndex = class.InsertUtf8Const(AttributeNameLucyTemplateFunction)
 	info.attributeLength = 10
 	info.Info = make([]byte, info.attributeLength)
 	binary.BigEndian.PutUint16(info.Info, class.InsertUtf8Const(a.Name))

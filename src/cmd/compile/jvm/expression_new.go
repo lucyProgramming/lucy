@@ -5,16 +5,16 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	if e.ExpressionValue.Type == ast.VariableTypeArray {
-		return makeExpression.buildNewArray(class, code, e, context, state)
+		return buildExpression.buildNewArray(class, code, e, context, state)
 	}
 	if e.ExpressionValue.Type == ast.VariableTypeJavaArray {
-		return makeExpression.buildNewJavaArray(class, code, e, context, state)
+		return buildExpression.buildNewJavaArray(class, code, e, context, state)
 	}
 	if e.ExpressionValue.Type == ast.VariableTypeMap {
-		return makeExpression.buildNewMap(class, code, e, context)
+		return buildExpression.buildNewMap(class, code, e, context)
 	}
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -34,7 +34,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 	code.CodeLength += 4
 	maxStack = 2
 	if n.Args != nil && len(n.Args) > 0 {
-		maxStack += makeExpression.buildCallArgs(class, code, n.Args, n.Construction.Function.Type.ParameterList, context, state)
+		maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.Construction.Function.Type.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	if n.Construction == nil {
@@ -59,7 +59,7 @@ func (makeExpression *MakeExpression) buildNew(class *cg.ClassHighLevel, code *c
 	code.CodeLength += 3
 	return
 }
-func (makeExpression *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
@@ -76,7 +76,7 @@ func (makeExpression *MakeExpression) buildNewMap(class *cg.ClassHighLevel, code
 	return
 }
 
-func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	dimensions := byte(0)
 	{
@@ -88,7 +88,7 @@ func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel
 		}
 	}
 	n := e.Data.(*ast.ExpressionNew)
-	maxStack, _ = makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
+	maxStack, _ = buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
 		loadInt32(class, code, 0)
@@ -103,7 +103,7 @@ func (makeExpression *MakeExpression) buildNewJavaArray(class *cg.ClassHighLevel
 	code.CodeLength += 4
 	return
 }
-func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
@@ -122,46 +122,46 @@ func (makeExpression *MakeExpression) buildNewArray(class *cg.ClassHighLevel, co
 		defer state.popStack(2)
 	}
 	if n.IsConvertJavaArray2Array {
-		stack, _ := makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
+		stack, _ := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
 	} else {
 		// get amount
-		stack, _ := makeExpression.build(class, code, n.Args[0], context, state) // must be a integer
+		stack, _ := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
 		switch e.ExpressionValue.Array.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
+			code.Codes[code.CodeLength+1] = ArrayTypeBoolean
 			code.CodeLength += 2
 		case ast.VariableTypeByte:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
+			code.Codes[code.CodeLength+1] = ArrayTypeByte
 			code.CodeLength += 2
 		case ast.VariableTypeShort:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
+			code.Codes[code.CodeLength+1] = ArrayTypeShort
 			code.CodeLength += 2
 		case ast.VariableTypeEnum:
 			fallthrough
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_INT
+			code.Codes[code.CodeLength+1] = ArrayTypeInt
 			code.CodeLength += 2
 		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_LONG
+			code.Codes[code.CodeLength+1] = ArrayTypeLong
 			code.CodeLength += 2
 		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_FLOAT
+			code.Codes[code.CodeLength+1] = ArrayTypeFloat
 			code.CodeLength += 2
 		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_newarray
-			code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
+			code.Codes[code.CodeLength+1] = ArrayTypeDouble
 			code.CodeLength += 2
 		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_anewarray

@@ -8,7 +8,7 @@ import (
 /*
 	function printf
 */
-func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -26,10 +26,10 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 		code.CodeLength += 3
 		maxStack = 1
 	} else { // get stream from args
-		maxStack, _ = makeExpression.build(class, code, meta.Stream, context, state)
+		maxStack, _ = buildExpression.build(class, code, meta.Stream, context, state)
 	}
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
-	stack, _ := makeExpression.build(class, code, meta.Format, context, state)
+	stack, _ := buildExpression.build(class, code, meta.Format, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -51,7 +51,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 	for _, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			currentStack = 3
-			stack, _ := makeExpression.build(class, code, v, context, state)
+			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -80,7 +80,7 @@ func (makeExpression *MakeExpression) mkBuildInPrintf(class *cg.ClassHighLevel, 
 		currentStack += 2
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack, es := makeExpression.build(class, code, v, context, state)
+		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)

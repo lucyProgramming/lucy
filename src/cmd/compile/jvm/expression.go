@@ -5,11 +5,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type MakeExpression struct {
-	MakeClass *MakeClass
+type BuildExpression struct {
+	BuildPackage *BuildPackage
 }
 
-func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16, exits []*cg.Exit) {
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
@@ -91,7 +91,7 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	case ast.ExpressionTypeLogicalOr:
 		fallthrough
 	case ast.ExpressionTypeLogicalAnd:
-		maxStack, exits = makeExpression.buildLogical(class, code, e, context, state)
+		maxStack, exits = buildExpression.buildLogical(class, code, e, context, state)
 	case ast.ExpressionTypeOr:
 		fallthrough
 	case ast.ExpressionTypeAnd:
@@ -111,12 +111,12 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	case ast.ExpressionTypeDiv:
 		fallthrough
 	case ast.ExpressionTypeMod:
-		maxStack = makeExpression.buildArithmetic(class, code, e, context, state)
+		maxStack = buildExpression.buildArithmetic(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeAssign:
-		maxStack = makeExpression.buildAssign(class, code, e, context, state)
+		maxStack = buildExpression.buildAssign(class, code, e, context, state)
 	case ast.ExpressionTypeColonAssign:
-		maxStack = makeExpression.buildColonAssign(class, code, e, context, state)
+		maxStack = buildExpression.buildColonAssign(class, code, e, context, state)
 	//
 	case ast.ExpressionTypePlusAssign:
 		fallthrough
@@ -137,7 +137,7 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	case ast.ExpressionTypeRshAssign:
 		fallthrough
 	case ast.ExpressionTypeXorAssign:
-		maxStack = makeExpression.buildOpAssign(class, code, e, context, state)
+		maxStack = buildExpression.buildOpAssign(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeEq:
 		fallthrough
@@ -150,18 +150,18 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	case ast.ExpressionTypeLe:
 		fallthrough
 	case ast.ExpressionTypeLt:
-		maxStack = makeExpression.buildRelations(class, code, e, context, state)
+		maxStack = buildExpression.buildRelations(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeIndex:
-		maxStack = makeExpression.buildIndex(class, code, e, context, state)
+		maxStack = buildExpression.buildIndex(class, code, e, context, state)
 	case ast.ExpressionTypeSelection:
-		maxStack = makeExpression.buildSelection(class, code, e, context, state)
+		maxStack = buildExpression.buildSelection(class, code, e, context, state)
 
 	//
 	case ast.ExpressionTypeMethodCall:
-		maxStack = makeExpression.buildMethodCall(class, code, e, context, state)
+		maxStack = buildExpression.buildMethodCall(class, code, e, context, state)
 	case ast.ExpressionTypeFunctionCall:
-		maxStack = makeExpression.buildFunctionCall(class, code, e, context, state)
+		maxStack = buildExpression.buildFunctionCall(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeIncrement:
 		fallthrough
@@ -170,44 +170,44 @@ func (makeExpression *MakeExpression) build(class *cg.ClassHighLevel, code *cg.A
 	case ast.ExpressionTypePrefixIncrement:
 		fallthrough
 	case ast.ExpressionTypePrefixDecrement:
-		maxStack = makeExpression.buildSelfIncrement(class, code, e, context, state)
+		maxStack = buildExpression.buildSelfIncrement(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeBitwiseNot:
 		fallthrough
 	case ast.ExpressionTypeNegative:
 		fallthrough
 	case ast.ExpressionTypeNot:
-		maxStack = makeExpression.buildUnary(class, code, e, context, state)
+		maxStack = buildExpression.buildUnary(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeIdentifier:
-		maxStack = makeExpression.buildIdentifier(class, code, e, context)
+		maxStack = buildExpression.buildIdentifier(class, code, e, context)
 	case ast.ExpressionTypeNew:
-		maxStack = makeExpression.buildNew(class, code, e, context, state)
+		maxStack = buildExpression.buildNew(class, code, e, context, state)
 	case ast.ExpressionTypeFunctionLiteral:
-		maxStack = makeExpression.MakeClass.buildFunctionExpression(class, code, e, context, state)
+		maxStack = buildExpression.BuildPackage.buildFunctionExpression(class, code, e, context, state)
 	case ast.ExpressionTypeCheckCast: // []byte(str)
-		maxStack = makeExpression.buildTypeConversion(class, code, e, context, state)
+		maxStack = buildExpression.buildTypeConversion(class, code, e, context, state)
 
 	case ast.ExpressionTypeConst: // const will analyse at ast stage
 	case ast.ExpressionTypeSlice:
-		maxStack = makeExpression.buildSlice(class, code, e, context, state)
+		maxStack = buildExpression.buildSlice(class, code, e, context, state)
 	case ast.ExpressionTypeArray:
-		maxStack = makeExpression.buildArray(class, code, e, context, state)
+		maxStack = buildExpression.buildArray(class, code, e, context, state)
 	case ast.ExpressionTypeMap:
-		maxStack = makeExpression.buildMapLiteral(class, code, e, context, state)
+		maxStack = buildExpression.buildMapLiteral(class, code, e, context, state)
 	case ast.ExpressionTypeVar:
-		maxStack = makeExpression.buildVar(class, code, e, context, state)
+		maxStack = buildExpression.buildVar(class, code, e, context, state)
 	case ast.ExpressionTypeTypeAssert:
-		maxStack = makeExpression.buildTypeAssert(class, code, e, context, state)
+		maxStack = buildExpression.buildTypeAssert(class, code, e, context, state)
 	case ast.ExpressionTypeTernary:
-		maxStack = makeExpression.buildTernary(class, code, e, context, state)
+		maxStack = buildExpression.buildTernary(class, code, e, context, state)
 	default:
 		panic(e.OpName())
 	}
 	return
 }
 
-func (makeExpression *MakeExpression) valueJvmSize(e *ast.Expression) (size uint16) {
+func (buildExpression *BuildExpression) expressionValueJvmSize(e *ast.Expression) (size uint16) {
 	if len(e.ExpressionMultiValues) > 1 {
 		return 1
 	}
@@ -217,7 +217,7 @@ func (makeExpression *MakeExpression) valueJvmSize(e *ast.Expression) (size uint
 	return jvmSlotSize(e.ExpressionValue)
 }
 
-func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	es []*ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := 0
 	for _, e := range es {
@@ -243,7 +243,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 	for _, v := range es {
 		currentStack := uint16(1)
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
-			stack, _ := makeExpression.build(class, code, v, context, state)
+			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -267,7 +267,7 @@ func (makeExpression *MakeExpression) buildExpressions(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack++
-		stack, es := makeExpression.build(class, code, v, context, state)
+		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)

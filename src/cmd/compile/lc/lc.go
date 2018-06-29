@@ -39,7 +39,7 @@ type LucyCompile struct {
 	NErrsStopCompile int
 	lucyPaths        []string
 	ClassPaths       []string
-	Maker            jvm.MakeClass
+	Maker            jvm.BuildPackage
 }
 
 func (lc *LucyCompile) shouldExit() {

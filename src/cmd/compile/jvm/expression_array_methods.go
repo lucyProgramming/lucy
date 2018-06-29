@@ -6,10 +6,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	switch call.Name {
 	case common.ArrayMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -22,14 +22,14 @@ func (makeExpression *MakeExpression) buildJavaArrayMethodCall(class *cg.ClassHi
 	return
 }
 
-func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length) // ref type
 	}()
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.ExpressionValue)
 	switch call.Name {
 	case common.ArrayMethodCap,
@@ -55,7 +55,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 		for _, v := range call.Args {
 			currentStack := uint16(1)
 			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 0 {
-				stack, _ := makeExpression.build(class, code, v, context, state)
+				stack, _ := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -78,7 +78,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 				}
 				continue
 			}
-			stack, es := makeExpression.build(class, code, v, context, state)
+			stack, es := buildExpression.build(class, code, v, context, state)
 			if len(es) > 0 {
 				fillOffsetForExits(es, code.CodeLength)
 				state.pushStack(class, v.ExpressionValue)
@@ -107,7 +107,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
 			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
-				stack, _ := makeExpression.build(class, code, v, context, state)
+				stack, _ := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -128,7 +128,7 @@ func (makeExpression *MakeExpression) buildArrayMethodCall(class *cg.ClassHighLe
 				}
 				continue
 			}
-			stack, _ := makeExpression.build(class, code, v, context, state)
+			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}

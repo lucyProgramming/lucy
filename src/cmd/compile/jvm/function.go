@@ -5,14 +5,14 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
 		code.MaxLocals += jvmSlotSize(v.Type)
 		state.appendLocals(class, v.Type)
 	}
 	for _, v := range f.Type.ParameterList {
-		if v.BeenCaptured == false { // capture
+		if v.BeenCaptured == false { // not capture
 			continue
 		}
 		stack := closure.createClosureVar(class, code, v.Type)
@@ -25,10 +25,9 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 		if t := 2 + jvmSlotSize(v.Type); t > maxStack {
 			maxStack = t
 		}
-		makeClass.storeLocalVar(class, code, v)
+		buildPackage.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 	}
 	for _, v := range f.Type.ReturnList {
@@ -54,7 +53,7 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals += jvmSlotSize(v.Type)
 		}
-		stack, es := makeClass.makeExpression.build(class, code, v.Expression, context, state)
+		stack, es := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.Type)
@@ -64,7 +63,7 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		makeClass.storeLocalVar(class, code, v)
+		buildPackage.storeLocalVar(class, code, v)
 		if v.BeenCaptured {
 			state.popStack(1)
 			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
@@ -75,7 +74,7 @@ func (makeClass *MakeClass) buildFunctionParameterAndReturnList(class *cg.ClassH
 	return
 }
 
-func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
+func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
 	context := &Context{}
 	context.lastStackMapOffset = -1
 	context.class = astClass
@@ -129,7 +128,7 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
-	if t := makeClass.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
+	if t := buildPackage.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
 	{
@@ -152,13 +151,13 @@ func (makeClass *MakeClass) buildFunction(class *cg.ClassHighLevel, astClass *as
 		}
 	}
 
-	if t := makeClass.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
+	if t := buildPackage.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
-	makeClass.buildBlock(class, method.Code, &f.Block, context, state)
+	buildPackage.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }
-func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	if f.AutoVariableForException != nil {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -195,7 +194,7 @@ func (makeClass *MakeClass) buildFunctionAutoVar(class *cg.ClassHighLevel, code 
 	return
 }
 
-func (makeClass *MakeClass) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
+func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
 	for _, v := range context.class.Fields {
 		if v.IsStatic() || v.Expression == nil {
 			continue
@@ -203,7 +202,7 @@ func (makeClass *MakeClass) mkNonStaticFieldDefaultValue(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(class.Name))
-		stack, es := makeClass.makeExpression.build(class, code, v.Expression, context, state)
+		stack, es := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
 			state.pushStack(class, v.Expression.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)

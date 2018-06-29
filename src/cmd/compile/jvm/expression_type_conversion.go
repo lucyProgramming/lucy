@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	{
 		length := len(state.Stacks)
@@ -48,10 +48,10 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
 	}
-	stack, _ := makeExpression.build(class, code, conversion.Expression, context, state)
+	stack, _ := buildExpression.build(class, code, conversion.Expression, context, state)
 	maxStack = currentStack + stack
 	if e.ExpressionValue.IsNumber() {
-		makeExpression.numberTypeConverter(code, conversion.Expression.ExpressionValue.Type, conversion.Type.Type)
+		buildExpression.numberTypeConverter(code, conversion.Expression.ExpressionValue.Type, conversion.Type.Type)
 		if t := jvmSlotSize(conversion.Type); t > maxStack {
 			maxStack = t
 		}
@@ -153,7 +153,7 @@ func (makeExpression *MakeExpression) buildTypeConversion(class *cg.ClassHighLev
 	return
 }
 
-func (makeExpression *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
@@ -177,7 +177,7 @@ func (makeExpression *MakeExpression) stackTop2Byte(code *cg.AttributeCode, typ 
 	}
 }
 
-func (makeExpression *MakeExpression) stackTop2Short(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
@@ -201,7 +201,7 @@ func (makeExpression *MakeExpression) stackTop2Short(code *cg.AttributeCode, typ
 	}
 }
 
-func (makeExpression *MakeExpression) stackTop2Int(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
@@ -221,7 +221,7 @@ func (makeExpression *MakeExpression) stackTop2Int(code *cg.AttributeCode, typ i
 	}
 }
 
-func (makeExpression *MakeExpression) stackTop2Float(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Float(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -241,7 +241,7 @@ func (makeExpression *MakeExpression) stackTop2Float(code *cg.AttributeCode, typ
 	}
 }
 
-func (makeExpression *MakeExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -261,7 +261,7 @@ func (makeExpression *MakeExpression) stackTop2Long(code *cg.AttributeCode, typ 
 	}
 }
 
-func (makeExpression *MakeExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
 	switch typ {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -284,27 +284,27 @@ func (makeExpression *MakeExpression) stackTop2Double(code *cg.AttributeCode, ty
 /*
 	convert stack top to target
 */
-func (makeExpression *MakeExpression) numberTypeConverter(code *cg.AttributeCode, typ int, target int) {
+func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCode, typ int, target int) {
 	if typ == target {
 		return
 	}
 	switch target {
 	case ast.VariableTypeByte:
-		makeExpression.stackTop2Byte(code, typ)
+		buildExpression.stackTop2Byte(code, typ)
 	case ast.VariableTypeShort:
-		makeExpression.stackTop2Short(code, typ)
+		buildExpression.stackTop2Short(code, typ)
 	case ast.VariableTypeInt:
-		makeExpression.stackTop2Int(code, typ)
+		buildExpression.stackTop2Int(code, typ)
 	case ast.VariableTypeLong:
-		makeExpression.stackTop2Long(code, typ)
+		buildExpression.stackTop2Long(code, typ)
 	case ast.VariableTypeFloat:
-		makeExpression.stackTop2Float(code, typ)
+		buildExpression.stackTop2Float(code, typ)
 	case ast.VariableTypeDouble:
-		makeExpression.stackTop2Double(code, typ)
+		buildExpression.stackTop2Double(code, typ)
 	}
 }
 
-func (makeExpression *MakeExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	typ *ast.Type, context *Context, state *StackMapState) (maxstack uint16) {
 	if typ.Type == ast.VariableTypeString {
 		return

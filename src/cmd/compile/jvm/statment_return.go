@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxStack uint16) {
 	if context.function.NoReturnValue() { // no return value
 		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
@@ -16,7 +16,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 			if 1 > maxStack {
 				maxStack = 1
 			}
-			stack := makeClass.buildDefersForReturn(class, code, context, state, statementReturn)
+			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -29,7 +29,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 	if len(context.function.Type.ReturnList) == 1 {
 		var es []*cg.Exit
 		if len(statementReturn.Expressions) > 0 {
-			maxStack, es = makeClass.makeExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack, es = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 			if len(es) > 0 {
 				fillOffsetForExits(es, code.CodeLength)
 				state.pushStack(class, statementReturn.Expressions[0].ExpressionValue)
@@ -41,25 +41,25 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 		if len(statementReturn.Defers) > 0 {
 			//return value  is on stack,  store to local var
 			if len(statementReturn.Expressions) > 0 { //rewrite return value
-				makeClass.storeLocalVar(class, code, context.function.Type.ReturnList[0])
+				buildPackage.storeLocalVar(class, code, context.function.Type.ReturnList[0])
 			}
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
 			if 1 > maxStack {
 				maxStack = 1
 			}
-			stack := makeClass.buildDefersForReturn(class, code, context, state, statementReturn)
+			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
 				maxStack = stack
 			}
 			//restore the stack
 			if len(statementReturn.Expressions) > 0 { //restore stack
-				makeClass.loadLocalVar(class, code, context.function.Type.ReturnList[0])
+				buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 			}
 		}
 		// in this case,load local var is not under exception handle,should be ok
 		if len(statementReturn.Expressions) == 0 {
-			makeClass.loadLocalVar(class, code, context.function.Type.ReturnList[0])
+			buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		}
 		switch context.function.Type.ReturnList[0].Type.Type {
 		case ast.VariableTypeBool:
@@ -97,7 +97,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 	//multi returns
 	if len(statementReturn.Expressions) > 0 {
 		if len(statementReturn.Expressions) == 1 {
-			maxStack, _ = makeClass.makeExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack, _ = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 		} else {
 			loadInt32(class, code, int32(len(context.function.Type.ReturnList)))
 			code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -112,7 +112,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 			for _, v := range statementReturn.Expressions {
 				currentStack := uint16(1)
 				if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
-					stack, _ := makeClass.makeExpression.build(class, code, v, context, state)
+					stack, _ := buildPackage.BuildExpression.build(class, code, v, context, state)
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}
@@ -140,7 +140,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 				code.Codes[code.CodeLength] = cg.OP_dup // dup array list
 				code.CodeLength++
 				currentStack++
-				stack, es := makeClass.makeExpression.build(class, code, v, context, state)
+				stack, es := buildPackage.BuildExpression.build(class, code, v, context, state)
 				if len(es) > 0 {
 					fillOffsetForExits(es, code.CodeLength)
 					state.pushStack(class, v.ExpressionValue)
@@ -178,7 +178,7 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 		if 1 > maxStack {
 			maxStack = 1
 		}
-		stack := makeClass.buildDefersForReturn(class, code, context, state, statementReturn)
+		stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -194,20 +194,20 @@ func (makeClass *MakeClass) buildReturnStatement(class *cg.ClassHighLevel, code 
 		code.CodeLength++
 		return
 	}
-	stack := makeClass.buildReturnFromFunctionReturnList(class, code, context)
+	stack := buildPackage.buildReturnFromFunctionReturnList(class, code, context)
 	if stack > maxStack {
 		maxStack = stack
 	}
 	return
 }
 
-func (makeClass *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel,
+func (buildPackage *BuildPackage) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context) (maxStack uint16) {
 	if context.function.NoReturnValue() { // when has no return,should not call this function
 		return
 	}
 	if len(context.function.Type.ReturnList) == 1 {
-		makeClass.loadLocalVar(class, code, context.function.Type.ReturnList[0])
+		buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		maxStack = jvmSlotSize(context.function.Type.ReturnList[0].Type)
 		switch context.function.Type.ReturnList[0].Type.Type {
 		case ast.VariableTypeBool:
@@ -255,7 +255,7 @@ func (makeClass *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHig
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack++
-		makeClass.loadLocalVar(class, code, v)
+		buildPackage.loadLocalVar(class, code, v)
 		if t := currentStack + jvmSlotSize(v.Type); t > maxStack {
 			maxStack = t
 		}
@@ -276,7 +276,7 @@ func (makeClass *MakeClass) buildReturnFromFunctionReturnList(class *cg.ClassHig
 	return
 }
 
-func (makeClass *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, from *StackMapState,
+func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, from *StackMapState,
 	statementReturn *ast.StatementReturn) (maxStack uint16) {
 	if len(statementReturn.Defers) == 0 {
 		return
@@ -304,7 +304,7 @@ func (makeClass *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code 
 		state.popStack(1)
 		// build block
 		context.Defer = statementReturn.Defers[index]
-		makeClass.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
+		buildPackage.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
 		if index > 0 { // not the last defer, no need to look at
@@ -337,7 +337,7 @@ func (makeClass *MakeClass) buildDefersForReturn(class *cg.ClassHighLevel, code 
 			length := code.CodeLength + 3
 			code.CodeLength += 6
 			context.MakeStackMap(code, state, code.CodeLength)
-			makeClass.buildReturnFromFunctionReturnList(class, code, context)
+			buildPackage.buildReturnFromFunctionReturnList(class, code, context)
 			context.MakeStackMap(code, state, code.CodeLength)
 			binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
 		}

@@ -6,10 +6,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack, _ = makeExpression.build(class, code, call.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -19,7 +19,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 	switch call.Name {
 	case common.MapMethodKeyExists:
 		variableType := call.Args[0].ExpressionValue
-		stack, _ := makeExpression.build(class, code, call.Args[0], context, state)
+		stack, _ := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -52,7 +52,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 		for k, v := range call.Args {
 			currentStack = 1
 			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
-				stack, _ := makeExpression.build(class, code, v, context, state)
+				stack, _ := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -87,7 +87,7 @@ func (makeExpression *MakeExpression) buildMapMethodCall(class *cg.ClassHighLeve
 				}
 				state.pushStack(class, hashMapVerifyType)
 			}
-			stack, _ := makeExpression.build(class, code, v, context, state)
+			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}

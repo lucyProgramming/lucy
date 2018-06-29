@@ -17,12 +17,6 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 				Pos:  e.Pos,
 			}
 		}
-		//else {
-		//	return &Type{
-		//		Type: ExpressionTypeInt,
-		//		Pos:  e.Pos,
-		//	}
-		//}
 		return nil
 	}
 	if e.Type == ExpressionTypeNot {

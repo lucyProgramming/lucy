@@ -8,14 +8,14 @@ import (
 /*
 	s += "456";
 */
-func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack, remainStack, op, _, className, name, descriptor := makeExpression.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, _, className, name, descriptor := buildExpression.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -32,7 +32,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	}
 	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	currentStack := remainStack + 1 //
-	stack, _ := makeExpression.build(class, code, bin.Left, context, state)
+	stack, _ := buildExpression.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -44,7 +44,7 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, _ = makeExpression.build(class, code, bin.Right, context, state)
+	stack, _ = buildExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -65,14 +65,14 @@ func (makeExpression *MakeExpression) buildStrPlusAssign(class *cg.ClassHighLeve
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
+		currentStack += buildExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
 	}
 	//copy op
 	copyLeftValueOps(class, code, op, className, name, descriptor)
 	return
 
 }
-func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -80,17 +80,17 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
 	if bin.Left.ExpressionValue.Type == ast.VariableTypeString {
-		return makeExpression.buildStrPlusAssign(class, code, e, context, state)
+		return buildExpression.buildStrPlusAssign(class, code, e, context, state)
 	}
-	maxStack, remainStack, op, _, className, name, descriptor := makeExpression.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, _, className, name, descriptor := buildExpression.getLeftValue(class, code, bin.Left, context, state)
 	//left value must can be used as right value,
-	stack, _ := makeExpression.build(class, code, bin.Left, context, state) // load it`s value
+	stack, _ := buildExpression.build(class, code, bin.Left, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
 	state.pushStack(class, e.ExpressionValue)
 	currentStack := jvmSlotSize(e.ExpressionValue) + remainStack // incase int -> long
-	stack, _ = makeExpression.build(class, code, bin.Right, context, state)
+	stack, _ = buildExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -247,7 +247,7 @@ func (makeExpression *MakeExpression) buildOpAssign(class *cg.ClassHighLevel, co
 		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
-		currentStack += makeExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
+		currentStack += buildExpression.controlStack2FitAssign(code, op, className, bin.Left.ExpressionValue)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}

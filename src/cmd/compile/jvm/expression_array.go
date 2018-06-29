@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
@@ -31,33 +31,33 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	switch e.ExpressionValue.Array.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_BOOLEAN
+		code.Codes[code.CodeLength+1] = ArrayTypeBoolean
 		code.CodeLength += 2
 	case ast.VariableTypeByte:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_BYTE
+		code.Codes[code.CodeLength+1] = ArrayTypeByte
 		code.CodeLength += 2
 	case ast.VariableTypeShort:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_SHORT
+		code.Codes[code.CodeLength+1] = ArrayTypeShort
 		code.CodeLength += 2
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_INT
+		code.Codes[code.CodeLength+1] = ArrayTypeInt
 		code.CodeLength += 2
 	case ast.VariableTypeLong:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_LONG
+		code.Codes[code.CodeLength+1] = ArrayTypeLong
 		code.CodeLength += 2
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_FLOAT
+		code.Codes[code.CodeLength+1] = ArrayTypeFloat
 		code.CodeLength += 2
 	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ATYPE_T_DOUBLE
+		code.Codes[code.CodeLength+1] = ArrayTypeDouble
 		code.CodeLength += 2
 	case ast.VariableTypeMap:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -123,7 +123,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 	for _, v := range arr.Expressions {
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			// stack top is array list
-			stack, _ := makeExpression.build(class, code, v, context, state)
+			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxStack {
 				maxStack = t
 			}
@@ -146,7 +146,7 @@ func (makeExpression *MakeExpression) buildArray(class *cg.ClassHighLevel, code 
 		loadInt32(class, code, index) // load index
 		state.pushStack(class, arrayObject)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack, es := makeExpression.build(class, code, v, context, state)
+		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			fillOffsetForExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)

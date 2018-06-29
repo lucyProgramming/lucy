@@ -3,7 +3,7 @@ package jvm
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
-func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	selection := e.Data.(*ast.ExpressionSelection)
 	if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
@@ -28,7 +28,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 	// check cast to super class
 	if selection.Name == ast.SUPER {
 		if selection.Expression.ExpressionValue.Type == ast.VariableTypeObject {
-			maxStack, _ = makeExpression.build(class, code, selection.Expression, context, state)
+			maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
 			code.Codes[code.CodeLength] = cg.OP_checkcast
 			class.InsertClassConst(e.ExpressionValue.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -73,7 +73,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 			maxStack = 4
 		}
 		if selection.Expression.ExpressionValue.Type == ast.VariableTypeObject {
-			stack, _ := makeExpression.build(class, code, selection.Expression, context, state)
+			stack, _ := buildExpression.build(class, code, selection.Expression, context, state)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -100,7 +100,7 @@ func (makeExpression *MakeExpression) buildSelection(class *cg.ClassHighLevel, c
 		return
 	}
 	// object
-	maxStack, _ = makeExpression.build(class, code, selection.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
 	if t := jvmSlotSize(e.ExpressionValue); t > maxStack {
 		maxStack = t
 	}

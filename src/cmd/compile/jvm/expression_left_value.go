@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (makeExpression *MakeExpression) getCaptureIdentifierLeftValue(
+func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
@@ -37,15 +37,15 @@ func (makeExpression *MakeExpression) getCaptureIdentifierLeftValue(
 	return
 }
 
-func (makeExpression *MakeExpression) getMapLeftValue(
+func (buildExpression *BuildExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
 	target *ast.Type, className, name, descriptor string) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
+	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaMapClass))
-	stack, _ := makeExpression.build(class, code, index.Index, context, state)
+	stack, _ := buildExpression.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -73,7 +73,7 @@ func (makeExpression *MakeExpression) getMapLeftValue(
 	return
 }
 
-func (makeExpression *MakeExpression) getLeftValue(
+func (buildExpression *BuildExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, op []byte,
@@ -84,13 +84,13 @@ func (makeExpression *MakeExpression) getLeftValue(
 		if identifier.Variable.IsGlobal {
 			op = []byte{cg.OP_putstatic}
 			target = identifier.Variable.Type
-			className = makeExpression.MakeClass.mainClass.Name
+			className = buildExpression.BuildPackage.mainClass.Name
 			name = identifier.Name
 			descriptor = JvmDescriptor.typeDescriptor(identifier.Variable.Type)
 			return
 		}
 		if identifier.Variable.BeenCaptured {
-			return makeExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
+			return buildExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
 		if identifier.Name == ast.NoNameIdentifier {
 			panic("this is not happening")
@@ -180,7 +180,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 			meta := ArrayMetas[index.Expression.ExpressionValue.Array.Type]
-			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
+			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.ExpressionValue)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
@@ -205,7 +205,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 
-			stack, _ := makeExpression.build(class, code, index.Index, context, state)
+			stack, _ := buildExpression.build(class, code, index.Index, context, state)
 			if t := stack + 3; t > maxStack {
 				maxStack = t
 			}
@@ -272,6 +272,8 @@ func (makeExpression *MakeExpression) getLeftValue(
 				op = []byte{cg.OP_fastore}
 			case ast.VariableTypeDouble:
 				op = []byte{cg.OP_dastore}
+			case ast.VariableTypeFunction:
+				fallthrough
 			case ast.VariableTypeString:
 				fallthrough
 			case ast.VariableTypeObject:
@@ -286,11 +288,11 @@ func (makeExpression *MakeExpression) getLeftValue(
 			remainStack = 2 // [arrayref ,index]
 			target = e.ExpressionValue
 		} else if index.Expression.ExpressionValue.Type == ast.VariableTypeMap { // map
-			return makeExpression.getMapLeftValue(class, code, e, context, state)
+			return buildExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
-			maxStack, _ = makeExpression.build(class, code, index.Expression, context, state)
+			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.ExpressionValue)
-			stack, _ := makeExpression.build(class, code, index.Index, context, state)
+			stack, _ := buildExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
@@ -314,6 +316,8 @@ func (makeExpression *MakeExpression) getLeftValue(
 				op = []byte{cg.OP_fastore}
 			case ast.VariableTypeDouble:
 				op = []byte{cg.OP_dastore}
+			case ast.VariableTypeFunction:
+				fallthrough
 			case ast.VariableTypeString:
 				fallthrough
 			case ast.VariableTypeObject:
@@ -352,7 +356,7 @@ func (makeExpression *MakeExpression) getLeftValue(
 			if selection.Field.IsStatic() {
 				op = []byte{cg.OP_putstatic}
 			} else {
-				maxStack, _ = makeExpression.build(class, code, selection.Expression, context, state)
+				maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, selection.Expression.ExpressionValue)
 				op = []byte{cg.OP_putfield}

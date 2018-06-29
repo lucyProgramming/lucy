@@ -6,19 +6,19 @@ import (
 )
 
 type StatementIF struct {
-	PreExpressions []*Expression
-	Condition      *Expression
-	ConditionBlock Block
-	Block          Block
-	ElseIfList     []*StatementElseIf
-	ElseBlock      *Block
-	Exits          []*cg.Exit
+	PrefixExpressions []*Expression
+	Condition         *Expression
+	ConditionBlock    Block
+	Block             Block
+	ElseIfList        []*StatementElseIf
+	ElseBlock         *Block
+	Exits             []*cg.Exit
 }
 
 func (s *StatementIF) check(father *Block) []error {
 	s.ConditionBlock.inherit(father)
 	errs := []error{}
-	for _, v := range s.PreExpressions {
+	for _, v := range s.PrefixExpressions {
 		v.IsStatementExpression = true
 		_, es := v.check(&s.ConditionBlock)
 		if errorsNotEmpty(es) {
