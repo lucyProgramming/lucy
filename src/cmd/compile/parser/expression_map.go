@@ -7,10 +7,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (expressionParser *ExpressionParser) parseMapExpression(needType bool) (*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 	var typ *ast.Type
 	var err error
-	if needType {
+	if expressionParser.parser.token.Type == lex.TokenMap {
 		typ, err = expressionParser.parser.parseType()
 		if err != nil {
 			return nil, err

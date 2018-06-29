@@ -138,8 +138,8 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TokenEqual ||
-		expressionParser.parser.token.Type == lex.TokenNe) && expressionParser.parser.token.Type != lex.TokenEof {
+	for expressionParser.parser.token.Type == lex.TokenEqual ||
+		expressionParser.parser.token.Type == lex.TokenNe {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -170,8 +170,8 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TokenGt || expressionParser.parser.token.Type == lex.TokenGe ||
-		expressionParser.parser.token.Type == lex.TokenLt || expressionParser.parser.token.Type == lex.TokenLe) && expressionParser.parser.token.Type != lex.TokenEof {
+	for expressionParser.parser.token.Type == lex.TokenGt || expressionParser.parser.token.Type == lex.TokenGe ||
+		expressionParser.parser.token.Type == lex.TokenLt || expressionParser.parser.token.Type == lex.TokenLe {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -206,9 +206,8 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TokenLsh ||
-		expressionParser.parser.token.Type == lex.TokenRsh) &&
-		expressionParser.parser.token.Type != lex.TokenEof {
+	for expressionParser.parser.token.Type == lex.TokenLsh ||
+		expressionParser.parser.token.Type == lex.TokenRsh {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -239,8 +238,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TokenAdd || expressionParser.parser.token.Type == lex.TokenSub) &&
-		expressionParser.parser.token.Type != lex.TokenEof {
+	for expressionParser.parser.token.Type == lex.TokenAdd || expressionParser.parser.token.Type == lex.TokenSub {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
@@ -271,9 +269,9 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		return nil, err
 	}
 	var typ int
-	for (expressionParser.parser.token.Type == lex.TokenMul ||
+	for expressionParser.parser.token.Type == lex.TokenMul ||
 		expressionParser.parser.token.Type == lex.TokenDiv ||
-		expressionParser.parser.token.Type == lex.TokenMod) && expressionParser.parser.token.Type != lex.TokenEof {
+		expressionParser.parser.token.Type == lex.TokenMod {
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()

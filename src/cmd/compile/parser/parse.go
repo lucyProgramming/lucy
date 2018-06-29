@@ -254,7 +254,7 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenEof:
 			break
 		default:
-			parser.errs = append(parser.errs, fmt.Errorf("%s token(%s) is not except",
+			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
 				parser.errorMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolon)
 			resetProperty()

@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool) (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch expressionParser.parser.token.Type {
@@ -25,15 +25,15 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		left.Data = true
 		left.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next()
-	case lex.TokenGlobal:
-		left = &ast.Expression{}
-		left.Type = ast.ExpressionTypeGlobal
-		left.Pos = expressionParser.parser.mkPos()
-		expressionParser.Next()
 	case lex.TokenFalse:
 		left = &ast.Expression{}
 		left.Type = ast.ExpressionTypeBool
 		left.Data = false
+		left.Pos = expressionParser.parser.mkPos()
+		expressionParser.Next()
+	case lex.TokenGlobal:
+		left = &ast.Expression{}
+		left.Type = ast.ExpressionTypeGlobal
 		left.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next()
 	case lex.TokenLiteralByte:
@@ -215,22 +215,25 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		if err != nil {
 			return left, err
 		}
-		//
+		//byte()
 	case lex.TokenByte:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		//short()
 	case lex.TokenShort:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		//int()
 	case lex.TokenInt:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		//long()
 	case lex.TokenLong:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
@@ -269,17 +272,17 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		left.Data = e
 		return left, nil
 	case lex.TokenMap:
-		left, err = expressionParser.parseMapExpression(true)
+		left, err = expressionParser.parseMapExpression()
 		if err != nil {
 			return left, err
 		}
 	case lex.TokenLc:
-		left, err = expressionParser.parseMapExpression(false)
+		left, err = expressionParser.parseMapExpression()
 		if err != nil {
 			return left, err
 		}
 	default:
-		err = fmt.Errorf("%s unkown begining of a expression, token:%s",
+		err = fmt.Errorf("%s unkown begining of a expression, token:'%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		return nil, err
 	}
@@ -292,7 +295,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		// ++ or --
 		if expressionParser.parser.token.Type == lex.TokenIncrement ||
 			expressionParser.parser.token.Type == lex.TokenDecrement { //  ++ or --
-			if unary {
+			if isPrefixUnary {
 				return left, nil
 			}
 			newExpression := &ast.Expression{}
@@ -301,13 +304,8 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 			} else {
 				newExpression.Type = ast.ExpressionTypeDecrement
 			}
-			if left.Type != ast.ExpressionTypeList {
-				newExpression.Data = left
-				left = newExpression
-			} else {
-				list := left.Data.([]*ast.Expression)
-				newExpression.Data = list[len(list)-1]
-			}
+			newExpression.Data = left
+			left = newExpression
 			newExpression.Pos = expressionParser.parser.mkPos()
 			expressionParser.Next()
 			continue
@@ -315,8 +313,11 @@ func (expressionParser *ExpressionParser) parseOneExpression(unary bool) (*ast.E
 		// [
 		if expressionParser.parser.token.Type == lex.TokenLb {
 			pos := expressionParser.parser.mkPos()
-			expressionParser.Next()                                   // skip [
-			if expressionParser.parser.token.Type == lex.TokenColon { // a[:]
+			expressionParser.Next() // skip [
+			if expressionParser.parser.token.Type == lex.TokenColon {
+				/*
+					a[:]
+				*/
 				expressionParser.Next() // skip :
 				var end *ast.Expression
 				if expressionParser.parser.token.Type != lex.TokenRb {

@@ -10,26 +10,11 @@ import (
 func (parser *Parser) parseType() (*ast.Type, error) {
 	var err error
 	var ret *ast.Type
+	pos := parser.mkPos()
 	switch parser.token.Type {
+
 	case lex.TokenLb:
 
-		//if len(pre) > 0 {
-		//	parser.Next()
-		//	if parser.token.Type != lex.TOKEN_RB {
-		//		// [ and ] not match
-		//		err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
-		//		parser.errs = append(parser.errs, err)
-		//		return nil, err
-		//	}
-		//	parser.Next() //skip ]
-		//	ret = &ast.Type{
-		//		Pos:       pos,
-		//		Type:      ast.VARIABLE_TYPE_JAVA_ARRAY,
-		//		ArrayType: pre[0],
-		//	}
-		//	break
-		//}
-		pos := parser.mkPos()
 		parser.Next()
 		if parser.token.Type != lex.TokenRb {
 			// [ and ] not match
@@ -48,56 +33,55 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		ret.Type = ast.VariableTypeArray
 		ret.Array = t
 	case lex.TokenBool:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeBool,
 			Pos:  pos,
 		}
 	case lex.TokenByte:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeByte,
 			Pos:  pos,
 		}
 	case lex.TokenShort:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeShort,
 			Pos:  pos,
 		}
 	case lex.TokenInt:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeInt,
 			Pos:  pos,
 		}
 	case lex.TokenFloat:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeFloat,
 			Pos:  pos,
 		}
 	case lex.TokenDouble:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeDouble,
 			Pos:  pos,
 		}
 	case lex.TokenLong:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeLong,
 			Pos:  pos,
 		}
 	case lex.TokenString:
-		pos := parser.mkPos()
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeString,
@@ -105,9 +89,8 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 	case lex.TokenIdentifier:
 		ret, err = parser.parseIdentifierType()
-
 	case lex.TokenMap:
-		pos := parser.mkPos()
+
 		parser.Next() // skip map key word
 		if parser.token.Type != lex.TokenLc {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
@@ -143,7 +126,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Pos:  pos,
 		}
 	case lex.TokenTemplate:
-		pos := parser.mkPos()
+
 		ret = &ast.Type{
 			Type: ast.VariableTypeTemplate,
 			Pos:  pos,
@@ -151,7 +134,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 		parser.Next()
 	case lex.TokenFunction:
-		pos := parser.mkPos()
+
 		parser.Next()
 		ft, err := parser.parseFunctionType()
 		if err != nil {
