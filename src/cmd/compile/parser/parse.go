@@ -27,6 +27,7 @@ type Parser struct {
 	tops         *[]*ast.Top
 	scanner      *lex.Lexer
 	filename     string
+	expectLf     bool
 	lastToken    *lex.Token
 	token        *lex.Token
 	errs         []error
@@ -79,16 +80,11 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenVar:
 			pos := parser.mkPos()
 			parser.Next() // skip var key word
-			vs, es, typ, err := parser.parseConstDefinition(true)
+			vs, es, err := parser.parseConstDefinition(true)
 			if err != nil {
 				parser.consume(untilSemicolon)
 				parser.Next()
 				continue
-			}
-			if typ != nil && typ.Type != lex.TokenAssign {
-				parser.errs = append(parser.errs,
-					fmt.Errorf("%s use '=' to initialize value",
-						parser.errorMsgPrefix()))
 			}
 			d := &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es}
 			e := &ast.Expression{
@@ -104,12 +100,13 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenIdentifier:
 			e, err := parser.ExpressionParser.parseExpression(true)
 			if err != nil {
+				parser.errs = append(parser.errs, err)
 				parser.consume(untilSemicolon)
 				parser.Next()
 				continue
 			}
 			e.IsPublic = isPublic
-			parser.validStatementEnding(e.Pos)
+			parser.validStatementEnding()
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
 			})
@@ -197,23 +194,10 @@ func (parser *Parser) Parse() []error {
 			continue
 		case lex.TokenConst:
 			parser.Next() // skip const key word
-			vs, es, typ, err := parser.parseConstDefinition(false)
+			vs, es, err := parser.parseConstDefinition(false)
 			if err != nil {
 				parser.consume(untilSemicolon)
 				parser.Next()
-				resetProperty()
-				continue
-			}
-			if parser.validStatementEnding() == false { //assume missing ; not big deal
-				parser.Next()
-				parser.consume(untilSemicolon)
-				resetProperty()
-				continue
-			}
-			// const a := 1 is wrong,
-			if typ != nil && typ.Type != lex.TokenAssign {
-				parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':=' for const definition",
-					parser.errorMsgPrefix()))
 				resetProperty()
 				continue
 			}
@@ -250,7 +234,6 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: a,
 			})
-
 		case lex.TokenEof:
 			break
 		default:
@@ -303,17 +286,23 @@ func (parser *Parser) validAfterPublic(isPublic bool) {
 	}
 	parser.errs = append(parser.errs, err)
 }
-func (parser *Parser) validStatementEnding(pos ...*ast.Position) bool {
+func (parser *Parser) validStatementEnding() {
 	if parser.token.Type == lex.TokenSemicolon ||
 		(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
-		return true
+		return
 	}
-	if len(pos) > 0 {
-		parser.errs = append(parser.errs, fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(pos[0])))
-	} else {
-		parser.errs = append(parser.errs, fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix()))
+	var token *lex.Token
+	if nil != parser.lastToken {
+		token = parser.lastToken
 	}
-	return false
+	if token == nil {
+		token = parser.token
+	}
+	parser.errs = append(parser.errs, fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(&ast.Position{
+		Filename:    parser.filename,
+		StartLine:   token.StartLine,
+		StartColumn: token.StartColumn,
+	})))
 }
 
 func (parser *Parser) mkPos() *ast.Position {
@@ -326,10 +315,10 @@ func (parser *Parser) mkPos() *ast.Position {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*ast.Expression, *lex.Token, error) {
+func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*ast.Expression, error) {
 	names, err := parser.parseNameList()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	var variableType *ast.Type
 	//trying to parse type
@@ -337,10 +326,10 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 		variableType, err = parser.parseType()
 		if err != nil {
 			parser.errs = append(parser.errs, err)
-			return nil, nil, nil, err
+			return nil, nil, err
 		}
 	}
-	f := func() []*ast.Variable {
+	mkResult := func() []*ast.Variable {
 		vs := make([]*ast.Variable, len(names))
 		for k, v := range names {
 			vd := &ast.Variable{}
@@ -355,15 +344,17 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 	}
 	if parser.token.Type != lex.TokenAssign &&
 		parser.token.Type != lex.TokenColonAssign {
-		return f(), nil, nil, err
+		return mkResult(), nil, err
 	}
-	typ := parser.token
+	if parser.token.Type != lex.TokenAssign {
+		parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':='", parser.errorMsgPrefix()))
+	}
 	parser.Next() // skip = or :=
 	es, err := parser.ExpressionParser.parseExpressions()
 	if err != nil {
-		return nil, nil, typ, err
+		return nil, nil, err
 	}
-	return f(), es, typ, nil
+	return mkResult(), es, nil
 }
 
 func (parser *Parser) Next() {

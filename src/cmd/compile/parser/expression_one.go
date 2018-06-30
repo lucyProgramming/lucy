@@ -203,7 +203,6 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 				Type: t,
 			},
 		}
-
 	case lex.TokenLb:
 		left, err = expressionParser.parseArrayExpression()
 		if err != nil {
@@ -239,30 +238,35 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		if err != nil {
 			return left, err
 		}
+		//float()
 	case lex.TokenFloat:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		//double
 	case lex.TokenDouble:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		//string()
 	case lex.TokenString:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		// T()
 	case lex.TokenTemplate:
 		left, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return left, err
 		}
+		// range
 	case lex.TokenRange:
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
-		e, err := expressionParser.parseExpression(false)
+		e, err := expressionParser.parseOneExpression(false)
 		if err != nil {
 			return nil, err
 		}

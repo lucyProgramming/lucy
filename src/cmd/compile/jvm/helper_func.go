@@ -132,3 +132,15 @@ func nameTemplateFunction(f *ast.Function) string {
 	}
 	return s
 }
+
+func insertTypeAssertClass(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
+	if t.Type == ast.VariableTypeObject {
+		class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
+	} else if t.Type == ast.VariableTypeArray { // arrays
+		meta := ArrayMetas[t.Array.Type]
+		class.InsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
+	} else {
+		class.InsertClassConst(JvmDescriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
+	}
+	code.CodeLength += 2
+}

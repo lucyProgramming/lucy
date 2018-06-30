@@ -14,9 +14,6 @@ func (expressionParser *ExpressionParser) parseTernaryExpression() (*ast.Express
 	if expressionParser.parser.token.Type != lex.TokenQuestion {
 		return left, nil
 	}
-	newExpression := &ast.Expression{}
-	newExpression.Pos = expressionParser.parser.mkPos()
-	newExpression.Type = ast.ExpressionTypeTernary
 	expressionParser.Next() // skip ?
 	True, err := expressionParser.parseExpression(false)
 	if err != nil {
@@ -31,6 +28,9 @@ func (expressionParser *ExpressionParser) parseTernaryExpression() (*ast.Express
 	if err != nil {
 		return left, nil
 	}
+	newExpression := &ast.Expression{}
+	newExpression.Pos = expressionParser.parser.mkPos()
+	newExpression.Type = ast.ExpressionTypeTernary
 	ternary := &ast.ExpressionTernary{}
 	ternary.Selection = left
 	ternary.True = True

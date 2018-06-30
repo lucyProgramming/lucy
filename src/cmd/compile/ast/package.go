@@ -191,7 +191,7 @@ type LucySourceFile struct {
 
 type Import struct {
 	AccessName string
-	ImportName string // full name
+	Import     string // full name
 	Pos        *Position
 	Used       bool
 }
@@ -202,13 +202,13 @@ type Import struct {
 */
 func (i *Import) GetAccessName() (string, error) {
 	if i.AccessName == "_" { //special case _ is a identifier
-		return "", fmt.Errorf("'_' is not legal package name")
+		return "", fmt.Errorf("'_' is not legal package access name")
 	}
 	if i.AccessName != "" {
 		return i.AccessName, nil
 	}
-	name := i.ImportName
-	if strings.Contains(i.ImportName, "/") {
+	name := i.Import
+	if strings.Contains(i.Import, "/") {
 		name = name[strings.LastIndex(name, "/")+1:]
 		if name == "" {
 			return "", fmt.Errorf("no last element after/")

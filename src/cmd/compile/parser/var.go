@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -10,11 +11,17 @@ func init() {
 }
 
 var (
-	untilLc = map[int]bool{
-		lex.TokenLc: true,
+	untilLp = map[int]bool{
+		lex.TokenLp: true,
+	}
+	untilRp = map[int]bool{
+		lex.TokenRp: true,
 	}
 	untilGt = map[int]bool{
 		lex.TokenGt: true,
+	}
+	untilLc = map[int]bool{
+		lex.TokenLc: true,
 	}
 	untilRc = map[int]bool{
 		lex.TokenRc: true,
@@ -57,4 +64,14 @@ func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 		p.errs = append(p.errs, err)
 	}
 	return f, p.errs
+}
+
+var (
+	nameIndex int = 1
+)
+
+func compileAutoName() string {
+	s := fmt.Sprintf("autoName$%d", nameIndex)
+	nameIndex++
+	return s
 }

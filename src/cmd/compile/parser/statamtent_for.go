@@ -11,11 +11,14 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 	f = &ast.StatementFor{}
 	f.Pos = blockParser.parser.mkPos()
 	f.Block = &ast.Block{}
-	blockParser.Next()                                                                                       // skip for
-	if blockParser.parser.token.Type != lex.TokenLc && blockParser.parser.token.Type != lex.TokenSemicolon { // not {
+	blockParser.Next() // skip for
+	if blockParser.parser.token.Type != lex.TokenLc &&
+		blockParser.parser.token.Type != lex.TokenSemicolon { // not {
 		e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
+			blockParser.consume(untilLc)
+			goto parseBlock
 		} else {
 			f.Condition = e
 		}
@@ -29,7 +32,8 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 			e, err := blockParser.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
-				blockParser.consume(untilSemicolon)
+				blockParser.consume(untilLc)
+				goto parseBlock
 			} else {
 				f.Condition = e
 			}
@@ -37,6 +41,7 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s missing semicolon after expression",
 					blockParser.parser.errorMsgPrefix()))
 				blockParser.consume(untilLc)
+				goto parseBlock
 			}
 		}
 		blockParser.Next()
@@ -44,11 +49,13 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 			e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
+				blockParser.consume(untilLc)
+				goto parseBlock
 			}
 			f.After = e
 		}
-
 	}
+parseBlock:
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)

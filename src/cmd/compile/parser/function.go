@@ -21,19 +21,15 @@ func (functionParser *FunctionParser) consume(until map[int]bool) {
 
 func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
+	f.Pos = functionParser.parser.mkPos()
 	var offset int
 	offset = functionParser.parser.token.Offset
 	functionParser.Next() // skip fn key word
-	f.Pos = functionParser.parser.mkPos()
-	if needName {
-		if functionParser.parser.token.Type != lex.TokenIdentifier {
-			err := fmt.Errorf("%s expect function name,but '%s'",
-				functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
-			functionParser.parser.errs = append(functionParser.parser.errs, err)
-			if functionParser.parser.token.Type != lex.TokenLc {
-				return nil, err
-			}
-		}
+	if needName && functionParser.parser.token.Type != lex.TokenIdentifier {
+		err := fmt.Errorf("%s expect function name,but '%s'",
+			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+		functionParser.parser.errs = append(functionParser.parser.errs, err)
+		functionParser.parser.consume(untilLp)
 	}
 	if functionParser.parser.token.Type == lex.TokenIdentifier {
 		f.Name = functionParser.parser.token.Data.(string)
@@ -41,10 +37,12 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	}
 	f.Type, err = functionParser.parser.parseFunctionType()
 	if err != nil {
-		functionParser.consume(untilLc)
+		//functionParser.consume(untilLc)
+		return nil, err
 	}
 	if functionParser.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s except '{' but '%s'", functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+		err = fmt.Errorf("%s except '{' but '%s'",
+			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilLc)
 	}
@@ -54,10 +52,10 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	if functionParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}', but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+		functionParser.consume(untilRc)
 	} else {
 		f.SourceCodes = functionParser.parser.bs[offset : functionParser.parser.token.Offset+1]
 		functionParser.Next()
 	}
-
 	return f, err
 }

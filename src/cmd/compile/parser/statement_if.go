@@ -7,9 +7,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (blockParser *BlockParser) parseIf() (i *ast.StatementIF, err error) {
+func (blockParser *BlockParser) parseIf() (i *ast.StatementIf, err error) {
 	blockParser.Next() // skip if
-
 	var e *ast.Expression
 	e, err = blockParser.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
@@ -17,7 +16,7 @@ func (blockParser *BlockParser) parseIf() (i *ast.StatementIF, err error) {
 		blockParser.consume(untilLc)
 		blockParser.Next()
 	}
-	i = &ast.StatementIF{}
+	i = &ast.StatementIf{}
 	i.Condition = e
 	for blockParser.parser.token.Type == lex.TokenSemicolon {
 		if i.Condition != nil {

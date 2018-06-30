@@ -26,7 +26,7 @@ func (classParser *ClassParser) consume(m map[int]bool) {
 
 func (classParser *ClassParser) parseClassName() (string, error) {
 	if classParser.parser.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect class`s name,but '%s'",
+		err := fmt.Errorf("%s expect identifier for class`s name,but '%s'",
 			classParser.parser.errorMsgPrefix(), classParser.parser.token.Description)
 		classParser.parser.errs = append(classParser.parser.errs, err)
 		return "", err
@@ -34,9 +34,9 @@ func (classParser *ClassParser) parseClassName() (string, error) {
 	name := classParser.parser.token.Data.(string)
 	classParser.Next()
 	if classParser.parser.token.Type == lex.TokenSelection {
-		classParser.Next()
+		classParser.Next() // skip .
 		if classParser.parser.token.Type != lex.TokenIdentifier {
-			err := fmt.Errorf("%s expect identifer,but '%s'", classParser.parser.errorMsgPrefix(),
+			err := fmt.Errorf("%s expect identifer for class`s name,but '%s'", classParser.parser.errorMsgPrefix(),
 				classParser.parser.token.Description)
 			classParser.parser.errs = append(classParser.parser.errs, err)
 		}
@@ -46,7 +46,7 @@ func (classParser *ClassParser) parseClassName() (string, error) {
 	return name, nil
 }
 
-func (classParser *ClassParser) parseInterfaces() ([]*ast.NameWithPos, error) {
+func (classParser *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos, error) {
 	ret := []*ast.NameWithPos{}
 	for classParser.parser.token.Type != lex.TokenEof {
 		pos := classParser.parser.mkPos()
@@ -68,37 +68,36 @@ func (classParser *ClassParser) parseInterfaces() ([]*ast.NameWithPos, error) {
 }
 
 func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) {
-	defer classParser.resetProperty()
+	classParser.resetProperty()
 	classDefinition = &ast.Class{}
 	classParser.ret = classDefinition
-	classParser.Next() // skip class key word
 	classParser.ret.Pos = classParser.parser.mkPos()
+	classParser.Next() // skip class key word
 	classParser.ret.Name, err = classParser.parseClassName()
 	classParser.ret.Block.IsClassBlock = true
 	if err != nil {
-		return nil, err
+		if classParser.ret.Name == "" {
+			compileAutoName()
+		}
+		classParser.parser.consume(untilLc)
+		//continue analyse source code
 	}
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		//classParser.ret.HaveExtends = true
 		classParser.Next() // skip extends
 		classParser.ret.Pos = classParser.parser.mkPos()
-		if classParser.parser.token.Type != lex.TokenIdentifier {
-			err = fmt.Errorf("%s class`s father must be a identifier", classParser.parser.errorMsgPrefix())
+		t, err := classParser.parseClassName()
+		classParser.ret.SuperClassName = t
+		if err != nil {
 			classParser.parser.errs = append(classParser.parser.errs, err)
-			classParser.consume(untilLc) //
-		} else {
-			t, err := classParser.parseClassName()
-			classParser.ret.SuperClassName = t
-			if err != nil {
-				classParser.parser.errs = append(classParser.parser.errs, err)
-				return nil, err
-			}
+			classParser.parser.consume(untilLc)
 		}
 	}
 	if classParser.parser.token.Type == lex.TokenImplements {
 		classParser.Next() // skip key word
-		classParser.ret.InterfaceNames, err = classParser.parseInterfaces()
+		classParser.ret.InterfaceNames, err = classParser.parseImplementsInterfaces()
 		if err != nil {
+			classParser.parser.errs = append(classParser.parser.errs, err)
 			classParser.consume(untilLc)
 		}
 	}
@@ -107,8 +106,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		classParser.parser.errs = append(classParser.parser.errs, err)
 		return nil, err
 	}
-	classParser.Next() // skip {
-	classParser.resetProperty()
 	validAfterPublic := func(keyWord string, token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier ||
 			token.Type == lex.TokenFunction ||
@@ -137,6 +134,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		}
 		return fmt.Errorf("%s not a valid token after 'static'", classParser.parser.errorMsgPrefix())
 	}
+	classParser.Next()
 	for classParser.parser.token.Type != lex.TokenEof {
 		if len(classParser.parser.errs) > classParser.parser.nErrors2Stop {
 			break
@@ -167,34 +165,23 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			err := validAfterStatic(classParser.parser.token)
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
+				classParser.isStatic = false
 			}
 		//access private
-		case lex.TokenPublic:
+		case lex.TokenPublic, lex.TokenProtected, lex.TokenPrivate:
 			classParser.accessControlToken = classParser.parser.token
 			classParser.Next()
-			err = validAfterPublic("public", classParser.parser.token)
+			err = validAfterPublic(classParser.accessControlToken.Description, classParser.parser.token)
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-			}
-		case lex.TokenProtected:
-			classParser.accessControlToken = classParser.parser.token
-			classParser.Next()
-			err = validAfterPublic("protected", classParser.parser.token)
-			if err != nil {
-				classParser.parser.errs = append(classParser.parser.errs, err)
-			}
-		case lex.TokenPrivate:
-			classParser.accessControlToken = classParser.parser.token
-			classParser.Next() // skip private
-			err = validAfterPublic("private", classParser.parser.token)
-			if err != nil {
-				classParser.parser.errs = append(classParser.parser.errs, err)
+				classParser.accessControlToken = nil // set to nil
 			}
 		case lex.TokenVolatile:
 			classParser.isVolatile = true
 			classParser.Next()
 			if err := validAfterVolatile(classParser.parser.token); err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
+				classParser.isVolatile = false
 			}
 		case lex.TokenIdentifier:
 			err = classParser.parseField(&classParser.parser.errs)
@@ -211,28 +198,26 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.Next()
 				continue
 			}
-			classParser.resetProperty()
 		case lex.TokenSynchronized:
 			classParser.isSynchronized = true
 			classParser.Next()
 			if err := validAfterSynchronized(classParser.parser.token); err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
+				classParser.isSynchronized = false
 			}
 		case lex.TokenFunction:
 			f, err := classParser.parser.FunctionParser.parse(true)
 			if err != nil {
+				classParser.resetProperty()
 				classParser.consume(untilRc)
 				classParser.Next()
-				classParser.resetProperty()
 				continue
 			}
 			if classParser.ret.Methods == nil {
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == "" {
-				classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s method has no name", classParser.parser.errorMsgPrefix(f.Pos)))
-				classParser.resetProperty()
-				continue
+				f.Name = compileAutoName()
 			}
 			m := &ast.ClassMethod{}
 			m.Function = f
@@ -281,14 +266,9 @@ func (classParser *ClassParser) resetProperty() {
 
 func (classParser *ClassParser) parseConst() error {
 	pos := classParser.parser.mkPos()
-	vs, es, typ, err := classParser.parser.parseConstDefinition(false)
+	vs, es, err := classParser.parser.parseConstDefinition(false)
 	if err != nil {
 		return err
-	}
-	if typ != nil && typ.Type != lex.TokenAssign {
-		classParser.parser.errs = append(classParser.parser.errs,
-			fmt.Errorf("%s declare const should use ‘=’ instead of ‘:=’",
-				classParser.parser.errorMsgPrefix(vs[0].Pos)))
 	}
 	if len(vs) != len(es) {
 		classParser.parser.errs = append(classParser.parser.errs,
@@ -305,7 +285,7 @@ func (classParser *ClassParser) parseConst() error {
 				classParser.parser.errorMsgPrefix(), v.Name))
 			continue
 		}
-		if k < len(es) {
+		if k < len(es) && es[k] != nil {
 			t := &ast.Constant{}
 			t.Variable = *v
 			t.Expression = es[k]
@@ -316,36 +296,23 @@ func (classParser *ClassParser) parseConst() error {
 }
 
 func (classParser *ClassParser) parseField(errs *[]error) error {
-	names, err := classParser.parser.parseNameList()
-	if err != nil {
-		return err
-	}
-	t, err := classParser.parser.parseType()
-	if err != nil {
-		return err
-	}
-	var es []*ast.Expression
-	if classParser.parser.token.Type == lex.TokenAssign {
-		classParser.Next() // skip =
-		es, err = classParser.parser.ExpressionParser.parseExpressions()
-		if err != nil {
-			*errs = append(*errs, err)
-		}
-	}
-
-	if classParser.parser.token.Type != lex.TokenSemicolon {
+	variables, es, err := classParser.parser.parseConstDefinition(true)
+	if err == nil && classParser.parser.token.Type != lex.TokenSemicolon {
 		*errs = append(*errs, fmt.Errorf("%s missing senicolon after field definition",
 			classParser.parser.errorMsgPrefix()))
+	}
+	if len(variables) == 0 {
+		return err
 	}
 	if classParser.ret.Fields == nil {
 		classParser.ret.Fields = make(map[string]*ast.ClassField)
 	}
-	if es != nil && len(es) != len(names) {
+	if es != nil && len(es) != len(variables) {
 		err := fmt.Errorf("%s cannot assign %d values to %d destinations",
-			classParser.parser.errorMsgPrefix(), len(es), len(names))
+			classParser.parser.errorMsgPrefix(), len(es), len(variables))
 		*errs = append(*errs, err)
 	}
-	for k, v := range names {
+	for k, v := range variables {
 		if _, ok := classParser.ret.Fields[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
@@ -356,14 +323,11 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		f.Name = v.Name
 		f.Pos = v.Pos
 		f.Type = &ast.Type{}
-		if t == nil {
-			panic(11)
-		}
-		*f.Type = *t
-		f.AccessFlags = 0
+		*f.Type = *v.Type
 		if k < len(es) && es[k] != nil {
 			f.Expression = es[k]
 		}
+		f.AccessFlags = 0
 		if classParser.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
 		}

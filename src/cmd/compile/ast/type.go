@@ -27,6 +27,7 @@ const (
 	VariableTypeName
 	VariableTypeTemplate
 	VariableTypeVoid
+	VariableTypeAlias
 
 	VariableTypePackage
 	VariableTypeNull
@@ -47,6 +48,7 @@ type Type struct {
 	Map          *Map
 	Package      *Package
 	Alias        string
+	AliasType    *Type
 }
 
 func (typ *Type) validForTypeAssertOrConversion() bool {
@@ -204,7 +206,7 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 	if strings.Contains(typ.Name, ".") == false {
 		i := PackageBeenCompile.getImport(typ.Pos.Filename, typ.Name)
 		if i != nil {
-			return PackageBeenCompile.load(i.ImportName)
+			return PackageBeenCompile.load(i.Import)
 		}
 		return nil, fmt.Errorf("%s type named '%s' not found",
 			errMsgPrefix(typ.Pos), typ.Name)
@@ -215,7 +217,7 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 		return nil, fmt.Errorf("%s package '%s' not imported",
 			errMsgPrefix(typ.Pos), packageAndName[0])
 	}
-	p, err := PackageBeenCompile.load(i.ImportName)
+	p, err := PackageBeenCompile.load(i.Import)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v",
 			errMsgPrefix(typ.Pos), err)

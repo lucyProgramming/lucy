@@ -10,6 +10,7 @@ import (
 func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 	var typ *ast.Type
 	var err error
+	pos := expressionParser.parser.mkPos()
 	if expressionParser.parser.token.Type == lex.TokenMap {
 		typ, err = expressionParser.parser.parseType()
 		if err != nil {
@@ -20,7 +21,10 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 		return nil, fmt.Errorf("expect '{',but '%s'", expressionParser.parser.token.Description)
 	}
 	expressionParser.Next() // skip {
-	ret := &ast.Expression{Type: ast.ExpressionTypeMap}
+	ret := &ast.Expression{
+		Type: ast.ExpressionTypeMap,
+		Pos:  pos,
+	}
 	m := &ast.ExpressionMap{}
 	m.Type = typ
 	ret.Data = m
@@ -35,7 +39,7 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 			return ret, fmt.Errorf("%s expect '->',but '%s'",
 				expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		}
-		expressionParser.Next()
+		expressionParser.Next() // skip ->
 		// value
 		v, err := expressionParser.parseExpression(false)
 		if err != nil {

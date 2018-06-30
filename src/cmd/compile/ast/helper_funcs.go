@@ -71,12 +71,16 @@ func checkRightValuesValid(ts []*Type, errs *[]error) (ret []*Type) {
 /*
 	when access from global,should check if access from package
 */
-func shouldAccessFromImports(name string, from *Position, have *Position) (*Import, bool) {
-	if have == nil { // in case buildIn types
+func shouldAccessFromImports(name string, from *Position, alreadyHave *Position) (*Import, bool) {
+	if alreadyHave == nil {
+		/*
+			in case buildIn types
+			only build in types have no "*Pos" is <nil>
+		*/
 		return nil, false
 	}
 	// different file
-	if from.Filename != have.Filename {
+	if from.Filename != alreadyHave.Filename {
 		i := PackageBeenCompile.getImport(from.Filename, name)
 		return i, i != nil
 	}
@@ -84,7 +88,7 @@ func shouldAccessFromImports(name string, from *Position, have *Position) (*Impo
 	if i == nil {
 		return nil, false
 	}
-	return i, have.StartLine < from.StartLine
+	return i, alreadyHave.StartLine < from.StartLine
 }
 
 func msNotMatchError(pos *Position, name string, ms []*ClassMethod, want []*Type) error {

@@ -44,7 +44,6 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
-
 	if b.Variables != nil {
 		if t, ok := b.Variables[name]; ok {
 			return t, true
@@ -128,7 +127,7 @@ func (b *Block) searchType(name string) interface{} {
 /*
 	search rightValue
 */
-func (b *Block) searchRightValue(name string) (interface{}, error) {
+func (b *Block) searchIdentifier(name string) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			return t, nil
@@ -146,6 +145,11 @@ func (b *Block) searchRightValue(name string) (interface{}, error) {
 	}
 	if b.EnumNames != nil {
 		if t, ok := b.EnumNames[name]; ok {
+			return t, nil
+		}
+	}
+	if b.Enums != nil {
+		if t, ok := b.Enums[name]; ok {
 			return t, nil
 		}
 	}
@@ -173,7 +177,7 @@ func (b *Block) searchRightValue(name string) (interface{}, error) {
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchRightValue(name) // search by outer block
+	t, err := b.Outer.searchIdentifier(name) // search by outer block
 	if err != nil {
 		return t, err
 	}

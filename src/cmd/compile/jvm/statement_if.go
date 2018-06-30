@@ -8,7 +8,7 @@ import (
 )
 
 func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, s *ast.StatementIF, context *Context, state *StackMapState) (maxStack uint16) {
+	code *cg.AttributeCode, s *ast.StatementIf, context *Context, state *StackMapState) (maxStack uint16) {
 	var es []*cg.Exit
 	conditionState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(conditionState)

@@ -27,7 +27,6 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		err = fmt.Errorf("%s fn declared wrong,missing ')',but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
-
 		return
 	}
 	parser.Next()

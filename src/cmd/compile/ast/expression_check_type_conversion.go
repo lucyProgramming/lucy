@@ -56,7 +56,6 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 	if conversion.Type.validForTypeAssertOrConversion() && t.IsPointer() {
 		return ret
 	}
-
 	*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s'",
 		errMsgPrefix(e.Pos), t.TypeString(), conversion.Type.TypeString()))
 	return ret

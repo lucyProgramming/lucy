@@ -79,7 +79,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 
 func (buildPackage *BuildPackage) statementIsUnConditionGoTo(s *ast.Statement) bool {
 	return s.Type == ast.StatementTypeReturn ||
-		s.Type == ast.StatementTypeGoto ||
+		s.Type == ast.StatementTypeGoTo ||
 		s.Type == ast.StatementTypeContinue ||
 		s.Type == ast.StatementTypeBreak
 }

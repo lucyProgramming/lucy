@@ -17,9 +17,8 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 	if call.Expression.ExpressionValue.Type == ast.VariableTypeJavaArray {
 		return buildExpression.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
-
-	pop := func(f *ast.Function) {
-		if e.IsStatementExpression && f.NoReturnValue() == false {
+	pop := func(ft *ast.FunctionType) {
+		if e.IsStatementExpression && ft.NoReturnValue() == false {
 			if len(e.ExpressionMultiValues) == 1 {
 				if jvmSlotSize(e.ExpressionMultiValues[0]) == 1 {
 					code.Codes[code.CodeLength] = cg.OP_pop
@@ -51,7 +50,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		if t := buildExpression.expressionValueJvmSize(e); t > maxStack {
 			maxStack = t
 		}
-		pop(call.Method.Function)
+		pop(&call.Method.Function.Type)
 		return
 	}
 
@@ -102,6 +101,6 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	pop(call.Method.Function)
+	pop(&call.Method.Function.Type)
 	return
 }

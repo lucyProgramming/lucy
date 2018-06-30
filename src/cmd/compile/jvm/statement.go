@@ -68,7 +68,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			fillOffsetForExits(s.StatementSwitch.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
-	case ast.StatementTypeGoto:
+	case ast.StatementTypeGoTo:
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 			jumpTo(cg.OP_goto, code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {

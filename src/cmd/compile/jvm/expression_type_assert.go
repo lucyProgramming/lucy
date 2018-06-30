@@ -9,29 +9,23 @@ import (
 
 func (buildExpression *BuildExpression) buildTypeAssert(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	assertOn := e.Data.(*ast.ExpressionTypeAssert)
-	maxStack, _ = buildExpression.build(class, code, assertOn.Expression, context, state)
+	assert := e.Data.(*ast.ExpressionTypeAssert)
+	maxStack, _ = buildExpression.build(class, code, assert.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_instanceof
-	if assertOn.Type.Type == ast.VariableTypeObject {
-		class.InsertClassConst(assertOn.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	} else if assertOn.Type.Type == ast.VariableTypeArray { // arrays
-		meta := ArrayMetas[assertOn.Type.Array.Type]
-		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	} else {
-		class.InsertClassConst(JvmDescriptor.typeDescriptor(assertOn.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])
-	}
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
+	code.CodeLength++
+	insertTypeAssertClass(class, code, assert.Type)
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.CodeLength++
 
 	{
-		state.pushStack(class, assertOn.Expression.ExpressionValue)
+		state.pushStack(class, assert.Expression.ExpressionValue)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.popStack(2)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		state.pushStack(class, assertOn.Expression.ExpressionValue)
+		state.pushStack(class, assert.Expression.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(2)
 	}

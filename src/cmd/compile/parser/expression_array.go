@@ -26,7 +26,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			Pos:  pos,
 		}, err
 	}
-	expressionParser.Next() // skip [
+	expressionParser.Next() // skip ]
 	t, err := expressionParser.parser.parseType()
 	if err != nil {
 		return nil, err

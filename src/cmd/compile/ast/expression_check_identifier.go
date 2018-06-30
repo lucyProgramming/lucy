@@ -11,7 +11,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 			errMsgPrefix(e.Pos), NoNameIdentifier)
 	}
 	fromImport := false
-	d, err := block.searchRightValue(identifier.Name)
+	d, err := block.searchIdentifier(identifier.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 	}
@@ -19,7 +19,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
 		if i != nil {
 			fromImport = true
-			d, err = PackageBeenCompile.load(i.ImportName)
+			d, err = PackageBeenCompile.load(i.Import)
 			if err != nil {
 				return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 			}
@@ -28,13 +28,14 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 	if d == nil {
 		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifier.Name)
 	}
+
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
 		if fromImport == false && f.IsGlobal && f.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.ImportName)
+				p, err := PackageBeenCompile.load(i.Import)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -64,7 +65,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.ImportName)
+				p, err := PackageBeenCompile.load(i.Import)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -91,7 +92,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		if fromImport == false && t.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.ImportName)
+				p, err := PackageBeenCompile.load(i.Import)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -117,7 +118,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		if fromImport == false && c.IsGlobal { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.ImportName)
+				p, err := PackageBeenCompile.load(i.Import)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -139,11 +140,11 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		t.Class = c
 		return t, nil
 	case *EnumName:
-		e := d.(*EnumName)
+		enumName := d.(*EnumName)
 		if fromImport == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, e.Pos)
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.ImportName)
+				p, err := PackageBeenCompile.load(i.Import)
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
@@ -159,21 +160,48 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				return tt, nil
 			}
 		}
-		if e != nil {
+		if enumName != nil {
 			t := &Type{}
-			t.Pos = e.Pos
+			t.Pos = enumName.Pos
 			t.Type = VariableTypeEnum
-			t.EnumName = e
-			t.Enum = e.Enum
-			identifier.EnumName = e
+			t.EnumName = enumName
+			t.Enum = enumName.Enum
+			identifier.EnumName = enumName
 			return t, nil
 		}
+	case *Type:
+		typ := d.(*Type)
+		if fromImport == false { // try from import
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, typ.Pos)
+			if should {
+				p, err := PackageBeenCompile.load(i.Import)
+				if err != nil {
+					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+				}
+				tt := &Type{}
+				tt.Pos = e.Pos
+				if pp, ok := p.(*Package); ok {
+					tt.Package = pp
+					tt.Type = VariableTypePackage
+				} else {
+					tt.Class = p.(*Class)
+					tt.Type = VariableTypeObject
+				}
+				return tt, nil
+			}
+		}
+		t := &Type{}
+		t.Pos = e.Pos
+		t.Type = VariableTypeAlias
+		t.AliasType = typ
+		return t, nil
 	case *Package:
 		t := &Type{}
 		t.Pos = e.Pos
 		t.Type = VariableTypePackage
 		t.Package = d.(*Package)
 		return t, nil
+
 	}
 	return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
 		errMsgPrefix(e.Pos), identifier.Name)

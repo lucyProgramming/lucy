@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type StatementIF struct {
+type StatementIf struct {
 	PrefixExpressions []*Expression
 	Condition         *Expression
 	ConditionBlock    Block
@@ -15,7 +15,7 @@ type StatementIF struct {
 	Exits             []*cg.Exit
 }
 
-func (s *StatementIF) check(father *Block) []error {
+func (s *StatementIf) check(father *Block) []error {
 	s.ConditionBlock.inherit(father)
 	errs := []error{}
 	for _, v := range s.PrefixExpressions {

@@ -294,7 +294,7 @@ func (c *Class) resolveFather(block *Block) error {
 		if i == nil {
 			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
-		r, err := PackageBeenCompile.load(i.ImportName)
+		r, err := PackageBeenCompile.load(i.Import)
 		if err != nil {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}

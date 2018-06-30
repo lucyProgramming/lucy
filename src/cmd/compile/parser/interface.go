@@ -53,7 +53,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 	}
 	if interfaceParser.parser.token.Type == lex.TokenImplements {
 		interfaceParser.Next() // skip key word
-		interfaceParser.classDefinition.InterfaceNames, err = interfaceParser.parser.ClassParser.parseInterfaces()
+		interfaceParser.classDefinition.InterfaceNames, err = interfaceParser.parser.ClassParser.parseImplementsInterfaces()
 		if err != nil {
 			interfaceParser.consume(untilLc)
 		}

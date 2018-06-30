@@ -141,15 +141,8 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 
 	// objects
 	code.Codes[code.CodeLength] = cg.OP_checkcast
-	if conversion.Type.Type == ast.VariableTypeObject {
-		class.InsertClassConst(conversion.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	} else if conversion.Type.Type == ast.VariableTypeArray { // arrays
-		meta := ArrayMetas[conversion.Type.Array.Type]
-		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	} else {
-		class.InsertClassConst(JvmDescriptor.typeDescriptor(conversion.Type), code.Codes[code.CodeLength+1:code.CodeLength+3])
-	}
-	code.CodeLength += 3
+	code.CodeLength++
+	insertTypeAssertClass(class, code, conversion.Type)
 	return
 }
 

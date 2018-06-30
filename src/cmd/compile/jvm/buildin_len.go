@@ -16,7 +16,6 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 		maxStack = 2
 	}
 	exit := (&cg.Exit{}).FromCode(cg.OP_ifnull, code)
-	//binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 3)
 	if call.Args[0].ExpressionValue.Type == ast.VariableTypeJavaArray {
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++

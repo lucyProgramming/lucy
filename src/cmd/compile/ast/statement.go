@@ -16,7 +16,7 @@ const (
 	StatementTypeSwitch
 	StatementTypeSwitchTemplate
 	StatementTypeLabel
-	StatementTypeGoto
+	StatementTypeGoTo
 	StatementTypeDefer
 	StatementTypeClass
 	StatementTypeEnum
@@ -28,7 +28,7 @@ type Statement struct {
 	Checked                   bool // if checked
 	Pos                       *Position
 	Type                      int
-	StatementIf               *StatementIF
+	StatementIf               *StatementIf
 	Expression                *Expression
 	StatementFor              *StatementFor
 	StatementReturn           *StatementReturn
@@ -65,7 +65,7 @@ func (s *Statement) StatementName() string {
 		return "switch statement"
 	case StatementTypeLabel:
 		return "label statement"
-	case StatementTypeGoto:
+	case StatementTypeGoTo:
 		return "goto statement"
 	case StatementTypeDefer:
 		return "defer statement"
@@ -140,7 +140,7 @@ func (s *Statement) check(block *Block) []error { // block is father
 			block.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
 		}
 		return es
-	case StatementTypeGoto:
+	case StatementTypeGoTo:
 		err := s.checkStatementGoTo(block)
 		if err != nil {
 			return []error{err}

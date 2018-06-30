@@ -100,7 +100,7 @@ const (
 	TokenMap           // map
 	TokenTemplate      // T or T1
 	TokenQuestion      // ?
-	TokenVolatile      //volatile
+	TokenVolatile      // volatile
 	TokenSynchronized  // synchronized
 	TokenEof           // end of file
 	TokenGlobal        // global
