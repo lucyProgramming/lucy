@@ -790,7 +790,6 @@ redo:
 			token.Description = ":"
 			lex.unGetChar()
 		}
-
 	default:
 		err = fmt.Errorf("unkown beginning of token:%d", c)
 		return

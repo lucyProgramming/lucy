@@ -38,22 +38,22 @@ func registerBuildInFunctions() {
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionPrint,
 	}
-	catchBuildFunction := &Function{}
-	catchBuildFunction.IsBuildIn = true
-	catchBuildFunction.Name = common.BuildInFunctionCatch
-	buildInFunctionsMap[common.BuildInFunctionCatch] = catchBuildFunction
+	catch := &Function{}
+	catch.IsBuildIn = true
+	catch.Name = common.BuildInFunctionCatch
+	buildInFunctionsMap[common.BuildInFunctionCatch] = catch
 	{
-		catchBuildFunction.Type.ReturnList = make([]*Variable, 1)
-		catchBuildFunction.Type.ReturnList[0] = &Variable{}
-		catchBuildFunction.Type.ReturnList[0].Name = "returnValue"
-		catchBuildFunction.Type.ReturnList[0].Type = &Type{}
-		catchBuildFunction.Type.ReturnList[0].Type.Type = VariableTypeObject
-		catchBuildFunction.Type.ReturnList[0].Type.Class = &Class{}
-		catchBuildFunction.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
-		catchBuildFunction.Type.ReturnList[0].Type.Class.NotImportedYet = true
+		catch.Type.ReturnList = make([]*Variable, 1)
+		catch.Type.ReturnList[0] = &Variable{}
+		catch.Type.ReturnList[0].Name = "returnValue"
+		catch.Type.ReturnList[0].Type = &Type{}
+		catch.Type.ReturnList[0].Type.Type = VariableTypeObject
+		catch.Type.ReturnList[0].Type.Class = &Class{}
+		catch.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
+		catch.Type.ReturnList[0].Type.Class.NotImportedYet = true
 		//class is going to make value by checker
 	}
-	catchBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position) {
+	catch.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position) {
 		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 				errMsgPrefix(pos)))
@@ -170,24 +170,24 @@ func registerBuildInFunctions() {
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionLen,
 	}
-	lenFunction := buildInFunctionsMap[common.BuildInFunctionLen]
-	lenFunction.Type.ReturnList = make(ReturnList, 1)
-	lenFunction.Type.ReturnList[0] = &Variable{}
-	lenFunction.Type.ReturnList[0].Type = &Type{}
-	lenFunction.Type.ReturnList[0].Type.Type = VariableTypeInt
+	Len := buildInFunctionsMap[common.BuildInFunctionLen]
+	Len.Type.ReturnList = make(ReturnList, 1)
+	Len.Type.ReturnList[0] = &Variable{}
+	Len.Type.ReturnList[0].Type = &Type{}
+	Len.Type.ReturnList[0].Type.Type = VariableTypeInt
 	// sprintf
-	sprintfBuildFunction := &Function{}
-	buildInFunctionsMap[common.BuildInFunctionSprintf] = sprintfBuildFunction
-	sprintfBuildFunction.Name = common.BuildInFunctionSprintf
-	sprintfBuildFunction.IsBuildIn = true
+	sprintf := &Function{}
+	buildInFunctionsMap[common.BuildInFunctionSprintf] = sprintf
+	sprintf.Name = common.BuildInFunctionSprintf
+	sprintf.IsBuildIn = true
 	{
-		sprintfBuildFunction.Type.ReturnList = make([]*Variable, 1)
-		sprintfBuildFunction.Type.ReturnList[0] = &Variable{}
-		sprintfBuildFunction.Type.ReturnList[0].Name = "returnValue"
-		sprintfBuildFunction.Type.ReturnList[0].Type = &Type{}
-		sprintfBuildFunction.Type.ReturnList[0].Type.Type = VariableTypeString
+		sprintf.Type.ReturnList = make([]*Variable, 1)
+		sprintf.Type.ReturnList[0] = &Variable{}
+		sprintf.Type.ReturnList[0].Name = "returnValue"
+		sprintf.Type.ReturnList[0].Type = &Type{}
+		sprintf.Type.ReturnList[0].Type.Type = VariableTypeString
 	}
-	sprintfBuildFunction.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	sprintf.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*Type, pos *Position) {
 		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",

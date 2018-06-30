@@ -32,33 +32,33 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		case *Class:
 			//object cast
 			class := d.(*Class)
-			typeConversion := &ExpressionTypeConversion{}
-			typeConversion.Type = &Type{}
-			typeConversion.Type.Type = VariableTypeObject
-			typeConversion.Type.Pos = e.Pos
-			typeConversion.Type.Class = class
+			conversion := &ExpressionTypeConversion{}
+			conversion.Type = &Type{}
+			conversion.Type.Type = VariableTypeObject
+			conversion.Type.Pos = e.Pos
+			conversion.Type.Class = class
 			e.Type = ExpressionTypeCheckCast
 			if len(call.Args) >= 1 {
-				typeConversion.Expression = call.Args[0]
+				conversion.Expression = call.Args[0]
 			}
-			e.Data = typeConversion
+			e.Data = conversion
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
-				return []*Type{typeConversion.Type.Clone()}
+				return []*Type{conversion.Type.Clone()}
 			}
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
 		case *Type:
-			typeConversion := &ExpressionTypeConversion{}
-			typeConversion.Type = object.Package.Block.TypeAliases[call.Name]
+			conversion := &ExpressionTypeConversion{}
+			conversion.Type = object.Package.Block.TypeAliases[call.Name]
 			e.Type = ExpressionTypeCheckCast
 			if len(call.Args) >= 1 {
-				typeConversion.Expression = call.Args[0]
+				conversion.Expression = call.Args[0]
 			}
-			e.Data = typeConversion
+			e.Data = conversion
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 					errMsgPrefix(e.Pos)))
-				return []*Type{typeConversion.Type}
+				return []*Type{conversion.Type}
 			}
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
 		default:

@@ -54,7 +54,6 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		ret.Data = data
 		return ret, nil
 	}
-
 	arr := &ast.ExpressionArray{}
 	if t != nil {
 		arr.Type = &ast.Type{}
