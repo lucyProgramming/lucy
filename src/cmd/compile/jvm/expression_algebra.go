@@ -27,8 +27,6 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 		case ast.VariableTypeShort:
 			fallthrough
 		case ast.VariableTypeInt:
-			fallthrough
-		case ast.VariableTypeFloat:
 			if e.Type == ast.ExpressionTypeAnd {
 				code.Codes[code.CodeLength] = cg.OP_iand
 			} else if e.Type == ast.ExpressionTypeOr {
@@ -36,8 +34,6 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ixor
 			}
-		case ast.VariableTypeDouble:
-			fallthrough
 		case ast.VariableTypeLong:
 			if e.Type == ast.ExpressionTypeAnd {
 				code.Codes[code.CodeLength] = cg.OP_land
@@ -88,7 +84,6 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 				code.Codes[code.CodeLength] = cg.OP_irem
 				code.CodeLength++
 			}
-
 		case ast.VariableTypeShort:
 			switch e.Type {
 			case ast.ExpressionTypeAdd:

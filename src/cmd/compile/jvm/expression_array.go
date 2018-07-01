@@ -18,7 +18,6 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
-
 	{
 		t := &cg.StackMapVerificationTypeInfo{}
 		tt := &cg.StackMapUninitializedVariableInfo{}
@@ -26,7 +25,6 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 		t.Verify = tt
 		state.Stacks = append(state.Stacks, t, t)
 	}
-
 	loadInt32(class, code, int32(arr.Length))
 	switch e.ExpressionValue.Array.Type {
 	case ast.VariableTypeBool:
