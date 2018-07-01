@@ -33,6 +33,22 @@ public class ArrayTTT   {
 	private ArrayTTT(){
 
 	}
+	public void set(int index , TTT value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public TTT get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayTTT slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

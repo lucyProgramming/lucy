@@ -30,6 +30,22 @@ public class ArrayString   {
 	private ArrayString(){
 
 	}
+	public void set(int index , String value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public String get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayString slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

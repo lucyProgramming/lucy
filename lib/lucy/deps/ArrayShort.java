@@ -30,6 +30,22 @@ public class ArrayShort   {
 	private ArrayShort(){
 
 	}
+	public void set(int index , short value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public short get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayShort slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

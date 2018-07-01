@@ -32,6 +32,22 @@ public class ArrayObject   {
 	private ArrayObject(){
 
 	}
+	public void set(int index , Object value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public Object get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayObject slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

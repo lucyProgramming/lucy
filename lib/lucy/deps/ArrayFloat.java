@@ -30,6 +30,22 @@ public class ArrayFloat   {
 	private ArrayFloat(){
 
 	}
+	public void set(int index , float value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public float get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayFloat slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

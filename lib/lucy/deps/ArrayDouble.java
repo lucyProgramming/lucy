@@ -30,6 +30,22 @@ public class ArrayDouble   {
 	private ArrayDouble(){
 
 	}
+	public void set(int index , double value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public double get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayDouble slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

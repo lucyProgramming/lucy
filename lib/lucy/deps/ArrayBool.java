@@ -30,6 +30,22 @@ public class ArrayBool   {
 	private ArrayBool(){
 
 	}
+	public void set(int index , boolean value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public boolean get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayBool slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length

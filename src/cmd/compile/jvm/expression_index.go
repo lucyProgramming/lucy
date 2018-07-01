@@ -104,112 +104,55 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 	}
 	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.ExpressionValue)
-	currentStack := uint16(1)
-	if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
-		meta := ArrayMetas[e.ExpressionValue.Type]
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Field:      "end",
-			Descriptor: "I",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_swap
-		code.CodeLength++
-		code.Codes[code.CodeLength] = cg.OP_dup_x1
-		code.CodeLength++
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Field:      "start",
-			Descriptor: "I",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		currentStack = 3
-	}
 	stack, _ := buildExpression.build(class, code, index.Index, context, state)
-	if t := stack + currentStack; t > maxStack {
+	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}
 	if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
 		meta := ArrayMetas[e.ExpressionValue.Type]
-		// stack arrayref  end start index
-		code.Codes[code.CodeLength] = cg.OP_iadd
-		code.CodeLength++
-		code.Codes[code.CodeLength] = cg.OP_dup_x1
-		code.CodeLength++
-		{
-			state.popStack(1)
-			context.MakeStackMap(code, state, code.CodeLength+6)
-			context.MakeStackMap(code, state, code.CodeLength+16)
-		}
-		code.Codes[code.CodeLength] = cg.OP_if_icmple
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-		code.Codes[code.CodeLength+3] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 13)
-		code.Codes[code.CodeLength+6] = cg.OP_pop // incase stack over flow
-		code.Codes[code.CodeLength+7] = cg.OP_pop
-		code.Codes[code.CodeLength+8] = cg.OP_new
-		class.InsertClassConst(javaIndexOutOfRangeExceptionClass, code.Codes[code.CodeLength+9:code.CodeLength+11])
-		code.Codes[code.CodeLength+11] = cg.OP_dup
-		code.Codes[code.CodeLength+12] = cg.OP_invokespecial
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaIndexOutOfRangeExceptionClass,
-			Method:     specialMethodInit,
-			Descriptor: "()V",
-		}, code.Codes[code.CodeLength+13:code.CodeLength+15])
-		code.Codes[code.CodeLength+15] = cg.OP_athrow
-		// index not out of range
-		code.Codes[code.CodeLength+16] = cg.OP_swap
-		code.Codes[code.CodeLength+17] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      meta.className,
-			Field:      "elements",
-			Descriptor: meta.elementsFieldDescriptor,
-		}, code.Codes[code.CodeLength+18:code.CodeLength+20])
-		code.CodeLength += 20
-		code.Codes[code.CodeLength] = cg.OP_swap
+			Method:     "get",
+			Descriptor: meta.getMethodDescription,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VariableTypeString {
+			typeConverter.castPointerTypeToRealType(class, code, e.ExpressionValue)
+		}
+	} else {
+		switch e.ExpressionValue.Type {
+		case ast.VariableTypeBool:
+			fallthrough
+		case ast.VariableTypeByte:
+			code.Codes[code.CodeLength] = cg.OP_baload
+		case ast.VariableTypeShort:
+			code.Codes[code.CodeLength] = cg.OP_saload
+		case ast.VariableTypeEnum:
+			fallthrough
+		case ast.VariableTypeInt:
+			code.Codes[code.CodeLength] = cg.OP_iaload
+		case ast.VariableTypeLong:
+			code.Codes[code.CodeLength] = cg.OP_laload
+		case ast.VariableTypeFloat:
+			code.Codes[code.CodeLength] = cg.OP_faload
+		case ast.VariableTypeDouble:
+			code.Codes[code.CodeLength] = cg.OP_daload
+		case ast.VariableTypeString:
+			fallthrough
+		case ast.VariableTypeObject:
+			fallthrough
+		case ast.VariableTypeMap:
+			fallthrough
+		case ast.VariableTypeArray:
+			fallthrough
+		case ast.VariableTypeFunction:
+			fallthrough
+		case ast.VariableTypeJavaArray:
+			code.Codes[code.CodeLength] = cg.OP_aaload
+		}
 		code.CodeLength++
 	}
-	switch e.ExpressionValue.Type {
-	case ast.VariableTypeBool:
-		fallthrough
-	case ast.VariableTypeByte:
-		code.Codes[code.CodeLength] = cg.OP_baload
-	case ast.VariableTypeShort:
-		code.Codes[code.CodeLength] = cg.OP_saload
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeInt:
-		code.Codes[code.CodeLength] = cg.OP_iaload
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_laload
-	case ast.VariableTypeFloat:
-		code.Codes[code.CodeLength] = cg.OP_faload
-	case ast.VariableTypeDouble:
-		code.Codes[code.CodeLength] = cg.OP_daload
-	case ast.VariableTypeString:
-		fallthrough
-	case ast.VariableTypeObject:
-		fallthrough
-	case ast.VariableTypeMap:
-		fallthrough
-	case ast.VariableTypeArray:
-		fallthrough
-	case ast.VariableTypeFunction:
-		fallthrough
-	case ast.VariableTypeJavaArray:
-		code.Codes[code.CodeLength] = cg.OP_aaload
 
-	}
-	code.CodeLength++
-	if index.Expression.Type == ast.VariableTypeArray &&
-		e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VariableTypeString {
-		typeConverter.castPointerTypeToRealType(class, code, e.ExpressionValue)
-	}
 	return
 }

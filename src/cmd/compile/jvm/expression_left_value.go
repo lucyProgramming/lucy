@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -179,112 +177,24 @@ func (buildExpression *BuildExpression) getLeftValue(
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
-			meta := ArrayMetas[index.Expression.ExpressionValue.Array.Type]
 			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.ExpressionValue)
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      meta.className,
-				Field:      "end",
-				Descriptor: "I",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_swap
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_dup_x1
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      meta.className,
-				Field:      "start",
-				Descriptor: "I",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-
 			stack, _ := buildExpression.build(class, code, index.Index, context, state)
-			if t := stack + 3; t > maxStack {
+			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
-			code.Codes[code.CodeLength] = cg.OP_iadd
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_dup_x1
-			code.CodeLength++
-			{
-				state.popStack(3)
-				state.pushStack(class, state.newObjectVariableType(meta.className))
-				state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-				context.MakeStackMap(code, state, code.CodeLength+6)
-				context.MakeStackMap(code, state, code.CodeLength+16)
-				state.popStack(2)
-			}
-			code.Codes[code.CodeLength] = cg.OP_if_icmple
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-			code.Codes[code.CodeLength+3] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 13)
-			code.Codes[code.CodeLength+6] = cg.OP_pop // incase stack over flow
-			code.Codes[code.CodeLength+7] = cg.OP_pop
-			code.Codes[code.CodeLength+8] = cg.OP_new
-			class.InsertClassConst(javaIndexOutOfRangeExceptionClass, code.Codes[code.CodeLength+9:code.CodeLength+11])
-			code.Codes[code.CodeLength+11] = cg.OP_dup
-			code.Codes[code.CodeLength+12] = cg.OP_invokespecial
+			meta := ArrayMetas[index.Expression.ExpressionValue.Array.Type]
+			op = make([]byte, 3)
+			op[0] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      javaIndexOutOfRangeExceptionClass,
-				Method:     specialMethodInit,
-				Descriptor: "()V",
-			}, code.Codes[code.CodeLength+13:code.CodeLength+15])
-			code.Codes[code.CodeLength+15] = cg.OP_athrow
-			// index not out of range
-			code.Codes[code.CodeLength+16] = cg.OP_swap
-			code.Codes[code.CodeLength+17] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      meta.className,
-				Field:      "elements",
-				Descriptor: meta.elementsFieldDescriptor,
-			}, code.Codes[code.CodeLength+18:code.CodeLength+20])
-			code.CodeLength += 20
-			code.Codes[code.CodeLength] = cg.OP_swap
-			code.CodeLength++
-			{
-				t := &ast.Type{}
-				t.Type = ast.VariableTypeJavaArray
-				t.Array = index.Expression.ExpressionValue.Array
-				state.pushStack(class, t)
-				state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-			}
-			switch e.ExpressionValue.Type {
-			case ast.VariableTypeBool:
-				op = []byte{cg.OP_bastore}
-			case ast.VariableTypeByte:
-				op = []byte{cg.OP_bastore}
-			case ast.VariableTypeShort:
-				op = []byte{cg.OP_sastore}
-			case ast.VariableTypeEnum:
-				fallthrough
-			case ast.VariableTypeInt:
-				op = []byte{cg.OP_iastore}
-			case ast.VariableTypeLong:
-				op = []byte{cg.OP_lastore}
-			case ast.VariableTypeFloat:
-				op = []byte{cg.OP_fastore}
-			case ast.VariableTypeDouble:
-				op = []byte{cg.OP_dastore}
-			case ast.VariableTypeFunction:
-				fallthrough
-			case ast.VariableTypeString:
-				fallthrough
-			case ast.VariableTypeObject:
-				fallthrough
-			case ast.VariableTypeMap:
-				fallthrough
-			case ast.VariableTypeArray:
-				fallthrough
-			case ast.VariableTypeJavaArray:
-				op = []byte{cg.OP_aastore}
-			}
+				Method:     "set",
+				Descriptor: meta.setMethodDescription,
+			}, op[1:3])
+			state.pushStack(class, &ast.Type{
+				Type: ast.VariableTypeInt,
+			})
+			className = meta.className
 			remainStack = 2 // [arrayref ,index]
 			target = e.ExpressionValue
 		} else if index.Expression.ExpressionValue.Type == ast.VariableTypeMap { // map

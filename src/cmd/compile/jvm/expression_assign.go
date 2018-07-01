@@ -115,6 +115,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		code.CodeLength++
 		return
 	}
+
 	if op[0] == cg.OP_putfield {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
@@ -126,6 +127,13 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		code.CodeLength++
 		return
 	}
+	isLucyArray := false
+	for _, v := range ArrayMetas {
+		if v.className == className {
+			isLucyArray = true
+			break
+		}
+	}
 	if op[0] == cg.OP_iastore ||
 		op[0] == cg.OP_lastore ||
 		op[0] == cg.OP_fastore ||
@@ -133,7 +141,8 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		op[0] == cg.OP_aastore ||
 		op[0] == cg.OP_bastore ||
 		op[0] == cg.OP_castore ||
-		op[0] == cg.OP_sastore {
+		op[0] == cg.OP_sastore ||
+		isLucyArray {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2

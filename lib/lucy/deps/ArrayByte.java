@@ -30,6 +30,22 @@ public class ArrayByte   {
 	private ArrayByte(){
 
 	}
+	public void set(int index , byte value) {
+		index += this.start ; 
+		if (index >= this.end ){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		this.elements[index] = value ; 
+	}
+	public byte get(int index) {
+		index += this.start ; 
+		if (index >= this.end){
+			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+		}
+		return this.elements[index]  ; 
+	}	
+
+
 	public ArrayByte slice(int start,int end){
 		if(end  < 0 ){
 		      end = this.end - this.start;  // whole length
