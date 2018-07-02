@@ -89,9 +89,10 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 	case lex.TokenIdentifier:
 		ret, err = parser.parseIdentifierType()
-	case lex.TokenMap:
-
-		parser.Next() // skip map key word
+	case lex.TokenMap, lex.TokenLc:
+		if parser.token.Type == lex.TokenMap {
+			parser.Next() // skip map key word
+		}
 		if parser.token.Type != lex.TokenLc {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description)

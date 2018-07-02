@@ -39,8 +39,6 @@ func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 	p := &Parser{}
 	p.filename = pos.Filename
 	p.nErrors2Stop = 10
-	tops := []*ast.Top{}
-	p.tops = &tops
 	p.bs = bs
 	p.FunctionParser = &FunctionParser{
 		parser: p,
@@ -67,7 +65,7 @@ func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 }
 
 var (
-	nameIndex int = 1
+	nameIndex = 1
 )
 
 func compileAutoName() string {

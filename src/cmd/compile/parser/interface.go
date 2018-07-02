@@ -10,7 +10,7 @@ import (
 
 type InterfaceParser struct {
 	parser             *Parser
-	classDefinition    *ast.Class
+	ret                *ast.Class
 	isStatic           bool
 	accessControlToken *lex.Token
 }
@@ -25,26 +25,25 @@ func (interfaceParser *InterfaceParser) consume(m map[int]bool) {
 
 func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 	interfaceParser.Next() // skip interface key word
-	classDefinition = &ast.Class{}
-	interfaceParser.classDefinition = classDefinition
-	interfaceParser.classDefinition.Pos = interfaceParser.parser.mkPos()
-	interfaceParser.classDefinition.Block.IsClassBlock = true
-	interfaceParser.classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
-	interfaceParser.classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
-	interfaceParser.classDefinition.Name, err = interfaceParser.parser.ClassParser.parseClassName()
+	interfaceParser.ret = &ast.Class{}
+	interfaceParser.ret.Pos = interfaceParser.parser.mkPos()
+	interfaceParser.ret.Block.IsClassBlock = true
+	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
+	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+	interfaceParser.ret.Name, err = interfaceParser.parser.ClassParser.parseClassName()
 	if err != nil {
 		return nil, err
 	}
 	if interfaceParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		interfaceParser.Next() // skip extends
-		interfaceParser.classDefinition.Pos = interfaceParser.parser.mkPos()
+		interfaceParser.ret.Pos = interfaceParser.parser.mkPos()
 		if interfaceParser.parser.token.Type != lex.TokenIdentifier {
 			err = fmt.Errorf("%s class`s father must be a identifier", interfaceParser.parser.errorMsgPrefix())
 			interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
 			interfaceParser.consume(untilLc) //
 		} else {
 			t, err := interfaceParser.parser.ClassParser.parseClassName()
-			interfaceParser.classDefinition.SuperClassName = t
+			interfaceParser.ret.SuperClassName = t
 			if err != nil {
 				interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
 				return nil, err
@@ -53,7 +52,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 	}
 	if interfaceParser.parser.token.Type == lex.TokenImplements {
 		interfaceParser.Next() // skip key word
-		interfaceParser.classDefinition.InterfaceNames, err = interfaceParser.parser.ClassParser.parseImplementsInterfaces()
+		interfaceParser.ret.InterfaceNames, err = interfaceParser.parser.ClassParser.parseImplementsInterfaces()
 		if err != nil {
 			interfaceParser.consume(untilLc)
 		}
@@ -93,18 +92,18 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 				interfaceParser.Next()
 				continue
 			}
-			if interfaceParser.classDefinition.Methods == nil {
-				interfaceParser.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
+			if interfaceParser.ret.Methods == nil {
+				interfaceParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			m := &ast.ClassMethod{}
 			m.Function = &ast.Function{}
 			m.Function.Name = name
 			m.Function.Type = functionType
 			m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
-			if interfaceParser.classDefinition.Methods == nil {
-				interfaceParser.classDefinition.Methods = make(map[string][]*ast.ClassMethod)
+			if interfaceParser.ret.Methods == nil {
+				interfaceParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
-			interfaceParser.classDefinition.Methods[m.Function.Name] = append(interfaceParser.classDefinition.Methods[m.Function.Name], m)
+			interfaceParser.ret.Methods[m.Function.Name] = append(interfaceParser.ret.Methods[m.Function.Name], m)
 		default:
 			interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s unexpect token:%s", interfaceParser.parser.errorMsgPrefix(),
 				interfaceParser.parser.token.Description))

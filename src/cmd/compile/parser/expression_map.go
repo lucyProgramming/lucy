@@ -50,7 +50,8 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 			Right: v,
 		})
 		if expressionParser.parser.token.Type == lex.TokenComma {
-			expressionParser.Next() // read next  key value pair
+			// read next  key value pair
+			expressionParser.Next()
 		} else {
 			break
 		}

@@ -26,7 +26,7 @@ func (parser *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 			// not a ,
 			break
 		}
-		parser.Next()
+		parser.Next() // skip comma
 		if parser.token.Type != lex.TokenIdentifier {
 			err = fmt.Errorf("%s not a 'identifier' after a comma,but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description)

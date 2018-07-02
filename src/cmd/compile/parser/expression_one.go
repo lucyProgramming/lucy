@@ -290,7 +290,6 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		return nil, err
 	}
-
 	for expressionParser.parser.token.Type == lex.TokenIncrement ||
 		expressionParser.parser.token.Type == lex.TokenDecrement ||
 		expressionParser.parser.token.Type == lex.TokenLp ||
