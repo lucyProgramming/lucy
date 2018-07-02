@@ -68,7 +68,6 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 			return true
 		}
 	}
-
 	return false
 }
 
@@ -104,6 +103,9 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	case VariableTypeDouble:
 		e.Type = ExpressionTypeDouble
 		e.Data = float64(0)
+	case VariableTypeEnum:
+		e.Type = ExpressionTypeInt
+		e.Data = typ.Enum.Enums[0].Value
 	case VariableTypeFunction:
 		fallthrough
 	case VariableTypeString:
@@ -116,9 +118,6 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 		fallthrough
 	case VariableTypeArray:
 		e.Type = ExpressionTypeNull
-	case VariableTypeEnum:
-		e.Type = ExpressionTypeInt
-		e.Data = typ.Enum.Enums[0].Value
 	}
 	return &e
 }

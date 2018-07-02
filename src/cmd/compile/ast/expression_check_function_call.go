@@ -240,7 +240,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	ret = call.TemplateFunctionCallPair.Function
 	// when all ok ,ret is not a template function any more
 	if len(tps) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s to many typed parameter to call template function",
+		*errs = append(*errs, fmt.Errorf("%s to many parameter type  to call template function",
 			errMsgPrefix(e.Pos)))
 	}
 	return ret

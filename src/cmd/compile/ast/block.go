@@ -125,7 +125,7 @@ func (b *Block) searchType(name string) interface{} {
 }
 
 /*
-	search rightValue
+	search identifier
 */
 func (b *Block) searchIdentifier(name string) (interface{}, error) {
 	if b.Functions != nil {
