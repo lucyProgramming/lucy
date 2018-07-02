@@ -37,6 +37,7 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	}
 	return JvmDescriptor.typeDescriptor(variableType)
 }
+
 func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error) {
 	var err error
 	if bs[0] == 'M' {

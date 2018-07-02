@@ -12,6 +12,16 @@ var (
 )
 
 const (
+	_ = iota
+	LeftValueTypeLucyArray
+	LeftValueTypeMap
+	LeftValueTypeStoreLocalVar
+	LeftValueTypePutStatic
+	LeftValueTypePutField
+	LeftValueTypeArray
+)
+
+const (
 	specialMethodInit                 = "<init>"
 	javaRootObjectArray               = "[Ljava/lang/Object;"
 	javaStringClass                   = "java/lang/String"

@@ -70,7 +70,6 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel
 			Descriptor: "()J",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(javaFloatClass, code.Codes[code.CodeLength+1:code.CodeLength+3])

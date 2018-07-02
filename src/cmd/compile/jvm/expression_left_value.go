@@ -8,11 +8,10 @@ import (
 func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
-	maxStack, remainStack uint16, op []byte,
-	target *ast.Type, className, fieldName, fieldDescriptor string) {
+	maxStack, remainStack uint16, ops []byte,
+	target *ast.Type, leftValueType int) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	target = identifier.Variable.Type
-	op = []byte{cg.OP_putfield}
 	meta := closure.getMeta(identifier.Variable.Type.Type)
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
@@ -29,17 +28,22 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	state.pushStack(class, state.newObjectVariableType(meta.className))
 	maxStack = 1
 	remainStack = 1
-	className = meta.className
-	fieldName = meta.fieldName
-	fieldDescriptor = meta.fieldDescriptor
+	ops = make([]byte, 3)
+	ops[0] = cg.OP_putfield
+	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		Class:      meta.className,
+		Field:      meta.fieldName,
+		Descriptor: meta.fieldDescriptor,
+	}, ops[1:3])
+	leftValueType = LeftValueTypePutField
 	return
 }
 
 func (buildExpression *BuildExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
-	maxStack, remainStack uint16, op []byte,
-	target *ast.Type, className, name, descriptor string) {
+	maxStack, remainStack uint16, ops []byte,
+	target *ast.Type, leftValueType int) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaMapClass))
@@ -52,9 +56,9 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	}
 	state.pushStack(class, state.newObjectVariableType(javaRootClass))
 	remainStack = 2
-	op = []byte{}
+	ops = []byte{}
 	if index.Expression.ExpressionValue.Map.Value.IsPointer() == false {
-		op = append(op,
+		ops = append(ops,
 			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.Value)...)
 	}
 	bs4 := make([]byte, 4)
@@ -65,26 +69,30 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
-	op = append(op, bs4...)
+	ops = append(ops, bs4...)
 	target = index.Expression.ExpressionValue.Map.Value
-	className = javaMapClass
+	leftValueType = LeftValueTypeMap
 	return
 }
 
 func (buildExpression *BuildExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
-	maxStack, remainStack uint16, op []byte,
-	target *ast.Type, className, name, descriptor string) {
+	maxStack, remainStack uint16, ops []byte,
+	target *ast.Type, leftValueType int) {
 	switch e.Type {
 	case ast.ExpressionTypeIdentifier:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
 		if identifier.Variable.IsGlobal {
-			op = []byte{cg.OP_putstatic}
+			ops = make([]byte, 3)
+			leftValueType = LeftValueTypePutStatic
+			ops[0] = cg.OP_putstatic
 			target = identifier.Variable.Type
-			className = buildExpression.BuildPackage.mainClass.Name
-			name = identifier.Name
-			descriptor = JvmDescriptor.typeDescriptor(identifier.Variable.Type)
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      buildExpression.BuildPackage.mainClass.Name,
+				Field:      identifier.Name,
+				Descriptor: JvmDescriptor.typeDescriptor(identifier.Variable.Type),
+			}, ops[1:3])
 			return
 		}
 		if identifier.Variable.BeenCaptured {
@@ -93,6 +101,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 		if identifier.Name == ast.NoNameIdentifier {
 			panic("this is not happening")
 		}
+		leftValueType = LeftValueTypeStoreLocalVar
 		switch identifier.Variable.Type.Type {
 		case ast.VariableTypeBool:
 			fallthrough
@@ -104,71 +113,71 @@ func (buildExpression *BuildExpression) getLeftValue(
 			fallthrough
 		case ast.VariableTypeInt:
 			if identifier.Variable.LocalValOffset == 0 {
-				op = []byte{cg.OP_istore_0}
+				ops = []byte{cg.OP_istore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
-				op = []byte{cg.OP_istore_1}
+				ops = []byte{cg.OP_istore_1}
 			} else if identifier.Variable.LocalValOffset == 2 {
-				op = []byte{cg.OP_istore_2}
+				ops = []byte{cg.OP_istore_2}
 			} else if identifier.Variable.LocalValOffset == 3 {
-				op = []byte{cg.OP_istore_3}
+				ops = []byte{cg.OP_istore_3}
 			} else if identifier.Variable.LocalValOffset <= 255 {
-				op = []byte{cg.OP_istore, byte(identifier.Variable.LocalValOffset)}
+				ops = []byte{cg.OP_istore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		case ast.VariableTypeFloat:
 			if identifier.Variable.LocalValOffset == 0 {
-				op = []byte{cg.OP_fstore_0}
+				ops = []byte{cg.OP_fstore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
-				op = []byte{cg.OP_fstore_1}
+				ops = []byte{cg.OP_fstore_1}
 			} else if identifier.Variable.LocalValOffset == 2 {
-				op = []byte{cg.OP_fstore_2}
+				ops = []byte{cg.OP_fstore_2}
 			} else if identifier.Variable.LocalValOffset == 3 {
-				op = []byte{cg.OP_fstore_3}
+				ops = []byte{cg.OP_fstore_3}
 			} else if identifier.Variable.LocalValOffset <= 255 {
-				op = []byte{cg.OP_fstore, byte(identifier.Variable.LocalValOffset)}
+				ops = []byte{cg.OP_fstore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		case ast.VariableTypeDouble:
 			if identifier.Variable.LocalValOffset == 0 {
-				op = []byte{cg.OP_dstore_0}
+				ops = []byte{cg.OP_dstore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
-				op = []byte{cg.OP_dstore_1}
+				ops = []byte{cg.OP_dstore_1}
 			} else if identifier.Variable.LocalValOffset == 2 {
-				op = []byte{cg.OP_dstore_2}
+				ops = []byte{cg.OP_dstore_2}
 			} else if identifier.Variable.LocalValOffset == 3 {
-				op = []byte{cg.OP_dstore_3}
+				ops = []byte{cg.OP_dstore_3}
 			} else if identifier.Variable.LocalValOffset <= 255 {
-				op = []byte{cg.OP_dstore, byte(identifier.Variable.LocalValOffset)}
+				ops = []byte{cg.OP_dstore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		case ast.VariableTypeLong:
 			if identifier.Variable.LocalValOffset == 0 {
-				op = []byte{cg.OP_lstore_0}
+				ops = []byte{cg.OP_lstore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
-				op = []byte{cg.OP_lstore_1}
+				ops = []byte{cg.OP_lstore_1}
 			} else if identifier.Variable.LocalValOffset == 2 {
-				op = []byte{cg.OP_lstore_2}
+				ops = []byte{cg.OP_lstore_2}
 			} else if identifier.Variable.LocalValOffset == 3 {
-				op = []byte{cg.OP_lstore_3}
+				ops = []byte{cg.OP_lstore_3}
 			} else if identifier.Variable.LocalValOffset <= 255 {
-				op = []byte{cg.OP_lstore, byte(identifier.Variable.LocalValOffset)}
+				ops = []byte{cg.OP_lstore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
 		default: // must be a object type
 			if identifier.Variable.LocalValOffset == 0 {
-				op = []byte{cg.OP_astore_0}
+				ops = []byte{cg.OP_astore_0}
 			} else if identifier.Variable.LocalValOffset == 1 {
-				op = []byte{cg.OP_astore_1}
+				ops = []byte{cg.OP_astore_1}
 			} else if identifier.Variable.LocalValOffset == 2 {
-				op = []byte{cg.OP_astore_2}
+				ops = []byte{cg.OP_astore_2}
 			} else if identifier.Variable.LocalValOffset == 3 {
-				op = []byte{cg.OP_astore_3}
+				ops = []byte{cg.OP_astore_3}
 			} else if identifier.Variable.LocalValOffset <= 255 {
-				op = []byte{cg.OP_astore, byte(identifier.Variable.LocalValOffset)}
+				ops = []byte{cg.OP_astore, byte(identifier.Variable.LocalValOffset)}
 			} else {
 				panic("over 255")
 			}
@@ -184,17 +193,17 @@ func (buildExpression *BuildExpression) getLeftValue(
 				maxStack = t
 			}
 			meta := ArrayMetas[index.Expression.ExpressionValue.Array.Type]
-			op = make([]byte, 3)
-			op[0] = cg.OP_invokevirtual
+			ops = make([]byte, 3)
+			ops[0] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      meta.className,
 				Method:     "set",
 				Descriptor: meta.setMethodDescription,
-			}, op[1:3])
+			}, ops[1:3])
 			state.pushStack(class, &ast.Type{
 				Type: ast.VariableTypeInt,
 			})
-			className = meta.className
+			leftValueType = LeftValueTypeLucyArray
 			remainStack = 2 // [arrayref ,index]
 			target = e.ExpressionValue
 		} else if index.Expression.ExpressionValue.Type == ast.VariableTypeMap { // map
@@ -211,21 +220,21 @@ func (buildExpression *BuildExpression) getLeftValue(
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			switch e.ExpressionValue.Type {
 			case ast.VariableTypeBool:
-				op = []byte{cg.OP_bastore}
+				ops = []byte{cg.OP_bastore}
 			case ast.VariableTypeByte:
-				op = []byte{cg.OP_bastore}
+				ops = []byte{cg.OP_bastore}
 			case ast.VariableTypeShort:
-				op = []byte{cg.OP_sastore}
+				ops = []byte{cg.OP_sastore}
 			case ast.VariableTypeEnum:
 				fallthrough
 			case ast.VariableTypeInt:
-				op = []byte{cg.OP_iastore}
+				ops = []byte{cg.OP_iastore}
 			case ast.VariableTypeLong:
-				op = []byte{cg.OP_lastore}
+				ops = []byte{cg.OP_lastore}
 			case ast.VariableTypeFloat:
-				op = []byte{cg.OP_fastore}
+				ops = []byte{cg.OP_fastore}
 			case ast.VariableTypeDouble:
-				op = []byte{cg.OP_dastore}
+				ops = []byte{cg.OP_dastore}
 			case ast.VariableTypeFunction:
 				fallthrough
 			case ast.VariableTypeString:
@@ -237,39 +246,45 @@ func (buildExpression *BuildExpression) getLeftValue(
 			case ast.VariableTypeArray:
 				fallthrough
 			case ast.VariableTypeJavaArray:
-				op = []byte{cg.OP_aastore}
+				ops = []byte{cg.OP_aastore}
 			}
+			leftValueType = LeftValueTypeArray
 			return
 		}
 	case ast.ExpressionTypeSelection:
 		selection := e.Data.(*ast.ExpressionSelection)
 		if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
-			op = []byte{cg.OP_putstatic}
+			ops = make([]byte, 3)
+			ops[0] = cg.OP_putstatic
 			target = selection.PackageVariable.Type
-			className = selection.Expression.ExpressionValue.Package.Name + "/main"
-			name = selection.PackageVariable.Name
-			if selection.PackageVariable.JvmDescriptor == "" {
-				selection.PackageVariable.JvmDescriptor = JvmDescriptor.typeDescriptor(e.ExpressionValue)
-			}
-			descriptor = selection.PackageVariable.JvmDescriptor
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      selection.Expression.ExpressionValue.Package.Name + "/main",
+				Field:      selection.PackageVariable.Name,
+				Descriptor: selection.PackageVariable.JvmDescriptor,
+			}, ops[1:3])
 			maxStack = 0
+			leftValueType = LeftValueTypePutStatic
 			remainStack = 0
 		} else {
-			className = selection.Expression.ExpressionValue.Class.Name
 			target = selection.Field.Variable.Type
-			name = selection.Name
-			if selection.Field.LoadFromOutSide {
-				descriptor = selection.Field.JvmDescriptor
-			} else {
-				descriptor = JvmDescriptor.typeDescriptor(target)
+			ops = make([]byte, 3)
+			if selection.Field.JvmDescriptor == "" {
+				selection.Field.JvmDescriptor = JvmDescriptor.typeDescriptor(target)
 			}
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      selection.Expression.ExpressionValue.Class.Name,
+				Field:      selection.Name,
+				Descriptor: selection.Field.JvmDescriptor,
+			}, ops[1:3])
 			if selection.Field.IsStatic() {
-				op = []byte{cg.OP_putstatic}
+				leftValueType = LeftValueTypePutStatic
+				ops[0] = cg.OP_putstatic
 			} else {
+				leftValueType = LeftValueTypePutField
+				ops[0] = cg.OP_putfield
 				maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, selection.Expression.ExpressionValue)
-				op = []byte{cg.OP_putfield}
 			}
 		}
 	}

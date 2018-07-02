@@ -216,7 +216,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	} else { // for k,v  = range xxx
 		// store v
 		stackLength := len(blockState.Stacks)
-		stack, remainStack, op, _, className, name, descriptor :=
+		stack, remainStack, op, _, _ :=
 			buildPackage.BuildExpression.getLeftValue(class, code, s.RangeAttr.ExpressionValue, context, blockState)
 		if stack > maxStack { // this means  current stack is 0
 			maxStack = stack
@@ -226,11 +226,11 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Value); t > maxStack {
 			maxStack = t
 		}
-		copyLeftValueOps(class, code, op, className, name, descriptor)
+		copyOPs(code, op...)
 		forState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil {
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, op, _, className, name, descriptor :=
+			stack, remainStack, op, _, _ :=
 				buildPackage.BuildExpression.getLeftValue(class, code, s.RangeAttr.ExpressionKey, context, blockState)
 			if stack > maxStack { // this means  current stack is 0
 				maxStack = stack
@@ -240,7 +240,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Key); t > maxStack {
 				maxStack = t
 			}
-			copyLeftValueOps(class, code, op, className, name, descriptor)
+			copyOPs(code, op...)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
 	}

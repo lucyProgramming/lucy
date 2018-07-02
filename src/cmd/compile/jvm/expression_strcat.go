@@ -35,7 +35,8 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := currentStack + buildExpression.stackTop2String(class, code, e.Left.ExpressionValue, context, state); t > maxStack {
+	if t := currentStack +
+		buildExpression.stackTop2String(class, code, e.Left.ExpressionValue, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

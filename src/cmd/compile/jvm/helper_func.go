@@ -28,24 +28,6 @@ func copyOPs(code *cg.AttributeCode, op ...byte) {
 	code.CodeLength += len(op)
 }
 
-func copyLeftValueOps(class *cg.ClassHighLevel, code *cg.AttributeCode, ops []byte, className,
-	name, descriptor string) {
-	if len(ops) == 0 {
-		return
-	}
-	code.Codes[code.CodeLength] = ops[0]
-	code.CodeLength++
-	if ops[0] == cg.OP_putstatic || ops[0] == cg.OP_putfield {
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      className,
-			Field:      name,
-			Descriptor: descriptor,
-		}, code.Codes[code.CodeLength:code.CodeLength+2])
-		code.CodeLength += 2
-	}
-	copyOPs(code, ops[1:]...)
-}
-
 func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	switch value {
 	case -1:

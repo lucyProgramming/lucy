@@ -86,7 +86,6 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 			code.CodeLength += 3
 		}
 		return
-
 	}
 	if selection.Expression.ExpressionValue.Type == ast.VariableTypeClass {
 		maxStack = jvmSlotSize(e.ExpressionValue)

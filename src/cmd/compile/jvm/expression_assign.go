@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxStack, remainStack, op, target, className, name, descriptor := buildExpression.getLeftValue(class, code, left, context, state)
+	maxStack, remainStack, op, target, className := buildExpression.getLeftValue(class, code, left, context, state)
 	stack, es := buildExpression.build(class, code, right, context, state)
 	if len(es) > 0 {
 		state.pushStack(class, right.ExpressionValue)
@@ -26,12 +26,12 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	}
 	currentStack := remainStack + jvmSlotSize(target)
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, op, className, target)
+		currentStack += buildExpression.controlStack2FitAssign(code, className, target)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
 	}
-	copyLeftValueOps(class, code, op, className, name, descriptor)
+	copyOPs(code, op...)
 	return
 }
 
@@ -52,7 +52,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	multiValuePacker.storeMultiValueAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
-		stack, remainStack, op, target, className, name, descriptor :=
+		stack, remainStack, op, target, _ :=
 			buildExpression.getLeftValue(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
@@ -61,39 +61,18 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}
-		copyLeftValueOps(class, code, op, className, name, descriptor)
+		copyOPs(code, op...)
 		state.popStack(len(state.Stacks) - stackLength)
 	}
 	return
 }
 
-func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, op []byte, className string,
+func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, leftValueKind int,
 	stackTopType *ast.Type) (increment uint16) {
-	if op[0] == cg.OP_istore ||
-		op[0] == cg.OP_lstore ||
-		op[0] == cg.OP_fstore ||
-		op[0] == cg.OP_dstore ||
-		op[0] == cg.OP_astore ||
-		op[0] == cg.OP_istore_0 ||
-		op[0] == cg.OP_istore_1 ||
-		op[0] == cg.OP_istore_2 ||
-		op[0] == cg.OP_istore_3 ||
-		op[0] == cg.OP_lstore_0 ||
-		op[0] == cg.OP_lstore_1 ||
-		op[0] == cg.OP_lstore_2 ||
-		op[0] == cg.OP_lstore_3 ||
-		op[0] == cg.OP_fstore_0 ||
-		op[0] == cg.OP_fstore_1 ||
-		op[0] == cg.OP_fstore_2 ||
-		op[0] == cg.OP_fstore_3 ||
-		op[0] == cg.OP_dstore_0 ||
-		op[0] == cg.OP_dstore_1 ||
-		op[0] == cg.OP_dstore_2 ||
-		op[0] == cg.OP_dstore_3 ||
-		op[0] == cg.OP_astore_0 ||
-		op[0] == cg.OP_astore_1 ||
-		op[0] == cg.OP_astore_2 ||
-		op[0] == cg.OP_astore_3 {
+	if leftValueKind == 0 {
+		panic("missing  assign")
+	}
+	if leftValueKind == LeftValueTypeStoreLocalVar {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -104,7 +83,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		code.CodeLength++
 		return
 	}
-	if op[0] == cg.OP_putstatic {
+	if leftValueKind == LeftValueTypePutStatic {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -116,7 +95,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		return
 	}
 
-	if op[0] == cg.OP_putfield {
+	if leftValueKind == LeftValueTypePutField {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
@@ -127,22 +106,8 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		code.CodeLength++
 		return
 	}
-	isLucyArray := false
-	for _, v := range ArrayMetas {
-		if v.className == className {
-			isLucyArray = true
-			break
-		}
-	}
-	if op[0] == cg.OP_iastore ||
-		op[0] == cg.OP_lastore ||
-		op[0] == cg.OP_fastore ||
-		op[0] == cg.OP_dastore ||
-		op[0] == cg.OP_aastore ||
-		op[0] == cg.OP_bastore ||
-		op[0] == cg.OP_castore ||
-		op[0] == cg.OP_sastore ||
-		isLucyArray {
+
+	if leftValueKind == LeftValueTypeArray || leftValueKind == LeftValueTypeLucyArray {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2
@@ -154,11 +119,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 		}
 		return
 	}
-	/*
-		it is a flag indicate  map destination
-		stack are ... mapRef kRef
-	*/
-	if className == javaMapClass {
+	if leftValueKind == LeftValueTypeMap {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2

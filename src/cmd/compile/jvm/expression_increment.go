@@ -43,7 +43,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	maxStack, remainStack, op, _, className, name, descriptor := buildExpression.getLeftValue(class, code, ee, context, state)
+	maxStack, remainStack, op, _, leftValueKind := buildExpression.getLeftValue(class, code, ee, context, state)
 	/*
 		left value must can be used as right value
 	*/
@@ -54,7 +54,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	currentStack := jvmSlotSize(ee.ExpressionValue) + remainStack
 	if e.IsStatementExpression == false {
 		if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-			currentStack += buildExpression.controlStack2FitAssign(code, op, className, e.ExpressionValue)
+			currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, e.ExpressionValue)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
@@ -142,13 +142,13 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	if e.IsStatementExpression == false {
 		if e.Type == ast.ExpressionTypePrefixIncrement ||
 			e.Type == ast.ExpressionTypePrefixDecrement {
-			currentStack += buildExpression.controlStack2FitAssign(code, op, className, e.ExpressionValue)
+			currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, e.ExpressionValue)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
 		}
 	}
 	//copy op
-	copyLeftValueOps(class, code, op, className, name, descriptor)
+	copyOPs(code, op...)
 	return
 }

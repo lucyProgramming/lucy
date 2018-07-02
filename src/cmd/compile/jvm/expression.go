@@ -187,7 +187,6 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 		maxStack = buildExpression.BuildPackage.buildFunctionExpression(class, code, e, context, state)
 	case ast.ExpressionTypeCheckCast: // []byte(str)
 		maxStack = buildExpression.buildTypeConversion(class, code, e, context, state)
-
 	case ast.ExpressionTypeConst: // const will analyse at ast stage
 	case ast.ExpressionTypeSlice:
 		maxStack = buildExpression.buildSlice(class, code, e, context, state)
