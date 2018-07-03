@@ -102,8 +102,8 @@ const (
 	TokenQuestion      // ?
 	TokenVolatile      // volatile
 	TokenSynchronized  // synchronized
-	TokenEof           // end of file
 	TokenGlobal        // global
+	TokenEof           // end of file
 )
 
 var (
@@ -157,7 +157,7 @@ var (
 )
 
 type Token struct {
-	Offset      int
+	Offset      int // bs offset
 	Type        int
 	StartLine   int
 	StartColumn int

@@ -75,7 +75,7 @@ func (lex *Lexer) isHex(c byte) bool {
 		('A' <= c && c <= 'F')
 }
 
-func (lex *Lexer) hexByte2Byte(c byte) byte {
+func (lex *Lexer) hexByte2ByteValue(c byte) byte {
 	if 'a' <= c && c <= 'f' {
 		return c - 'a' + 10
 	}
@@ -96,7 +96,7 @@ func (lex *Lexer) parseInt(bs []byte) int64 {
 	}
 	var result int64 = 0
 	for _, v := range bs {
-		result = result*base + int64(lex.hexByte2Byte(v))
+		result = result*base + int64(lex.hexByte2ByteValue(v))
 	}
 	return result
 }
@@ -229,7 +229,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		index := len(bs) - 1
 		var fp float64
 		for index >= 0 {
-			fp = fp*0.1 + (float64(lex.hexByte2Byte(bs[index])) / 10.0)
+			fp = fp*0.1 + (float64(lex.hexByte2ByteValue(bs[index])) / 10.0)
 			index--
 		}
 		return fp
@@ -460,10 +460,10 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 				err = fmt.Errorf("unknown escape sequence")
 				continue
 			}
-			b := lex.hexByte2Byte(c1)
+			b := lex.hexByte2ByteValue(c1)
 			c2, eof = lex.getChar()
 			if lex.isHex(c2) {
-				if t := b*16 + lex.hexByte2Byte(c2); t < 127 { // only support standard ascii
+				if t := b*16 + lex.hexByte2ByteValue(c2); t < 127 { // only support standard ascii
 					b = t
 				} else {
 					lex.unGetChar()
@@ -484,7 +484,7 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 					lex.unGetChar()
 					break
 				}
-				if t := b*8 + lex.hexByte2Byte(c); t > 127 { // only support standard ascii
+				if t := b*8 + lex.hexByte2ByteValue(c); t > 127 { // only support standard ascii
 					lex.unGetChar()
 					break
 				} else {

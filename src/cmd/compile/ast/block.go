@@ -32,9 +32,7 @@ type Block struct {
 }
 
 func (b *Block) HaveVariableDefinition() bool {
-	if b.ClosureFunctions == nil && b.Variables == nil {
-		return false
-	}
+
 	return len(b.ClosureFunctions) > 0 || len(b.Variables) > 0
 }
 
@@ -64,7 +62,6 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 			return t, true
 		}
 	}
-
 	if b.Enums != nil {
 		if t, ok := b.Enums[name]; ok {
 			return t, true
@@ -218,10 +215,9 @@ func (b *Block) inherit(father *Block) {
 	}
 	b.InheritedAttribute = father.InheritedAttribute
 	b.Outer = father
-
 }
 
-func (b *Block) checkUnUsedVariable() (es []error) {
+func (b *Block) checkUnUsedVariables() (es []error) {
 	es = []error{}
 	for _, v := range b.Variables {
 		if v.Used ||
@@ -250,7 +246,7 @@ func (b *Block) checkStatements() []error {
 		}
 	}
 	if common.CompileFlags.DisableCheckUnUsedVariable == false {
-		errs = append(errs, b.checkUnUsedVariable()...)
+		errs = append(errs, b.checkUnUsedVariables()...)
 	}
 	return errs
 }

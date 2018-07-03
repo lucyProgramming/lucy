@@ -28,7 +28,6 @@ const (
 	VariableTypeTemplate
 	VariableTypeVoid
 	VariableTypeAlias
-
 	VariableTypePackage
 	VariableTypeNull
 )

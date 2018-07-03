@@ -54,7 +54,9 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.consume(untilRc)
 	} else {
-		f.SourceCodes = functionParser.parser.bs[offset : functionParser.parser.token.Offset+1]
+		f.SourceCodes =
+			functionParser.parser.
+				bs[offset : functionParser.parser.token.Offset+1]
 		functionParser.Next()
 	}
 	return f, err
