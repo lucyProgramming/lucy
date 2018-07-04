@@ -75,7 +75,8 @@ func shouldAccessFromImports(name string, from *Position, alreadyHave *Position)
 	if alreadyHave == nil {
 		/*
 			in case buildIn types
-			only build in types have no "*Pos" is <nil>
+			only build in types have no "*Pos"
+			pos is <nil>
 		*/
 		return nil, false
 	}
@@ -88,6 +89,9 @@ func shouldAccessFromImports(name string, from *Position, alreadyHave *Position)
 	if i == nil {
 		return nil, false
 	}
+	/*
+
+	 */
 	return i, alreadyHave.StartLine < from.StartLine
 }
 

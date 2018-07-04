@@ -37,7 +37,7 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 	if index.Expression.ExpressionValue.Map.Value.Type == ast.VariableTypeEnum {
 		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.Value)
 	} else if index.Expression.ExpressionValue.Map.Value.IsPointer() {
-		typeConverter.castPointerTypeToRealType(class, code, index.Expression.ExpressionValue.Map.Value)
+		typeConverter.castPointer(class, code, index.Expression.ExpressionValue.Map.Value)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
 		code.CodeLength++
@@ -118,7 +118,7 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		if e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VariableTypeString {
-			typeConverter.castPointerTypeToRealType(class, code, e.ExpressionValue)
+			typeConverter.castPointer(class, code, e.ExpressionValue)
 		}
 	} else {
 		switch e.ExpressionValue.Type {

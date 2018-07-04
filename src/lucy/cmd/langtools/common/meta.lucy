@@ -1,6 +1,5 @@
 
-
-
+/*
 
 public class PackageMeta {
 	public compiledFrom map { string -> FileMeta } ;  // filename -> meta
@@ -16,7 +15,7 @@ public class FileMeta {
 }
 
 
-
+*/
 
 
 

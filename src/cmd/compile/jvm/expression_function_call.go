@@ -16,7 +16,7 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.Class
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/invoke/MethodHandle",
 		Method:     "invoke",
-		Descriptor: JvmDescriptor.methodDescriptor(call.Expression.ExpressionValue.FunctionType),
+		Descriptor: Descriptor.methodDescriptor(call.Expression.ExpressionValue.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression {
@@ -50,8 +50,10 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 	if call.Function.TemplateFunction != nil {
 		return buildExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
-	if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
-		maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+	if call.Expression != nil {
+		if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
+			maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+		}
 	}
 
 	if call.Function.IsClosureFunction == false {

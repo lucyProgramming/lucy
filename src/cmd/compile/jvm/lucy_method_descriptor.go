@@ -8,18 +8,18 @@ import (
 type LucyMethodSignature struct {
 }
 
-func (signature *LucyMethodSignature) Need(functionType *ast.FunctionType) bool {
-	for _, v := range functionType.ParameterList {
+func (signature *LucyMethodSignature) Need(ft *ast.FunctionType) bool {
+	for _, v := range ft.ParameterList {
 		if LucyFieldSignatureParser.Need(v.Type) {
 			return true
 		}
 	}
-	for _, v := range functionType.ReturnList {
+	for _, v := range ft.ReturnList {
 		if LucyFieldSignatureParser.Need(v.Type) {
 			return true
 		}
 	}
-	if len(functionType.ReturnList) > 1 {
+	if len(ft.ReturnList) > 1 {
 		return true
 	}
 	return false
@@ -62,7 +62,8 @@ func (signature *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([
 		ft.ReturnList = []*ast.Variable{}
 		for bs[0] != ')' {
 			v := &ast.Variable{}
-			bs, t, err := LucyFieldSignatureParser.Decode(bs)
+			var t *ast.Type
+			bs, t, err = LucyFieldSignatureParser.Decode(bs)
 			if err != nil {
 				return bs, err
 			}

@@ -29,11 +29,12 @@ type Class struct {
 }
 
 func (c *Class) HaveStaticsCodes() bool {
-	s := 0
-	for _, v := range c.StaticBlocks {
-		s += len(v.Statements)
-	}
-	return s > 0
+	//s := 0
+	//for _, v := range c.StaticBlocks {
+	//	s += len(v.Statements)
+	//}
+	//return s > 0
+	return len(c.StaticBlocks) > 0
 }
 
 func (c *Class) IsInterface() bool {

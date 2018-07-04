@@ -44,13 +44,8 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 					arr.Type.Array = tt
 					arr.Type.Pos = e.Pos
 				} else {
-					if t.RightValueValid() {
-						*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
-							errMsgPrefix(e.Pos), t.TypeString()))
-					} else {
-						*errs = append(*errs, fmt.Errorf("%s right value '%s' invalid",
-							errMsgPrefix(e.Pos), t.TypeString()))
-					}
+					*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
+						errMsgPrefix(e.Pos), t.TypeString()))
 				}
 			}
 			if arr.Type != nil {

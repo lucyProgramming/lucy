@@ -36,7 +36,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 
 	d := call.Method.Function.Descriptor
 	if call.Class.LoadFromOutSide == false {
-		d = JvmDescriptor.methodDescriptor(&call.Method.Function.Type)
+		d = Descriptor.methodDescriptor(&call.Method.Function.Type)
 	}
 	if call.Method.IsStatic() {
 		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)

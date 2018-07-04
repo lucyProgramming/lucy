@@ -13,7 +13,6 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	if callExpression == nil {
 		return nil
 	}
-
 	if callExpression.Type == VariableTypeClass { // cast type
 		typeConversion := &ExpressionTypeConversion{}
 		typeConversion.Type = &Type{}

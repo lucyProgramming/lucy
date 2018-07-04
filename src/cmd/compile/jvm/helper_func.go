@@ -69,10 +69,10 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	}
 }
 
-func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
+func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
 	var b uint16
 	b = 1
-	for _, v := range ft.ParameterList {
+	for _, v := range functionType.ParameterList {
 		b += jvmSlotSize(v.Type)
 	}
 	if b > 255 {
@@ -81,20 +81,20 @@ func interfaceMethodArgsCount(ft *ast.FunctionType) byte {
 	return byte(b)
 }
 
-func jvmSlotSize(v *ast.Type) uint16 {
-	if v.RightValueValid() == false {
-		panic("right value is not valid:" + v.TypeString())
+func jvmSlotSize(typ *ast.Type) uint16 {
+	if typ.RightValueValid() == false {
+		panic("right value is not valid:" + typ.TypeString())
 	}
-	if v.Type == ast.VariableTypeDouble || ast.VariableTypeLong == v.Type {
+	if typ.Type == ast.VariableTypeDouble || ast.VariableTypeLong == typ.Type {
 		return 2
 	} else {
 		return 1
 	}
 }
 
-func nameTemplateFunction(f *ast.Function) string {
-	s := f.Name
-	for _, v := range f.Type.ParameterList {
+func nameTemplateFunction(function *ast.Function) string {
+	s := function.Name
+	for _, v := range function.Type.ParameterList {
 		if v.Type.IsPrimitive() {
 			s += fmt.Sprintf("$%s", v.Type.TypeString())
 			continue
@@ -122,7 +122,7 @@ func insertTypeAssertClass(class *cg.ClassHighLevel, code *cg.AttributeCode, t *
 		meta := ArrayMetas[t.Array.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else {
-		class.InsertClassConst(JvmDescriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
+		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
 	}
 	code.CodeLength += 2
 }

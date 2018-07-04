@@ -16,7 +16,7 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(class *cg.Clas
 		method.AccessFlags |= cg.ACC_CLASS_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
-		method.Descriptor = JvmDescriptor.methodDescriptor(&call.TemplateFunctionCallPair.Function.Type)
+		method.Descriptor = Descriptor.methodDescriptor(&call.TemplateFunctionCallPair.Function.Type)
 		method.Code = &cg.AttributeCode{}
 		class.AppendMethod(method)
 		call.TemplateFunctionCallPair.Function.ClassMethod = method

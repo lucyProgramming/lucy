@@ -3,12 +3,13 @@ package jvm
 var (
 	ArrayMetas                 = map[int]*ArrayMeta{}
 	typeConverter              TypeConverterAndPrimitivePacker
-	JvmDescriptor              JvmDescription
+	Descriptor                 Description
 	LucyMethodSignatureParser  LucyMethodSignature
 	LucyFieldSignatureParser   LucyFieldSignature
 	LucyTypeAliasParser        LucyTypeAlias
 	FunctionDefaultValueParser FunctionDefaultValueParse
 	multiValuePacker           MultiValuePacker
+	closure                    Closure
 )
 
 const (

@@ -21,6 +21,7 @@ public class Command implements Runnable{
 
 	p Process;
 	public fn Command(cmd string , args  , envs string []   ,file File  ){
+		this.super();
 		this.cmd = cmd;
 		this.args = args;
 		this.envs = envs;

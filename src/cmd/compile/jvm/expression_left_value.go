@@ -91,7 +91,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      buildExpression.BuildPackage.mainClass.Name,
 				Field:      identifier.Name,
-				Descriptor: JvmDescriptor.typeDescriptor(identifier.Variable.Type),
+				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 			}, ops[1:3])
 			return
 		}
@@ -190,7 +190,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			target = selection.Field.Variable.Type
 			ops = make([]byte, 3)
 			if selection.Field.JvmDescriptor == "" {
-				selection.Field.JvmDescriptor = JvmDescriptor.typeDescriptor(target)
+				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(target)
 			}
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      selection.Expression.ExpressionValue.Class.Name,

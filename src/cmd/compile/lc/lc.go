@@ -113,13 +113,16 @@ func (lc *LucyCompile) compile() {
 	}
 	c := ast.ConvertTops2Package{}
 	ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName
+
 	rs, errs := c.ConvertTops2Package(lc.Tops)
+
 	lc.Errs = append(lc.Errs, errs...)
 	for _, v := range rs {
 		lc.Errs = append(lc.Errs, v.Error())
 	}
 	lc.shouldExit()
 	lc.Errs = append(lc.Errs, ast.PackageBeenCompile.TypeCheck()...)
+
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}

@@ -66,7 +66,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		f.AccessFlags = v.AccessFlags
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
-		_, f.Type, err = jvm.JvmDescriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
+		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
 		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		m.Function.AccessFlags = v.AccessFlags
-		m.Function.Type, err = jvm.JvmDescriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.LoadFromOutSide = true
-		_, f.Type, err = jvm.JvmDescriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
+		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -145,7 +145,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m := &ast.ClassMethod{}
 		m.Function = &ast.Function{}
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
-		m.Function.Type, err = jvm.JvmDescriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err
 		}
@@ -215,7 +215,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if len(constValue) > 1 {
 			return fmt.Errorf("constant value length greater than  1 at class 'main'  field '%s'", name)
 		}
-		_, typ, err := jvm.JvmDescriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+		_, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
 		if err != nil {
 			return err
 		}
@@ -225,7 +225,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			cos.Name = name
 			cos.AccessFlags = f.AccessFlags
 			cos.Type = typ
-			_, cos.Type, err = jvm.JvmDescriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+			_, cos.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
 			if err != nil {
 				return err
 			}
@@ -271,6 +271,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			}
 		}
 	}
+
 	for _, m := range c.Methods {
 		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != nil && len(t) > 0 {
 			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
@@ -287,11 +288,13 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function := &ast.Function{}
 		function.Name = name
 		function.AccessFlags = m.AccessFlags
+
 		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
-		function.Type, err = jvm.JvmDescriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
+		function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
 			return err
 		}
+
 		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&function.Type, c.ConstPool[index].Info)
@@ -299,6 +302,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 				return err
 			}
 		}
+
 		err = loadEnumForFunction(function)
 		if err != nil {
 			return err
@@ -316,6 +320,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function.IsGlobal = true
 		pack.Block.Functions[name] = function
 	}
+
 	if pack.Block.TypeAliases == nil {
 		pack.Block.TypeAliases = make(map[string]*ast.Type)
 	}
@@ -352,6 +357,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 }
 
 func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
+
 	fis, err := ioutil.ReadDir(r.realPath)
 	if err != nil {
 		return nil, err
@@ -362,6 +368,7 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 			fisM[v.Name()] = v
 		}
 	}
+
 	_, ok := fisM[mainClassName]
 	if ok == false {
 		return nil, fmt.Errorf("main class not found")
@@ -380,6 +387,7 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse main class failed,err:%v", err)
 	}
+
 	delete(fisM, mainClassName)
 	mkEnums := func(e *ast.Enum) {
 		if p.Block.Enums == nil {
@@ -394,6 +402,7 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 		}
 	}
 	for _, v := range fisM {
+
 		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))
 		if err != nil {
 			return p, fmt.Errorf("read class failed,err:%v", err)
@@ -464,6 +473,7 @@ func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 }
 
 func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
+
 	if loader.caches != nil && loader.caches[importName] != nil {
 		return loader.caches[importName], nil
 	}

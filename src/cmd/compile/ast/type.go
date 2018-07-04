@@ -54,10 +54,11 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 	if typ.IsPointer() == false {
 		return false
 	}
-	if typ.Type == VariableTypeArray && typ.Array.IsPrimitive() {
+	// object or string
+	if typ.Type == VariableTypeObject || typ.Type == VariableTypeString {
 		return true
 	}
-	if typ.Type == VariableTypeObject || typ.Type == VariableTypeString {
+	if typ.Type == VariableTypeArray && typ.Array.IsPrimitive() {
 		return true
 	}
 	if typ.Type == VariableTypeJavaArray {

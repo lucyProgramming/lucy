@@ -12,6 +12,7 @@ public fn getLucyRoot()->(path string , err error ){
 	path = envs["LUCYROOT"];
 }
 
+ 
 public fn getLucyPath()->(paths []string, err error){
 	envs := os.getEnvs();
 	if envs.keyExists("LUCYROOT") == false {
@@ -67,9 +68,7 @@ public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which str
 }
 
 
-
-
-
+ 
 
 
 

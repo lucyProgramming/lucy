@@ -28,7 +28,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 	if d == nil {
 		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifier.Name)
 	}
-
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)

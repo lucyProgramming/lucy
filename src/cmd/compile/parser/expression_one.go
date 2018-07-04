@@ -338,7 +338,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 				newExpression.Pos = expressionParser.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newExpression.Data = slice
-				slice.Array = left
+				slice.Expression = left
 				slice.End = end
 				left = newExpression
 				continue
@@ -369,7 +369,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 				slice := &ast.ExpressionSlice{}
 				newExpression.Data = slice
 				slice.Start = e
-				slice.Array = left
+				slice.Expression = left
 				slice.End = end
 				left = newExpression
 				continue

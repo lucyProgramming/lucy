@@ -239,6 +239,7 @@ func (b *Block) checkStatements() []error {
 		if s.isStaticFieldDefaultValue {
 			continue
 		}
+
 		b.InheritedAttribute.StatementOffset = k
 		errs = append(errs, s.check(b)...)
 		if PackageBeenCompile.shouldStop(errs) {

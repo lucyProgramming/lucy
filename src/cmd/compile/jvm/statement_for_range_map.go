@@ -158,7 +158,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		if s.RangeAttr.RangeOn.ExpressionValue.Map.Value.IsPointer() == false {
 			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
 		} else {
-			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
+			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
 		}
 		autoVar.V = code.MaxLocals
 		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
@@ -181,7 +181,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		if s.RangeAttr.RangeOn.ExpressionValue.Map.Key.IsPointer() == false {
 			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
 		} else {
-			typeConverter.castPointerTypeToRealType(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
+			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
 		}
 		autoVar.K = code.MaxLocals
 		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Key)

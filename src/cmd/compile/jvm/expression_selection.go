@@ -10,7 +10,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		maxStack = jvmSlotSize(e.ExpressionValue)
 		if selection.PackageVariable != nil {
 			if selection.PackageVariable.JvmDescriptor == "" {
-				selection.PackageVariable.JvmDescriptor = JvmDescriptor.typeDescriptor(e.ExpressionValue)
+				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(e.ExpressionValue)
 			}
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -51,7 +51,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
-			Descriptor: JvmDescriptor.methodDescriptor(&selection.Method.Function.Type),
+			Descriptor: Descriptor.methodDescriptor(&selection.Method.Function.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -93,7 +93,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      selection.Expression.ExpressionValue.Class.Name,
 			Field:      selection.Name,
-			Descriptor: JvmDescriptor.typeDescriptor(e.ExpressionValue),
+			Descriptor: Descriptor.typeDescriptor(e.ExpressionValue),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
@@ -107,7 +107,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      selection.Expression.ExpressionValue.Class.Name,
 		Field:      selection.Name,
-		Descriptor: JvmDescriptor.typeDescriptor(e.ExpressionValue),
+		Descriptor: Descriptor.typeDescriptor(e.ExpressionValue),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return

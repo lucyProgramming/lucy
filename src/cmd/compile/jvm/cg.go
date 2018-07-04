@@ -119,7 +119,7 @@ func (buildPackage *BuildPackage) mkGlobalConstants() {
 		f.AttributeConstantValue = &cg.AttributeConstantValue{}
 		f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(buildPackage.mainClass, v.Type, v.Value)
 		f.AttributeLucyConst = &cg.AttributeLucyConst{}
-		f.Descriptor = JvmDescriptor.typeDescriptor(v.Type)
+		f.Descriptor = Descriptor.typeDescriptor(v.Type)
 		buildPackage.mainClass.Fields[k] = f
 	}
 }
@@ -136,7 +136,7 @@ func (buildPackage *BuildPackage) mkGlobalVariables() {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= v.AccessFlags
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
-		f.Descriptor = JvmDescriptor.typeDescriptor(v.Type)
+		f.Descriptor = Descriptor.typeDescriptor(v.Type)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
@@ -276,7 +276,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			f.AttributeConstantValue = &cg.AttributeConstantValue{}
 			f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(class, v.Type, v.DefaultValue)
 		}
-		f.Descriptor = JvmDescriptor.typeDescriptor(v.Type)
+		f.Descriptor = Descriptor.typeDescriptor(v.Type)
 		if LucyFieldSignatureParser.Need(v.Type) {
 			t := &cg.AttributeLucyFieldDescriptor{}
 			t.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
@@ -298,7 +298,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.AccessFlags |= cg.ACC_METHOD_ABSTRACT
 		}
 		method.Class = class
-		method.Descriptor = JvmDescriptor.methodDescriptor(&vv.Function.Type)
+		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
 			buildPackage.buildFunction(class, nil, method, vv.Function)
@@ -312,7 +312,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.Name = "<init>"
 			method.AccessFlags = t[0].Function.AccessFlags
 			method.Class = class
-			method.Descriptor = JvmDescriptor.methodDescriptor(&t[0].Function.Type)
+			method.Descriptor = Descriptor.methodDescriptor(&t[0].Function.Type)
 			method.IsConstruction = true
 			method.Code = &cg.AttributeCode{}
 			buildPackage.buildFunction(class, c, method, t[0].Function)
@@ -346,7 +346,7 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 		if f.Name == ast.MainFunctionName {
 			method.Descriptor = "([Ljava/lang/String;)V"
 		} else {
-			method.Descriptor = JvmDescriptor.methodDescriptor(&f.Type)
+			method.Descriptor = Descriptor.methodDescriptor(&f.Type)
 		}
 		method.AccessFlags = 0
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
@@ -428,7 +428,7 @@ func (buildPackage *BuildPackage) storeGlobalVariable(class *cg.ClassHighLevel, 
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      buildPackage.mainClass.Name,
 		Field:      v.Name,
-		Descriptor: JvmDescriptor.typeDescriptor(v.Type),
+		Descriptor: Descriptor.typeDescriptor(v.Type),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 }

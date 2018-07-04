@@ -23,7 +23,7 @@ func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCo
 			maxStack = t
 		}
 	} else {
-		typeConverter.castPointerTypeToRealType(class, code, typ)
+		typeConverter.castPointer(class, code, typ)
 	}
 	return
 }

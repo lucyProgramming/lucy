@@ -19,7 +19,6 @@ type Context struct {
 }
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
-
 	if context.lastStackMapOffset == offset {
 		code.AttributeStackMap.StackMaps = code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
 		context.stackMapOffsets = context.stackMapOffsets[0 : len(context.stackMapOffsets)-1]
@@ -45,7 +44,10 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		context.stackMapOffsets = append(context.stackMapOffsets, offset)
 	}()
 	if state == context.lastStackMapState {
-		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 { // same frame or same frame extended
+		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 {
+			/*
+				same frame or same frame extended
+			*/
 			if delta <= 63 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 					&cg.StackMapSameFrame{FrameType: byte(delta)})

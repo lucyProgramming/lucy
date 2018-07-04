@@ -133,9 +133,17 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VariableTypeString:
-			if t2.Type != VariableTypeString {
-				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+			if t2.Type == VariableTypeNull {
+				if e.Type != ExpressionTypeEq && ExpressionTypeNe != e.Type {
+					*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+
+				}
+			} else {
+				if t2.Type != VariableTypeString {
+					*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+				}
 			}
+
 		case VariableTypeNull:
 			if t2.IsPointer() == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",

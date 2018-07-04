@@ -217,7 +217,7 @@ func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHi
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      class.Name,
 			Field:      v.Name,
-			Descriptor: JvmDescriptor.typeDescriptor(v.Type),
+			Descriptor: Descriptor.typeDescriptor(v.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}

@@ -52,7 +52,7 @@ func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      buildExpression.BuildPackage.mainClass.Name,
 			Field:      identifier.Name,
-			Descriptor: JvmDescriptor.typeDescriptor(identifier.Variable.Type),
+			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		maxStack = jvmSlotSize(identifier.Variable.Type)

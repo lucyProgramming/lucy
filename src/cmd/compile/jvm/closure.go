@@ -19,10 +19,6 @@ type Closure struct {
 	ClosureObjectMetas map[int]*ClosureObjectMeta
 }
 
-var (
-	closure Closure
-)
-
 type ClosureObjectMeta struct {
 	className       string
 	fieldName       string
@@ -279,7 +275,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 			Descriptor: meta.fieldDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		typeConverter.castPointerTypeToRealType(class, code, v)
+		typeConverter.castPointer(class, code, v)
 
 	}
 

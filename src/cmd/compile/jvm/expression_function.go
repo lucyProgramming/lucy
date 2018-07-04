@@ -92,7 +92,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
 		function.ClassMethod = method
 		method.Class = class
-		method.Descriptor = JvmDescriptor.methodDescriptor(&function.Type)
+		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
 		buildPackage.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
@@ -114,7 +114,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	method.Descriptor = JvmDescriptor.methodDescriptor(&function.Type)
+	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 	method.Class = closureClass
 	function.ClassMethod = method
 

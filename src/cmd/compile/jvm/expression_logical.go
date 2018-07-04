@@ -7,11 +7,13 @@ import (
 
 func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16, exits []*cg.Exit) {
-	exits = []*cg.Exit{}
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxStack, es := buildExpression.build(class, code, bin.Left, context, state)
 	if es != nil {
-		exits = append(exits, es...)
+		state.pushStack(class, bin.Left.ExpressionValue)
+		context.MakeStackMap(code, state, code.CodeLength)
+		state.popStack(1)
+		fillOffsetForExits(es, code.CodeLength)
 	}
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++

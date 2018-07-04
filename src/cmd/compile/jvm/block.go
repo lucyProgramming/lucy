@@ -7,7 +7,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, context *Context, state *StackMapState) {
+func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block,
+	context *Context, state *StackMapState) {
 	willNotExecuteToEnd := false
 	for _, s := range b.Statements {
 		if willNotExecuteToEnd == true && s.Type == ast.StatementTypeLabel {

@@ -129,6 +129,12 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 			Method:     "valueOf",
 			Descriptor: "(I)Ljava/lang/Integer;",
 		}, bs[1:3])
+	case ast.VariableTypeLong:
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      javaLongClass,
+			Method:     "valueOf",
+			Descriptor: "(J)Ljava/lang/Long;",
+		}, bs[1:3])
 	case ast.VariableTypeFloat:
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaFloatClass,
@@ -141,17 +147,11 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/Double;",
 		}, bs[1:3])
-	case ast.VariableTypeLong:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaLongClass,
-			Method:     "valueOf",
-			Descriptor: "(J)Ljava/lang/Long;",
-		}, bs[1:3])
 	}
 	return
 }
 
-func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
+func (TypeConverterAndPrimitivePacker) castPointer(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
 	if t.IsPointer() == false {
 		panic("...")
 	}
@@ -173,7 +173,7 @@ func (TypeConverterAndPrimitivePacker) castPointerTypeToRealType(class *cg.Class
 		class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
-		class.InsertClassConst(JvmDescriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeFunction:
 		class.InsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])

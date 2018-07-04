@@ -315,7 +315,7 @@ type ExpressionTernary struct {
 }
 
 type ExpressionSlice struct {
-	Array      *Expression
+	Expression *Expression
 	Start, End *Expression
 }
 

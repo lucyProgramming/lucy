@@ -83,7 +83,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 			t := &ast.Type{}
 			t.Type = ast.VariableTypeJavaArray
 			t.Array = s.RangeAttr.RangeOn.ExpressionValue.Array
-			class.InsertClassConst(JvmDescriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 

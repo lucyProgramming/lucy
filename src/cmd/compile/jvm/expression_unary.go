@@ -11,7 +11,8 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 
 	if e.Type == ast.ExpressionTypeNegative {
-		maxStack, _ = buildExpression.build(class, code, e.Data.(*ast.Expression), context, state)
+		ee := e.Data.(*ast.Expression)
+		maxStack, _ = buildExpression.build(class, code, ee, context, state)
 		switch e.ExpressionValue.Type {
 		case ast.VariableTypeByte:
 			fallthrough
