@@ -146,7 +146,7 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1) // must be a logical expression

@@ -3,10 +3,9 @@ package ast
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"path/filepath"
+	"strings"
 )
 
 type Class struct {
@@ -69,7 +68,7 @@ func (c *Class) mkDefaultConstruction() {
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
 	}
-	if len(c.Methods[ConstructionMethodName]) > 0 {
+	if len(c.Methods[SpecialMethodInit]) > 0 {
 		return
 	}
 	if c.Methods == nil {
@@ -101,14 +100,20 @@ func (c *Class) mkDefaultConstruction() {
 			Expression: e,
 		}
 	}
-	c.Methods[ConstructionMethodName] = []*ClassMethod{m}
+	c.Methods[SpecialMethodInit] = []*ClassMethod{m}
 }
 
-func (c *Class) checkIfClassHierarchyCircularity() error {
+func (c *Class) checkIfClassHierarchyErr() error {
 	m := make(map[string]struct{})
 	arr := []string{}
 	is := false
 	class := c
+	if err := c.loadSuperClass(); err != nil {
+		return err
+	}
+	if c.SuperClass.IsFinal() {
+		return fmt.Errorf("class name '%s' have super class  named '%s' that is final", c.Name, c.SuperClassName)
+	}
 	for class.Name != JavaRootClass {
 		_, ok := m[class.Name]
 		if ok {
@@ -141,6 +146,45 @@ func (c *Class) checkIfClassHierarchyCircularity() error {
 	}
 	return fmt.Errorf(errMsg)
 }
+
+func (c *Class) checkIfOverrideFinalMethod() []error {
+	err := c.loadSuperClass()
+	if err != nil {
+		return []error{err}
+	}
+	errs := []error{}
+	for name, v := range c.Methods {
+		if name == SpecialMethodInit {
+			continue
+		}
+		if len(v) == 0 {
+			continue
+		}
+		if len(c.SuperClass.Methods[name]) == 0 {
+			// this class not found at super
+			continue
+		}
+		m := v[0]
+		for _, v := range c.SuperClass.Methods[name] {
+			f1 := &Type{
+				Type:         VariableTypeFunction,
+				FunctionType: &m.Function.Type,
+			}
+			f2 := &Type{
+				Type:         VariableTypeFunction,
+				FunctionType: &v.Function.Type,
+			}
+			if f1.Equal(&errs, f2) == true {
+				if v.IsFinal() {
+					errs = append(errs, fmt.Errorf("%s override final method",
+						errMsgPrefix(m.Function.Pos)))
+				}
+			}
+		}
+	}
+	return errs
+}
+
 func (c *Class) checkPhase1(father *Block) []error {
 	c.Block.inherit(father)
 	errs := c.Block.checkConstants()
@@ -153,7 +197,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 	if err != nil {
 		errs = append(errs, err)
 	} else {
-		err = c.checkIfClassHierarchyCircularity()
+		err = c.checkIfClassHierarchyErr()
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -199,11 +243,11 @@ func (c *Class) checkPhase2() []error {
 			errs = append(errs, errors.New(errMsg))
 		}
 	}
-
 	errs = append(errs, c.checkMethods()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
+	errs = append(errs, c.checkIfOverrideFinalMethod()...)
 	return errs
 }
 
@@ -449,11 +493,11 @@ func (c *Class) checkFields() []error {
 				continue
 			}
 			//TODO:: should check or not ???
-			//if t.Type == VARIABLE_TYPE_NULL {
-			//	errs = append(errs, fmt.Errorf("%s pointer types default value is '%s' already",
-			//		errMsgPrefix(v.Pos), t.TypeString()))
-			//	continue
-			//}
+			if t.Type == VariableTypeNull {
+				errs = append(errs, fmt.Errorf("%s pointer types default value is '%s' already",
+					errMsgPrefix(v.Pos), t.TypeString()))
+				continue
+			}
 			if v.IsStatic() && v.Expression.IsLiteral() {
 				v.DefaultValue = v.Expression.Data
 				continue
@@ -515,24 +559,29 @@ func (c *Class) checkMethods() []error {
 	if c.IsInterface() {
 		return errs
 	}
-	for name, v := range c.Methods {
-		for _, vv := range v {
+	for name, methods := range c.Methods {
+		for _, method := range methods {
 			if c.IsInterface() {
 				continue
 			}
-			isConstruction := (name == ConstructionMethodName)
-			if isConstruction &&
-				vv.IsFirstStatementCallFatherConstruction() == false {
-				errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",
-					errMsgPrefix(vv.Function.Pos)))
+			isConstruction := (name == SpecialMethodInit)
+			if isConstruction {
+				if method.IsFirstStatementCallFatherConstruction() == false {
+					errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",
+						errMsgPrefix(method.Function.Pos)))
+				}
+				if method.IsFinal() {
+					errs = append(errs, fmt.Errorf("%s construction method cannot be final",
+						errMsgPrefix(method.Function.Pos)))
+				}
 			}
-			if isConstruction && vv.Function.NoReturnValue() == false {
+			if isConstruction && method.Function.NoReturnValue() == false {
 				errs = append(errs, fmt.Errorf("%s construction method expect no return values",
-					errMsgPrefix(vv.Function.Type.ParameterList[0].Pos)))
+					errMsgPrefix(method.Function.Type.ParameterList[0].Pos)))
 			}
 			if c.IsInterface() == false {
-				vv.Function.Block.InheritedAttribute.IsConstructionMethod = isConstruction
-				vv.Function.checkBlock(&errs)
+				method.Function.Block.InheritedAttribute.IsConstructionMethod = isConstruction
+				method.Function.checkBlock(&errs)
 			}
 		}
 	}

@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 		}
 		stack, es := buildExpression.build(class, code, vs.InitValues[0], context, state)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			state.pushStack(class, vs.InitValues[0].ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -200,7 +200,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 		//
 		stack, es := buildExpression.build(class, code, vs.InitValues[0], context, state)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

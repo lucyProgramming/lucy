@@ -68,7 +68,6 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 			continue
 		}
 	}
-	// if b.IsFunctionTopBlock == true must a return at end
 	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++

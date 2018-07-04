@@ -3,7 +3,6 @@ package jvm
 import (
 	"bytes"
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 

@@ -55,7 +55,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 		}
 		stack, es := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			state.pushStack(class, v.Type)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
@@ -207,7 +207,7 @@ func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHi
 			state.pushStack(class, v.Expression.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 		}
 		if t := 1 + stack; t > code.MaxStack {
 			code.MaxStack = t

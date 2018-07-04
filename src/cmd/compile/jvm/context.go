@@ -22,6 +22,7 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	if context.lastStackMapOffset == offset {
 		code.AttributeStackMap.StackMaps = code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
 		context.stackMapOffsets = context.stackMapOffsets[0 : len(context.stackMapOffsets)-1]
+		context.lastStackMapState = nil
 		if len(context.stackMapOffsets) > 0 {
 			context.lastStackMapOffset = context.stackMapOffsets[len(context.stackMapOffsets)-1]
 		} else {
@@ -30,20 +31,23 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	}
 	var delta uint16
 	if context.lastStackMapOffset == 0 {
+		/*
+			first one
+		*/
 		delta = uint16(offset)
 	} else {
 		delta = uint16(offset - context.lastStackMapOffset - 1)
 	}
 	defer func() {
 		context.lastStackMapOffset = offset // rewrite
+		context.lastStackMapState = state
 		context.lastStackMapStateLocals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
 		copy(context.lastStackMapStateLocals, state.Locals)
 		context.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
 		copy(context.lastStackMapStateStacks, state.Stacks)
-		context.lastStackMapState = state
 		context.stackMapOffsets = append(context.stackMapOffsets, offset)
 	}()
-	if state == context.lastStackMapState {
+	if state == context.lastStackMapState { // same state
 		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 {
 			/*
 				same frame or same frame extended

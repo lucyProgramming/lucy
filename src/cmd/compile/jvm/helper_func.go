@@ -8,7 +8,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func fillOffsetForExits(es []*cg.Exit, to int) {
+func writeExits(es []*cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
 		e.BranchBytes[0] = byte(offset >> 8)
@@ -18,7 +18,7 @@ func fillOffsetForExits(es []*cg.Exit, to int) {
 
 func jumpTo(op byte, code *cg.AttributeCode, to int) {
 	b := (&cg.Exit{}).FromCode(op, code)
-	fillOffsetForExits([]*cg.Exit{b}, to)
+	writeExits([]*cg.Exit{b}, to)
 }
 
 func copyOPs(code *cg.AttributeCode, op ...byte) {

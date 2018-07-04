@@ -48,7 +48,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength+3)
+	writeExits([]*cg.Exit{exit}, code.CodeLength+3)
 	state.pushStack(class, call.Args[0].ExpressionValue)
 	context.MakeStackMap(code, state, code.CodeLength+3)
 	state.popStack(1)

@@ -156,7 +156,6 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 		maxStack = buildExpression.buildIndex(class, code, e, context, state)
 	case ast.ExpressionTypeSelection:
 		maxStack = buildExpression.buildSelection(class, code, e, context, state)
-
 	//
 	case ast.ExpressionTypeMethodCall:
 		maxStack = buildExpression.buildMethodCall(class, code, e, context, state)
@@ -187,7 +186,10 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 		maxStack = buildExpression.BuildPackage.buildFunctionExpression(class, code, e, context, state)
 	case ast.ExpressionTypeCheckCast: // []byte(str)
 		maxStack = buildExpression.buildTypeConversion(class, code, e, context, state)
-	case ast.ExpressionTypeConst: // const will analyse at ast stage
+	case ast.ExpressionTypeConst:
+		/*
+		 analyse at ast stage
+		*/
 	case ast.ExpressionTypeSlice:
 		maxStack = buildExpression.buildSlice(class, code, e, context, state)
 	case ast.ExpressionTypeArray:
@@ -201,12 +203,12 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 	case ast.ExpressionTypeTernary:
 		maxStack = buildExpression.buildTernary(class, code, e, context, state)
 	default:
-		panic(e.OpName())
+		panic("missing handle:" + e.OpName())
 	}
 	return
 }
 
-func (buildExpression *BuildExpression) expressionValueJvmSize(e *ast.Expression) (size uint16) {
+func (buildExpression *BuildExpression) jvmSize(e *ast.Expression) (size uint16) {
 	if len(e.ExpressionMultiValues) > 1 {
 		return 1
 	}
@@ -268,7 +270,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 		currentStack++
 		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			state.pushStack(class, v.ExpressionValue)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)

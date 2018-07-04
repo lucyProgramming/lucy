@@ -17,7 +17,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = buildPackage.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.Exits) > 0 {
-			fillOffsetForExits(s.StatementIf.Exits, code.CodeLength)
+			writeExits(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeBlock: //new
@@ -33,7 +33,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
-			fillOffsetForExits(s.StatementFor.Exits, code.CodeLength)
+			writeExits(s.StatementFor.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeContinue:
@@ -65,7 +65,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 				code.Codes[code.CodeLength] = cg.OP_nop
 				code.CodeLength++
 			}
-			fillOffsetForExits(s.StatementSwitch.Exits, code.CodeLength)
+			writeExits(s.StatementSwitch.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeGoTo:
@@ -80,7 +80,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		s.StatementLabel.CodeOffset = code.CodeLength
 		s.StatementLabel.Exits = []*cg.Exit{} //could compile multi times
 		if len(s.StatementLabel.Exits) > 0 {
-			fillOffsetForExits(s.StatementLabel.Exits, code.CodeLength) // back patch
+			writeExits(s.StatementLabel.Exits, code.CodeLength) // back patch
 		}
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled

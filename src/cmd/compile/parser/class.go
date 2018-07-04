@@ -111,7 +111,8 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		if token.Type == lex.TokenIdentifier ||
 			token.Type == lex.TokenFunction ||
 			token.Type == lex.TokenStatic ||
-			token.Type == lex.TokenSynchronized {
+			token.Type == lex.TokenSynchronized ||
+			token.Type == lex.TokenFinal {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after '%s'", classParser.parser.errorMsgPrefix(), keyWord)
@@ -123,20 +124,23 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		return fmt.Errorf("%s not a valid token after 'volatile'", classParser.parser.errorMsgPrefix())
 	}
 	validAfterSynchronized := func(token *lex.Token) error {
-		if token.Type == lex.TokenFunction {
+		if token.Type == lex.TokenFunction ||
+			token.Type == lex.TokenFinal {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'synchronized'", classParser.parser.errorMsgPrefix())
 	}
 	validAfterStatic := func(token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier ||
-			token.Type == lex.TokenFunction {
+			token.Type == lex.TokenFunction ||
+			token.Type == lex.TokenFinal {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'static'", classParser.parser.errorMsgPrefix())
 	}
 	validAfterFinal := func(token *lex.Token) error {
-		if token.Type == lex.TokenFunction {
+		if token.Type == lex.TokenFunction ||
+			token.Type == lex.TokenSynchronized {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'final'", classParser.parser.errorMsgPrefix())
@@ -261,7 +265,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == classParser.ret.Name {
-				f.Name = ast.ConstructionMethodName
+				f.Name = ast.SpecialMethodInit
 			}
 			classParser.ret.Methods[f.Name] = append(classParser.ret.Methods[f.Name], m)
 			classParser.resetProperty()

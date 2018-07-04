@@ -101,7 +101,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 		}
 	}
 	// don`t try father, when is is construction method
-	if name == ConstructionMethodName {
+	if name == SpecialMethodInit {
 		return nil, false, nil
 	}
 	err = c.loadSuperClass()
@@ -136,7 +136,7 @@ func (c *Class) accessMethodAsJava(from *Position, errs *[]error, name string,
 		}
 	}
 	// don`t try father, when is is construction method
-	if name == ConstructionMethodName {
+	if name == SpecialMethodInit {
 		return ms, false, nil
 	}
 	if c.Name == JavaRootClass {
@@ -158,5 +158,5 @@ func (c *Class) accessMethodAsJava(from *Position, errs *[]error, name string,
 
 func (c *Class) matchConstructionFunction(from *Position, errs *[]error, args []*Type,
 	callArgs *CallArgs) (ms []*ClassMethod, matched bool, err error) {
-	return c.accessMethod(from, errs, ConstructionMethodName, args, callArgs, false)
+	return c.accessMethod(from, errs, SpecialMethodInit, args, callArgs, false)
 }

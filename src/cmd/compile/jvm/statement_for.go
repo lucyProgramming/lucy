@@ -31,7 +31,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	if s.Condition != nil {
 		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			forState.pushStack(class, s.Condition.ExpressionValue)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
@@ -53,7 +53,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	if s.Condition != nil {
 		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			forState.pushStack(class, s.Condition.ExpressionValue)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
@@ -64,7 +64,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 	}
 	if firstTimeExit != nil {
-		fillOffsetForExits([]*cg.Exit{firstTimeExit}, code.CodeLength)
+		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}
 	buildPackage.buildBlock(class, code, s.Block, context, forState)

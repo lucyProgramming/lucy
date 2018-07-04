@@ -47,7 +47,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			Descriptor: d,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := buildExpression.expressionValueJvmSize(e); t > maxStack {
+		if t := buildExpression.jvmSize(e); t > maxStack {
 			maxStack = t
 		}
 		pop(&call.Method.Function.Type)
@@ -58,7 +58,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 	// object ref
 	state.pushStack(class, call.Expression.ExpressionValue)
 	defer state.popStack(1)
-	if call.Name == ast.ConstructionMethodName {
+	if call.Name == ast.SpecialMethodInit {
 		state.popStack(1)
 		v := &cg.StackMapUninitializedThisVariableInfo{} // make it right
 		state.Stacks = append(state.Stacks, &cg.StackMapVerificationTypeInfo{
@@ -69,10 +69,10 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}
-	if t := buildExpression.expressionValueJvmSize(e); t > maxStack {
+	if t := buildExpression.jvmSize(e); t > maxStack {
 		maxStack = t
 	}
-	if call.Name == ast.ConstructionMethodName { // call father construction method
+	if call.Name == ast.SpecialMethodInit { // call father construction method
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,

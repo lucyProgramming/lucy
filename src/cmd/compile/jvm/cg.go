@@ -286,7 +286,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	}
 
 	for k, v := range c.Methods {
-		if k == ast.ConstructionMethodName && c.IsInterface() == false {
+		if k == ast.SpecialMethodInit && c.IsInterface() == false {
 			continue
 		}
 		vv := v[0]
@@ -307,7 +307,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	}
 	if c.IsInterface() == false {
 		//construction
-		if t := c.Methods[ast.ConstructionMethodName]; t != nil && len(t) > 0 {
+		if t := c.Methods[ast.SpecialMethodInit]; t != nil && len(t) > 0 {
 			method := &cg.MethodHighLevel{}
 			method.Name = "<init>"
 			method.AccessFlags = t[0].Function.AccessFlags

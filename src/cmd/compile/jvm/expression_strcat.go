@@ -27,7 +27,7 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	currentStack := uint16(1)
 	stack, es := buildExpression.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
-		fillOffsetForExits(es, code.CodeLength)
+		writeExits(es, code.CodeLength)
 		state.pushStack(class, e.Left.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
@@ -48,7 +48,7 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	code.CodeLength += 3
 	stack, es = buildExpression.build(class, code, e.Right, context, state)
 	if len(es) > 0 {
-		fillOffsetForExits(es, code.CodeLength)
+		writeExits(es, code.CodeLength)
 		state.pushStack(class, e.Right.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)

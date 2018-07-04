@@ -296,7 +296,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	}
 
 	//pop index on stack
-	fillOffsetForExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
+	writeExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
 	forState.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 	context.MakeStackMap(code, forState, code.CodeLength)
 	forState.popStack(1)

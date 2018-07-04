@@ -343,7 +343,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			block.Statements = append(block.Statements, s)
 		case lex.TokenEnum:
 			pos := blockParser.parser.mkPos()
-			e, err := blockParser.parser.parseEnum(false)
+			e, err := blockParser.parser.parseEnum()
 			if err != nil {
 				blockParser.consume(untilRc)
 				blockParser.Next()

@@ -10,17 +10,17 @@ type LoadImport interface {
 }
 
 const (
-	MainFunctionName       = "main"
-	THIS                   = "this"
-	NoNameIdentifier       = "_"
-	LucyRootClass          = "lucy/lang/Lucy"
-	JavaRootClass          = "java/lang/Object"
-	DefaultExceptionClass  = "java/lang/Exception"
-	JavaThrowableClass     = "java/lang/Throwable"
-	JavaStringClass        = "java/lang/String"
-	SUPER                  = "super"
-	ConstructionMethodName = "<init>"
-	ClassInitMethod        = "<clinit>"
+	MainFunctionName      = "main"
+	THIS                  = "this"
+	NoNameIdentifier      = "_"
+	LucyRootClass         = "lucy/lang/Lucy"
+	JavaRootClass         = "java/lang/Object"
+	DefaultExceptionClass = "java/lang/Exception"
+	JavaThrowableClass    = "java/lang/Throwable"
+	JavaStringClass       = "java/lang/String"
+	SUPER                 = "super"
+	SpecialMethodInit     = "<init>"
+	ClassInitMethod       = "<clinit>"
 )
 
 var (

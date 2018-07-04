@@ -47,9 +47,6 @@ public class ArrayShort   {
 
 
 	public ArrayShort slice(int start,int end){
-		if(end  < 0 ){
-		      end = this.end - this.start;  // whole length
-		}
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
 		}

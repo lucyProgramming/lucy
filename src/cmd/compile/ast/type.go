@@ -600,7 +600,6 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 		}
 	}
 	if typ.Type == VariableTypeFunction && compareTo.Type == VariableTypeFunction {
-
 		compareToFunctionType := compareTo.FunctionType
 		if len(typ.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) ||
 			len(typ.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {

@@ -34,7 +34,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 		stack, es := buildExpression.build(class, code, e, context, state)
 		if len(es) > 0 {
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeBool})
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}

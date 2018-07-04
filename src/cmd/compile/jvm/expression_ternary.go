@@ -11,7 +11,7 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 	var es []*cg.Exit
 	maxStack, es = buildExpression.build(class, code, ternary.Selection, context, state)
 	if len(es) > 0 {
-		fillOffsetForExits(es, code.CodeLength)
+		writeExits(es, code.CodeLength)
 		state.pushStack(class, ternary.Selection.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
@@ -20,7 +20,7 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 	//true part
 	stack, es := buildExpression.build(class, code, ternary.True, context, state)
 	if len(es) > 0 {
-		fillOffsetForExits(es, code.CodeLength)
+		writeExits(es, code.CodeLength)
 		state.pushStack(class, ternary.True.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
@@ -30,10 +30,10 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 	}
 	exit2 := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	context.MakeStackMap(code, state, code.CodeLength)
-	fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength)
+	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	stack, es = buildExpression.build(class, code, ternary.False, context, state)
 	if len(es) > 0 {
-		fillOffsetForExits(es, code.CodeLength)
+		writeExits(es, code.CodeLength)
 		state.pushStack(class, ternary.False.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
@@ -44,7 +44,7 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 	state.pushStack(class, e.ExpressionValue)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
-	fillOffsetForExits([]*cg.Exit{exit2}, code.CodeLength)
+	writeExits([]*cg.Exit{exit2}, code.CodeLength)
 	return
 
 }

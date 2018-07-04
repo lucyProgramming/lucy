@@ -25,9 +25,9 @@ func (stackMapState *StackMapState) addTop(absent *StackMapState) {
 	t.Verify = &cg.StackMapTopVariableInfo{}
 	for i := 0; i < length; i++ {
 		tt := absent.Locals[i+oldLength].Verify
-		_, ok1 := tt.(*cg.StackMapDoubleVariableInfo)
-		_, ok2 := tt.(*cg.StackMapLongVariableInfo)
-		if ok1 || ok2 {
+		_, isDouble := tt.(*cg.StackMapDoubleVariableInfo)
+		_, isLong := tt.(*cg.StackMapLongVariableInfo)
+		if isDouble || isLong {
 			stackMapState.Locals = append(stackMapState.Locals, t, t)
 		} else {
 			stackMapState.Locals = append(stackMapState.Locals, t)
@@ -44,11 +44,11 @@ func (stackMapState *StackMapState) newObjectVariableType(name string) *ast.Type
 }
 
 func (stackMapState *StackMapState) popStack(pop int) {
-	if pop < 0 {
-		panic("negative pop")
-	}
 	if pop == 0 {
 		return
+	}
+	if pop < 0 {
+		panic("negative pop")
 	}
 	if len(stackMapState.Stacks) == 0 {
 		panic("already 0")

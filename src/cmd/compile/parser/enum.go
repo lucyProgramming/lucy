@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
+func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 	parser.Next() // skip enum
 	enumName := &ast.NameWithPos{
 		Pos: parser.mkPos(),
@@ -82,10 +81,6 @@ func (parser *Parser) parseEnum(isPublic bool) (e *ast.Enum, err error) {
 		t.Pos = v.Pos
 		t.Enum = e
 		e.Enums = append(e.Enums, t)
-	}
-	e.AccessFlags = 0
-	if isPublic {
-		e.AccessFlags |= cg.ACC_CLASS_PUBLIC
 	}
 	return e, err
 }

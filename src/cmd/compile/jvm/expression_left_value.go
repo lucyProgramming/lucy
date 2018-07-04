@@ -33,7 +33,7 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      meta.className,
 		Field:      meta.fieldName,
-		Descriptor: meta.fieldDescriptor,
+		Descriptor: meta.fieldDescription,
 	}, ops[1:3])
 	leftValueType = LeftValueTypePutField
 	return

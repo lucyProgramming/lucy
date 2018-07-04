@@ -13,7 +13,7 @@ func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, c
 		state.pushStack(class, bin.Left.ExpressionValue)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
-		fillOffsetForExits(es, code.CodeLength)
+		writeExits(es, code.CodeLength)
 	}
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++

@@ -250,7 +250,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	if s.Block.WillNotExecuteToEnd == false {
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
 	}
-	fillOffsetForExits([]*cg.Exit{exit}, code.CodeLength)
+	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	{
 		forState.pushStack(class,
 			&ast.Type{Type: ast.VariableTypeInt})

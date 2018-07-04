@@ -65,9 +65,14 @@ func (parser *Parser) Parse() []error {
 	if parser.onlyImport { // only parse imports
 		return parser.errs
 	}
-	isPublic := false
+	var accessControlToken *lex.Token
+	isFinal := false
 	resetProperty := func() {
-		isPublic = false
+		accessControlToken = nil
+		isFinal = false
+	}
+	isPublic := func() bool {
+		return accessControlToken != nil && accessControlToken.Type == lex.TokenPublic
 	}
 	for parser.token.Type != lex.TokenEof {
 		if len(parser.errs) > parser.nErrors2Stop {
@@ -76,6 +81,20 @@ func (parser *Parser) Parse() []error {
 		switch parser.token.Type {
 		case lex.TokenSemicolon: // empty statement, no big deal
 			parser.Next()
+			continue
+		case lex.TokenPublic:
+			accessControlToken = parser.token
+			parser.Next()
+			if err := parser.validAfterPublic(); err != nil {
+				accessControlToken = nil
+			}
+			continue
+		case lex.TokenFinal:
+			isFinal = true
+			parser.Next()
+			if err := parser.validAfterFinal(); err != nil {
+				isFinal = false
+			}
 			continue
 		case lex.TokenVar:
 			pos := parser.mkPos()
@@ -87,6 +106,7 @@ func (parser *Parser) Parse() []error {
 				continue
 			}
 			d := &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es}
+			isPublic := isPublic()
 			e := &ast.Expression{
 				Type:     ast.ExpressionTypeVar,
 				Data:     d,
@@ -105,14 +125,14 @@ func (parser *Parser) Parse() []error {
 				parser.Next()
 				continue
 			}
-			e.IsPublic = isPublic
+			e.IsPublic = isPublic()
 			parser.validStatementEnding()
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
 			})
 			resetProperty()
 		case lex.TokenEnum:
-			e, err := parser.parseEnum(isPublic)
+			e, err := parser.parseEnum()
 			if err != nil {
 				parser.consume(untilRc)
 				parser.Next()
@@ -132,8 +152,13 @@ func (parser *Parser) Parse() []error {
 				parser.Next()
 				continue
 			}
-			if isPublic {
-				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
+			if accessControlToken != nil {
+				switch accessControlToken.Type {
+				case lex.TokenPublic:
+					f.AccessFlags |= cg.ACC_METHOD_PUBLIC
+				case lex.TokenPrivate:
+					f.AccessFlags |= cg.ACC_METHOD_PRIVATE
+				}
 			} else {
 				f.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			}
@@ -167,8 +192,11 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: c,
 			})
-			if isPublic {
+			if isPublic() {
 				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
+			}
+			if isFinal {
+				c.AccessFlags |= cg.ACC_CLASS_FINAL
 			}
 			resetProperty()
 		case lex.TokenInterface:
@@ -183,15 +211,13 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: c,
 			})
-			if isPublic {
+			if isPublic() {
 				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
+			if isFinal {
+				c.AccessFlags |= cg.ACC_CLASS_FINAL
+			}
 			resetProperty()
-		case lex.TokenPublic:
-			isPublic = true
-			parser.Next()
-			parser.validAfterPublic(isPublic)
-			continue
 		case lex.TokenConst:
 			parser.Next() // skip const key word
 			vs, es, err := parser.parseConstDefinition(false)
@@ -206,6 +232,7 @@ func (parser *Parser) Parse() []error {
 					fmt.Errorf("%s cannot assign %d values to %d destinations",
 						parser.errorMsgPrefix(parser.mkPos()), len(es), len(vs)))
 			}
+			isPublic := isPublic()
 			for k, v := range vs {
 				if k < len(es) {
 					c := &ast.Constant{}
@@ -262,30 +289,34 @@ func (parser *Parser) parseTypes() ([]*ast.Type, error) {
 	return ret, nil
 }
 
-func (parser *Parser) validAfterPublic(isPublic bool) {
+func (parser *Parser) validAfterPublic() error {
 	if parser.token.Type == lex.TokenFunction ||
 		parser.token.Type == lex.TokenClass ||
 		parser.token.Type == lex.TokenEnum ||
 		parser.token.Type == lex.TokenIdentifier ||
 		parser.token.Type == lex.TokenInterface ||
 		parser.token.Type == lex.TokenConst ||
-		parser.token.Type == lex.TokenVar {
-		return
+		parser.token.Type == lex.TokenVar ||
+		parser.token.Type == lex.TokenFinal {
+		return nil
 	}
-	var err error
-	token := "public"
-	if isPublic == false {
-		token = "private"
-	}
-	if parser.token.Description != "" {
-		err = fmt.Errorf("%s cannot have token:%s after '%s'",
-			parser.errorMsgPrefix(), parser.token.Description, token)
-	} else {
-		err = fmt.Errorf("%s cannot have token:%s after '%s'",
-			parser.errorMsgPrefix(), parser.token.Description, token)
-	}
+	err := fmt.Errorf("%s cannot have token '%s' after 'public'",
+		parser.errorMsgPrefix(), parser.token.Description)
 	parser.errs = append(parser.errs, err)
+	return err
 }
+
+func (parser *Parser) validAfterFinal() error {
+	if parser.token.Type == lex.TokenClass ||
+		parser.token.Type == lex.TokenInterface {
+		return nil
+	}
+	err := fmt.Errorf("%s cannot have token '%s' after 'final'",
+		parser.errorMsgPrefix(), parser.token.Description)
+	parser.errs = append(parser.errs, err)
+	return err
+}
+
 func (parser *Parser) validStatementEnding() {
 	if parser.token.Type == lex.TokenSemicolon ||
 		(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {

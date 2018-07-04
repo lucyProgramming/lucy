@@ -89,13 +89,13 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		state.pushStack(class, bin.Left.ExpressionValue)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 		}
 		stack, es := buildExpression.build(class, code, bin.Right, context, state)
 		state.pushStack(class, bin.Right.ExpressionValue)
 		if len(es) > 0 {
 			context.MakeStackMap(code, state, code.CodeLength)
-			fillOffsetForExits(es, code.CodeLength)
+			writeExits(es, code.CodeLength)
 		}
 		if t := jvmSlotSize(bin.Left.ExpressionValue) + stack; t > maxStack {
 			maxStack = t
