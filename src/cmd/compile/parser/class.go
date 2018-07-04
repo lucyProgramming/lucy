@@ -13,6 +13,7 @@ type ClassParser struct {
 	isStatic           bool
 	isVolatile         bool
 	isSynchronized     bool
+	isFinal            bool
 	accessControlToken *lex.Token
 }
 
@@ -129,10 +130,16 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	}
 	validAfterStatic := func(token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier ||
-			token.Type == lex.TokenFunction || token.Type == lex.TokenLc {
+			token.Type == lex.TokenFunction {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'static'", classParser.parser.errorMsgPrefix())
+	}
+	validAfterFinal := func(token *lex.Token) error {
+		if token.Type == lex.TokenFunction {
+			return nil
+		}
+		return fmt.Errorf("%s not a valid token after 'final'", classParser.parser.errorMsgPrefix())
 	}
 	classParser.Next()
 	for classParser.parser.token.Type != lex.TokenEof {
@@ -182,6 +189,13 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			if err := validAfterVolatile(classParser.parser.token); err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
 				classParser.isVolatile = false
+			}
+		case lex.TokenFinal:
+			classParser.isFinal = true
+			classParser.Next()
+			if err := validAfterFinal(classParser.parser.token); err != nil {
+				classParser.parser.errs = append(classParser.parser.errs, err)
+				classParser.isFinal = false
 			}
 		case lex.TokenIdentifier:
 			err = classParser.parseField(&classParser.parser.errs)
@@ -240,6 +254,9 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			if classParser.isStatic {
 				f.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
+			if classParser.isFinal {
+				f.AccessFlags |= cg.ACC_METHOD_FINAL
+			}
 			if classParser.ret.Methods == nil {
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
@@ -261,6 +278,7 @@ func (classParser *ClassParser) resetProperty() {
 	classParser.isStatic = false
 	classParser.isVolatile = false
 	classParser.isSynchronized = false
+	classParser.isFinal = false
 	classParser.accessControlToken = nil
 }
 

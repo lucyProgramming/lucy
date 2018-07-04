@@ -102,6 +102,7 @@ const (
 	TokenQuestion      // ?
 	TokenVolatile      // volatile
 	TokenSynchronized  // synchronized
+	TokenFinal         // final
 	TokenGlobal        // global
 	TokenEof           // end of file
 )
@@ -152,6 +153,7 @@ var (
 		"map":          TokenMap,
 		"volatile":     TokenVolatile,
 		"synchronized": TokenSynchronized,
+		"final":        TokenFinal,
 		"global":       TokenGlobal,
 	}
 )

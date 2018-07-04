@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lc"
 )

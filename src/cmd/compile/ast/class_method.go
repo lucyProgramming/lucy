@@ -25,6 +25,9 @@ func (m *ClassMethod) IsStatic() bool {
 func (m *ClassMethod) IsPrivate() bool {
 	return (m.Function.AccessFlags & cg.ACC_METHOD_PRIVATE) != 0
 }
+func (m *ClassMethod) IsFinal() bool {
+	return (m.Function.AccessFlags & cg.ACC_METHOD_FINAL) != 0
+}
 
 func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	if len(m.Function.Block.Statements) == 0 {

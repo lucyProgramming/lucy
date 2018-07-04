@@ -20,7 +20,6 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-
 	//new class
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
