@@ -8,8 +8,7 @@ import (
 func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	captured := context.function.Closure.ClosureVariableExist(identifier.Variable)
-	if captured == false {
+	if context.function.Closure.ClosureVariableExist(identifier.Variable) {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
 	} else {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
