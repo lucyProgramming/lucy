@@ -361,6 +361,9 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 	if name == "_" {
 		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
 	}
+	if isMagicIdentifier(name) {
+		return fmt.Errorf("%s '%s' is not a magic identifier", errMsgPrefix(pos), name)
+	}
 	// name exists in buildIn, not allow
 	if lucyBuildInPackage != nil {
 		if _, exits := lucyBuildInPackage.Block.NameExists(name); exits {

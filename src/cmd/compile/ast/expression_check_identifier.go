@@ -27,6 +27,16 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		e.Data = int64(time.Now().UnixNano())
 		ts, _ := e.check(block)
 		return ts[0], nil
+	case MagicIdentifierClass:
+		if block.InheritedAttribute.Class == nil {
+			return nil,
+				fmt.Errorf("%s '%s' must in class scope", errMsgPrefix(e.Pos), identifier.Name)
+		}
+		t := &Type{}
+		t.Type = VariableTypeClass
+		t.Pos = e.Pos
+		t.Class = block.InheritedAttribute.Class
+		return t, nil
 	}
 
 	fromImport := false

@@ -10,10 +10,10 @@ type LoadImport interface {
 }
 
 const (
-	MagicIdentifierFile = "__FILE__"
-	MagicIdentifierLine = "__LINE__"
-	MagicIdentifierTime = "__TIME__"
-
+	MagicIdentifierFile   = "__FILE__"
+	MagicIdentifierLine   = "__LINE__"
+	MagicIdentifierTime   = "__TIME__"
+	MagicIdentifierClass  = "__CLASS__"
 	MainFunctionName      = "main"
 	THIS                  = "this"
 	NoNameIdentifier      = "_"
@@ -26,6 +26,13 @@ const (
 	SpecialMethodInit     = "<init>"
 	ClassInitMethod       = "<clinit>"
 )
+
+func isMagicIdentifier(name string) bool {
+	return name == MagicIdentifierFile ||
+		name == MagicIdentifierLine ||
+		name == MagicIdentifierTime ||
+		name == MagicIdentifierClass
+}
 
 var (
 	packageAccessNameReg *regexp.Regexp

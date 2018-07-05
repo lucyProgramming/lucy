@@ -10,7 +10,6 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 	if errorsNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-
 	if t == nil {
 		return nil
 	}
