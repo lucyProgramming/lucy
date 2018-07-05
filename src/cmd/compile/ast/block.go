@@ -367,58 +367,7 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
 		}
 	}
-	switch d.(type) {
-	case *Class:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-
-		b.Classes[name] = d.(*Class)
-	case *Function:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		t := d.(*Function)
-		if buildInFunctionsMap[t.Name] != nil {
-			return fmt.Errorf("%s function named '%s' is buildin",
-				errMsgPrefix(pos), name)
-		}
-		b.Functions[name] = t
-	case *Constant:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		b.Constants[name] = d.(*Constant)
-	case *Variable:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		t := d.(*Variable)
-		b.Variables[name] = t
-	case *Enum:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		e := d.(*Enum)
-		b.Enums[name] = e
-		for _, v := range e.Enums {
-			err := b.Insert(v.Name, v.Pos, v)
-			if err != nil {
-				return err
-			}
-		}
-	case *EnumName:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		b.EnumNames[name] = d.(*EnumName)
-	case *StatementLabel:
+	if label, ok := d.(*StatementLabel); ok && label != nil {
 		if b.Labels == nil {
 			b.Labels = make(map[string]*StatementLabel)
 		}
@@ -428,12 +377,40 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
 			return fmt.Errorf(errMsg)
 		}
-		b.Labels[name] = d.(*StatementLabel)
-	case *Type:
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
+		b.Labels[name] = label
+		return nil
+	}
+	err := b.checkNameExist(name, pos)
+	if err != nil {
+		return err
+	}
+	switch d.(type) {
+	case *Class:
+		b.Classes[name] = d.(*Class)
+	case *Function:
+		t := d.(*Function)
+		if buildInFunctionsMap[t.Name] != nil {
+			return fmt.Errorf("%s function named '%s' is buildin",
+				errMsgPrefix(pos), name)
 		}
+		b.Functions[name] = t
+	case *Constant:
+		b.Constants[name] = d.(*Constant)
+	case *Variable:
+		t := d.(*Variable)
+		b.Variables[name] = t
+	case *Enum:
+		e := d.(*Enum)
+		b.Enums[name] = e
+		for _, v := range e.Enums {
+			err := b.Insert(v.Name, v.Pos, v)
+			if err != nil {
+				return err
+			}
+		}
+	case *EnumName:
+		b.EnumNames[name] = d.(*EnumName)
+	case *Type:
 		b.TypeAliases[name] = d.(*Type)
 	default:
 		panic(d) // panic d

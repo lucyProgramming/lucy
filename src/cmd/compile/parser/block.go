@@ -378,6 +378,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 				blockParser.parser.errorMsgPrefix()))
 		}
 		*isLabel = true
+		blockParser.parser.expectLf = true
 		blockParser.Next() // skip :
 		s := &ast.Statement{}
 		s.Pos = pos

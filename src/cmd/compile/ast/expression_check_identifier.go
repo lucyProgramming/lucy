@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"time"
 )
 
 func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error) {
@@ -10,6 +11,24 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
 			errMsgPrefix(e.Pos), NoNameIdentifier)
 	}
+	switch identifier.Name {
+	case MagicIdentifierFile:
+		e.Type = ExpressionTypeString
+		e.Data = e.Pos.Filename
+		ts, _ := e.check(block)
+		return ts[0], nil
+	case MagicIdentifierLine:
+		e.Type = ExpressionTypeInt
+		e.Data = int32(e.Pos.StartLine)
+		ts, _ := e.check(block)
+		return ts[0], nil
+	case MagicIdentifierTime:
+		e.Type = ExpressionTypeLong
+		e.Data = int64(time.Now().UnixNano())
+		ts, _ := e.check(block)
+		return ts[0], nil
+	}
+
 	fromImport := false
 	d, err := block.searchIdentifier(identifier.Name)
 	if err != nil {
@@ -191,7 +210,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		}
 		t := &Type{}
 		t.Pos = e.Pos
-		t.Type = VariableTypeAlias
+		t.Type = VariableTypeTypeAlias
 		t.AliasType = typ
 		return t, nil
 	case *Package:

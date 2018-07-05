@@ -114,6 +114,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 	method.Name = function.Name
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 	method.Class = closureClass
 	function.ClassMethod = method

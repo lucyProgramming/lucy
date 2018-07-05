@@ -43,43 +43,26 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.ExpressionTypeGt || e.Type == ast.ExpressionTypeLe { // > and <=
-			if e.Type == ast.ExpressionTypeGt {
-				code.Codes[code.CodeLength] = cg.OP_ifgt
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifle
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		} else if e.Type == ast.ExpressionTypeLt || e.Type == ast.ExpressionTypeGe { // < and >=
-			if e.Type == ast.ExpressionTypeLt {
-				code.Codes[code.CodeLength] = cg.OP_iflt
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifge
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		} else {
-			if e.Type == ast.ExpressionTypeEq {
-				code.Codes[code.CodeLength] = cg.OP_ifeq
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifne
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
+		switch e.Type {
+		case ast.ExpressionTypeGt:
+			code.Codes[code.CodeLength] = cg.OP_ifgt
+		case ast.ExpressionTypeLe:
+			code.Codes[code.CodeLength] = cg.OP_ifle
+		case ast.ExpressionTypeLt:
+			code.Codes[code.CodeLength] = cg.OP_iflt
+		case ast.ExpressionTypeGe:
+			code.Codes[code.CodeLength] = cg.OP_ifge
+		case ast.ExpressionTypeEq:
+			code.Codes[code.CodeLength] = cg.OP_ifeq
+		case ast.ExpressionTypeNe:
+			code.Codes[code.CodeLength] = cg.OP_ifne
 		}
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		code.CodeLength += 8
 		return
 	}
 	if bin.Left.ExpressionValue.Type == ast.VariableTypeBool ||
@@ -168,43 +151,26 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			Type: ast.VariableTypeBool,
 		})
 		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.ExpressionTypeGt || e.Type == ast.ExpressionTypeLe { // > and <=
-			if e.Type == ast.ExpressionTypeGt {
-				code.Codes[code.CodeLength] = cg.OP_ifgt
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifle
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		} else if e.Type == ast.ExpressionTypeLt || e.Type == ast.ExpressionTypeGe { // < and >=
-			if e.Type == ast.ExpressionTypeLt {
-				code.Codes[code.CodeLength] = cg.OP_iflt
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifge
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
-		} else {
-			if e.Type == ast.ExpressionTypeEq {
-				code.Codes[code.CodeLength] = cg.OP_ifeq
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_ifne
-			}
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-			code.Codes[code.CodeLength+4] = cg.OP_goto
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-			code.CodeLength += 8
+		switch e.Type {
+		case ast.ExpressionTypeGt:
+			code.Codes[code.CodeLength] = cg.OP_ifgt
+		case ast.ExpressionTypeLe:
+			code.Codes[code.CodeLength] = cg.OP_ifle
+		case ast.ExpressionTypeLt:
+			code.Codes[code.CodeLength] = cg.OP_iflt
+		case ast.ExpressionTypeGe:
+			code.Codes[code.CodeLength] = cg.OP_ifge
+		case ast.ExpressionTypeEq:
+			code.Codes[code.CodeLength] = cg.OP_ifeq
+		case ast.ExpressionTypeNe:
+			code.Codes[code.CodeLength] = cg.OP_ifne
 		}
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+4] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+		code.CodeLength += 8
 		return
 	}
 

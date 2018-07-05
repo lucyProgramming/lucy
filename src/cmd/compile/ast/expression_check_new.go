@@ -20,7 +20,6 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	if no.Type.Type == VariableTypeJavaArray {
 		return e.checkNewJavaArrayExpression(block, no, errs)
 	}
-
 	// new object
 	if no.Type.Type != VariableTypeObject {
 		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'",

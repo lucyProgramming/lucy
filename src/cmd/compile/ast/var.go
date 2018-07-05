@@ -10,6 +10,10 @@ type LoadImport interface {
 }
 
 const (
+	MagicIdentifierFile = "__FILE__"
+	MagicIdentifierLine = "__LINE__"
+	MagicIdentifierTime = "__TIME__"
+
 	MainFunctionName      = "main"
 	THIS                  = "this"
 	NoNameIdentifier      = "_"

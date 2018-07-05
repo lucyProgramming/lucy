@@ -49,42 +49,6 @@ type Statement struct {
 	IsCallFatherConstructionStatement bool
 }
 
-func (s *Statement) StatementName() string {
-	switch s.Type {
-	case StatementTypeExpression:
-		return "expression statement"
-	case StatementTypeIf:
-		return "if statement"
-	case StatementTypeFor:
-		return "for statement"
-	case StatementTypeContinue:
-		return "continue statement"
-	case StatementTypeBreak:
-		return "break statement"
-	case StatementTypeSwitch:
-		return "switch statement"
-	case StatementTypeLabel:
-		return "label statement"
-	case StatementTypeGoTo:
-		return "goto statement"
-	case StatementTypeDefer:
-		return "defer statement"
-	case StatementTypeBlock:
-		return "block statement"
-	case StatementTypeReturn:
-		return "return statement"
-	case StatementTypeClass:
-		return "class"
-	case StatementTypeEnum:
-		return "enum"
-	case StatementTypeNop:
-		return "nop"
-	case StatementTypeSwitchTemplate:
-		return "switch template"
-	}
-	return ""
-}
-
 func (s *Statement) isVariableDefinition() bool {
 	return s.Type == StatementTypeExpression &&
 		(s.Expression.Type == ExpressionTypeColonAssign || s.Expression.Type == ExpressionTypeVar)
@@ -106,11 +70,11 @@ func (s *Statement) check(block *Block) []error { // block is father
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:
 		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
-			return []error{fmt.Errorf("%s '%s' cannot in this scope", errMsgPrefix(s.Pos), s.StatementName())}
+			return []error{fmt.Errorf("%s 'break' cannot in this scope", errMsgPrefix(s.Pos))}
 		} else {
 			if block.InheritedAttribute.Defer != nil {
-				return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
-					errMsgPrefix(s.Pos), s.StatementName())}
+				return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
+					errMsgPrefix(s.Pos))}
 			}
 			if f, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
 				s.StatementBreak.StatementFor = f
@@ -121,19 +85,19 @@ func (s *Statement) check(block *Block) []error { // block is father
 		}
 	case StatementTypeContinue:
 		if block.InheritedAttribute.StatementFor == nil {
-			return []error{fmt.Errorf("%s '%s' can`t in this scope",
-				errMsgPrefix(s.Pos), s.StatementName())}
+			return []error{fmt.Errorf("%s 'continue' can`t in this scope",
+				errMsgPrefix(s.Pos))}
 		}
 		if block.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
-				errMsgPrefix(s.Pos), s.StatementName())}
+			return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
+				errMsgPrefix(s.Pos))}
 		}
 		s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
 		s.StatementContinue.mkDefers(block)
 	case StatementTypeReturn:
 		if block.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has '%s' in 'defer'",
-				errMsgPrefix(s.Pos), s.StatementName())}
+			return []error{fmt.Errorf("%s cannot has 'return' in 'defer'",
+				errMsgPrefix(s.Pos))}
 		}
 		es := s.StatementReturn.check(block)
 		if len(s.StatementReturn.Defers) > 0 {
@@ -211,3 +175,40 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	return errs
 }
+
+//
+//func (s *Statement) StatementName() string {
+//	switch s.Type {
+//	case StatementTypeExpression:
+//		return "expression statement"
+//	case StatementTypeIf:
+//		return "if statement"
+//	case StatementTypeFor:
+//		return "for statement"
+//	case StatementTypeContinue:
+//		return "continue statement"
+//	case StatementTypeBreak:
+//		return "break statement"
+//	case StatementTypeSwitch:
+//		return "switch statement"
+//	case StatementTypeLabel:
+//		return "label statement"
+//	case StatementTypeGoTo:
+//		return "goto statement"
+//	case StatementTypeDefer:
+//		return "defer statement"
+//	case StatementTypeBlock:
+//		return "block statement"
+//	case StatementTypeReturn:
+//		return "return statement"
+//	case StatementTypeClass:
+//		return "class"
+//	case StatementTypeEnum:
+//		return "enum"
+//	case StatementTypeNop:
+//		return "nop"
+//	case StatementTypeSwitchTemplate:
+//		return "switch template"
+//	}
+//	return ""
+//}

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -15,7 +16,7 @@ func (expressionParser *ExpressionParser) parseTernaryExpression() (*ast.Express
 		return left, nil
 	}
 	expressionParser.Next() // skip ?
-	True, err := expressionParser.parseExpression(false)
+	True, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
 	}
@@ -24,7 +25,7 @@ func (expressionParser *ExpressionParser) parseTernaryExpression() (*ast.Express
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
 	expressionParser.Next() // skip :
-	False, err := expressionParser.parseExpression(false)
+	False, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
 	}

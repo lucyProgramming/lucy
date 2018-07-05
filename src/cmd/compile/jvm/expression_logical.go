@@ -21,10 +21,10 @@ func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, c
 		maxStack = 2
 	}
 	if e.Type == ast.ExpressionTypeLogicalOr {
-		// at this point,value is clear,leave 1 on stack
+		// at this point,value is clear,leave true on stack
 		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifne, code))
 	} else { //  &&
-		// at this point,value is clear,leave 0 on stack
+		// at this point,value is clear,leave false on stack
 		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 	}
 	code.Codes[code.CodeLength] = cg.OP_pop // pop 0

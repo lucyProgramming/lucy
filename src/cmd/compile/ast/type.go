@@ -27,7 +27,7 @@ const (
 	VariableTypeName
 	VariableTypeTemplate
 	VariableTypeVoid
-	VariableTypeAlias
+	VariableTypeTypeAlias
 	VariableTypePackage
 	VariableTypeNull
 )

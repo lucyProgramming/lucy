@@ -41,22 +41,22 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		tt := t.Array.Clone()
 		tt.Pos = e.Pos
 		return tt
-	}
-	// map
-	ret := t.Map.Value.Clone()
-	ret.Pos = e.Pos
-	indexType, es := index.Index.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	} else {
+		// map
+		ret := t.Map.Value.Clone()
+		ret.Pos = e.Pos
+		indexType, es := index.Index.checkSingleValueContextExpression(block)
+		if errorsNotEmpty(es) {
+			*errs = append(*errs, es...)
+		}
 
-	if indexType == nil {
+		if indexType == nil {
+			return ret
+		}
+		if t.Map.Key.Equal(errs, indexType) == false {
+			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
+				errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.Key.TypeString()))
+		}
 		return ret
 	}
-	if t.Map.Key.Equal(errs, indexType) == false {
-		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-			errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.Key.TypeString()))
-	}
-	return ret
-
 }

@@ -33,7 +33,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		}
 		return []*Type{ret}
 	}
-	if callExpression.Type == VariableTypeAlias {
+	if callExpression.Type == VariableTypeTypeAlias {
 		typeConversion := &ExpressionTypeConversion{}
 		typeConversion.Type = callExpression.AliasType
 		if len(call.Args) != 1 {

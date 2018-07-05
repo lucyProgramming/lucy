@@ -753,7 +753,7 @@ redo:
 		}
 	case '\n':
 		token.Type = TokenLf
-		token.Description = "\n"
+		token.Description = "\\n"
 	case '.':
 		token.Type = TokenSelection
 		token.Description = "."

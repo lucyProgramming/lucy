@@ -400,13 +400,19 @@ func (parser *Parser) Next() {
 		if tok == nil {
 			continue
 		}
+		if parser.expectLf {
+			if tok.Type != lex.TokenLf {
+				parser.errs = append(parser.errs, fmt.Errorf("%s expect new line", parser.errorMsgPrefix()))
+			}
+			parser.expectLf = false
+		}
 		parser.token = tok
 		if tok.Type != lex.TokenLf {
-			if parser.token.Description != "" {
-				//	fmt.Println("#########", p.token.Type, p.token.Desp)
-			} else {
-				//fmt.Println("#########", p.token.Type, p.token.Data)
-			}
+			//if parser.token.Description != "" {
+			//	fmt.Println("#########", parser.token.Type, parser.token.Description)
+			//} else {
+			//	fmt.Println("#########", parser.token.Type, parser.token.Data)
+			//}
 			break
 		}
 	}
