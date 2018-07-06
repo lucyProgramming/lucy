@@ -282,7 +282,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		if matched {
 			call.Name = "<init>"
-			//block.InheritedAttribute.Function.ConstructionMethodCalledByUser = true
 			call.Method = ms[0]
 			call.Class = object.Class.SuperClass
 			ret := []*Type{&Type{}}
