@@ -170,7 +170,6 @@ func (e *Expression) constantFold() (is bool, err error) {
 			e.Type = bin.Left.Type
 			return
 		}
-
 		return e.getBinaryExpressionConstValue(f)
 	}
 	// & | ^
