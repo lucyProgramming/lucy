@@ -10,5 +10,5 @@ type InheritedAttribute struct {
 	Class                 *Class
 	Defer                 *StatementDefer
 	ClassMethod           *ClassMethod
-	ClassAndFunctionNames []string
+	ClassAndFunctionNames string
 }

@@ -284,14 +284,10 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		class.Fields[v.Name] = f
 	}
-
-	for k, v := range c.Methods {
-		if k == ast.SpecialMethodInit && c.IsInterface() == false {
-			continue
-		}
+	for name, v := range c.Methods {
 		vv := v[0]
 		method := &cg.MethodHighLevel{}
-		method.Name = vv.Function.Name
+		method.Name = name
 		method.AccessFlags = vv.Function.AccessFlags
 		if c.IsInterface() {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
@@ -301,24 +297,9 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		if c.IsInterface() == false {
 			method.Code = &cg.AttributeCode{}
-			buildPackage.buildFunction(class, nil, method, vv.Function)
+			buildPackage.buildFunction(class, c, method, vv.Function)
 		}
 		class.AppendMethod(method)
-	}
-	if c.IsInterface() == false {
-		//construction
-		if t := c.Methods[ast.SpecialMethodInit]; t != nil && len(t) > 0 {
-			method := &cg.MethodHighLevel{}
-			method.Name = "<init>"
-			method.AccessFlags = t[0].Function.AccessFlags
-			method.Class = class
-			method.Descriptor = Descriptor.methodDescriptor(&t[0].Function.Type)
-			method.IsConstruction = true
-			method.Code = &cg.AttributeCode{}
-			buildPackage.buildFunction(class, c, method, t[0].Function)
-			class.AppendMethod(method)
-
-		}
 	}
 	return class
 }

@@ -187,6 +187,9 @@ class Decoder {
 	}
 
 	fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
+		if tree.Type != JSON_SYNTAX_TREE_TYPE_OBJECT {
+			return  new error(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()));
+		}
 		fs := c.getFields();
 		for f := range fs {
 			if null == tree.keyPairs {
@@ -228,8 +231,13 @@ class Decoder {
 
 
 	fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
+		if tree.Type != JSON_SYNTAX_TREE_TYPE_ARRAY {
+			return  new error(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()));
+		}
 		
+
 	}
+
 
 	fn skipWhiteSpace() {
 		b := this.bs[this.offset];
@@ -416,7 +424,7 @@ class Decoder {
 					bs.append('\t');
 					b = this.bs[this.offset++];
 				case 'u':  // unicode
-					panic(new error("11111111"));
+					panic(new error("unSupport unicode at this stage"));
 			}
 		}
 		// b == '"'

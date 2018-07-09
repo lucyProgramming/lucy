@@ -180,8 +180,14 @@ func (parser *Parser) Parse() []error {
 				Data: b,
 			})
 			resetProperty()
-		case lex.TokenClass:
-			c, err := parser.ClassParser.parse()
+		case lex.TokenClass, lex.TokenInterface:
+			var c *ast.Class
+			var err error
+			if parser.token.Type == lex.TokenClass {
+				c, err = parser.ClassParser.parse()
+			} else {
+				c, err = parser.InterfaceParser.parse()
+			}
 			if err != nil {
 				parser.errs = append(parser.errs, err)
 				parser.consume(untilRc)
@@ -189,24 +195,8 @@ func (parser *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
-			*parser.tops = append(*parser.tops, &ast.Top{
-				Data: c,
-			})
-			if isPublic() {
-				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
-			}
-			if isFinal {
-				c.AccessFlags |= cg.ACC_CLASS_FINAL
-			}
-			resetProperty()
-		case lex.TokenInterface:
-			c, err := parser.InterfaceParser.parse()
-			if err != nil {
-				parser.errs = append(parser.errs, err)
-				parser.consume(untilRc)
-				parser.Next()
-				resetProperty()
-				continue
+			if c == nil && err == nil {
+				panic(1)
 			}
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: c,

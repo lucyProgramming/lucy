@@ -85,7 +85,9 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 					return nil, false, fmt.Errorf(errMsg)
 				}
 			} else {
-				convertLiteralExpressionsToNeeds(*callArgs, m.Function.Type.getParameterTypes(), args)
+				if callArgs != nil {
+					convertLiteralExpressionsToNeeds(*callArgs, m.Function.Type.getParameterTypes(), args)
+				}
 			}
 			for k, v := range m.Function.Type.ParameterList {
 				if k < len(args) {

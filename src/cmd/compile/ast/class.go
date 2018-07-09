@@ -28,11 +28,7 @@ type Class struct {
 }
 
 func (c *Class) HaveStaticsCodes() bool {
-	//s := 0
-	//for _, v := range c.StaticBlocks {
-	//	s += len(v.Statements)
-	//}
-	//return s > 0
+
 	return len(c.StaticBlocks) > 0
 }
 
@@ -65,6 +61,9 @@ func (c *Class) check(father *Block) []error {
 }
 
 func (c *Class) mkDefaultConstruction() {
+	if c.IsInterface() {
+		return
+	}
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
 	}
@@ -80,6 +79,7 @@ func (c *Class) mkDefaultConstruction() {
 	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
+	m.Function.Name = SpecialMethodInit
 	{
 		e := &Expression{}
 		e.Type = ExpressionTypeMethodCall
@@ -213,11 +213,7 @@ func (c *Class) checkPhase1(father *Block) []error {
 func (c *Class) checkPhase2() []error {
 	errs := []error{}
 	c.Block.InheritedAttribute.Class = c
-	c.Block.InheritedAttribute.ClassAndFunctionNames = append(c.Block.InheritedAttribute.ClassAndFunctionNames, filepath.Base(c.Name))
-	defer func() {
-		c.Block.InheritedAttribute.ClassAndFunctionNames =
-			c.Block.InheritedAttribute.ClassAndFunctionNames[:len(c.Block.InheritedAttribute.ClassAndFunctionNames)-1]
-	}()
+	c.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(c.Name)
 	errs = append(errs, c.checkFields()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
@@ -376,6 +372,10 @@ func (c *Class) resolveFather(block *Block) error {
 		c.SuperClassName = variableType.Class.Name
 		c.SuperClass = variableType.Class
 	}
+	err := c.loadSuperClass()
+	if err != nil {
+		return err
+	}
 	if c.IsInterface() {
 		if c.SuperClass.Name == JavaRootClass {
 			//nothing
@@ -384,6 +384,49 @@ func (c *Class) resolveFather(block *Block) error {
 				errMsgPrefix(c.Pos), JavaRootClass)
 		}
 	}
+	//// load interfaces
+	//for _, v := range c.InterfaceNames {
+	//	if strings.Contains(v.Name, ".") {
+	//		t := strings.Split(v.Name, ".")
+	//		i := PackageBeenCompile.getImport(c.Pos.Filename, t[0])
+	//		if i == nil {
+	//			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
+	//		}
+	//		r, err := PackageBeenCompile.load(i.Import)
+	//		if err != nil {
+	//			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
+	//		}
+	//		if p, ok := r.(*Package); ok && p != nil { // if package
+	//			if _, ok := p.Block.NameExists(t[1]); ok == false {
+	//				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
+	//			}
+	//			if p.Block.Classes == nil || p.Block.Classes[t[1]] == nil {
+	//				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
+	//			}
+	//			c.SuperClass = p.Block.Classes[t[1]]
+	//		} else if ss, ok := r.(*Class); ok && ss != nil { // must be class now
+	//			c.Interfaces = append(c.Interfaces, ss)
+	//		} else {
+	//			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+	//		}
+	//	} else {
+	//		variableType := Type{}
+	//		variableType.Type = VariableTypeName // naming
+	//		variableType.Name = v.Name
+	//		variableType.Pos = c.Pos
+	//		err := variableType.resolve(block)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		if variableType.Type != VariableTypeObject {
+	//			return fmt.Errorf("%s '%s' is not a interface", errMsgPrefix(c.Pos), c.SuperClassName)
+	//		}
+	//		if variableType.Class.IsInterface() == false {
+	//			return fmt.Errorf("%s '%s' is not a interface", errMsgPrefix(c.Pos), c.SuperClassName)
+	//		}
+	//		c.Interfaces = append(c.Interfaces, variableType.Class)
+	//	}
+	//}
 	return nil
 }
 func (c *Class) resolveInterfaces(block *Block) []error {
@@ -399,7 +442,12 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 			continue
 		}
 		if t.Type != VariableTypeObject {
-			errs = append(errs, fmt.Errorf("%s '%s' is not a class",
+			errs = append(errs, fmt.Errorf("%s '%s' is not a interface",
+				errMsgPrefix(i.Pos), i.Name))
+			continue
+		}
+		if t.Class.IsInterface() == false {
+			errs = append(errs, fmt.Errorf("%s '%s' is not a interface",
 				errMsgPrefix(i.Pos), i.Name))
 			continue
 		}
@@ -420,21 +468,43 @@ func (c *Class) suitableForInterfaces() []error {
 	return errs
 }
 func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
+	fmt.Println(inter.Name)
 	errs := []error{}
 	for name, v := range inter.Methods {
 		m := v[0]
-		if fromSub == false || m.IsPrivate() == false {
-			continue
-		}
 		args := make([]*Type, len(m.Function.Type.ParameterList))
 		for k, v := range m.Function.Type.ParameterList {
 			args[k] = v.Type
 		}
-		_, match, _ := c.accessMethod(c.Pos, &errs, name, args, nil, false)
+		ms, match, _ := c.accessMethod(c.Pos, &errs, name, args, nil, false)
 		if match == false {
 			err := fmt.Errorf("%s class named '%s' does not implement '%s',missing method '%s'",
 				errMsgPrefix(c.Pos), c.Name, inter.Name, m.Function.readableMsg())
 			errs = append(errs, err)
+		} else {
+			m := ms[0]
+			if m.IsPublic() == false {
+				err := fmt.Errorf("%s method is not public",
+					errMsgPrefix(c.Pos))
+				errs = append(errs, err)
+			}
+			if m.IsStatic() {
+				err := fmt.Errorf("%s method is static",
+					errMsgPrefix(c.Pos))
+				errs = append(errs, err)
+			}
+		}
+		fmt.Println(inter.Interfaces)
+		for _, v := range inter.Interfaces {
+			err := v.loadSelf()
+			if err != nil {
+				errs = append(errs, err)
+				return errs
+			}
+			es := c.suitableForInterface(v, false)
+			if errorsNotEmpty(es) {
+				errs = append(errs, es...)
+			}
 		}
 	}
 	return errs

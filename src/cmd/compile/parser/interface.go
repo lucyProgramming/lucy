@@ -31,8 +31,11 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
 	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	interfaceParser.ret.Name, err = interfaceParser.parser.ClassParser.parseClassName()
+	classDefinition = interfaceParser.ret
 	if err != nil {
-		return nil, err
+		interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
+		interfaceParser.consume(untilLc) //
+		interfaceParser.ret.Name = compileAutoName()
 	}
 	if interfaceParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		interfaceParser.Next() // skip extends

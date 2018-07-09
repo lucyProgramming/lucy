@@ -194,7 +194,11 @@ func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel,
 	return
 }
 
-func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, state *StackMapState) {
+func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	context *Context, state *StackMapState) {
+	if context.class == nil {
+		panic(1)
+	}
 	for _, v := range context.class.Fields {
 		if v.IsStatic() || v.Expression == nil {
 			continue

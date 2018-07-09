@@ -230,19 +230,14 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 	case ast.VariableTypeDouble:
 		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_dadd
-
 		} else if e.Type == ast.ExpressionTypeMinusAssign {
 			code.Codes[code.CodeLength] = cg.OP_dsub
-
 		} else if e.Type == ast.ExpressionTypeMulAssign {
 			code.Codes[code.CodeLength] = cg.OP_dmul
-
 		} else if e.Type == ast.ExpressionTypeDivAssign {
 			code.Codes[code.CodeLength] = cg.OP_ddiv
-
 		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_drem
-
 		}
 		code.CodeLength++
 	}
