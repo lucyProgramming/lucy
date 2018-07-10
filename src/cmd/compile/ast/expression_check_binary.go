@@ -7,11 +7,11 @@ import (
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *Type) {
 	bin := e.Data.(*ExpressionBinary)
 	t1, es := bin.Left.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	t2, es := bin.Right.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 

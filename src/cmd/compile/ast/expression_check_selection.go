@@ -9,7 +9,7 @@ import (
 func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type {
 	selection := e.Data.(*ExpressionSelection)
 	on, es := selection.Expression.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if on == nil {

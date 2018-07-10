@@ -170,7 +170,7 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		errs = append(errs, err)
 	}
 	_, es := s.Expression.check(b)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	return errs

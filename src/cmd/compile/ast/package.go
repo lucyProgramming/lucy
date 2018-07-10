@@ -84,22 +84,27 @@ func (p *Package) TypeCheck() []error {
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
 		v.mkDefaultConstruction()
+		v.Block.inherit(&PackageBeenCompile.Block)
+		v.Block.InheritedAttribute.Class = v
 	}
 
 	for _, v := range p.Block.Classes {
-		err := v.resolveFather(&p.Block)
+		err := v.resolveFather()
 		if err != nil {
 			p.Errors = append(p.Errors, err)
 		}
-		es := v.resolveInterfaces(&p.Block)
-		if errorsNotEmpty(es) {
+		es := v.resolveInterfaces()
+		if esNotEmpty(es) {
+			p.Errors = append(p.Errors, es...)
+		}
+		es = v.resolveFieldsAndMethodsType()
+		if esNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)
 		}
 	}
-
 	for _, v := range p.Block.Classes {
-		es := v.checkPhase1(&p.Block)
-		if errorsNotEmpty(es) {
+		es := v.checkPhase1()
+		if esNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)
 		}
 		if p.shouldStop(nil) {
@@ -114,7 +119,7 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase2()
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			p.Errors = append(p.Errors, es...)
 		}
 		if p.shouldStop(nil) {

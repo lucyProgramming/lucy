@@ -9,27 +9,27 @@ import (
 )
 
 type Class struct {
-	FatherNameResolved bool
-	InterfacesResolved bool
-	NotImportedYet     bool // not imported
-	Name               string
-	Pos                *Position
-	IsJava             bool //class found in CLASSPATH
-	IsGlobal           bool
-	Block              Block
-	AccessFlags        uint16
-	Fields             map[string]*ClassField
-	Methods            map[string][]*ClassMethod
-	SuperClassName     string
-	SuperClass         *Class
-	InterfaceNames     []*NameWithPos
-	Interfaces         []*Class
-	LoadFromOutSide    bool
-	StaticBlocks       []*Block
+	resolveFatherCalled               bool
+	resolveInterfacesCalled           bool
+	resolveFieldsAndMethodsTypeCalled bool
+	NotImportedYet                    bool   // not imported
+	Name                              string // binary name
+	Pos                               *Position
+	IsJava                            bool //class imported from CLASSPATH
+	IsGlobal                          bool
+	Block                             Block
+	AccessFlags                       uint16
+	Fields                            map[string]*ClassField
+	Methods                           map[string][]*ClassMethod
+	SuperClassName                    string
+	SuperClass                        *Class
+	InterfaceNames                    []*NameWithPos
+	Interfaces                        []*Class
+	LoadFromOutSide                   bool
+	StaticBlocks                      []*Block
 }
 
 func (c *Class) HaveStaticsCodes() bool {
-
 	return len(c.StaticBlocks) > 0
 }
 
@@ -38,6 +38,10 @@ func (c *Class) IsInterface() bool {
 }
 func (c *Class) IsFinal() bool {
 	return c.AccessFlags&cg.ACC_CLASS_FINAL != 0
+}
+
+func (c *Class) IsPublic() bool {
+	return c.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
 }
 
 func (c *Class) loadSelf() error {
@@ -53,11 +57,75 @@ func (c *Class) loadSelf() error {
 }
 
 func (c *Class) check(father *Block) []error {
-	errs := c.checkPhase1(father)
+	c.Block.inherit(father)
+	c.Block.InheritedAttribute.Class = c
+	errs := c.checkPhase1()
 	es := c.checkPhase2()
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
+	return errs
+}
+
+func (c *Class) checkPhase1() []error {
+	errs := c.Block.checkConstants()
+	err := c.resolveFather()
+	if err != nil {
+		errs = append(errs, err)
+	} else {
+		err = c.checkIfClassHierarchyErr()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	es := c.resolveFieldsAndMethodsType()
+	if esNotEmpty(es) {
+		errs = append(errs, es...)
+	}
+	es = c.resolveInterfaces()
+	errs = append(errs, es...)
+	es = c.suitableForInterfaces()
+	errs = append(errs, es...)
+	return errs
+}
+
+func (c *Class) checkPhase2() []error {
+	errs := []error{}
+	if c.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+		c.Block.InheritedAttribute.ClassAndFunctionNames = filepath.Base(c.Name)
+	} else {
+		c.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(c.Name)
+	}
+	errs = append(errs, c.checkFields()...)
+	if PackageBeenCompile.shouldStop(errs) {
+		return errs
+	}
+	c.mkClassInitMethod()
+	for name, ms := range c.Methods {
+		if c.Fields != nil && c.Fields[name] != nil {
+			f := c.Fields[name]
+			errMsg := fmt.Sprintf("%s class method named '%s' already declared as field,at:\n",
+				errMsgPrefix(ms[0].Function.Pos),
+			)
+			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
+			errs = append(errs, errors.New(errMsg))
+			continue
+		}
+		if len(ms) > 1 {
+			errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
+				errMsgPrefix(ms[0].Function.Pos),
+				ms[0].Function.Name, len(ms))
+			for _, v := range ms {
+				errMsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Function.Pos))
+			}
+			errs = append(errs, errors.New(errMsg))
+		}
+	}
+	errs = append(errs, c.checkMethods()...)
+	if PackageBeenCompile.shouldStop(errs) {
+		return errs
+	}
+	errs = append(errs, c.checkIfOverrideFinalMethod()...)
 	return errs
 }
 
@@ -186,68 +254,6 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 	return errs
 }
 
-func (c *Class) checkPhase1(father *Block) []error {
-	c.Block.inherit(father)
-	errs := c.Block.checkConstants()
-	c.Block.InheritedAttribute.Class = c
-	es := c.resolveAllNames(father)
-	if errorsNotEmpty(es) {
-		errs = append(errs, es...)
-	}
-	err := c.resolveFather(father)
-	if err != nil {
-		errs = append(errs, err)
-	} else {
-		err = c.checkIfClassHierarchyErr()
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	es = c.resolveInterfaces(father)
-	errs = append(errs, es...)
-	es = c.suitableForInterfaces()
-	errs = append(errs, es...)
-	return errs
-}
-
-func (c *Class) checkPhase2() []error {
-	errs := []error{}
-	c.Block.InheritedAttribute.Class = c
-	c.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(c.Name)
-	errs = append(errs, c.checkFields()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	c.mkClassInitMethod()
-	for name, ms := range c.Methods {
-		if c.Fields != nil && c.Fields[name] != nil {
-			f := c.Fields[name]
-			errMsg := fmt.Sprintf("%s class method named '%s' already declared as field,at:\n",
-				errMsgPrefix(ms[0].Function.Pos),
-			)
-			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
-			errs = append(errs, errors.New(errMsg))
-			continue
-		}
-		if len(ms) > 1 {
-			errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
-				errMsgPrefix(ms[0].Function.Pos),
-				ms[0].Function.Name, len(ms))
-			for _, v := range ms {
-				errMsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Function.Pos))
-			}
-			errs = append(errs, errors.New(errMsg))
-		}
-	}
-	errs = append(errs, c.checkMethods()...)
-	if PackageBeenCompile.shouldStop(errs) {
-		return errs
-	}
-	errs = append(errs, c.checkIfOverrideFinalMethod()...)
-	return errs
-}
-
 func (c *Class) mkClassInitMethod() {
 	if c.HaveStaticsCodes() == false {
 		return // no need
@@ -280,7 +286,13 @@ func (c *Class) mkClassInitMethod() {
 	c.Methods[f.Name] = []*ClassMethod{method}
 }
 
-func (c *Class) resolveAllNames(b *Block) []error {
+func (c *Class) resolveFieldsAndMethodsType() []error {
+	if c.resolveFieldsAndMethodsTypeCalled {
+		return []error{}
+	}
+	defer func() {
+		c.resolveFieldsAndMethodsTypeCalled = true
+	}()
 	errs := []error{}
 	var err error
 	for _, v := range c.Fields {
@@ -288,7 +300,7 @@ func (c *Class) resolveAllNames(b *Block) []error {
 			errs = append(errs, fmt.Errorf("%s super is special for access 'super'",
 				errMsgPrefix(v.Pos)))
 		}
-		err = v.Type.resolve(b)
+		err = v.Type.resolve(&c.Block)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -330,8 +342,8 @@ func (c *Class) resolveAllNames(b *Block) []error {
 	return errs
 }
 
-func (c *Class) resolveFather(block *Block) error {
-	if c.SuperClass != nil || c.FatherNameResolved {
+func (c *Class) resolveFather() error {
+	if c.resolveFatherCalled {
 		return nil
 	}
 	defer func() {
@@ -342,7 +354,7 @@ func (c *Class) resolveFather(block *Block) error {
 				c.SuperClassName = JavaRootClass
 			}
 		}
-		c.FatherNameResolved = true
+		c.resolveFatherCalled = true
 	}()
 	if c.SuperClassName == "" {
 		return nil
@@ -377,7 +389,7 @@ func (c *Class) resolveFather(block *Block) error {
 		variableType.Type = VariableTypeName // naming
 		variableType.Name = c.SuperClassName
 		variableType.Pos = c.Pos
-		err := variableType.resolve(block)
+		err := variableType.resolve(&c.Block, false)
 		if err != nil {
 			return err
 		}
@@ -401,12 +413,12 @@ func (c *Class) resolveFather(block *Block) error {
 	}
 	return nil
 }
-func (c *Class) resolveInterfaces(block *Block) []error {
-	if c.InterfacesResolved {
+func (c *Class) resolveInterfaces() []error {
+	if c.resolveInterfacesCalled {
 		return []error{}
 	}
 	defer func() {
-		c.InterfacesResolved = true
+		c.resolveInterfacesCalled = true
 	}()
 	errs := []error{}
 	for _, i := range c.InterfaceNames {
@@ -414,7 +426,7 @@ func (c *Class) resolveInterfaces(block *Block) []error {
 		t.Type = VariableTypeName
 		t.Pos = i.Pos
 		t.Name = i.Name
-		err := t.resolve(block)
+		err := t.resolve(&c.Block)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -475,7 +487,7 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 			return errs
 		}
 		es := c.suitableForInterface(vv, true)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 	}
@@ -576,7 +588,7 @@ func (c *Class) checkFields() []error {
 	for _, v := range c.Fields {
 		if v.Expression != nil {
 			t, es := v.Expression.checkSingleValueContextExpression(&c.Block)
-			if errorsNotEmpty(es) {
+			if esNotEmpty(es) {
 				errs = append(errs, es...)
 			}
 			if v.Type.Equal(&errs, t) == false {

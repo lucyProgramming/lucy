@@ -7,7 +7,7 @@ import (
 func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *Type {
 	conversion := e.Data.(*ExpressionTypeConversion)
 	t, es := conversion.Expression.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {

@@ -9,7 +9,7 @@ import (
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	object, es := call.Expression.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if object == nil {
@@ -80,7 +80,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 			matchKey := call.Name == common.MapMethodKeyExists
 			t, es := call.Args[0].checkSingleValueContextExpression(block)
-			if errorsNotEmpty(es) {
+			if esNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
 			if t == nil {
@@ -108,7 +108,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 			for _, v := range call.Args {
 				ts, es := v.check(block)
-				if errorsNotEmpty(es) {
+				if esNotEmpty(es) {
 					*errs = append(*errs, es...)
 				}
 				for _, t := range ts {
@@ -185,7 +185,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 			for _, e := range call.Args {
 				ts, es := e.check(block)
-				if errorsNotEmpty(es) {
+				if esNotEmpty(es) {
 					*errs = append(*errs, es...)
 				}
 				for _, t := range ts {

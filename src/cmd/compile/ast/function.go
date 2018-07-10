@@ -137,9 +137,12 @@ func (f *Function) checkBlock(errs *[]error) {
 	f.mkLastReturnStatement()
 	if f.Name == "" {
 		f.Name = fmt.Sprintf("literal$%d", f.Pos.StartLine)
-
 	}
-	f.Block.InheritedAttribute.ClassAndFunctionNames += "$" + f.Name
+	if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+		f.Block.InheritedAttribute.ClassAndFunctionNames = f.Name
+	} else {
+		f.Block.InheritedAttribute.ClassAndFunctionNames += "$" + f.Name
+	}
 	*errs = append(*errs, f.Block.checkStatements()...)
 }
 
@@ -156,7 +159,7 @@ func (f *Function) check(b *Block) []error {
 
 func (f *Function) clone() (ret *Function, es []error) {
 	ret, es = ParseFunctionHandler(f.SourceCodes, f.Pos)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		return ret, es
 	}
 	return ret, es
@@ -224,7 +227,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			}
 			f.HaveDefaultValue = true
 			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-			if errorsNotEmpty(es) {
+			if esNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
 			if t != nil {
@@ -273,7 +276,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			continue
 		}
 		t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 			continue
 		}

@@ -41,7 +41,7 @@ func (s *StatementFor) checkRange() []error {
 		rangeExpression = t[0].Data.(*Expression)
 	}
 	rangeOn, es := rangeExpression.checkSingleValueContextExpression(s.Block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	if rangeOn == nil {
@@ -219,7 +219,7 @@ func (s *StatementFor) check(block *Block) []error {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Init.Pos)))
 		}
 		_, es := s.Init.check(s.Block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 	}
@@ -229,7 +229,7 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
 		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 		if t != nil && t.Type != VariableTypeBool {
@@ -243,12 +243,12 @@ func (s *StatementFor) check(block *Block) []error {
 			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.After.Pos)))
 		}
 		_, es := s.After.check(s.Block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			errs = append(errs, es...)
 		}
 	}
 	es := s.Block.checkStatements()
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	return errs

@@ -8,8 +8,8 @@ func errMsgPrefix(pos *Position) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
-func errorsNotEmpty(es []error) bool {
-	return es != nil && len(es) > 0
+func esNotEmpty(es []error) bool {
+	return len(es) > 0
 }
 
 func checkEnum(enums []*Enum) []error {
@@ -34,7 +34,7 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
 	ret := []*Type{}
 	for _, v := range es {
 		ts, e := v.check(block)
-		if errorsNotEmpty(e) {
+		if esNotEmpty(e) {
 			*errs = append(*errs, e...)
 		}
 		if ts != nil {

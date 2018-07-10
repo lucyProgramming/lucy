@@ -7,7 +7,7 @@ import (
 func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 	ternary := e.Data.(*ExpressionTernary)
 	condition, es := ternary.Selection.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if condition != nil {
@@ -20,11 +20,11 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 	True, es := ternary.True.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	False, es := ternary.False.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if True != nil && False != nil && True.Equal(errs, False) == false {

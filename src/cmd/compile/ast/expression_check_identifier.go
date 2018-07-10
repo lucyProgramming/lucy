@@ -40,6 +40,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 	}
 
 	fromImport := false
+	//fmt.Println(e.Pos)
 	d, err := block.searchIdentifier(identifier.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)

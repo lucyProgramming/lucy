@@ -25,7 +25,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 	}
 	for _, v := range arr.Expressions {
 		ts, es := v.check(block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if ts != nil {

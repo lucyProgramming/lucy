@@ -22,7 +22,7 @@ type StatementSwitchCase struct {
 func (s *StatementSwitch) check(block *Block) []error {
 	errs := []error{}
 	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
 	if conditionType == nil {
@@ -77,7 +77,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 				}
 			}
 			t, es := e.checkSingleValueContextExpression(block)
-			if errorsNotEmpty(es) {
+			if esNotEmpty(es) {
 				errs = append(errs, es...)
 			}
 			if t == nil {

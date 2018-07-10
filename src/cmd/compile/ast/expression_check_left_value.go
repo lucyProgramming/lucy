@@ -38,7 +38,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 	case ExpressionTypeSelection:
 		dot := e.Data.(*ExpressionSelection)
 		t, es := dot.Expression.checkSingleValueContextExpression(block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if t == nil {

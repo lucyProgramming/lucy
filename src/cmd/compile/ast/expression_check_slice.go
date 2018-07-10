@@ -15,7 +15,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		slice.Start.Data = int32(0)
 	}
 	startT, es := slice.Start.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if startT != nil && startT.IsInteger() == false {
@@ -27,7 +27,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	}
 	if slice.End != nil {
 		endT, es := slice.End.checkSingleValueContextExpression(block)
-		if errorsNotEmpty(es) {
+		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if endT != nil && endT.IsInteger() == false {
@@ -52,7 +52,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	}
 
 	t, es := slice.Expression.checkSingleValueContextExpression(block)
-	if errorsNotEmpty(es) {
+	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
 	if t == nil {
