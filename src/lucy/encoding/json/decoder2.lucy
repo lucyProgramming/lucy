@@ -195,7 +195,7 @@ class Decoder {
 			if null == tree.keyPairs {
 				continue ;
 			}
-			if false == tree.keyPairs.keyExists(f.getName()) {
+			if false == tree.keyPairs.keyExist(f.getName()) {
 				continue ; 
 			}
 			var cc Class ;

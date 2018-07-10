@@ -11,7 +11,7 @@ const (
 	// map
 	MapMethodRemove    = "remove"
 	MapMethodRemoveAll = "removeAll"
-	MapMethodKeyExists = "keyExists"
+	MapMethodKeyExists = "keyExist"
 	MapMethodSize      = "size"
 	// buildIn function
 	BuildInFunctionPanic        = "panic"
