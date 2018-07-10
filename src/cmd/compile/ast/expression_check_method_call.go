@@ -238,11 +238,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		return nil
 	}
-	if object.Type != VariableTypeObject && object.Type != VariableTypeClass {
-		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
-			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
-		return nil
-	}
+
 	// call father`s construction method
 	if call.Name == SUPER {
 		if block.InheritedAttribute.IsConstructionMethod == false ||
@@ -298,9 +294,40 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		return nil
 	}
+	if object.Type != VariableTypeObject && object.Type != VariableTypeClass {
+		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
+			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
+		return nil
+	}
 	call.Class = object.Class
 	args := checkExpressions(block, call.Args, errs)
 	args = checkRightValuesValid(args, errs)
+	if object.Class.IsInterface() {
+		if object.Type == VariableTypeClass {
+			*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",
+				errMsgPrefix(e.Pos), object.Class.Name))
+			return nil
+		}
+		ms, matched, err := object.Class.accessInterfaceMethod(e.Pos, errs, call.Name, args, false)
+		if err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+			return nil
+		}
+		if matched {
+			if ms[0].IsStatic() {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is static",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			call.Method = ms[0]
+			return ms[0].Function.Type.returnTypes(e.Pos)
+		}
+		if len(ms) == 0 {
+			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
+		} else {
+			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))
+		}
+		return nil
+	}
 	if len(call.ParameterTypes) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s method call expect no parameter types",
 			errMsgPrefix(e.Pos)))

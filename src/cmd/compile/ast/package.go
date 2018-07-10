@@ -85,12 +85,18 @@ func (p *Package) TypeCheck() []error {
 		v.Name = p.Name + "/" + v.Name
 		v.mkDefaultConstruction()
 	}
+
 	for _, v := range p.Block.Classes {
 		err := v.resolveFather(&p.Block)
 		if err != nil {
 			p.Errors = append(p.Errors, err)
 		}
+		es := v.resolveInterfaces(&p.Block)
+		if errorsNotEmpty(es) {
+			p.Errors = append(p.Errors, es...)
+		}
 	}
+
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase1(&p.Block)
 		if errorsNotEmpty(es) {

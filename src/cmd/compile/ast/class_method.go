@@ -48,6 +48,105 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	return true
 }
 
+func (c *Class) accessInterfaceMethod(from *Position, errs *[]error, name string, args []*Type,
+	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	err = c.loadSelf()
+	if err != nil {
+		return nil, false, err
+	}
+	if c.IsJava {
+		return c.accessInterfaceMethodAsJava(from, errs, name, args, false)
+	}
+	if len(c.Methods[name]) > 0 {
+		for _, m := range c.Methods[name] {
+			if fromSub {
+				if m.IsPrivate() { // break the looking
+					return nil, false, fmt.Errorf("method '%s' not found", name)
+				}
+			}
+			if len(args) > len(m.Function.Type.ParameterList) {
+				errMsg := fmt.Sprintf("too many paramaters to call function '%s':\n", name)
+				errMsg += fmt.Sprintf("\thave %s\n", m.Function.badParameterMsg(name, args))
+				errMsg += fmt.Sprintf("\twant %s\n", m.Function.readableMsg())
+				return nil, false, fmt.Errorf(errMsg)
+			}
+			if len(args) < len(m.Function.Type.ParameterList) {
+				errMsg := fmt.Sprintf("too few paramaters to call function '%s'\n", name)
+				errMsg += fmt.Sprintf("\thave %s\n", m.Function.badParameterMsg(m.Function.Name, args))
+				errMsg += fmt.Sprintf("\twant %s\n", m.Function.readableMsg())
+				return nil, false, fmt.Errorf(errMsg)
+			}
+			for k, v := range m.Function.Type.ParameterList {
+				if k < len(args) {
+					if args[k] != nil && !v.Type.Equal(errs, args[k]) {
+						errMsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Type.TypeString())
+						errMsg += fmt.Sprintf("\thave %s\n", m.Function.badParameterMsg(m.Function.Name, args))
+						errMsg += fmt.Sprintf("\twant %s\n", m.Function.readableMsg())
+						return nil, false, fmt.Errorf(errMsg)
+					}
+				}
+			}
+			return []*ClassMethod{m}, true, nil
+		}
+	}
+	for _, v := range c.Interfaces {
+		err := v.loadSelf()
+		if err != nil {
+			return nil, false, fmt.Errorf("%s %v", errMsgPrefix(from), err)
+		}
+		ms, matched, err := v.accessInterfaceMethod(from, errs, name, args, true)
+		if matched {
+			return ms, matched, err
+		}
+	}
+	return nil, false, fmt.Errorf("%s method '%s' not found", errMsgPrefix(from), name)
+}
+
+/*
+	access method java style
+*/
+func (c *Class) accessInterfaceMethodAsJava(from *Position, errs *[]error, name string,
+	args []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	for _, v := range c.Methods[name] {
+		if len(v.Function.Type.ParameterList) != len(args) {
+			if fromSub == false || v.IsPublic() || v.IsProtected() {
+				ms = append(ms, v)
+			}
+			continue
+		}
+		noError := true
+		for kk, vv := range v.Function.Type.ParameterList {
+			if args[kk] != nil && vv.Type.Equal(errs, args[kk]) == false {
+				noError = false
+				ms = append(ms, v)
+				break
+			}
+		}
+		if noError {
+			return []*ClassMethod{v}, true, nil
+		}
+	}
+	// don`t try father, when is is construction method
+	if name == SpecialMethodInit {
+		return ms, false, nil
+	}
+	if c.Name == JavaRootClass {
+		return ms, false, nil
+	}
+	err = c.loadSuperClass()
+	if err != nil {
+		return nil, false, err
+	}
+	ms_, matched, err := c.SuperClass.accessMethodAsJava(from, errs, name, args, true)
+	if err != nil {
+		return ms, false, err
+	}
+	if matched { // perfect match in father
+		return ms_, matched, nil
+	}
+	return append(ms, ms_...), false, nil // methods have the same name
+}
+
 /*
 	access method lucy style
 */
@@ -85,9 +184,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 					return nil, false, fmt.Errorf(errMsg)
 				}
 			} else {
-				if callArgs != nil {
-					convertLiteralExpressionsToNeeds(*callArgs, m.Function.Type.getParameterTypes(), args)
-				}
+				convertLiteralExpressionsToNeeds(*callArgs, m.Function.Type.getParameterTypes(), args)
 			}
 			for k, v := range m.Function.Type.ParameterList {
 				if k < len(args) {
