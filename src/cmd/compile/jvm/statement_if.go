@@ -37,10 +37,13 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	code.CodeLength += 3
 	buildPackage.buildBlock(class, code, &s.Block, context, IfState)
 	conditionState.addTop(IfState)
-	if s.Block.WillNotExecuteToEnd == false {
-		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+	if s.ElseBlock != nil || len(s.ElseIfList) > 0 {
+		if s.Block.WillNotExecuteToEnd == false {
+			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+		}
 	}
-	for _, v := range s.ElseIfList {
+
+	for k, v := range s.ElseIfList {
 		context.MakeStackMap(code, conditionState, code.CodeLength) // state is not change,all block var should be access from outside
 		binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codeLength))
 		var elseIfState *StackMapState
@@ -64,9 +67,10 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 		exit = code.Codes[code.CodeLength+1 : code.CodeLength+3]
 		code.CodeLength += 3
 		buildPackage.buildBlock(class, code, v.Block, context, elseIfState)
-
-		if v.Block.WillNotExecuteToEnd == false {
-			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+		if s.ElseBlock != nil || k != len(s.ElseIfList)-1 {
+			if v.Block.WillNotExecuteToEnd == false {
+				s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+			}
 		}
 		// when done
 		conditionState.addTop(elseIfState)

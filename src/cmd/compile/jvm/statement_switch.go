@@ -67,7 +67,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	size := jvmSlotSize(s.Condition.ExpressionValue)
 	currentStack := size
 	state.pushStack(class, s.Condition.ExpressionValue)
-	for _, c := range s.StatementSwitchCases {
+	for k, c := range s.StatementSwitchCases {
 		if exit != nil {
 			writeExits([]*cg.Exit{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -120,7 +120,6 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			}
 			state.pushStack(class, s.Condition.ExpressionValue)
 			compare(s.Condition.ExpressionValue)
-
 			matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
@@ -141,9 +140,11 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			buildPackage.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
-			s.Exits = append(s.Exits,
-				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
+		if k != len(s.StatementSwitchCases)-1 || s.Default != nil {
+			if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
+				s.Exits = append(s.Exits,
+					(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
+			}
 		}
 	}
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
