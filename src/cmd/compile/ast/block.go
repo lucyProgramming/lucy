@@ -4,16 +4,19 @@ import (
 	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Block struct {
-	WillNotExecuteToEnd        bool // should analyse at ast stage
+	Exits                      []*cg.Exit // for switch template
+	WillNotExecuteToEnd        bool       // should analyse at ast stage
 	Defers                     []*StatementDefer
 	isGlobalVariableDefinition bool
 	IsFunctionBlock            bool
 	IsClassBlock               bool
 	IsForBlock                 bool
 	IsSwitchStatementTopBlock  bool
+	IsSwitchTemplateBlock      bool
 	Pos                        *Position
 	EndPos                     *Position
 	Outer                      *Block

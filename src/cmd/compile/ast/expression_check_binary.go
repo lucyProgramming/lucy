@@ -26,7 +26,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return result
 		}
 		if t1.Type != VariableTypeBool || t2.Type != VariableTypeBool {
-			*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 
 		return result
@@ -36,12 +36,12 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		ExpressionTypeAnd == e.Type ||
 		ExpressionTypeXor == e.Type {
 		if t1 == nil || t2 == nil {
-			if t1 != nil {
+			if t1 != nil && t1.IsNumber() {
 				tt := t1.Clone()
 				tt.Pos = e.Pos
 				return tt
 			}
-			if t2 != nil {
+			if t2 != nil && t2.IsNumber() {
 				tt := t2.Clone()
 				tt.Pos = e.Pos
 				return tt
@@ -49,7 +49,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return nil
 		}
 		if t1.IsInteger() == false || t1.Equal(errs, t2) == false {
-			*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 		result = t1.Clone()
 		result.Pos = e.Pos
@@ -59,20 +59,15 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if e.Type == ExpressionTypeLsh ||
 		e.Type == ExpressionTypeRsh {
 		if t1 == nil || t2 == nil {
-			if t1 != nil {
+			if t1 != nil && t1.IsNumber() {
 				tt := t1.Clone()
-				tt.Pos = e.Pos
-				return tt
-			}
-			if t2 != nil {
-				tt := t2.Clone()
 				tt.Pos = e.Pos
 				return tt
 			}
 			return nil
 		}
 		if false == t1.IsInteger() || t2.IsInteger() == false {
-			*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 		} else {
 			if t2.Type == VariableTypeLong {
 				bin.Right.ConvertToNumber(VariableTypeInt)
@@ -99,11 +94,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		switch t1.Type {
 		case VariableTypeBool:
 			if t2.Type != VariableTypeBool || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
-				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+				*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VariableTypeEnum:
 			if t1.Equal(errs, t2) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
-				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+				*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VariableTypeByte:
 			fallthrough
@@ -120,7 +115,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				(t1.IsFloat() && t2.IsFloat()) {
 				if t1.Equal(errs, t2) == false {
 					if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
-						*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+						*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 					} else {
 						if bin.Left.IsLiteral() {
 							bin.Left.ConvertToNumber(t2.Type)
@@ -130,17 +125,17 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					}
 				}
 			} else {
-				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+				*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 		case VariableTypeString:
 			if t2.Type == VariableTypeNull {
 				if e.Type != ExpressionTypeEq && ExpressionTypeNe != e.Type {
-					*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+					*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 
 				}
 			} else {
 				if t2.Type != VariableTypeString {
-					*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+					*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 				}
 			}
 
@@ -197,7 +192,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		//check string first
 		if t1.Type == VariableTypeString || t2.Type == VariableTypeString { // string is always ok
 			if e.Type != ExpressionTypeAdd {
-				*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+				*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 			}
 			result = &Type{}
 			result.Type = VariableTypeString
@@ -208,7 +203,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			(t1.IsFloat() && t2.IsFloat()) {
 			if t1.Equal(errs, t2) == false {
 				if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
-					*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+					*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 				} else {
 					if bin.Left.IsLiteral() {
 						bin.Left.ConvertToNumber(t2.Type)
@@ -218,7 +213,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				}
 			}
 		} else {
-			*errs = append(*errs, e.mkWrongOpErr(t1.TypeString(), t2.TypeString()))
+			*errs = append(*errs, e.makeWrongOpErr(t1.TypeString(), t2.TypeString()))
 		}
 		result = t1.Clone()
 		result.Pos = e.Pos

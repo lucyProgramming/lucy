@@ -72,8 +72,8 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 }
 
 type Map struct {
-	Key   *Type
-	Value *Type
+	K *Type
+	V *Type
 }
 
 func (typ *Type) mkDefaultValueExpression() *Expression {
@@ -154,8 +154,8 @@ func (typ *Type) Clone() *Type {
 	}
 	if ret.Type == VariableTypeMap {
 		ret.Map = &Map{}
-		ret.Map.Key = typ.Map.Key.Clone()
-		ret.Map.Value = typ.Map.Value.Clone()
+		ret.Map.K = typ.Map.K.Clone()
+		ret.Map.V = typ.Map.V.Clone()
 	}
 	return ret
 }
@@ -188,14 +188,14 @@ func (typ *Type) resolve(block *Block, subPart ...bool) error {
 	}
 	if typ.Type == VariableTypeMap {
 		var err error
-		if typ.Map.Key != nil {
-			err = typ.Map.Key.resolve(block, true)
+		if typ.Map.K != nil {
+			err = typ.Map.K.resolve(block, true)
 			if err != nil {
 				return err
 			}
 		}
-		if typ.Map.Value != nil {
-			return typ.Map.Value.resolve(block, true)
+		if typ.Map.V != nil {
+			return typ.Map.V.resolve(block, true)
 		}
 	}
 	return nil
@@ -393,9 +393,9 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "object@(" + typ.Class.Name + ")"
 	case VariableTypeMap:
 		*ret += "map{"
-		*ret += typ.Map.Key.TypeString()
+		*ret += typ.Map.K.TypeString()
 		*ret += " -> "
-		*ret += typ.Map.Value.TypeString()
+		*ret += typ.Map.V.TypeString()
 		*ret += "}"
 	case VariableTypeJavaArray:
 		*ret += typ.Array.TypeString() + "[]"
@@ -458,10 +458,10 @@ func (typ *Type) haveParameterType() (ret []string) {
 	}
 	if typ.Type == VariableTypeMap {
 		ret = []string{}
-		if t := typ.Map.Key.haveParameterType(); t != nil {
+		if t := typ.Map.K.haveParameterType(); t != nil {
 			ret = append(ret, t...)
 		}
-		if t := typ.Map.Value.haveParameterType(); t != nil {
+		if t := typ.Map.V.haveParameterType(); t != nil {
 			ret = append(ret, t...)
 		}
 		return
@@ -481,11 +481,11 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 		return typ.Array.canBeBindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
-		err := typ.Map.Key.canBeBindWithParameterTypes(parameterTypes)
+		err := typ.Map.K.canBeBindWithParameterTypes(parameterTypes)
 		if err != nil {
 			return err
 		}
-		return typ.Map.Value.canBeBindWithParameterTypes(parameterTypes)
+		return typ.Map.V.canBeBindWithParameterTypes(parameterTypes)
 	}
 	return fmt.Errorf("not T") // looks impossible
 }
@@ -506,11 +506,11 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 		return typ.Array.bindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
-		err := typ.Map.Key.bindWithParameterTypes(parameterTypes)
+		err := typ.Map.K.bindWithParameterTypes(parameterTypes)
 		if err != nil {
 			return err
 		}
-		return typ.Map.Value.bindWithParameterTypes(parameterTypes)
+		return typ.Map.V.bindWithParameterTypes(parameterTypes)
 	}
 	panic("not T")
 }
@@ -536,11 +536,11 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 		return typ.Array.canBeBindWithType(mkParameterTypes, bind.Array)
 	}
 	if typ.Type == VariableTypeMap && bind.Type == VariableTypeMap {
-		err := typ.Map.Key.canBeBindWithType(mkParameterTypes, bind.Map.Key)
+		err := typ.Map.K.canBeBindWithType(mkParameterTypes, bind.Map.K)
 		if err != nil {
 			return err
 		}
-		return typ.Map.Value.canBeBindWithType(mkParameterTypes, bind.Map.Value)
+		return typ.Map.V.canBeBindWithType(mkParameterTypes, bind.Map.V)
 	}
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())
 }
@@ -570,7 +570,7 @@ func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
 		return typ.Enum.Name == compareTo.Enum.Name
 	}
 	if typ.Type == VariableTypeMap && compareTo.Type == VariableTypeMap {
-		return typ.Map.Key.Equal(errs, compareTo.Map.Key) && typ.Map.Value.Equal(errs, compareTo.Map.Value)
+		return typ.Map.K.Equal(errs, compareTo.Map.K) && typ.Map.V.Equal(errs, compareTo.Map.V)
 	}
 	if typ.Type == VariableTypeObject && compareTo.Type == VariableTypeObject { // object
 		if typ.Class.NotImportedYet {
@@ -631,10 +631,10 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 		return typ.Array.StrictEqual(compareTo.Array)
 	}
 	if typ.Type == VariableTypeMap {
-		if false == typ.Map.Key.StrictEqual(compareTo.Map.Key) {
+		if false == typ.Map.K.StrictEqual(compareTo.Map.K) {
 			return false
 		}
-		return typ.Map.Value.StrictEqual(compareTo.Map.Value)
+		return typ.Map.V.StrictEqual(compareTo.Map.V)
 	}
 	if typ.Type == VariableTypeEnum {
 		return typ.Enum.Name == compareTo.Enum.Name

@@ -17,8 +17,8 @@ func writeExits(es []*cg.Exit, to int) {
 }
 
 func jumpTo(op byte, code *cg.AttributeCode, to int) {
-	b := (&cg.Exit{}).FromCode(op, code)
-	writeExits([]*cg.Exit{b}, to)
+	exit := (&cg.Exit{}).FromCode(op, code)
+	writeExits([]*cg.Exit{exit}, to)
 }
 
 func copyOPs(code *cg.AttributeCode, op ...byte) {

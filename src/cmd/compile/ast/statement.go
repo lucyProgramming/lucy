@@ -69,17 +69,21 @@ func (s *Statement) check(block *Block) []error { // block is father
 	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:
-		if block.InheritedAttribute.StatementFor == nil && block.InheritedAttribute.StatementSwitch == nil {
+		if block.InheritedAttribute.StatementFor == nil &&
+			block.InheritedAttribute.StatementSwitch == nil &&
+			block.InheritedAttribute.SwitchTemplateBlock == nil {
 			return []error{fmt.Errorf("%s 'break' cannot in this scope", errMsgPrefix(s.Pos))}
 		} else {
 			if block.InheritedAttribute.Defer != nil {
 				return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
 					errMsgPrefix(s.Pos))}
 			}
-			if f, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
-				s.StatementBreak.StatementFor = f
+			if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
+				s.StatementBreak.StatementFor = t
+			} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
+				s.StatementBreak.StatementSwitch = t
 			} else {
-				s.StatementBreak.StatementSwitch = block.InheritedAttribute.ForBreak.(*StatementSwitch)
+				s.StatementBreak.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
 			}
 			s.StatementBreak.mkDefers(block)
 		}

@@ -155,16 +155,16 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if s.RangeAttr.RangeOn.ExpressionValue.Map.Value.IsPointer() == false {
-			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
+		if s.RangeAttr.RangeOn.ExpressionValue.Map.V.IsPointer() == false {
+			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		} else {
-			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
+			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		}
 		autoVar.V = code.MaxLocals
-		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
+		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 		//store to V
-		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.Value.Type, autoVar.V)...)
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.Value)
+		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.V.Type, autoVar.V)...)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
@@ -178,15 +178,15 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
-		if s.RangeAttr.RangeOn.ExpressionValue.Map.Key.IsPointer() == false {
-			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
+		if s.RangeAttr.RangeOn.ExpressionValue.Map.K.IsPointer() == false {
+			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 		} else {
-			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
+			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 		}
 		autoVar.K = code.MaxLocals
-		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
-		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.Key.Type, autoVar.K)...)
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.Key)
+		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K)
+		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.K.Type, autoVar.K)...)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
 	}
 
 	// store k and v into user defined variable
@@ -222,8 +222,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			maxStack = stack
 		}
 		copyOPs(code,
-			loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.Value.Type, autoVar.V)...)
-		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Value); t > maxStack {
+			loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.V.Type, autoVar.V)...)
+		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V); t > maxStack {
 			maxStack = t
 		}
 		copyOPs(code, op...)
@@ -236,8 +236,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 				maxStack = stack
 			}
 			copyOPs(code,
-				loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.Key.Type, autoVar.K)...)
-			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.Key); t > maxStack {
+				loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.K.Type, autoVar.K)...)
+			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K); t > maxStack {
 				maxStack = t
 			}
 			copyOPs(code, op...)

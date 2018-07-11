@@ -72,7 +72,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 	if leftValueKind == 0 {
 		panic("missing  assign")
 	}
-	if leftValueKind == LeftValueTypeStoreLocalVar {
+	if leftValueKind == LeftValueTypeLocalVar {
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup

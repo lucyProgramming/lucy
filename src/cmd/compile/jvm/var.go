@@ -16,7 +16,7 @@ const (
 	_ = iota
 	LeftValueTypeLucyArray
 	LeftValueTypeMap
-	LeftValueTypeStoreLocalVar
+	LeftValueTypeLocalVar
 	LeftValueTypePutStatic
 	LeftValueTypePutField
 	LeftValueTypeArray
@@ -36,5 +36,4 @@ const (
 	javaStringBuilderClass = "java/lang/StringBuilder"
 	throwableClass         = "java/lang/Throwable"
 	javaPrintStreamClass   = "java/io/PrintStream"
-	//javaIndexOutOfRangeExceptionClass = "java/lang/ArrayIndexOutOfBoundsException"
 )

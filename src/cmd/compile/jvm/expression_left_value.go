@@ -57,9 +57,9 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	state.pushStack(class, state.newObjectVariableType(javaRootClass))
 	remainStack = 2
 	ops = []byte{}
-	if index.Expression.ExpressionValue.Map.Value.IsPointer() == false {
+	if index.Expression.ExpressionValue.Map.V.IsPointer() == false {
 		ops = append(ops,
-			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.Value)...)
+			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.V)...)
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
@@ -70,7 +70,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	ops = append(ops, bs4...)
-	target = index.Expression.ExpressionValue.Map.Value
+	target = index.Expression.ExpressionValue.Map.V
 	leftValueType = LeftValueTypeMap
 	return
 }
@@ -101,7 +101,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 		if identifier.Name == ast.NoNameIdentifier {
 			panic("this is not happening")
 		}
-		leftValueType = LeftValueTypeStoreLocalVar
+		leftValueType = LeftValueTypeLocalVar
 		ops = storeLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)
 		target = identifier.Variable.Type
 	case ast.ExpressionTypeIndex:

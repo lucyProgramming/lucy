@@ -29,6 +29,10 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		}
 		buildPackage.buildBlock(class, code, s.Block, context, blockState)
 		state.addTop(blockState)
+		if len(s.Block.Exits) > 0 {
+			writeExits(s.StatementIf.Exits, code.CodeLength)
+			context.MakeStackMap(code, state, code.CodeLength)
+		}
 	case ast.StatementTypeFor:
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
@@ -49,11 +53,13 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			code.CodeLength++
 			buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		}
-		b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+		exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
-			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, b)
-		} else { // switch
-			s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, b)
+			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
+		} else if s.StatementBreak.StatementSwitch != nil { // switch
+			s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, exit)
+		} else {
+			s.StatementBreak.SwitchTemplateBlock.Exits = append(s.StatementBreak.SwitchTemplateBlock.Exits, exit)
 		}
 	case ast.StatementTypeReturn:
 		maxStack = buildPackage.buildReturnStatement(class, code, s.StatementReturn, context, state)
@@ -72,8 +78,8 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 			jumpTo(cg.OP_goto, code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {
-			b := (&cg.Exit{}).FromCode(cg.OP_goto, code)
-			s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, b)
+			exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+			s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, exit)
 		}
 	case ast.StatementTypeLabel:
 		s.StatementLabel.CodeOffsetGenerated = true

@@ -5,6 +5,7 @@ type InheritedAttribute struct {
 	IsConstructionMethod  bool
 	StatementFor          *StatementFor // if this statement is in for or not
 	StatementSwitch       *StatementSwitch
+	SwitchTemplateBlock   *Block
 	ForBreak              interface{} // for or switch statement
 	Function              *Function
 	Class                 *Class

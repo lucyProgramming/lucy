@@ -460,18 +460,18 @@ func (c *Class) suitableForInterfaces() []error {
 
 func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 	errs := []error{}
-	for _, v := range inter.Methods {
+	for name, v := range inter.Methods {
 		m := v[0]
 		im, match := c.implementMethod(m, false, &errs, c.Pos)
 		if match {
 			if im.IsPublic() == false {
-				err := fmt.Errorf("%s method is not public",
-					errMsgPrefix(c.Pos))
+				err := fmt.Errorf("%s method '%s' is not public",
+					errMsgPrefix(c.Pos), name)
 				errs = append(errs, err)
 			}
 			if im.IsStatic() {
-				err := fmt.Errorf("%s method is static",
-					errMsgPrefix(c.Pos))
+				err := fmt.Errorf("%s method '%s' is static",
+					errMsgPrefix(c.Pos), name)
 				errs = append(errs, err)
 			}
 			return errs

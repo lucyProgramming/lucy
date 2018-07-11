@@ -118,8 +118,8 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 		parser.Next()
 		m := &ast.Map{
-			Key:   k,
-			Value: v,
+			K: k,
+			V: v,
 		}
 		ret = &ast.Type{
 			Type: ast.VariableTypeMap,

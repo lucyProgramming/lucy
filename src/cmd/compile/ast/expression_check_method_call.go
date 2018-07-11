@@ -87,14 +87,14 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				return []*Type{ret}
 			}
 			if matchKey {
-				if false == object.Map.Key.Equal(errs, t) {
+				if false == object.Map.K.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(e.Pos), t.TypeString(), object.Map.Key.TypeString()))
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
 				}
 			} else {
-				if false == object.Map.Value.Equal(errs, t) {
+				if false == object.Map.V.Equal(errs, t) {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(e.Pos), t.TypeString(), object.Map.Value.TypeString()))
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.V.TypeString()))
 				}
 			}
 			return []*Type{ret}
@@ -115,9 +115,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					if t == nil {
 						continue
 					}
-					if object.Map.Key.Equal(errs, t) == false {
+					if object.Map.K.Equal(errs, t) == false {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for key",
-							errMsgPrefix(e.Pos), t.TypeString(), object.Map.Key.TypeString()))
+							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
 					}
 				}
 			}

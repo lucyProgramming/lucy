@@ -1,9 +1,10 @@
 package ast
 
 type StatementBreak struct {
-	Defers          []*StatementDefer
-	StatementFor    *StatementFor
-	StatementSwitch *StatementSwitch
+	Defers              []*StatementDefer
+	StatementFor        *StatementFor
+	StatementSwitch     *StatementSwitch
+	SwitchTemplateBlock *Block
 }
 
 func (s *StatementBreak) mkDefers(block *Block) {
@@ -14,9 +15,15 @@ func (s *StatementBreak) mkDefers(block *Block) {
 		}
 		s.mkDefers(block.Outer)
 		return
-	} else {
+	} else if s.StatementSwitch != nil {
 		// switch
 		if block.IsSwitchStatementTopBlock {
+			s.Defers = append(s.Defers, block.Defers...)
+			return
+		}
+		s.mkDefers(block.Outer)
+	} else if s.SwitchTemplateBlock != nil {
+		if block.IsSwitchTemplateBlock {
 			s.Defers = append(s.Defers, block.Defers...)
 			return
 		}

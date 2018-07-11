@@ -39,12 +39,12 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			if false == rightValueValid {
 				*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
 			}
-			if noType && m.Type.Map.Key == nil {
+			if noType && m.Type.Map.K == nil {
 				if kType.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k", errMsgPrefix(v.Left.Pos)))
 				} else {
-					m.Type.Map.Key = kType
-					mapK = m.Type.Map.Key
+					m.Type.Map.K = kType
+					mapK = m.Type.Map.K
 				}
 			}
 			if rightValueValid && mapK != nil {
@@ -67,13 +67,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(v.Left.Pos)))
 			continue
 		}
-		if noType && m.Type.Map.Value == nil {
+		if noType && m.Type.Map.V == nil {
 			if vType.isTyped() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
 					errMsgPrefix(v.Left.Pos)))
 			} else {
-				m.Type.Map.Value = vType
-				mapV = m.Type.Map.Value
+				m.Type.Map.V = vType
+				mapV = m.Type.Map.V
 			}
 		}
 		if mapV != nil {
@@ -85,14 +85,14 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 
-	if m.Type.Map.Key == nil {
-		m.Type.Map.Key = &Type{
+	if m.Type.Map.K == nil {
+		m.Type.Map.K = &Type{
 			Type: VariableTypeVoid,
 			Pos:  e.Pos,
 		}
 	}
-	if m.Type.Map.Value == nil {
-		m.Type.Map.Value = &Type{
+	if m.Type.Map.V == nil {
+		m.Type.Map.V = &Type{
 			Type: VariableTypeVoid,
 			Pos:  e.Pos,
 		}

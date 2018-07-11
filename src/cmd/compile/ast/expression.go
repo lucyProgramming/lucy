@@ -540,7 +540,7 @@ type ExpressionMap struct {
 }
 
 /*
-for some general purpose
+	for some general purpose
 */
 type ExpressionBinary struct {
 	Left  *Expression

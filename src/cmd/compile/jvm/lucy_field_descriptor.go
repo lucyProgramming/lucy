@@ -18,8 +18,8 @@ func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {
 func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	if variableType.Type == ast.VariableTypeMap {
 		d = "M" // start token of map
-		d += signature.Encode(variableType.Map.Key)
-		d += signature.Encode(variableType.Map.Value)
+		d += signature.Encode(variableType.Map.K)
+		d += signature.Encode(variableType.Map.V)
 		return d
 	}
 	if variableType.Type == ast.VariableTypeEnum {
@@ -55,8 +55,8 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 		m := &ast.Type{}
 		m.Type = ast.VariableTypeMap
 		m.Map = &ast.Map{}
-		m.Map.Key = kt
-		m.Map.Value = vt
+		m.Map.K = kt
+		m.Map.V = vt
 		return bs, m, nil
 	}
 	if bs[0] == 'E' {

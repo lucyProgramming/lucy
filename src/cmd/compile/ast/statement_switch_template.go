@@ -63,6 +63,9 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 		statement.Type = StatementTypeBlock
 		statement.Block = s.Default
 		statement.Block.inherit(block)
+		statement.Block.IsSwitchTemplateBlock = true
+		statement.Block.InheritedAttribute.SwitchTemplateBlock = statement.Block
+		statement.Block.InheritedAttribute.ForBreak = statement.Block
 		return statement.Block.checkStatements()
 	}
 	// let`s reWrite
@@ -72,6 +75,9 @@ func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (err
 		statement.Type = StatementTypeBlock
 		statement.Block = matchBlock
 		statement.Block.inherit(block)
+		statement.Block.IsSwitchTemplateBlock = true
+		statement.Block.InheritedAttribute.SwitchTemplateBlock = statement.Block
+		statement.Block.InheritedAttribute.ForBreak = statement.Block
 		return append(errs, statement.Block.checkStatements()...)
 	}
 	return
