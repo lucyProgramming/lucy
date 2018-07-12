@@ -41,6 +41,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	ret.Pos = e.Pos
 	return ret
 }
+
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type {
 	ee := e.Data.(*Expression)
 	t := ee.getLeftValue(block, errs)

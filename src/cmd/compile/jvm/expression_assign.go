@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -67,12 +68,10 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	return
 }
 
-func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, leftValueKind int,
+func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, leftValueType int,
 	stackTopType *ast.Type) (increment uint16) {
-	if leftValueKind == 0 {
-		panic("missing  assign")
-	}
-	if leftValueKind == LeftValueTypeLocalVar {
+	switch leftValueType {
+	case LeftValueTypeLocalVar:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -81,9 +80,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 			increment = 2
 		}
 		code.CodeLength++
-		return
-	}
-	if leftValueKind == LeftValueTypePutStatic {
+	case LeftValueTypePutStatic:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -92,10 +89,8 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 			increment = 2
 		}
 		code.CodeLength++
-		return
-	}
 
-	if leftValueKind == LeftValueTypePutField {
+	case LeftValueTypePutField:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
@@ -104,32 +99,31 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 			code.Codes[code.CodeLength] = cg.OP_dup2_x1
 		}
 		code.CodeLength++
-		return
+
+	case LeftValueTypeArray, LeftValueTypeLucyArray:
+		if jvmSlotSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup_x2
+			code.CodeLength++
+		} else {
+			increment = 2
+			code.Codes[code.CodeLength] = cg.OP_dup2_x2
+			code.CodeLength++
+		}
+
+	case LeftValueTypeMap:
+		if jvmSlotSize(stackTopType) == 1 {
+			increment = 1
+			code.Codes[code.CodeLength] = cg.OP_dup_x2
+			code.CodeLength++
+		} else {
+			increment = 2
+			code.Codes[code.CodeLength] = cg.OP_dup2_x2
+			code.CodeLength++
+		}
+	default:
+		panic(fmt.Sprintf("unknow %d", leftValueType))
 	}
 
-	if leftValueKind == LeftValueTypeArray || leftValueKind == LeftValueTypeLucyArray {
-		if jvmSlotSize(stackTopType) == 1 {
-			increment = 1
-			code.Codes[code.CodeLength] = cg.OP_dup_x2
-			code.CodeLength++
-		} else {
-			increment = 2
-			code.Codes[code.CodeLength] = cg.OP_dup2_x2
-			code.CodeLength++
-		}
-		return
-	}
-	if leftValueKind == LeftValueTypeMap {
-		if jvmSlotSize(stackTopType) == 1 {
-			increment = 1
-			code.Codes[code.CodeLength] = cg.OP_dup_x2
-			code.CodeLength++
-		} else {
-			increment = 2
-			code.Codes[code.CodeLength] = cg.OP_dup2_x2
-			code.CodeLength++
-		}
-		return
-	}
 	return
 }

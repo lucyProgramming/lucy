@@ -35,6 +35,38 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		}
 		return
 	}
+	if selection.Function != nil { // pack to method handle
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/invoke/MethodHandles",
+			Method:     "lookup",
+			Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertClassConst(selection.Expression.ExpressionValue.Package.Name+"/main",
+			code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+			Descriptor: Descriptor.methodDescriptor(&selection.Function.Type),
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/invoke/MethodHandles$Lookup",
+			Method:     "findStatic",
+			Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if 4 > maxStack {
+			maxStack = 4
+		}
+		return
+	}
 	if selection.Method != nil { // pack to method handle
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

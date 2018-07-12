@@ -136,7 +136,12 @@ func (f *Function) badParameterMsg(name string, args []*Type) string {
 func (f *Function) checkBlock(errs *[]error) {
 	f.mkLastReturnStatement()
 	if f.Name == "" {
-		f.Name = fmt.Sprintf("literal$%d", f.Pos.StartLine)
+		if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+			f.Name = fmt.Sprintf("literal$%d", f.Pos.StartLine)
+		} else {
+			f.Name = fmt.Sprintf("%s$literal%d",
+				f.Block.InheritedAttribute.ClassAndFunctionNames, f.Pos.StartLine)
+		}
 	}
 	if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
 		f.Block.InheritedAttribute.ClassAndFunctionNames = f.Name

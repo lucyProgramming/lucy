@@ -74,7 +74,7 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 		*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
 			errMsgPrefix(e.Pos)))
 	}
-
+	ret := ft.getReturnTypes(e.Pos)
 	if len(callArgsTypes) > len(ft.ParameterList) {
 		errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(e.Pos))
 		errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(callArgsTypes))
@@ -82,7 +82,6 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 		*errs = append(*errs, fmt.Errorf(errMsg))
 	}
 	//trying to convert literal
-	var ret []*Type
 	convertLiteralExpressionsToNeeds(call.Args, ft.getParameterTypes(), callArgsTypes)
 	if len(callArgsTypes) < len(ft.ParameterList) {
 		errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(e.Pos))
@@ -130,9 +129,9 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	var ret []*Type
 	convertLiteralExpressionsToNeeds(call.Args, f.Type.getParameterTypes(), callArgsTypes)
 	if f.TemplateFunction == nil {
-		ret = f.Type.returnTypes(e.Pos)
+		ret = f.Type.getReturnTypes(e.Pos)
 	} else {
-		ret = tf.Type.returnTypes(e.Pos)
+		ret = tf.Type.getReturnTypes(e.Pos)
 	}
 	{
 		f := f // override f

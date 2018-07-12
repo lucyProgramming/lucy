@@ -298,11 +298,11 @@ func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCo
 }
 
 func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	typ *ast.Type, context *Context, state *StackMapState) (maxstack uint16) {
+	typ *ast.Type, context *Context, state *StackMapState) (maxStack uint16) {
 	if typ.Type == ast.VariableTypeString {
 		return
 	}
-	maxstack = jvmSlotSize(typ)
+	maxStack = jvmSlotSize(typ)
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
@@ -357,8 +357,8 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 	case ast.VariableTypeJavaArray:
 		fallthrough
 	case ast.VariableTypeMap:
-		if 2 > maxstack {
-			maxstack = 2
+		if 2 > maxStack {
+			maxStack = 2
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++

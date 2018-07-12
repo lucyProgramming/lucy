@@ -48,7 +48,7 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.Sta
 			blockParser.parser.token.Type != lex.TokenDefault &&
 			blockParser.parser.token.Type != lex.TokenRc {
 			block = &ast.Block{}
-			block.IsSwitchStatementTopBlock = true
+			block.IsSwitchBlock = true
 			blockParser.parseStatementList(block, false)
 
 		}
@@ -69,7 +69,7 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.Sta
 		}
 		if blockParser.parser.token.Type != lex.TokenRc {
 			block := ast.Block{}
-			block.IsSwitchStatementTopBlock = true
+			block.IsSwitchBlock = true
 			blockParser.parseStatementList(&block, false)
 			s.Default = &block
 		}
@@ -130,7 +130,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 			blockParser.parser.token.Type != lex.TokenDefault &&
 			blockParser.parser.token.Type != lex.TokenRc {
 			block = &ast.Block{}
-			block.IsSwitchStatementTopBlock = true
+			block.IsSwitchBlock = true
 			blockParser.parseStatementList(block, false)
 
 		}
@@ -151,7 +151,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		}
 		if blockParser.parser.token.Type != lex.TokenRc {
 			block := ast.Block{}
-			block.IsSwitchStatementTopBlock = true
+			block.IsSwitchBlock = true
 			blockParser.parseStatementList(&block, false)
 			s.Default = &block
 		}

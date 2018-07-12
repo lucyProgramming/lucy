@@ -164,7 +164,6 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		}
 	}
 	for k, v := range call.Args {
-		var variableType *ast.Type
 		if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
 			stack, _ := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
@@ -188,10 +187,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 			}
 			continue
 		}
-		variableType = v.ExpressionValue
-		if v.MayHaveMultiValue() {
-			variableType = v.ExpressionMultiValues[0]
-		}
+		variableType := v.ExpressionValue
 		stack, es := buildExpression.build(class, code, v, context, state)
 		if len(es) > 0 {
 			writeExits(es, code.CodeLength)

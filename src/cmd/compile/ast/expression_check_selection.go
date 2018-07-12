@@ -77,7 +77,20 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			tt.Type = VariableTypeEnum
 			selection.PackageEnumName = n
 			return tt
+		case *Function:
+			f := d.(*Function)
+			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
+				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
+				*errs = append(*errs, err)
+			}
+			tt := &Type{}
+			tt.Pos = e.Pos
+			tt.Type = VariableTypeFunction
+			tt.FunctionType = &f.Type
+			selection.Function = f
+			return tt
 		}
+
 		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
 		*errs = append(*errs, err)
 		return nil

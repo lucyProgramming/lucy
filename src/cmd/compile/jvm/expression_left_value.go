@@ -136,6 +136,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
+			leftValueType = LeftValueTypeArray
 			target = e.ExpressionValue
 			remainStack = 2 // [objectref ,index]
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
@@ -169,7 +170,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 			case ast.VariableTypeJavaArray:
 				ops = []byte{cg.OP_aastore}
 			}
-			leftValueType = LeftValueTypeArray
 			return
 		}
 	case ast.ExpressionTypeSelection:
@@ -186,7 +186,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			maxStack = 0
 			leftValueType = LeftValueTypePutStatic
 			remainStack = 0
-		} else {
+		} else { // class or object
 			target = selection.Field.Variable.Type
 			ops = make([]byte, 3)
 			if selection.Field.JvmDescriptor == "" {

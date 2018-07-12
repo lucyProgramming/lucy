@@ -330,7 +330,7 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
-		return f.Type.returnTypes(e.Pos)
+		return f.Type.getReturnTypes(e.Pos)
 	}
 	return nil //
 }

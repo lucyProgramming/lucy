@@ -14,27 +14,27 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		slice.Start.Type = ExpressionTypeInt
 		slice.Start.Data = int32(0)
 	}
-	startT, es := slice.Start.checkSingleValueContextExpression(block)
+	startType, es := slice.Start.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if startT != nil && startT.IsInteger() == false {
+	if startType != nil && startType.IsInteger() == false {
 		*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
-			errMsgPrefix(slice.Start.Pos), startT.TypeString()))
+			errMsgPrefix(slice.Start.Pos), startType.TypeString()))
 	}
-	if startT != nil && startT.Type == VariableTypeLong {
+	if startType != nil && startType.Type == VariableTypeLong {
 		slice.Start.ConvertToNumber(VariableTypeInt)
 	}
 	if slice.End != nil {
-		endT, es := slice.End.checkSingleValueContextExpression(block)
+		endType, es := slice.End.checkSingleValueContextExpression(block)
 		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		if endT != nil && endT.IsInteger() == false {
+		if endType != nil && endType.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'",
-				errMsgPrefix(slice.End.Pos), endT.TypeString()))
+				errMsgPrefix(slice.End.Pos), endType.TypeString()))
 		}
-		if endT != nil && endT.Type == VariableTypeLong {
+		if endType != nil && endType.Type == VariableTypeLong {
 			slice.End.ConvertToNumber(VariableTypeInt)
 		}
 	} else {

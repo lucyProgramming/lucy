@@ -8,29 +8,29 @@ import (
 )
 
 type Block struct {
-	Exits                      []*cg.Exit // for switch template
-	WillNotExecuteToEnd        bool       // should analyse at ast stage
-	Defers                     []*StatementDefer
-	isGlobalVariableDefinition bool
-	IsFunctionBlock            bool
-	IsClassBlock               bool
-	IsForBlock                 bool
-	IsSwitchStatementTopBlock  bool
-	IsSwitchTemplateBlock      bool
-	Pos                        *Position
-	EndPos                     *Position
-	Outer                      *Block
-	InheritedAttribute         InheritedAttribute
-	Statements                 []*Statement
-	Constants                  map[string]*Constant
-	Functions                  map[string]*Function
-	Classes                    map[string]*Class
-	Enums                      map[string]*Enum
-	EnumNames                  map[string]*EnumName
-	Labels                     map[string]*StatementLabel
-	TypeAliases                map[string]*Type
-	Variables                  map[string]*Variable
-	ClosureFunctions           map[string]*Function //in "Functions" too
+	Exits                           []*cg.Exit // for switch template
+	WillNotExecuteToEnd             bool       // should analyse at ast stage
+	Defers                          []*StatementDefer
+	IsGlobalVariableDefinitionBlock bool
+	IsFunctionBlock                 bool
+	IsClassBlock                    bool
+	IsForBlock                      bool
+	IsSwitchBlock                   bool
+	IsSwitchTemplateBlock           bool
+	Pos                             *Position
+	EndPos                          *Position
+	Outer                           *Block
+	InheritedAttribute              InheritedAttribute
+	Statements                      []*Statement
+	Constants                       map[string]*Constant
+	Functions                       map[string]*Function
+	Classes                         map[string]*Class
+	Enums                           map[string]*Enum
+	EnumNames                       map[string]*EnumName
+	Labels                          map[string]*StatementLabel
+	TypeAliases                     map[string]*Type
+	Variables                       map[string]*Variable
+	ClosureFunctions                map[string]*Function //in "Functions" too
 
 }
 

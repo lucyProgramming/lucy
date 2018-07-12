@@ -17,7 +17,7 @@ func (s *StatementBreak) mkDefers(block *Block) {
 		return
 	} else if s.StatementSwitch != nil {
 		// switch
-		if block.IsSwitchStatementTopBlock {
+		if block.IsSwitchBlock {
 			s.Defers = append(s.Defers, block.Defers...)
 			return
 		}

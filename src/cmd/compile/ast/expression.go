@@ -523,6 +523,7 @@ type ExpressionSelection struct {
 	Name            string
 	Field           *ClassField  // expression is class or object
 	Method          *ClassMethod // pack to method handle
+	Function        *Function    //   expression is package  pack to method handle
 	PackageVariable *Variable    // expression is package
 	PackageEnumName *EnumName    // expression is package
 }

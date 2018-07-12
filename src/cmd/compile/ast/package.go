@@ -49,7 +49,7 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 		f := &Function{}
 		f.Pos = b.Pos
 		f.Block = *b
-		f.isGlobalVariableDefinition = b.isGlobalVariableDefinition
+		f.isGlobalVariableDefinition = b.IsGlobalVariableDefinitionBlock
 		p.InitFunctions[k] = f
 		f.Used = true
 		f.isPackageBlockFunction = true

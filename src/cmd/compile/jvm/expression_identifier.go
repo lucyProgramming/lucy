@@ -45,7 +45,6 @@ func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel
 	if identifier.Function != nil {
 		return buildExpression.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
 	}
-
 	if identifier.Variable.IsGlobal { //fetch global var
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
