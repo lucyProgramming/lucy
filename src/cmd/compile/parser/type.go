@@ -12,9 +12,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 	var ret *ast.Type
 	pos := parser.mkPos()
 	switch parser.token.Type {
-
 	case lex.TokenLb:
-
 		parser.Next()
 		if parser.token.Type != lex.TokenRb {
 			// [ and ] not match
@@ -33,49 +31,42 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		ret.Type = ast.VariableTypeArray
 		ret.Array = t
 	case lex.TokenBool:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeBool,
 			Pos:  pos,
 		}
 	case lex.TokenByte:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeByte,
 			Pos:  pos,
 		}
 	case lex.TokenShort:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeShort,
 			Pos:  pos,
 		}
 	case lex.TokenInt:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeInt,
 			Pos:  pos,
 		}
 	case lex.TokenFloat:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeFloat,
 			Pos:  pos,
 		}
 	case lex.TokenDouble:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeDouble,
 			Pos:  pos,
 		}
 	case lex.TokenLong:
-
 		parser.Next()
 		ret = &ast.Type{
 			Type: ast.VariableTypeLong,
@@ -127,7 +118,6 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Pos:  pos,
 		}
 	case lex.TokenTemplate:
-
 		ret = &ast.Type{
 			Type: ast.VariableTypeTemplate,
 			Pos:  pos,
@@ -135,7 +125,6 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 		parser.Next()
 	case lex.TokenFunction:
-
 		parser.Next()
 		ft, err := parser.parseFunctionType()
 		if err != nil {
@@ -154,7 +143,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	for parser.token.Type == lex.TokenLb {
+	for parser.token.Type == lex.TokenLb { // int [
 		pos := parser.mkPos()
 		parser.Next() // skip [
 		if parser.token.Type != lex.TokenRb {
@@ -174,6 +163,9 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 
 }
 
+/*
+	valid begin token of a type
+*/
 func (parser *Parser) isValidTypeBegin() bool {
 	return parser.token.Type == lex.TokenLb ||
 		parser.token.Type == lex.TokenBool ||
@@ -203,7 +195,7 @@ func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 				parser.errorMsgPrefix())
 		}
 		name += "." + parser.token.Data.(string)
-		parser.Next() // if
+		parser.Next() // skip identifier
 	}
 	ret.Name = name
 	return ret, nil

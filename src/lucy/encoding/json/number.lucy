@@ -59,7 +59,6 @@ class Number {
 	}
 
 	public fn getLong() -> ( v long,err error){
-		print(this.integerPart);
 		err = this.prepare();
 		if err != null {
 			return ;
@@ -69,7 +68,6 @@ class Number {
 			return ;
 		}
 		ret := 0l;
-		print(this.integerPart);
 		for v := range this.integerPart {
 			ret = ret * 10 + long(v - '0') ; 
 		}

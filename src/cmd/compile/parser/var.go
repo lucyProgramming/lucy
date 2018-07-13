@@ -40,23 +40,7 @@ func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 	p.filename = pos.Filename
 	p.nErrors2Stop = 10
 	p.bs = bs
-	p.FunctionParser = &FunctionParser{
-		parser: p,
-	}
-	p.BlockParser = &BlockParser{
-		parser: p,
-	}
-	p.ExpressionParser = &ExpressionParser{
-		parser: p,
-	}
-	p.ClassParser = &ClassParser{
-		parser: p,
-	}
-	p.InterfaceParser = &InterfaceParser{
-		parser: p,
-	}
-	p.scanner = lex.New(p.bs, pos.StartLine, pos.StartColumn)
-	p.Next() // parse fn
+	p.initParser()
 	f, err := p.FunctionParser.parse(true)
 	if err != nil {
 		p.errs = append(p.errs, err)
@@ -65,11 +49,11 @@ func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 }
 
 var (
-	nameIndex = 1
+	autoNameIndex = 1
 )
 
 func compileAutoName() string {
-	s := fmt.Sprintf("autoName$%d", nameIndex)
-	nameIndex++
+	s := fmt.Sprintf("autoName$%d", autoNameIndex)
+	autoNameIndex++
 	return s
 }

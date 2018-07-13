@@ -11,7 +11,7 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.Sta
 	condition, err := blockParser.parser.parseType()
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		return nil, err
+		blockParser.consume(untilLc)
 	}
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
@@ -61,7 +61,7 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.Sta
 	if blockParser.parser.token.Type == lex.TokenDefault {
 		blockParser.Next() // skip default key word
 		if blockParser.parser.token.Type != lex.TokenColon {
-			err = fmt.Errorf("%s missing clon after default",
+			err = fmt.Errorf("%s missing colon after default",
 				blockParser.parser.errorMsgPrefix())
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		} else {
@@ -93,7 +93,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	condition, err := blockParser.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		return nil, err
+		blockParser.consume(untilLc)
 	}
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
@@ -143,7 +143,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	if blockParser.parser.token.Type == lex.TokenDefault {
 		blockParser.Next() // skip default key word
 		if blockParser.parser.token.Type != lex.TokenColon {
-			err = fmt.Errorf("%s missing clon after default",
+			err = fmt.Errorf("%s missing colon after 'default'",
 				blockParser.parser.errorMsgPrefix())
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		} else {

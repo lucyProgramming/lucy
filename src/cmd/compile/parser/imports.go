@@ -14,7 +14,7 @@ func (parser *Parser) parseImports() {
 	}
 	parser.Next() // skip import key word
 	if parser.token.Type != lex.TokenLiteralString {
-		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'packageName' after import,but '%s'",
+		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description))
 		parser.consume(untilSemicolon)
 		parser.Next()
@@ -46,15 +46,12 @@ func (parser *Parser) parseImports() {
 	if parser.token.Type != lex.TokenSemicolon {
 		parser.errs = append(parser.errs, fmt.Errorf("%s expect semicolon, but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description))
-		parser.consume(untilSemicolon)
-		parser.consume(untilSemicolon)
-		parser.Next()
-		parser.insertImports(i)
-		parser.parseImports()
-		return
+		if parser.token.Type != lex.TokenImport { // next token is not import
+			parser.consume(untilSemicolon)
+		}
 	}
-	parser.insertImports(i)
 	parser.Next() // skip ;
+	parser.insertImports(i)
 	parser.parseImports()
 }
 
@@ -68,7 +65,7 @@ func (parser *Parser) insertImports(im *ast.Import) {
 		return
 	}
 	if parser.imports[access] != nil {
-		parser.errs = append(parser.errs, fmt.Errorf("%s package '%s' reimported",
+		parser.errs = append(parser.errs, fmt.Errorf("%s package '%s' reImported",
 			parser.errorMsgPrefix(im.Pos), access))
 		return
 	}

@@ -30,7 +30,6 @@ func (blockParser *BlockParser) parseIf() (i *ast.StatementIf, err error) {
 			blockParser.Next()
 		}
 	}
-
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)

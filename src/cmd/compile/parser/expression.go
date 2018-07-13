@@ -11,6 +11,7 @@ type ExpressionParser struct {
 	parser *Parser
 }
 
+// wrapper
 func (expressionParser *ExpressionParser) Next() {
 	expressionParser.parser.Next()
 }
@@ -22,11 +23,7 @@ func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression,
 		if err != nil {
 			return es, err
 		}
-		if e.Type == ast.ExpressionTypeList {
-			es = append(es, e.Data.([]*ast.Expression)...)
-		} else {
-			es = append(es, e)
-		}
+		es = append(es, e)
 		if expressionParser.parser.token.Type != lex.TokenComma {
 			break
 		}
@@ -36,7 +33,9 @@ func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression,
 	return es, nil
 }
 
-//parse assign expression
+/*
+	parse assign expression
+*/
 func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
 	left, err := expressionParser.parseTernaryExpression() //
 	if err != nil {
@@ -159,4 +158,27 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 		},
 		Pos: pos,
 	}, nil
+}
+func (expressionParser *ExpressionParser) looksLikeExpression() bool {
+	return expressionParser.parser.token.Type == lex.TokenIdentifier ||
+		expressionParser.parser.token.Type == lex.TokenTrue ||
+		expressionParser.parser.token.Type == lex.TokenFalse ||
+		expressionParser.parser.token.Type == lex.TokenGlobal ||
+		expressionParser.parser.token.Type == lex.TokenLiteralByte ||
+		expressionParser.parser.token.Type == lex.TokenLiteralShort ||
+		expressionParser.parser.token.Type == lex.TokenLiteralInt ||
+		expressionParser.parser.token.Type == lex.TokenLiteralLong ||
+		expressionParser.parser.token.Type == lex.TokenLiteralFloat ||
+		expressionParser.parser.token.Type == lex.TokenLiteralDouble ||
+		expressionParser.parser.token.Type == lex.TokenLiteralString ||
+		expressionParser.parser.token.Type == lex.TokenNull ||
+		expressionParser.parser.token.Type == lex.TokenLp ||
+		expressionParser.parser.token.Type == lex.TokenIncrement ||
+		expressionParser.parser.token.Type == lex.TokenDecrement ||
+		expressionParser.parser.token.Type == lex.TokenNot ||
+		expressionParser.parser.token.Type == lex.TokenBitNot ||
+		expressionParser.parser.token.Type == lex.TokenSub ||
+		expressionParser.parser.token.Type == lex.TokenFunction ||
+		expressionParser.parser.token.Type == lex.TokenNew ||
+		expressionParser.parser.token.Type == lex.TokenLb
 }

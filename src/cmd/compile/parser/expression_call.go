@@ -41,8 +41,15 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 		result.Data = call
 		result.Pos = expressionParser.parser.mkPos()
 	}
-	expressionParser.Next() // skip )
-	if expressionParser.parser.token.Type == lex.TokenLt {
+	expressionParser.Next()                                // skip )
+	if expressionParser.parser.token.Type == lex.TokenLt { // <
+		/*
+			template function call return type binds
+			fn a ()->(r T) {
+
+			}
+			a<int , ... >
+		*/
 		expressionParser.Next() // skip <
 		ts, err := expressionParser.parser.parseTypes()
 		if err != nil {

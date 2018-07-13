@@ -19,13 +19,6 @@ class xxx {
 }
 
 
-
-
-
-
-
-
-
 fn main(args []string) {
 	x := new xxx();
 	x.y = "11111111111";
@@ -54,13 +47,8 @@ fn main(args []string) {
 		print(err);
 	}
 	print(string(bs));
-
 	print("#############################");
-
-
-
 	y := new xxx ();
-
 	s := `
 		{
 			"boolValue" : true , 

@@ -43,6 +43,18 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		if len(blockParser.parser.errs) > blockParser.parser.nErrors2Stop {
 			break
 		}
+		if blockParser.parser.ExpressionParser.looksLikeExpression() {
+			var isLabel bool
+			blockParser.parseExpressionStatement(block, isDefer, &isLabel)
+			if isLabel == false {
+				blockParser.parser.validStatementEnding()
+				if blockParser.parser.token.Type == lex.TokenSemicolon {
+					blockParser.Next()
+				}
+			}
+			resetDefer()
+			continue
+		}
 		switch blockParser.parser.token.Type {
 		case lex.TokenSemicolon: // may be empty statement
 			resetDefer()
@@ -55,16 +67,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				resetDefer()
 			}
-		case lex.TokenIdentifier, lex.TokenLp, lex.TokenFunction:
-			var isLabel bool
-			blockParser.parseExpressionStatement(block, isDefer, &isLabel)
-			if isLabel == false {
-				blockParser.parser.validStatementEnding()
-				if blockParser.parser.token.Type == lex.TokenSemicolon {
-					blockParser.Next()
-				}
-			}
-			resetDefer()
 		case lex.TokenVar:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next() // skip var key word

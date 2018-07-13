@@ -16,6 +16,9 @@ type StatementSwitchTemplateCase struct {
 
 func (s *StatementSwitchTemplate) check(block *Block, statement *Statement) (errs []error) {
 	errs = []error{}
+	if s.Condition == nil { // must be a error must parser stage
+		return errs
+	}
 	TName := s.Condition.Name
 	if err := s.Condition.resolve(block); err != nil {
 		errs = append(errs, err)

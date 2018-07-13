@@ -31,11 +31,9 @@ type Block struct {
 	TypeAliases                     map[string]*Type
 	Variables                       map[string]*Variable
 	ClosureFunctions                map[string]*Function //in "Functions" too
-
 }
 
 func (b *Block) HaveVariableDefinition() bool {
-
 	return len(b.ClosureFunctions) > 0 || len(b.Variables) > 0
 }
 

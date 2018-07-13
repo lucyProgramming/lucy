@@ -13,7 +13,7 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 	f.Block = &ast.Block{}
 	blockParser.Next() // skip for
 	if blockParser.parser.token.Type != lex.TokenLc &&
-		blockParser.parser.token.Type != lex.TokenSemicolon { // not {
+		blockParser.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
 		e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
@@ -28,14 +28,13 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 		f.Init = f.Condition
 		f.Condition = nil // mk nil
 		//condition
+		var err error
 		if blockParser.parser.token.Type != lex.TokenSemicolon {
-			e, err := blockParser.parser.ExpressionParser.parseExpression(false)
+			f.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilLc)
 				goto parseBlock
-			} else {
-				f.Condition = e
 			}
 			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s missing semicolon after expression",
@@ -46,13 +45,13 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 		}
 		blockParser.Next()
 		if blockParser.parser.token.Type != lex.TokenLc {
-			e, err := blockParser.parser.ExpressionParser.parseExpression(true)
+			f.After, err = blockParser.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilLc)
 				goto parseBlock
 			}
-			f.After = e
+
 		}
 	}
 parseBlock:
@@ -69,6 +68,6 @@ parseBlock:
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 		blockParser.consume(untilRc)
 	}
-	blockParser.Next() // }
+	blockParser.Next() // skip }
 	return f, nil
 }

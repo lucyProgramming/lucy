@@ -21,6 +21,10 @@ type StatementSwitchCase struct {
 
 func (s *StatementSwitch) check(block *Block) []error {
 	errs := []error{}
+	if s.Condition == nil { // must be a error must parser stage
+		return errs
+	}
+
 	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		errs = append(errs, es...)

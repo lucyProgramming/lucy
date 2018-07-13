@@ -52,6 +52,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	if functionParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}', but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilRc)
 	} else {
 		f.SourceCodes =

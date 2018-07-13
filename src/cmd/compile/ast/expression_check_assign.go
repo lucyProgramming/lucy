@@ -9,13 +9,10 @@ import (
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
 	var names []*Expression
-	if bin.Left.Type == ExpressionTypeIdentifier {
-		names = append(names, bin.Left)
-	} else if bin.Left.Type == ExpressionTypeList {
+	if bin.Left.Type == ExpressionTypeList {
 		names = bin.Left.Data.([]*Expression)
 	} else {
-		*errs = append(*errs, fmt.Errorf("%s no names on the left", errMsgPrefix(e.Pos)))
-		return
+		names = []*Expression{bin.Left}
 	}
 	noErr := true
 	values := bin.Right.Data.([]*Expression)

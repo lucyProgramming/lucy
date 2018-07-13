@@ -472,7 +472,7 @@ func (e *Expression) CallHasReturnValue() bool {
 type CallArgs []*Expression // f(1,2)
 
 type ExpressionFunctionCall struct {
-	BuildInFunctionMeta      interface{} // for build function only
+	BuildInFunctionMeta      interface{} // for build in function only
 	Expression               *Expression
 	Args                     CallArgs
 	Function                 *Function
@@ -492,8 +492,7 @@ type ExpressionMethodCall struct {
 	Args           CallArgs
 	Name           string
 	Method         *ClassMethod
-	ParameterTypes []*Type
-	//PackageFunction *Function // Expression is package
+	ParameterTypes []*Type // unSupport !!!!!!
 }
 
 type ExpressionDeclareVariable struct {

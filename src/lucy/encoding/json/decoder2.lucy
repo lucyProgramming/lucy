@@ -169,7 +169,6 @@ class Decoder {
 				if err != null {
 					return null , err ;
 				}
-				print(doubleValue);
 				if doubleValue > double( Float.MAX_VALUE) {
 					return null , new error(sprintf("%f exceeds byte max value" ,doubleValue));
 				}
@@ -365,7 +364,6 @@ class Decoder {
 			n.keyPairs[k.stringValue] = v;
 			this.skipWhiteSpace();
 			b = this.bs[this.offset];
-			print(b == ',' , b == '}' , b);
 			if b == ',' {
 				this.offset++ ;	
 				this.skipWhiteSpace();
@@ -523,7 +521,7 @@ class Decoder {
 				n.eIsNegative = true;
 			}
 			if false ==  this.isDigit(b) {
-				err = new error("expect number after 'e' or 'E' ，" + this.getErrMsg() );
+				err = new error("expect number after 'e' or 'E' ," + this.getErrMsg() );
 				return ;
 			}
 			for this.isDigit(b) {

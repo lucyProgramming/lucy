@@ -141,6 +141,9 @@ func (p *Package) TypeCheck() []error {
 	return p.Errors
 }
 
+/*
+	load package or class
+*/
 func (p *Package) load(resource string) (interface{}, error) {
 	if resource == "" {
 		panic("null string")
@@ -195,7 +198,7 @@ func (p *Package) mkClassCache(load *Package) {
 	}
 }
 
-//different for other file
+//different from different source file
 type LucySourceFile struct {
 	Imports map[string]*Import // n
 }

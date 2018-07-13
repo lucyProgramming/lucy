@@ -1,38 +1,38 @@
 package parser
 
 import (
-	"bytes"
 	"fmt"
 
+	"bytes"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyImport bool, nerr int) []error {
+func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyParseImport bool, nErrors2Stop int) []error {
 	p := &Parser{
-		bs:           bs,
-		tops:         tops,
-		filename:     filename,
-		onlyImport:   onlyImport,
-		nErrors2Stop: nerr,
+		bs:              bs,
+		tops:            tops,
+		filename:        filename,
+		onlyParseImport: onlyParseImport,
+		nErrors2Stop:    nErrors2Stop,
 	}
 	return p.Parse()
 }
 
 type Parser struct {
-	onlyImport   bool
-	bs           []byte
-	lines        [][]byte
-	tops         *[]*ast.Top
-	scanner      *lex.Lexer
-	filename     string
-	expectLf     bool
-	lastToken    *lex.Token
-	token        *lex.Token
-	errs         []error
-	imports      map[string]*ast.Import
-	nErrors2Stop int
+	onlyParseImport bool
+	bs              []byte
+	lines           [][]byte
+	tops            *[]*ast.Top
+	scanner         *lex.Lexer
+	filename        string
+	expectLf        bool
+	lastToken       *lex.Token
+	token           *lex.Token
+	errs            []error
+	imports         map[string]*ast.Import
+	nErrors2Stop    int
 	// parsers
 	ExpressionParser *ExpressionParser
 	FunctionParser   *FunctionParser
@@ -41,7 +41,10 @@ type Parser struct {
 	InterfaceParser  *InterfaceParser
 }
 
-func (parser *Parser) Parse() []error {
+/*
+	call before parse source file
+*/
+func (parser *Parser) initParser() {
 	parser.ExpressionParser = &ExpressionParser{parser}
 	parser.FunctionParser = &FunctionParser{}
 	parser.FunctionParser.parser = parser
@@ -51,23 +54,25 @@ func (parser *Parser) Parse() []error {
 	parser.InterfaceParser.parser = parser
 	parser.BlockParser = &BlockParser{}
 	parser.BlockParser.parser = parser
-	parser.errs = []error{}
 	parser.scanner = lex.New(parser.bs, 1, 1)
 	parser.lines = bytes.Split(parser.bs, []byte("\n"))
-	parser.Next()
+	parser.errs = []error{}
+	parser.Next() //
+}
+
+func (parser *Parser) Parse() []error {
+	parser.initParser()
 	if parser.token.Type == lex.TokenEof {
+		//TODO::empty source lucy file , should forbidden???
 		return nil
 	}
-	parser.parseImports() // next is called
-	if parser.token.Type == lex.TokenEof {
-		return parser.errs
-	}
-	if parser.onlyImport { // only parse imports
+	parser.parseImports()
+	if parser.onlyParseImport { // only parse imports
 		return parser.errs
 	}
 	var accessControlToken *lex.Token
 	isFinal := false
-	resetProperty := func() {
+	resetSomeProperty := func() {
 		accessControlToken = nil
 		isFinal = false
 	}
@@ -116,7 +121,7 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
 			})
-			resetProperty()
+			resetSomeProperty()
 		case lex.TokenIdentifier:
 			e, err := parser.ExpressionParser.parseExpression(true)
 			if err != nil {
@@ -130,21 +135,25 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
 			})
-			resetProperty()
+			resetSomeProperty()
 		case lex.TokenEnum:
 			e, err := parser.parseEnum()
 			if err != nil {
 				parser.consume(untilRc)
 				parser.Next()
-				resetProperty()
+				resetSomeProperty()
 				continue
+			}
+			isPublic := isPublic()
+			if isPublic {
+				e.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			if e != nil {
 				*parser.tops = append(*parser.tops, &ast.Top{
 					Data: e,
 				})
 			}
-			resetProperty()
+			resetSomeProperty()
 		case lex.TokenFunction:
 			f, err := parser.FunctionParser.parse(true)
 			if err != nil {
@@ -152,24 +161,18 @@ func (parser *Parser) Parse() []error {
 				parser.Next()
 				continue
 			}
-			if accessControlToken != nil {
-				switch accessControlToken.Type {
-				case lex.TokenPublic:
-					f.AccessFlags |= cg.ACC_METHOD_PUBLIC
-				case lex.TokenPrivate:
-					f.AccessFlags |= cg.ACC_METHOD_PRIVATE
-				}
-			} else {
-				f.AccessFlags |= cg.ACC_METHOD_PRIVATE
+			isPublic := isPublic()
+			if isPublic {
+				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			}
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: f,
 			})
-			resetProperty()
+			resetSomeProperty()
 		case lex.TokenLc:
 			b := &ast.Block{}
-			parser.Next()                                  // skip {
-			parser.BlockParser.parseStatementList(b, true) // this function will lookup next
+			parser.Next() // skip {
+			parser.BlockParser.parseStatementList(b, true)
 			if parser.token.Type != lex.TokenRc {
 				parser.errs = append(parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					parser.errorMsgPrefix(), parser.token.Description))
@@ -179,7 +182,6 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: b,
 			})
-			resetProperty()
 		case lex.TokenClass, lex.TokenInterface:
 			var c *ast.Class
 			var err error
@@ -192,7 +194,7 @@ func (parser *Parser) Parse() []error {
 				parser.errs = append(parser.errs, err)
 				parser.consume(untilRc)
 				parser.Next()
-				resetProperty()
+				resetSomeProperty()
 				continue
 			}
 			if c == nil && err == nil {
@@ -207,14 +209,14 @@ func (parser *Parser) Parse() []error {
 			if isFinal {
 				c.AccessFlags |= cg.ACC_CLASS_FINAL
 			}
-			resetProperty()
+			resetSomeProperty()
 		case lex.TokenConst:
 			parser.Next() // skip const key word
 			vs, es, err := parser.parseConstDefinition(false)
 			if err != nil {
 				parser.consume(untilSemicolon)
 				parser.Next()
-				resetProperty()
+				resetSomeProperty()
 				continue
 			}
 			if len(vs) != len(es) {
@@ -238,26 +240,31 @@ func (parser *Parser) Parse() []error {
 					})
 				}
 			}
-			resetProperty()
+			resetSomeProperty()
 			continue
 		case lex.TokenType:
 			a, err := parser.parseTypeAlias()
 			if err != nil {
 				parser.consume(untilSemicolon)
 				parser.Next()
-				resetProperty()
+				resetSomeProperty()
 				continue
 			}
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: a,
 			})
+		case lex.TokenImport:
+			pos := parser.mkPos()
+			parser.parseImports()
+			parser.errs = append(parser.errs, fmt.Errorf("%s cannot have import at this scope",
+				parser.errorMsgPrefix(pos)))
 		case lex.TokenEof:
 			break
 		default:
 			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
 				parser.errorMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolon)
-			resetProperty()
+			resetSomeProperty()
 		}
 	}
 	return parser.errs
@@ -433,12 +440,6 @@ func (parser *Parser) consume(until map[int]bool) {
 	}
 }
 
-func (parser *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Position) {
-	pos.Filename = parser.filename
-	pos.StartLine = t.StartLine
-	pos.StartColumn = t.StartColumn
-}
-
 func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	parser.Next() // skip type key word
 	if parser.token.Type != lex.TokenIdentifier {
@@ -458,6 +459,9 @@ func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	parser.Next() // skip =
 	var err error
 	ret.Type, err = parser.parseType()
+	if err != nil {
+		return nil, err
+	}
 	return ret, err
 }
 
@@ -477,6 +481,7 @@ func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
 		vd.Name = v.Name
 		vd.Pos = v.Pos
 		vd.Type = t.Clone()
+		vd.Type.Pos = v.Pos // override pos
 	}
 	return vs, nil
 }
@@ -508,3 +513,9 @@ func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 	}
 	return vs, nil
 }
+
+//func (parser *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Position) {
+//	pos.Filename = parser.filename
+//	pos.StartLine = t.StartLine
+//	pos.StartColumn = t.StartColumn
+//}
