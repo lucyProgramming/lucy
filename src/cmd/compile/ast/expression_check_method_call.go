@@ -202,7 +202,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					}
 				}
 			}
-			t := object.Clone()
+			t := object.Clone() // support
 			t.Pos = e.Pos
 			return []*Type{t}
 		default:

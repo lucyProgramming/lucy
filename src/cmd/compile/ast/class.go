@@ -39,7 +39,6 @@ func (c *Class) IsInterface() bool {
 func (c *Class) IsFinal() bool {
 	return c.AccessFlags&cg.ACC_CLASS_FINAL != 0
 }
-
 func (c *Class) IsPublic() bool {
 	return c.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
 }
@@ -271,7 +270,7 @@ func (c *Class) mkClassInitMethod() {
 		s.Block = c.StaticBlocks[k]
 		f.Block.Statements[k] = s
 	}
-	f.mkLastReturnStatement()
+	f.makeLastReturnStatement()
 	f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	f.AccessFlags |= cg.ACC_METHOD_STATIC
 	f.AccessFlags |= cg.ACC_METHOD_FINAL
@@ -496,6 +495,7 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 
 func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos *Position) (*ClassMethod, bool) {
 	if c.Methods == nil || len(c.Methods[m.Function.Name]) == 0 {
+		//no same name method at current class
 		if c.Name == JavaRootClass {
 			return nil, false
 		}
@@ -509,13 +509,15 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 		}
 	}
 	for _, v := range c.Methods[m.Function.Name] {
-		if fromSub && v.IsPrivate() && c.IsJava == false {
+		if fromSub && v.IsPrivate() {
 			return nil, false
 		}
 		if len(v.Function.Type.ParameterList) != len(m.Function.Type.ParameterList) {
+			// parameter count not match
 			continue
 		}
 		if len(v.Function.Type.ReturnList) != len(m.Function.Type.ReturnList) {
+			// return list count not match
 			continue
 		}
 		match := true

@@ -94,7 +94,6 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-
 	if e.IsStatementExpression {
 		if e.CallHasReturnValue() == false {
 			// nothing to do
@@ -110,7 +109,6 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 			code.CodeLength++
 		}
 	}
-
 	if e.CallHasReturnValue() == false { // nothing
 	} else if len(e.ExpressionMultiValues) == 1 {
 		if t := jvmSlotSize(e.ExpressionMultiValues[0]); t > maxStack {

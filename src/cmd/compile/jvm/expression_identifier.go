@@ -9,8 +9,6 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassH
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) {
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
-	} else {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 		meta := closure.getMeta(identifier.Variable.Type.Type)
 		code.Codes[code.CodeLength] = cg.OP_getfield
@@ -20,6 +18,8 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassH
 			Descriptor: "L" + meta.className + ";",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+	} else {
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
 	}
 	if 1 > maxStack {
 		maxStack = 1

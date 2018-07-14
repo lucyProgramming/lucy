@@ -43,17 +43,17 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 }
 
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type {
-	ee := e.Data.(*Expression)
-	t := ee.getLeftValue(block, errs)
-	ee.ExpressionValue = t
+	on := e.Data.(*Expression)
+	t := on.getLeftValue(block, errs)
+	on.ExpressionValue = t
 	if t == nil {
 		return nil
 	}
 	if !t.IsNumber() {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply '++' or '--' on '%s'",
-			errMsgPrefix(ee.Pos), t.TypeString()))
+		*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s'",
+			errMsgPrefix(on.Pos), on.OpName(), t.TypeString()))
 	}
-	tt := t.Clone()
-	tt.Pos = e.Pos
-	return tt
+	ret := t.Clone()
+	ret.Pos = e.Pos
+	return ret
 }

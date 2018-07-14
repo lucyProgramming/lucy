@@ -94,7 +94,7 @@ func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
 }
 
 /*
-	create a closure var, inited and leave on stack
+	create a closure var, init and leave on stack
 */
 func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, v *ast.Type) (maxStack uint16) {
@@ -216,7 +216,6 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		meta = closure.ClosureObjectMetas[ClosureClassLong]
 	case ast.VariableTypeFloat:
 		meta = closure.ClosureObjectMetas[ClosureClassFloat]
-
 	case ast.VariableTypeDouble:
 		meta = closure.ClosureObjectMetas[ClosureClassDouble]
 	case ast.VariableTypeString:
@@ -239,5 +238,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		Descriptor: meta.fieldDescription,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-
+	if v.IsPointer() && v.Type != ast.VariableTypeString {
+		typeConverter.castPointer(class, code, v)
+	}
 }

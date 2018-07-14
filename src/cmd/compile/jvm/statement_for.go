@@ -44,8 +44,8 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	}
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
-	if s.After != nil {
-		stack, _ := buildPackage.BuildExpression.build(class, code, s.After, context, forState)
+	if s.AfterBlockStatement != nil {
+		stack, _ := buildPackage.BuildExpression.build(class, code, s.AfterBlockStatement, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}

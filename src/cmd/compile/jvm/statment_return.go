@@ -171,7 +171,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-				context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
+				context.function.AutoVariableForReturnBecauseOfDefer.Offset)...)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -186,7 +186,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code,
 				loadLocalVariableOps(ast.VariableTypeObject,
-					context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
+					context.function.AutoVariableForReturnBecauseOfDefer.Offset)...)
 		}
 	}
 	if len(statementReturn.Expressions) > 0 {
@@ -330,7 +330,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		//exception that have been handled
 		if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
 			//load when function have multi returns if read to end
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForReturnBecauseOfDefer.Offset)...)
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 			code.Codes[code.CodeLength+3] = cg.OP_goto

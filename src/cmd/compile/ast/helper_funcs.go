@@ -12,20 +12,6 @@ func esNotEmpty(es []error) bool {
 	return len(es) > 0
 }
 
-func checkEnum(enums []*Enum) []error {
-	ret := make([]error, 0)
-	for _, v := range enums {
-		if len(v.Enums) == 0 {
-			continue
-		}
-		err := v.check()
-		if err != nil {
-			ret = append(ret, err)
-		}
-	}
-	return ret
-}
-
 func divisionByZeroErr(pos *Position) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
@@ -214,3 +200,17 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, checked [
 	}
 	return errs
 }
+
+//func checkEnum(enums []*Enum) []error {
+//	ret := make([]error, 0)
+//	for _, v := range enums {
+//		if len(v.Enums) == 0 {
+//			continue
+//		}
+//		err := v.check()
+//		if err != nil {
+//			ret = append(ret, err)
+//		}
+//	}
+//	return ret
+//}

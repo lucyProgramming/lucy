@@ -20,7 +20,12 @@ type BuildPackage struct {
 
 func (buildPackage *BuildPackage) newClassName(prefix string) (autoName string) {
 	for i := 0; i < math.MaxInt16; i++ {
-		autoName = fmt.Sprintf("%s$%d", prefix, i)
+		if i == 0 {
+			//use prefix only
+			autoName = prefix
+		} else {
+			autoName = fmt.Sprintf("%s$%d", prefix, i)
+		}
 		if _, exists := buildPackage.Package.Block.NameExists(autoName); exists {
 			continue
 		}
@@ -31,7 +36,7 @@ func (buildPackage *BuildPackage) newClassName(prefix string) (autoName string) 
 			return autoName
 		}
 	}
-	panic("new class name overflow")
+	panic("new class name overflow") // impossible
 }
 
 func (buildPackage *BuildPackage) putClass(class *cg.ClassHighLevel) {
@@ -70,10 +75,10 @@ func (buildPackage *BuildPackage) Make(p *ast.Package) {
 	buildPackage.mkGlobalFunctions()
 	buildPackage.mkInitFunctions()
 	for _, v := range p.Block.Classes {
-		buildPackage.classes[v.Name] = buildPackage.buildClass(v)
+		buildPackage.putClass(buildPackage.buildClass(v))
 	}
 	for _, v := range p.Block.Enums {
-		buildPackage.classes[v.Name] = buildPackage.mkEnum(v)
+		buildPackage.putClass(buildPackage.mkEnum(v))
 	}
 	err := buildPackage.DumpClass()
 	if err != nil {
@@ -134,13 +139,13 @@ func (buildPackage *BuildPackage) mkGlobalTypeAlias() {
 func (buildPackage *BuildPackage) mkGlobalVariables() {
 	for k, v := range buildPackage.Package.Block.Variables {
 		f := &cg.FieldHighLevel{}
-		f.AccessFlags |= v.AccessFlags
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
 		f.Descriptor = Descriptor.typeDescriptor(v.Type)
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		f.AccessFlags |= cg.ACC_FIELD_VOLATILE
+		f.AccessFlags |= cg.ACC_FIELD_FINAL
 		if LucyFieldSignatureParser.Need(v.Type) {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
@@ -238,7 +243,7 @@ func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *as
 	case ast.VariableTypeByte:
 		index = c.Class.InsertIntConst(int32(v.(byte)))
 	case ast.VariableTypeShort:
-		fallthrough
+		index = c.Class.InsertIntConst(v.(int32))
 	case ast.VariableTypeInt:
 		index = c.Class.InsertIntConst(v.(int32))
 	case ast.VariableTypeLong:
@@ -339,7 +344,7 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 		method.Code = &cg.AttributeCode{}
 		buildPackage.mainClass.AppendMethod(method)
 	}
-	for k, f := range buildPackage.Package.Block.Functions { // first round
+	for k, f := range buildPackage.Package.Block.Functions {
 		if f.IsBuildIn || f.TemplateFunction != nil { //
 			continue
 		}

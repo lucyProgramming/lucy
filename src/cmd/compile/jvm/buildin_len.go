@@ -15,7 +15,15 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 	if 2 > maxStack {
 		maxStack = 2
 	}
-	exit := (&cg.Exit{}).FromCode(cg.OP_ifnull, code)
+	code.Codes[code.CodeLength] = cg.OP_ifnonnull
+	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 8)
+	code.Codes[code.CodeLength+3] = cg.OP_pop
+	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
+	code.CodeLength += 5
+	exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+	state.pushStack(class, call.Args[0].ExpressionValue)
+	context.MakeStackMap(code, state, code.CodeLength)
+	state.popStack(1)
 	if call.Args[0].ExpressionValue.Type == ast.VariableTypeJavaArray {
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
@@ -48,15 +56,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	writeExits([]*cg.Exit{exit}, code.CodeLength+3)
-	state.pushStack(class, call.Args[0].ExpressionValue)
-	context.MakeStackMap(code, state, code.CodeLength+3)
-	state.popStack(1)
-	code.Codes[code.CodeLength] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 5)
-	code.Codes[code.CodeLength+3] = cg.OP_pop
-	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
-	code.CodeLength += 5
+	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)

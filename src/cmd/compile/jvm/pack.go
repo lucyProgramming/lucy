@@ -155,6 +155,10 @@ func (TypeConverterAndPrimitivePacker) castPointer(class *cg.ClassHighLevel, cod
 	if t.IsPointer() == false {
 		panic("...")
 	}
+	if t.Type == ast.VariableTypeObject && t.Class.Name == javaRootClass {
+		// no need
+		return
+	}
 	code.Codes[code.CodeLength] = cg.OP_checkcast
 	switch t.Type {
 	case ast.VariableTypeString:

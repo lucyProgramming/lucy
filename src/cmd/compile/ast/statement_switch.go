@@ -21,10 +21,9 @@ type StatementSwitchCase struct {
 
 func (s *StatementSwitch) check(block *Block) []error {
 	errs := []error{}
-	if s.Condition == nil { // must be a error must parser stage
+	if s.Condition == nil { // must be a error must parse stage
 		return errs
 	}
-
 	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		errs = append(errs, es...)
@@ -62,6 +61,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 			var stringValue string
 			var enumName string
 			valueValid := false
+			//literal value
 			valueFromExpression := func() {
 				switch e.Type {
 				case ExpressionTypeByte:

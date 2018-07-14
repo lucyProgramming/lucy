@@ -49,7 +49,7 @@ type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs
 type buildFunctionChecker CallChecker
 
 type AutoVariableForReturnBecauseOfDefer struct {
-	ForArrayList uint16
+	Offset uint16
 }
 
 func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
@@ -133,8 +133,7 @@ func (f *Function) badParameterMsg(name string, args []*Type) string {
 	return s
 }
 
-func (f *Function) checkBlock(errs *[]error) {
-	f.mkLastReturnStatement()
+func (f *Function) makeName() {
 	if f.Name == "" {
 		if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
 			f.Name = fmt.Sprintf("literal$%d", f.Pos.StartLine)
@@ -148,6 +147,11 @@ func (f *Function) checkBlock(errs *[]error) {
 	} else {
 		f.Block.InheritedAttribute.ClassAndFunctionNames += "$" + f.Name
 	}
+}
+
+func (f *Function) checkBlock(errs *[]error) {
+	f.makeName()
+	f.makeLastReturnStatement()
 	*errs = append(*errs, f.Block.checkStatements()...)
 }
 
@@ -169,7 +173,7 @@ func (f *Function) clone() (ret *Function, es []error) {
 	}
 	return ret, es
 }
-func (f *Function) mkLastReturnStatement() {
+func (f *Function) makeLastReturnStatement() {
 	if len(f.Block.Statements) == 0 ||
 		(f.Block.Statements[len(f.Block.Statements)-1].Type != StatementTypeReturn) {
 		s := &StatementReturn{}
@@ -208,7 +212,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 	var err error
 	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true
-		if len(v.Type.haveParameterType()) > 0 {
+		if len(v.Type.getParameterType()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}
@@ -258,7 +262,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 	//handler return
 	for _, v := range f.Type.ReturnList {
 		v.IsFunctionReturnVariable = true
-		if len(v.Type.haveParameterType()) > 0 {
+		if len(v.Type.getParameterType()) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}

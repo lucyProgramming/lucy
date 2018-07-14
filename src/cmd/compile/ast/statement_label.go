@@ -29,6 +29,17 @@ func (s *StatementLabel) Ready(from *Position) error {
 	if len(ss) == 0 {
 		return nil
 	}
+	/*
+		{
+			if true {
+				// jump over variable definition not allow
+				goto some ;
+			}
+		}
+		a := false ;
+		some:
+
+	*/
 	errMsg := fmt.Sprintf("%s cannot jump over variable definition:\n", errMsgPrefix(from))
 	for _, v := range ss {
 		errMsg += fmt.Sprintf("\t%s constains variable definition\n", errMsgPrefix(v.Pos))

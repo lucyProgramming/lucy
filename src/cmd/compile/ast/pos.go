@@ -7,7 +7,8 @@ type Position struct {
 	//EndLint int
 	//EndColumn int
 	/*
-		offset at bs , for special use
+		offset at bs , for special use。
+		for template function only currently
 	*/
 	Offset int
 }

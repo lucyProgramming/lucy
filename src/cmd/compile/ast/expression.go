@@ -419,6 +419,13 @@ func (e *Expression) isFloat() bool {
 	check out this expression is increment or decrement
 */
 func (e *Expression) IsIncrement() bool {
+	if e.Type == ExpressionTypeIncrement ||
+		e.Type == ExpressionTypePrefixIncrement ||
+		e.Type == ExpressionTypeDecrement ||
+		e.Type == ExpressionTypePrefixDecrement {
+	} else {
+		panic("not increment or decrement at all")
+	}
 	return e.Type == ExpressionTypeIncrement ||
 		e.Type == ExpressionTypePrefixIncrement
 }
@@ -429,6 +436,32 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	}
 	return len(e.Data.([]*Expression)) > n
 }
+
+//func (e *Expression) assginExpressionLeftValueAlsoUsedAsRightValue() bool {
+//	if e.Type != ExpressionTypeAssign {
+//		//should not happen
+//		return false
+//	}
+//	bin := e.Data.(*ExpressionBinary)
+//	leftValueVariables := make(map[*Variable]struct{})
+//	rightValueVariables := make(map[*Variable]struct{})
+//	for _, v := range bin.Left.Data.([]*Expression) {
+//		t := v.variableIn()
+//		if t != nil {
+//			leftValueVariables[t] = struct{}{}
+//		}
+//	}
+//	for _, v := range bin.Right.Data.([]*Expression) {
+//		t := v.variableIn()
+//		if t != nil {
+//			rightValueVariables[t] = struct{}{}
+//		}
+//	}
+//	return true
+//}
+//func (e *Expression) variableIn() *Variable {
+//	return nil
+//}
 
 func (e *Expression) HaveOnlyOneValue() bool {
 	if e.MayHaveMultiValue() {

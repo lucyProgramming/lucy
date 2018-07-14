@@ -33,7 +33,6 @@ const (
 )
 
 type Type struct {
-	TNames       []string
 	Resolved     bool
 	Pos          *Position
 	Type         int
@@ -48,6 +47,11 @@ type Type struct {
 	Package      *Package
 	Alias        string
 	AliasType    *Type
+}
+
+type Map struct {
+	K *Type
+	V *Type
 }
 
 func (typ *Type) validForTypeAssertOrConversion() bool {
@@ -69,11 +73,6 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 		}
 	}
 	return false
-}
-
-type Map struct {
-	K *Type
-	V *Type
 }
 
 func (typ *Type) mkDefaultValueExpression() *Expression {
@@ -136,7 +135,7 @@ func (typ *Type) RightValueValid() bool {
 }
 
 /*
-	isTyped means can get type from this
+	have type or not
 */
 func (typ *Type) isTyped() bool {
 	return typ.RightValueValid() && typ.Type != VariableTypeNull
@@ -160,7 +159,7 @@ func (typ *Type) Clone() *Type {
 	return ret
 }
 
-func (typ *Type) resolve(block *Block, subPart ...bool) error {
+func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 	if typ == nil {
 		return nil
 	}
@@ -180,7 +179,7 @@ func (typ *Type) resolve(block *Block, subPart ...bool) error {
 		return nil
 	}
 	if typ.Type == VariableTypeName { //
-		return typ.resolveName(block, len(subPart) > 0)
+		return typ.resolveName(block, len(isSubPart) > 0)
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
@@ -247,19 +246,15 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 		}
 	case *Type:
 		dd := d.(*Type)
-		if dd != nil {
-			tt := dd.Clone()
-			tt.Pos = typ.Pos
-			*typ = *tt
-			return nil
-		}
+		tt := dd.Clone()
+		tt.Pos = typ.Pos
+		*typ = *tt
+		return nil
 	case *Enum:
 		dd := d.(*Enum)
-		if dd != nil {
-			typ.Type = VariableTypeEnum
-			typ.Enum = dd
-			return nil
-		}
+		typ.Type = VariableTypeEnum
+		typ.Enum = dd
+		return nil
 	}
 	return fmt.Errorf("%s name '%s' is not a type",
 		errMsgPrefix(typ.Pos), typ.Name)
@@ -440,31 +435,23 @@ func (typ *Type) TypeString() string {
 	typ.typeString(&t)
 	return t
 }
-func (typ *Type) haveParameterType() (ret []string) {
-	ret = []string{}
-	defer func() {
-		typ.TNames = ret
-	}()
-	if typ.TNames != nil {
-		return typ.TNames
-	}
+func (typ *Type) getParameterType() []string {
 	if typ.Type == VariableTypeTemplate {
-		ret = []string{typ.Name}
-		return
+		return []string{typ.Name}
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		ret = typ.Array.haveParameterType()
-		return
+		return typ.Array.getParameterType()
+
 	}
 	if typ.Type == VariableTypeMap {
-		ret = []string{}
-		if t := typ.Map.K.haveParameterType(); t != nil {
+		ret := []string{}
+		if t := typ.Map.K.getParameterType(); t != nil {
 			ret = append(ret, t...)
 		}
-		if t := typ.Map.V.haveParameterType(); t != nil {
+		if t := typ.Map.V.getParameterType(); t != nil {
 			ret = append(ret, t...)
 		}
-		return
+		return ret
 	}
 	return nil
 }
@@ -477,7 +464,8 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 		}
 		return nil
 	}
-	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
+	if typ.Type == VariableTypeArray ||
+		typ.Type == VariableTypeJavaArray {
 		return typ.Array.canBeBindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
@@ -487,7 +475,8 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 		}
 		return typ.Map.V.canBeBindWithParameterTypes(parameterTypes)
 	}
-	return fmt.Errorf("not T") // looks impossible
+	return nil
+	//return fmt.Errorf("not T") // looks impossible
 }
 
 /*
@@ -506,11 +495,15 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 		return typ.Array.bindWithParameterTypes(parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
-		err := typ.Map.K.bindWithParameterTypes(parameterTypes)
-		if err != nil {
-			return err
+		if len(typ.Map.K.getParameterType()) > 0 {
+			err := typ.Map.K.bindWithParameterTypes(parameterTypes)
+			if err != nil {
+				return err
+			}
 		}
-		return typ.Map.V.bindWithParameterTypes(parameterTypes)
+		if len(typ.Map.V.getParameterType()) > 0 {
+			return typ.Map.V.bindWithParameterTypes(parameterTypes)
+		}
 	}
 	panic("not T")
 }
@@ -536,11 +529,15 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 		return typ.Array.canBeBindWithType(mkParameterTypes, bind.Array)
 	}
 	if typ.Type == VariableTypeMap && bind.Type == VariableTypeMap {
-		err := typ.Map.K.canBeBindWithType(mkParameterTypes, bind.Map.K)
-		if err != nil {
-			return err
+		if len(typ.Map.K.getParameterType()) > 0 {
+			err := typ.Map.K.canBeBindWithType(mkParameterTypes, bind.Map.K)
+			if err != nil {
+				return err
+			}
 		}
-		return typ.Map.V.canBeBindWithType(mkParameterTypes, bind.Map.V)
+		if len(typ.Map.V.getParameterType()) > 0 {
+			return typ.Map.V.canBeBindWithType(mkParameterTypes, bind.Map.V)
+		}
 	}
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())
 }

@@ -25,8 +25,8 @@ func (s *StatementReturn) check(b *Block) []error {
 	}
 	errs := make([]error, 0)
 	returnValueTypes := checkRightValuesValid(checkExpressions(b, s.Expressions, &errs), &errs)
-	pos := s.Expressions[len(s.Expressions)-1].Pos
 	rs := b.InheritedAttribute.Function.Type.ReturnList
+	pos := s.Expressions[len(s.Expressions)-1].Pos
 	if len(returnValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few arguments to return", errMsgPrefix(pos)))
 	} else if len(returnValueTypes) > len(rs) {

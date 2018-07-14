@@ -169,7 +169,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	call := e.Data.(*ExpressionFunctionCall)
 	parameterTypes := make(map[string]*Type)
 	for k, v := range f.Type.ParameterList {
-		if v == nil || v.Type == nil || len(v.Type.haveParameterType()) == 0 {
+		if v == nil || v.Type == nil || len(v.Type.getParameterType()) == 0 {
 			continue
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
@@ -185,7 +185,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	}
 	tps := call.ParameterTypes
 	for k, v := range f.Type.ReturnList {
-		if v == nil || v.Type == nil || len(v.Type.haveParameterType()) == 0 {
+		if v == nil || v.Type == nil || len(v.Type.getParameterType()) == 0 {
 			continue
 		}
 		if len(tps) == 0 || tps[0] == nil {
@@ -205,7 +205,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		tps = tps[1:]
 	}
-	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypes, ret, errs)
+	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypes)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		cloneFunction, es := f.clone()
 		if esNotEmpty(es) {
@@ -216,23 +216,26 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		call.TemplateFunctionCallPair.Function = cloneFunction
 		cloneFunction.parameterTypes = parameterTypes
 		for _, v := range cloneFunction.Type.ParameterList {
-			if len(v.Type.haveParameterType()) > 0 {
+			if len(v.Type.getParameterType()) > 0 {
 				v.Type.bindWithParameterTypes(parameterTypes)
 			}
 		}
 		for _, v := range cloneFunction.Type.ReturnList {
-			if len(v.Type.haveParameterType()) > 0 {
+			if len(v.Type.getParameterType()) > 0 {
 				v.Type.bindWithParameterTypes(parameterTypes)
 			}
 		}
 		//check this function
+		cloneFunction.Block.inherit(&PackageBeenCompile.Block)
 		if cloneFunction.Block.Functions == nil {
 			cloneFunction.Block.Functions = make(map[string]*Function)
 		}
 		cloneFunction.Block.Functions[cloneFunction.Name] = cloneFunction
-		cloneFunction.Block.inherit(&PackageBeenCompile.Block)
 		cloneFunction.Block.InheritedAttribute.Function = cloneFunction
 		cloneFunction.checkParametersAndReturns(errs)
+		//for k, v := range cloneFunction.Block.Variables {
+		//	fmt.Println(k, v)
+		//}
 		cloneFunction.checkBlock(errs)
 	}
 	ret = call.TemplateFunctionCallPair.Function

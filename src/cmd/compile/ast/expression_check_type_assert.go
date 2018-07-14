@@ -13,7 +13,6 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-
 	if object == nil {
 		return nil
 	}

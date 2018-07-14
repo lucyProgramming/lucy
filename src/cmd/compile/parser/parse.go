@@ -54,14 +54,13 @@ func (parser *Parser) initParser() {
 	parser.InterfaceParser.parser = parser
 	parser.BlockParser = &BlockParser{}
 	parser.BlockParser.parser = parser
-	parser.scanner = lex.New(parser.bs, 1, 1)
-	parser.lines = bytes.Split(parser.bs, []byte("\n"))
-	parser.errs = []error{}
-	parser.Next() //
 }
 
 func (parser *Parser) Parse() []error {
 	parser.initParser()
+	parser.scanner = lex.New(parser.bs, 1, 1)
+	parser.Next() //
+	parser.lines = bytes.Split(parser.bs, []byte("\n"))
 	if parser.token.Type == lex.TokenEof {
 		//TODO::empty source lucy file , should forbidden???
 		return nil

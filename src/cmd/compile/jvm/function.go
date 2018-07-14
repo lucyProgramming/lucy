@@ -173,10 +173,10 @@ func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel,
 		if len(f.Type.ReturnList) > 1 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			f.AutoVariableForReturnBecauseOfDefer.ForArrayList = code.MaxLocals
+			f.AutoVariableForReturnBecauseOfDefer.Offset = code.MaxLocals
 			code.MaxLocals++
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-				f.AutoVariableForReturnBecauseOfDefer.ForArrayList)...)
+				f.AutoVariableForReturnBecauseOfDefer.Offset)...)
 			state.appendLocals(class, state.newObjectVariableType(javaRootObjectArray))
 		}
 		maxStack = 1

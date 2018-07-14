@@ -57,12 +57,12 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
 	errs *[]error) *Type {
 	if len(newMap.Args) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s new map expect no arguments",
+		*errs = append(*errs, fmt.Errorf("%s new 'map' expect no arguments",
 			errMsgPrefix(newMap.Args[0].Pos)))
 	}
-	tt := newMap.Type.Clone()
-	tt.Pos = e.Pos
-	return tt
+	ret := newMap.Type.Clone()
+	ret.Pos = e.Pos
+	return ret
 }
 
 func (e *Expression) checkNewJavaArrayExpression(block *Block, newArray *ExpressionNew,

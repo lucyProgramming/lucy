@@ -9,24 +9,24 @@ import (
 type Description struct {
 }
 
-func (description *Description) methodDescriptor(f *ast.FunctionType) string {
+func (description *Description) methodDescriptor(functionType *ast.FunctionType) string {
 	s := "("
-	for _, v := range f.ParameterList {
+	for _, v := range functionType.ParameterList {
 		s += description.typeDescriptor(v.Type)
 	}
 	s += ")"
-	if f.NoReturnValue() {
+	if functionType.NoReturnValue() {
 		s += "V"
-	} else if len(f.ReturnList) == 1 {
-		s += description.typeDescriptor(f.ReturnList[0].Type)
+	} else if len(functionType.ReturnList) == 1 {
+		s += description.typeDescriptor(functionType.ReturnList[0].Type)
 	} else {
 		s += "[Ljava/lang/Object;" //always this type
 	}
 	return s
 }
 
-func (description *Description) typeDescriptor(v *ast.Type) string {
-	switch v.Type {
+func (description *Description) typeDescriptor(typ *ast.Type) string {
+	switch typ.Type {
 	case ast.VariableTypeBool:
 		return "Z"
 	case ast.VariableTypeByte:
@@ -42,20 +42,20 @@ func (description *Description) typeDescriptor(v *ast.Type) string {
 	case ast.VariableTypeDouble:
 		return "D"
 	case ast.VariableTypeArray:
-		meta := ArrayMetas[v.Array.Type] // combination type
+		meta := ArrayMetas[typ.Array.Type] // combination type
 		return "L" + meta.className + ";"
 	case ast.VariableTypeString:
 		return "Ljava/lang/String;"
 	case ast.VariableTypeVoid:
 		return "V"
 	case ast.VariableTypeObject:
-		return "L" + v.Class.Name + ";"
+		return "L" + typ.Class.Name + ";"
 	case ast.VariableTypeMap:
 		return "L" + javaMapClass + ";"
 	case ast.VariableTypeFunction:
 		return "L" + javaMethodHandleClass + ";"
 	case ast.VariableTypeJavaArray:
-		return "[" + description.typeDescriptor(v.Array)
+		return "[" + description.typeDescriptor(typ.Array)
 	}
 	panic("unHandle type signature")
 }

@@ -16,7 +16,7 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
-	exit := (&cg.Exit{}).FromCode(cg.OP_ifeq, code)
+	falseExit := (&cg.Exit{}).FromCode(cg.OP_ifeq, code)
 	//true part
 	stack, es := buildExpression.build(class, code, ternary.True, context, state)
 	if len(es) > 0 {
@@ -28,9 +28,9 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 	if stack > maxStack {
 		maxStack = stack
 	}
-	exit2 := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+	trueExit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
 	context.MakeStackMap(code, state, code.CodeLength)
-	writeExits([]*cg.Exit{exit}, code.CodeLength)
+	writeExits([]*cg.Exit{falseExit}, code.CodeLength)
 	stack, es = buildExpression.build(class, code, ternary.False, context, state)
 	if len(es) > 0 {
 		writeExits(es, code.CodeLength)
@@ -44,7 +44,7 @@ func (buildExpression *BuildExpression) buildTernary(class *cg.ClassHighLevel, c
 	state.pushStack(class, e.ExpressionValue)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
-	writeExits([]*cg.Exit{exit2}, code.CodeLength)
+	writeExits([]*cg.Exit{trueExit}, code.CodeLength)
 	return
 
 }

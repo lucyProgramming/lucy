@@ -15,39 +15,38 @@ type TemplateFunctionCallPair struct {
 	ClassName      string
 }
 
-func (t *TemplateFunction) callPairExists(parameterTypes map[string]*Type, errs *[]error) *TemplateFunctionCallPair {
-	f := func(p *TemplateFunctionCallPair) *TemplateFunctionCallPair {
+func (t *TemplateFunction) callPairExists(parameterTypes map[string]*Type) *TemplateFunctionCallPair {
+	equal := func(p *TemplateFunctionCallPair) bool {
 		if len(p.parameterTypes) != len(parameterTypes) {
-			return nil
+			return false
 		}
-		for kk, vv := range parameterTypes {
-			t, ok := p.parameterTypes[kk]
+		for tName, tType := range parameterTypes {
+			t, ok := p.parameterTypes[tName]
 			if ok == false {
 				//not found
-				return nil
+				return false
 			}
-			if vv.Equal(errs, t) == false {
+			if tType.StrictEqual(t) == false {
 				//not equal
-				return nil
+				return false
 			}
 		}
-		return p
+		return true
 	}
 	for _, v := range t.Pairs {
-		if p := f(v); p != nil {
-			return p
+		if equal(v) {
+			return v
 		}
 	}
 	return nil
 }
 
-func (t *TemplateFunction) insert(parameterTypes map[string]*Type, f *Function, errs *[]error) *TemplateFunctionCallPair {
-	if t := t.callPairExists(parameterTypes, errs); t != nil {
+func (t *TemplateFunction) insert(parameterTypes map[string]*Type) *TemplateFunctionCallPair {
+	if t := t.callPairExists(parameterTypes); t != nil {
 		return t
 	}
 	ret := &TemplateFunctionCallPair{
 		parameterTypes: parameterTypes,
-		Function:       f,
 	}
 	t.Pairs = append(t.Pairs, ret)
 	return ret

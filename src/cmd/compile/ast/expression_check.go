@@ -170,9 +170,6 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		e.checkVarExpression(block, &errs)
 		returnValueTypes = []*Type{mkVoidType(e.Pos)}
 		e.ExpressionValue = returnValueTypes[0]
-		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		}
 	case ExpressionTypeFunctionCall:
 		returnValueTypes = e.checkFunctionCallExpression(block, &errs)
 		e.ExpressionMultiValues = returnValueTypes

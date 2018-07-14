@@ -8,15 +8,18 @@ import (
 )
 
 type Block struct {
-	Exits                           []*cg.Exit // for switch template
-	WillNotExecuteToEnd             bool       // should analyse at ast stage
+	Exits []*cg.Exit // for switch template
+	/*
+		should analyse at ast stage
+	*/
+	WillNotExecuteToEnd             bool
 	Defers                          []*StatementDefer
 	IsGlobalVariableDefinitionBlock bool
-	IsFunctionBlock                 bool
-	IsClassBlock                    bool
-	IsForBlock                      bool
-	IsSwitchBlock                   bool
-	IsSwitchTemplateBlock           bool
+	IsFunctionBlock                 bool // function block
+	IsClassBlock                    bool // class block
+	IsForBlock                      bool // for top block
+	IsSwitchBlock                   bool // switch statement list block
+	IsSwitchTemplateBlock           bool // template swtich statement list block
 	Pos                             *Position
 	EndPos                          *Position
 	Outer                           *Block
@@ -238,9 +241,9 @@ func (b *Block) checkStatements() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
 		if s.isStaticFieldDefaultValue {
+			//  compiler auto statement, no need to check
 			continue
 		}
-
 		b.InheritedAttribute.StatementOffset = k
 		errs = append(errs, s.check(b)...)
 		if PackageBeenCompile.shouldStop(errs) {

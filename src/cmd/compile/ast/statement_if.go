@@ -28,7 +28,6 @@ func (s *StatementIf) check(father *Block) []error {
 			err := fmt.Errorf("%s expression '%s' evaluate but not used",
 				errMsgPrefix(v.Pos), v.OpName())
 			errs = append(errs, err)
-			continue
 		}
 	}
 	if s.Condition != nil {

@@ -36,16 +36,18 @@ var (
 )
 
 func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
-	p := &Parser{}
-	p.filename = pos.Filename
-	p.nErrors2Stop = 10
-	p.bs = bs
-	p.initParser()
-	f, err := p.FunctionParser.parse(true)
+	parser := &Parser{}
+	parser.filename = pos.Filename
+	parser.nErrors2Stop = 10
+	parser.bs = bs
+	parser.initParser()
+	parser.scanner = lex.New(parser.bs, pos.StartLine, pos.StartColumn)
+	parser.Next() //
+	f, err := parser.FunctionParser.parse(true)
 	if err != nil {
-		p.errs = append(p.errs, err)
+		parser.errs = append(parser.errs, err)
 	}
-	return f, p.errs
+	return f, parser.errs
 }
 
 var (

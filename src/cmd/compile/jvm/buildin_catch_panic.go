@@ -8,7 +8,9 @@ import (
 func (buildExpression *BuildExpression) mkBuildInPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Args[0].Type != ast.ExpressionTypeNew { // not new expression
+	if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
+		maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
+	} else {
 		code.Codes[code.CodeLength] = cg.OP_new
 		className := call.Args[0].ExpressionValue.Class.Name
 		class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -32,8 +34,6 @@ func (buildExpression *BuildExpression) mkBuildInPanic(class *cg.ClassHighLevel,
 			Descriptor: "(Ljava/lang/Throwable;)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else {
-		maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
@@ -47,7 +47,8 @@ func (buildExpression *BuildExpression) mkBuildInCatch(class *cg.ClassHighLevel,
 		maxStack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...)
+		copyOPs(code,
+			storeLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...)
 		return
 	}
 	maxStack = 2

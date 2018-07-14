@@ -34,7 +34,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 			buildPackage.mkNonStaticFieldDefaultValue(class, code, context, state)
 		}
 		//unCondition goto
-		if buildPackage.statementIsUnConditionGoTo(s) {
+		if buildPackage.statementIsUnConditionGoto(s) {
 			willNotExecuteToEnd = true
 			continue
 		}
@@ -77,7 +77,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 	return
 }
 
-func (buildPackage *BuildPackage) statementIsUnConditionGoTo(s *ast.Statement) bool {
+func (buildPackage *BuildPackage) statementIsUnConditionGoto(s *ast.Statement) bool {
 	return s.Type == ast.StatementTypeReturn ||
 		s.Type == ast.StatementTypeGoTo ||
 		s.Type == ast.StatementTypeContinue ||

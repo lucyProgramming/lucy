@@ -24,24 +24,28 @@ const (
 )
 
 type Statement struct {
+	Type int
+
+	Checked                 bool // if checked
+	Pos                     *Position
+	StatementIf             *StatementIf
+	Expression              *Expression
+	StatementFor            *StatementFor
+	StatementReturn         *StatementReturn
+	StatementSwitch         *StatementSwitch
+	StatementSwitchTemplate *StatementSwitchTemplate
+	StatementBreak          *StatementBreak
+	Block                   *Block
+	StatementContinue       *StatementContinue
+	StatementLabel          *StatementLabel
+	StatementGoTo           *StatementGoTo
+	Defer                   *StatementDefer
+	Class                   *Class
+	Enum                    *Enum
+	/*
+
+	 */
 	isStaticFieldDefaultValue bool
-	Checked                   bool // if checked
-	Pos                       *Position
-	Type                      int
-	StatementIf               *StatementIf
-	Expression                *Expression
-	StatementFor              *StatementFor
-	StatementReturn           *StatementReturn
-	StatementSwitch           *StatementSwitch
-	StatementSwitchTemplate   *StatementSwitchTemplate
-	StatementBreak            *StatementBreak
-	Block                     *Block
-	StatementContinue         *StatementContinue
-	StatementLabel            *StatementLabel
-	StatementGoTo             *StatementGoTo
-	Defer                     *StatementDefer
-	Class                     *Class
-	Enum                      *Enum
 	/*
 		this.super()
 		special case
@@ -117,7 +121,6 @@ func (s *Statement) check(block *Block) []error { // block is father
 		block.InheritedAttribute.Function.mkAutoVarForException()
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		//s.Defer.allowCatch = block.IsFunctionBlock
 		es := s.Defer.Block.checkStatements()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
@@ -179,40 +182,3 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 	}
 	return errs
 }
-
-//
-//func (s *Statement) StatementName() string {
-//	switch s.Type {
-//	case StatementTypeExpression:
-//		return "expression statement"
-//	case StatementTypeIf:
-//		return "if statement"
-//	case StatementTypeFor:
-//		return "for statement"
-//	case StatementTypeContinue:
-//		return "continue statement"
-//	case StatementTypeBreak:
-//		return "break statement"
-//	case StatementTypeSwitch:
-//		return "switch statement"
-//	case StatementTypeLabel:
-//		return "label statement"
-//	case StatementTypeGoTo:
-//		return "goto statement"
-//	case StatementTypeDefer:
-//		return "defer statement"
-//	case StatementTypeBlock:
-//		return "block statement"
-//	case StatementTypeReturn:
-//		return "return statement"
-//	case StatementTypeClass:
-//		return "class"
-//	case StatementTypeEnum:
-//		return "enum"
-//	case StatementTypeNop:
-//		return "nop"
-//	case StatementTypeSwitchTemplate:
-//		return "switch template"
-//	}
-//	return ""
-//}

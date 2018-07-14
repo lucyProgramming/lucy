@@ -31,7 +31,7 @@ func (buildExpression *BuildExpression) mkBuildInFunctionCall(class *cg.ClassHig
 	case common.BuildInFunctionLen:
 		return buildExpression.mkBuildInLen(class, code, e, context, state)
 	default:
-		panic("unKnow buildIn function:" + call.Function.Name)
+		panic("unknown  buildIn function:" + call.Function.Name)
 	}
 	return
 }

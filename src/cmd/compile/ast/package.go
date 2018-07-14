@@ -80,6 +80,10 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Enums {
 		v.Name = p.Name + "/" + v.Name
+		err := v.check()
+		if err != nil {
+			p.Errors = append(p.Errors, err)
+		}
 	}
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
@@ -87,7 +91,6 @@ func (p *Package) TypeCheck() []error {
 		v.Block.inherit(&PackageBeenCompile.Block)
 		v.Block.InheritedAttribute.Class = v
 	}
-
 	for _, v := range p.Block.Classes {
 		err := v.resolveFather()
 		if err != nil {

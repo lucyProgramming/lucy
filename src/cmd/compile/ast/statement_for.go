@@ -7,14 +7,14 @@ import (
 )
 
 type StatementFor struct {
-	RangeAttr          *ForRangeAttr
-	Exits              []*cg.Exit
-	ContinueCodeOffset int
-	Pos                *Position
-	Init               *Expression
-	Condition          *Expression
-	After              *Expression
-	Block              *Block
+	RangeAttr           *ForRangeAttr
+	Exits               []*cg.Exit
+	ContinueCodeOffset  int
+	Pos                 *Position
+	Init                *Expression
+	Condition           *Expression
+	AfterBlockStatement *Expression
+	Block               *Block
 }
 
 type ForRangeAttr struct {
@@ -40,7 +40,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 		rangeExpression = t[0].Data.(*Expression)
 	}
-	rangeOn, es := rangeExpression.checkSingleValueContextExpression(s.Block)
+	rangeOn, es := rangeExpression.checkSingleValueContextExpression(s.Block.Outer)
 	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
@@ -50,7 +50,7 @@ func (s *StatementFor) checkRange() []error {
 	if rangeOn.Type != VariableTypeArray &&
 		rangeOn.Type != VariableTypeJavaArray &&
 		rangeOn.Type != VariableTypeMap {
-		errs = append(errs, fmt.Errorf("%s cannot have range on '%s'",
+		errs = append(errs, fmt.Errorf("%s cannot range on '%s'",
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
@@ -64,45 +64,17 @@ func (s *StatementFor) checkRange() []error {
 	if len(lefts) > 2 {
 		errs = append(errs, fmt.Errorf("%s cannot have more than 2 expressions on the left",
 			errMsgPrefix(lefts[2].Pos)))
-		lefts = lefts[:2]
+		lefts = lefts[0:2]
 	}
-	modelKv := false
-	if len(lefts) == 2 {
-		modelKv = true
-	}
+	modelKv := len(lefts) == 2
 	s.RangeAttr = &ForRangeAttr{}
-	if s.Condition.Type == ExpressionTypeAssign {
-		if modelKv {
-			if false == lefts[0].IsNoNameIdentifier() {
-				s.RangeAttr.ExpressionKey = lefts[0]
-			}
-			if false == lefts[1].IsNoNameIdentifier() {
-				s.RangeAttr.ExpressionValue = lefts[1]
-			}
-		} else {
-			if false == lefts[0].IsNoNameIdentifier() {
-				s.RangeAttr.ExpressionValue = lefts[0]
-			}
-		}
-	}
 	s.RangeAttr.RangeOn = rangeExpression
 	var err error
 	if s.Condition.Type == ExpressionTypeColonAssign {
-		if modelKv {
-			if lefts[0].Type != ExpressionTypeIdentifier {
+		for _, v := range lefts {
+			if v.Type != ExpressionTypeIdentifier {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",
-					errMsgPrefix(lefts[0].Pos)))
-				return errs
-			}
-			if lefts[1].Type != ExpressionTypeIdentifier {
-				errs = append(errs, fmt.Errorf("%s not a identifier on left",
-					errMsgPrefix(lefts[0].Pos)))
-				return errs
-			}
-		} else {
-			if lefts[0].Type != ExpressionTypeIdentifier {
-				errs = append(errs, fmt.Errorf("%s not a identifier on left",
-					errMsgPrefix(lefts[0].Pos)))
+					errMsgPrefix(v.Pos)))
 				return errs
 			}
 		}
@@ -118,7 +90,6 @@ func (s *StatementFor) checkRange() []error {
 			identifierV = lefts[0].Data.(*ExpressionIdentifier)
 			posV = lefts[0].Pos
 		}
-
 		if identifierV.Name != NoNameIdentifier {
 			vd := &Variable{}
 			if rangeOn.Type == VariableTypeArray || rangeOn.Type == VariableTypeJavaArray {
@@ -156,47 +127,56 @@ func (s *StatementFor) checkRange() []error {
 			identifierK.Variable = vd
 			s.RangeAttr.IdentifierKey = identifierK
 		}
-	}
-
-	if s.Condition.Type == ExpressionTypeAssign {
-		var tk *Type
+	} else { // k,v = range arr
+		if modelKv {
+			if false == lefts[0].IsNoNameIdentifier() {
+				s.RangeAttr.ExpressionKey = lefts[0]
+			}
+			if false == lefts[1].IsNoNameIdentifier() {
+				s.RangeAttr.ExpressionValue = lefts[1]
+			}
+		} else {
+			if false == lefts[0].IsNoNameIdentifier() {
+				s.RangeAttr.ExpressionValue = lefts[0]
+			}
+		}
+		var receiverKType *Type
 		if s.RangeAttr.ExpressionKey != nil {
-			tk = s.RangeAttr.ExpressionKey.getLeftValue(s.Block, &errs)
-			if tk == nil {
+			receiverKType = s.RangeAttr.ExpressionKey.getLeftValue(s.Block, &errs)
+			if receiverKType == nil {
 				return errs
 			}
 		}
-		var tv *Type
+		var receiverVType *Type
 		if s.RangeAttr.ExpressionValue != nil {
-			tv = s.RangeAttr.ExpressionValue.getLeftValue(s.Block, &errs)
-			if tv == nil {
+			receiverVType = s.RangeAttr.ExpressionValue.getLeftValue(s.Block, &errs)
+			if receiverVType == nil {
 				return errs
 			}
 		}
-		var tkk, tvv *Type
-
+		var kType, vType *Type
 		if rangeOn.Type == VariableTypeArray ||
 			rangeOn.Type == VariableTypeJavaArray {
-			tkk = &Type{
+			kType = &Type{
 				Type: VariableTypeInt,
 			}
-			tvv = rangeOn.Array
+			vType = rangeOn.Array
 		} else {
-			tkk = rangeOn.Map.K
-			tvv = rangeOn.Map.V
+			kType = rangeOn.Map.K
+			vType = rangeOn.Map.V
 		}
-		if tk != nil {
-			if tk.Equal(&errs, tkk) == false {
+		if receiverKType != nil {
+			if receiverKType.Equal(&errs, kType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
-					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), tk.TypeString(), tkk.TypeString())
+					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
 				return errs
 			}
 		}
-		if tv != nil {
-			if tv.Equal(&errs, tvv) == false {
+		if receiverVType != nil {
+			if receiverVType.Equal(&errs, vType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
-					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), tk.TypeString(), tkk.TypeString())
+					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
 				return errs
 			}
@@ -210,13 +190,15 @@ func (s *StatementFor) check(block *Block) []error {
 	s.Block.InheritedAttribute.StatementFor = s
 	s.Block.InheritedAttribute.ForBreak = s
 	errs := []error{}
-	if s.Init == nil && s.After == nil && s.Condition != nil && s.Condition.canBeUsedForRange() { // for k,v := range arr
+	if s.Init == nil && s.AfterBlockStatement == nil && s.Condition != nil && s.Condition.canBeUsedForRange() {
+		// for k,v := range arr
 		return s.checkRange()
 	}
 	if s.Init != nil {
 		s.Init.IsStatementExpression = true
 		if s.Init.canBeUsedAsStatement() == false {
-			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.Init.Pos)))
+			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
+				errMsgPrefix(s.Init.Pos), s.Init.OpName()))
 		}
 		_, es := s.Init.check(s.Block)
 		if esNotEmpty(es) {
@@ -225,7 +207,7 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	if s.Condition != nil {
 		if s.Condition.canBeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression(%s) cannot used as condition",
+			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
 				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
 		}
 		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
@@ -237,12 +219,13 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Condition.Pos), t.TypeString()))
 		}
 	}
-	if s.After != nil {
-		s.After.IsStatementExpression = true
-		if s.After.canBeUsedAsStatement() == false {
-			errs = append(errs, fmt.Errorf("%s cannot be used as statement", errMsgPrefix(s.After.Pos)))
+	if s.AfterBlockStatement != nil {
+		s.AfterBlockStatement.IsStatementExpression = true
+		if s.AfterBlockStatement.canBeUsedAsStatement() == false {
+			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
+				errMsgPrefix(s.AfterBlockStatement.Pos), s.AfterBlockStatement.OpName()))
 		}
-		_, es := s.After.check(s.Block)
+		_, es := s.AfterBlockStatement.check(s.Block)
 		if esNotEmpty(es) {
 			errs = append(errs, es...)
 		}
