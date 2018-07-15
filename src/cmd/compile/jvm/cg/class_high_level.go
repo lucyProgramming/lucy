@@ -47,7 +47,12 @@ func (classHighLevel *ClassHighLevel) NewFieldName(prefix string) string {
 		return prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
-		name := fmt.Sprintf("%s_%d", prefix, i)
+		var name string
+		if i == 0 {
+			name = prefix
+		} else {
+			name = fmt.Sprintf("%s$%d", prefix, i)
+		}
 		if _, ok := classHighLevel.Fields[name]; ok == false {
 			return name
 		}
