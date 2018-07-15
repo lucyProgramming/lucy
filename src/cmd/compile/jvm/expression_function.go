@@ -63,7 +63,6 @@ func (buildPackage *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighL
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-
 	return
 }
 
