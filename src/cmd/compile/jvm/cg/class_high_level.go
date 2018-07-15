@@ -34,7 +34,12 @@ func (classHighLevel *ClassHighLevel) NewFunctionName(prefix string) string {
 		return prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
-		name := fmt.Sprintf("%s$%d", prefix, i)
+		var name string
+		if i == 0 {
+			name = prefix
+		} else {
+			name = fmt.Sprintf("%s$%d", prefix, i)
+		}
 		if _, ok := classHighLevel.Methods[name]; ok == false {
 			return name
 		}
@@ -42,23 +47,23 @@ func (classHighLevel *ClassHighLevel) NewFunctionName(prefix string) string {
 	panic("names over flow") // this is not happening
 }
 
-func (classHighLevel *ClassHighLevel) NewFieldName(prefix string) string {
-	if classHighLevel.Fields == nil || classHighLevel.Fields[prefix] == nil {
-		return prefix
-	}
-	for i := 0; i < math.MaxInt16; i++ {
-		var name string
-		if i == 0 {
-			name = prefix
-		} else {
-			name = fmt.Sprintf("%s$%d", prefix, i)
-		}
-		if _, ok := classHighLevel.Fields[name]; ok == false {
-			return name
-		}
-	}
-	panic("names over flow") // this is not happening
-}
+//func (classHighLevel *ClassHighLevel) NewFieldName(prefix string) string {
+//	if classHighLevel.Fields == nil || classHighLevel.Fields[prefix] == nil {
+//		return prefix
+//	}
+//	for i := 0; i < math.MaxInt16; i++ {
+//		var name string
+//		if i == 0 {
+//			name = prefix
+//		} else {
+//			name = fmt.Sprintf("%s$%d", prefix, i)
+//		}
+//		if _, ok := classHighLevel.Fields[name]; ok == false {
+//			return name
+//		}
+//	}
+//	panic("names over flow") // this is not happening
+//}
 func (classHighLevel *ClassHighLevel) InsertStringConst(s string, location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertStringConst(s))
 }
