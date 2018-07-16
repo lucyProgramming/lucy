@@ -3,6 +3,7 @@ package ast
 import "fmt"
 
 type StatementDefer struct {
+	Labels         []*StatementLabel
 	StartPc        int         // for jvm
 	StackMapState  interface{} // *jvm.StackMapState
 	Block          Block

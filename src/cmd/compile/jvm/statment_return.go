@@ -307,6 +307,9 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		buildPackage.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
+		for _, v := range statementReturn.Defers[index].Labels {
+			v.Reset()
+		}
 		if index > 0 { // not the last defer, no need to look at
 			index--
 			continue

@@ -8,12 +8,27 @@ import (
 )
 
 type StatementLabel struct {
+	//InDefer             bool
 	CodeOffsetGenerated bool
 	CodeOffset          int
 	Block               *Block
 	Name                string
 	Exits               []*cg.Exit
 	Statement           *Statement
+}
+
+/*
+	defer {
+		xxx:
+	}
+	defer block could be compile multi time,
+	should reset the label
+
+*/
+func (s *StatementLabel) Reset() {
+	s.CodeOffsetGenerated = false
+	s.CodeOffset = -1
+	s.Exits = []*cg.Exit{}
 }
 
 func (s *StatementLabel) Ready(from *Position) error {

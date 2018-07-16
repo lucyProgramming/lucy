@@ -45,7 +45,7 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 		}
 		blockParser.Next()
 		if blockParser.parser.token.Type != lex.TokenLc {
-			f.AfterBlockStatement, err = blockParser.parser.ExpressionParser.parseExpression(true)
+			f.Increment, err = blockParser.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilLc)

@@ -62,7 +62,7 @@ func (parser *Parser) Parse() []error {
 	parser.Next() //
 	parser.lines = bytes.Split(parser.bs, []byte("\n"))
 	if parser.token.Type == lex.TokenEof {
-		//TODO::empty source lucy file , should forbidden???
+		//TODO::empty source file , should forbidden???
 		return nil
 	}
 	parser.parseImports()
@@ -422,7 +422,7 @@ func (parser *Parser) errorMsgPrefix(pos ...*ast.Position) string {
 	if len(pos) > 0 {
 		return fmt.Sprintf("%s:%d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
 	}
-	line, column := parser.scanner.GetPos()
+	line, column := parser.scanner.GetLineAndColumn()
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }
 

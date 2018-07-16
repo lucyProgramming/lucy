@@ -22,7 +22,7 @@ type Lexer struct {
 	offset, end          int
 }
 
-func (lex *Lexer) GetPos() (int, int) {
+func (lex *Lexer) GetLineAndColumn() (int, int) {
 	return lex.line, lex.column
 }
 

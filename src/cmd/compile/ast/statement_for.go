@@ -7,14 +7,19 @@ import (
 )
 
 type StatementFor struct {
-	RangeAttr           *ForRangeAttr
-	Exits               []*cg.Exit
-	ContinueCodeOffset  int
-	Pos                 *Position
-	Init                *Expression
-	Condition           *Expression
-	AfterBlockStatement *Expression
-	Block               *Block
+	RangeAttr          *ForRangeAttr
+	Exits              []*cg.Exit
+	ContinueCodeOffset int
+	Pos                *Position
+	/*
+		for i := 0 ; i < 10 ;i ++ {
+
+		}
+	*/
+	Init      *Expression
+	Condition *Expression
+	Increment *Expression
+	Block     *Block
 }
 
 type ForRangeAttr struct {
@@ -190,7 +195,7 @@ func (s *StatementFor) check(block *Block) []error {
 	s.Block.InheritedAttribute.StatementFor = s
 	s.Block.InheritedAttribute.ForBreak = s
 	errs := []error{}
-	if s.Init == nil && s.AfterBlockStatement == nil && s.Condition != nil && s.Condition.canBeUsedForRange() {
+	if s.Init == nil && s.Increment == nil && s.Condition != nil && s.Condition.canBeUsedForRange() {
 		// for k,v := range arr
 		return s.checkRange()
 	}
@@ -219,13 +224,13 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Condition.Pos), t.TypeString()))
 		}
 	}
-	if s.AfterBlockStatement != nil {
-		s.AfterBlockStatement.IsStatementExpression = true
-		if s.AfterBlockStatement.canBeUsedAsStatement() == false {
+	if s.Increment != nil {
+		s.Increment.IsStatementExpression = true
+		if s.Increment.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(s.AfterBlockStatement.Pos), s.AfterBlockStatement.OpName()))
+				errMsgPrefix(s.Increment.Pos), s.Increment.OpName()))
 		}
-		_, es := s.AfterBlockStatement.check(s.Block)
+		_, es := s.Increment.check(s.Block)
 		if esNotEmpty(es) {
 			errs = append(errs, es...)
 		}

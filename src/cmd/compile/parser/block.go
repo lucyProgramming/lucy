@@ -386,6 +386,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		s.Pos = pos
 		s.Type = ast.StatementTypeLabel
 		label := &ast.StatementLabel{}
+		label.CodeOffset = -1
 		s.StatementLabel = label
 		label.Statement = s
 		label.Name = e.Data.(*ast.ExpressionIdentifier).Name

@@ -129,6 +129,10 @@ func (s *Statement) check(block *Block) []error { // block is father
 		return s.Block.checkStatements()
 	case StatementTypeLabel:
 		// nothing to do
+		//s.StatementLabel.InDefer = block.InheritedAttribute.Defer != nil
+		if block.InheritedAttribute.Defer != nil {
+			block.InheritedAttribute.Defer.Labels = append(block.InheritedAttribute.Defer.Labels, s.StatementLabel)
+		}
 	case StatementTypeClass:
 		err := block.Insert(s.Class.Name, s.Pos, s.Class)
 		if err != nil {

@@ -15,7 +15,6 @@ type ParameterList []*Variable
 type ReturnList []*Variable
 
 func (ft FunctionType) getReturnTypes(pos *Position) []*Type {
-
 	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
 		t := &Type{}
 		t.Type = VariableTypeVoid // means no return ;
@@ -27,12 +26,11 @@ func (ft FunctionType) getReturnTypes(pos *Position) []*Type {
 		ret[k] = v.Type.Clone()
 		ret[k].Pos = pos
 	}
-
 	return ret
 }
 
 func (ft FunctionType) getParameterTypes() []*Type {
-	if len(ft.parameterTypes) > 0 {
+	if ft.parameterTypes != nil {
 		return ft.parameterTypes
 	}
 	ret := make([]*Type, len(ft.ParameterList))

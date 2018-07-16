@@ -87,9 +87,6 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
-			parseReturnListNames(c, t[0].Info, m.Function)
-		}
 		if astClass.Methods[m.Function.Name] == nil {
 			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}
 		} else {

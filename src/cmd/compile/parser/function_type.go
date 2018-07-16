@@ -20,7 +20,8 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 	if parser.token.Type != lex.TokenRp { // not (
 		t.ParameterList, err = parser.parseReturnLists()
 		if err != nil {
-			return t, err
+			parser.consume(untilRp)
+			parser.Next()
 		}
 	}
 	if parser.token.Type != lex.TokenRp { // not )
@@ -30,7 +31,8 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		return
 	}
 	parser.Next()
-	if parser.token.Type == lex.TokenArrow { // ->
+
+	if parser.token.Type == lex.TokenArrow { // ->  parse return list
 		parser.Next() // skip ->
 		if parser.token.Type != lex.TokenLp {
 			err = fmt.Errorf("%s fn declared wrong, not '(' after '->'",
@@ -42,9 +44,7 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		if parser.token.Type != lex.TokenRp {
 			t.ReturnList, err = parser.parseReturnLists()
 			if err != nil { // skip until next (,continue to analyse
-				parser.consume(map[int]bool{
-					lex.TokenRp: true,
-				})
+				parser.consume(untilRp)
 				parser.Next()
 			}
 		}

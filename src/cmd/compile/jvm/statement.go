@@ -27,6 +27,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		} else {
 			blockState = state
 		}
+		s.Block.Exits = []*cg.Exit{}
 		buildPackage.buildBlock(class, code, s.Block, context, blockState)
 		state.addTop(blockState)
 		if len(s.Block.Exits) > 0 {
@@ -75,6 +76,11 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeGoTo:
+		if len(s.StatementGoTo.Defers) > 0 {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			buildPackage.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
+		}
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 			jumpTo(cg.OP_goto, code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {
@@ -84,7 +90,6 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 	case ast.StatementTypeLabel:
 		s.StatementLabel.CodeOffsetGenerated = true
 		s.StatementLabel.CodeOffset = code.CodeLength
-		s.StatementLabel.Exits = []*cg.Exit{} //could compile multi times
 		if len(s.StatementLabel.Exits) > 0 {
 			writeExits(s.StatementLabel.Exits, code.CodeLength) // back patch
 		}
@@ -130,6 +135,9 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		buildPackage.buildBlock(class, code, &ds[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
+		for _, v := range ds[index].Labels {
+			v.Reset()
+		}
 		if index > 0 {
 			index--
 			continue

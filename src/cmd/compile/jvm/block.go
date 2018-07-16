@@ -68,12 +68,14 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 			continue
 		}
 	}
-	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		buildPackage.buildDefers(class, code, context, b.Defers, state)
-	}
 	b.WillNotExecuteToEnd = willNotExecuteToEnd
+	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
+		if b.WillNotExecuteToEnd == false {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			buildPackage.buildDefers(class, code, context, b.Defers, state)
+		}
+	}
 	return
 }
 

@@ -187,12 +187,12 @@ func (f *Function) makeLastReturnStatement() {
 
 func (f *Function) checkParametersAndReturns(errs *[]error) {
 	if f.Name == MainFunctionName {
-		errFunc := func() {
+		errMain := func() {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
 				errMsgPrefix(f.Pos), MainFunctionName))
 		}
 		if len(f.Type.ParameterList) != 1 {
-			errFunc()
+			errMain()
 		} else { //
 			if f.Type.ParameterList[0].Type.Type == VariableTypeArray &&
 				f.Type.ParameterList[0].Type.Array.Type == VariableTypeString {
@@ -201,12 +201,14 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 					*errs = append(*errs, err)
 				}
 			} else {
-				errFunc()
+				errMain()
 			}
-			f.Type.ParameterList[0].LocalValOffset = 1
+			//f.Type.ParameterList[0].LocalValOffset = 1
 			f.Type.ParameterList[0].IsFunctionParameter = true
 		}
-
+		if len(f.Type.ReturnList) > 0 {
+			errMain()
+		}
 		return
 	}
 	var err error
