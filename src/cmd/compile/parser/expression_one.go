@@ -7,6 +7,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
+/*
+	isPrefixUnary is not use, means suffix have highest priority
+	++ a ++ = ++ (a ++ )
+*/
 func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool) (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
@@ -298,9 +302,9 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		// ++ or --
 		if expressionParser.parser.token.Type == lex.TokenIncrement ||
 			expressionParser.parser.token.Type == lex.TokenDecrement { //  ++ or --
-			if isPrefixUnary {
-				return left, nil
-			}
+			//if isPrefixUnary {
+			//	return left, nil
+			//}
 			newExpression := &ast.Expression{}
 			if expressionParser.parser.token.Type == lex.TokenIncrement {
 				newExpression.Type = ast.ExpressionTypeIncrement

@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block, s *ast.Statement,
+func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, block *ast.Block, s *ast.Statement,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	//fmt.Println(s.Pos)
 	switch s.Type {
@@ -98,7 +98,13 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
 	case ast.StatementTypeClass:
-		s.Class.Name = buildPackage.newClassName(s.Class.Name)
+		var name string
+		if block.InheritedAttribute.ClassAndFunctionNames == "" {
+			name = s.Class.Name
+		} else {
+			name = block.InheritedAttribute.ClassAndFunctionNames + "$" + s.Class.Name
+		}
+		s.Class.Name = buildPackage.newClassName(name)
 		c := buildPackage.buildClass(s.Class)
 		buildPackage.putClass(c)
 	case ast.StatementTypeNop:
