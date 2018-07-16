@@ -8,8 +8,8 @@ import (
 )
 
 //(a,b int)->(total int)
-func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
-	t = ast.FunctionType{}
+func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err error) {
+	functionType = ast.FunctionType{}
 	if parser.token.Type != lex.TokenLp {
 		err = fmt.Errorf("%s fn declared wrong,missing '(',but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
@@ -17,8 +17,8 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		return
 	}
 	parser.Next()                         // skip (
-	if parser.token.Type != lex.TokenRp { // not (
-		t.ParameterList, err = parser.parseReturnLists()
+	if parser.token.Type != lex.TokenRp { // not )
+		functionType.ParameterList, err = parser.parseReturnLists()
 		if err != nil {
 			parser.consume(untilRp)
 			parser.Next()
@@ -30,8 +30,7 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		parser.errs = append(parser.errs, err)
 		return
 	}
-	parser.Next()
-
+	parser.Next()                            // skip )
 	if parser.token.Type == lex.TokenArrow { // ->  parse return list
 		parser.Next() // skip ->
 		if parser.token.Type != lex.TokenLp {
@@ -42,7 +41,7 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 		}
 		parser.Next() // skip (
 		if parser.token.Type != lex.TokenRp {
-			t.ReturnList, err = parser.parseReturnLists()
+			functionType.ReturnList, err = parser.parseReturnLists()
 			if err != nil { // skip until next (,continue to analyse
 				parser.consume(untilRp)
 				parser.Next()
@@ -54,12 +53,12 @@ func (parser *Parser) parseFunctionType() (t ast.FunctionType, err error) {
 			parser.errs = append(parser.errs, err)
 			return
 		}
-		parser.Next()
+		parser.Next() // skip )
 	}
-	return t, err
+	return functionType, err
 }
 
-func (parser *Parser) parseReturnList() (returnList []*ast.Variable, err error) {
+func (parser *Parser) parseTypedNameForReturnVar() (returnList []*ast.Variable, err error) {
 	returnList, err = parser.parseTypedName()
 	if parser.token.Type != lex.TokenAssign {
 		return
@@ -67,12 +66,10 @@ func (parser *Parser) parseReturnList() (returnList []*ast.Variable, err error) 
 	parser.Next() // skip =
 	for k, v := range returnList {
 		var er error
-		v.Expression, er = parser.ExpressionParser.parseTernaryExpression()
+		v.Expression, er = parser.ExpressionParser.parseExpression(false)
 		if er != nil {
 			parser.errs = append(parser.errs, err)
-			parser.consume(map[int]bool{
-				lex.TokenComma: true,
-			})
+			parser.consume(untilComma)
 			err = er
 			parser.Next()
 			continue
@@ -83,11 +80,11 @@ func (parser *Parser) parseReturnList() (returnList []*ast.Variable, err error) 
 			parser.Next() // skip ,
 		}
 	}
-	return returnList, nil
+	return returnList, err
 }
 func (parser *Parser) parseReturnLists() (returnList []*ast.Variable, err error) {
 	for parser.token.Type == lex.TokenIdentifier {
-		v, err := parser.parseReturnList()
+		v, err := parser.parseTypedNameForReturnVar()
 		if v != nil {
 			returnList = append(returnList, v...)
 		}

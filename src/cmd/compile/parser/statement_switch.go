@@ -17,7 +17,7 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.Sta
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		return nil, err
+		blockParser.consume(untilLc)
 	}
 	blockParser.Next() // skip {  , must be case
 	if blockParser.parser.token.Type != lex.TokenCase {
@@ -50,7 +50,6 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.Sta
 			block = &ast.Block{}
 			block.IsSwitchBlock = true
 			blockParser.parseStatementList(block, false)
-
 		}
 		s.StatementSwitchCases = append(s.StatementSwitchCases, &ast.StatementSwitchTemplateCase{
 			Matches: ts,
@@ -99,7 +98,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		return nil, err
+		blockParser.consume(untilLc)
 	}
 	blockParser.Next() // skip {  , must be case
 	if blockParser.parser.token.Type != lex.TokenCase {

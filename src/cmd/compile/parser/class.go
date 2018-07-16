@@ -269,6 +269,11 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			}
 			classParser.ret.Methods[f.Name] = append(classParser.ret.Methods[f.Name], m)
 			classParser.resetProperty()
+		case lex.TokenImport:
+			pos := classParser.parser.mkPos()
+			classParser.parser.parseImports()
+			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s cannot have import at this scope",
+				classParser.parser.errorMsgPrefix(pos)))
 		default:
 			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s unexpect '%s'",
 				classParser.parser.errorMsgPrefix(), classParser.parser.token.Description))

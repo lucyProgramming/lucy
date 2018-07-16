@@ -30,6 +30,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 	interfaceParser.ret.Block.IsClassBlock = true
 	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
 	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+
 	interfaceParser.ret.Name, err = interfaceParser.parser.ClassParser.parseClassName()
 	classDefinition = interfaceParser.ret
 	if err != nil {
@@ -107,6 +108,11 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 				interfaceParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			interfaceParser.ret.Methods[m.Function.Name] = append(interfaceParser.ret.Methods[m.Function.Name], m)
+		case lex.TokenImport:
+			pos := interfaceParser.parser.mkPos()
+			interfaceParser.parser.parseImports()
+			interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s cannot have import at this scope",
+				interfaceParser.parser.errorMsgPrefix(pos)))
 		default:
 			interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s unexpect token:%s", interfaceParser.parser.errorMsgPrefix(),
 				interfaceParser.parser.token.Description))

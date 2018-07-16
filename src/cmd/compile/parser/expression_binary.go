@@ -267,7 +267,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 
 // * / %
 func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseOneExpression(false)
+	e, err := expressionParser.parseOneExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +278,7 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		typ = expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
-		e2, err := expressionParser.parseOneExpression(false)
+		e2, err := expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}

@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -44,8 +43,11 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			break
 		}
 		if blockParser.parser.ExpressionParser.looksLikeExpression() {
-			var isLabel bool
-			blockParser.parseExpressionStatement(block, isDefer, &isLabel)
+			isLabel := blockParser.parseExpressionStatement(block, isDefer)
+			/*
+				could be lable
+					someLable:
+			*/
 			if isLabel == false {
 				blockParser.parser.validStatementEnding()
 				if blockParser.parser.token.Type == lex.TokenSemicolon {
@@ -356,6 +358,11 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			s.Type = ast.StatementTypeEnum
 			s.Enum = e
 			block.Statements = append(block.Statements, s)
+		case lex.TokenImport:
+			pos := blockParser.parser.mkPos()
+			blockParser.parser.parseImports()
+			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s cannot have import at this scope",
+				blockParser.parser.errorMsgPrefix(pos)))
 		default:
 			// something I cannot handle
 			return
@@ -364,7 +371,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 	return
 }
 
-func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool, isLabel *bool) {
+func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool) (isLabel bool) {
 	pos := blockParser.parser.mkPos()
 	e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
@@ -379,7 +386,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement lable has no meaning",
 				blockParser.parser.errorMsgPrefix()))
 		}
-		*isLabel = true
+		isLabel = true
 		blockParser.parser.expectLf = true
 		blockParser.Next() // skip :
 		s := &ast.Statement{}
@@ -416,4 +423,5 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 			})
 		}
 	}
+	return
 }

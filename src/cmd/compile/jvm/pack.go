@@ -147,6 +147,8 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/Double;",
 		}, bs[1:3])
+	default:
+		panic("not a primitive")
 	}
 	return
 }

@@ -14,13 +14,11 @@ func (blockParser *BlockParser) parseFor() (f *ast.StatementFor, err error) {
 	blockParser.Next() // skip for
 	if blockParser.parser.token.Type != lex.TokenLc &&
 		blockParser.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
-		e, err := blockParser.parser.ExpressionParser.parseExpression(true)
+		f.Condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
 			goto parseBlock
-		} else {
-			f.Condition = e
 		}
 	}
 	if blockParser.parser.token.Type == lex.TokenSemicolon {

@@ -512,9 +512,3 @@ func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 	}
 	return vs, nil
 }
-
-//func (parser *Parser) lexPos2AstPos(t *lex.Token, pos *ast.Position) {
-//	pos.Filename = parser.filename
-//	pos.StartLine = t.StartLine
-//	pos.StartColumn = t.StartColumn
-//}

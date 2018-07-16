@@ -7,11 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-/*
-	isPrefixUnary is not use, means suffix have highest priority
-	++ a ++ = ++ (a ++ )
-*/
-func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool) (*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression, error) {
 	var left *ast.Expression
 	var err error
 	switch expressionParser.parser.token.Type {
@@ -111,7 +107,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		expressionParser.Next() // skip ++
 		newE := &ast.Expression{}
 		newE.Pos = pos
-		left, err = expressionParser.parseOneExpression(true)
+		left, err = expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +118,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next() // skip --
 		newE := &ast.Expression{}
-		left, err = expressionParser.parseOneExpression(true)
+		left, err = expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -134,7 +130,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		newE := &ast.Expression{}
-		left, err = expressionParser.parseOneExpression(true)
+		left, err = expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -146,7 +142,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		newE := &ast.Expression{}
-		left, err = expressionParser.parseOneExpression(true)
+		left, err = expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -158,7 +154,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		newE := &ast.Expression{}
-		left, err = expressionParser.parseOneExpression(true)
+		left, err = expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -270,7 +266,7 @@ func (expressionParser *ExpressionParser) parseOneExpression(isPrefixUnary bool)
 	case lex.TokenRange:
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
-		e, err := expressionParser.parseOneExpression(false)
+		e, err := expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
 		}

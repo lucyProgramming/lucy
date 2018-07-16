@@ -9,14 +9,14 @@ type MultiValuePacker struct {
 /*
 	stack is 1
 */
-func (a *MultiValuePacker) storeMultiValueAutoVar(code *cg.AttributeCode, context *Context) {
+func (packer *MultiValuePacker) storeMultiValueAutoVar(code *cg.AttributeCode, context *Context) {
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 		context.function.AutoVariableForMultiReturn.Offset)...)
 }
 
-func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (packer *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	k int, typ *ast.Type, context *Context) (maxStack uint16) {
-	maxStack = a.unPackObject(class, code, k, context)
+	maxStack = packer.unPackObject(class, code, k, context)
 	if typ.IsPointer() == false {
 		typeConverter.unPackPrimitives(class, code, typ)
 		if t := jvmSlotSize(typ); t > maxStack {
@@ -31,7 +31,7 @@ func (a *MultiValuePacker) unPack(class *cg.ClassHighLevel, code *cg.AttributeCo
 /*
 	object is all i need
 */
-func (a *MultiValuePacker) unPackObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (packer *MultiValuePacker) unPackObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	k int, context *Context) (maxStack uint16) {
 	if k > 127 {
 		panic("over 127")
