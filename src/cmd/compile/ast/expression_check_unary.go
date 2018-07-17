@@ -49,6 +49,9 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type
 	if t == nil {
 		return nil
 	}
+	if on.Type == ExpressionTypeIdentifier && e.IsStatementExpression == false {
+		on.Data.(*ExpressionIdentifier).Variable.Used = true
+	}
 	if !t.IsNumber() {
 		*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s'",
 			errMsgPrefix(on.Pos), on.OpName(), t.TypeString()))

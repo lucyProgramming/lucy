@@ -314,8 +314,11 @@ func (parser *Parser) validAfterFinal() error {
 }
 
 func (parser *Parser) validStatementEnding() {
-	if parser.token.Type == lex.TokenSemicolon ||
-		(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
+	//if parser.token.Type == lex.TokenSemicolon ||
+	//	(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
+	//	return
+	//}
+	if parser.token.Type == lex.TokenSemicolon {
 		return
 	}
 	var token *lex.Token
