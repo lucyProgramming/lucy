@@ -56,6 +56,11 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			call.Expression.OpName(), callExpression.TypeString()))
 		return nil
 	}
+	if call.Expression.Type == ExpressionTypeFunctionLiteral {
+		//get function pointer
+		callExpression.Function = call.Expression.Data.(*Function)
+		call.Expression.IsStatementExpression = true
+	}
 	if callExpression.Function != nil {
 		call.Function = callExpression.Function
 		if callExpression.Function.IsBuildIn {

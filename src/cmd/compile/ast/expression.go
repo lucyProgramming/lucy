@@ -88,6 +88,7 @@ const (
 	ExpressionTypeTypeAssert
 	ExpressionTypeQuestion
 	ExpressionTypeGlobal
+	ExpressionTypeParentthesis
 )
 
 func (e *Expression) OpName() string {
@@ -226,6 +227,8 @@ func (e *Expression) OpName() string {
 		return "type alias"
 	case ExpressionTypeGlobal:
 		return "global"
+	case ExpressionTypeParentthesis:
+		return "(" + e.Data.(*Expression).OpName() + ")"
 	default:
 		return fmt.Sprintf("op[%d](missing handle)", e.Type)
 	}

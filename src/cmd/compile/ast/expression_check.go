@@ -304,6 +304,9 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			Package: &PackageBeenCompile,
 		}
 		e.ExpressionValue = returnValueTypes[0]
+	case ExpressionTypeParentthesis:
+		*e = *e.Data.(*Expression) // override
+		return e.check(block)
 	default:
 		panic(fmt.Sprintf("unhandled type:%v", e.OpName()))
 	}

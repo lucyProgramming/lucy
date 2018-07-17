@@ -50,12 +50,12 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 	if call.Function.TemplateFunction != nil {
 		return buildExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
+
 	if call.Expression != nil {
 		if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
 			maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 		}
 	}
-
 	if call.Function.IsClosureFunction == false {
 		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

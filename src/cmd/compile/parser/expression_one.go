@@ -92,6 +92,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		}
 		expressionParser.Next()
 	case lex.TokenLp:
+		pos := expressionParser.parser.mkPos()
 		expressionParser.Next()
 		left, err = expressionParser.parseExpression(false)
 		if err != nil {
@@ -101,6 +102,12 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 			return nil, fmt.Errorf("%s '(' and ')' not matched, but '%s'",
 				expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		}
+		newExpression := &ast.Expression{
+			Type: ast.ExpressionTypeParentthesis,
+			Pos:  pos,
+			Data: left,
+		}
+		left = newExpression
 		expressionParser.Next()
 	case lex.TokenIncrement:
 		pos := expressionParser.parser.mkPos()
