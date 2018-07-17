@@ -83,6 +83,4 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	if noErr == false {
 		return
 	}
-
-	//vs.insertFunctionPointer()
 }

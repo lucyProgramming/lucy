@@ -36,6 +36,9 @@ func (c *Class) HaveStaticsCodes() bool {
 func (c *Class) IsInterface() bool {
 	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
 }
+func (c *Class) IsAbstract() bool {
+	return c.AccessFlags&cg.ACC_CLASS_ABSTRACT != 0
+}
 func (c *Class) IsFinal() bool {
 	return c.AccessFlags&cg.ACC_CLASS_FINAL != 0
 }

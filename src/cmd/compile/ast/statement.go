@@ -26,25 +26,22 @@ const (
 type Statement struct {
 	Type int
 
-	Checked                 bool // if checked
-	Pos                     *Position
-	StatementIf             *StatementIf
-	Expression              *Expression
-	StatementFor            *StatementFor
-	StatementReturn         *StatementReturn
-	StatementSwitch         *StatementSwitch
-	StatementSwitchTemplate *StatementSwitchTemplate
-	StatementBreak          *StatementBreak
-	Block                   *Block
-	StatementContinue       *StatementContinue
-	StatementLabel          *StatementLabel
-	StatementGoTo           *StatementGoTo
-	Defer                   *StatementDefer
-	Class                   *Class
-	Enum                    *Enum
-	/*
-
-	 */
+	Checked                   bool // if checked
+	Pos                       *Position
+	StatementIf               *StatementIf
+	Expression                *Expression
+	StatementFor              *StatementFor
+	StatementReturn           *StatementReturn
+	StatementSwitch           *StatementSwitch
+	StatementSwitchTemplate   *StatementSwitchTemplate
+	StatementBreak            *StatementBreak
+	Block                     *Block
+	StatementContinue         *StatementContinue
+	StatementLabel            *StatementLabel
+	StatementGoTo             *StatementGoTo
+	Defer                     *StatementDefer
+	Class                     *Class
+	Enum                      *Enum
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()

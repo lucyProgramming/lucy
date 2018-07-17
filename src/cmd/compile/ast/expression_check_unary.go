@@ -6,11 +6,11 @@ import (
 
 func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	ee := e.Data.(*Expression)
-	t, es := ee.checkSingleValueContextExpression(block)
+	unary, es := ee.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t == nil {
+	if unary == nil {
 		if e.Type == ExpressionTypeNot {
 			return &Type{
 				Type: ExpressionTypeBool,
@@ -20,24 +20,24 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 		return nil
 	}
 	if e.Type == ExpressionTypeNot {
-		if t.Type != VariableTypeBool {
+		if unary.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
-				errMsgPrefix(t.Pos)))
+				errMsgPrefix(unary.Pos)))
 		}
 	}
 	if e.Type == ExpressionTypeNegative {
-		if t.IsNumber() == false {
+		if unary.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'",
-				errMsgPrefix(e.Pos), t.TypeString()))
+				errMsgPrefix(e.Pos), unary.TypeString()))
 		}
 	}
 	if e.Type == ExpressionTypeBitwiseNot {
-		if t.IsInteger() == false {
+		if unary.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
-				errMsgPrefix(e.Pos), t.TypeString()))
+				errMsgPrefix(e.Pos), unary.TypeString()))
 		}
 	}
-	ret := t.Clone()
+	ret := unary.Clone()
 	ret.Pos = e.Pos
 	return ret
 }

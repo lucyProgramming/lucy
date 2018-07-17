@@ -6,23 +6,23 @@ import (
 
 func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 	index := e.Data.(*ExpressionIndex)
-	t, es := index.Expression.checkSingleValueContextExpression(block)
+	on, es := index.Expression.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t == nil {
+	if on == nil {
 		return nil
 	}
-	if t.Type != VariableTypeArray &&
-		t.Type != VariableTypeMap &&
-		t.Type != VariableTypeJavaArray {
-		*errs = append(*errs, fmt.Errorf("%s cannot have 'index' on '%s'",
-			errMsgPrefix(e.Pos), t.TypeString()))
+	if on.Type != VariableTypeArray &&
+		on.Type != VariableTypeMap &&
+		on.Type != VariableTypeJavaArray {
+		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
+			errMsgPrefix(e.Pos), on.TypeString()))
 		return nil
 	}
 	// array
-	if t.Type == VariableTypeArray ||
-		t.Type == VariableTypeJavaArray {
+	if on.Type == VariableTypeArray ||
+		on.Type == VariableTypeJavaArray {
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
@@ -37,24 +37,24 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 					errMsgPrefix(e.Pos), indexType.TypeString()))
 			}
 		}
-		tt := t.Array.Clone()
-		tt.Pos = e.Pos
-		return tt
+		result := on.Array.Clone()
+		result.Pos = e.Pos
+		return result
 	} else {
 		// map
-		ret := t.Map.V.Clone()
-		ret.Pos = e.Pos
+		result := on.Map.V.Clone()
+		result.Pos = e.Pos
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
 		if indexType == nil {
-			return ret
+			return result
 		}
-		if t.Map.K.Equal(errs, indexType) == false {
+		if on.Map.K.Equal(errs, indexType) == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-				errMsgPrefix(e.Pos), indexType.TypeString(), t.Map.K.TypeString()))
+				errMsgPrefix(e.Pos), indexType.TypeString(), on.Map.K.TypeString()))
 		}
-		return ret
+		return result
 	}
 }

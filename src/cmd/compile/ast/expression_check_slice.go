@@ -51,18 +51,18 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		slice.End.Data = call
 	}
 
-	t, es := slice.Expression.checkSingleValueContextExpression(block)
+	sliceOn, es := slice.Expression.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t == nil {
+	if sliceOn == nil {
 		return nil
 	}
-	if t.Type != VariableTypeArray && t.Type != VariableTypeString {
+	if sliceOn.Type != VariableTypeArray && sliceOn.Type != VariableTypeString {
 		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
-			errMsgPrefix(slice.Expression.Pos), t.TypeString()))
+			errMsgPrefix(slice.Expression.Pos), sliceOn.TypeString()))
 	}
-	tt := t.Clone()
-	tt.Pos = e.Pos
-	return tt
+	result := sliceOn.Clone()
+	result.Pos = e.Pos
+	return result
 }

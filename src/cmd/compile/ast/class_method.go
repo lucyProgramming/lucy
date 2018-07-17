@@ -151,13 +151,46 @@ func (c *Class) accessInterfaceMethodAsJava(from *Position, errs *[]error, name 
 	access method lucy style
 */
 func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []*Type,
-	callArgs *CallArgs, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	callArgs *CallArgs, fromSub bool, fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {
 		return nil, false, err
 	}
 	if c.IsJava {
 		return c.accessMethodAsJava(from, errs, name, args, false)
+	}
+
+	if f := c.Fields[name]; f != nil && f.Type.Type == VariableTypeFunction {
+		if fromSub && f.IsPrivate() {
+			//cannot access this field
+		} else {
+			if len(args) > len(f.Type.FunctionType.ParameterList) {
+				errMsg := fmt.Sprintf("too many paramaters to call function '%s':\n", name)
+				errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(args))
+				errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(f.Type.FunctionType.ParameterList))
+				return nil, false, fmt.Errorf(errMsg)
+			}
+			if len(args) < len(f.Type.FunctionType.ParameterList) {
+				errMsg := fmt.Sprintf("too few paramaters to call function '%s'\n", name)
+				errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(args))
+				errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(f.Type.FunctionType.ParameterList))
+				return nil, false, fmt.Errorf(errMsg)
+			} else {
+				convertLiteralExpressionsToNeeds(*callArgs, f.Type.FunctionType.getParameterTypes(), args)
+			}
+			for k, v := range f.Type.FunctionType.ParameterList {
+				if k < len(args) {
+					if args[k] != nil && !v.Type.Equal(errs, args[k]) {
+						errMsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Type.TypeString())
+						errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(args))
+						errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(f.Type.FunctionType.ParameterList))
+						return nil, false, fmt.Errorf(errMsg)
+					}
+				}
+			}
+			*fieldMethodHandler = f
+			return nil, true, nil
+		}
 	}
 	if len(c.Methods[name]) > 0 {
 		for _, m := range c.Methods[name] {
@@ -207,7 +240,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 	if err != nil {
 		return nil, false, err
 	}
-	return c.SuperClass.accessMethod(from, errs, name, args, callArgs, true)
+	return c.SuperClass.accessMethod(from, errs, name, args, callArgs, true, fieldMethodHandler)
 }
 
 /*
@@ -257,5 +290,5 @@ func (c *Class) accessMethodAsJava(from *Position, errs *[]error, name string,
 
 func (c *Class) matchConstructionFunction(from *Position, errs *[]error, args []*Type,
 	callArgs *CallArgs) (ms []*ClassMethod, matched bool, err error) {
-	return c.accessMethod(from, errs, SpecialMethodInit, args, callArgs, false)
+	return c.accessMethod(from, errs, SpecialMethodInit, args, callArgs, false, nil)
 }

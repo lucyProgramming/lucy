@@ -288,7 +288,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 		b.Classes = make(map[string]*Class)
 	}
 	if c, ok := b.Classes[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errMsg)
@@ -297,7 +297,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 		b.Functions = make(map[string]*Function)
 	}
 	if f, ok := b.Functions[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
 		return fmt.Errorf(errMsg)
@@ -306,7 +306,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 		b.Constants = make(map[string]*Constant)
 	}
 	if c, ok := b.Constants[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
 		return fmt.Errorf(errMsg)
@@ -315,7 +315,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 		b.EnumNames = make(map[string]*EnumName)
 	}
 	if en, ok := b.EnumNames[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
 		return fmt.Errorf(errMsg)
@@ -324,7 +324,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 		b.TypeAliases = make(map[string]*Type)
 	}
 	if t, ok := b.TypeAliases[name]; ok {
-		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
+		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
 		return fmt.Errorf(errMsg)
@@ -333,7 +333,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 		b.Enums = make(map[string]*Enum)
 	}
 	if e, ok := b.Enums[name]; ok {
-		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:",
+		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:\n",
 			errMsgPrefix(pos), name)
 		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
 		return fmt.Errorf(errMsg)
@@ -346,11 +346,9 @@ func (b *Block) Insert(name string, pos *Position, d interface{}) error {
 	// global var Insert into block
 	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
-		if vv, ok := b.Variables[name]; ok {
-			errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
-				errMsgPrefix(pos), name)
-			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(vv.Pos))
-			return fmt.Errorf(errMsg)
+		err := b.checkNameExist(name, pos)
+		if err != nil {
+			return err
 		}
 		b.Variables[name] = v
 		v.IsGlobal = true // it`s global

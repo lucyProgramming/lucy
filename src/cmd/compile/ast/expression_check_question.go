@@ -5,8 +5,8 @@ import (
 )
 
 func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
-	ternary := e.Data.(*ExpressionTernary)
-	condition, es := ternary.Selection.checkSingleValueContextExpression(block)
+	question := e.Data.(*ExpressionQuestion)
+	condition, es := question.Selection.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
@@ -14,16 +14,16 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		if condition.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(e.Pos)))
 		}
-		if ternary.Selection.canBeUsedAsCondition() == false {
+		if question.Selection.canBeUsedAsCondition() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as condition",
 				errMsgPrefix(e.Pos), e.OpName()))
 		}
 	}
-	True, es := ternary.True.checkSingleValueContextExpression(block)
+	True, es := question.True.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	False, es := ternary.False.checkSingleValueContextExpression(block)
+	False, es := question.False.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}

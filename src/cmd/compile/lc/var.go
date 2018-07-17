@@ -5,15 +5,14 @@ import (
 )
 
 var (
-	compiler             LucyCompile
-	loader               FileLoader
-	ParseFunctionHandler func(bs []byte, pos *ast.Position) (*ast.Function, []error)
+	compiler LucyCompile
+	loader   FileLoader
 )
 
 func init() {
 	ast.ImportsLoader = &loader
 	loader.caches = make(map[string]interface{})
-	ParseFunctionHandler = ast.ParseFunctionHandler
+
 }
 
 const (

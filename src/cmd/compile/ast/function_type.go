@@ -6,37 +6,37 @@ type FunctionType struct {
 	ReturnList     ReturnList
 }
 
-func (ft *FunctionType) NoReturnValue() bool {
-	return len(ft.ReturnList) == 0 ||
-		ft.ReturnList[0].Type.Type == VariableTypeVoid
+func (functionType *FunctionType) NoReturnValue() bool {
+	return len(functionType.ReturnList) == 0 ||
+		functionType.ReturnList[0].Type.Type == VariableTypeVoid
 }
 
 type ParameterList []*Variable
 type ReturnList []*Variable
 
-func (ft FunctionType) getReturnTypes(pos *Position) []*Type {
-	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
+func (functionType FunctionType) getReturnTypes(pos *Position) []*Type {
+	if functionType.ReturnList == nil || len(functionType.ReturnList) == 0 {
 		t := &Type{}
 		t.Type = VariableTypeVoid // means no return ;
 		t.Pos = pos
 		return []*Type{t}
 	}
-	ret := make([]*Type, len(ft.ReturnList))
-	for k, v := range ft.ReturnList {
+	ret := make([]*Type, len(functionType.ReturnList))
+	for k, v := range functionType.ReturnList {
 		ret[k] = v.Type.Clone()
 		ret[k].Pos = pos
 	}
 	return ret
 }
 
-func (ft FunctionType) getParameterTypes() []*Type {
-	if ft.parameterTypes != nil {
-		return ft.parameterTypes
+func (functionType FunctionType) getParameterTypes() []*Type {
+	if functionType.parameterTypes != nil {
+		return functionType.parameterTypes
 	}
-	ret := make([]*Type, len(ft.ParameterList))
-	for k, v := range ft.ParameterList {
+	ret := make([]*Type, len(functionType.ParameterList))
+	for k, v := range functionType.ParameterList {
 		ret[k] = v.Type
 	}
-	ft.parameterTypes = ret
+	functionType.parameterTypes = ret
 	return ret
 }

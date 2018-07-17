@@ -200,8 +200,8 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 		maxStack = buildExpression.buildVar(class, code, e, context, state)
 	case ast.ExpressionTypeTypeAssert:
 		maxStack = buildExpression.buildTypeAssert(class, code, e, context, state)
-	case ast.ExpressionTypeTernary:
-		maxStack = buildExpression.buildTernary(class, code, e, context, state)
+	case ast.ExpressionTypeQuestion:
+		maxStack = buildExpression.buildQuestion(class, code, e, context, state)
 	default:
 		panic("missing handle:" + e.OpName())
 	}

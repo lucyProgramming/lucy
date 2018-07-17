@@ -145,7 +145,6 @@ func (buildPackage *BuildPackage) mkGlobalVariables() {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		f.AccessFlags |= cg.ACC_FIELD_VOLATILE
-		f.AccessFlags |= cg.ACC_FIELD_FINAL
 		if LucyFieldSignatureParser.Need(v.Type) {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)

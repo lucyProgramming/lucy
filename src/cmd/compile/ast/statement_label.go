@@ -3,12 +3,10 @@ package ast
 import (
 	"errors"
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type StatementLabel struct {
-	//InDefer             bool
 	CodeOffsetGenerated bool
 	CodeOffset          int
 	Block               *Block

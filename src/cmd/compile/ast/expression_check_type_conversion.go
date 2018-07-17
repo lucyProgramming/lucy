@@ -6,11 +6,11 @@ import (
 
 func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *Type {
 	conversion := e.Data.(*ExpressionTypeConversion)
-	t, es := conversion.Expression.checkSingleValueContextExpression(block)
+	on, es := conversion.Expression.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t == nil {
+	if on == nil {
 		return nil
 	}
 	err := conversion.Type.resolve(block)
@@ -21,7 +21,7 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 	ret := conversion.Type.Clone()
 	ret.Pos = e.Pos
 
-	if t.IsNumber() && conversion.Type.IsNumber() {
+	if on.IsNumber() && conversion.Type.IsNumber() {
 		if conversion.Expression.IsLiteral() {
 			conversion.Expression.convertNumberLiteralTo(conversion.Type.Type)
 			//rewrite
@@ -34,29 +34,29 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 
 	// string([]byte)
 	if conversion.Type.Type == VariableTypeString &&
-		t.Type == VariableTypeArray && t.Array.Type == VariableTypeByte {
+		on.Type == VariableTypeArray && on.Array.Type == VariableTypeByte {
 		return ret
 	}
 	// string(byte[])
 	if conversion.Type.Type == VariableTypeString &&
-		t.Type == VariableTypeJavaArray && t.Array.Type == VariableTypeByte {
+		on.Type == VariableTypeJavaArray && on.Array.Type == VariableTypeByte {
 		return ret
 	}
 
 	// []byte("hello world")
 	if conversion.Type.Type == VariableTypeArray && conversion.Type.Array.Type == VariableTypeByte &&
-		t.Type == VariableTypeString {
+		on.Type == VariableTypeString {
 		return ret
 	}
 	// byte[]("hello world")
 	if conversion.Type.Type == VariableTypeJavaArray && conversion.Type.Array.Type == VariableTypeByte &&
-		t.Type == VariableTypeString {
+		on.Type == VariableTypeString {
 		return ret
 	}
-	if conversion.Type.validForTypeAssertOrConversion() && t.IsPointer() {
+	if conversion.Type.validForTypeAssertOrConversion() && on.IsPointer() {
 		return ret
 	}
 	*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s'",
-		errMsgPrefix(e.Pos), t.TypeString(), conversion.Type.TypeString()))
+		errMsgPrefix(e.Pos), on.TypeString(), conversion.Type.TypeString()))
 	return ret
 }

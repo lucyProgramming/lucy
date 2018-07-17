@@ -31,6 +31,11 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 			errMsgPrefix(e.Pos), no.Type.Class.Name))
 		return nil
 	}
+	if no.Type.Class.IsAbstract() {
+		*errs = append(*errs, fmt.Errorf("%s '%s' is abstract",
+			errMsgPrefix(e.Pos), no.Type.Class.Name))
+		return nil
+	}
 	ret := &Type{}
 	*ret = *no.Type
 	ret.Type = VariableTypeObject

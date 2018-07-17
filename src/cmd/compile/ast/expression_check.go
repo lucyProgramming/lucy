@@ -207,7 +207,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			returnValueTypes = []*Type{tt}
 		}
 		e.ExpressionValue = tt
-	case ExpressionTypeTernary:
+	case ExpressionTypeQuestion:
 		tt := e.checkTernaryExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
@@ -333,7 +333,7 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 }
 func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []error) {
 	ts, es := e.check(block)
-	t, err := e.mustBeOneValueContext(ts)
+	ret, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		if es == nil {
 			es = []error{err}
@@ -341,5 +341,5 @@ func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []e
 			es = append(es, err)
 		}
 	}
-	return t, es
+	return ret, es
 }

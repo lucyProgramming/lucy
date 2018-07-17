@@ -16,7 +16,6 @@ type ConvertTops2Package struct {
 	Functions []*Function
 	Classes   []*Class
 	Enums     []*Enum
-	Variables []*Variable
 	Constants []*Constant
 	Imports   []*Import
 	TypeAlias []*ExpressionTypeAlias
@@ -29,13 +28,12 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 		os.Exit(1)
 	}
 	errs = make([]error, 0)
-	PackageBeenCompile.Files = make(map[string]*LucySourceFile)
+	PackageBeenCompile.Files = make(map[string]*SourceFile)
 	conversion.Name = []string{}
 	conversion.Blocks = []*Block{}
 	conversion.Functions = make([]*Function, 0)
 	conversion.Classes = make([]*Class, 0)
 	conversion.Enums = make([]*Enum, 0)
-	conversion.Variables = make([]*Variable, 0)
 	conversion.Constants = make([]*Constant, 0)
 	expressions := []*Expression{}
 	for _, v := range t {
@@ -58,7 +56,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 		case *Import:
 			i := v.Data.(*Import)
 			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
-				PackageBeenCompile.Files[i.Pos.Filename] = &LucySourceFile{Imports: make(map[string]*Import)}
+				PackageBeenCompile.Files[i.Pos.Filename] = &SourceFile{Imports: make(map[string]*Import)}
 			}
 			PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
 		case *Expression: // a,b = f();
@@ -136,7 +134,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	ret := []*RedeclareError{}
 	m := make(map[string][]interface{})
-	//eums
+	//enums
 	for _, v := range conversion.Enums {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
@@ -159,15 +157,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 			m[v.Name] = []interface{}{v}
 		}
 	}
-	//vars
-	for _, v := range conversion.Variables {
-		if _, ok := m[v.Name]; ok {
-			m[v.Name] = append(m[v.Name], v)
-		} else {
-			m[v.Name] = []interface{}{v}
-		}
-	}
-	//funcs
+	//functions
 	for _, v := range conversion.Functions {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)

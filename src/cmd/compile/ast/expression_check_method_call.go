@@ -216,12 +216,19 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, err)
 			return nil
 		}
+
+		//var fieldMethodHandler *ClassField
 		args := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
-		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, args, nil, false)
+		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, args, nil, false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
 		}
+		//if fieldMethodHandler != nil {
+		//	call.FieldMethodHandler = fieldMethodHandler
+		//	return fieldMethodHandler.Type.FunctionType.getReturnTypes(e.Pos)
+		//}
+
 		if matched {
 			call.Class = javaStringClass
 			if false == call.Expression.isThis() &&
@@ -332,10 +339,33 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		*errs = append(*errs, fmt.Errorf("%s method call expect no parameter types",
 			errMsgPrefix(e.Pos)))
 	}
-	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, args, &call.Args, false)
+	var fieldMethodHandler *ClassField
+	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, args, &call.Args, false, &fieldMethodHandler)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
+	}
+	if fieldMethodHandler != nil {
+		if fieldMethodHandler.IsStatic() {
+			if object.Type != VariableTypeClass {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,shoule make call from class",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			if fieldMethodHandler.IsPublic() == false && object.Class != block.InheritedAttribute.Class {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			}
+		} else {
+			if false == call.Expression.isThis() &&
+				fieldMethodHandler.IsPublic() == false {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			}
+			if object.Type != VariableTypeObject {
+				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,shoule make call from object",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+		}
+		call.FieldMethodHandler = fieldMethodHandler
+		return fieldMethodHandler.Type.FunctionType.getReturnTypes(e.Pos)
 	}
 	if matched {
 		if ms[0].IsStatic() {

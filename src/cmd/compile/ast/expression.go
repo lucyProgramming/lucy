@@ -86,7 +86,7 @@ const (
 	ExpressionTypeMap   // map literal
 	ExpressionTypeTypeAlias
 	ExpressionTypeTypeAssert
-	ExpressionTypeTernary
+	ExpressionTypeQuestion
 	ExpressionTypeGlobal
 )
 
@@ -192,7 +192,7 @@ func (e *Expression) OpName() string {
 		return "--"
 	case ExpressionTypeNegative:
 		return "negative(-)"
-	case ExpressionTypeTernary:
+	case ExpressionTypeQuestion:
 		return "ternary(?:)"
 	case ExpressionTypeNot:
 		return "not(!)"
@@ -308,7 +308,7 @@ type ExpressionTypeAlias struct {
 	Pos  *Position
 }
 
-type ExpressionTernary struct {
+type ExpressionQuestion struct {
 	Selection *Expression
 	True      *Expression
 	False     *Expression
@@ -373,7 +373,7 @@ func (e *Expression) canBeUsedAsCondition() bool {
 		e.Type == ExpressionTypeCheckCast ||
 		e.Type == ExpressionTypeSlice ||
 		e.Type == ExpressionTypeMap ||
-		e.Type == ExpressionTypeTernary
+		e.Type == ExpressionTypeQuestion
 }
 
 func (e *Expression) canBeUsedAsStatement() bool {
@@ -520,12 +520,13 @@ func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *Exp
 }
 
 type ExpressionMethodCall struct {
-	Class          *Class //
-	Expression     *Expression
-	Args           CallArgs
-	Name           string
-	Method         *ClassMethod
-	ParameterTypes []*Type // unSupport !!!!!!
+	Class              *Class //
+	Expression         *Expression
+	Args               CallArgs
+	Name               string
+	Method             *ClassMethod
+	FieldMethodHandler *ClassField
+	ParameterTypes     []*Type // unSupport !!!!!!
 }
 
 type ExpressionDeclareVariable struct {
@@ -555,9 +556,9 @@ type ExpressionSelection struct {
 	Name            string
 	Field           *ClassField  // expression is class or object
 	Method          *ClassMethod // pack to method handle
-	Function        *Function    //   expression is package  pack to method handle
-	PackageVariable *Variable    // expression is package
-	PackageEnumName *EnumName    // expression is package
+	Function        *Function    // expression is package , pack function to method handle
+	PackageVariable *Variable    // expression is package , get package variable
+	PackageEnumName *EnumName    // expression is package , get enumName
 }
 
 type ExpressionNew struct {

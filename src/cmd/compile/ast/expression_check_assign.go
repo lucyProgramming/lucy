@@ -16,11 +16,11 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
-	ts := checkRightValuesValid(checkExpressions(block, values, errs), errs)
-	if len(names) != len(ts) {
+	assignTypes := checkRightValuesValid(checkExpressions(block, values, errs), errs)
+	if len(names) != len(assignTypes) {
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(e.Pos),
-			len(ts),
+			len(assignTypes),
 			len(names)))
 		noErr = false
 	}
@@ -44,16 +44,16 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			continue
 		}
 		var variableType *Type
-		if k < len(ts) && ts[k] != nil {
-			variableType = ts[k]
+		if k < len(assignTypes) && assignTypes[k] != nil {
+			variableType = assignTypes[k]
 		}
 		if variable, ok := block.Variables[identifier.Name]; ok {
 			if variableType != nil {
-				if variable.Type.Equal(errs, ts[k]) == false {
+				if variable.Type.Equal(errs, assignTypes[k]) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
-						errMsgPrefix(ts[k].Pos),
+						errMsgPrefix(assignTypes[k].Pos),
 						variable.Type.TypeString(),
-						ts[k].TypeString()))
+						assignTypes[k].TypeString()))
 					noErr = false
 				}
 			}
@@ -63,8 +63,8 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 		} else { // should be no error
 			noNewVariable = false
 			vd := &Variable{}
-			if k < len(ts) {
-				vd.Type = ts[k]
+			if k < len(assignTypes) {
+				vd.Type = assignTypes[k]
 			}
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
@@ -101,27 +101,27 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
 	bin := e.Data.(*ExpressionBinary)
-	t1 := bin.Left.getLeftValue(block, errs)
-	bin.Left.ExpressionValue = t1
-	t2, es := bin.Right.checkSingleValueContextExpression(block)
+	left := bin.Left.getLeftValue(block, errs)
+	bin.Left.ExpressionValue = left
+	right, es := bin.Right.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if t1 == nil || t2 == nil {
+	if left == nil || right == nil {
 		return
 	}
-	ret := t1.Clone()
+	ret := left.Clone()
 	ret.Pos = e.Pos
 	/*
 		var  s string;
 		s += "11111111";
 	*/
-	if t1.Type == VariableTypeString {
-		if t2.Type != VariableTypeString || (e.Type != ExpressionTypePlusAssign) {
+	if left.Type == VariableTypeString {
+		if right.Type != VariableTypeString || (e.Type != ExpressionTypePlusAssign) {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
 				errMsgPrefix(e.Pos),
 				e.OpName(),
-				t2.TypeString()))
+				right.TypeString()))
 		}
 		return ret
 	}
@@ -131,15 +131,15 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		e.Type == ExpressionTypeMulAssign ||
 		e.Type == ExpressionTypeDivAssign ||
 		e.Type == ExpressionTypeModAssign {
-		if t1.Equal(errs, t2) {
+		if left.Equal(errs, right) {
 			return ret
 		}
-		if t1.IsInteger() && t2.IsInteger() && bin.Right.IsLiteral() {
-			bin.Right.ConvertToNumber(t1.Type)
+		if left.IsInteger() && right.IsInteger() && bin.Right.IsLiteral() {
+			bin.Right.ConvertToNumber(left.Type)
 			return ret
 		}
-		if t1.IsFloat() && t2.IsFloat() && bin.Right.IsLiteral() {
-			bin.Right.ConvertToNumber(t1.Type)
+		if left.IsFloat() && right.IsFloat() && bin.Right.IsLiteral() {
+			bin.Right.ConvertToNumber(left.Type)
 			return ret
 		}
 
@@ -147,14 +147,14 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	if e.Type == ExpressionTypeAndAssign ||
 		e.Type == ExpressionTypeOrAssign ||
 		e.Type == ExpressionTypeXorAssign {
-		if t1.IsInteger() && t1.Equal(errs, t2) {
+		if left.IsInteger() && left.Equal(errs, right) {
 			return ret
 		}
 	}
 	if e.Type == ExpressionTypeLshAssign ||
 		e.Type == ExpressionTypeRshAssign {
-		if t1.IsInteger() && t2.IsInteger() {
-			if t2.Type == VariableTypeLong {
+		if left.IsInteger() && right.IsInteger() {
+			if right.Type == VariableTypeLong {
 				bin.Right.ConvertToNumber(VariableTypeInt)
 			}
 			return ret
@@ -164,8 +164,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 		errMsgPrefix(e.Pos),
 		e.OpName(),
-		t1.TypeString(),
-		t2.TypeString()))
+		left.TypeString(),
+		right.TypeString()))
 
 	return ret
 }

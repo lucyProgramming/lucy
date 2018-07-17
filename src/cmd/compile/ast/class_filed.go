@@ -26,12 +26,44 @@ func (f *ClassField) IsPrivate() bool {
 	return (f.AccessFlags & cg.ACC_FIELD_PRIVATE) != 0
 }
 
-func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error) {
-	err = c.loadSelf()
+func (c *Class) getFieldOrMethod(name string, fromSub bool) (interface{}, error) {
+	err := c.loadSelf()
 	if err != nil {
-		return
+		return nil, err
 	}
 	notFoundErr := fmt.Errorf("field or method named '%s' not found", name)
+	if c.Fields != nil && nil != c.Fields[name] {
+		if fromSub && c.Fields[name].IsPrivate() {
+			// private field
+			return nil, notFoundErr
+		} else {
+			return c.Fields[name], nil
+		}
+	}
+	if c.Methods != nil && nil != c.Methods[name] {
+		m := c.Methods[name][0]
+		if fromSub && m.IsPrivate() {
+			return nil, notFoundErr
+		} else {
+			return m, nil
+		}
+	}
+	if c.Name == JavaRootClass { // root class
+		return nil, notFoundErr
+	}
+	err = c.loadSuperClass()
+	if err != nil {
+		return nil, err
+	}
+	return c.SuperClass.getFieldOrMethod(name, true)
+}
+
+func (c *Class) accessField(name string, fromSub bool) (*ClassField, error) {
+	err := c.loadSelf()
+	if err != nil {
+		return nil, err
+	}
+	notFoundErr := fmt.Errorf("field named '%s' not found", name)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].IsPrivate() {
 			// private field
@@ -45,7 +77,7 @@ func (c *Class) accessField(name string, fromSub bool) (f *ClassField, err error
 	}
 	err = c.loadSuperClass()
 	if err != nil {
-		return
+		return nil, err
 	}
 	return c.SuperClass.accessField(name, true)
 }

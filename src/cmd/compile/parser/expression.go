@@ -37,13 +37,13 @@ func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression,
 	parse assign expression
 */
 func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
-	left, err := expressionParser.parseTernaryExpression() //
+	left, err := expressionParser.parseQuestionExpression() //
 	if err != nil {
 		return nil, err
 	}
 	for expressionParser.parser.token.Type == lex.TokenComma && statementLevel { // read more
-		expressionParser.Next()                                 //  skip comma
-		left2, err := expressionParser.parseTernaryExpression() //
+		expressionParser.Next()                                  //  skip comma
+		left2, err := expressionParser.parseQuestionExpression() //
 		if err != nil {
 			return nil, err
 		}

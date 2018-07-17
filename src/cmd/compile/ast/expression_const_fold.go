@@ -107,6 +107,7 @@ func (e *Expression) constantFold() (is bool, err error) {
 		}
 		return
 	}
+
 	// && and ||
 	if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
@@ -135,6 +136,7 @@ func (e *Expression) constantFold() (is bool, err error) {
 		is, err = e.getBinaryExpressionConstValue(e.arithmeticBinaryConstFolder)
 		return
 	}
+
 	// <<  >>
 	if e.Type == ExpressionTypeLsh || e.Type == ExpressionTypeRsh {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
