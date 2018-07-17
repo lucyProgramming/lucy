@@ -202,12 +202,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 			}
 			r.Expressions = es
-			if blockParser.parser.token.Type != lex.TokenSemicolon {
-				blockParser.parser.errs = append(blockParser.parser.errs,
-					fmt.Errorf("%s  no semicolon after return statement, but %s",
-						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
-				continue
-			}
+			blockParser.parser.validStatementEnding()
 			blockParser.Next()
 		case lex.TokenLc:
 			pos := blockParser.parser.mkPos()
@@ -245,10 +240,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 						blockParser.parser.errorMsgPrefix()))
 			}
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TokenSemicolon {
-				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon after 'skip'",
-					blockParser.parser.errorMsgPrefix()))
-			}
+			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:            ast.StatementTypeReturn,
 				Pos:             pos,
@@ -257,12 +249,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		case lex.TokenContinue:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TokenSemicolon {
-				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon after 'continue'",
-					blockParser.parser.errorMsgPrefix()))
-			} else {
-				blockParser.Next()
-			}
+			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:              ast.StatementTypeContinue,
 				StatementContinue: &ast.StatementContinue{},
@@ -271,12 +258,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		case lex.TokenBreak:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TokenSemicolon {
-				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon after 'break'",
-					blockParser.parser.errorMsgPrefix()))
-			} else {
-				blockParser.Next()
-			}
+			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:           ast.StatementTypeBreak,
 				StatementBreak: &ast.StatementBreak{},
@@ -315,9 +297,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next()
 				continue
 			}
-			if blockParser.parser.token.Type != lex.TokenSemicolon {
-				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s  missing semicolon", blockParser.parser.errorMsgPrefix()))
-			}
+			blockParser.parser.validStatementEnding()
 			s := &ast.Statement{}
 			s.Pos = pos
 			s.Type = ast.StatementTypeExpression

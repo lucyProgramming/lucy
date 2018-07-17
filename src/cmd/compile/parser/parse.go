@@ -312,8 +312,7 @@ func (parser *Parser) validAfterFinal() error {
 	parser.errs = append(parser.errs, err)
 	return err
 }
-
-func (parser *Parser) validStatementEnding() {
+func (parser *Parser) shouldBeSemicolon() {
 	//if parser.token.Type == lex.TokenSemicolon ||
 	//	(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
 	//	return
@@ -333,6 +332,28 @@ func (parser *Parser) validStatementEnding() {
 		StartLine:   token.StartLine,
 		StartColumn: token.StartColumn,
 	})))
+}
+func (parser *Parser) validStatementEnding() {
+	//if parser.token.Type == lex.TokenSemicolon ||
+	//	(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
+	//	return
+	//}
+	//if parser.token.Type == lex.TokenSemicolon {
+	//	return
+	//}
+	//var token *lex.Token
+	//if nil != parser.lastToken {
+	//	token = parser.lastToken
+	//}
+	//if token == nil {
+	//	token = parser.token
+	//}
+	//parser.errs = append(parser.errs, fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(&ast.Position{
+	//	Filename:    parser.filename,
+	//	StartLine:   token.StartLine,
+	//	StartColumn: token.StartColumn,
+	//})))
+	parser.shouldBeSemicolon()
 }
 
 func (parser *Parser) mkPos() *ast.Position {
