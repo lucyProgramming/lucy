@@ -110,7 +110,6 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Class = result.Class.SuperClass
 			return result
 		}
-
 		fieldOrMethod, err := on.Class.getFieldOrMethod(selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
@@ -131,16 +130,16 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return result
 		} else {
 			method := fieldOrMethod.(*ClassMethod)
-			selection.Method = method
-			result := &Type{}
-			result.Type = VariableTypeFunction
-			result.Pos = e.Pos
 			if method.IsStatic() {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,should access by className",
 					errMsgPrefix(e.Pos),
 					selection.Name))
 			}
+			selection.Method = method
+			result := &Type{}
+			result.Type = VariableTypeFunction
 			result.FunctionType = &method.Function.Type
+			result.Pos = e.Pos
 			return result
 		}
 

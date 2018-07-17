@@ -26,7 +26,6 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 		return nil
 	}
 	result := make([]*Type, 2)
-	result[0] = &Type{}
 	result[0] = assert.Type.Clone()
 	result[0].Pos = e.Pos
 	result[1] = &Type{}

@@ -51,7 +51,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return []*Type{ret}
 	}
 	if callExpression.Type != VariableTypeFunction {
-		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function,but '%s'",
+		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
 			errMsgPrefix(e.Pos),
 			call.Expression.OpName(), callExpression.TypeString()))
 		return nil
