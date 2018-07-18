@@ -304,7 +304,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			Package: &PackageBeenCompile,
 		}
 		e.ExpressionValue = returnValueTypes[0]
-	case ExpressionTypeParentthesis:
+	case ExpressionTypeParenthesis:
 		*e = *e.Data.(*Expression) // override
 		return e.check(block)
 	default:

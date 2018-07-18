@@ -103,7 +103,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 				expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		}
 		newExpression := &ast.Expression{
-			Type: ast.ExpressionTypeParentthesis,
+			Type: ast.ExpressionTypeParenthesis,
 			Pos:  pos,
 			Data: left,
 		}
