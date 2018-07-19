@@ -10,8 +10,9 @@ import (
 func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 	arr := e.Data.(*ExpressionArray)
 	if arr.Type == nil && len(arr.Expressions) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s array literal has no type, no expression, cannot inference it`s type ",
-			errMsgPrefix(e.Pos)))
+		*errs = append(*errs,
+			fmt.Errorf("%s array literal has no type and no expression, cannot inference it`s type ",
+				errMsgPrefix(e.Pos)))
 		return nil
 	}
 	noType := true

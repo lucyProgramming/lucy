@@ -37,7 +37,6 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		}
 		code.CodeLength++
 		state.popStack(1)
-
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,

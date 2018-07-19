@@ -11,7 +11,6 @@ type Top struct {
 }
 
 type ConvertTops2Package struct {
-	Name      []string //package name
 	Blocks    []*Block
 	Functions []*Function
 	Classes   []*Class
@@ -29,7 +28,6 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 	}
 	errs = make([]error, 0)
 	PackageBeenCompile.Files = make(map[string]*SourceFile)
-	conversion.Name = []string{}
 	conversion.Blocks = []*Block{}
 	conversion.Functions = make([]*Function, 0)
 	conversion.Classes = make([]*Class, 0)
