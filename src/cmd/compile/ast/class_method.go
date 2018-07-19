@@ -159,7 +159,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 	if c.IsJava {
 		return c.accessMethodAsJava(from, errs, name, args, false)
 	}
-
+	//TODO:: can be accessed or not ???
 	if f := c.Fields[name]; f != nil && f.Type.Type == VariableTypeFunction {
 		if fromSub && f.IsPrivate() {
 			//cannot access this field
@@ -189,7 +189,6 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 				}
 			}
 			*fieldMethodHandler = f
-			//return nil, false, nil
 		}
 	}
 	if len(c.Methods[name]) > 0 {

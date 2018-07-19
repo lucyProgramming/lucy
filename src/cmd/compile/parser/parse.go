@@ -471,8 +471,9 @@ func (parser *Parser) expectNewLine() error {
 
 func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	parser.Next(lfIsToken) // skip type key word
+	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect identifer,but %s", parser.errorMsgPrefix(), parser.token.Description)
+		err := fmt.Errorf("%s expect identifer,but '%s'", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
@@ -481,7 +482,7 @@ func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	ret.Name = parser.token.Data.(string)
 	parser.Next(lfIsToken) // skip identifier
 	if parser.token.Type != lex.TokenAssign {
-		err := fmt.Errorf("%s expect '=',but %s", parser.errorMsgPrefix(), parser.token.Description)
+		err := fmt.Errorf("%s expect '=',but '%s'", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}

@@ -16,6 +16,7 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 		if err != nil {
 			return nil, err
 		}
+		expressionParser.parser.ifTokenIsLfSkip()
 	}
 	if expressionParser.parser.token.Type != lex.TokenLc {
 		return nil, fmt.Errorf("expect '{',but '%s'", expressionParser.parser.token.Description)

@@ -24,7 +24,7 @@ const (
 	TokenRb            // ]
 	TokenPass          // pass
 	TokenSemicolon     // ;
-	TokenLf            // enter
+	TokenLf            // "\n"
 	TokenComma         // ,
 	TokenLogicalAnd    // &&
 	TokenLogicalOr     // ||

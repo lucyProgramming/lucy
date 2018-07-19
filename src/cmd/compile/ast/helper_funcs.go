@@ -143,9 +143,8 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 func functionPointerCallWant(ts ParameterList) string {
 	s := "("
 	for k, v := range ts {
-		s += " " + v.Name + " "
+		s += v.Name + " "
 		s += v.Type.TypeString()
-		s += " "
 		if k != len(ts)-1 {
 			s += ","
 		}
@@ -158,7 +157,7 @@ func functionPointerCallHave(ts []*Type) string {
 	s := "("
 	for k, v := range ts {
 		if v.Name != "" {
-			s += " " + v.Name + " "
+			s += v.Name + " "
 		}
 		s += v.TypeString()
 		if k != len(ts)-1 {

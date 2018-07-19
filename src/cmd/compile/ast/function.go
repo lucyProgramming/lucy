@@ -93,12 +93,11 @@ func (f *Function) readableMsg(name ...string) string {
 		s = "fn " + f.Name + "("
 	}
 	for k, v := range f.Type.ParameterList {
-		s += " " + v.Name + " "
+		s += v.Name + " "
 		s += v.Type.TypeString()
 		if v.Expression != nil {
-			s += " = " + v.Expression.OpName()
+			s += "=" + v.Expression.OpName()
 		}
-		s += " "
 		if k != len(f.Type.ParameterList)-1 {
 			s += ","
 		}
@@ -107,7 +106,7 @@ func (f *Function) readableMsg(name ...string) string {
 	if len(f.Type.ReturnList) > 0 && f.NoReturnValue() == false {
 		s += "->( "
 		for k, v := range f.Type.ReturnList {
-			s += " " + v.Name + " "
+			s += v.Name + " "
 			s += v.Type.TypeString()
 			if k != len(f.Type.ReturnList)-1 {
 				s += ","
@@ -142,10 +141,14 @@ func (f *Function) makeName() {
 				f.Block.InheritedAttribute.ClassAndFunctionNames, f.Pos.StartLine)
 		}
 	}
+	name := f.Name
+	if name == SpecialMethodInit {
+		name = "init"
+	}
 	if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-		f.Block.InheritedAttribute.ClassAndFunctionNames = f.Name
+		f.Block.InheritedAttribute.ClassAndFunctionNames = name
 	} else {
-		f.Block.InheritedAttribute.ClassAndFunctionNames += "$" + f.Name
+		f.Block.InheritedAttribute.ClassAndFunctionNames += "$" + name
 	}
 }
 

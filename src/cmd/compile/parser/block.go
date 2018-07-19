@@ -141,7 +141,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			if len(vs) != len(es) {
 				blockParser.parser.errs = append(blockParser.parser.errs,
-					fmt.Errorf("%s cannot assign '%d' values to '%d' destination",
+					fmt.Errorf("%s cannot assign %d values to %d destination",
 						blockParser.parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
 			}
 			cs := make([]*ast.Constant, len(vs))
@@ -180,15 +180,18 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementReturn: r,
 				Pos:             pos,
 			})
-			if blockParser.parser.token.Type == lex.TokenSemicolon {
+
+			if blockParser.parser.token.Type == lex.TokenSemicolon ||
+				blockParser.parser.token.Type == lex.TokenLf {
 				blockParser.Next(lfNotToken)
 				continue
 			}
+
 			var es []*ast.Expression
 			es, err = blockParser.parser.ExpressionParser.parseExpressions()
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
-				blockParser.consume(untilSemicolon)
+				blockParser.consume(untilSemicolonAndLf)
 				blockParser.Next(lfNotToken)
 			}
 			r.Expressions = es

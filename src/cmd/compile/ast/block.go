@@ -199,7 +199,10 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 			if b.IsFunctionBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false { // 	b.InheritedAttribute.Function.IsGlobal == false  no need to check
 				if v.Name == THIS {
-					return nil, nil // capture this not allow
+					return nil, fmt.Errorf("capture '%s' not allow", name) // capture this not allow
+				}
+				if v.IsFunctionParameter {
+					return nil, fmt.Errorf("capture function parameter '%s' not allow", name) // capture this not allow
 				}
 				b.InheritedAttribute.Function.Closure.InsertVar(v)
 			}

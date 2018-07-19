@@ -17,6 +17,7 @@ func (parser *Parser) parseImports() {
 		parser.consume(untilSemicolonAndLf)
 		parser.Next(lfNotToken)
 		parser.parseImports()
+		return
 	}
 	if parser.token.Type != lex.TokenLiteralString {
 		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",

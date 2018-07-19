@@ -19,9 +19,20 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(e.Pos), e.OpName()))
 		}
 	}
+
 	True, es := question.True.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
+	}
+	if True.RightValueValid() == false {
+		*errs = append(*errs, fmt.Errorf("%s not right value valid",
+			errMsgPrefix(question.True.Pos)))
+		return nil
+	}
+	if True.isTyped() == false {
+		*errs = append(*errs, fmt.Errorf("%s not typed",
+			errMsgPrefix(question.True.Pos)))
+		return nil
 	}
 	False, es := question.False.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {

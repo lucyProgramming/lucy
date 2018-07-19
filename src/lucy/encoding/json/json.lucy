@@ -1,17 +1,17 @@
 
-import "java/lang/Object";
-import "java/lang/Class";
+import "java/lang/Object"
+import "java/lang/Class"
 
 
 public fn encode(x Object,format bool = false) -> (bs []byte ,err error){
-	e := new Encoder(x,format);
-	return e.encode();
+	e := new Encoder(x,format)
+	return e.encode()
 }
 
 
 public fn decode( bs []byte , x Object ) -> (err error){
-	e := new Decoder( x , bs   );
-	return e.decode();
+	e := new Decoder( x , bs   )
+	return e.decode()
 }
 
 
@@ -19,14 +19,14 @@ public fn decode( bs []byte , x Object ) -> (err error){
 
  //TODO:: c.isPrimitive() is not working, why ????
 public fn isPrimitive(c Class)-> (is bool) {
-	typeName :=  c.getTypeName();
+	typeName :=  c.getTypeName()
 	is = typeName == "java.lang.Boolean" || 
 		typeName ==  "java.lang.Byte" || 
 		typeName ==  "java.lang.Short" || 
 		typeName ==  "java.lang.Character" || 
 		typeName ==  "java.lang.Integer" || 
 		typeName ==  "java.lang.Float" ||
-		typeName ==  "java.lang.Double" ; 
+		typeName ==  "java.lang.Double" 
 }
 
 

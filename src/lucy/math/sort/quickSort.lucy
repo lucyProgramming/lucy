@@ -3,46 +3,46 @@
 
 public fn quickSort(s T, l int, r int,asc bool) {  
     if  l< r  && asc{        
-        i ,j := l, r;
-        x := s[l];  
+        i ,j := l, r
+        x := s[l]
         for  i < j {  
             for i < j && s[j]>= x { 
-            	j--;
+            	j--
             } 
             if i < j {
-            	s[i++] = s[j];  
+            	s[i++] = s[j]
             } 
             for i < j && s[i]< x{ 
-            	i++;
+            	i++
             }   
             if i < j  {
-                s[j--] = s[i];  
+                s[j--] = s[i]
             }
         }  
         s[i] = x; 
-        quickSort(s, l, i - 1,desc);  
-        quickSort(s, i + 1, r,desc);  
+        quickSort(s, l, i - 1,desc)
+        quickSort(s, i + 1, r,desc)
     } 
     if  l< r  && asc == false {        
-        i ,j := l, r;
-        x := s[l];  
+        i ,j := l, r
+        x := s[l]
         for  i < j {  
             for i < j && s[j] < x { 
-                j--;
+                j--
             } 
             if i < j {
-                s[i++] = s[j];  
+                s[i++] = s[j]
             } 
             for i < j && s[i] >=  x{ 
-                i++;
+                i++
             }   
             if i < j  {
-                s[j--] = s[i];  
+                s[j--] = s[i]
             }
         }  
-        s[i] = x; 
-        quickSort(s, l, i - 1,desc); 
-        quickSort(s, i + 1, r,desc);  
+        s[i] = x
+        quickSort(s, l, i - 1,desc)
+        quickSort(s, i + 1, r,desc)
     } 
 }
 

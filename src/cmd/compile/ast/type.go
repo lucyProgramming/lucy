@@ -197,6 +197,18 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 			return typ.Map.V.resolve(block, true)
 		}
 	}
+	if typ.Type == VariableTypeFunction {
+		for _, v := range typ.FunctionType.ParameterList {
+			if err := v.Type.resolve(block); err != nil {
+				return err
+			}
+		}
+		for _, v := range typ.FunctionType.ReturnList {
+			if err := v.Type.resolve(block); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -412,8 +424,11 @@ func (typ *Type) typeString(ret *string) {
 			}
 		}
 		if len(typ.FunctionType.ReturnList) > 0 {
-			s += " ) -> ( "
+			s += ") -> ("
 			for k, v := range typ.FunctionType.ReturnList {
+				if v.Name != "" {
+					s += v.Name + " "
+				}
 				s += v.Type.TypeString()
 				if k != len(typ.FunctionType.ReturnList)-1 {
 					s += ","
