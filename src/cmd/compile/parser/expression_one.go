@@ -18,82 +18,82 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		identifier.Name = expressionParser.parser.token.Data.(string)
 		left.Data = identifier
 		left.Pos = expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenTrue:
 		left = &ast.Expression{}
 		left.Type = ast.ExpressionTypeBool
 		left.Data = true
 		left.Pos = expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenFalse:
 		left = &ast.Expression{}
 		left.Type = ast.ExpressionTypeBool
 		left.Data = false
 		left.Pos = expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenGlobal:
 		left = &ast.Expression{}
 		left.Type = ast.ExpressionTypeGlobal
 		left.Pos = expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralByte:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeByte,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralShort:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeShort,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralInt:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeInt,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralLong:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeLong,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralFloat:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeFloat,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralDouble:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeDouble,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLiteralString:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeString,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenNull:
 		left = &ast.Expression{
 			Type: ast.ExpressionTypeNull,
 			Pos:  expressionParser.parser.mkPos(),
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 	case lex.TokenLp:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(false)
 		left, err = expressionParser.parseExpression(false)
 		if err != nil {
 			return nil, err
@@ -108,10 +108,10 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 			Data: left,
 		}
 		left = newExpression
-		expressionParser.Next()
+		expressionParser.Next(false)
 	case lex.TokenIncrement:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next() // skip ++
+		expressionParser.Next(true) // skip ++
 		newE := &ast.Expression{}
 		newE.Pos = pos
 		left, err = expressionParser.parseOneExpression()
@@ -123,7 +123,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		left = newE
 	case lex.TokenDecrement:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next() // skip --
+		expressionParser.Next(true) // skip --
 		newE := &ast.Expression{}
 		left, err = expressionParser.parseOneExpression()
 		if err != nil {
@@ -135,7 +135,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		left = newE
 	case lex.TokenNot:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 		newE := &ast.Expression{}
 		left, err = expressionParser.parseOneExpression()
 		if err != nil {
@@ -147,7 +147,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		left = newE
 	case lex.TokenBitNot:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 		newE := &ast.Expression{}
 		left, err = expressionParser.parseOneExpression()
 		if err != nil {
@@ -159,7 +159,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		left = newE
 	case lex.TokenSub:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 		newE := &ast.Expression{}
 		left, err = expressionParser.parseOneExpression()
 		if err != nil {
@@ -182,7 +182,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		}
 	case lex.TokenNew:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(false)
 		t, err := expressionParser.parser.parseType()
 		if err != nil {
 			return nil, err
@@ -190,7 +190,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		if expressionParser.parser.token.Type != lex.TokenLp {
 			return nil, fmt.Errorf("%s missing '(' after new", expressionParser.parser.errorMsgPrefix())
 		}
-		expressionParser.Next() // skip (
+		expressionParser.Next(false) // skip (
 		var es []*ast.Expression
 		if expressionParser.parser.token.Type != lex.TokenRp { //
 			es, err = expressionParser.parseExpressions()
@@ -201,7 +201,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		if expressionParser.parser.token.Type != lex.TokenRp {
 			return nil, fmt.Errorf("%s ( and ) not match", expressionParser.parser.errorMsgPrefix())
 		}
-		expressionParser.Next()
+		expressionParser.Next(true)
 		left = &ast.Expression{
 			Pos:  pos,
 			Type: ast.ExpressionTypeNew,
@@ -272,7 +272,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		// range
 	case lex.TokenRange:
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next()
+		expressionParser.Next(true)
 		e, err := expressionParser.parseOneExpression()
 		if err != nil {
 			return nil, err
@@ -317,18 +317,18 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 			newExpression.Data = left
 			left = newExpression
 			newExpression.Pos = expressionParser.parser.mkPos()
-			expressionParser.Next()
+			expressionParser.Next(true)
 			continue
 		}
 		// [
 		if expressionParser.parser.token.Type == lex.TokenLb {
 			pos := expressionParser.parser.mkPos()
-			expressionParser.Next() // skip [
+			expressionParser.Next(false) // skip [
 			if expressionParser.parser.token.Type == lex.TokenColon {
 				/*
 					a[:]
 				*/
-				expressionParser.Next() // skip :
+				expressionParser.Next(false) // skip :
 				var end *ast.Expression
 				if expressionParser.parser.token.Type != lex.TokenRb {
 					end, err = expressionParser.parseExpression(false)
@@ -339,7 +339,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 				if expressionParser.parser.token.Type != lex.TokenRb {
 					return nil, fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 				}
-				expressionParser.Next() // skip ]
+				expressionParser.Next(false) // skip ]
 				newExpression := &ast.Expression{}
 				newExpression.Type = ast.ExpressionTypeSlice
 				newExpression.Pos = expressionParser.parser.mkPos()
@@ -355,10 +355,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 				return nil, err
 			}
 			if expressionParser.parser.token.Type == lex.TokenColon {
-				expressionParser.parser.Next()
-				if expressionParser.parser.token.Type == lex.TokenColon {
-					expressionParser.parser.Next() // skip :
-				}
+				expressionParser.Next(false)
 				var end *ast.Expression
 				if expressionParser.parser.token.Type != lex.TokenRb {
 					end, err = expressionParser.parseExpression(false)
@@ -369,7 +366,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 				if expressionParser.parser.token.Type != lex.TokenRb {
 					return nil, fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 				}
-				expressionParser.Next() // skip ]
+				expressionParser.Next(false) // skip ]
 				newExpression := &ast.Expression{}
 				newExpression.Type = ast.ExpressionTypeSlice
 				newExpression.Pos = expressionParser.parser.mkPos()
@@ -392,13 +389,13 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 			index.Index = e
 			newExpression.Data = index
 			left = newExpression
-			expressionParser.Next()
+			expressionParser.Next(false)
 			continue
 		}
 		// aaa.xxxx
 		if expressionParser.parser.token.Type == lex.TokenSelection {
 			pos := expressionParser.parser.mkPos()
-			expressionParser.parser.Next() // skip .
+			expressionParser.Next(false) // skip .
 			if expressionParser.parser.token.Type == lex.TokenIdentifier {
 				newExpression := &ast.Expression{}
 				newExpression.Pos = pos
@@ -408,10 +405,10 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 				index.Name = expressionParser.parser.token.Data.(string)
 				newExpression.Data = index
 				left = newExpression
-				expressionParser.Next()
+				expressionParser.Next(true)
 			} else if expressionParser.parser.token.Type == lex.TokenLp { //  a.(xxx)
 				//
-				expressionParser.Next() // skip (
+				expressionParser.Next(false) // skip (
 				typ, err := expressionParser.parser.parseType()
 				if err != nil {
 					return nil, err
@@ -419,7 +416,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 				if expressionParser.parser.token.Type != lex.TokenRp {
 					return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
 				}
-				expressionParser.Next() // skip  )
+				expressionParser.Next(false) // skip  )
 				newExpression := &ast.Expression{}
 				newExpression.Pos = pos
 				newExpression.Type = ast.ExpressionTypeTypeAssert

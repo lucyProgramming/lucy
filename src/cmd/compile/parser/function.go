@@ -11,8 +11,8 @@ type FunctionParser struct {
 	parser *Parser
 }
 
-func (functionParser *FunctionParser) Next() {
-	functionParser.parser.Next()
+func (functionParser *FunctionParser) Next(lfIsToken ...bool) {
+	functionParser.parser.Next(lfIsToken...)
 }
 
 func (functionParser *FunctionParser) consume(until map[int]bool) {
@@ -58,7 +58,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 		f.SourceCodes =
 			functionParser.parser.
 				bs[offset : functionParser.parser.token.Offset+1]
-		functionParser.Next()
 	}
+	functionParser.Next(true)
 	return f, err
 }

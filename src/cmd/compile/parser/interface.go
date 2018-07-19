@@ -15,8 +15,8 @@ type InterfaceParser struct {
 	accessControlToken *lex.Token
 }
 
-func (interfaceParser *InterfaceParser) Next() {
-	interfaceParser.parser.Next()
+func (interfaceParser *InterfaceParser) Next(lfIsToken ...bool) {
+	interfaceParser.parser.Next(lfIsToken...)
 }
 
 func (interfaceParser *InterfaceParser) consume(m map[int]bool) {

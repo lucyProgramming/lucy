@@ -10,8 +10,8 @@ type BlockParser struct {
 	parser *Parser
 }
 
-func (blockParser *BlockParser) Next() {
-	blockParser.parser.Next()
+func (blockParser *BlockParser) Next(lfIsToken ...bool) {
+	blockParser.parser.Next(lfIsToken...)
 }
 
 func (blockParser *BlockParser) consume(c map[int]bool) {
@@ -58,7 +58,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			continue
 		}
 		switch blockParser.parser.token.Type {
-		case lex.TokenSemicolon: // may be empty statement
+		case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
 			resetDefer()
 			blockParser.Next() // look up next
 			continue
@@ -356,7 +356,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 	e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		blockParser.parser.consume(untilSemicolon)
+		blockParser.parser.consume(untilSemicolonAndLf)
 		blockParser.Next()
 		return
 	}

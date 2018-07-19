@@ -17,8 +17,8 @@ type ClassParser struct {
 	accessControlToken *lex.Token
 }
 
-func (classParser *ClassParser) Next() {
-	classParser.parser.Next()
+func (classParser *ClassParser) Next(lfIsToken ...bool) {
+	classParser.parser.Next(lfIsToken...)
 }
 
 func (classParser *ClassParser) consume(m map[int]bool) {
@@ -154,7 +154,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		case lex.TokenRc:
 			classParser.Next()
 			return
-		case lex.TokenSemicolon:
+		case lex.TokenSemicolon, lex.TokenLf:
 			classParser.Next()
 			continue
 		case lex.TokenStatic:

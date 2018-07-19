@@ -10,13 +10,16 @@ import (
 func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression) (*ast.Expression, error) {
 	var err error
 	pos := expressionParser.parser.mkPos()
-	expressionParser.Next() // skip (
+	expressionParser.Next(false) // skip (
 	args := []*ast.Expression{}
 	if expressionParser.parser.token.Type != lex.TokenRp { //a(123)
 		args, err = expressionParser.parseExpressions()
 		if err != nil {
 			return nil, err
 		}
+	}
+	if expressionParser.parser.token.Type == lex.TokenLf {
+		expressionParser.Next(false)
 	}
 	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s except ')' ,but '%s'",
@@ -41,7 +44,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 		result.Data = call
 		result.Pos = expressionParser.parser.mkPos()
 	}
-	expressionParser.Next()                                // skip )
+	expressionParser.Next(true)                            // skip )
 	if expressionParser.parser.token.Type == lex.TokenLt { // <
 		/*
 			template function call return type binds
@@ -50,18 +53,18 @@ func (expressionParser *ExpressionParser) parseCallExpression(e *ast.Expression)
 			}
 			a<int , ... >
 		*/
-		expressionParser.Next() // skip <
+		expressionParser.Next(false) // skip <
 		ts, err := expressionParser.parser.parseTypes()
 		if err != nil {
 			expressionParser.parser.consume(untilGt)
-			expressionParser.Next()
+			expressionParser.Next(false)
 		} else {
 			if expressionParser.parser.token.Type != lex.TokenGt {
 				expressionParser.parser.errs = append(expressionParser.parser.errs, fmt.Errorf("%s '<' and '>' not match",
 					expressionParser.parser.errorMsgPrefix()))
 				expressionParser.parser.consume(untilGt)
 			}
-			expressionParser.Next()
+			expressionParser.Next(true)
 			if result.Type == ast.ExpressionTypeFunctionCall {
 				result.Data.(*ast.ExpressionFunctionCall).ParameterTypes = ts
 			} else {

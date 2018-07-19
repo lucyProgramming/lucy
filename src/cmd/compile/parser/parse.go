@@ -83,7 +83,7 @@ func (parser *Parser) Parse() []error {
 			break
 		}
 		switch parser.token.Type {
-		case lex.TokenSemicolon: // empty statement, no big deal
+		case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
 			parser.Next()
 			continue
 		case lex.TokenPublic:
@@ -317,7 +317,8 @@ func (parser *Parser) shouldBeSemicolon() {
 	//	(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
 	//	return
 	//}
-	if parser.token.Type == lex.TokenSemicolon {
+	if parser.token.Type == lex.TokenSemicolon ||
+		parser.token.Type == lex.TokenLf {
 		return
 	}
 	var token *lex.Token
@@ -408,7 +409,7 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 	return mkResult(), es, nil
 }
 
-func (parser *Parser) Next() {
+func (parser *Parser) Next(lfIsToken ...bool) {
 	var err error
 	var tok *lex.Token
 	parser.lastToken = parser.token
@@ -427,12 +428,10 @@ func (parser *Parser) Next() {
 			parser.expectLf = false
 		}
 		parser.token = tok
+		if len(lfIsToken) > 0 {
+			break
+		}
 		if tok.Type != lex.TokenLf {
-			//if parser.token.Description != "" {
-			//	fmt.Println("#########", parser.token.Type, parser.token.Description)
-			//} else {
-			//	fmt.Println("#########", parser.token.Type, parser.token.Data)
-			//}
 			break
 		}
 	}

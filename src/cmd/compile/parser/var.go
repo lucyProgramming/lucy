@@ -32,6 +32,10 @@ var (
 	untilSemicolon = map[int]bool{
 		lex.TokenSemicolon: true,
 	}
+	untilSemicolonAndLf = map[int]bool{
+		lex.TokenSemicolon: true,
+		lex.TokenLf:        true,
+	}
 	untilRcAndSemicolon = map[int]bool{
 		lex.TokenRc:        true,
 		lex.TokenSemicolon: true,

@@ -15,7 +15,7 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 	if expressionParser.parser.token.Type != lex.TokenQuestion {
 		return left, nil
 	}
-	expressionParser.Next() // skip ?
+	expressionParser.Next(false) // skip ?
 	True, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
@@ -24,7 +24,7 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 		return left, fmt.Errorf("%s expect ':',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
-	expressionParser.Next() // skip :
+	expressionParser.Next(false) // skip :
 	False, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
