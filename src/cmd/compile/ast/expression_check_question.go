@@ -12,11 +12,11 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 	}
 	if condition != nil {
 		if condition.Type != VariableTypeBool {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(e.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(question.Selection.Pos)))
 		}
 		if question.Selection.canBeUsedAsCondition() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as condition",
-				errMsgPrefix(e.Pos), e.OpName()))
+				errMsgPrefix(question.Selection.Pos), question.Selection.OpName()))
 		}
 	}
 

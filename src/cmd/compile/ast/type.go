@@ -557,72 +557,72 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())
 }
 
-func (typ *Type) Equal(errs *[]error, compareTo *Type) bool {
-	if typ == compareTo { // equal
+func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
+	if leftValue == rightValue { // equal
 		return true
 	}
-	if typ.IsPrimitive() && compareTo.IsPrimitive() {
-		return typ.Type == compareTo.Type
+	if leftValue.IsPrimitive() && rightValue.IsPrimitive() {
+		return leftValue.Type == rightValue.Type
 	}
-	if typ.IsPointer() && compareTo.Type == VariableTypeNull {
+	if leftValue.IsPointer() && rightValue.Type == VariableTypeNull {
 		return true
 	}
-	if typ.Type == VariableTypeObject && typ.Class.Name == JavaRootClass &&
-		compareTo.IsPointer() {
+	if leftValue.Type == VariableTypeObject && leftValue.Class.Name == JavaRootClass &&
+		rightValue.IsPointer() {
 		return true
 	}
-	if typ.Type == VariableTypeArray && compareTo.Type == VariableTypeArray {
-		return typ.Array.Equal(errs, compareTo.Array)
+	if leftValue.Type == VariableTypeArray && rightValue.Type == VariableTypeArray {
+		return leftValue.Array.Equal(errs, rightValue.Array)
 	}
-	if typ.Type == VariableTypeJavaArray && compareTo.Type == VariableTypeJavaArray {
-		return typ.Array.Equal(errs, compareTo.Array)
+	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
+		return leftValue.Array.Equal(errs, rightValue.Array)
 	}
 
-	if typ.Type == VariableTypeEnum && compareTo.Type == VariableTypeEnum {
-		return typ.Enum.Name == compareTo.Enum.Name
+	if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
+		return leftValue.Enum.Name == rightValue.Enum.Name
 	}
-	if typ.Type == VariableTypeMap && compareTo.Type == VariableTypeMap {
-		return typ.Map.K.Equal(errs, compareTo.Map.K) && typ.Map.V.Equal(errs, compareTo.Map.V)
+	if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
+		return leftValue.Map.K.Equal(errs, rightValue.Map.K) && leftValue.Map.V.Equal(errs, rightValue.Map.V)
 	}
-	if typ.Type == VariableTypeObject && compareTo.Type == VariableTypeObject { // object
-		if typ.Class.NotImportedYet {
-			if err := typ.Class.loadSelf(); err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
+	if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
+		if leftValue.Class.NotImportedYet {
+			if err := leftValue.Class.loadSelf(); err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 				return false
 			}
 		}
-		if compareTo.Class.NotImportedYet {
-			if err := compareTo.Class.loadSelf(); err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
+		if rightValue.Class.NotImportedYet {
+			if err := rightValue.Class.loadSelf(); err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 				return false
 			}
 		}
-		if typ.Class.IsInterface() {
-			i, err := compareTo.Class.implemented(typ.Class.Name)
+		if leftValue.Class.IsInterface() {
+			i, err := rightValue.Class.implemented(leftValue.Class.Name)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 			}
 			return i
 		} else { // class
-			has, err := compareTo.Class.haveSuper(typ.Class.Name)
+			has, err := rightValue.Class.haveSuper(leftValue.Class.Name)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(compareTo.Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 			}
 			return has
 		}
 	}
-	if typ.Type == VariableTypeFunction && compareTo.Type == VariableTypeFunction {
-		compareToFunctionType := compareTo.FunctionType
-		if len(typ.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) ||
-			len(typ.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {
+	if leftValue.Type == VariableTypeFunction && rightValue.Type == VariableTypeFunction {
+		compareToFunctionType := rightValue.FunctionType
+		if len(leftValue.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) ||
+			len(leftValue.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {
 			return false
 		}
-		for k, v := range typ.FunctionType.ParameterList {
+		for k, v := range leftValue.FunctionType.ParameterList {
 			if false == v.Type.StrictEqual(compareToFunctionType.ParameterList[k].Type) {
 				return false
 			}
 		}
-		for k, v := range typ.FunctionType.ReturnList {
+		for k, v := range leftValue.FunctionType.ReturnList {
 			if false == v.Type.StrictEqual(compareToFunctionType.ReturnList[k].Type) {
 				return false
 			}

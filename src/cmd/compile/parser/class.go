@@ -73,7 +73,8 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	classDefinition = &ast.Class{}
 	classParser.ret = classDefinition
 	classParser.ret.Pos = classParser.parser.mkPos()
-	classParser.Next(lfNotToken) // skip class key word
+	classParser.Next(lfIsToken) // skip class key word
+	classParser.parser.unExpectNewLineAndSkip()
 	classParser.ret.Name, err = classParser.parseClassName()
 	classParser.ret.Block.IsClassBlock = true
 	if err != nil {
