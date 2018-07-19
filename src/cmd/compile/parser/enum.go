@@ -8,19 +8,20 @@ import (
 )
 
 func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
-	parser.Next() // skip enum
+	parser.Next(lfIsToken) // skip enum
 	enumName := &ast.NameWithPos{
 		Pos: parser.mkPos(),
 	}
+	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
-		err = fmt.Errorf("%s expect 'identifier', but '%s'",
+		err = fmt.Errorf("%s expect 'identifier' for enum name, but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		enumName.Name = compileAutoName()
 		parser.consume(untilLc)
 	} else {
 		enumName.Name = parser.token.Data.(string)
-		parser.Next() // skip enum name
+		parser.Next(lfNotToken) // skip enum name
 	}
 	if parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
@@ -28,7 +29,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	parser.Next() // skip {
+	parser.Next(lfNotToken) // skip {
 	e = &ast.Enum{}
 	e.Name = enumName.Name
 	e.Pos = enumName.Pos
@@ -45,13 +46,10 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 			Pos:  parser.mkPos(),
 		},
 	}
-	parser.Next() // skip first name
+	parser.Next(lfIsToken) // skip first name
 	var initExpression *ast.Expression
-	if parser.token.Type == lex.TokenAssign || parser.token.Type == lex.TokenColonAssign { // first value defined here
-		if parser.token.Type == lex.TokenColonAssign {
-			parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':='", parser.errorMsgPrefix()))
-		}
-		parser.Next() // skip assign
+	if parser.token.Type == lex.TokenAssign { // first value defined here
+		parser.Next(lfNotToken) // skip assign
 		initExpression, err = parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			parser.errs = append(parser.errs, err)
@@ -59,7 +57,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 		}
 	}
 	if parser.token.Type == lex.TokenComma {
-		parser.Next() // skip ,should be a identifier after  comma
+		parser.Next(lfNotToken) // skip ,should be a identifier after  comma
 		ns, err := parser.parseNameList()
 		if err != nil {
 			parser.consume(untilRc)
@@ -68,12 +66,13 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 			names = append(names, ns...)
 		}
 	}
+	parser.ifTokenIsLfSkip()
 	if parser.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}',but '%s'", parser.token.Description, parser.token.Description)
+		err = fmt.Errorf("%s expect '}',but '%s'", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		parser.consume(untilRc)
 	}
-	parser.Next() // skip }
+	parser.Next(lfNotToken) // skip }
 	e.Init = initExpression
 	for _, v := range names {
 		t := &ast.EnumName{}

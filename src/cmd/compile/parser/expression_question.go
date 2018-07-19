@@ -15,16 +15,17 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 	if expressionParser.parser.token.Type != lex.TokenQuestion {
 		return left, nil
 	}
-	expressionParser.Next(false) // skip ?
+	expressionParser.Next(lfNotToken) // skip ?
 	True, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
 	}
+	expressionParser.parser.ifTokenIsLfSkip()
 	if expressionParser.parser.token.Type != lex.TokenColon {
 		return left, fmt.Errorf("%s expect ':',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
-	expressionParser.Next(false) // skip :
+	expressionParser.Next(lfNotToken) // skip :
 	False, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil

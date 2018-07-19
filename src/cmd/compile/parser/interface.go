@@ -15,16 +15,20 @@ type InterfaceParser struct {
 	accessControlToken *lex.Token
 }
 
-func (interfaceParser *InterfaceParser) Next(lfIsToken ...bool) {
-	interfaceParser.parser.Next(lfIsToken...)
+func (interfaceParser *InterfaceParser) Next(lfIsToken bool) {
+	interfaceParser.parser.Next(lfIsToken)
 }
 
 func (interfaceParser *InterfaceParser) consume(m map[int]bool) {
 	interfaceParser.parser.consume(m)
 }
 
+func (interfaceParser *InterfaceParser) validStatementEnding() error {
+	return interfaceParser.parser.validStatementEnding()
+}
+
 func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
-	interfaceParser.Next() // skip interface key word
+	interfaceParser.Next(lfIsToken) // skip interface key word
 	interfaceParser.ret = &ast.Class{}
 	interfaceParser.ret.Pos = interfaceParser.parser.mkPos()
 	interfaceParser.ret.Block.IsClassBlock = true
@@ -39,7 +43,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 		interfaceParser.ret.Name = compileAutoName()
 	}
 	if interfaceParser.parser.token.Type == lex.TokenExtends { // parse father expression
-		interfaceParser.Next() // skip extends
+		interfaceParser.Next(lfNotToken) // skip extends
 		interfaceParser.ret.Pos = interfaceParser.parser.mkPos()
 		if interfaceParser.parser.token.Type != lex.TokenIdentifier {
 			err = fmt.Errorf("%s class`s father must be a identifier", interfaceParser.parser.errorMsgPrefix())
@@ -55,7 +59,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 		}
 	}
 	if interfaceParser.parser.token.Type == lex.TokenImplements {
-		interfaceParser.Next() // skip key word
+		interfaceParser.Next(lfNotToken) // skip key word
 		interfaceParser.ret.InterfaceNames, err = interfaceParser.parser.ClassParser.parseImplementsInterfaces()
 		if err != nil {
 			interfaceParser.consume(untilLc)
@@ -66,36 +70,38 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 		interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
 		interfaceParser.consume(untilLc)
 	}
-	interfaceParser.Next()
+	interfaceParser.Next(lfNotToken)
 	for interfaceParser.parser.token.Type != lex.TokenEof {
 		if len(interfaceParser.parser.errs) > interfaceParser.parser.nErrors2Stop {
 			break
 		}
 		switch interfaceParser.parser.token.Type {
 		case lex.TokenRc:
-			interfaceParser.Next()
+			interfaceParser.Next(lfNotToken)
 			return
 		case lex.TokenSemicolon:
-			interfaceParser.Next()
+			interfaceParser.Next(lfNotToken)
 			continue
 		case lex.TokenFunction:
-			interfaceParser.Next() /// skip key word
+			interfaceParser.Next(lfIsToken) /// skip key word
+			interfaceParser.parser.unExpectNewLineAndSkip()
 			var name string
 			if interfaceParser.parser.token.Type != lex.TokenIdentifier {
 				interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s expect function name,but '%s'",
 					interfaceParser.parser.errorMsgPrefix(), interfaceParser.parser.token.Description))
-				interfaceParser.consume(untilRc)
-				interfaceParser.Next()
+				interfaceParser.consume(untilSemicolonAndLf)
+				interfaceParser.Next(lfNotToken)
 				continue
 			}
 			name = interfaceParser.parser.token.Data.(string)
-			interfaceParser.Next() // skip name
+			interfaceParser.Next(lfNotToken) // skip name
 			functionType, err := interfaceParser.parser.parseFunctionType()
 			if err != nil {
-				interfaceParser.consume(untilRc)
-				interfaceParser.Next()
+				interfaceParser.consume(untilSemicolonAndLf)
+				interfaceParser.Next(lfNotToken)
 				continue
 			}
+			interfaceParser.validStatementEnding()
 			if interfaceParser.ret.Methods == nil {
 				interfaceParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
@@ -116,7 +122,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 		default:
 			interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s unexpect token:%s", interfaceParser.parser.errorMsgPrefix(),
 				interfaceParser.parser.token.Description))
-			interfaceParser.Next()
+			interfaceParser.Next(lfNotToken)
 		}
 	}
 	return

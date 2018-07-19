@@ -5,6 +5,7 @@ import (
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
+	"runtime/debug"
 )
 
 //at least one name
@@ -13,6 +14,7 @@ func (parser *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		err = fmt.Errorf("%s expect identifier,but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
+		debug.PrintStack()
 		return nil, err
 	}
 	names = []*ast.NameWithPos{}
@@ -21,12 +23,12 @@ func (parser *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 			Name: parser.token.Data.(string),
 			Pos:  parser.mkPos(),
 		})
-		parser.Next()
+		parser.Next(lfIsToken)
 		if parser.token.Type != lex.TokenComma {
 			// not a ,
 			break
 		} else {
-			parser.Next() // skip comma
+			parser.Next(lfNotToken) // skip comma
 			if parser.token.Type != lex.TokenIdentifier {
 				err = fmt.Errorf("%s not a 'identifier' after a comma,but '%s'",
 					parser.errorMsgPrefix(), parser.token.Description)

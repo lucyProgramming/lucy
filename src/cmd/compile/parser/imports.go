@@ -12,47 +12,47 @@ func (parser *Parser) parseImports() {
 		// not a import
 		return
 	}
-	parser.Next() // skip import key word
+	parser.Next(lfIsToken) // skip import key word
+	if err := parser.unExpectNewLine(); err != nil {
+		parser.consume(untilSemicolonAndLf)
+		parser.Next(lfNotToken)
+		parser.parseImports()
+	}
 	if parser.token.Type != lex.TokenLiteralString {
 		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description))
-		parser.consume(untilSemicolon)
-		parser.Next()
+		parser.consume(untilSemicolonAndLf)
+		parser.Next(lfNotToken)
 		parser.parseImports()
 		return
 	}
 	i := &ast.Import{}
 	i.Pos = parser.mkPos()
 	i.Import = parser.token.Data.(string)
-	parser.Next() // skip name
+	parser.Next(lfIsToken) // skip name
 	if parser.token.Type == lex.TokenAs {
 		/*
 			import "xxxxxxxxxxx" as yyy
 		*/
-		parser.Next() // skip as
+		parser.Next(lfNotToken) // skip as
 		if parser.token.Type != lex.TokenIdentifier {
 			parser.insertImports(i)
 			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description))
-			parser.consume(untilSemicolon)
-			parser.Next()
+			parser.consume(untilSemicolonAndLf)
+			parser.Next(lfNotToken)
 			parser.parseImports()
 			return
 		} else {
 			i.AccessName = parser.token.Data.(string)
-			parser.Next() // skip identifier
+			parser.Next(lfIsToken) // skip identifier
 		}
 	}
-	if parser.token.Type != lex.TokenSemicolon {
-		parser.errs = append(parser.errs, fmt.Errorf("%s expect semicolon, but '%s'",
-			parser.errorMsgPrefix(), parser.token.Description))
-		if parser.token.Type != lex.TokenImport { // next token is not import
-			parser.consume(untilSemicolon)
-		}
-	}
-	parser.Next() // skip ;
+	parser.validStatementEnding()
+	parser.Next(lfNotToken)
 	parser.insertImports(i)
 	parser.parseImports()
+
 }
 
 func (parser *Parser) insertImports(im *ast.Import) {

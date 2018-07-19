@@ -7,6 +7,7 @@ import (
 )
 
 type StatementLabel struct {
+	Used                bool
 	CodeOffsetGenerated bool
 	CodeOffset          int
 	Block               *Block

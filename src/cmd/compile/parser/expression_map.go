@@ -20,7 +20,7 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 	if expressionParser.parser.token.Type != lex.TokenLc {
 		return nil, fmt.Errorf("expect '{',but '%s'", expressionParser.parser.token.Description)
 	}
-	expressionParser.Next(false) // skip {
+	expressionParser.Next(lfNotToken) // skip {
 	ret := &ast.Expression{
 		Type: ast.ExpressionTypeMap,
 		Pos:  pos,
@@ -39,7 +39,7 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 			return ret, fmt.Errorf("%s expect '->',but '%s'",
 				expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 		}
-		expressionParser.Next(false) // skip ->
+		expressionParser.Next(lfNotToken) // skip ->
 		// value
 		v, err := expressionParser.parseExpression(false)
 		if err != nil {
@@ -51,15 +51,16 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 		})
 		if expressionParser.parser.token.Type == lex.TokenComma {
 			// read next  key value pair
-			expressionParser.Next(false)
+			expressionParser.Next(lfNotToken)
 		} else {
 			break
 		}
 	}
+	expressionParser.parser.ifTokenIsLfSkip()
 	if expressionParser.parser.token.Type != lex.TokenRc {
 		return nil, fmt.Errorf("%s expect '}',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
-	expressionParser.Next(false) // skip }
+	expressionParser.Next(lfNotToken) // skip }
 	return ret, nil
 }

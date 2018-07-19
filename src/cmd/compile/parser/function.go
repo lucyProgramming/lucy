@@ -11,8 +11,8 @@ type FunctionParser struct {
 	parser *Parser
 }
 
-func (functionParser *FunctionParser) Next(lfIsToken ...bool) {
-	functionParser.parser.Next(lfIsToken...)
+func (functionParser *FunctionParser) Next(lfIsToken bool) {
+	functionParser.parser.Next(lfIsToken)
 }
 
 func (functionParser *FunctionParser) consume(until map[int]bool) {
@@ -24,7 +24,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	f.Pos = functionParser.parser.mkPos()
 	var offset int
 	offset = functionParser.parser.token.Offset
-	functionParser.Next() // skip fn key word
+	functionParser.Next(lfIsToken) // skip fn key word
 	if needName && functionParser.parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect function name,but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
@@ -33,7 +33,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	}
 	if functionParser.parser.token.Type == lex.TokenIdentifier {
 		f.Name = functionParser.parser.token.Data.(string)
-		functionParser.Next()
+		functionParser.Next(lfNotToken)
 	}
 	f.Type, err = functionParser.parser.parseFunctionType()
 	if err != nil {
@@ -47,7 +47,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 		functionParser.consume(untilLc)
 	}
 	f.Block.IsFunctionBlock = true
-	functionParser.Next() // skip {
+	functionParser.Next(lfNotToken) // skip {
 	functionParser.parser.BlockParser.parseStatementList(&f.Block, false)
 	if functionParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}', but '%s'",
@@ -59,6 +59,6 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 			functionParser.parser.
 				bs[offset : functionParser.parser.token.Offset+1]
 	}
-	functionParser.Next(true)
+	functionParser.Next(lfIsToken)
 	return f, err
 }

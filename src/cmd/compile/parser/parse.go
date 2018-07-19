@@ -27,7 +27,6 @@ type Parser struct {
 	tops            *[]*ast.Top
 	scanner         *lex.Lexer
 	filename        string
-	expectLf        bool
 	lastToken       *lex.Token
 	token           *lex.Token
 	errs            []error
@@ -59,7 +58,7 @@ func (parser *Parser) initParser() {
 func (parser *Parser) Parse() []error {
 	parser.initParser()
 	parser.scanner = lex.New(parser.bs, 1, 1)
-	parser.Next() //
+	parser.Next(lfNotToken) //
 	parser.lines = bytes.Split(parser.bs, []byte("\n"))
 	if parser.token.Type == lex.TokenEof {
 		//TODO::empty source file , should forbidden???
@@ -84,29 +83,29 @@ func (parser *Parser) Parse() []error {
 		}
 		switch parser.token.Type {
 		case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
-			parser.Next()
+			parser.Next(lfNotToken)
 			continue
 		case lex.TokenPublic:
 			accessControlToken = parser.token
-			parser.Next()
+			parser.Next(lfIsToken)
 			if err := parser.validAfterPublic(); err != nil {
 				accessControlToken = nil
 			}
 			continue
 		case lex.TokenFinal:
 			isFinal = true
-			parser.Next()
+			parser.Next(lfIsToken)
 			if err := parser.validAfterFinal(); err != nil {
 				isFinal = false
 			}
 			continue
 		case lex.TokenVar:
 			pos := parser.mkPos()
-			parser.Next() // skip var key word
+			parser.Next(lfIsToken) // skip var key word
 			vs, es, err := parser.parseConstDefinition(true)
 			if err != nil {
 				parser.consume(untilSemicolon)
-				parser.Next()
+				parser.Next(lfNotToken)
 				continue
 			}
 			d := &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es}
@@ -126,7 +125,7 @@ func (parser *Parser) Parse() []error {
 			if err != nil {
 				parser.errs = append(parser.errs, err)
 				parser.consume(untilSemicolon)
-				parser.Next()
+				parser.Next(lfNotToken)
 				continue
 			}
 			e.IsPublic = isPublic()
@@ -139,7 +138,7 @@ func (parser *Parser) Parse() []error {
 			e, err := parser.parseEnum()
 			if err != nil {
 				parser.consume(untilRc)
-				parser.Next()
+				parser.Next(lfNotToken)
 				resetSomeProperty()
 				continue
 			}
@@ -157,7 +156,7 @@ func (parser *Parser) Parse() []error {
 			f, err := parser.FunctionParser.parse(true)
 			if err != nil {
 				parser.consume(untilRc)
-				parser.Next()
+				parser.Next(lfNotToken)
 				continue
 			}
 			isPublic := isPublic()
@@ -170,14 +169,14 @@ func (parser *Parser) Parse() []error {
 			resetSomeProperty()
 		case lex.TokenLc:
 			b := &ast.Block{}
-			parser.Next() // skip {
+			parser.Next(lfNotToken) // skip {
 			parser.BlockParser.parseStatementList(b, true)
 			if parser.token.Type != lex.TokenRc {
 				parser.errs = append(parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					parser.errorMsgPrefix(), parser.token.Description))
 				parser.consume(untilRc)
 			}
-			parser.Next() // skip }
+			parser.Next(lfNotToken) // skip }
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: b,
 			})
@@ -192,7 +191,7 @@ func (parser *Parser) Parse() []error {
 			if err != nil {
 				parser.errs = append(parser.errs, err)
 				parser.consume(untilRc)
-				parser.Next()
+				parser.Next(lfNotToken)
 				resetSomeProperty()
 				continue
 			}
@@ -210,11 +209,11 @@ func (parser *Parser) Parse() []error {
 			}
 			resetSomeProperty()
 		case lex.TokenConst:
-			parser.Next() // skip const key word
+			parser.Next(lfIsToken) // skip const key word
 			vs, es, err := parser.parseConstDefinition(false)
 			if err != nil {
 				parser.consume(untilSemicolon)
-				parser.Next()
+				parser.Next(lfNotToken)
 				resetSomeProperty()
 				continue
 			}
@@ -245,7 +244,7 @@ func (parser *Parser) Parse() []error {
 			a, err := parser.parseTypeAlias()
 			if err != nil {
 				parser.consume(untilSemicolon)
-				parser.Next()
+				parser.Next(lfNotToken)
 				resetSomeProperty()
 				continue
 			}
@@ -280,7 +279,7 @@ func (parser *Parser) parseTypes() ([]*ast.Type, error) {
 		if parser.token.Type != lex.TokenComma {
 			break
 		}
-		parser.Next() // skip ,
+		parser.Next(lfNotToken) // skip ,
 	}
 	return ret, nil
 }
@@ -312,14 +311,10 @@ func (parser *Parser) validAfterFinal() error {
 	parser.errs = append(parser.errs, err)
 	return err
 }
-func (parser *Parser) shouldBeSemicolon() {
-	//if parser.token.Type == lex.TokenSemicolon ||
-	//	(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
-	//	return
-	//}
+func (parser *Parser) shouldBeSemicolonOrLf() error {
 	if parser.token.Type == lex.TokenSemicolon ||
 		parser.token.Type == lex.TokenLf {
-		return
+		return nil
 	}
 	var token *lex.Token
 	if nil != parser.lastToken {
@@ -328,33 +323,17 @@ func (parser *Parser) shouldBeSemicolon() {
 	if token == nil {
 		token = parser.token
 	}
-	parser.errs = append(parser.errs, fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(&ast.Position{
+	err := fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(&ast.Position{
 		Filename:    parser.filename,
 		StartLine:   token.StartLine,
 		StartColumn: token.StartColumn,
-	})))
+	}))
+	parser.errs = append(parser.errs, err)
+	return nil
+
 }
-func (parser *Parser) validStatementEnding() {
-	//if parser.token.Type == lex.TokenSemicolon ||
-	//	(parser.lastToken != nil && parser.lastToken.Type == lex.TokenRc) {
-	//	return
-	//}
-	//if parser.token.Type == lex.TokenSemicolon {
-	//	return
-	//}
-	//var token *lex.Token
-	//if nil != parser.lastToken {
-	//	token = parser.lastToken
-	//}
-	//if token == nil {
-	//	token = parser.token
-	//}
-	//parser.errs = append(parser.errs, fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(&ast.Position{
-	//	Filename:    parser.filename,
-	//	StartLine:   token.StartLine,
-	//	StartColumn: token.StartColumn,
-	//})))
-	parser.shouldBeSemicolon()
+func (parser *Parser) validStatementEnding() error {
+	return parser.shouldBeSemicolonOrLf()
 }
 
 func (parser *Parser) mkPos() *ast.Position {
@@ -401,7 +380,7 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 	if parser.token.Type != lex.TokenAssign {
 		parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':='", parser.errorMsgPrefix()))
 	}
-	parser.Next() // skip = or :=
+	parser.Next(lfNotToken) // skip = or :=
 	es, err := parser.ExpressionParser.parseExpressions()
 	if err != nil {
 		return nil, nil, err
@@ -409,7 +388,7 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 	return mkResult(), es, nil
 }
 
-func (parser *Parser) Next(lfIsToken ...bool) {
+func (parser *Parser) Next(lfIsToken bool) {
 	var err error
 	var tok *lex.Token
 	parser.lastToken = parser.token
@@ -421,14 +400,8 @@ func (parser *Parser) Next(lfIsToken ...bool) {
 		if tok == nil {
 			continue
 		}
-		if parser.expectLf {
-			if tok.Type != lex.TokenLf {
-				parser.errs = append(parser.errs, fmt.Errorf("%s expect new line", parser.errorMsgPrefix()))
-			}
-			parser.expectLf = false
-		}
 		parser.token = tok
-		if len(lfIsToken) > 0 {
+		if lfIsToken {
 			break
 		}
 		if tok.Type != lex.TokenLf {
@@ -458,12 +431,46 @@ func (parser *Parser) consume(until map[int]bool) {
 		if _, ok = until[parser.token.Type]; ok {
 			return
 		}
-		parser.Next()
+		parser.Next(lfIsToken)
 	}
 }
 
+func (parser *Parser) ifTokenIsLfSkip() {
+	if parser.token.Type == lex.TokenLf {
+		parser.Next(lfNotToken)
+	}
+}
+func (parser *Parser) unExpectNewLineAndSkip() {
+	if err := parser.unExpectNewLine(); err != nil {
+		parser.Next(lfNotToken)
+	}
+}
+func (parser *Parser) unExpectNewLine() error {
+	var err error
+	if parser.token.Type == lex.TokenLf {
+		err = fmt.Errorf("%s unexpect new line",
+			parser.errorMsgPrefix())
+		parser.errs = append(parser.errs, err)
+	}
+	return err
+}
+func (parser *Parser) expectNewLineAndSkip() {
+	if err := parser.expectNewLine(); err == nil {
+		parser.Next(lfNotToken)
+	}
+}
+func (parser *Parser) expectNewLine() error {
+	var err error
+	if parser.token.Type != lex.TokenLf {
+		err = fmt.Errorf("%s expect new line , but '%s'",
+			parser.errorMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
+	}
+	return err
+}
+
 func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
-	parser.Next() // skip type key word
+	parser.Next(lfIsToken) // skip type key word
 	if parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect identifer,but %s", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
@@ -472,13 +479,13 @@ func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 	ret := &ast.ExpressionTypeAlias{}
 	ret.Pos = parser.mkPos()
 	ret.Name = parser.token.Data.(string)
-	parser.Next() // skip identifier
+	parser.Next(lfIsToken) // skip identifier
 	if parser.token.Type != lex.TokenAssign {
 		err := fmt.Errorf("%s expect '=',but %s", parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	parser.Next() // skip =
+	parser.Next(lfNotToken) // skip =
 	var err error
 	ret.Type, err = parser.parseType()
 	if err != nil {
@@ -530,7 +537,7 @@ func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 		if parser.token.Type != lex.TokenComma { // not a comma
 			break
 		} else {
-			parser.Next()
+			parser.Next(lfNotToken)
 		}
 	}
 	return vs, nil

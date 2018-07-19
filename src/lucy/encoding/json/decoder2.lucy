@@ -1,14 +1,14 @@
 
-import "java/lang/Object";
-import "java/lang/Class";
-import "java/lang/Boolean";
-import "java/lang/Byte";
-import "java/lang/Short";
-import "java/lang/Float";
-import "java/lang/Integer";
-import "java/lang/Double";
-import "java/lang/Long";
-import "java/lang/Character"; 
+import "java/lang/Object" 
+import "java/lang/Class"
+import "java/lang/Boolean"
+import "java/lang/Byte"
+import "java/lang/Short"
+import "java/lang/Float"
+import "java/lang/Integer"
+import "java/lang/Double"
+import "java/lang/Long"
+import "java/lang/Character" 
 
 enum JSON_SYNTAX_TREE_TYPE {
 	JSON_SYNTAX_TREE_TYPE_ARRAY = 1  ,
@@ -31,17 +31,17 @@ class JsonSyntaxTreeNode {
 	public fn nodeType() -> (t string ) {
 		switch this.Type {
 			case JSON_SYNTAX_TREE_TYPE_ARRAY :
-				return "array";
+				return "array" 
 			case JSON_SYNTAX_TREE_TYPE_OBJECT :
-				return "object";
+				return "object" 
 			case JSON_SYNTAX_TREE_TYPE_NUMBER : 
-				return "number";
+				return "number" 
 			case JSON_SYNTAX_TREE_TYPE_BOOL :
-				return "bool";
+				return "bool" 
 			case JSON_SYNTAX_TREE_TYPE_STRING :
-				return "string";
+				return "string" 
 			case JSON_SYNTAX_TREE_TYPE_NULL:
-				return "null";
+				return "null" 
 		}
 	}
 }
@@ -98,7 +98,7 @@ class Decoder {
 
 	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object,err error) {
 		typeName := c.getName();
-		switch typeName{
+		switch typeName{ 
 			case "java.lang.Boolean":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_BOOL {
 					return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()));
@@ -418,7 +418,7 @@ class Decoder {
 				case 'r':
 					bs.append('\r');
 					b = this.bs[this.offset++];
-				case 't':
+				case 't':  // 1 
 					bs.append('\t');
 					b = this.bs[this.offset++];
 				case 'u':  // unicode

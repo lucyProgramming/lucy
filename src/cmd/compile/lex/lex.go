@@ -742,7 +742,9 @@ redo:
 			for c != '\n' && eof == false {
 				c, eof = lex.getChar()
 			}
-			goto redo
+			token.StartColumn = lex.column
+			token.Type = TokenLf
+			token.Description = "\\n"
 		} else if c == '*' {
 			lex.lexMultiLineComment()
 			goto redo

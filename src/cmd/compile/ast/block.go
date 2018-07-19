@@ -92,6 +92,7 @@ func (b *Block) searchLabel(name string) *StatementLabel {
 	for {
 		if bb.Labels != nil {
 			if l, ok := bb.Labels[name]; ok {
+				l.Used = true
 				return l
 			}
 		}
@@ -111,9 +112,11 @@ func (b *Block) searchType(name string) interface{} {
 	for bb != nil {
 		if bb.Classes != nil {
 			if t, ok := bb.Classes[name]; ok {
+				t.Used = true
 				return t
 			}
 			if t, ok := bb.Enums[name]; ok {
+				t.Used = true
 				return t
 			}
 			if t, ok := bb.TypeAliases[name]; ok {
@@ -131,16 +134,19 @@ func (b *Block) searchType(name string) interface{} {
 func (b *Block) searchIdentifier(name string) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
+			t.Used = true
 			return t, nil
 		}
 	}
 	if b.Variables != nil {
 		if t, ok := b.Variables[name]; ok {
+			t.Used = true
 			return t, nil
 		}
 	}
 	if b.Constants != nil {
 		if t, ok := b.Constants[name]; ok {
+			t.Used = true
 			return t, nil
 		}
 	}
@@ -151,11 +157,13 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 	}
 	if b.Enums != nil {
 		if t, ok := b.Enums[name]; ok {
+			t.Used = true
 			return t, nil
 		}
 	}
 	if b.Classes != nil {
 		if t, ok := b.Classes[name]; ok {
+			t.Used = true
 			return t, nil
 		}
 	}

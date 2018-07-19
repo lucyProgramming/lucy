@@ -6,6 +6,11 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
+const (
+	lfIsToken  = true
+	lfNotToken = false
+)
+
 func init() {
 	ast.ParseFunctionHandler = ParseFunction
 }
@@ -49,7 +54,7 @@ func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
 	parser.bs = bs
 	parser.initParser()
 	parser.scanner = lex.New(parser.bs, pos.StartLine, pos.StartColumn)
-	parser.Next() //
+	parser.Next(lfNotToken) //
 	f, err := parser.FunctionParser.parse(true)
 	if err != nil {
 		parser.errs = append(parser.errs, err)

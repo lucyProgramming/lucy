@@ -9,6 +9,7 @@ import (
 )
 
 type Class struct {
+	Used                              bool
 	resolveFatherCalled               bool
 	resolveInterfacesCalled           bool
 	resolveFieldsAndMethodsTypeCalled bool

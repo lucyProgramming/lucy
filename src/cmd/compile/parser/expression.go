@@ -13,11 +13,7 @@ type ExpressionParser struct {
 
 // wrapper
 func (expressionParser *ExpressionParser) Next(lfIsToken bool) {
-	if lfIsToken {
-		expressionParser.parser.Next(lfIsToken)
-	} else {
-		expressionParser.parser.Next()
-	}
+	expressionParser.parser.Next(lfIsToken)
 }
 
 func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
@@ -32,7 +28,7 @@ func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression,
 			break
 		}
 		// == ,
-		expressionParser.Next(false) // skip ,
+		expressionParser.Next(lfNotToken) // skip ,
 	}
 	return es, nil
 }
@@ -46,7 +42,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		return nil, err
 	}
 	for expressionParser.parser.token.Type == lex.TokenComma && statementLevel { // read more
-		expressionParser.Next(false)                             //  skip comma
+		expressionParser.Next(lfNotToken)                        //  skip comma
 		left2, err := expressionParser.parseQuestionExpression() //
 		if err != nil {
 			return nil, err
@@ -75,7 +71,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	}
 	mkExpression := func(typ int, multi bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
-		expressionParser.Next(false) // skip = :=
+		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
 		result.Type = typ
 		bin := &ast.ExpressionBinary{}
@@ -142,18 +138,20 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	if err != nil {
 		return nil, err
 	}
+	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenLp {
 		return nil, fmt.Errorf("%s not '(' after a type", expressionParser.parser.errorMsgPrefix())
 	}
-	expressionParser.Next(false) // skip (
+	expressionParser.Next(lfNotToken) // skip (
 	e, err := expressionParser.parseExpression(false)
 	if err != nil {
 		return nil, err
 	}
+	expressionParser.parser.ifTokenIsLfSkip()
 	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
 	}
-	expressionParser.Next(false) // skip )
+	expressionParser.Next(lfIsToken) // skip )
 	return &ast.Expression{
 		Type: ast.ExpressionTypeCheckCast,
 		Data: &ast.ExpressionTypeConversion{

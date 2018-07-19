@@ -189,7 +189,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 				}
 			}
 			*fieldMethodHandler = f
-			return nil, true, nil
+			//return nil, false, nil
 		}
 	}
 	if len(c.Methods[name]) > 0 {

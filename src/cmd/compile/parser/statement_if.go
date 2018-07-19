@@ -7,76 +7,78 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (blockParser *BlockParser) parseIf() (i *ast.StatementIf, err error) {
-	blockParser.Next() // skip if
+func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
+	blockParser.Next(lfIsToken) // skip if
 	var condition *ast.Expression
+	blockParser.parser.unExpectNewLineAndSkip()
 	condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
-		blockParser.Next()
+		blockParser.Next(lfNotToken)
 	}
-	i = &ast.StatementIf{}
-	i.Condition = condition
+	statementIf = &ast.StatementIf{}
+	statementIf.Condition = condition
 	for blockParser.parser.token.Type == lex.TokenSemicolon {
-		if i.Condition != nil {
-			i.PrefixExpressions = append(i.PrefixExpressions, i.Condition)
+		if statementIf.Condition != nil {
+			statementIf.PrefixExpressions = append(statementIf.PrefixExpressions, statementIf.Condition)
 		}
-		blockParser.Next() // skip ;
-		i.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+		blockParser.Next(lfNotToken) // skip ;
+		statementIf.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
-			blockParser.Next()
+			blockParser.Next(lfNotToken)
 		}
 	}
+	blockParser.parser.ifTokenIsLfSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		blockParser.consume(untilLc) // consume and next
-		blockParser.Next()
+		blockParser.consume(untilLc)
 	}
-	blockParser.Next() //skip {
-	blockParser.parseStatementList(&i.Block, false)
+	blockParser.Next(lfNotToken) //skip {
+	blockParser.parseStatementList(&statementIf.Block, false)
 	if blockParser.parser.token.Type != lex.TokenRc {
 		blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 		blockParser.consume(untilRc)
 	}
-	blockParser.Next() // skip }
+	blockParser.Next(lfIsToken) // skip }
 	if blockParser.parser.token.Type == lex.TokenElseif {
-		i.ElseIfList, err = blockParser.parseElseIfList()
+		statementIf.ElseIfList, err = blockParser.parseElseIfList()
 		if err != nil {
-			return i, err
+			return statementIf, err
 		}
 	}
 	if blockParser.parser.token.Type == lex.TokenElse {
-		blockParser.Next()
+		blockParser.Next(lfNotToken)
 		if blockParser.parser.token.Type != lex.TokenLc {
 			err = fmt.Errorf("%s missing '{' after else", blockParser.parser.errorMsgPrefix())
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
 		}
-		blockParser.Next() // skip {
-		i.ElseBlock = &ast.Block{}
-		blockParser.parseStatementList(i.ElseBlock, false)
+		blockParser.Next(lfNotToken) // skip {
+		statementIf.ElseBlock = &ast.Block{}
+		blockParser.parseStatementList(statementIf.ElseBlock, false)
 		if blockParser.parser.token.Type != lex.TokenRc {
 			err = fmt.Errorf("%s expect '}', but '%s'",
 				blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilRc)
 		}
-		blockParser.Next() // skip }
+		blockParser.Next(lfNotToken) // skip }
 	}
-	return i, err
+	return statementIf, err
 }
 
 func (blockParser *BlockParser) parseElseIfList() (elseIfList []*ast.StatementElseIf, err error) {
 	elseIfList = []*ast.StatementElseIf{}
 	var condition *ast.Expression
 	for blockParser.parser.token.Type == lex.TokenElseif {
-		blockParser.Next() // skip elseif token
+		blockParser.Next(lfIsToken) // skip elseif token
+		blockParser.parser.unExpectNewLineAndSkip()
 		condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
@@ -88,7 +90,7 @@ func (blockParser *BlockParser) parseElseIfList() (elseIfList []*ast.StatementEl
 			blockParser.parser.errs = append(blockParser.parser.errs)
 			blockParser.consume(untilLc)
 		}
-		blockParser.Next() // skip {
+		blockParser.Next(lfNotToken) // skip {
 		block := &ast.Block{}
 		blockParser.parseStatementList(block, false)
 		elseIfList = append(elseIfList, &ast.StatementElseIf{
@@ -101,7 +103,7 @@ func (blockParser *BlockParser) parseElseIfList() (elseIfList []*ast.StatementEl
 			blockParser.parser.errs = append(blockParser.parser.errs)
 			blockParser.consume(untilRc)
 		}
-		blockParser.Next() // skip }
+		blockParser.Next(lfIsToken) // skip }
 	}
 	return elseIfList, err
 }

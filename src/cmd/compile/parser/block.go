@@ -10,8 +10,8 @@ type BlockParser struct {
 	parser *Parser
 }
 
-func (blockParser *BlockParser) Next(lfIsToken ...bool) {
-	blockParser.parser.Next(lfIsToken...)
+func (blockParser *BlockParser) Next(lfIsToken bool) {
+	blockParser.parser.Next(lfIsToken)
 }
 
 func (blockParser *BlockParser) consume(c map[int]bool) {
@@ -43,42 +43,32 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			break
 		}
 		if blockParser.parser.ExpressionParser.looksLikeExpression() {
-			isLabel := blockParser.parseExpressionStatement(block, isDefer)
-			/*
-				could be lable
-					someLable:
-			*/
-			if isLabel == false {
-				blockParser.parser.validStatementEnding()
-				if blockParser.parser.token.Type == lex.TokenSemicolon {
-					blockParser.Next()
-				}
-			}
+			blockParser.parseExpressionStatement(block, isDefer)
 			resetDefer()
 			continue
 		}
 		switch blockParser.parser.token.Type {
 		case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
 			resetDefer()
-			blockParser.Next() // look up next
+			blockParser.Next(lfNotToken) // look up next
 			continue
 		case lex.TokenDefer:
 			isDefer = true
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
 			if err := validAfterDefer(); err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				resetDefer()
 			}
 		case lex.TokenVar:
 			pos := blockParser.parser.mkPos()
-			blockParser.Next() // skip var key word
+			blockParser.Next(lfIsToken) // skip var key word
 			vs, es, err := blockParser.parser.parseConstDefinition(true)
 			if err != nil {
 				blockParser.consume(untilSemicolon)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
-			s := &ast.Statement{
+			statement := &ast.Statement{
 				Type: ast.StatementTypeExpression,
 				Expression: &ast.Expression{
 					Type: ast.ExpressionTypeVar,
@@ -87,66 +77,66 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				},
 				Pos: pos,
 			}
-			block.Statements = append(block.Statements, s)
+			block.Statements = append(block.Statements, statement)
 			blockParser.parser.validStatementEnding()
 			if blockParser.parser.token.Type == lex.TokenSemicolon {
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 			}
 		case lex.TokenIf:
 			pos := blockParser.parser.mkPos()
-			i, err := blockParser.parseIf()
+			statement, err := blockParser.parseIf()
 			if err != nil {
 				blockParser.consume(untilRc)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:        ast.StatementTypeIf,
-				StatementIf: i,
+				StatementIf: statement,
 				Pos:         pos,
 			})
 		case lex.TokenFor:
 			pos := blockParser.parser.mkPos()
-			f, err := blockParser.parseFor()
+			statement, err := blockParser.parseFor()
 			if err != nil {
 				blockParser.consume(untilRc)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
-			f.Block.IsForBlock = true
+			statement.Block.IsForBlock = true
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:         ast.StatementTypeFor,
-				StatementFor: f,
+				StatementFor: statement,
 				Pos:          pos,
 			})
 		case lex.TokenSwitch:
 			pos := blockParser.parser.mkPos()
-			s, err := blockParser.parseSwitch()
+			statement, err := blockParser.parseSwitch()
 			if err != nil {
 				blockParser.consume(untilRc)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
-			if _, ok := s.(*ast.StatementSwitch); ok {
+			if _, ok := statement.(*ast.StatementSwitch); ok {
 				block.Statements = append(block.Statements, &ast.Statement{
 					Type:            ast.StatementTypeSwitch,
-					StatementSwitch: s.(*ast.StatementSwitch),
+					StatementSwitch: statement.(*ast.StatementSwitch),
 					Pos:             pos,
 				})
 			} else {
 				block.Statements = append(block.Statements, &ast.Statement{
 					Type: ast.StatementTypeSwitchTemplate,
-					StatementSwitchTemplate: s.(*ast.StatementSwitchTemplate),
+					StatementSwitchTemplate: statement.(*ast.StatementSwitchTemplate),
 					Pos: pos,
 				})
 			}
 		case lex.TokenConst:
 			pos := blockParser.parser.mkPos()
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
 			vs, es, err := blockParser.parser.parseConstDefinition(false)
 			if err != nil {
 				blockParser.consume(untilRcAndSemicolon)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
 			if len(vs) != len(es) {
@@ -163,18 +153,18 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					cs[k].Expression = es[k] // assignment
 				}
 			}
-			r := &ast.Statement{}
-			r.Type = ast.StatementTypeExpression
-			r.Pos = pos
-			r.Expression = &ast.Expression{
+			statement := &ast.Statement{}
+			statement.Type = ast.StatementTypeExpression
+			statement.Pos = pos
+			statement.Expression = &ast.Expression{
 				Type: ast.ExpressionTypeConst,
 				Data: cs,
 				Pos:  pos,
 			}
-			block.Statements = append(block.Statements, r)
+			block.Statements = append(block.Statements, statement)
 			blockParser.parser.validStatementEnding()
 			if blockParser.parser.token.Type == lex.TokenSemicolon {
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 			}
 		case lex.TokenReturn:
 			pos := blockParser.parser.mkPos()
@@ -183,7 +173,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					fmt.Errorf("%s 'return' cannot used in global block",
 						blockParser.parser.errorMsgPrefix()))
 			}
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
 			r := &ast.StatementReturn{}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:            ast.StatementTypeReturn,
@@ -191,7 +181,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				Pos:             pos,
 			})
 			if blockParser.parser.token.Type == lex.TokenSemicolon {
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
 			var es []*ast.Expression
@@ -199,22 +189,23 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilSemicolon)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 			}
 			r.Expressions = es
 			blockParser.parser.validStatementEnding()
-			blockParser.Next()
+			blockParser.Next(lfNotToken)
 		case lex.TokenLc:
 			pos := blockParser.parser.mkPos()
 			newBlock := ast.Block{}
-			blockParser.Next() // skip {
+			blockParser.Next(lfNotToken) // skip {
 			blockParser.parseStatementList(&newBlock, false)
+			blockParser.parser.ifTokenIsLfSkip()
 			if blockParser.parser.token.Type != lex.TokenRc {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				blockParser.consume(untilRc)
 			}
-			blockParser.Next()
+			blockParser.Next(lfNotToken)
 			if isDefer {
 				d := &ast.StatementDefer{
 					Block: newBlock,
@@ -239,7 +230,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					fmt.Errorf("%s 'pass' can only be used in global blocks",
 						blockParser.parser.errorMsgPrefix()))
 			}
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:            ast.StatementTypeReturn,
@@ -248,7 +239,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			})
 		case lex.TokenContinue:
 			pos := blockParser.parser.mkPos()
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:              ast.StatementTypeContinue,
@@ -257,7 +248,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			})
 		case lex.TokenBreak:
 			pos := blockParser.parser.mkPos()
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:           ast.StatementTypeBreak,
@@ -266,46 +257,42 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			})
 		case lex.TokenGoto:
 			pos := blockParser.parser.mkPos()
-			blockParser.Next() // skip goto key word
+			blockParser.Next(lfIsToken) // skip goto key word
 			if blockParser.parser.token.Type != lex.TokenIdentifier {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s  missing identifier after goto statement, but '%s'",
 						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
 				blockParser.consume(untilSemicolon)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
-			s := &ast.StatementGoTo{}
-			s.LabelName = blockParser.parser.token.Data.(string)
+			statementGoto := &ast.StatementGoTo{}
+			statementGoto.LabelName = blockParser.parser.token.Data.(string)
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:          ast.StatementTypeGoTo,
-				StatementGoTo: s,
+				StatementGoTo: statementGoto,
 				Pos:           pos,
 			})
-			blockParser.Next()
-			if blockParser.parser.token.Type != lex.TokenSemicolon { // in case forget
-				blockParser.parser.errs = append(blockParser.parser.errs,
-					fmt.Errorf("%s  missing semicolon after goto statement,but '%s'",
-						blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
-			}
-			blockParser.Next()
+			blockParser.Next(lfIsToken)
+			blockParser.parser.validStatementEnding()
+			blockParser.Next(lfNotToken)
 		case lex.TokenType:
 			pos := blockParser.parser.mkPos()
 			alias, err := blockParser.parser.parseTypeAlias()
 			if err != nil {
 				blockParser.consume(untilSemicolon)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
 			blockParser.parser.validStatementEnding()
-			s := &ast.Statement{}
-			s.Pos = pos
-			s.Type = ast.StatementTypeExpression
-			s.Expression = &ast.Expression{}
-			s.Expression.Type = ast.ExpressionTypeTypeAlias
-			s.Expression.Data = alias
-			block.Statements = append(block.Statements, s)
-			blockParser.Next()
+			statement := &ast.Statement{}
+			statement.Pos = pos
+			statement.Type = ast.StatementTypeExpression
+			statement.Expression = &ast.Expression{}
+			statement.Expression.Type = ast.ExpressionTypeTypeAlias
+			statement.Expression.Data = alias
+			block.Statements = append(block.Statements, statement)
+			blockParser.Next(lfNotToken)
 		case lex.TokenClass, lex.TokenInterface:
 			pos := blockParser.parser.mkPos()
 			var class *ast.Class
@@ -317,20 +304,20 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			if err != nil {
 				blockParser.consume(untilRc)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
-			s := &ast.Statement{}
-			s.Pos = pos
-			s.Type = ast.StatementTypeClass
-			s.Class = class
-			block.Statements = append(block.Statements, s)
+			statement := &ast.Statement{}
+			statement.Pos = pos
+			statement.Type = ast.StatementTypeClass
+			statement.Class = class
+			block.Statements = append(block.Statements, statement)
 		case lex.TokenEnum:
 			pos := blockParser.parser.mkPos()
 			e, err := blockParser.parser.parseEnum()
 			if err != nil {
 				blockParser.consume(untilRc)
-				blockParser.Next()
+				blockParser.Next(lfNotToken)
 				continue
 			}
 			s := &ast.Statement{}
@@ -357,7 +344,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.parser.consume(untilSemicolonAndLf)
-		blockParser.Next()
+		blockParser.Next(lfNotToken)
 		return
 	}
 	if e.Type == ast.ExpressionTypeIdentifier && blockParser.parser.token.Type == lex.TokenColon {
@@ -367,23 +354,27 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 				blockParser.parser.errorMsgPrefix()))
 		}
 		isLabel = true
-		blockParser.parser.expectLf = true
-		blockParser.Next() // skip :
-		s := &ast.Statement{}
-		s.Pos = pos
-		s.Type = ast.StatementTypeLabel
+		blockParser.Next(lfIsToken) // skip :
+		if blockParser.parser.token.Type != lex.TokenLf {
+			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect new line",
+				blockParser.parser.errorMsgPrefix()))
+		}
+		statement := &ast.Statement{}
+		statement.Pos = pos
+		statement.Type = ast.StatementTypeLabel
 		label := &ast.StatementLabel{}
 		label.CodeOffset = -1
-		s.StatementLabel = label
-		label.Statement = s
+		statement.StatementLabel = label
+		label.Statement = statement
 		label.Name = e.Data.(*ast.ExpressionIdentifier).Name
-		block.Statements = append(block.Statements, s)
+		block.Statements = append(block.Statements, statement)
 		label.Block = block
 		err = block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		}
 	} else {
+		blockParser.parser.validStatementEnding()
 		if isDefer {
 			d := &ast.StatementDefer{}
 			d.Block.Statements = []*ast.Statement{&ast.Statement{
