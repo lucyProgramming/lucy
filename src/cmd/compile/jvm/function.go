@@ -5,12 +5,15 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, state *StackMapState) {
 	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
 		code.MaxLocals += jvmSlotSize(v.Type)
 		state.appendLocals(class, v.Type)
 	}
+}
+
+func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Type.ParameterList {
 		if v.BeenCaptured == false { // not capture
 			continue
@@ -21,15 +24,22 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
 		if t := 2 + jvmSlotSize(v.Type); t > maxStack {
 			maxStack = t
 		}
+		copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
 		buildPackage.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
+		copyOPs(code, storeLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 	}
+	return
+}
+
+func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
+	buildPackage.mkParametersOffset(class, code, f, state)
+	maxStack = buildPackage.mkCapturedParameters(class, code, f, state)
 	for _, v := range f.Type.ReturnList {
 		currentStack := uint16(0)
 		if v.BeenCaptured { //create closure object
@@ -90,6 +100,14 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		t := &cg.StackMapVerificationTypeInfo{}
 		t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
 		state.Locals = append(state.Locals, t)
+		buildPackage.mkParametersOffset(class, method.Code, f, state)
+		stack, _ := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression, context, state)
+		if stack > method.Code.MaxStack {
+			method.Code.MaxStack = stack
+		}
+		state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
+		buildPackage.mkNonStaticFieldDefaultValue(class, method.Code, context, state)
+		buildPackage.mkCapturedParameters(class, method.Code, f, state)
 	} else if f.Name == ast.MainFunctionName { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -128,8 +146,10 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 	if f.HaveDefaultValue {
 		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
 	}
-	if t := buildPackage.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
-		method.Code.MaxStack = t
+	if method.IsConstruction == false {
+		if t := buildPackage.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
+			method.Code.MaxStack = t
+		}
 	}
 	{
 		method.AttributeMethodParameters = &cg.AttributeMethodParameters{}

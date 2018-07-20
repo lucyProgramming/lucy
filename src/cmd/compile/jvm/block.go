@@ -19,6 +19,11 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 		if willNotExecuteToEnd {
 			continue
 		}
+		if s.IsCallFatherConstructionStatement {
+			// special case
+			// no need to build
+			continue
+		}
 		maxStack := buildPackage.buildStatement(class, code, b, s, context, state)
 		if maxStack > code.MaxStack {
 			code.MaxStack = maxStack
@@ -28,10 +33,6 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 				fmt.Println(v.Verify)
 			}
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
-		}
-		if s.IsCallFatherConstructionStatement { // special case
-			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
-			buildPackage.mkNonStaticFieldDefaultValue(class, code, context, state)
 		}
 		//unCondition goto
 		if buildPackage.statementIsUnConditionGoto(s) {

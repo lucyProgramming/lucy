@@ -2,11 +2,11 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 type Function struct {
+	CallFatherConstructionExpression    *Expression
 	TemplateFunction                    *TemplateFunction
 	parameterTypes                      map[string]*Type    //typed parameters
 	ClassMethod                         *cg.MethodHighLevel // make call from

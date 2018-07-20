@@ -36,25 +36,17 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 		maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.Construction.Function.Type.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	if n.Construction == nil {
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      n.Type.Class.Name,
-			Method:     specialMethodInit,
-			Descriptor: "()V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	d := ""
+	if n.Type.Class.LoadFromOutSide {
+		d = n.Construction.Function.Descriptor
 	} else {
-		d := ""
-		if n.Type.Class.LoadFromOutSide {
-			d = n.Construction.Function.Descriptor
-		} else {
-			d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
-		}
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      n.Type.Class.Name,
-			Method:     specialMethodInit,
-			Descriptor: d,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
 	}
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      n.Type.Class.Name,
+		Method:     specialMethodInit,
+		Descriptor: d,
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return
 }

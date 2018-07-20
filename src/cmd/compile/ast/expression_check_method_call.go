@@ -291,6 +291,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			ret[0].Type = VariableTypeVoid
 			ret[0].Pos = e.Pos
 			block.Statements[0].IsCallFatherConstructionStatement = true
+			block.InheritedAttribute.Function.CallFatherConstructionExpression = e
 			return ret
 		}
 		if len(ms) == 0 {

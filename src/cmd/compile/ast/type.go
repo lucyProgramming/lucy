@@ -40,7 +40,7 @@ type Type struct {
 	Array        *Type
 	Class        *Class
 	Enum         *Enum
-	EnumName     *EnumName
+	EnumName     *EnumName // is a const
 	Function     *Function
 	FunctionType *FunctionType
 	Map          *Map

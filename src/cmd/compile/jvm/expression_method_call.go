@@ -33,7 +33,6 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			}
 		}
 	}
-
 	if call.FieldMethodHandler != nil {
 		if call.FieldMethodHandler.IsStatic() == false {
 			stack, _ := buildExpression.build(class, code, call.Expression, context, state)

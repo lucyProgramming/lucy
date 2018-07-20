@@ -201,9 +201,9 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 				if v.Name == THIS {
 					return nil, fmt.Errorf("capture '%s' not allow", name) // capture this not allow
 				}
-				if v.IsFunctionParameter {
-					return nil, fmt.Errorf("capture function parameter '%s' not allow", name) // capture this not allow
-				}
+				//if v.IsFunctionParameter {
+				//	return nil, fmt.Errorf("capture function parameter '%s' not allow", name) // capture this not allow
+				//}
 				b.InheritedAttribute.Function.Closure.InsertVar(v)
 			}
 			//cannot search variable from class body
