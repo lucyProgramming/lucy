@@ -33,11 +33,11 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassH
 
 func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context) (maxStack uint16) {
-	if e.ExpressionValue.Type == ast.VariableTypeClass {
+	if e.Value.Type == ast.VariableTypeClass {
 		return
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	if e.ExpressionValue.Type == ast.VariableTypeEnum && identifier.EnumName != nil { // not a var
+	if e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != nil { // not a var
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1
 		return

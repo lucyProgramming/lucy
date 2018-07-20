@@ -7,13 +7,13 @@ import (
 
 func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	if e.ExpressionValue.Type == ast.VariableTypeArray {
+	if e.Value.Type == ast.VariableTypeArray {
 		return buildExpression.buildNewArray(class, code, e, context, state)
 	}
-	if e.ExpressionValue.Type == ast.VariableTypeJavaArray {
+	if e.Value.Type == ast.VariableTypeJavaArray {
 		return buildExpression.buildNewJavaArray(class, code, e, context, state)
 	}
-	if e.ExpressionValue.Type == ast.VariableTypeMap {
+	if e.Value.Type == ast.VariableTypeMap {
 		return buildExpression.buildNewMap(class, code, e, context)
 	}
 	stackLength := len(state.Stacks)
@@ -80,7 +80,7 @@ func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLev
 	dimensions := byte(0)
 	{
 		// get dimension
-		t := e.ExpressionValue
+		t := e.Value
 		for t.Type == ast.VariableTypeJavaArray {
 			dimensions++
 			t = t.Array
@@ -97,7 +97,7 @@ func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLev
 		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_multianewarray
-	class.InsertClassConst(Descriptor.typeDescriptor(e.ExpressionValue), code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = dimensions
 	code.CodeLength += 4
 	return
@@ -106,7 +106,7 @@ func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, 
 	context *Context, state *StackMapState) (maxStack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
-	meta := ArrayMetas[e.ExpressionValue.Array.Type]
+	meta := ArrayMetas[e.Value.Array.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -131,7 +131,7 @@ func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, 
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
-		switch e.ExpressionValue.Array.Type {
+		switch e.Value.Array.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_newarray
 			code.Codes[code.CodeLength+1] = ArrayTypeBoolean
@@ -176,16 +176,16 @@ func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, 
 			code.CodeLength += 3
 		case ast.VariableTypeObject:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(e.ExpressionValue.Array.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(e.Value.Array.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			meta := ArrayMetas[e.ExpressionValue.Array.Array.Type]
+			meta := ArrayMetas[e.Value.Array.Array.Type]
 			class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeJavaArray:
 			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(Descriptor.typeDescriptor(e.ExpressionValue.Array), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertClassConst(Descriptor.typeDescriptor(e.Value.Array), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}

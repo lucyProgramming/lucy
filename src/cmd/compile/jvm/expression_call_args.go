@@ -14,13 +14,13 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 	}()
 	parameterIndex := 0
 	for _, e := range args {
-		if e.MayHaveMultiValue() && len(e.ExpressionMultiValues) > 1 {
+		if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
 			stack, _ := buildExpression.build(class, code, e, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
 			multiValuePacker.storeMultiValueAutoVar(code, context)
-			for k, t := range e.ExpressionMultiValues {
+			for k, t := range e.MultiValues {
 				stack = multiValuePacker.unPack(class, code, k, t, context)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t

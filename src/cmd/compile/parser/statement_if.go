@@ -31,7 +31,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 			blockParser.Next(lfNotToken)
 		}
 	}
-	blockParser.parser.ifTokenIsLfSkip()
+	blockParser.parser.ifTokenIsLfThenSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)

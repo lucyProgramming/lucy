@@ -6,15 +6,15 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	selection := e.Data.(*ast.ExpressionSelection)
-	if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
-		maxStack = jvmSlotSize(e.ExpressionValue)
+	if selection.Expression.Value.Type == ast.VariableTypePackage {
+		maxStack = jvmSlotSize(e.Value)
 		if selection.PackageVariable != nil {
 			if selection.PackageVariable.JvmDescriptor == "" {
-				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(e.ExpressionValue)
+				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(e.Value)
 			}
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      selection.Expression.ExpressionValue.Package.Name + "/main",
+				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
 				Descriptor: selection.PackageVariable.JvmDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -45,7 +45,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertClassConst(selection.Expression.ExpressionValue.Package.Name+"/main",
+		class.InsertClassConst(selection.Expression.Value.Package.Name+"/main",
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
@@ -77,7 +77,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertClassConst(selection.Expression.ExpressionValue.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(selection.Expression.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -105,7 +105,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		if 4 > maxStack {
 			maxStack = 4
 		}
-		if selection.Expression.ExpressionValue.Type == ast.VariableTypeObject {
+		if selection.Expression.Value.Type == ast.VariableTypeObject {
 			stack, _ := buildExpression.build(class, code, selection.Expression, context, state)
 			if stack > maxStack {
 				maxStack = stack
@@ -120,27 +120,27 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		}
 		return
 	}
-	if selection.Expression.ExpressionValue.Type == ast.VariableTypeClass {
-		maxStack = jvmSlotSize(e.ExpressionValue)
+	if selection.Expression.Value.Type == ast.VariableTypeClass {
+		maxStack = jvmSlotSize(e.Value)
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      selection.Expression.ExpressionValue.Class.Name,
+			Class:      selection.Expression.Value.Class.Name,
 			Field:      selection.Name,
-			Descriptor: Descriptor.typeDescriptor(e.ExpressionValue),
+			Descriptor: Descriptor.typeDescriptor(e.Value),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
 	}
 	// object
 	maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
-	if t := jvmSlotSize(e.ExpressionValue); t > maxStack {
+	if t := jvmSlotSize(e.Value); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      selection.Expression.ExpressionValue.Class.Name,
+		Class:      selection.Expression.Value.Class.Name,
 		Field:      selection.Name,
-		Descriptor: Descriptor.typeDescriptor(e.ExpressionValue),
+		Descriptor: Descriptor.typeDescriptor(e.Value),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	return

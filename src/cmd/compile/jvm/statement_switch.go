@@ -64,9 +64,9 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	maxStack, _ = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.Exit
-	size := jvmSlotSize(s.Condition.ExpressionValue)
+	size := jvmSlotSize(s.Condition.Value)
 	currentStack := size
-	state.pushStack(class, s.Condition.ExpressionValue)
+	state.pushStack(class, s.Condition.Value)
 	for k, c := range s.StatementSwitchCases {
 		if exit != nil {
 			writeExits([]*cg.Exit{exit}, code.CodeLength)
@@ -74,13 +74,13 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 		}
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
-			if ee.MayHaveMultiValue() && len(ee.ExpressionMultiValues) > 1 {
+			if ee.MayHaveMultiValue() && len(ee.MultiValues) > 1 {
 				stack, _ := buildPackage.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
 				multiValuePacker.storeMultiValueAutoVar(code, context)
-				for kkk, ttt := range ee.ExpressionMultiValues {
+				for kkk, ttt := range ee.MultiValues {
 					currentStack = size
 					if size == 1 {
 						code.Codes[code.CodeLength] = cg.OP_dup
@@ -88,7 +88,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 						code.Codes[code.CodeLength] = cg.OP_dup2
 					}
 					code.CodeLength++
-					state.pushStack(class, s.Condition.ExpressionValue)
+					state.pushStack(class, s.Condition.Value)
 					currentStack += size
 					if currentStack > maxStack {
 						maxStack = currentStack
@@ -97,8 +97,8 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}
-					state.pushStack(class, s.Condition.ExpressionValue)
-					compare(s.Condition.ExpressionValue)
+					state.pushStack(class, s.Condition.Value)
+					compare(s.Condition.Value)
 					// consume result on stack
 					matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
 				}
@@ -113,13 +113,13 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			}
 			code.CodeLength++
 			currentStack += size
-			state.pushStack(class, s.Condition.ExpressionValue)
+			state.pushStack(class, s.Condition.Value)
 			stack, _ := buildPackage.BuildExpression.build(class, code, ee, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			state.pushStack(class, s.Condition.ExpressionValue)
-			compare(s.Condition.ExpressionValue)
+			state.pushStack(class, s.Condition.Value)
+			compare(s.Condition.Value)
 			matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match

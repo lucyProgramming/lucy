@@ -65,7 +65,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, bin.Left.ExpressionValue)
+		currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, bin.Left.Value)
 	}
 	//copy op
 	copyOPs(code, op...)
@@ -79,7 +79,7 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 		state.popStack(len(state.Stacks) - length)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	if bin.Left.ExpressionValue.Type == ast.VariableTypeString {
+	if bin.Left.Value.Type == ast.VariableTypeString {
 		return buildExpression.buildStrPlusAssign(class, code, e, context, state)
 	}
 	maxStack, remainStack, op, _, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
@@ -88,13 +88,13 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, e.ExpressionValue)
-	currentStack := jvmSlotSize(e.ExpressionValue) + remainStack // incase int -> long
+	state.pushStack(class, e.Value)
+	currentStack := jvmSlotSize(e.Value) + remainStack // incase int -> long
 	stack, _ = buildExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	switch bin.Left.ExpressionValue.Type {
+	switch bin.Left.Value.Type {
 	case ast.VariableTypeByte:
 		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_iadd
@@ -242,7 +242,7 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, bin.Left.ExpressionValue)
+		currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, bin.Left.Value)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}

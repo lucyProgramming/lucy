@@ -10,7 +10,7 @@ func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, c
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxStack, es := buildExpression.build(class, code, bin.Left, context, state)
 	if es != nil {
-		state.pushStack(class, bin.Left.ExpressionValue)
+		state.pushStack(class, bin.Left.Value)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 		writeExits(es, code.CodeLength)

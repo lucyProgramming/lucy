@@ -17,14 +17,14 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
-	state.pushStack(class, index.Expression.ExpressionValue)
+	state.pushStack(class, index.Expression.Value)
 	stack, _ := buildExpression.build(class, code, index.Index, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
 	currentStack = 2 // mapref kref
-	if index.Expression.ExpressionValue.Map.K.IsPointer() == false {
-		typeConverter.packPrimitives(class, code, index.Expression.ExpressionValue.Map.K)
+	if index.Expression.Value.Map.K.IsPointer() == false {
+		typeConverter.packPrimitives(class, code, index.Expression.Value.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -34,10 +34,10 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.popStack(1)
-	if index.Expression.ExpressionValue.Map.V.Type == ast.VariableTypeEnum {
-		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.V)
-	} else if index.Expression.ExpressionValue.Map.V.IsPointer() {
-		typeConverter.castPointer(class, code, index.Expression.ExpressionValue.Map.V)
+	if index.Expression.Value.Map.V.Type == ast.VariableTypeEnum {
+		typeConverter.unPackPrimitives(class, code, index.Expression.Value.Map.V)
+	} else if index.Expression.Value.Map.V.IsPointer() {
+		typeConverter.castPointer(class, code, index.Expression.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
 		code.CodeLength++
@@ -47,7 +47,7 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength] = cg.OP_ifnonnull
 		codeLength := code.CodeLength
 		code.CodeLength += 3
-		switch index.Expression.ExpressionValue.Map.V.Type {
+		switch index.Expression.Value.Map.V.Type {
 		case ast.VariableTypeBool:
 			fallthrough
 		case ast.VariableTypeByte:
@@ -81,10 +81,10 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 			state.popStack(1) // pop java_root_class ref
 		}
 		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
-		typeConverter.unPackPrimitives(class, code, index.Expression.ExpressionValue.Map.V)
+		typeConverter.unPackPrimitives(class, code, index.Expression.Value.Map.V)
 		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
 		{
-			state.pushStack(class, e.ExpressionValue)
+			state.pushStack(class, e.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 		}
@@ -99,17 +99,17 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	if index.Expression.ExpressionValue.Type == ast.VariableTypeMap {
+	if index.Expression.Value.Type == ast.VariableTypeMap {
 		return buildExpression.buildMapIndex(class, code, e, context, state)
 	}
 	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
-	state.pushStack(class, index.Expression.ExpressionValue)
+	state.pushStack(class, index.Expression.Value)
 	stack, _ := buildExpression.build(class, code, index.Index, context, state)
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}
-	if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
-		meta := ArrayMetas[e.ExpressionValue.Type]
+	if index.Expression.Value.Type == ast.VariableTypeArray {
+		meta := ArrayMetas[e.Value.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
@@ -117,11 +117,11 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 			Descriptor: meta.getMethodDescription,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if e.ExpressionValue.IsPointer() && e.ExpressionValue.Type != ast.VariableTypeString {
-			typeConverter.castPointer(class, code, e.ExpressionValue)
+		if e.Value.IsPointer() && e.Value.Type != ast.VariableTypeString {
+			typeConverter.castPointer(class, code, e.Value)
 		}
 	} else {
-		switch e.ExpressionValue.Type {
+		switch e.Value.Type {
 		case ast.VariableTypeBool:
 			fallthrough
 		case ast.VariableTypeByte:

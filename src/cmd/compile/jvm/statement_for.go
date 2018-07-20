@@ -8,8 +8,8 @@ import (
 func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	if s.RangeAttr != nil {
-		if s.RangeAttr.RangeOn.ExpressionValue.Type == ast.VariableTypeArray ||
-			s.RangeAttr.RangeOn.ExpressionValue.Type == ast.VariableTypeJavaArray {
+		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray ||
+			s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {
 			return buildPackage.buildForRangeStatementForArray(class, code, s, context, state)
 		} else { // for map
 			return buildPackage.buildForRangeStatementForMap(class, code, s, context, state)
@@ -32,7 +32,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			writeExits(es, code.CodeLength)
-			forState.pushStack(class, s.Condition.ExpressionValue)
+			forState.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}
@@ -54,7 +54,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if len(es) > 0 {
 			writeExits(es, code.CodeLength)
-			forState.pushStack(class, s.Condition.ExpressionValue)
+			forState.pushStack(class, s.Condition.Value)
 			context.MakeStackMap(code, forState, code.CodeLength)
 			forState.popStack(1) // must be bool expression
 		}

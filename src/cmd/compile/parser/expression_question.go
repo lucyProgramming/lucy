@@ -20,7 +20,7 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 	if err != nil {
 		return left, nil
 	}
-	expressionParser.parser.ifTokenIsLfSkip()
+	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenColon {
 		return left, fmt.Errorf("%s expect ':',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)

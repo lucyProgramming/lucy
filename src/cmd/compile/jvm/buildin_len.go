@@ -21,14 +21,14 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
 	code.CodeLength += 5
 	exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
-	state.pushStack(class, call.Args[0].ExpressionValue)
+	state.pushStack(class, call.Args[0].Value)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
-	if call.Args[0].ExpressionValue.Type == ast.VariableTypeJavaArray {
+	if call.Args[0].Value.Type == ast.VariableTypeJavaArray {
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
-	} else if call.Args[0].ExpressionValue.Type == ast.VariableTypeArray {
-		meta := ArrayMetas[call.Args[0].ExpressionValue.Array.Type]
+	} else if call.Args[0].Value.Type == ast.VariableTypeArray {
+		meta := ArrayMetas[call.Args[0].Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
@@ -37,7 +37,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 		},
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else if call.Args[0].ExpressionValue.Type == ast.VariableTypeMap {
+	} else if call.Args[0].Value.Type == ast.VariableTypeMap {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaMapClass,
@@ -46,7 +46,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 		},
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else if call.Args[0].ExpressionValue.Type == ast.VariableTypeString {
+	} else if call.Args[0].Value.Type == ast.VariableTypeString {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,

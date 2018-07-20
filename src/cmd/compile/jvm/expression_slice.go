@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildStringSlice(class *cg.ClassHighLeve
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, slice.Start.ExpressionValue)
+	state.pushStack(class, slice.Start.Value)
 	stack, _ = buildExpression.build(class, code, slice.End, context, state)
 	if t := 2 + stack; t > maxStack {
 		maxStack = t
@@ -37,18 +37,18 @@ func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, cod
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	slice := e.Data.(*ast.ExpressionSlice)
-	if slice.Expression.ExpressionValue.Type == ast.VariableTypeString {
+	if slice.Expression.Value.Type == ast.VariableTypeString {
 		return buildExpression.buildStringSlice(class, code, e, context, state)
 	}
-	meta := ArrayMetas[slice.Expression.ExpressionValue.Array.Type]
+	meta := ArrayMetas[slice.Expression.Value.Array.Type]
 	maxStack, _ = buildExpression.build(class, code, slice.Expression, context, state)
-	state.pushStack(class, slice.Expression.ExpressionValue)
+	state.pushStack(class, slice.Expression.Value)
 	// build start
 	stack, _ := buildExpression.build(class, code, slice.Start, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, slice.Start.ExpressionValue)
+	state.pushStack(class, slice.Start.Value)
 	stack, _ = buildExpression.build(class, code, slice.End, context, state)
 	if t := 2 + stack; t > maxStack {
 		maxStack = t

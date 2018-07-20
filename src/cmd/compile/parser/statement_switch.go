@@ -96,7 +96,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 	}
-	blockParser.parser.ifTokenIsLfSkip()
+	blockParser.parser.ifTokenIsLfThenSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)

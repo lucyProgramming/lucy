@@ -208,7 +208,7 @@ func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHi
 		state.pushStack(class, state.newObjectVariableType(class.Name))
 		stack, es := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
 		if len(es) > 0 {
-			state.pushStack(class, v.Expression.ExpressionValue)
+			state.pushStack(class, v.Expression.Value)
 			context.MakeStackMap(code, state, code.CodeLength)
 			state.popStack(1)
 			writeExits(es, code.CodeLength)

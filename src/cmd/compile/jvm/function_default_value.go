@@ -51,7 +51,7 @@ func (fd *FunctionDefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp
 	for i := uint16(0); i < uint16(len(dp.Constants)); i++ {
 		v := f.Type.ParameterList[dp.Start+i]
 		v.Expression = &ast.Expression{}
-		v.Expression.ExpressionValue = v.Type
+		v.Expression.Value = v.Type
 		switch v.Type.Type {
 		case ast.VariableTypeBool:
 			v.Expression.Type = ast.ExpressionTypeBool

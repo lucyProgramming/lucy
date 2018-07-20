@@ -94,7 +94,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		if err != nil {
 			return nil, err
 		}
-		parser.ifTokenIsLfSkip()
+		parser.ifTokenIsLfThenSkip()
 		if parser.token.Type != lex.TokenArrow {
 			return nil, fmt.Errorf("%s expect '->',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description)
@@ -104,7 +104,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		if err != nil {
 			return nil, err
 		}
-		parser.ifTokenIsLfSkip()
+		parser.ifTokenIsLfThenSkip()
 		if parser.token.Type != lex.TokenRc {
 			return nil, fmt.Errorf("%s expect '}',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description)

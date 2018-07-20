@@ -28,7 +28,7 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	stack, es := buildExpression.build(class, code, e.Left, context, state)
 	if len(es) > 0 {
 		writeExits(es, code.CodeLength)
-		state.pushStack(class, e.Left.ExpressionValue)
+		state.pushStack(class, e.Left.Value)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
@@ -36,7 +36,7 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 		maxStack = t
 	}
 	if t := currentStack +
-		buildExpression.stackTop2String(class, code, e.Left.ExpressionValue, context, state); t > maxStack {
+		buildExpression.stackTop2String(class, code, e.Left.Value, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -49,14 +49,14 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	stack, es = buildExpression.build(class, code, e.Right, context, state)
 	if len(es) > 0 {
 		writeExits(es, code.CodeLength)
-		state.pushStack(class, e.Right.ExpressionValue)
+		state.pushStack(class, e.Right.Value)
 		context.MakeStackMap(code, state, code.CodeLength)
 		state.popStack(1)
 	}
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := currentStack + buildExpression.stackTop2String(class, code, e.Right.ExpressionValue, context, state); t > maxStack {
+	if t := currentStack + buildExpression.stackTop2String(class, code, e.Right.Value, context, state); t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

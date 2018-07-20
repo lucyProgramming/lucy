@@ -32,7 +32,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			maxStack, es = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 			if len(es) > 0 {
 				writeExits(es, code.CodeLength)
-				state.pushStack(class, statementReturn.Expressions[0].ExpressionValue)
+				state.pushStack(class, statementReturn.Expressions[0].Value)
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1)
 			}
@@ -111,13 +111,13 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			index := int32(0)
 			for _, v := range statementReturn.Expressions {
 				currentStack := uint16(1)
-				if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
+				if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
 					stack, _ := buildPackage.BuildExpression.build(class, code, v, context, state)
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}
 					multiValuePacker.storeMultiValueAutoVar(code, context)
-					for kk, _ := range v.ExpressionMultiValues {
+					for kk, _ := range v.MultiValues {
 						currentStack := uint16(1)
 						code.Codes[code.CodeLength] = cg.OP_dup // dup array list
 						code.CodeLength++
@@ -143,7 +143,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 				stack, es := buildPackage.BuildExpression.build(class, code, v, context, state)
 				if len(es) > 0 {
 					writeExits(es, code.CodeLength)
-					state.pushStack(class, v.ExpressionValue)
+					state.pushStack(class, v.Value)
 					context.MakeStackMap(code, state, code.CodeLength)
 					state.popStack(1) // must be bool expression
 				}
@@ -151,8 +151,8 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 					maxStack = t
 				}
 				//convert to object
-				if v.ExpressionValue.IsPointer() == false {
-					typeConverter.packPrimitives(class, code, v.ExpressionValue)
+				if v.Value.IsPointer() == false {
+					typeConverter.packPrimitives(class, code, v.Value)
 				}
 				// append
 				loadInt32(class, code, index)

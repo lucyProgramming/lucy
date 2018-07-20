@@ -30,13 +30,13 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 	}()
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
-	state.pushStack(class, call.Expression.ExpressionValue)
+	state.pushStack(class, call.Expression.Value)
 	switch call.Name {
 	case common.ArrayMethodCap,
 		common.ArrayMethodSize,
 		common.ArrayMethodStart,
 		common.ArrayMethodEnd:
-		meta := ArrayMetas[call.Expression.ExpressionValue.Array.Type]
+		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
@@ -49,18 +49,18 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			code.CodeLength++
 		}
 	case common.ArrayMethodAppend:
-		meta := ArrayMetas[call.Expression.ExpressionValue.Array.Type]
+		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		appendName := "append"
 		appendDescriptor := meta.appendDescriptor
 		for _, v := range call.Args {
 			currentStack := uint16(1)
-			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 0 {
+			if v.MayHaveMultiValue() && len(v.MultiValues) > 0 {
 				stack, _ := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
 				multiValuePacker.storeMultiValueAutoVar(code, context)
-				for kk, t := range v.ExpressionMultiValues {
+				for kk, t := range v.MultiValues {
 					currentStack = 1
 					if t := multiValuePacker.unPack(class, code, kk, t, context) + currentStack; t > maxStack {
 						maxStack = t
@@ -81,7 +81,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			stack, es := buildExpression.build(class, code, v, context, state)
 			if len(es) > 0 {
 				writeExits(es, code.CodeLength)
-				state.pushStack(class, v.ExpressionValue)
+				state.pushStack(class, v.Value)
 				context.MakeStackMap(code, state, code.CodeLength)
 				state.popStack(1) // must be a logical expression
 			}
@@ -101,18 +101,18 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			code.CodeLength++
 		}
 	case common.ArrayMethodAppendAll:
-		meta := ArrayMetas[call.Expression.ExpressionValue.Array.Type]
+		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		for _, v := range call.Args {
 			currentStack := uint16(1)
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
-			if v.MayHaveMultiValue() && len(v.ExpressionMultiValues) > 1 {
+			if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
 				stack, _ := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
 				multiValuePacker.storeMultiValueAutoVar(code, context)
-				for kk, tt := range v.ExpressionMultiValues {
+				for kk, tt := range v.MultiValues {
 					currentStack := uint16(1)
 					stack = multiValuePacker.unPack(class, code, kk, tt, context)
 					if t := currentStack + 2; t > maxStack {

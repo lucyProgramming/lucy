@@ -22,9 +22,9 @@ func (functionParser *FunctionParser) consume(until map[int]bool) {
 func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
 	f.Pos = functionParser.parser.mkPos()
-	var offset int
-	offset = functionParser.parser.token.Offset
+	offset := functionParser.parser.token.Offset
 	functionParser.Next(lfIsToken) // skip fn key word
+	functionParser.parser.unExpectNewLineAndSkip()
 	if needName && functionParser.parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect function name,but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
@@ -37,8 +37,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	}
 	f.Type, err = functionParser.parser.parseFunctionType()
 	if err != nil {
-		//functionParser.consume(untilLc)
-		return nil, err
+		functionParser.parser.consume(untilLc)
 	}
 	if functionParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s except '{' but '%s'",

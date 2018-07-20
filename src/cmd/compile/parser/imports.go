@@ -14,7 +14,7 @@ func (parser *Parser) parseImports() {
 	}
 	parser.Next(lfIsToken) // skip import key word
 	if err := parser.unExpectNewLine(); err != nil {
-		parser.consume(untilSemicolonAndLf)
+		parser.consume(untilSemicolonOrLf)
 		parser.Next(lfNotToken)
 		parser.parseImports()
 		return
@@ -22,7 +22,7 @@ func (parser *Parser) parseImports() {
 	if parser.token.Type != lex.TokenLiteralString {
 		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description))
-		parser.consume(untilSemicolonAndLf)
+		parser.consume(untilSemicolonOrLf)
 		parser.Next(lfNotToken)
 		parser.parseImports()
 		return
@@ -40,7 +40,7 @@ func (parser *Parser) parseImports() {
 			parser.insertImports(i)
 			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description))
-			parser.consume(untilSemicolonAndLf)
+			parser.consume(untilSemicolonOrLf)
 			parser.Next(lfNotToken)
 			parser.parseImports()
 			return
@@ -53,7 +53,6 @@ func (parser *Parser) parseImports() {
 	parser.Next(lfNotToken)
 	parser.insertImports(i)
 	parser.parseImports()
-
 }
 
 func (parser *Parser) insertImports(im *ast.Import) {

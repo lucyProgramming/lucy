@@ -16,12 +16,12 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 		e.Type == ast.ExpressionTypeAnd ||
 		e.Type == ast.ExpressionTypeXor {
 		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, bin.Left.ExpressionValue)
+		state.pushStack(class, bin.Left.Value)
 		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
+		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}
-		switch e.ExpressionValue.Type {
+		switch e.Value.Type {
 		case ast.VariableTypeByte:
 			fallthrough
 		case ast.VariableTypeShort:
@@ -52,17 +52,17 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 		e.Type == ast.ExpressionTypeDiv ||
 		e.Type == ast.ExpressionTypeMod {
 		//handle string first
-		if bin.Left.ExpressionValue.Type == ast.VariableTypeString ||
-			bin.Right.ExpressionValue.Type == ast.VariableTypeString {
+		if bin.Left.Value.Type == ast.VariableTypeString ||
+			bin.Right.Value.Type == ast.VariableTypeString {
 			return buildExpression.buildStrCat(class, code, bin, context, state)
 		}
 		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, e.ExpressionValue)
+		state.pushStack(class, e.Value)
 		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
-		if t := jvmSlotSize(bin.Left.ExpressionValue) + stack; t > maxStack {
+		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
-		switch e.ExpressionValue.Type {
+		switch e.Value.Type {
 		case ast.VariableTypeByte:
 			switch e.Type {
 			case ast.ExpressionTypeAdd:
@@ -168,12 +168,12 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 	if e.Type == ast.ExpressionTypeLsh ||
 		e.Type == ast.ExpressionTypeRsh {
 		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, bin.Left.ExpressionValue)
+		state.pushStack(class, bin.Left.Value)
 		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSlotSize(bin.Left.ExpressionValue); t > maxStack {
+		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}
-		switch e.ExpressionValue.Type {
+		switch e.Value.Type {
 		case ast.VariableTypeByte:
 			if e.Type == ast.ExpressionTypeLsh {
 				code.Codes[code.CodeLength] = cg.OP_ishl

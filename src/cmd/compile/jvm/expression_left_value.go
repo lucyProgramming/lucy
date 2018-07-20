@@ -51,15 +51,15 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	if index.Index.ExpressionValue.IsPointer() == false {
-		typeConverter.packPrimitives(class, code, index.Index.ExpressionValue)
+	if index.Index.Value.IsPointer() == false {
+		typeConverter.packPrimitives(class, code, index.Index.Value)
 	}
 	state.pushStack(class, state.newObjectVariableType(javaRootClass))
 	remainStack = 2
 	ops = []byte{}
-	if index.Expression.ExpressionValue.Map.V.IsPointer() == false {
+	if index.Expression.Value.Map.V.IsPointer() == false {
 		ops = append(ops,
-			typeConverter.packPrimitivesBytes(class, index.Expression.ExpressionValue.Map.V)...)
+			typeConverter.packPrimitivesBytes(class, index.Expression.Value.Map.V)...)
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
@@ -70,7 +70,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	ops = append(ops, bs4...)
-	target = index.Expression.ExpressionValue.Map.V
+	target = index.Expression.Value.Map.V
 	leftValueType = LeftValueTypeMap
 	return
 }
@@ -106,14 +106,14 @@ func (buildExpression *BuildExpression) getLeftValue(
 		target = identifier.Variable.Type
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
-		if index.Expression.ExpressionValue.Type == ast.VariableTypeArray {
+		if index.Expression.Value.Type == ast.VariableTypeArray {
 			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
-			state.pushStack(class, index.Expression.ExpressionValue)
+			state.pushStack(class, index.Expression.Value)
 			stack, _ := buildExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
-			meta := ArrayMetas[index.Expression.ExpressionValue.Array.Type]
+			meta := ArrayMetas[index.Expression.Value.Array.Type]
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -126,21 +126,21 @@ func (buildExpression *BuildExpression) getLeftValue(
 			})
 			leftValueType = LeftValueTypeLucyArray
 			remainStack = 2 // [arrayref ,index]
-			target = e.ExpressionValue
-		} else if index.Expression.ExpressionValue.Type == ast.VariableTypeMap { // map
+			target = e.Value
+		} else if index.Expression.Value.Type == ast.VariableTypeMap { // map
 			return buildExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
 			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
-			state.pushStack(class, index.Expression.ExpressionValue)
+			state.pushStack(class, index.Expression.Value)
 			stack, _ := buildExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
 			leftValueType = LeftValueTypeArray
-			target = e.ExpressionValue
+			target = e.Value
 			remainStack = 2 // [objectref ,index]
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-			switch e.ExpressionValue.Type {
+			switch e.Value.Type {
 			case ast.VariableTypeBool:
 				ops = []byte{cg.OP_bastore}
 			case ast.VariableTypeByte:
@@ -174,12 +174,12 @@ func (buildExpression *BuildExpression) getLeftValue(
 		}
 	case ast.ExpressionTypeSelection:
 		selection := e.Data.(*ast.ExpressionSelection)
-		if selection.Expression.ExpressionValue.Type == ast.VariableTypePackage {
+		if selection.Expression.Value.Type == ast.VariableTypePackage {
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_putstatic
 			target = selection.PackageVariable.Type
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      selection.Expression.ExpressionValue.Package.Name + "/main",
+				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
 				Descriptor: selection.PackageVariable.JvmDescriptor,
 			}, ops[1:3])
@@ -193,7 +193,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(target)
 			}
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      selection.Expression.ExpressionValue.Class.Name,
+				Class:      selection.Expression.Value.Class.Name,
 				Field:      selection.Name,
 				Descriptor: selection.Field.JvmDescriptor,
 			}, ops[1:3])
@@ -205,7 +205,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 				ops[0] = cg.OP_putfield
 				maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
 				remainStack = 1
-				state.pushStack(class, selection.Expression.ExpressionValue)
+				state.pushStack(class, selection.Expression.Value)
 			}
 		}
 	}

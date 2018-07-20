@@ -59,7 +59,7 @@ func (s *StatementFor) checkRange() []error {
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
-	rangeExpression.ExpressionValue = rangeOn
+	rangeExpression.Value = rangeOn
 	var lefts []*Expression
 	if bin.Left.Type == ExpressionTypeList {
 		lefts = bin.Left.Data.([]*Expression)

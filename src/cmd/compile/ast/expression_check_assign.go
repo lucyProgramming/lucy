@@ -102,7 +102,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
 	bin := e.Data.(*ExpressionBinary)
 	left := bin.Left.getLeftValue(block, errs)
-	bin.Left.ExpressionValue = left
+	bin.Left.Value = left
 	right, es := bin.Right.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
@@ -195,11 +195,11 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 		t := v.getLeftValue(block, errs)
-		v.ExpressionValue = t
+		v.Value = t
 		leftTypes = append(leftTypes, t) // append even if it`s nil
 	}
 	convertLiteralExpressionsToNeeds(values, leftTypes, valueTypes)
-	bin.Left.ExpressionMultiValues = leftTypes
+	bin.Left.MultiValues = leftTypes
 	if len(lefts) != len(valueTypes) { //expression length compare with value types is more appropriate
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
 			errMsgPrefix(e.Pos),

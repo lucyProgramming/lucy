@@ -9,20 +9,20 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.Class
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
-	if len(call.Expression.ExpressionValue.FunctionType.ParameterList) > 0 {
-		buildExpression.buildCallArgs(class, code, call.Args, call.Expression.ExpressionValue.FunctionType.ParameterList, context, state)
+	if len(call.Expression.Value.FunctionType.ParameterList) > 0 {
+		buildExpression.buildCallArgs(class, code, call.Args, call.Expression.Value.FunctionType.ParameterList, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/invoke/MethodHandle",
 		Method:     "invoke",
-		Descriptor: Descriptor.methodDescriptor(call.Expression.ExpressionValue.FunctionType),
+		Descriptor: Descriptor.methodDescriptor(call.Expression.Value.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression {
-		if call.Expression.ExpressionValue.FunctionType.NoReturnValue() == false {
-			if len(call.Expression.ExpressionValue.FunctionType.ReturnList) == 1 {
-				if jvmSlotSize(call.Expression.ExpressionValue.FunctionType.ReturnList[0].Type) == 1 {
+		if call.Expression.Value.FunctionType.NoReturnValue() == false {
+			if len(call.Expression.Value.FunctionType.ReturnList) == 1 {
+				if jvmSlotSize(call.Expression.Value.FunctionType.ReturnList[0].Type) == 1 {
 					code.Codes[code.CodeLength] = cg.OP_pop
 					code.CodeLength++
 				} else {
@@ -97,8 +97,8 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 	if e.IsStatementExpression {
 		if e.CallHasReturnValue() == false {
 			// nothing to do
-		} else if len(e.ExpressionMultiValues) == 1 {
-			if 2 == jvmSlotSize(e.ExpressionMultiValues[0]) {
+		} else if len(e.MultiValues) == 1 {
+			if 2 == jvmSlotSize(e.MultiValues[0]) {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop
@@ -110,8 +110,8 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 		}
 	}
 	if e.CallHasReturnValue() == false { // nothing
-	} else if len(e.ExpressionMultiValues) == 1 {
-		if t := jvmSlotSize(e.ExpressionMultiValues[0]); t > maxStack {
+	} else if len(e.MultiValues) == 1 {
+		if t := jvmSlotSize(e.MultiValues[0]); t > maxStack {
 			maxStack = t
 		}
 	} else { // > 1

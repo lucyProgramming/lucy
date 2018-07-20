@@ -20,7 +20,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	// if null skip
 	{
 		state.Stacks = append(state.Stacks,
-			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.RangeOn.ExpressionValue))
+			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.RangeOn.Value))
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		context.MakeStackMap(code, state, code.CodeLength+11)
 		state.popStack(1) // pop
@@ -155,16 +155,16 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if s.RangeAttr.RangeOn.ExpressionValue.Map.V.IsPointer() == false {
-			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
+		if s.RangeAttr.RangeOn.Value.Map.V.IsPointer() == false {
+			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.Value.Map.V)
 		} else {
-			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
+			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.Value.Map.V)
 		}
 		autoVar.V = code.MaxLocals
-		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V)
+		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.Value.Map.V)
 		//store to V
-		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.V.Type, autoVar.V)...)
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.V)
+		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.V.Type, autoVar.V)...)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
@@ -178,15 +178,15 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
-		if s.RangeAttr.RangeOn.ExpressionValue.Map.K.IsPointer() == false {
-			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
+		if s.RangeAttr.RangeOn.Value.Map.K.IsPointer() == false {
+			typeConverter.unPackPrimitives(class, code, s.RangeAttr.RangeOn.Value.Map.K)
 		} else {
-			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
+			typeConverter.castPointer(class, code, s.RangeAttr.RangeOn.Value.Map.K)
 		}
 		autoVar.K = code.MaxLocals
-		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K)
-		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.K.Type, autoVar.K)...)
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.ExpressionValue.Map.K)
+		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.Value.Map.K)
+		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.K.Type, autoVar.K)...)
+		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.K)
 	}
 
 	// store k and v into user defined variable
@@ -222,8 +222,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			maxStack = stack
 		}
 		copyOPs(code,
-			loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.V.Type, autoVar.V)...)
-		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.V); t > maxStack {
+			loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.V.Type, autoVar.V)...)
+		if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.Value.Map.V); t > maxStack {
 			maxStack = t
 		}
 		copyOPs(code, op...)
@@ -236,8 +236,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 				maxStack = stack
 			}
 			copyOPs(code,
-				loadLocalVariableOps(s.RangeAttr.RangeOn.ExpressionValue.Map.K.Type, autoVar.K)...)
-			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.ExpressionValue.Map.K); t > maxStack {
+				loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.K.Type, autoVar.K)...)
+			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.Value.Map.K); t > maxStack {
 				maxStack = t
 			}
 			copyOPs(code, op...)

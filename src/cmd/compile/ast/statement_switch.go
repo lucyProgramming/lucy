@@ -98,9 +98,9 @@ func (s *StatementSwitch) check(block *Block) []error {
 						errMsgPrefix(e.Pos)))
 					continue
 				} else {
-					if e.ExpressionValue.Type == VariableTypePackage &&
+					if e.Value.Type == VariableTypePackage &&
 						enumPackageName == "" {
-						enumPackageName = e.ExpressionValue.Package.Name
+						enumPackageName = e.Value.Package.Name
 					}
 					enumName = t.EnumName.Name
 					valueValid = true

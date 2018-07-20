@@ -42,7 +42,8 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 				goto parseBlock
 			}
 		}
-		blockParser.Next(lfNotToken)
+		blockParser.Next(lfIsToken)
+		blockParser.parser.unExpectNewLineAndSkip()
 		if blockParser.parser.token.Type != lex.TokenLc {
 			statementFor.Increment, err = blockParser.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
@@ -50,10 +51,9 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 				blockParser.consume(untilLc)
 				goto parseBlock
 			}
-
 		}
 	}
-	blockParser.parser.ifTokenIsLfSkip()
+	blockParser.parser.ifTokenIsLfThenSkip()
 parseBlock:
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",

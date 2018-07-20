@@ -624,7 +624,7 @@ func (c *Class) checkFields() []error {
 			{
 				selection := &ExpressionSelection{}
 				selection.Expression = &Expression{}
-				selection.Expression.ExpressionValue = &Type{
+				selection.Expression.Value = &Type{
 					Type:  VariableTypeClass,
 					Class: c,
 				}
@@ -634,7 +634,7 @@ func (c *Class) checkFields() []error {
 					Type: ExpressionTypeSelection,
 					Data: selection,
 				}
-				left.ExpressionValue = v.Type
+				left.Value = v.Type
 				bin.Left = &Expression{
 					Type: ExpressionTypeList,
 					Data: []*Expression{left},

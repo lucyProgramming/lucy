@@ -8,19 +8,19 @@ import (
 func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.Expression.ExpressionValue.Type == ast.VariableTypeArray {
+	if call.Expression.Value.Type == ast.VariableTypeArray {
 		return buildExpression.buildArrayMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.ExpressionValue.Type == ast.VariableTypeMap {
+	if call.Expression.Value.Type == ast.VariableTypeMap {
 		return buildExpression.buildMapMethodCall(class, code, e, context, state)
 	}
-	if call.Expression.ExpressionValue.Type == ast.VariableTypeJavaArray {
+	if call.Expression.Value.Type == ast.VariableTypeJavaArray {
 		return buildExpression.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
 	pop := func(ft *ast.FunctionType) {
 		if e.IsStatementExpression && ft.NoReturnValue() == false {
-			if len(e.ExpressionMultiValues) == 1 {
-				if jvmSlotSize(e.ExpressionMultiValues[0]) == 1 {
+			if len(e.MultiValues) == 1 {
+				if jvmSlotSize(e.MultiValues[0]) == 1 {
 					code.Codes[code.CodeLength] = cg.OP_pop
 					code.CodeLength++
 				} else {
@@ -42,7 +42,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			}
 			code.Codes[code.CodeLength] = cg.OP_getfield
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      call.Expression.ExpressionValue.Class.Name,
+				Class:      call.Expression.Value.Class.Name,
 				Field:      call.Name,
 				Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -50,7 +50,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      call.Expression.ExpressionValue.Class.Name,
+				Class:      call.Expression.Value.Class.Name,
 				Field:      call.Name,
 				Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -96,7 +96,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 
 	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	// object ref
-	state.pushStack(class, call.Expression.ExpressionValue)
+	state.pushStack(class, call.Expression.Value)
 	defer state.popStack(1)
 	if call.Name == ast.SpecialMethodInit {
 		state.popStack(1)

@@ -79,7 +79,7 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	var e Expression
 	e.IsCompileAuto = true
 	e.Pos = typ.Pos
-	e.ExpressionValue = typ.Clone()
+	e.Value = typ.Clone()
 	switch typ.Type {
 	case VariableTypeBool:
 		e.Type = ExpressionTypeBool

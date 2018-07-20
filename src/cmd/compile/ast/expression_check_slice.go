@@ -41,7 +41,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		slice.End = &Expression{}
 		slice.End.Type = ExpressionTypeFunctionCall
 		slice.End.Pos = e.Pos
-		slice.End.ExpressionValue = &Type{
+		slice.End.Value = &Type{
 			Type: VariableTypeInt,
 			Pos:  e.Pos,
 		}

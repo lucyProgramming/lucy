@@ -47,16 +47,12 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		if err != nil {
 			return nil, err
 		}
-		if left.Type == ast.ExpressionTypeList {
-			left.Data = append(left.Data.([]*ast.Expression), left2)
-		} else {
-			newExpression := &ast.Expression{}
-			newExpression.Type = ast.ExpressionTypeList
-			newExpression.Pos = left.Pos
-			list := []*ast.Expression{left, left2}
-			newExpression.Data = list
-			left = newExpression
-		}
+		newExpression := &ast.Expression{}
+		newExpression.Type = ast.ExpressionTypeList
+		newExpression.Pos = left.Pos
+		list := []*ast.Expression{left, left2}
+		newExpression.Data = list
+		left = newExpression
 	}
 	mustBeOneExpression := func(left *ast.Expression) {
 		if left.Type == ast.ExpressionTypeList {
@@ -69,16 +65,16 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			}
 		}
 	}
-	mkExpression := func(typ int, multi bool) (*ast.Expression, error) {
+	mkExpression := func(expressionType int, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
-		result.Type = typ
+		result.Type = expressionType
 		bin := &ast.ExpressionBinary{}
 		result.Data = bin
 		bin.Left = left
 		result.Pos = pos
-		if multi {
+		if isMulti {
 			es, err := expressionParser.parseExpressions()
 			if err != nil {
 				return result, err
@@ -127,7 +123,6 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	case lex.TokenXorAssign:
 		mustBeOneExpression(left)
 		return mkExpression(ast.ExpressionTypeXorAssign, false)
-
 	}
 	return left, nil
 }
@@ -140,14 +135,15 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	}
 	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenLp {
-		return nil, fmt.Errorf("%s not '(' after a type", expressionParser.parser.errorMsgPrefix())
+		return nil, fmt.Errorf("%s not '(' after a type",
+			expressionParser.parser.errorMsgPrefix())
 	}
 	expressionParser.Next(lfNotToken) // skip (
 	e, err := expressionParser.parseExpression(false)
 	if err != nil {
 		return nil, err
 	}
-	expressionParser.parser.ifTokenIsLfSkip()
+	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
 	}

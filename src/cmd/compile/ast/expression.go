@@ -221,8 +221,8 @@ type Expression struct {
 	Type                  int
 	IsPublic              bool // only for global variable definition
 	IsCompileAuto         bool // compile auto expression
-	ExpressionValue       *Type
-	ExpressionMultiValues []*Type
+	Value                 *Type
+	MultiValues           []*Type
 	Pos                   *Position
 	Data                  interface{}
 	IsStatementExpression bool
@@ -233,7 +233,7 @@ func (e *Expression) ConvertTo(t *Type) {
 	c.Expression = &Expression{}
 	*c.Expression = *e // copy
 	c.Type = t
-	e.ExpressionValue = t
+	e.Value = t
 	e.Type = ExpressionTypeCheckCast
 	e.IsCompileAuto = true
 	e.Data = c
@@ -242,7 +242,7 @@ func (e *Expression) ConvertTo(t *Type) {
 func (e *Expression) ConvertToNumber(typ int) {
 	if e.IsLiteral() {
 		e.convertNumberLiteralTo(typ)
-		e.ExpressionValue = &Type{
+		e.Value = &Type{
 			Type: typ,
 			Pos:  e.Pos,
 		}
@@ -451,7 +451,7 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 
 func (e *Expression) HaveOnlyOneValue() bool {
 	if e.MayHaveMultiValue() {
-		return len(e.ExpressionMultiValues) == 1
+		return len(e.MultiValues) == 1
 	}
 	return true
 }
@@ -485,7 +485,7 @@ func (e *Expression) MayHaveMultiValue() bool {
 }
 
 func (e *Expression) CallHasReturnValue() bool {
-	return len(e.ExpressionMultiValues) >= 1 && e.ExpressionMultiValues[0].RightValueValid()
+	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()
 }
 
 type CallArgs []*Expression // f(1,2)

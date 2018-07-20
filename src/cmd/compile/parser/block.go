@@ -135,7 +135,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next(lfIsToken)
 			vs, es, err := blockParser.parser.parseConstDefinition(false)
 			if err != nil {
-				blockParser.consume(untilRcAndSemicolon)
+				blockParser.consume(untilRcOrSemicolon)
 				blockParser.Next(lfNotToken)
 				continue
 			}
@@ -191,7 +191,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			es, err = blockParser.parser.ExpressionParser.parseExpressions()
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
-				blockParser.consume(untilSemicolonAndLf)
+				blockParser.consume(untilSemicolonOrLf)
 				blockParser.Next(lfNotToken)
 			}
 			r.Expressions = es
@@ -202,7 +202,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			newBlock := ast.Block{}
 			blockParser.Next(lfNotToken) // skip {
 			blockParser.parseStatementList(&newBlock, false)
-			blockParser.parser.ifTokenIsLfSkip()
+			blockParser.parser.ifTokenIsLfThenSkip()
 			if blockParser.parser.token.Type != lex.TokenRc {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 					blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
@@ -346,7 +346,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 	e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		blockParser.parser.consume(untilSemicolonAndLf)
+		blockParser.parser.consume(untilSemicolonOrLf)
 		blockParser.Next(lfNotToken)
 		return
 	}

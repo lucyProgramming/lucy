@@ -29,12 +29,12 @@ func (interfaceParser *InterfaceParser) validStatementEnding() error {
 
 func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err error) {
 	interfaceParser.Next(lfIsToken) // skip interface key word
+	interfaceParser.parser.unExpectNewLineAndSkip()
 	interfaceParser.ret = &ast.Class{}
 	interfaceParser.ret.Pos = interfaceParser.parser.mkPos()
 	interfaceParser.ret.Block.IsClassBlock = true
 	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE // interface
 	interfaceParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
-
 	interfaceParser.ret.Name, err = interfaceParser.parser.ClassParser.parseClassName()
 	classDefinition = interfaceParser.ret
 	if err != nil {
@@ -65,8 +65,10 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 			interfaceParser.consume(untilLc)
 		}
 	}
+	interfaceParser.parser.ifTokenIsLfThenSkip()
 	if interfaceParser.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{' but '%s'", interfaceParser.parser.errorMsgPrefix(), interfaceParser.parser.token.Description)
+		err = fmt.Errorf("%s expect '{' but '%s'", interfaceParser.parser.errorMsgPrefix(),
+			interfaceParser.parser.token.Description)
 		interfaceParser.parser.errs = append(interfaceParser.parser.errs, err)
 		interfaceParser.consume(untilLc)
 	}
@@ -89,7 +91,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 			if interfaceParser.parser.token.Type != lex.TokenIdentifier {
 				interfaceParser.parser.errs = append(interfaceParser.parser.errs, fmt.Errorf("%s expect function name,but '%s'",
 					interfaceParser.parser.errorMsgPrefix(), interfaceParser.parser.token.Description))
-				interfaceParser.consume(untilSemicolonAndLf)
+				interfaceParser.consume(untilSemicolonOrLf)
 				interfaceParser.Next(lfNotToken)
 				continue
 			}
@@ -97,7 +99,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 			interfaceParser.Next(lfNotToken) // skip name
 			functionType, err := interfaceParser.parser.parseFunctionType()
 			if err != nil {
-				interfaceParser.consume(untilSemicolonAndLf)
+				interfaceParser.consume(untilSemicolonOrLf)
 				interfaceParser.Next(lfNotToken)
 				continue
 			}

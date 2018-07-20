@@ -311,6 +311,7 @@ func (parser *Parser) validAfterFinal() error {
 	parser.errs = append(parser.errs, err)
 	return err
 }
+
 func (parser *Parser) shouldBeSemicolonOrLf() error {
 	if parser.token.Type == lex.TokenSemicolon ||
 		parser.token.Type == lex.TokenLf {
@@ -415,10 +416,13 @@ func (parser *Parser) Next(lfIsToken bool) {
 	errorMsgPrefix(pos) only receive one argument
 */
 func (parser *Parser) errorMsgPrefix(pos ...*ast.Position) string {
+	var line, column int
 	if len(pos) > 0 {
-		return fmt.Sprintf("%s:%d:%d", pos[0].Filename, pos[0].StartLine, pos[0].StartColumn)
+		line = pos[0].StartLine
+		column = pos[0].StartColumn
+	} else {
+		line, column = parser.scanner.GetLineAndColumn()
 	}
-	line, column := parser.scanner.GetLineAndColumn()
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }
 
@@ -435,11 +439,12 @@ func (parser *Parser) consume(until map[int]bool) {
 	}
 }
 
-func (parser *Parser) ifTokenIsLfSkip() {
+func (parser *Parser) ifTokenIsLfThenSkip() {
 	if parser.token.Type == lex.TokenLf {
 		parser.Next(lfNotToken)
 	}
 }
+
 func (parser *Parser) unExpectNewLineAndSkip() {
 	if err := parser.unExpectNewLine(); err != nil {
 		parser.Next(lfNotToken)

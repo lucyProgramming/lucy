@@ -11,15 +11,19 @@ import (
 func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 	pos := expressionParser.parser.mkPos()
 	expressionParser.parser.Next(lfIsToken) // skip [
+	expressionParser.parser.unExpectNewLineAndSkip()
 	var err error
 	if expressionParser.parser.token.Type != lex.TokenRb {
+		/*
+			[1 ,2 ]
+		*/
 		arr := &ast.ExpressionArray{}
 		arr.Expressions, err = expressionParser.parseExpressions()
 		if expressionParser.parser.token.Type != lex.TokenRb {
 			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 			return nil, err
 		} else {
-			expressionParser.Next(lfNotToken) // skip ]
+			expressionParser.Next(lfIsToken) // skip ]
 		}
 		return &ast.Expression{
 			Type: ast.ExpressionTypeArray,
@@ -27,12 +31,16 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			Pos:  pos,
 		}, err
 	}
-	expressionParser.Next(lfNotToken) // skip ]
+	expressionParser.Next(lfIsToken) // skip ]
+	expressionParser.parser.unExpectNewLineAndSkip()
 	t, err := expressionParser.parser.parseType()
 	if err != nil {
 		return nil, err
 	}
-	if expressionParser.parser.token.Type == lex.TokenLp { // []byte("1111111111")
+	if expressionParser.parser.token.Type == lex.TokenLp {
+		/*
+			[]byte("1111111111")
+		*/
 		expressionParser.Next(lfNotToken) // skip (
 		e, err := expressionParser.parseExpression(false)
 		if err != nil {
@@ -55,6 +63,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		ret.Data = data
 		return ret, nil
 	}
+	expressionParser.parser.ifTokenIsLfThenSkip()
 	arr := &ast.ExpressionArray{}
 	if t != nil {
 		arr.Type = &ast.Type{}
@@ -62,6 +71,10 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		arr.Type.Array = t
 		arr.Type.Pos = pos
 	}
+	/*
+
+		[]int { 1, 2}
+	*/
 	arr.Expressions, err = expressionParser.parseArrayValues()
 	return &ast.Expression{
 		Type: ast.ExpressionTypeArray,
@@ -105,10 +118,10 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 			break
 		}
 	}
-	expressionParser.parser.ifTokenIsLfSkip()
+	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRc {
 		return es, fmt.Errorf("%s expect '}',but '%s'", expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
-	expressionParser.Next(lfNotToken)
+	expressionParser.Next(lfIsToken)
 	return es, nil
 }

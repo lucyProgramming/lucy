@@ -82,7 +82,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			compileAutoName()
 		}
 		classParser.parser.consume(untilLc)
-		//continue analyse source code
 	}
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		//classParser.ret.HaveExtends = true

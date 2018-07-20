@@ -5,14 +5,16 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInPanic(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) mkBuildInPanic(
+	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
+	context *Context, state *StackMapState) (
+	maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
 		maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_new
-		className := call.Args[0].ExpressionValue.Class.Name
+		className := call.Args[0].Value.Class.Name
 		class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
