@@ -140,7 +140,7 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	return nil
 }
 
-func functionPointerCallWant(ts ParameterList) string {
+func callWant(ts ParameterList) string {
 	s := "("
 	for k, v := range ts {
 		s += v.Name + " "
@@ -153,7 +153,7 @@ func functionPointerCallWant(ts ParameterList) string {
 	return s
 }
 
-func functionPointerCallHave(ts []*Type) string {
+func callHave(ts []*Type) string {
 	s := "("
 	for k, v := range ts {
 		if v.Name != "" {

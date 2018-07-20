@@ -162,7 +162,6 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		ret = newRet
 	}
 	return ret, err
-
 }
 
 /*

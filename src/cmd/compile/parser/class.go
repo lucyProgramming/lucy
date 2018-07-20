@@ -204,7 +204,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		case lex.TokenIdentifier:
 			err = classParser.parseField(&classParser.parser.errs)
 			if err != nil {
-				classParser.consume(untilSemicolon)
+				classParser.consume(untilSemicolonOrLf)
 				classParser.Next(lfNotToken)
 			}
 			classParser.resetProperty()
@@ -212,7 +212,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			classParser.Next(lfIsToken)
 			err := classParser.parseConst()
 			if err != nil {
-				classParser.consume(untilSemicolon)
+				classParser.consume(untilSemicolonOrLf)
 				classParser.Next(lfNotToken)
 				continue
 			}
@@ -235,6 +235,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == "" {
+				// some error
 				f.Name = compileAutoName()
 			}
 			m := &ast.ClassMethod{}
@@ -260,9 +261,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			}
 			if classParser.isFinal {
 				f.AccessFlags |= cg.ACC_METHOD_FINAL
-			}
-			if classParser.ret.Methods == nil {
-				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == classParser.ret.Name {
 				f.Name = ast.SpecialMethodInit

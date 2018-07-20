@@ -517,6 +517,32 @@ redo:
 	goto redo
 }
 
+func (lex *Lexer) lexVargs() (is bool) {
+	c, _ := lex.getChar()
+	if c != '.' {
+		lex.unGetChar()
+		return
+	}
+	// ..
+	c, _ = lex.getChar()
+	if c != '.' {
+		lex.unGetChar()
+		lex.unGetChar()
+		return
+	}
+	// ...
+	c, _ = lex.getChar()
+	if c == '.' {
+		lex.unGetChar()
+		lex.unGetChar()
+		lex.unGetChar()
+		return
+	}
+	lex.unGetChar()
+	is = true
+	return
+}
+
 func (lex *Lexer) Next() (token *Token, err error) {
 redo:
 	token = &Token{}
@@ -747,8 +773,13 @@ redo:
 		token.Type = TokenLf
 		token.Description = "\\n"
 	case '.':
-		token.Type = TokenSelection
-		token.Description = "."
+		if lex.lexVargs() {
+			token.Type = TokenVargs
+			token.Description = "."
+		} else {
+			token.Type = TokenSelection
+			token.Description = "."
+		}
 	case '`':
 		bs := []byte{}
 		c, eof = lex.getChar()

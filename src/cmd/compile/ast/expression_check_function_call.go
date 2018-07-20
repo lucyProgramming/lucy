@@ -82,16 +82,16 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 	ret := ft.getReturnTypes(e.Pos)
 	if len(callArgsTypes) > len(ft.ParameterList) {
 		errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(e.Pos))
-		errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(callArgsTypes))
-		errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(ft.ParameterList))
+		errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+		errMsg += fmt.Sprintf("\twant %s\n", callWant(ft.ParameterList))
 		*errs = append(*errs, fmt.Errorf(errMsg))
 	}
 	//trying to convert literal
 	convertLiteralExpressionsToNeeds(call.Args, ft.getParameterTypes(), callArgsTypes)
 	if len(callArgsTypes) < len(ft.ParameterList) {
 		errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(e.Pos))
-		errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(callArgsTypes))
-		errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(ft.ParameterList))
+		errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+		errMsg += fmt.Sprintf("\twant %s\n", callWant(ft.ParameterList))
 		*errs = append(*errs, fmt.Errorf(errMsg))
 		return ret
 	}
@@ -104,6 +104,7 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 			}
 		}
 	}
+
 	return ret
 }
 

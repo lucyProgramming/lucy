@@ -19,6 +19,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 	}
 	statementIf = &ast.StatementIf{}
 	statementIf.Condition = condition
+	blockParser.parser.ifTokenIsLfThenSkip()
 	for blockParser.parser.token.Type == lex.TokenSemicolon {
 		if statementIf.Condition != nil {
 			statementIf.PrefixExpressions = append(statementIf.PrefixExpressions, statementIf.Condition)
@@ -33,7 +34,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 	}
 	blockParser.parser.ifTokenIsLfThenSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s missing '{' after a expression,but '%s'",
+		err = fmt.Errorf("%s missing '{' after condtion,but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)

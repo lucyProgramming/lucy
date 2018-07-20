@@ -13,7 +13,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 	expressionParser.Next(lfNotToken) // skip (
 	args := []*ast.Expression{}
 	if expressionParser.parser.token.Type != lex.TokenRp { //a(123)
-		args, err = expressionParser.parseExpressions()
+		args, err = expressionParser.parseExpressions(lex.TokenRp)
 		if err != nil {
 			return nil, err
 		}

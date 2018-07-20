@@ -18,7 +18,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			[1 ,2 ]
 		*/
 		arr := &ast.ExpressionArray{}
-		arr.Expressions, err = expressionParser.parseExpressions()
+		arr.Expressions, err = expressionParser.parseExpressions(lex.TokenRb)
 		if expressionParser.parser.token.Type != lex.TokenRb {
 			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 			return nil, err

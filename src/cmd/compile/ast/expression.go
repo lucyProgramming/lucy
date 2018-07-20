@@ -498,6 +498,7 @@ type ExpressionFunctionCall struct {
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 	FunctionPointer          *FunctionType
+	VArgs                    *CallVArgs
 }
 
 func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *ExpressionFunctionCall {
@@ -513,6 +514,7 @@ type ExpressionMethodCall struct {
 	Method             *ClassMethod
 	FieldMethodHandler *ClassField
 	ParameterTypes     []*Type // unSupport !!!!!!
+	VArgs              *CallVArgs
 }
 
 type ExpressionDeclareVariable struct {

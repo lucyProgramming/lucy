@@ -8,10 +8,10 @@ import (
 )
 
 func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
-	parser.Next(lfIsToken) // skip enum
 	enumName := &ast.NameWithPos{
 		Pos: parser.mkPos(),
 	}
+	parser.Next(lfIsToken) // skip enum
 	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect 'identifier' for enum name, but '%s'",

@@ -33,6 +33,7 @@ const (
 )
 
 type Type struct {
+	IsVargs      bool
 	Resolved     bool
 	Pos          *Position
 	Type         int
@@ -405,7 +406,11 @@ func (typ *Type) typeString(ret *string) {
 		*ret += typ.Map.V.TypeString()
 		*ret += "}"
 	case VariableTypeJavaArray:
-		*ret += typ.Array.TypeString() + "[]"
+		if typ.IsVargs {
+			*ret += "..." + typ.Array.TypeString()
+		} else {
+			*ret += typ.Array.TypeString() + "[]"
+		}
 	case VariableTypePackage:
 		*ret += typ.Package.Name
 	case VariableTypeNull:
@@ -572,9 +577,13 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 		return true
 	}
 	if leftValue.Type == VariableTypeArray && rightValue.Type == VariableTypeArray {
+
 		return leftValue.Array.Equal(errs, rightValue.Array)
 	}
 	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
+		if leftValue.IsVargs != rightValue.IsVargs {
+			return false
+		}
 		return leftValue.Array.Equal(errs, rightValue.Array)
 	}
 
@@ -640,6 +649,9 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 		return typ.Type == compareTo.Type
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
+		if typ.Type == VariableTypeJavaArray && typ.IsVargs != compareTo.IsVargs {
+			return false
+		}
 		return typ.Array.StrictEqual(compareTo.Array)
 	}
 	if typ.Type == VariableTypeMap {

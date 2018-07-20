@@ -29,7 +29,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 		err := fmt.Errorf("%s expect function name,but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
-		functionParser.parser.consume(untilLp)
+		functionParser.consume(untilLp)
 	}
 	if functionParser.parser.token.Type == lex.TokenIdentifier {
 		f.Name = functionParser.parser.token.Data.(string)
@@ -39,6 +39,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	if err != nil {
 		functionParser.parser.consume(untilLc)
 	}
+	functionParser.parser.ifTokenIsLfThenSkip()
 	if functionParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s except '{' but '%s'",
 			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)

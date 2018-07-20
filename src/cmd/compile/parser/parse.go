@@ -70,7 +70,7 @@ func (parser *Parser) Parse() []error {
 	}
 	var accessControlToken *lex.Token
 	isFinal := false
-	resetSomeProperty := func() {
+	resetProperty := func() {
 		accessControlToken = nil
 		isFinal = false
 	}
@@ -104,7 +104,7 @@ func (parser *Parser) Parse() []error {
 			parser.Next(lfIsToken) // skip var key word
 			vs, es, err := parser.parseConstDefinition(true)
 			if err != nil {
-				parser.consume(untilSemicolon)
+				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
 				continue
 			}
@@ -119,12 +119,12 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
 			})
-			resetSomeProperty()
+			resetProperty()
 		case lex.TokenIdentifier:
 			e, err := parser.ExpressionParser.parseExpression(true)
 			if err != nil {
 				parser.errs = append(parser.errs, err)
-				parser.consume(untilSemicolon)
+				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
 				continue
 			}
@@ -133,13 +133,13 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
 			})
-			resetSomeProperty()
+			resetProperty()
 		case lex.TokenEnum:
 			e, err := parser.parseEnum()
 			if err != nil {
 				parser.consume(untilRc)
 				parser.Next(lfNotToken)
-				resetSomeProperty()
+				resetProperty()
 				continue
 			}
 			isPublic := isPublic()
@@ -151,7 +151,7 @@ func (parser *Parser) Parse() []error {
 					Data: e,
 				})
 			}
-			resetSomeProperty()
+			resetProperty()
 		case lex.TokenFunction:
 			f, err := parser.FunctionParser.parse(true)
 			if err != nil {
@@ -166,7 +166,7 @@ func (parser *Parser) Parse() []error {
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: f,
 			})
-			resetSomeProperty()
+			resetProperty()
 		case lex.TokenLc:
 			b := &ast.Block{}
 			parser.Next(lfNotToken) // skip {
@@ -192,7 +192,7 @@ func (parser *Parser) Parse() []error {
 				parser.errs = append(parser.errs, err)
 				parser.consume(untilRc)
 				parser.Next(lfNotToken)
-				resetSomeProperty()
+				resetProperty()
 				continue
 			}
 			if c == nil && err == nil {
@@ -207,14 +207,14 @@ func (parser *Parser) Parse() []error {
 			if isFinal {
 				c.AccessFlags |= cg.ACC_CLASS_FINAL
 			}
-			resetSomeProperty()
+			resetProperty()
 		case lex.TokenConst:
 			parser.Next(lfIsToken) // skip const key word
 			vs, es, err := parser.parseConstDefinition(false)
 			if err != nil {
-				parser.consume(untilSemicolon)
+				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
-				resetSomeProperty()
+				resetProperty()
 				continue
 			}
 			if len(vs) != len(es) {
@@ -238,14 +238,14 @@ func (parser *Parser) Parse() []error {
 					})
 				}
 			}
-			resetSomeProperty()
+			resetProperty()
 			continue
 		case lex.TokenType:
 			a, err := parser.parseTypeAlias()
 			if err != nil {
-				parser.consume(untilSemicolon)
+				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
-				resetSomeProperty()
+				resetProperty()
 				continue
 			}
 			*parser.tops = append(*parser.tops, &ast.Top{
@@ -261,8 +261,8 @@ func (parser *Parser) Parse() []error {
 		default:
 			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
 				parser.errorMsgPrefix(), parser.token.Description))
-			parser.consume(untilSemicolon)
-			resetSomeProperty()
+			parser.consume(untilSemicolonOrLf)
+			resetProperty()
 		}
 	}
 	return parser.errs
@@ -324,7 +324,7 @@ func (parser *Parser) shouldBeSemicolonOrLf() error {
 	if token == nil {
 		token = parser.token
 	}
-	err := fmt.Errorf("%s missing semicolon", parser.errorMsgPrefix(&ast.Position{
+	err := fmt.Errorf("%s expect semicolon or new line", parser.errorMsgPrefix(&ast.Position{
 		Filename:    parser.filename,
 		StartLine:   token.StartLine,
 		StartColumn: token.StartColumn,
@@ -344,6 +344,24 @@ func (parser *Parser) mkPos() *ast.Position {
 		StartColumn: parser.token.StartColumn,
 		Offset:      parser.scanner.GetOffSet(),
 	}
+}
+
+func (parser *Parser) assignExpressionForConstants(vs []*ast.Variable, es []*ast.Expression) []*ast.Constant {
+	if len(vs) != len(es) {
+		parser.errs = append(parser.errs,
+			fmt.Errorf("%s cannot assign %d values to %d destination",
+				parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
+	}
+	cs := make([]*ast.Constant, len(vs))
+	for k, v := range vs {
+		c := &ast.Constant{}
+		c.Variable = *v
+		cs[k] = c
+		if k < len(es) {
+			cs[k].Expression = es[k] // assignment
+		}
+	}
+	return cs
 }
 
 // str := "hello world"   a,b = 123 or a b ;
@@ -382,7 +400,7 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 		parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':='", parser.errorMsgPrefix()))
 	}
 	parser.Next(lfNotToken) // skip = or :=
-	es, err := parser.ExpressionParser.parseExpressions()
+	es, err := parser.ExpressionParser.parseExpressions(lex.TokenSemicolon, lex.TokenLf)
 	if err != nil {
 		return nil, nil, err
 	}

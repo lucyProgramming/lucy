@@ -16,7 +16,7 @@ func (expressionParser *ExpressionParser) Next(lfIsToken bool) {
 	expressionParser.parser.Next(lfIsToken)
 }
 
-func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseExpressions(endTokens ...int) ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
 	for expressionParser.parser.token.Type != lex.TokenEof {
 		e, err := expressionParser.parseExpression(false)
@@ -29,7 +29,21 @@ func (expressionParser *ExpressionParser) parseExpressions() ([]*ast.Expression,
 		}
 		// == ,
 		expressionParser.Next(lfNotToken) // skip ,
+		for expressionParser.parser.token.Type == lex.TokenComma {
+			expressionParser.parser.errs = append(expressionParser.parser.errs,
+				fmt.Errorf("%s missing expression", expressionParser.parser.errorMsgPrefix()))
+			expressionParser.Next(lfNotToken) // skip ,
+		}
+		for _, v := range endTokens {
+			if v == expressionParser.parser.token.Type {
+				// found end token
+				expressionParser.parser.errs = append(expressionParser.parser.errs,
+					fmt.Errorf("%s extra comma", expressionParser.parser.errorMsgPrefix()))
+				goto end
+			}
+		}
 	}
+end:
 	return es, nil
 }
 
@@ -75,7 +89,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		bin.Left = left
 		result.Pos = pos
 		if isMulti {
-			es, err := expressionParser.parseExpressions()
+			es, err := expressionParser.parseExpressions(lex.TokenSemicolon, lex.TokenLf)
 			if err != nil {
 				return result, err
 			}

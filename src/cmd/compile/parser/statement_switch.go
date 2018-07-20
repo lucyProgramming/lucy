@@ -117,7 +117,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	for blockParser.parser.token.Type == lex.TokenCase {
 		blockParser.Next(lfIsToken) // skip case
 		blockParser.parser.unExpectNewLineAndSkip()
-		es, err := blockParser.parser.ExpressionParser.parseExpressions()
+		es, err := blockParser.parser.ExpressionParser.parseExpressions(lex.TokenColon)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return statementSwitch, err

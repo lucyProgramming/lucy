@@ -196,7 +196,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		expressionParser.Next(lfNotToken) // skip (
 		var es []*ast.Expression
 		if expressionParser.parser.token.Type != lex.TokenRp { //
-			es, err = expressionParser.parseExpressions()
+			es, err = expressionParser.parseExpressions(lex.TokenRp)
 			if err != nil {
 				return nil, err
 			}

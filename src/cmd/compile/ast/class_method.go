@@ -166,14 +166,14 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 		} else {
 			if len(args) > len(f.Type.FunctionType.ParameterList) {
 				errMsg := fmt.Sprintf("too many paramaters to call function '%s':\n", name)
-				errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(args))
-				errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(f.Type.FunctionType.ParameterList))
+				errMsg += fmt.Sprintf("\thave %s\n", callHave(args))
+				errMsg += fmt.Sprintf("\twant %s\n", callWant(f.Type.FunctionType.ParameterList))
 				return nil, false, fmt.Errorf(errMsg)
 			}
 			if len(args) < len(f.Type.FunctionType.ParameterList) {
 				errMsg := fmt.Sprintf("too few paramaters to call function '%s'\n", name)
-				errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(args))
-				errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(f.Type.FunctionType.ParameterList))
+				errMsg += fmt.Sprintf("\thave %s\n", callHave(args))
+				errMsg += fmt.Sprintf("\twant %s\n", callWant(f.Type.FunctionType.ParameterList))
 				return nil, false, fmt.Errorf(errMsg)
 			} else {
 				convertLiteralExpressionsToNeeds(*callArgs, f.Type.FunctionType.getParameterTypes(), args)
@@ -182,8 +182,8 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, args []
 				if k < len(args) {
 					if args[k] != nil && !v.Type.Equal(errs, args[k]) {
 						errMsg := fmt.Sprintf("cannot use '%s' as '%s'\n", args[k].TypeString(), v.Type.TypeString())
-						errMsg += fmt.Sprintf("\thave %s\n", functionPointerCallHave(args))
-						errMsg += fmt.Sprintf("\twant %s\n", functionPointerCallWant(f.Type.FunctionType.ParameterList))
+						errMsg += fmt.Sprintf("\thave %s\n", callHave(args))
+						errMsg += fmt.Sprintf("\twant %s\n", callWant(f.Type.FunctionType.ParameterList))
 						return nil, false, fmt.Errorf(errMsg)
 					}
 				}
