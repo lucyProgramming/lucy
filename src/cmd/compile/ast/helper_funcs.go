@@ -130,7 +130,7 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	if c.Type != nil {
 		if c.Type.Equal(errs, t) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
-				errMsgPrefix(c.Pos), c.Type.TypeString(), t)
+				errMsgPrefix(c.Pos), c.Type.TypeString(), t.TypeString())
 			*errs = append(*errs, err)
 			return err
 		}

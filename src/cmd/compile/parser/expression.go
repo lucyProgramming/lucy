@@ -89,7 +89,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		bin.Left = left
 		result.Pos = pos
 		if isMulti {
-			es, err := expressionParser.parseExpressions(lex.TokenSemicolon, lex.TokenLf)
+			es, err := expressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != nil {
 				return result, err
 			}
@@ -143,7 +143,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 
 func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, error) {
 	pos := expressionParser.parser.mkPos()
-	t, err := expressionParser.parser.parseType()
+	to, err := expressionParser.parser.parseType()
 	if err != nil {
 		return nil, err
 	}
@@ -165,12 +165,13 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	return &ast.Expression{
 		Type: ast.ExpressionTypeCheckCast,
 		Data: &ast.ExpressionTypeConversion{
-			Type:       t,
+			Type:       to,
 			Expression: e,
 		},
 		Pos: pos,
 	}, nil
 }
+
 func (expressionParser *ExpressionParser) looksLikeExpression() bool {
 	return expressionParser.parser.token.Type == lex.TokenIdentifier ||
 		expressionParser.parser.token.Type == lex.TokenTrue ||

@@ -53,8 +53,8 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 			}
 		}
 	}
-	blockParser.parser.ifTokenIsLfThenSkip()
 parseBlock:
+	blockParser.parser.ifTokenIsLfThenSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)

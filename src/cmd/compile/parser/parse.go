@@ -400,7 +400,7 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 		parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':='", parser.errorMsgPrefix()))
 	}
 	parser.Next(lfNotToken) // skip = or :=
-	es, err := parser.ExpressionParser.parseExpressions(lex.TokenSemicolon, lex.TokenLf)
+	es, err := parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 	if err != nil {
 		return nil, nil, err
 	}

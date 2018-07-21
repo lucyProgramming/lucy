@@ -108,8 +108,8 @@ func (c *Class) checkPhase2() []error {
 		if c.Fields != nil && c.Fields[name] != nil {
 			f := c.Fields[name]
 			errMsg := fmt.Sprintf("%s class method named '%s' already declared as field,at:\n",
-				errMsgPrefix(ms[0].Function.Pos),
-			)
+				errMsgPrefix(ms[0].Function.Pos), ms[0].Function.Name)
+
 			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
 			errs = append(errs, errors.New(errMsg))
 			continue

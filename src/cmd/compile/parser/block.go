@@ -169,7 +169,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				continue
 			}
 			var es []*ast.Expression
-			es, err = blockParser.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon, lex.TokenLf)
+			es, err = blockParser.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != nil {
 				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilSemicolonOrLf)

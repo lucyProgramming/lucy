@@ -47,7 +47,7 @@ func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs,
 	errs = []error{}
 	for _, v := range *args {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-			errs = append(errs, fmt.Errorf("%s multi value in signal value context",
+			errs = append(errs, fmt.Errorf("%s multi value in single value context",
 				errMsgPrefix(from)))
 			return
 		}

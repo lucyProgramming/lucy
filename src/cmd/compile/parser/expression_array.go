@@ -15,10 +15,11 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	var err error
 	if expressionParser.parser.token.Type != lex.TokenRb {
 		/*
-			[1 ,2 ]
+			[1 ,2]
 		*/
 		arr := &ast.ExpressionArray{}
 		arr.Expressions, err = expressionParser.parseExpressions(lex.TokenRb)
+		expressionParser.parser.ifTokenIsLfThenSkip()
 		if expressionParser.parser.token.Type != lex.TokenRb {
 			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 			return nil, err
@@ -33,7 +34,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	}
 	expressionParser.Next(lfIsToken) // skip ]
 	expressionParser.parser.unExpectNewLineAndSkip()
-	t, err := expressionParser.parser.parseType()
+	array, err := expressionParser.parser.parseType()
 	if err != nil {
 		return nil, err
 	}
@@ -58,17 +59,17 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		data.Type = &ast.Type{}
 		data.Type.Type = ast.VariableTypeArray
 		data.Type.Pos = pos
-		data.Type.Array = t
+		data.Type.Array = array
 		data.Expression = e
 		ret.Data = data
 		return ret, nil
 	}
-	expressionParser.parser.ifTokenIsLfThenSkip()
+	expressionParser.parser.unExpectNewLineAndSkip()
 	arr := &ast.ExpressionArray{}
-	if t != nil {
+	if array != nil {
 		arr.Type = &ast.Type{}
 		arr.Type.Type = ast.VariableTypeArray
-		arr.Type.Array = t
+		arr.Type.Array = array
 		arr.Type.Pos = pos
 	}
 	/*
