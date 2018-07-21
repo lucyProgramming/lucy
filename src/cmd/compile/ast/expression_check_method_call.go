@@ -216,19 +216,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, err)
 			return nil
 		}
-
 		//var fieldMethodHandler *ClassField
 		args := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
-		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, args, nil, false, nil)
+		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, call, args, false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
 		}
-		//if fieldMethodHandler != nil {
-		//	call.FieldMethodHandler = fieldMethodHandler
-		//	return fieldMethodHandler.Type.FunctionType.getReturnTypes(e.Pos)
-		//}
-
 		if matched {
 			call.Class = javaStringClass
 			if false == call.Expression.isThis() &&
@@ -270,9 +264,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
 		}
-		args := checkExpressions(block, call.Args, errs)
-		args = checkRightValuesValid(args, errs)
-		ms, matched, err := object.Class.SuperClass.matchConstructionFunction(e.Pos, errs, args, &call.Args)
+		callArgsTypes := checkExpressions(block, call.Args, errs)
+		callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
+		ms, matched, err := object.Class.SuperClass.matchConstructionFunction(e.Pos, errs, nil, call, callArgsTypes)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
@@ -298,7 +292,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, fmt.Errorf("%s 'construction' not found",
 				errMsgPrefix(e.Pos)))
 		} else {
-			*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
+			*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, callArgsTypes))
 		}
 		return nil
 	}
@@ -308,15 +302,15 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	}
 	call.Class = object.Class
-	args := checkExpressions(block, call.Args, errs)
-	args = checkRightValuesValid(args, errs)
+	callArgTypes := checkExpressions(block, call.Args, errs)
+	callArgTypes = checkRightValuesValid(callArgTypes, errs)
 	if object.Class.IsInterface() {
 		if object.Type == VariableTypeClass {
 			*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",
 				errMsgPrefix(e.Pos), object.Class.Name))
 			return nil
 		}
-		ms, matched, err := object.Class.accessInterfaceMethod(e.Pos, errs, call.Name, args, false)
+		ms, matched, err := object.Class.accessInterfaceMethod(e.Pos, errs, call.Name, call, callArgTypes, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
@@ -332,7 +326,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		if len(ms) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
 		} else {
-			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))
+			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 		}
 		return nil
 	}
@@ -341,7 +335,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			errMsgPrefix(e.Pos)))
 	}
 	var fieldMethodHandler *ClassField
-	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, args, &call.Args, false, &fieldMethodHandler)
+	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, call, callArgTypes, false, &fieldMethodHandler)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
@@ -393,7 +387,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
 	} else {
-		*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))
+		*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 	}
 	return nil
 }

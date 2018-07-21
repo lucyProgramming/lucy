@@ -87,7 +87,7 @@ class Decoder {
 		}
 	}
 
-
+	
 	fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (err error ){
 		c := x.getClass();
 		if c.isArray () {

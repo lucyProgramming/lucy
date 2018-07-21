@@ -26,6 +26,12 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 			errMsgPrefix(e.Pos), no.Type.TypeString()))
 		return nil
 	}
+	err = no.Type.Class.loadSelf()
+	if err != nil {
+		*errs = append(*errs, fmt.Errorf("%s %v",
+			errMsgPrefix(e.Pos), err))
+		return nil
+	}
 	if no.Type.Class.IsInterface() {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is interface",
 			errMsgPrefix(e.Pos), no.Type.Class.Name))
@@ -40,8 +46,8 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	*ret = *no.Type
 	ret.Type = VariableTypeObject
 	ret.Pos = e.Pos
-	args := checkExpressions(block, no.Args, errs)
-	ms, matched, err := no.Type.Class.matchConstructionFunction(e.Pos, errs, args, &no.Args)
+	callArgTypes := checkExpressions(block, no.Args, errs)
+	ms, matched, err := no.Type.Class.matchConstructionFunction(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return ret
@@ -54,7 +60,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, fmt.Errorf("%s  'construction' not found",
 			errMsgPrefix(e.Pos)))
 	} else {
-		*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, args))
+		*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, callArgTypes))
 	}
 	return ret
 }

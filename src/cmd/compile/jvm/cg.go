@@ -297,6 +297,9 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			method.AccessFlags |= cg.ACC_METHOD_ABSTRACT
 		}
+		if vv.Function.Type.VArgs != nil {
+			method.AccessFlags |= cg.ACC_METHOD_VARARGS
+		}
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		method.IsConstruction = name == specialMethodInit
@@ -338,6 +341,9 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MainFunctionName {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		}
+		if f.Type.VArgs != nil {
+			method.AccessFlags |= cg.ACC_METHOD_VARARGS
 		}
 		ms[k] = method
 		f.ClassMethod = method

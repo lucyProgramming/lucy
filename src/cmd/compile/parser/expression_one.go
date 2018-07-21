@@ -309,8 +309,16 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		expressionParser.parser.token.Type == lex.TokenDecrement ||
 		expressionParser.parser.token.Type == lex.TokenLp ||
 		expressionParser.parser.token.Type == lex.TokenLb ||
-		expressionParser.parser.token.Type == lex.TokenSelection {
+		expressionParser.parser.token.Type == lex.TokenSelection ||
+		expressionParser.parser.token.Type == lex.TokenVargs {
 		// ++ or --
+		if expressionParser.parser.token.Type == lex.TokenVargs {
+			expressionParser.Next(lfIsToken)
+			newExpression := &ast.Expression{}
+			newExpression.Type = ast.ExpressionTypeVargs
+			newExpression.Data = suffix
+			return newExpression, nil
+		}
 		if expressionParser.parser.token.Type == lex.TokenIncrement ||
 			expressionParser.parser.token.Type == lex.TokenDecrement {
 			newExpression := &ast.Expression{}
@@ -439,6 +447,7 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 			continue
 		}
 		// aa()
+
 		if expressionParser.parser.token.Type == lex.TokenLp {
 			newExpression, err := expressionParser.parseCallExpression(suffix)
 			if err != nil {

@@ -14,6 +14,9 @@ func (description *Description) methodDescriptor(functionType *ast.FunctionType)
 	for _, v := range functionType.ParameterList {
 		s += description.typeDescriptor(v.Type)
 	}
+	if functionType.VArgs != nil {
+		s += description.typeDescriptor(functionType.VArgs.Type)
+	}
 	s += ")"
 	if functionType.NoReturnValue() {
 		s += "V"

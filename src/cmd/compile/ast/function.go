@@ -96,11 +96,18 @@ func (f *Function) readableMsg(name ...string) string {
 		s += v.Name + " "
 		s += v.Type.TypeString()
 		if v.Expression != nil {
-			s += "=" + v.Expression.OpName()
+			s += " = " + v.Expression.OpName()
 		}
 		if k != len(f.Type.ParameterList)-1 {
 			s += ","
 		}
+	}
+	if f.Type.VArgs != nil {
+		if len(f.Type.ParameterList) > 0 {
+			s += ","
+		}
+		s += f.Type.VArgs.Name + " "
+		s += f.Type.VArgs.Type.TypeString()
 	}
 	s += ")"
 	if len(f.Type.ReturnList) > 0 && f.NoReturnValue() == false {
@@ -115,6 +122,7 @@ func (f *Function) readableMsg(name ...string) string {
 		s += " )"
 	}
 	return s
+
 }
 
 /*
@@ -232,6 +240,23 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				continue
 			}
 		}
+		if f.HaveDefaultValue && v.Type.IsVargs {
+			//TODO::
+		}
+		if v.Type.IsVargs && v.Expression != nil {
+			*errs = append(*errs, fmt.Errorf("%s vargs cannot have default value",
+				errMsgPrefix(v.Type.Pos)))
+		}
+		if v.Type.IsVargs {
+			if k != len(f.Type.ParameterList)-1 {
+				*errs = append(*errs, fmt.Errorf("%s only last parameter can be use as vargs",
+					errMsgPrefix(v.Type.Pos)))
+			} else {
+				f.Type.ParameterList = f.Type.ParameterList[0:k]
+				f.Type.VArgs = v
+			}
+			continue
+		}
 		if f.TemplateFunction != nil {
 			continue
 		}
@@ -250,7 +275,6 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Type.TypeString()))
 					continue
 				}
-
 			}
 			if v.Expression.IsLiteral() == false {
 				*errs = append(*errs, fmt.Errorf("%s default value must be literal",

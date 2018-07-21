@@ -11,6 +11,11 @@ func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, c
 		code.MaxLocals += jvmSlotSize(v.Type)
 		state.appendLocals(class, v.Type)
 	}
+	if f.Type.VArgs != nil {
+		f.Type.VArgs.LocalValOffset = code.MaxLocals
+		code.MaxLocals++
+		state.appendLocals(class, f.Type.VArgs.Type)
+	}
 }
 
 func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, state *StackMapState) (maxStack uint16) {

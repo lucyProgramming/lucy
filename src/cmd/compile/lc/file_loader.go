@@ -87,6 +87,13 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
+		if (v.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
+			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
+			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
+				panic("variable args is not array")
+			}
+			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
+		}
 		if astClass.Methods[m.Function.Name] == nil {
 			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}
 		} else {
@@ -170,6 +177,13 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		err = loadEnumForFunction(m.Function)
 		if err != nil {
 			return nil, err
+		}
+		if (v.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
+			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
+			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
+				panic("variable args is not array")
+			}
+			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
 		if astClass.Methods[m.Function.Name] == nil {
 			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}

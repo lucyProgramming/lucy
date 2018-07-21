@@ -712,3 +712,31 @@ func (c *Class) loadSuperClass() error {
 	c.SuperClass = class
 	return nil
 }
+
+func (c *Class) matchConstructionFunction(from *Position, errs *[]error, no *ExpressionNew,
+	call *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
+	err = c.loadSelf()
+	if err != nil {
+		return nil, false, err
+	}
+	var args *CallArgs
+	if no != nil {
+		args = &no.Args
+	} else {
+		args = &call.Args
+	}
+	for _, v := range c.Methods[SpecialMethodInit] {
+		fit, vArgs, _ := v.Function.Type.fitCallArgs(from, args, callArgs, v.Function)
+		if fit {
+			if no != nil {
+				no.VArgs = vArgs
+			} else {
+				call.VArgs = vArgs
+			}
+			return []*ClassMethod{v}, true, nil
+		} else {
+			ms = append(ms, v)
+		}
+	}
+	return ms, false, nil
+}

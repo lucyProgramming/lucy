@@ -41,12 +41,16 @@ func (lex *Lexer) getChar() (c byte, eof bool) {
 		}
 	}
 	return
-
 }
 
 func (lex *Lexer) unGetChar() {
 	lex.offset--
 	lex.line, lex.column = lex.lastLine, lex.lastColumn
+}
+
+func (lex *Lexer) unGetChar2(offset int) {
+	lex.offset -= offset
+	lex.column -= offset
 }
 
 func (lex *Lexer) isLetter(c byte) bool {
@@ -530,6 +534,7 @@ func (lex *Lexer) lexVargs() (is bool) {
 		lex.unGetChar()
 		return
 	}
+
 	// ...
 	c, _ = lex.getChar()
 	if c == '.' {
@@ -775,7 +780,7 @@ redo:
 	case '.':
 		if lex.lexVargs() {
 			token.Type = TokenVargs
-			token.Description = "."
+			token.Description = "..."
 		} else {
 			token.Type = TokenSelection
 			token.Description = "."

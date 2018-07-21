@@ -33,7 +33,7 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 	code.CodeLength += 4
 	maxStack = 2
 	if n.Args != nil && len(n.Args) > 0 {
-		maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.Construction.Function.Type.ParameterList, context, state)
+		maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.VArgs, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	d := ""

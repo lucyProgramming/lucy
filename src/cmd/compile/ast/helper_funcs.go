@@ -140,14 +140,19 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	return nil
 }
 
-func callWant(ts ParameterList) string {
+func callWant(ft *FunctionType) string {
 	s := "("
-	for k, v := range ts {
+	for k, v := range ft.ParameterList {
 		s += v.Name + " "
 		s += v.Type.TypeString()
-		if k != len(ts)-1 {
+		if k != len(ft.ParameterList)-1 {
 			s += ","
 		}
+	}
+	if ft.VArgs != nil {
+		s += ","
+		s += ft.VArgs.Name + " "
+		s += ft.VArgs.Type.TypeString()
 	}
 	s += ")"
 	return s

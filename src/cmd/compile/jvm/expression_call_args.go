@@ -6,13 +6,13 @@ import (
 )
 
 func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	args []*ast.Expression, parameters ast.ParameterList, context *Context, state *StackMapState) (maxStack uint16) {
+	args []*ast.Expression, vArgs *ast.CallVArgs, context *Context, state *StackMapState) (maxStack uint16) {
 	currentStack := uint16(0)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength) // let`s pop
 	}()
-	parameterIndex := 0
+
 	for _, e := range args {
 		if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
 			stack, _ := buildExpression.build(class, code, e, context, state)
@@ -26,8 +26,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 					maxStack = t
 				}
 				currentStack += jvmSlotSize(t)
-				state.pushStack(class, parameters[parameterIndex].Type)
-				parameterIndex++
+				state.pushStack(class, t)
 			}
 			continue
 		}
@@ -41,9 +40,60 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 		if t := stack + currentStack; t > maxStack {
 			maxStack = t
 		}
-		currentStack += jvmSlotSize(parameters[parameterIndex].Type)
-		state.pushStack(class, parameters[parameterIndex].Type)
-		parameterIndex++
+		currentStack += jvmSlotSize(e.Value)
+		state.pushStack(class, e.Value)
 	}
+	if vArgs == nil {
+		return
+	}
+	if vArgs.NoArgs {
+		code.Codes[code.CodeLength] = cg.OP_aconst_null
+		code.CodeLength++
+		if t := 1 + currentStack; t > maxStack {
+			maxStack = t
+		}
+	} else {
+		if vArgs.ConvertJavaArray {
+			stack, _ := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
+			}
+		} else {
+			loadInt32(class, code, int32(vArgs.Length))
+			newArrayBaseOnType(class, code, vArgs.Type.Array)
+			state.pushStack(class, vArgs.Type)
+			currentStack++
+			op := storeArrayElementByTypeOps(vArgs.Type.Array.Type)
+			index := int32(0)
+			for _, e := range vArgs.Expressions {
+				if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
+					continue
+				}
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				state.pushStack(class, vArgs.Type)
+				loadInt32(class, code, index)
+				state.pushStack(class, &ast.Type{
+					Type: ast.VariableTypeInt,
+				})
+				currentStack += 2
+				stack, es := buildExpression.build(class, code, e, context, state)
+				state.pushStack(class, e.Value)
+				if len(es) > 0 {
+					writeExits(es, code.CodeLength)
+					context.MakeStackMap(code, state, code.CodeLength)
+				}
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
+				}
+				code.Codes[code.CodeLength] = op
+				code.CodeLength++
+				state.popStack(3)
+				currentStack -= 2
+				index++
+			}
+		}
+	}
+
 	return
 }

@@ -56,7 +56,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			code.CodeLength += 3
 		}
 		state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.FieldMethodHandler.Type.FunctionType.ParameterList,
+		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
 			context, state)
 		defer state.popStack(1)
 		if t := 1 + stack; t > maxStack {
@@ -78,7 +78,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		d = Descriptor.methodDescriptor(&call.Method.Function.Type)
 	}
 	if call.Method.IsStatic() {
-		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
+		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Class.Name,
@@ -104,7 +104,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			Verify: v,
 		})
 	}
-	stack := buildExpression.buildCallArgs(class, code, call.Args, call.Method.Function.Type.ParameterList, context, state)
+	stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}

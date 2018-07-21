@@ -129,3 +129,96 @@ func insertTypeAssertClass(class *cg.ClassHighLevel, code *cg.AttributeCode, t *
 	}
 	code.CodeLength += 2
 }
+
+func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *ast.Type) {
+	switch typ.Type {
+	case ast.VariableTypeBool:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeBoolean
+		code.CodeLength += 2
+	case ast.VariableTypeByte:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeByte
+		code.CodeLength += 2
+	case ast.VariableTypeShort:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeShort
+		code.CodeLength += 2
+	case ast.VariableTypeEnum:
+		fallthrough
+	case ast.VariableTypeInt:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeInt
+		code.CodeLength += 2
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeLong
+		code.CodeLength += 2
+	case ast.VariableTypeFloat:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeFloat
+		code.CodeLength += 2
+	case ast.VariableTypeDouble:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeDouble
+		code.CodeLength += 2
+	case ast.VariableTypeString:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VariableTypeMap:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VariableTypeFunction:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VariableTypeObject:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VariableTypeArray:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		meta := ArrayMetas[typ.Array.Array.Type]
+		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	case ast.VariableTypeJavaArray:
+		code.Codes[code.CodeLength] = cg.OP_anewarray
+		class.InsertClassConst(Descriptor.typeDescriptor(typ.Array), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	}
+}
+func storeArrayElementByTypeOps(typ int) (op byte) {
+	switch typ {
+	case ast.VariableTypeBool:
+		fallthrough
+	case ast.VariableTypeByte:
+		fallthrough
+	case ast.VariableTypeShort:
+		fallthrough
+	case ast.VariableTypeEnum:
+		fallthrough
+	case ast.VariableTypeInt:
+		op = cg.OP_iastore
+	case ast.VariableTypeLong:
+		op = cg.OP_lastore
+	case ast.VariableTypeFloat:
+		op = cg.OP_fastore
+	case ast.VariableTypeDouble:
+		op = cg.OP_dastore
+	case ast.VariableTypeString:
+		fallthrough
+	case ast.VariableTypeMap:
+		fallthrough
+	case ast.VariableTypeFunction:
+		fallthrough
+	case ast.VariableTypeObject:
+		fallthrough
+	case ast.VariableTypeArray:
+		fallthrough
+	case ast.VariableTypeJavaArray:
+		op = cg.OP_aastore
+	}
+	return
+}

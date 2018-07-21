@@ -16,6 +16,9 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(class *cg.Clas
 		method.AccessFlags |= cg.ACC_CLASS_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
+		if call.TemplateFunctionCallPair.Function.Type.VArgs != nil {
+			method.AccessFlags |= cg.ACC_METHOD_VARARGS
+		}
 		method.Descriptor = Descriptor.methodDescriptor(&call.TemplateFunctionCallPair.Function.Type)
 		method.Code = &cg.AttributeCode{}
 		class.AppendMethod(method)
@@ -25,8 +28,7 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(class *cg.Clas
 		call.TemplateFunctionCallPair.Generated = method
 
 	}
-	maxStack = buildExpression.buildCallArgs(class, code, call.Args,
-		call.TemplateFunctionCallPair.Function.Type.ParameterList, context, state)
+	maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      call.TemplateFunctionCallPair.Generated.Class.Name,

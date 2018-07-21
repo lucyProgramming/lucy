@@ -19,6 +19,10 @@ func (signature *LucyMethodSignature) Need(ft *ast.FunctionType) bool {
 			return true
 		}
 	}
+	if ft.VArgs != nil && LucyFieldSignatureParser.Need(ft.VArgs.Type) {
+		return true
+	}
+
 	if len(ft.ReturnList) > 1 {
 		return true
 	}
@@ -29,6 +33,9 @@ func (signature *LucyMethodSignature) Encode(ft *ast.FunctionType) (descriptor s
 	descriptor = "("
 	for _, v := range ft.ParameterList {
 		descriptor += LucyFieldSignatureParser.Encode(v.Type)
+	}
+	if ft.VArgs != nil {
+		descriptor += LucyFieldSignatureParser.Encode(ft.VArgs.Type)
 	}
 	descriptor += ")"
 	if ft.NoReturnValue() {

@@ -38,13 +38,6 @@ var (
 		lex.TokenSemicolon: true,
 		lex.TokenLf:        true,
 	}
-	//untilRcOrSemicolon = map[int]bool{
-	//	lex.TokenRc:        true,
-	//	lex.TokenSemicolon: true,
-	//}
-	//untilSemicolon = map[int]bool{
-	//	lex.TokenSemicolon: true,
-	//}
 )
 
 func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {

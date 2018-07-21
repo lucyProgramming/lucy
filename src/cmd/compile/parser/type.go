@@ -145,6 +145,17 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
+	if parser.token.Type == lex.TokenVargs {
+		parser.Next(lfIsToken) // skip ...
+		newRet := &ast.Type{
+			Pos:     pos,
+			Type:    ast.VariableTypeJavaArray,
+			Array:   ret,
+			IsVargs: true,
+		}
+		ret = newRet
+		return ret, nil
+	}
 	for parser.token.Type == lex.TokenLb { // int [
 		pos := parser.mkPos()
 		parser.Next(lfIsToken) // skip [

@@ -10,7 +10,7 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.Class
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
 	if len(call.Expression.Value.FunctionType.ParameterList) > 0 {
-		buildExpression.buildCallArgs(class, code, call.Args, call.Expression.Value.FunctionType.ParameterList, context, state)
+		buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -57,7 +57,7 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 		}
 	}
 	if call.Function.IsClosureFunction == false {
-		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
+		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      call.Function.ClassMethod.Class.Name,
@@ -82,7 +82,7 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 		}
 		state.pushStack(class, state.newObjectVariableType(call.Function.ClassMethod.Class.Name))
 		defer state.popStack(1)
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.Function.Type.ParameterList, context, state)
+		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}

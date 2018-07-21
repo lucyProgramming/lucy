@@ -649,7 +649,9 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 		return typ.Type == compareTo.Type
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		if typ.Type == VariableTypeJavaArray && typ.IsVargs != compareTo.IsVargs {
+
+		if typ.Type == VariableTypeJavaArray &&
+			typ.IsVargs != compareTo.IsVargs {
 			return false
 		}
 		return typ.Array.StrictEqual(compareTo.Array)

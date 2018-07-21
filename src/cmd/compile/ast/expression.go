@@ -72,6 +72,7 @@ const (
 	ExpressionTypeQuestion               // true ? a : b
 	ExpressionTypeGlobal                 // global.XXX
 	ExpressionTypeParenthesis            // ( a + b )
+	ExpressionTypeVargs                  // a ...
 )
 
 func (e *Expression) OpName() string {
@@ -554,6 +555,7 @@ type ExpressionNew struct {
 	Args                     CallArgs
 	Construction             *ClassMethod
 	IsConvertJavaArray2Array bool
+	VArgs                    *CallVArgs
 }
 
 type ExpressionMap struct {

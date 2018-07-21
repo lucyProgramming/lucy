@@ -3,22 +3,9 @@ package ast
 import "fmt"
 
 type FunctionType struct {
-	parameterTypes []*Type
-	ParameterList  ParameterList
-	ReturnList     ReturnList
-	VArgs          *Variable
-}
-
-func (functionType *FunctionType) isVargs() *Variable {
-	if len(functionType.parameterTypes) == 0 {
-		return nil
-	}
-	t := functionType.ParameterList[len(functionType.ParameterList)-1]
-	if t.Type.IsVargs {
-		return t
-	} else {
-		return nil
-	}
+	ParameterList ParameterList
+	ReturnList    ReturnList
+	VArgs         *Variable
 }
 
 func (functionType *FunctionType) NoReturnValue() bool {
@@ -45,71 +32,57 @@ func (functionType FunctionType) getReturnTypes(pos *Position) []*Type {
 }
 
 func (functionType FunctionType) getParameterTypes() []*Type {
-	if functionType.parameterTypes != nil {
-		return functionType.parameterTypes
-	}
 	ret := make([]*Type, len(functionType.ParameterList))
 	for k, v := range functionType.ParameterList {
 		ret[k] = v.Type
 	}
-	functionType.parameterTypes = ret
 	return ret
 }
 
-func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs, block *Block) (fit bool, errs []error, vargs *CallVArgs) {
+func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs,
+	callArgsTypes []*Type, f *Function) (match bool, vArgs *CallVArgs, errs []error) {
 	errs = []error{}
-	length := len(errs)
-	callArgsTypes := checkExpressions(block, *args, &errs)
-	if len(errs) != length {
-		return
+	if functionType.VArgs != nil {
+		vArgs = &CallVArgs{}
+		vArgs.NoArgs = true
+		vArgs.Type = functionType.VArgs.Type
 	}
 	if len(callArgsTypes) > len(functionType.ParameterList) {
-		if v := functionType.isVargs(); v != nil {
-			for _, t := range callArgsTypes[len(functionType.ParameterList):] {
-				if false == v.Type.Equal(&errs, t) {
-					errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(t.Pos),
-						t.TypeString(), v.Type.TypeString()))
-					return
-				}
-			}
-			parameterIndex := 0
-			var e *Expression
-			var k int
-			for k, e = range *args {
-				if e.MayHaveMultiValue() == false {
-					parameterIndex++
-				} else {
-					if parameterIndex+len(e.MultiValues) >= len(functionType.parameterTypes) {
-						errs = append(errs, fmt.Errorf("%s expression include arg and varg",
-							errMsgPrefix(e.Pos)))
-						return
-					} else {
-						parameterIndex += len(e.MultiValues)
-					}
-				}
-				if parameterIndex == len(functionType.parameterTypes)-1 {
-					break
-				}
-			}
-			vargs = &CallVArgs{}
-			vargs.Es = (*args)[k+1:]
-			*args = (*args)[0 : k+1]
-			vargs.Length = len(callArgsTypes) - len(functionType.parameterTypes)
-		} else {
+		if functionType.VArgs == nil {
 			errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
 			errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-			errMsg += fmt.Sprintf("\twant %s\n", callWant(functionType.ParameterList))
+			errMsg += fmt.Sprintf("\twant %s\n", callWant(functionType))
 			errs = append(errs, fmt.Errorf(errMsg))
+			return // no further check
 		}
+		v := functionType.VArgs
+		for _, t := range callArgsTypes[len(functionType.ParameterList):] {
+			if false == v.Type.Array.Equal(&errs, t) {
+				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					errMsgPrefix(t.Pos),
+					t.TypeString(), v.Type.TypeString()))
+				return
+			}
+		}
+		vArgs.NoArgs = false
+		vArgs.Length = len(callArgsTypes) - len(functionType.ParameterList)
+		vArgs.Expressions = (*args)[len(functionType.ParameterList):]
+		*args = (*args)[:len(functionType.ParameterList)]
+		vArgs.Length = len(callArgsTypes) - len(functionType.ParameterList)
 	}
 	//trying to convert literal
 	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	if len(callArgsTypes) < len(functionType.ParameterList) {
-		errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
-		errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-		errMsg += fmt.Sprintf("\twant %s\n", callWant(functionType.ParameterList))
-		errs = append(errs, fmt.Errorf(errMsg))
+		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
+			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
+				*args = append(*args, f.Type.ParameterList[i].Expression)
+			}
+		} else { // no default value
+			errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
+			errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+			errMsg += fmt.Sprintf("\twant %s\n", callWant(functionType))
+			errs = append(errs, fmt.Errorf(errMsg))
+		}
 	}
 	for k, v := range functionType.ParameterList {
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
@@ -120,11 +93,18 @@ func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs, bl
 			}
 		}
 	}
-	fit = len(errs) == 0
+	match = len(errs) == 0
 	return
 }
 
 type CallVArgs struct {
-	Es     []*Expression
-	Length int
+	Expressions []*Expression
+	Length      int
+	/*
+		a := new int[](10)
+		print(a...)
+	*/
+	ConvertJavaArray bool
+	NoArgs           bool
+	Type             *Type
 }

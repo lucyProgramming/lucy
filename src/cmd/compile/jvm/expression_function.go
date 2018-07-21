@@ -89,6 +89,9 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
+		if function.Type.VArgs != nil {
+			method.AccessFlags |= cg.ACC_METHOD_VARARGS
+		}
 		function.ClassMethod = method
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
@@ -114,6 +117,9 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	method.AccessFlags |= cg.ACC_METHOD_FINAL
+	if function.Type.VArgs != nil {
+		method.AccessFlags |= cg.ACC_METHOD_VARARGS
+	}
 	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 	method.Class = closureClass
 	function.ClassMethod = method
