@@ -53,7 +53,8 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			maxStack = t
 		}
 	} else {
-		if vArgs.ConvertJavaArray {
+
+		if vArgs.IsJavaArray {
 			stack, _ := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
@@ -67,6 +68,24 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			index := int32(0)
 			for _, e := range vArgs.Expressions {
 				if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
+					stack, _ := buildExpression.build(class, code, e, context, state)
+					if t := stack + currentStack; t > maxStack {
+						maxStack = t
+					}
+					multiValuePacker.storeMultiValueAutoVar(code, context)
+					for kk, tt := range e.MultiValues {
+						code.Codes[code.CodeLength] = cg.OP_dup
+						code.CodeLength++
+						loadInt32(class, code, index)
+						currentStack += 2
+						if t := currentStack + multiValuePacker.unPack(class, code, kk, tt, context); t > maxStack {
+							maxStack = t
+						}
+						code.Codes[code.CodeLength] = op
+						code.CodeLength++
+						currentStack -= 2
+						index++
+					}
 					continue
 				}
 				code.Codes[code.CodeLength] = cg.OP_dup

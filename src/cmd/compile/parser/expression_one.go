@@ -313,10 +313,11 @@ func (expressionParser *ExpressionParser) parseOneExpression() (*ast.Expression,
 		expressionParser.parser.token.Type == lex.TokenVargs {
 		// ++ or --
 		if expressionParser.parser.token.Type == lex.TokenVargs {
-			expressionParser.Next(lfIsToken)
 			newExpression := &ast.Expression{}
-			newExpression.Type = ast.ExpressionTypeVargs
+			newExpression.Type = ast.ExpressionTypeVArgs
 			newExpression.Data = suffix
+			newExpression.Pos = expressionParser.parser.mkPos()
+			expressionParser.Next(lfIsToken)
 			return newExpression, nil
 		}
 		if expressionParser.parser.token.Type == lex.TokenIncrement ||

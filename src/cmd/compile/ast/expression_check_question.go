@@ -19,7 +19,6 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(question.Selection.Pos), question.Selection.OpName()))
 		}
 	}
-
 	True, es := question.True.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
@@ -43,14 +42,14 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 			errMsgPrefix(e.Pos), False.TypeString(), True.TypeString()))
 	}
 	if True != nil {
-		tt := True.Clone()
-		tt.Pos = e.Pos
-		return tt
+		result := True.Clone()
+		result.Pos = e.Pos
+		return result
 	}
 	if False != nil {
-		tt := False.Clone()
-		tt.Pos = e.Pos
-		return tt
+		result := False.Clone()
+		result.Pos = e.Pos
+		return result
 	}
 	return nil
 }

@@ -307,6 +307,23 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 	case ExpressionTypeParenthesis:
 		*e = *e.Data.(*Expression) // override
 		return e.check(block)
+	case ExpressionTypeVArgs:
+		var t *Type
+		t, errs = e.Data.(*Expression).checkSingleValueContextExpression(block)
+		if esNotEmpty(errs) {
+			return returnValueTypes, errs
+		}
+		e.Value = t
+		returnValueTypes = []*Type{t}
+		if t == nil {
+			return
+		}
+		if t.Type != VariableTypeJavaArray {
+			errs = append(errs, fmt.Errorf("%s cannot pack non java array to variable-length arguments",
+				errMsgPrefix(e.Pos)))
+			return
+		}
+		t.IsVargs = true
 	default:
 		panic(fmt.Sprintf("unhandled type:%v", e.OpName()))
 	}

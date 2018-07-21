@@ -37,14 +37,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		ExpressionTypeXor == e.Type {
 		if left == nil || right == nil {
 			if left != nil && left.IsNumber() {
-				tt := left.Clone()
-				tt.Pos = e.Pos
-				return tt
+				result := left.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			if right != nil && right.IsNumber() {
-				tt := right.Clone()
-				tt.Pos = e.Pos
-				return tt
+				result := right.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			return nil
 		}
@@ -60,9 +60,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Type == ExpressionTypeRsh {
 		if left == nil || right == nil {
 			if left != nil && left.IsNumber() {
-				tt := left.Clone()
-				tt.Pos = e.Pos
-				return tt
+				result := left.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			return nil
 		}
@@ -178,14 +178,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		e.Type == ExpressionTypeMod {
 		if left == nil || right == nil {
 			if left != nil {
-				tt := left.Clone()
-				tt.Pos = e.Pos
-				return tt
+				result := left.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			if right != nil {
-				tt := right.Clone()
-				tt.Pos = e.Pos
-				return tt
+				result := right.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			return nil
 		}

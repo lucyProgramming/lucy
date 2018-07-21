@@ -47,6 +47,18 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	}
 	return true
 }
+func (c *Class) accessInterfaceObjectMethod(from *Position, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	ms, matched, err = c.accessInterfaceObjectMethod(from, errs, name, call, callArgTypes, fromSub)
+	if matched {
+		return ms, matched, err
+	}
+	err = c.loadSuperClass()
+	if err != nil {
+		return nil, false, err
+	}
+	return c.SuperClass.accessMethod(from, errs, name, call, callArgTypes, fromSub, nil)
+}
 
 func (c *Class) accessInterfaceMethod(from *Position, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
@@ -115,8 +127,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, call *E
 				}
 			}
 			var fit bool
-			fit, call.VArgs, _ =
-				m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
+			fit, call.VArgs, _ = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
 			if fit {
 				return []*ClassMethod{m}, true, nil
 			}

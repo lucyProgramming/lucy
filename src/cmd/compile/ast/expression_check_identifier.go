@@ -68,27 +68,27 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
-				tt := &Type{}
-				tt.Pos = e.Pos
-				tt.Type = VariableTypePackage
+				result := &Type{}
+				result.Pos = e.Pos
+				result.Type = VariableTypePackage
 				if pp, ok := p.(*Package); ok {
-					tt.Package = pp
-					tt.Type = VariableTypePackage
+					result.Package = pp
+					result.Type = VariableTypePackage
 				} else {
-					tt.Class = p.(*Class)
-					tt.Type = VariableTypeObject
+					result.Class = p.(*Class)
+					result.Type = VariableTypeObject
 				}
-				return tt, nil
+				return result, nil
 			}
 		}
 		f.Used = true
-		tt := &Type{}
-		tt.Type = VariableTypeFunction
-		tt.FunctionType = &f.Type
-		tt.Pos = e.Pos
-		tt.Function = f
+		result := &Type{}
+		result.Type = VariableTypeFunction
+		result.FunctionType = &f.Type
+		result.Pos = e.Pos
+		result.Function = f
 		identifier.Function = f
-		return tt, nil
+		return result, nil
 	case *Variable:
 		t := d.(*Variable)
 		if fromImport == false && t.IsGlobal { // try from import
@@ -98,17 +98,17 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
-				tt := &Type{}
-				tt.Pos = e.Pos
-				tt.Type = VariableTypePackage
+				result := &Type{}
+				result.Pos = e.Pos
+				result.Type = VariableTypePackage
 				if pp, ok := p.(*Package); ok {
-					tt.Package = pp
-					tt.Type = VariableTypePackage
+					result.Package = pp
+					result.Type = VariableTypePackage
 				} else {
-					tt.Class = p.(*Class)
-					tt.Type = VariableTypeObject
+					result.Class = p.(*Class)
+					result.Type = VariableTypeObject
 				}
-				return tt, nil
+				return result, nil
 			}
 		}
 		t.Used = true
@@ -125,23 +125,23 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
-				tt := &Type{}
-				tt.Pos = e.Pos
+				result := &Type{}
+				result.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
-					tt.Package = pp
-					tt.Type = VariableTypePackage
+					result.Package = pp
+					result.Type = VariableTypePackage
 				} else {
-					tt.Class = p.(*Class)
-					tt.Type = VariableTypeObject
+					result.Class = p.(*Class)
+					result.Type = VariableTypeObject
 				}
-				return tt, nil
+				return result, nil
 			}
 		}
 		t.Used = true
 		e.fromConst(t)
-		tt := t.Type.Clone()
-		tt.Pos = e.Pos
-		return tt, nil
+		result := t.Type.Clone()
+		result.Pos = e.Pos
+		return result, nil
 	case *Class:
 		c := d.(*Class)
 		if fromImport == false && c.IsGlobal { // try from import
@@ -151,23 +151,23 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
-				tt := &Type{}
-				tt.Pos = e.Pos
+				result := &Type{}
+				result.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
-					tt.Package = pp
-					tt.Type = VariableTypePackage
+					result.Package = pp
+					result.Type = VariableTypePackage
 				} else {
-					tt.Class = p.(*Class)
-					tt.Type = VariableTypeObject
+					result.Class = p.(*Class)
+					result.Type = VariableTypeObject
 				}
-				return tt, nil
+				return result, nil
 			}
 		}
-		t := &Type{}
-		t.Type = VariableTypeClass
-		t.Pos = e.Pos
-		t.Class = c
-		return t, nil
+		result := &Type{}
+		result.Type = VariableTypeClass
+		result.Pos = e.Pos
+		result.Class = c
+		return result, nil
 	case *EnumName:
 		enumName := d.(*EnumName)
 		if fromImport == false { // try from import
@@ -177,26 +177,26 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
-				tt := &Type{}
-				tt.Pos = e.Pos
+				result := &Type{}
+				result.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
-					tt.Package = pp
-					tt.Type = VariableTypePackage
+					result.Package = pp
+					result.Type = VariableTypePackage
 				} else {
-					tt.Class = p.(*Class)
-					tt.Type = VariableTypeObject
+					result.Class = p.(*Class)
+					result.Type = VariableTypeObject
 				}
-				return tt, nil
+				return result, nil
 			}
 		}
 		if enumName != nil {
-			t := &Type{}
-			t.Pos = enumName.Pos
-			t.Type = VariableTypeEnum
-			t.EnumName = enumName
-			t.Enum = enumName.Enum
+			result := &Type{}
+			result.Pos = enumName.Pos
+			result.Type = VariableTypeEnum
+			result.EnumName = enumName
+			result.Enum = enumName.Enum
 			identifier.EnumName = enumName
-			return t, nil
+			return result, nil
 		}
 	case *Type:
 		typ := d.(*Type)
@@ -207,29 +207,29 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 				if err != nil {
 					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
 				}
-				tt := &Type{}
-				tt.Pos = e.Pos
+				result := &Type{}
+				result.Pos = e.Pos
 				if pp, ok := p.(*Package); ok {
-					tt.Package = pp
-					tt.Type = VariableTypePackage
+					result.Package = pp
+					result.Type = VariableTypePackage
 				} else {
-					tt.Class = p.(*Class)
-					tt.Type = VariableTypeObject
+					result.Class = p.(*Class)
+					result.Type = VariableTypeObject
 				}
-				return tt, nil
+				return result, nil
 			}
 		}
-		t := &Type{}
-		t.Pos = e.Pos
-		t.Type = VariableTypeTypeAlias
-		t.AliasType = typ
-		return t, nil
+		result := &Type{}
+		result.Pos = e.Pos
+		result.Type = VariableTypeTypeAlias
+		result.AliasType = typ
+		return result, nil
 	case *Package:
-		t := &Type{}
-		t.Pos = e.Pos
-		t.Type = VariableTypePackage
-		t.Package = d.(*Package)
-		return t, nil
+		result := &Type{}
+		result.Pos = e.Pos
+		result.Type = VariableTypePackage
+		result.Package = d.(*Package)
+		return result, nil
 
 	}
 	return nil, fmt.Errorf("%s identifier named '%s' is not a expression",

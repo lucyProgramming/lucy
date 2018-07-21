@@ -72,7 +72,7 @@ const (
 	ExpressionTypeQuestion               // true ? a : b
 	ExpressionTypeGlobal                 // global.XXX
 	ExpressionTypeParenthesis            // ( a + b )
-	ExpressionTypeVargs                  // a ...
+	ExpressionTypeVArgs                  // a ...
 )
 
 func (e *Expression) OpName() string {
@@ -213,6 +213,8 @@ func (e *Expression) OpName() string {
 		return "global"
 	case ExpressionTypeParenthesis:
 		return "(" + e.Data.(*Expression).OpName() + ")"
+	case ExpressionTypeVArgs:
+		return fmt.Sprintf("%s...", e.Data.(*Expression).OpName())
 	default:
 		return fmt.Sprintf("op[%d](missing handle)", e.Type)
 	}
@@ -423,32 +425,6 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	}
 	return len(e.Data.([]*Expression)) > n
 }
-
-//func (e *Expression) assginExpressionLeftValueAlsoUsedAsRightValue() bool {
-//	if e.Type != ExpressionTypeAssign {
-//		//should not happen
-//		return false
-//	}
-//	bin := e.Data.(*ExpressionBinary)
-//	leftValueVariables := make(map[*Variable]struct{})
-//	rightValueVariables := make(map[*Variable]struct{})
-//	for _, v := range bin.Left.Data.([]*Expression) {
-//		t := v.variableIn()
-//		if t != nil {
-//			leftValueVariables[t] = struct{}{}
-//		}
-//	}
-//	for _, v := range bin.Right.Data.([]*Expression) {
-//		t := v.variableIn()
-//		if t != nil {
-//			rightValueVariables[t] = struct{}{}
-//		}
-//	}
-//	return true
-//}
-//func (e *Expression) variableIn() *Variable {
-//	return nil
-//}
 
 func (e *Expression) HaveOnlyOneValue() bool {
 	if e.MayHaveMultiValue() {

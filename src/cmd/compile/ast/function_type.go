@@ -1,6 +1,9 @@
 package ast
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type FunctionType struct {
 	ParameterList ParameterList
@@ -42,6 +45,13 @@ func (functionType FunctionType) getParameterTypes() []*Type {
 func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs,
 	callArgsTypes []*Type, f *Function) (match bool, vArgs *CallVArgs, errs []error) {
 	errs = []error{}
+	for _, v := range *args {
+		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+			errs = append(errs, fmt.Errorf("%s multi value in signal value context",
+				errMsgPrefix(from)))
+			return
+		}
+	}
 	if functionType.VArgs != nil {
 		vArgs = &CallVArgs{}
 		vArgs.NoArgs = true
@@ -57,6 +67,27 @@ func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs,
 		}
 		v := functionType.VArgs
 		for _, t := range callArgsTypes[len(functionType.ParameterList):] {
+			if t == nil { // some error before
+				return
+			}
+			if t.IsVargs {
+				if len(callArgsTypes[len(functionType.ParameterList):]) > 1 {
+					errMsg := fmt.Sprintf("%s too many argument to call\n",
+						errMsgPrefix(t.Pos))
+					errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+					errMsg += fmt.Sprintf("\twant %s\n", callWant(functionType))
+					errs = append(errs, errors.New(errMsg))
+					return
+				}
+				if false == v.Type.Equal(&errs, t) {
+					errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						errMsgPrefix(t.Pos),
+						t.TypeString(), v.Type.TypeString()))
+					return
+				}
+				vArgs.IsJavaArray = true
+				continue
+			}
 			if false == v.Type.Array.Equal(&errs, t) {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(t.Pos),
@@ -65,11 +96,13 @@ func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs,
 			}
 		}
 		vArgs.NoArgs = false
-		vArgs.Length = len(callArgsTypes) - len(functionType.ParameterList)
-		vArgs.Expressions = (*args)[len(functionType.ParameterList):]
-		*args = (*args)[:len(functionType.ParameterList)]
-		vArgs.Length = len(callArgsTypes) - len(functionType.ParameterList)
+		k := len(functionType.ParameterList)
+		vArgs.Length = len(callArgsTypes) - k
+		vArgs.Expressions = (*args)[k:]
+		*args = (*args)[:k]
+		vArgs.Length = len(callArgsTypes) - k
 	}
+
 	//trying to convert literal
 	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	if len(callArgsTypes) < len(functionType.ParameterList) {
@@ -104,7 +137,7 @@ type CallVArgs struct {
 		a := new int[](10)
 		print(a...)
 	*/
-	ConvertJavaArray bool
-	NoArgs           bool
-	Type             *Type
+	IsJavaArray bool
+	NoArgs      bool
+	Type        *Type
 }

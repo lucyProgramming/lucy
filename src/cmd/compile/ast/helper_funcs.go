@@ -150,7 +150,9 @@ func callWant(ft *FunctionType) string {
 		}
 	}
 	if ft.VArgs != nil {
-		s += ","
+		if len(ft.ParameterList) > 0 {
+			s += ","
+		}
 		s += ft.VArgs.Name + " "
 		s += ft.VArgs.Type.TypeString()
 	}

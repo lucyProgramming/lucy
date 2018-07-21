@@ -38,11 +38,11 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 			}
 			if noType && arr.Type == nil {
 				if t.RightValueValid() && t.isTyped() {
-					tt := t.Clone()
-					tt.Pos = e.Pos
+					tmp := t.Clone()
+					tmp.Pos = e.Pos
 					arr.Type = &Type{}
 					arr.Type.Type = VariableTypeArray
-					arr.Type.Array = tt
+					arr.Type.Array = tmp
 					arr.Type.Pos = e.Pos
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
@@ -65,7 +65,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 	if arr.Type == nil {
 		return nil
 	}
-	tt := arr.Type.Clone()
-	tt.Pos = e.Pos
-	return tt
+	result := arr.Type.Clone()
+	result.Pos = e.Pos
+	return result
 }
