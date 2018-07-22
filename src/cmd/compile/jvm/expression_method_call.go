@@ -33,6 +33,46 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			}
 		}
 	}
+	if call.Expression.Value.Type == ast.VariableTypePackage {
+		if call.PackageFunction != nil {
+			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+			if stack > maxStack {
+				maxStack = stack
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      call.Expression.Value.Package.Name + "/main",
+				Method:     call.Name,
+				Descriptor: Descriptor.methodDescriptor(&call.PackageFunction.Type),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			pop(&call.PackageFunction.Type)
+		}
+		if call.PackageGlobalVariableFunctionHandler != nil {
+			code.Codes[code.CodeLength] = cg.OP_getstatic
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      call.Expression.Value.Package.Name + "/main",
+				Field:      call.Name,
+				Descriptor: Descriptor.typeDescriptor(call.PackageGlobalVariableFunctionHandler.Type),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			state.pushStack(class, call.PackageGlobalVariableFunctionHandler.Type)
+			defer state.popStack(1)
+			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+			if t := 1 + stack; t > maxStack {
+				maxStack = t
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandle",
+				Method:     functionPointerInvokeMethod,
+				Descriptor: Descriptor.methodDescriptor(call.PackageGlobalVariableFunctionHandler.Type.FunctionType),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			pop(call.PackageGlobalVariableFunctionHandler.Type.FunctionType)
+		}
+		return
+	}
 	if call.FieldMethodHandler != nil {
 		if call.FieldMethodHandler.IsStatic() == false {
 			stack, _ := buildExpression.build(class, code, call.Expression, context, state)
@@ -65,14 +105,13 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaMethodHandleClass,
-			Method:     "invoke",
+			Method:     functionPointerInvokeMethod,
 			Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		pop(call.FieldMethodHandler.Type.FunctionType)
 		return
 	}
-
 	d := call.Method.Function.Descriptor
 	if call.Class.LoadFromOutSide == false {
 		d = Descriptor.methodDescriptor(&call.Method.Function.Type)

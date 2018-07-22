@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*Type {
@@ -24,14 +25,27 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
-			e.Type = ExpressionTypeFunctionCall
-			call := (&ExpressionFunctionCall{}).FromMethodCall(e.Data.(*ExpressionMethodCall))
-			call.Function = f
-			e.Data = call
-			return e.checkFunctionCall(block, errs, f, call)
+			if f.isPublic() == false && object.Package.Name != PackageBeenCompile.Name {
+				*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			call := e.Data.(*ExpressionMethodCall)
+			callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+			_, vArgs, es := f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+			ret := f.Type.getReturnTypes(e.Pos)
+			if esNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			call.PackageFunction = f
+			call.VArgs = vArgs
+			return ret
 		case *Class:
 			//object cast
 			class := d.(*Class)
+			if class.IsPublic() == false && object.Package.Name != PackageBeenCompile.Name {
+				*errs = append(*errs, fmt.Errorf("%s class '%s' is not public",
+					errMsgPrefix(e.Pos), call.Name))
+			}
 			conversion := &ExpressionTypeConversion{}
 			conversion.Type = &Type{}
 			conversion.Type.Type = VariableTypeObject
@@ -61,6 +75,27 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				return []*Type{conversion.Type}
 			}
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
+		case *Variable:
+			v := d.(*Variable)
+			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
+				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			if v.Type.Type != VariableTypeFunction {
+				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not a function",
+					errMsgPrefix(e.Pos), call.Name))
+				return nil
+			}
+			call := e.Data.(*ExpressionMethodCall)
+			callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
+			if esNotEmpty(es) {
+				*errs = append(*errs, es...)
+			}
+			call.PackageGlobalVariableFunctionHandler = v
+			call.VArgs = vArgs
+			return ret
 		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
 				errMsgPrefix(e.Pos), call.Name))

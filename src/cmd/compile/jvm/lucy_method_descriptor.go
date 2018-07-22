@@ -14,15 +14,14 @@ func (signature *LucyMethodSignature) Need(ft *ast.FunctionType) bool {
 			return true
 		}
 	}
+	if ft.VArgs != nil && LucyFieldSignatureParser.Need(ft.VArgs.Type) {
+		return true
+	}
 	for _, v := range ft.ReturnList {
 		if LucyFieldSignatureParser.Need(v.Type) {
 			return true
 		}
 	}
-	if ft.VArgs != nil && LucyFieldSignatureParser.Need(ft.VArgs.Type) {
-		return true
-	}
-
 	if len(ft.ReturnList) > 1 {
 		return true
 	}
@@ -54,11 +53,18 @@ func (signature *LucyMethodSignature) Encode(ft *ast.FunctionType) (descriptor s
 func (signature *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte, error) {
 	bs = bs[1:] // skip (
 	var err error
-	for i := 0; i < len(ft.ParameterList); i++ {
-		bs, ft.ParameterList[i].Type, err = LucyFieldSignatureParser.Decode(bs)
+	if len(ft.ParameterList) > 0 {
+		ft.ParameterList = nil
+	}
+	for bs[0] != ')' {
+		var t *ast.Type
+		bs, t, err = LucyFieldSignatureParser.Decode(bs)
 		if err != nil {
 			return bs, err
 		}
+		vd := &ast.Variable{}
+		vd.Type = t
+		ft.ParameterList = append(ft.ParameterList, vd)
 	}
 	if bs[0] != ')' {
 		return bs, fmt.Errorf("function type format wrong")
@@ -90,6 +96,5 @@ func (signature *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([
 	} else {
 		return bs, fmt.Errorf("function type format wrong")
 	}
-
 	return bs, nil
 }

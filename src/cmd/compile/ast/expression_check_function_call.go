@@ -73,36 +73,12 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 }
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs)
-	callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
-	if len(call.ParameterTypes) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
-			errMsgPrefix(e.Pos)))
-	}
+	callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
 	ret := ft.getReturnTypes(e.Pos)
-	if len(callArgsTypes) > len(ft.ParameterList) {
-		errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(e.Pos))
-		errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-		errMsg += fmt.Sprintf("\twant %s\n", callWant(ft))
-		*errs = append(*errs, fmt.Errorf(errMsg))
-	}
-	//trying to convert literal
-	convertLiteralExpressionsToNeeds(call.Args, ft.getParameterTypes(), callArgsTypes)
-	if len(callArgsTypes) < len(ft.ParameterList) {
-		errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(e.Pos))
-		errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-		errMsg += fmt.Sprintf("\twant %s\n", callWant(ft))
-		*errs = append(*errs, fmt.Errorf(errMsg))
-		return ret
-	}
-	for k, v := range ft.ParameterList {
-		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
-			if false == v.Type.Equal(errs, callArgsTypes[k]) {
-				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-					errMsgPrefix((call.Args)[k].Pos),
-					callArgsTypes[k].TypeString(), v.Type.TypeString()))
-			}
-		}
+	var es []error
+	_, call.VArgs, es = ft.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+	if esNotEmpty(es) {
+		*errs = append(*errs, es...)
 	}
 	return ret
 }

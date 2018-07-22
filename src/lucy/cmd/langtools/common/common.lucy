@@ -5,8 +5,8 @@ import "java/io";
 
 public fn getLucyRoot()->(path string , err error ){
 	envs := os.getEnvs();
-	if envs.keyExists("LUCYROOT") == false {
-		err = new error("env variable LUCYROOT is not set");
+	if envs.keyExist("LUCYROOT") == false {
+		err = new error(``"env variable LUCYROOT is not set");
 		return ;
 	}
 	path = envs["LUCYROOT"];
@@ -15,11 +15,11 @@ public fn getLucyRoot()->(path string , err error ){
  
 public fn getLucyPath()->(paths []string, err error){
 	envs := os.getEnvs();
-	if envs.keyExists("LUCYROOT") == false {
+	if envs.keyExist("LUCYROOT") == false {
 		err = new error("env variable LUCYROOT is not set");
 		return ;
 	}
-	if envs.keyExists("LUCYPATH") == false {
+	if envs.keyExist("LUCYPATH") == false {
 		err = new error("env variable LUCYPATH is not set");
 		return ;
 	}

@@ -170,9 +170,8 @@ func (s *Statement) checkStatementExpression(b *Block) []error {
 		}
 		return nil
 	}
-	if s.Expression.canBeUsedAsStatement() {
-		s.Expression.IsStatementExpression = true
-	} else {
+	s.Expression.IsStatementExpression = true
+	if s.Expression.canBeUsedAsStatement() == false {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
 		errs = append(errs, err)

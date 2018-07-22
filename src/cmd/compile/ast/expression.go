@@ -478,20 +478,22 @@ type ExpressionFunctionCall struct {
 	VArgs                    *CallVArgs
 }
 
-func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *ExpressionFunctionCall {
-	e.Args = call.Args
-	return e
-}
+//func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *ExpressionFunctionCall {
+//	e.Args = call.Args
+//	return e
+//}
 
 type ExpressionMethodCall struct {
-	Class              *Class //
-	Expression         *Expression
-	Args               CallArgs
-	Name               string
-	Method             *ClassMethod
-	FieldMethodHandler *ClassField
-	ParameterTypes     []*Type // unSupport !!!!!!
-	VArgs              *CallVArgs
+	Class                                *Class //
+	Expression                           *Expression
+	Args                                 CallArgs
+	Name                                 string
+	Method                               *ClassMethod
+	FieldMethodHandler                   *ClassField
+	ParameterTypes                       []*Type // unSupport !!!!!!
+	VArgs                                *CallVArgs
+	PackageFunction                      *Function
+	PackageGlobalVariableFunctionHandler *Variable
 }
 
 type ExpressionDeclareVariable struct {

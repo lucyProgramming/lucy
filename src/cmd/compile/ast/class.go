@@ -509,6 +509,7 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 				fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 			return nil, false
 		} else {
+			//trying find fathte`s implementation
 			return c.SuperClass.implementMethod(m, true, errs, pos)
 		}
 	}
@@ -516,19 +517,30 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 		if fromSub && v.IsPrivate() {
 			return nil, false
 		}
+
 		if len(v.Function.Type.ParameterList) != len(m.Function.Type.ParameterList) {
 			// parameter count not match
 			continue
 		}
+		if (v.Function.Type.VArgs != nil) != (m.Function.Type.VArgs != nil) {
+			continue
+		}
+
 		if len(v.Function.Type.ReturnList) != len(m.Function.Type.ReturnList) {
 			// return list count not match
 			continue
 		}
+
 		match := true
-		for kk, p := range v.Function.Type.ParameterList {
-			if p.Type.StrictEqual(m.Function.Type.ParameterList[kk].Type) == false {
-				match = false
-				break
+		if v.Function.Type.VArgs != nil && v.Function.Type.VArgs.Type.StrictEqual(m.Function.Type.VArgs.Type) {
+			match = false
+		}
+		if match {
+			for kk, p := range v.Function.Type.ParameterList {
+				if p.Type.StrictEqual(m.Function.Type.ParameterList[kk].Type) == false {
+					match = false
+					break
+				}
 			}
 		}
 		if match {
@@ -542,6 +554,19 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 		if match {
 			return v, true
 		}
+	}
+	//no same name method at current class
+	if c.Name == JavaRootClass {
+		return nil, false
+	}
+	err := c.loadSuperClass()
+	if err != nil {
+		*errs = append(*errs,
+			fmt.Errorf("%s %v", errMsgPrefix(pos), err))
+		return nil, false
+	} else {
+		//trying find fathte`s implementation
+		return c.SuperClass.implementMethod(m, true, errs, pos)
 	}
 	return nil, false
 }

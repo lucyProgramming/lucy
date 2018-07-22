@@ -379,14 +379,13 @@ func (lex *Lexer) tryLexElseIf() (is bool) {
 	c, eof = lex.getChar()
 	if c != 'f' {
 		lex.unGetChar()
-		lex.unGetChar()
+		lex.unGetChar2(1)
 		return
 	}
 	c, eof = lex.getChar()
 	if c != ' ' && c != '\t' && c != '\r' { // white list
 		lex.unGetChar()
-		lex.unGetChar()
-		lex.unGetChar()
+		lex.unGetChar2(2)
 		return
 	}
 	is = true
@@ -531,7 +530,7 @@ func (lex *Lexer) lexVargs() (is bool) {
 	c, _ = lex.getChar()
 	if c != '.' {
 		lex.unGetChar()
-		lex.unGetChar()
+		lex.unGetChar2(1)
 		return
 	}
 
@@ -539,11 +538,10 @@ func (lex *Lexer) lexVargs() (is bool) {
 	c, _ = lex.getChar()
 	if c == '.' {
 		lex.unGetChar()
-		lex.unGetChar()
-		lex.unGetChar()
+		lex.unGetChar2(2)
 		return
 	}
-	lex.unGetChar()
+	lex.unGetChar2(1)
 	is = true
 	return
 }

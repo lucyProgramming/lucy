@@ -33,6 +33,10 @@ type Function struct {
 	SourceCodes                         []byte // source code for template function
 }
 
+func (f *Function) isPublic() bool {
+	return f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0
+}
+
 func (f *Function) NameLiteralFunction() string {
 	if f.Name != "" {
 		return f.Name
@@ -169,8 +173,8 @@ func (f *Function) checkBlock(errs *[]error) {
 func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Block.inherit(b)
-	f.checkParametersAndReturns(&errs)
 	f.Block.InheritedAttribute.Function = f
+	f.checkParametersAndReturns(&errs)
 	if f.TemplateFunction == nil {
 		f.checkBlock(&errs)
 	}

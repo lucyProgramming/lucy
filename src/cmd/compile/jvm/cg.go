@@ -145,9 +145,14 @@ func (buildPackage *BuildPackage) mkGlobalVariables() {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		f.AccessFlags |= cg.ACC_FIELD_VOLATILE
+
 		if LucyFieldSignatureParser.Need(v.Type) {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
+			if v.Type.Type == ast.VariableTypeFunction {
+				f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
+					cg.ACC_METHOD_VARARGS
+			}
 		}
 		f.Name = v.Name
 		buildPackage.mainClass.Fields[k] = f

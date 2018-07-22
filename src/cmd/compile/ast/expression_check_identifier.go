@@ -112,10 +112,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 			}
 		}
 		t.Used = true
-		tt := t.Type.Clone()
-		tt.Pos = e.Pos
+		result := t.Type.Clone()
+		result.Pos = e.Pos
 		identifier.Variable = t
-		return tt, nil
+		return result, nil
 	case *Constant:
 		t := d.(*Constant)
 		if fromImport == false && t.IsGlobal { // try from import

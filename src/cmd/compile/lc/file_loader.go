@@ -87,11 +87,15 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
+		if m.Function.Type.NoReturnValue() {
+			m.Function.Type.ReturnList = nil
+		}
 		if (v.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
 			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
 			}
+			m.Function.Type.VArgs.Type.IsVargs = true
 			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
 		if astClass.Methods[m.Function.Name] == nil {
@@ -132,10 +136,19 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			return nil, err
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != nil && len(t) > 0 {
-			index := binary.BigEndian.Uint16(t[0].Info)
-			_, f.Type, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
+			d := &cg.AttributeLucyFieldDescriptor{}
+			d.FromBs(c, t[0].Info)
+			_, f.Type, err = jvm.LucyFieldSignatureParser.Decode([]byte(d.Descriptor))
 			if err != nil {
 				return nil, err
+			}
+			if f.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.ACC_METHOD_VARARGS != 0 {
+				if f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1].Type.Type != ast.VariableTypeJavaArray {
+					panic("not a java array")
+				}
+				f.Type.FunctionType.VArgs = f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1]
+				f.Type.FunctionType.VArgs.Type.IsVargs = true
+				f.Type.FunctionType.ParameterList = f.Type.FunctionType.ParameterList[:len(f.Type.FunctionType.ParameterList)-1]
 			}
 		}
 		if f.Type.Type == ast.VariableTypeEnum {
@@ -174,6 +187,9 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Function)
 		}
+		if m.Function.Type.NoReturnValue() {
+			m.Function.Type.ReturnList = nil
+		}
 		err = loadEnumForFunction(m.Function)
 		if err != nil {
 			return nil, err
@@ -183,6 +199,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
 			}
+			m.Function.Type.VArgs.Type.IsVargs = true
 			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
 		if astClass.Methods[m.Function.Name] == nil {
@@ -271,10 +288,19 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			vd.IsGlobal = true
 			pack.Block.Variables[name] = vd
 			if t := f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != nil && len(t) > 0 {
-				index := binary.BigEndian.Uint16(t[0].Info)
-				_, vd.Type, err = jvm.LucyFieldSignatureParser.Decode(c.ConstPool[index].Info)
+				d := &cg.AttributeLucyFieldDescriptor{}
+				d.FromBs(c, t[0].Info)
+				_, vd.Type, err = jvm.LucyFieldSignatureParser.Decode([]byte(d.Descriptor))
 				if err != nil {
 					return err
+				}
+				if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.ACC_METHOD_VARARGS != 0 {
+					if vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1].Type.Type != ast.VariableTypeJavaArray {
+						panic("not a java array")
+					}
+					vd.Type.FunctionType.VArgs = vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1]
+					vd.Type.FunctionType.VArgs.Type.IsVargs = true
+					vd.Type.FunctionType.ParameterList = vd.Type.FunctionType.ParameterList[:len(vd.Type.FunctionType.ParameterList)-1]
 				}
 			}
 			if typ.Type == ast.VariableTypeEnum {
@@ -299,13 +325,14 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function := &ast.Function{}
 		function.Name = name
 		function.AccessFlags = m.AccessFlags
-
+		if function.Type.NoReturnValue() {
+			function.Type.ReturnList = nil
+		}
 		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
 		function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
 			return err
 		}
-
 		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&function.Type, c.ConstPool[index].Info)
@@ -313,7 +340,6 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 				return err
 			}
 		}
-
 		err = loadEnumForFunction(function)
 		if err != nil {
 			return err
@@ -324,6 +350,15 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, function)
 		}
+		if (function.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
+			function.Type.VArgs = function.Type.ParameterList[len(function.Type.ParameterList)-1]
+			if function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
+				panic("variable args is not array")
+			}
+			function.Type.VArgs.Type.IsVargs = true
+			function.Type.ParameterList = function.Type.ParameterList[:len(function.Type.ParameterList)-1]
+		}
+
 		function.ClassMethod = &cg.MethodHighLevel{}
 		function.ClassMethod.Name = function.Name
 		function.ClassMethod.Class = mainClassName

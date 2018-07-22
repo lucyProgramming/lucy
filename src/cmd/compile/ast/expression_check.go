@@ -280,7 +280,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		f := e.Data.(*Function)
 		errs = f.check(block)
 		f.IsClosureFunction = f.Closure.NotEmpty(f)
-		if f.Name != "" {
+		if e.IsStatementExpression {
 			err := block.Insert(f.Name, f.Pos, f)
 			if err != nil {
 				errs = append(errs, err)

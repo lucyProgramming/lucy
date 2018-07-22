@@ -9,13 +9,14 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.Class
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
-	if len(call.Expression.Value.FunctionType.ParameterList) > 0 {
-		buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+	stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+	if t := 1 + stack; t > maxStack {
+		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/invoke/MethodHandle",
-		Method:     "invoke",
+		Method:     functionPointerInvokeMethod,
 		Descriptor: Descriptor.methodDescriptor(call.Expression.Value.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

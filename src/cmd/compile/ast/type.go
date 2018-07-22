@@ -407,7 +407,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "}"
 	case VariableTypeJavaArray:
 		if typ.IsVargs {
-			*ret += "..." + typ.Array.TypeString()
+			*ret += typ.Array.TypeString() + "..."
 		} else {
 			*ret += typ.Array.TypeString() + "[]"
 		}
@@ -428,6 +428,14 @@ func (typ *Type) typeString(ret *string) {
 				s += " , "
 			}
 		}
+		if typ.FunctionType.VArgs != nil {
+			if len(typ.FunctionType.ParameterList) > 0 {
+				s += ","
+			}
+			s += typ.FunctionType.VArgs.Name + " "
+			s += typ.FunctionType.VArgs.Type.TypeString()
+		}
+		s += ")"
 		if len(typ.FunctionType.ReturnList) > 0 {
 			s += ") -> ("
 			for k, v := range typ.FunctionType.ReturnList {
@@ -439,8 +447,8 @@ func (typ *Type) typeString(ret *string) {
 					s += ","
 				}
 			}
+			s += ")"
 		}
-		s += ")"
 		*ret += s
 	case VariableTypeTemplate:
 		*ret += typ.Name
@@ -667,6 +675,9 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 	}
 	if typ.Type == VariableTypeObject {
 		return typ.Class.Name == compareTo.Class.Name
+	}
+	if typ.Type == VariableTypeVoid {
+		return true
 	}
 	return false
 }

@@ -34,6 +34,7 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	}
 	if variableType.Type == ast.VariableTypeFunction {
 		d = LucyMethodSignatureParser.Encode(variableType.FunctionType)
+		return d
 	}
 	return Descriptor.typeDescriptor(variableType)
 }
