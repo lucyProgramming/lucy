@@ -288,8 +288,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				class, err = blockParser.parser.InterfaceParser.parse()
 			}
 			if err != nil {
-				blockParser.consume(untilRc)
-				blockParser.Next(lfNotToken)
 				continue
 			}
 			statement := &ast.Statement{}
@@ -301,8 +299,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			pos := blockParser.parser.mkPos()
 			e, err := blockParser.parser.parseEnum()
 			if err != nil {
-				blockParser.consume(untilRc)
-				blockParser.Next(lfNotToken)
 				continue
 			}
 			s := &ast.Statement{}

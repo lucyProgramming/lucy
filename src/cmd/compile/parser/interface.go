@@ -11,7 +11,6 @@ import (
 type InterfaceParser struct {
 	parser             *Parser
 	ret                *ast.Class
-	isStatic           bool
 	accessControlToken *lex.Token
 }
 

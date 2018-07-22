@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func errMsgPrefix(pos *Position) string {
+func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
@@ -12,7 +12,7 @@ func esNotEmpty(es []error) bool {
 	return len(es) > 0
 }
 
-func divisionByZeroErr(pos *Position) error {
+func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
 
@@ -32,7 +32,7 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
 	return ret
 }
 
-func mkVoidType(pos *Position) *Type {
+func mkVoidType(pos *Pos) *Type {
 	t := &Type{}
 	t.Type = VariableTypeVoid // means no return;
 	t.Pos = pos
@@ -57,7 +57,7 @@ func checkRightValuesValid(ts []*Type, errs *[]error) (ret []*Type) {
 /*
 	when access from global,should check if access from package
 */
-func shouldAccessFromImports(name string, from *Position, alreadyHave *Position) (*Import, bool) {
+func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import, bool) {
 	if alreadyHave == nil {
 		/*
 			in case buildIn types
@@ -81,7 +81,7 @@ func shouldAccessFromImports(name string, from *Position, alreadyHave *Position)
 	return i, alreadyHave.StartLine < from.StartLine
 }
 
-func msNotMatchError(pos *Position, name string, ms []*ClassMethod, want []*Type) error {
+func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type) error {
 	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
 	errMsg += "\twant " + ms[0].Function.badParameterMsg(name, want) + "\n"

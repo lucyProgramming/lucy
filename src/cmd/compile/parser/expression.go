@@ -25,6 +25,15 @@ func (expressionParser *ExpressionParser) parseExpressions(endTokens ...int) ([]
 		}
 		es = append(es, e)
 		if expressionParser.parser.token.Type != lex.TokenComma {
+			if expressionParser.looksLikeExpression() {
+				/*
+					missing comma
+					a(1 2)
+				*/
+				expressionParser.parser.errs = append(expressionParser.parser.errs, fmt.Errorf("%s missing comma",
+					expressionParser.parser.errorMsgPrefix()))
+				continue
+			}
 			break
 		}
 		// == ,

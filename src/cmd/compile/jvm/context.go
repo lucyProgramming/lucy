@@ -103,7 +103,7 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	return
 }
 
-func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Position,
+func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos,
 	code *cg.AttributeCode, class *cg.ClassHighLevel) {
 	if pos == nil {
 		return

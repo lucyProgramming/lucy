@@ -20,8 +20,8 @@ type Block struct {
 	IsForBlock                      bool // for top block
 	IsSwitchBlock                   bool // switch statement list block
 	IsSwitchTemplateBlock           bool // template swtich statement list block
-	Pos                             *Position
-	EndPos                          *Position
+	Pos                             *Pos
+	EndPos                          *Pos
 	Outer                           *Block
 	InheritedAttribute              InheritedAttribute
 	Statements                      []*Statement
@@ -285,7 +285,7 @@ func (b *Block) checkConstants() []error {
 	return errs
 }
 
-func (b *Block) checkNameExist(name string, pos *Position) error {
+func (b *Block) checkNameExist(name string, pos *Pos) error {
 	if b.Variables == nil {
 		b.Variables = make(map[string]*Variable)
 	}
@@ -352,7 +352,7 @@ func (b *Block) checkNameExist(name string, pos *Position) error {
 	return nil
 }
 
-func (b *Block) Insert(name string, pos *Position, d interface{}) error {
+func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	//fmt.Println(name, pos)
 	// global var Insert into block
 	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {

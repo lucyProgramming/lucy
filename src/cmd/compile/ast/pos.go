@@ -1,6 +1,6 @@
 package ast
 
-type Position struct {
+type Pos struct {
 	Filename    string
 	StartLine   int
 	StartColumn int
@@ -15,5 +15,5 @@ type Position struct {
 
 type NameWithPos struct {
 	Name string
-	Pos  *Position
+	Pos  *Pos
 }

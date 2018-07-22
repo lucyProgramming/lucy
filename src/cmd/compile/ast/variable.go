@@ -8,7 +8,7 @@ type Variable struct {
 	BeenCaptured             bool
 	Used                     bool   // use as right value
 	AccessFlags              uint16 // public private or protected
-	Pos                      *Position
+	Pos                      *Pos
 	Expression               *Expression
 	Name                     string
 	Type                     *Type

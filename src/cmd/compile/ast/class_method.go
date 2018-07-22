@@ -47,7 +47,7 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	}
 	return true
 }
-func (c *Class) accessInterfaceObjectMethod(from *Position, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+func (c *Class) accessInterfaceObjectMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	ms, matched, err = c.accessInterfaceObjectMethod(from, errs, name, call, callArgTypes, fromSub)
 	if matched {
@@ -60,7 +60,7 @@ func (c *Class) accessInterfaceObjectMethod(from *Position, errs *[]error, name 
 	return c.SuperClass.accessMethod(from, errs, name, call, callArgTypes, fromSub, nil)
 }
 
-func (c *Class) accessInterfaceMethod(from *Position, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *Class) accessInterfaceMethod(from *Position, errs *[]error, name string
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(from *Position, errs *[]error, name string, call *ExpressionMethodCall,
+func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool, fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {
@@ -147,7 +147,7 @@ func (c *Class) accessMethod(from *Position, errs *[]error, name string, call *E
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(from *Position, errs *[]error, name string, call *ExpressionMethodCall,
+func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	for _, m := range c.Methods[name] {
 		var fit bool

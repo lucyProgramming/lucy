@@ -186,7 +186,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 		r := &RedeclareError{}
 		r.Name = k
-		r.Positions = make([]*Position, len(v))
+		r.Positions = make([]*Pos, len(v))
 		r.Types = make([]string, len(v))
 		for kk, vv := range v {
 			switch vv.(type) {

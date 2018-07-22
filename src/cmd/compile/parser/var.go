@@ -40,13 +40,13 @@ var (
 	}
 )
 
-func ParseFunction(bs []byte, pos *ast.Position) (*ast.Function, []error) {
+func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
 	parser := &Parser{}
 	parser.filename = pos.Filename
 	parser.nErrors2Stop = 10
 	parser.bs = bs
 	parser.initParser()
-	parser.scanner = lex.New(parser.bs, pos.StartLine, pos.StartColumn)
+	parser.lexer = lex.New(parser.bs, pos.StartLine, pos.StartColumn)
 	parser.Next(lfNotToken) //
 	f, err := parser.FunctionParser.parse(true)
 	if err != nil {

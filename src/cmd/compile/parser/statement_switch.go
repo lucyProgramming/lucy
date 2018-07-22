@@ -7,7 +7,7 @@ import (
 )
 
 //TODO:: missing format
-func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Position) (*ast.StatementSwitchTemplate, error) {
+func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Pos) (*ast.StatementSwitchTemplate, error) {
 	condition, err := blockParser.parser.parseType()
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)

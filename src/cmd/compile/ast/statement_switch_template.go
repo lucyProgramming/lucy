@@ -6,7 +6,7 @@ import (
 )
 
 type StatementSwitchTemplate struct {
-	Pos                  *Position
+	Pos                  *Pos
 	Condition            *Type //switch
 	StatementSwitchCases []*StatementSwitchTemplateCase
 	Default              *Block

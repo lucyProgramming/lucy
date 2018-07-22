@@ -17,6 +17,14 @@ type ClassParser struct {
 	accessControlToken *lex.Token
 }
 
+func (classParser *ClassParser) resetProperty() {
+	classParser.isStatic = false
+	classParser.isVolatile = false
+	classParser.isSynchronized = false
+	classParser.isFinal = false
+	classParser.accessControlToken = nil
+}
+
 func (classParser *ClassParser) Next(lfIsToken bool) {
 	classParser.parser.Next(lfIsToken)
 }
@@ -102,6 +110,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			classParser.consume(untilLc)
 		}
 	}
+	classParser.parser.ifTokenIsLfThenSkip()
 	if classParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{' but '%s'", classParser.parser.errorMsgPrefix(), classParser.parser.token.Description)
 		classParser.parser.errs = append(classParser.parser.errs, err)
@@ -145,7 +154,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		}
 		return fmt.Errorf("%s not a valid token after 'final'", classParser.parser.errorMsgPrefix())
 	}
-	classParser.Next(lfNotToken)
+	classParser.Next(lfNotToken) // skip {
 	for classParser.parser.token.Type != lex.TokenEof {
 		if len(classParser.parser.errs) > classParser.parser.nErrors2Stop {
 			break
@@ -166,7 +175,8 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.parser.BlockParser.parseStatementList(block, false)
 				if classParser.parser.token.Type != lex.TokenRc {
 					classParser.parser.errs = append(classParser.parser.errs,
-						fmt.Errorf("%s expect '}' , but '%s'", classParser.parser.errorMsgPrefix(), classParser.parser.token.Description))
+						fmt.Errorf("%s expect '}' , but '%s'", classParser.parser.errorMsgPrefix(),
+							classParser.parser.token.Description))
 				} else {
 					classParser.Next(lfNotToken) // skip }
 					classParser.ret.StaticBlocks = append(classParser.ret.StaticBlocks, block)
@@ -227,7 +237,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 			f, err := classParser.parser.FunctionParser.parse(true)
 			if err != nil {
 				classParser.resetProperty()
-				classParser.consume(untilRc)
 				classParser.Next(lfNotToken)
 				continue
 			}
@@ -279,14 +288,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		}
 	}
 	return
-}
-
-func (classParser *ClassParser) resetProperty() {
-	classParser.isStatic = false
-	classParser.isVolatile = false
-	classParser.isSynchronized = false
-	classParser.isFinal = false
-	classParser.accessControlToken = nil
 }
 
 func (classParser *ClassParser) parseConst() error {

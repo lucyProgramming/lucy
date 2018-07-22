@@ -30,7 +30,7 @@ func (s *StatementLabel) Reset() {
 	s.Exits = []*cg.Exit{}
 }
 
-func (s *StatementLabel) Ready(from *Position) error {
+func (s *StatementLabel) Ready(from *Pos) error {
 	ss := []*Statement{}
 	for _, v := range s.Block.Statements {
 		if v.StatementLabel == s { // this is me

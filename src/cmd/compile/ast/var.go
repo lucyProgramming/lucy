@@ -40,7 +40,7 @@ var (
 	PackageBeenCompile   Package
 	buildInFunctionsMap  = make(map[string]*Function)
 	lucyBuildInPackage   *Package
-	ParseFunctionHandler func(bs []byte, pos *Position) (f *Function, es []error)
+	ParseFunctionHandler func(bs []byte, pos *Pos) (f *Function, es []error)
 	javaStringClass      *Class
 )
 
@@ -52,7 +52,7 @@ func init() {
 	}
 }
 
-func loadJavaStringClass(pos *Position) error {
+func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {
 		return nil
 	}

@@ -27,7 +27,7 @@ type Statement struct {
 	Type int
 
 	Checked                   bool // if checked
-	Pos                       *Position
+	Pos                       *Pos
 	StatementIf               *StatementIf
 	Expression                *Expression
 	StatementFor              *StatementFor

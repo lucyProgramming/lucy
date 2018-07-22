@@ -14,6 +14,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 	switch parser.token.Type {
 	case lex.TokenLb:
 		parser.Next(lfIsToken)
+		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenRb {
 			// [ and ] not match
 			err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
@@ -22,14 +23,15 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 		//lookahead
 		parser.Next(lfIsToken) //skip ]
-		t, err := parser.parseType()
+		parser.unExpectNewLineAndSkip()
+		array, err := parser.parseType()
 		if err != nil {
 			return nil, err
 		}
 		ret = &ast.Type{}
 		ret.Pos = pos
 		ret.Type = ast.VariableTypeArray
-		ret.Array = t
+		ret.Array = array
 	case lex.TokenBool:
 		parser.Next(lfIsToken)
 		ret = &ast.Type{
@@ -145,7 +147,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	if parser.token.Type == lex.TokenVargs {
+	if parser.token.Type == lex.TokenVArgs {
 		parser.Next(lfIsToken) // skip ...
 		newRet := &ast.Type{
 			Pos:     pos,
@@ -159,6 +161,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 	for parser.token.Type == lex.TokenLb { // int [
 		pos := parser.mkPos()
 		parser.Next(lfIsToken) // skip [
+		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenRb {
 			err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
 			parser.errs = append(parser.errs, err)

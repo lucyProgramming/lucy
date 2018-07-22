@@ -35,7 +35,7 @@ const (
 type Type struct {
 	IsVargs      bool
 	Resolved     bool
-	Pos          *Position
+	Pos          *Pos
 	Type         int
 	Name         string
 	Array        *Type

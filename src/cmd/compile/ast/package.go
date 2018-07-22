@@ -209,7 +209,7 @@ type SourceFile struct {
 type Import struct {
 	AccessName string
 	Import     string // full name
-	Pos        *Position
+	Pos        *Pos
 	Used       bool
 }
 
@@ -241,7 +241,7 @@ func (i *Import) GetAccessName() (string, error) {
 
 type RedeclareError struct {
 	Name      string
-	Positions []*Position
+	Positions []*Pos
 	Types     []string
 }
 

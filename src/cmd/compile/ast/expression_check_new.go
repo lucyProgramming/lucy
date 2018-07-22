@@ -88,7 +88,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	if len(newArray.Args) != 1 { // 0 and 1 is accept
 		*errs = append(*errs,
 			fmt.Errorf("%s new array expect at least 1 argument ",
-				errMsgPrefix(newArray.Args[0].Pos)))
+				errMsgPrefix(e.Pos)))
 		newArray.Args = []*Expression{} // reset to 0,continue to analyse
 	}
 	ts := checkRightValuesValid(checkExpressions(block, newArray.Args, errs), errs)

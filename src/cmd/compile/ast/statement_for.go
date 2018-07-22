@@ -10,7 +10,7 @@ type StatementFor struct {
 	RangeAttr          *ForRangeAttr
 	Exits              []*cg.Exit
 	ContinueCodeOffset int
-	Pos                *Position
+	Pos                *Pos
 	/*
 		for i := 0 ; i < 10 ;i ++ {
 
@@ -85,7 +85,7 @@ func (s *StatementFor) checkRange() []error {
 		}
 		var identifierK *ExpressionIdentifier
 		var identifierV *ExpressionIdentifier
-		var posK, posV *Position
+		var posK, posV *Pos
 		if modelKv {
 			identifierK = lefts[0].Data.(*ExpressionIdentifier)
 			identifierV = lefts[1].Data.(*ExpressionIdentifier)

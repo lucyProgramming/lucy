@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 
-	"bytes"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -23,11 +22,9 @@ func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyParseImport bool, n
 type Parser struct {
 	onlyParseImport bool
 	bs              []byte
-	lines           [][]byte
 	tops            *[]*ast.Top
-	scanner         *lex.Lexer
+	lexer           *lex.Lexer
 	filename        string
-	lastToken       *lex.Token
 	token           *lex.Token
 	errs            []error
 	imports         map[string]*ast.Import
@@ -57,9 +54,8 @@ func (parser *Parser) initParser() {
 
 func (parser *Parser) Parse() []error {
 	parser.initParser()
-	parser.scanner = lex.New(parser.bs, 1, 1)
+	parser.lexer = lex.New(parser.bs, 1, 1)
 	parser.Next(lfNotToken) //
-	parser.lines = bytes.Split(parser.bs, []byte("\n"))
 	if parser.token.Type == lex.TokenEof {
 		//TODO::empty source file , should forbidden???
 		return nil
@@ -137,8 +133,6 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenEnum:
 			e, err := parser.parseEnum()
 			if err != nil {
-				parser.consume(untilRc)
-				parser.Next(lfNotToken)
 				resetProperty()
 				continue
 			}
@@ -155,7 +149,6 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenFunction:
 			f, err := parser.FunctionParser.parse(true)
 			if err != nil {
-				parser.consume(untilRc)
 				parser.Next(lfNotToken)
 				continue
 			}
@@ -189,9 +182,6 @@ func (parser *Parser) Parse() []error {
 				c, err = parser.InterfaceParser.parse()
 			}
 			if err != nil {
-				parser.errs = append(parser.errs, err)
-				parser.consume(untilRc)
-				parser.Next(lfNotToken)
 				resetProperty()
 				continue
 			}
@@ -317,14 +307,8 @@ func (parser *Parser) shouldBeSemicolonOrLf() error {
 		parser.token.Type == lex.TokenLf {
 		return nil
 	}
-	var token *lex.Token
-	if nil != parser.lastToken {
-		token = parser.lastToken
-	}
-	if token == nil {
-		token = parser.token
-	}
-	err := fmt.Errorf("%s expect semicolon or new line", parser.errorMsgPrefix(&ast.Position{
+	token := parser.token
+	err := fmt.Errorf("%s expect semicolon or new line", parser.errorMsgPrefix(&ast.Pos{
 		Filename:    parser.filename,
 		StartLine:   token.StartLine,
 		StartColumn: token.StartColumn,
@@ -337,12 +321,12 @@ func (parser *Parser) validStatementEnding() error {
 	return parser.shouldBeSemicolonOrLf()
 }
 
-func (parser *Parser) mkPos() *ast.Position {
-	return &ast.Position{
+func (parser *Parser) mkPos() *ast.Pos {
+	return &ast.Pos{
 		Filename:    parser.filename,
 		StartLine:   parser.token.StartLine,
 		StartColumn: parser.token.StartColumn,
-		Offset:      parser.scanner.GetOffSet(),
+		Offset:      parser.lexer.GetOffSet(),
 	}
 }
 
@@ -410,9 +394,8 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 func (parser *Parser) Next(lfIsToken bool) {
 	var err error
 	var tok *lex.Token
-	parser.lastToken = parser.token
 	for {
-		tok, err = parser.scanner.Next()
+		tok, err = parser.lexer.Next()
 		if err != nil {
 			parser.errs = append(parser.errs, fmt.Errorf("%s %s", parser.errorMsgPrefix(), err.Error()))
 		}
@@ -433,13 +416,13 @@ func (parser *Parser) Next(lfIsToken bool) {
 /*
 	errorMsgPrefix(pos) only receive one argument
 */
-func (parser *Parser) errorMsgPrefix(pos ...*ast.Position) string {
+func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	var line, column int
 	if len(pos) > 0 {
 		line = pos[0].StartLine
 		column = pos[0].StartColumn
 	} else {
-		line, column = parser.scanner.GetLineAndColumn()
+		line, column = parser.lexer.GetLineAndColumn()
 	}
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }
@@ -448,9 +431,8 @@ func (parser *Parser) consume(until map[int]bool) {
 	if len(until) == 0 {
 		panic("no token to consume")
 	}
-	var ok bool
 	for parser.token.Type != lex.TokenEof {
-		if _, ok = until[parser.token.Type]; ok {
+		if _, ok := until[parser.token.Type]; ok {
 			return
 		}
 		parser.Next(lfIsToken)

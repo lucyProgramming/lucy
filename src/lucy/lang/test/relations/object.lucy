@@ -2,7 +2,7 @@
 
 
 fn testObject()->(ok bool = true){
-	a := new []int();
+	a := new []int(0);
 	if true != (a != null){
 		ok = false;
 		return ;

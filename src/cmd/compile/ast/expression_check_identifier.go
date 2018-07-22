@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error) {
+func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	identifier := e.Data.(*ExpressionIdentifier)
 	if identifier.Name == NoNameIdentifier {
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
@@ -38,9 +38,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (t *Type, err error
 		t.Class = block.InheritedAttribute.Class
 		return t, nil
 	}
-
 	fromImport := false
-	//fmt.Println(e.Pos)
 	d, err := block.searchIdentifier(identifier.Name)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)

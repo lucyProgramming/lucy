@@ -104,7 +104,7 @@ const (
 	TokenSynchronized  // synchronized
 	TokenFinal         // final
 	TokenGlobal        // global
-	TokenVargs         // ...
+	TokenVArgs         // ...
 	TokenEof           // end of file
 )
 

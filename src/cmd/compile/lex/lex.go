@@ -84,7 +84,9 @@ func (lex *Lexer) parseInt(bs []byte) int64 {
 	if bs[0] == '0' {
 		base = 8
 	}
-	if len(bs) >= 2 && bs[0] == '0' && (bs[1] == 'X' || bs[1] == 'x') { // correct base to hex
+	if len(bs) >= 2 &&
+		bs[0] == '0' &&
+		(bs[1] == 'X' || bs[1] == 'x') { // correct base to hex
 		base = 16
 		bs = bs[2:]
 	}
@@ -133,9 +135,9 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	c, eof = lex.getChar()
 	floatPart := []byte{}
-	isFloat := false // float or double
-	if c == '.' {    // float numbers
-		isFloat = true
+	haveFloatPart := false // float or double
+	if c == '.' {          // float numbers
+		haveFloatPart = true
 		c, eof = lex.getChar()
 		for eof == false {
 			if lex.isDigit(c) {
@@ -149,7 +151,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	} else {
 		lex.unGetChar()
 	}
-	if isHex && isFloat {
+	if isHex && haveFloatPart {
 		token.Type = TokenLiteralInt
 		token.Data = 0
 		err = fmt.Errorf("mix up float and hex")
@@ -162,14 +164,23 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	c, eof = lex.getChar()
 	if c == 'l' || c == 'L' {
 		isLong = true
+		if haveFloatPart {
+			err = fmt.Errorf("mixup float and long")
+		}
 	} else if c == 'f' || c == 'F' {
-		isFloat = true
+		haveFloatPart = true
 	} else if c == 's' || c == 'S' {
 		isShort = true
+		if haveFloatPart {
+			err = fmt.Errorf("mixup float and short")
+		}
 	} else if c == 'd' || c == 'D' {
 		isDouble = true
 	} else if c == 'b' || c == 'B' {
 		isByte = true
+		if haveFloatPart {
+			err = fmt.Errorf("mixup float and byte")
+		}
 	} else {
 		lex.unGetChar()
 	}
@@ -193,7 +204,6 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		} else {
 			err = fmt.Errorf("wrong format scientific notation")
 		}
-
 		if lex.isDigit(c) == false {
 			lex.unGetChar() //
 			err = fmt.Errorf("wrong format scientific notation")
@@ -231,7 +241,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	if isScientificNotation == false {
-		if isFloat {
+		if haveFloatPart {
 			value := parseFloat(floatPart) + float64(lex.parseInt(integerPart))
 			if isDouble {
 				token.Type = TokenLiteralDouble
@@ -257,7 +267,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 				if int32(value) > math.MaxInt16 {
 					err = fmt.Errorf("max short is %v", math.MaxInt16)
 				}
-			} else {
+			} else { // int
 				token.Type = TokenLiteralInt
 				token.Data = int32(value)
 			}
@@ -285,10 +295,9 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			token.Data = int32(value)
 		} else { // float
 			integerPart = append(integerPart, floatPart[0:p]...)
-			fmt.Println(floatPart[p:], parseFloat(floatPart[p:]))
 			value := float64(lex.parseInt(integerPart)) + parseFloat(floatPart[p:])
 			token.Type = TokenLiteralFloat
-			token.Data = value
+			token.Data = float32(value)
 		}
 	} else { // power is negative,must be float number
 		b := make([]byte, p-len(integerPart))
@@ -299,10 +308,11 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		b = append(b, floatPart...)
 		value := parseFloat(b)
 		token.Type = TokenLiteralFloat
-		token.Data = value
+		token.Data = float32(value)
 	}
 	return
 }
+
 func (lex *Lexer) looksLikeT(bs []byte) bool {
 	if len(bs) == 0 {
 		return false
@@ -323,8 +333,8 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
 	token.StartColumn = lex.column - 1 // c is read
+	token.Offset = lex.offset - 1      // c is read
 	bs := []byte{c}
-	token.Offset = lex.offset - 1 // read
 	c, eof := lex.getChar()
 	for eof == false {
 		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {
@@ -366,7 +376,7 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 
 func (lex *Lexer) tryLexElseIf() (is bool) {
 	c, eof := lex.getChar()
-	for (c == ' ' || c == '\t' || c == '\r') && eof == false {
+	for (c == ' ' || c == '\t') && eof == false {
 		c, eof = lex.getChar()
 	}
 	if eof {
@@ -383,9 +393,9 @@ func (lex *Lexer) tryLexElseIf() (is bool) {
 		return
 	}
 	c, eof = lex.getChar()
-	if c != ' ' && c != '\t' && c != '\r' { // white list
+	if c != ' ' && c != '\t' { // white list expect ' ' or '\t'
 		lex.unGetChar()
-		lex.unGetChar2(2)
+		lex.unGetChar2(2) // un get 'i' and 'f'
 		return
 	}
 	is = true
@@ -449,14 +459,14 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 				err = fmt.Errorf("unexpect EOF")
 				continue
 			}
-			if !lex.isHex(c) {
+			if false == lex.isHex(c) {
 				err = fmt.Errorf("unknown escape sequence")
 				continue
 			}
 			b := lex.hexByte2ByteValue(c1)
 			c2, eof = lex.getChar()
 			if lex.isHex(c2) {
-				if t := b*16 + lex.hexByte2ByteValue(c2); t < 127 { // only support standard ascii
+				if t := b*16 + lex.hexByte2ByteValue(c2); t <= 127 { // only support standard ascii
 					b = t
 				} else {
 					lex.unGetChar()
@@ -520,21 +530,23 @@ redo:
 	goto redo
 }
 
-func (lex *Lexer) lexVargs() (is bool) {
+/*
+	one '.' is read
+*/
+func (lex *Lexer) lexVArgs() (is bool) {
 	c, _ := lex.getChar()
 	if c != '.' {
 		lex.unGetChar()
 		return
 	}
-	// ..
+	// current '..'
 	c, _ = lex.getChar()
 	if c != '.' {
 		lex.unGetChar()
 		lex.unGetChar2(1)
 		return
 	}
-
-	// ...
+	// current '...'
 	c, _ = lex.getChar()
 	if c == '.' {
 		lex.unGetChar()
@@ -550,25 +562,23 @@ func (lex *Lexer) Next() (token *Token, err error) {
 redo:
 	token = &Token{}
 	var c byte
-	token.StartLine = lex.line
-	token.StartColumn = lex.column
 	c, eof := lex.getChar()
 	if eof {
 		token.Type = TokenEof
 		token.Description = "EOF"
 		return
 	}
-	for c == ' ' || c == '\t' || c == '\r' {
-		token.StartLine = lex.line
-		token.StartColumn = lex.column
+	for c == ' ' || c == '\t' || c == '\r' { // skip empty
 		c, eof = lex.getChar()
 	}
+	token.StartLine = lex.line
+	token.StartColumn = lex.column
 	if eof {
 		token.Type = TokenEof
 		token.Description = "EOF"
 		return
 	}
-	if lex.isLetter(c) || c == '_' || c == '$' {
+	if lex.isLetter(c) || c == '_' || c == '$' { // start of a identifier
 		return lex.lexIdentifier(c)
 	}
 	if lex.isDigit(c) {
@@ -776,8 +786,8 @@ redo:
 		token.Type = TokenLf
 		token.Description = "\\n"
 	case '.':
-		if lex.lexVargs() {
-			token.Type = TokenVargs
+		if lex.lexVArgs() {
+			token.Type = TokenVArgs
 			token.Description = "..."
 		} else {
 			token.Type = TokenSelection

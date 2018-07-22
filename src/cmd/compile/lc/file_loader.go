@@ -388,7 +388,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTemplateFunction) {
 		attr := &cg.AttributeTemplateFunction{}
 		attr.FromBytes(c, v.Info)
-		f, es := ast.ParseFunctionHandler([]byte(attr.Code), &ast.Position{
+		f, es := ast.ParseFunctionHandler([]byte(attr.Code), &ast.Pos{
 			Filename:    attr.Filename,
 			StartLine:   int(attr.StartLine),
 			StartColumn: int(attr.StartColumn),

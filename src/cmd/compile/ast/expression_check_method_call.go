@@ -29,14 +29,37 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
 					errMsgPrefix(e.Pos), call.Name))
 			}
+			methodCall := e.Data.(*ExpressionMethodCall)
+			functionCall := &ExpressionFunctionCall{}
+			functionCall.Args = methodCall.Args
+			functionCall.Function = f
+			functionCall.ParameterTypes = methodCall.ParameterTypes
+			e.Type = ExpressionTypeFunctionCall
+			e.Data = functionCall
+			return e.checkFunctionCall(block, errs, f, functionCall)
+		case *Variable:
+			v := d.(*Variable)
+			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
+				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
+					errMsgPrefix(e.Pos), call.Name))
+			}
+			if v.Type.Type != VariableTypeFunction {
+				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not a function",
+					errMsgPrefix(e.Pos), call.Name))
+				return nil
+			}
 			call := e.Data.(*ExpressionMethodCall)
+			if len(call.ParameterTypes) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s variable '%s' cannot be a template fucntion",
+					errMsgPrefix(e.Pos), call.Name))
+			}
 			callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
-			_, vArgs, es := f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
-			ret := f.Type.getReturnTypes(e.Pos)
+			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
 			if esNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
-			call.PackageFunction = f
+			call.PackageGlobalVariableFunctionHandler = v
 			call.VArgs = vArgs
 			return ret
 		case *Class:
@@ -75,27 +98,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				return []*Type{conversion.Type}
 			}
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
-		case *Variable:
-			v := d.(*Variable)
-			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
-				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
-					errMsgPrefix(e.Pos), call.Name))
-			}
-			if v.Type.Type != VariableTypeFunction {
-				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not a function",
-					errMsgPrefix(e.Pos), call.Name))
-				return nil
-			}
-			call := e.Data.(*ExpressionMethodCall)
-			callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
-			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
-			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
-			if esNotEmpty(es) {
-				*errs = append(*errs, es...)
-			}
-			call.PackageGlobalVariableFunctionHandler = v
-			call.VArgs = vArgs
-			return ret
 		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
 				errMsgPrefix(e.Pos), call.Name))

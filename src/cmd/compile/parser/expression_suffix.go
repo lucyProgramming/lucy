@@ -310,9 +310,9 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		expressionParser.parser.token.Type == lex.TokenLp ||
 		expressionParser.parser.token.Type == lex.TokenLb ||
 		expressionParser.parser.token.Type == lex.TokenSelection ||
-		expressionParser.parser.token.Type == lex.TokenVargs {
+		expressionParser.parser.token.Type == lex.TokenVArgs {
 		// ++ or --
-		if expressionParser.parser.token.Type == lex.TokenVargs {
+		if expressionParser.parser.token.Type == lex.TokenVArgs {
 			newExpression := &ast.Expression{}
 			newExpression.Type = ast.ExpressionTypeVArgs
 			newExpression.Data = suffix

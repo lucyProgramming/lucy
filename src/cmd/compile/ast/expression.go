@@ -12,8 +12,8 @@ const (
 	ExpressionTypeShort                  // 100s
 	ExpressionTypeInt                    // 100
 	ExpressionTypeLong                   // 100L
-	ExpressionTypeFloat                  //1.0
-	ExpressionTypeDouble                 //1.0d
+	ExpressionTypeFloat                  // 1.0
+	ExpressionTypeDouble                 // 1.0d
 	ExpressionTypeString                 // "hello world"
 	ExpressionTypeArray                  // []bool{false,true}
 	ExpressionTypeLogicalOr              // a || b
@@ -184,7 +184,7 @@ func (e *Expression) OpName() string {
 	case ExpressionTypeBitwiseNot:
 		return "~"
 	case ExpressionTypeIdentifier:
-		return fmt.Sprintf("identifier_%s", e.Data.(*ExpressionIdentifier).Name)
+		return e.Data.(*ExpressionIdentifier).Name
 	case ExpressionTypeNull:
 		return "null"
 	case ExpressionTypeNew:
@@ -221,22 +221,26 @@ func (e *Expression) OpName() string {
 }
 
 type Expression struct {
-	Type                  int
-	IsPublic              bool // only for global variable definition
+	Type int
+	/*
+		only for global variable definition
+		public hello = "hai...."
+	*/
+	IsPublic              bool
 	IsCompileAuto         bool // compile auto expression
 	Value                 *Type
 	MultiValues           []*Type
-	Pos                   *Position
+	Pos                   *Pos
 	Data                  interface{}
 	IsStatementExpression bool
 }
 
-func (e *Expression) ConvertTo(t *Type) {
+func (e *Expression) ConvertTo(to *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
 	*c.Expression = *e // copy
-	c.Type = t
-	e.Value = t
+	c.Type = to
+	e.Value = to
 	e.Type = ExpressionTypeCheckCast
 	e.IsCompileAuto = true
 	e.Data = c
@@ -294,7 +298,7 @@ func (e *Expression) fromConst(c *Constant) {
 type ExpressionTypeAlias struct {
 	Name string
 	Type *Type
-	Pos  *Position
+	Pos  *Pos
 }
 
 type ExpressionQuestion struct {
@@ -426,7 +430,7 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	return len(e.Data.([]*Expression)) > n
 }
 
-func (e *Expression) HaveOnlyOneValue() bool {
+func (e *Expression) IsOneValue() bool {
 	if e.MayHaveMultiValue() {
 		return len(e.MultiValues) == 1
 	}
@@ -460,7 +464,13 @@ func (e *Expression) MayHaveMultiValue() bool {
 		e.Type == ExpressionTypeMethodCall ||
 		e.Type == ExpressionTypeTypeAssert
 }
+func (e *Expression) HaveMore1Value() bool {
+	return e.HaveMoreNValue(1)
+}
 
+func (e *Expression) HaveMoreNValue(n int) bool {
+	return e.MayHaveMultiValue() && len(e.MultiValues) > n
+}
 func (e *Expression) CallHasReturnValue() bool {
 	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()
 }
@@ -471,28 +481,26 @@ type ExpressionFunctionCall struct {
 	BuildInFunctionMeta      interface{} // for build in function only
 	Expression               *Expression
 	Args                     CallArgs
+	VArgs                    *CallVArgs
 	Function                 *Function
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
 	FunctionPointer          *FunctionType
-	VArgs                    *CallVArgs
 }
 
-//func (e *ExpressionFunctionCall) FromMethodCall(call *ExpressionMethodCall) *ExpressionFunctionCall {
-//	e.Args = call.Args
-//	return e
-//}
-
 type ExpressionMethodCall struct {
-	Class                                *Class //
-	Expression                           *Expression
-	Args                                 CallArgs
-	Name                                 string
-	Method                               *ClassMethod
-	FieldMethodHandler                   *ClassField
-	ParameterTypes                       []*Type // unSupport !!!!!!
-	VArgs                                *CallVArgs
-	PackageFunction                      *Function
+	Class              *Class //
+	Expression         *Expression
+	Args               CallArgs
+	VArgs              *CallVArgs
+	Name               string
+	Method             *ClassMethod
+	FieldMethodHandler *ClassField
+	/*
+		unSupport !!!!!!
+	*/
+	ParameterTypes []*Type
+	//PackageFunction                      *Function
 	PackageGlobalVariableFunctionHandler *Variable
 }
 

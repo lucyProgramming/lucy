@@ -6,18 +6,18 @@ import (
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionFunctionCall)
-	callExpression, es := call.Expression.checkSingleValueContextExpression(block)
+	on, es := call.Expression.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if callExpression == nil {
+	if on == nil {
 		return nil
 	}
-	if callExpression.Type == VariableTypeClass { // cast type
+	if on.Type == VariableTypeClass { // cast type
 		typeConversion := &ExpressionTypeConversion{}
 		typeConversion.Type = &Type{}
 		typeConversion.Type.Type = VariableTypeObject
-		typeConversion.Type.Class = callExpression.Class
+		typeConversion.Type.Class = on.Class
 		typeConversion.Type.Pos = e.Pos
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
@@ -33,9 +33,9 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		}
 		return []*Type{ret}
 	}
-	if callExpression.Type == VariableTypeTypeAlias {
+	if on.Type == VariableTypeTypeAlias {
 		typeConversion := &ExpressionTypeConversion{}
-		typeConversion.Type = callExpression.AliasType
+		typeConversion.Type = on.AliasType
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
 				errMsgPrefix(e.Pos)))
@@ -50,26 +50,30 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		}
 		return []*Type{ret}
 	}
-	if callExpression.Type != VariableTypeFunction {
+	if on.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
 			errMsgPrefix(e.Pos),
-			call.Expression.OpName(), callExpression.TypeString()))
+			call.Expression.OpName(), on.TypeString()))
 		return nil
 	}
 	if call.Expression.Type == ExpressionTypeFunctionLiteral {
-		//get function pointer
-		callExpression.Function = call.Expression.Data.(*Function)
+		on.Function = call.Expression.Data.(*Function)
+		/*
+			fn() {
+			}()
+			no name function is statement too
+		*/
 		call.Expression.IsStatementExpression = true
 	}
-	if callExpression.Function != nil {
-		call.Function = callExpression.Function
-		if callExpression.Function.IsBuildIn {
-			return e.checkBuildInFunctionCall(block, errs, callExpression.Function, call)
+	if on.Function != nil {
+		call.Function = on.Function
+		if on.Function.IsBuildIn {
+			return e.checkBuildInFunctionCall(block, errs, on.Function, call)
 		} else {
-			return e.checkFunctionCall(block, errs, callExpression.Function, call)
+			return e.checkFunctionCall(block, errs, on.Function, call)
 		}
 	}
-	return e.checkFunctionPointerCall(block, errs, callExpression.FunctionType, call)
+	return e.checkFunctionPointerCall(block, errs, on.FunctionType, call)
 }
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
@@ -96,21 +100,17 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 	} else { // not template function
 		if len(call.ParameterTypes) > 0 {
-			*errs = append(*errs, fmt.Errorf("%s function is not a template function,cannot not have typed parameters",
+			*errs = append(*errs, fmt.Errorf("%s function is not a template function",
 				errMsgPrefix(e.Pos)))
 		}
 	}
 	var ret []*Type
-	if f.TemplateFunction == nil {
-		ret = f.Type.getReturnTypes(e.Pos)
-	} else {
-		ret = tf.Type.getReturnTypes(e.Pos)
-	}
 	{
 		f := f // override f
 		if f.TemplateFunction != nil {
 			f = tf
 		}
+		ret = f.Type.getReturnTypes(e.Pos)
 		var es []error
 		_, call.VArgs, es = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
 		if esNotEmpty(es) {

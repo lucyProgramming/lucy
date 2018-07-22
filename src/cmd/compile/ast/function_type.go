@@ -19,7 +19,7 @@ func (functionType *FunctionType) NoReturnValue() bool {
 type ParameterList []*Variable
 type ReturnList []*Variable
 
-func (functionType FunctionType) getReturnTypes(pos *Position) []*Type {
+func (functionType FunctionType) getReturnTypes(pos *Pos) []*Type {
 	if functionType.ReturnList == nil || len(functionType.ReturnList) == 0 {
 		t := &Type{}
 		t.Type = VariableTypeVoid // means no return ;
@@ -42,7 +42,7 @@ func (functionType FunctionType) getParameterTypes() []*Type {
 	return ret
 }
 
-func (functionType *FunctionType) fitCallArgs(from *Position, args *CallArgs,
+func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 	callArgsTypes []*Type, f *Function) (match bool, vArgs *CallVArgs, errs []error) {
 	errs = []error{}
 	for _, v := range *args {

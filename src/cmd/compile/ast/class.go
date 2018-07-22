@@ -15,7 +15,7 @@ type Class struct {
 	resolveFieldsAndMethodsTypeCalled bool
 	NotImportedYet                    bool   // not imported
 	Name                              string // binary name
-	Pos                               *Position
+	Pos                               *Pos
 	IsJava                            bool //class imported from CLASSPATH
 	IsGlobal                          bool
 	Block                             Block
@@ -71,6 +71,7 @@ func (c *Class) check(father *Block) []error {
 }
 
 func (c *Class) checkPhase1() []error {
+	c.mkDefaultConstruction()
 	errs := c.Block.checkConstants()
 	err := c.resolveFather()
 	if err != nil {
@@ -134,6 +135,9 @@ func (c *Class) checkPhase2() []error {
 
 func (c *Class) mkDefaultConstruction() {
 	if c.IsInterface() {
+		return
+	}
+	if c.IsAbstract() {
 		return
 	}
 	if c.Methods == nil {
@@ -497,7 +501,7 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 	return errs
 }
 
-func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos *Position) (*ClassMethod, bool) {
+func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos *Pos) (*ClassMethod, bool) {
 	if c.Methods == nil || len(c.Methods[m.Function.Name]) == 0 {
 		//no same name method at current class
 		if c.Name == JavaRootClass {
@@ -738,7 +742,7 @@ func (c *Class) loadSuperClass() error {
 	return nil
 }
 
-func (c *Class) matchConstructionFunction(from *Position, errs *[]error, no *ExpressionNew,
+func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *ExpressionNew,
 	call *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf()
 	if err != nil {

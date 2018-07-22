@@ -24,7 +24,7 @@ type Function struct {
 	Closure                             Closure
 	Name                                string // if name is nil string,means no name function
 	Block                               Block
-	Pos                                 *Position
+	Pos                                 *Pos
 	Descriptor                          string
 	AutoVariableForException            *AutoVariableForException
 	AutoVariableForReturnBecauseOfDefer *AutoVariableForReturnBecauseOfDefer
@@ -48,7 +48,7 @@ func (f *Function) NameLiteralFunction() string {
 	return t
 }
 
-type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Position)
+type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos)
 
 type buildFunctionChecker CallChecker
 

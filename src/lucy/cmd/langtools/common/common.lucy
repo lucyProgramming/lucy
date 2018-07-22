@@ -6,7 +6,7 @@ import "java/io";
 public fn getLucyRoot()->(path string , err error ){
 	envs := os.getEnvs();
 	if envs.keyExist("LUCYROOT") == false {
-		err = new error(``"env variable LUCYROOT is not set");
+		err = new error("env variable LUCYROOT is not set");
 		return ;
 	}
 	path = envs["LUCYROOT"];

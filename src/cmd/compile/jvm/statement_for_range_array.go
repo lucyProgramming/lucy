@@ -29,6 +29,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	context.MakeStackMap(code, state, code.CodeLength+11)
 	state.popStack(1)
 	code.CodeLength += 8
+	// code.CodeLength += 3
 	s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
 	forState := (&StackMapState{}).FromLast(state)
 	defer func() {
