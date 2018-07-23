@@ -28,7 +28,7 @@ public class ArrayBool   {
 		
 	}
 	private ArrayBool(){
-
+			
 	}
 	public void set(int index , boolean value) {
 		if (index < 0 ){

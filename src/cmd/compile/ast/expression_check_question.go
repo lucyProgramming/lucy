@@ -19,6 +19,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(question.Selection.Pos), question.Selection.OpName()))
 		}
 	}
+
 	True, es := question.True.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)

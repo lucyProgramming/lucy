@@ -13,6 +13,11 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 	if on == nil {
 		return nil
 	}
+	if on.RightValueValid() == false {
+		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
+			errMsgPrefix(conversion.Expression.Pos), on.TypeString()))
+		return nil
+	}
 	err := conversion.Type.resolve(block)
 	if err != nil {
 		*errs = append(*errs, err)

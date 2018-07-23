@@ -112,6 +112,11 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	}
 	ret := left.Clone()
 	ret.Pos = e.Pos
+	if right.RightValueValid() == false {
+		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
+			errMsgPrefix(bin.Right.Pos), right.TypeString()))
+		return ret
+	}
 	/*
 		var  s string;
 		s += "11111111";

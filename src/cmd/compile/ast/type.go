@@ -78,7 +78,7 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 }
 
 func (typ *Type) mkDefaultValueExpression() *Expression {
-	var e Expression
+	e := &Expression{}
 	e.IsCompileAuto = true
 	e.Pos = typ.Pos
 	e.Value = typ.Clone()
@@ -120,7 +120,7 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	case VariableTypeArray:
 		e.Type = ExpressionTypeNull
 	}
-	return &e
+	return e
 }
 
 func (typ *Type) RightValueValid() bool {
@@ -279,29 +279,34 @@ func (typ *Type) resolveName(block *Block, subPart bool) error {
 	var d interface{}
 	if strings.Contains(typ.Name, ".") == false {
 		d = block.searchType(typ.Name)
-		loadFromImport := (d == nil)
-		if loadFromImport == false { // d is not nil
-			switch d.(type) {
-			case *Class:
-				if t := d.(*Class); t == nil {
-					loadFromImport = true
-				} else {
-					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
-				}
-			case *Type:
-				if t := d.(*Type); t == nil {
-					loadFromImport = true
-				} else {
-					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
-				}
-			case *Enum:
-				if t := d.(*Enum); t == nil {
-					loadFromImport = true
-				} else {
-					_, loadFromImport = shouldAccessFromImports(t.Name, t.Pos, t.Pos)
+		var loadFromImport bool
+		if d != nil {
+			if loadFromImport == false { // d is not nil
+				switch d.(type) {
+				case *Class:
+					if t := d.(*Class); t != nil && t.IsBuildIn {
+						loadFromImport = false
+					} else {
+						_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
+					}
+				case *Type:
+					if t := d.(*Type); t != nil && t.IsBuildIn {
+						loadFromImport = false
+					} else {
+						_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
+					}
+				case *Enum:
+					if t := d.(*Enum); t != nil && t.IsBuildIn {
+						loadFromImport = true
+					} else {
+						_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
+					}
 				}
 			}
+		} else {
+			loadFromImport = true
 		}
+
 		if loadFromImport {
 			d, err = typ.resolveNameFromImport()
 			if err != nil {

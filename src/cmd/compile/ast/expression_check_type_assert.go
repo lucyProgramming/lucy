@@ -16,6 +16,11 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	if object == nil {
 		return nil
 	}
+	if object.RightValueValid() == false {
+		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
+			errMsgPrefix(e.Pos), object.TypeString()))
+		return nil
+	}
 	if object.IsPointer() == false {
 		*errs = append(*errs, fmt.Errorf("%s expression is not pointer", errMsgPrefix(e.Pos)))
 		return nil
