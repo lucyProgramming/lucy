@@ -59,7 +59,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 			a<int , ... >
 		*/
 		expressionParser.Next(lfNotToken) // skip <
-		ts, err := expressionParser.parser.parseTypes()
+		ts, err := expressionParser.parser.parseTypes(lex.TokenGt)
 		if err != nil {
 			return result, err
 		}

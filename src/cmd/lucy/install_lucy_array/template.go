@@ -9,7 +9,7 @@ public class ArrayTTT   {
 	public int start;
 	public int end; // not include
 	public int cap;
-	static String outOfRagneMsg = "index out range";
+	static String outOfRangeMsg = "index out range";
 	public TTT[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -34,16 +34,22 @@ public class ArrayTTT   {
 
 	}
 	public void set(int index , TTT value) {
+		if (index < 0 ){
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
 		index += this.start ; 
 		if (index >= this.end ){
-			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		this.elements[index] = value ; 
 	}
 	public TTT get(int index) {
+		if (index < 0 ){
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
 		index += this.start ; 
 		if (index >= this.end){
-			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
 	}	
@@ -51,7 +57,7 @@ public class ArrayTTT   {
 
 	public ArrayTTT slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
-			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
 		ArrayTTT result = new ArrayTTT();
 		result.elements = this.elements;

@@ -31,7 +31,7 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Pos) (*ast.Statemen
 	statementSwitchTemplate.Condition = condition
 	for blockParser.parser.token.Type == lex.TokenCase {
 		blockParser.Next(lfNotToken) // skip case
-		ts, err := blockParser.parser.parseTypes()
+		ts, err := blockParser.parser.parseTypes(lex.TokenColon)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return statementSwitchTemplate, err

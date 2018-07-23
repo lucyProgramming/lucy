@@ -3,6 +3,7 @@ package ast
 import "fmt"
 
 type Enum struct {
+	IsBuildIn   bool
 	AccessFlags uint16
 	Name        string
 	Pos         *Pos

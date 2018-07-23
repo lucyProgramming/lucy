@@ -59,7 +59,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			if esNotEmpty(es) {
 				*errs = append(*errs, es...)
 			}
-			call.PackageGlobalVariableFunctionHandler = v
+			call.PackageGlobalVariableFunction = v
 			call.VArgs = vArgs
 			return ret
 		case *Class:

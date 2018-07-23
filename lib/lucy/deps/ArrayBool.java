@@ -6,7 +6,7 @@ public class ArrayBool   {
 	public int start;
 	public int end; // not include
 	public int cap;
-	static String outOfRagneMsg = "index out range";
+	static String outOfRangeMsg = "index out range";
 	public boolean[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -31,16 +31,22 @@ public class ArrayBool   {
 
 	}
 	public void set(int index , boolean value) {
+		if (index < 0 ){
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
 		index += this.start ; 
 		if (index >= this.end ){
-			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		this.elements[index] = value ; 
 	}
 	public boolean get(int index) {
+		if (index < 0 ){
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
 		index += this.start ; 
 		if (index >= this.end){
-			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
 	}	
@@ -48,7 +54,7 @@ public class ArrayBool   {
 
 	public ArrayBool slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
-			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
 		ArrayBool result = new ArrayBool();
 		result.elements = this.elements;

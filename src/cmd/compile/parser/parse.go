@@ -258,22 +258,6 @@ func (parser *Parser) Parse() []error {
 	return parser.errs
 }
 
-func (parser *Parser) parseTypes() ([]*ast.Type, error) {
-	ret := []*ast.Type{}
-	for parser.token.Type != lex.TokenEof {
-		t, err := parser.parseType()
-		if err != nil {
-			return ret, err
-		}
-		ret = append(ret, t)
-		if parser.token.Type != lex.TokenComma {
-			break
-		}
-		parser.Next(lfNotToken) // skip ,
-	}
-	return ret, nil
-}
-
 func (parser *Parser) validAfterPublic() error {
 	if parser.token.Type == lex.TokenFunction ||
 		parser.token.Type == lex.TokenClass ||

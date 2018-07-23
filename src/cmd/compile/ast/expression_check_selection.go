@@ -87,7 +87,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Pos = e.Pos
 			result.Type = VariableTypeFunction
 			result.FunctionType = &f.Type
-			selection.Function = f
+			selection.PackageFunction = f
 			return result
 		}
 		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)

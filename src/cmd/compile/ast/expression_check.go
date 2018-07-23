@@ -278,7 +278,14 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 	case ExpressionTypeFunctionLiteral:
 		f := e.Data.(*Function)
-		errs = f.check(block)
+		if e.IsStatementExpression == false && f.Name != "" {
+			errs = append(errs,
+				fmt.Errorf("%s function literal named '%s' expect no name", errMsgPrefix(e.Pos), f.Name))
+		}
+		es := f.check(block)
+		if esNotEmpty(es) {
+			errs = append(errs, es...)
+		}
 		f.IsClosureFunction = f.Closure.NotEmpty(f)
 		if e.IsStatementExpression {
 			err := block.Insert(f.Name, f.Pos, f)
@@ -292,6 +299,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			Pos:          e.Pos,
 			FunctionType: &f.Type,
 		}
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeList:
 		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 			"this may be cause be compiler error,please contact the author",
@@ -323,7 +331,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 				errMsgPrefix(e.Pos)))
 			return
 		}
-		t.IsVargs = true
+		t.IsVArgs = true
 	default:
 		panic(fmt.Sprintf("unhandled type:%v", e.OpName()))
 	}

@@ -40,7 +40,6 @@ func (s *StatementSwitch) check(block *Block) []error {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
 			errMsgPrefix(s.Pos)))
 	}
-
 	byteMap := make(map[byte]*Pos)
 	shortMap := make(map[int32]*Pos)
 	int32Map := make(map[int32]*Pos)

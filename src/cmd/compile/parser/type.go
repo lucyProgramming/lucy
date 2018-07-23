@@ -153,7 +153,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Pos:     pos,
 			Type:    ast.VariableTypeJavaArray,
 			Array:   ret,
-			IsVargs: true,
+			IsVArgs: true,
 		}
 		ret = newRet
 		return ret, nil
@@ -194,7 +194,10 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenMap ||
 		parser.token.Type == lex.TokenIdentifier ||
 		parser.token.Type == lex.TokenTemplate
-
+}
+func (parser *Parser) looksLikeType() bool {
+	return parser.isValidTypeBegin() &&
+		parser.token.Type != lex.TokenIdentifier
 }
 func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 	name := parser.token.Data.(string)
@@ -213,5 +216,33 @@ func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 		parser.Next(lfIsToken) // skip identifier
 	}
 	ret.Name = name
+	return ret, nil
+}
+
+func (parser *Parser) parseTypes(endTokens ...int) ([]*ast.Type, error) {
+	ret := []*ast.Type{}
+	for parser.token.Type != lex.TokenEof {
+		t, err := parser.parseType()
+		if err != nil {
+			return ret, err
+		}
+		ret = append(ret, t)
+		if parser.token.Type != lex.TokenComma {
+			if parser.isValidTypeBegin() {
+				parser.errs = append(parser.errs, fmt.Errorf("%s missing comma",
+					parser.errorMsgPrefix()))
+				continue
+			}
+			break
+		}
+		parser.Next(lfNotToken) // skip ,
+		for _, v := range endTokens {
+			if v == parser.token.Type {
+				parser.errs = append(parser.errs, fmt.Errorf("%s extra comma", parser.errorMsgPrefix()))
+				goto end
+			}
+		}
+	}
+end:
 	return ret, nil
 }

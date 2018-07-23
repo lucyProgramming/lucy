@@ -14,6 +14,7 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
+	//fmt.Println(e.Pos)
 	switch e.Type {
 	case ast.ExpressionTypeTypeAlias:
 		return // handled at ast stage

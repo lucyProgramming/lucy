@@ -7,8 +7,8 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	selection := e.Data.(*ast.ExpressionSelection)
 	if selection.Expression.Value.Type == ast.VariableTypePackage {
-		maxStack = jvmSlotSize(e.Value)
 		if selection.PackageVariable != nil {
+			maxStack = jvmSlotSize(e.Value)
 			if selection.PackageVariable.JvmDescriptor == "" {
 				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(e.Value)
 			}
@@ -19,11 +19,45 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 				Descriptor: selection.PackageVariable.JvmDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+			return
 		}
 		if selection.PackageEnumName != nil {
 			loadInt32(class, code, selection.PackageEnumName.Value)
+			maxStack = 1
+			return
 		}
-		return
+		if selection.PackageFunction != nil { // pack to method handle
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles",
+				Method:     "lookup",
+				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertClassConst(selection.Expression.Value.Package.Name+"/main",
+				code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+				Descriptor: Descriptor.methodDescriptor(&selection.PackageFunction.Type),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles$Lookup",
+				Method:     "findStatic",
+				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			if 4 > maxStack {
+				maxStack = 4
+			}
+			return
+		}
 	}
 	// check cast to super class
 	if selection.Name == ast.SUPER {
@@ -36,38 +70,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		//		}
 		return
 	}
-	if selection.Function != nil { // pack to method handle
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/invoke/MethodHandles",
-			Method:     "lookup",
-			Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertClassConst(selection.Expression.Value.Package.Name+"/main",
-			code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
-			Descriptor: Descriptor.methodDescriptor(&selection.Function.Type),
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/invoke/MethodHandles$Lookup",
-			Method:     "findStatic",
-			Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		if 4 > maxStack {
-			maxStack = 4
-		}
-		return
-	}
+
 	if selection.Method != nil { // pack to method handle
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

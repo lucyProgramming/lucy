@@ -33,10 +33,11 @@ const (
 )
 
 type Type struct {
-	IsVargs      bool
+	Type         int
+	IsBuildIn    bool // build in type alias
+	IsVArgs      bool
 	Resolved     bool
 	Pos          *Pos
-	Type         int
 	Name         string
 	Array        *Type
 	Class        *Class
@@ -406,7 +407,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += typ.Map.V.TypeString()
 		*ret += "}"
 	case VariableTypeJavaArray:
-		if typ.IsVargs {
+		if typ.IsVArgs {
 			*ret += typ.Array.TypeString() + "..."
 		} else {
 			*ret += typ.Array.TypeString() + "[]"
@@ -589,7 +590,7 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 		return leftValue.Array.Equal(errs, rightValue.Array)
 	}
 	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
-		if leftValue.IsVargs != rightValue.IsVargs {
+		if leftValue.IsVArgs != rightValue.IsVArgs {
 			return false
 		}
 		return leftValue.Array.Equal(errs, rightValue.Array)
@@ -659,7 +660,7 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
 
 		if typ.Type == VariableTypeJavaArray &&
-			typ.IsVargs != compareTo.IsVargs {
+			typ.IsVArgs != compareTo.IsVArgs {
 			return false
 		}
 		return typ.Array.StrictEqual(compareTo.Array)

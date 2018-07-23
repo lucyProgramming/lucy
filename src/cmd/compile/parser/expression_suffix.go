@@ -360,7 +360,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				newExpression.Pos = expressionParser.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newExpression.Data = slice
-				slice.Expression = suffix
+				slice.ExpressionOn = suffix
 				slice.End = end
 				suffix = newExpression
 				continue
@@ -388,7 +388,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				slice := &ast.ExpressionSlice{}
 				newExpression.Data = slice
 				slice.Start = e
-				slice.Expression = suffix
+				slice.ExpressionOn = suffix
 				slice.End = end
 				suffix = newExpression
 				continue
@@ -448,7 +448,6 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			continue
 		}
 		// aa()
-
 		if expressionParser.parser.token.Type == lex.TokenLp {
 			newExpression, err := expressionParser.parseCallExpression(suffix)
 			if err != nil {

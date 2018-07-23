@@ -89,13 +89,13 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				return nil
 			}
-			if vd, ok := variable.(*Variable); ok && vd != nil {
-				if vd.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && t.Package.Name != PackageBeenCompile.Name {
+			if v, ok := variable.(*Variable); ok && v != nil {
+				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && t.Package.Name != PackageBeenCompile.Name {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
 				}
-				dot.PackageVariable = vd
-				ret = vd.Type.Clone()
+				dot.PackageVariable = v
+				ret = v.Type.Clone()
 				ret.Pos = e.Pos
 				return ret
 			} else {

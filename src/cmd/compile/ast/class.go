@@ -9,6 +9,7 @@ import (
 )
 
 type Class struct {
+	IsBuildIn                         bool
 	Used                              bool
 	resolveFatherCalled               bool
 	resolveInterfacesCalled           bool

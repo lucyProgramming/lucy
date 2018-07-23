@@ -28,10 +28,30 @@ func (p *Package) loadBuildInPackage() error {
 		return err
 	}
 	lucyBuildInPackage = pp.(*Package)
+	lucyBuildInPackage.mkBuildInMark()
 	p.Block.Outer = &lucyBuildInPackage.Block
 	return nil
 }
-
+func (p *Package) mkBuildInMark() {
+	for _, v := range p.Block.Variables {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Constants {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Enums {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Classes {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Functions {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.TypeAliases {
+		v.IsBuildIn = true
+	}
+}
 func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
 		return nil
@@ -49,10 +69,9 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 		f := &Function{}
 		f.Pos = b.Pos
 		f.Block = *b
-		f.isGlobalVariableDefinition = b.IsGlobalVariableDefinitionBlock
 		p.InitFunctions[k] = f
+		f.isGlobalVariableDefinition = b.IsGlobalVariableDefinitionBlock
 		f.Used = true
-		f.isPackageBlockFunction = true
 	}
 }
 

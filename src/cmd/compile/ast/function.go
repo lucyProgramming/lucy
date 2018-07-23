@@ -14,7 +14,6 @@ type Function struct {
 	DefaultValueStartAt                 int
 	IsClosureFunction                   bool
 	isGlobalVariableDefinition          bool
-	isPackageBlockFunction              bool
 	buildInFunctionChecker              buildFunctionChecker // used in build function
 	IsGlobal                            bool
 	IsBuildIn                           bool
@@ -48,9 +47,7 @@ func (f *Function) NameLiteralFunction() string {
 	return t
 }
 
-type CallChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos)
-
-type buildFunctionChecker CallChecker
+type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos)
 
 type AutoVariableForReturnBecauseOfDefer struct {
 	Offset uint16
@@ -244,14 +241,14 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				continue
 			}
 		}
-		if f.HaveDefaultValue && v.Type.IsVargs {
+		if f.HaveDefaultValue && v.Type.IsVArgs {
 			//TODO::
 		}
-		if v.Type.IsVargs && v.Expression != nil {
+		if v.Type.IsVArgs && v.Expression != nil {
 			*errs = append(*errs, fmt.Errorf("%s vargs cannot have default value",
 				errMsgPrefix(v.Type.Pos)))
 		}
-		if v.Type.IsVargs {
+		if v.Type.IsVArgs {
 			if k != len(f.Type.ParameterList)-1 {
 				*errs = append(*errs, fmt.Errorf("%s only last parameter can be use as vargs",
 					errMsgPrefix(v.Type.Pos)))

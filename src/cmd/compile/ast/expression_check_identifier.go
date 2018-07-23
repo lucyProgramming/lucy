@@ -59,7 +59,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
-		if fromImport == false && f.IsGlobal && f.IsBuildIn == false { // try from import
+		if fromImport == false && f.IsBuildIn == false && f.IsGlobal && f.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)
@@ -89,7 +89,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Variable:
 		t := d.(*Variable)
-		if fromImport == false && t.IsGlobal { // try from import
+		if fromImport == false && t.IsGlobal && t.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)
@@ -116,7 +116,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Constant:
 		t := d.(*Constant)
-		if fromImport == false && t.IsGlobal { // try from import
+		if fromImport == false && t.IsGlobal && t.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)
@@ -142,7 +142,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Class:
 		c := d.(*Class)
-		if fromImport == false && c.IsGlobal { // try from import
+		if fromImport == false && c.IsGlobal && c.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)
@@ -168,7 +168,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *EnumName:
 		enumName := d.(*EnumName)
-		if fromImport == false { // try from import
+		if fromImport == false && enumName.Enum.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)
@@ -198,7 +198,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		}
 	case *Type:
 		typ := d.(*Type)
-		if fromImport == false { // try from import
+		if fromImport == false && typ.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, typ.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)
@@ -228,7 +228,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Type = VariableTypePackage
 		result.Package = d.(*Package)
 		return result, nil
-
 	}
 	return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
 		errMsgPrefix(e.Pos), identifier.Name)

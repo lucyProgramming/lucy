@@ -201,9 +201,6 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 				if v.Name == THIS {
 					return nil, fmt.Errorf("capture '%s' not allow", name) // capture this not allow
 				}
-				//if v.IsFunctionParameter {
-				//	return nil, fmt.Errorf("capture function parameter '%s' not allow", name) // capture this not allow
-				//}
 				b.InheritedAttribute.Function.Closure.InsertVar(v)
 			}
 			//cannot search variable from class body
@@ -377,9 +374,8 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	if isMagicIdentifier(name) {
 		return fmt.Errorf("%s '%s' is not a magic identifier", errMsgPrefix(pos), name)
 	}
-	// name exists in buildIn, not allow
 	if lucyBuildInPackage != nil {
-		if _, exits := lucyBuildInPackage.Block.NameExists(name); exits {
+		if searchBuildIns(name) != nil {
 			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
 		}
 	}

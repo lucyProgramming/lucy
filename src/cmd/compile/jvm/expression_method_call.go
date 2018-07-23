@@ -48,15 +48,15 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		//	code.CodeLength += 3
 		//	pop(&call.PackageFunction.Type)
 		//}
-		if call.PackageGlobalVariableFunctionHandler != nil {
+		if call.PackageGlobalVariableFunction != nil {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      call.Expression.Value.Package.Name + "/main",
 				Field:      call.Name,
-				Descriptor: Descriptor.typeDescriptor(call.PackageGlobalVariableFunctionHandler.Type),
+				Descriptor: Descriptor.typeDescriptor(call.PackageGlobalVariableFunction.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			state.pushStack(class, call.PackageGlobalVariableFunctionHandler.Type)
+			state.pushStack(class, call.PackageGlobalVariableFunction.Type)
 			defer state.popStack(1)
 			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 			if t := 1 + stack; t > maxStack {
@@ -66,10 +66,10 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/lang/invoke/MethodHandle",
 				Method:     functionPointerInvokeMethod,
-				Descriptor: Descriptor.methodDescriptor(call.PackageGlobalVariableFunctionHandler.Type.FunctionType),
+				Descriptor: Descriptor.methodDescriptor(call.PackageGlobalVariableFunction.Type.FunctionType),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			pop(call.PackageGlobalVariableFunctionHandler.Type.FunctionType)
+			pop(call.PackageGlobalVariableFunction.Type.FunctionType)
 		}
 		return
 	}

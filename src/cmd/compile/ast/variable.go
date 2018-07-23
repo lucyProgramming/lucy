@@ -1,6 +1,7 @@
 package ast
 
 type Variable struct {
+	IsBuildIn                bool
 	LocalValOffset           uint16
 	IsGlobal                 bool
 	IsFunctionParameter      bool

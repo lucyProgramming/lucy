@@ -25,20 +25,20 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 		}
 	}
 	for _, v := range arr.Expressions {
-		ts, es := v.check(block)
+		eTypes, es := v.check(block)
 		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		if ts != nil {
-			arr.Length += len(ts)
+		if eTypes != nil {
+			arr.Length += len(eTypes)
 		}
-		for _, t := range ts {
-			if t == nil {
+		for _, eType := range eTypes {
+			if eType == nil {
 				continue
 			}
 			if noType && arr.Type == nil {
-				if t.RightValueValid() && t.isTyped() {
-					tmp := t.Clone()
+				if eType.RightValueValid() && eType.isTyped() {
+					tmp := eType.Clone()
 					tmp.Pos = e.Pos
 					arr.Type = &Type{}
 					arr.Type.Type = VariableTypeArray
@@ -46,17 +46,17 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 					arr.Type.Pos = e.Pos
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
-						errMsgPrefix(e.Pos), t.TypeString()))
+						errMsgPrefix(e.Pos), eType.TypeString()))
 				}
 			}
 			if arr.Type != nil {
-				if arr.Type.Array.Equal(errs, t) == false {
+				if arr.Type.Array.Equal(errs, eType) == false {
 					if noType {
 						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
-							errMsgPrefix(t.Pos), arr.Type.Array.TypeString(), t.TypeString()))
+							errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString()))
 					} else {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(t.Pos), t.TypeString(), arr.Type.Array.TypeString()))
+							errMsgPrefix(eType.Pos), eType.TypeString(), arr.Type.Array.TypeString()))
 					}
 				}
 			}

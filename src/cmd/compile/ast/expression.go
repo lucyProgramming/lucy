@@ -59,7 +59,7 @@ const (
 	ExpressionTypeBitwiseNot             // ~a
 	ExpressionTypeIdentifier             // a
 	ExpressionTypeNew                    // new []int(10)
-	ExpressionTypeList                   //
+	ExpressionTypeList                   // a,b := "hello","world"
 	ExpressionTypeFunctionLiteral        // fn() { print("hello world"); }
 	ExpressionTypeVar                    // var a,b int
 	ExpressionTypeConst                  // const a = "hello world"
@@ -308,8 +308,8 @@ type ExpressionQuestion struct {
 }
 
 type ExpressionSlice struct {
-	Expression *Expression
-	Start, End *Expression
+	ExpressionOn *Expression
+	Start, End   *Expression
 }
 
 func (e *Expression) IsLiteral() bool {
@@ -499,9 +499,8 @@ type ExpressionMethodCall struct {
 	/*
 		unSupport !!!!!!
 	*/
-	ParameterTypes []*Type
-	//PackageFunction                      *Function
-	PackageGlobalVariableFunctionHandler *Variable
+	ParameterTypes                []*Type
+	PackageGlobalVariableFunction *Variable
 }
 
 type ExpressionDeclareVariable struct {
@@ -531,7 +530,7 @@ type ExpressionSelection struct {
 	Name            string
 	Field           *ClassField  // expression is class or object
 	Method          *ClassMethod // pack to method handle
-	Function        *Function    // expression is package , pack function to method handle
+	PackageFunction *Function    // expression is package , pack function to method handle
 	PackageVariable *Variable    // expression is package , get package variable
 	PackageEnumName *EnumName    // expression is package , get enumName
 }

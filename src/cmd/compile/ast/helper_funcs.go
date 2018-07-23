@@ -39,10 +39,8 @@ func mkVoidType(pos *Pos) *Type {
 	return t
 }
 
-func checkRightValuesValid(ts []*Type, errs *[]error) (ret []*Type) {
-	ret = []*Type{}
+func checkRightValuesValid(ts []*Type, errs *[]error) []*Type {
 	for _, v := range ts {
-		ret = append(ret, v)
 		if v == nil {
 			continue
 		}
@@ -51,7 +49,7 @@ func checkRightValuesValid(ts []*Type, errs *[]error) (ret []*Type) {
 				errMsgPrefix(v.Pos), v.TypeString()))
 		}
 	}
-	return ret
+	return ts
 }
 
 /*
@@ -75,9 +73,6 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 	if i == nil {
 		return nil, false
 	}
-	/*
-
-	 */
 	return i, alreadyHave.StartLine < from.StartLine
 }
 

@@ -6,7 +6,7 @@ public class ArrayDouble   {
 	public int start;
 	public int end; // not include
 	public int cap;
-	static String outOfRagneMsg = "index out range";
+	static String outOfRangeMsg = "index out range";
 	public double[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -31,16 +31,22 @@ public class ArrayDouble   {
 
 	}
 	public void set(int index , double value) {
+		if (index < 0 ){
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
 		index += this.start ; 
 		if (index >= this.end ){
-			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		this.elements[index] = value ; 
 	}
 	public double get(int index) {
+		if (index < 0 ){
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
 		index += this.start ; 
 		if (index >= this.end){
-			throw new ArrayIndexOutOfBoundsException (outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
 	}	
@@ -48,7 +54,7 @@ public class ArrayDouble   {
 
 	public ArrayDouble slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
-			throw new ArrayIndexOutOfBoundsException(outOfRagneMsg);
+			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
 		ArrayDouble result = new ArrayDouble();
 		result.elements = this.elements;

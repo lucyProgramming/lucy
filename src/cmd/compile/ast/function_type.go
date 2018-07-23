@@ -10,14 +10,13 @@ type FunctionType struct {
 	ReturnList    ReturnList
 	VArgs         *Variable
 }
+type ParameterList []*Variable
+type ReturnList []*Variable
 
 func (functionType *FunctionType) NoReturnValue() bool {
 	return len(functionType.ReturnList) == 0 ||
 		functionType.ReturnList[0].Type.Type == VariableTypeVoid
 }
-
-type ParameterList []*Variable
-type ReturnList []*Variable
 
 func (functionType FunctionType) getReturnTypes(pos *Pos) []*Type {
 	if functionType.ReturnList == nil || len(functionType.ReturnList) == 0 {
@@ -70,7 +69,7 @@ func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 			if t == nil { // some error before
 				return
 			}
-			if t.IsVargs {
+			if t.IsVArgs {
 				if len(callArgsTypes[len(functionType.ParameterList):]) > 1 {
 					errMsg := fmt.Sprintf("%s too many argument to call\n",
 						errMsgPrefix(t.Pos))
