@@ -16,25 +16,25 @@ func init() {
 }
 
 var (
-	untilLp = map[int]bool{
+	untilLp = map[lex.TokenKind]bool{
 		lex.TokenLp: true,
 	}
-	untilRp = map[int]bool{
+	untilRp = map[lex.TokenKind]bool{
 		lex.TokenRp: true,
 	}
-	untilGt = map[int]bool{
+	untilGt = map[lex.TokenKind]bool{
 		lex.TokenGt: true,
 	}
-	untilLc = map[int]bool{
+	untilLc = map[lex.TokenKind]bool{
 		lex.TokenLc: true,
 	}
-	untilRc = map[int]bool{
+	untilRc = map[lex.TokenKind]bool{
 		lex.TokenRc: true,
 	}
-	untilComma = map[int]bool{
+	untilComma = map[lex.TokenKind]bool{
 		lex.TokenComma: true,
 	}
-	untilSemicolonOrLf = map[int]bool{
+	untilSemicolonOrLf = map[lex.TokenKind]bool{
 		lex.TokenSemicolon: true,
 		lex.TokenLf:        true,
 	}

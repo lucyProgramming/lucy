@@ -12,7 +12,6 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength) // let`s pop
 	}()
-
 	for _, e := range args {
 		if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
 			stack, _ := buildExpression.build(class, code, e, context, state)
@@ -53,7 +52,6 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			maxStack = t
 		}
 	} else {
-
 		if vArgs.IsJavaArray {
 			stack, _ := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
 			if t := currentStack + stack; t > maxStack {

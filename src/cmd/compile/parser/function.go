@@ -15,7 +15,7 @@ func (functionParser *FunctionParser) Next(lfIsToken bool) {
 	functionParser.parser.Next(lfIsToken)
 }
 
-func (functionParser *FunctionParser) consume(until map[int]bool) {
+func (functionParser *FunctionParser) consume(until map[lex.TokenKind]bool) {
 	functionParser.parser.consume(until)
 }
 

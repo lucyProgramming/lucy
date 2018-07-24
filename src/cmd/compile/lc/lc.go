@@ -102,6 +102,13 @@ func (lc *LucyCompile) compile() {
 			lc.Errs = append(lc.Errs, err)
 			continue
 		}
+		if len(bs) >= 3 &&
+			bs[0] == 0xef &&
+			bs[1] == 0xbb &&
+			bs[2] == 0xbf {
+			// utf8 bom
+			bs = bs[3:]
+		}
 		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs,
 			compileCommon.CompileFlags.OnlyImport, lc.NErrsStopCompile)...)
 		lc.shouldExit()
@@ -113,9 +120,7 @@ func (lc *LucyCompile) compile() {
 	}
 	c := ast.ConvertTops2Package{}
 	ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName
-
 	rs, errs := c.ConvertTops2Package(lc.Tops)
-
 	lc.Errs = append(lc.Errs, errs...)
 	for _, v := range rs {
 		lc.Errs = append(lc.Errs, v.Error())

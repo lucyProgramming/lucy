@@ -24,10 +24,8 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	values := e.Data.(*ast.ExpressionMap).KeyValuePairs
-
 	hashMapObject := state.newObjectVariableType(javaMapClass)
 	state.pushStack(class, hashMapObject)
-
 	for _, v := range values {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++

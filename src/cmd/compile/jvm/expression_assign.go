@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxStack, remainStack, op, target, className := buildExpression.getLeftValue(class, code, left, context, state)
+	maxStack, remainStack, op, target, LeftValueKind := buildExpression.getLeftValue(class, code, left, context, state)
 	stack, es := buildExpression.build(class, code, right, context, state)
 	if len(es) > 0 {
 		state.pushStack(class, right.Value)
@@ -27,7 +27,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	}
 	currentStack := remainStack + jvmSlotSize(target)
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, className, target)
+		currentStack += buildExpression.controlStack2FitAssign(code, LeftValueKind, target)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
@@ -68,9 +68,9 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	return
 }
 
-func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, leftValueType int,
+func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, leftValueKind LeftValueKind,
 	stackTopType *ast.Type) (increment uint16) {
-	switch leftValueType {
+	switch leftValueKind {
 	case LeftValueTypeLocalVar:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
@@ -122,7 +122,7 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 			code.CodeLength++
 		}
 	default:
-		panic(fmt.Sprintf("unknow %d", leftValueType))
+		panic(fmt.Sprintf("unknow %d", leftValueKind))
 	}
 
 	return

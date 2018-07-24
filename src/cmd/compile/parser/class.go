@@ -29,7 +29,7 @@ func (classParser *ClassParser) Next(lfIsToken bool) {
 	classParser.parser.Next(lfIsToken)
 }
 
-func (classParser *ClassParser) consume(m map[int]bool) {
+func (classParser *ClassParser) consume(m map[lex.TokenKind]bool) {
 	classParser.parser.consume(m)
 }
 

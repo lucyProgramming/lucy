@@ -14,7 +14,7 @@ func (blockParser *BlockParser) Next(lfIsToken bool) {
 	blockParser.parser.Next(lfIsToken)
 }
 
-func (blockParser *BlockParser) consume(c map[int]bool) {
+func (blockParser *BlockParser) consume(c map[lex.TokenKind]bool) {
 	blockParser.parser.consume(c)
 }
 

@@ -10,7 +10,7 @@ import (
 /*
 	store local var according on type and offset
 */
-func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint16) []byte {
+func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough
@@ -21,7 +21,7 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_istore_0}
 		case 1:
@@ -31,13 +31,13 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 		case 3:
 			return []byte{cg.OP_istore_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_istore, byte(variableOffset)}
+			return []byte{cg.OP_istore, byte(offset)}
 		}
 	case ast.VariableTypeLong:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_lstore_0}
 		case 1:
@@ -47,13 +47,13 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 		case 3:
 			return []byte{cg.OP_lstore_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_lstore, byte(variableOffset)}
+			return []byte{cg.OP_lstore, byte(offset)}
 		}
 	case ast.VariableTypeFloat:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_fstore_0}
 		case 1:
@@ -63,13 +63,13 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 		case 3:
 			return []byte{cg.OP_fstore_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_fstore, byte(variableOffset)}
+			return []byte{cg.OP_fstore, byte(offset)}
 		}
 	case ast.VariableTypeDouble:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_dstore_0}
 		case 1:
@@ -79,10 +79,10 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 		case 3:
 			return []byte{cg.OP_dstore_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_dstore, byte(variableOffset)}
+			return []byte{cg.OP_dstore, byte(offset)}
 		}
 	case ast.VariableTypeJavaArray:
 		fallthrough
@@ -95,7 +95,7 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 	case ast.VariableTypeMap:
 		fallthrough
 	case ast.VariableTypeArray:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_astore_0}
 		case 1:
@@ -105,17 +105,17 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uin
 		case 3:
 			return []byte{cg.OP_astore_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_astore, byte(variableOffset)}
+			return []byte{cg.OP_astore, byte(offset)}
 		}
 	default:
 		panic(fmt.Sprintf("typ:%v", variableType))
 	}
 }
 
-func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint16) []byte {
+func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough
@@ -126,7 +126,7 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_iload_0}
 		case 1:
@@ -136,13 +136,13 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 		case 3:
 			return []byte{cg.OP_iload_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_iload, byte(variableOffset)}
+			return []byte{cg.OP_iload, byte(offset)}
 		}
 	case ast.VariableTypeLong:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_lload_0}
 		case 1:
@@ -152,13 +152,13 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 		case 3:
 			return []byte{cg.OP_lload_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_lload, byte(variableOffset)}
+			return []byte{cg.OP_lload, byte(offset)}
 		}
 	case ast.VariableTypeFloat:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_fload_0}
 		case 1:
@@ -168,13 +168,13 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 		case 3:
 			return []byte{cg.OP_fload_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_fload, byte(variableOffset)}
+			return []byte{cg.OP_fload, byte(offset)}
 		}
 	case ast.VariableTypeDouble:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_dload_0}
 		case 1:
@@ -184,10 +184,10 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 		case 3:
 			return []byte{cg.OP_dload_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_dload, byte(variableOffset)}
+			return []byte{cg.OP_dload, byte(offset)}
 		}
 	case ast.VariableTypeString:
 		fallthrough
@@ -198,7 +198,7 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 	case ast.VariableTypeFunction:
 		fallthrough
 	case ast.VariableTypeArray:
-		switch variableOffset {
+		switch offset {
 		case 0:
 			return []byte{cg.OP_aload_0}
 		case 1:
@@ -208,10 +208,10 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint
 		case 3:
 			return []byte{cg.OP_aload_3}
 		default:
-			if variableOffset > 255 {
+			if offset > 255 {
 				panic("over 255")
 			}
-			return []byte{cg.OP_aload, byte(variableOffset)}
+			return []byte{cg.OP_aload, byte(offset)}
 		}
 	default:
 		panic(fmt.Sprintf("typ:%d", variableType))

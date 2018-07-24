@@ -4,10 +4,10 @@ import (
 	"fmt"
 )
 
-type StatementKind int
+type StatementTypeKind int
 
 const (
-	_ StatementKind = iota
+	_ StatementTypeKind = iota
 	StatementTypeExpression
 	StatementTypeIf
 	StatementTypeBlock
@@ -26,7 +26,7 @@ const (
 )
 
 type Statement struct {
-	Type                      StatementKind
+	Type                      StatementTypeKind
 	Checked                   bool // if checked
 	Pos                       *Pos
 	StatementIf               *StatementIf
@@ -126,7 +126,6 @@ func (s *Statement) check(block *Block) []error { // block is father
 		s.Block.inherit(block)
 		return s.Block.checkStatements()
 	case StatementTypeLabel:
-		// nothing to do
 		if block.InheritedAttribute.Defer != nil {
 			block.InheritedAttribute.Defer.Labels = append(block.InheritedAttribute.Defer.Labels, s.StatementLabel)
 		}

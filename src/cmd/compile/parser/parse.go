@@ -411,7 +411,7 @@ func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }
 
-func (parser *Parser) consume(until map[int]bool) {
+func (parser *Parser) consume(until map[lex.TokenKind]bool) {
 	if len(until) == 0 {
 		panic("no token to consume")
 	}

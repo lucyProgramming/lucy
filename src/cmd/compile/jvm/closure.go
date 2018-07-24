@@ -5,8 +5,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+type ClosureKind int
+
 const (
-	_ = iota
+	_ ClosureKind = iota
 	ClosureClassInt
 	ClosureClassLong
 	ClosureClassFloat
@@ -16,7 +18,7 @@ const (
 )
 
 type Closure struct {
-	ClosureObjectMetas map[int]*ClosureObjectMeta
+	ClosureObjectMetas map[ClosureKind]*ClosureObjectMeta
 }
 
 type ClosureObjectMeta struct {
@@ -26,7 +28,7 @@ type ClosureObjectMeta struct {
 }
 
 func init() {
-	closure.ClosureObjectMetas = make(map[int]*ClosureObjectMeta)
+	closure.ClosureObjectMetas = make(map[ClosureKind]*ClosureObjectMeta)
 	closure.ClosureObjectMetas[ClosureClassInt] = &ClosureObjectMeta{
 		className:        "lucy/deps/ClosureInt",
 		fieldName:        "value",

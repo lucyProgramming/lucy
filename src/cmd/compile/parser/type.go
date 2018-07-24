@@ -219,7 +219,7 @@ func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 	return ret, nil
 }
 
-func (parser *Parser) parseTypes(endTokens ...int) ([]*ast.Type, error) {
+func (parser *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error) {
 	ret := []*ast.Type{}
 	for parser.token.Type != lex.TokenEof {
 		t, err := parser.parseType()

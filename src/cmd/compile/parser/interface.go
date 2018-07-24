@@ -18,7 +18,7 @@ func (interfaceParser *InterfaceParser) Next(lfIsToken bool) {
 	interfaceParser.parser.Next(lfIsToken)
 }
 
-func (interfaceParser *InterfaceParser) consume(m map[int]bool) {
+func (interfaceParser *InterfaceParser) consume(m map[lex.TokenKind]bool) {
 	interfaceParser.parser.consume(m)
 }
 

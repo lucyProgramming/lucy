@@ -37,7 +37,7 @@ const (
 type Type struct {
 	Type         VariableTypeKind
 	IsBuildIn    bool // build in type alias
-	IsVArgs      bool
+	IsVArgs      bool // int ...
 	Resolved     bool
 	Pos          *Pos
 	Name         string

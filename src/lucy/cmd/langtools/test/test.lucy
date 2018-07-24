@@ -12,7 +12,7 @@ class Test {
 		this.lucypaths = lucypaths
 		this.packageName = packageName
 	}
-
+	
 	
 	//real test method
 	public fn test(){

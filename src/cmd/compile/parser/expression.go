@@ -16,7 +16,7 @@ func (expressionParser *ExpressionParser) Next(lfIsToken bool) {
 	expressionParser.parser.Next(lfIsToken)
 }
 
-func (expressionParser *ExpressionParser) parseExpressions(endTokens ...int) ([]*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
 	for expressionParser.parser.token.Type != lex.TokenEof {
 		e, err := expressionParser.parseExpression(false)
@@ -88,7 +88,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			}
 		}
 	}
-	mkExpression := func(expressionType ast.ExpressionKind, isMulti bool) (*ast.Expression, error) {
+	mkExpression := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}

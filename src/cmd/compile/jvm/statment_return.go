@@ -24,7 +24,6 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		code.CodeLength++
 		return
 	}
-
 	if len(context.function.Type.ReturnList) == 1 {
 		var es []*cg.Exit
 		if len(statementReturn.Expressions) > 0 {

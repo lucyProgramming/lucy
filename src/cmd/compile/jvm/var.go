@@ -14,8 +14,10 @@ var (
 	closure                    Closure
 )
 
+type LeftValueKind int
+
 const (
-	_ = iota
+	_ LeftValueKind = iota
 	LeftValueTypeLucyArray
 	LeftValueTypeMap
 	LeftValueTypeLocalVar

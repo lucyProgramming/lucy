@@ -9,7 +9,7 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
-	target *ast.Type, leftValueType int) {
+	target *ast.Type, leftValueType LeftValueKind) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	target = identifier.Variable.Type
 	meta := closure.getMeta(identifier.Variable.Type.Type)
@@ -43,7 +43,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
-	target *ast.Type, leftValueType int) {
+	target *ast.Type, leftValueType LeftValueKind) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaMapClass))
@@ -79,7 +79,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
-	target *ast.Type, leftValueType int) {
+	target *ast.Type, leftValueType LeftValueKind) {
 	switch e.Type {
 	case ast.ExpressionTypeIdentifier:
 		identifier := e.Data.(*ast.ExpressionIdentifier)

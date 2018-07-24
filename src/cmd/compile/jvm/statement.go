@@ -20,7 +20,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			writeExits(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
-	case ast.StatementTypeBlock: //new
+	case ast.StatementTypeBlock:
 		var blockState *StackMapState
 		if s.Block.HaveVariableDefinition() {
 			blockState = (&StackMapState{}).FromLast(state)
