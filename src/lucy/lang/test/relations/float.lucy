@@ -4,64 +4,64 @@
 
 
 fn testFloat()->(ok bool = true){
-	var a ,b float;
-	a = 2.0;
-	b = 1.0;
+	var a ,b float
+	a = 2.0
+	b = 1.0
 	if true != a > b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if true != a >= b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if false !=  a < b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if false != a <= b  {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if false != (a == b)  {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if  true != (a != b)   {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 
 
 
 fn testDouble()->(ok bool = true){
-	var a ,b double;
-	a = 2.0;
-	b = 1.0;
+	var a ,b double
+	a = 2.0
+	b = 1.0
 	if true != a > b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if true != a >= b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if false !=  a < b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if false != a <= b  {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if false != (a == b)  {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if  true != (a != b)   {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 
@@ -72,10 +72,10 @@ fn testDouble()->(ok bool = true){
 
 fn testFloats(){
 	if false == testFloat() {
-		panic(new error("test float failed"));
+		panic(new error("test float failed"))
 	}
     if false == testDouble()  {
-		panic(new error("test double failed"));
+		panic(new error("test double failed"))
 	}
 }
 

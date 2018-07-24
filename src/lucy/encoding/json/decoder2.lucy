@@ -426,7 +426,7 @@ class Decoder {
 			}
 		}
 		// b == '"'
-		//this.offset++ ; // skip "
+		// this.offset++ ; // skip "
 		s = string(bs);
 	}
 

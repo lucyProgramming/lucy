@@ -29,7 +29,8 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 	m := &ast.ExpressionMap{}
 	m.Type = typ
 	ret.Data = m
-	for expressionParser.parser.token.Type != lex.TokenEof && expressionParser.parser.token.Type != lex.TokenRc {
+	for expressionParser.parser.token.Type != lex.TokenEof &&
+		expressionParser.parser.token.Type != lex.TokenRc {
 		// key
 		k, err := expressionParser.parseExpression(false)
 		if err != nil {

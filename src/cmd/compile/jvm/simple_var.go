@@ -10,7 +10,7 @@ import (
 /*
 	store local var according on type and offset
 */
-func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
+func storeLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint16) []byte {
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough
@@ -115,7 +115,7 @@ func storeLocalVariableOps(variableType int, variableOffset uint16) []byte {
 	}
 }
 
-func loadLocalVariableOps(variableType int, variableOffset uint16) []byte {
+func loadLocalVariableOps(variableType ast.VariableTypeKind, variableOffset uint16) []byte {
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough

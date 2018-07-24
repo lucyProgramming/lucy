@@ -13,7 +13,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	if unary == nil {
 		if e.Type == ExpressionTypeNot {
 			return &Type{
-				Type: ExpressionTypeBool,
+				Type: VariableTypeBool,
 				Pos:  e.Pos,
 			}
 		}

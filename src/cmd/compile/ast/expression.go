@@ -4,75 +4,77 @@ import (
 	"fmt"
 )
 
+type ExpressionKind int
+
 const (
-	_                             = iota // start with 1
-	ExpressionTypeNull                   // null
-	ExpressionTypeBool                   // true or false
-	ExpressionTypeByte                   // 'a' or 97b
-	ExpressionTypeShort                  // 100s
-	ExpressionTypeInt                    // 100
-	ExpressionTypeLong                   // 100L
-	ExpressionTypeFloat                  // 1.0
-	ExpressionTypeDouble                 // 1.0d
-	ExpressionTypeString                 // "hello world"
-	ExpressionTypeArray                  // []bool{false,true}
-	ExpressionTypeLogicalOr              // a || b
-	ExpressionTypeLogicalAnd             // a && b
-	ExpressionTypeOr                     // a | b
-	ExpressionTypeAnd                    // a & b
-	ExpressionTypeXor                    // a ^b
-	ExpressionTypeLsh                    // a << b
-	ExpressionTypeRsh                    // a >> b
-	ExpressionTypeAdd                    // a + b
-	ExpressionTypeSub                    // a - b
-	ExpressionTypeMul                    // a * b
-	ExpressionTypeDiv                    // a / b
-	ExpressionTypeMod                    // a % b
-	ExpressionTypeAssign                 // a = b
-	ExpressionTypeColonAssign            // a := b
-	ExpressionTypePlusAssign             // a += b
-	ExpressionTypeMinusAssign            // a -= b
-	ExpressionTypeMulAssign              // a *= b
-	ExpressionTypeDivAssign              // a /= b
-	ExpressionTypeModAssign              // a %= b
-	ExpressionTypeAndAssign              // a &= b
-	ExpressionTypeOrAssign               // a |= b
-	ExpressionTypeXorAssign              // a ^= b
-	ExpressionTypeLshAssign              // a <<= b
-	ExpressionTypeRshAssign              // a >>= b
-	ExpressionTypeEq                     // a == b
-	ExpressionTypeNe                     // a != b
-	ExpressionTypeGe                     // a >= b
-	ExpressionTypeGt                     // a > b
-	ExpressionTypeLe                     // a <= b
-	ExpressionTypeLt                     // a < b
-	ExpressionTypeIndex                  // a["b"]
-	ExpressionTypeSelection              //	a.b
-	ExpressionTypeMethodCall             // a.b()
-	ExpressionTypeFunctionCall           // a()
-	ExpressionTypeIncrement              // a++
-	ExpressionTypeDecrement              // a--
-	ExpressionTypePrefixIncrement        // ++ a
-	ExpressionTypePrefixDecrement        // -- a
-	ExpressionTypeNegative               // -a
-	ExpressionTypeNot                    // !a
-	ExpressionTypeBitwiseNot             // ~a
-	ExpressionTypeIdentifier             // a
-	ExpressionTypeNew                    // new []int(10)
-	ExpressionTypeList                   // a,b := "hello","world"
-	ExpressionTypeFunctionLiteral        // fn() { print("hello world"); }
-	ExpressionTypeVar                    // var a,b int
-	ExpressionTypeConst                  // const a = "hello world"
-	ExpressionTypeCheckCast              // []byte(str)
-	ExpressionTypeRange                  // for range
-	ExpressionTypeSlice                  // arr[0:2]
-	ExpressionTypeMap                    // map literal
-	ExpressionTypeTypeAlias              // type age = int
-	ExpressionTypeTypeAssert             // a.(Object)
-	ExpressionTypeQuestion               // true ? a : b
-	ExpressionTypeGlobal                 // global.XXX
-	ExpressionTypeParenthesis            // ( a + b )
-	ExpressionTypeVArgs                  // a ...
+	_                             ExpressionKind = iota // start with 1
+	ExpressionTypeNull                                  // null
+	ExpressionTypeBool                                  // true or false
+	ExpressionTypeByte                                  // 'a' or 97b
+	ExpressionTypeShort                                 // 100s
+	ExpressionTypeInt                                   // 100
+	ExpressionTypeLong                                  // 100L
+	ExpressionTypeFloat                                 // 1.0
+	ExpressionTypeDouble                                // 1.0d
+	ExpressionTypeString                                // "hello world"
+	ExpressionTypeArray                                 // []bool{false,true}
+	ExpressionTypeLogicalOr                             // a || b
+	ExpressionTypeLogicalAnd                            // a && b
+	ExpressionTypeOr                                    // a | b
+	ExpressionTypeAnd                                   // a & b
+	ExpressionTypeXor                                   // a ^b
+	ExpressionTypeLsh                                   // a << b
+	ExpressionTypeRsh                                   // a >> b
+	ExpressionTypeAdd                                   // a + b
+	ExpressionTypeSub                                   // a - b
+	ExpressionTypeMul                                   // a * b
+	ExpressionTypeDiv                                   // a / b
+	ExpressionTypeMod                                   // a % b
+	ExpressionTypeAssign                                // a = b
+	ExpressionTypeColonAssign                           // a := b
+	ExpressionTypePlusAssign                            // a += b
+	ExpressionTypeMinusAssign                           // a -= b
+	ExpressionTypeMulAssign                             // a *= b
+	ExpressionTypeDivAssign                             // a /= b
+	ExpressionTypeModAssign                             // a %= b
+	ExpressionTypeAndAssign                             // a &= b
+	ExpressionTypeOrAssign                              // a |= b
+	ExpressionTypeXorAssign                             // a ^= b
+	ExpressionTypeLshAssign                             // a <<= b
+	ExpressionTypeRshAssign                             // a >>= b
+	ExpressionTypeEq                                    // a == b
+	ExpressionTypeNe                                    // a != b
+	ExpressionTypeGe                                    // a >= b
+	ExpressionTypeGt                                    // a > b
+	ExpressionTypeLe                                    // a <= b
+	ExpressionTypeLt                                    // a < b
+	ExpressionTypeIndex                                 // a["b"]
+	ExpressionTypeSelection                             //	a.b
+	ExpressionTypeMethodCall                            // a.b()
+	ExpressionTypeFunctionCall                          // a()
+	ExpressionTypeIncrement                             // a++
+	ExpressionTypeDecrement                             // a--
+	ExpressionTypePrefixIncrement                       // ++ a
+	ExpressionTypePrefixDecrement                       // -- a
+	ExpressionTypeNegative                              // -a
+	ExpressionTypeNot                                   // !a
+	ExpressionTypeBitwiseNot                            // ~a
+	ExpressionTypeIdentifier                            // a
+	ExpressionTypeNew                                   // new []int(10)
+	ExpressionTypeList                                  // a,b := "hello","world"
+	ExpressionTypeFunctionLiteral                       // fn() { print("hello world"); }
+	ExpressionTypeVar                                   // var a,b int
+	ExpressionTypeConst                                 // const a = "hello world"
+	ExpressionTypeCheckCast                             // []byte(str)
+	ExpressionTypeRange                                 // for range
+	ExpressionTypeSlice                                 // arr[0:2]
+	ExpressionTypeMap                                   // map literal
+	ExpressionTypeTypeAlias                             // type age = int
+	ExpressionTypeTypeAssert                            // a.(Object)
+	ExpressionTypeQuestion                              // true ? a : b
+	ExpressionTypeGlobal                                // global.XXX
+	ExpressionTypeParenthesis                           // ( a + b )
+	ExpressionTypeVArgs                                 // a ...
 )
 
 func (e *Expression) OpName() string {
@@ -221,7 +223,7 @@ func (e *Expression) OpName() string {
 }
 
 type Expression struct {
-	Type int
+	Type ExpressionKind
 	/*
 		only for global variable definition
 		public hello = "hai...."
@@ -246,7 +248,7 @@ func (e *Expression) ConvertTo(to *Type) {
 	e.Data = c
 }
 
-func (e *Expression) ConvertToNumber(typ int) {
+func (e *Expression) ConvertToNumber(typ VariableTypeKind) {
 	if e.IsLiteral() {
 		e.convertNumberLiteralTo(typ)
 		e.Value = &Type{

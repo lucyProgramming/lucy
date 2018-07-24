@@ -5,8 +5,10 @@ import (
 	"strings"
 )
 
+type VariableTypeKind int
+
 const (
-	_ = iota
+	_ VariableTypeKind = iota
 	//value types
 	VariableTypeBool
 	VariableTypeByte
@@ -33,7 +35,7 @@ const (
 )
 
 type Type struct {
-	Type         int
+	Type         VariableTypeKind
 	IsBuildIn    bool // build in type alias
 	IsVArgs      bool
 	Resolved     bool

@@ -146,7 +146,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 	return
 }
 
-func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
@@ -170,7 +170,7 @@ func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, ty
 	}
 }
 
-func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
@@ -194,7 +194,7 @@ func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, t
 	}
 }
 
-func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
@@ -214,7 +214,7 @@ func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ
 	}
 }
 
-func (buildExpression *BuildExpression) stackTop2Float(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Float(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -234,7 +234,7 @@ func (buildExpression *BuildExpression) stackTop2Float(code *cg.AttributeCode, t
 	}
 }
 
-func (buildExpression *BuildExpression) stackTop2Long(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Long(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -254,7 +254,7 @@ func (buildExpression *BuildExpression) stackTop2Long(code *cg.AttributeCode, ty
 	}
 }
 
-func (buildExpression *BuildExpression) stackTop2Double(code *cg.AttributeCode, typ int) {
+func (buildExpression *BuildExpression) stackTop2Double(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -277,7 +277,7 @@ func (buildExpression *BuildExpression) stackTop2Double(code *cg.AttributeCode, 
 /*
 	convert stack top to target
 */
-func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCode, typ int, target int) {
+func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCode, typ ast.VariableTypeKind, target ast.VariableTypeKind) {
 	if typ == target {
 		return
 	}

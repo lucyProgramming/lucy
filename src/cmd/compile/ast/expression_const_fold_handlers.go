@@ -216,7 +216,7 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 	return
 }
 
-func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (value interface{}, support bool, err error) {
+func (e *Expression) numberTypeAlgebra(typ ExpressionKind, value1, value2 interface{}) (value interface{}, support bool, err error) {
 	support = true
 	switch typ {
 	case ExpressionTypeByte:
@@ -344,7 +344,7 @@ func (e *Expression) numberTypeAlgebra(typ int, value1, value2 interface{}) (val
 	return
 }
 
-func (e *Expression) relationCompare(typ int, value1, value2 interface{}) (b, support bool) {
+func (e *Expression) relationCompare(typ ExpressionKind, value1, value2 interface{}) (b, support bool) {
 	support = true
 	switch typ {
 	case ExpressionTypeBool:

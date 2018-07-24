@@ -375,7 +375,7 @@ func (e *Expression) getDoubleValue() float64 {
 	return 0
 }
 
-func (e *Expression) convertNumberLiteralTo(t int) {
+func (e *Expression) convertNumberLiteralTo(t VariableTypeKind) {
 	if e.isNumber() == false {
 		panic("...")
 	}

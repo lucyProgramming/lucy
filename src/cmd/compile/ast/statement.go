@@ -4,8 +4,10 @@ import (
 	"fmt"
 )
 
+type StatementKind int
+
 const (
-	_ = iota
+	_ StatementKind = iota
 	StatementTypeExpression
 	StatementTypeIf
 	StatementTypeBlock
@@ -24,7 +26,7 @@ const (
 )
 
 type Statement struct {
-	Type                      int
+	Type                      StatementKind
 	Checked                   bool // if checked
 	Pos                       *Pos
 	StatementIf               *StatementIf

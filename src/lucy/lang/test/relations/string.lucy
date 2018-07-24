@@ -10,30 +10,30 @@
 
 
 fn testString()->(ok bool = true){
-	s1 := "abc";
-	s2 := "abcd";
-	s3 := "abcdfg";
-	s4 := "1bcdfg";
-	s5 := "cdfg";
+	s1 := "abc"
+	s2 := "abcd"
+	s3 := "abcdfg"
+	s4 := "1bcdfg"
+	s5 := "cdfg"
 	if true != (s1 == "abc"){
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if true != s1 < s2 {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if true != s1 < s3 {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if true != s1 > s4 {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if true != s1 < s5 {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 

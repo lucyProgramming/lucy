@@ -5,7 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, state *StackMapState) {
+func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	f *ast.Function, state *StackMapState) {
 	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
 		code.MaxLocals += jvmSlotSize(v.Type)
@@ -18,7 +19,8 @@ func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, c
 	}
 }
 
-func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	f *ast.Function, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Type.ParameterList {
 		if v.BeenCaptured == false { // not capture
 			continue
@@ -42,7 +44,8 @@ func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel,
 	return
 }
 
-func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode, f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	buildPackage.mkParametersOffset(class, code, f, state)
 	maxStack = buildPackage.mkCapturedParameters(class, code, f, state)
 	for _, v := range f.Type.ReturnList {
@@ -89,7 +92,8 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 	return
 }
 
-func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel, f *ast.Function) {
+func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel,
+	f *ast.Function) {
 	context := &Context{}
 	context.lastStackMapOffset = -1
 	context.class = astClass
@@ -106,7 +110,8 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
 		state.Locals = append(state.Locals, t)
 		buildPackage.mkParametersOffset(class, method.Code, f, state)
-		stack, _ := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression, context, state)
+		stack, _ := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
+			context, state)
 		if stack > method.Code.MaxStack {
 			method.Code.MaxStack = stack
 		}

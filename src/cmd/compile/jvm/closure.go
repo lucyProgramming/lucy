@@ -59,7 +59,7 @@ func init() {
 	}
 }
 
-func (closure *Closure) getMeta(t int) (meta *ClosureObjectMeta) {
+func (closure *Closure) getMeta(t ast.VariableTypeKind) (meta *ClosureObjectMeta) {
 	switch t {
 	case ast.VariableTypeBool:
 		fallthrough

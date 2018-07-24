@@ -1,157 +1,157 @@
 
 
 fn testByte()->(ok bool = true){
-	var a ,b byte;
-	a = 1b;
-	b = 2b;
+	var a ,b byte
+	a = 1b
+	b = 2b
 	if 3 != a + b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if -1 != a - b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != b - a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b * a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b / a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != a / b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != b % a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != a % b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 
 
 fn testShort()->(ok bool = true){
-	var a ,b short;
-	a = 1s;
-	b = 2s;
+	var a ,b short
+	a = 1s
+	b = 2s
 	if 3 != a + b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if -1 != a - b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != b - a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b * a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b / a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != a / b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != b % a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != a % b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 
 
 fn testInt()->(ok bool = true){
-	var a ,b int;
-	a = 1;
-	b = 2;
+	var a ,b int
+	a = 1
+	b = 2
 	if 3 != a + b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if -1 != a - b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != b - a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b * a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b / a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != a / b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != b % a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != a % b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 
 
 fn testLong()->(ok bool = true){
-	var a ,b long;
-	a = 1L;
-	b = 2L;
+	var a ,b long
+	a = 1L
+	b = 2L
 	if 3 != a + b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if -1 != a - b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != b - a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b * a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 2 != b / a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != a / b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 0 != b % a {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 	if 1 != a % b {
-		ok = false;
-		return ;
+		ok = false
+		return 
 	}
 }
 
@@ -159,16 +159,16 @@ fn testLong()->(ok bool = true){
 
 fn testIntegers(){
 	if false == testByte() {
-		panic(new error("test byte failed"));
+		panic(new error("test byte failed"))
 	}
     if false == testShort() {
-		panic(new error("test short failed"));
+		panic(new error("test short failed"))
 	}
 	if false == testInt() {
-		panic(new error("test int failed"));
+		panic(new error("test int failed"))
 	}
     if false == testLong() {
-		panic(new error("test  failed"));
+		panic(new error("test  failed"))
 	}
 }
 

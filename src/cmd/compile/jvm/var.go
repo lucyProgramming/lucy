@@ -1,7 +1,9 @@
 package jvm
 
+import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+
 var (
-	ArrayMetas                 = map[int]*ArrayMeta{}
+	ArrayMetas                 = map[ast.VariableTypeKind]*ArrayMeta{}
 	typeConverter              TypeConverterAndPrimitivePacker
 	Descriptor                 Description
 	LucyMethodSignatureParser  LucyMethodSignature

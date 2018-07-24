@@ -1,67 +1,68 @@
-import "java/io";
-import "lucy/os";
-import "lucy/cmd/langtools/common";
+import "java/io"
+import "lucy/os"
+import "lucy/cmd/langtools/common"
 
 class Test {
-	lucypaths []string ;
-	packageName string ;
-	lucyroot string; 
+	lucypaths []string 
+	packageName string 
+	lucyroot string 
 	public fn Test(lucyroot string, lucypaths []string,packageName string){
-	    this.super();
-		this.lucyroot = lucyroot ;
-		this.lucypaths = lucypaths;
-		this.packageName = packageName;
+	    this.super()
+		this.lucyroot = lucyroot 
+		this.lucypaths = lucypaths
+		this.packageName = packageName
 	}
 
 	
 	//real test method
 	public fn test(){
-    	w,err := common.findPackageLiesIn(this.lucypaths , this.packageName);
+    	w,err := common.findPackageLiesIn(this.lucypaths , this.packageName)
 		if err != null  {
-			print(err);
-			os.exit(1);
+			print(err)
+			os.exit(1)
 		}
 		// check is test exist
-		dir := w + "/src/" + this.packageName + "/test" ;
-		if f := new io.File(dir); f.isDirectory() == false {
-			printf("dir '%s' is not directory\n" , dir);
-			return ;
+		dir := w + "/src/" + this.packageName + "/test" 
+		if f := new io.File(dir) ;  f.isDirectory() == false {
+			printf("dir '%s' is not directory\n" , dir)
+			return 
 		}
-		if err := this.testDir(this.packageName + "/test" , dir )  ; err != null {
-			print(err);
-			return ; 
+		if err := this.testDir(this.packageName + "/test" , dir )  ;   err != null {
+			print(err)
+			return  
 		}
 	}
 	
 	fn testDir(packageName  ,  dir string) ->(err error ){
-		fis  := (new io.File (dir)) .listFiles();
-		lucyFiles := []io.File{}  ;
+		fis  := (new io.File (dir)) .listFiles() 
+		lucyFiles := []io.File{} 
 		for v := range fis {
-		    name := v.getName();
+		    name := v.getName()
 		    if v.isDirectory(){
-		        this.testDir(packageName + "/" + name , dir + "/" + name);
-		        continue;
+		        this.testDir(packageName + "/" + name , dir + "/" + name)
+		        continue
 		    }
 		    if name.endsWith(".lucy")  {
-		        lucyFiles.append(v);
+		        lucyFiles.append(v)
 		    }
 		}
 		if lucyFiles.size() == 0 {  // no lucy files
-		    return ;
+		    return 
 		}
-        printf("test package: %s\n" , packageName);
-        printf("directory: %s\n" , dir);
-        args  := new string[](2);
-        args[0] = "run" ; 
-        args[1] =  packageName;
-        cmd := new os.Command(this.lucyroot + "/bin/lucy", args  , null ,null);
-        cmd.stdout = os.stdout ;
-        cmd.stderr = os.stderr ; 
-        if err =  cmd.start(); err != null {
-        	return ;
+		print("############################")
+        printf("test package: %s\n" , packageName)
+        printf("directory: %s\n" , dir)
+        args  := new string[](2)
+        args[0] = "run"  
+        args[1] =  packageName
+        cmd := new os.Command(this.lucyroot + "/bin/lucy", args  , null ,null)
+        cmd.stdout = os.stdout 
+        cmd.stderr = os.stderr  
+        if err =  cmd.start()  ; err != null {
+        	return 
         }
-        if err =  cmd.wait(); err != null {
-        	return ;
+        if err =  cmd.wait() ;  err != null {
+        	return 
         }
 	}
 }

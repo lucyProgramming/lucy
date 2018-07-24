@@ -88,7 +88,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			}
 		}
 	}
-	mkExpression := func(expressionType int, isMulti bool) (*ast.Expression, error) {
+	mkExpression := func(expressionType ast.ExpressionKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
