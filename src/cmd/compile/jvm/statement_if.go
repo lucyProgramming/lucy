@@ -39,7 +39,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	conditionState.addTop(IfState)
 	if s.ElseBlock != nil || len(s.ElseIfList) > 0 {
 		if s.Block.WillNotExecuteToEnd == false {
-			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
 	}
 
@@ -69,7 +69,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 		buildPackage.buildBlock(class, code, v.Block, context, elseIfState)
 		if s.ElseBlock != nil || k != len(s.ElseIfList)-1 {
 			if v.Block.WillNotExecuteToEnd == false {
-				s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+				s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 			}
 		}
 		// when done
@@ -87,7 +87,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 		buildPackage.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
 		conditionState.addTop(elseBlockState)
 		if s.ElseBlock.WillNotExecuteToEnd == false {
-			s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
 	}
 	return

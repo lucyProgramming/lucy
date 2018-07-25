@@ -22,10 +22,10 @@ func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, c
 	}
 	if e.Type == ast.ExpressionTypeLogicalOr {
 		// at this point,value is clear,leave true on stack
-		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifne, code))
+		exits = append(exits, (&cg.Exit{}).Init(cg.OP_ifne, code))
 	} else { //  &&
 		// at this point,value is clear,leave false on stack
-		exits = append(exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+		exits = append(exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
 	}
 	code.Codes[code.CodeLength] = cg.OP_pop // pop 0
 	code.CodeLength++

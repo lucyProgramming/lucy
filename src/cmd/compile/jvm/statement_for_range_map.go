@@ -34,7 +34,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	code.CodeLength += 8
 	forState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(forState)
-	s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 	//keySets
 	code.Codes[code.CodeLength] = cg.OP_dup
 	if 2 > maxStack {
@@ -133,7 +133,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	if 5 > maxStack {
 		maxStack = 5
 	}
-	exit := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
+	exit := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		// load k sets
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)

@@ -54,7 +54,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			code.CodeLength++
 			buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		}
-		exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+		exit := (&cg.Exit{}).Init(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
 			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
 		} else if s.StatementBreak.StatementSwitch != nil { // switch
@@ -84,7 +84,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 			jumpTo(cg.OP_goto, code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {
-			exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+			exit := (&cg.Exit{}).Init(cg.OP_goto, code)
 			s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, exit)
 		}
 	case ast.StatementTypeLabel:

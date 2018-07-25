@@ -100,7 +100,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
 					// consume result on stack
-					matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+					matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code))
 				}
 				continue
 			}
@@ -120,10 +120,10 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			}
 			state.pushStack(class, s.Condition.Value)
 			compare(s.Condition.Value)
-			matches = append(matches, (&cg.Exit{}).FromCode(cg.OP_ifeq, code)) // comsume result on stack
+			matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
-		exit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
+		exit = (&cg.Exit{}).Init(cg.OP_goto, code)
 		// if match goto here
 		writeExits(matches, code.CodeLength)
 		//before block,pop off stack
@@ -142,7 +142,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 		}
 		if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
 			s.Exits = append(s.Exits,
-				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
+				(&cg.Exit{}).Init(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
 	writeExits([]*cg.Exit{exit}, code.CodeLength)

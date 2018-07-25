@@ -30,7 +30,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	state.popStack(1)
 	code.CodeLength += 8
 	// code.CodeLength += 3
-	s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_goto, code))
+	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 	forState := (&StackMapState{}).FromLast(state)
 	defer func() {
 		state.addTop(forState) // add top
@@ -177,7 +177,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		k + start >= end,break loop,pop index on stack
 		check if need to break
 	*/
-	rangeEnd := (&cg.Exit{}).FromCode(cg.OP_if_icmpge, code)
+	rangeEnd := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
 	//load elements
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)

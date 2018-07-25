@@ -20,7 +20,7 @@ func jumpTo(op byte, code *cg.AttributeCode, to int) {
 	if to < 0 {
 		panic("to is negative")
 	}
-	exit := (&cg.Exit{}).FromCode(op, code)
+	exit := (&cg.Exit{}).Init(op, code)
 	writeExits([]*cg.Exit{exit}, to)
 }
 

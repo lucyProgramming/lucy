@@ -39,8 +39,8 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		if stack > maxStack {
 			maxStack = stack
 		}
-		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
-		firstTimeExit = (&cg.Exit{}).FromCode(cg.OP_goto, code)
+		s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
+		firstTimeExit = (&cg.Exit{}).Init(cg.OP_goto, code)
 	}
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
@@ -61,7 +61,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		if stack > maxStack {
 			maxStack = stack
 		}
-		s.Exits = append(s.Exits, (&cg.Exit{}).FromCode(cg.OP_ifeq, code))
+		s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
 	}
 	if firstTimeExit != nil {
 		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)

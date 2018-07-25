@@ -20,7 +20,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 	code.Codes[code.CodeLength+3] = cg.OP_pop
 	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
 	code.CodeLength += 5
-	exit := (&cg.Exit{}).FromCode(cg.OP_goto, code)
+	exit := (&cg.Exit{}).Init(cg.OP_goto, code)
 	state.pushStack(class, call.Args[0].Value)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
