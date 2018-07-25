@@ -43,6 +43,8 @@ func (functionType FunctionType) getParameterTypes() []*Type {
 
 func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 	callArgsTypes []*Type, f *Function) (match bool, vArgs *CallVArgs, errs []error) {
+	//trying to convert literal
+	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	errs = []error{}
 	for _, v := range *args {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
@@ -102,8 +104,6 @@ func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 		vArgs.Length = len(callArgsTypes) - k
 	}
 
-	//trying to convert literal
-	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	if len(callArgsTypes) < len(functionType.ParameterList) {
 		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {

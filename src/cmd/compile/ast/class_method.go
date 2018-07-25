@@ -130,18 +130,24 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 			fit, call.VArgs, _ = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
 			if fit {
 				return []*ClassMethod{m}, true, nil
+			} else {
+				ms = append(ms, m)
 			}
 		}
 	}
 	// don`t try father, when is is construction method
 	if name == SpecialMethodInit {
-		return nil, false, nil
+		return ms, false, nil
 	}
 	err = c.loadSuperClass()
 	if err != nil {
-		return nil, false, err
+		return ms, false, err
 	}
-	return c.SuperClass.accessMethod(from, errs, name, call, callArgTypes, true, fieldMethodHandler)
+	ms_, matched, err := c.SuperClass.accessMethod(from, errs, name, call, callArgTypes, true, fieldMethodHandler)
+	if matched {
+		return ms_, matched, err
+	}
+	return append(ms, ms_...), matched, err
 }
 
 /*

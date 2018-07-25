@@ -135,7 +135,7 @@ public final class  Flag {
 				value = value * 10.0 + float(b- '0')
 			}else {
 				err = new error(sprintf("'%s' format float wrong" , s ))
-				return 
+				return  
 			}
 		}
 		if b == '.' {
@@ -143,8 +143,9 @@ public final class  Flag {
 			index := len(bs) -1 
 			var t float
 			for index >= 0{
+			    b = bs[index]
 				if '0' <= b  && b <= '9'{
-					t = t * 0.1 + float(bs[index] - '0') / 10.0
+					t = t * 0.1 + float(b - '0') / 10.0
 				}else {
 					err = new error(sprintf("'%s' format float wrong" , s ))
 					return 

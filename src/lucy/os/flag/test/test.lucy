@@ -11,8 +11,8 @@ fn main(args []string) {
 	b := flag.boolOption("-b",false,"bool")
 	i := flag.intOption("-i" , 123 ,"")
 
-	f := flag.floatOption("-f" , 0 , "")
-	no,_ := flag.parse(["-b","-i" ,"456" , "121" ,"-aaa"])
+	f := flag.floatOption("-f" , 1f, "")
+	no,_ := flag.parse(["-b","-i" ,"456" , "121" ,"-aaa" , "-f" ,"93232.21"])
 
 	print(no)
 	print(b.getBoolValue())
