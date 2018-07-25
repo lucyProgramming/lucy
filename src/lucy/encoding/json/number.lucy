@@ -1,99 +1,99 @@
 
 
 class Number {
-	public isNegative bool;
-	public integerPart []byte;
-	public isFloat bool ;
-	public floatPart []byte ;
-	public eIsNegative bool ;
-	public e []byte ;  
+	public isNegative bool
+	public integerPart []byte
+	public isFloat bool 
+	public floatPart []byte 
+	public eIsNegative bool 
+	public e []byte   
 
 	public fn Number(){
-		this.super();
-		this.integerPart = []byte{} ; 
-		this.floatPart = []byte{} ; 
-		this.e = []byte{} ; 
+		this.super()
+		this.integerPart = []byte{}  
+		this.floatPart = []byte{}  
+		this.e = []byte{}  
 	}
 
 	
 	
 	public fn prepare() -> (err error){
 		if len(this.e) == 0 {
-			return ; 
+			return  
 		}
-		e := 0;
+		e := 0
 		for v := range this.e {
-			e += e * 10 + int(v - '0') ; 
+			e += e * 10 + int(v - '0')  
 		}
 		if this.eIsNegative == false {
 			if e >= len(this.floatPart) {
-				this.integerPart.appendAll(this.floatPart , this.mkAscii0Bytes (e - len(this.floatPart))) ;
-				this.isFloat = false ; 
+				this.integerPart.appendAll(this.floatPart , this.mkAscii0Bytes (e - len(this.floatPart))) 
+				this.isFloat = false  
 			}else {
-				this.integerPart.appendAll(this.floatPart[0:e]);
-				this.floatPart = this.floatPart[e:] ; 
+				this.integerPart.appendAll(this.floatPart[0:e])
+				this.floatPart = this.floatPart[e:]  
 			}
 		}else {
-			this.isFloat = true;
+			this.isFloat = true
 			if e >= len(this.integerPart) {
-				bs := this.mkAscii0Bytes (e - len(this.integerPart) ); 
-				bs.appendAll(this.integerPart , this.floatPart) ;	
-				this.integerPart = []byte{} ;
-				this.floatPart = bs ; 
+				bs := this.mkAscii0Bytes (e - len(this.integerPart) ) 
+				bs.appendAll(this.integerPart , this.floatPart) 	
+				this.integerPart = []byte{} 
+				this.floatPart = bs  
 			}else {
-				this.integerPart = this.integerPart[ : len(this.integerPart) - e ];
-				bs := []byte{} ;
-				bs.appendAll(this.integerPart[ len(this.integerPart) - e : ]  );
+				this.integerPart = this.integerPart[ : len(this.integerPart) - e ]
+				bs := []byte{} 
+				bs.appendAll(this.integerPart[ len(this.integerPart) - e : ]  )
 				if len(this.floatPart) > 0 {
-					bs.appendAll(this.floatPart);
+					bs.appendAll(this.floatPart)
 				}
 			}
 		}
 	}
 
 	fn mkAscii0Bytes(length int) -> (bs []byte ){
-		bs = new []byte(length);
+		bs = new []byte(length)
 		for k,_ := range bs {
-			bs[k] = '0' ; 
+			bs[k] = '0'  
 		}
 	}
 
 	public fn getLong() -> ( v long,err error){
-		err = this.prepare();
+		err = this.prepare()
 		if err != null {
-			return ;
+			return 
 		}
 		if this.isFloat {
-			err = new error("cannot convert 'float' to 'interger'");
-			return ;
+			err = new error("cannot convert 'float' to 'interger'")
+			return 
 		}
-		ret := 0l;
+		ret := 0l
 		for v := range this.integerPart {
-			ret = ret * 10 + long(v - '0') ; 
+			ret = ret * 10 + long(v - '0')  
 		}
-		v = ret ; 
+		v = ret  
 		if this.isNegative {
-			v = -v ;
+			v = -v 
 		}
 	}
 
 	public fn getDouble() -> (v double,err error) {
-		err = this.prepare();
+		err = this.prepare()
 		if err != null {
-			return ;
+			return 
 		}
-		ret := 0.0d;
+		ret := 0.0d
 		for v := range this.integerPart {
-			ret = ret * 10.0  + double(v - '0') ; 
+			ret = ret * 10.0  + double(v - '0')  
 		}
-		f := 0.0d;
-		index := len(this.floatPart) - 1 ;
+		f := 0.0d
+		index := len(this.floatPart) - 1 
 		for index >= 0 {
-			f = f * 0.1 + double (this.floatPart[index] - '0' ) * 0.1 ; 
-			index -- ;
+			f = f * 0.1 + double (this.floatPart[index] - '0' ) * 0.1  
+			index -- 
 		}
-		ret += f ;
-		v = ret; 
+		ret += f 
+		v = ret 
 	}
 	
 }

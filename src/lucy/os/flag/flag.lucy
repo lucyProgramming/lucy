@@ -1,0 +1,193 @@
+
+/*
+	a simple but yet powerful args parse for lucy programing
+*/
+public final class  Flag {
+	options map{ string -> Option };
+	
+	public fn Flag() {
+	    this.super()
+		this.options = new map{string -> Option}()
+	}
+	
+	public fn boolOption(name string , d bool ,usage string ) ->(o Option){
+		if this.options.keyExist(name)  {
+			panic(new error(sprintf("name already '%s' exists" , name )))
+		}
+		if name.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , name )))
+		}
+		o = new Option();
+		o.typ = OptionTypeBool
+		o.boolDefaultValue = d 
+		o.usage = usage
+		this.options[name] = o
+	} 
+	
+	public fn intOption(name string , d int ,usage string ) ->(o Option){
+		if this.options.keyExist(name)  {
+			panic(new error(sprintf("name already '%s' exists" , name )))
+		}
+		if name.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , name )))
+		}
+		o = new Option();
+		o.typ = OptionTypeInt
+		o.intDefaultValue = d
+		o.usage = usage 
+		this.options[name] = o
+	} 
+	
+	public fn stringOption(name string , d string ,usage string ) ->(o Option){
+		if this.options.keyExist(name)  {
+			panic(new error(sprintf("name already '%s' exists" , name )))
+		}
+		if name.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , name )))
+		}
+		o = new Option();
+		o.typ = OptionTypeString
+		o.stringDefaultValue = d
+		o.usage = usage 
+		this.options[name] = o
+	}
+
+	public fn floatOption(name string , d float ,usage string ) ->(o Option){
+		if this.options.keyExist(name)  {
+			panic(new error(sprintf("name already '%s' exists" , name )))
+		}
+		if name.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , name )))
+		}
+		o = new Option();
+		o.typ = OptionTypeFloat
+		o.floatDefaultValue = d
+		o.usage = usage 
+		this.options[name] = o
+	} 
+	
+	
+	public fn parse(args []string)->(noDefine []string , err error){
+		for v := range this.options{
+			v.resetDefaultValue()
+		}
+		noDefine = []string{} 
+		for k := 0 ; k < len (args) ; k++{
+			v := args[k]
+			if false == this.options.keyExist(v) {
+				noDefine.append(v)
+				continue
+			}
+			o := this.options[v]
+			switch o.typ {
+				case OptionTypeBool:
+					o.boolValue = !o.boolDefaultValue
+				case OptionTypeInt:
+					if k == len(args) -1 {
+						err = new error(sprintf("no value  after '%s'" , v ))
+						return 
+					}
+					o.intValue,err = this.parseInt(args[++k])
+					if err != null {
+						return 
+					}
+				case OptionTypeString:
+					if k == len(args) -1 {
+						err = new error(sprintf("no value  after '%s'", v ))
+						return 
+					}
+					o.stringValue = args[++k]
+				case OptionTypeFloat:
+					if k == len(args) -1 {
+						err = new error(sprintf("no value  after '%s'" , v ))
+						return 
+					}
+					o.floatValue,err = this.parseFloat(args[++k])
+					if err != null {
+						return 
+					}
+			}
+		}
+	}
+	
+	fn parseInt(s string)->(value int, err error) {
+		bs := []byte(s)
+		for b := range bs {
+			if '0' <= b  && b <= '9'{
+				value = value * 10 + int(b - '0')
+			}else {
+				err = new error(sprintf("'%s' format int wrong" , s ))
+				return 
+			}
+		}
+	}
+	
+	fn parseFloat(s string)->(value float, err error) {
+		bs := []byte(s)
+		var k int 
+		var b byte 
+		for k,b = range bs {
+			if b == '.'{
+				break
+			}
+			if '0' <= b  && b <= '9'{
+				value = value * 10.0 + float(b- '0')
+			}else {
+				err = new error(sprintf("'%s' format float wrong" , s ))
+				return 
+			}
+		}
+		if b == '.' {
+			bs = bs[k+1:]
+			index := len(bs) -1 
+			var t float
+			for index >= 0{
+				if '0' <= b  && b <= '9'{
+					t = t * 0.1 + float(bs[index] - '0') / 10.0
+				}else {
+					err = new error(sprintf("'%s' format float wrong" , s ))
+					return 
+				}
+				index --
+			} 
+			value += t 
+		}
+	}
+	
+	public fn helpMsg() -> (msg string){
+		msg = "flag are:\n"
+		for k,v := range this.options {
+			switch v.typ {
+				case OptionTypeBool:
+					msg += sprintf("\t '%s' default:%b usage:%s\n" , k , v.boolDefaultValue , v.usage )
+				case OptionTypeInt:
+					msg += sprintf("\t '%s' default:%d usage:%s\n" , k , v.intDefaultValue , v.usage )
+				case OptionTypeString: 
+					msg += sprintf("\t '%s' default:%s usage:%s\n" , k , v.stringDefaultValue , v.usage )
+				case OptionTypeFloat:
+					msg += sprintf("\t '%s' default:%f usage:%s\n" , k , v.floatDefaultValue , v.usage )
+			}
+		}
+	}
+
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

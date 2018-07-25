@@ -1,0 +1,41 @@
+
+
+
+import "lucy/os/flag"
+
+
+
+
+fn main(args []string) {
+	flag := new flag.Flag()
+	b := flag.boolOption("-b",false,"bool")
+	i := flag.intOption("-i" , 123 ,"")
+	no,_ := flag.parse(["-b","-i" ,"456" , "121" ,"-aaa"])
+
+	print(no)
+	print(b.getBoolValue())
+	print(i.getIntValue())
+	print(flag.helpMsg());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -354,7 +354,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				if expressionParser.parser.token.Type != lex.TokenRb {
 					return nil, fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 				}
-				expressionParser.Next(lfNotToken) // skip ]
+				expressionParser.Next(lfIsToken) // skip ]
 				newExpression := &ast.Expression{}
 				newExpression.Type = ast.ExpressionTypeSlice
 				newExpression.Pos = expressionParser.parser.mkPos()
@@ -381,7 +381,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				if expressionParser.parser.token.Type != lex.TokenRb {
 					return nil, fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 				}
-				expressionParser.Next(lfNotToken) // skip ]
+				expressionParser.Next(lfIsToken) // skip ]
 				newExpression := &ast.Expression{}
 				newExpression.Type = ast.ExpressionTypeSlice
 				newExpression.Pos = expressionParser.parser.mkPos()

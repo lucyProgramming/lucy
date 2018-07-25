@@ -36,30 +36,33 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 		ret = e.checkIndexExpression(block, errs)
 		return ret
 	case ExpressionTypeSelection:
-		dot := e.Data.(*ExpressionSelection)
-		t, es := dot.Expression.checkSingleValueContextExpression(block)
+		selection := e.Data.(*ExpressionSelection)
+		object, es := selection.Expression.checkSingleValueContextExpression(block)
 		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		if t == nil {
+		if object == nil {
 			return nil
 		}
-		switch t.Type {
+		switch object.Type {
 		case VariableTypeObject:
-			field, err := t.Class.accessField(dot.Name, false)
+			field, err := object.Class.accessField(selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			}
-			dot.Field = field
+			selection.Field = field
 			if field != nil {
 				if field.IsStatic() {
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is static,should access by class",
-						errMsgPrefix(e.Pos), dot.Name))
+						errMsgPrefix(e.Pos), selection.Name))
 				}
 				// not this and private
-				if dot.Expression.isThis() == false && field.IsPrivate() {
-					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
-						errMsgPrefix(e.Pos), dot.Name))
+				if selection.Expression.isThis() == false {
+					if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
+						(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
+						*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
+							errMsgPrefix(e.Pos), selection.Name))
+					}
 				}
 				ret = field.Type.Clone()
 				ret.Pos = e.Pos
@@ -67,15 +70,22 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 			}
 			return nil
 		case VariableTypeClass:
-			field, err := t.Class.accessField(dot.Name, false)
+			field, err := object.Class.accessField(selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			}
-			dot.Field = field
+			selection.Field = field
 			if field != nil {
 				if field.IsStatic() == false {
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by instance",
-						errMsgPrefix(e.Pos), dot.Name))
+						errMsgPrefix(e.Pos), selection.Name))
+				}
+				if block.InheritedAttribute.Class != selection.Expression.Value.Class {
+					if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
+						(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
+						*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
+							errMsgPrefix(e.Pos), selection.Name))
+					}
 				}
 				ret = field.Type.Clone()
 				ret.Pos = e.Pos
@@ -83,30 +93,30 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 			}
 			return nil
 		case VariableTypePackage:
-			variable, exists := t.Package.Block.NameExists(dot.Name)
+			variable, exists := object.Package.Block.NameExists(selection.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
-					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
 			if v, ok := variable.(*Variable); ok && v != nil {
-				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && t.Package.Name != PackageBeenCompile.Name {
+				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
-						errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+						errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				}
-				dot.PackageVariable = v
+				selection.PackageVariable = v
 				ret = v.Type.Clone()
 				ret.Pos = e.Pos
 				return ret
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
-					errMsgPrefix(e.Pos), t.Package.Name, dot.Name))
+					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
 				errMsgPrefix(e.Pos),
-				dot.Expression.OpName()))
+				selection.Expression.OpName()))
 			return nil
 		}
 	default:

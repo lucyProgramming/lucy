@@ -1,6 +1,9 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+)
 
 type Enum struct {
 	IsBuildIn   bool
@@ -11,6 +14,11 @@ type Enum struct {
 	Init        *Expression //should be a int expression
 	Used        bool
 }
+
+func (e *Enum) IsPublic() bool {
+	return e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
+}
+
 type EnumName struct {
 	Enum  *Enum
 	Name  string

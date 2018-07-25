@@ -67,7 +67,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	size := jvmSlotSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
-	for k, c := range s.StatementSwitchCases {
+	for _, c := range s.StatementSwitchCases {
 		if exit != nil {
 			writeExits([]*cg.Exit{exit}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -140,11 +140,9 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			buildPackage.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if k != len(s.StatementSwitchCases)-1 || s.Default != nil {
-			if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
-				s.Exits = append(s.Exits,
-					(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
-			}
+		if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
+			s.Exits = append(s.Exits,
+				(&cg.Exit{}).FromCode(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
 	writeExits([]*cg.Exit{exit}, code.CodeLength)

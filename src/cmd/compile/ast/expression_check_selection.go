@@ -116,9 +116,12 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {
-			if false == selection.Expression.isThis() && false == field.IsPublic() {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is private", errMsgPrefix(e.Pos),
-					selection.Name))
+			if selection.Expression.isThis() == false {
+				if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
+					(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
+					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
+						errMsgPrefix(e.Pos), selection.Name))
+				}
 			}
 			if field.IsStatic() {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by className",
@@ -156,10 +159,12 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {
-			if field.IsPublic() == false && on.Class != block.InheritedAttribute.Class {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public",
-					errMsgPrefix(e.Pos),
-					selection.Name))
+			if block.InheritedAttribute.Class != selection.Expression.Value.Class {
+				if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
+					(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
+					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
+						errMsgPrefix(e.Pos), selection.Name))
+				}
 			}
 			if field.IsStatic() == false {
 				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by object ref",

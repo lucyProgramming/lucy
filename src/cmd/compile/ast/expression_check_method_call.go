@@ -276,7 +276,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		return nil
 	}
-
 	// call father`s construction method
 	if call.Name == SUPER {
 		if block.InheritedAttribute.IsConstructionMethod == false ||
@@ -313,6 +312,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, fmt.Errorf("%s compile auto constuction method cannnot match appropriate father`s constuction",
 				errMsgPrefix(e.Pos)))
 			return nil
+		}
+		if matched && ms[0].IsPublic() == false {
+			*errs = append(*errs, fmt.Errorf("%s construction method is not public",
+				errMsgPrefix(e.Pos)))
 		}
 		if matched {
 			call.Name = "<init>"
@@ -400,26 +403,33 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return fieldMethodHandler.Type.FunctionType.getReturnTypes(e.Pos)
 	}
 	if matched {
-		if ms[0].IsStatic() {
-			if object.Type != VariableTypeClass {
+		m := ms[0]
+		if object.Type == VariableTypeObject {
+			if m.IsStatic() {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			if ms[0].IsPublic() == false && object.Class != block.InheritedAttribute.Class {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			if false == call.Expression.isThis() {
+				if (call.Expression.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+					(call.Expression.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+				}
 			}
-		} else {
-			if false == call.Expression.isThis() &&
-				ms[0].IsPublic() == false {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
-			}
-			if object.Type != VariableTypeObject {
+		} else { // class
+			if m.IsStatic() == false {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
 					errMsgPrefix(e.Pos), call.Name))
 			}
+			if call.Expression.Value.Class != block.InheritedAttribute.Class {
+				if (call.Expression.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+					(call.Expression.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+					fmt.Println(call.Name, m.IsPrivate())
+					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+				}
+			}
 		}
-		call.Method = ms[0]
-		return ms[0].Function.Type.getReturnTypes(e.Pos)
+		call.Method = m
+		return m.Function.Type.getReturnTypes(e.Pos)
 	}
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))

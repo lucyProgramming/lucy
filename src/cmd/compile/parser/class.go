@@ -259,8 +259,6 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				case lex.TokenPublic:
 					m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 				}
-			} else {
-				m.Function.AccessFlags |= cg.ACC_METHOD_PRIVATE
 			}
 			if classParser.isSynchronized {
 				m.Function.AccessFlags |= cg.ACC_METHOD_SYNCHRONIZED
@@ -356,9 +354,7 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		if classParser.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
 		}
-		if classParser.accessControlToken == nil {
-			f.AccessFlags |= cg.ACC_FIELD_PRIVATE
-		} else {
+		if classParser.accessControlToken != nil {
 			switch classParser.accessControlToken.Type {
 			case lex.TokenPublic:
 				f.AccessFlags |= cg.ACC_FIELD_PUBLIC

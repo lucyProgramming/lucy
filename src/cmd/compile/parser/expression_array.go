@@ -51,7 +51,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			return nil, fmt.Errorf("%s '(' and  ')' not match",
 				expressionParser.parser.errorMsgPrefix())
 		}
-		expressionParser.Next(lfNotToken) // skip )
+		expressionParser.Next(lfIsToken) // skip )
 		ret := &ast.Expression{}
 		ret.Pos = pos
 		ret.Type = ast.ExpressionTypeCheckCast

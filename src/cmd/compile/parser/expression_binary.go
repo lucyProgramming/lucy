@@ -7,14 +7,14 @@ import (
 
 // ||
 func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseLogicalAndExpression()
+	left, err := expressionParser.parseLogicalAndExpression()
 	if err != nil {
 		return nil, err
 	}
 	for expressionParser.parser.token.Type == lex.TokenLogicalOr {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseLogicalAndExpression()
+		right, err := expressionParser.parseLogicalAndExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -22,17 +22,17 @@ func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expre
 		newExpression.Pos = pos
 		newExpression.Type = ast.ExpressionTypeLogicalOr
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // &&
 func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseOrExpression()
+	left, err := expressionParser.parseOrExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -47,24 +47,24 @@ func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expr
 		newExpression.Pos = pos
 		newExpression.Type = ast.ExpressionTypeLogicalAnd
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
+		binary.Left = left
 		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 //  |
 func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseXorExpression()
+	left, err := expressionParser.parseXorExpression()
 	if err != nil {
 		return nil, err
 	}
 	for expressionParser.parser.token.Type == lex.TokenOr {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseXorExpression()
+		right, err := expressionParser.parseXorExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -72,17 +72,17 @@ func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, 
 		newExpression.Pos = pos
 		newExpression.Type = ast.ExpressionTypeOr
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // ^
 func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseAndExpression()
+	left, err := expressionParser.parseAndExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 	for expressionParser.parser.token.Type == lex.TokenXor {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseAndExpression()
+		right, err := expressionParser.parseAndExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -98,24 +98,24 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 		newExpression.Pos = pos
 		newExpression.Type = ast.ExpressionTypeXor
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // &
 func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseEqualExpression()
+	left, err := expressionParser.parseEqualExpression()
 	if err != nil {
 		return nil, err
 	}
 	for expressionParser.parser.token.Type == lex.TokenAnd {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseEqualExpression()
+		right, err := expressionParser.parseEqualExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -123,17 +123,17 @@ func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression,
 		newExpression.Pos = pos
 		newExpression.Type = ast.ExpressionTypeAnd
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // == and !=
 func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseRelationExpression()
+	left, err := expressionParser.parseRelationExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseRelationExpression()
+		right, err := expressionParser.parseRelationExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -155,17 +155,17 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 			newExpression.Type = ast.ExpressionTypeNe
 		}
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // > < >= <=
 func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseShiftExpression()
+	left, err := expressionParser.parseShiftExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseShiftExpression()
+		right, err := expressionParser.parseShiftExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -192,17 +192,17 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 			newExpression.Type = ast.ExpressionTypeLe
 		}
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // << >>
 func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseAddExpression()
+	left, err := expressionParser.parseAddExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseAddExpression()
+		right, err := expressionParser.parseAddExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -223,17 +223,17 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 			newExpression.Type = ast.ExpressionTypeRsh
 		}
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // + -
 func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseMulExpression()
+	left, err := expressionParser.parseMulExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseMulExpression()
+		right, err := expressionParser.parseMulExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -254,17 +254,17 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 			newExpression.Type = ast.ExpressionTypeSub
 		}
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }
 
 // * / %
 func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
-	e, err := expressionParser.parseSuffixExpression()
+	left, err := expressionParser.parseSuffixExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -274,7 +274,7 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		e2, err := expressionParser.parseSuffixExpression()
+		right, err := expressionParser.parseSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -288,10 +288,10 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 			newExpression.Type = ast.ExpressionTypeMod
 		}
 		binary := &ast.ExpressionBinary{}
-		binary.Left = e
-		binary.Right = e2
+		binary.Left = left
+		binary.Right = right
 		newExpression.Data = binary
-		e = newExpression
+		left = newExpression
 	}
-	return e, nil
+	return left, nil
 }

@@ -216,13 +216,13 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 		code.CodeLength++
 	case ast.VariableTypeFloat:
 		if e.Type == ast.ExpressionTypePlusAssign {
-			code.Codes[code.CodeLength] = cg.OP_ladd
+			code.Codes[code.CodeLength] = cg.OP_fadd
 		} else if e.Type == ast.ExpressionTypeMinusAssign {
-			code.Codes[code.CodeLength] = cg.OP_lsub
+			code.Codes[code.CodeLength] = cg.OP_fsub
 		} else if e.Type == ast.ExpressionTypeMulAssign {
-			code.Codes[code.CodeLength] = cg.OP_lmul
+			code.Codes[code.CodeLength] = cg.OP_fmul
 		} else if e.Type == ast.ExpressionTypeDivAssign {
-			code.Codes[code.CodeLength] = cg.OP_ldiv
+			code.Codes[code.CodeLength] = cg.OP_fdiv
 		} else if e.Type == ast.ExpressionTypeModAssign {
 			code.Codes[code.CodeLength] = cg.OP_frem
 		}

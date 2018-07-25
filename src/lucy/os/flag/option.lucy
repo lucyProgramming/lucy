@@ -1,0 +1,53 @@
+
+enum OptionType {
+	OptionTypeBool = 1 ,
+	OptionTypeInt ,
+	OptionTypeString ,
+	OptionTypeFloat 
+}
+
+
+public final class Option {
+	typ OptionType
+	usage string 
+	boolValue,boolDefaultValue bool 
+	stringValue , stringDefaultValue string 
+	intValue ,intDefaultValue int 
+	floatValue,floatDefaultValue float 
+	fn resetDefaultValue() {
+		switch this.typ {
+			case OptionTypeBool:
+				this.boolValue = this.boolDefaultValue
+			case OptionTypeInt:
+				this.intValue = this.intDefaultValue
+			case OptionTypeString:
+				this.stringValue = this.stringDefaultValue
+			case OptionTypeFloat:
+				this.floatValue = this.floatDefaultValue
+		}
+	}
+	public fn getBoolValue() -> (value bool = this.boolValue){
+		if this.typ != OptionTypeBool{
+			panic(new error("not bool option"))
+		}
+	}
+	public fn getIntValue()-> (value int = this.intValue ){
+		if this.typ != OptionTypeInt{
+			panic(new error("not int option"))
+		}
+	}
+	public fn getStringValue()-> (value string = this.stringValue ){
+		if this.typ != OptionTypeString{
+			panic(new error("not string option"))
+		}
+	}
+	public fn getFloatValue()-> (value float = this.floatValue ){
+		if this.typ != OptionTypeFloat{
+			panic(new error("not float option"))
+		}
+	}
+}
+
+
+
+

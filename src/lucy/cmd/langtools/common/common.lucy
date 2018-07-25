@@ -1,47 +1,45 @@
 
-import "lucy/os";
-import "java/lang/System";
-import "java/io";
+import "lucy/os"
+import "java/lang/System"
+import "java/io"
 
 public fn getLucyRoot()->(path string , err error ){
-	envs := os.getEnvs();
+	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
-		err = new error("env variable LUCYROOT is not set");
-		return ;
+		err = new error("env variable LUCYROOT is not set")
+		return 
 	}
-	path = envs["LUCYROOT"];
+	path = envs["LUCYROOT"]
 }
 
  
 public fn getLucyPath()->(paths []string, err error){
-	envs := os.getEnvs();
+	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
-		err = new error("env variable LUCYROOT is not set");
-		return ;
+		err = new error("env variable LUCYROOT is not set")
+		return 
 	}
 	if envs.keyExist("LUCYPATH") == false {
-		err = new error("env variable LUCYPATH is not set");
-		return ;
+		err = new error("env variable LUCYPATH is not set")
+		return 
 	}
-	
-	ps := { envs["LUCYROOT"] -> true };
-	lucyPath := envs["LUCYPATH"];
-	osName := System.getProperty("os.name").toLowerCase();
+	ps := { envs["LUCYROOT"] -> true }
+	lucyPath := envs["LUCYPATH"]
+	osName := System.getProperty("os.name").toLowerCase()
 	if osName.startsWith("windows") {
-	    for v := range lucyPath.split(";"){
-        		ps[v] = true;
+	    for v := range lucyPath.split(""){
+        		ps[v] = true
         }
 	} else {  // unix style
 	    for v := range lucyPath.split(":"){
-        		ps[v] = true;
+        		ps[v] = true
         }
 	}
-	
-	paths = new []string(ps.size());
-	i := 0 ;
+	paths = new []string(ps.size())
+	i := 0 
 	for k,_ := range ps {
-		paths[i] = k;
-		i++; 
+		paths[i] = k
+		i++ 
 	}
 	
 }
@@ -49,22 +47,22 @@ public fn getLucyPath()->(paths []string, err error){
 
 
 public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which string ,err error ){
-	ps := []string{} ; 
+	ps := []string{}  
 	for _,v := range lucyPaths {
 		if true == (new io.File(v + "/src/" + packageName)).isDirectory() {
-			ps.append(v);
+			ps.append(v)
 		}
 	}
 	if ps.size() == 0 {
-		err = new error(sprintf("package '%s' not found" , packageName));
-		return ; 
+		err = new error(sprintf("package '%s' not found" , packageName))
+		return  
 	}
 	if ps.size() > 1 {
-		errmsg := sprintf("more than 1 package named '%s'" , packageName);
-		err = new error(errmsg);
-		return ; 
+		errMsg := sprintf("more than 1 package named '%s'" , packageName)
+		err = new error(errMsg)
+		return  
 	}
-	which = ps[0];
+	which = ps[0]
 }
 
 

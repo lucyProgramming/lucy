@@ -1,45 +1,36 @@
 
-import "lucy/cmd/langtools/common";
-import "lucy/os";
-import "lucy/encoding/json";
-import "java/io/File";
+import "lucy/cmd/langtools/common"
+import "lucy/os"
+import "lucy/encoding/json"
+import "java/io/File"
 
 class Clean {
-	lucypaths []string ;
-	packageName string ;
-	lucyroot string; 
-	static jsonFile string = "maintain.json";
-	public fn Clean(lucyroot string, lucypaths []string,packageName string) {
-		this.lucyroot = lucyroot ;
-		this.lucypaths = lucypaths;
-		this.packageName = packageName;
+	lucyPaths []string 
+	packageName string 
+	lucyRoot string 
+	static jsonFile string = "maintain.json"
+	public fn Clean(lucyRoot string, lucyPaths []string,packageName string) {
+	    this.super() 
+		this.lucyRoot = lucyRoot 
+		this.lucyPaths = lucyPaths
+		this.packageName = packageName
 	}
 
 	public fn clean() {
-		w,err := common.findPackageLiesIn(this.lucypaths , this.packageName);
+		w,err := common.findPackageLiesIn(this.lucyPaths , this.packageName)
 		if err != null {
-			print(err);
-			return ; 
+			print(err)
+			return  
 		}
-		bs,err := os.readFile(w + "/class/" + this.packageName + "/" + Clean.jsonFile);
-		if err != null {
-			print(err);
-			return ; 
-		}
-		meta := new common.PackageMeta();
-		err = json.decode(bs , meta );
-		if err != null {
-			print(err);
-			return ; 
-		}
-		os.chCwd(w + "/class/" + this.packageName);  // change dir
-		for _,v := range meta.classes {
-			if false == (new File(v)).delete() {
-				printf("delete file '%s' failed\n" , v );
+		dir := w + "/class/" + this.packageName
+		f := new File(w + "/class/" + this.packageName)
+		fs := f.listFiles()
+		for f := range fs {
+			if  name := f.getName() ; name == "maintain.json" || 
+				f.getName().endsWith(".class"){
+				print(dir + "/" + name)
+				new File(dir + "/" + name ).delete()
 			}
-		}
-		if false == (new File("maintain.json")).delete() {
-			printf("delete file '%s' failed\n" , Clean.jsonFile);
 		}
 	}
 }

@@ -2,53 +2,53 @@
 
 
 class xxx {
-	public boolValue bool;
-	public y string ; 
-	public intValue int ; 
-	public floatValue float ;
-	public stringValue string ; 
-	public c map { int -> string } ; 
-	public d map { string  -> int } ; 
+	public boolValue bool
+	public y string  
+	public intValue int  
+	public floatValue float 
+	public stringValue string  
+	public c map { int -> string }  
+	public d map { string  -> int }  
 	
 	public fn toString()->(s string ){
-		s = sprintf("boolValue:%b\n" , this.boolValue );		
-		s += sprintf("intValue:%d\n" , this.intValue );	
-		s += sprintf("stringValue:%s\n" , this.stringValue );	
-		s += sprintf("floatValue:%s\n" , this.floatValue );	
+		s = sprintf("boolValue:%b\n" , this.boolValue )		
+		s += sprintf("intValue:%d\n" , this.intValue )	
+		s += sprintf("stringValue:%s\n" , this.stringValue )	
+		s += sprintf("floatValue:%s\n" , this.floatValue )	
 	}
 }
 
 
 fn main(args []string) {
-	x := new xxx();
-	x.y = "11111111111";
-	x.c = new map { int -> string }();
-	x.c[1] = "hello world";
-	x.c[2] = "hello world";
-	x.d = { "hello world" -> 1 , "11111111111111111" -> 222 }; 
-	bs,err := encode(x , true ) ;
+	x := new xxx()
+	x.y = "11111111111"
+	x.c = new map { int -> string }()
+	x.c[1] = "hello world"
+	x.c[2] = "hello world"
+	x.d = { "hello world" -> 1 , "11111111111111111" -> 222 } 
+	bs,err := encode(x , true ) 
 	if err != null {
-		print(err);
+		print(err)
 	}
 
-	//print(bs);
-	print(string(bs));
+	//print(bs)
+	print(string(bs))
 
-	x2 := new xxx[](10);
+	x2 := new xxx[](10)
 
 	for k, _:= range x2 {
 		if k == 0 {
-			continue ; 
+			continue  
 		}
-		x2[k] = new xxx();
+		x2[k] = new xxx()
 	} 
-	bs,err = encode(x2);
+	bs,err = encode(x2)
 	if err != null {
-		print(err);
+		print(err)
 	}
-	print(string(bs));
-	print("#############################");
-	y := new xxx ();
+	print(string(bs))
+	print("#############################")
+	y := new xxx ()
 	s := `
 		{
 			"boolValue" : true , 
@@ -56,14 +56,14 @@ fn main(args []string) {
 			"stringValue" :"hello world",
 			"floatValue" : 1e3 
 		} 
-	` ; 
+	`  
 
-	err = decode([]byte(s) , y );
+	err = decode([]byte(s) , y )
 	if err != null {
-		panic(err);
+		panic(err)
 	}
 
-	print(y);
+	print(y)
 
 
 

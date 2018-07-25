@@ -73,7 +73,7 @@ const (
 	ExpressionTypeTypeAssert                                // a.(Object)
 	ExpressionTypeQuestion                                  // true ? a : b
 	ExpressionTypeGlobal                                    // global.XXX
-	ExpressionTypeParenthesis                               // ( a + b )
+	ExpressionTypeParenthesis                               // ( a )
 	ExpressionTypeVArgs                                     // a ...
 )
 
@@ -226,7 +226,7 @@ type Expression struct {
 	Type ExpressionTypeKind
 	/*
 		only for global variable definition
-		public hello = "hai...."
+		public hello := "hai...."
 	*/
 	IsPublic              bool
 	IsCompileAuto         bool // compile auto expression

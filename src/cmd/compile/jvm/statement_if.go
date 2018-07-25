@@ -77,7 +77,6 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	}
 	context.MakeStackMap(code, conditionState, code.CodeLength)
 	binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codeLength))
-	//s.Exits = append(s.Exits, (&cg.JumpBackPatch{}).FromCode(cg.OP_goto, code))
 	if s.ElseBlock != nil {
 		var elseBlockState *StackMapState
 		if s.ElseBlock.HaveVariableDefinition() {

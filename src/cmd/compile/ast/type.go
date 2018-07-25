@@ -248,13 +248,16 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 		return nil, fmt.Errorf("%s '%s' is not a package",
 			errMsgPrefix(typ.Pos), packageAndName[0])
 	}
-
 }
 
-func (typ *Type) makeTypeFrom(d interface{}) error {
+func (typ *Type) makeTypeFrom(d interface{}, loadFromImport bool) error {
 	switch d.(type) {
 	case *Class:
 		dd := d.(*Class)
+		if loadFromImport && dd.IsPublic() == false {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, fmt.Errorf("%s class '%s' is not public",
+				errMsgPrefix(typ.Pos), dd.Name))
+		}
 		if typ != nil {
 			typ.Type = VariableTypeObject
 			typ.Class = dd
@@ -268,6 +271,10 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 		return nil
 	case *Enum:
 		dd := d.(*Enum)
+		if loadFromImport && dd.IsPublic() == false {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, fmt.Errorf("%s enum '%s' is not public",
+				errMsgPrefix(typ.Pos), dd.Name))
+		}
 		typ.Type = VariableTypeEnum
 		typ.Enum = dd
 		return nil
@@ -279,9 +286,9 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 func (typ *Type) resolveName(block *Block, subPart bool) error {
 	var err error
 	var d interface{}
+	var loadFromImport bool
 	if strings.Contains(typ.Name, ".") == false {
 		d = block.searchType(typ.Name)
-		var loadFromImport bool
 		if d != nil {
 			if loadFromImport == false { // d is not nil
 				switch d.(type) {
@@ -308,7 +315,6 @@ func (typ *Type) resolveName(block *Block, subPart bool) error {
 		} else {
 			loadFromImport = true
 		}
-
 		if loadFromImport {
 			d, err = typ.resolveNameFromImport()
 			if err != nil {
@@ -316,6 +322,7 @@ func (typ *Type) resolveName(block *Block, subPart bool) error {
 			}
 		}
 	} else { // a.b  in type situation,must be package name
+		loadFromImport = true
 		d, err = typ.resolveNameFromImport()
 		if err != nil {
 			return err
@@ -324,7 +331,7 @@ func (typ *Type) resolveName(block *Block, subPart bool) error {
 	if d == nil {
 		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(typ.Pos), typ.Name)
 	}
-	err = typ.makeTypeFrom(d)
+	err = typ.makeTypeFrom(d, loadFromImport)
 	if err != nil {
 		return err
 	}

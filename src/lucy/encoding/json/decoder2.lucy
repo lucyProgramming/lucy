@@ -22,12 +22,12 @@ enum JSON_SYNTAX_TREE_TYPE {
 
 
 class JsonSyntaxTreeNode {
-	public Type JSON_SYNTAX_TREE_TYPE ;
-	public boolValue bool ;
-	public numberValue Number  ; // number value
-	public stringValue string ;
-	public arrayElements []JsonSyntaxTreeNode ;
-	public keyPairs map{ string -> JsonSyntaxTreeNode} ;
+	public Type JSON_SYNTAX_TREE_TYPE 
+	public boolValue bool 
+	public numberValue Number   // number value
+	public stringValue string 
+	public arrayElements []JsonSyntaxTreeNode 
+	public keyPairs map{ string -> JsonSyntaxTreeNode} 
 	public fn nodeType() -> (t string ) {
 		switch this.Type {
 			case JSON_SYNTAX_TREE_TYPE_ARRAY :
@@ -50,180 +50,180 @@ class JsonSyntaxTreeNode {
 
 
 class Decoder {
-	x Object ;
-	bs []byte;
-	offset int ; 
-	tree JsonSyntaxTreeNode ; 
+	x Object 
+	bs []byte
+	offset int  
+	tree JsonSyntaxTreeNode  
 
 	public fn Decoder(x Object,bs []byte) {
-		this.super();
-		this.x = x;
-		this.bs = bs;
+		this.super()
+		this.x = x
+		this.bs = bs
 	}
 
 	public fn decode() -> (err error){
 		defer {
-			x := catch();
+			x := catch()
 			if x != null {
-				err = x ;
+				err = x 
 			}
 		}
-		err = this.generateSyntaxTree();
+		err = this.generateSyntaxTree()
 		if err != null {
-			return ; 
+			return  
 		}
-		return this.decodeFromTree(this.tree , this . x );
+		return this.decodeFromTree(this.tree , this . x )
 	}
 	
 	fn generateSyntaxTree() -> (err error) {
-		this.skipWhiteSpace();
-		b := this.bs[this.offset] ; 
+		this.skipWhiteSpace()
+		b := this.bs[this.offset]  
 		if b != '[' && b != '{' {
-			err = new error("unkown begining of json input");
+			err = new error("unkown begining of json input")
 		}
-		this.tree ,err = this.parseValue();
+		this.tree ,err = this.parseValue()
 		if err != null {
-			return ; 
+			return  
 		}
 	}
 
 	
 	fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (err error ){
-		c := x.getClass();
+		c := x.getClass()
 		if c.isArray () {
-			return this.decodeArrayFromTree(tree , x , c);
+			return this.decodeArrayFromTree(tree , x , c)
 		}
-		return this.decodeObjectFromTree(tree , x , c);
+		return this.decodeObjectFromTree(tree , x , c)
 	}
 
 	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object,err error) {
-		typeName := c.getName();
+		typeName := c.getName()
 		switch typeName{ 
 			case "java.lang.Boolean":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_BOOL {
-					return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
 				} 
-				return Boolean.valueOf(tree.boolValue), null;
+				return Boolean.valueOf(tree.boolValue), null
 			case "java.lang.Byte":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()))
 				} 
-				longValue,err := tree.numberValue.getLong();
+				longValue,err := tree.numberValue.getLong()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
 				if longValue > long(Byte.MAX_VALUE) {
-					return null , new error(sprintf("%d exceeds byte max value" ,longValue));
+					return null , new error(sprintf("%d exceeds byte max value" ,longValue))
 				}
-				return Byte.valueOf(byte(longValue)) , null ;
+				return Byte.valueOf(byte(longValue)) , null 
 			case "java.lang.Short":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'short'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'short'" , tree.nodeType()))
 				} 
-				longValue,err := tree.numberValue.getLong();
+				longValue,err := tree.numberValue.getLong()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
 				if longValue > long(Short.MAX_VALUE) {
-					return null , new error(sprintf("%d exceeds short max value" ,longValue));
+					return null , new error(sprintf("%d exceeds short max value" ,longValue))
 				}
-				return Short.valueOf(short(longValue)) , null ;
+				return Short.valueOf(short(longValue)) , null 
 			case "java.lang.Character":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'character'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'character'" , tree.nodeType()))
 				} 
-				longValue,err := tree.numberValue.getLong();
+				longValue,err := tree.numberValue.getLong()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
 				if longValue > long(Character.MAX_VALUE) {
-					return null , new error(sprintf("%d exceeds character max value" ,longValue));
+					return null , new error(sprintf("%d exceeds character max value" ,longValue))
 				}
-				return Character.valueOf(short(longValue)) , null ;
+				return Character.valueOf(short(longValue)) , null 
 			case "java.lang.Integer" :
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()))
 				} 
-				longValue,err := tree.numberValue.getLong();
+				longValue,err := tree.numberValue.getLong()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
 				if longValue > long(Integer.MAX_VALUE) {
-					return null , new error(sprintf("%d exceeds integer max value" ,longValue));
+					return null , new error(sprintf("%d exceeds integer max value" ,longValue))
 				}
-				return Integer.valueOf(int(longValue)) , null ;
+				return Integer.valueOf(int(longValue)) , null 
 			case "java.lang.Long" :
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'long'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'long'" , tree.nodeType()))
 				} 
-				longValue,err := tree.numberValue.getLong();
+				longValue,err := tree.numberValue.getLong()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
-				return Long.valueOf(longValue) , null ;
+				return Long.valueOf(longValue) , null 
 			case "java.lang.Float" :
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'float'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'float'" , tree.nodeType()))
 				} 
-				doubleValue,err := tree.numberValue.getDouble();
+				doubleValue,err := tree.numberValue.getDouble()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
 				if doubleValue > double( Float.MAX_VALUE) {
-					return null , new error(sprintf("%f exceeds byte max value" ,doubleValue));
+					return null , new error(sprintf("%f exceeds byte max value" ,doubleValue))
 				}
-				return Float.valueOf(float(doubleValue)) , null ;
+				return Float.valueOf(float(doubleValue)) , null 
 			case "java.lang.Double":
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_NUMBER {
-					return null, new error(sprintf("cannot decode '%s' to 'double'" , tree.nodeType()));
+					return null, new error(sprintf("cannot decode '%s' to 'double'" , tree.nodeType()))
 				} 
-				doubleValue,err := tree.numberValue.getDouble();
+				doubleValue,err := tree.numberValue.getDouble()
 				if err != null {
-					return null , err ;
+					return null , err 
 				}
-				return Double.valueOf(doubleValue) , null ;
+				return Double.valueOf(doubleValue) , null 
 		}
 	}
 
 	fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
 		if tree.Type != JSON_SYNTAX_TREE_TYPE_OBJECT {
-			return  new error(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()));
+			return  new error(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()))
 		}
-		fs := c.getFields();
+		fs := c.getFields()
 		for f := range fs {
 			if null == tree.keyPairs {
-				continue ;
+				continue 
 			}
 			if false == tree.keyPairs.keyExist(f.getName()) {
-				continue ; 
+				continue  
 			}
-			var cc Class ;
+			var cc Class 
 			if t := f.get(x) ; t != null {
-				cc = t.getClass();
+				cc = t.getClass()
 			}
 			if cc == null {
-				cc = f.getType();
+				cc = f.getType()
 			}
 			if  isPrimitive(cc) {
-				tree :=  tree.keyPairs[f.getName()] ; 
-				obj,err :=  Decoder.decodePrimitives( cc , tree  ) ;
+				tree :=  tree.keyPairs[f.getName()]  
+				obj,err :=  Decoder.decodePrimitives( cc , tree  ) 
 				if err != null {
-					return err ; 
+					return err  
 				}
-				f.set(x , obj) ;
-				continue ; 
+				f.set(x , obj) 
+				continue  
 			}
 			if cc.getName() == "java.lang.String" {
-				tree :=  tree.keyPairs[f.getName()] ; 
+				tree :=  tree.keyPairs[f.getName()]  
 				if tree.Type != JSON_SYNTAX_TREE_TYPE_STRING {
-					return new error(sprintf("cannot decode '%s' as 'string'" , tree.nodeType()));
+					return new error(sprintf("cannot decode '%s' as 'string'" , tree.nodeType()))
 				}
-				f.set(x , tree.stringValue);
-				continue;
+				f.set(x , tree.stringValue)
+				continue
 			}
-			err = this.decodeObjectFromTree( tree.keyPairs[f.getName()] , f.get(x) , cc );
+			err = this.decodeObjectFromTree( tree.keyPairs[f.getName()] , f.get(x) , cc )
 			if err != null {
-				return err ;
+				return err 
 			}
 		}
 	}
@@ -231,7 +231,7 @@ class Decoder {
 
 	fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
 		if tree.Type != JSON_SYNTAX_TREE_TYPE_ARRAY {
-			return  new error(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()));
+			return  new error(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
 		}
 		
 
@@ -239,304 +239,304 @@ class Decoder {
 
 
 	fn skipWhiteSpace() {
-		b := this.bs[this.offset];
+		b := this.bs[this.offset]
 		if b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' {
 			
 		}else {
-			return ; 
+			return  
 		}
 		for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' { // 13 stands for CR
-			b = this.bs[this.offset++];
+			b = this.bs[this.offset++]
 		}
-		this.offset --; 
+		this.offset -- 
 	}
 
 	fn parseValue() -> (n JsonSyntaxTreeNode,err error ) {
-		this.skipWhiteSpace();
-		b := this.bs[this.offset];
+		this.skipWhiteSpace()
+		b := this.bs[this.offset]
 		switch b {
 			case '\"':
-				s := this.parseString();
-				n = new JsonSyntaxTreeNode();
-				n.Type = JSON_SYNTAX_TREE_TYPE_STRING ;
-				n.stringValue = s ;
-				return ;
+				s := this.parseString()
+				n = new JsonSyntaxTreeNode()
+				n.Type = JSON_SYNTAX_TREE_TYPE_STRING 
+				n.stringValue = s 
+				return 
 			case '[':
-				return this.parseArray();
+				return this.parseArray()
 			case '{':
-				return this.parseObject();
+				return this.parseObject()
 			case 't' , 'f':
-				isTrue := b == 't' ; 
+				isTrue := b == 't'  
 				if isTrue {
-					err = this.parseTrue();
+					err = this.parseTrue()
 				}else {
-					err = this.parseFalse();
+					err = this.parseFalse()
 				}
 				if err != null {
-					return null , err ; 
+					return null , err  
 				}
-				n = new JsonSyntaxTreeNode();
-				n.Type = JSON_SYNTAX_TREE_TYPE_BOOL ;
-				n.boolValue = isTrue;
-				return ;
+				n = new JsonSyntaxTreeNode()
+				n.Type = JSON_SYNTAX_TREE_TYPE_BOOL 
+				n.boolValue = isTrue
+				return 
 			case 'n':
-				err = this.parseNull();
+				err = this.parseNull()
 				if err != null {
-					return null , err ; 
+					return null , err  
 				}
-				n = new JsonSyntaxTreeNode();
-				n.Type = JSON_SYNTAX_TREE_TYPE_NULL ;
-				return  ; 
+				n = new JsonSyntaxTreeNode()
+				n.Type = JSON_SYNTAX_TREE_TYPE_NULL 
+				return   
 			default:
 				if this.isDigit(b) == false && b != '-' {
-					err = new error("unkown begining of value: " +  string(this.bs[this.offset:]));
-					return ;
+					err = new error("unkown begining of value: " +  string(this.bs[this.offset:]))
+					return 
 				}
-				var number Number ; 
-				number,err = this.parseNumber();
+				var number Number  
+				number,err = this.parseNumber()
 				if err != null {
-					return null , err ; 
+					return null , err  
 				}
-				n = new JsonSyntaxTreeNode();
-				n.Type = JSON_SYNTAX_TREE_TYPE_NUMBER ;
-				n.numberValue = number ;
-				return; 
+				n = new JsonSyntaxTreeNode()
+				n.Type = JSON_SYNTAX_TREE_TYPE_NUMBER 
+				n.numberValue = number 
+				return 
 		} 
 	} 
 
 	fn parseArray() -> (n JsonSyntaxTreeNode,err error ) {
-		this.offset++ ; // skip [
-		n = new JsonSyntaxTreeNode();
-		n.Type = JSON_SYNTAX_TREE_TYPE_ARRAY ; 
-		n.arrayElements = []JsonSyntaxTreeNode{};
-		b := this.bs[this.offset];
+		this.offset++  // skip [
+		n = new JsonSyntaxTreeNode()
+		n.Type = JSON_SYNTAX_TREE_TYPE_ARRAY  
+		n.arrayElements = []JsonSyntaxTreeNode{}
+		b := this.bs[this.offset]
 		for b != ']' {
-			value,err := this.parseValue();
+			value,err := this.parseValue()
 			if err != null {
-				return null,err ;
+				return null,err 
 			}
-			n.arrayElements.append(value);
-			this.skipWhiteSpace();
-			b = this.bs[this.offset];
+			n.arrayElements.append(value)
+			this.skipWhiteSpace()
+			b = this.bs[this.offset]
 			if b == ',' {
-				this.offset++ ;	
-				this.skipWhiteSpace();
-				b = this.bs[this.offset];
+				this.offset++ 	
+				this.skipWhiteSpace()
+				b = this.bs[this.offset]
 				if b == ']' {
-					return null , new error(sprintf("expect key value list, but '%s'" , this.getErrMsg()));
+					return null , new error(sprintf("expect key value list, but '%s'" , this.getErrMsg()))
 				}
 			}else if b == ']' {
 				//nothing to do 
 			}else {
-				return null , new error(sprintf("expect ']' or ',' but '%s'",this.getErrMsg()));
+				return null , new error(sprintf("expect ']' or ',' but '%s'",this.getErrMsg()))
 			}
 		}
 		if b != ']' {
-			return null , new error ("'[' and ']' not match");
+			return null , new error ("'[' and ']' not match")
 		}
-		this.offset++; // skip ] 
-		return n , null  ;
+		this.offset++ // skip ] 
+		return n , null  
 	}
 
 	fn parseObject() -> (n JsonSyntaxTreeNode,err error )  {
-		this.offset++ ; // skip { 
-		b := this.bs[this.offset];
-		n = new JsonSyntaxTreeNode();
-		n.Type = JSON_SYNTAX_TREE_TYPE_OBJECT;
-		n.keyPairs = new map {string ->JsonSyntaxTreeNode } ()  ;
+		this.offset++  // skip { 
+		b := this.bs[this.offset]
+		n = new JsonSyntaxTreeNode()
+		n.Type = JSON_SYNTAX_TREE_TYPE_OBJECT
+		n.keyPairs = new map {string ->JsonSyntaxTreeNode } ()  
 		for b != '}' {
-			k ,err := this.parseValue();
+			k ,err := this.parseValue()
 			if err != null {
-				return null , err ; 
+				return null , err  
 			}
 			if k.Type != JSON_SYNTAX_TREE_TYPE_STRING {
-				return null , new error("expect string for object key , but:" + k.nodeType());
+				return null , new error("expect string for object key , but:" + k.nodeType())
 			}
-			this.skipWhiteSpace();
-			b = this.bs[this.offset++] ; 
+			this.skipWhiteSpace()
+			b = this.bs[this.offset++]  
 			if b != ':' {
-				return null , new error("expect colon");
+				return null , new error("expect colon")
 			}
-			v,err := this.parseValue();
+			v,err := this.parseValue()
 			if err != null {
-				return null ,err ;
+				return null ,err 
 			}
-			n.keyPairs[k.stringValue] = v;
-			this.skipWhiteSpace();
-			b = this.bs[this.offset];
+			n.keyPairs[k.stringValue] = v
+			this.skipWhiteSpace()
+			b = this.bs[this.offset]
 			if b == ',' {
-				this.offset++ ;	
-				this.skipWhiteSpace();
-				b = this.bs[this.offset];
+				this.offset++ 	
+				this.skipWhiteSpace()
+				b = this.bs[this.offset]
 				if b == '}' {
-					return null , new error(sprintf("expect key value list, but '%s'",this.getErrMsg()));
+					return null , new error(sprintf("expect key value list, but '%s'",this.getErrMsg()))
 				}
 			}else if b == '}' {
 					//nothing to do 
 			}else {
-				return null , new error(sprintf("expect '}' or ',' but '%s'",this.getErrMsg()));
+				return null , new error(sprintf("expect '}' or ',' but '%s'",this.getErrMsg()))
 			}
 		}
 		if b != '}' {
-			err = new error("expect } , but " + string(this.bs[this.offset:]));
+			err = new error("expect } , but " + string(this.bs[this.offset:]))
 		}
-		this.offset ++ ;
-		return  ; 
+		this.offset ++ 
+		return   
 	}
 	
 
 	fn parseString() -> (s string) {
-		this.offset++ ; // skip "
-		b := this.bs[this.offset++]; 
-		bs := []byte {} ; 
+		this.offset++  // skip "
+		b := this.bs[this.offset++] 
+		bs := []byte {}  
 		for b != '\"' {
 			if b != '\\' {
-				bs.append(b);
-				b = this.bs[this.offset++];
-				continue;
+				bs.append(b)
+				b = this.bs[this.offset++]
+				continue
 			}
-			b = this.bs[this.offset++];
+			b = this.bs[this.offset++]
 			switch b{
 				case '\"' :
-					bs.append('\"');
-					b = this.bs[this.offset++];
+					bs.append('\"')
+					b = this.bs[this.offset++]
 				case '\\':
-					bs.append('\\');
-					b = this.bs[this.offset++];
+					bs.append('\\')
+					b = this.bs[this.offset++]
 				case 47b:
-					bs.append(47b);
-					b = this.bs[this.offset++];
+					bs.append(47b)
+					b = this.bs[this.offset++]
 				case 'b':
-					bs.append('\b');
-					b = this.bs[this.offset++];
+					bs.append('\b')
+					b = this.bs[this.offset++]
 				case 'f':
-					bs.append('\f');
-					b = this.bs[this.offset++];
+					bs.append('\f')
+					b = this.bs[this.offset++]
 				case 'n':
-					bs.append('\n');
-					b = this.bs[this.offset++];
+					bs.append('\n')
+					b = this.bs[this.offset++]
 				case 'r':
-					bs.append('\r');
-					b = this.bs[this.offset++];
+					bs.append('\r')
+					b = this.bs[this.offset++]
 				case 't':  // 1 
-					bs.append('\t');
-					b = this.bs[this.offset++];
+					bs.append('\t')
+					b = this.bs[this.offset++]
 				case 'u':  // unicode
-					panic(new error("unSupport unicode at this stage"));
+					panic(new error("unSupport unicode at this stage"))
 			}
 		}
 		// b == '"'
-		// this.offset++ ; // skip "
-		s = string(bs);
+		// this.offset++  // skip "
+		s = string(bs)
 	}
 
 
 	// 
 	fn parseTrue () ->(err error ) {
-		this.offset++ ; // skip 't' 
+		this.offset++  // skip 't' 
 		if this.bs[ this.offset ++ ] != 'r' {
-			err = new error("wrong true");
+			err = new error("wrong true")
 		} 
 		if this.bs[ this.offset ++ ] != 'u' {
-			err = new error("wrong true");
+			err = new error("wrong true")
 		} 
 		if this.bs[ this.offset ++ ] != 'e' {
-			err = new error("wrong true");
+			err = new error("wrong true")
 		} 
 	}
 
 	fn parseNull () ->(err error ) {
-		this.offset++ ; // skip 'n' 
+		this.offset++  // skip 'n' 
 		if this.bs[ this.offset ++ ] != 'u' {
-			err = new error("wrong null");
+			err = new error("wrong null")
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong null");
+			err = new error("wrong null")
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong null");
+			err = new error("wrong null")
 		} 
 	}
 
 	fn parseFalse () ->(err error ) {
-		this.offset++ ; // skip 'f' 
+		this.offset++  // skip 'f' 
 		if this.bs[ this.offset ++ ] != 'a' {
-			err = new error("wrong false");
+			err = new error("wrong false")
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong false");
+			err = new error("wrong false")
 		} 
 		if this.bs[ this.offset ++ ] != 's' {
-			err = new error("wrong false");
+			err = new error("wrong false")
 		} 
 		if this.bs[ this.offset ++ ] != 'e' {
-			err = new error("wrong false");
+			err = new error("wrong false")
 		} 
 	}
 
 	fn isDigit(b byte) -> (is bool) {
-		is = b >= '0' && b <= '9';
+		is = b >= '0' && b <= '9'
 	}
 	fn isHex(b byte) -> (is bool) {
-		is = this.isDigit(b) || (b >= 'a' && b <= 'f');
+		is = this.isDigit(b) || (b >= 'a' && b <= 'f')
 	} 
 
 	fn parseNumber() -> (n Number ,err error ) {
-		n  = new Number();
-		b := this.bs[this.offset];
+		n  = new Number()
+		b := this.bs[this.offset]
 		if b == '-' {
-			n.isNegative = true ;
-			b = this.bs[++this.offset];
+			n.isNegative = true 
+			b = this.bs[++this.offset]
 			if false == this.isDigit(b) {
-				err = new error("expect number after '-'");
-				return ;
+				err = new error("expect number after '-'")
+				return 
 			}
 		}
 		if b == '0' {
-			n.integerPart.append(b);
+			n.integerPart.append(b)
 		}else {
 			for this.isDigit(b) {
-				n.integerPart.append(b);
-				b = this.bs[++ this.offset];
+				n.integerPart.append(b)
+				b = this.bs[++ this.offset]
 			}
 		}
 		if b == '.' {
-			n.isFloat = true ; 
-			b = this.bs[++this.offset];
+			n.isFloat = true  
+			b = this.bs[++this.offset]
 			if this.isDigit(b) == false  {
-				err = new error("expect number after '.'");
-				return ;
+				err = new error("expect number after '.'")
+				return 
 			}
 			for this.isDigit(b) {
-				n.floatPart.append(b);
-				b = this.bs[++this.offset  ];
+				n.floatPart.append(b)
+				b = this.bs[++this.offset  ]
 			}
 		}
 		if b == 'e' || b == 'E' {
-			b = this.bs[ ++ this.offset];
+			b = this.bs[ ++ this.offset]
 			if b == '+' {
-				b = this.bs[++this.offset];
+				b = this.bs[++this.offset]
 			}else if b == '-' {
-				b = this.bs[++this.offset];
-				n.eIsNegative = true;
+				b = this.bs[++this.offset]
+				n.eIsNegative = true
 			}
 			if false ==  this.isDigit(b) {
-				err = new error("expect number after 'e' or 'E' ," + this.getErrMsg() );
-				return ;
+				err = new error("expect number after 'e' or 'E' ," + this.getErrMsg() )
+				return 
 			}
 			for this.isDigit(b) {
-				n.e.append(b);
-				b = this.bs[++this.offset];
+				n.e.append(b)
+				b = this.bs[++this.offset]
 			}
 		}
 	}
 
 	fn getErrMsg() -> (msg string ) {
-		end := this.bs.size();
-		size := 20 ;
+		end := this.bs.size()
+		size := 20 
 		if this.bs.size() - this.offset >  size {
-			end = this.offset + size;
+			end = this.offset + size
 		}
-		return string(this.bs[this.offset:end]);
+		return string(this.bs[this.offset:end])
 	}
 }

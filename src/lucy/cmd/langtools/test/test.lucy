@@ -3,20 +3,20 @@ import "lucy/os"
 import "lucy/cmd/langtools/common"
 
 class Test {
-	lucypaths []string 
+	lucyPaths []string
 	packageName string 
-	lucyroot string 
-	public fn Test(lucyroot string, lucypaths []string,packageName string){
+	lucyRoot string
+	public fn Test(lucyRoot string, lucyPaths []string,packageName string){
 	    this.super()
-		this.lucyroot = lucyroot 
-		this.lucypaths = lucypaths
+		this.lucyRoot = lucyRoot
+		this.lucyPaths = lucyPaths
 		this.packageName = packageName
 	}
 	
 	
 	//real test method
 	public fn test(){
-    	w,err := common.findPackageLiesIn(this.lucypaths , this.packageName)
+    	w,err := common.findPackageLiesIn(this.lucyPaths , this.packageName)
 		if err != null  {
 			print(err)
 			os.exit(1)
@@ -55,10 +55,10 @@ class Test {
         args  := new string[](2)
         args[0] = "run"  
         args[1] =  packageName
-        cmd := new os.Command(this.lucyroot + "/bin/lucy", args  , null ,null)
+        cmd := new os.Command(this.lucyRoot + "/bin/lucy", args  , null ,null)
         cmd.stdout = os.stdout 
         cmd.stderr = os.stderr  
-        if err =  cmd.start()  ; err != null {
+        if err =  cmd.start() ; err != null {
         	return 
         }
         if err =  cmd.wait() ;  err != null {
