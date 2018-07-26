@@ -9,7 +9,7 @@ import (
 func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -19,7 +19,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 	switch call.Name {
 	case common.MapMethodKeyExists:
 		variableType := call.Args[0].Value
-		stack, _ := buildExpression.build(class, code, call.Args[0], context, state)
+		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -52,7 +52,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 		for k, v := range call.Args {
 			currentStack = 1
 			if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-				stack, _ := buildExpression.build(class, code, v, context, state)
+				stack := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -87,7 +87,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 				}
 				state.pushStack(class, hashMapVerifyType)
 			}
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}

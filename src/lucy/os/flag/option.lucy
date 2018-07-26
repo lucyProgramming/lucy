@@ -26,25 +26,29 @@ public final class Option {
 				this.floatValue = this.floatDefaultValue
 		}
 	}
-	public fn getBoolValue() -> (value bool = this.boolValue){
+	public fn getBoolValue() -> (value bool ){
 		if this.typ != OptionTypeBool{
 			panic(new error("not bool option"))
 		}
+		value = this.boolValue
 	}
-	public fn getIntValue()-> (value int = this.intValue ){
+	public fn getIntValue()-> (value int ){
 		if this.typ != OptionTypeInt{
 			panic(new error("not int option"))
 		}
+		value = this.intValue
 	}
-	public fn getStringValue()-> (value string = this.stringValue ){
+	public fn getStringValue()-> (value string ){
 		if this.typ != OptionTypeString{
 			panic(new error("not string option"))
 		}
+		value = this.stringValue
 	}
-	public fn getFloatValue()-> (value float = this.floatValue ){
+	public fn getFloatValue()-> (value float ){
 		if this.typ != OptionTypeFloat{
 			panic(new error("not float option"))
 		}
+		value = this.floatValue
 	}
 }
 

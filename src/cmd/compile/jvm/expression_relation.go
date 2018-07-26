@@ -15,9 +15,9 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	if bin.Left.Value.IsNumber() { // in this case ,right must be a number type
-		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
+		stack := buildExpression.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -66,19 +66,10 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 	}
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
 		bin.Right.Value.Type == ast.VariableTypeBool { // bool type
-		var es []*cg.Exit
-		maxStack, es = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		if len(es) > 0 {
-			context.MakeStackMap(code, state, code.CodeLength)
-			writeExits(es, code.CodeLength)
-		}
-		stack, es := buildExpression.build(class, code, bin.Right, context, state)
+		stack := buildExpression.build(class, code, bin.Right, context, state)
 		state.pushStack(class, bin.Right.Value)
-		if len(es) > 0 {
-			context.MakeStackMap(code, state, code.CodeLength)
-			writeExits(es, code.CodeLength)
-		}
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -109,7 +100,7 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		} else {
 			notNullExpression = bin.Right
 		}
-		maxStack, _ = buildExpression.build(class, code, notNullExpression, context, state)
+		maxStack = buildExpression.build(class, code, notNullExpression, context, state)
 		if e.Type == ast.ExpressionTypeEq {
 			code.Codes[code.CodeLength] = cg.OP_ifnull
 		} else { // ne
@@ -131,9 +122,9 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 
 	//string compare
 	if bin.Left.Value.Type == ast.VariableTypeString {
-		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
+		stack := buildExpression.build(class, code, bin.Right, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,
@@ -174,12 +165,12 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 	}
 
 	if bin.Left.Value.IsPointer() && bin.Right.Value.IsPointer() { //
-		stack, _ := buildExpression.build(class, code, bin.Left, context, state)
+		stack := buildExpression.build(class, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		state.pushStack(class, bin.Left.Value)
-		stack, _ = buildExpression.build(class, code, bin.Right, context, state)
+		stack = buildExpression.build(class, code, bin.Right, context, state)
 		if t := stack + 1; t > maxStack {
 			maxStack = t
 		}
@@ -205,12 +196,12 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 
 	// enum
 	if bin.Left.Value.Type == ast.VariableTypeEnum {
-		stack, _ := buildExpression.build(class, code, bin.Left, context, state)
+		stack := buildExpression.build(class, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		state.pushStack(class, bin.Left.Value)
-		stack, _ = buildExpression.build(class, code, bin.Right, context, state)
+		stack = buildExpression.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}

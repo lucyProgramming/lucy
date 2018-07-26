@@ -15,6 +15,7 @@ func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {
 		variableType.Type == ast.VariableTypeEnum ||
 		variableType.Type == ast.VariableTypeFunction
 }
+
 func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	if variableType.Type == ast.VariableTypeMap {
 		d = "M" // start token of map

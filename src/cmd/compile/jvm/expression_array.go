@@ -121,7 +121,7 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	for _, v := range arr.Expressions {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
 			// stack top is array list
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxStack {
 				maxStack = t
 			}
@@ -144,13 +144,8 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 		loadInt32(class, code, index) // load index
 		state.pushStack(class, arrayObject)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack, es := buildExpression.build(class, code, v, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1) // must be a logical expression
-		}
+		stack := buildExpression.build(class, code, v, context, state)
+
 		state.popStack(2)
 		if t := 5 + stack; t > maxStack {
 			maxStack = t

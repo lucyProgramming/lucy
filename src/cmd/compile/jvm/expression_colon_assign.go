@@ -30,13 +30,7 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 				state.pushStack(class, obj)
 			}
 		}
-		stack, es := buildExpression.build(class, code, vs.InitValues[0], context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, vs.InitValues[0].Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -74,7 +68,7 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 		return
 	}
 	if len(vs.InitValues) == 1 {
-		maxStack, _ = buildExpression.build(class, code, vs.InitValues[0], context, state)
+		maxStack = buildExpression.build(class, code, vs.InitValues[0], context, state)
 	} else {
 		maxStack = buildExpression.buildExpressions(class, code, vs.InitValues, context, state)
 	}
@@ -171,7 +165,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 	index = 0
 	for _, v := range vs.InitValues {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-			stack, _ := buildExpression.build(class, code, vs.InitValues[0], context, state)
+			stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -198,13 +192,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 			continue
 		}
 		//
-		stack, es := buildExpression.build(class, code, vs.InitValues[0], context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

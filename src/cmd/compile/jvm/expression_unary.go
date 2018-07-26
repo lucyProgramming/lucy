@@ -12,7 +12,7 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 
 	if e.Type == ast.ExpressionTypeNegative {
 		ee := e.Data.(*ast.Expression)
-		maxStack, _ = buildExpression.build(class, code, ee, context, state)
+		maxStack = buildExpression.build(class, code, ee, context, state)
 		switch e.Value.Type {
 		case ast.VariableTypeByte:
 			fallthrough
@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 	}
 	if e.Type == ast.ExpressionTypeBitwiseNot {
 		ee := e.Data.(*ast.Expression)
-		maxStack, _ = buildExpression.build(class, code, ee, context, state)
+		maxStack = buildExpression.build(class, code, ee, context, state)
 		if t := jvmSlotSize(ee.Value) * 2; t > maxStack {
 			maxStack = t
 		}
@@ -75,14 +75,7 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 	}
 	if e.Type == ast.ExpressionTypeNot {
 		ee := e.Data.(*ast.Expression)
-		var es []*cg.Exit
-		maxStack, es = buildExpression.build(class, code, ee, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, ee.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		maxStack = buildExpression.build(class, code, ee, context, state)
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		state.pushStack(class, ee.Value)
 		context.MakeStackMap(code, state, code.CodeLength+8)

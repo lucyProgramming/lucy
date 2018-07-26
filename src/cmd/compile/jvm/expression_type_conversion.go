@@ -48,7 +48,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
 	}
-	stack, _ := buildExpression.build(class, code, conversion.Expression, context, state)
+	stack := buildExpression.build(class, code, conversion.Expression, context, state)
 	maxStack = currentStack + stack
 	if e.Value.IsNumber() {
 		buildExpression.numberTypeConverter(code, conversion.Expression.Value.Type, conversion.Type.Type)

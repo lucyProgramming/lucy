@@ -8,36 +8,17 @@ import (
 func (buildExpression *BuildExpression) buildQuestion(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	question := e.Data.(*ast.ExpressionQuestion)
-	var es []*cg.Exit
-	maxStack, es = buildExpression.build(class, code, question.Selection, context, state)
-	if len(es) > 0 {
-		writeExits(es, code.CodeLength)
-		state.pushStack(class, question.Selection.Value)
-		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(1)
-	}
+	maxStack = buildExpression.build(class, code, question.Selection, context, state)
 	falseExit := (&cg.Exit{}).Init(cg.OP_ifeq, code)
 	//true part
-	stack, es := buildExpression.build(class, code, question.True, context, state)
-	if len(es) > 0 {
-		writeExits(es, code.CodeLength)
-		state.pushStack(class, question.True.Value)
-		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(1)
-	}
+	stack := buildExpression.build(class, code, question.True, context, state)
 	if stack > maxStack {
 		maxStack = stack
 	}
 	trueExit := (&cg.Exit{}).Init(cg.OP_goto, code)
 	context.MakeStackMap(code, state, code.CodeLength)
 	writeExits([]*cg.Exit{falseExit}, code.CodeLength)
-	stack, es = buildExpression.build(class, code, question.False, context, state)
-	if len(es) > 0 {
-		writeExits(es, code.CodeLength)
-		state.pushStack(class, question.False.Value)
-		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(1)
-	}
+	stack = buildExpression.build(class, code, question.False, context, state)
 	if stack > maxStack {
 		maxStack = stack
 	}
@@ -46,5 +27,4 @@ func (buildExpression *BuildExpression) buildQuestion(class *cg.ClassHighLevel, 
 	state.popStack(1)
 	writeExits([]*cg.Exit{trueExit}, code.CodeLength)
 	return
-
 }

@@ -9,7 +9,7 @@ import (
 func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
+	maxStack = buildExpression.build(class, code, call.Args[0], context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	if 2 > maxStack {

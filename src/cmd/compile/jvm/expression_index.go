@@ -14,11 +14,11 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
 	state.pushStack(class, index.Expression.Value)
-	stack, _ := buildExpression.build(class, code, index.Index, context, state)
+	stack := buildExpression.build(class, code, index.Index, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -102,9 +102,9 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 	if index.Expression.Value.Type == ast.VariableTypeMap {
 		return buildExpression.buildMapIndex(class, code, e, context, state)
 	}
-	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.Value)
-	stack, _ := buildExpression.build(class, code, index.Index, context, state)
+	stack := buildExpression.build(class, code, index.Index, context, state)
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}

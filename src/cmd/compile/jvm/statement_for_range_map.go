@@ -16,7 +16,7 @@ type AutoVariableForRangeMap struct {
 
 func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
-	maxStack, _ = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // map instance on stack
+	maxStack = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // map instance on stack
 	// if null skip
 	{
 		state.Stacks = append(state.Stacks,

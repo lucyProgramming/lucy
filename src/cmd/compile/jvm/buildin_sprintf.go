@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
-	maxStack, _ = buildExpression.build(class, code, meta.Format, context, state)
+	maxStack = buildExpression.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 	for _, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
 			currentStack = 2
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -61,13 +61,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 		currentStack += 2
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack, es := buildExpression.build(class, code, v, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1) // bool value
-		}
+		stack := buildExpression.build(class, code, v, context, state)
 		state.popStack(2)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t

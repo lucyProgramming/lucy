@@ -25,13 +25,7 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	maxStack = 2 // current stack is 2
 	currentStack := uint16(1)
-	stack, es := buildExpression.build(class, code, e.Left, context, state)
-	if len(es) > 0 {
-		writeExits(es, code.CodeLength)
-		state.pushStack(class, e.Left.Value)
-		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(1)
-	}
+	stack := buildExpression.build(class, code, e.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -46,13 +40,7 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, es = buildExpression.build(class, code, e.Right, context, state)
-	if len(es) > 0 {
-		writeExits(es, code.CodeLength)
-		state.pushStack(class, e.Right.Value)
-		context.MakeStackMap(code, state, code.CodeLength)
-		state.popStack(1)
-	}
+	stack = buildExpression.build(class, code, e.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}

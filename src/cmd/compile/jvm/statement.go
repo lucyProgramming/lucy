@@ -12,7 +12,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 	//fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.StatementTypeExpression:
-		maxStack, _ = buildPackage.BuildExpression.build(class, code, s.Expression, context, state)
+		maxStack = buildPackage.BuildExpression.build(class, code, s.Expression, context, state)
 	case ast.StatementTypeIf:
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = buildPackage.buildIfStatement(class, code, s.StatementIf, context, state)

@@ -61,7 +61,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			code.CodeLength += 8
 		}
 	}
-	maxStack, _ = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
+	maxStack = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
 	var exit *cg.Exit
 	size := jvmSlotSize(s.Condition.Value)
@@ -75,7 +75,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
 			if ee.MayHaveMultiValue() && len(ee.MultiValues) > 1 {
-				stack, _ := buildPackage.BuildExpression.build(class, code, ee, context, state)
+				stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -114,7 +114,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			code.CodeLength++
 			currentStack += size
 			state.pushStack(class, s.Condition.Value)
-			stack, _ := buildPackage.BuildExpression.build(class, code, ee, context, state)
+			stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}

@@ -31,7 +31,9 @@ public class Command implements Runnable{
 		this.p.destroy();
 	}
 
-	public fn getProcess() -> (p Process = this . p ) {	}
+	public fn getProcess() -> (p Process  ) {
+	    p = this.p
+	}
 	
 	public fn start() -> (err error) {
 		if this.cmd == null || this.cmd == "" {

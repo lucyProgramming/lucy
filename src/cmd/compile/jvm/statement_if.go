@@ -9,11 +9,10 @@ import (
 
 func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, s *ast.StatementIf, context *Context, state *StackMapState) (maxStack uint16) {
-	var es []*cg.Exit
 	conditionState := (&StackMapState{}).FromLast(state)
 	defer state.addTop(conditionState)
 	for _, v := range s.PrefixExpressions {
-		stack, _ := buildPackage.BuildExpression.build(class, code, v, context, conditionState)
+		stack := buildPackage.BuildExpression.build(class, code, v, context, conditionState)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -24,13 +23,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	} else {
 		IfState = conditionState
 	}
-	maxStack, es = buildPackage.BuildExpression.build(class, code, s.Condition, context, IfState)
-	if len(es) > 0 {
-		writeExits(es, code.CodeLength)
-		IfState.pushStack(class, s.Condition.Value)
-		context.MakeStackMap(code, IfState, code.CodeLength)
-		IfState.popStack(1) // must be bool expression
-	}
+	maxStack = buildPackage.BuildExpression.build(class, code, s.Condition, context, IfState)
 	code.Codes[code.CodeLength] = cg.OP_ifeq
 	codeLength := code.CodeLength
 	exit := code.Codes[code.CodeLength+1 : code.CodeLength+3]
@@ -52,13 +45,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 		} else {
 			elseIfState = conditionState
 		}
-		stack, es := buildPackage.BuildExpression.build(class, code, v.Condition, context, elseIfState)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			elseIfState.pushStack(class, s.Condition.Value)
-			context.MakeStackMap(code, elseIfState, code.CodeLength)
-			elseIfState.popStack(1)
-		}
+		stack := buildPackage.BuildExpression.build(class, code, v.Condition, context, elseIfState)
 		if stack > maxStack {
 			maxStack = stack
 		}

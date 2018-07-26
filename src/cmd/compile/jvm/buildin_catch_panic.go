@@ -11,7 +11,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 	maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
-		maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
+		maxStack = buildExpression.build(class, code, call.Args[0], context, state)
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_new
 		className := call.Args[0].Value.Class.Name
@@ -26,7 +26,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 			state.Stacks = append(state.Stacks, t)
 			state.Stacks = append(state.Stacks, t)
 		}
-		stack, _ := buildExpression.build(class, code, call.Args[0], context, state)
+		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		state.popStack(2)
 		maxStack = 2 + stack
 		code.Codes[code.CodeLength] = cg.OP_invokespecial

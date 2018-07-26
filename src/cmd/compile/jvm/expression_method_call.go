@@ -75,7 +75,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 	}
 	if call.FieldMethodHandler != nil {
 		if call.FieldMethodHandler.IsStatic() == false {
-			stack, _ := buildExpression.build(class, code, call.Expression, context, state)
+			stack := buildExpression.build(class, code, call.Expression, context, state)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -132,7 +132,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		return
 	}
 
-	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	// object ref
 	state.pushStack(class, call.Expression.Value)
 	defer state.popStack(1)

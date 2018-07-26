@@ -48,7 +48,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	/*
 		left value must can be used as right value
 	*/
-	stack, _ := buildExpression.build(class, code, ee, context, state) // load it`s value
+	stack := buildExpression.build(class, code, ee, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}

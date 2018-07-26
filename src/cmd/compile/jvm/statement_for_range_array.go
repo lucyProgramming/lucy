@@ -15,7 +15,7 @@ type AutoVariableForRangeArray struct {
 func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	//build array expression
-	maxStack, _ = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
+	maxStack = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
 
 	// if null skip
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top

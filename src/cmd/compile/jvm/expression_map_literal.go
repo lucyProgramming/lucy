@@ -31,7 +31,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 		code.CodeLength++
 		currentStack := uint16(2)
 		state.pushStack(class, hashMapObject)
-		stack, _ := buildExpression.build(class, code, v.Left, context, state)
+		stack := buildExpression.build(class, code, v.Left, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -40,13 +40,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 		}
 		state.pushStack(class, state.newObjectVariableType(javaRootClass))
 		currentStack = 3 // stack is ... mapref mapref kref
-		stack, es := buildExpression.build(class, code, v.Right, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Right.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack = buildExpression.build(class, code, v.Right, context, state)
 		state.popStack(1) // @43 line
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t

@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
 	if meta.Stream != nil {
 		// get stream from args
-		maxStack, _ = buildExpression.build(class, code, meta.Stream, context, state)
+		maxStack = buildExpression.build(class, code, meta.Stream, context, state)
 	} else {
 		// get stream from stdout
 		code.Codes[code.CodeLength] = cg.OP_getstatic
@@ -44,13 +44,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	if len(call.Args) == 1 && call.Args[0].IsOneValue() {
-		stack, es := buildExpression.build(class, code, call.Args[0], context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, call.Args[0].Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -169,7 +163,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	}
 	for k, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
@@ -192,13 +186,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 			continue
 		}
 		variableType := v.Value
-		stack, es := buildExpression.build(class, code, v, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, variableType)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildExpression.build(class, code, v, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

@@ -21,7 +21,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	}()
 	//init
 	if s.Init != nil {
-		stack, _ := buildPackage.BuildExpression.build(class, code, s.Init, context, forState)
+		stack := buildPackage.BuildExpression.build(class, code, s.Init, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -29,13 +29,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	//condition
 	var firstTimeExit *cg.Exit
 	if s.Condition != nil {
-		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			forState.pushStack(class, s.Condition.Value)
-			context.MakeStackMap(code, forState, code.CodeLength)
-			forState.popStack(1) // must be bool expression
-		}
+		stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -45,19 +39,14 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	if s.Increment != nil {
-		stack, _ := buildPackage.BuildExpression.build(class, code, s.Increment, context, forState)
+		stack := buildPackage.BuildExpression.build(class, code, s.Increment, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
 	}
 	if s.Condition != nil {
-		stack, es := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			forState.pushStack(class, s.Condition.Value)
-			context.MakeStackMap(code, forState, code.CodeLength)
-			forState.popStack(1) // must be bool expression
-		}
+		stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
+
 		if stack > maxStack {
 			maxStack = stack
 		}

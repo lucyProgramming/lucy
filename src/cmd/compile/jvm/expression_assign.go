@@ -16,12 +16,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
 	maxStack, remainStack, op, target, LeftValueKind := buildExpression.getLeftValue(class, code, left, context, state)
-	stack, es := buildExpression.build(class, code, right, context, state)
-	if len(es) > 0 {
-		state.pushStack(class, right.Value)
-		context.MakeStackMap(code, state, code.CodeLength)
-		writeExits(es, code.CodeLength)
-	}
+	stack := buildExpression.build(class, code, right, context, state)
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -46,7 +41,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 		return buildExpression.buildExpressionAssign(class, code, e, context, state)
 	}
 	if len(rights) == 1 {
-		maxStack, _ = buildExpression.build(class, code, rights[0], context, state)
+		maxStack = buildExpression.build(class, code, rights[0], context, state)
 	} else {
 		maxStack = buildExpression.buildExpressions(class, code, rights, context, state)
 	}

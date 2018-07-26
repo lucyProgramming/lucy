@@ -71,13 +71,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals += jvmSlotSize(v.Type)
 		}
-		stack, es := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Type)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -110,7 +104,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
 		state.Locals = append(state.Locals, t)
 		buildPackage.mkParametersOffset(class, method.Code, f, state)
-		stack, _ := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
+		stack := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
 			context, state)
 		if stack > method.Code.MaxStack {
 			method.Code.MaxStack = stack
@@ -236,13 +230,7 @@ func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHi
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(class.Name))
-		stack, es := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
-		if len(es) > 0 {
-			state.pushStack(class, v.Expression.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-			writeExits(es, code.CodeLength)
-		}
+		stack := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
 		if t := 1 + stack; t > code.MaxStack {
 			code.MaxStack = t
 		}

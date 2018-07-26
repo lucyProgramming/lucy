@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 	}()
 	for _, e := range args {
 		if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
-			stack, _ := buildExpression.build(class, code, e, context, state)
+			stack := buildExpression.build(class, code, e, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -29,13 +29,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			}
 			continue
 		}
-		stack, es := buildExpression.build(class, code, e, context, state)
-		if len(es) > 0 {
-			state.pushStack(class, &ast.Type{Type: ast.VariableTypeBool})
-			writeExits(es, code.CodeLength)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildExpression.build(class, code, e, context, state)
 		if t := stack + currentStack; t > maxStack {
 			maxStack = t
 		}
@@ -53,7 +47,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 		}
 	} else {
 		if vArgs.IsJavaArray {
-			stack, _ := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
+			stack := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -66,7 +60,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			index := int32(0)
 			for _, e := range vArgs.Expressions {
 				if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
-					stack, _ := buildExpression.build(class, code, e, context, state)
+					stack := buildExpression.build(class, code, e, context, state)
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}
@@ -94,12 +88,8 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 					Type: ast.VariableTypeInt,
 				})
 				currentStack += 2
-				stack, es := buildExpression.build(class, code, e, context, state)
+				stack := buildExpression.build(class, code, e, context, state)
 				state.pushStack(class, e.Value)
-				if len(es) > 0 {
-					writeExits(es, code.CodeLength)
-					context.MakeStackMap(code, state, code.CodeLength)
-				}
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}

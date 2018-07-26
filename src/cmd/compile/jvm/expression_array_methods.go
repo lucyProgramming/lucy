@@ -9,7 +9,7 @@ import (
 func (buildExpression *BuildExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	switch call.Name {
 	case common.ArrayMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -29,7 +29,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 		state.popStack(len(state.Stacks) - length) // ref type
 	}()
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.Value)
 	switch call.Name {
 	case common.ArrayMethodCap,
@@ -55,7 +55,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 		for _, v := range call.Args {
 			currentStack := uint16(1)
 			if v.MayHaveMultiValue() && len(v.MultiValues) > 0 {
-				stack, _ := buildExpression.build(class, code, v, context, state)
+				stack := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -78,13 +78,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 				}
 				continue
 			}
-			stack, es := buildExpression.build(class, code, v, context, state)
-			if len(es) > 0 {
-				writeExits(es, code.CodeLength)
-				state.pushStack(class, v.Value)
-				context.MakeStackMap(code, state, code.CodeLength)
-				state.popStack(1) // must be a logical expression
-			}
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
@@ -107,7 +101,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
 			if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-				stack, _ := buildExpression.build(class, code, v, context, state)
+				stack := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -128,7 +122,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 				}
 				continue
 			}
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}

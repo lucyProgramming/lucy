@@ -15,9 +15,9 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 	if e.Type == ast.ExpressionTypeOr ||
 		e.Type == ast.ExpressionTypeAnd ||
 		e.Type == ast.ExpressionTypeXor {
-		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
+		stack := buildExpression.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}
@@ -56,9 +56,9 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 			bin.Right.Value.Type == ast.VariableTypeString {
 			return buildExpression.buildStrCat(class, code, bin, context, state)
 		}
-		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.Value)
-		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
+		stack := buildExpression.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -167,9 +167,9 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 
 	if e.Type == ast.ExpressionTypeLsh ||
 		e.Type == ast.ExpressionTypeRsh {
-		maxStack, _ = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack, _ := buildExpression.build(class, code, bin.Right, context, state)
+		stack := buildExpression.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}

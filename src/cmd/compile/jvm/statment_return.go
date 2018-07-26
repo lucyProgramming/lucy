@@ -25,15 +25,8 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		return
 	}
 	if len(context.function.Type.ReturnList) == 1 {
-		var es []*cg.Exit
 		if len(statementReturn.Expressions) > 0 {
-			maxStack, es = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
-			if len(es) > 0 {
-				writeExits(es, code.CodeLength)
-				state.pushStack(class, statementReturn.Expressions[0].Value)
-				context.MakeStackMap(code, state, code.CodeLength)
-				state.popStack(1)
-			}
+			maxStack = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 		}
 		// execute defer first
 		if len(statementReturn.Defers) > 0 {
@@ -95,7 +88,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 	//multi returns
 	if len(statementReturn.Expressions) > 0 {
 		if len(statementReturn.Expressions) == 1 {
-			maxStack, _ = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 		} else {
 			loadInt32(class, code, int32(len(context.function.Type.ReturnList)))
 			code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -110,7 +103,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			for _, v := range statementReturn.Expressions {
 				currentStack := uint16(1)
 				if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-					stack, _ := buildPackage.BuildExpression.build(class, code, v, context, state)
+					stack := buildPackage.BuildExpression.build(class, code, v, context, state)
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}
@@ -138,13 +131,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 				code.Codes[code.CodeLength] = cg.OP_dup // dup array list
 				code.CodeLength++
 				currentStack++
-				stack, es := buildPackage.BuildExpression.build(class, code, v, context, state)
-				if len(es) > 0 {
-					writeExits(es, code.CodeLength)
-					state.pushStack(class, v.Value)
-					context.MakeStackMap(code, state, code.CodeLength)
-					state.popStack(1) // must be bool expression
-				}
+				stack := buildPackage.BuildExpression.build(class, code, v, context, state)
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}

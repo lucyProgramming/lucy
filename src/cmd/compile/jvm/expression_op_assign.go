@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 	}
 	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	currentStack := remainStack + 1 //
-	stack, _ := buildExpression.build(class, code, bin.Left, context, state)
+	stack := buildExpression.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -44,7 +44,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	stack, _ = buildExpression.build(class, code, bin.Right, context, state)
+	stack = buildExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -83,13 +83,13 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 	}
 	maxStack, remainStack, op, _, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
 	//left value must can be used as right value,
-	stack, _ := buildExpression.build(class, code, bin.Left, context, state) // load it`s value
+	stack := buildExpression.build(class, code, bin.Left, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
 	state.pushStack(class, e.Value)
 	currentStack := jvmSlotSize(e.Value) + remainStack // incase int -> long
-	stack, _ = buildExpression.build(class, code, bin.Right, context, state)
+	stack = buildExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}

@@ -109,7 +109,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 			maxStack = 4
 		}
 		if selection.Expression.Value.Type == ast.VariableTypeObject {
-			stack, _ := buildExpression.build(class, code, selection.Expression, context, state)
+			stack := buildExpression.build(class, code, selection.Expression, context, state)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -135,7 +135,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		return
 	}
 	// object
-	maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
+	maxStack = buildExpression.build(class, code, selection.Expression, context, state)
 	if t := jvmSlotSize(e.Value); t > maxStack {
 		maxStack = t
 	}

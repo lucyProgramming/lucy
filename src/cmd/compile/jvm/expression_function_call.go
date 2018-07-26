@@ -8,7 +8,7 @@ import (
 func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
@@ -54,7 +54,7 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 
 	if call.Expression != nil {
 		if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
-			maxStack, _ = buildExpression.build(class, code, call.Expression, context, state)
+			maxStack = buildExpression.build(class, code, call.Expression, context, state)
 		}
 	}
 	if call.Function.IsClosureFunction == false {

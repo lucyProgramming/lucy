@@ -27,10 +27,10 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 		code.CodeLength += 3
 		maxStack = 1
 	} else { // get stream from args
-		maxStack, _ = buildExpression.build(class, code, meta.Stream, context, state)
+		maxStack = buildExpression.build(class, code, meta.Stream, context, state)
 	}
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
-	stack, _ := buildExpression.build(class, code, meta.Format, context, state)
+	stack := buildExpression.build(class, code, meta.Format, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -52,7 +52,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 	for _, v := range call.Args {
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
 			currentStack = 3
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -81,13 +81,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 		currentStack += 2
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack, es := buildExpression.build(class, code, v, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1) // bool value
-		}
+		stack := buildExpression.build(class, code, v, context, state)
 		state.popStack(2)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t

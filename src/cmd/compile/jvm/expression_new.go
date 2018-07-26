@@ -77,7 +77,7 @@ func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLev
 		}
 	}
 	n := e.Data.(*ast.ExpressionNew)
-	maxStack, _ = buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
+	maxStack = buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
 		loadInt32(class, code, 0)
@@ -111,13 +111,13 @@ func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, 
 		defer state.popStack(2)
 	}
 	if n.IsConvertJavaArray2Array {
-		stack, _ := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
+		stack := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
 	} else {
 		// get amount
-		stack, _ := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
+		stack := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}

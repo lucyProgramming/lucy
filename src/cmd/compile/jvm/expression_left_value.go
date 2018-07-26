@@ -45,9 +45,9 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	maxStack, remainStack uint16, ops []byte,
 	target *ast.Type, leftValueType LeftValueKind) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaMapClass))
-	stack, _ := buildExpression.build(class, code, index.Index, context, state)
+	stack := buildExpression.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -107,9 +107,9 @@ func (buildExpression *BuildExpression) getLeftValue(
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Value.Type == ast.VariableTypeArray {
-			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
+			maxStack = buildExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
-			stack, _ := buildExpression.build(class, code, index.Index, context, state)
+			stack := buildExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
@@ -130,9 +130,9 @@ func (buildExpression *BuildExpression) getLeftValue(
 		} else if index.Expression.Value.Type == ast.VariableTypeMap { // map
 			return buildExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
-			maxStack, _ = buildExpression.build(class, code, index.Expression, context, state)
+			maxStack = buildExpression.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
-			stack, _ := buildExpression.build(class, code, index.Index, context, state)
+			stack := buildExpression.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
@@ -203,7 +203,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			} else {
 				leftValueType = LeftValueTypePutField
 				ops[0] = cg.OP_putfield
-				maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
+				maxStack = buildExpression.build(class, code, selection.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, selection.Expression.Value)
 			}

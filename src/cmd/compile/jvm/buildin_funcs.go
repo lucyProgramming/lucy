@@ -17,7 +17,7 @@ func (buildExpression *BuildExpression) mkBuildInFunctionCall(class *cg.ClassHig
 	case common.BuildInFunctionCatch:
 		return buildExpression.mkBuildInCatch(class, code, e, context)
 	case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
-		maxStack, _ = buildExpression.build(class, code, call.Args[0], context, state)
+		maxStack = buildExpression.build(class, code, call.Args[0], context, state)
 		if call.Function.Name == common.BuildInFunctionMonitorEnter {
 			code.Codes[code.CodeLength] = cg.OP_monitorenter
 		} else { // monitor enter on exit

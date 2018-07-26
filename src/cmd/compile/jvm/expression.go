@@ -10,7 +10,7 @@ type BuildExpression struct {
 }
 
 func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16, exits []*cg.Exit) {
+	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
@@ -92,7 +92,7 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 	case ast.ExpressionTypeLogicalOr:
 		fallthrough
 	case ast.ExpressionTypeLogicalAnd:
-		maxStack, exits = buildExpression.buildLogical(class, code, e, context, state)
+		maxStack = buildExpression.buildLogical(class, code, e, context, state)
 	case ast.ExpressionTypeOr:
 		fallthrough
 	case ast.ExpressionTypeAnd:
@@ -204,7 +204,7 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 	case ast.ExpressionTypeQuestion:
 		maxStack = buildExpression.buildQuestion(class, code, e, context, state)
 	case ast.ExpressionTypeVArgs:
-		maxStack, exits = buildExpression.build(class, code, e.Data.(*ast.Expression), context, state)
+		maxStack = buildExpression.build(class, code, e.Data.(*ast.Expression), context, state)
 	default:
 		panic("missing handle:" + e.OpName())
 	}
@@ -238,7 +238,6 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	if 1 > maxStack {
 		maxStack = 1
 	}
-
 	arrayListObject := state.newObjectVariableType(javaRootObjectArray)
 	state.pushStack(class, arrayListObject)
 	state.pushStack(class, arrayListObject)
@@ -247,7 +246,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	for _, v := range es {
 		currentStack := uint16(1)
 		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
-			stack, _ := buildExpression.build(class, code, v, context, state)
+			stack := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -271,13 +270,8 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack++
-		stack, es := buildExpression.build(class, code, v, context, state)
-		if len(es) > 0 {
-			writeExits(es, code.CodeLength)
-			state.pushStack(class, v.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		stack := buildExpression.build(class, code, v, context, state)
+
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

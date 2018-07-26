@@ -318,18 +318,7 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
-			if vv.IsStatic() == false { // bind this
-				if vv.Function.Block.Variables == nil {
-					vv.Function.Block.Variables = make(map[string]*Variable)
-				}
-				vv.Function.Block.Variables[THIS] = &Variable{}
-				vv.Function.Block.Variables[THIS].Name = THIS
-				vv.Function.Block.Variables[THIS].Pos = vv.Function.Pos
-				vv.Function.Block.Variables[THIS].Type = &Type{
-					Type:  VariableTypeObject,
-					Class: c,
-				}
-			}
+
 			vv.Function.Block.inherit(&c.Block)
 			vv.Function.Block.InheritedAttribute.Function = vv.Function
 			vv.Function.Block.InheritedAttribute.ClassMethod = vv
@@ -717,6 +706,18 @@ func (c *Class) checkMethods() []error {
 				if method.IsFinal() {
 					errs = append(errs, fmt.Errorf("%s construction method cannot be final",
 						errMsgPrefix(method.Function.Pos)))
+				}
+			}
+			if method.IsStatic() == false { // bind this
+				if method.Function.Block.Variables == nil {
+					method.Function.Block.Variables = make(map[string]*Variable)
+				}
+				method.Function.Block.Variables[THIS] = &Variable{}
+				method.Function.Block.Variables[THIS].Name = THIS
+				method.Function.Block.Variables[THIS].Pos = method.Function.Pos
+				method.Function.Block.Variables[THIS].Type = &Type{
+					Type:  VariableTypeObject,
+					Class: c,
 				}
 			}
 			if isConstruction && method.Function.NoReturnValue() == false {
