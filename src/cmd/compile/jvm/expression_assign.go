@@ -15,14 +15,14 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxStack, remainStack, op, target, LeftValueKind := buildExpression.getLeftValue(class, code, left, context, state)
+	maxStack, remainStack, op, LeftValueKind := buildExpression.getLeftValue(class, code, left, context, state)
 	stack := buildExpression.build(class, code, right, context, state)
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t
 	}
-	currentStack := remainStack + jvmSlotSize(target)
+	currentStack := remainStack + jvmSlotSize(left.Value)
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, LeftValueKind, target)
+		currentStack += buildExpression.controlStack2FitAssign(code, LeftValueKind, left.Value)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
@@ -48,12 +48,12 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	multiValuePacker.storeMultiValueAutoVar(code, context)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
-		stack, remainStack, op, target, _ :=
+		stack, remainStack, op, _ :=
 			buildExpression.getLeftValue(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		stack = multiValuePacker.unPack(class, code, k, target, context)
+		stack = multiValuePacker.unPack(class, code, k, v.Value, context)
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}

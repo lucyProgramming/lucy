@@ -26,6 +26,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			identifier.Variable = t
 			result = identifier.Variable.Type.Clone()
 			result.Pos = e.Pos
+			e.Value = result
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier named '%s' is not variable",
@@ -34,6 +35,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		}
 	case ExpressionTypeIndex:
 		result = e.checkIndexExpression(block, errs)
+		e.Value = result
 		return result
 	case ExpressionTypeSelection:
 		selection := e.Data.(*ExpressionSelection)
@@ -66,6 +68,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				}
 				result = field.Type.Clone()
 				result.Pos = e.Pos
+				e.Value = result
 				return result
 			}
 			return nil
@@ -89,6 +92,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				}
 				result = field.Type.Clone()
 				result.Pos = e.Pos
+				e.Value = result
 				return result
 			}
 			return nil
@@ -107,6 +111,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				selection.PackageVariable = v
 				result = v.Type.Clone()
 				result.Pos = e.Pos
+				e.Value = result
 				return result
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",

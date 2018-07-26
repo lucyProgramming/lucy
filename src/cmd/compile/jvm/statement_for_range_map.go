@@ -216,7 +216,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	} else { // for k,v  = range xxx
 		// store v
 		stackLength := len(blockState.Stacks)
-		stack, remainStack, op, _, _ :=
+		stack, remainStack, op, _ :=
 			buildPackage.BuildExpression.getLeftValue(class, code, s.RangeAttr.ExpressionValue, context, blockState)
 		if stack > maxStack { // this means  current stack is 0
 			maxStack = stack
@@ -230,7 +230,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		forState.popStack(len(blockState.Stacks) - stackLength)
 		if s.RangeAttr.ExpressionKey != nil {
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, op, _, _ :=
+			stack, remainStack, op, _ :=
 				buildPackage.BuildExpression.getLeftValue(class, code, s.RangeAttr.ExpressionKey, context, blockState)
 			if stack > maxStack { // this means  current stack is 0
 				maxStack = stack

@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack, remainStack, op, _, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -81,7 +81,7 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 	if bin.Left.Value.Type == ast.VariableTypeString {
 		return buildExpression.buildStrPlusAssign(class, code, e, context, state)
 	}
-	maxStack, remainStack, op, _, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
 	//left value must can be used as right value,
 	stack := buildExpression.build(class, code, bin.Left, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {

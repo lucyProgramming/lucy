@@ -9,9 +9,8 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
-	target *ast.Type, leftValueType LeftValueKind) {
+	leftValueType LeftValueKind) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	target = identifier.Variable.Type
 	meta := closure.getMeta(identifier.Variable.Type.Type)
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
@@ -43,7 +42,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
-	target *ast.Type, leftValueType LeftValueKind) {
+	leftValueType LeftValueKind) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaMapClass))
@@ -70,7 +69,6 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	ops = append(ops, bs4...)
-	target = index.Expression.Value.Map.V
 	leftValueType = LeftValueTypeMap
 	return
 }
@@ -79,7 +77,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 	class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
-	target *ast.Type, leftValueType LeftValueKind) {
+	leftValueType LeftValueKind) {
 	switch e.Type {
 	case ast.ExpressionTypeIdentifier:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
@@ -87,7 +85,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 			ops = make([]byte, 3)
 			leftValueType = LeftValueTypePutStatic
 			ops[0] = cg.OP_putstatic
-			target = identifier.Variable.Type
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      buildExpression.BuildPackage.mainClass.Name,
 				Field:      identifier.Name,
@@ -103,7 +100,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 		}
 		leftValueType = LeftValueTypeLocalVar
 		ops = storeLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)
-		target = identifier.Variable.Type
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Value.Type == ast.VariableTypeArray {
@@ -126,7 +122,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 			})
 			leftValueType = LeftValueTypeLucyArray
 			remainStack = 2 // [arrayref ,index]
-			target = e.Value
 		} else if index.Expression.Value.Type == ast.VariableTypeMap { // map
 			return buildExpression.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
@@ -137,7 +132,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 				maxStack = t
 			}
 			leftValueType = LeftValueTypeArray
-			target = e.Value
 			remainStack = 2 // [objectref ,index]
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			switch e.Value.Type {
@@ -177,7 +171,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 		if selection.Expression.Value.Type == ast.VariableTypePackage {
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_putstatic
-			target = selection.PackageVariable.Type
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
@@ -187,10 +180,9 @@ func (buildExpression *BuildExpression) getLeftValue(
 			leftValueType = LeftValueTypePutStatic
 			remainStack = 0
 		} else { // class or object
-			target = selection.Field.Variable.Type
 			ops = make([]byte, 3)
 			if selection.Field.JvmDescriptor == "" {
-				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(target)
+				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
 			}
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      selection.Expression.Value.Class.Name,
