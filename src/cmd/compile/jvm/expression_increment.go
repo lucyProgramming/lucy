@@ -12,7 +12,8 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	if t, ok := ee.Data.(*ast.ExpressionIdentifier); ee.Type == ast.ExpressionTypeIdentifier &&
 		ok &&
 		t.Variable.BeenCaptured == false &&
-		t.Variable.Type.Type == ast.VariableTypeInt {
+		t.Variable.Type.Type == ast.VariableTypeInt &&
+		t.Variable.IsGlobal == false {
 		if t.Variable.LocalValOffset > 255 { // early check
 			panic("over 255")
 		}

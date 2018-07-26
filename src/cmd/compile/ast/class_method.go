@@ -78,7 +78,7 @@ func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, cal
 			if fit {
 				return []*ClassMethod{m}, true, nil
 			} else {
-				break
+				ms = append(ms, m)
 			}
 		}
 	}
@@ -87,12 +87,14 @@ func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, cal
 		if err != nil {
 			return nil, false, fmt.Errorf("%s %v", errMsgPrefix(from), err)
 		}
-		ms, matched, err := v.accessInterfaceMethod(from, errs, name, call, callArgTypes, true)
+		ms_, matched, err := v.accessInterfaceMethod(from, errs, name, call, callArgTypes, true)
 		if matched {
-			return ms, matched, err
+			return ms_, matched, err
+		} else {
+			ms = append(ms, ms_...)
 		}
 	}
-	return nil, false, fmt.Errorf("%s method '%s' not found", errMsgPrefix(from), name)
+	return ms, false, fmt.Errorf("%s method '%s' not found", errMsgPrefix(from), name)
 }
 
 /*
@@ -103,6 +105,9 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 	err = c.loadSelf()
 	if err != nil {
 		return nil, false, err
+	}
+	if err := c.checkIfLoadFromAnotherPackageAndPrivate(from); err != nil {
+		*errs = append(*errs, err)
 	}
 	if c.IsJava {
 		return c.accessMethodAsJava(from, errs, name, call, callArgTypes, false)
@@ -157,8 +162,7 @@ func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string, call *
 	callArgTypes []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	for _, m := range c.Methods[name] {
 		var fit bool
-		fit, call.VArgs, _ =
-			m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
+		fit, call.VArgs, _ = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
 		if fit {
 			return []*ClassMethod{m}, true, nil
 		}

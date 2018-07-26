@@ -70,7 +70,6 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 	//copy op
 	copyOPs(code, op...)
 	return
-
 }
 func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {

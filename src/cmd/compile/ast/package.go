@@ -17,6 +17,7 @@ type Package struct {
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
 	TriggerPackageInitMethodName string
+	UnUsedPackage                map[string]*Import
 }
 
 func (p *Package) loadBuildInPackage() error {
@@ -160,6 +161,7 @@ func (p *Package) TypeCheck() []error {
 			return p.Errors
 		}
 	}
+	p.checkUnUsedPackage()
 	return p.Errors
 }
 
@@ -195,6 +197,37 @@ func (p *Package) load(resource string) (interface{}, error) {
 	}
 	return t, err
 }
+
+func (p *Package) checkUnUsedPackage() {
+	for _, v := range p.Files {
+		for _, i := range v.Imports {
+			if i.Used == false {
+				p.Errors = append(p.Errors, fmt.Errorf("%s '%s' imported not used",
+					errMsgPrefix(i.Pos), i.Import))
+
+			}
+		}
+	}
+	for _, i := range p.UnUsedPackage {
+		pp, err := p.load(i.Import)
+		if err != nil {
+			p.Errors = append(p.Errors, fmt.Errorf("%s %v",
+				errMsgPrefix(i.Pos), err))
+			continue
+		}
+		if _, ok := pp.(*Package); ok == false {
+			p.Errors = append(p.Errors, fmt.Errorf("%s '%s' not a package",
+				errMsgPrefix(i.Pos), i.Import))
+		}
+		//else {
+		//	if ppp.TriggerPackageInitMethodName == "" {
+		//		p.Errors = append(p.Errors, fmt.Errorf("%s '%s' have ",
+		//			errMsgPrefix(i.Pos), i.Import))
+		//	}
+		//}
+	}
+}
+
 func (p *Package) loadClass(className string) (*Class, error) {
 	if p.loadedClasses == nil {
 		p.loadedClasses = make(map[string]*Class)
@@ -236,26 +269,23 @@ type Import struct {
 	import "github.com/lucy" should access by lucy.Println
 	import "github.com/std" as std should access by std.Println
 */
-func (i *Import) GetAccessName() (string, error) {
-	if i.AccessName == "_" { //special case _ is a identifier
-		return "", fmt.Errorf("'_' is not legal package access name")
-	}
+func (i *Import) MkAccessName() error {
 	if i.AccessName != "" {
-		return i.AccessName, nil
+		return nil
 	}
 	name := i.Import
 	if strings.Contains(i.Import, "/") {
 		name = name[strings.LastIndex(name, "/")+1:]
 		if name == "" {
-			return "", fmt.Errorf("no last element after/")
+			return fmt.Errorf("no last element after/")
 		}
 	}
 	//check if legal
 	if false == packageAccessNameReg.Match([]byte(name)) {
-		return "", fmt.Errorf("%s is not legal package name", name)
+		return fmt.Errorf("%s is not legal package name", name)
 	}
 	i.AccessName = name
-	return name, nil
+	return nil
 }
 
 type RedeclareError struct {

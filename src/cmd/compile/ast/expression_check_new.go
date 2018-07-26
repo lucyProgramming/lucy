@@ -52,12 +52,15 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return ret
 	}
-	if matched && ms[0].IsPublic() == false {
-		*errs = append(*errs, fmt.Errorf("%s construction method is not public",
-			errMsgPrefix(e.Pos)))
-	}
 	if matched {
-		no.Construction = ms[0]
+		m := ms[0]
+		if block.InheritedAttribute.Class != ret.Class {
+			if (ret.Class.LoadFromOutSide && m.IsPublic() == false) ||
+				(ret.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(e.Pos)))
+			}
+		}
+		no.Construction = m
 		return ret
 	}
 	if len(ms) == 0 {

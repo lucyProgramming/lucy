@@ -2,11 +2,9 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-//TODO:: if class is private
 func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
 	var names []*Expression

@@ -60,7 +60,11 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 	// different file
 	if from.Filename != alreadyHave.Filename {
 		i := PackageBeenCompile.getImport(from.Filename, name)
-		return i, i != nil
+		should := i != nil
+		if should {
+			i.Used = true
+		}
+		return i, should
 	}
 	i := PackageBeenCompile.getImport(from.Filename, name)
 	if i == nil {
@@ -69,7 +73,11 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 	/*
 
 	 */
-	return i, from.StartLine < alreadyHave.StartLine
+	should := from.StartLine < alreadyHave.StartLine
+	if should {
+		i.Used = true
+	}
+	return i, should
 }
 
 func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type) error {

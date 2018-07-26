@@ -308,18 +308,19 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			return nil
 		}
 		if block.InheritedAttribute.ClassMethod.isCompilerAuto && matched == false {
-			//
-			*errs = append(*errs, fmt.Errorf("%s compile auto constuction method cannnot match appropriate father`s constuction",
+			*errs = append(*errs, fmt.Errorf("%s compile auto constuction method not able to match appropriate father`s constuction",
 				errMsgPrefix(e.Pos)))
 			return nil
 		}
-		if matched && ms[0].IsPublic() == false {
-			*errs = append(*errs, fmt.Errorf("%s construction method is not public",
-				errMsgPrefix(e.Pos)))
-		}
+
 		if matched {
+			m := ms[0]
+			if (object.Class.SuperClass.LoadFromOutSide && m.IsPublic() == false) ||
+				(object.Class.SuperClass.LoadFromOutSide == false && m.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(e.Pos)))
+			}
 			call.Name = "<init>"
-			call.Method = ms[0]
+			call.Method = m
 			call.Class = object.Class.SuperClass
 			ret := []*Type{&Type{}}
 			ret[0].Type = VariableTypeVoid

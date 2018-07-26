@@ -128,7 +128,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Name: parser.token.Data.(string),
 		}
 		parser.Next(lfIsToken)
-	case lex.TokenFunction:
+	case lex.TokenFn:
 		parser.Next(lfIsToken)
 		ft, err := parser.parseFunctionType()
 		if err != nil {

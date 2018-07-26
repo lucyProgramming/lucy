@@ -56,21 +56,32 @@ func (parser *Parser) parseImports() {
 }
 
 func (parser *Parser) insertImports(im *ast.Import) {
-	if parser.imports == nil {
-		parser.imports = make(map[string]*ast.Import)
+	if parser.importsByAccessName == nil {
+		parser.importsByAccessName = make(map[string]*ast.Import)
 	}
-	access, err := im.GetAccessName()
+	if parser.importsByResourceName == nil {
+		parser.importsByResourceName = make(map[string]*ast.Import)
+	}
+	err := im.MkAccessName()
 	if err != nil {
 		parser.errs = append(parser.errs, fmt.Errorf("%s %v", parser.errorMsgPrefix(im.Pos), err))
 		return
 	}
-	if parser.imports[access] != nil {
-		parser.errs = append(parser.errs, fmt.Errorf("%s package '%s' reImported",
-			parser.errorMsgPrefix(im.Pos), access))
-		return
-	}
-	parser.imports[access] = im
 	*parser.tops = append(*parser.tops, &ast.Top{
 		Data: im,
 	})
+	if im.AccessName != ast.NoNameIdentifier {
+		if parser.importsByAccessName[im.AccessName] != nil {
+			parser.errs = append(parser.errs, fmt.Errorf("%s '%s' reImported",
+				parser.errorMsgPrefix(im.Pos), im.AccessName))
+			return
+		}
+		parser.importsByAccessName[im.AccessName] = im
+	}
+	if parser.importsByResourceName[im.Import] != nil {
+		parser.errs = append(parser.errs, fmt.Errorf("%s '%s' reImported",
+			parser.errorMsgPrefix(im.Pos), im.Import))
+		return
+	}
+	parser.importsByResourceName[im.Import] = im
 }

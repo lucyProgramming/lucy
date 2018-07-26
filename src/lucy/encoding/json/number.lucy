@@ -1,14 +1,14 @@
 
 
 class Number {
-	public isNegative bool
-	public integerPart []byte
-	public isFloat bool 
-	public floatPart []byte 
-	public eIsNegative bool 
-	public e []byte   
+	isNegative bool
+	integerPart []byte
+	isFloat bool 
+	floatPart []byte 
+	eIsNegative bool 
+	e []byte   
 
-	public fn Number(){
+	fn Number(){
 		this.super()
 		this.integerPart = []byte{}  
 		this.floatPart = []byte{}  
@@ -17,7 +17,7 @@ class Number {
 
 	
 	
-	public fn prepare() -> (err error){
+	private fn prepare() -> (err error){
 		if len(this.e) == 0 {
 			return  
 		}
@@ -51,7 +51,7 @@ class Number {
 		}
 	}
 
-	fn mkAscii0Bytes(length int) -> (bs []byte ){
+	private fn mkAscii0Bytes(length int) -> (bs []byte ){
 		bs = new []byte(length)
 		for k,_ := range bs {
 			bs[k] = '0'  
@@ -95,7 +95,6 @@ class Number {
 		ret += f 
 		v = ret 
 	}
-	
 }
 
 

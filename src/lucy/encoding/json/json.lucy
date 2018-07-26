@@ -18,7 +18,7 @@ public fn decode( bs []byte , x Object ) -> (err error){
 
 
  //TODO:: c.isPrimitive() is not working, why ????
-public fn isPrimitive(c Class)-> (is bool) {
+fn isPrimitive(c Class)-> (is bool) {
 	typeName :=  c.getTypeName()
 	is = typeName == "java.lang.Boolean" || 
 		typeName ==  "java.lang.Byte" || 

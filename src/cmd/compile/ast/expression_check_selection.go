@@ -138,6 +138,13 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 					errMsgPrefix(e.Pos),
 					selection.Name))
 			}
+			if selection.Expression.isThis() == false {
+				if (selection.Expression.Value.Class.LoadFromOutSide && method.IsPublic() == false) ||
+					(selection.Expression.Value.Class.LoadFromOutSide == false && method.IsPrivate()) {
+					*errs = append(*errs, fmt.Errorf("%s method '%s' is private",
+						errMsgPrefix(e.Pos), selection.Name))
+				}
+			}
 			selection.Method = method
 			result := &Type{}
 			result.Type = VariableTypeFunction
@@ -177,6 +184,13 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return result
 		} else {
 			method := fieldOrMethod.(*ClassMethod)
+			if block.InheritedAttribute.Class != selection.Expression.Value.Class {
+				if (selection.Expression.Value.Class.LoadFromOutSide && method.IsPublic() == false) ||
+					(selection.Expression.Value.Class.LoadFromOutSide == false && method.IsPrivate()) {
+					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
+						errMsgPrefix(e.Pos), selection.Name))
+				}
+			}
 			selection.Method = method
 			result := &Type{}
 			result.Type = VariableTypeFunction

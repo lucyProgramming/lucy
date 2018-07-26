@@ -1,7 +1,6 @@
 
 import "java/lang/Object"
 import "java/lang/Class"
-import "java/lang/Integer"
 import "java/lang/reflect/Array"
 import "java/util/AbstractMap"
 

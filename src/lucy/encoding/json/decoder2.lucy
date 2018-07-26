@@ -10,6 +10,7 @@ import "java/lang/Double"
 import "java/lang/Long"
 import "java/lang/Character" 
 
+
 enum JSON_SYNTAX_TREE_TYPE {
 	JSON_SYNTAX_TREE_TYPE_ARRAY = 1  ,
 	JSON_SYNTAX_TREE_TYPE_OBJECT ,
@@ -22,13 +23,13 @@ enum JSON_SYNTAX_TREE_TYPE {
 
 
 class JsonSyntaxTreeNode {
-	public Type JSON_SYNTAX_TREE_TYPE 
-	public boolValue bool 
-	public numberValue Number   // number value
-	public stringValue string 
-	public arrayElements []JsonSyntaxTreeNode 
-	public keyPairs map{ string -> JsonSyntaxTreeNode} 
-	public fn nodeType() -> (t string ) {
+	Type JSON_SYNTAX_TREE_TYPE 
+	boolValue bool 
+	numberValue Number   // number value
+	stringValue string 
+	arrayElements []JsonSyntaxTreeNode 
+	keyPairs map{ string -> JsonSyntaxTreeNode} 
+	fn nodeType() -> (t string ) {
 		switch this.Type {
 			case JSON_SYNTAX_TREE_TYPE_ARRAY :
 				return "array" 
@@ -75,7 +76,7 @@ class Decoder {
 		return this.decodeFromTree(this.tree , this . x )
 	}
 	
-	fn generateSyntaxTree() -> (err error) {
+	private fn generateSyntaxTree() -> (err error) {
 		this.skipWhiteSpace()
 		b := this.bs[this.offset]  
 		if b != '[' && b != '{' {
@@ -88,7 +89,7 @@ class Decoder {
 	}
 
 	
-	fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (err error ){
+	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (err error ){
 		c := x.getClass()
 		if c.isArray () {
 			return this.decodeArrayFromTree(tree , x , c)
@@ -185,7 +186,7 @@ class Decoder {
 		}
 	}
 
-	fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
+	private fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
 		if tree.Type != JSON_SYNTAX_TREE_TYPE_OBJECT {
 			return  new error(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()))
 		}
@@ -206,7 +207,7 @@ class Decoder {
 			}
 			if  isPrimitive(cc) {
 				tree :=  tree.keyPairs[f.getName()]  
-				obj,err :=  Decoder.decodePrimitives( cc , tree  ) 
+				obj,err :=  __CLASS__.decodePrimitives( cc , tree  ) 
 				if err != null {
 					return err  
 				}
@@ -229,7 +230,7 @@ class Decoder {
 	}
 
 
-	fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
+	private fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (err error ){
 		if tree.Type != JSON_SYNTAX_TREE_TYPE_ARRAY {
 			return  new error(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
 		}
@@ -238,7 +239,7 @@ class Decoder {
 	}
 
 
-	fn skipWhiteSpace() {
+	private fn skipWhiteSpace() {
 		b := this.bs[this.offset]
 		if b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' {
 			
@@ -251,7 +252,7 @@ class Decoder {
 		this.offset -- 
 	}
 
-	fn parseValue() -> (n JsonSyntaxTreeNode,err error ) {
+	private fn parseValue() -> (n JsonSyntaxTreeNode,err error ) {
 		this.skipWhiteSpace()
 		b := this.bs[this.offset]
 		switch b {
@@ -304,7 +305,7 @@ class Decoder {
 		} 
 	} 
 
-	fn parseArray() -> (n JsonSyntaxTreeNode,err error ) {
+	private fn parseArray() -> (n JsonSyntaxTreeNode,err error ) {
 		this.offset++  // skip [
 		n = new JsonSyntaxTreeNode()
 		n.Type = JSON_SYNTAX_TREE_TYPE_ARRAY  
@@ -338,7 +339,7 @@ class Decoder {
 		return n , null  
 	}
 
-	fn parseObject() -> (n JsonSyntaxTreeNode,err error )  {
+	private fn parseObject() -> (n JsonSyntaxTreeNode,err error )  {
 		this.offset++  // skip { 
 		b := this.bs[this.offset]
 		n = new JsonSyntaxTreeNode()
@@ -385,7 +386,7 @@ class Decoder {
 	}
 	
 
-	fn parseString() -> (s string) {
+	private fn parseString() -> (s string) {
 		this.offset++  // skip "
 		b := this.bs[this.offset++] 
 		bs := []byte {}  
@@ -432,7 +433,7 @@ class Decoder {
 
 
 	// 
-	fn parseTrue () ->(err error ) {
+	private fn parseTrue () ->(err error ) {
 		this.offset++  // skip 't' 
 		if this.bs[ this.offset ++ ] != 'r' {
 			err = new error("wrong true")
@@ -445,7 +446,7 @@ class Decoder {
 		} 
 	}
 
-	fn parseNull () ->(err error ) {
+	private fn parseNull () ->(err error ) {
 		this.offset++  // skip 'n' 
 		if this.bs[ this.offset ++ ] != 'u' {
 			err = new error("wrong null")
@@ -458,7 +459,7 @@ class Decoder {
 		} 
 	}
 
-	fn parseFalse () ->(err error ) {
+	private fn parseFalse () ->(err error ) {
 		this.offset++  // skip 'f' 
 		if this.bs[ this.offset ++ ] != 'a' {
 			err = new error("wrong false")
@@ -474,14 +475,14 @@ class Decoder {
 		} 
 	}
 
-	fn isDigit(b byte) -> (is bool) {
+	private fn isDigit(b byte) -> (is bool) {
 		is = b >= '0' && b <= '9'
 	}
-	fn isHex(b byte) -> (is bool) {
+	private fn isHex(b byte) -> (is bool) {
 		is = this.isDigit(b) || (b >= 'a' && b <= 'f')
 	} 
 
-	fn parseNumber() -> (n Number ,err error ) {
+	private fn parseNumber() -> (n Number ,err error ) {
 		n  = new Number()
 		b := this.bs[this.offset]
 		if b == '-' {
@@ -531,7 +532,7 @@ class Decoder {
 		}
 	}
 
-	fn getErrMsg() -> (msg string ) {
+	private fn getErrMsg() -> (msg string ) {
 		end := this.bs.size()
 		size := 20 
 		if this.bs.size() - this.offset >  size {

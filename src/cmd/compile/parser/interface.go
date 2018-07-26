@@ -83,7 +83,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 		case lex.TokenSemicolon:
 			interfaceParser.Next(lfNotToken)
 			continue
-		case lex.TokenFunction:
+		case lex.TokenFn:
 			interfaceParser.Next(lfIsToken) /// skip key word
 			interfaceParser.parser.unExpectNewLineAndSkip()
 			var name string

@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
+func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 	switch e.Type {
 	case ExpressionTypeIdentifier:
 		identifier := e.Data.(*ExpressionIdentifier)
@@ -24,17 +24,17 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 			}
 			t := d.(*Variable)
 			identifier.Variable = t
-			ret = identifier.Variable.Type.Clone()
-			ret.Pos = e.Pos
-			return ret
+			result = identifier.Variable.Type.Clone()
+			result.Pos = e.Pos
+			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier named '%s' is not variable",
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil
 		}
 	case ExpressionTypeIndex:
-		ret = e.checkIndexExpression(block, errs)
-		return ret
+		result = e.checkIndexExpression(block, errs)
+		return result
 	case ExpressionTypeSelection:
 		selection := e.Data.(*ExpressionSelection)
 		object, es := selection.Expression.checkSingleValueContextExpression(block)
@@ -64,9 +64,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 							errMsgPrefix(e.Pos), selection.Name))
 					}
 				}
-				ret = field.Type.Clone()
-				ret.Pos = e.Pos
-				return ret
+				result = field.Type.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			return nil
 		case VariableTypeClass:
@@ -87,9 +87,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 							errMsgPrefix(e.Pos), selection.Name))
 					}
 				}
-				ret = field.Type.Clone()
-				ret.Pos = e.Pos
-				return ret
+				result = field.Type.Clone()
+				result.Pos = e.Pos
+				return result
 			}
 			return nil
 		case VariableTypePackage:
@@ -105,9 +105,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (ret *Type) {
 						errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				}
 				selection.PackageVariable = v
-				ret = v.Type.Clone()
-				ret.Pos = e.Pos
-				return ret
+				result = v.Type.Clone()
+				result.Pos = e.Pos
+				return result
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
 					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))

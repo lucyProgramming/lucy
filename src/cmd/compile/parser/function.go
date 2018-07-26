@@ -37,7 +37,7 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	}
 	f.Type, err = functionParser.parser.parseFunctionType()
 	if err != nil {
-		functionParser.parser.consume(untilLc)
+		functionParser.consume(untilLc)
 	}
 	functionParser.parser.ifTokenIsLfThenSkip()
 	if functionParser.parser.token.Type != lex.TokenLc {

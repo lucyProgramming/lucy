@@ -153,7 +153,6 @@ func (c *Class) mkDefaultConstruction() {
 	m := &ClassMethod{}
 	m.isCompilerAuto = true
 	m.Function = &Function{}
-	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
 	m.Function.Name = SpecialMethodInit
@@ -188,8 +187,12 @@ func (c *Class) checkIfClassHierarchyErr() error {
 	if err := c.loadSuperClass(); err != nil {
 		return err
 	}
+	if c.SuperClass.LoadFromOutSide && c.SuperClass.IsPublic() == false {
+		return fmt.Errorf("%s class`s super-class named '%s' cannot be accessed from here", errMsgPrefix(c.Pos), c.SuperClass.Name)
+	}
 	if c.SuperClass.IsFinal() {
-		return fmt.Errorf("class name '%s' have super class  named '%s' that is final", c.Name, c.SuperClassName)
+		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
+			errMsgPrefix(c.Pos), c.Name, c.SuperClassName)
 	}
 	for class.Name != JavaRootClass {
 		_, ok := m[class.Name]
@@ -373,6 +376,7 @@ func (c *Class) resolveFather() error {
 		if i == nil {
 			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
+		i.Used = true
 		r, err := PackageBeenCompile.load(i.Import)
 		if err != nil {
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
@@ -749,6 +753,9 @@ func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *Expressi
 	if err != nil {
 		return nil, false, err
 	}
+	if err := c.checkIfLoadFromAnotherPackageAndPrivate(from); err != nil {
+		*errs = append(*errs, err)
+	}
 	var args *CallArgs
 	if no != nil {
 		args = &no.Args
@@ -769,4 +776,18 @@ func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *Expressi
 		}
 	}
 	return ms, false, nil
+}
+
+func (c *Class) checkIfLoadFromAnotherPackageAndPrivate(pos *Pos) error {
+	if c.LoadFromOutSide == false {
+		return nil
+	}
+	err := c.loadSelf()
+	if err != nil {
+		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
+	}
+	if c.IsPublic() == false {
+		return fmt.Errorf("%s class '%s' is not public", errMsgPrefix(pos), c.Name)
+	}
+	return nil
 }

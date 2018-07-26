@@ -20,15 +20,17 @@ func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyParseImport bool, n
 }
 
 type Parser struct {
-	onlyParseImport bool
-	bs              []byte
-	tops            *[]*ast.Top
-	lexer           *lex.Lexer
-	filename        string
-	token           *lex.Token
-	errs            []error
-	imports         map[string]*ast.Import
-	nErrors2Stop    int
+	onlyParseImport             bool
+	bs                          []byte
+	tops                        *[]*ast.Top
+	lexer                       *lex.Lexer
+	filename                    string
+	token                       *lex.Token
+	errs                        []error
+	importsByAccessName         map[string]*ast.Import
+	importsByResourceName       map[string]*ast.Import
+	nErrors2Stop                int
+	consumeFoundValidStartToken bool
 	// parsers
 	ExpressionParser *ExpressionParser
 	FunctionParser   *FunctionParser
@@ -146,7 +148,7 @@ func (parser *Parser) Parse() []error {
 				})
 			}
 			resetProperty()
-		case lex.TokenFunction:
+		case lex.TokenFn:
 			f, err := parser.FunctionParser.parse(true)
 			if err != nil {
 				parser.Next(lfNotToken)
@@ -259,7 +261,7 @@ func (parser *Parser) Parse() []error {
 }
 
 func (parser *Parser) validAfterPublic() error {
-	if parser.token.Type == lex.TokenFunction ||
+	if parser.token.Type == lex.TokenFn ||
 		parser.token.Type == lex.TokenClass ||
 		parser.token.Type == lex.TokenEnum ||
 		parser.token.Type == lex.TokenIdentifier ||
@@ -376,6 +378,10 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 }
 
 func (parser *Parser) Next(lfIsToken bool) {
+	if parser.consumeFoundValidStartToken {
+		parser.consumeFoundValidStartToken = false
+		return
+	}
 	var err error
 	var tok *lex.Token
 	for {
@@ -416,6 +422,22 @@ func (parser *Parser) consume(until map[lex.TokenKind]bool) {
 		panic("no token to consume")
 	}
 	for parser.token.Type != lex.TokenEof {
+		if parser.token.Type == lex.TokenPublic ||
+			parser.token.Type == lex.TokenProtected ||
+			parser.token.Type == lex.TokenPrivate ||
+			parser.token.Type == lex.TokenClass ||
+			parser.token.Type == lex.TokenInterface ||
+			parser.token.Type == lex.TokenFn ||
+			parser.token.Type == lex.TokenFor ||
+			parser.token.Type == lex.TokenIf ||
+			parser.token.Type == lex.TokenSwitch ||
+			parser.token.Type == lex.TokenEnum ||
+			parser.token.Type == lex.TokenConst ||
+			parser.token.Type == lex.TokenVar ||
+			parser.token.Type == lex.TokenImport {
+			parser.consumeFoundValidStartToken = true
+			return
+		}
 		if _, ok := until[parser.token.Type]; ok {
 			return
 		}

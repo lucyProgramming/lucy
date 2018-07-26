@@ -324,7 +324,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 	e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		blockParser.parser.consume(untilSemicolonOrLf)
+		blockParser.consume(untilSemicolonOrLf)
 		blockParser.Next(lfNotToken)
 		return
 	}

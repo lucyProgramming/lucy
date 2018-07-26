@@ -200,7 +200,7 @@ func (expressionParser *ExpressionParser) looksLikeExpression() bool {
 		expressionParser.parser.token.Type == lex.TokenNot ||
 		expressionParser.parser.token.Type == lex.TokenBitNot ||
 		expressionParser.parser.token.Type == lex.TokenSub ||
-		expressionParser.parser.token.Type == lex.TokenFunction ||
+		expressionParser.parser.token.Type == lex.TokenFn ||
 		expressionParser.parser.token.Type == lex.TokenNew ||
 		expressionParser.parser.token.Type == lex.TokenLb
 }

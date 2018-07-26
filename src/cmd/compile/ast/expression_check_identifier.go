@@ -46,6 +46,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	if d == nil {
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
 		if i != nil {
+			i.Used = true
 			fromImport = true
 			d, err = PackageBeenCompile.load(i.Import)
 			if err != nil {

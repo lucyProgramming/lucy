@@ -53,10 +53,18 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 			conversion.Constants = append(conversion.Constants, t)
 		case *Import:
 			i := v.Data.(*Import)
-			if PackageBeenCompile.Files[i.Pos.Filename] == nil {
-				PackageBeenCompile.Files[i.Pos.Filename] = &SourceFile{Imports: make(map[string]*Import)}
+			if i.AccessName != NoNameIdentifier {
+				if PackageBeenCompile.Files[i.Pos.Filename] == nil {
+					PackageBeenCompile.Files[i.Pos.Filename] = &SourceFile{Imports: make(map[string]*Import)}
+				}
+				PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
+			} else {
+				if PackageBeenCompile.UnUsedPackage == nil {
+					PackageBeenCompile.UnUsedPackage = make(map[string]*Import)
+				}
+				PackageBeenCompile.UnUsedPackage[i.Import] = i
 			}
-			PackageBeenCompile.Files[i.Pos.Filename].Imports[i.AccessName] = i
+
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
 			expressions = append(expressions, t)

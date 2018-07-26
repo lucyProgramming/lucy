@@ -4,7 +4,7 @@ type TokenKind int
 
 const (
 	_                  TokenKind = iota
-	TokenFunction                // fn
+	TokenFn                      // fn
 	TokenEnum                    // enum
 	TokenConst                   // const
 	TokenIf                      // if
@@ -112,7 +112,7 @@ const (
 
 var (
 	keywordsMap = map[string]TokenKind{
-		"fn":           TokenFunction,
+		"fn":           TokenFn,
 		"enum":         TokenEnum,
 		"const":        TokenConst,
 		"if":           TokenIf,

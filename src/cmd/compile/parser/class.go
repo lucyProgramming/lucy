@@ -89,7 +89,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		if classParser.ret.Name == "" {
 			compileAutoName()
 		}
-		classParser.parser.consume(untilLc)
+		classParser.consume(untilLc)
 	}
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		//classParser.ret.HaveExtends = true
@@ -99,7 +99,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		classParser.ret.SuperClassName = t
 		if err != nil {
 			classParser.parser.errs = append(classParser.parser.errs, err)
-			classParser.parser.consume(untilLc)
+			classParser.consume(untilLc)
 		}
 	}
 	if classParser.parser.token.Type == lex.TokenImplements {
@@ -118,7 +118,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	}
 	validAfterPublic := func(keyWord string, token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier ||
-			token.Type == lex.TokenFunction ||
+			token.Type == lex.TokenFn ||
 			token.Type == lex.TokenStatic ||
 			token.Type == lex.TokenSynchronized ||
 			token.Type == lex.TokenFinal {
@@ -133,7 +133,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 		return fmt.Errorf("%s not a valid token after 'volatile'", classParser.parser.errorMsgPrefix())
 	}
 	validAfterSynchronized := func(token *lex.Token) error {
-		if token.Type == lex.TokenFunction ||
+		if token.Type == lex.TokenFn ||
 			token.Type == lex.TokenFinal {
 			return nil
 		}
@@ -141,14 +141,14 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	}
 	validAfterStatic := func(token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier ||
-			token.Type == lex.TokenFunction ||
+			token.Type == lex.TokenFn ||
 			token.Type == lex.TokenFinal {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'static'", classParser.parser.errorMsgPrefix())
 	}
 	validAfterFinal := func(token *lex.Token) error {
-		if token.Type == lex.TokenFunction ||
+		if token.Type == lex.TokenFn ||
 			token.Type == lex.TokenSynchronized {
 			return nil
 		}
@@ -233,7 +233,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.parser.errs = append(classParser.parser.errs, err)
 				classParser.isSynchronized = false
 			}
-		case lex.TokenFunction:
+		case lex.TokenFn:
 			f, err := classParser.parser.FunctionParser.parse(true)
 			if err != nil {
 				classParser.resetProperty()

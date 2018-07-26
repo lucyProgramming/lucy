@@ -220,6 +220,7 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 	if strings.Contains(typ.Name, ".") == false {
 		i := PackageBeenCompile.getImport(typ.Pos.Filename, typ.Name)
 		if i != nil {
+			i.Used = true
 			return PackageBeenCompile.load(i.Import)
 		}
 		return nil, fmt.Errorf("%s type named '%s' not found",
@@ -231,6 +232,7 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 		return nil, fmt.Errorf("%s package '%s' not imported",
 			errMsgPrefix(typ.Pos), packageAndName[0])
 	}
+	i.Used = true
 	p, err := PackageBeenCompile.load(i.Import)
 	if err != nil {
 		return nil, fmt.Errorf("%s %v",
@@ -672,7 +674,6 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 		return typ.Type == compareTo.Type
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-
 		if typ.Type == VariableTypeJavaArray &&
 			typ.IsVArgs != compareTo.IsVArgs {
 			return false
@@ -695,4 +696,32 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 		return true
 	}
 	return false
+}
+
+func (typ *Type) involvedClasses() []*Class {
+	switch typ.Type {
+	case VariableTypeObject:
+		return []*Class{typ.Class}
+	case VariableTypeMap:
+		csk := typ.Map.K.involvedClasses()
+		csv := typ.Map.V.involvedClasses()
+		cs := []*Class{}
+		cs = append(cs, csk...)
+		cs = append(cs, csv...)
+		return cs
+	case VariableTypeArray, VariableTypeJavaArray:
+		return typ.Array.involvedClasses()
+	case VariableTypeFunction:
+		cs := []*Class{}
+		for _, v := range typ.FunctionType.ParameterList {
+			t := v.Type.involvedClasses()
+			cs = append(cs, t...)
+		}
+		for _, v := range typ.FunctionType.ReturnList {
+			t := v.Type.involvedClasses()
+			cs = append(cs, t...)
+		}
+		return cs
+	}
+	return nil
 }
