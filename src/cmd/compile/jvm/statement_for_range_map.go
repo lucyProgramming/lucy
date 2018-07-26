@@ -258,6 +258,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		forState.popStack(1)
 	}
 	// pop 1
-	copyOPs(code, []byte{cg.OP_pop}...)
+	copyOPs(code, cg.OP_pop)
 	return
 }
