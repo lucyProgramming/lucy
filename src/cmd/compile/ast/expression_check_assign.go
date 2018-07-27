@@ -68,6 +68,10 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
 			vd.Type = variableType
+			if variableType.isTyped() == false {
+				*errs = append(*errs, fmt.Errorf("%s '%s' init value not typed",
+					errMsgPrefix(v.Pos), identifier.Name))
+			}
 			if vd.Type == nil { // still cannot have type,we can have a void,that`s ok
 				vd.Type = &Type{}
 				vd.Type.Type = VariableTypeVoid

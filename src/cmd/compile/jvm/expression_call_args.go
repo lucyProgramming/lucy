@@ -13,7 +13,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 		state.popStack(len(state.Stacks) - stackLength) // let`s pop
 	}()
 	for _, e := range args {
-		if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
+		if e.HaveMultiValue() {
 			stack := buildExpression.build(class, code, e, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
@@ -59,7 +59,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			op := storeArrayElementByTypeOps(vArgs.Type.Array.Type)
 			index := int32(0)
 			for _, e := range vArgs.Expressions {
-				if e.MayHaveMultiValue() && len(e.MultiValues) > 1 {
+				if e.HaveMultiValue() {
 					stack := buildExpression.build(class, code, e, context, state)
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t

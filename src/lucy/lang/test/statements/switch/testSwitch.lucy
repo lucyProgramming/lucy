@@ -1,0 +1,97 @@
+
+
+
+ 
+fn testSwitchByte() {
+	s := 'a'
+	ok := false 
+	switch s {
+		case 'a':
+			ok = true 
+		case 'b' , 'c' , 54b ,'d':
+		case 'e':
+		default:
+		
+	}
+	if ok == false {
+		panic(wrongBranch)
+	} 
+	
+}
+
+fn testSwitchInt() {
+	s := 123
+	ok := false 
+	switch s {
+		case 123:
+			ok = true 
+		case 32 , 12 , 43:
+		case 999:
+		default:
+	}
+	if ok == false {
+		panic(wrongBranch)
+	}
+}
+
+fn testSwitchFloat() {
+	s := 123.0123
+	ok := false
+	switch s {
+		case 123.0123:
+			ok = true
+		case 32.54 , 12.433 , 43f, 12.434f:
+		case 999.0:
+		default:
+	}
+	if ok == false {
+		panic(wrongBranch)
+	}
+}
+
+
+fn testSwitchDouble() {
+	s := 123.0123d
+	ok := false
+	switch s {
+		case 123.0123d:
+			ok = true
+		case 32.54d , 12.433d , 43D, 12D:
+		case 999.0d:
+		default:
+	
+	}
+	if ok == false {
+		panic(wrongBranch)
+	}
+}
+
+
+
+fn testSwitchObject() {
+	class test {} 
+	x := new test()
+	y := x 
+	var z test
+	z = null
+	ok := false
+	switch x {
+		case y:
+			ok = true
+		case z , null:
+		default:
+	}
+	if ok == false {
+		panic(wrongBranch)
+	}
+
+}
+
+
+
+
+
+
+
+
+

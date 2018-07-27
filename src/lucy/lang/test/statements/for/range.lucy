@@ -1,0 +1,373 @@
+
+
+fn forRange1() {
+	for _ = range new bool[](10) {}
+	for _ = range new byte[](10) {}
+	for _ = range new short[](10) {}
+	for _ = range new int[](10) {}
+	for _ = range new long[](10) {}
+	for _ = range new float[](10) {}
+	for _ = range new double[](10) {}
+	for _ = range new string[](10) {}
+
+	for _ = range new []bool(10) {}
+	for _ = range new []byte(10) {}
+	for _ = range new []short(10) {}
+	for _ = range new []int(10) {}
+	for _ = range new []long(10) {}
+	for _ = range new []float(10) {}
+	for _ = range new []double(10) {}
+	for _ = range new []string(10) {}
+	for _ = range [1 , 2, 3, 4 ] {}
+	for _ = range ["hello" , "world"] {} 
+
+	for _ = range { "hello" ->true } {}
+	for _ = range { "hello" -> 'a' } {}
+	for _ = range { "hello" -> 1s } {}
+	for _ = range { "hello" -> 1 } {}
+	for _ = range { "hello" -> 1L } {}
+	for _ = range { "hello" -> 1f } {}
+	for _ = range { "hello" -> 1D } {}
+	for _ = range { 1 -> "hello" }{}
+
+	
+}
+
+
+
+
+fn forRange2() {
+	for k,_ := range new bool[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new byte[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new short[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new int[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new long[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new float[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new double[](10) {
+		blackHole(k)
+	}
+	for k,_ := range new string[](10) {
+		blackHole(k)
+	}
+
+	for k,_ := range new []bool(10) {
+		blackHole(k)
+	}
+	for k,_ := range new []byte(10) {
+		blackHole(k)
+	}
+	for k,_ := range new []short(10) {
+		blackHole(k)
+	}
+	for k,_ := range new []int(10) {
+		blackHole(k)
+	}
+	for k,_ := range new []long(10) {
+		blackHole(k)
+	}
+	for k,_ := range new []float(10){
+		blackHole(k)
+	}
+	for k,_ := range new []double(10){
+		blackHole(k)
+	}
+	for k,_ := range new []string(10) {
+		blackHole(k)
+	}
+	for k,_ := range [1 , 2, 3, 4 ] {
+		blackHole(k)
+	}
+	for k,_ := range ["hello" , "world"] {
+		blackHole(k)
+	}
+
+	for k,_ := range { "hello" ->true } {
+		blackHole(k)
+	}
+	for k,_ := range { "hello" -> 'a' } {
+		blackHole(k)
+	}
+	for k,_ := range { "hello" -> 1s } {
+		blackHole(k)
+	}
+	for k,_ := range { "hello" -> 1 } {
+		blackHole(k)
+	}
+	for k,_ := range { "hello" -> 1L } {
+		blackHole(k)
+	}
+	for k,_ := range { "hello" -> 1f } {
+		blackHole(k)
+	}
+	for k,_ := range { "hello" -> 1D } {
+		blackHole(k)
+	}
+	for k,_ := range { 1 -> "hello" }{
+		blackHole(k)
+	}
+}
+
+
+ 
+fn forRange3() {
+	for v :=  range new bool[](10) {
+		blackHole(v)
+	}
+	for v :=  range new byte[](10) {
+		blackHole(v)
+	}
+	for v :=  range new short[](10) {
+		blackHole(v)
+	}
+	for v :=  range new int[](10) {
+		blackHole(v)
+	}
+	for v :=  range new long[](10) {
+		blackHole(v)
+	}
+	for v :=  range new float[](10) {
+		blackHole(v)
+	}
+	for v :=  range new double[](10) {
+		blackHole(v)
+	}
+	for v :=  range new string[](10) {
+		blackHole(v)
+	}
+
+	for v :=  range new []bool(10) {
+		blackHole(v)
+	}
+	for v :=  range new []byte(10) {
+		blackHole(v)
+	}
+	for v :=  range new []short(10) {
+		blackHole(v)
+	}
+	for v :=  range new []int(10) {
+		blackHole(v)
+	}
+	for v :=  range new []long(10) {
+		blackHole(v)
+	}
+	for v :=  range new []float(10){
+		blackHole(v)
+	}
+	for v :=  range new []double(10){
+		blackHole(v)
+	}
+	for v :=  range new []string(10) {
+		blackHole(v)
+	}
+	for v :=  range [1 , 2, 3, 4 ] {
+		blackHole(v)
+	}
+	for v :=  range ["hello" , "world"] {
+		blackHole(v)
+	}
+	
+	for v :=  range { "hello" ->true } {
+		blackHole(v)
+	}
+	for v :=  range { "hello" -> 'a' } {
+		blackHole(v)
+	}
+	for v :=  range { "hello" -> 1s } {
+		blackHole(v)
+	}
+	for v :=  range { "hello" -> 1 } {
+		blackHole(v)
+	}
+	for v :=  range { "hello" -> 1L } {
+		blackHole(v)
+	}
+	for v :=  range { "hello" -> 1f } {
+		blackHole(v)
+	}
+	for v :=  range { "hello" -> 1D } {
+		blackHole(v)
+	}
+	for v :=  range { 1 -> "hello" }{
+		blackHole(v)
+	}
+}
+
+fn forRange4() {
+	for _,v :=  range new bool[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new byte[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new short[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new int[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new long[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new float[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new double[](10) {
+		blackHole(v)
+	}
+	for _,v :=  range new string[](10) {
+		blackHole(v)
+	}
+
+	for _,v :=  range new []bool(10) {
+		blackHole(v)
+	}
+	for _,v :=  range new []byte(10) {
+		blackHole(v)
+	}
+	for _,v :=  range new []short(10) {
+		blackHole(v)
+	}
+	for _,v :=  range new []int(10) {
+		blackHole(v)
+	}
+	for _,v :=  range new []long(10) {
+		blackHole(v)
+	}
+	for _,v :=  range new []float(10){
+		blackHole(v)
+	}
+	for _,v :=  range new []double(10){
+		blackHole(v)
+	}
+	for _,v :=  range new []string(10) {
+		blackHole(v)
+	}
+	for _,v :=  range [1 , 2, 3, 4 ] {
+		blackHole(v)
+	}
+	for _,v :=  range ["hello" , "world"] {
+		blackHole(v)
+	}
+
+	for _,v :=  range { "hello" ->true } {
+		blackHole(v)
+	}
+	for _,v :=  range { "hello" -> 'a' } {
+		blackHole(v)
+	}
+	for _,v :=  range { "hello" -> 1s } {
+		blackHole(v)
+	}
+	for _,v :=  range { "hello" -> 1 } {
+		blackHole(v)
+	}
+	for _,v :=  range { "hello" -> 1L } {
+		blackHole(v)
+	}
+	for _,v :=  range { "hello" -> 1f } {
+		blackHole(v)
+	}
+	for _,v :=  range { "hello" -> 1D } {
+		blackHole(v)
+	}
+	for _,v :=  range { 1 -> "hello" }{
+		blackHole(v)
+	}
+}
+
+
+
+fn forRange5() {
+	for k,v :=  range new bool[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new byte[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new short[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new int[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new long[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new float[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new double[](10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new string[](10) {
+		blackHole(k,v)
+	}
+
+	for k,v :=  range new []bool(10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new []byte(10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new []short(10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new []int(10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new []long(10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range new []float(10){
+		blackHole(k,v)
+	}
+	for k,v :=  range new []double(10){
+		blackHole(k,v)
+	}
+	for k,v :=  range new []string(10) {
+		blackHole(k,v)
+	}
+	for k,v :=  range [1 , 2, 3, 4 ] {
+		blackHole(k,v)
+	}
+	for k,v :=  range ["hello" , "world"] {
+		blackHole(k,v)
+	}
+
+	for k,v :=  range { "hello" ->true } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { "hello" -> 'a' } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { "hello" -> 1s } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { "hello" -> 1 } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { "hello" -> 1L } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { "hello" -> 1f } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { "hello" -> 1D } {
+		blackHole(k,v)
+	}
+	for k,v :=  range { 1 -> "hello" }{
+		blackHole(k,v)
+	}
+}

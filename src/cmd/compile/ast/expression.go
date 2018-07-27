@@ -433,7 +433,7 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 }
 
 func (e *Expression) IsOneValue() bool {
-	if e.MayHaveMultiValue() {
+	if e.HaveMultiValue() {
 		return len(e.MultiValues) == 1
 	}
 	return true
@@ -454,24 +454,26 @@ func (e *Expression) canBeUsedForRange() bool {
 	if bin.Right.Type == ExpressionTypeList {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) == 1 && t[0].Type == ExpressionTypeRange {
-			// bin.Right = t[0] // override
 			return true
 		}
 	}
 	return false
 }
 
-func (e *Expression) MayHaveMultiValue() bool {
-	return e.Type == ExpressionTypeFunctionCall ||
+func (e *Expression) HaveMultiValue() bool {
+	if e.Type == ExpressionTypeFunctionCall ||
 		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeTypeAssert
+		e.Type == ExpressionTypeTypeAssert {
+		return len(e.MultiValues) > 1
+	}
+	return false
 }
 func (e *Expression) HaveMore1Value() bool {
 	return e.HaveMoreNValue(1)
 }
 
 func (e *Expression) HaveMoreNValue(n int) bool {
-	return e.MayHaveMultiValue() && len(e.MultiValues) > n
+	return e.HaveMultiValue() && len(e.MultiValues) > n
 }
 func (e *Expression) CallHasReturnValue() bool {
 	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()

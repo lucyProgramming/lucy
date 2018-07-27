@@ -11,6 +11,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, es...)
 	}
 	if on == nil {
+		checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
 		return nil
 	}
 	if on.Type == VariableTypeClass { // cast type

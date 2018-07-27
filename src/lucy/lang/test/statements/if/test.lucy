@@ -4,7 +4,7 @@
 
 
 fn main(args []string){
-	
+	testIf()
 	
 }
 

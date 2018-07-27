@@ -54,7 +54,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 		appendDescriptor := meta.appendDescriptor
 		for _, v := range call.Args {
 			currentStack := uint16(1)
-			if v.MayHaveMultiValue() && len(v.MultiValues) > 0 {
+			if v.HaveMultiValue() {
 				stack := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
@@ -100,7 +100,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			currentStack := uint16(1)
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
-			if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+			if v.HaveMultiValue() {
 				stack := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t

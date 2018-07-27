@@ -77,6 +77,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		newExpression.Data = list
 		left = newExpression
 	}
+
 	mustBeOneExpression := func(left *ast.Expression) {
 		if left.Type == ast.ExpressionTypeList {
 			es := left.Data.([]*ast.Expression)
@@ -88,7 +89,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			}
 		}
 	}
-	mkExpression := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
+	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
@@ -100,52 +101,55 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		if isMulti {
 			es, err := expressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != nil {
-				return result, err
+				return nil, err
 			}
 			bin.Right = &ast.Expression{}
 			bin.Right.Type = ast.ExpressionTypeList
 			bin.Right.Data = es
 		} else {
 			bin.Right, err = expressionParser.parseExpression(false)
+			if err != nil {
+				return nil, err
+			}
 		}
 		return result, err
 	}
 	// := += -= *= /= %=
 	switch expressionParser.parser.token.Type {
 	case lex.TokenAssign:
-		return mkExpression(ast.ExpressionTypeAssign, true)
+		return parseRight(ast.ExpressionTypeAssign, true)
 	case lex.TokenColonAssign:
-		return mkExpression(ast.ExpressionTypeColonAssign, true)
+		return parseRight(ast.ExpressionTypeColonAssign, true)
 	case lex.TokenAddAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypePlusAssign, false)
+		return parseRight(ast.ExpressionTypePlusAssign, false)
 	case lex.TokenSubAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeMinusAssign, false)
+		return parseRight(ast.ExpressionTypeMinusAssign, false)
 	case lex.TokenMulAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeMulAssign, false)
+		return parseRight(ast.ExpressionTypeMulAssign, false)
 	case lex.TokenDivAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeDivAssign, false)
+		return parseRight(ast.ExpressionTypeDivAssign, false)
 	case lex.TokenModAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeModAssign, false)
+		return parseRight(ast.ExpressionTypeModAssign, false)
 	case lex.TokenLshAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeLshAssign, false)
+		return parseRight(ast.ExpressionTypeLshAssign, false)
 	case lex.TokenRshAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeRshAssign, false)
+		return parseRight(ast.ExpressionTypeRshAssign, false)
 	case lex.TokenAndAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeAndAssign, false)
+		return parseRight(ast.ExpressionTypeAndAssign, false)
 	case lex.TokenOrAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeOrAssign, false)
+		return parseRight(ast.ExpressionTypeOrAssign, false)
 	case lex.TokenXorAssign:
 		mustBeOneExpression(left)
-		return mkExpression(ast.ExpressionTypeXorAssign, false)
+		return parseRight(ast.ExpressionTypeXorAssign, false)
 	}
 	return left, nil
 }

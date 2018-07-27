@@ -102,7 +102,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			index := int32(0)
 			for _, v := range statementReturn.Expressions {
 				currentStack := uint16(1)
-				if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+				if v.HaveMultiValue() {
 					stack := buildPackage.BuildExpression.build(class, code, v, context, state)
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t

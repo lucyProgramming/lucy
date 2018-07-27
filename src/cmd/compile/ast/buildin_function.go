@@ -279,6 +279,14 @@ func registerBuildInFunctions() {
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionPrintf,
 	}
+	buildInFunctionsMap[common.BuildInFunctionBlockHole] = &Function{
+		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+			args []*Type, pos *Pos) {
+			// nothing to check
+		},
+		IsBuildIn: true,
+		Name:      common.BuildInFunctionBlockHole,
+	}
 }
 
 func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,

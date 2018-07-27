@@ -74,7 +74,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 		}
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
-			if ee.MayHaveMultiValue() && len(ee.MultiValues) > 1 {
+			if ee.HaveMultiValue() {
 				stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t

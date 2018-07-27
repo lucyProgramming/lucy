@@ -22,6 +22,7 @@ const (
 	BuildInFunctionLen          = "len"
 	BuildInFunctionMonitorEnter = "monitorEnter"
 	BuildInFunctionMonitorExit  = "monitorExit"
+	BuildInFunctionBlockHole    = "blackHole"
 )
 
 const (

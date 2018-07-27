@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
+func (expressionParser *ExpressionParser) parsePrefixSuffixExpression() (*ast.Expression, error) {
 	var suffix *ast.Expression
 	var err error
 	switch expressionParser.parser.token.Type {
@@ -113,7 +113,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 	case lex.TokenIncrement:
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken) // skip ++
-		suffix, err = expressionParser.parseSuffixExpression()
+		suffix, err = expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -125,7 +125,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 	case lex.TokenDecrement:
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken) // skip --
-		suffix, err = expressionParser.parseSuffixExpression()
+		suffix, err = expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +138,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 		newE := &ast.Expression{}
-		suffix, err = expressionParser.parseSuffixExpression()
+		suffix, err = expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +149,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 	case lex.TokenBitNot:
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
-		suffix, err = expressionParser.parseSuffixExpression()
+		suffix, err = expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +161,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 	case lex.TokenSub:
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
-		suffix, err = expressionParser.parseSuffixExpression()
+		suffix, err = expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +278,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 		expressionParser.parser.unExpectNewLineAndSkip()
-		e, err := expressionParser.parseSuffixExpression()
+		e, err := expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
@@ -299,7 +299,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		}
 	case lex.TokenLf:
 		expressionParser.parser.unExpectNewLineAndSkip()
-		return expressionParser.parseSuffixExpression()
+		return expressionParser.parsePrefixSuffixExpression()
 	default:
 		err = fmt.Errorf("%s unkown begining of a expression, token:'%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)

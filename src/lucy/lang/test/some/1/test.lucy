@@ -1,0 +1,30 @@
+
+
+
+
+
+
+fn main(args []string) {
+	print("hello world")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

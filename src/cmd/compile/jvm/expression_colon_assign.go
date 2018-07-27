@@ -164,7 +164,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 	}
 	index = 0
 	for _, v := range vs.InitValues {
-		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+		if v.HaveMultiValue() {
 			stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t

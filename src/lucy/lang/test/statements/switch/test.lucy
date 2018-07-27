@@ -1,11 +1,17 @@
 
 
+wrongBranch := new error("wrong branch")
+
 
 
 
 fn main(args []string){
-	
-
+	testSwitchByte()
+	testSwitchInt()
+	testSwitchFloat()
+	testSwitchDouble()
+	testSwitchObject()
+	testSwitchTemplate()
 	
 }
 

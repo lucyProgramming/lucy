@@ -1,0 +1,75 @@
+import "lucy/lang"
+
+fn testT(t T) ->(typeString string) {
+	switch T {
+		case bool:
+			typeString = "bool"
+	    case byte:
+			typeString = "byte"
+		case short:
+			typeString = "short"
+		case int:
+			typeString = "int"
+		case long:
+			typeString = "long"
+		case float:
+			typeString = "float"
+		case double:
+			typeString = "double"
+		case []Lucy:
+			typeString = "[]Lucy"
+		case Lucy:
+			typeString = "Lucy"
+		default:
+			panic(new error("no match"))
+	}
+}
+
+
+fn testSwitchTemplate() {
+	ok := true
+    ok = ok && testT(true) == "bool"
+	ok = ok && testT('a') == "byte"
+	ok = ok && testT(1s) == "short"
+	ok = ok && testT(1) == "int"
+    ok = ok && testT(1L) == "long"
+    ok = ok && testT(1f) == "float"
+    ok = ok && testT(1.0D) == "double"
+    ok = ok && testT(new []lang.Lucy(10)) == "[]Lucy"
+    ok = ok && testT(new Lucy()) == "Lucy"
+    if ok == false {
+        panic(wrongBranch)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

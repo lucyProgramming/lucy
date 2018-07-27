@@ -264,7 +264,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 
 // * / %
 func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
-	left, err := expressionParser.parseSuffixExpression()
+	left, err := expressionParser.parsePrefixSuffixExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -274,7 +274,7 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		right, err := expressionParser.parseSuffixExpression()
+		right, err := expressionParser.parsePrefixSuffixExpression()
 		if err != nil {
 			return nil, err
 		}

@@ -19,11 +19,11 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	{
-		t := &cg.StackMapVerificationTypeInfo{}
-		tt := &cg.StackMapUninitializedVariableInfo{}
-		tt.CodeOffset = uint16(code.CodeLength - 4)
-		t.Verify = tt
-		state.Stacks = append(state.Stacks, t, t)
+		verify := &cg.StackMapVerificationTypeInfo{}
+		uninit := &cg.StackMapUninitializedVariableInfo{}
+		uninit.CodeOffset = uint16(code.CodeLength - 4)
+		verify.Verify = uninit
+		state.Stacks = append(state.Stacks, verify, verify)
 	}
 	loadInt32(class, code, int32(arr.Length))
 	switch e.Value.Array.Type {
@@ -83,9 +83,7 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	arrayObject.Type = ast.VariableTypeJavaArray
 	arrayObject.Array = e.Value.Array
 	state.pushStack(class, arrayObject)
-
 	maxStack = 4
-
 	store := func() {
 		switch e.Value.Array.Type {
 		case ast.VariableTypeBool:
@@ -119,7 +117,7 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	}
 	var index int32 = 0
 	for _, v := range arr.Expressions {
-		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+		if v.HaveMultiValue() {
 			// stack top is array list
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := 3 + stack; t > maxStack {

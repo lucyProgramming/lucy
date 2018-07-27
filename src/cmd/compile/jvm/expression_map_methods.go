@@ -51,7 +51,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 		}
 		for k, v := range call.Args {
 			currentStack = 1
-			if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+			if v.HaveMultiValue() {
 				stack := buildExpression.build(class, code, v, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t

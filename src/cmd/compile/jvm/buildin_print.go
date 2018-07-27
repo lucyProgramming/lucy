@@ -162,7 +162,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		}
 	}
 	for k, v := range call.Args {
-		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+		if v.HaveMultiValue() {
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t

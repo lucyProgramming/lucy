@@ -47,7 +47,7 @@ func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	errs = []error{}
 	for _, v := range *args {
-		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+		if v.HaveMultiValue() && len(v.MultiValues) > 1 {
 			errs = append(errs, fmt.Errorf("%s multi value in single value context",
 				errMsgPrefix(from)))
 			return

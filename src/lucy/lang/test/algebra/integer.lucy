@@ -119,8 +119,8 @@ fn testInt()->(ok bool = true){
 
 fn testLong()->(ok bool = true){
 	var a ,b long
-	a = 1L
-	b = 2L
+	a = 1
+	b = 2
 	if 3 != a + b {
 		ok = false
 		return 

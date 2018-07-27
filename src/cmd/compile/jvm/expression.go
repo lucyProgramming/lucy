@@ -225,7 +225,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	es []*ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := 0
 	for _, e := range es {
-		if e.MayHaveMultiValue() {
+		if e.HaveMultiValue() {
 			length += len(e.MultiValues)
 			continue
 		}
@@ -245,7 +245,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	index := int32(0)
 	for _, v := range es {
 		currentStack := uint16(1)
-		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+		if v.HaveMultiValue() {
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t

@@ -50,7 +50,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 
 	index := int32(0)
 	for _, v := range call.Args {
-		if v.MayHaveMultiValue() && len(v.MultiValues) > 1 {
+		if v.HaveMultiValue() {
 			currentStack = 3
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {

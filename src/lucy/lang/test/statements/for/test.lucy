@@ -3,7 +3,16 @@
 
 
 
-fn main(args []string){}
+fn main(args []string){
+	forRange1()
+	forRange2()
+	forRange3()
+	forRange4()
+	forRange5()
+
+	forCondtion() 
+
+}
 
 
 

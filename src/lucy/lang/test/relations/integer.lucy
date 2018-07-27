@@ -129,7 +129,6 @@ fn testIntegers(){
 	if false == testByte() {
 		panic(new error("test byte failed"))
 	}
-
     if false == testShort() {
 		panic(new error("test short failed"))
 	}

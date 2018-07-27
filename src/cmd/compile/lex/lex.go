@@ -79,7 +79,7 @@ func (lex *Lexer) hexByte2ByteValue(c byte) byte {
 	return c - '0' //also valid for digit
 }
 
-func (lex *Lexer) parseInt(bs []byte) int64 {
+func (lex *Lexer) parseInt64(bs []byte) int64 {
 	base := int64(10)
 	if bs[0] == '0' {
 		base = 8
@@ -157,33 +157,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
-	isDouble := false
-	isLong := false
-	isShort := false
-	isByte := false
-	c, eof = lex.getChar()
-	if c == 'l' || c == 'L' {
-		isLong = true
-		if haveFloatPart {
-			err = fmt.Errorf("mixup float and long")
-		}
-	} else if c == 'f' || c == 'F' {
-		haveFloatPart = true
-	} else if c == 's' || c == 'S' {
-		isShort = true
-		if haveFloatPart {
-			err = fmt.Errorf("mixup float and short")
-		}
-	} else if c == 'd' || c == 'D' {
-		isDouble = true
-	} else if c == 'b' || c == 'B' {
-		isByte = true
-		if haveFloatPart {
-			err = fmt.Errorf("mixup float and byte")
-		}
-	} else {
-		lex.unGetChar()
-	}
+
 	isScientificNotation := false
 	power := []byte{}
 	powerPositive := true
@@ -226,10 +200,29 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		err = fmt.Errorf("mix up hex and seientific notation")
 		return
 	}
+	isDouble := false
+	isLong := false
+	isShort := false
+	isByte := false
+	isFloat := false
+	c, eof = lex.getChar()
+	if c == 'l' || c == 'L' {
+		isLong = true
+	} else if c == 'f' || c == 'F' {
+		isFloat = true
+	} else if c == 's' || c == 'S' {
+		isShort = true
+	} else if c == 'd' || c == 'D' {
+		isDouble = true
+	} else if c == 'b' || c == 'B' {
+		isByte = true
+	} else {
+		lex.unGetChar()
+	}
 	/*
 		parse float part
 	*/
-	parseFloat := func(bs []byte) float64 {
+	parseFloat64 := func(bs []byte) float64 {
 		index := len(bs) - 1
 		var fp float64
 		for index >= 0 {
@@ -241,47 +234,59 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	if isScientificNotation == false {
+		int64Part := lex.parseInt64(integerPart)
+		floatPart := parseFloat64(floatPart)
 		if haveFloatPart {
-			value := parseFloat(floatPart) + float64(lex.parseInt(integerPart))
 			if isDouble {
 				token.Type = TokenLiteralDouble
-				token.Data = value
+				token.Data = float64(int64Part) + floatPart
 			} else {
 				token.Type = TokenLiteralFloat
-				token.Data = float32(value)
+				token.Data = float32(int64Part) + float32(floatPart)
 			}
 		} else {
-			value := lex.parseInt(integerPart)
-			if isLong {
+			if isDouble {
+				token.Type = TokenLiteralDouble
+				token.Data = float64(int64Part) + floatPart
+			} else if isFloat {
+				token.Type = TokenLiteralFloat
+				token.Data = float32(int64Part) + float32(floatPart)
+			} else if isLong {
 				token.Type = TokenLiteralLong
-				token.Data = value
+				token.Data = int64Part
 			} else if isByte {
 				token.Type = TokenLiteralByte
-				token.Data = byte(value)
-				if int32(value) > math.MaxUint8 {
+				token.Data = byte(int64Part)
+				if int32(int64Part) > math.MaxUint8 {
 					err = fmt.Errorf("max byte is %v", math.MaxUint8)
 				}
 			} else if isShort {
 				token.Type = TokenLiteralShort
-				token.Data = int32(value)
-				if int32(value) > math.MaxInt16 {
-					err = fmt.Errorf("max short is %v", math.MaxInt16)
+				token.Data = int32(int64Part)
+				if int32(int64Part) > math.MaxInt16 {
+					err = fmt.Errorf("max short is %v", math.MaxUint8)
 				}
-			} else { // int
+			} else {
 				token.Type = TokenLiteralInt
-				token.Data = int32(value)
+				token.Data = int32(int64Part)
+				if int32(int64Part) > math.MaxInt32 {
+					err = fmt.Errorf("max int is %v", math.MaxUint8)
+				}
 			}
 		}
 		return
 	}
 	//scientific notation
-	if t := lex.parseInt(integerPart); t > 10 || t < 1 {
-		err = fmt.Errorf("wrong format scientific notation")
+	if t := lex.parseInt64(integerPart); t > 10 && t < 1 {
+		err = fmt.Errorf("wrong format of scientific notation")
 		token.Type = TokenLiteralInt
-		token.Data = 0
+		token.Data = int32(0)
 		return
 	}
-	p := int(lex.parseInt(power))
+	p := int(lex.parseInt64(power))
+	notationIsDouble := false
+	var notationDoubleValue float64
+	var notationLongValue int64
 	if powerPositive {
 		if p >= len(floatPart) { // int
 			integerPart = append(integerPart, floatPart...)
@@ -290,14 +295,11 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 				b[k] = '0'
 			}
 			integerPart = append(integerPart, b...)
-			value := lex.parseInt(integerPart)
-			token.Type = TokenLiteralInt
-			token.Data = int32(value)
+			notationLongValue = lex.parseInt64(integerPart)
 		} else { // float
-			integerPart = append(integerPart, floatPart[0:p]...)
-			value := float64(lex.parseInt(integerPart)) + parseFloat(floatPart[p:])
-			token.Type = TokenLiteralFloat
-			token.Data = float32(value)
+			integerPart = append(integerPart, floatPart[:p]...)
+			notationIsDouble = true
+			notationDoubleValue = float64(lex.parseInt64(integerPart)) + parseFloat64(floatPart[p:])
 		}
 	} else { // power is negative,must be float number
 		b := make([]byte, p-len(integerPart))
@@ -306,9 +308,62 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		}
 		b = append(b, integerPart...)
 		b = append(b, floatPart...)
-		value := parseFloat(b)
+		notationIsDouble = true
+		notationDoubleValue = parseFloat64(b)
+	}
+	if isDouble == false &&
+		isFloat == false &&
+		isLong == false &&
+		isByte == false &&
+		isShort == false {
+		if notationIsDouble {
+			token.Type = TokenLiteralDouble
+			token.Data = notationDoubleValue
+		} else {
+			token.Type = TokenLiteralLong
+			token.Data = notationLongValue
+		}
+		return
+	}
+	if isDouble {
+		token.Type = TokenLiteralDouble
+		token.Data = notationDoubleValue
+	} else if isFloat {
 		token.Type = TokenLiteralFloat
-		token.Data = float32(value)
+		token.Data = float32(notationDoubleValue)
+	} else if isLong {
+		token.Type = TokenLiteralLong
+		if notationIsDouble {
+			err = fmt.Errorf("number literal defined as 'long' but notation is float")
+		}
+		token.Data = notationLongValue
+	} else if isByte {
+		token.Type = TokenLiteralByte
+		token.Data = byte(notationLongValue)
+		if notationIsDouble {
+			err = fmt.Errorf("number literal defined as 'byte' but notation is float")
+		}
+		if notationLongValue > math.MaxUint8 {
+			err = fmt.Errorf("max byte is %v", math.MaxUint8)
+		}
+	} else if isShort {
+		token.Type = TokenLiteralShort
+		token.Data = int32(notationLongValue)
+		if notationIsDouble {
+			err = fmt.Errorf("number literal defined as 'short' but notation is float")
+		}
+		if notationLongValue > math.MaxInt16 {
+			err = fmt.Errorf("max short is %v", math.MaxUint8)
+		}
+	} else {
+		if notationIsDouble {
+			token.Type = TokenLiteralDouble
+			token.Data = notationDoubleValue
+		} else {
+			token.Type = TokenLiteralLong
+			token.Data = notationLongValue
+		}
+		return
 	}
 	return
 }
