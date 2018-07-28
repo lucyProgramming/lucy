@@ -1,158 +1,205 @@
 
 
-fn testByte()->(ok bool = true){
+fn testByte()->(ok bool = false){
 	var a ,b byte
 	a = 1b
 	b = 2b
 	if 3 != a + b {
-		ok = false
 		return 
 	}
 	if -1 != a - b {
-		ok = false
 		return 
 	}
 	if 1 != b - a {
-		ok = false
 		return 
 	}
 	if 2 != b * a {
-		ok = false
 		return 
 	}
 	if 2 != b / a {
-		ok = false
 		return 
 	}
 	if 0 != a / b {
-		ok = false
 		return 
 	}
 	if 0 != b % a {
-		ok = false
 		return 
 	}
 	if 1 != a % b {
-		ok = false
 		return 
 	}
+	ok = true
 }
 
 
-fn testShort()->(ok bool = true){
+fn testShort()->(ok bool = false){
 	var a ,b short
 	a = 1s
 	b = 2s
 	if 3 != a + b {
-		ok = false
 		return 
 	}
 	if -1 != a - b {
-		ok = false
 		return 
 	}
 	if 1 != b - a {
-		ok = false
 		return 
 	}
 	if 2 != b * a {
-		ok = false
 		return 
 	}
 	if 2 != b / a {
-		ok = false
 		return 
 	}
 	if 0 != a / b {
-		ok = false
 		return 
 	}
 	if 0 != b % a {
-		ok = false
 		return 
 	}
 	if 1 != a % b {
-		ok = false
 		return 
 	}
+	ok = true
 }
 
 
-fn testInt()->(ok bool = true){
+fn testInt()->(ok bool = false){
 	var a ,b int
 	a = 1
 	b = 2
 	if 3 != a + b {
-		ok = false
 		return 
 	}
 	if -1 != a - b {
-		ok = false
 		return 
 	}
 	if 1 != b - a {
-		ok = false
 		return 
 	}
 	if 2 != b * a {
-		ok = false
 		return 
 	}
 	if 2 != b / a {
-		ok = false
 		return 
 	}
 	if 0 != a / b {
-		ok = false
 		return 
 	}
 	if 0 != b % a {
-		ok = false
 		return 
 	}
 	if 1 != a % b {
-		ok = false
 		return 
 	}
+	ok = true
 }
 
 
-fn testLong()->(ok bool = true){
+fn testLong()->(ok bool = false){
 	var a ,b long
 	a = 1
 	b = 2
 	if 3 != a + b {
-		ok = false
 		return 
 	}
 	if -1 != a - b {
-		ok = false
 		return 
 	}
 	if 1 != b - a {
-		ok = false
 		return 
 	}
 	if 2 != b * a {
-		ok = false
 		return 
 	}
 	if 2 != b / a {
-		ok = false
 		return 
 	}
 	if 0 != a / b {
-		ok = false
 		return 
 	}
 	if 0 != b % a {
-		ok = false
 		return 
 	}
 	if 1 != a % b {
-		ok = false
 		return 
 	}
+	ok = true 
+}
+
+fn testShift() -> ( ok bool = false){
+	a := 1
+	if 1 != a << 0 {
+		return 
+	}
+	if 2 != a << 1 {
+		return 
+	}
+	if 4 != a << 2 {
+		return 
+	}
+	if 8 != a << 3 {
+		return 
+	}
+	if 16 != a << 4 {
+		return 
+	}
+	if 32 != a << 5 {
+		return 
+	}
+	if 64 != a << 6 {
+		return 
+	}
+	if 128 != a << 7 {
+		return 
+	}
+	if 256 != a << 8 {
+		return 
+	}
+	if 512 != a << 9 {
+		return 
+	}
+	if 1024 != a << 10 {
+		return 
+	}
+	a = 1024
+	if 1024 != a >> 0  {
+		return 
+	}
+	if 512 != a >> 1  {
+		return 
+	}
+	if 256 != a >> 2  {
+		return 
+	}
+	if 128 != a >> 3  {
+		return 
+	}
+	if 64 != a >> 4  {
+		return 
+	}
+	if 32 != a >> 5  {
+		return 
+	}
+	if 16 != a >> 6  {
+		return 
+	}
+	if 8 != a >> 7  {
+		return 
+	}
+	if 4 != a >> 8  {
+		return 
+	}
+	if 2 != a >> 9  {
+		return 
+	}
+	if 1 != a >> 10  {
+		return 
+	}
+	if 0 != a >> 11  {
+		return 
+	}
+	ok = true
 }
 
 
@@ -168,7 +215,10 @@ fn testIntegers(){
 		panic(new error("test int failed"))
 	}
     if false == testLong() {
-		panic(new error("test  failed"))
+		panic(new error("test long failed"))
+	}
+	if false == testShift () {
+		panic(new error("test shift  failed"))
 	}
 }
 

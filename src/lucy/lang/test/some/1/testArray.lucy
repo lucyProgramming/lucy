@@ -1,0 +1,191 @@
+
+
+fn testJavaArray () {
+    {
+        arr := new bool[](10)
+        if 10 != len(arr) {
+       	    printErrAndExit("get bool array length error")
+        }
+        for k,_ := range arr {
+        	if t := k % 2 ; t  == 0 {
+        	    arr[k] = true
+        	}else {
+        	    arr[k] = false
+        	}
+        }
+        for k,_ := range arr {
+            if t := k % 2 ; t  == 0 {
+                if arr[k] != true {
+                    printErrAndExit("set or get bool value error")
+                }
+            }else {
+                if arr[k] != false {
+                    printErrAndExit("set or get bool value error")
+                }
+            }
+        }
+    }
+	{
+		arr := new byte[](10)
+		if 10 != len(arr) {
+			printErrAndExit("get byte array  length error")
+		}
+		for k,_ := range arr {
+			arr[k] = byte(k)
+		}
+		for k,v := range arr {
+			if byte(k) != v {
+				printErrAndExit("set or get byte value error")
+			}
+		}
+	}
+	{
+    		arr := new short[](10)
+    		if 10 != len(arr) {
+    			printErrAndExit("get  short array length error")
+    		}
+    		for k,_ := range arr {
+    			arr[k] = short(k)
+    		}
+    		for k,v := range arr {
+    			if short(k) != v {
+    				printErrAndExit("set or get  short value error")
+    			}
+    		}
+    	}
+	{
+		arr := new int[](10)
+		if 10 != len(arr) {
+			printErrAndExit("get int array length error")
+		}
+		for k,_ := range arr {
+			arr[k] = k
+		}
+		for k,v := range arr {
+			if k != v {
+				printErrAndExit("set or get int value error")
+			}
+		}
+	}
+	{
+		arr := new long[](10)
+		if 10 != len(arr) {
+			printErrAndExit("get long array length error")
+		}
+		for k,_ := range arr {
+			arr[k] = long(k)
+		}
+		for k,v := range arr {
+			if k != int(v) {
+				printErrAndExit("set or get long value error")
+			}
+		}
+	}
+	{
+		arr := new float[](10)
+		if 10 != len(arr) {
+			printErrAndExit("get float array length error")
+		}
+		for k,_ := range arr {
+			arr[k] = float(k)
+		}
+		for k,v := range arr {
+			if float(k) != v {
+				printErrAndExit("set or get float value error")
+			}
+		}
+	}
+	
+	{
+		arr := new double[](10)
+		if 10 != len(arr) {
+			printErrAndExit("get double array length error")
+		}
+		for k,_ := range arr {
+			arr[k] = double(k)
+		}
+		for k,v := range arr {
+			if double(k) != v {
+				printErrAndExit("set or get double value error")
+			}
+		}
+	}
+}
+
+
+
+
+
+
+fn testLucyArray (arr []T  ) {
+	length := 10 
+	if arr.size() != length {
+		printErrAndExit("length should be 10")
+	}
+	for i := 0 ;i < length ;i++{
+		arr[i] = T(i)
+	}
+	if t := arr[0:2] ; true {
+		if len(t) != 2 {
+			printErrAndExit("array length is not 2")
+		}
+		if t[0] != T(0) {
+			printErrAndExit("should be 0")
+		}
+		if t[1] != T(1) {
+			printErrAndExit("should be 1")
+		}
+	}
+	if t := arr[:2] ; true {
+		if len(t) != 2 {
+			printErrAndExit("array length is not 2")
+		}
+		if t[0] != T(0) {
+			printErrAndExit("should be 0")
+		}
+		if t[1] != T(1) {
+			printErrAndExit("should be 1")
+		}
+	}
+	if t := arr[5:] ; true {
+		if len(t) != 5 {
+			printErrAndExit("array length is not 2")
+		}
+		if t[0] != T(5) {
+			printErrAndExit("should be 5")
+		}
+		if t[4] != T(9) {
+			printErrAndExit("should be 9")
+		}
+	}
+}
+
+
+
+
+
+
+
+fn testAppendArray () {
+	arr := new []int(0)
+	length := 10000
+	for i := 0 ; i < length ; i++ {
+		arr.append(i)
+	}
+	for i := 0 ; i < length ; i++ {
+		if arr[i] != i {
+			printErrAndExit("append have some error")
+		} 
+	} 
+}
+
+
+
+
+
+
+
+
+
+
+

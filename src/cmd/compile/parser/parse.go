@@ -412,7 +412,7 @@ func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 		line = pos[0].StartLine
 		column = pos[0].StartColumn
 	} else {
-		line, column = parser.lexer.GetLineAndColumn()
+		line, column = parser.token.StartLine, parser.token.StartColumn
 	}
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }
@@ -460,7 +460,7 @@ func (parser *Parser) unExpectNewLine() error {
 	var err error
 	if parser.token.Type == lex.TokenLf {
 		err = fmt.Errorf("%s unexpect new line",
-			parser.errorMsgPrefix())
+			parser.errorMsgPrefix(parser.mkPos()))
 		parser.errs = append(parser.errs, err)
 	}
 	return err

@@ -179,10 +179,10 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 			return v, nil
 		}
 	}
-	if b.IsFunctionBlock &&
-		len(b.InheritedAttribute.Function.parameterTypes) > 0 { // this is a template function
-		return searchBuildIns(name), nil
-	}
+	//if b.IsFunctionBlock &&
+	//	len(b.InheritedAttribute.Function.parameterTypes) > 0 { // this is a template function
+	//	return searchBuildIns(name), nil
+	//}
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}

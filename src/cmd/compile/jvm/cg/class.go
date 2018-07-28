@@ -158,6 +158,9 @@ func (c *Class) InsertUtf8Const(s string) uint16 {
 	if c.Utf8Constants == nil {
 		c.Utf8Constants = make(map[string]*ConstPool)
 	}
+	//if s == "" {
+	//	panic(1)
+	//}
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil}
 	}

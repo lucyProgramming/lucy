@@ -14,14 +14,14 @@ public class ArrayTTT   {
 	public int size(){
 		return this.end - this.start;
 	}
-	public int start(){
+	public synchronized int start(){
         return this.start;
 	}
 	public int end(){
          return this.end;
 	}
 	public int cap(){
-         return this.end;
+         return this.cap;
 	}
 	public ArrayTTT(TTT[] values){
 		this.start = 0;
@@ -33,7 +33,7 @@ public class ArrayTTT   {
 	private ArrayTTT(){
 
 	}
-	public void set(int index , TTT value) {
+	public synchronized void set(int index , TTT value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -43,7 +43,7 @@ public class ArrayTTT   {
 		}
 		this.elements[index] = value ; 
 	}
-	public TTT get(int index) {
+	public synchronized TTT get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -55,7 +55,7 @@ public class ArrayTTT   {
 	}	
 
 
-	public ArrayTTT slice(int start,int end){
+	public  synchronized ArrayTTT slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
@@ -66,7 +66,7 @@ public class ArrayTTT   {
 		result.cap = this.cap;
 		return result;
 	}
-	public ArrayTTT append(TTT e){
+	public synchronized ArrayTTT append(TTT e){
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -89,7 +89,7 @@ public class ArrayTTT   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public ArrayTTT append(ArrayTTT es){
+	public synchronized  ArrayTTT append(ArrayTTT es){
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);
@@ -100,7 +100,7 @@ public class ArrayTTT   {
 		this.end += es.size();
 		return this;
 	}
-	public String toString(){
+	public synchronized String toString(){
 	    String s = "[";
 	    int size = this.end - this.start;
 	    for(int i= 0;i < size;i ++){

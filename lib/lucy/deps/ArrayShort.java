@@ -11,14 +11,14 @@ public class ArrayShort   {
 	public int size(){
 		return this.end - this.start;
 	}
-	public int start(){
+	public synchronized int start(){
         return this.start;
 	}
 	public int end(){
          return this.end;
 	}
 	public int cap(){
-         return this.end;
+         return this.cap;
 	}
 	public ArrayShort(short[] values){
 		this.start = 0;
@@ -30,7 +30,7 @@ public class ArrayShort   {
 	private ArrayShort(){
 
 	}
-	public void set(int index , short value) {
+	public synchronized void set(int index , short value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -40,7 +40,7 @@ public class ArrayShort   {
 		}
 		this.elements[index] = value ; 
 	}
-	public short get(int index) {
+	public synchronized short get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -52,7 +52,7 @@ public class ArrayShort   {
 	}	
 
 
-	public ArrayShort slice(int start,int end){
+	public  synchronized ArrayShort slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
@@ -63,7 +63,7 @@ public class ArrayShort   {
 		result.cap = this.cap;
 		return result;
 	}
-	public ArrayShort append(short e){
+	public synchronized ArrayShort append(short e){
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -86,7 +86,7 @@ public class ArrayShort   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public ArrayShort append(ArrayShort es){
+	public synchronized  ArrayShort append(ArrayShort es){
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);
@@ -97,7 +97,7 @@ public class ArrayShort   {
 		this.end += es.size();
 		return this;
 	}
-	public String toString(){
+	public synchronized String toString(){
 	    String s = "[";
 	    int size = this.end - this.start;
 	    for(int i= 0;i < size;i ++){

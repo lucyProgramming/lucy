@@ -23,7 +23,10 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	} else {
 		IfState = conditionState
 	}
-	maxStack = buildPackage.BuildExpression.build(class, code, s.Condition, context, IfState)
+	stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, IfState)
+	if stack > maxStack {
+		maxStack = stack
+	}
 	code.Codes[code.CodeLength] = cg.OP_ifeq
 	codeLength := code.CodeLength
 	exit := code.Codes[code.CodeLength+1 : code.CodeLength+3]

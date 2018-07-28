@@ -1,0 +1,93 @@
+
+
+
+class Capture {
+	intValue int 
+	stringValue string 
+	handler fn(c Capture)
+	fn Capture(handler fn(c Capture)) {
+	    this.super()
+		this.handler = fn(c Capture) {
+			handler(c)
+		}  
+	}
+}
+
+
+CaptureHandler := fn(c Capture) {
+    c.intValue = 100
+    if c.intValue != 100 {
+        panic(new error("intValue is wrong"))
+    }
+    const helloWorld = "hello world"
+    c.stringValue = helloWorld
+    if c.
+        stringValue != helloWorld
+    {
+        panic(new error("stringValue is wrong"))
+    }
+}
+
+
+{
+    c := new Capture(CaptureHandler)
+    c.handler(c)
+	c.handler = fn(c Capture) {
+		blackHole(c)
+	}
+	c.handler(c)
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

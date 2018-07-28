@@ -11,14 +11,14 @@ public class ArrayByte   {
 	public int size(){
 		return this.end - this.start;
 	}
-	public int start(){
+	public synchronized int start(){
         return this.start;
 	}
 	public int end(){
          return this.end;
 	}
 	public int cap(){
-         return this.end;
+         return this.cap;
 	}
 	public ArrayByte(byte[] values){
 		this.start = 0;
@@ -30,7 +30,7 @@ public class ArrayByte   {
 	private ArrayByte(){
 
 	}
-	public void set(int index , byte value) {
+	public synchronized void set(int index , byte value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -40,7 +40,7 @@ public class ArrayByte   {
 		}
 		this.elements[index] = value ; 
 	}
-	public byte get(int index) {
+	public synchronized byte get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -52,7 +52,7 @@ public class ArrayByte   {
 	}	
 
 
-	public ArrayByte slice(int start,int end){
+	public  synchronized ArrayByte slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
@@ -63,7 +63,7 @@ public class ArrayByte   {
 		result.cap = this.cap;
 		return result;
 	}
-	public ArrayByte append(byte e){
+	public synchronized ArrayByte append(byte e){
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -86,7 +86,7 @@ public class ArrayByte   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public ArrayByte append(ArrayByte es){
+	public synchronized  ArrayByte append(ArrayByte es){
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);
@@ -97,7 +97,7 @@ public class ArrayByte   {
 		this.end += es.size();
 		return this;
 	}
-	public String toString(){
+	public synchronized String toString(){
 	    String s = "[";
 	    int size = this.end - this.start;
 	    for(int i= 0;i < size;i ++){

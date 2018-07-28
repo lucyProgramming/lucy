@@ -59,11 +59,15 @@ class Test {
         cmd.stdout = os.stdout 
         cmd.stderr = os.stderr  
         if err =  cmd.start() ; err != null {
+			printf("start program failed,err:%s\n",err.toString())
         	return 
         }
         if err =  cmd.wait() ;  err != null {
-        	return 
+			 print("test failed....",err)
+        }else {
+             print("test ok....")
         }
+        printf("\n\n\n")
 	}
 }
 

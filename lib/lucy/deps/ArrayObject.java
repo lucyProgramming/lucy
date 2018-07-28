@@ -13,14 +13,14 @@ public class ArrayObject   {
 	public int size(){
 		return this.end - this.start;
 	}
-	public int start(){
+	public synchronized int start(){
         return this.start;
 	}
 	public int end(){
          return this.end;
 	}
 	public int cap(){
-         return this.end;
+         return this.cap;
 	}
 	public ArrayObject(Object[] values){
 		this.start = 0;
@@ -32,7 +32,7 @@ public class ArrayObject   {
 	private ArrayObject(){
 
 	}
-	public void set(int index , Object value) {
+	public synchronized void set(int index , Object value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -42,7 +42,7 @@ public class ArrayObject   {
 		}
 		this.elements[index] = value ; 
 	}
-	public Object get(int index) {
+	public synchronized Object get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
@@ -54,7 +54,7 @@ public class ArrayObject   {
 	}	
 
 
-	public ArrayObject slice(int start,int end){
+	public  synchronized ArrayObject slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
@@ -65,7 +65,7 @@ public class ArrayObject   {
 		result.cap = this.cap;
 		return result;
 	}
-	public ArrayObject append(Object e){
+	public synchronized ArrayObject append(Object e){
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -88,7 +88,7 @@ public class ArrayObject   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public ArrayObject append(ArrayObject es){
+	public synchronized  ArrayObject append(ArrayObject es){
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);
@@ -99,7 +99,7 @@ public class ArrayObject   {
 		this.end += es.size();
 		return this;
 	}
-	public String toString(){
+	public synchronized String toString(){
 	    String s = "[";
 	    int size = this.end - this.start;
 	    for(int i= 0;i < size;i ++){

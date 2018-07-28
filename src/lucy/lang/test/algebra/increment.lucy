@@ -1,0 +1,130 @@
+
+var i int = 1 
+
+{
+	global.i++
+	if global.i != 2 {
+		panic(new error("++ is wrong"))
+	} 
+	global.i--
+	if global.i != 1 {
+		panic(new error("-- is wrong"))
+	} 
+	++global.i 
+	if global.i != 2 {
+		panic(new error("++ is wrong"))
+	} 
+	--global.i
+	if global.i != 1 {
+		panic(new error("-- is wrong"))
+	}
+
+	if global.i++ != 1 {
+        panic(new error("++ is wrong"))
+    }
+    if global.i-- != 2 {
+        panic(new error("-- is wrong"))
+    }
+    if ++global.i != 2 {
+        panic(new error("++ is wrong"))
+    }
+    if --global.i != 1 {
+        panic(new error("-- is wrong"))
+    }
+}
+
+
+
+
+fn  testIncrement (noUse T) {
+	var a T = T(1)
+	a++
+	if a != T(2) {
+		panic(new error("++ is wrong"))
+	} 
+	a--
+	if a != T(1) {
+		panic(new error("-- is wrong"))
+	} 
+	++a 
+	if a != T(2) {
+		panic(new error("++ is wrong"))
+	} 
+	--a
+	if a != T(1) {
+		panic(new error("-- is wrong"))
+	}
+
+	if a++ != T(1) {
+        panic(new error("++ is wrong"))
+    }
+    if a-- != T(2) {
+        panic(new error("-- is wrong"))
+    }
+    if ++a != T(2) {
+        panic(new error("++ is wrong"))
+    }
+    if --a != T(1) {
+        panic(new error("-- is wrong"))
+    }
+    //
+    m := new map{ string -> T}()
+    m["a"] = T(1)
+    m["a"]++
+    if  m["a"] != T(2) {
+        panic(new error("++ is wrong"))
+    }
+    m["a"]--
+    if   m["a"] != T(1) {
+        panic(new error("-- is wrong"))
+    }
+    ++  m["a"]
+    if   m["a"] != T(2) {
+        panic(new error("++ is wrong"))
+    }
+    --  m["a"]
+    if   m["a"] != T(1) {
+        panic(new error("-- is wrong"))
+    }
+
+    if   m["a"]++ != T(1) {
+        panic(new error("++ is wrong"))
+    }
+    if  m["a"]-- != T(2) {
+        panic(new error("-- is wrong"))
+    }
+    if ++ m["a"] != T(2) {
+        panic(new error("++ is wrong"))
+    }
+    if --  m["a"] != T(1) {
+        panic(new error("-- is wrong"))
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -312,7 +312,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				errMsgPrefix(e.Pos)))
 			return nil
 		}
-
 		if matched {
 			m := ms[0]
 			if (object.Class.SuperClass.LoadFromOutSide && m.IsPublic() == false) ||
@@ -382,22 +381,27 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	}
 	if fieldMethodHandler != nil {
-		if fieldMethodHandler.IsStatic() {
-			if object.Type != VariableTypeClass {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,shoule make call from class",
+		if object.Type == VariableTypeObject {
+			if fieldMethodHandler.IsStatic() {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			if fieldMethodHandler.IsPublic() == false && object.Class != block.InheritedAttribute.Class {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+			if false == call.Expression.isThis() {
+				if (call.Expression.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+					(call.Expression.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
+					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+				}
 			}
-		} else {
-			if false == call.Expression.isThis() &&
-				fieldMethodHandler.IsPublic() == false {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not public", errMsgPrefix(e.Pos), call.Name))
-			}
-			if object.Type != VariableTypeObject {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,shoule make call from object",
+		} else { // class
+			if fieldMethodHandler.IsStatic() == false {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
 					errMsgPrefix(e.Pos), call.Name))
+			}
+			if call.Expression.Value.Class != block.InheritedAttribute.Class {
+				if (call.Expression.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+					(call.Expression.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
+					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+				}
 			}
 		}
 		call.FieldMethodHandler = fieldMethodHandler
@@ -424,7 +428,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			if call.Expression.Value.Class != block.InheritedAttribute.Class {
 				if (call.Expression.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
 					(call.Expression.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
-					fmt.Println(call.Name, m.IsPrivate())
 					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 				}
 			}

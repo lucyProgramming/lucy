@@ -1,3 +1,20 @@
+import "lucy/os"
+
+
+fn printErrAndExit(msg string) {
+	print(msg)
+	os.exit(1)
+}
+
+
+fn add(a ,b int) ->(sum int) {
+	sum = a + b 
+}
+
+
+
+
+
 
 
 
@@ -5,7 +22,19 @@
 
 
 fn main(args []string) {
-	print("hello world")
+	if add(1,  2) != 3 {
+		print("add failed")
+		os.exit(1)
+	}
+	testJavaArray()
+	testLucyArray(new []byte(10))
+	testLucyArray(new []short(10))
+	testLucyArray(new []int(10))
+	testLucyArray(new []long(10))
+	testLucyArray(new []float(10))
+	testLucyArray(new []double(10))
+	
+	testAppendArray()
 }
 
 

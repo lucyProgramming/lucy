@@ -171,6 +171,9 @@ func (buildExpression *BuildExpression) getLeftValue(
 		if selection.Expression.Value.Type == ast.VariableTypePackage {
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_putstatic
+			if selection.PackageVariable.JvmDescriptor == "" {
+				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(selection.PackageVariable.Type)
+			}
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,

@@ -3,83 +3,68 @@
 
 
 
-fn testFloat()->(ok bool = true){
+fn testFloat()->(ok bool = false){
 	var a ,b float
 	a = 1.0
 	b = 2.0
 	if 3.0 != a + b {
-		ok = false
 		return 
 	}
 	if -1.0 != a - b {
-		ok = false
 		return 
 	}
 	if 1.0 != b - a {
-		ok = false
 		return 
 	}
 	if 2.0 != b * a {
-		ok = false
 		return 
 	}
 
 	if 2.0 != b / a {
-		ok = false
 		return 
 	}
 	if 0.5 != a / b {
-		ok = false
 		return 
 	}
 	if 0.0 != b % a {
-		ok = false
-		return 
 		return 
 	}
 	if 1.0 != a % b {
-		ok = false
 		return 
 	}
+	ok = true
 }
 
 
 
-fn testDouble()->(ok bool = true){
+fn testDouble()->(ok bool = false){
 	var a ,b double
 	a = 1.0
 	b = 2.0
 	if 3.0 != a + b {
-		ok = false
 	}
 	if -1.0 != a - b {
-		ok = false
 		return 
 	}
 	if 1.0 != b - a {
-		ok = false
 		return 
 	}
 	if 2.0 != b * a {
-		ok = false
 		return 
 	}
 	if 2.0 != b / a {
-		ok = false
 		return 
 	}
 	if 0.5 != a / b {
-		ok = false
 		return 
 	}
 	if 0.0 != b % a {
-		ok = false
 		return 
 	}
 	if 1.0 != a % b {
-		ok = false
 		return 
 	}
+	ok = true
 }
 
 

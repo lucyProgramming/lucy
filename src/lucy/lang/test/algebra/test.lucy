@@ -3,6 +3,12 @@
 fn main(args []string) {
 	 testIntegers()
 	 testFloats()
+	 testIncrement(1b)
+	 testIncrement(1s)
+	 testIncrement(1)
+	 testIncrement(1L)
+	 testIncrement(1.0)
+	 testIncrement(1.0D)
 }
 
 
