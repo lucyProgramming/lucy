@@ -171,6 +171,9 @@ fn testAppendArray () {
 	length := 10000
 	for i := 0 ; i < length ; i++ {
 		arr.append(i)
+		if len(arr) != i + 1 {
+			printErrAndExit("array length not right")
+		}
 	}
 	for i := 0 ; i < length ; i++ {
 		if arr[i] != i {

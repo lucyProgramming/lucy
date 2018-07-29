@@ -69,7 +69,7 @@ func (parser *Parser) insertImports(im *ast.Import) {
 	}
 	*parser.tops = append(*parser.tops, &ast.Top{
 		Data: im,
-	})``
+	})
 	if im.AccessName != ast.NoNameIdentifier {
 		if parser.importsByAccessName[im.AccessName] != nil {
 			parser.errs = append(parser.errs, fmt.Errorf("%s '%s' reImported",

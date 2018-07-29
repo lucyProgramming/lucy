@@ -8,25 +8,25 @@ import (
 
 func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type {
 	selection := e.Data.(*ExpressionSelection)
-	on, es := selection.Expression.checkSingleValueContextExpression(block)
+	object, es := selection.Expression.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if on == nil {
+	if object == nil {
 		return nil
 	}
 	// dot
-	if on.Type != VariableTypeObject &&
-		on.Type != VariableTypeClass &&
-		on.Type != VariableTypePackage {
+	if object.Type != VariableTypeObject &&
+		object.Type != VariableTypeClass &&
+		object.Type != VariableTypePackage {
 		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'",
-			errMsgPrefix(e.Pos), selection.Name, on.TypeString()))
+			errMsgPrefix(e.Pos), selection.Name, object.TypeString()))
 		return nil
 	}
 	var err error
-	switch on.Type {
+	switch object.Type {
 	case VariableTypePackage:
-		d, ok := on.Package.Block.NameExists(selection.Name)
+		d, ok := object.Package.Block.NameExists(selection.Name)
 		if ok == false {
 			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
 			*errs = append(*errs, err)
@@ -37,7 +37,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			v := d.(*Variable)
 			result := v.Type.Clone()
 			result.Pos = e.Pos
-			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
+			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -48,7 +48,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			e.fromConst(c) //
 			result := c.Type.Clone()
 			result.Pos = e.Pos
-			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && on.Package.Name != PackageBeenCompile.Name {
+			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -59,14 +59,14 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Pos = e.Pos
 			result.Type = VariableTypeClass
 			result.Class = c
-			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
+			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			return result
 		case *EnumName:
 			n := d.(*EnumName)
-			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
+			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -79,7 +79,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return result
 		case *Function:
 			f := d.(*Function)
-			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 && on.Package.Name != PackageBeenCompile.Name {
+			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
 				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -96,22 +96,22 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		}
 	case VariableTypeObject:
 		if selection.Name == SUPER {
-			if on.Class.Name == JavaRootClass {
+			if object.Class.Name == JavaRootClass {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
 					errMsgPrefix(e.Pos), JavaRootClass))
-				return on
+				return object
 			}
-			err = on.Class.loadSuperClass()
+			err = object.Class.loadSuperClass()
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
-				return on
+				return object
 			}
-			result := on.Clone()
+			result := object.Clone()
 			result.Pos = e.Pos
 			result.Class = result.Class.SuperClass
 			return result
 		}
-		fieldOrMethod, err := on.Class.getFieldOrMethod(selection.Name, false)
+		fieldOrMethod, err := object.Class.getFieldOrMethod(selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 			return nil
@@ -156,10 +156,10 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 	case VariableTypeClass:
 		if selection.Name == SUPER {
 			*errs = append(*errs, fmt.Errorf("%s cannot access super on class named '%s'",
-				errMsgPrefix(e.Pos), on.Class.Name))
+				errMsgPrefix(e.Pos), object.Class.Name))
 			return nil
 		}
-		fieldOrMethod, err := on.Class.getFieldOrMethod(selection.Name, false)
+		fieldOrMethod, err := object.Class.getFieldOrMethod(selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
 			return nil

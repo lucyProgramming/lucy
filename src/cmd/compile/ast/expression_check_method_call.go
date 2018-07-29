@@ -106,7 +106,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 	}
 	if object.Type == VariableTypeMap {
 		switch call.Name {
-		case common.MapMethodKeyExists:
+		case common.MapMethodKeyExist:
 			ret := &Type{}
 			ret.Pos = e.Pos
 			ret.Type = VariableTypeBool
@@ -115,7 +115,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					errMsgPrefix(e.Pos), call.Name))
 				return []*Type{ret}
 			}
-			matchKey := call.Name == common.MapMethodKeyExists
+			matchKey := call.Name == common.MapMethodKeyExist
 			t, es := call.Args[0].checkSingleValueContextExpression(block)
 			if esNotEmpty(es) {
 				*errs = append(*errs, es...)

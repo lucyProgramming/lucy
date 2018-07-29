@@ -17,7 +17,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 	hashMapVerifyType := state.newObjectVariableType(javaMapClass)
 	state.pushStack(class, hashMapVerifyType)
 	switch call.Name {
-	case common.MapMethodKeyExists:
+	case common.MapMethodKeyExist:
 		variableType := call.Args[0].Value
 		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {

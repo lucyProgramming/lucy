@@ -89,8 +89,7 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs)
-	callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
+	callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
 	var tf *Function
 	if f.TemplateFunction != nil {
 		length := len(*errs)

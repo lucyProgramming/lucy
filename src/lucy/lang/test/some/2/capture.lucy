@@ -36,7 +36,6 @@ CaptureHandler := fn(c Capture) {
 		blackHole(c)
 	}
 	c.handler(c)
-	
 }
 
 

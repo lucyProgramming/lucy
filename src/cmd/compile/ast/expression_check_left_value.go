@@ -39,16 +39,16 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		return result
 	case ExpressionTypeSelection:
 		selection := e.Data.(*ExpressionSelection)
-		on, es := selection.Expression.checkSingleValueContextExpression(block)
+		object, es := selection.Expression.checkSingleValueContextExpression(block)
 		if esNotEmpty(es) {
 			*errs = append(*errs, es...)
 		}
-		if on == nil {
+		if object == nil {
 			return nil
 		}
-		switch on.Type {
+		switch object.Type {
 		case VariableTypeObject:
-			field, err := on.Class.accessField(selection.Name, false)
+			field, err := object.Class.accessField(selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			}
@@ -73,7 +73,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			return nil
 		case VariableTypeClass:
-			field, err := on.Class.accessField(selection.Name, false)
+			field, err := object.Class.accessField(selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			}
@@ -97,16 +97,16 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			return nil
 		case VariableTypePackage:
-			variable, exists := on.Package.Block.NameExists(selection.Name)
+			variable, exists := object.Package.Block.NameExists(selection.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
-					errMsgPrefix(e.Pos), on.Package.Name, selection.Name))
+					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
 			if v, ok := variable.(*Variable); ok && v != nil {
-				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && on.Package.Name != PackageBeenCompile.Name {
+				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
-						errMsgPrefix(e.Pos), on.Package.Name, selection.Name))
+						errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				}
 				selection.PackageVariable = v
 				result = v.Type.Clone()
@@ -115,12 +115,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				return result
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
-					errMsgPrefix(e.Pos), on.Package.Name, selection.Name))
+					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
-				errMsgPrefix(e.Pos), selection.Name, on.TypeString()))
+				errMsgPrefix(e.Pos), selection.Name, object.TypeString()))
 			return nil
 		}
 	default:

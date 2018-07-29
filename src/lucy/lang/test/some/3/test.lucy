@@ -4,30 +4,15 @@
 
 
 
-fn main(args []string) {
-	
-	testSetField()
 
 
 
-
+fn main(args []string) 
+{
+			
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

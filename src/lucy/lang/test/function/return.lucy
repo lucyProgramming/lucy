@@ -1,0 +1,86 @@
+
+returnErr := new error("return value is wrong")
+
+fn returnTemplateFunction1(a T) ->(r T = a ) {
+	
+}
+
+fn returnTemplateFunction2(a T ,b T2) ->(r T = a , r2 T2  = b ) {
+	
+}
+
+fn testReturnTemplateFunction1() {
+	if returnTemplateFunction1(1) != 1 {
+		panic(returnErr)
+	}
+	if returnTemplateFunction1(2) != 2 {
+		panic(returnErr)
+	}
+	if ok := returnTemplateFunction1(1.0) == 1f ; ok == false {
+		panic(returnErr)
+	}
+	if ok := returnTemplateFunction1("hello") == "hello" ; ok == false {
+    	panic(returnErr)
+    }
+	
+	if a,b := returnTemplateFunction2(1 ,2 ) ; a != 1 || b != 2 {
+		panic(returnErr)
+	}
+	if a,b := returnTemplateFunction2("hello" ,2 ) ; a != "hello" || b != 2 {
+		panic(returnErr)
+	}
+	if a,b := returnTemplateFunction2(1 , "hello" ) ; a != 1 || b != "hello" {
+		panic(returnErr)
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

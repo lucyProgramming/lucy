@@ -1,0 +1,40 @@
+
+{
+	fn fn_1() {
+
+	}
+	fn fn_2(args bool ) {
+
+	}
+	fn fn_3(args int) {
+
+	}
+	fn fn_4(args string) {
+
+	}
+	class test {} 
+
+	fn fn_5(args test) {
+
+	}
+	fn fn_6(args test) ->(r bool) {
+
+	}
+	fn fn_7(args test) ->(r int) {
+
+	}
+    fn fn_8(args test) ->(r string) {
+
+	}
+	fn fn_9(args test) ->(r test) {
+
+    }
+    fn fn_10(args  map{int -> test}) ->(r Lucy) {
+
+    }
+
+
+}
+
+
+

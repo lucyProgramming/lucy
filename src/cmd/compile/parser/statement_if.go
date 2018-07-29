@@ -11,7 +11,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 	blockParser.Next(lfIsToken) // skip if
 	var condition *ast.Expression
 	blockParser.parser.unExpectNewLineAndSkip()
-	condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+	condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
@@ -25,7 +25,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 			statementIf.PrefixExpressions = append(statementIf.PrefixExpressions, statementIf.Condition)
 		}
 		blockParser.Next(lfNotToken) // skip ;
-		statementIf.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+		statementIf.Condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)

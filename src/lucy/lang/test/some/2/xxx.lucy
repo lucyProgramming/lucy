@@ -1,0 +1,110 @@
+
+setFieldErr := new error("set field error")
+
+
+class xxx {
+	boolValue bool 
+	byteValue byte 
+	shortValue short
+	intValue int 
+	longValue long 
+	floatValue float
+	doubleValue double 
+	stringValue string
+	
+	static boolStaticValue bool 
+	static byteStaticValue byte 
+	static shortStaticValue short
+	static intStaticValue int 
+	static longStaticValue long 
+	static floatStaticValue float
+	static doubleStaticValue double 
+	static stringStaticValue string
+
+	fn testSetField() {
+		this.boolValue = true 
+		if this.boolValue != true {
+			panic(setFieldErr)
+		}
+		this.byteValue = 100
+		if this.byteValue != 100 {
+			panic(setFieldErr)
+		}
+		this.byteValue++
+		if this.byteValue != 101 {
+			panic(setFieldErr)
+		}
+		this.shortValue = 101
+		if this.shortValue != 101 {
+			panic(setFieldErr)
+		}
+		this.intValue = 102
+		if this.intValue != 102 {
+			panic(setFieldErr)
+		}
+		this.longValue = 103
+		if this.longValue != 103 {
+			panic(setFieldErr)
+		}
+		this.floatValue = 104f
+		if this.floatValue != 104f {
+			panic(setFieldErr)
+		}
+		this.doubleValue = 105d
+		if this.doubleValue != 105d {
+			panic(setFieldErr)
+		}
+		this.stringValue = "hello world"
+		if this.stringValue != "hello world" {
+			panic(setFieldErr)
+		}
+	}
+	static fn testSetStaticField() {
+		__CLASS__.boolStaticValue = true 
+		if __CLASS__.boolStaticValue != true {
+			panic(setFieldErr)
+		}
+		__CLASS__.byteStaticValue = 100
+		if __CLASS__.byteStaticValue != 100 {
+			panic(setFieldErr)
+		}
+		__CLASS__.shortStaticValue = 101
+		if __CLASS__.shortStaticValue != 101 {
+			panic(setFieldErr)
+		}
+		__CLASS__.intStaticValue = 102
+		if __CLASS__.intStaticValue != 102 {
+			panic(setFieldErr)
+		}
+		__CLASS__.intStaticValue ++ 
+		if __CLASS__.intStaticValue != 103 {
+			panic(setFieldErr)
+		}
+		__CLASS__.longStaticValue = 103
+		if __CLASS__.longStaticValue != 103 {
+			panic(setFieldErr)
+		}
+		__CLASS__.floatStaticValue = 104f
+		if __CLASS__.floatStaticValue != 104f {
+			panic(setFieldErr)
+		}
+		__CLASS__.doubleStaticValue = 105d
+		if __CLASS__.doubleStaticValue != 105d {
+			panic(setFieldErr)
+		}
+		__CLASS__.stringStaticValue = "hello world"
+		if __CLASS__.stringStaticValue != "hello world" {
+			panic(setFieldErr)
+		}
+	}
+}
+
+
+fn testSetField() {
+	x := new xxx ()
+	x.testSetField() 
+	xxx.testSetStaticField()
+}
+
+
+

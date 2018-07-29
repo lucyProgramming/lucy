@@ -476,7 +476,7 @@ func (e *Expression) HaveMoreThanNValue(n int) bool {
 	return e.HaveMultiValue() && len(e.MultiValues) > n
 }
 func (e *Expression) CallHasReturnValue() bool {
-	return len(e.MultiValues) >= 1 //&& e.MultiValues[0].RightValueValid()
+	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()
 }
 
 type CallArgs []*Expression // f(1,2)
