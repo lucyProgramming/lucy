@@ -9,7 +9,7 @@ fn returnTemplateFunction2(a T ,b T2) ->(r T = a , r2 T2  = b ) {
 	
 }
 
-fn testReturnTemplateFunction1() {
+fn testReturnTemplateFunction () {
 	if returnTemplateFunction1(1) != 1 {
 		panic(returnErr)
 	}
@@ -32,55 +32,7 @@ fn testReturnTemplateFunction1() {
 	if a,b := returnTemplateFunction2(1 , "hello" ) ; a != 1 || b != "hello" {
 		panic(returnErr)
 	}
-	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
