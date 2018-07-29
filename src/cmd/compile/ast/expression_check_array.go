@@ -15,9 +15,8 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 				errMsgPrefix(e.Pos)))
 		return nil
 	}
-	noType := true
+	noType := arr.Type == nil
 	if arr.Type != nil {
-		noType = false
 		err := arr.Type.resolve(block)
 		if err != nil {
 			*errs = append(*errs, err)

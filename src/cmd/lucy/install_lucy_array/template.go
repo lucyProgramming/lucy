@@ -90,6 +90,9 @@ public class ArrayTTT   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayTTT append(ArrayTTT es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

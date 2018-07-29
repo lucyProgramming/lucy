@@ -107,6 +107,10 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
+		es := v.Block.checkConstants()
+		if esNotEmpty(es) {
+			p.Errors = append(p.Errors, es...)
+		}
 		v.mkDefaultConstruction()
 		v.Block.inherit(&PackageBeenCompile.Block)
 		v.Block.InheritedAttribute.Class = v

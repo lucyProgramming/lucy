@@ -29,17 +29,17 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	err = no.Type.Class.loadSelf()
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v",
-			errMsgPrefix(e.Pos), err))
+			errMsgPrefix(no.Type.Pos), err))
 		return nil
 	}
 	if no.Type.Class.IsInterface() {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is interface",
-			errMsgPrefix(e.Pos), no.Type.Class.Name))
+			errMsgPrefix(no.Type.Pos), no.Type.Class.Name))
 		return nil
 	}
 	if no.Type.Class.IsAbstract() {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is abstract",
-			errMsgPrefix(e.Pos), no.Type.Class.Name))
+			errMsgPrefix(no.Type.Pos), no.Type.Class.Name))
 		return nil
 	}
 	ret := &Type{}
@@ -49,7 +49,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	callArgTypes := checkRightValuesValid(checkExpressions(block, no.Args, errs), errs)
 	ms, matched, err := no.Type.Class.matchConstructionFunction(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(no.Type.Pos), err))
 		return ret
 	}
 	if matched {
@@ -57,7 +57,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		if block.InheritedAttribute.Class != ret.Class {
 			if (ret.Class.LoadFromOutSide && m.IsPublic() == false) ||
 				(ret.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
-				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(e.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(no.Type.Pos)))
 			}
 		}
 		no.Construction = m
@@ -67,7 +67,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, fmt.Errorf("%s  'construction' not found",
 			errMsgPrefix(e.Pos)))
 	} else {
-		*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, callArgTypes))
+		*errs = append(*errs, msNotMatchError(no.Type.Pos, "constructor", ms, callArgTypes))
 	}
 	return ret
 }

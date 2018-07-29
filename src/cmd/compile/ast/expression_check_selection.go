@@ -89,10 +89,11 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.FunctionType = &f.Type
 			selection.PackageFunction = f
 			return result
+		default:
+			err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
+			*errs = append(*errs, err)
+			return nil
 		}
-		err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
-		*errs = append(*errs, err)
-		return nil
 	case VariableTypeObject:
 		if selection.Name == SUPER {
 			if on.Class.Name == JavaRootClass {
@@ -152,14 +153,12 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Pos = e.Pos
 			return result
 		}
-
 	case VariableTypeClass:
 		if selection.Name == SUPER {
 			*errs = append(*errs, fmt.Errorf("%s cannot access super on class named '%s'",
 				errMsgPrefix(e.Pos), on.Class.Name))
 			return nil
 		}
-
 		fieldOrMethod, err := on.Class.getFieldOrMethod(selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
@@ -203,7 +202,6 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.FunctionType = &method.Function.Type
 			return result
 		}
-
 	}
 	return nil
 }

@@ -69,7 +69,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		result.Pos = e.Pos
 		return result
 	}
-
 	if e.Type == ExpressionTypeLsh ||
 		e.Type == ExpressionTypeRsh {
 		if left == nil || right == nil {
@@ -181,7 +180,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				left.TypeString(),
 				right.TypeString()))
 		}
-
 		return result
 	}
 	//

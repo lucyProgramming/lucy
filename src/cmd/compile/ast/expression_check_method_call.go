@@ -314,10 +314,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		if matched {
 			m := ms[0]
+
 			if (object.Class.SuperClass.LoadFromOutSide && m.IsPublic() == false) ||
 				(object.Class.SuperClass.LoadFromOutSide == false && m.IsPrivate() == true) {
 				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(e.Pos)))
 			}
+
 			call.Name = "<init>"
 			call.Method = m
 			call.Class = object.Class.SuperClass

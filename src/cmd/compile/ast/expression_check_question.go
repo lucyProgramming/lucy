@@ -23,21 +23,25 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if True.RightValueValid() == false {
-		*errs = append(*errs, fmt.Errorf("%s not right value valid",
-			errMsgPrefix(question.True.Pos)))
-		return nil
-	}
-	if True.isTyped() == false {
-		*errs = append(*errs, fmt.Errorf("%s not typed",
-			errMsgPrefix(question.True.Pos)))
-		return nil
+	if True != nil {
+		if True.RightValueValid() == false {
+			*errs = append(*errs, fmt.Errorf("%s not right value valid",
+				errMsgPrefix(question.True.Pos)))
+			return nil
+		}
+		if True.isTyped() == false {
+			*errs = append(*errs, fmt.Errorf("%s not typed",
+				errMsgPrefix(question.True.Pos)))
+			return nil
+		}
 	}
 	False, es := question.False.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if True != nil && False != nil && True.Equal(errs, False) == false {
+	if True != nil &&
+		False != nil &&
+		True.Equal(errs, False) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 			errMsgPrefix(e.Pos), False.TypeString(), True.TypeString()))
 	}

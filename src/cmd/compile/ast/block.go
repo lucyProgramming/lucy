@@ -3,7 +3,6 @@ package ast
 import (
 	"fmt"
 
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -34,6 +33,7 @@ type Block struct {
 	TypeAliases                     map[string]*Type
 	Variables                       map[string]*Variable
 	ClosureFunctions                map[string]*Function //in "Functions" too
+	checkConstantsCalled            bool
 }
 
 func (b *Block) HaveVariableDefinition() bool {
@@ -179,10 +179,6 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 			return v, nil
 		}
 	}
-	//if b.IsFunctionBlock &&
-	//	len(b.InheritedAttribute.Function.parameterTypes) > 0 { // this is a template function
-	//	return searchBuildIns(name), nil
-	//}
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
@@ -223,7 +219,7 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 
 func (b *Block) inherit(father *Block) {
 	if b == father {
-		panic("inherit  from self")
+		panic("inherit from self")
 	}
 	b.InheritedAttribute = father.InheritedAttribute
 	b.Outer = father
@@ -249,7 +245,6 @@ func (b *Block) checkStatements() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
 		if s.isStaticFieldDefaultValue {
-			//  compiler auto statement, no need to check
 			continue
 		}
 		b.InheritedAttribute.StatementOffset = k
@@ -258,13 +253,17 @@ func (b *Block) checkStatements() []error {
 			return errs
 		}
 	}
-	if common.CompileFlags.DisableCheckUnUsedVariable == false {
-		errs = append(errs, b.checkUnUsedVariables()...)
-	}
+	errs = append(errs, b.checkUnUsedVariables()...)
 	return errs
 }
 
 func (b *Block) checkConstants() []error {
+	if b.checkConstantsCalled {
+		return []error{}
+	}
+	defer func() {
+		b.checkConstantsCalled = true
+	}()
 	errs := make([]error, 0)
 	for _, c := range b.Constants {
 		if c.Name == NoNameIdentifier {
@@ -424,8 +423,6 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		b.EnumNames[name] = d.(*EnumName)
 	case *Type:
 		b.TypeAliases[name] = d.(*Type)
-	default:
-		panic(d) // panic d
 	}
 	return nil
 }

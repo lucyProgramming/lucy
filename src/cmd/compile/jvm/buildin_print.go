@@ -43,7 +43,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	}()
 
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
-	if len(call.Args) == 1 && call.Args[0].OnlyOneValue() {
+	if len(call.Args) == 1 && call.Args[0].IsOneValue() {
 		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t

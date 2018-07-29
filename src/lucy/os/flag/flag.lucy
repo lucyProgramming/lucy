@@ -161,13 +161,13 @@ public final class  Flag {
 		for k,v := range this.options {
 			switch v.typ {
 				case OptionTypeBool:
-					msg += sprintf("\t '%s' default:%b usage:%s\n" , k , v.boolDefaultValue , v.usage )
+					msg += sprintf("\t '%s' default:'%b' usage:'%s'\n" , k , v.boolDefaultValue , v.usage )
 				case OptionTypeInt:
-					msg += sprintf("\t '%s' default:%d usage:%s\n" , k , v.intDefaultValue , v.usage )
+					msg += sprintf("\t '%s' default:'%d' usage:'%s'\n" , k , v.intDefaultValue , v.usage )
 				case OptionTypeString: 
-					msg += sprintf("\t '%s' default:%s usage:%s\n" , k , v.stringDefaultValue , v.usage )
+					msg += sprintf("\t '%s' default:'%s' usage:'%s'\n" , k , v.stringDefaultValue , v.usage )
 				case OptionTypeFloat:
-					msg += sprintf("\t '%s' default:%f usage:%s\n" , k , v.floatDefaultValue , v.usage )
+					msg += sprintf("\t '%s' default:'%f' usage:'%s'\n" , k , v.floatDefaultValue , v.usage )
 			}
 		}
 	}

@@ -3,15 +3,13 @@ package lc
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"sort"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
+	"io/ioutil"
+	"os"
 )
 
 func Main(files []string) {
@@ -54,20 +52,20 @@ func (lc *LucyCompile) exit() {
 		code = 2
 	}
 	//template function maybe parse twice,maybe same error
-	errsM := make(map[string]struct{})
-	es := []error{}
-	for _, v := range lc.Errs {
-		if _, ok := errsM[v.Error()]; ok {
-			continue
-		}
-		es = append(es, v)
-		errsM[v.Error()] = struct{}{}
-	}
-	lc.Errs = es
+	//errsM := make(map[string]struct{})
+	//es := []error{}
+	//for _, v := range lc.Errs {
+	//	if _, ok := errsM[v.Error()]; ok {
+	//		continue
+	//	}
+	//	es = append(es, v)
+	//	errsM[v.Error()] = struct{}{}
+	//}
+	//lc.Errs = es
 	// sort errors
-	es = SortErrors(lc.Errs)
-	sort.Sort(SortErrors(es))
-	for _, v := range es {
+	//es = SortErrors(lc.Errs)
+	//sort.Sort(SortErrors(es))
+	for _, v := range lc.Errs {
 		fmt.Fprintln(os.Stderr, v)
 	}
 	os.Exit(code)

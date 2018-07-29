@@ -18,14 +18,12 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 		return nil
-	} else {
-		if unary.RightValueValid() == false {
-			*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-				errMsgPrefix(ee.Pos), unary.TypeString()))
-			return nil
-		}
 	}
-
+	if unary.RightValueValid() == false {
+		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
+			errMsgPrefix(ee.Pos), unary.TypeString()))
+		return nil
+	}
 	if e.Type == ExpressionTypeNot {
 		if unary.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
@@ -56,7 +54,8 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type
 	if t == nil {
 		return nil
 	}
-	if on.Type == ExpressionTypeIdentifier && e.IsStatementExpression == false {
+	if on.Type == ExpressionTypeIdentifier &&
+		e.IsStatementExpression == false {
 		on.Data.(*ExpressionIdentifier).Variable.Used = true
 	}
 	if !t.IsNumber() {

@@ -12,7 +12,7 @@ func init() {
 
 func registerBuildInFunctions() {
 	buildInFunctionsMap[common.BuildInFunctionPrint] = &Function{
-		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
+		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 					errMsgPrefix(pos)))
@@ -51,9 +51,8 @@ func registerBuildInFunctions() {
 		catch.Type.ReturnList[0].Type.Class = &Class{}
 		catch.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
 		catch.Type.ReturnList[0].Type.Class.NotImportedYet = true
-		//class is going to make value by checker
 	}
-	catch.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
+	catch.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 				errMsgPrefix(pos)))
@@ -78,13 +77,13 @@ func registerBuildInFunctions() {
 						errMsgPrefix(pos), err))
 					return
 				}
-				ft.Type.ReturnList[0].Type.Class = c.(*Class)
+				f.Type.ReturnList[0].Type.Class = c.(*Class)
 				err = block.InheritedAttribute.Defer.registerExceptionClass(c.(*Class))
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 				}
 			} else {
-				ft.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
+				f.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
 
 			}
 			return
@@ -108,7 +107,7 @@ func registerBuildInFunctions() {
 		}
 	}
 	buildInFunctionsMap[common.BuildInFunctionPanic] = &Function{
-		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall,
+		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall,
 			block *Block, errs *[]error, args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -187,7 +186,7 @@ func registerBuildInFunctions() {
 		sprintf.Type.ReturnList[0].Type = &Type{}
 		sprintf.Type.ReturnList[0].Type.Type = VariableTypeString
 	}
-	sprintf.buildInFunctionChecker = func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	sprintf.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 		args []*Type, pos *Pos) {
 		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -221,7 +220,7 @@ func registerBuildInFunctions() {
 	}
 	// printf
 	buildInFunctionsMap[common.BuildInFunctionPrintf] = &Function{
-		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
@@ -280,7 +279,7 @@ func registerBuildInFunctions() {
 		Name:      common.BuildInFunctionPrintf,
 	}
 	buildInFunctionsMap[common.BuildInFunctionBlockHole] = &Function{
-		buildInFunctionChecker: func(ft *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*Type, pos *Pos) {
 			// nothing to check
 		},
@@ -302,7 +301,7 @@ func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *
 	if args[0] == nil {
 		return
 	}
-	if args[0].IsPointer() == false || args[0].Type == VariableTypeString {
+	if args[0].IsPointer() == false {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not valid type to call",
 			errMsgPrefix(pos), args[0].TypeString()))
 		return

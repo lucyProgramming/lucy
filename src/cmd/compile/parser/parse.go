@@ -25,6 +25,7 @@ type Parser struct {
 	tops                        *[]*ast.Top
 	lexer                       *lex.Lexer
 	filename                    string
+	lastToken                   *lex.Token
 	token                       *lex.Token
 	errs                        []error
 	importsByAccessName         map[string]*ast.Import
@@ -384,6 +385,7 @@ func (parser *Parser) Next(lfIsToken bool) {
 	}
 	var err error
 	var tok *lex.Token
+	parser.lastToken = parser.token
 	for {
 		tok, err = parser.lexer.Next()
 		if err != nil {
@@ -412,7 +414,11 @@ func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 		line = pos[0].StartLine
 		column = pos[0].StartColumn
 	} else {
-		line, column = parser.token.StartLine, parser.token.StartColumn
+		if parser.lastToken == nil {
+			line, column = parser.token.StartLine, parser.token.StartColumn
+		} else {
+			line, column = parser.lastToken.StartLine, parser.lastToken.StartColumn
+		}
 	}
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }

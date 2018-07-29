@@ -1,10 +1,9 @@
 package common
 
 type Flags struct {
-	OnlyImport                 bool
-	PackageName                string
-	JvmVersion                 int
-	DisableCheckUnUsedVariable bool //
+	OnlyImport  bool
+	PackageName string
+	JvmVersion  int
 }
 
 var (

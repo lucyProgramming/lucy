@@ -3,6 +3,7 @@ import "lucy/os"
 import "java/lang/System"
 import "java/io"
 
+
 public fn getLucyRoot()->(path string , err error ){
 	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
@@ -27,7 +28,7 @@ public fn getLucyPath()->(paths []string, err error){
 	lucyPath := envs["LUCYPATH"]
 	osName := System.getProperty("os.name").toLowerCase()
 	if osName.startsWith("windows") {
-	    for v := range lucyPath.split(""){
+	    for v := range lucyPath.split(";"){
         		ps[v] = true
         }
 	} else {  // unix style
@@ -41,10 +42,7 @@ public fn getLucyPath()->(paths []string, err error){
 		paths[i] = k
 		i++ 
 	}
-	
 }
-
-
 
 public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which string ,err error ){
 	ps := []string{}  

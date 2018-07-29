@@ -7,6 +7,17 @@ import (
 
 func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	on := e.Data.(*ExpressionSlice)
+	sliceOn, es := on.ExpressionOn.checkSingleValueContextExpression(block)
+	if esNotEmpty(es) {
+		*errs = append(*errs, es...)
+	}
+	if sliceOn == nil {
+		return nil
+	}
+	if sliceOn.Type != VariableTypeArray && sliceOn.Type != VariableTypeString {
+		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
+			errMsgPrefix(on.ExpressionOn.Pos), sliceOn.TypeString()))
+	}
 	//start
 	if on.Start == nil {
 		on.Start = &Expression{}
@@ -18,12 +29,15 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
 	}
-	if startType != nil && startType.IsInteger() == false {
-		*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
-			errMsgPrefix(on.Start.Pos), startType.TypeString()))
-	}
-	if startType != nil && startType.Type == VariableTypeLong {
-		on.Start.ConvertToNumber(VariableTypeInt)
+	if startType != nil {
+		if startType.IsInteger() == false {
+			*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
+				errMsgPrefix(on.Start.Pos), startType.TypeString()))
+		} else {
+			if startType.Type == VariableTypeLong {
+				on.Start.ConvertToNumber(VariableTypeInt)
+			}
+		}
 	}
 	if on.End != nil {
 		endType, es := on.End.checkSingleValueContextExpression(block)
@@ -49,18 +63,6 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		call.Function = buildInFunctionsMap[common.BuildInFunctionLen]
 		call.Args = []*Expression{on.ExpressionOn}
 		on.End.Data = call
-	}
-
-	sliceOn, es := on.ExpressionOn.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
-	if sliceOn == nil {
-		return nil
-	}
-	if sliceOn.Type != VariableTypeArray && sliceOn.Type != VariableTypeString {
-		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
-			errMsgPrefix(on.ExpressionOn.Pos), sliceOn.TypeString()))
 	}
 	result := sliceOn.Clone()
 	result.Pos = e.Pos

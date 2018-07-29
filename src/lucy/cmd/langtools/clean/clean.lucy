@@ -1,19 +1,19 @@
 
 import "lucy/cmd/langtools/common"
-import "lucy/os"
-import "lucy/encoding/json"
 import "java/io/File"
 
-class Clean {
+final class Clean {
 	lucyPaths []string 
 	packageName string 
 	lucyRoot string 
+	recursive bool 
 	static jsonFile string = "maintain.json"
-	public fn Clean(lucyRoot string, lucyPaths []string,packageName string) {
+	public fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool  ) {
 	    this.super() 
 		this.lucyRoot = lucyRoot 
 		this.lucyPaths = lucyPaths
 		this.packageName = packageName
+		this.recursive = recursive 
 	}
 
 	public fn clean() {
@@ -23,46 +23,22 @@ class Clean {
 			return  
 		}
 		dir := w + "/class/" + this.packageName
-		f := new File(w + "/class/" + this.packageName)
+		this.cleanDir(dir) 
+	}
+	private fn cleanDir(dir string) {
+		f := new File(dir)
 		fs := f.listFiles()
 		for f := range fs {
+			if f.isDirectory () && this.recursive {
+				sub := sprintf("%s/%s" , dir , f.getName() )
+				this.cleanDir(sub)
+				continue 
+			}
 			if  name := f.getName() ; name == "maintain.json" || 
 				f.getName().endsWith(".class"){
-				print(dir + "/" + name)
+				print( sprintf("clean: %s/%s" , dir , name))
 				new File(dir + "/" + name ).delete()
 			}
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

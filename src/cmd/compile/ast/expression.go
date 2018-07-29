@@ -432,7 +432,7 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	return len(e.Data.([]*Expression)) > n
 }
 
-func (e *Expression) OnlyOneValue() bool {
+func (e *Expression) IsOneValue() bool {
 	if e.HaveMultiValue() {
 		return len(e.MultiValues) == 1
 	}
@@ -469,14 +469,14 @@ func (e *Expression) HaveMultiValue() bool {
 	return false
 }
 func (e *Expression) HaveMore1Value() bool {
-	return e.HaveMoreNValue(1)
+	return e.HaveMoreThanNValue(1)
 }
 
-func (e *Expression) HaveMoreNValue(n int) bool {
+func (e *Expression) HaveMoreThanNValue(n int) bool {
 	return e.HaveMultiValue() && len(e.MultiValues) > n
 }
 func (e *Expression) CallHasReturnValue() bool {
-	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()
+	return len(e.MultiValues) >= 1 //&& e.MultiValues[0].RightValueValid()
 }
 
 type CallArgs []*Expression // f(1,2)
@@ -493,7 +493,7 @@ type ExpressionFunctionCall struct {
 }
 
 type ExpressionMethodCall struct {
-	Class              *Class //
+	Class              *Class // for object or class
 	Expression         *Expression
 	Args               CallArgs
 	VArgs              *CallVArgs
@@ -563,7 +563,7 @@ type ExpressionBinary struct {
 type ExpressionArray struct {
 	Type        *Type
 	Expressions []*Expression
-	Length      int
+	Length      int // elements length
 }
 
 func (e *Expression) isThis() bool {

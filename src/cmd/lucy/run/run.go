@@ -38,6 +38,7 @@ func (r *Run) parseCmd(args []string) error {
 	cmd := flag.NewFlagSet("run", flag.ErrorHandling(1))
 	cmd.BoolVar(&r.Flags.forceReBuild, "forceReBuild", false, "force rebuild all package")
 	cmd.IntVar(&r.Flags.JvmVersion, "jvm-version", 54, "jvm major version")
+	cmd.BoolVar(&r.Flags.JustBuild, "just-build", false, "build package no run")
 	err := cmd.Parse(args)
 	if err != nil {
 		return err
@@ -108,6 +109,9 @@ func (r *Run) RunCommand(command string, args []string) {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
+	}
+	if r.Flags.JustBuild {
+		os.Exit(0)
 	}
 	//
 	cmd := exec.Command("java", append([]string{r.Package + "/" + "main"}, r.Args...)...)

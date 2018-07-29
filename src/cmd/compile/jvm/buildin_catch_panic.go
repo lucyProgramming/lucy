@@ -19,12 +19,12 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		{
-			t := &cg.StackMapVerificationTypeInfo{}
-			tt := &cg.StackMapUninitializedVariableInfo{}
-			tt.CodeOffset = uint16(code.CodeLength - 4)
-			t.Verify = tt
-			state.Stacks = append(state.Stacks, t)
-			state.Stacks = append(state.Stacks, t)
+			verificationTypeInfo := &cg.StackMapVerificationTypeInfo{}
+			uninitializedVariableInfo := &cg.StackMapUninitializedVariableInfo{}
+			uninitializedVariableInfo.CodeOffset = uint16(code.CodeLength - 4)
+			verificationTypeInfo.Verify = uninitializedVariableInfo
+			state.Stacks = append(state.Stacks, verificationTypeInfo)
+			state.Stacks = append(state.Stacks, verificationTypeInfo)
 		}
 		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		state.popStack(2)

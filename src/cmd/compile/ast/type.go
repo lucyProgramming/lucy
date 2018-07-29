@@ -454,7 +454,7 @@ func (typ *Type) typeString(ret *string) {
 		}
 		s += ")"
 		if len(typ.FunctionType.ReturnList) > 0 {
-			s += ") -> ("
+			s += " -> ("
 			for k, v := range typ.FunctionType.ReturnList {
 				if v.Name != "" {
 					s += v.Name + " "

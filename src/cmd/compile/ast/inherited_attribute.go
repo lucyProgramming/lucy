@@ -1,7 +1,7 @@
 package ast
 
 type InheritedAttribute struct {
-	StatementOffset       int
+	StatementOffset       int // should not inherite
 	IsConstructionMethod  bool
 	StatementFor          *StatementFor // if this statement is in for or not
 	StatementSwitch       *StatementSwitch

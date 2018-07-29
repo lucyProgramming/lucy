@@ -84,7 +84,6 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 	}
-
 	if m.Type.Map.K == nil {
 		m.Type.Map.K = &Type{
 			Type: VariableTypeVoid,

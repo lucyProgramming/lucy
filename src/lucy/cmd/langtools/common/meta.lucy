@@ -1,5 +1,5 @@
 
-
+/*
 public class PackageMeta {
 	public compiledFrom map { string -> FileMeta } ;  // filename -> meta
 	public imports      string[]        ;     //lucy package that imported
@@ -8,12 +8,11 @@ public class PackageMeta {
 }
 
 
-
 public class FileMeta {
 	public lastModify long ;  // unix seconds
 }
 
-
+*/
 
 
 
