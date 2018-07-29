@@ -86,7 +86,6 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 	if err != nil {
 		return nil, err
 	}
-
 	for expressionParser.parser.token.Type == lex.TokenXor {
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
@@ -137,7 +136,6 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 	if err != nil {
 		return nil, err
 	}
-
 	for expressionParser.parser.token.Type == lex.TokenEqual ||
 		expressionParser.parser.token.Type == lex.TokenNe {
 		typ := expressionParser.parser.token.Type
@@ -264,7 +262,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 
 // * / %
 func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
-	left, err := expressionParser.parsePrefixSuffixExpression()
+	left, err := expressionParser.parseSuffixExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -274,7 +272,7 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		typ := expressionParser.parser.token.Type
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfNotToken)
-		right, err := expressionParser.parsePrefixSuffixExpression()
+		right, err := expressionParser.parseSuffixExpression()
 		if err != nil {
 			return nil, err
 		}
