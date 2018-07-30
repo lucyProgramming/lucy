@@ -53,9 +53,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		}
 		switch object.Type {
 		case VariableTypeObject:
-			field, err := object.Class.accessField(selection.Name, false)
+			field, err := object.Class.accessField(e.Pos, selection.Name, false)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+				*errs = append(*errs, err)
 			}
 			selection.Field = field
 			if field != nil {
@@ -78,9 +78,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			return nil
 		case VariableTypeClass:
-			field, err := object.Class.accessField(selection.Name, false)
+			field, err := object.Class.accessField(e.Pos, selection.Name, false)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+				*errs = append(*errs, err)
 			}
 			selection.Field = field
 			if field != nil {

@@ -10,8 +10,8 @@ var (
 	LucyFieldSignatureParser   LucyFieldSignature
 	LucyTypeAliasParser        LucyTypeAlias
 	FunctionDefaultValueParser FunctionDefaultValueParse
-	multiValuePacker           MultiValuePacker
 	closure                    Closure
+	//multiValuePacker           MultiValueAutoVar
 )
 
 type LeftValueKind int

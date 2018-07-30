@@ -1,5 +1,6 @@
 package cg
 
+// indicate compiler auto
 type AttributeCompilerAuto struct {
 }
 

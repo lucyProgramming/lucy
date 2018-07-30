@@ -66,7 +66,7 @@ func (buildPackage *BuildPackage) Make(p *ast.Package) {
 	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
 	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
-	buildPackage.mkClassDefaultConstruction(buildPackage.mainClass, nil)
+	buildPackage.mkClassDefaultConstruction(buildPackage.mainClass)
 	buildPackage.BuildExpression.BuildPackage = buildPackage
 	buildPackage.classes = make(map[string]*cg.ClassHighLevel)
 	buildPackage.mkGlobalConstants()
@@ -392,7 +392,7 @@ func (buildPackage *BuildPackage) DumpClass() error {
 /*
 	make a default construction
 */
-func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHighLevel, astClass *ast.Class) {
+func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHighLevel) {
 	method := &cg.MethodHighLevel{}
 	method.Name = specialMethodInit
 	method.Descriptor = "()V"

@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 	if len(vs.Variables) == 1 {
 		v := vs.Variables[0]
 		currentStack := uint16(0)
-		if v.Name != ast.NoNameIdentifier && v.BeenCaptured {
+		if v.BeenCaptured {
 			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			if vs.IfDeclaredBefore[0] {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
@@ -43,7 +43,6 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 			code.CodeLength++
 			return
 		}
-		maxStack += currentStack
 		if v.IsGlobal {
 			buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[0])
 		} else {
@@ -72,14 +71,14 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 	} else {
 		maxStack = buildExpression.buildExpressions(class, code, vs.InitValues, context, state)
 	}
-	multiValuePacker.storeMultiValueAutoVar(code, context)
+	autoVar := storeMultiValueAutoVar(class, code, state)
 	//first round
 	for k, v := range vs.Variables {
 		if v.Name == ast.NoNameIdentifier {
 			continue
 		}
 		if v.IsGlobal {
-			stack := multiValuePacker.unPack(class, code, k, v.Type, context)
+			stack := autoVar.unPack(class, code, k, v.Type, context)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -90,12 +89,12 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 		if vs.IfDeclaredBefore[k] {
 			if v.BeenCaptured {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-				stack := multiValuePacker.unPack(class, code, k, v.Type, context)
+				stack := autoVar.unPack(class, code, k, v.Type, context)
 				if t := 1 + stack; t > maxStack {
 					maxStack = t
 				}
 			} else {
-				stack := multiValuePacker.unPack(class, code, k, v.Type, context)
+				stack := autoVar.unPack(class, code, k, v.Type, context)
 				if stack > maxStack {
 					maxStack = stack
 				}
@@ -123,7 +122,7 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 			code.MaxLocals += jvmSlotSize(v.Type)
 			state.appendLocals(class, v.Type)
 		}
-		if t := currentStack + multiValuePacker.unPack(class, code, k, v.Type, context); t > maxStack {
+		if t := currentStack + autoVar.unPack(class, code, k, v.Type, context); t > maxStack {
 			maxStack = t
 		}
 		buildExpression.BuildPackage.storeLocalVar(class, code, v)
@@ -169,8 +168,9 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
+			autoVar := storeMultiValueAutoVar(class, code, state)
 			for kk, tt := range v.MultiValues {
-				stack = multiValuePacker.unPack(class, code, kk, tt, context)
+				stack = autoVar.unPack(class, code, kk, tt, context)
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
@@ -211,6 +211,5 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 		}
 		index++
 	}
-
 	return
 }

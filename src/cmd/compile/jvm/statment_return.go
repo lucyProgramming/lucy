@@ -107,13 +107,13 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}
-					multiValuePacker.storeMultiValueAutoVar(code, context)
+					autoVar := storeMultiValueAutoVar(class, code, state)
 					for kk, _ := range v.MultiValues {
 						currentStack := uint16(1)
 						code.Codes[code.CodeLength] = cg.OP_dup // dup array list
 						code.CodeLength++
 						currentStack++
-						stack = multiValuePacker.unPackObject(class, code, kk, context)
+						stack = autoVar.unPackObject(class, code, kk, context)
 						if t := stack + currentStack; t > maxStack {
 							maxStack = t
 						}

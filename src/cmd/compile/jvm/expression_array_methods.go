@@ -59,10 +59,10 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				multiValuePacker.storeMultiValueAutoVar(code, context)
+				autoVar := storeMultiValueAutoVar(class, code, state)
 				for kk, t := range v.MultiValues {
 					currentStack = 1
-					if t := multiValuePacker.unPack(class, code, kk, t, context) + currentStack; t > maxStack {
+					if t := autoVar.unPack(class, code, kk, t, context) + currentStack; t > maxStack {
 						maxStack = t
 					}
 					if t := currentStack + jvmSlotSize(t); t > maxStack {
@@ -105,10 +105,10 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				multiValuePacker.storeMultiValueAutoVar(code, context)
+				autoVar := storeMultiValueAutoVar(class, code, state)
 				for kk, tt := range v.MultiValues {
 					currentStack := uint16(1)
-					stack = multiValuePacker.unPack(class, code, kk, tt, context)
+					stack = autoVar.unPack(class, code, kk, tt, context)
 					if t := currentStack + 2; t > maxStack {
 						maxStack = t
 					}

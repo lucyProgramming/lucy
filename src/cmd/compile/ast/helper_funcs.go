@@ -84,9 +84,12 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 	if i == nil {
 		return nil, false
 	}
+	// this is should
 	/*
-
-	 */
+		import
+		from
+		alreadyHave
+	*/
 	should := from.StartLine < alreadyHave.StartLine
 	if should {
 		i.Used = true

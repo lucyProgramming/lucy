@@ -7,10 +7,7 @@ import (
 
 func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	stackLength := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - stackLength)
-	}()
+
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -26,6 +23,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 	values := e.Data.(*ast.ExpressionMap).KeyValuePairs
 	hashMapObject := state.newObjectVariableType(javaMapClass)
 	state.pushStack(class, hashMapObject)
+	defer state.popStack(1)
 	for _, v := range values {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
@@ -41,7 +39,6 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 		state.pushStack(class, state.newObjectVariableType(javaRootClass))
 		currentStack = 3 // stack is ... mapref mapref kref
 		stack = buildExpression.build(class, code, v.Right, context, state)
-		state.popStack(1) // @43 line
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -57,7 +54,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_pop
 		code.CodeLength += 4
-		state.popStack(1) // @35
+		state.popStack(2)
 	}
 	return
 }

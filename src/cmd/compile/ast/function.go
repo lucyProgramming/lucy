@@ -27,7 +27,6 @@ type Function struct {
 	Descriptor                          string
 	AutoVariableForException            *AutoVariableForException
 	AutoVariableForReturnBecauseOfDefer *AutoVariableForReturnBecauseOfDefer
-	AutoVariableForMultiReturn          *AutoVariableForMultiReturn
 	ClosureVariableOffSet               uint16 // for closure
 	SourceCodes                         []byte // source code for template function
 }
@@ -73,17 +72,6 @@ func (f *Function) mkAutoVarForException() {
 		return
 	}
 	f.AutoVariableForException = &AutoVariableForException{}
-}
-
-func (f *Function) mkAutoVarForMultiReturn() {
-	if f.AutoVariableForMultiReturn != nil {
-		return
-	}
-	f.AutoVariableForMultiReturn = &AutoVariableForMultiReturn{}
-}
-
-type AutoVariableForMultiReturn struct {
-	Offset uint16
 }
 
 func (f *Function) readableMsg(name ...string) string {

@@ -45,7 +45,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	} else {
 		maxStack = buildExpression.buildExpressions(class, code, rights, context, state)
 	}
-	multiValuePacker.storeMultiValueAutoVar(code, context)
+	autoVar := storeMultiValueAutoVar(class, code, state)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, _ :=
@@ -53,7 +53,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 		if stack > maxStack {
 			maxStack = stack
 		}
-		stack = multiValuePacker.unPack(class, code, k, v.Value, context)
+		stack = autoVar.unPack(class, code, k, v.Value, context)
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}

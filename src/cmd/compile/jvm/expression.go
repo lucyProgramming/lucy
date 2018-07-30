@@ -226,9 +226,9 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	for _, e := range es {
 		if e.HaveMultiValue() {
 			length += len(e.MultiValues)
-			continue
+		} else {
+			length++
 		}
-		length++
 	}
 	loadInt32(class, code, int32(length))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -239,8 +239,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	}
 	arrayListObject := state.newObjectVariableType(javaRootObjectArray)
 	state.pushStack(class, arrayListObject)
-	state.pushStack(class, arrayListObject)
-	defer state.popStack(2)
+	defer state.popStack(1)
 	index := int32(0)
 	for _, v := range es {
 		currentStack := uint16(1)
@@ -249,12 +248,13 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
+			autoVar := storeMultiValueAutoVar(class, code, state)
 			for kk, _ := range v.MultiValues {
 				currentStack = 1
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				currentStack++
-				stack = multiValuePacker.unPackObject(class, code, kk, context)
+				stack = autoVar.unPackObject(class, code, kk, context)
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
@@ -268,9 +268,9 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
+		state.pushStack(class, arrayListObject)
 		currentStack++
 		stack := buildExpression.build(class, code, v, context, state)
-
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -281,6 +281,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.Codes[code.CodeLength+1] = cg.OP_aastore
 		code.CodeLength += 2
+		state.popStack(1) // @270
 		index++
 	}
 	return

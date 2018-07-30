@@ -415,10 +415,10 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				newExpression := &ast.Expression{}
 				newExpression.Pos = pos
 				newExpression.Type = ast.ExpressionTypeSelection
-				index := &ast.ExpressionSelection{}
-				index.Expression = suffix
-				index.Name = expressionParser.parser.token.Data.(string)
-				newExpression.Data = index
+				selection := &ast.ExpressionSelection{}
+				selection.Expression = suffix
+				selection.Name = expressionParser.parser.token.Data.(string)
+				newExpression.Data = selection
 				suffix = newExpression
 				expressionParser.Next(lfIsToken)
 			} else if expressionParser.parser.token.Type == lex.TokenLp { //  a.(xxx)

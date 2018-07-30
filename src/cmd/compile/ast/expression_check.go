@@ -38,45 +38,51 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeShort:
-		returnValueTypes = []*Type{{
-			Type: VariableTypeShort,
-			Pos:  e.Pos,
-		},
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeShort,
+				Pos:  e.Pos,
+			},
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeInt:
-		returnValueTypes = []*Type{{
-			Type: VariableTypeInt,
-			Pos:  e.Pos,
-		},
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeInt,
+				Pos:  e.Pos,
+			},
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeFloat:
-		returnValueTypes = []*Type{{
-			Type: VariableTypeFloat,
-			Pos:  e.Pos,
-		},
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeFloat,
+				Pos:  e.Pos,
+			},
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeDouble:
-		returnValueTypes = []*Type{{
-			Type: VariableTypeDouble,
-			Pos:  e.Pos,
-		},
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeDouble,
+				Pos:  e.Pos,
+			},
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeLong:
-		returnValueTypes = []*Type{{
-			Type: VariableTypeLong,
-			Pos:  e.Pos,
-		},
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeLong,
+				Pos:  e.Pos,
+			},
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeString:
-		returnValueTypes = []*Type{{
-			Type: VariableTypeString,
-			Pos:  e.Pos,
-		}}
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeString,
+				Pos:  e.Pos,
+			}}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeIdentifier:
 		tt, err := e.checkIdentifierExpression(block)
@@ -138,18 +144,18 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		e.checkColonAssignExpression(block, &errs)
 		e.Value = mkVoidType(e.Pos)
 		returnValueTypes = []*Type{e.Value}
-		if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		}
+		//if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
+		//	block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
+		//}
 	case ExpressionTypeAssign:
 		tt := e.checkAssignExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
 		e.Value = tt
-		if e.Data.(*ExpressionBinary).Left.isListAndMoreThanNElements(1) {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		}
+		//if e.Data.(*ExpressionBinary).Left.isListAndMoreThanNElements(1) {
+		//	block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
+		//}
 	case ExpressionTypeIncrement:
 		fallthrough
 	case ExpressionTypeDecrement:
@@ -176,26 +182,17 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		if len(returnValueTypes) > 0 {
 			e.Value = returnValueTypes[0]
 		}
-		if len(returnValueTypes) > 1 {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		}
 	case ExpressionTypeMethodCall:
 		returnValueTypes = e.checkMethodCallExpression(block, &errs)
 		e.MultiValues = returnValueTypes
 		if len(returnValueTypes) > 0 {
 			e.Value = returnValueTypes[0]
 		}
-		if len(returnValueTypes) > 1 {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		}
 	case ExpressionTypeTypeAssert:
 		returnValueTypes = e.checkTypeAssert(block, &errs)
 		e.MultiValues = returnValueTypes
 		if len(returnValueTypes) > 0 {
 			e.Value = returnValueTypes[0]
-		}
-		if len(returnValueTypes) > 1 {
-			block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
 		}
 	case ExpressionTypeNot:
 		fallthrough

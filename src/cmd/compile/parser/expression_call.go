@@ -48,7 +48,6 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		result.Data = call
 		result.Pos = expressionParser.parser.mkPos()
 	}
-
 	if expressionParser.parser.token.Type == lex.TokenLt { // <
 		/*
 			template function call return type binds

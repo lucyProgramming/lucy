@@ -111,9 +111,9 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Class = result.Class.SuperClass
 			return result
 		}
-		fieldOrMethod, err := object.Class.getFieldOrMethod(selection.Name, false)
+		fieldOrMethod, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
 		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+			*errs = append(*errs, err)
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {
@@ -159,9 +159,9 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 				errMsgPrefix(e.Pos), object.Class.Name))
 			return nil
 		}
-		fieldOrMethod, err := object.Class.getFieldOrMethod(selection.Name, false)
+		fieldOrMethod, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
 		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(e.Pos), err.Error()))
+			*errs = append(*errs, err)
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {

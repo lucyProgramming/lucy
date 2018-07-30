@@ -219,16 +219,16 @@ func (p *Package) checkUnUsedPackage() {
 				errMsgPrefix(i.Pos), err))
 			continue
 		}
-		if _, ok := pp.(*Package); ok == false {
+		if ppp, ok := pp.(*Package); ok == false {
 			p.Errors = append(p.Errors, fmt.Errorf("%s '%s' not a package",
 				errMsgPrefix(i.Pos), i.Import))
+		} else {
+			if ppp.TriggerPackageInitMethodName == "" {
+				p.Errors = append(p.Errors, fmt.Errorf("%s  package named '%s' have no global vars and package "+
+					"init blocks, no need to trigger package init method",
+					errMsgPrefix(i.Pos), i.Import))
+			}
 		}
-		//else {
-		//	if ppp.TriggerPackageInitMethodName == "" {
-		//		p.Errors = append(p.Errors, fmt.Errorf("%s '%s' have ",
-		//			errMsgPrefix(i.Pos), i.Import))
-		//	}
-		//}
 	}
 }
 
@@ -259,7 +259,7 @@ func (p *Package) mkClassCache(load *Package) {
 
 //different from different source file
 type SourceFile struct {
-	Imports map[string]*Import // n
+	Imports map[string]*Import // accessName -> *Import
 }
 
 type Import struct {

@@ -174,7 +174,6 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 				append(method.AttributeLucyReturnListNames.Parameters, p)
 		}
 	}
-
 	if t := buildPackage.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
 		method.Code.MaxStack = t
 	}
@@ -184,6 +183,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	if f.AutoVariableForException != nil {
+		//for exception
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
 		f.AutoVariableForException.Offset = code.MaxLocals
@@ -194,6 +194,7 @@ func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel,
 		maxStack = 1
 	}
 	if f.AutoVariableForReturnBecauseOfDefer != nil {
+		// for return Object[]
 		if len(f.Type.ReturnList) > 1 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
@@ -205,23 +206,13 @@ func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel,
 		}
 		maxStack = 1
 	}
-	if f.AutoVariableForMultiReturn != nil {
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		f.AutoVariableForMultiReturn.Offset = code.MaxLocals
-		code.MaxLocals++
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, f.AutoVariableForMultiReturn.Offset)...)
-		state.appendLocals(class, state.newObjectVariableType(javaRootObjectArray))
-		maxStack = 1
-	}
-
 	return
 }
 
 func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	context *Context, state *StackMapState) {
 	if context.class == nil {
-		panic(1)
+		return // closure function class have no class
 	}
 	for _, v := range context.class.Fields {
 		if v.IsStatic() || v.Expression == nil {

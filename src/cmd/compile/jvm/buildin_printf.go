@@ -52,14 +52,14 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 				maxStack = t
 			}
 			// store in temp var
-			multiValuePacker.storeMultiValueAutoVar(code, context)
+			autoVar := storeMultiValueAutoVar(class, code, state)
 			for kk, _ := range v.MultiValues {
 				currentStack = 3
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				loadInt32(class, code, index)
 				currentStack += 2
-				stack = multiValuePacker.unPackObject(class, code, kk, context)
+				stack = autoVar.unPackObject(class, code, kk, context)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
