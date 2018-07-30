@@ -10,25 +10,24 @@ import (
 */
 func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
-	if meta.Stream == nil {
-		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      "java/lang/System",
-			Field:      "out",
-			Descriptor: "Ljava/io/PrintStream;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		maxStack = 1
-	} else { // get stream from args
-		maxStack = buildExpression.build(class, code, meta.Stream, context, state)
-	}
+	//if meta.Stream != nil {
+	//	maxStack = buildExpression.build(class, code, meta.Stream, context, state)
+	//} else { // get stream from args
+	code.Codes[code.CodeLength] = cg.OP_getstatic
+	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		Class:      "java/lang/System",
+		Field:      "out",
+		Descriptor: "Ljava/io/PrintStream;",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	maxStack = 1
+	//}
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	stack := buildExpression.build(class, code, meta.Format, context, state)
 	if t := 1 + stack; t > maxStack {

@@ -1,7 +1,7 @@
 package ast
 
 type BuildInFunctionPrintMeta struct {
-	Stream *Expression
+	//Stream *Expression
 }
 
 type BuildInFunctionPrintfMeta struct {

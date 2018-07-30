@@ -21,18 +21,18 @@ func registerBuildInFunctions() {
 			if len(args) == 0 || args[0] == nil {
 				return // not error
 			}
-			if args[0].Type == VariableTypeObject {
-				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
-				if have {
-					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].MultiValues)
-					if err != nil {
-						*errs = append(*errs, err)
-					} else {
-						meta.Stream = e.Args[0]
-						e.Args = e.Args[1:]
-					}
-				}
-			}
+			//if args[0].Type == VariableTypeObject {
+			//	have, _ := args[0].Class.haveSuper("java/io/PrintStream")
+			//	if have {
+			//		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].MultiValues)
+			//		if err != nil {
+			//			*errs = append(*errs, err)
+			//		} else {
+			//			meta.Stream = e.Args[0]
+			//			e.Args = e.Args[1:]
+			//		}
+			//	}
+			//}
 		},
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionPrint,
@@ -236,20 +236,20 @@ func registerBuildInFunctions() {
 			if args[0] == nil {
 				return
 			}
-			if args[0].Type == VariableTypeObject {
-				have, _ := args[0].Class.haveSuper("java/io/PrintStream")
-				if have {
-					_, err := e.Args[0].mustBeOneValueContext(e.Args[0].MultiValues)
-					if err != nil {
-						*errs = append(*errs, err)
-						return
-					} else {
-						meta.Stream = e.Args[0]
-						e.Args = e.Args[1:]
-						args = args[1:]
-					}
-				}
-			}
+			//if args[0].Type == VariableTypeObject {
+			//	have, _ := args[0].Class.haveSuper("java/io/PrintStream")
+			//	if have {
+			//		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].MultiValues)
+			//		if err != nil {
+			//			*errs = append(*errs, err)
+			//			return
+			//		} else {
+			//			//meta.Stream = e.Args[0]
+			//			e.Args = e.Args[1:]
+			//			args = args[1:]
+			//		}
+			//	}
+			//}
 			if len(args) == 0 {
 				err := fmt.Errorf("%s missing format argument",
 					errMsgPrefix(pos))
