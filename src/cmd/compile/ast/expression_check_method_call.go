@@ -53,7 +53,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s variable '%s' cannot be a template fucntion",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+			callArgsTypes := checkRightValuesValid(block, call.Args, errs)
 			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
 			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
 			if esNotEmpty(es) {
@@ -254,7 +254,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			return nil
 		}
 		//var fieldMethodHandler *ClassField
-		args := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+		args := checkRightValuesValid(block, call.Args, errs)
 		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, call, args, false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
@@ -300,8 +300,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
 		}
-		callArgsTypes := checkExpressions(block, call.Args, errs)
-		callArgsTypes = checkRightValuesValid(callArgsTypes, errs)
+		callArgsTypes := checkRightValuesValid(block, call.Args, errs)
 		ms, matched, err := object.Class.SuperClass.matchConstructionFunction(e.Pos, errs, nil, call, callArgsTypes)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -344,8 +343,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	}
 	call.Class = object.Class
-	callArgTypes := checkExpressions(block, call.Args, errs)
-	callArgTypes = checkRightValuesValid(callArgTypes, errs)
+	callArgTypes := checkRightValuesValid(block, call.Args, errs)
 	if object.Class.IsInterface() {
 		if object.Type == VariableTypeClass {
 			*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",

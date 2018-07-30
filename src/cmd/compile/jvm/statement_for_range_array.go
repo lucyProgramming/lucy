@@ -150,7 +150,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 				forState.newObjectVariableType(closure.getMeta(ast.VariableTypeInt).className))
 		}
 	}
-
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	blockState := (&StackMapState{}).FromLast(forState)

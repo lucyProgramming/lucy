@@ -15,7 +15,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
-	assignTypes := checkRightValuesValid(checkExpressions(block, values, errs), errs)
+	assignTypes := checkRightValuesValid(block, values, errs)
 	if len(names) > len(assignTypes) {
 		pos := e.Pos
 		getLastPosFromArgs(assignTypes, &pos)
@@ -199,7 +199,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		bin.Left.Data = lefts // rewrite to list anyway
 	}
 	values := bin.Right.Data.([]*Expression)
-	valueTypes := checkRightValuesValid(checkExpressions(block, values, errs), errs)
+	valueTypes := checkRightValuesValid(block, values, errs)
 	leftTypes := []*Type{}
 	for _, v := range lefts {
 		if v.Type == ExpressionTypeIdentifier {

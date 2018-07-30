@@ -48,6 +48,7 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 	code.CodeLength += 3
 	return
 }
+
 func (buildExpression *BuildExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	maxStack = 2

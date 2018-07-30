@@ -38,7 +38,6 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
 	}
-
 	for k, v := range s.ElseIfList {
 		context.MakeStackMap(code, conditionState, code.CodeLength) // state is not change,all block var should be access from outside
 		binary.BigEndian.PutUint16(exit, uint16(code.CodeLength-codeLength))

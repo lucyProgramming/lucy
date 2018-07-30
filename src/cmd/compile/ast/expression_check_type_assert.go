@@ -18,11 +18,11 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	}
 	if object.RightValueValid() == false {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-			errMsgPrefix(e.Pos), object.TypeString()))
+			errMsgPrefix(object.Pos), object.TypeString()))
 		return nil
 	}
 	if object.IsPointer() == false {
-		*errs = append(*errs, fmt.Errorf("%s expression is not pointer", errMsgPrefix(e.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s expression is not pointer", errMsgPrefix(object.Pos)))
 		return nil
 	}
 	err := assert.Type.resolve(block)
@@ -38,7 +38,7 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	result[1].Type = VariableTypeBool // if  assert is ok
 	if assert.Type.validForTypeAssertOrConversion() == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for type assertion",
-			errMsgPrefix(e.Pos), assert.Type.TypeString()))
+			errMsgPrefix(assert.Type.Pos), assert.Type.TypeString()))
 		return result
 	}
 	return result

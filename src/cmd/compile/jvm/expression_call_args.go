@@ -46,7 +46,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			maxStack = t
 		}
 	} else {
-		if vArgs.IsJavaArray {
+		if vArgs.PackageJavaArray2VArgs {
 			stack := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t

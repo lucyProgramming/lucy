@@ -86,7 +86,7 @@ func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 						t.TypeString(), v.Type.TypeString()))
 					return
 				}
-				vArgs.IsJavaArray = true
+				vArgs.PackageJavaArray2VArgs = true
 				continue
 			}
 			if false == v.Type.Array.Equal(&errs, t) {
@@ -136,7 +136,7 @@ type CallVArgs struct {
 		a := new int[](10)
 		print(a...)
 	*/
-	IsJavaArray bool
-	NoArgs      bool
-	Type        *Type
+	PackageJavaArray2VArgs bool
+	NoArgs                 bool
+	Type                   *Type
 }

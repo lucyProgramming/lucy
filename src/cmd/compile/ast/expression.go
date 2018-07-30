@@ -82,7 +82,7 @@ func (e *Expression) OpName() string {
 	case ExpressionTypeBool:
 		return fmt.Sprintf("%v", e.Data.(bool))
 	case ExpressionTypeByte:
-		return fmt.Sprintf("%v", e.Data.(byte))
+		return fmt.Sprintf("%vb", e.Data.(byte))
 	case ExpressionTypeShort:
 		return fmt.Sprintf("%vs", e.Data.(int32))
 	case ExpressionTypeInt:
@@ -180,7 +180,7 @@ func (e *Expression) OpName() string {
 	case ExpressionTypeNegative:
 		return "negative(-)"
 	case ExpressionTypeQuestion:
-		return "ternary(?:)"
+		return "question(?:)"
 	case ExpressionTypeNot:
 		return "not(!)"
 	case ExpressionTypeBitwiseNot:

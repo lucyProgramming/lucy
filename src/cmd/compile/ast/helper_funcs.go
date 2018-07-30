@@ -16,17 +16,24 @@ func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
 
-func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
+func checkRightValuesValid(block *Block, es []*Expression, errs *[]error) []*Type {
 	ret := []*Type{}
 	for _, v := range es {
-		ts, e := v.check(block)
-		if esNotEmpty(e) {
-			*errs = append(*errs, e...)
-		}
-		if ts != nil {
-			ret = append(ret, ts...)
-		} else {
+		ts, es := v.check(block)
+		*errs = append(*errs, es...)
+		if ts == nil {
 			ret = append(ret, nil)
+		} else {
+			for _, t := range ts {
+				if t == nil {
+					continue
+				}
+				if false == t.RightValueValid() {
+					*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value",
+						errMsgPrefix(t.Pos), t.TypeString()))
+				}
+			}
+			ret = append(ret, ts...)
 		}
 	}
 	return ret
@@ -57,19 +64,6 @@ func mkVoidType(pos *Pos) *Type {
 	t.Type = VariableTypeVoid // means no return;
 	t.Pos = pos
 	return t
-}
-
-func checkRightValuesValid(ts []*Type, errs *[]error) []*Type {
-	for _, v := range ts {
-		if v == nil {
-			continue
-		}
-		if false == v.RightValueValid() {
-			*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value",
-				errMsgPrefix(v.Pos), v.TypeString()))
-		}
-	}
-	return ts
 }
 
 /*

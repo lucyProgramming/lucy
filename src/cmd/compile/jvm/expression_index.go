@@ -153,6 +153,5 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 		}
 		code.CodeLength++
 	}
-
 	return
 }

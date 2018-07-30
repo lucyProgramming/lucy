@@ -11,7 +11,6 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	s *ast.StatementSwitch, context *Context, state *StackMapState) (maxStack uint16) {
 	// if equal,leave 0 on stack
 	compare := func(t *ast.Type) {
-		state.popStack(2)
 		switch t.Type {
 		case ast.VariableTypeByte:
 			fallthrough
@@ -88,7 +87,6 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 						code.Codes[code.CodeLength] = cg.OP_dup2
 					}
 					code.CodeLength++
-					state.pushStack(class, s.Condition.Value)
 					currentStack += size
 					if currentStack > maxStack {
 						maxStack = currentStack
@@ -97,7 +95,6 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}
-					state.pushStack(class, s.Condition.Value)
 					compare(s.Condition.Value)
 					// consume result on stack
 					matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code))
@@ -118,7 +115,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			state.pushStack(class, s.Condition.Value)
+			state.popStack(1)
 			compare(s.Condition.Value)
 			matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code)) // comsume result on stack
 		}

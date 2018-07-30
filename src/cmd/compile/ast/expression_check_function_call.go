@@ -11,7 +11,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, es...)
 	}
 	if on == nil {
-		checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+		checkRightValuesValid(block, call.Args, errs)
 		return nil
 	}
 	if on.Type == VariableTypeClass { // cast type
@@ -78,7 +78,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 }
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+	callArgsTypes := checkRightValuesValid(block, call.Args, errs)
 	ret := ft.getReturnTypes(e.Pos)
 	var es []error
 	_, call.VArgs, es = ft.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
@@ -89,7 +89,7 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkRightValuesValid(checkExpressions(block, call.Args, errs), errs)
+	callArgsTypes := checkRightValuesValid(block, call.Args, errs)
 	var tf *Function
 	if f.TemplateFunction != nil {
 		length := len(*errs)
