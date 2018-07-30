@@ -14,25 +14,8 @@ func registerBuildInFunctions() {
 		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					errMsgPrefix(pos)))
+					errMsgPrefix(e.ParameterTypes[0].Pos)))
 			}
-			meta := &BuildInFunctionPrintfMeta{}
-			e.BuildInFunctionMeta = meta
-			if len(args) == 0 || args[0] == nil {
-				return // not error
-			}
-			//if args[0].Type == VariableTypeObject {
-			//	have, _ := args[0].Class.haveSuper("java/io/PrintStream")
-			//	if have {
-			//		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].MultiValues)
-			//		if err != nil {
-			//			*errs = append(*errs, err)
-			//		} else {
-			//			meta.Stream = e.Args[0]
-			//			e.Args = e.Args[1:]
-			//		}
-			//	}
-			//}
 		},
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionPrint,
@@ -54,7 +37,7 @@ func registerBuildInFunctions() {
 	catch.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-				errMsgPrefix(pos)))
+				errMsgPrefix(e.ParameterTypes[0].Pos)))
 		}
 		if block.InheritedAttribute.Defer == nil {
 			*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
@@ -62,6 +45,8 @@ func registerBuildInFunctions() {
 			return
 		}
 		if len(args) > 1 {
+			pos := pos
+			getFirstPosFromArgs(args[1:], &pos)
 			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect at most 1 argument",
 				errMsgPrefix(pos), common.BuildInFunctionCatch))
 			return
@@ -70,20 +55,19 @@ func registerBuildInFunctions() {
 			// make default exception class
 			// load java/lang/Exception this is default exception level to catch
 			if block.InheritedAttribute.Defer.ExceptionClass == nil {
-				c, err := ImportsLoader.LoadImport(DefaultExceptionClass)
+				c, err := PackageBeenCompile.loadClass(DefaultExceptionClass)
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s load exception class failed,err:%v",
 						errMsgPrefix(pos), err))
 					return
 				}
-				f.Type.ReturnList[0].Type.Class = c.(*Class)
-				err = block.InheritedAttribute.Defer.registerExceptionClass(c.(*Class))
+				f.Type.ReturnList[0].Type.Class = c
+				err = block.InheritedAttribute.Defer.registerExceptionClass(c)
 				if err != nil {
 					*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
 				}
 			} else {
 				f.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
-
 			}
 			return
 		}
@@ -92,17 +76,17 @@ func registerBuildInFunctions() {
 		}
 		if args[0].Type != VariableTypeObject {
 			*errs = append(*errs, fmt.Errorf("%s build function '%s' expect a object ref argument",
-				errMsgPrefix(pos), common.BuildInFunctionCatch))
+				errMsgPrefix(args[0].Pos), common.BuildInFunctionCatch))
 			return
 		}
 		if has, _ := args[0].Class.haveSuper(JavaThrowableClass); has == false {
 			*errs = append(*errs, fmt.Errorf("%s '%s' does not have super-class '%s'",
-				errMsgPrefix(pos), args[0].Class.Name, JavaThrowableClass))
+				errMsgPrefix(args[0].Pos), args[0].Class.Name, JavaThrowableClass))
 			return
 		}
 		err := block.InheritedAttribute.Defer.registerExceptionClass(args[0].Class)
 		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
+			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(args[0].Pos), err))
 		}
 	}
 	buildInFunctionsMap[common.BuildInFunctionPanic] = &Function{
@@ -110,7 +94,7 @@ func registerBuildInFunctions() {
 			block *Block, errs *[]error, args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					errMsgPrefix(pos)))
+					errMsgPrefix(e.ParameterTypes[0].Pos)))
 			}
 			if len(args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function 'panic' expect one argument",
@@ -149,7 +133,7 @@ func registerBuildInFunctions() {
 		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					errMsgPrefix(pos)))
+					errMsgPrefix(e.ParameterTypes[0].Pos)))
 			}
 			if len(args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s expect one argument", errMsgPrefix(pos)))
@@ -189,7 +173,7 @@ func registerBuildInFunctions() {
 		args []*Type, pos *Pos) {
 		if len(e.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-				errMsgPrefix(pos)))
+				errMsgPrefix(e.ParameterTypes[0].Pos)))
 		}
 		if len(args) == 0 {
 			err := fmt.Errorf("%s '%s' expect one argument at lease",
@@ -223,7 +207,7 @@ func registerBuildInFunctions() {
 			args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					errMsgPrefix(pos)))
+					errMsgPrefix(e.ParameterTypes[0].Pos)))
 			}
 			meta := &BuildInFunctionPrintfMeta{}
 			e.BuildInFunctionMeta = meta
@@ -236,20 +220,6 @@ func registerBuildInFunctions() {
 			if args[0] == nil {
 				return
 			}
-			//if args[0].Type == VariableTypeObject {
-			//	have, _ := args[0].Class.haveSuper("java/io/PrintStream")
-			//	if have {
-			//		_, err := e.Args[0].mustBeOneValueContext(e.Args[0].MultiValues)
-			//		if err != nil {
-			//			*errs = append(*errs, err)
-			//			return
-			//		} else {
-			//			//meta.Stream = e.Args[0]
-			//			e.Args = e.Args[1:]
-			//			args = args[1:]
-			//		}
-			//	}
-			//}
 			if len(args) == 0 {
 				err := fmt.Errorf("%s missing format argument",
 					errMsgPrefix(pos))
@@ -280,7 +250,6 @@ func registerBuildInFunctions() {
 	buildInFunctionsMap[common.BuildInFunctionBlockHole] = &Function{
 		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*Type, pos *Pos) {
-			// nothing to check
 		},
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionBlockHole,
@@ -291,9 +260,11 @@ func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *
 	args []*Type, pos *Pos) {
 	if len(e.ParameterTypes) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-			errMsgPrefix(pos)))
+			errMsgPrefix(e.ParameterTypes[0].Pos)))
 	}
 	if len(args) != 1 {
+		pos := pos
+		getFirstPosFromArgs(args[1:], &pos)
 		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
 		return
 	}
@@ -302,7 +273,7 @@ func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *
 	}
 	if args[0].IsPointer() == false {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not valid type to call",
-			errMsgPrefix(pos), args[0].TypeString()))
+			errMsgPrefix(args[0].Pos), args[0].TypeString()))
 		return
 	}
 }

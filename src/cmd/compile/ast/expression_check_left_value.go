@@ -10,6 +10,11 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 	switch e.Type {
 	case ExpressionTypeIdentifier:
 		identifier := e.Data.(*ExpressionIdentifier)
+		if identifier.Name == NoNameIdentifier {
+			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as left value",
+				errMsgPrefix(e.Pos), identifier.Name))
+			return nil
+		}
 		d, _ := block.searchIdentifier(identifier.Name)
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",

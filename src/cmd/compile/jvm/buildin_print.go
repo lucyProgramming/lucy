@@ -11,11 +11,6 @@ import (
 func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	//meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
-	//if meta.Stream != nil {
-	//	// get stream from args
-	//	maxStack = buildExpression.build(class, code, meta.Stream, context, state)
-	//} else {
 	// get stream from stdout
 	code.Codes[code.CodeLength] = cg.OP_getstatic
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -25,7 +20,6 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxStack = 1
-	//}
 	if len(call.Args) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

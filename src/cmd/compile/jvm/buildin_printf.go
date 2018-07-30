@@ -16,9 +16,6 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 	}()
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
-	//if meta.Stream != nil {
-	//	maxStack = buildExpression.build(class, code, meta.Stream, context, state)
-	//} else { // get stream from args
 	code.Codes[code.CodeLength] = cg.OP_getstatic
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      "java/lang/System",
@@ -27,7 +24,6 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxStack = 1
-	//}
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	stack := buildExpression.build(class, code, meta.Format, context, state)
 	if t := 1 + stack; t > maxStack {

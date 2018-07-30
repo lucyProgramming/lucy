@@ -43,7 +43,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		False != nil &&
 		True.Equal(errs, False) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-			errMsgPrefix(e.Pos), False.TypeString(), True.TypeString()))
+			errMsgPrefix(question.False.Pos), False.TypeString(), True.TypeString()))
 	}
 	if True != nil {
 		result := True.Clone()

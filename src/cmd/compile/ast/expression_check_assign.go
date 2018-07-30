@@ -16,12 +16,21 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
 	assignTypes := checkRightValuesValid(checkExpressions(block, values, errs), errs)
-	if len(names) != len(assignTypes) {
+	if len(names) > len(assignTypes) {
+		pos := e.Pos
+		getLastPosFromArgs(assignTypes, &pos)
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
-			errMsgPrefix(e.Pos),
+			errMsgPrefix(pos),
 			len(assignTypes),
 			len(names)))
 		noErr = false
+	} else if len(names) < len(assignTypes) {
+		pos := e.Pos
+		getFirstPosFromArgs(assignTypes[len(names):], &pos)
+		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
+			errMsgPrefix(pos),
+			len(assignTypes),
+			len(names)))
 	}
 	var err error
 	noNewVariable := true
@@ -190,9 +199,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		bin.Left.Data = lefts // rewrite to list anyway
 	}
 	values := bin.Right.Data.([]*Expression)
-	valueTypes := checkRightValuesValid(
-		checkExpressions(block, values, errs),
-		errs)
+	valueTypes := checkRightValuesValid(checkExpressions(block, values, errs), errs)
 	leftTypes := []*Type{}
 	for _, v := range lefts {
 		if v.Type == ExpressionTypeIdentifier {
@@ -208,9 +215,18 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	}
 	convertLiteralExpressionsToNeeds(values, leftTypes, valueTypes)
 	bin.Left.MultiValues = leftTypes
-	if len(lefts) != len(valueTypes) { //expression length compare with value types is more appropriate
+	if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
+		pos := e.Pos
+		getLastPosFromArgs(valueTypes, &pos)
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
-			errMsgPrefix(e.Pos),
+			errMsgPrefix(pos),
+			len(valueTypes),
+			len(lefts)))
+	} else if len(lefts) < len(valueTypes) {
+		pos := e.Pos
+		getFirstPosFromArgs(valueTypes[len(lefts):], &pos)
+		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
+			errMsgPrefix(pos),
 			len(valueTypes),
 			len(lefts)))
 	}
@@ -224,13 +240,11 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		if valueTypes[k] == nil {
 			continue
 		}
-		//fmt.Println(leftTypes[k].TypeString(), valueTypes[k].TypeString())
 		if false == leftTypes[k].Equal(errs, valueTypes[k]) {
 			*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 				errMsgPrefix(e.Pos),
 				valueTypes[k].TypeString(), leftTypes[k].TypeString()))
 		}
-
 	}
 	voidReturn := mkVoidType(e.Pos)
 	if len(leftTypes) > 1 || len(leftTypes) == 0 {

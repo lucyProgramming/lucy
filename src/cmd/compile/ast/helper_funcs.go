@@ -32,6 +32,26 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
 	return ret
 }
 
+func getFirstPosFromArgs(args []*Type, pos **Pos) {
+	for _, a := range args {
+		if a != nil {
+			*pos = a.Pos
+			break
+		}
+	}
+}
+
+func getLastPosFromArgs(args []*Type, pos **Pos) {
+	index := len(args) - 1
+	for index >= 0 {
+		if args[index] != nil {
+			*pos = args[index].Pos
+			break
+		}
+		index--
+	}
+}
+
 func mkVoidType(pos *Pos) *Type {
 	t := &Type{}
 	t.Type = VariableTypeVoid // means no return;
