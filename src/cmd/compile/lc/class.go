@@ -25,7 +25,6 @@ func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
 	ret.MajorVersion = binary.BigEndian.Uint16(c.bs[2:])
 	c.bs = c.bs[4:]
 	ret.ConstPool = []*cg.ConstPool{nil} // pool start 1
-
 	//const pool
 	if err := c.parseConstPool(); err != nil {
 		return ret, err

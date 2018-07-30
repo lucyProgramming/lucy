@@ -468,13 +468,7 @@ func (e *Expression) HaveMultiValue() bool {
 	}
 	return false
 }
-func (e *Expression) HaveMore1Value() bool {
-	return e.HaveMoreThanNValue(1)
-}
 
-func (e *Expression) HaveMoreThanNValue(n int) bool {
-	return e.HaveMultiValue() && len(e.MultiValues) > n
-}
 func (e *Expression) CallHasReturnValue() bool {
 	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()
 }

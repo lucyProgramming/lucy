@@ -249,7 +249,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	}
 	// build block
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)
-	defer forState.addTop(blockState)
+	forState.addTop(blockState)
 	if s.Block.WillNotExecuteToEnd == false {
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
 	}
@@ -261,6 +261,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		forState.popStack(1)
 	}
 	// pop 1
-	copyOPs(code, cg.OP_pop)
+	code.Codes[code.CodeLength] = cg.OP_pop
+	code.CodeLength++
 	return
 }

@@ -144,7 +144,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Class:
 		c := d.(*Class)
-		if fromImport == false && c.IsGlobal && c.IsBuildIn == false { // try from import
+		if fromImport == false && c.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 			if should {
 				p, err := PackageBeenCompile.load(i.Import)

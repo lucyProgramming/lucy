@@ -75,18 +75,20 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 				fmt.Errorf("%s parameter type named '%s',resolve as '%s' has no match and no 'default block'",
 					errMsgPrefix(s.Pos), TName, s.Condition.TypeString()))
 			return
+		} else {
+			switchStatement.Type = StatementTypeBlock
+			switchStatement.Block = s.Default
+			switchStatement.Block.inherit(block)
+			switchStatement.Block.IsSwitchTemplateBlock = true
+			switchStatement.Block.InheritedAttribute.SwitchTemplateBlock = switchStatement.Block
+			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
+			return switchStatement.Block.checkStatements()
 		}
-		switchStatement.Type = StatementTypeBlock
-		switchStatement.Block = s.Default
-		switchStatement.Block.inherit(block)
-		switchStatement.Block.IsSwitchTemplateBlock = true
-		switchStatement.Block.InheritedAttribute.SwitchTemplateBlock = switchStatement.Block
-		switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-		return switchStatement.Block.checkStatements()
 	}
 	// let`s reWrite
 	if matchBlock == nil {
 		switchStatement.Type = StatementTypeNop
+		return errs
 	} else {
 		switchStatement.Type = StatementTypeBlock
 		switchStatement.Block = matchBlock
@@ -96,5 +98,4 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 		switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
 		return append(errs, switchStatement.Block.checkStatements()...)
 	}
-	return
 }

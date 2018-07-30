@@ -111,11 +111,12 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	} else { // java_array
 		//get length
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
+		code.CodeLength++
 		if 2 > maxStack {
 			maxStack = 2
 		}
-		code.Codes[code.CodeLength+1] = cg.OP_arraylength
-		code.CodeLength += 2
+		code.Codes[code.CodeLength] = cg.OP_arraylength
+		code.CodeLength++
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements)...)
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
@@ -123,7 +124,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
 	}
 
-	// k set to  -1
+	// k set to -1
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
@@ -289,7 +290,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 
 	// build block
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)
-	defer forState.addTop(blockState)
+	forState.addTop(blockState)
 	if s.Block.WillNotExecuteToEnd == false {
 		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
 	}

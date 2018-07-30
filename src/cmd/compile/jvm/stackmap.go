@@ -21,16 +21,16 @@ func (stackMapState *StackMapState) addTop(absent *StackMapState) {
 	}
 	length := len(absent.Locals) - len(stackMapState.Locals)
 	oldLength := len(stackMapState.Locals)
-	t := &cg.StackMapVerificationTypeInfo{}
-	t.Verify = &cg.StackMapTopVariableInfo{}
+	verify := &cg.StackMapVerificationTypeInfo{}
+	verify.Verify = &cg.StackMapTopVariableInfo{}
 	for i := 0; i < length; i++ {
 		tt := absent.Locals[i+oldLength].Verify
 		_, isDouble := tt.(*cg.StackMapDoubleVariableInfo)
 		_, isLong := tt.(*cg.StackMapLongVariableInfo)
 		if isDouble || isLong {
-			stackMapState.Locals = append(stackMapState.Locals, t, t)
+			stackMapState.Locals = append(stackMapState.Locals, verify, verify)
 		} else {
-			stackMapState.Locals = append(stackMapState.Locals, t)
+			stackMapState.Locals = append(stackMapState.Locals, verify)
 		}
 	}
 }

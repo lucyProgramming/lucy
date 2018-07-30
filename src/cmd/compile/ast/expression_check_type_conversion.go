@@ -35,7 +35,6 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 		}
 		return ret
 	}
-
 	// string([]byte)
 	if conversion.Type.Type == VariableTypeString &&
 		on.Type == VariableTypeArray && on.Array.Type == VariableTypeByte {

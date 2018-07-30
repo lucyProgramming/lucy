@@ -46,7 +46,6 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	}
 	if s.Condition != nil {
 		stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
-
 		if stack > maxStack {
 			maxStack = stack
 		}

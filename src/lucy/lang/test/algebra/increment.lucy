@@ -82,7 +82,7 @@ fn  testIncrement (noUse T) {
     if   m["a"] != T(2) {
         panic(new error("++ is wrong"))
     }
-    --  m["a"]
+    -- m["a"]
     if   m["a"] != T(1) {
         panic(new error("-- is wrong"))
     }

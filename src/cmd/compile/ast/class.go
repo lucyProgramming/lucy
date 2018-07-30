@@ -18,7 +18,6 @@ type Class struct {
 	Name                              string // binary name
 	Pos                               *Pos
 	IsJava                            bool //class imported from CLASSPATH
-	IsGlobal                          bool
 	Block                             Block
 	AccessFlags                       uint16
 	Fields                            map[string]*ClassField
@@ -188,7 +187,8 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		return err
 	}
 	if c.SuperClass.LoadFromOutSide && c.SuperClass.IsPublic() == false {
-		return fmt.Errorf("%s class`s super-class named '%s' cannot be accessed from here", errMsgPrefix(c.Pos), c.SuperClass.Name)
+		return fmt.Errorf("%s class`s super-class named '%s' is not public",
+			errMsgPrefix(c.Pos), c.SuperClass.Name)
 	}
 	if c.SuperClass.IsFinal() {
 		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
@@ -246,6 +246,9 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 		}
 		m := v[0]
 		for _, v := range c.SuperClass.Methods[name] {
+			if v.IsFinal() == false {
+				continue
+			}
 			f1 := &Type{
 				Type:         VariableTypeFunction,
 				FunctionType: &m.Function.Type,
@@ -255,10 +258,8 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 				FunctionType: &v.Function.Type,
 			}
 			if f1.Equal(&errs, f2) == true {
-				if v.IsFinal() {
-					errs = append(errs, fmt.Errorf("%s override final method",
-						errMsgPrefix(m.Function.Pos)))
-				}
+				errs = append(errs, fmt.Errorf("%s override final method",
+					errMsgPrefix(m.Function.Pos)))
 			}
 		}
 	}
