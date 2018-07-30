@@ -91,7 +91,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 					if currentStack > maxStack {
 						maxStack = currentStack
 					}
-					stack = autoVar.unPack(class, code, kkk, ttt, context)
+					stack = autoVar.unPack(class, code, kkk, ttt)
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}

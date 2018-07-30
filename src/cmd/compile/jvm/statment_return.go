@@ -113,7 +113,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 						code.Codes[code.CodeLength] = cg.OP_dup // dup array list
 						code.CodeLength++
 						currentStack++
-						stack = autoVar.unPackObject(class, code, kk, context)
+						stack = autoVar.unPackObject(class, code, kk)
 						if t := stack + currentStack; t > maxStack {
 							maxStack = t
 						}

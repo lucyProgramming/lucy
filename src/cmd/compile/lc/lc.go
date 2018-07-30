@@ -51,20 +51,6 @@ func (lc *LucyCompile) exit() {
 	if len(lc.Errs) > 0 {
 		code = 2
 	}
-	//template function maybe parse twice,maybe same error
-	//errsM := make(map[string]struct{})
-	//es := []error{}
-	//for _, v := range lc.Errs {
-	//	if _, ok := errsM[v.Error()]; ok {
-	//		continue
-	//	}
-	//	es = append(es, v)
-	//	errsM[v.Error()] = struct{}{}
-	//}
-	//lc.Errs = es
-	// sort errors
-	//es = SortErrors(lc.Errs)
-	//sort.Sort(SortErrors(es))
 	for _, v := range lc.Errs {
 		fmt.Fprintln(os.Stderr, v)
 	}
@@ -81,7 +67,7 @@ func (lc *LucyCompile) Init() {
 	}
 }
 
-func (lc *LucyCompile) parseImports() {
+func (lc *LucyCompile) dumpImports() {
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}
@@ -113,7 +99,7 @@ func (lc *LucyCompile) compile() {
 	}
 	// parse import only
 	if compileCommon.CompileFlags.OnlyImport {
-		lc.parseImports()
+		lc.dumpImports()
 		return
 	}
 	c := ast.ConvertTops2Package{}
@@ -125,7 +111,6 @@ func (lc *LucyCompile) compile() {
 	}
 	lc.shouldExit()
 	lc.Errs = append(lc.Errs, ast.PackageBeenCompile.TypeCheck()...)
-
 	if len(lc.Errs) > 0 {
 		lc.exit()
 	}

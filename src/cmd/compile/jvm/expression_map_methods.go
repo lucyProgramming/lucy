@@ -66,7 +66,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 						state.pushStack(class, hashMapVerifyType)
 					}
 					//load
-					stack = autoVar.unPack(class, code, kk, tt, context)
+					stack = autoVar.unPack(class, code, kk, tt)
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}

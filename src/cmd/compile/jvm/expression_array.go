@@ -128,7 +128,7 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				loadInt32(class, code, index) // load index
-				stack := autoVar.unPack(class, code, k, t, context)
+				stack := autoVar.unPack(class, code, k, t)
 				if t := 5 + stack; t > maxStack {
 					maxStack = t
 				}

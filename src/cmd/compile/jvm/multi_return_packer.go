@@ -21,8 +21,8 @@ func storeMultiValueAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, st
 }
 
 func (packer *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	k int, typ *ast.Type, context *Context) (maxStack uint16) {
-	maxStack = packer.unPackObject(class, code, k, context)
+	valueIndex int, typ *ast.Type) (maxStack uint16) {
+	maxStack = packer.unPackObject(class, code, valueIndex)
 	if typ.IsPointer() == false {
 		typeConverter.unPackPrimitives(class, code, typ)
 		if t := jvmSlotSize(typ); t > maxStack {
@@ -38,15 +38,15 @@ func (packer *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.Attri
 	object is all i need
 */
 func (packer *MultiValueAutoVar) unPackObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	k int, context *Context) (maxStack uint16) {
-	if k > 127 {
+	valueIndex int) (maxStack uint16) {
+	if valueIndex > 127 {
 		panic("over 127")
 	}
 	maxStack = 2
 	//a.buildLoadArrayListAutoVar(code, context) // local array list on stack
 	copyOPs(code,
 		loadLocalVariableOps(ast.VariableTypeObject, packer.offset)...)
-	loadInt32(class, code, int32(k))
+	loadInt32(class, code, int32(valueIndex))
 	code.Codes[code.CodeLength] = cg.OP_aaload
 	code.CodeLength++
 	return

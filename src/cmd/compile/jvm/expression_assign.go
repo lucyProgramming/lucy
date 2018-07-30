@@ -53,7 +53,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 		if stack > maxStack {
 			maxStack = stack
 		}
-		stack = autoVar.unPack(class, code, k, v.Value, context)
+		stack = autoVar.unPack(class, code, k, v.Value)
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}

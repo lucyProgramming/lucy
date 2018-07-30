@@ -59,7 +59,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 				code.CodeLength++
 				loadInt32(class, code, index)
 				currentStack += 2
-				stack = autoVar.unPackObject(class, code, kk, context)
+				stack = autoVar.unPackObject(class, code, kk)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}

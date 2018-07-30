@@ -254,7 +254,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				currentStack++
-				stack = autoVar.unPackObject(class, code, kk, context)
+				stack = autoVar.unPackObject(class, code, kk)
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
