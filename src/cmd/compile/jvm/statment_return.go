@@ -311,6 +311,10 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength+6] = cg.OP_athrow
 		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
 		code.CodeLength += 8
+		if index != 0 {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+		}
 		if index == 0 {
 			//exception that have been handled
 			if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
