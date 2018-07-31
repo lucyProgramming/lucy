@@ -29,14 +29,24 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			methodCall := e.Data.(*ExpressionMethodCall)
-			functionCall := &ExpressionFunctionCall{}
-			functionCall.Args = methodCall.Args
-			functionCall.Function = f
-			functionCall.ParameterTypes = methodCall.ParameterTypes
-			e.Type = ExpressionTypeFunctionCall
-			e.Data = functionCall
-			return e.checkFunctionCall(block, errs, f, functionCall)
+			if f.TemplateFunction != nil {
+				methodCall := e.Data.(*ExpressionMethodCall)
+				functionCall := &ExpressionFunctionCall{}
+				functionCall.Args = methodCall.Args
+				functionCall.Function = f
+				functionCall.ParameterTypes = methodCall.ParameterTypes
+				e.Type = ExpressionTypeFunctionCall
+				e.Data = functionCall
+				return e.checkFunctionCall(block, errs, f, functionCall)
+			} else {
+				methodCall := e.Data.(*ExpressionMethodCall)
+				methodCall.PackageFunction = f
+				callArgsTypes := checkRightValuesValid(block, methodCall.Args, errs)
+				var es []error
+				_, methodCall.VArgs, es = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+				*errs = append(*errs, es...)
+				return f.Type.getReturnTypes(e.Pos)
+			}
 		case *Variable:
 			v := d.(*Variable)
 			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {

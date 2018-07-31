@@ -498,6 +498,7 @@ type ExpressionMethodCall struct {
 		unSupport !!!!!!
 	*/
 	ParameterTypes                []*Type
+	PackageFunction               *Function
 	PackageGlobalVariableFunction *Variable
 }
 

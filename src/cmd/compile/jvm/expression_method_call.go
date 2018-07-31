@@ -34,21 +34,21 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		}
 	}
 	if call.Expression.Value.Type == ast.VariableTypePackage {
-		//if call.PackageFunction != nil {
-		//	stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
-		//	if stack > maxStack {
-		//		maxStack = stack
-		//	}
-		//	code.Codes[code.CodeLength] = cg.OP_invokestatic
-		//	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		//		Class:      call.Expression.Value.Package.Name + "/main",
-		//		Method:     call.Name,
-		//		Descriptor: Descriptor.methodDescriptor(&call.PackageFunction.Type),
-		//	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		//	code.CodeLength += 3
-		//	pop(&call.PackageFunction.Type)
-		//}
-		if call.PackageGlobalVariableFunction != nil {
+		if call.PackageFunction != nil {
+			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+			if stack > maxStack {
+				maxStack = stack
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      call.Expression.Value.Package.Name + "/main",
+				Method:     call.Name,
+				Descriptor: Descriptor.methodDescriptor(&call.PackageFunction.Type),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			pop(&call.PackageFunction.Type)
+		} else {
+			// call.PackageGlobalVariableFunction != nil
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      call.Expression.Value.Package.Name + "/main",

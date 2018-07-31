@@ -3,66 +3,56 @@
 
 
 
-fn testFloat()->(ok bool = true){
+fn testFloat()->(ok bool = false){
 	var a ,b float
 	a = 2.0
 	b = 1.0
 	if true != a > b {
-		ok = false
 		return 
 	}
 	if true != a >= b {
-		ok = false
 		return 
 	}
 	if false !=  a < b {
-		ok = false
 		return 
 	}
 	if false != a <= b  {
-		ok = false
 		return 
 	}
 	if false != (a == b)  {
-		ok = false
 		return 
 	}
 	if  true != (a != b)   {
-		ok = false
 		return 
 	}
+	ok = true 
 }
 
 
 
-fn testDouble()->(ok bool = true){
+fn testDouble()->(ok bool = false){
 	var a ,b double
 	a = 2.0
 	b = 1.0
-	if true != a > b {
-		ok = false
+	if true != a > b {	
 		return 
 	}
-	if true != a >= b {
-		ok = false
+	if true != a >= b {	
 		return 
 	}
 	if false !=  a < b {
-		ok = false
 		return 
 	}
 	if false != a <= b  {
-		ok = false
 		return 
 	}
 	if false != (a == b)  {
-		ok = false
 		return 
 	}
 	if  true != (a != b)   {
-		ok = false
 		return 
 	}
+	ok = true 
 }
 
 

@@ -44,7 +44,8 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	maxStack, remainStack, op, leftValueKind := buildExpression.getLeftValue(class, code, ee, context, state)
+	maxStack, remainStack, op, leftValueKind :=
+		buildExpression.getLeftValue(class, code, ee, context, state)
 	/*
 		left value must can be used as right value
 	*/
