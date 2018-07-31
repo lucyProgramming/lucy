@@ -43,15 +43,11 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		}
 	case ast.StatementTypeContinue:
 		if len(s.StatementContinue.Defers) > 0 {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
-			code.CodeLength++
 			buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		}
 		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.StatementTypeBreak:
 		if len(s.StatementBreak.Defers) > 0 {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
-			code.CodeLength++
 			buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		}
 		exit := (&cg.Exit{}).Init(cg.OP_goto, code)
@@ -77,8 +73,6 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		}
 	case ast.StatementTypeGoTo:
 		if len(s.StatementGoTo.Defers) > 0 {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
-			code.CodeLength++
 			buildPackage.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
 		}
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
@@ -121,6 +115,11 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 
 func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, from *StackMapState) {
+	if len(ds) == 0 {
+		return
+	}
+	code.Codes[code.CodeLength] = cg.OP_aconst_null
+	code.CodeLength++
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		state := ds[index].StackMapState.(*StackMapState)

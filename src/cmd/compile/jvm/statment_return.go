@@ -10,11 +10,6 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxStack uint16) {
 	if context.function.NoReturnValue() { // no return value
 		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null // expect exception on stack
-			code.CodeLength++
-			if 1 > maxStack {
-				maxStack = 1
-			}
 			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
 				maxStack = stack
@@ -33,11 +28,6 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			//return value  is on stack,  store to local var
 			if len(statementReturn.Expressions) > 0 { //rewrite return value
 				buildPackage.storeLocalVar(class, code, context.function.Type.ReturnList[0])
-			}
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
-			code.CodeLength++
-			if 1 > maxStack {
-				maxStack = 1
 			}
 			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
@@ -158,11 +148,6 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 				context.multiValueOffset)...)
 		}
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		if 1 > maxStack {
-			maxStack = 1
-		}
 		stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 		if stack > maxStack {
 			maxStack = stack
@@ -266,6 +251,11 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 	statementReturn *ast.StatementReturn) (maxStack uint16) {
 	if len(statementReturn.Defers) == 0 {
 		return
+	}
+	code.Codes[code.CodeLength] = cg.OP_aconst_null
+	code.CodeLength++
+	if 1 > maxStack {
+		maxStack = 1
 	}
 	index := len(statementReturn.Defers) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
