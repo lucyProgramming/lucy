@@ -29,7 +29,9 @@ fn testReturnTemplateFunction () {
 	if a,b := returnTemplateFunction2("hello" ,2 ) ; a != "hello" || b != 2 {
 		panic(returnErr)
 	}
-	if a,b := returnTemplateFunction2(1 , "hello" ) ; a != 1 || b != "hello" {
+	if a,b := returnTemplateFunction2(1 , "hello" ) ; 
+		a += 1 ; b += " world" ;
+			a != 2 || b != "hello world" {
 		panic(returnErr)
 	}
 }

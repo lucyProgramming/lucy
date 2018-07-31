@@ -20,8 +20,8 @@ public fn quickSort(s T, l int, r int,asc bool) {
             }
         }  
         s[i] = x; 
-        quickSort(s, l, i - 1,desc)
-        quickSort(s, i + 1, r,desc)
+        quickSort(s, l, i - 1,asc)
+        quickSort(s, i + 1, r,asc)
     } 
     if  l< r  && asc == false {        
         i ,j := l, r
@@ -41,8 +41,8 @@ public fn quickSort(s T, l int, r int,asc bool) {
             }
         }  
         s[i] = x
-        quickSort(s, l, i - 1,desc)
-        quickSort(s, i + 1, r,desc)
+        quickSort(s, l, i - 1,asc)
+        quickSort(s, i + 1, r,asc)
     } 
 }
 

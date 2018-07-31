@@ -396,6 +396,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if len(es) > 0 { // looks impossible
 			return es[0]
 		}
+		f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 		f.TemplateFunction = &ast.TemplateFunction{}
 		pack.Block.Functions[attr.Name] = f
 	}

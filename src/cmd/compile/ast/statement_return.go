@@ -5,8 +5,9 @@ import (
 )
 
 type StatementReturn struct {
-	Defers      []*StatementDefer
-	Expressions []*Expression
+	ResultOffset uint16
+	Defers       []*StatementDefer
+	Expressions  []*Expression
 }
 
 func (s *StatementReturn) mkDefers(b *Block) {

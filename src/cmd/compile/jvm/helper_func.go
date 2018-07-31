@@ -193,11 +193,11 @@ func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *a
 func storeArrayElementByTypeOps(typ ast.VariableTypeKind) (op byte) {
 	switch typ {
 	case ast.VariableTypeBool:
-		fallthrough
+		op = cg.OP_bastore
 	case ast.VariableTypeByte:
-		fallthrough
+		op = cg.OP_bastore
 	case ast.VariableTypeShort:
-		fallthrough
+		op = cg.OP_sastore
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:

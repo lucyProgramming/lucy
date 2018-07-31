@@ -163,6 +163,9 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementReturn: r,
 				Pos:             pos,
 			})
+			if blockParser.parser.token.Type == lex.TokenRc {
+				continue
+			}
 			if blockParser.parser.token.Type == lex.TokenLf ||
 				blockParser.parser.token.Type == lex.TokenSemicolon {
 				blockParser.Next(lfNotToken)

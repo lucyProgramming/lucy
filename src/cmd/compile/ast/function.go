@@ -6,29 +6,27 @@ import (
 )
 
 type Function struct {
-	CallFatherConstructionExpression    *Expression
-	TemplateFunction                    *TemplateFunction
-	parameterTypes                      map[string]*Type    //typed parameters
-	ClassMethod                         *cg.MethodHighLevel // make call from
-	HaveDefaultValue                    bool
-	DefaultValueStartAt                 int
-	IsClosureFunction                   bool
-	isGlobalVariableDefinition          bool
-	buildInFunctionChecker              buildFunctionChecker // used in build function
-	IsGlobal                            bool
-	IsBuildIn                           bool
-	Used                                bool
-	AccessFlags                         uint16
-	Type                                FunctionType
-	Closure                             Closure
-	Name                                string // if name is nil string,means no name function
-	Block                               Block
-	Pos                                 *Pos
-	Descriptor                          string
-	AutoVariableForException            *AutoVariableForException
-	AutoVariableForReturnBecauseOfDefer *AutoVariableForReturnBecauseOfDefer
-	ClosureVariableOffSet               uint16 // for closure
-	SourceCodes                         []byte // source code for template function
+	CallFatherConstructionExpression *Expression
+	TemplateFunction                 *TemplateFunction
+	parameterTypes                   map[string]*Type    //typed parameters
+	ClassMethod                      *cg.MethodHighLevel // make call from
+	HaveDefaultValue                 bool
+	DefaultValueStartAt              int
+	IsClosureFunction                bool
+	isGlobalVariableDefinition       bool
+	buildInFunctionChecker           buildFunctionChecker // used in build function
+	IsGlobal                         bool
+	IsBuildIn                        bool
+	Used                             bool
+	AccessFlags                      uint16
+	Type                             FunctionType
+	Closure                          Closure
+	Name                             string // if name is nil string,means no name function
+	Block                            Block
+	Pos                              *Pos
+	Descriptor                       string
+	ClosureVariableOffSet            uint16 // for closure
+	SourceCodes                      []byte // source code for template function
 }
 
 func (f *Function) isPublic() bool {
@@ -52,26 +50,8 @@ type AutoVariableForReturnBecauseOfDefer struct {
 	Offset uint16
 }
 
-func (f *Function) MkAutoVarForReturnBecauseOfDefer() {
-	if f.AutoVariableForReturnBecauseOfDefer != nil {
-		return
-	}
-	f.AutoVariableForReturnBecauseOfDefer = &AutoVariableForReturnBecauseOfDefer{}
-}
-
 func (f *Function) NoReturnValue() bool {
 	return f.Type.NoReturnValue()
-}
-
-type AutoVariableForException struct {
-	Offset uint16
-}
-
-func (f *Function) mkAutoVarForException() {
-	if f.AutoVariableForException != nil {
-		return
-	}
-	f.AutoVariableForException = &AutoVariableForException{}
 }
 
 func (f *Function) readableMsg(name ...string) string {

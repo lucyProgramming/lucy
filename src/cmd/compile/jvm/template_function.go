@@ -26,7 +26,6 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(class *cg.Clas
 		//build function
 		buildExpression.BuildPackage.buildFunction(class, nil, method, call.TemplateFunctionCallPair.Function)
 		call.TemplateFunctionCallPair.Generated = method
-
 	}
 	maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic

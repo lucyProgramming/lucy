@@ -174,38 +174,24 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 				append(method.AttributeLucyReturnListNames.Parameters, p)
 		}
 	}
-	if t := buildPackage.buildFunctionAutoVar(class, method.Code, f, context, state); t > method.Code.MaxStack {
-		method.Code.MaxStack = t
+	if len(f.Type.ParameterList) > 1 {
+		if t := buildPackage.buildFunctionMultiReturnOffset(class, method.Code, f, context, state); t > method.Code.MaxStack {
+			method.Code.MaxStack = t
+		}
 	}
 	buildPackage.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }
-func (buildPackage *BuildPackage) buildFunctionAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildPackage *BuildPackage) buildFunctionMultiReturnOffset(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
-	if f.AutoVariableForException != nil {
-		//for exception
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		f.AutoVariableForException.Offset = code.MaxLocals
-		code.MaxLocals++
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, f.AutoVariableForException.Offset)...)
-		state.appendLocals(class,
-			state.newObjectVariableType(throwableClass))
-		maxStack = 1
-	}
-	if f.AutoVariableForReturnBecauseOfDefer != nil {
-		// for return Object[]
-		if len(f.Type.ReturnList) > 1 {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
-			code.CodeLength++
-			f.AutoVariableForReturnBecauseOfDefer.Offset = code.MaxLocals
-			code.MaxLocals++
-			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-				f.AutoVariableForReturnBecauseOfDefer.Offset)...)
-			state.appendLocals(class, state.newObjectVariableType(javaRootObjectArray))
-		}
-		maxStack = 1
-	}
+	code.Codes[code.CodeLength] = cg.OP_aconst_null
+	code.CodeLength++
+	context.multiValueOffset = code.MaxLocals
+	code.MaxLocals++
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+		context.multiValueOffset)...)
+	state.appendLocals(class, state.newObjectVariableType(javaRootObjectArray))
+	maxStack = 1
 	return
 }
 

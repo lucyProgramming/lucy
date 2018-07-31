@@ -73,7 +73,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 		if s.Default == nil {
 			errs = append(errs,
 				fmt.Errorf("%s parameter type named '%s',resolve as '%s' has no match and no 'default block'",
-					errMsgPrefix(s.Pos), TName, s.Condition.TypeString()))
+					errMsgPrefix(s.Condition.Pos), TName, s.Condition.TypeString()))
 			return
 		} else {
 			switchStatement.Type = StatementTypeBlock

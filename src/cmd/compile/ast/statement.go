@@ -105,18 +105,13 @@ func (s *Statement) check(block *Block) []error { // block is father
 			return []error{fmt.Errorf("%s cannot has 'return' in 'defer'",
 				errMsgPrefix(s.Pos))}
 		}
-		es := s.StatementReturn.check(block)
-		if len(s.StatementReturn.Defers) > 0 {
-			block.InheritedAttribute.Function.MkAutoVarForReturnBecauseOfDefer()
-		}
-		return es
+		return s.StatementReturn.check(block)
 	case StatementTypeGoTo:
 		err := s.checkStatementGoTo(block)
 		if err != nil {
 			return []error{err}
 		}
 	case StatementTypeDefer:
-		block.InheritedAttribute.Function.mkAutoVarForException()
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
 		es := s.Defer.Block.checkStatements()

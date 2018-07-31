@@ -181,6 +181,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				v.Type.bindWithParameterTypes(parameterTypes)
 			}
 		}
+
 		//check this function
 		cloneFunction.Block.inherit(&PackageBeenCompile.Block)
 		if cloneFunction.Block.Functions == nil {

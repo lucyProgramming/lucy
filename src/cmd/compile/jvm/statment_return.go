@@ -156,7 +156,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-				context.function.AutoVariableForReturnBecauseOfDefer.Offset)...)
+				context.multiValueOffset)...)
 		}
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
@@ -168,10 +168,11 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 			maxStack = stack
 		}
 		//restore the stack
+
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code,
 				loadLocalVariableOps(ast.VariableTypeObject,
-					context.function.AutoVariableForReturnBecauseOfDefer.Offset)...)
+					context.multiValueOffset)...)
 		}
 	}
 	if len(statementReturn.Expressions) > 0 {
@@ -285,7 +286,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-			context.function.AutoVariableForException.Offset)...) // this code will make stack is empty
+			statementReturn.Defers[index].ExceptionOffset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
 		context.Defer = statementReturn.Defers[index]
@@ -295,12 +296,8 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		for _, v := range statementReturn.Defers[index].Labels {
 			v.Reset()
 		}
-		if index > 0 { // not the last defer, no need to look at
-			index--
-			continue
-		}
 		//if need throw
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForException.Offset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, statementReturn.Defers[index].ExceptionOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(throwableClass))
@@ -314,20 +311,21 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength+6] = cg.OP_athrow
 		code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
 		code.CodeLength += 8
-
-		//exception that have been handled
-		if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
-			//load when function have multi returns if read to end
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.function.AutoVariableForReturnBecauseOfDefer.Offset)...)
-			code.Codes[code.CodeLength] = cg.OP_ifnull
-			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-			code.Codes[code.CodeLength+3] = cg.OP_goto
-			length := code.CodeLength + 3
-			code.CodeLength += 6
-			context.MakeStackMap(code, state, code.CodeLength)
-			buildPackage.buildReturnFromFunctionReturnList(class, code, context)
-			context.MakeStackMap(code, state, code.CodeLength)
-			binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
+		if index == 0 {
+			//exception that have been handled
+			if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
+				//load when function have multi returns if read to end
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueOffset)...)
+				code.Codes[code.CodeLength] = cg.OP_ifnull
+				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+				code.Codes[code.CodeLength+3] = cg.OP_goto
+				length := code.CodeLength + 3
+				code.CodeLength += 6
+				context.MakeStackMap(code, state, code.CodeLength)
+				buildPackage.buildReturnFromFunctionReturnList(class, code, context)
+				context.MakeStackMap(code, state, code.CodeLength)
+				binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
+			}
 		}
 		index--
 	}

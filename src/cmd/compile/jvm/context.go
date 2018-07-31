@@ -6,6 +6,7 @@ import (
 )
 
 type Context struct {
+	multiValueOffset        uint16
 	class                   *ast.Class
 	function                *ast.Function
 	currentSourceFile       string

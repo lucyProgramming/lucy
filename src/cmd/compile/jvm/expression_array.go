@@ -62,7 +62,6 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 		state.pushStack(class, arrayObject)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		stack := buildExpression.build(class, code, v, context, state)
-
 		state.popStack(2)
 		if t := 5 + stack; t > maxStack {
 			maxStack = t
