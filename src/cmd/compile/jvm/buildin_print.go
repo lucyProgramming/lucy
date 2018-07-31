@@ -161,7 +161,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
-			autoVar := storeMultiValueAutoVar(class, code, state)
+			autoVar := newMultiValueAutoVar(class, code, state)
 			for kk, tt := range v.MultiValues {
 				stack = autoVar.unPack(class, code, kk, tt)
 				if t := stack + currentStack; t > maxStack {

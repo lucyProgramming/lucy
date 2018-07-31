@@ -107,7 +107,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}
-					autoVar := storeMultiValueAutoVar(class, code, state)
+					autoVar := newMultiValueAutoVar(class, code, state)
 					for kk, _ := range v.MultiValues {
 						currentStack := uint16(1)
 						code.Codes[code.CodeLength] = cg.OP_dup // dup array list

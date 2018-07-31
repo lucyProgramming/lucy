@@ -248,7 +248,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			autoVar := storeMultiValueAutoVar(class, code, state)
+			autoVar := newMultiValueAutoVar(class, code, state)
 			for kk, _ := range v.MultiValues {
 				currentStack = 1
 				code.Codes[code.CodeLength] = cg.OP_dup

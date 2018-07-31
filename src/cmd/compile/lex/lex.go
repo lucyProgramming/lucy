@@ -460,7 +460,7 @@ func (lex *Lexer) tryLexElseIf() (is bool) {
 func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
-	token.StartColumn = lex.column
+	token.StartColumn = lex.column - 1
 	token.Type = TokenLiteralString
 	bs := []byte{}
 	var c byte
@@ -627,7 +627,7 @@ redo:
 		c, eof = lex.getChar()
 	}
 	token.StartLine = lex.line
-	token.StartColumn = lex.column
+	token.StartColumn = lex.column - 1
 	if eof {
 		token.Type = TokenEof
 		token.Description = "EOF"

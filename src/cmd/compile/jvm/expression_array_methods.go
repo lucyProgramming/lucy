@@ -59,7 +59,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				autoVar := storeMultiValueAutoVar(class, code, state)
+				autoVar := newMultiValueAutoVar(class, code, state)
 				for kk, t := range v.MultiValues {
 					currentStack = 1
 					if t := autoVar.unPack(class, code, kk, t) + currentStack; t > maxStack {
@@ -105,7 +105,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				autoVar := storeMultiValueAutoVar(class, code, state)
+				autoVar := newMultiValueAutoVar(class, code, state)
 				for kk, tt := range v.MultiValues {
 					currentStack := uint16(1)
 					stack = autoVar.unPack(class, code, kk, tt)

@@ -56,7 +56,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				autoVar := storeMultiValueAutoVar(class, code, state) // store to temp
+				autoVar := newMultiValueAutoVar(class, code, state) // store to temp
 				for kk, tt := range v.MultiValues {
 					currentStack = 1
 					if k != len(call.Args)-1 || kk != len(v.MultiValues)-1 {

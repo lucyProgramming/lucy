@@ -10,7 +10,7 @@ type MultiValueAutoVar struct {
 /*
 	stack is 1 ,expect value on stack
 */
-func storeMultiValueAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState) *MultiValueAutoVar {
+func newMultiValueAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState) *MultiValueAutoVar {
 	ret := &MultiValueAutoVar{}
 	ret.offset = code.MaxLocals
 	code.MaxLocals++

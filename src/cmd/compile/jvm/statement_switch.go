@@ -78,7 +78,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				autoVar := storeMultiValueAutoVar(class, code, state)
+				autoVar := newMultiValueAutoVar(class, code, state)
 				for kkk, ttt := range ee.MultiValues {
 					currentStack = size
 					if size == 1 {

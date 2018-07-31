@@ -18,7 +18,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			autoVar := storeMultiValueAutoVar(class, code, state)
+			autoVar := newMultiValueAutoVar(class, code, state)
 			for k, t := range e.MultiValues {
 				stack = autoVar.unPack(class, code, k, t)
 				if t := currentStack + stack; t > maxStack {
@@ -64,7 +64,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 					if t := stack + currentStack; t > maxStack {
 						maxStack = t
 					}
-					autoVar := storeMultiValueAutoVar(class, code, state)
+					autoVar := newMultiValueAutoVar(class, code, state)
 					for kk, tt := range e.MultiValues {
 						code.Codes[code.CodeLength] = cg.OP_dup
 						code.CodeLength++

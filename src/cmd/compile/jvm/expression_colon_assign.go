@@ -71,7 +71,7 @@ func (buildExpression *BuildExpression) buildColonAssign(class *cg.ClassHighLeve
 	} else {
 		maxStack = buildExpression.buildExpressions(class, code, vs.InitValues, context, state)
 	}
-	autoVar := storeMultiValueAutoVar(class, code, state)
+	autoVar := newMultiValueAutoVar(class, code, state)
 	//first round
 	for k, v := range vs.Variables {
 		if v.Name == ast.NoNameIdentifier {
@@ -168,7 +168,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			autoVar := storeMultiValueAutoVar(class, code, state)
+			autoVar := newMultiValueAutoVar(class, code, state)
 			for kk, tt := range v.MultiValues {
 				stack = autoVar.unPack(class, code, kk, tt)
 				if t := stack + currentStack; t > maxStack {

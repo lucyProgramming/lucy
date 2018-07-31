@@ -45,7 +45,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	} else {
 		maxStack = buildExpression.buildExpressions(class, code, rights, context, state)
 	}
-	autoVar := storeMultiValueAutoVar(class, code, state)
+	autoVar := newMultiValueAutoVar(class, code, state)
 	for k, v := range lefts {
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, _ :=

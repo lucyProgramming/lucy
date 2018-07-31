@@ -37,7 +37,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 				maxStack = t
 			}
 			// store in temp var
-			autoVar := storeMultiValueAutoVar(class, code, state)
+			autoVar := newMultiValueAutoVar(class, code, state)
 			for kk, _ := range v.MultiValues {
 				currentStack = 2
 				code.Codes[code.CodeLength] = cg.OP_dup
