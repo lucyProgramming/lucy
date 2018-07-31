@@ -27,9 +27,6 @@ fn testObject()->(ok bool = false){
     }
     ok = true 
 
-
-
-
 }
 
 

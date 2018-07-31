@@ -86,6 +86,40 @@ func (lc *LucyCompile) compile() {
 			lc.Errs = append(lc.Errs, err)
 			continue
 		}
+
+		//UTF-16 (BE)
+		if len(bs) >= 2 &&
+			bs[0] == 0xfe &&
+			bs[1] == 0xff {
+			fmt.Printf("file:%s looks like UTF-16(BE) file\n", v)
+			os.Exit(2)
+		}
+		//UTF-16 (LE)
+		if len(bs) >= 2 &&
+			bs[0] == 0xff &&
+			bs[1] == 0xfe {
+			fmt.Printf("file:%s looks like UTF-16(LE) file\n", v)
+			os.Exit(2)
+		}
+		//UTF-32 (LE)
+		if len(bs) >= 4 &&
+			bs[0] == 0x0 &&
+			bs[1] == 0x0 &&
+			bs[2] == 0xfe &&
+			bs[3] == 0xff {
+			fmt.Printf("file:%s looks like UTF-32(LE) file\n", v)
+			os.Exit(2)
+		}
+		//UTF-32 (BE)
+		if len(bs) >= 4 &&
+			bs[0] == 0xff &&
+			bs[1] == 0xfe &&
+			bs[2] == 0x0 &&
+			bs[3] == 0x0 {
+			fmt.Printf("file:%s looks like UTF-32(BE) file\n", v)
+			os.Exit(2)
+		}
+
 		if len(bs) >= 3 &&
 			bs[0] == 0xef &&
 			bs[1] == 0xbb &&

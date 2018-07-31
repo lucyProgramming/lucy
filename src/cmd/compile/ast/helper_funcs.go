@@ -16,7 +16,7 @@ func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
 
-func checkRightValuesValid(block *Block, es []*Expression, errs *[]error) []*Type {
+func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
 	ret := []*Type{}
 	for _, v := range es {
 		ts, es := v.check(block)

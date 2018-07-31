@@ -24,7 +24,7 @@ func (s *StatementReturn) check(b *Block) []error {
 		return nil
 	}
 	errs := make([]error, 0)
-	returnValueTypes := checkRightValuesValid(b, s.Expressions, &errs)
+	returnValueTypes := checkExpressions(b, s.Expressions, &errs)
 	rs := b.InheritedAttribute.Function.Type.ReturnList
 	pos := s.Expressions[len(s.Expressions)-1].Pos
 	if len(returnValueTypes) < len(rs) {

@@ -81,6 +81,9 @@ func (buildExpression *BuildExpression) getLeftValue(
 	switch e.Type {
 	case ast.ExpressionTypeIdentifier:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
+		if identifier.Name == ast.NoNameIdentifier {
+			panic("this is not happening")
+		}
 		if identifier.Variable.IsGlobal {
 			ops = make([]byte, 3)
 			leftValueType = LeftValueTypePutStatic
@@ -94,9 +97,6 @@ func (buildExpression *BuildExpression) getLeftValue(
 		}
 		if identifier.Variable.BeenCaptured {
 			return buildExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
-		}
-		if identifier.Name == ast.NoNameIdentifier {
-			panic("this is not happening")
 		}
 		leftValueType = LeftValueTypeLocalVar
 		ops = storeLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)

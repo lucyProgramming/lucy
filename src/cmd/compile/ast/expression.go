@@ -535,11 +535,10 @@ type ExpressionSelection struct {
 }
 
 type ExpressionNew struct {
-	Type                     *Type
-	Args                     CallArgs
-	Construction             *ClassMethod
-	IsConvertJavaArray2Array bool
-	VArgs                    *CallVArgs
+	Type         *Type
+	Args         CallArgs
+	Construction *ClassMethod
+	VArgs        *CallVArgs
 }
 
 type ExpressionMap struct {

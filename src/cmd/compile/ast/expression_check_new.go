@@ -46,7 +46,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	*ret = *no.Type
 	ret.Type = VariableTypeObject
 	ret.Pos = e.Pos
-	callArgTypes := checkRightValuesValid(block, no.Args, errs)
+	callArgTypes := checkExpressions(block, no.Args, errs)
 	ms, matched, err := no.Type.Class.matchConstructionFunction(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(no.Type.Pos), err))
@@ -98,7 +98,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 				errMsgPrefix(e.Pos)))
 		newArray.Args = []*Expression{} // reset to 0,continue to analyse
 	}
-	ts := checkRightValuesValid(block, newArray.Args, errs)
+	ts := checkExpressions(block, newArray.Args, errs)
 	amount, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		*errs = append(*errs, err)

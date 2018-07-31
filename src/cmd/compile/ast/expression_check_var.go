@@ -12,7 +12,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	var err error
 	vs.IfDeclaredBefore = make([]bool, len(vs.Variables)) // all create this time
 	if vs.InitValues != nil && len(vs.InitValues) > 0 {
-		valueTypes := checkRightValuesValid(block, vs.InitValues, errs)
+		valueTypes := checkExpressions(block, vs.InitValues, errs)
 		if len(valueTypes) != len(vs.Variables) {
 			noErr = false
 			*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",

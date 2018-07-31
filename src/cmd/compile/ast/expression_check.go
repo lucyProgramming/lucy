@@ -144,18 +144,12 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		e.checkColonAssignExpression(block, &errs)
 		e.Value = mkVoidType(e.Pos)
 		returnValueTypes = []*Type{e.Value}
-		//if t, ok := e.Data.(*ExpressionDeclareVariable); ok && t != nil && len(t.Variables) > 1 {
-		//	block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		//}
 	case ExpressionTypeAssign:
 		tt := e.checkAssignExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
 		e.Value = tt
-		//if e.Data.(*ExpressionBinary).Left.isListAndMoreThanNElements(1) {
-		//	block.InheritedAttribute.Function.mkAutoVarForMultiReturn()
-		//}
 	case ExpressionTypeIncrement:
 		fallthrough
 	case ExpressionTypeDecrement:
@@ -347,7 +341,7 @@ func (e *Expression) mustBeOneValueContext(ts []*Type) (*Type, error) {
 }
 
 func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkRightValuesValid(block, call.Args, errs)
+	callArgsTypes := checkExpressions(block, call.Args, errs)
 	length := len(*errs)
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {

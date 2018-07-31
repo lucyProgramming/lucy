@@ -23,7 +23,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			state.newStackMapVerificationTypeInfo(class, s.RangeAttr.RangeOn.Value))
 		context.MakeStackMap(code, state, code.CodeLength+7)
 		context.MakeStackMap(code, state, code.CodeLength+11)
-		state.popStack(1) // pop
+		state.popStack(1) //pop
 	}
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
 	code.Codes[code.CodeLength+1] = cg.OP_ifnull
