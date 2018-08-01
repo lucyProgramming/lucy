@@ -181,7 +181,7 @@ func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *a
 		code.CodeLength += 3
 	case ast.VariableTypeArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		meta := ArrayMetas[typ.Array.Array.Type]
+		meta := ArrayMetas[typ.Array.Type]
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
