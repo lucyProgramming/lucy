@@ -24,9 +24,7 @@ public fn copy(dest T,src T , start int = 0 , end int = -1) {
 }
 
 
-
-
-
+/* 
 public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) {
 	if end == -1 {
 		end = len(java)
@@ -44,7 +42,7 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 	}
 
 }
-
+*/
 
 
 
