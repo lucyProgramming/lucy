@@ -20,6 +20,9 @@ func (stackMapState *StackMapState) addTop(absent *StackMapState) {
 		return
 	}
 	length := len(absent.Locals) - len(stackMapState.Locals)
+	if length == 0 {
+		return
+	}
 	oldLength := len(stackMapState.Locals)
 	verify := &cg.StackMapVerificationTypeInfo{}
 	verify.Verify = &cg.StackMapTopVariableInfo{}

@@ -112,6 +112,7 @@ func (s *Statement) check(block *Block) []error { // block is father
 			return []error{err}
 		}
 	case StatementTypeDefer:
+		block.InheritedAttribute.Function.HasDefer = true
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
 		es := s.Defer.Block.checkStatements()

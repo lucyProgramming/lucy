@@ -66,6 +66,12 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*/
 		call.Expression.IsStatementExpression = true
 	}
+	if call.Expression.Type == ExpressionTypeIdentifier {
+		t := call.Expression.Data.(*ExpressionIdentifier)
+		if t.Function != nil {
+			on.Function = t.Function
+		}
+	}
 	if on.Function != nil {
 		call.Function = on.Function
 		if on.Function.IsBuildIn {

@@ -276,7 +276,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-			statementReturn.Defers[index].ExceptionOffset)...) // this code will make stack is empty
+			context.exceptionOffset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
 		context.Defer = statementReturn.Defers[index]
@@ -287,7 +287,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 			v.Reset()
 		}
 		//if need throw
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, statementReturn.Defers[index].ExceptionOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(throwableClass))

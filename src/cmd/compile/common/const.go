@@ -23,6 +23,7 @@ const (
 	BuildInFunctionMonitorEnter = "monitorEnter"
 	BuildInFunctionMonitorExit  = "monitorExit"
 	BuildInFunctionBlockHole    = "blackHole"
+	BuildInFunctionTypeOf       = "typeOf"
 )
 
 const (

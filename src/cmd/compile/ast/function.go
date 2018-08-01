@@ -27,6 +27,7 @@ type Function struct {
 	Descriptor                       string
 	ClosureVariableOffSet            uint16 // for closure
 	SourceCodes                      []byte // source code for template function
+	HasDefer                         bool
 }
 
 func (f *Function) isPublic() bool {

@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -89,12 +88,6 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		}
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		s.Defer.ExceptionOffset = code.MaxLocals
-		code.MaxLocals++
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, s.Defer.ExceptionOffset)...)
-		state.appendLocals(class, state.newObjectVariableType(ast.JavaThrowableClass))
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
 	case ast.StatementTypeClass:
@@ -139,7 +132,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-			ds[index].ExceptionOffset)...) // this code will make stack is empty
+			context.exceptionOffset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
 		context.Defer = ds[index]
@@ -150,7 +143,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 			v.Reset()
 		}
 		//if need throw
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, ds[index].ExceptionOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(throwableClass))

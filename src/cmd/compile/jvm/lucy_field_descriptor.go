@@ -3,10 +3,86 @@ package jvm
 import (
 	"bytes"
 
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 )
 
 type LucyFieldSignature struct {
+}
+
+func (signature *LucyFieldSignature) typeOf(variableType *ast.Type) string {
+	s := ""
+	signature.typeOf_(variableType, &s)
+	fmt.Println()
+	return s
+}
+
+func (signature *LucyFieldSignature) typeOf_(variableType *ast.Type, s *string) {
+	switch variableType.Type {
+	case ast.VariableTypeBool:
+		*s += "bool"
+	case ast.VariableTypeByte:
+		*s += "byte"
+	case ast.VariableTypeShort:
+		*s += "short"
+	case ast.VariableTypeInt:
+		*s += "int"
+	case ast.VariableTypeLong:
+		*s += "long"
+	case ast.VariableTypeFloat:
+		*s += "float"
+	case ast.VariableTypeDouble:
+		*s += "double"
+	case ast.VariableTypeString:
+		*s += "string"
+	case ast.VariableTypeObject:
+		*s += variableType.Class.Name
+	case ast.VariableTypeMap:
+		*s += "map{"
+		*s = signature.typeOf(variableType.Map.K)
+		*s += "->"
+		*s += signature.typeOf(variableType.Map.V)
+		*s += "}"
+	case ast.VariableTypeArray:
+		*s += "[]"
+		*s += signature.typeOf(variableType.Array)
+	case ast.VariableTypeJavaArray:
+		*s += signature.typeOf(variableType.Array)
+		if variableType.IsVArgs {
+			*s += "..."
+		} else {
+			*s += "[]"
+		}
+	case ast.VariableTypeFunction:
+		*s += "fn("
+		for k, v := range variableType.FunctionType.ParameterList {
+			*s += signature.typeOf(v.Type)
+			if k != len(variableType.FunctionType.ParameterList)-1 {
+				*s += ","
+			}
+		}
+		if variableType.FunctionType.VArgs != nil {
+			if len(variableType.FunctionType.ParameterList) > 0 {
+				*s += ","
+			}
+			*s += signature.typeOf(variableType.FunctionType.VArgs.Type)
+		}
+		*s += ")"
+		if len(variableType.FunctionType.ReturnList) > 0 {
+			*s += "->("
+			for k, v := range variableType.FunctionType.ReturnList {
+				*s += signature.typeOf(v.Type)
+				if k != len(variableType.FunctionType.ParameterList)-1 {
+					*s += ","
+				}
+			}
+			*s += ")"
+		}
+	case ast.VariableTypeEnum:
+		*s += variableType.Enum.Name
+
+	}
+
 }
 
 func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {

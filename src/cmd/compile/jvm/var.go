@@ -11,7 +11,6 @@ var (
 	LucyTypeAliasParser        LucyTypeAlias
 	FunctionDefaultValueParser FunctionDefaultValueParse
 	closure                    Closure
-	//multiValuePacker           MultiValueAutoVar
 )
 
 type LeftValueKind int

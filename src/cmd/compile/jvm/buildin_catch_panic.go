@@ -50,16 +50,16 @@ func (buildExpression *BuildExpression) mkBuildInCatch(class *cg.ClassHighLevel,
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++
 		copyOPs(code,
-			storeLocalVariableOps(ast.VariableTypeObject, context.Defer.ExceptionOffset)...)
+			storeLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
 		return
 	}
 	maxStack = 2
 	//load to stack
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.Defer.ExceptionOffset)...) // load
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...) // load
 	//set 2 null
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.Defer.ExceptionOffset)...) // store
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...) // store
 	//check cast
 	code.Codes[code.CodeLength] = cg.OP_checkcast
 	if context.Defer.ExceptionClass != nil {

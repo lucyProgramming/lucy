@@ -179,6 +179,14 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 			method.Code.MaxStack = t
 		}
 	}
+	if f.HasDefer {
+		context.exceptionOffset = method.Code.MaxLocals
+		method.Code.MaxLocals++
+		method.Code.Codes[method.Code.CodeLength] = cg.OP_aconst_null
+		method.Code.CodeLength++
+		copyOPs(method.Code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
+		state.appendLocals(class, state.newObjectVariableType(ast.JavaThrowableClass))
+	}
 	buildPackage.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }

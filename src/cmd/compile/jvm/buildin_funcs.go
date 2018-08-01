@@ -32,6 +32,8 @@ func (buildExpression *BuildExpression) mkBuildInFunctionCall(class *cg.ClassHig
 		return buildExpression.mkBuildInLen(class, code, e, context, state)
 	case common.BuildInFunctionBlockHole:
 		return buildExpression.mkBuildInBlackHole(class, code, e, context, state)
+	case common.BuildInFunctionTypeOf:
+		return buildExpression.mkBuildInTypeOf(class, code, e, context, state)
 	default:
 		panic("unknown  buildIn function:" + call.Function.Name)
 	}

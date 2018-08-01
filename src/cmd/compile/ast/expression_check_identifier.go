@@ -87,7 +87,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Type = VariableTypeFunction
 		result.FunctionType = &f.Type
 		result.Pos = e.Pos
-		result.Function = f
 		identifier.Function = f
 		return result, nil
 	case *Variable:
