@@ -27,7 +27,7 @@ public class ArrayInt   {
 		this.elements = values;
 		
 	}
-	private ArrayInt(){
+	public ArrayInt(){
 
 	}
 	public synchronized void set(int index , int value) {
@@ -87,6 +87,9 @@ public class ArrayInt   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayInt append(ArrayInt es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

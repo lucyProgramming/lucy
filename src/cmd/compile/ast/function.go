@@ -17,6 +17,7 @@ type Function struct {
 	buildInFunctionChecker           buildFunctionChecker // used in build function
 	IsGlobal                         bool
 	IsBuildIn                        bool
+	LoadedFromLucyLang               bool
 	Used                             bool
 	AccessFlags                      uint16
 	Type                             FunctionType
@@ -209,9 +210,6 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				*errs = append(*errs, err)
 				continue
 			}
-		}
-		if f.HaveDefaultValue && v.Type.IsVArgs {
-			//TODO::
 		}
 		if v.Type.IsVArgs && v.Expression != nil {
 			*errs = append(*errs, fmt.Errorf("%s vargs cannot have default value",

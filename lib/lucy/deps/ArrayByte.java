@@ -27,7 +27,7 @@ public class ArrayByte   {
 		this.elements = values;
 		
 	}
-	private ArrayByte(){
+	public ArrayByte(){
 
 	}
 	public synchronized void set(int index , byte value) {
@@ -87,6 +87,9 @@ public class ArrayByte   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayByte append(ArrayByte es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

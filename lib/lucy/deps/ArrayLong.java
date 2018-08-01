@@ -27,7 +27,7 @@ public class ArrayLong   {
 		this.elements = values;
 		
 	}
-	private ArrayLong(){
+	public ArrayLong(){
 
 	}
 	public synchronized void set(int index , long value) {
@@ -87,6 +87,9 @@ public class ArrayLong   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayLong append(ArrayLong es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

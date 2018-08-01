@@ -27,7 +27,7 @@ public class ArrayDouble   {
 		this.elements = values;
 		
 	}
-	private ArrayDouble(){
+	public ArrayDouble(){
 
 	}
 	public synchronized void set(int index , double value) {
@@ -87,6 +87,9 @@ public class ArrayDouble   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayDouble append(ArrayDouble es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

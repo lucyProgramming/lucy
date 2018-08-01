@@ -11,7 +11,7 @@ type Context struct {
 	class                   *ast.Class
 	function                *ast.Function
 	currentSourceFile       string
-	currentLineNUmber       int
+	currentLineNumber       int
 	Defer                   *ast.StatementDefer
 	lastStackMapState       *StackMapState
 	lastStackMapStateLocals []*cg.StackMapVerificationTypeInfo
@@ -116,12 +116,12 @@ func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos,
 		}
 		class.SourceFiles[pos.Filename] = struct{}{}
 		context.currentSourceFile = pos.Filename
-		context.currentLineNUmber = pos.StartLine
+		context.currentLineNumber = pos.StartLine
 		code.MKLineNumber(pos.StartLine)
 		return
 	}
-	if context.currentLineNUmber != pos.StartLine {
+	if context.currentLineNumber != pos.StartLine {
 		code.MKLineNumber(pos.StartLine)
-		context.currentLineNUmber = pos.StartLine
+		context.currentLineNumber = pos.StartLine
 	}
 }

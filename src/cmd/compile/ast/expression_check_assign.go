@@ -52,7 +52,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			continue
 		}
 		var variableType *Type
-		if k < len(assignTypes) && assignTypes[k] != nil {
+		if k < len(assignTypes) {
 			variableType = assignTypes[k]
 		}
 		if variable, ok := block.Variables[identifier.Name]; ok {
@@ -76,15 +76,17 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 			}
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
-			vd.Type = variableType
-			if variableType.isTyped() == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s' init value not typed",
-					errMsgPrefix(v.Pos), identifier.Name))
-			}
-			if vd.Type == nil { // still cannot have type,we can have a void,that`s ok
+			if variableType != nil {
+				vd.Type = variableType.Clone()
+				vd.Type.Pos = e.Pos
+			} else {
 				vd.Type = &Type{}
 				vd.Type.Type = VariableTypeVoid
 				vd.Type.Pos = v.Pos
+			}
+			if vd.Type.isTyped() == false {
+				*errs = append(*errs, fmt.Errorf("%s '%s' init value not typed",
+					errMsgPrefix(v.Pos), identifier.Name))
 			}
 			err = block.Insert(vd.Name, v.Pos, vd)
 			identifier.Variable = vd

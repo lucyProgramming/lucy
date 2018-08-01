@@ -48,6 +48,7 @@ func (p *Package) mkBuildInMark() {
 	}
 	for _, v := range p.Block.Functions {
 		v.IsBuildIn = true
+		v.LoadedFromLucyLang = true
 	}
 	for _, v := range p.Block.TypeAliases {
 		v.IsBuildIn = true

@@ -9,6 +9,17 @@ import (
 func (buildExpression *BuildExpression) mkBuildInFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
+	if call.Function.LoadedFromLucyLang {
+		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      call.Function.ClassMethod.Class.Name,
+			Method:     call.Function.Name,
+			Descriptor: call.Function.ClassMethod.Descriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
+	}
 	switch call.Function.Name {
 	case common.BuildInFunctionPrint:
 		return buildExpression.mkBuildInPrint(class, code, e, context, state)

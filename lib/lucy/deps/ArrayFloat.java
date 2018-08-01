@@ -27,7 +27,7 @@ public class ArrayFloat   {
 		this.elements = values;
 		
 	}
-	private ArrayFloat(){
+	public ArrayFloat(){
 
 	}
 	public synchronized void set(int index , float value) {
@@ -87,6 +87,9 @@ public class ArrayFloat   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayFloat append(ArrayFloat es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

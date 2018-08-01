@@ -27,7 +27,7 @@ public class ArrayBool   {
 		this.elements = values;
 		
 	}
-	private ArrayBool(){
+	public ArrayBool(){
 
 	}
 	public synchronized void set(int index , boolean value) {
@@ -87,6 +87,9 @@ public class ArrayBool   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayBool append(ArrayBool es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

@@ -29,7 +29,7 @@ public class ArrayObject   {
 		this.elements = values;
 		
 	}
-	private ArrayObject(){
+	public ArrayObject(){
 
 	}
 	public synchronized void set(int index , Object value) {
@@ -89,6 +89,9 @@ public class ArrayObject   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayObject append(ArrayObject es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

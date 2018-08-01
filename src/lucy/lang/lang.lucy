@@ -1,6 +1,8 @@
 
 import "java/lang/Object" as javaRootClass;
 
+
+
 /*
 	root object for lucy language default object
 */
@@ -24,6 +26,24 @@ public fn copy(dest T,src T , start int = 0 , end int = -1) {
 
 
 
+
+public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) {
+	if end == -1 {
+		end = len(java)
+	}
+	type retType = []T
+	switch T {
+		case bool:
+			a := new deps.ArrayBool()
+			a.start = start 
+			a.end = end 
+			a.cap = len(java)
+			lucy = retType(a)
+			break
+		
+	}
+
+}
 
 
 

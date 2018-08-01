@@ -150,7 +150,7 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 			*errs = append(*errs, err)
 			return err
 		}
-	} else { // means use old typec
+	} else { // means use old type
 		c.Type = t
 	}
 	return nil
@@ -191,48 +191,34 @@ func callHave(ts []*Type) string {
 	return s
 }
 
-func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, checked []*Type) []error {
+func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) []error {
 	errs := []error{}
 	if len(es) == 0 {
-		return errs
-	}
-	if len(es) != len(checked) || len(es) != len(needs) { // means multi return
 		return errs
 	}
 	for k, e := range es {
 		if e.IsLiteral() == false {
 			continue
 		}
+		if k >= len(needs) {
+			break
+		}
 		if needs[k] == nil {
 			continue
 		}
-		if checked[k] == nil {
+		if eval[k] == nil {
 			continue
 		}
-		if needs[k].Equal(&errs, checked[k]) {
+		if needs[k].Equal(&errs, eval[k]) {
 			continue // no need
 		}
-		if (needs[k].IsInteger() && checked[k].IsInteger()) ||
-			(needs[k].IsFloat() && checked[k].IsFloat()) {
-			pos := checked[k].Pos // keep pos
+		if (needs[k].IsInteger() && eval[k].IsInteger()) ||
+			(needs[k].IsFloat() && eval[k].IsFloat()) {
+			pos := eval[k].Pos // keep pos
 			e.convertNumberLiteralTo(needs[k].Type)
-			*checked[k] = *needs[k]
-			checked[k].Pos = pos
+			*eval[k] = *needs[k]
+			eval[k].Pos = pos
 		}
 	}
 	return errs
 }
-
-//func checkEnum(enums []*Enum) []error {
-//	ret := make([]error, 0)
-//	for _, v := range enums {
-//		if len(v.Enums) == 0 {
-//			continue
-//		}
-//		err := v.check()
-//		if err != nil {
-//			ret = append(ret, err)
-//		}
-//	}
-//	return ret
-//}

@@ -27,7 +27,7 @@ public class ArrayString   {
 		this.elements = values;
 		
 	}
-	private ArrayString(){
+	public ArrayString(){
 
 	}
 	public synchronized void set(int index , String value) {
@@ -87,6 +87,9 @@ public class ArrayString   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayString append(ArrayString es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);

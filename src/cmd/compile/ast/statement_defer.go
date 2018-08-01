@@ -3,7 +3,6 @@ package ast
 import "fmt"
 
 type StatementDefer struct {
-	//ExceptionOffset uint16
 	Labels         []*StatementLabel
 	StartPc        int         // for jvm
 	StackMapState  interface{} // *jvm.StackMapState

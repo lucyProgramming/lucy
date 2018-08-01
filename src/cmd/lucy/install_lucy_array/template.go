@@ -30,7 +30,7 @@ public class ArrayTTT   {
 		this.elements = values;
 		DEFAULT_INIT
 	}
-	private ArrayTTT(){
+	public ArrayTTT(){
 
 	}
 	public synchronized void set(int index , TTT value) {

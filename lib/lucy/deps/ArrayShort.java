@@ -27,7 +27,7 @@ public class ArrayShort   {
 		this.elements = values;
 		
 	}
-	private ArrayShort(){
+	public ArrayShort(){
 
 	}
 	public synchronized void set(int index , short value) {
@@ -87,6 +87,9 @@ public class ArrayShort   {
 		this.elements = eles;
 	}
 	public synchronized  ArrayShort append(ArrayShort es){
+		if (es == null) { //no need 
+			return this ; 
+		}
 		if(this.end + es.size() < this.cap){
 		}else {
 			this.expand((this.cap + es.size()) * 2);
