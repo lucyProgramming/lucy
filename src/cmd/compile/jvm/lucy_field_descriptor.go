@@ -39,7 +39,7 @@ func (signature *LucyFieldSignature) typeOf_(variableType *ast.Type, s *string) 
 		*s += variableType.Class.Name
 	case ast.VariableTypeMap:
 		*s += "map{"
-		*s = signature.typeOf(variableType.Map.K)
+		*s += signature.typeOf(variableType.Map.K)
 		*s += "->"
 		*s += signature.typeOf(variableType.Map.V)
 		*s += "}"
@@ -80,9 +80,7 @@ func (signature *LucyFieldSignature) typeOf_(variableType *ast.Type, s *string) 
 		}
 	case ast.VariableTypeEnum:
 		*s += variableType.Enum.Name
-
 	}
-
 }
 
 func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {
