@@ -73,7 +73,6 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		arr.Type.Pos = pos
 	}
 	/*
-
 		[]int { 1, 2}
 	*/
 	arr.Expressions, err = expressionParser.parseArrayValues()
