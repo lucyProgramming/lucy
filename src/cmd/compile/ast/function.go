@@ -19,6 +19,7 @@ type Function struct {
 	IsBuildIn                        bool
 	LoadedFromLucyLang               bool
 	Used                             bool
+	TemplateClonedFunction           bool
 	AccessFlags                      uint16
 	Type                             FunctionType
 	Closure                          Closure

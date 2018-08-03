@@ -23,6 +23,7 @@ const (
 	StatementTypeClass
 	StatementTypeEnum
 	StatementTypeNop
+	StatementTypeImport
 )
 
 type Statement struct {
@@ -43,6 +44,7 @@ type Statement struct {
 	Defer                     *StatementDefer
 	Class                     *Class
 	Enum                      *Enum
+	Import                    *Import
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()
@@ -146,6 +148,11 @@ func (s *Statement) check(block *Block) []error { // block is father
 		//nop , should be never execute to here
 	case StatementTypeSwitchTemplate:
 		return s.StatementSwitchTemplate.check(block, s)
+	case StatementTypeImport:
+		err := s.Import.MkAccessName()
+		if err != nil {
+
+		}
 	}
 	return nil
 }

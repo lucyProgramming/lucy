@@ -32,6 +32,7 @@ const (
 	VariableTypeTypeAlias
 	VariableTypePackage
 	VariableTypeNull
+	VariableTypeSelectGlobal
 )
 
 type Type struct {
@@ -170,7 +171,9 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 	if typ.Resolved {
 		return nil
 	}
-	typ.Resolved = true
+	defer func() {
+		typ.Resolved = true
+	}()
 	if typ.Type == VariableTypeTemplate {
 		if block.InheritedAttribute.Function.parameterTypes == nil ||
 			block.InheritedAttribute.Function.parameterTypes[typ.Name] == nil {
@@ -184,6 +187,29 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 	}
 	if typ.Type == VariableTypeName { //
 		return typ.resolveName(block, len(isSubPart) > 0)
+	}
+	if typ.Type == VariableTypeSelectGlobal {
+		d, exists := PackageBeenCompile.Block.NameExists(typ.Name)
+		if exists == false {
+			return fmt.Errorf("%s '%s' not found",
+				errMsgPrefix(typ.Pos), typ.Name)
+		}
+		switch d.(type) {
+		case *Class:
+			typ.Type = VariableTypeObject
+			typ.Class = d.(*Class)
+		case *Enum:
+			typ.Type = VariableTypeEnum
+			typ.Enum = d.(*Enum)
+		case *Type:
+			pos := typ.Pos
+			*typ = *d.(*Type)
+			typ.Pos = pos
+		default:
+			return fmt.Errorf("%s '%s' is not a type",
+				errMsgPrefix(typ.Pos), typ.Name)
+		}
+
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
@@ -468,6 +494,8 @@ func (typ *Type) typeString(ret *string) {
 		}
 		*ret += s
 	case VariableTypeTemplate:
+		*ret += typ.Name
+	case VariableTypeSelectGlobal:
 		*ret += typ.Name
 	default:
 		panic(typ.Type)

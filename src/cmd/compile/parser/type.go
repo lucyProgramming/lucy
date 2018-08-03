@@ -139,8 +139,27 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Pos:          pos,
 			FunctionType: &ft,
 		}
+	case lex.TokenGlobal:
+		parser.Next(lfIsToken)
+		parser.unExpectNewLineAndSkip()
+		if parser.token.Type != lex.TokenSelection {
+			return nil, fmt.Errorf("%s expect '.' , but '%s'",
+				parser.errorMsgPrefix(), parser.token.Description)
+		}
+		parser.Next(lfNotToken)
+		if parser.token.Type != lex.TokenIdentifier {
+			parser.errs = append(parser.errs, fmt.Errorf("%s expect identifier , but '%s'",
+				parser.errorMsgPrefix(), parser.token.Description))
+		} else {
+			ret = &ast.Type{
+				Type: ast.VariableTypeSelectGlobal,
+				Pos:  pos,
+				Name: parser.token.Data.(string),
+			}
+			parser.Next(lfIsToken)
+		}
 	default:
-		err = fmt.Errorf("%s unkown type,begining token is '%s'",
+		err = fmt.Errorf("%s unkown begining '%s' token for a type",
 			parser.errorMsgPrefix(), parser.token.Description)
 	}
 	if err != nil {
