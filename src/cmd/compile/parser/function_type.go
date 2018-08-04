@@ -56,16 +56,14 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 			return
 		}
 		parser.Next(lfIsToken) // skip )
+	} else {
+		functionType.ReturnList = make([]*ast.Variable, 1)
+		functionType.ReturnList[0] = &ast.Variable{}
+		functionType.ReturnList[0].Pos = parser.mkPos()
+		functionType.ReturnList[0].Type = &ast.Type{}
+		functionType.ReturnList[0].Type.Pos = parser.mkPos()
+		functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
 	}
-	//else {
-	//	functionType.ReturnList = make([]*ast.Variable, 1)
-	//	functionType.ReturnList[0] = &ast.Variable{}
-	//	functionType.ReturnList[0].Pos = parser.mkPos()
-	//	functionType.ReturnList[0].Name = "compileAutoVoidReturnName"
-	//	functionType.ReturnList[0].Type = &ast.Type{}
-	//	functionType.ReturnList[0].Type.Pos = parser.mkPos()
-	//	functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
-	//}
 	return functionType, err
 }
 

@@ -87,9 +87,6 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
-		if m.Function.Type.NoReturnValue() {
-			m.Function.Type.ReturnList = nil
-		}
 		if (v.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
 			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
@@ -186,9 +183,6 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Function)
-		}
-		if m.Function.Type.NoReturnValue() {
-			m.Function.Type.ReturnList = nil
 		}
 		err = loadEnumForFunction(m.Function)
 		if err != nil {
@@ -325,9 +319,6 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function := &ast.Function{}
 		function.Name = name
 		function.AccessFlags = m.AccessFlags
-		if function.Type.NoReturnValue() {
-			function.Type.ReturnList = nil
-		}
 		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
 		function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
@@ -396,7 +387,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if len(es) > 0 { // looks impossible
 			return es[0]
 		}
-		f.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		f.AccessFlags = attr.AccessFlag
 		f.TemplateFunction = &ast.TemplateFunction{}
 		pack.Block.Functions[attr.Name] = f
 	}

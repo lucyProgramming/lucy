@@ -88,13 +88,31 @@ func (p *Package) TypeCheck() []error {
 	p.Errors = []error{}
 	p.Errors = append(p.Errors, p.Block.checkConstants()...)
 	//
-	for _, v := range p.Block.Functions {
-		if v.IsBuildIn {
+	for _, f := range p.Block.Functions {
+		if f.IsBuildIn {
 			continue
 		}
-		v.Block.inherit(&p.Block)
-		v.Block.InheritedAttribute.Function = v
-		v.checkParametersAndReturns(&p.Errors)
+		f.Block.inherit(&p.Block)
+		f.Block.InheritedAttribute.Function = f
+		f.checkParametersAndReturns(&p.Errors)
+		if f.Name == MainFunctionName {
+			errMain := func() {
+				p.Errors = append(p.Errors, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
+					errMsgPrefix(f.Pos), MainFunctionName))
+			}
+			if len(f.Type.ParameterList) != 1 {
+				errMain()
+			} else { //
+				if f.Type.ParameterList[0].Type.Type == VariableTypeArray &&
+					f.Type.ParameterList[0].Type.Array.Type == VariableTypeString {
+				} else {
+					errMain()
+				}
+			}
+			if f.Type.NoReturnValue() == false {
+				errMain()
+			}
+		}
 		if p.shouldStop(nil) {
 			return p.Errors
 		}
@@ -106,6 +124,13 @@ func (p *Package) TypeCheck() []error {
 			p.Errors = append(p.Errors, err)
 		}
 	}
+	for _, v := range p.Block.TypeAliases {
+		err := v.resolve(&PackageBeenCompile.Block)
+		if err != nil {
+			p.Errors = append(p.Errors, err)
+		}
+	}
+
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
 		es := v.Block.checkConstants()

@@ -167,33 +167,10 @@ func (f *Function) makeLastReturnStatement() {
 		})
 	}
 }
-
+func (f *Function) isGlobalMain() bool {
+	return f.IsGlobal && f.Name == MainFunctionName
+}
 func (f *Function) checkParametersAndReturns(errs *[]error) {
-	if f.Name == MainFunctionName {
-		errMain := func() {
-			*errs = append(*errs, fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
-				errMsgPrefix(f.Pos), MainFunctionName))
-		}
-		if len(f.Type.ParameterList) != 1 {
-			errMain()
-		} else { //
-			if f.Type.ParameterList[0].Type.Type == VariableTypeArray &&
-				f.Type.ParameterList[0].Type.Array.Type == VariableTypeString {
-				err := f.Block.Insert(f.Type.ParameterList[0].Name, f.Type.ParameterList[0].Pos, f.Type.ParameterList[0])
-				if err != nil {
-					*errs = append(*errs, err)
-				}
-			} else {
-				errMain()
-			}
-			//f.Type.ParameterList[0].LocalValOffset = 1
-			f.Type.ParameterList[0].IsFunctionParameter = true
-		}
-		if len(f.Type.ReturnList) > 0 {
-			errMain()
-		}
-		return
-	}
 	var err error
 	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true
@@ -256,41 +233,42 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			}
 		}
 	}
-
-	//handler return
-	for _, v := range f.Type.ReturnList {
-		v.IsFunctionReturnVariable = true
-		if len(v.Type.getParameterType()) > 0 {
-			if f.TemplateFunction == nil {
-				f.TemplateFunction = &TemplateFunction{}
+	if f.Type.NoReturnValue() == false {
+		//handler return
+		for _, v := range f.Type.ReturnList {
+			v.IsFunctionReturnVariable = true
+			if len(v.Type.getParameterType()) > 0 {
+				if f.TemplateFunction == nil {
+					f.TemplateFunction = &TemplateFunction{}
+				}
+			} else {
+				err = v.Type.resolve(&f.Block)
+				if err != nil {
+					*errs = append(*errs, err)
+				}
+				err = f.Block.Insert(v.Name, v.Pos, v)
+				if err != nil {
+					*errs = append(*errs, err)
+					continue
+				}
 			}
-		} else {
-			err = v.Type.resolve(&f.Block)
-			if err != nil {
-				*errs = append(*errs, err)
-			}
-			err = f.Block.Insert(v.Name, v.Pos, v)
-			if err != nil {
-				*errs = append(*errs, err)
+			if f.TemplateFunction != nil {
 				continue
 			}
-		}
-		if f.TemplateFunction != nil {
-			continue
-		}
-		if v.Expression == nil {
-			v.Expression = v.Type.mkDefaultValueExpression()
-			continue
-		}
-		t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
-			continue
-		}
-		if t != nil && t.Equal(errs, v.Type) == false {
-			err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
-				t.TypeString(), v.Type.TypeString())
-			*errs = append(*errs, err)
+			if v.Expression == nil {
+				v.Expression = v.Type.mkDefaultValueExpression()
+				continue
+			}
+			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
+			if esNotEmpty(es) {
+				*errs = append(*errs, es...)
+				continue
+			}
+			if t != nil && t.Equal(errs, v.Type) == false {
+				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+					t.TypeString(), v.Type.TypeString())
+				*errs = append(*errs, err)
+			}
 		}
 	}
 }

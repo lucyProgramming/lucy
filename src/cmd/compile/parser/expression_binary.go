@@ -16,7 +16,7 @@ func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expre
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseLogicalAndExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -41,7 +41,7 @@ func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expr
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseOrExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -66,7 +66,7 @@ func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, 
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseXorExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -91,7 +91,7 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseAndExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -116,7 +116,7 @@ func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression,
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseEqualExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -143,7 +143,7 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseRelationExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -176,7 +176,7 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseShiftExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -211,7 +211,7 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseAddExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -242,7 +242,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseMulExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
@@ -274,7 +274,7 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		expressionParser.Next(lfNotToken)
 		right, err := expressionParser.parseSuffixExpression()
 		if err != nil {
-			return nil, err
+			return left, err
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos

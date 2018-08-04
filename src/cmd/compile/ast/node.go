@@ -85,13 +85,16 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 	PackageBeenCompile.Block.Functions = make(map[string]*Function)
 	for _, v := range conversion.Functions {
 		v.IsGlobal = true
-		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
-		if err != nil {
-			errs = append(errs, err)
+		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
 		}
+		PackageBeenCompile.Block.Functions[v.Name] = v
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range conversion.Classes {
+		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
+		}
 		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
@@ -100,23 +103,22 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range conversion.Enums {
+		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
+		}
 		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
+	PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
 	//after class inserted,then resolve type
 	for _, v := range conversion.TypeAlias {
-		err := v.Type.resolve(&PackageBeenCompile.Block)
-		if err != nil {
-			errs = append(errs, err)
-			continue
+		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
 		}
-		if PackageBeenCompile.Block.TypeAliases == nil {
-			PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
-		}
-		v.Type.Alias = v.Name
 		PackageBeenCompile.Block.TypeAliases[v.Name] = v.Type
+		v.Type.Alias = v.Name
 	}
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))

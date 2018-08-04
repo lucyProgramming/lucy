@@ -92,7 +92,8 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 	}
 	expressionParser.Next(lfNotToken) // skip {
 	es := []*ast.Expression{}
-	for expressionParser.parser.token.Type != lex.TokenEof && expressionParser.parser.token.Type != lex.TokenRc {
+	for expressionParser.parser.token.Type != lex.TokenEof &&
+		expressionParser.parser.token.Type != lex.TokenRc {
 		if expressionParser.parser.token.Type == lex.TokenLc {
 			ees, err := expressionParser.parseArrayValues()
 			if err != nil {
@@ -120,7 +121,8 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 	}
 	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRc {
-		return es, fmt.Errorf("%s expect '}',but '%s'", expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
+		return es, fmt.Errorf("%s expect '}',but '%s'",
+			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
 	expressionParser.Next(lfIsToken)
 	return es, nil

@@ -143,7 +143,9 @@ func (typ *Type) RightValueValid() bool {
 	have type or not
 */
 func (typ *Type) isTyped() bool {
-	return typ.RightValueValid() && typ.Type != VariableTypeNull
+	//null is only untyped right value
+	return typ.RightValueValid() &&
+		typ.Type != VariableTypeNull
 }
 
 /*
@@ -175,12 +177,15 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 		typ.Resolved = true
 	}()
 	if typ.Type == VariableTypeTemplate {
-		if block.InheritedAttribute.Function.parameterTypes == nil ||
-			block.InheritedAttribute.Function.parameterTypes[typ.Name] == nil {
+		if block.InheritedAttribute.Function.parameterTypes == nil {
+			return fmt.Errorf("%s parameter type '%s' not in a template function",
+				errMsgPrefix(typ.Pos), typ.Name)
+		}
+		if block.InheritedAttribute.Function.parameterTypes[typ.Name] == nil {
 			return fmt.Errorf("%s parameter type '%s' not found",
 				errMsgPrefix(typ.Pos), typ.Name)
 		}
-		pos := typ.Pos
+		pos := typ.Pos // keep pos
 		*typ = *block.InheritedAttribute.Function.parameterTypes[typ.Name]
 		typ.Pos = pos // keep pos
 		return nil
@@ -209,7 +214,6 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 			return fmt.Errorf("%s '%s' is not a type",
 				errMsgPrefix(typ.Pos), typ.Name)
 		}
-
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
@@ -512,9 +516,9 @@ func (typ *Type) getParameterType() []string {
 	if typ.Type == VariableTypeTemplate {
 		return []string{typ.Name}
 	}
-	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
+	if typ.Type == VariableTypeArray ||
+		typ.Type == VariableTypeJavaArray {
 		return typ.Array.getParameterType()
-
 	}
 	if typ.Type == VariableTypeMap {
 		ret := []string{}
@@ -630,7 +634,6 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 		return true
 	}
 	if leftValue.Type == VariableTypeArray && rightValue.Type == VariableTypeArray {
-
 		return leftValue.Array.Equal(errs, rightValue.Array)
 	}
 	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
@@ -674,22 +677,7 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 		}
 	}
 	if leftValue.Type == VariableTypeFunction && rightValue.Type == VariableTypeFunction {
-		compareToFunctionType := rightValue.FunctionType
-		if len(leftValue.FunctionType.ParameterList) != len(compareToFunctionType.ParameterList) ||
-			len(leftValue.FunctionType.ReturnList) != len(compareToFunctionType.ReturnList) {
-			return false
-		}
-		for k, v := range leftValue.FunctionType.ParameterList {
-			if false == v.Type.StrictEqual(compareToFunctionType.ParameterList[k].Type) {
-				return false
-			}
-		}
-		for k, v := range leftValue.FunctionType.ReturnList {
-			if false == v.Type.StrictEqual(compareToFunctionType.ReturnList[k].Type) {
-				return false
-			}
-		}
-		return true
+		return leftValue.FunctionType.equal(rightValue.FunctionType)
 	}
 	return false
 }
@@ -701,10 +689,12 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 	if typ.IsPrimitive() {
 		return typ.Type == compareTo.Type
 	}
-	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		if typ.Type == VariableTypeJavaArray &&
-			typ.IsVArgs != compareTo.IsVArgs {
-			return false
+	if typ.Type == VariableTypeArray ||
+		typ.Type == VariableTypeJavaArray {
+		if typ.Type == VariableTypeJavaArray {
+			if typ.IsVArgs != compareTo.IsVArgs {
+				return false
+			}
 		}
 		return typ.Array.StrictEqual(compareTo.Array)
 	}
@@ -723,33 +713,36 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 	if typ.Type == VariableTypeVoid {
 		return true
 	}
+	if typ.Type == VariableTypeFunction {
+		return typ.FunctionType.equal(compareTo.FunctionType)
+	}
 	return false
 }
 
-func (typ *Type) involvedClasses() []*Class {
-	switch typ.Type {
-	case VariableTypeObject:
-		return []*Class{typ.Class}
-	case VariableTypeMap:
-		csk := typ.Map.K.involvedClasses()
-		csv := typ.Map.V.involvedClasses()
-		cs := []*Class{}
-		cs = append(cs, csk...)
-		cs = append(cs, csv...)
-		return cs
-	case VariableTypeArray, VariableTypeJavaArray:
-		return typ.Array.involvedClasses()
-	case VariableTypeFunction:
-		cs := []*Class{}
-		for _, v := range typ.FunctionType.ParameterList {
-			t := v.Type.involvedClasses()
-			cs = append(cs, t...)
-		}
-		for _, v := range typ.FunctionType.ReturnList {
-			t := v.Type.involvedClasses()
-			cs = append(cs, t...)
-		}
-		return cs
-	}
-	return nil
-}
+//func (typ *Type) involvedClasses() []*Class {
+//	switch typ.Type {
+//	case VariableTypeObject:
+//		return []*Class{typ.Class}
+//	case VariableTypeMap:
+//		csk := typ.Map.K.involvedClasses()
+//		csv := typ.Map.V.involvedClasses()
+//		cs := []*Class{}
+//		cs = append(cs, csk...)
+//		cs = append(cs, csv...)
+//		return cs
+//	case VariableTypeArray, VariableTypeJavaArray:
+//		return typ.Array.involvedClasses()
+//	case VariableTypeFunction:
+//		cs := []*Class{}
+//		for _, v := range typ.FunctionType.ParameterList {
+//			t := v.Type.involvedClasses()
+//			cs = append(cs, t...)
+//		}
+//		for _, v := range typ.FunctionType.ReturnList {
+//			t := v.Type.involvedClasses()
+//			cs = append(cs, t...)
+//		}
+//		return cs
+//	}
+//	return nil
+//}

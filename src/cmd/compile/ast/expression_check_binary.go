@@ -81,10 +81,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		if false == left.IsInteger() || right.IsInteger() == false {
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-		} else {
-			if right.Type == VariableTypeLong {
-				bin.Right.ConvertToNumber(VariableTypeInt)
-			}
+		}
+		if right.Type == VariableTypeLong {
+			bin.Right.ConvertToNumber(VariableTypeInt)
 		}
 		result = left.Clone()
 		result.Pos = e.Pos

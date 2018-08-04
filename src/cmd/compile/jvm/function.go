@@ -48,39 +48,41 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	buildPackage.mkParametersOffset(class, code, f, state)
 	maxStack = buildPackage.mkCapturedParameters(class, code, f, state)
-	for _, v := range f.Type.ReturnList {
-		currentStack := uint16(0)
-		if v.BeenCaptured { //create closure object
-			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals++
-			stack := closure.createClosureVar(class, code, v.Type)
-			if stack > maxStack {
-				maxStack = stack
+	if f.Type.NoReturnValue() == false {
+		for _, v := range f.Type.ReturnList {
+			currentStack := uint16(0)
+			if v.BeenCaptured { //create closure object
+				v.LocalValOffset = code.MaxLocals
+				code.MaxLocals++
+				stack := closure.createClosureVar(class, code, v.Type)
+				if stack > maxStack {
+					maxStack = stack
+				}
+				// then load
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				if 2 > maxStack {
+					maxStack = 2
+				}
+				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
+				currentStack = 1
+				state.pushStack(class,
+					state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
+			} else {
+				v.LocalValOffset = code.MaxLocals
+				code.MaxLocals += jvmSlotSize(v.Type)
 			}
-			// then load
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
-			if 2 > maxStack {
-				maxStack = 2
+			stack := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
 			}
-			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-			currentStack = 1
-			state.pushStack(class,
-				state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
-		} else {
-			v.LocalValOffset = code.MaxLocals
-			code.MaxLocals += jvmSlotSize(v.Type)
-		}
-		stack := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
-		if t := currentStack + stack; t > maxStack {
-			maxStack = t
-		}
-		buildPackage.storeLocalVar(class, code, v)
-		if v.BeenCaptured {
-			state.popStack(1)
-			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
-		} else {
-			state.appendLocals(class, v.Type)
+			buildPackage.storeLocalVar(class, code, v)
+			if v.BeenCaptured {
+				state.popStack(1)
+				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
+			} else {
+				state.appendLocals(class, v.Type)
+			}
 		}
 	}
 	return

@@ -82,6 +82,9 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 				return result, nil
 			}
 		}
+		if f.isGlobalMain() {
+			return nil, fmt.Errorf("%s fucntion is main", errMsgPrefix(e.Pos))
+		}
 		f.Used = true
 		result := &Type{}
 		result.Type = VariableTypeFunction

@@ -347,20 +347,7 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	return nil
 }
-
-func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
-	//fmt.Println(name, pos)
-	// global var Insert into block
-	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
-		b := PackageBeenCompile.Block
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		b.Variables[name] = v
-		v.IsGlobal = true // it`s global
-		return nil
-	}
+func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
 		return fmt.Errorf("%s name is null string", errMsgPrefix(pos))
 	}
@@ -377,6 +364,22 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		if searchBuildIns(name) != nil {
 			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
 		}
+	}
+	return nil
+}
+func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
+	if err := b.nameIsValid(name, pos); err != nil {
+		return err
+	}
+	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
+		b := PackageBeenCompile.Block
+		err := b.checkNameExist(name, pos)
+		if err != nil {
+			return err
+		}
+		b.Variables[name] = v
+		v.IsGlobal = true // it`s global
+		return nil
 	}
 	if label, ok := d.(*StatementLabel); ok && label != nil {
 		if b.Labels == nil {

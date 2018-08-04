@@ -414,11 +414,7 @@ func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 		line = pos[0].StartLine
 		column = pos[0].StartColumn
 	} else {
-		if parser.lastToken == nil {
-			line, column = parser.token.StartLine, parser.token.StartColumn
-		} else {
-			line, column = parser.lastToken.StartLine, parser.lastToken.StartColumn
-		}
+		line, column = parser.token.StartLine, parser.token.StartColumn
 	}
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }

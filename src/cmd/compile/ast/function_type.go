@@ -13,6 +13,24 @@ type FunctionType struct {
 type ParameterList []*Variable
 type ReturnList []*Variable
 
+func (functionType *FunctionType) equal(compareToFunctionType *FunctionType) bool {
+	if len(functionType.ParameterList) != len(compareToFunctionType.ParameterList) ||
+		len(functionType.ReturnList) != len(compareToFunctionType.ReturnList) {
+		return false
+	}
+	for k, v := range functionType.ParameterList {
+		if false == v.Type.StrictEqual(compareToFunctionType.ParameterList[k].Type) {
+			return false
+		}
+	}
+	for k, v := range functionType.ReturnList {
+		if false == v.Type.StrictEqual(compareToFunctionType.ReturnList[k].Type) {
+			return false
+		}
+	}
+	return true
+}
+
 func (functionType *FunctionType) NoReturnValue() bool {
 	return len(functionType.ReturnList) == 0 ||
 		functionType.ReturnList[0].Type.Type == VariableTypeVoid

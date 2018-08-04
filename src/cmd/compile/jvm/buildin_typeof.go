@@ -8,7 +8,7 @@ import (
 func (buildExpression *BuildExpression) mkBuildInTypeOf(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	//TODO:: should eval first or not
+	//TODO:: should eval value or not
 	maxStack = buildExpression.build(class, code, call.Args[0], context, state)
 	if jvmSlotSize(call.Args[0].Value) == 2 {
 		code.Codes[code.CodeLength] = cg.OP_pop2

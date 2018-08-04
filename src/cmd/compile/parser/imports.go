@@ -7,7 +7,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
+//atBeginningOfFile bool
 func (parser *Parser) parseImports() {
+
 	if parser.token.Type != lex.TokenImport {
 		// not a import
 		return
