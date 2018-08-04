@@ -179,6 +179,9 @@ func callWant(ft *FunctionType) string {
 func callHave(ts []*Type) string {
 	s := "("
 	for k, v := range ts {
+		if v == nil {
+			continue
+		}
 		if v.Name != "" {
 			s += v.Name + " "
 		}

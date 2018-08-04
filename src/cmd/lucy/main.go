@@ -31,7 +31,7 @@ func main() {
 		fmt.Printf("lucy-%v@(%s/%s)\n", common.VERSION, runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
 	case "build":
-		(&run.Run{}).RunCommand("run", append([]string{"-just-build"}, os.Args[2:]...))
+		(&run.Run{}).RunCommand("run", append([]string{"-build"}, os.Args[2:]...))
 	case "run":
 		(&run.Run{}).RunCommand(os.Args[1], os.Args[2:])
 	case "clean":

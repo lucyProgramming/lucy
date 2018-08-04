@@ -285,7 +285,8 @@ func (p *Package) mkClassCache(load *Package) {
 
 //different from different source file
 type SourceFile struct {
-	Imports map[string]*Import // accessName -> *Import
+	Imports            map[string]*Import // accessName -> *Import
+	ImportsByResources map[string]*Import // resourceName -> *Import
 }
 
 type Import struct {

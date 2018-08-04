@@ -45,13 +45,12 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 	if call.Function == nil {
 		return buildExpression.buildFunctionPointerCall(class, code, e, context, state)
 	}
-	if call.Function.IsBuildIn {
-		return buildExpression.mkBuildInFunctionCall(class, code, e, context, state)
-	}
 	if call.Function.TemplateFunction != nil {
 		return buildExpression.buildTemplateFunctionCall(class, code, e, context, state)
 	}
-
+	if call.Function.IsBuildIn {
+		return buildExpression.mkBuildInFunctionCall(class, code, e, context, state)
+	}
 	if call.Expression != nil {
 		if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
 			maxStack = buildExpression.build(class, code, call.Expression, context, state)

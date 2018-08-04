@@ -82,7 +82,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 				return result, nil
 			}
 		}
-		if f.isGlobalMain() {
+		if f.IsGlobalMain() {
 			return nil, fmt.Errorf("%s fucntion is main", errMsgPrefix(e.Pos))
 		}
 		f.Used = true

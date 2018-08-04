@@ -197,6 +197,8 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		fallthrough
 	case ast.VariableTypeFunction:
 		fallthrough
+	case ast.VariableTypeJavaArray:
+		fallthrough
 	case ast.VariableTypeArray:
 		switch offset {
 		case 0:

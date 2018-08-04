@@ -38,7 +38,7 @@ func (r *Run) parseCmd(args []string) error {
 	cmd := flag.NewFlagSet("run", flag.ErrorHandling(1))
 	cmd.BoolVar(&r.Flags.forceReBuild, "forceReBuild", false, "force rebuild all package")
 	cmd.IntVar(&r.Flags.JvmVersion, "jvm-version", 54, "jvm major version")
-	cmd.BoolVar(&r.Flags.JustBuild, "just-build", false, "build package no run")
+	cmd.BoolVar(&r.Flags.Build, "-build", false, "build package no run")
 	err := cmd.Parse(args)
 	if err != nil {
 		return err
@@ -54,7 +54,6 @@ func (r *Run) parseCmd(args []string) error {
 
 func (r *Run) setCompiler() error {
 	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
-
 	t := r.compilerAt
 	if runtime.GOOS == "windows" {
 		t += ".exe"
@@ -72,6 +71,10 @@ func (r *Run) RunCommand(command string, args []string) {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+	if r.Flags.JvmVersion <= 50 {
+		fmt.Println("jvm version must great than 50")
+		os.Exit(1)
 	}
 	r.LucyRoot, err = common.GetLucyRoot()
 	if err != nil {
@@ -110,7 +113,7 @@ func (r *Run) RunCommand(command string, args []string) {
 		fmt.Println(err)
 		os.Exit(3)
 	}
-	if r.Flags.JustBuild {
+	if r.Flags.Build {
 		os.Exit(0)
 	}
 	//

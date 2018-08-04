@@ -154,6 +154,7 @@ func (f *Function) clone() (ret *Function, es []error) {
 	if esNotEmpty(es) {
 		return ret, es
 	}
+	ret.TemplateClonedFunction = true
 	return ret, es
 }
 func (f *Function) makeLastReturnStatement() {
@@ -167,7 +168,7 @@ func (f *Function) makeLastReturnStatement() {
 		})
 	}
 }
-func (f *Function) isGlobalMain() bool {
+func (f *Function) IsGlobalMain() bool {
 	return f.IsGlobal && f.Name == MainFunctionName
 }
 func (f *Function) checkParametersAndReturns(errs *[]error) {

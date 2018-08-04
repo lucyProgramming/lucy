@@ -311,10 +311,15 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			s.Enum = e
 			block.Statements = append(block.Statements, s)
 		case lex.TokenImport:
-			pos := blockParser.parser.mkPos()
-			blockParser.parser.parseImports()
-			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s cannot have import at this scope",
-				blockParser.parser.errorMsgPrefix(pos)))
+			ims := blockParser.parser.parseImports()
+			for _, t := range ims {
+				s := &ast.Statement{
+					Type:   ast.StatementTypeImport,
+					Import: t,
+					Pos:    t.Pos,
+				}
+				block.Statements = append(block.Statements, s)
+			}
 		default:
 			// something I cannot handle
 			return

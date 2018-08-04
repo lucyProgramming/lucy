@@ -100,21 +100,27 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
 	state := &StackMapState{}
-	if method.IsConstruction { // construction method
-		method.Code.MaxLocals = 1
-		t := &cg.StackMapVerificationTypeInfo{}
-		t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
-		state.Locals = append(state.Locals, t)
-		buildPackage.mkParametersOffset(class, method.Code, f, state)
-		stack := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
-			context, state)
-		if stack > method.Code.MaxStack {
-			method.Code.MaxStack = stack
+	if method.AccessFlags&cg.ACC_METHOD_STATIC == 0 {
+		if method.IsConstruction { // construction method
+			method.Code.MaxLocals = 1
+			t := &cg.StackMapVerificationTypeInfo{}
+			t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
+			state.Locals = append(state.Locals, t)
+			buildPackage.mkParametersOffset(class, method.Code, f, state)
+			stack := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
+				context, state)
+			if stack > method.Code.MaxStack {
+				method.Code.MaxStack = stack
+			}
+			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
+			buildPackage.mkNonStaticFieldDefaultValue(class, method.Code, context, state)
+			buildPackage.mkCapturedParameters(class, method.Code, f, state)
+		} else {
+			method.Code.MaxLocals = 1
+			state.appendLocals(class, state.newObjectVariableType(class.Name))
 		}
-		state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
-		buildPackage.mkNonStaticFieldDefaultValue(class, method.Code, context, state)
-		buildPackage.mkCapturedParameters(class, method.Code, f, state)
-	} else if f.Name == ast.MainFunctionName { // main function
+	}
+	if f.IsGlobalMain() { // main function
 		code := method.Code
 		code.Codes[code.CodeLength] = cg.OP_new
 		meta := ArrayMetas[ast.VariableTypeString]
@@ -140,9 +146,6 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 			state.appendLocals(class, t)
 		}
 		method.Code.MaxLocals = 1
-	} else if method.AccessFlags&cg.ACC_METHOD_STATIC == 0 { // instance method
-		method.Code.MaxLocals = 1
-		state.appendLocals(class, state.newObjectVariableType(class.Name))
 	}
 	if LucyMethodSignatureParser.Need(&f.Type) {
 		d := &cg.AttributeLucyMethodDescriptor{}
@@ -176,8 +179,9 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 				append(method.AttributeLucyReturnListNames.Parameters, p)
 		}
 	}
-	if len(f.Type.ParameterList) > 1 {
-		if t := buildPackage.buildFunctionMultiReturnOffset(class, method.Code, f, context, state); t > method.Code.MaxStack {
+	if len(f.Type.ReturnList) > 1 {
+		if t := buildPackage.buildFunctionMultiReturnOffset(class, method.Code,
+			f, context, state); t > method.Code.MaxStack {
 			method.Code.MaxStack = t
 		}
 	}

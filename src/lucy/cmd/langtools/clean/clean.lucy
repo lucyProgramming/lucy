@@ -8,7 +8,7 @@ final class Clean {
 	lucyRoot string 
 	recursive bool 
 	static jsonFile string = "maintain.json"
-	public fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool  ) {
+	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool  ) {
 	    this.super() 
 		this.lucyRoot = lucyRoot 
 		this.lucyPaths = lucyPaths
@@ -16,7 +16,7 @@ final class Clean {
 		this.recursive = recursive 
 	}
 
-	public fn clean() {
+	fn clean() {
 		w,err := common.findPackageLiesIn(this.lucyPaths , this.packageName)
 		if err != null {
 			print(err)

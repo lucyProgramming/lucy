@@ -8,53 +8,44 @@ import (
 )
 
 //atBeginningOfFile bool
-func (parser *Parser) parseImports() {
-
-	if parser.token.Type != lex.TokenImport {
-		// not a import
-		return
-	}
-	parser.Next(lfIsToken) // skip import key word
-	if err := parser.unExpectNewLine(); err != nil {
-		parser.consume(untilSemicolonOrLf)
-		parser.Next(lfNotToken)
-		parser.parseImports()
-		return
-	}
-	if parser.token.Type != lex.TokenLiteralString {
-		parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
-			parser.errorMsgPrefix(), parser.token.Description))
-		parser.consume(untilSemicolonOrLf)
-		parser.Next(lfNotToken)
-		parser.parseImports()
-		return
-	}
-	i := &ast.Import{}
-	i.Pos = parser.mkPos()
-	i.Import = parser.token.Data.(string)
-	parser.Next(lfIsToken) // skip name
-	if parser.token.Type == lex.TokenAs {
-		/*
-			import "xxxxxxxxxxx" as yyy
-		*/
-		parser.Next(lfNotToken) // skip as
-		if parser.token.Type != lex.TokenIdentifier {
-			parser.insertImports(i)
-			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
+func (parser *Parser) parseImports() []*ast.Import {
+	ret := []*ast.Import{}
+	for parser.token.Type == lex.TokenImport {
+		parser.Next(lfIsToken) // skip import key word
+		parser.unExpectNewLineAndSkip()
+		if parser.token.Type != lex.TokenLiteralString {
+			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolonOrLf)
 			parser.Next(lfNotToken)
-			parser.parseImports()
-			return
-		} else {
-			i.AccessName = parser.token.Data.(string)
-			parser.Next(lfIsToken) // skip identifier
+			continue
 		}
+		i := &ast.Import{}
+		i.Pos = parser.mkPos()
+		i.Import = parser.token.Data.(string)
+		ret = append(ret, i)
+		parser.Next(lfIsToken) // skip name
+		if parser.token.Type == lex.TokenAs {
+			/*
+				import "xxxxxxxxxxx" as yyy
+			*/
+			parser.Next(lfNotToken) // skip as
+			if parser.token.Type != lex.TokenIdentifier {
+				parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
+					parser.errorMsgPrefix(), parser.token.Description))
+				parser.consume(untilSemicolonOrLf)
+				parser.Next(lfNotToken)
+				continue
+			} else {
+				i.AccessName = parser.token.Data.(string)
+				parser.Next(lfIsToken) // skip identifier
+			}
+		}
+		parser.validStatementEnding()
+		parser.Next(lfNotToken)
+		continue
 	}
-	parser.validStatementEnding()
-	parser.Next(lfNotToken)
-	parser.insertImports(i)
-	parser.parseImports()
+	return ret
 }
 
 func (parser *Parser) insertImports(im *ast.Import) {

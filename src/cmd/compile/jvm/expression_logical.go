@@ -16,10 +16,8 @@ func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, c
 	}
 	var exit *cg.Exit
 	if e.Type == ast.ExpressionTypeLogicalOr {
-		// at this point,value is clear,leave true on stack
 		exit = (&cg.Exit{}).Init(cg.OP_ifne, code)
-	} else { //  &&
-		// at this point,value is clear,leave false on stack
+	} else {
 		exit = (&cg.Exit{}).Init(cg.OP_ifeq, code)
 	}
 	code.Codes[code.CodeLength] = cg.OP_pop // pop 0

@@ -149,10 +149,51 @@ func (s *Statement) check(block *Block) []error { // block is father
 	case StatementTypeSwitchTemplate:
 		return s.StatementSwitchTemplate.check(block, s)
 	case StatementTypeImport:
+		if block.InheritedAttribute.Function.TemplateClonedFunction == false {
+			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope", errMsgPrefix(s.Pos)))
+			return errs
+		}
 		err := s.Import.MkAccessName()
 		if err != nil {
-
+			errs = append(errs, fmt.Errorf("%s %v",
+				errMsgPrefix(s.Pos), err))
+			return errs
 		}
+		if s.Import.AccessName == NoNameIdentifier {
+			errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
+				errMsgPrefix(s.Pos)))
+			return nil
+		}
+		if PackageBeenCompile.Files == nil {
+			PackageBeenCompile.Files = make(map[string]*SourceFile)
+		}
+		if PackageBeenCompile.Files[s.Pos.Filename] == nil {
+			PackageBeenCompile.Files[s.Pos.Filename] = &SourceFile{}
+		}
+		if PackageBeenCompile.Files[s.Pos.Filename].Imports == nil {
+			PackageBeenCompile.Files[s.Pos.Filename].Imports = make(map[string]*Import)
+		}
+		is := PackageBeenCompile.Files[s.Pos.Filename]
+		if is.Imports == nil {
+			is.Imports = make(map[string]*Import)
+		}
+		if is.ImportsByResources == nil {
+			is.ImportsByResources = make(map[string]*Import)
+		}
+		_, ok := is.Imports[s.Import.AccessName]
+		if ok {
+			errs = append(errs, fmt.Errorf("%s package '%s' reimported",
+				errMsgPrefix(s.Pos), s.Import.AccessName))
+			return nil
+		}
+		_, ok = is.ImportsByResources[s.Import.Import]
+		if ok {
+			errs = append(errs, fmt.Errorf("%s package '%s' reimported",
+				errMsgPrefix(s.Pos), s.Import.Import))
+			return nil
+		}
+		is.Imports[s.Import.AccessName] = s.Import
+		is.ImportsByResources[s.Import.Import] = s.Import
 	}
 	return nil
 }

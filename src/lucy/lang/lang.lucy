@@ -23,11 +23,11 @@ public fn copy(dest T,src T , start int = 0 , end int = -1) {
 	}
 }
 
-/*
+ 
 public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) {
 	import "lucy/deps"
 	if end == -1 {
-		end = java.size() - 1 
+		end = java.size()  
 	}
 	type retType = []T
 	switch T {
@@ -36,6 +36,7 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 		case byte:
@@ -43,6 +44,7 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 		case short:
@@ -50,6 +52,7 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 		case int:
@@ -57,12 +60,14 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a) 
 		case long:
 			a := new deps.ArrayLong()
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 		case float:
@@ -70,6 +75,7 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 		case double:
@@ -77,6 +83,7 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 		case string:
@@ -84,11 +91,12 @@ public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) 
 			a.start = start 
 			a.end = end 
 			a.cap = len(java)
+			a.elements = java
 			lucy = retType(a)
 			
 	}
 }
-*/
+ 
 
 
 

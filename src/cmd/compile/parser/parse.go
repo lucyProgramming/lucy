@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
@@ -63,7 +62,9 @@ func (parser *Parser) Parse() []error {
 		//TODO::empty source file , should forbidden???
 		return nil
 	}
-	parser.parseImports()
+	for _, t := range parser.parseImports() {
+		parser.insertImports(t)
+	}
 	if parser.onlyParseImport { // only parse imports
 		return parser.errs
 	}

@@ -1,15 +1,37 @@
-
-//import "java/io";
+import "java/io";
 //import "lucy/lang";
 
 
 
-public fn readFile(filepath string)->(bs []byte,err error){
-	 
+public fn readFile(filepath string)->(bs byte[],err error){
+	f := new io.File(filepath)	 
+	if f.exists() == false {
+		err = new error("file not exits")
+		return 
+	}
+	if f.isFile() == false {
+		err = new error("file not a regular file")
+		return
+	}
+	if f.canRead() == false {
+		err = new error("file not readable")
+		return
+	}
+	bs  = new byte[]( int (f.length()) )
+	stream := new io.FileInputStream(f)
+	defer stream.close()
+	stream.read(bs)
 }
 
-public fn writeFile( filepath string , bs []byte){
-		
+
+public fn writeFile( filepath string , bs byte[]) -> (err error){
+	f := new io.File(filepath)	 
+	if f.isFile() == false {
+		err = new error("file is a directory")
+		return
+	}
+	
+
 }
 
 	
