@@ -139,9 +139,8 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		buildPackage.buildBlock(class, code, &ds[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
-		for _, v := range ds[index].Labels {
-			v.Reset()
-		}
+		ds[index].ResetLabels()
+
 		//if need throw
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup

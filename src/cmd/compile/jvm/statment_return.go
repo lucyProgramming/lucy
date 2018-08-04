@@ -283,9 +283,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		buildPackage.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
-		for _, v := range statementReturn.Defers[index].Labels {
-			v.Reset()
-		}
+		statementReturn.Defers[index].ResetLabels()
 		//if need throw
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup

@@ -10,6 +10,12 @@ type StatementDefer struct {
 	ExceptionClass *Class
 }
 
+func (d *StatementDefer) ResetLabels() {
+	for _, v := range d.Labels {
+		v.Reset()
+	}
+}
+
 func (d *StatementDefer) registerExceptionClass(c *Class) error {
 	if d.ExceptionClass != nil {
 		return fmt.Errorf("exception class already registed as '%s'",
