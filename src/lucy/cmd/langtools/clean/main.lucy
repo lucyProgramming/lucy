@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/common"
 import "lucy/os" as os  //TODO :: same name
 import "lucy/os/flag"
 
-flagParser := new flag.Flag()
+flagParser := new flag.FlagParser()
 recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
 
 

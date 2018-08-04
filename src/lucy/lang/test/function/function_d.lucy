@@ -29,7 +29,7 @@
 	fn fn_9(args test) ->(r test) {
 
     }
-    fn fn_10(args  map{int -> test}) ->(r Lucy) {
+    fn fn_10(args  map{ int -> test }) ->(r Lucy) {
 
     }
 

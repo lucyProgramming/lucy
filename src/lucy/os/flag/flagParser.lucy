@@ -2,10 +2,10 @@
 /*
 	a simple but yet powerful args parse for lucy programing
 */
-public final class  Flag {
+public final class  FlagParser {
 	options map{ string -> Option };
 	
-	public fn Flag() {
+	public fn FlagParser() {
 	    this.super()
 		this.options = new map{string -> Option}()
 	}
