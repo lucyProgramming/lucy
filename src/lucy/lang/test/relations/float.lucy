@@ -59,7 +59,6 @@ fn testDouble()->(ok bool = false){
 
 
 
-
 fn testFloats(){
 	if false == testFloat() {
 		panic(new error("test float failed"))

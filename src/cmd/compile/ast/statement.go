@@ -150,7 +150,8 @@ func (s *Statement) check(block *Block) []error { // block is father
 		return s.StatementSwitchTemplate.check(block, s)
 	case StatementTypeImport:
 		if block.InheritedAttribute.Function.TemplateClonedFunction == false {
-			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope", errMsgPrefix(s.Pos)))
+			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",
+				errMsgPrefix(s.Pos)))
 			return errs
 		}
 		err := s.Import.MkAccessName()

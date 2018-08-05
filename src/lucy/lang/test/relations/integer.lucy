@@ -78,6 +78,7 @@ fn testInt()->(ok bool = false){
 }
 
 
+
 fn testLong()->(ok bool = false){
 	var a ,b long
 	a = 2L
