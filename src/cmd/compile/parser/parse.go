@@ -81,6 +81,7 @@ func (parser *Parser) Parse() []error {
 		if len(parser.errs) > parser.nErrors2Stop {
 			break
 		}
+
 		switch parser.token.Type {
 		case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
 			parser.Next(lfNotToken)
@@ -130,9 +131,14 @@ func (parser *Parser) Parse() []error {
 			}
 			e.IsPublic = isPublic()
 			parser.validStatementEnding()
-			*parser.tops = append(*parser.tops, &ast.Top{
-				Data: e,
-			})
+			if e.Type == ast.ExpressionTypeColonAssign {
+				*parser.tops = append(*parser.tops, &ast.Top{
+					Data: e,
+				})
+			} else {
+				parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
+					parser.errorMsgPrefix(e.Pos), e.OpName()))
+			}
 			resetProperty()
 		case lex.TokenEnum:
 			e, err := parser.parseEnum()
@@ -253,6 +259,22 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenEof:
 			break
 		default:
+			if parser.ExpressionParser.looksLikeExpression() {
+				e, err := parser.ExpressionParser.parseExpression(true)
+				if err != nil {
+					parser.errs = append(parser.errs, err)
+					continue
+				}
+				if e.Type == ast.ExpressionTypeColonAssign {
+					*parser.tops = append(*parser.tops, &ast.Top{
+						Data: e,
+					})
+				} else {
+					parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
+						parser.errorMsgPrefix(e.Pos), e.OpName()))
+				}
+				continue
+			}
 			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
 				parser.errorMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolonOrLf)
