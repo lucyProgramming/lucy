@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -94,7 +95,6 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 			code.Codes[code.CodeLength] = cg.OP_dup2_x1
 		}
 		code.CodeLength++
-
 	case LeftValueTypeArray, LeftValueTypeLucyArray:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1

@@ -30,6 +30,7 @@ const (
 	specialMethodInit           = "<init>"
 	javaRootObjectArray         = "[Ljava/lang/Object;"
 	javaStringClass             = "java/lang/String"
+	javaExceptionClass          = "java/lang/Exception"
 	javaMethodHandleClass       = "java/lang/invoke/MethodHandle"
 	javaRootClass               = "java/lang/Object"
 	javaMapClass                = "java/util/HashMap"

@@ -240,6 +240,36 @@ func registerBuildInFunctions() {
 		}
 	}
 	{
+		// sure
+		typeOf := &Function{}
+		buildInFunctionsMap[common.BuildInFunctionAssert] = typeOf
+		typeOf.Name = common.BuildInFunctionAssert
+		typeOf.IsBuildIn = true
+		typeOf.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+			args []*Type, pos *Pos) {
+			if len(e.ParameterTypes) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
+					errMsgPrefix(e.ParameterTypes[0].Pos)))
+			}
+			if len(args) == 0 {
+				err := fmt.Errorf("%s '%s' expect one argument at lease",
+					errMsgPrefix(pos), typeOf.Name)
+				*errs = append(*errs, err)
+				return
+			}
+			for _, a := range args {
+				if a == nil {
+					continue
+				}
+				if a.Type != VariableTypeBool {
+					err := fmt.Errorf("%s not a bool expression",
+						errMsgPrefix(pos))
+					*errs = append(*errs, err)
+				}
+			}
+		}
+	}
+	{
 		// printf
 		buildInFunctionsMap[common.BuildInFunctionPrintf] = &Function{
 			buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,

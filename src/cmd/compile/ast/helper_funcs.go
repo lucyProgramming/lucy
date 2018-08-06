@@ -15,7 +15,17 @@ func esNotEmpty(es []error) bool {
 func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
-
+func checkCallArgsSingelValue(args []*Expression) (errs []error) {
+	errs = []error{}
+	for _, v := range args {
+		if v.HaveMultiValue() && len(v.MultiValues) > 1 {
+			errs = append(errs, fmt.Errorf("%s multi value in single value context",
+				errMsgPrefix(v.Pos)))
+			return
+		}
+	}
+	return
+}
 func checkExpressions(block *Block, es []*Expression, errs *[]error) []*Type {
 	ret := []*Type{}
 	for _, v := range es {

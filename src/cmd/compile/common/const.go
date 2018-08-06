@@ -24,6 +24,7 @@ const (
 	BuildInFunctionMonitorExit  = "monitorExit"
 	BuildInFunctionBlockHole    = "blackHole"
 	BuildInFunctionTypeOf       = "typeOf"
+	BuildInFunctionAssert       = "assert"
 )
 
 const (
