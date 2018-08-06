@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -15,7 +16,7 @@ func (e *Expression) checkColonAssignExpression(block *Block, errs *[]error) {
 	}
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
-	assignTypes := checkExpressions(block, values, errs)
+	assignTypes := checkExpressions(block, values, errs, false)
 	if len(names) > len(assignTypes) {
 		pos := e.Pos
 		getLastPosFromArgs(assignTypes, &pos)
@@ -201,7 +202,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		bin.Left.Data = lefts // rewrite to list anyway
 	}
 	values := bin.Right.Data.([]*Expression)
-	valueTypes := checkExpressions(block, values, errs)
+	valueTypes := checkExpressions(block, values, errs, false)
 	leftTypes := []*Type{}
 	for _, v := range lefts {
 		if v.Type == ExpressionTypeIdentifier {

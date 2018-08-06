@@ -20,7 +20,7 @@ func (buildExpression *BuildExpression) buildLogical(class *cg.ClassHighLevel, c
 	} else {
 		exit = (&cg.Exit{}).Init(cg.OP_ifeq, code)
 	}
-	code.Codes[code.CodeLength] = cg.OP_pop // pop 0
+	code.Codes[code.CodeLength] = cg.OP_pop
 	code.CodeLength++
 	stack := buildExpression.build(class, code, bin.Right, context, state)
 	if stack > maxStack {

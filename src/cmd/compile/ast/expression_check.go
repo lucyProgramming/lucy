@@ -341,7 +341,7 @@ func (e *Expression) mustBeOneValueContext(ts []*Type) (*Type, error) {
 }
 
 func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs)
+	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	if f.LoadedFromLucyLang {
 		if f.TemplateFunction != nil {
 			tf := e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)

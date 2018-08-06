@@ -54,30 +54,30 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 		appendDescriptor := meta.appendDescriptor
 		for _, v := range call.Args {
 			currentStack := uint16(1)
-			if v.HaveMultiValue() {
-				stack := buildExpression.build(class, code, v, context, state)
-				if t := currentStack + stack; t > maxStack {
-					maxStack = t
-				}
-				autoVar := newMultiValueAutoVar(class, code, state)
-				for kk, t := range v.MultiValues {
-					currentStack = 1
-					if t := autoVar.unPack(class, code, kk, t) + currentStack; t > maxStack {
-						maxStack = t
-					}
-					if t := currentStack + jvmSlotSize(t); t > maxStack {
-						maxStack = t
-					}
-					code.Codes[code.CodeLength] = cg.OP_invokevirtual
-					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      meta.className,
-						Method:     appendName,
-						Descriptor: meta.appendDescriptor,
-					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
-				}
-				continue
-			}
+			//if v.HaveMultiValue() {
+			//	stack := buildExpression.build(class, code, v, context, state)
+			//	if t := currentStack + stack; t > maxStack {
+			//		maxStack = t
+			//	}
+			//	autoVar := newMultiValueAutoVar(class, code, state)
+			//	for kk, t := range v.MultiValues {
+			//		currentStack = 1
+			//		if t := autoVar.unPack(class, code, kk, t) + currentStack; t > maxStack {
+			//			maxStack = t
+			//		}
+			//		if t := currentStack + jvmSlotSize(t); t > maxStack {
+			//			maxStack = t
+			//		}
+			//		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			//			Class:      meta.className,
+			//			Method:     appendName,
+			//			Descriptor: meta.appendDescriptor,
+			//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			//		code.CodeLength += 3
+			//	}
+			//	continue
+			//}
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
@@ -90,38 +90,35 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if e.IsStatementExpression {
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.CodeLength++
-		}
+
 	case common.ArrayMethodAppendAll:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		for _, v := range call.Args {
 			currentStack := uint16(1)
 			appendName := "append"
 			appendDescriptor := meta.appendAllDescriptor
-			if v.HaveMultiValue() {
-				stack := buildExpression.build(class, code, v, context, state)
-				if t := currentStack + stack; t > maxStack {
-					maxStack = t
-				}
-				autoVar := newMultiValueAutoVar(class, code, state)
-				for kk, tt := range v.MultiValues {
-					currentStack := uint16(1)
-					stack = autoVar.unPack(class, code, kk, tt)
-					if t := currentStack + 2; t > maxStack {
-						maxStack = t
-					}
-					code.Codes[code.CodeLength] = cg.OP_invokevirtual
-					class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-						Class:      meta.className,
-						Method:     appendName,
-						Descriptor: appendDescriptor,
-					}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
-				}
-				continue
-			}
+			//if v.HaveMultiValue() {
+			//	stack := buildExpression.build(class, code, v, context, state)
+			//	if t := currentStack + stack; t > maxStack {
+			//		maxStack = t
+			//	}
+			//	autoVar := newMultiValueAutoVar(class, code, state)
+			//	for kk, tt := range v.MultiValues {
+			//		currentStack := uint16(1)
+			//		stack = autoVar.unPack(class, code, kk, tt)
+			//		if t := currentStack + 2; t > maxStack {
+			//			maxStack = t
+			//		}
+			//		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			//		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			//			Class:      meta.className,
+			//			Method:     appendName,
+			//			Descriptor: appendDescriptor,
+			//		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			//		code.CodeLength += 3
+			//	}
+			//	continue
+			//}
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
@@ -135,10 +132,7 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if e.IsStatementExpression {
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.CodeLength++
-		}
+
 	}
 	return
 }

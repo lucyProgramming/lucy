@@ -51,33 +51,33 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 		}
 		for k, v := range call.Args {
 			currentStack = 1
-			if v.HaveMultiValue() {
-				stack := buildExpression.build(class, code, v, context, state)
-				if t := currentStack + stack; t > maxStack {
-					maxStack = t
-				}
-				autoVar := newMultiValueAutoVar(class, code, state) // store to temp
-				for kk, tt := range v.MultiValues {
-					currentStack = 1
-					if k != len(call.Args)-1 || kk != len(v.MultiValues)-1 {
-						code.Codes[code.CodeLength] = cg.OP_dup
-						code.CodeLength++
-						currentStack++
-						state.pushStack(class, hashMapVerifyType)
-					}
-					//load
-					stack = autoVar.unPack(class, code, kk, tt)
-					if t := stack + currentStack; t > maxStack {
-						maxStack = t
-					}
-					//remove
-					callRemove()
-					if k != len(call.Args)-1 || kk != len(v.MultiValues)-1 {
-						state.popStack(1)
-					}
-				}
-				continue
-			}
+			//if v.HaveMultiValue() {
+			//	stack := buildExpression.build(class, code, v, context, state)
+			//	if t := currentStack + stack; t > maxStack {
+			//		maxStack = t
+			//	}
+			//	autoVar := newMultiValueAutoVar(class, code, state) // store to temp
+			//	for kk, tt := range v.MultiValues {
+			//		currentStack = 1
+			//		if k != len(call.Args)-1 || kk != len(v.MultiValues)-1 {
+			//			code.Codes[code.CodeLength] = cg.OP_dup
+			//			code.CodeLength++
+			//			currentStack++
+			//			state.pushStack(class, hashMapVerifyType)
+			//		}
+			//		//load
+			//		stack = autoVar.unPack(class, code, kk, tt)
+			//		if t := stack + currentStack; t > maxStack {
+			//			maxStack = t
+			//		}
+			//		//remove
+			//		callRemove()
+			//		if k != len(call.Args)-1 || kk != len(v.MultiValues)-1 {
+			//			state.popStack(1)
+			//		}
+			//	}
+			//	continue
+			//}
 			variableType := v.Value
 			if k != len(call.Args)-1 {
 				code.Codes[code.CodeLength] = cg.OP_dup

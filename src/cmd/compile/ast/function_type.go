@@ -64,7 +64,6 @@ func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 	//trying to convert literal
 	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	errs = []error{}
-	errs = append(errs, checkCallArgsSingelValue(*args)...)
 	if functionType.VArgs != nil {
 		vArgs = &CallVArgs{}
 		vArgs.NoArgs = true

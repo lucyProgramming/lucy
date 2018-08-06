@@ -13,22 +13,22 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 		state.popStack(len(state.Stacks) - stackLength) // let`s pop
 	}()
 	for _, e := range args {
-		if e.HaveMultiValue() {
-			stack := buildExpression.build(class, code, e, context, state)
-			if t := currentStack + stack; t > maxStack {
-				maxStack = t
-			}
-			autoVar := newMultiValueAutoVar(class, code, state)
-			for k, t := range e.MultiValues {
-				stack = autoVar.unPack(class, code, k, t)
-				if t := currentStack + stack; t > maxStack {
-					maxStack = t
-				}
-				currentStack += jvmSlotSize(t)
-				state.pushStack(class, t)
-			}
-			continue
-		}
+		//if e.HaveMultiValue() {
+		//	stack := buildExpression.build(class, code, e, context, state)
+		//	if t := currentStack + stack; t > maxStack {
+		//		maxStack = t
+		//	}
+		//	autoVar := newMultiValueAutoVar(class, code, state)
+		//	for k, t := range e.MultiValues {
+		//		stack = autoVar.unPack(class, code, k, t)
+		//		if t := currentStack + stack; t > maxStack {
+		//			maxStack = t
+		//		}
+		//		currentStack += jvmSlotSize(t)
+		//		state.pushStack(class, t)
+		//	}
+		//	continue
+		//}
 		stack := buildExpression.build(class, code, e, context, state)
 		if t := stack + currentStack; t > maxStack {
 			maxStack = t
@@ -59,27 +59,27 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			op := storeArrayElementByTypeOps(vArgs.Type.Array.Type)
 			index := int32(0)
 			for _, e := range vArgs.Expressions {
-				if e.HaveMultiValue() {
-					stack := buildExpression.build(class, code, e, context, state)
-					if t := stack + currentStack; t > maxStack {
-						maxStack = t
-					}
-					autoVar := newMultiValueAutoVar(class, code, state)
-					for kk, tt := range e.MultiValues {
-						code.Codes[code.CodeLength] = cg.OP_dup
-						code.CodeLength++
-						loadInt32(class, code, index)
-						currentStack += 2
-						if t := currentStack + autoVar.unPack(class, code, kk, tt); t > maxStack {
-							maxStack = t
-						}
-						code.Codes[code.CodeLength] = op
-						code.CodeLength++
-						currentStack -= 2
-						index++
-					}
-					continue
-				}
+				//if e.HaveMultiValue() {
+				//	stack := buildExpression.build(class, code, e, context, state)
+				//	if t := stack + currentStack; t > maxStack {
+				//		maxStack = t
+				//	}
+				//	autoVar := newMultiValueAutoVar(class, code, state)
+				//	for kk, tt := range e.MultiValues {
+				//		code.Codes[code.CodeLength] = cg.OP_dup
+				//		code.CodeLength++
+				//		loadInt32(class, code, index)
+				//		currentStack += 2
+				//		if t := currentStack + autoVar.unPack(class, code, kk, tt); t > maxStack {
+				//			maxStack = t
+				//		}
+				//		code.Codes[code.CodeLength] = op
+				//		code.CodeLength++
+				//		currentStack -= 2
+				//		index++
+				//	}
+				//	continue
+				//}
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 				state.pushStack(class, vArgs.Type)

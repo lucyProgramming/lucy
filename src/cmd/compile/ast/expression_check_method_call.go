@@ -41,7 +41,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			} else {
 				methodCall := e.Data.(*ExpressionMethodCall)
 				methodCall.PackageFunction = f
-				callArgsTypes := checkExpressions(block, methodCall.Args, errs)
+				callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
 				var es []error
 				_, methodCall.VArgs, es = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
 				*errs = append(*errs, es...)
@@ -63,7 +63,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s variable '%s' cannot be a template fucntion",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			callArgsTypes := checkExpressions(block, call.Args, errs)
+			callArgsTypes := checkExpressions(block, call.Args, errs, true)
 			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
 			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
 			if esNotEmpty(es) {
@@ -153,19 +153,14 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s remove expect at last 1 argement",
 					errMsgPrefix(e.Pos)))
 			}
-			for _, v := range call.Args {
-				ts, es := v.check(block)
-				if esNotEmpty(es) {
-					*errs = append(*errs, es...)
+			ts := checkExpressions(block, call.Args, errs, true)
+			for _, t := range ts {
+				if t == nil {
+					continue
 				}
-				for _, t := range ts {
-					if t == nil {
-						continue
-					}
-					if object.Map.K.Equal(errs, t) == false {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for key",
-							errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
-					}
+				if object.Map.K.Equal(errs, t) == false {
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for key",
+						errMsgPrefix(e.Pos), t.TypeString(), object.Map.K.TypeString()))
 				}
 			}
 			return []*Type{ret}
@@ -217,41 +212,37 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			common.ArrayMethodCap,   //for debug,remove when time is right
 			common.ArrayMethodStart, //for debug,remove when time is right
 			common.ArrayMethodEnd:   //for debug,remove when time is right
-			t := &Type{}
-			t.Type = VariableTypeInt
-			t.Pos = e.Pos
+			result := &Type{}
+			result.Type = VariableTypeInt
+			result.Pos = e.Pos
 			if len(call.Args) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			return []*Type{t}
+			return []*Type{result}
 		case common.ArrayMethodAppend, common.ArrayMethodAppendAll:
 			if len(call.Args) == 0 {
 				*errs = append(*errs, fmt.Errorf("%s too few arguments to call %s,expect at least one argument",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			for _, e := range call.Args {
-				ts, es := e.check(block)
-				if esNotEmpty(es) {
-					*errs = append(*errs, es...)
-				}
-				for _, t := range ts {
-					if call.Name == common.ArrayMethodAppend {
-						if object.Array.Equal(errs, t) == false {
-							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-								errMsgPrefix(t.Pos), t.TypeString(), object.Array.TypeString(), call.Name))
-						}
-					} else {
-						if object.Equal(errs, t) == false {
-							*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-								errMsgPrefix(t.Pos), t.TypeString(), object.Array.TypeString(), call.Name))
-						}
+			ts := checkExpressions(block, call.Args, errs, true)
+			for _, t := range ts {
+				if call.Name == common.ArrayMethodAppend {
+					if object.Array.Equal(errs, t) == false {
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
+							errMsgPrefix(t.Pos), t.TypeString(), object.Array.TypeString(), call.Name))
+					}
+				} else {
+					if object.Equal(errs, t) == false {
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
+							errMsgPrefix(t.Pos), t.TypeString(), object.Array.TypeString(), call.Name))
 					}
 				}
 			}
-			t := object.Clone() // support
-			t.Pos = e.Pos
-			return []*Type{t}
+			result := &Type{}
+			result.Type = VariableTypeVoid
+			result.Pos = e.Pos
+			return []*Type{result}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
 		}
@@ -264,7 +255,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			return nil
 		}
 		//var fieldMethodHandler *ClassField
-		args := checkExpressions(block, call.Args, errs)
+		args := checkExpressions(block, call.Args, errs, true)
 		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, call, args, false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
@@ -310,7 +301,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil
 		}
-		callArgsTypes := checkExpressions(block, call.Args, errs)
+		callArgsTypes := checkExpressions(block, call.Args, errs, true)
 		ms, matched, err := object.Class.SuperClass.matchConstructionFunction(e.Pos, errs, nil, call, callArgsTypes)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
@@ -353,7 +344,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	}
 	call.Class = object.Class
-	callArgTypes := checkExpressions(block, call.Args, errs)
+	callArgTypes := checkExpressions(block, call.Args, errs, true)
 	if object.Class.IsInterface() {
 		if object.Type == VariableTypeClass {
 			*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",

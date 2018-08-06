@@ -63,13 +63,26 @@ public class ArrayBool   {
 		result.cap = this.cap;
 		return result;
 	}
-	public synchronized ArrayBool append(boolean e){
+	public synchronized void append(boolean e){
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
 		}
 		this.elements[this.end++] = e;
-		return this;
+	}
+	public synchronized  void append(ArrayBool es){
+		if (es == null) { //no need 
+			return  ;
+		}
+		if(this.end + es.size() < this.cap){
+		}else {
+			this.expand((this.cap + es.size()) * 2);
+		}
+		for(int i = 0;i < es.size();i++){
+			this.elements[this.end + i] = es.elements[es.start + i ];
+		}
+		this.end += es.size();
+		 
 	}
 	private void expand(int cap){
 		if(cap <= 0){
@@ -86,20 +99,7 @@ public class ArrayBool   {
 		this.cap = cap;
 		this.elements = eles;
 	}
-	public synchronized  ArrayBool append(ArrayBool es){
-		if (es == null) { //no need 
-			return this ; 
-		}
-		if(this.end + es.size() < this.cap){
-		}else {
-			this.expand((this.cap + es.size()) * 2);
-		}
-		for(int i = 0;i < es.size();i++){
-			this.elements[this.end + i] = es.elements[es.start + i ];
-		}
-		this.end += es.size();
-		return this;
-	}
+	
 	public synchronized String toString(){
 	    String s = "[";
 	    int size = this.end - this.start;

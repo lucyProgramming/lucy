@@ -11,7 +11,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		*errs = append(*errs, es...)
 	}
 	if on == nil {
-		checkExpressions(block, call.Args, errs)
+		checkExpressions(block, call.Args, errs, true)
 		return nil
 	}
 	if on.Type == VariableTypeClass { // cast type
@@ -84,7 +84,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 }
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs)
+	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	ret := ft.getReturnTypes(e.Pos)
 	var es []error
 	_, call.VArgs, es = ft.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
@@ -95,7 +95,7 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *F
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs)
+	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	var tf *Function
 	if f.TemplateFunction != nil {
 		length := len(*errs)

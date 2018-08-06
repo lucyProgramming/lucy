@@ -45,30 +45,30 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 
 	index := int32(0)
 	for _, v := range call.Args {
-		if v.HaveMultiValue() {
-			currentStack = 3
-			stack := buildExpression.build(class, code, v, context, state)
-			if t := currentStack + stack; t > maxStack {
-				maxStack = t
-			}
-			// store in temp var
-			autoVar := newMultiValueAutoVar(class, code, state)
-			for kk, _ := range v.MultiValues {
-				currentStack = 3
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				loadInt32(class, code, index)
-				currentStack += 2
-				stack = autoVar.unPackObject(class, code, kk)
-				if t := currentStack + stack; t > maxStack {
-					maxStack = t
-				}
-				code.Codes[code.CodeLength] = cg.OP_aastore
-				code.CodeLength++
-				index++
-			}
-			continue
-		}
+		//if v.HaveMultiValue() {
+		//	currentStack = 3
+		//	stack := buildExpression.build(class, code, v, context, state)
+		//	if t := currentStack + stack; t > maxStack {
+		//		maxStack = t
+		//	}
+		//	// store in temp var
+		//	autoVar := newMultiValueAutoVar(class, code, state)
+		//	for kk, _ := range v.MultiValues {
+		//		currentStack = 3
+		//		code.Codes[code.CodeLength] = cg.OP_dup
+		//		code.CodeLength++
+		//		loadInt32(class, code, index)
+		//		currentStack += 2
+		//		stack = autoVar.unPackObject(class, code, kk)
+		//		if t := currentStack + stack; t > maxStack {
+		//			maxStack = t
+		//		}
+		//		code.Codes[code.CodeLength] = cg.OP_aastore
+		//		code.CodeLength++
+		//		index++
+		//	}
+		//	continue
+		//}
 		currentStack = 3
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
