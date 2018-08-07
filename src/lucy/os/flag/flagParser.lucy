@@ -10,14 +10,14 @@ public final class  FlagParser {
 		this.options = new map{string -> Option}()
 	}
 	
-	public fn boolOption(name string , d bool ,usage string ) ->(o Option){
+	public fn boolOption(name string , d bool ,usage string ) ->(o BoolOption){
 		if this.options.keyExist(name)  {
 			panic(new error(sprintf("name already '%s' exists" , name )))
 		}
 		if name.startsWith("-") == false {
 			panic(new error(sprintf("'%s' not a valid option" , name )))
 		}
-		o = new Option();
+		o = new BoolOption();
 		o.typ = OptionTypeBool
 		o.boolDefaultValue = d 
 		o.usage = usage
@@ -82,7 +82,7 @@ public final class  FlagParser {
 			o := this.options[v]
 			switch o.typ {
 				case OptionTypeBool:
-					o.boolValue = !o.boolDefaultValue
+					o.parse(v)
 				case OptionTypeInt:
 					if k == len(args) -1 {
 						err = new error(sprintf("no value  after '%s'" , v ))
