@@ -433,15 +433,6 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "float"
 	case VariableTypeDouble:
 		*ret += "double"
-	case VariableTypeClass:
-		*ret += fmt.Sprintf("class(%s)", typ.Class.Name)
-	case VariableTypeEnum:
-		*ret += "enum(" + typ.Enum.Name + ")"
-	case VariableTypeArray:
-		*ret += "[]"
-		typ.Array.typeString(ret)
-	case VariableTypeVoid:
-		*ret += "void"
 	case VariableTypeString:
 		*ret += "string"
 	case VariableTypeObject: // class name
@@ -452,18 +443,15 @@ func (typ *Type) typeString(ret *string) {
 		*ret += " -> "
 		*ret += typ.Map.V.TypeString()
 		*ret += "}"
+	case VariableTypeArray:
+		*ret += "[]"
+		typ.Array.typeString(ret)
 	case VariableTypeJavaArray:
 		if typ.IsVArgs {
 			*ret += typ.Array.TypeString() + "..."
 		} else {
 			*ret += typ.Array.TypeString() + "[]"
 		}
-	case VariableTypePackage:
-		*ret += typ.Package.Name
-	case VariableTypeNull:
-		*ret += "null"
-	case VariableTypeName:
-		*ret += typ.Name // resolve wrong, but typeString is ok to return
 	case VariableTypeFunction:
 		s := "fn ("
 		for k, v := range typ.FunctionType.ParameterList {
@@ -497,8 +485,22 @@ func (typ *Type) typeString(ret *string) {
 			s += ")"
 		}
 		*ret += s
+	case VariableTypeEnum:
+		*ret += "enum(" + typ.Enum.Name + ")"
+	case VariableTypeClass:
+		*ret += fmt.Sprintf("class(%s)", typ.Class.Name)
+	case VariableTypeName:
+		*ret += typ.Name // resolve wrong, but typeString is ok to return
 	case VariableTypeTemplate:
 		*ret += typ.Name
+	case VariableTypeVoid:
+		*ret += "void"
+	case VariableTypeTypeAlias:
+		*ret += typ.AliasType.TypeString()
+	case VariableTypePackage:
+		*ret += typ.Package.Name
+	case VariableTypeNull:
+		*ret += "null"
 	case VariableTypeSelectGlobal:
 		*ret += typ.Name
 	default:
@@ -718,31 +720,3 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 	}
 	return false
 }
-
-//func (typ *Type) involvedClasses() []*Class {
-//	switch typ.Type {
-//	case VariableTypeObject:
-//		return []*Class{typ.Class}
-//	case VariableTypeMap:
-//		csk := typ.Map.K.involvedClasses()
-//		csv := typ.Map.V.involvedClasses()
-//		cs := []*Class{}
-//		cs = append(cs, csk...)
-//		cs = append(cs, csv...)
-//		return cs
-//	case VariableTypeArray, VariableTypeJavaArray:
-//		return typ.Array.involvedClasses()
-//	case VariableTypeFunction:
-//		cs := []*Class{}
-//		for _, v := range typ.FunctionType.ParameterList {
-//			t := v.Type.involvedClasses()
-//			cs = append(cs, t...)
-//		}
-//		for _, v := range typ.FunctionType.ReturnList {
-//			t := v.Type.involvedClasses()
-//			cs = append(cs, t...)
-//		}
-//		return cs
-//	}
-//	return nil
-//}

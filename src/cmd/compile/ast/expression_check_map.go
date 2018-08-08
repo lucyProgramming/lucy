@@ -49,8 +49,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			}
 			if rightValueValid && mapK != nil {
 				if mapK.Equal(errs, kType) == false {
-					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(v.Left.Pos),
-						kType.TypeString(), mapK.TypeString()))
+					if noType {
+						*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map value", errMsgPrefix(v.Left.Pos),
+							kType.TypeString(), mapK.TypeString()))
+					} else {
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(v.Left.Pos),
+							kType.TypeString(), mapK.TypeString()))
+					}
 				}
 			}
 		}
@@ -78,9 +83,15 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 		}
 		if mapV != nil {
 			if mapV.Equal(errs, vType) == false {
-				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-					errMsgPrefix(v.Right.Pos),
-					vType.TypeString(), mapV.TypeString()))
+				if noType {
+					*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map key",
+						errMsgPrefix(v.Right.Pos),
+						vType.TypeString(), mapV.TypeString()))
+				} else {
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						errMsgPrefix(v.Right.Pos),
+						vType.TypeString(), mapV.TypeString()))
+				}
 			}
 		}
 	}

@@ -1,0 +1,16 @@
+
+
+
+public final class BoolOption  extends Option{
+	boolDefaultValue bool 
+	boolValue bool 
+	public fn reset() {
+		this.boolValue = this.boolDefaultValue 
+	}
+	public fn parse(s string) -> (err error) {
+		this.boolValue = !this.boolDefaultValue
+	} 
+	public fn getBoolValue() -> (b bool){
+		b = this.boolValue
+	}
+}

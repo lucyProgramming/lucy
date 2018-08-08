@@ -1,0 +1,18 @@
+import "java/lang/Runnable";
+
+
+
+
+
+
+public  final class Run implements Runnable{
+	private f fn() 
+	public fn Run(f fn () ) {
+		this.f = f 
+	}
+	public fn run() {
+		this.f()
+	}
+}
+
+

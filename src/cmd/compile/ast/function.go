@@ -8,18 +8,9 @@ import (
 type Function struct {
 	CallFatherConstructionExpression *Expression
 	TemplateFunction                 *TemplateFunction
-	parameterTypes                   map[string]*Type    //typed parameters
-	ClassMethod                      *cg.MethodHighLevel // make call from
-	HaveDefaultValue                 bool
-	DefaultValueStartAt              int
-	IsClosureFunction                bool
-	isGlobalVariableDefinition       bool
+	parameterTypes                   map[string]*Type     //typed parameters
+	ClassMethod                      *cg.MethodHighLevel  // make call from
 	buildInFunctionChecker           buildFunctionChecker // used in build function
-	IsGlobal                         bool
-	IsBuildIn                        bool
-	LoadedFromLucyLang               bool
-	Used                             bool
-	TemplateClonedFunction           bool
 	AccessFlags                      uint16
 	Type                             FunctionType
 	Closure                          Closure
@@ -30,6 +21,15 @@ type Function struct {
 	ClosureVariableOffSet            uint16 // for closure
 	SourceCodes                      []byte // source code for template function
 	HasDefer                         bool
+	HaveDefaultValue                 bool
+	DefaultValueStartAt              int
+	IsGlobal                         bool
+	IsBuildIn                        bool
+	LoadedFromLucyLang               bool
+	Used                             bool
+	TemplateClonedFunction           bool
+	IsClosureFunction                bool
+	isGlobalVariableDefinition       bool
 }
 
 func (f *Function) isPublic() bool {
