@@ -66,7 +66,7 @@ func (c *Class) accessField(from *Pos, name string, fromSub bool) (*ClassField, 
 	if err != nil {
 		return nil, err
 	}
-	notFoundErr := fmt.Errorf("field named '%s' not found", name)
+	notFoundErr := fmt.Errorf("%s field named '%s' not found", errMsgPrefix(from), name)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].IsPrivate() {
 			// private field

@@ -7,7 +7,6 @@ import (
 
 func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup

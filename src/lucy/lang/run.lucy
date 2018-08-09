@@ -1,3 +1,5 @@
+
+/*
 import "java/lang/Runnable";
 
 
@@ -16,3 +18,4 @@ public  final class Run implements Runnable{
 }
 
 
+*/

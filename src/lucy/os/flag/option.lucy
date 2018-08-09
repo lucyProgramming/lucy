@@ -11,10 +11,10 @@ public class Option {
 	protected  typ OptionType
 	protected usage string 
 	
-	protected public fn reset() {
+	protected fn reset() {
 		
 	}
-	protected public fn parse(s string) -> (err error ) {
+	protected fn parse(s string) -> (err error ) {
 		
 	}
 	

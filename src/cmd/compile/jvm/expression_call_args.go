@@ -40,7 +40,7 @@ func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, 
 			newArrayBaseOnType(class, code, vArgs.Type.Array)
 			state.pushStack(class, vArgs.Type)
 			currentStack++
-			op := storeArrayElementByTypeOps(vArgs.Type.Array.Type)
+			op := storeArrayElementOp(vArgs.Type.Array.Type)
 			index := int32(0)
 			for _, e := range vArgs.Expressions {
 				//if e.HaveMultiValue() {

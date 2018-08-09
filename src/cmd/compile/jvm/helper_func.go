@@ -190,7 +190,7 @@ func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *a
 		code.CodeLength += 3
 	}
 }
-func storeArrayElementByTypeOps(typ ast.VariableTypeKind) (op byte) {
+func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 	switch typ {
 	case ast.VariableTypeBool:
 		op = cg.OP_bastore

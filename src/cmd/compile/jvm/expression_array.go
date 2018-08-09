@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	arrayObject.Array = e.Value.Array
 	state.pushStack(class, arrayObject)
 	maxStack = 4
-	storeOP := storeArrayElementByTypeOps(e.Value.Array.Type)
+	storeOP := storeArrayElementOp(e.Value.Array.Type)
 	var index int32 = 0
 	for _, v := range arr.Expressions {
 		if v.HaveMultiValue() {

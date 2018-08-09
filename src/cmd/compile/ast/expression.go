@@ -237,25 +237,52 @@ type Expression struct {
 	IsStatementExpression bool
 }
 
+func (e *Expression) IsRelation() bool {
+	return e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe ||
+		e.Type == ExpressionTypeGe ||
+		e.Type == ExpressionTypeGt ||
+		e.Type == ExpressionTypeLe ||
+		e.Type == ExpressionTypeLt
+}
+
 /*
 	1 > 2
 	'a' > 'b'
 	1s > 2s
 */
-func (e *Expression) Is2IntCompare() bool {
-	if e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe ||
-		e.Type == ExpressionTypeGe ||
-		e.Type == ExpressionTypeGt ||
-		e.Type == ExpressionTypeLe ||
-		e.Type == ExpressionTypeLt {
-	} else {
+func (e *Expression) IsIntCompare() bool {
+	if e.IsRelation() == false {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
 	i1 := bin.Left.Value.IsInteger() && bin.Left.Value.Type != VariableTypeLong
 	i2 := bin.Right.Value.IsInteger() && bin.Right.Value.Type != VariableTypeLong
 	return i1 && i2
+}
+
+func (e *Expression) IsNullCompare() bool {
+	if e.IsRelation() == false {
+		return false
+	}
+	bin := e.Data.(*ExpressionBinary)
+	return bin.Left.Type == ExpressionTypeNull ||
+		bin.Right.Type == ExpressionTypeNull
+}
+
+func (e *Expression) IsStringCompare() bool {
+	if e.IsRelation() == false {
+		return false
+	}
+	bin := e.Data.(*ExpressionBinary)
+	return bin.Left.Value.Type == VariableTypeString
+}
+func (e *Expression) IsPointerCompare() bool {
+	if e.IsRelation() == false {
+		return false
+	}
+	bin := e.Data.(*ExpressionBinary)
+	return bin.Left.Value.IsPointer()
 }
 
 func (e *Expression) ConvertTo(to *Type) {
