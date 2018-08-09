@@ -27,14 +27,45 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		}
 	}
 	//condition
-	var firstTimeExit *cg.Exit
-	if s.Condition != nil {
-		stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
+	buildIntCompareCondition := func() {
+		bin := s.Condition.Data.(*ast.ExpressionBinary)
+		stack := buildPackage.BuildExpression.build(class, code, bin.Left, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
-		firstTimeExit = (&cg.Exit{}).Init(cg.OP_goto, code)
+		forState.pushStack(class, bin.Left.Value)
+		stack = buildPackage.BuildExpression.build(class, code, bin.Right, context, forState)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		switch s.Condition.Type {
+		case ast.ExpressionTypeEq:
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpne, code))
+		case ast.ExpressionTypeNe:
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpeq, code))
+		case ast.ExpressionTypeGe:
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmplt, code))
+		case ast.ExpressionTypeGt:
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmple, code))
+		case ast.ExpressionTypeLe:
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpgt, code))
+		case ast.ExpressionTypeLt:
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
+		}
+		forState.popStack(1)
+	}
+	var firstTimeExit *cg.Exit
+	if s.Condition != nil {
+		if s.Condition.Is2IntCompare() {
+			buildIntCompareCondition()
+		} else {
+			stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
+			if stack > maxStack {
+				maxStack = stack
+			}
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
+		}
+		firstTimeExit = (&cg.Exit{}).Init(cg.OP_goto, code) // goto body
 	}
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
@@ -45,11 +76,15 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		}
 	}
 	if s.Condition != nil {
-		stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
-		if stack > maxStack {
-			maxStack = stack
+		if s.Condition.Is2IntCompare() {
+			buildIntCompareCondition()
+		} else {
+			stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
+			if stack > maxStack {
+				maxStack = stack
+			}
+			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
 		}
-		s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
 	}
 	if firstTimeExit != nil {
 		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)

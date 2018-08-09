@@ -874,7 +874,7 @@ redo:
 	case ':':
 		c, eof = lex.getChar()
 		if c == '=' {
-			token.Type = TokenColonAssign
+			token.Type = TokenVarAssign
 			token.Description = ":= "
 		} else {
 			token.Type = TokenColon

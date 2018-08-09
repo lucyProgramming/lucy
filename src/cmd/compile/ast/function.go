@@ -32,7 +32,7 @@ type Function struct {
 	isGlobalVariableDefinition       bool
 }
 
-func (f *Function) isPublic() bool {
+func (f *Function) IsPublic() bool {
 	return f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0
 }
 

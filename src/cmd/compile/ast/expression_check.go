@@ -140,8 +140,8 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			returnValueTypes = []*Type{tt}
 		}
 		e.Value = tt
-	case ExpressionTypeColonAssign:
-		e.checkColonAssignExpression(block, &errs)
+	case ExpressionTypeVarAssign:
+		e.checkVarAssignExpression(block, &errs)
 		e.Value = mkVoidType(e.Pos)
 		returnValueTypes = []*Type{e.Value}
 	case ExpressionTypeAssign:
@@ -359,7 +359,6 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 			return f.Type.getReturnTypes(e.Pos)
 		}
 	}
-
 	length := len(*errs)
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {

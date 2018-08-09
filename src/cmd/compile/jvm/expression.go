@@ -115,8 +115,8 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 	//
 	case ast.ExpressionTypeAssign:
 		maxStack = buildExpression.buildAssign(class, code, e, context, state)
-	case ast.ExpressionTypeColonAssign:
-		maxStack = buildExpression.buildColonAssign(class, code, e, context, state)
+	case ast.ExpressionTypeVarAssign:
+		maxStack = buildExpression.buildVarAssign(class, code, e, context, state)
 	//
 	case ast.ExpressionTypePlusAssign:
 		fallthrough

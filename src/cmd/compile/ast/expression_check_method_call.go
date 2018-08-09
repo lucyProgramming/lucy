@@ -25,7 +25,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
-			if f.isPublic() == false && object.Package.Name != PackageBeenCompile.Name {
+			if f.IsPublic() == false && object.Package.Name != PackageBeenCompile.Name {
 				*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
 					errMsgPrefix(e.Pos), call.Name))
 			}
@@ -61,7 +61,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			call := e.Data.(*ExpressionMethodCall)
 			if len(call.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s variable '%s' cannot be a template fucntion",
-					errMsgPrefix(e.Pos), call.Name))
+					errMsgPrefix(call.ParameterTypes[0].Pos), call.Name))
 			}
 			callArgsTypes := checkExpressions(block, call.Args, errs, true)
 			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
@@ -95,6 +95,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
 		case *Type:
+			if len(call.Args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
+					errMsgPrefix(e.Pos)))
+				result := object.Package.Block.TypeAliases[call.Name].Clone()
+				result.Pos = e.Pos
+				return []*Type{result}
+			}
 			conversion := &ExpressionTypeConversion{}
 			conversion.Type = object.Package.Block.TypeAliases[call.Name]
 			e.Type = ExpressionTypeCheckCast
@@ -102,11 +109,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				conversion.Expression = call.Args[0]
 			}
 			e.Data = conversion
-			if len(call.Args) != 1 {
-				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					errMsgPrefix(e.Pos)))
-				return []*Type{conversion.Type}
-			}
 			return []*Type{e.checkTypeConversionExpression(block, errs)}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",

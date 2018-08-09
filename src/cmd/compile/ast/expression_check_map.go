@@ -37,11 +37,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 		if kType != nil {
 			rightValueValid := kType.RightValueValid()
 			if false == rightValueValid {
-				*errs = append(*errs, fmt.Errorf("%s k is not right value valid", errMsgPrefix(v.Left.Pos)))
+				*errs = append(*errs, fmt.Errorf("%s k is not right value valid",
+					errMsgPrefix(v.Left.Pos)))
 			}
 			if noType && m.Type.Map.K == nil {
 				if kType.isTyped() == false {
-					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k", errMsgPrefix(v.Left.Pos)))
+					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k",
+						errMsgPrefix(v.Left.Pos)))
 				} else {
 					m.Type.Map.K = kType
 					mapK = m.Type.Map.K
@@ -50,10 +52,12 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			if rightValueValid && mapK != nil {
 				if mapK.Equal(errs, kType) == false {
 					if noType {
-						*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map value", errMsgPrefix(v.Left.Pos),
+						*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map value",
+							errMsgPrefix(v.Left.Pos),
 							kType.TypeString(), mapK.TypeString()))
 					} else {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'", errMsgPrefix(v.Left.Pos),
+						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+							errMsgPrefix(v.Left.Pos),
 							kType.TypeString(), mapK.TypeString()))
 					}
 				}
@@ -69,13 +73,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 		}
 		if false == kType.RightValueValid() {
 			*errs = append(*errs, fmt.Errorf("%s k is not right value valid",
-				errMsgPrefix(v.Left.Pos)))
+				errMsgPrefix(v.Right.Pos)))
 			continue
 		}
 		if noType && m.Type.Map.V == nil {
 			if vType.isTyped() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
-					errMsgPrefix(v.Left.Pos)))
+					errMsgPrefix(v.Right.Pos)))
 			} else {
 				m.Type.Map.V = vType
 				mapV = m.Type.Map.V

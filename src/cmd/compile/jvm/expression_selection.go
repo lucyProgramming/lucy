@@ -135,9 +135,9 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		return
 	}
 	// object
-	maxStack = buildExpression.build(class, code, selection.Expression, context, state)
-	if t := jvmSlotSize(e.Value); t > maxStack {
-		maxStack = t
+	stack := buildExpression.build(class, code, selection.Expression, context, state)
+	if stack > maxStack {
+		maxStack = stack
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
@@ -146,5 +146,8 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		Descriptor: Descriptor.typeDescriptor(e.Value),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	if t := jvmSlotSize(e.Value); t > maxStack {
+		maxStack = t
+	}
 	return
 }

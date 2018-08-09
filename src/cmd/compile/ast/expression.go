@@ -31,7 +31,7 @@ const (
 	ExpressionTypeDiv                                       // a / b
 	ExpressionTypeMod                                       // a % b
 	ExpressionTypeAssign                                    // a = b
-	ExpressionTypeColonAssign                               // a := b
+	ExpressionTypeVarAssign                                 // a := b
 	ExpressionTypePlusAssign                                // a += b
 	ExpressionTypeMinusAssign                               // a -= b
 	ExpressionTypeMulAssign                                 // a *= b
@@ -113,7 +113,7 @@ func (e *Expression) OpName() string {
 		return ">>"
 	case ExpressionTypeAssign:
 		return "="
-	case ExpressionTypeColonAssign:
+	case ExpressionTypeVarAssign:
 		return ":="
 	case ExpressionTypePlusAssign:
 		return "+="
@@ -235,6 +235,27 @@ type Expression struct {
 	Pos                   *Pos
 	Data                  interface{}
 	IsStatementExpression bool
+}
+
+/*
+	1 > 2
+	'a' > 'b'
+	1s > 2s
+*/
+func (e *Expression) Is2IntCompare() bool {
+	if e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe ||
+		e.Type == ExpressionTypeGe ||
+		e.Type == ExpressionTypeGt ||
+		e.Type == ExpressionTypeLe ||
+		e.Type == ExpressionTypeLt {
+	} else {
+		return false
+	}
+	bin := e.Data.(*ExpressionBinary)
+	i1 := bin.Left.Value.IsInteger() && bin.Left.Value.Type != VariableTypeLong
+	i2 := bin.Right.Value.IsInteger() && bin.Right.Value.Type != VariableTypeLong
+	return i1 && i2
 }
 
 func (e *Expression) ConvertTo(to *Type) {
@@ -372,7 +393,7 @@ func (e *Expression) canBeUsedAsCondition() bool {
 }
 
 func (e *Expression) canBeUsedAsStatement() bool {
-	return e.Type == ExpressionTypeColonAssign ||
+	return e.Type == ExpressionTypeVarAssign ||
 		e.Type == ExpressionTypeAssign ||
 		e.Type == ExpressionTypeFunctionCall ||
 		e.Type == ExpressionTypeMethodCall ||
@@ -444,7 +465,7 @@ func (e *Expression) IsOneValue() bool {
 	k,v = range arr
 */
 func (e *Expression) canBeUsedForRange() bool {
-	if e.Type != ExpressionTypeAssign && e.Type != ExpressionTypeColonAssign {
+	if e.Type != ExpressionTypeAssign && e.Type != ExpressionTypeVarAssign {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)

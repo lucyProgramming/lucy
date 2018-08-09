@@ -130,7 +130,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 
 	//handle captured vars
-	if s.Condition.Type == ast.ExpressionTypeColonAssign {
+	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if s.RangeAttr.IdentifierValue != nil && s.RangeAttr.IdentifierValue.Variable.BeenCaptured {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Variable.Type)
 			s.RangeAttr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
@@ -229,7 +229,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		code.CodeLength++ // pop  k on stack
 	}
 	//current stack is 0
-	if s.Condition.Type == ast.ExpressionTypeColonAssign {
+	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if s.RangeAttr.IdentifierValue != nil {
 			if s.RangeAttr.IdentifierValue.Variable.BeenCaptured {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)

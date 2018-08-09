@@ -131,7 +131,7 @@ func (parser *Parser) Parse() []error {
 			}
 			e.IsPublic = isPublic()
 			parser.validStatementEnding()
-			if e.Type == ast.ExpressionTypeColonAssign {
+			if e.Type == ast.ExpressionTypeVarAssign {
 				*parser.tops = append(*parser.tops, &ast.Top{
 					Data: e,
 				})
@@ -265,7 +265,7 @@ func (parser *Parser) Parse() []error {
 					parser.errs = append(parser.errs, err)
 					continue
 				}
-				if e.Type == ast.ExpressionTypeColonAssign {
+				if e.Type == ast.ExpressionTypeVarAssign {
 					*parser.tops = append(*parser.tops, &ast.Top{
 						Data: e,
 					})
@@ -387,7 +387,7 @@ func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*a
 		return vs
 	}
 	if parser.token.Type != lex.TokenAssign &&
-		parser.token.Type != lex.TokenColonAssign {
+		parser.token.Type != lex.TokenVarAssign {
 		return mkResult(), nil, err
 	}
 	if parser.token.Type != lex.TokenAssign {

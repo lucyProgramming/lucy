@@ -75,7 +75,7 @@ func (s *StatementFor) checkRange() []error {
 	s.RangeAttr = &ForRangeAttr{}
 	s.RangeAttr.RangeOn = rangeExpression
 	var err error
-	if s.Condition.Type == ExpressionTypeColonAssign {
+	if s.Condition.Type == ExpressionTypeVarAssign {
 		for _, v := range lefts {
 			if v.Type != ExpressionTypeIdentifier {
 				errs = append(errs, fmt.Errorf("%s not a identifier on left",

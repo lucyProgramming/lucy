@@ -118,8 +118,8 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	switch expressionParser.parser.token.Type {
 	case lex.TokenAssign:
 		return parseRight(ast.ExpressionTypeAssign, true)
-	case lex.TokenColonAssign:
-		return parseRight(ast.ExpressionTypeColonAssign, true)
+	case lex.TokenVarAssign:
+		return parseRight(ast.ExpressionTypeVarAssign, true)
 	case lex.TokenAddAssign:
 		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypePlusAssign, false)

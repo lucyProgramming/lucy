@@ -55,7 +55,7 @@ type Statement struct {
 
 func (s *Statement) isVariableDefinition() bool {
 	return s.Type == StatementTypeExpression &&
-		(s.Expression.Type == ExpressionTypeColonAssign || s.Expression.Type == ExpressionTypeVar)
+		(s.Expression.Type == ExpressionTypeVarAssign || s.Expression.Type == ExpressionTypeVar)
 }
 
 func (s *Statement) check(block *Block) []error { // block is father
