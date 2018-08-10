@@ -126,9 +126,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		}
 		forState.popStack(1)
 	}
-
-	var firstTimeExit *cg.Exit
-	if s.Condition != nil {
+	buildCondition := func() {
 		if s.Condition.IsIntCompare() {
 			buildIntCompareCondition()
 		} else if s.Condition.IsNullCompare() {
@@ -144,6 +142,10 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 			}
 			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
 		}
+	}
+	var firstTimeExit *cg.Exit
+	if s.Condition != nil {
+		buildCondition()
 		firstTimeExit = (&cg.Exit{}).Init(cg.OP_goto, code) // goto body
 	}
 	s.ContinueCodeOffset = code.CodeLength
@@ -155,21 +157,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		}
 	}
 	if s.Condition != nil {
-		if s.Condition.IsIntCompare() {
-			buildIntCompareCondition()
-		} else if s.Condition.IsNullCompare() {
-			buildNullCompareCondition()
-		} else if s.Condition.IsStringCompare() {
-			buildStringCompareCondition()
-		} else if s.Condition.IsPointerCompare() {
-			buildPointerCompareCondition()
-		} else {
-			stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, forState)
-			if stack > maxStack {
-				maxStack = stack
-			}
-			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
-		}
+		buildCondition()
 	}
 	if firstTimeExit != nil {
 		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)

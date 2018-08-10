@@ -42,7 +42,6 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if left.Type != VariableTypeBool || right.Type != VariableTypeBool {
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
-
 		return result
 	}
 	// & |

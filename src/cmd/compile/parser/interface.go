@@ -111,6 +111,7 @@ func (interfaceParser *InterfaceParser) parse() (classDefinition *ast.Class, err
 			m.Function.Name = name
 			m.Function.Type = functionType
 			m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
+			m.Function.AccessFlags |= cg.ACC_METHOD_ABSTRACT
 			if interfaceParser.ret.Methods == nil {
 				interfaceParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}

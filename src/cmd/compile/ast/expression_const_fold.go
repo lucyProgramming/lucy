@@ -377,7 +377,7 @@ func (e *Expression) getDoubleValue() float64 {
 
 func (e *Expression) convertNumberLiteralTo(t VariableTypeKind) {
 	if e.isNumber() == false {
-		panic("...")
+		panic("not a number")
 	}
 	switch t {
 	case VariableTypeByte:

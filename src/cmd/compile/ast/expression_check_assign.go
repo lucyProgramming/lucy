@@ -27,10 +27,9 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 		t := v.getLeftValue(block, errs)
-		v.Value = t
 		leftTypes = append(leftTypes, t) // append even if it`s nil
 	}
-	convertLiteralExpressionsToNeeds(values, leftTypes, valueTypes)
+	convertExpressionsToNeeds(values, leftTypes, valueTypes)
 	bin.Left.MultiValues = leftTypes
 	if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
 		pos := e.Pos

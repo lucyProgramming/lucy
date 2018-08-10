@@ -15,8 +15,6 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
 	switch e.Type {
-	case ast.ExpressionTypeTypeAlias:
-		return // handled at ast stage
 	case ast.ExpressionTypeNull:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null
 		code.CodeLength++

@@ -38,8 +38,8 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
 			writeExits(s.StatementFor.Exits, code.CodeLength)
-			context.MakeStackMap(code, state, code.CodeLength)
 		}
+		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeContinue:
 		if len(s.StatementContinue.Defers) > 0 {
 			buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
@@ -102,6 +102,8 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		buildPackage.putClass(c)
 	case ast.StatementTypeNop:
 		// nop
+	case ast.StatementTypeTypeAlias:
+		// handled at ast stage
 	}
 	return
 }

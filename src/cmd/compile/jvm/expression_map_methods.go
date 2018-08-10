@@ -39,16 +39,6 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 		}
 	case common.MapMethodRemove:
 		currentStack := uint16(1)
-		callRemove := func() {
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      javaMapClass,
-				Method:     "remove",
-				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.Codes[code.CodeLength+3] = cg.OP_pop
-			code.CodeLength += 4
-		}
 		for k, v := range call.Args {
 			currentStack = 1
 			variableType := v.Value
@@ -68,7 +58,14 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 				typeConverter.packPrimitives(class, code, variableType)
 			}
 			//call remove
-			callRemove()
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaMapClass,
+				Method:     "remove",
+				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.Codes[code.CodeLength+3] = cg.OP_pop
+			code.CodeLength += 4
 			if k != len(call.Args)-1 {
 				state.popStack(1)
 			}

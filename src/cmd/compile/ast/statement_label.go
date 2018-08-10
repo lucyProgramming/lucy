@@ -30,6 +30,7 @@ func (s *StatementLabel) Reset() {
 	s.Exits = []*cg.Exit{}
 }
 
+// check this label is read to goto
 func (s *StatementLabel) Ready(from *Pos) error {
 	ss := []*Statement{}
 	for _, v := range s.Block.Statements {

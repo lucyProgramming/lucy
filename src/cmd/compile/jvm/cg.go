@@ -308,7 +308,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		method.IsConstruction = name == specialMethodInit
-		if c.IsInterface() == false {
+		if vv.IsAbstract() == false {
 			method.Code = &cg.AttributeCode{}
 			buildPackage.buildFunction(class, c, method, vv.Function)
 		}

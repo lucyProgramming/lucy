@@ -9,22 +9,21 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ee := e.Data.(*ast.Expression)
 	// identifier  and not captured and type`s int
-	if t, ok := ee.Data.(*ast.ExpressionIdentifier); ee.Type == ast.ExpressionTypeIdentifier &&
-		ok &&
-		t.Variable.BeenCaptured == false &&
-		t.Variable.Type.Type == ast.VariableTypeInt &&
-		t.Variable.IsGlobal == false {
-		if t.Variable.LocalValOffset > 255 { // early check
+	if identifier := ee.Data.(*ast.ExpressionIdentifier); ee.Type == ast.ExpressionTypeIdentifier &&
+		identifier.Variable.BeenCaptured == false &&
+		identifier.Variable.Type.Type == ast.VariableTypeInt &&
+		identifier.Variable.IsGlobal == false {
+		if identifier.Variable.LocalValOffset > 255 { // early check
 			panic("over 255")
 		}
 		if e.IsStatementExpression == false { //  need it`s value
 			if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, t.Variable.LocalValOffset)...) // load to stack top
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_iinc
-		code.Codes[code.CodeLength+1] = byte(t.Variable.LocalValOffset)
+		code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
 		if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypeIncrement {
 			code.Codes[code.CodeLength+2] = 1
 		} else { // --
@@ -34,7 +33,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 		code.CodeLength += 3
 		if e.IsStatementExpression == false { // I still need it`s value
 			if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypePrefixDecrement { // decrement
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, t.Variable.LocalValOffset)...) // load to stack top
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.LocalValOffset)...) // load to stack top
 				maxStack = 1
 			}
 		}

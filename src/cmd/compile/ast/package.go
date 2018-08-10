@@ -234,7 +234,6 @@ func (p *Package) checkUnUsedPackage() {
 			if i.Used == false {
 				p.Errors = append(p.Errors, fmt.Errorf("%s '%s' imported not used",
 					errMsgPrefix(i.Pos), i.Import))
-
 			}
 		}
 	}

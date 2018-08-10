@@ -5,7 +5,6 @@ import "fmt"
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
 	bin := e.Data.(*ExpressionBinary)
 	left := bin.Left.getLeftValue(block, errs)
-	bin.Left.Value = left
 	right, es := bin.Right.checkSingleValueContextExpression(block)
 	if esNotEmpty(es) {
 		*errs = append(*errs, es...)
@@ -27,6 +26,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 			t.Variable.Used = true
 		}
 	}
+	convertExpressionToNeed(bin.Right, left, right)
 	/*
 		var  s string;
 		s += "11111111";
@@ -41,6 +41,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		}
 		return result
 	}
+
 	//number
 	if e.Type == ExpressionTypePlusAssign ||
 		e.Type == ExpressionTypeMinusAssign ||

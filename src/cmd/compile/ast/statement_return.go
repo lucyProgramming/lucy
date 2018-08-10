@@ -33,7 +33,7 @@ func (s *StatementReturn) check(b *Block) []error {
 	} else if len(returnValueTypes) > len(rs) {
 		errs = append(errs, fmt.Errorf("%s too many arguments to return", errMsgPrefix(pos)))
 	}
-	convertLiteralExpressionsToNeeds(s.Expressions,
+	convertExpressionsToNeeds(s.Expressions,
 		b.InheritedAttribute.Function.Type.getReturnTypes(s.Expressions[0].Pos), returnValueTypes)
 	for k, v := range rs {
 		if k < len(returnValueTypes) && returnValueTypes[k] != nil {

@@ -26,25 +26,6 @@ func (buildExpression *BuildExpression) mkBuildInAssert(class *cg.ClassHighLevel
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, stepOffset)...)
 	exits := []*cg.Exit{}
 	for _, a := range call.Args {
-		//if a.HaveMultiValue() {
-		//	stack := buildExpression.build(class, code, a, context, state)
-		//	if stack > maxStack {
-		//		maxStack = stack
-		//	}
-		//	autoVar := newMultiValueAutoVar(class, code, state)
-		//	for kk, tt := range a.MultiValues {
-		//		stack = autoVar.unPack(class, code, kk, tt)
-		//		if stack > maxStack {
-		//			maxStack = stack
-		//		}
-		//		exits = append(exits, (&cg.Exit{}).Init(cg.OP_ifeq, code))
-		//		code.Codes[code.CodeLength] = cg.OP_iinc
-		//		code.Codes[code.CodeLength+1] = byte(stepOffset)
-		//		code.Codes[code.CodeLength+2] = 1
-		//		code.CodeLength += 3
-		//	}
-		//	continue
-		//}
 		stack := buildExpression.build(class, code, a, context, state)
 		if stack > maxStack {
 			maxStack = stack

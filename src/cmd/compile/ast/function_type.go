@@ -62,7 +62,7 @@ func (functionType FunctionType) getParameterTypes() []*Type {
 func (functionType *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 	callArgsTypes []*Type, f *Function) (match bool, vArgs *CallVArgs, errs []error) {
 	//trying to convert literal
-	convertLiteralExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
+	convertExpressionsToNeeds(*args, functionType.getParameterTypes(), callArgsTypes)
 	errs = []error{}
 	if functionType.VArgs != nil {
 		vArgs = &CallVArgs{}

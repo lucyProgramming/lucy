@@ -55,7 +55,7 @@ func (fd *FunctionDefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp
 		switch v.Type.Type {
 		case ast.VariableTypeBool:
 			v.Expression.Type = ast.ExpressionTypeBool
-			v.Expression.Data = int32(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info)) != 0
+			v.Expression.Data = binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info) != 0
 		case ast.VariableTypeByte:
 			v.Expression.Type = ast.ExpressionTypeByte
 			v.Expression.Data = byte(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))

@@ -24,6 +24,7 @@ const (
 	StatementTypeEnum
 	StatementTypeNop
 	StatementTypeImport
+	StatementTypeTypeAlias
 )
 
 type Statement struct {
@@ -32,6 +33,7 @@ type Statement struct {
 	Pos                       *Pos
 	StatementIf               *StatementIf
 	Expression                *Expression
+	TypeAlias                 *TypeAlias
 	StatementFor              *StatementFor
 	StatementReturn           *StatementReturn
 	StatementSwitch           *StatementSwitch
@@ -54,8 +56,11 @@ type Statement struct {
 }
 
 func (s *Statement) isVariableDefinition() bool {
-	return s.Type == StatementTypeExpression &&
-		(s.Expression.Type == ExpressionTypeVarAssign || s.Expression.Type == ExpressionTypeVar)
+	if s.Type != StatementTypeExpression {
+		return false
+	}
+	return s.Expression.Type == ExpressionTypeVarAssign ||
+		s.Expression.Type == ExpressionTypeVar
 }
 
 func (s *Statement) check(block *Block) []error { // block is father
@@ -195,32 +200,29 @@ func (s *Statement) check(block *Block) []error { // block is father
 		}
 		is.Imports[s.Import.AccessName] = s.Import
 		is.ImportsByResources[s.Import.Import] = s.Import
-	}
-	return nil
-}
-
-func (s *Statement) checkStatementExpression(b *Block) []error {
-	errs := []error{}
-	//
-	if s.Expression.Type == ExpressionTypeTypeAlias { // special case
-		t := s.Expression.Data.(*ExpressionTypeAlias)
-		err := t.Type.resolve(b)
+	case StatementTypeTypeAlias:
+		err := s.TypeAlias.Type.resolve(block)
 		if err != nil {
 			return []error{err}
 		}
-		err = b.Insert(t.Name, t.Pos, t.Type)
+		err = block.Insert(s.TypeAlias.Name, s.TypeAlias.Pos, s.TypeAlias.Type)
 		if err != nil {
 			return []error{err}
 		}
 		return nil
 	}
+	return nil
+}
+
+func (s *Statement) checkStatementExpression(block *Block) []error {
+	errs := []error{}
 	s.Expression.IsStatementExpression = true
 	if s.Expression.canBeUsedAsStatement() == false {
 		err := fmt.Errorf("%s expression '%s' evaluate but not used",
 			errMsgPrefix(s.Expression.Pos), s.Expression.OpName())
 		errs = append(errs, err)
 	}
-	_, es := s.Expression.check(b)
+	_, es := s.Expression.check(block)
 	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}

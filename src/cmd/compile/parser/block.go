@@ -276,10 +276,8 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.parser.validStatementEnding()
 			statement := &ast.Statement{}
 			statement.Pos = pos
-			statement.Type = ast.StatementTypeExpression
-			statement.Expression = &ast.Expression{}
-			statement.Expression.Type = ast.ExpressionTypeTypeAlias
-			statement.Expression.Data = alias
+			statement.Type = ast.StatementTypeTypeAlias
+			statement.TypeAlias = alias
 			block.Statements = append(block.Statements, statement)
 			blockParser.Next(lfNotToken)
 		case lex.TokenClass, lex.TokenInterface:

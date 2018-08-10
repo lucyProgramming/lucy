@@ -34,10 +34,8 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 	maxStack = 2
 	maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	d := ""
-	if n.Type.Class.LoadFromOutSide {
-		d = n.Construction.Function.Descriptor
-	} else {
+	d := n.Construction.Function.Descriptor
+	if d == "" {
 		d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
 	}
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

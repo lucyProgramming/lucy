@@ -158,7 +158,7 @@ func (TypeConverterAndPrimitivePacker) castPointer(class *cg.ClassHighLevel, cod
 		panic("...")
 	}
 	if t.Type == ast.VariableTypeObject && t.Class.Name == javaRootClass {
-		// no need
+		// no need  ,try to cast to root class
 		return
 	}
 	code.Codes[code.CodeLength] = cg.OP_checkcast

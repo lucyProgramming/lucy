@@ -18,7 +18,6 @@ func (buildExpression *BuildExpression) buildTypeAssert(class *cg.ClassHighLevel
 	insertTypeAssertClass(class, code, assert.Type)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
-
 	{
 		state.pushStack(class, assert.Expression.Value)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})

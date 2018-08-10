@@ -197,11 +197,13 @@ func callHave(ts []*Type) string {
 	s += ")"
 	return s
 }
-
-func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) []error {
-	errs := []error{}
+func convertExpressionToNeed(e *Expression, need *Type, eval *Type) {
+	convertExpressionsToNeeds([]*Expression{e}, []*Type{need}, []*Type{eval})
+}
+func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
+	errs := []error{} // no return
 	if len(es) == 0 {
-		return errs
+		return
 	}
 	for k, e := range es {
 		if e.IsLiteral() == false {
@@ -227,5 +229,5 @@ func convertLiteralExpressionsToNeeds(es []*Expression, needs []*Type, eval []*T
 			eval[k].Pos = pos
 		}
 	}
-	return errs
+	return
 }

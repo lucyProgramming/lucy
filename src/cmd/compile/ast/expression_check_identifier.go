@@ -40,9 +40,9 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return t, nil
 	}
 	fromImport := false
-	d, err := block.searchIdentifier(identifier.Name)
+	d, err := block.searchIdentifier(e.Pos, identifier.Name)
 	if err != nil {
-		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+		return nil, err
 	}
 	if d == nil {
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
@@ -65,21 +65,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			f.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Import)
-				if err != nil {
-					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-				}
-				result := &Type{}
-				result.Pos = e.Pos
-				result.Type = VariableTypePackage
-				if pp, ok := p.(*Package); ok {
-					result.Package = pp
-					result.Type = VariableTypePackage
-				} else {
-					result.Class = p.(*Class)
-					result.Type = VariableTypeObject
-				}
-				return result, nil
+				return e.checkIdentifierThroughImports(i)
 			}
 		}
 		if f.IsGlobalMain() {
@@ -98,21 +84,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			t.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Import)
-				if err != nil {
-					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-				}
-				result := &Type{}
-				result.Pos = e.Pos
-				result.Type = VariableTypePackage
-				if pp, ok := p.(*Package); ok {
-					result.Package = pp
-					result.Type = VariableTypePackage
-				} else {
-					result.Class = p.(*Class)
-					result.Type = VariableTypeObject
-				}
-				return result, nil
+				return e.checkIdentifierThroughImports(i)
 			}
 		}
 		t.Used = true
@@ -125,20 +97,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if fromImport == false && t.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Import)
-				if err != nil {
-					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-				}
-				result := &Type{}
-				result.Pos = e.Pos
-				if pp, ok := p.(*Package); ok {
-					result.Package = pp
-					result.Type = VariableTypePackage
-				} else {
-					result.Class = p.(*Class)
-					result.Type = VariableTypeObject
-				}
-				return result, nil
+				return e.checkIdentifierThroughImports(i)
 			}
 		}
 		t.Used = true
@@ -151,20 +110,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if fromImport == false && c.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Import)
-				if err != nil {
-					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-				}
-				result := &Type{}
-				result.Pos = e.Pos
-				if pp, ok := p.(*Package); ok {
-					result.Package = pp
-					result.Type = VariableTypePackage
-				} else {
-					result.Class = p.(*Class)
-					result.Type = VariableTypeObject
-				}
-				return result, nil
+				return e.checkIdentifierThroughImports(i)
 			}
 		}
 		result := &Type{}
@@ -178,20 +124,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			enumName.Enum.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Import)
-				if err != nil {
-					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-				}
-				result := &Type{}
-				result.Pos = e.Pos
-				if pp, ok := p.(*Package); ok {
-					result.Package = pp
-					result.Type = VariableTypePackage
-				} else {
-					result.Class = p.(*Class)
-					result.Type = VariableTypeObject
-				}
-				return result, nil
+				return e.checkIdentifierThroughImports(i)
 			}
 		}
 		if enumName != nil {
@@ -208,20 +141,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if fromImport == false && typ.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, typ.Pos)
 			if should {
-				p, err := PackageBeenCompile.load(i.Import)
-				if err != nil {
-					return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-				}
-				result := &Type{}
-				result.Pos = e.Pos
-				if pp, ok := p.(*Package); ok {
-					result.Package = pp
-					result.Type = VariableTypePackage
-				} else {
-					result.Class = p.(*Class)
-					result.Type = VariableTypeObject
-				}
-				return result, nil
+				return e.checkIdentifierThroughImports(i)
 			}
 		}
 		result := &Type{}
@@ -237,6 +157,23 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Package = d.(*Package)
 		return result, nil
 	}
-	return nil, fmt.Errorf("%s identifier named '%s' is not a expression",
-		errMsgPrefix(e.Pos), identifier.Name)
+	return nil, fmt.Errorf("%s identifier '%s' is not a expression , but '%s'",
+		errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIs(d))
+}
+
+func (e *Expression) checkIdentifierThroughImports(it *Import) (*Type, error) {
+	p, err := PackageBeenCompile.load(it.Import)
+	if err != nil {
+		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+	}
+	result := &Type{}
+	result.Pos = e.Pos
+	if pp, ok := p.(*Package); ok {
+		result.Package = pp
+		result.Type = VariableTypePackage
+	} else {
+		result.Class = p.(*Class)
+		result.Type = VariableTypeObject
+	}
+	return result, nil
 }

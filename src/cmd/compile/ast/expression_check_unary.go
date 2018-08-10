@@ -42,27 +42,26 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(unary.Pos), unary.TypeString()))
 		}
 	}
-	ret := unary.Clone()
-	ret.Pos = e.Pos
-	return ret
+	result := unary.Clone()
+	result.Pos = e.Pos
+	return result
 }
 
 func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type {
 	on := e.Data.(*Expression)
-	t := on.getLeftValue(block, errs)
-	on.Value = t
-	if t == nil {
+	increment := on.getLeftValue(block, errs)
+	if increment == nil {
 		return nil
 	}
 	if on.Type == ExpressionTypeIdentifier &&
 		e.IsStatementExpression == false {
 		on.Data.(*ExpressionIdentifier).Variable.Used = true
 	}
-	if !t.IsNumber() {
+	if !increment.IsNumber() {
 		*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s'",
-			errMsgPrefix(on.Pos), on.OpName(), t.TypeString()))
+			errMsgPrefix(on.Pos), on.OpName(), increment.TypeString()))
 	}
-	ret := t.Clone()
+	ret := increment.Clone()
 	ret.Pos = e.Pos
 	return ret
 }

@@ -511,7 +511,7 @@ func (parser *Parser) expectNewLine() error {
 	return err
 }
 
-func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
+func (parser *Parser) parseTypeAlias() (*ast.TypeAlias, error) {
 	parser.Next(lfIsToken) // skip type key word
 	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
@@ -519,7 +519,7 @@ func (parser *Parser) parseTypeAlias() (*ast.ExpressionTypeAlias, error) {
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
-	ret := &ast.ExpressionTypeAlias{}
+	ret := &ast.TypeAlias{}
 	ret.Pos = parser.mkPos()
 	ret.Name = parser.token.Data.(string)
 	parser.Next(lfIsToken) // skip identifier

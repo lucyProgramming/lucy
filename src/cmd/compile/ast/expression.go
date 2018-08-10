@@ -69,7 +69,6 @@ const (
 	ExpressionTypeRange                                     // for range
 	ExpressionTypeSlice                                     // arr[0:2]
 	ExpressionTypeMap                                       // map literal
-	ExpressionTypeTypeAlias                                 // type age = int
 	ExpressionTypeTypeAssert                                // a.(Object)
 	ExpressionTypeQuestion                                  // true ? a : b
 	ExpressionTypeGlobal                                    // global.XXX
@@ -209,8 +208,7 @@ func (e *Expression) OpName() string {
 		return "conversion of type"
 	case ExpressionTypeTypeAssert:
 		return "type assert"
-	case ExpressionTypeTypeAlias:
-		return "type alias"
+
 	case ExpressionTypeGlobal:
 		return "global"
 	case ExpressionTypeParenthesis:
@@ -314,7 +312,7 @@ func (e *Expression) ConvertToNumber(typ VariableTypeKind) {
 type ExpressionTypeAssert ExpressionTypeConversion
 
 /*
-	const
+	const spread
 */
 func (e *Expression) fromConst(c *Constant) {
 	switch c.Type.Type {
@@ -343,12 +341,6 @@ func (e *Expression) fromConst(c *Constant) {
 		e.Type = ExpressionTypeString
 		e.Data = c.Value.(string)
 	}
-}
-
-type ExpressionTypeAlias struct {
-	Name string
-	Type *Type
-	Pos  *Pos
 }
 
 type ExpressionQuestion struct {
@@ -515,10 +507,6 @@ func (e *Expression) HaveMultiValue() bool {
 		return len(e.MultiValues) > 1
 	}
 	return false
-}
-
-func (e *Expression) CallHasReturnValue() bool {
-	return len(e.MultiValues) >= 1 && e.MultiValues[0].RightValueValid()
 }
 
 type CallArgs []*Expression // f(1,2)

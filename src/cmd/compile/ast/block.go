@@ -128,10 +128,31 @@ func (b *Block) searchType(name string) interface{} {
 	return nil
 }
 
+func (b *Block) searchedIdentifierIs(d interface{}) string {
+	switch d.(type) {
+	case *Function:
+		return "function"
+	case *Variable:
+		return "variable"
+	case *Constant:
+		return "constant"
+	case *EnumName:
+		return "enum name"
+	case *Enum:
+		return "enum"
+	case *Class:
+		return "class"
+	case *Type:
+		return "type alias"
+	default:
+		return "new item,call author"
+	}
+}
+
 /*
 	search identifier
 */
-func (b *Block) searchIdentifier(name string) (interface{}, error) {
+func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			t.Used = true
@@ -182,7 +203,7 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchIdentifier(name) // search by outer block
+	t, err := b.Outer.searchIdentifier(from, name) // search by outer block
 	if err != nil {
 		return t, err
 	}
@@ -195,7 +216,8 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 			if b.IsFunctionBlock &&
 				b.InheritedAttribute.Function.IsGlobal == false { // 	b.InheritedAttribute.Function.IsGlobal == false  no need to check
 				if v.Name == THIS {
-					return nil, fmt.Errorf("capture '%s' not allow", name) // capture this not allow
+					return nil, fmt.Errorf("%s capture '%s' not allow",
+						errMsgPrefix(from), name) // capture this not allow
 				}
 				b.InheritedAttribute.Function.Closure.InsertVar(v)
 			}
@@ -210,7 +232,8 @@ func (b *Block) searchIdentifier(name string) (interface{}, error) {
 				b.InheritedAttribute.Function.Closure.InsertFunction(f)
 			}
 			if b.IsClassBlock && f.IsClosureFunction {
-				return nil, fmt.Errorf("trying to access closure function '%s' from class", name)
+				return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
+					errMsgPrefix(from), name)
 			}
 		}
 	}

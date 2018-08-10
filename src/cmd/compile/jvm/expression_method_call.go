@@ -17,22 +17,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 	if call.Expression.Value.Type == ast.VariableTypeJavaArray {
 		return buildExpression.buildJavaArrayMethodCall(class, code, e, context, state)
 	}
-	pop := func(ft *ast.FunctionType) {
-		if e.IsStatementExpression && ft.NoReturnValue() == false {
-			if len(e.MultiValues) == 1 {
-				if jvmSlotSize(e.MultiValues[0]) == 1 {
-					code.Codes[code.CodeLength] = cg.OP_pop
-					code.CodeLength++
-				} else {
-					code.Codes[code.CodeLength] = cg.OP_pop2
-					code.CodeLength++
-				}
-			} else { // > 1
-				code.Codes[code.CodeLength] = cg.OP_pop
-				code.CodeLength++
-			}
-		}
-	}
+
 	if call.Expression.Value.Type == ast.VariableTypePackage {
 		if call.PackageFunction != nil {
 			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
@@ -46,9 +31,12 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 				Descriptor: Descriptor.methodDescriptor(&call.PackageFunction.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			pop(&call.PackageFunction.Type)
+
+			if t := popCallResult(code, e, &call.PackageFunction.Type); t > maxStack {
+				maxStack = t
+			}
 		} else {
-			// call.PackageGlobalVariableFunction != nil
+			//call.PackageGlobalVariableFunction != nil
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      call.Expression.Value.Package.Name + "/main",
@@ -69,7 +57,9 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 				Descriptor: Descriptor.methodDescriptor(call.PackageGlobalVariableFunction.Type.FunctionType),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-			pop(call.PackageGlobalVariableFunction.Type.FunctionType)
+			if t := popCallResult(code, e, call.PackageGlobalVariableFunction.Type.FunctionType); t > maxStack {
+				maxStack = t
+			}
 		}
 		return
 	}
@@ -96,9 +86,9 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			code.CodeLength += 3
 		}
 		state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
+		defer state.popStack(1)
 		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
 			context, state)
-		defer state.popStack(1)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -109,7 +99,10 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		pop(call.FieldMethodHandler.Type.FunctionType)
+
+		if t := popCallResult(code, e, call.FieldMethodHandler.Type.FunctionType); t > maxStack {
+			maxStack = t
+		}
 		return
 	}
 	d := call.Method.Function.Descriptor
@@ -128,10 +121,11 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		if t := buildExpression.jvmSize(e); t > maxStack {
 			maxStack = t
 		}
-		pop(&call.Method.Function.Type)
+		if t := popCallResult(code, e, &call.Method.Function.Type); t > maxStack {
+			maxStack = t
+		}
 		return
 	}
-
 	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	// object ref
 	state.pushStack(class, call.Expression.Value)
@@ -179,6 +173,8 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	pop(&call.Method.Function.Type)
+	if t := popCallResult(code, e, &call.Method.Function.Type); t > maxStack {
+		maxStack = t
+	}
 	return
 }

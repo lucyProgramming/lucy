@@ -17,7 +17,7 @@ type ConvertTops2Package struct {
 	Enums     []*Enum
 	Constants []*Constant
 	Imports   []*Import
-	TypeAlias []*ExpressionTypeAlias
+	TypeAlias []*TypeAlias
 }
 
 func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareErrors []*RedeclareError, errs []error) {
@@ -68,8 +68,8 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*Top) (redeclareE
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
 			expressions = append(expressions, t)
-		case *ExpressionTypeAlias:
-			t := v.Data.(*ExpressionTypeAlias)
+		case *TypeAlias:
+			t := v.Data.(*TypeAlias)
 			conversion.TypeAlias = append(conversion.TypeAlias, t)
 		default:
 			panic("tops have unKnow  type")
@@ -216,8 +216,8 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				t := vv.(*Class)
 				r.Positions[kk] = t.Pos
 				r.Types[kk] = "class"
-			case *ExpressionTypeAlias:
-				t := vv.(*ExpressionTypeAlias)
+			case *TypeAlias:
+				t := vv.(*TypeAlias)
 				r.Positions[kk] = t.Pos
 				r.Types[kk] = "type alias"
 			case *EnumName:

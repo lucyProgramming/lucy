@@ -15,7 +15,10 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil
 		}
-		d, _ := block.searchIdentifier(identifier.Name)
+		d, err := block.searchIdentifier(e.Pos, identifier.Name)
+		if err != nil {
+			*errs = append(*errs, err)
+		}
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
 				errMsgPrefix(e.Pos), identifier.Name))
@@ -27,15 +30,15 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
 					errMsgPrefix(e.Pos), THIS))
 			}
-			t := d.(*Variable)
-			identifier.Variable = t
+			v := d.(*Variable)
+			identifier.Variable = v
 			result = identifier.Variable.Type.Clone()
 			result.Pos = e.Pos
 			e.Value = result
 			return result
 		default:
-			*errs = append(*errs, fmt.Errorf("%s identifier named '%s' is not variable",
-				errMsgPrefix(e.Pos), identifier.Name))
+			*errs = append(*errs, fmt.Errorf("%s identifier '%s' is '%s' , cannot be used as left value",
+				errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIs(d)))
 			return nil
 		}
 	case ExpressionTypeIndex:
@@ -108,7 +111,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
-			if v, ok := variable.(*Variable); ok && v != nil {
+			switch variable.(type) {
+			case *Variable:
+				v := variable.(*Variable)
 				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
@@ -118,11 +123,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				result.Pos = e.Pos
 				e.Value = result
 				return result
-			} else {
+			default:
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
 					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
+
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
 				errMsgPrefix(e.Pos), selection.Name, object.TypeString()))

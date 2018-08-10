@@ -20,22 +20,8 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.Class
 		Descriptor: Descriptor.methodDescriptor(call.Expression.Value.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if e.IsStatementExpression {
-		if call.Expression.Value.FunctionType.NoReturnValue() == false {
-			if len(call.Expression.Value.FunctionType.ReturnList) == 1 {
-				if jvmSlotSize(call.Expression.Value.FunctionType.ReturnList[0].Type) == 1 {
-					code.Codes[code.CodeLength] = cg.OP_pop
-					code.CodeLength++
-				} else {
-					code.Codes[code.CodeLength] = cg.OP_pop2
-					code.CodeLength++
-				}
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_pop
-				code.CodeLength++
-			}
-		}
-		return
+	if t := popCallResult(code, e, call.Expression.Value.FunctionType); t > maxStack {
+		maxStack = t
 	}
 	return
 }
@@ -94,30 +80,8 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	if e.IsStatementExpression {
-		if e.CallHasReturnValue() == false {
-			// nothing to do
-		} else if len(e.MultiValues) == 1 {
-			if 2 == jvmSlotSize(e.MultiValues[0]) {
-				code.Codes[code.CodeLength] = cg.OP_pop2
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_pop
-			}
-			code.CodeLength++
-		} else { // > 1
-			code.Codes[code.CodeLength] = cg.OP_pop // array list object on stack
-			code.CodeLength++
-		}
-	}
-	if e.CallHasReturnValue() == false { // nothing
-	} else if len(e.MultiValues) == 1 {
-		if t := jvmSlotSize(e.MultiValues[0]); t > maxStack {
-			maxStack = t
-		}
-	} else { // > 1
-		if 1 > maxStack {
-			maxStack = 1
-		}
+	if t := popCallResult(code, e, &call.Function.Type); t > maxStack {
+		maxStack = t
 	}
 	return
 }
