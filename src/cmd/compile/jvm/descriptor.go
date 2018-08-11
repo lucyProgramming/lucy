@@ -54,7 +54,7 @@ func (description *Description) typeDescriptor(typ *ast.Type) string {
 	case ast.VariableTypeObject:
 		return "L" + typ.Class.Name + ";"
 	case ast.VariableTypeMap:
-		return "L" + javaMapClass + ";"
+		return "L" + mapClass + ";"
 	case ast.VariableTypeFunction:
 		return "L" + javaMethodHandleClass + ";"
 	case ast.VariableTypeJavaArray:

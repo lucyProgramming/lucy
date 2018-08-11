@@ -176,7 +176,7 @@ func (TypeConverterAndPrimitivePacker) castPointer(class *cg.ClassHighLevel, cod
 		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeMap:
-		class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
 		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])

@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	hashMapVerifyType := state.newObjectVariableType(javaMapClass)
+	hashMapVerifyType := state.newObjectVariableType(mapClass)
 	state.pushStack(class, hashMapVerifyType)
 	switch call.Name {
 	case common.MapMethodKeyExist:
@@ -28,7 +28,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaMapClass,
+			Class:      mapClass,
 			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -60,7 +60,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 			//call remove
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      javaMapClass,
+				Class:      mapClass,
 				Method:     "remove",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -73,7 +73,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 	case common.MapMethodRemoveAll:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaMapClass,
+			Class:      mapClass,
 			Method:     "clear",
 			Descriptor: "()V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -81,7 +81,7 @@ func (buildExpression *BuildExpression) buildMapMethodCall(class *cg.ClassHighLe
 	case common.MapMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaMapClass,
+			Class:      mapClass,
 			Method:     "size",
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

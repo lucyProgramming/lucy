@@ -28,7 +28,7 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaMapClass,
+		Class:      mapClass,
 		Method:     "get",
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

@@ -45,7 +45,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	leftValueType LeftValueKind) {
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack = buildExpression.build(class, code, index.Expression, context, state)
-	state.pushStack(class, state.newObjectVariableType(javaMapClass))
+	state.pushStack(class, state.newObjectVariableType(mapClass))
 	stack := buildExpression.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
@@ -63,7 +63,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaMapClass,
+		Class:      mapClass,
 		Method:     "put",
 		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
 	}, bs4[1:3])

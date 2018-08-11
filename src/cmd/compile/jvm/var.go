@@ -33,7 +33,6 @@ const (
 	javaExceptionClass          = "java/lang/Exception"
 	javaMethodHandleClass       = "java/lang/invoke/MethodHandle"
 	javaRootClass               = "java/lang/Object"
-	javaMapClass                = "java/util/HashMap"
 	javaIntegerClass            = "java/lang/Integer"
 	javaFloatClass              = "java/lang/Float"
 	javaDoubleClass             = "java/lang/Double"
@@ -41,4 +40,5 @@ const (
 	javaStringBuilderClass      = "java/lang/StringBuilder"
 	throwableClass              = "java/lang/Throwable"
 	javaPrintStreamClass        = "java/io/PrintStream"
+	mapClass                    = "java/util/HashMap"
 )

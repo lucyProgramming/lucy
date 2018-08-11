@@ -9,7 +9,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	ee := e.Data.(*ast.Expression)
 	// identifier  and not captured and type`s int
-	if identifier := ee.Data.(*ast.ExpressionIdentifier); ee.Type == ast.ExpressionTypeIdentifier &&
+	if identifier, ok := ee.Data.(*ast.ExpressionIdentifier); ok && ee.Type == ast.ExpressionTypeIdentifier &&
 		identifier.Variable.BeenCaptured == false &&
 		identifier.Variable.Type.Type == ast.VariableTypeInt &&
 		identifier.Variable.IsGlobal == false {

@@ -43,7 +43,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaMapClass,
+		Class:      mapClass,
 		Method:     "keySet",
 		Descriptor: "()Ljava/util/Set;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -76,7 +76,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		forState.appendLocals(class, t)
 		autoVar.MapObject = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, forState.newObjectVariableType(javaMapClass))
+		forState.appendLocals(class, forState.newObjectVariableType(mapClass))
 		autoVar.KeySetsK = code.MaxLocals
 		code.MaxLocals++
 		forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
@@ -150,7 +150,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaMapClass,
+			Class:      mapClass,
 			Method:     "get",
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])

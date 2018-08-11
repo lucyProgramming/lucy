@@ -51,12 +51,12 @@ func (buildExpression *BuildExpression) buildNewMap(class *cg.ClassHighLevel, co
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaMapClass,
+		Class:      mapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])

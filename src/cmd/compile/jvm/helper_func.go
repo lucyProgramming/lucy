@@ -169,7 +169,7 @@ func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *a
 		code.CodeLength += 3
 	case ast.VariableTypeMap:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(javaMapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeFunction:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -228,7 +228,7 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 	return function call result stack size , this value should be proper handled
 */
 func popCallResult(code *cg.AttributeCode, e *ast.Expression, ft *ast.FunctionType) (stackSize uint16) {
-	stackSize = callJvmSize(ft)
+	stackSize = functionReturnJvmSize(ft)
 	if ft.NoReturnValue() == false && e.IsStatementExpression {
 		if len(ft.ReturnList) == 1 {
 			if jvmSlotSize(ft.ReturnList[0].Type) == 1 {
@@ -246,7 +246,7 @@ func popCallResult(code *cg.AttributeCode, e *ast.Expression, ft *ast.FunctionTy
 	return
 }
 
-func callJvmSize(ft *ast.FunctionType) uint16 {
+func functionReturnJvmSize(ft *ast.FunctionType) uint16 {
 	if ft.NoReturnValue() {
 		return 0
 	}

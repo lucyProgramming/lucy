@@ -40,7 +40,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 	} else if call.Args[0].Value.Type == ast.VariableTypeMap {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaMapClass,
+			Class:      mapClass,
 			Method:     "size",
 			Descriptor: "()I",
 		},
