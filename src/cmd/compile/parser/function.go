@@ -19,7 +19,10 @@ func (functionParser *FunctionParser) consume(until map[lex.TokenKind]bool) {
 	functionParser.parser.consume(until)
 }
 
-func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err error) {
+/*
+	when canBeAbstract is true , means can have no body
+*/
+func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
 	f.Pos = functionParser.parser.mkPos()
 	offset := functionParser.parser.token.Offset
@@ -37,7 +40,14 @@ func (functionParser *FunctionParser) parse(needName bool) (f *ast.Function, err
 	}
 	f.Type, err = functionParser.parser.parseFunctionType()
 	if err != nil {
-		functionParser.consume(untilLc)
+		if isAbstract {
+			functionParser.consume(untilSemicolonOrLf)
+		} else {
+			functionParser.consume(untilLc)
+		}
+	}
+	if isAbstract {
+		return f, nil
 	}
 	functionParser.parser.ifTokenIsLfThenSkip()
 	if functionParser.parser.token.Type != lex.TokenLc {

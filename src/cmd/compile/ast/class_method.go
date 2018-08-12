@@ -32,6 +32,23 @@ func (m *ClassMethod) IsAbstract() bool {
 	return (m.Function.AccessFlags & cg.ACC_METHOD_ABSTRACT) != 0
 }
 
+func (m *ClassMethod) checkModifierOk() []error {
+	errs := []error{}
+	if m.IsAbstract() && m.IsFinal() {
+		errs = append(errs, fmt.Errorf("%s abstract method cannot be final",
+			errMsgPrefix(m.Function.Pos)))
+	}
+	if m.IsAbstract() && m.IsPrivate() {
+		errs = append(errs, fmt.Errorf("%s abstract method cannot be private",
+			errMsgPrefix(m.Function.Pos)))
+	}
+	if m.IsAbstract() && m.Function.Name == SpecialMethodInit {
+		errs = append(errs, fmt.Errorf("%s construction method cannot be abstract",
+			errMsgPrefix(m.Function.Pos)))
+	}
+	return errs
+}
+
 func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	if len(m.Function.Block.Statements) == 0 {
 		return false

@@ -172,7 +172,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		suffix = newE
 	case lex.TokenFn:
 		pos := expressionParser.parser.mkPos()
-		f, err := expressionParser.parser.FunctionParser.parse(false)
+		f, err := expressionParser.parser.FunctionParser.parse(false, false)
 		if err != nil {
 			return nil, err
 		}

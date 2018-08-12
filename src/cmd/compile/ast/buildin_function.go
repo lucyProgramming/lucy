@@ -23,7 +23,6 @@ func registerBuildInFunctions() {
 			Name:      common.BuildInFunctionPrint,
 		}
 	}
-
 	{
 		//catch
 		catch := &Function{}
@@ -83,7 +82,7 @@ func registerBuildInFunctions() {
 					errMsgPrefix(args[0].Pos), common.BuildInFunctionCatch))
 				return
 			}
-			if has, _ := args[0].Class.haveSuper(JavaThrowableClass); has == false {
+			if has, _ := args[0].Class.haveSuperClass(JavaThrowableClass); has == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s' does not have super-class '%s'",
 					errMsgPrefix(args[0].Pos), args[0].Class.Name, JavaThrowableClass))
 				return
@@ -117,7 +116,7 @@ func registerBuildInFunctions() {
 						errMsgPrefix(pos), args[0].TypeString()))
 					return
 				}
-				if have, _ := args[0].Class.haveSuper(JavaThrowableClass); have == false {
+				if have, _ := args[0].Class.haveSuperClass(JavaThrowableClass); have == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
 						errMsgPrefix(pos), args[0].TypeString()))
 					return

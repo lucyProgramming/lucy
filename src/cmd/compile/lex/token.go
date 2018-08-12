@@ -105,6 +105,7 @@ const (
 	TokenVolatile                // volatile
 	TokenSynchronized            // synchronized
 	TokenFinal                   // final
+	TokenAbstract                // abstract
 	TokenGlobal                  // global
 	TokenVArgs                   // ...
 	TokenEof                     // end of file
@@ -158,6 +159,7 @@ var (
 		"synchronized": TokenSynchronized,
 		"final":        TokenFinal,
 		"global":       TokenGlobal,
+		"abstract":     TokenAbstract,
 	}
 )
 

@@ -665,13 +665,13 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 			}
 		}
 		if leftValue.Class.IsInterface() {
-			i, err := rightValue.Class.implemented(leftValue.Class.Name)
+			i, err := rightValue.Class.implementedInterface(leftValue.Class.Name)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 			}
 			return i
 		} else { // class
-			has, err := rightValue.Class.haveSuper(leftValue.Class.Name)
+			has, err := rightValue.Class.haveSuperClass(leftValue.Class.Name)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 			}
