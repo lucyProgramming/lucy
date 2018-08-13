@@ -61,7 +61,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		case lex.TokenVar:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next(lfIsToken) // skip var key word
-			vs, es, err := blockParser.parser.parseConstDefinition(true)
+			vs, err := blockParser.parser.parseVar()
 			if err != nil {
 				blockParser.consume(untilSemicolonOrLf)
 				blockParser.Next(lfNotToken)
@@ -71,7 +71,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				Type: ast.StatementTypeExpression,
 				Expression: &ast.Expression{
 					Type: ast.ExpressionTypeVar,
-					Data: &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es},
+					Data: vs,
 					Pos:  pos,
 				},
 				Pos: pos,
@@ -130,13 +130,12 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		case lex.TokenConst:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next(lfIsToken)
-			vs, es, err := blockParser.parser.parseConstDefinition(false)
+			cs, err := blockParser.parser.parseConst()
 			if err != nil {
 				blockParser.consume(untilSemicolonOrLf)
 				blockParser.Next(lfNotToken)
 				continue
 			}
-			cs := blockParser.parser.assignExpressionForConstants(vs, es)
 			statement := &ast.Statement{}
 			statement.Type = ast.StatementTypeExpression
 			statement.Pos = pos

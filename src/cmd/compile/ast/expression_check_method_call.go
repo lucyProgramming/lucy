@@ -297,9 +297,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				errMsgPrefix(e.Pos)))
 			return nil
 		}
-		err := object.Class.loadSuperClass()
+		err := object.Class.loadSuperClass(e.Pos)
 		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+			*errs = append(*errs, err)
 			return nil
 		}
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)

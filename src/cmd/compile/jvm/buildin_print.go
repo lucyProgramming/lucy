@@ -156,29 +156,6 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		}
 	}
 	for k, v := range call.Args {
-		//if v.HaveMultiValue() {
-		//	stack := buildExpression.build(class, code, v, context, state)
-		//	if t := stack + currentStack; t > maxStack {
-		//		maxStack = t
-		//	}
-		//	autoVar := newMultiValueAutoVar(class, code, state)
-		//	for kk, tt := range v.MultiValues {
-		//		stack = autoVar.unPack(class, code, kk, tt)
-		//		if t := stack + currentStack; t > maxStack {
-		//			maxStack = t
-		//		}
-		//		if t := currentStack + buildExpression.stackTop2String(class, code, tt, context, state); t > maxStack {
-		//			maxStack = t
-		//		}
-		//		if tt.IsPointer() && tt.Type != ast.VariableTypeString {
-		//			if t := 2 + currentStack; t > maxStack {
-		//				maxStack = t
-		//			}
-		//		}
-		//		appendString(k == len(call.Args)-1 && kk == len(v.MultiValues)-1) // last and last
-		//	}
-		//	continue
-		//}
 		variableType := v.Value
 		stack := buildExpression.build(class, code, v, context, state)
 		if t := currentStack + stack; t > maxStack {

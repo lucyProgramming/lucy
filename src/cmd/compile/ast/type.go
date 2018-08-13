@@ -653,27 +653,27 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 	}
 	if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
 		if leftValue.Class.NotImportedYet {
-			if err := leftValue.Class.loadSelf(); err != nil {
+			if err := leftValue.Class.loadSelf(leftValue.Pos); err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 				return false
 			}
 		}
 		if rightValue.Class.NotImportedYet {
-			if err := rightValue.Class.loadSelf(); err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
+			if err := rightValue.Class.loadSelf(rightValue.Pos); err != nil {
+				*errs = append(*errs, err)
 				return false
 			}
 		}
 		if leftValue.Class.IsInterface() {
-			i, err := rightValue.Class.implementedInterface(leftValue.Class.Name)
+			i, err := rightValue.Class.implementedInterface(leftValue.Pos, leftValue.Class.Name)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
+				*errs = append(*errs, err)
 			}
 			return i
 		} else { // class
-			has, err := rightValue.Class.haveSuperClass(leftValue.Class.Name)
+			has, err := rightValue.Class.haveSuperClass(rightValue.Pos, leftValue.Class.Name)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
+				*errs = append(*errs, err)
 			}
 			return has
 		}

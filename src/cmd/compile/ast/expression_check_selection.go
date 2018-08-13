@@ -101,9 +101,9 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 					errMsgPrefix(e.Pos), JavaRootClass))
 				return object
 			}
-			err = object.Class.loadSuperClass()
+			err = object.Class.loadSuperClass(e.Pos)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+				*errs = append(*errs, err)
 				return object
 			}
 			result := object.Clone()

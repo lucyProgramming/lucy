@@ -538,12 +538,17 @@ type ExpressionMethodCall struct {
 	PackageGlobalVariableFunction *Variable
 }
 
-type ExpressionDeclareVariable struct {
+type ExpressionVar struct {
+	Type       *Type
+	Variables  []*Variable
+	InitValues []*Expression
+}
+
+type ExpressionVarAssign struct {
 	Variables        []*Variable
 	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
 }
-
 type ExpressionTypeConversion struct {
 	Type       *Type
 	Expression *Expression

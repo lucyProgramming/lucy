@@ -77,6 +77,7 @@ func (c *Class) checkPhase2() []error {
 	errs = append(errs, c.checkIfOverrideFinalMethod()...)
 	errs = append(errs, c.resolveInterfaces()...)
 	errs = append(errs, c.suitableForInterfaces()...)
+
 	return errs
 }
 
@@ -85,7 +86,8 @@ func (c *Class) checkIfClassHierarchyErr() error {
 	arr := []string{}
 	is := false
 	class := c
-	if err := c.loadSuperClass(); err != nil {
+	pos := c.Pos
+	if err := c.loadSuperClass(pos); err != nil {
 		return err
 	}
 	if c.SuperClass.LoadFromOutSide && c.SuperClass.IsPublic() == false {
@@ -105,7 +107,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		}
 		m[class.Name] = struct{}{}
 		arr = append(arr, class.Name)
-		err := class.loadSuperClass()
+		err := class.loadSuperClass(pos)
 		if err != nil {
 			return err
 		}
@@ -130,7 +132,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 }
 
 func (c *Class) checkIfOverrideFinalMethod() []error {
-	err := c.loadSuperClass()
+	err := c.loadSuperClass(c.Pos)
 	if err != nil {
 		return []error{err}
 	}
@@ -168,12 +170,24 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 	return errs
 }
 
+func (c *Class) implementedAbstractMethod() []error {
+	errs := []error{}
+	if c.IsAbstract() {
+		return errs
+	}
+	err := c.loadSuperClass(c.Pos)
+	if err != nil {
+		errs = append(errs, err)
+		return errs
+	}
+	return errs
+}
+
 func (c *Class) suitableForInterfaces() []error {
 	errs := []error{}
 	if c.IsInterface() {
 		return errs
 	}
-	// c is class
 	for _, i := range c.Interfaces {
 		errs = append(errs, c.suitableForInterface(i, false)...)
 	}
@@ -203,7 +217,7 @@ func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
 		}
 	}
 	for _, vv := range inter.Interfaces {
-		err := vv.loadSelf()
+		err := vv.loadSelf(c.Pos)
 		if err != nil {
 			errs = append(errs, err)
 			return errs

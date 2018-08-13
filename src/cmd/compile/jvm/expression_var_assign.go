@@ -7,7 +7,7 @@ import (
 
 func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	vs := e.Data.(*ast.ExpressionDeclareVariable)
+	vs := e.Data.(*ast.ExpressionVarAssign)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)

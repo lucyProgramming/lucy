@@ -7,7 +7,8 @@ import (
 
 func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	vs := e.Data.(*ast.ExpressionDeclareVariable)
+	vs := e.Data.(*ast.ExpressionVar)
+	// make offset
 	for _, v := range vs.Variables {
 		if v.BeenCaptured {
 			v.LocalValOffset = code.MaxLocals
@@ -20,23 +21,33 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 	index := len(vs.Variables) - 1
 	currentStack := uint16(0)
 	for index >= 0 {
-		if vs.Variables[index].BeenCaptured == false {
-			index--
-			continue
+		if vs.Variables[index].BeenCaptured {
+			v := vs.Variables[index]
+			closure.createClosureVar(class, code, v.Type)
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
+			state.pushStack(class, obj)
+			state.pushStack(class, obj)
+			currentStack += 2
 		}
-		v := vs.Variables[index]
-		closure.createClosureVar(class, code, v.Type)
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
-		{
-			t := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
-			state.pushStack(class, t)
-			state.pushStack(class, t)
-		}
-		currentStack += 2
 		index--
 	}
 	index = 0
+	store := func() {
+		if vs.Variables[index].IsGlobal {
+			buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
+		} else {
+			buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
+			if vs.Variables[index].BeenCaptured {
+				copyOPs(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
+				state.popStack(2)
+				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
+			} else {
+				state.appendLocals(class, vs.Variables[index].Type)
+			}
+		}
+	}
 	for _, v := range vs.InitValues {
 		if v.HaveMultiValue() {
 			stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
@@ -49,41 +60,17 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
-				if vs.Variables[index].IsGlobal {
-					buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
-					index++
-					continue
-				}
-				buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
-				if vs.Variables[index].BeenCaptured {
-					copyOPs(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
-					state.popStack(2)
-					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
-				} else {
-					state.appendLocals(class, vs.Variables[index].Type)
-				}
+				store()
 				index++
 			}
 			continue
 		}
 		//
-		stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
+		stack := buildExpression.build(class, code, v, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if vs.Variables[index].IsGlobal {
-			buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
-			index++
-			continue
-		}
-		buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
-		if vs.Variables[index].BeenCaptured {
-			copyOPs(code, storeLocalVariableOps(vs.Variables[index].Type.Type, vs.Variables[index].LocalValOffset)...)
-			state.popStack(2)
-			state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
-		} else {
-			state.appendLocals(class, vs.Variables[index].Type)
-		}
+		store()
 		index++
 	}
 	return

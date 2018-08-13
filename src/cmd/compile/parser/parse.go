@@ -114,17 +114,16 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenVar:
 			pos := parser.mkPos()
 			parser.Next(lfIsToken) // skip var key word
-			vs, es, err := parser.parseConstDefinition(true)
+			vs, err := parser.parseVar()
 			if err != nil {
 				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
 				continue
 			}
-			d := &ast.ExpressionDeclareVariable{Variables: vs, InitValues: es}
 			isPublic := isPublic()
 			e := &ast.Expression{
 				Type:     ast.ExpressionTypeVar,
-				Data:     d,
+				Data:     vs,
 				Pos:      pos,
 				IsPublic: isPublic,
 			}
@@ -218,33 +217,22 @@ func (parser *Parser) Parse() []error {
 			resetProperty()
 		case lex.TokenConst:
 			parser.Next(lfIsToken) // skip const key word
-			vs, es, err := parser.parseConstDefinition(false)
+			cs, err := parser.parseConst()
 			if err != nil {
 				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
 				resetProperty()
 				continue
 			}
-			if len(vs) != len(es) {
-				parser.errs = append(parser.errs,
-					fmt.Errorf("%s cannot assign %d values to %d destinations",
-						parser.errorMsgPrefix(parser.mkPos()), len(es), len(vs)))
-			}
 			isPublic := isPublic()
-			for k, v := range vs {
-				if k < len(es) {
-					c := &ast.Constant{}
-					c.Variable = *v
-					c.Expression = es[k]
-					if isPublic {
-						c.AccessFlags |= cg.ACC_FIELD_PUBLIC
-					} else {
-						c.AccessFlags |= cg.ACC_FIELD_PRIVATE
-					}
-					*parser.tops = append(*parser.tops, &ast.Top{
-						Data: c,
-					})
+			for _, v := range cs {
+				if isPublic {
+					v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 				}
+				*parser.tops = append(*parser.tops, &ast.Top{
+					Data: v,
+				})
+
 			}
 			resetProperty()
 			continue
@@ -359,76 +347,98 @@ func (parser *Parser) mkPos() *ast.Pos {
 	}
 }
 
-func (parser *Parser) assignExpressionForConstants(vs []*ast.Variable, es []*ast.Expression) []*ast.Constant {
-	if len(vs) != len(es) {
-		parser.errs = append(parser.errs,
-			fmt.Errorf("%s cannot assign %d values to %d destination",
-				parser.errorMsgPrefix(vs[0].Pos), len(es), len(vs)))
+// str := "hello world"   a,b = 123 or a b ;
+func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
+	names, err := parser.parseNameList()
+	if err != nil {
+		return
 	}
-	cs := make([]*ast.Constant, len(vs))
-	for k, v := range vs {
-		c := &ast.Constant{}
-		c.Variable = *v
-		cs[k] = c
-		if k < len(es) {
-			cs[k].Expression = es[k] // assignment
+	constants = make([]*ast.Constant, len(names))
+	for k, v := range names {
+		vd := &ast.Constant{}
+		vd.Name = v.Name
+		vd.Pos = v.Pos
+		constants[k] = vd
+	}
+	var variableType *ast.Type
+	if parser.isValidTypeBegin() {
+		variableType, err = parser.parseType()
+		if err != nil {
+			return
 		}
 	}
-	return cs
+	if variableType != nil {
+		for _, c := range constants {
+			c.Type = variableType.Clone()
+		}
+	}
+	if parser.token.Type != lex.TokenAssign {
+		err = fmt.Errorf("%s missing assign", parser.errorMsgPrefix())
+		parser.errs = append(parser.errs, err)
+		return
+	}
+	parser.Next(lfNotToken) // skip =
+	es, err := parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+	if err != nil {
+		return
+	}
+	if len(es) != len(constants) {
+		err = fmt.Errorf("%s cannot assign %d value to %d constant",
+			parser.errorMsgPrefix(), len(es), len(constants))
+		parser.errs = append(parser.errs, err)
+	}
+	for k, _ := range constants {
+		if k < len(es) {
+			constants[k].Expression = es[k]
+		}
+	}
+	return
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (parser *Parser) parseConstDefinition(needType bool) ([]*ast.Variable, []*ast.Expression, error) {
+func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
 	names, err := parser.parseNameList()
 	if err != nil {
-		return nil, nil, err
+		return
 	}
-	var variableType *ast.Type
-	mkResult := func() []*ast.Variable {
-		vs := make([]*ast.Variable, len(names))
-		for k, v := range names {
-			vd := &ast.Variable{}
-			vd.Name = v.Name
-			vd.Pos = v.Pos
-			if variableType != nil {
-				vd.Type = variableType.Clone()
-			}
-			vs[k] = vd
-		}
-		return vs
+	ret = &ast.ExpressionVar{}
+	ret.Variables = make([]*ast.Variable, len(names))
+	for k, v := range names {
+		vd := &ast.Variable{}
+		vd.Name = v.Name
+		vd.Pos = v.Pos
+		ret.Variables[k] = vd
 	}
-	if parser.isStatementEnding() && needType {
-		parser.errs = append(parser.errs, fmt.Errorf("%s missing type after identifier",
-			parser.errorMsgPrefix()))
-		variableType = &ast.Type{
+	if parser.isStatementEnding() {
+		err = fmt.Errorf("%s missing type after identifier",
+			parser.errorMsgPrefix())
+		parser.errs = append(parser.errs, err)
+		ret.Type = &ast.Type{
 			Type: ast.VariableTypeInt,
 			Pos:  parser.mkPos(),
 		}
-		return mkResult(), nil, nil
+		return
 	}
-
-	//trying to parse type
-	if parser.isValidTypeBegin() || needType {
-		variableType, err = parser.parseType()
-		if err != nil {
-			parser.errs = append(parser.errs, err)
-			return nil, nil, err
-		}
+	ret.Type, err = parser.parseType()
+	if err != nil {
+		parser.errs = append(parser.errs, err)
+		return
 	}
-
 	if parser.token.Type != lex.TokenAssign &&
 		parser.token.Type != lex.TokenVarAssign {
-		return mkResult(), nil, err
+
+		return
 	}
 	if parser.token.Type != lex.TokenAssign {
-		parser.errs = append(parser.errs, fmt.Errorf("%s use '=' instead of ':='", parser.errorMsgPrefix()))
+		parser.errs = append(parser.errs, fmt.Errorf("%s missing assign",
+			parser.errorMsgPrefix()))
 	}
 	parser.Next(lfNotToken) // skip = or :=
-	es, err := parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+	ret.InitValues, err = parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 	if err != nil {
-		return nil, nil, err
+		return
 	}
-	return mkResult(), es, nil
+	return
 }
 
 func (parser *Parser) Next(lfIsToken bool) {

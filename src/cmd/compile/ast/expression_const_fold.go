@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) getBinaryExpressionConstValue(f binaryConstFolder) (is bool, err error) {
+func (e *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is bool, err error) {
 	bin := e.Data.(*ExpressionBinary)
 	is1, err1 := bin.Left.constantFold()
 	is2, err2 := bin.Right.constantFold()
@@ -21,7 +21,7 @@ func (e *Expression) getBinaryExpressionConstValue(f binaryConstFolder) (is bool
 		err = nil
 		return
 	}
-	return f(bin)
+	return folder(bin)
 }
 
 type binaryConstFolder func(bin *ExpressionBinary) (is bool, err error)

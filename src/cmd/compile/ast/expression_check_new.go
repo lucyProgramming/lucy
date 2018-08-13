@@ -26,7 +26,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 			errMsgPrefix(e.Pos), no.Type.TypeString()))
 		return nil
 	}
-	err = no.Type.Class.loadSelf()
+	err = no.Type.Class.loadSelf(e.Pos)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v",
 			errMsgPrefix(no.Type.Pos), err))

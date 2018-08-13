@@ -34,7 +34,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	}
 	var err error
 	noNewVariable := true
-	declareVariableExpression := &ExpressionDeclareVariable{}
+	declareVariableExpression := &ExpressionVarAssign{}
 	declareVariableExpression.InitValues = values
 	for k, v := range names {
 		if v.Type != ExpressionTypeIdentifier {

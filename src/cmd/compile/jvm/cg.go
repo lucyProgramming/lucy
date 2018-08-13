@@ -18,6 +18,36 @@ type BuildPackage struct {
 	BuildExpression BuildExpression
 }
 
+func (buildPackage *BuildPackage) Make(p *ast.Package) {
+	buildPackage.Package = p
+	mainClass := &cg.ClassHighLevel{}
+	buildPackage.mainClass = mainClass
+	mainClass.AccessFlags |= cg.ACC_CLASS_PUBLIC
+	mainClass.AccessFlags |= cg.ACC_CLASS_FINAL
+	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
+	mainClass.SuperClass = ast.JavaRootClass
+	mainClass.Name = p.Name + "/main"
+	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
+	buildPackage.mkClassDefaultConstruction(buildPackage.mainClass)
+	buildPackage.BuildExpression.BuildPackage = buildPackage
+	buildPackage.classes = make(map[string]*cg.ClassHighLevel)
+	buildPackage.mkGlobalConstants()
+	buildPackage.mkGlobalTypeAlias()
+	buildPackage.mkGlobalVariables()
+	buildPackage.mkGlobalFunctions()
+	buildPackage.mkInitFunctions()
+	for _, v := range p.Block.Classes {
+		buildPackage.putClass(buildPackage.buildClass(v))
+	}
+	for _, v := range p.Block.Enums {
+		buildPackage.putClass(buildPackage.mkEnum(v))
+	}
+	err := buildPackage.DumpClass()
+	if err != nil {
+		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
+	}
+}
+
 func (buildPackage *BuildPackage) newClassName(prefix string) (autoName string) {
 	for i := 0; i < math.MaxInt16; i++ {
 		if i == 0 {
@@ -54,36 +84,6 @@ func (buildPackage *BuildPackage) putClass(class *cg.ClassHighLevel) {
 		panic(fmt.Sprintf("name:'%s' already been token", name))
 	}
 	buildPackage.classes[name] = class
-}
-
-func (buildPackage *BuildPackage) Make(p *ast.Package) {
-	buildPackage.Package = p
-	mainClass := &cg.ClassHighLevel{}
-	buildPackage.mainClass = mainClass
-	mainClass.AccessFlags |= cg.ACC_CLASS_PUBLIC
-	mainClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
-	mainClass.SuperClass = ast.JavaRootClass
-	mainClass.Name = p.Name + "/main"
-	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
-	buildPackage.mkClassDefaultConstruction(buildPackage.mainClass)
-	buildPackage.BuildExpression.BuildPackage = buildPackage
-	buildPackage.classes = make(map[string]*cg.ClassHighLevel)
-	buildPackage.mkGlobalConstants()
-	buildPackage.mkGlobalTypeAlias()
-	buildPackage.mkGlobalVariables()
-	buildPackage.mkGlobalFunctions()
-	buildPackage.mkInitFunctions()
-	for _, v := range p.Block.Classes {
-		buildPackage.putClass(buildPackage.buildClass(v))
-	}
-	for _, v := range p.Block.Enums {
-		buildPackage.putClass(buildPackage.mkEnum(v))
-	}
-	err := buildPackage.DumpClass()
-	if err != nil {
-		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
-	}
 }
 
 func (buildPackage *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
@@ -422,10 +422,13 @@ func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHigh
 func (buildPackage *BuildPackage) storeGlobalVariable(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	v *ast.Variable) {
 	code.Codes[code.CodeLength] = cg.OP_putstatic
+	if v.JvmDescriptor == "" {
+		v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
+	}
 	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 		Class:      buildPackage.mainClass.Name,
 		Field:      v.Name,
-		Descriptor: Descriptor.typeDescriptor(v.Type),
+		Descriptor: v.JvmDescriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 }

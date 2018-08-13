@@ -315,53 +315,33 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 }
 
 func (classParser *ClassParser) parseConst() error {
-	pos := classParser.parser.mkPos()
-	vs, es, err := classParser.parser.parseConstDefinition(false)
+	cs, err := classParser.parser.parseConst()
 	if err != nil {
 		return err
 	}
-	if len(vs) != len(es) {
-		classParser.parser.errs = append(classParser.parser.errs,
-			fmt.Errorf("%s cannot assign %d values to %d destinations",
-				classParser.parser.errorMsgPrefix(pos), len(es), len(vs)))
-	}
-
 	if classParser.ret.Block.Constants == nil {
 		classParser.ret.Block.Constants = make(map[string]*ast.Constant)
 	}
-	for k, v := range vs {
+	for _, v := range cs {
 		if _, ok := classParser.ret.Block.Constants[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s const %s alreay declared",
 				classParser.parser.errorMsgPrefix(), v.Name))
 			continue
-		}
-		if k < len(es) && es[k] != nil {
-			t := &ast.Constant{}
-			t.Variable = *v
-			t.Expression = es[k]
-			classParser.ret.Block.Constants[v.Name] = t
 		}
 	}
 	return nil
 }
 
 func (classParser *ClassParser) parseField(errs *[]error) error {
-	variables, es, err := classParser.parser.parseConstDefinition(true)
+	cs, err := classParser.parser.parseVar()
 	if err == nil {
 		classParser.parser.validStatementEnding()
-	}
-	if len(variables) == 0 {
-		return err
 	}
 	if classParser.ret.Fields == nil {
 		classParser.ret.Fields = make(map[string]*ast.ClassField)
 	}
-	if es != nil && len(es) != len(variables) {
-		err := fmt.Errorf("%s cannot assign %d values to %d destinations",
-			classParser.parser.errorMsgPrefix(), len(es), len(variables))
-		*errs = append(*errs, err)
-	}
-	for k, v := range variables {
+
+	for _, v := range cs.Variables {
 		if _, ok := classParser.ret.Fields[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
@@ -372,10 +352,7 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		f.Name = v.Name
 		f.Pos = v.Pos
 		f.Type = &ast.Type{}
-		*f.Type = *v.Type
-		if k < len(es) && es[k] != nil {
-			f.Expression = es[k]
-		}
+		f.Type = cs.Type.Clone()
 		f.AccessFlags = 0
 		if classParser.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC

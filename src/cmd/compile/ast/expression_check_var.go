@@ -7,20 +7,36 @@ import (
 )
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
-	vs := e.Data.(*ExpressionDeclareVariable)
+	ev := e.Data.(*ExpressionVar)
+	if ev.Type == nil {
+		return
+	}
+	if err := ev.Type.resolve(block); err != nil {
+		*errs = append(*errs, err)
+		return
+	}
+	for _, v := range ev.Variables {
+		v.Type = ev.Type.Clone()
+	}
 	noErr := true
 	var err error
-	vs.IfDeclaredBefore = make([]bool, len(vs.Variables)) // all create this time
-	if vs.InitValues != nil && len(vs.InitValues) > 0 {
-		valueTypes := checkExpressions(block, vs.InitValues, errs, false)
-		if len(valueTypes) != len(vs.Variables) {
+	if len(ev.InitValues) > 0 {
+		valueTypes := checkExpressions(block, ev.InitValues, errs, false)
+		{
+			needs := make([]*Type, len(ev.Variables))
+			for k, _ := range needs {
+				needs[k] = ev.Type
+			}
+			convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
+		}
+		if len(valueTypes) != len(ev.Variables) {
 			noErr = false
 			*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
 				errMsgPrefix(e.Pos),
 				len(valueTypes),
-				len(vs.Variables)))
+				len(ev.Variables)))
 		}
-		for k, v := range vs.Variables {
+		for k, v := range ev.Variables {
 			if v.Name == NoNameIdentifier {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
@@ -40,7 +56,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				continue
 			}
 			if k < len(valueTypes) && valueTypes[k] != nil {
-				if vs.Variables[k].Type.Equal(errs, valueTypes[k]) == false {
+				if ev.Variables[k].Type.Equal(errs, valueTypes[k]) == false {
 					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 						errMsgPrefix(valueTypes[k].Pos),
 						valueTypes[k].TypeString(),
@@ -55,7 +71,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			}
 		}
 	} else {
-		for _, v := range vs.Variables {
+		for _, v := range ev.Variables {
 			if v.Name == NoNameIdentifier {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
@@ -74,7 +90,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			vs.InitValues = append(vs.InitValues, v.Type.mkDefaultValueExpression())
+			ev.InitValues = append(ev.InitValues, v.Type.mkDefaultValueExpression())
 			if e.IsPublic {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}

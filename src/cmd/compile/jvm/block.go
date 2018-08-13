@@ -22,6 +22,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 		if s.IsCallFatherConstructionStatement {
 			// special case
 			// no need to build
+			// this statement is build before
 			continue
 		}
 		maxStack := buildPackage.buildStatement(class, code, b, s, context, state)

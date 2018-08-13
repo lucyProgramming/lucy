@@ -30,7 +30,7 @@ func (f *ClassField) IsPrivate() bool {
 	ret is *ClassField or *ClassMethod
 */
 func (c *Class) getFieldOrMethod(from *Pos, name string, fromSub bool) (interface{}, error) {
-	err := c.loadSelf()
+	err := c.loadSelf(from)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *Class) getFieldOrMethod(from *Pos, name string, fromSub bool) (interfac
 	if c.Name == JavaRootClass { // root class
 		return nil, notFoundErr
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(from)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *Class) getFieldOrMethod(from *Pos, name string, fromSub bool) (interfac
 }
 
 func (c *Class) accessField(from *Pos, name string, fromSub bool) (*ClassField, error) {
-	err := c.loadSelf()
+	err := c.loadSelf(from)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *Class) accessField(from *Pos, name string, fromSub bool) (*ClassField, 
 	if c.Name == JavaRootClass { // root class
 		return nil, notFoundErr
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(from)
 	if err != nil {
 		return nil, err
 	}

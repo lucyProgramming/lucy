@@ -73,7 +73,7 @@ func (c *Class) accessInterfaceObjectMethod(from *Pos, errs *[]error, name strin
 	if matched {
 		return ms, matched, err
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(from)
 	if err != nil {
 		return nil, false, err
 	}
@@ -82,7 +82,7 @@ func (c *Class) accessInterfaceObjectMethod(from *Pos, errs *[]error, name strin
 
 func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf()
+	err = c.loadSelf(from)
 	if err != nil {
 		return nil, false, err
 	}
@@ -103,9 +103,9 @@ func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, cal
 		}
 	}
 	for _, v := range c.Interfaces {
-		err := v.loadSelf()
+		err := v.loadSelf(from)
 		if err != nil {
-			return nil, false, fmt.Errorf("%s %v", errMsgPrefix(from), err)
+			return nil, false, err
 		}
 		ms_, matched, err := v.accessInterfaceMethod(from, errs, name, call, callArgTypes, true)
 		if matched {
@@ -122,7 +122,7 @@ func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, cal
 */
 func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool, fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf()
+	err = c.loadSelf(from)
 	if err != nil {
 		return nil, false, err
 	}
@@ -164,7 +164,7 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 	if name == SpecialMethodInit {
 		return ms, false, nil
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(from)
 	if err != nil {
 		return ms, false, err
 	}
@@ -194,7 +194,7 @@ func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string, call *
 	if c.Name == JavaRootClass {
 		return ms, false, nil
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(from)
 	if err != nil {
 		return nil, false, err
 	}

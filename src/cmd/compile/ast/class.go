@@ -49,13 +49,13 @@ func (c *Class) IsPublic() bool {
 	return c.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
 }
 
-func (c *Class) loadSelf() error {
+func (c *Class) loadSelf(pos *Pos) error {
 	if c.NotImportedYet == false {
 		return nil
 	}
 	cc, err := PackageBeenCompile.loadClass(c.Name)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
 	}
 	*c = *cc
 	return nil
@@ -159,7 +159,6 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 	}
 	for _, v := range c.Methods {
 		for _, vv := range v {
-
 			vv.Function.Block.inherit(&c.Block)
 			vv.Function.Block.InheritedAttribute.Function = vv.Function
 			vv.Function.Block.InheritedAttribute.ClassMethod = vv
@@ -241,7 +240,7 @@ func (c *Class) resolveFather() error {
 		c.SuperClassName = variableType.Class.Name
 		c.SuperClass = variableType.Class
 	}
-	err := c.loadSuperClass()
+	err := c.loadSuperClass(c.Pos)
 	if err != nil {
 		return err
 	}
@@ -289,21 +288,6 @@ func (c *Class) resolveInterfaces() []error {
 }
 
 func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos *Pos) (*ClassMethod, bool) {
-	if c.Methods == nil || len(c.Methods[m.Function.Name]) == 0 {
-		//no same name method at current class
-		if c.Name == JavaRootClass {
-			return nil, false
-		}
-		err := c.loadSuperClass()
-		if err != nil {
-			*errs = append(*errs,
-				fmt.Errorf("%s %v", errMsgPrefix(pos), err))
-			return nil, false
-		} else {
-			//trying find fathte`s implementation
-			return c.SuperClass.implementMethod(m, true, errs, pos)
-		}
-	}
 	for _, v := range c.Methods[m.Function.Name] {
 		if v.IsAbstract() {
 			continue
@@ -323,7 +307,6 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 			// return list count not match
 			continue
 		}
-
 		match := true
 		if v.Function.Type.VArgs != nil && v.Function.Type.VArgs.Type.StrictEqual(m.Function.Type.VArgs.Type) {
 			match = false
@@ -352,10 +335,9 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 	if c.Name == JavaRootClass {
 		return nil, false
 	}
-	err := c.loadSuperClass()
+	err := c.loadSuperClass(pos)
 	if err != nil {
-		*errs = append(*errs,
-			fmt.Errorf("%s %v", errMsgPrefix(pos), err))
+		*errs = append(*errs, err)
 		return nil, false
 	} else {
 		//trying find fathte`s implementation
@@ -364,8 +346,8 @@ func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos
 	return nil, false
 }
 
-func (c *Class) haveSuperClass(superclassName string) (bool, error) {
-	err := c.loadSelf()
+func (c *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
+	err := c.loadSelf(pos)
 	if err != nil {
 		return false, err
 	}
@@ -375,15 +357,15 @@ func (c *Class) haveSuperClass(superclassName string) (bool, error) {
 	if c.Name == JavaRootClass {
 		return false, nil
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(pos)
 	if err != nil {
 		return false, err
 	}
-	return c.SuperClass.haveSuperClass(superclassName)
+	return c.SuperClass.haveSuperClass(pos, superclassName)
 }
 
-func (c *Class) implementedInterface(inter string) (bool, error) {
-	err := c.loadSelf()
+func (c *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
+	err := c.loadSelf(pos)
 	if err != nil {
 		return false, err
 	}
@@ -391,7 +373,7 @@ func (c *Class) implementedInterface(inter string) (bool, error) {
 		if v.Name == inter {
 			return true, nil
 		}
-		im, _ := v.implementedInterface(inter)
+		im, _ := v.implementedInterface(pos, inter)
 		if im {
 			return im, nil
 		}
@@ -399,23 +381,23 @@ func (c *Class) implementedInterface(inter string) (bool, error) {
 	if c.Name == JavaRootClass {
 		return false, nil
 	}
-	err = c.loadSuperClass()
+	err = c.loadSuperClass(pos)
 	if err != nil {
 		return false, err
 	}
 	return false, nil
 }
 
-func (c *Class) loadSuperClass() error {
+func (c *Class) loadSuperClass(pos *Pos) error {
 	if c.SuperClass != nil {
 		return nil
 	}
 	if c.Name == JavaRootClass {
-		return fmt.Errorf("root class already")
+		return fmt.Errorf("%s root class already", errMsgPrefix(pos))
 	}
 	class, err := PackageBeenCompile.loadClass(c.SuperClassName)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
 	}
 	c.SuperClass = class
 	return nil
@@ -423,7 +405,7 @@ func (c *Class) loadSuperClass() error {
 
 func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *ExpressionNew,
 	call *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf()
+	err = c.loadSelf(from)
 	if err != nil {
 		return nil, false, err
 	}
@@ -456,9 +438,9 @@ func (c *Class) checkIfLoadFromAnotherPackageAndPrivate(pos *Pos) error {
 	if c.LoadFromOutSide == false {
 		return nil
 	}
-	err := c.loadSelf()
+	err := c.loadSelf(pos)
 	if err != nil {
-		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
+		return err
 	}
 	if c.IsPublic() == false {
 		return fmt.Errorf("%s class '%s' is not public", errMsgPrefix(pos), c.Name)
