@@ -7,7 +7,7 @@ import (
 
 func (buildPackage *BuildPackage) loadLocalVar(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, v *ast.Variable) (maxStack uint16) {
-	if v.IsCaptureVarAndModifiedInCaptureFunction() {
+	if v.BeenCaptured {
 		return closure.loadLocalClosureVar(class, code, v)
 	}
 	maxStack = jvmSlotSize(v.Type)
@@ -17,7 +17,7 @@ func (buildPackage *BuildPackage) loadLocalVar(class *cg.ClassHighLevel,
 
 func (buildPackage *BuildPackage) storeLocalVar(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, v *ast.Variable) (maxStack uint16) {
-	if v.IsCaptureVarAndModifiedInCaptureFunction() {
+	if v.BeenCaptured {
 		closure.storeLocalClosureVar(class, code, v)
 		return
 	}

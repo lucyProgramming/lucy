@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 	if len(vs.Variables) == 1 {
 		v := vs.Variables[0]
 		currentStack := uint16(0)
-		if v.IsCaptureVarAndModifiedInCaptureFunction() {
+		if v.BeenCaptured {
 			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			if vs.IfDeclaredBefore[0] {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
@@ -50,13 +50,13 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 				buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[0])
 			} else {
 				v.LocalValOffset = code.MaxLocals
-				if v.IsCaptureVarAndModifiedInCaptureFunction() {
+				if v.BeenCaptured {
 					code.MaxLocals++
 				} else {
 					code.MaxLocals += jvmSlotSize(v.Type)
 				}
 				buildExpression.BuildPackage.storeLocalVar(class, code, v)
-				if vs.Variables[0].IsCaptureVarAndModifiedInCaptureFunction() {
+				if vs.Variables[0].BeenCaptured {
 					copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 				} else {
@@ -87,7 +87,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		}
 		//this variable not been captured,also not declared here
 		if vs.IfDeclaredBefore[k] {
-			if v.IsCaptureVarAndModifiedInCaptureFunction() {
+			if v.BeenCaptured {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 				stack := autoVar.unPack(class, code, k, v.Type)
 				if t := 1 + stack; t > maxStack {
@@ -103,7 +103,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		} else {
 			v.LocalValOffset = code.MaxLocals
 			currentStack := uint16(0)
-			if v.IsCaptureVarAndModifiedInCaptureFunction() {
+			if v.BeenCaptured {
 				code.MaxLocals++
 				stack := closure.createClosureVar(class, code, v.Type)
 				if stack > maxStack {

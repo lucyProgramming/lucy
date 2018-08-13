@@ -94,50 +94,25 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 		}
-		if v.BeenCapturedAndModifiedInCaptureFunction {
-			meta := closure.getMeta(v.Type.Type)
-			filed.Descriptor = "L" + meta.className + ";"
-			if context.function.Closure.ClosureVariableExist(v) {
-				// I Know class at 0 offset
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-				if 3 > maxStack {
-					maxStack = 3
-				}
-				code.Codes[code.CodeLength] = cg.OP_getfield
-				class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-					Class:      class.Name,
-					Field:      v.Name,
-					Descriptor: filed.Descriptor,
-				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
-			} else { // not exits
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-				if 3 > maxStack {
-					maxStack = 3
-				}
+		meta := closure.getMeta(v.Type.Type)
+		filed.Descriptor = "L" + meta.className + ";"
+		if context.function.Closure.ClosureVariableExist(v) {
+			// I Know class at 0 offset
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+			if 3 > maxStack {
+				maxStack = 3
 			}
-		} else {
-			if v.JvmDescriptor == "" {
-				v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
-			}
-			filed.Descriptor = v.JvmDescriptor
-			if context.function.Closure.ClosureVariableExist(v) {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-				if 3 > maxStack {
-					maxStack = 3
-				}
-				code.Codes[code.CodeLength] = cg.OP_getfield
-				class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-					Class:      class.Name,
-					Field:      v.Name,
-					Descriptor: filed.Descriptor,
-				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
-			} else {
-				copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
-				if 3 > maxStack {
-					maxStack = 3
-				}
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      class.Name,
+				Field:      v.Name,
+				Descriptor: filed.Descriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else { // not exits
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
+			if 3 > maxStack {
+				maxStack = 3
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
@@ -147,7 +122,6 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 			Descriptor: filed.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-
 		total--
 	}
 	for v, _ := range function.Closure.Functions {

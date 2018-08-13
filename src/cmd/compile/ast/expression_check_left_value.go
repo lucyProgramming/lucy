@@ -32,9 +32,6 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			v := d.(*Variable)
 			identifier.Variable = v
-			if v.BeenCaptured {
-				v.BeenCapturedAndModifiedInCaptureFunction = true
-			}
 			result = identifier.Variable.Type.Clone()
 			result.Pos = e.Pos
 			e.Value = result

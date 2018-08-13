@@ -11,39 +11,30 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	maxStack, remainStack uint16, ops []byte,
 	leftValueType LeftValueKind) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	if identifier.Variable.BeenCapturedAndModifiedInCaptureFunction {
-		meta := closure.getMeta(identifier.Variable.Type.Type)
-		if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      class.Name,
-				Field:      identifier.Name,
-				Descriptor: "L" + meta.className + ";",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		} else {
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
-		}
-		state.pushStack(class, state.newObjectVariableType(meta.className))
-		maxStack = 1
-		remainStack = 1
-		ops = make([]byte, 3)
-		ops[0] = cg.OP_putfield
+	meta := closure.getMeta(identifier.Variable.Type.Type)
+	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+		code.Codes[code.CodeLength] = cg.OP_getfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      meta.className,
-			Field:      meta.fieldName,
-			Descriptor: meta.fieldDescription,
-		}, ops[1:3])
-		leftValueType = LeftValueTypePutField
+			Class:      class.Name,
+			Field:      identifier.Name,
+			Descriptor: "L" + meta.className + ";",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	} else {
-		if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
-			panic("this is not happening")
-		} else {
-			ops = storeLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)
-			leftValueType = LeftValueTypeLocalVar
-		}
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
 	}
+	state.pushStack(class, state.newObjectVariableType(meta.className))
+	maxStack = 1
+	remainStack = 1
+	ops = make([]byte, 3)
+	ops[0] = cg.OP_putfield
+	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		Class:      meta.className,
+		Field:      meta.fieldName,
+		Descriptor: meta.fieldDescription,
+	}, ops[1:3])
+	leftValueType = LeftValueTypePutField
 	return
 }
 
