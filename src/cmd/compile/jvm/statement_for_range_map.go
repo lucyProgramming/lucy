@@ -87,7 +87,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Length)...)
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.MapObject)...)
-	// k set to 0
+	// k set to -1
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)

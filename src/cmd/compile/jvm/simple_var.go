@@ -34,9 +34,6 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		case 3:
 			return []byte{cg.OP_istore_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_istore, byte(offset)}
 		}
 	case ast.VariableTypeLong:
@@ -50,9 +47,6 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		case 3:
 			return []byte{cg.OP_lstore_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_lstore, byte(offset)}
 		}
 	case ast.VariableTypeFloat:
@@ -66,9 +60,6 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		case 3:
 			return []byte{cg.OP_fstore_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_fstore, byte(offset)}
 		}
 	case ast.VariableTypeDouble:
@@ -82,9 +73,6 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		case 3:
 			return []byte{cg.OP_dstore_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_dstore, byte(offset)}
 		}
 	case ast.VariableTypeJavaArray:
@@ -108,9 +96,6 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		case 3:
 			return []byte{cg.OP_astore_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_astore, byte(offset)}
 		}
 	default:
@@ -142,9 +127,6 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		case 3:
 			return []byte{cg.OP_iload_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_iload, byte(offset)}
 		}
 	case ast.VariableTypeLong:
@@ -158,9 +140,6 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		case 3:
 			return []byte{cg.OP_lload_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_lload, byte(offset)}
 		}
 	case ast.VariableTypeFloat:
@@ -174,9 +153,6 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		case 3:
 			return []byte{cg.OP_fload_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_fload, byte(offset)}
 		}
 	case ast.VariableTypeDouble:
@@ -190,9 +166,6 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		case 3:
 			return []byte{cg.OP_dload_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_dload, byte(offset)}
 		}
 	case ast.VariableTypeString:
@@ -216,9 +189,6 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		case 3:
 			return []byte{cg.OP_aload_3}
 		default:
-			if offset > 255 {
-				panic("over 255")
-			}
 			return []byte{cg.OP_aload, byte(offset)}
 		}
 	default:

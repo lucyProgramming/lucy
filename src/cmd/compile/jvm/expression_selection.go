@@ -61,16 +61,8 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 	}
 	// check cast to super class
 	if selection.Name == ast.SUPER {
-		// no  need to cast to father
-		//		if selection.Expression.ExpressionValue.Type == ast.VariableTypeObject {
-		//			maxStack, _ = buildExpression.build(class, code, selection.Expression, context, state)
-		//			code.Codes[code.CodeLength] = cg.OP_checkcast
-		//			class.InsertClassConst(e.ExpressionValue.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		//			code.CodeLength += 3
-		//		}
 		return
 	}
-
 	if selection.Method != nil { // pack to method handle
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
