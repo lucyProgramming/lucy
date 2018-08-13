@@ -310,7 +310,7 @@ func registerBuildInFunctions() {
 				}
 				meta.Format = e.Args[0]
 				e.Args = e.Args[1:]
-				meta.ArgsLength = len(args)
+				meta.Length = len(args)
 			},
 			IsBuildIn: true,
 			Name:      common.BuildInFunctionPrintf,

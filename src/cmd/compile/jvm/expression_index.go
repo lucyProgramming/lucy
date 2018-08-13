@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -39,14 +37,12 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 	} else if index.Expression.Value.Map.V.IsPointer() {
 		typeConverter.castPointer(class, code, index.Expression.Value.Map.V)
 	} else {
-		code.Codes[code.CodeLength] = cg.OP_dup // incrment the stack
+		code.Codes[code.CodeLength] = cg.OP_dup // increment the stack
 		code.CodeLength++
-		if t := 1 + currentStack; t > maxStack {
-			maxStack = t
+		if 2 > maxStack { // stack is  ... valueObjectRef valueObjectRef
+			maxStack = 2
 		}
-		code.Codes[code.CodeLength] = cg.OP_ifnonnull
-		codeLength := code.CodeLength
-		code.CodeLength += 3
+		noNullExit := (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
 		switch index.Expression.Value.Map.V.Type {
 		case ast.VariableTypeBool:
 			fallthrough
@@ -71,37 +67,30 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 			code.Codes[code.CodeLength+1] = cg.OP_dconst_0
 			code.CodeLength += 2
 		}
-		code.Codes[code.CodeLength] = cg.OP_goto
-		codeLength2 := code.CodeLength
-		code.CodeLength += 3
-		// no null goto here
-		{
-			state.pushStack(class, state.newObjectVariableType(javaRootClass))
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1) // pop java_root_class ref
-		}
-		binary.BigEndian.PutUint16(code.Codes[codeLength+1:codeLength+3], uint16(code.CodeLength-codeLength))
+		nullExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		state.pushStack(class, state.newObjectVariableType(javaRootClass))
+		context.MakeStackMap(code, state, code.CodeLength)
+		state.popStack(1) // pop java_root_class ref
+		writeExits([]*cg.Exit{noNullExit}, code.CodeLength)
 		typeConverter.unPackPrimitives(class, code, index.Expression.Value.Map.V)
-		binary.BigEndian.PutUint16(code.Codes[codeLength2+1:codeLength2+3], uint16(code.CodeLength-codeLength2))
-		{
-			state.pushStack(class, e.Value)
-			context.MakeStackMap(code, state, code.CodeLength)
-			state.popStack(1)
-		}
+		writeExits([]*cg.Exit{nullExit}, code.CodeLength)
+		state.pushStack(class, e.Value)
+		context.MakeStackMap(code, state, code.CodeLength)
+		state.popStack(1)
 	}
 	return
 }
 
 func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	length := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - length)
-	}()
 	index := e.Data.(*ast.ExpressionIndex)
 	if index.Expression.Value.Type == ast.VariableTypeMap {
 		return buildExpression.buildMapIndex(class, code, e, context, state)
 	}
+	length := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - length)
+	}()
 	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.Value)
 	stack := buildExpression.build(class, code, index.Index, context, state)

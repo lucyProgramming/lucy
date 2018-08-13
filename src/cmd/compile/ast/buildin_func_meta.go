@@ -1,8 +1,8 @@
 package ast
 
 type BuildInFunctionPrintfMeta struct {
-	Format     *Expression
-	ArgsLength int
+	Format *Expression
+	Length int
 }
 
 type BuildInFunctionSprintfMeta struct {

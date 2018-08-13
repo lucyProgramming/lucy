@@ -7,6 +7,10 @@ import (
 
 func (buildExpression *BuildExpression) buildStringSlice(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	slice := e.Data.(*ast.ExpressionSlice)
 	maxStack = buildExpression.build(class, code, slice.ExpressionOn, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
@@ -32,15 +36,15 @@ func (buildExpression *BuildExpression) buildStringSlice(class *cg.ClassHighLeve
 
 func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	stackLength := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - stackLength)
-	}()
 	slice := e.Data.(*ast.ExpressionSlice)
 	if slice.ExpressionOn.Value.Type == ast.VariableTypeString {
 		return buildExpression.buildStringSlice(class, code, e, context, state)
 	}
-	meta := ArrayMetas[slice.ExpressionOn.Value.Array.Type]
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
+	meta := ArrayMetas[e.Value.Array.Type]
 	maxStack = buildExpression.build(class, code, slice.ExpressionOn, context, state)
 	state.pushStack(class, slice.ExpressionOn.Value)
 	// build start

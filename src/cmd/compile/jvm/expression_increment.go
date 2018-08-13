@@ -52,7 +52,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
-	currentStack := jvmSlotSize(ee.Value) + remainStack
+	currentStack := jvmSlotSize(e.Value) + remainStack
 	if e.IsStatementExpression == false {
 		if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
 			currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, e.Value)
@@ -61,15 +61,15 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 			}
 		}
 	}
+	if t := currentStack + jvmSlotSize(e.Value); t > maxStack { // last op will change stack
+		maxStack = t
+	}
 	switch e.Value.Type {
 	case ast.VariableTypeByte:
 		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
-		}
-		if t := currentStack + 1; t > maxStack { // last op will change stack
-			maxStack = t
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.Codes[code.CodeLength+2] = cg.OP_i2b
@@ -80,9 +80,6 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
 		}
-		if t := currentStack + 1; t > maxStack { // last op will change stack
-			maxStack = t
-		}
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.Codes[code.CodeLength+2] = cg.OP_i2s
 		code.CodeLength += 3
@@ -91,9 +88,6 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 			code.Codes[code.CodeLength] = cg.OP_iconst_1
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_iconst_m1
-		}
-		if t := currentStack + 1; t > maxStack { // last op will change stack
-			maxStack = t
 		}
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.CodeLength += 2
@@ -106,9 +100,6 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if t := currentStack + 2; t > maxStack { // last op will change stack
-			maxStack = t
-		}
 		code.Codes[code.CodeLength] = cg.OP_ladd
 		code.CodeLength++
 	case ast.VariableTypeFloat:
@@ -120,9 +111,6 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 			class.InsertFloatConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-		if t := currentStack + 1; t > maxStack { // last op will change stack
-			maxStack = t
-		}
 		code.Codes[code.CodeLength] = cg.OP_fadd
 		code.CodeLength++
 	case ast.VariableTypeDouble:
@@ -133,9 +121,6 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
 			class.InsertDoubleConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		}
-		if t := currentStack + 2; t > maxStack { // last op will change stack
-			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_dadd
 		code.CodeLength++

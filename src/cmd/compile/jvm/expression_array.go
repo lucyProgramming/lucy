@@ -20,9 +20,9 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	code.CodeLength += 4
 	{
 		verify := &cg.StackMapVerificationTypeInfo{}
-		uninit := &cg.StackMapUninitializedVariableInfo{}
-		uninit.CodeOffset = uint16(code.CodeLength - 4)
-		verify.Verify = uninit
+		unInit := &cg.StackMapUninitializedVariableInfo{}
+		unInit.CodeOffset = uint16(code.CodeLength - 4)
+		verify.Verify = unInit
 		state.Stacks = append(state.Stacks, verify, verify)
 	}
 	loadInt32(class, code, int32(arr.Length))

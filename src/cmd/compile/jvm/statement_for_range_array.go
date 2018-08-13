@@ -62,6 +62,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		autoVar.K = code.MaxLocals
 		code.MaxLocals++
 		forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
+
 	}
 
 	if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {

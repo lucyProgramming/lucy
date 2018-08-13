@@ -55,10 +55,10 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassH
 func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
 	context *Context) (maxStack uint16) {
 	if e.Value.Type == ast.VariableTypeClass {
-		return
+		panic("this is not happening")
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	if e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != nil { // not a var
+	if e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != nil {
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1
 		return
@@ -80,120 +80,7 @@ func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel
 	if identifier.Variable.BeenCaptured {
 		return buildExpression.buildCapturedIdentifier(class, code, e, context)
 	}
-	switch identifier.Variable.Type.Type {
-	case ast.VariableTypeBool:
-		fallthrough
-	case ast.VariableTypeByte:
-		fallthrough
-	case ast.VariableTypeShort:
-		fallthrough
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeInt:
-		if identifier.Variable.LocalValOffset == 0 {
-			code.Codes[code.CodeLength] = cg.OP_iload_0
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 1 {
-			code.Codes[code.CodeLength] = cg.OP_iload_1
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 2 {
-			code.Codes[code.CodeLength] = cg.OP_iload_2
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 3 {
-			code.Codes[code.CodeLength] = cg.OP_iload_3
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset < 255 {
-			code.Codes[code.CodeLength] = cg.OP_iload
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
-			code.CodeLength += 2
-		} else {
-			panic("over 255")
-		}
-		maxStack = 1
-	case ast.VariableTypeFloat:
-		if identifier.Variable.LocalValOffset == 0 {
-			code.Codes[code.CodeLength] = cg.OP_fload_0
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 1 {
-			code.Codes[code.CodeLength] = cg.OP_fload_1
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 2 {
-			code.Codes[code.CodeLength] = cg.OP_fload_2
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 3 {
-			code.Codes[code.CodeLength] = cg.OP_fload_3
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset < 255 {
-			code.Codes[code.CodeLength] = cg.OP_fload
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
-			code.CodeLength += 2
-		} else {
-			panic("over 255")
-		}
-		maxStack = 1
-	case ast.VariableTypeDouble:
-		if identifier.Variable.LocalValOffset == 0 {
-			code.Codes[code.CodeLength] = cg.OP_dload_0
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 1 {
-			code.Codes[code.CodeLength] = cg.OP_dload_1
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 2 {
-			code.Codes[code.CodeLength] = cg.OP_dload_2
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 3 {
-			code.Codes[code.CodeLength] = cg.OP_dload_3
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset < 255 {
-			code.Codes[code.CodeLength] = cg.OP_dload
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
-			code.CodeLength += 2
-		} else {
-			panic("over 255")
-		}
-		maxStack = 2
-	case ast.VariableTypeLong:
-		if identifier.Variable.LocalValOffset == 0 {
-			code.Codes[code.CodeLength] = cg.OP_lload_0
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 1 {
-			code.Codes[code.CodeLength] = cg.OP_lload_1
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 2 {
-			code.Codes[code.CodeLength] = cg.OP_lload_2
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 3 {
-			code.Codes[code.CodeLength] = cg.OP_lload_3
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset < 255 {
-			code.Codes[code.CodeLength] = cg.OP_lload
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
-			code.CodeLength += 2
-		} else {
-			panic("over 255")
-		}
-		maxStack = 2
-	default: // object types
-		if identifier.Variable.LocalValOffset == 0 {
-			code.Codes[code.CodeLength] = cg.OP_aload_0
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 1 {
-			code.Codes[code.CodeLength] = cg.OP_aload_1
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 2 {
-			code.Codes[code.CodeLength] = cg.OP_aload_2
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset == 3 {
-			code.Codes[code.CodeLength] = cg.OP_aload_3
-			code.CodeLength++
-		} else if identifier.Variable.LocalValOffset < 255 {
-			code.Codes[code.CodeLength] = cg.OP_aload
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
-			code.CodeLength += 2
-		} else {
-			panic("over 255")
-		}
-		maxStack = 1
-	}
+	maxStack = jvmSlotSize(e.Value)
+	copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
 	return
 }

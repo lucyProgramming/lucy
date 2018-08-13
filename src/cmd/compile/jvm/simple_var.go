@@ -11,6 +11,9 @@ import (
 	store local var according on type and offset
 */
 func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
+	if offset > 255 {
+		panic("over 255")
+	}
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough
@@ -116,6 +119,9 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 }
 
 func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
+	if offset > 255 {
+		panic("over 255")
+	}
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough

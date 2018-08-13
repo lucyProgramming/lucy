@@ -32,9 +32,9 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.Value)
 	switch call.Name {
-	case common.ArrayMethodCap,
-		common.ArrayMethodSize,
+	case common.ArrayMethodSize,
 		common.ArrayMethodStart,
+		common.ArrayMethodCap,
 		common.ArrayMethodEnd:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -50,11 +50,8 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 		}
 	case common.ArrayMethodAppend:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
-		appendName := "append"
-		appendDescriptor := meta.appendDescriptor
 		for _, v := range call.Args {
 			currentStack := uint16(1)
-
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
@@ -62,18 +59,15 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      meta.className,
-				Method:     appendName,
-				Descriptor: appendDescriptor,
+				Method:     "append",
+				Descriptor: meta.appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-
 	case common.ArrayMethodAppendAll:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		for _, v := range call.Args {
 			currentStack := uint16(1)
-			appendName := "append"
-			appendDescriptor := meta.appendAllDescriptor
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
@@ -82,12 +76,11 @@ func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHigh
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      meta.className,
-				Method:     appendName,
-				Descriptor: appendDescriptor,
+				Method:     "append",
+				Descriptor: meta.appendAllDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
-
 	}
 	return
 }
