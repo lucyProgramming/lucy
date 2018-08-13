@@ -472,13 +472,6 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	return len(e.Data.([]*Expression)) > n
 }
 
-func (e *Expression) IsOneValue() bool {
-	if e.HaveMultiValue() {
-		return len(e.MultiValues) == 1
-	}
-	return true
-}
-
 /*
 	k,v := range arr
 	k,v = range arr

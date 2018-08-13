@@ -30,30 +30,6 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 	state.pushStack(class, objectArray)
 	index := int32(0)
 	for _, v := range call.Args {
-		//if v.HaveMultiValue() {
-		//	currentStack = 2
-		//	stack := buildExpression.build(class, code, v, context, state)
-		//	if t := currentStack + stack; t > maxStack {
-		//		maxStack = t
-		//	}
-		//	// store in temp var
-		//	autoVar := newMultiValueAutoVar(class, code, state)
-		//	for kk, _ := range v.MultiValues {
-		//		currentStack = 2
-		//		code.Codes[code.CodeLength] = cg.OP_dup
-		//		code.CodeLength++
-		//		loadInt32(class, code, index)
-		//		currentStack += 2
-		//		stack = autoVar.unPackObject(class, code, kk)
-		//		if t := currentStack + stack; t > maxStack {
-		//			maxStack = t
-		//		}
-		//		code.Codes[code.CodeLength] = cg.OP_aastore
-		//		code.CodeLength++
-		//		index++
-		//	}
-		//	continue
-		//}
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++

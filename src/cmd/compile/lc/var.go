@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	compiler LucyCompile
+	compiler Compiler
 	loader   FileLoader
 )
 

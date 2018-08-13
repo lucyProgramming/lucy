@@ -8,25 +8,46 @@ import (
 func (buildExpression *BuildExpression) buildCapturedIdentifier(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	if context.function.Closure.ClosureVariableExist(identifier.Variable) {
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-		meta := closure.getMeta(identifier.Variable.Type.Type)
-		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-			Class:      class.Name,
-			Field:      identifier.Variable.Name,
-			Descriptor: "L" + meta.className + ";",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+	if identifier.Variable.BeenCapturedAndModifiedInCaptureFunction {
+		if context.function.Closure.ClosureVariableExist(identifier.Variable) {
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+			meta := closure.getMeta(identifier.Variable.Type.Type)
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      class.Name,
+				Field:      identifier.Variable.Name,
+				Descriptor: "L" + meta.className + ";",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else {
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
+		}
+		if 1 > maxStack {
+			maxStack = 1
+		}
+		closure.unPack(class, code, identifier.Variable.Type)
+		if t := jvmSlotSize(identifier.Variable.Type); t > maxStack {
+			maxStack = t
+		}
 	} else {
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
-	}
-	if 1 > maxStack {
-		maxStack = 1
-	}
-	closure.unPack(class, code, identifier.Variable.Type)
-	if t := jvmSlotSize(identifier.Variable.Type); t > maxStack {
-		maxStack = t
+		if identifier.Variable.JvmDescriptor == "" {
+			identifier.Variable.JvmDescriptor = Descriptor.typeDescriptor(identifier.Variable.Type)
+		}
+		if context.function.Closure.ClosureVariableExist(identifier.Variable) {
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+			code.Codes[code.CodeLength] = cg.OP_getfield
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      class.Name,
+				Field:      identifier.Variable.Name,
+				Descriptor: identifier.Variable.JvmDescriptor,
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		} else {
+			copyOPs(code, loadLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)...)
+		}
+		if t := jvmSlotSize(e.Value); t > maxStack {
+			maxStack = t
+		}
 	}
 	return
 }

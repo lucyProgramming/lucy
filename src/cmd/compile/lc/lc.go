@@ -30,7 +30,7 @@ func Main(files []string) {
 	compiler.compile()
 }
 
-type LucyCompile struct {
+type Compiler struct {
 	Tops             []*ast.Top
 	Files            []string
 	Errs             []error
@@ -40,50 +40,50 @@ type LucyCompile struct {
 	Maker            jvm.BuildPackage
 }
 
-func (lc *LucyCompile) shouldExit() {
-	if len(lc.Errs) > lc.NErrsStopCompile {
-		lc.exit()
+func (compiler *Compiler) shouldExit() {
+	if len(compiler.Errs) > compiler.NErrsStopCompile {
+		compiler.exit()
 	}
 }
 
-func (lc *LucyCompile) exit() {
+func (compiler *Compiler) exit() {
 	code := 0
-	if len(lc.Errs) > 0 {
+	if len(compiler.Errs) > 0 {
 		code = 2
 	}
-	for _, v := range lc.Errs {
+	for _, v := range compiler.Errs {
 		fmt.Fprintln(os.Stderr, v)
 	}
 	os.Exit(code)
 }
 
-func (lc *LucyCompile) Init() {
-	lc.ClassPaths = common.GetClassPaths()
+func (compiler *Compiler) Init() {
+	compiler.ClassPaths = common.GetClassPaths()
 	var err error
-	lc.lucyPaths, err = common.GetLucyPaths()
+	compiler.lucyPaths, err = common.GetLucyPaths()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
 }
 
-func (lc *LucyCompile) dumpImports() {
-	if len(lc.Errs) > 0 {
-		lc.exit()
+func (compiler *Compiler) dumpImports() {
+	if len(compiler.Errs) > 0 {
+		compiler.exit()
 	}
-	is := make([]string, len(lc.Tops))
-	for k, v := range lc.Tops {
+	is := make([]string, len(compiler.Tops))
+	for k, v := range compiler.Tops {
 		is[k] = v.Data.(*ast.Import).Import
 	}
 	bs, _ := json.Marshal(is)
 	fmt.Println(string(bs))
 }
 
-func (lc *LucyCompile) compile() {
-	for _, v := range lc.Files {
+func (compiler *Compiler) compile() {
+	for _, v := range compiler.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
-			lc.Errs = append(lc.Errs, err)
+			compiler.Errs = append(compiler.Errs, err)
 			continue
 		}
 
@@ -127,28 +127,28 @@ func (lc *LucyCompile) compile() {
 			// utf8 bom
 			bs = bs[3:]
 		}
-		lc.Errs = append(lc.Errs, parser.Parse(&lc.Tops, v, bs,
-			compileCommon.CompileFlags.OnlyImport, lc.NErrsStopCompile)...)
-		lc.shouldExit()
+		compiler.Errs = append(compiler.Errs, parser.Parse(&compiler.Tops, v, bs,
+			compileCommon.CompileFlags.OnlyImport, compiler.NErrsStopCompile)...)
+		compiler.shouldExit()
 	}
 	// parse import only
 	if compileCommon.CompileFlags.OnlyImport {
-		lc.dumpImports()
+		compiler.dumpImports()
 		return
 	}
 	c := ast.ConvertTops2Package{}
 	ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName
-	rs, errs := c.ConvertTops2Package(lc.Tops)
-	lc.Errs = append(lc.Errs, errs...)
+	rs, errs := c.ConvertTops2Package(compiler.Tops)
+	compiler.Errs = append(compiler.Errs, errs...)
 	for _, v := range rs {
-		lc.Errs = append(lc.Errs, v.Error())
+		compiler.Errs = append(compiler.Errs, v.Error())
 	}
-	lc.shouldExit()
-	lc.Errs = append(lc.Errs, ast.PackageBeenCompile.TypeCheck()...)
-	if len(lc.Errs) > 0 {
-		lc.exit()
+	compiler.shouldExit()
+	compiler.Errs = append(compiler.Errs, ast.PackageBeenCompile.TypeCheck()...)
+	if len(compiler.Errs) > 0 {
+		compiler.exit()
 	}
 	//optimizer.Optimize(&ast.PackageBeenCompile)
-	lc.Maker.Make(&ast.PackageBeenCompile)
-	lc.exit()
+	compiler.Maker.Make(&ast.PackageBeenCompile)
+	compiler.exit()
 }

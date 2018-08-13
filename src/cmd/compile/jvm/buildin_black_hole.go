@@ -13,14 +13,10 @@ func (buildExpression *BuildExpression) mkBuildInBlackHole(class *cg.ClassHighLe
 		if stack > maxStack {
 			maxStack = stack
 		}
-		if v.HaveMultiValue() {
+		if 1 == jvmSlotSize(v.Value) {
 			code.Codes[code.CodeLength] = cg.OP_pop
 		} else {
-			if 1 == jvmSlotSize(v.Value) {
-				code.Codes[code.CodeLength] = cg.OP_pop
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_pop2
-			}
+			code.Codes[code.CodeLength] = cg.OP_pop2
 		}
 		code.CodeLength++
 	}

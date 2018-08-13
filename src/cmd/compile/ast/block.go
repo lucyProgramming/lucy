@@ -214,7 +214,7 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 		}
 		if v, ok := t.(*Variable); ok && v.IsGlobal == false { // not a global variable
 			if b.IsFunctionBlock &&
-				b.InheritedAttribute.Function.IsGlobal == false { // 	b.InheritedAttribute.Function.IsGlobal == false  no need to check
+				b.InheritedAttribute.Function.IsGlobal == false {
 				if v.Name == THIS {
 					return nil, fmt.Errorf("%s capture '%s' not allow",
 						errMsgPrefix(from), name) // capture this not allow

@@ -10,7 +10,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	ee := e.Data.(*ast.Expression)
 	// identifier  and not captured and type`s int
 	if identifier, ok := ee.Data.(*ast.ExpressionIdentifier); ok && ee.Type == ast.ExpressionTypeIdentifier &&
-		identifier.Variable.BeenCaptured == false &&
+		identifier.Variable.BeenCapturedAndModifiedInCaptureFunction == false &&
 		identifier.Variable.Type.Type == ast.VariableTypeInt &&
 		identifier.Variable.IsGlobal == false {
 		if identifier.Variable.LocalValOffset > 255 { // early check
