@@ -25,7 +25,7 @@ type Function struct {
 	DefaultValueStartAt              int
 	IsGlobal                         bool
 	IsBuildIn                        bool
-	LoadedFromLucyLang               bool
+	LoadedFromLucyLangPackage        bool
 	Used                             bool
 	TemplateClonedFunction           bool
 	IsClosureFunction                bool
