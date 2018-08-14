@@ -73,15 +73,15 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 }
 
 func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
-	var b uint16
-	b = 1
+	var count uint16
+	count = 1
 	for _, v := range functionType.ParameterList {
-		b += jvmSlotSize(v.Type)
+		count += jvmSlotSize(v.Type)
 	}
-	if b > 255 {
+	if count > 255 {
 		panic("over 255")
 	}
-	return byte(b)
+	return byte(count)
 }
 
 func jvmSlotSize(typ *ast.Type) uint16 {

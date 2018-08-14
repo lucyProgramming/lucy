@@ -352,7 +352,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				errMsgPrefix(e.Pos), object.Class.Name))
 			return nil
 		}
-		ms, matched, err := object.Class.accessInterfaceMethod(e.Pos, errs, call.Name, call, callArgTypes, false)
+		ms, matched, err := object.Class.accessInterfaceObjectMethod(e.Pos, errs, call.Name, call, callArgTypes, false)
 		if err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 			return nil

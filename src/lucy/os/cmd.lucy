@@ -9,10 +9,10 @@ import "java/lang/Thread"
 import "java/io/File"
 
 public class Command implements Runnable{
-	public cmd string  
-	public args string []  
-	public envs string [] 
-	public file File 
+	cmd string  
+	args string []  
+	envs string [] 
+	file File 
 	public stdin  InputStream
 	public stdout , stderr  OutputStream 
 	public in InputStream 

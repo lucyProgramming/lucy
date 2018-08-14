@@ -60,7 +60,7 @@ func (ft FunctionType) getParameterTypes() []*Type {
 }
 
 func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
-	callArgsTypes []*Type, f *Function) (match bool, vArgs *CallVArgs, errs []error) {
+	callArgsTypes []*Type, f *Function) (fit bool, vArgs *CallVArgs, errs []error) {
 	//trying to convert literal
 	convertExpressionsToNeeds(*args, ft.getParameterTypes(), callArgsTypes)
 	errs = []error{}
@@ -136,7 +136,7 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 			}
 		}
 	}
-	match = len(errs) == 0
+	fit = len(errs) == 0
 	return
 }
 

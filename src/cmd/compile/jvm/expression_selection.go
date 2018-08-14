@@ -61,6 +61,7 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 	}
 	// check cast to super class
 	if selection.Name == ast.SUPER {
+		maxStack = buildExpression.build(class, code, selection.Expression, context, state)
 		return
 	}
 	if selection.Method != nil { // pack to method handle

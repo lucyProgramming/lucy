@@ -1,10 +1,10 @@
-import "lucy/cmd/langtools/common";
-import "lucy/os";
+import "lucy/cmd/langtools/common"
+import "lucy/os"
 
 
 fn printUsageAndExit(code int){
-	print("expect package name");	
-	os.exit(code);
+	print("expect package name")	
+	os.exit(code)
 }
 
 
@@ -14,19 +14,19 @@ fn printUsageAndExit(code int){
 
 fn main(args []string){
 	if args.size() == 0 {
-		printUsageAndExit(1);
+		printUsageAndExit(1)
 	}
-	lucyRoot,err := common.getLucyRoot();
+	lucyRoot,err := common.getLucyRoot()
 	if err != null {
-		print(err);
-		return ;
+		print(err)
+		return 
 	}
-	lcyPaths ,err := common.getLucyPath();
+	lcyPaths ,err := common.getLucyPath()
 	if err != null {
-		print(err);
-		return ;
+		print(err)
+		return 
 	}
-	(new Test(lucyRoot , lcyPaths ,args[0]) ).test();
+	(new Test(lucyRoot , lcyPaths ,args[0]) ).test()
 }
 
 
