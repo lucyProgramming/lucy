@@ -496,9 +496,9 @@ func (typ *Type) typeString(ret *string) {
 	case VariableTypeVoid:
 		*ret += "void"
 	case VariableTypeTypeAlias:
-		*ret += typ.AliasType.TypeString()
+		*ret += "type_alias@" + typ.AliasType.TypeString()
 	case VariableTypePackage:
-		*ret += typ.Package.Name
+		*ret += "package@" + typ.Package.Name
 	case VariableTypeNull:
 		*ret += "null"
 	case VariableTypeSelectGlobal:

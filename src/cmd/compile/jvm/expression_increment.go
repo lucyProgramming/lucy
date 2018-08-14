@@ -61,7 +61,8 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 			}
 		}
 	}
-	if t := currentStack + jvmSlotSize(e.Value); t > maxStack { // last op will change stack
+	if t := currentStack + jvmSlotSize(e.Value); t > maxStack {
+		//
 		maxStack = t
 	}
 	switch e.Value.Type {

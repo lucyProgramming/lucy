@@ -1,5 +1,5 @@
 
-import "java/lang/System";
+import "java/lang/System"
 
 
 
@@ -24,10 +24,10 @@ public fn getEnvs()->
 	envs map{string -> string} = new map{string -> string}()
 )
 {
-	es := System.getenv();	
-	ks := es.keySet().toArray();
+	es := System.getenv()	
+	ks := es.keySet().toArray()
 	for v := range ks {
-		envs[string(v)] = string(es.get(v));
+		envs[string(v)] = string(es.get(v))
 	}
 }
 
@@ -44,7 +44,7 @@ public fn getCwd()->(d string = System.getProperty("user.dir")){
 	change working directory to
 */
 public fn chCwd(to string){
-	System.setProperty("user.dir", to);
+	System.setProperty("user.dir", to)
 }
 
 /*
@@ -59,7 +59,7 @@ public fn getUser()->(r string = System.getProperty("user.name")){
 */
 
 public fn exit(code int){
-	System.exit(code);
+	System.exit(code)
 }
 
 /*
@@ -67,7 +67,7 @@ public fn exit(code int){
 */
 
 public fn gc(){
-	System.gc();
+	System.gc()
 }
 
 

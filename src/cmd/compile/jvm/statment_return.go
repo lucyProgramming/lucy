@@ -146,7 +146,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-				context.multiValueOffset)...)
+				context.multiValueVarOffset)...)
 		}
 		stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 		if stack > maxStack {
@@ -157,7 +157,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code,
 				loadLocalVariableOps(ast.VariableTypeObject,
-					context.multiValueOffset)...)
+					context.multiValueVarOffset)...)
 		}
 	}
 	if len(statementReturn.Expressions) > 0 {
@@ -276,7 +276,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-			context.exceptionOffset)...) // this code will make stack is empty
+			context.exceptionVarOffset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
 		context.Defer = statementReturn.Defers[index]
@@ -285,7 +285,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		context.Defer = nil
 		statementReturn.Defers[index].ResetLabels()
 		//if need throw
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(throwableClass))
@@ -307,7 +307,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 			//exception that have been handled
 			if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
 				//load when function have multi returns if read to end
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset)...)
 				code.Codes[code.CodeLength] = cg.OP_ifnull
 				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
 				code.Codes[code.CodeLength+3] = cg.OP_goto

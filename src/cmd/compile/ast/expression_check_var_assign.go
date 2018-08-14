@@ -34,8 +34,8 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	}
 	var err error
 	noNewVariable := true
-	declareVariableExpression := &ExpressionVarAssign{}
-	declareVariableExpression.InitValues = values
+	assign := &ExpressionVarAssign{}
+	assign.InitValues = values
 	for k, v := range names {
 		if v.Type != ExpressionTypeIdentifier {
 			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'",
@@ -47,8 +47,8 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 		if identifier.Name == NoNameIdentifier {
 			vd := &Variable{}
 			vd.Name = identifier.Name
-			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, false)
+			assign.Variables = append(assign.Variables, vd)
+			assign.IfDeclaredBefore = append(assign.IfDeclaredBefore, false)
 			continue
 		}
 		var variableType *Type
@@ -66,8 +66,8 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 				}
 			}
 			identifier.Variable = variable
-			declareVariableExpression.Variables = append(declareVariableExpression.Variables, variable)
-			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, true)
+			assign.Variables = append(assign.Variables, variable)
+			assign.IfDeclaredBefore = append(assign.IfDeclaredBefore, true)
 		} else { // should be no error
 			noNewVariable = false
 			vd := &Variable{}
@@ -79,14 +79,14 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			if variableType != nil {
 				vd.Type = variableType.Clone()
 				vd.Type.Pos = e.Pos
+				if variableType.isTyped() == false {
+					*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
+						errMsgPrefix(v.Pos), variableType.TypeString()))
+				}
 			} else {
 				vd.Type = &Type{}
 				vd.Type.Type = VariableTypeVoid
 				vd.Type.Pos = v.Pos
-			}
-			if vd.Type.isTyped() == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s' init value not typed",
-					errMsgPrefix(v.Pos), identifier.Name))
 			}
 			err = block.Insert(vd.Name, v.Pos, vd)
 			identifier.Variable = vd
@@ -95,8 +95,8 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			declareVariableExpression.Variables = append(declareVariableExpression.Variables, vd)
-			declareVariableExpression.IfDeclaredBefore = append(declareVariableExpression.IfDeclaredBefore, false)
+			assign.Variables = append(assign.Variables, vd)
+			assign.IfDeclaredBefore = append(assign.IfDeclaredBefore, false)
 			if e.IsPublic { // only use when is is global
 				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}
@@ -110,5 +110,5 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 		return
 	}
 	// no error,rewrite data
-	e.Data = declareVariableExpression
+	e.Data = assign
 }

@@ -38,8 +38,8 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
 			writeExits(s.StatementFor.Exits, code.CodeLength)
+			context.MakeStackMap(code, state, code.CodeLength)
 		}
-		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeContinue:
 		if len(s.StatementContinue.Defers) > 0 {
 			buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
@@ -134,7 +134,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-			context.exceptionOffset)...) // this code will make stack is empty
+			context.exceptionVarOffset)...) // this code will make stack is empty
 		state.popStack(1)
 		// build block
 		context.Defer = ds[index]
@@ -144,7 +144,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		ds[index].ResetLabels()
 
 		//if need throw
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(throwableClass))

@@ -186,11 +186,11 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		}
 	}
 	if f.HasDefer {
-		context.exceptionOffset = method.Code.MaxLocals
+		context.exceptionVarOffset = method.Code.MaxLocals
 		method.Code.MaxLocals++
 		method.Code.Codes[method.Code.CodeLength] = cg.OP_aconst_null
 		method.Code.CodeLength++
-		copyOPs(method.Code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionOffset)...)
+		copyOPs(method.Code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(ast.JavaThrowableClass))
 	}
 	buildPackage.buildBlock(class, method.Code, &f.Block, context, state)
@@ -200,10 +200,10 @@ func (buildPackage *BuildPackage) buildFunctionMultiReturnOffset(class *cg.Class
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
-	context.multiValueOffset = code.MaxLocals
+	context.multiValueVarOffset = code.MaxLocals
 	code.MaxLocals++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-		context.multiValueOffset)...)
+		context.multiValueVarOffset)...)
 	state.appendLocals(class, state.newObjectVariableType(javaRootObjectArray))
 	maxStack = 1
 	return

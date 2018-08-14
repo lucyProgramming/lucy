@@ -6,10 +6,10 @@ import (
 )
 
 type Context struct {
-	exceptionOffset         uint16
-	multiValueOffset        uint16
 	class                   *ast.Class
 	function                *ast.Function
+	exceptionVarOffset      uint16
+	multiValueVarOffset     uint16
 	currentSourceFile       string
 	currentLineNumber       int
 	Defer                   *ast.StatementDefer

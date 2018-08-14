@@ -37,7 +37,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	}()
 
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
-	if len(call.Args) == 1 && call.Args[0].HaveMultiValue() == false {
+	if len(call.Args) == 1 {
 		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
@@ -116,7 +116,6 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		}
 		return
 	}
-
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(javaStringBuilderClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -134,7 +133,6 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	currentStack := uint16(2)
 	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
 	appendString := func(isLast bool) {
-		//
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/StringBuilder",

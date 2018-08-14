@@ -254,8 +254,8 @@ func (b *Block) checkUnUsedVariables() (es []error) {
 		if v.Used ||
 			v.IsGlobal ||
 			v.IsFunctionParameter ||
-			v.IsFunctionReturnVariable ||
-			v.Name == THIS {
+			v.Name == THIS ||
+			v.IsReturn {
 			continue
 		}
 		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",

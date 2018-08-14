@@ -208,7 +208,6 @@ func (e *Expression) OpName() string {
 		return "conversion of type"
 	case ExpressionTypeTypeAssert:
 		return "type assert"
-
 	case ExpressionTypeGlobal:
 		return "global"
 	case ExpressionTypeParenthesis:
@@ -259,6 +258,9 @@ func (e *Expression) IsIntCompare() bool {
 	return i1 && i2
 }
 
+/*
+	a == null
+*/
 func (e *Expression) IsNullCompare() bool {
 	if e.IsRelation() == false {
 		return false
@@ -268,6 +270,9 @@ func (e *Expression) IsNullCompare() bool {
 		bin.Right.Type == ExpressionTypeNull
 }
 
+/*
+	a > "b"
+*/
 func (e *Expression) IsStringCompare() bool {
 	if e.IsRelation() == false {
 		return false
@@ -275,6 +280,11 @@ func (e *Expression) IsStringCompare() bool {
 	bin := e.Data.(*ExpressionBinary)
 	return bin.Left.Value.Type == VariableTypeString
 }
+
+/*
+	var a ,b []int
+	a == b
+*/
 func (e *Expression) IsPointerCompare() bool {
 	if e.IsRelation() == false {
 		return false

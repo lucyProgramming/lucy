@@ -15,7 +15,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 	if object == nil {
 		return nil
 	}
-	// dot
+	//
 	if object.Type != VariableTypeObject &&
 		object.Type != VariableTypeClass &&
 		object.Type != VariableTypePackage {

@@ -9,14 +9,14 @@ import (
 
 func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block,
 	context *Context, state *StackMapState) {
-	willNotExecuteToEnd := false
+	notToHere := false
 	for _, s := range b.Statements {
-		if willNotExecuteToEnd == true && s.Type == ast.StatementTypeLabel {
+		if notToHere == true && s.Type == ast.StatementTypeLabel {
 			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
-			willNotExecuteToEnd = !jumpForwards
+			notToHere = !jumpForwards
 			//continue compile block from this label statement
 		}
-		if willNotExecuteToEnd {
+		if notToHere {
 			continue
 		}
 		if s.IsCallFatherConstructionStatement {
@@ -37,12 +37,12 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 		}
 		//unCondition goto
 		if buildPackage.statementIsUnConditionGoto(s) {
-			willNotExecuteToEnd = true
+			notToHere = true
 			continue
 		}
 		//block deadEnd
 		if s.Type == ast.StatementTypeBlock {
-			willNotExecuteToEnd = s.Block.WillNotExecuteToEnd
+			notToHere = s.Block.WillNotExecuteToEnd
 			continue
 		}
 		if s.Type == ast.StatementTypeIf && s.StatementIf.ElseBlock != nil {
@@ -51,7 +51,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 				t = t && v.Block.WillNotExecuteToEnd
 			}
 			t = t && s.StatementIf.ElseBlock.WillNotExecuteToEnd
-			willNotExecuteToEnd = t
+			notToHere = t
 			continue
 		}
 		if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != nil {
@@ -66,17 +66,15 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 				}
 			}
 			t = t && s.StatementSwitch.Default.WillNotExecuteToEnd
-			willNotExecuteToEnd = t
+			notToHere = t
 			continue
 		}
 	}
-	b.WillNotExecuteToEnd = willNotExecuteToEnd
-	if b.IsFunctionBlock == false && len(b.Defers) > 0 {
-		if b.WillNotExecuteToEnd == false {
-			code.Codes[code.CodeLength] = cg.OP_aconst_null
-			code.CodeLength++
-			buildPackage.buildDefers(class, code, context, b.Defers, state)
-		}
+	b.WillNotExecuteToEnd = notToHere
+	if b.IsFunctionBlock == false &&
+		len(b.Defers) > 0 &&
+		b.WillNotExecuteToEnd == false {
+		buildPackage.buildDefers(class, code, context, b.Defers, state)
 	}
 	return
 }

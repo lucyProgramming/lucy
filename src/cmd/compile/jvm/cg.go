@@ -145,7 +145,6 @@ func (buildPackage *BuildPackage) mkGlobalVariables() {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		}
 		f.AccessFlags |= cg.ACC_FIELD_VOLATILE
-
 		if LucyFieldSignatureParser.Need(v.Type) {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
@@ -227,6 +226,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 	trigger.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
 	trigger.AccessFlags |= cg.ACC_METHOD_STATIC
+	trigger.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
 	trigger.Descriptor = "()V"
 	trigger.Code = &cg.AttributeCode{}
 	trigger.Code.Codes = make([]byte, 1)
@@ -236,6 +236,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 	buildPackage.mainClass.AppendMethod(trigger)
 	buildPackage.mainClass.TriggerPackageInitMethod = trigger
 }
+
 func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {
 	switch t.Type {
 	case ast.VariableTypeBool:
@@ -261,6 +262,7 @@ func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *as
 	}
 	return
 }
+
 func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = c.Name
@@ -398,10 +400,9 @@ func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHigh
 	method.Descriptor = "()V"
 	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	method.Code = &cg.AttributeCode{}
-	method.Code.Codes = make([]byte, 65536)
-	defer func() {
-		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
-	}()
+	method.Code.Codes = make([]byte, 5)
+	method.Code.CodeLength = 5
+	method.Code.MaxLocals = 1
 	method.Code.Codes[0] = cg.OP_aload_0
 	method.Code.Codes[1] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
@@ -409,13 +410,8 @@ func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHigh
 		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, method.Code.Codes[2:4])
-	if 1 > method.Code.MaxStack {
-		method.Code.MaxStack = 1
-	}
-	method.Code.CodeLength = 4
-	method.Code.Codes[method.Code.CodeLength] = cg.OP_return
-	method.Code.CodeLength += 1
-	method.Code.MaxLocals = 1
+	method.Code.MaxStack = 1
+	method.Code.Codes[4] = cg.OP_return
 	class.AppendMethod(method)
 }
 

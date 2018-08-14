@@ -54,13 +54,11 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 		Class:      javaStringClass,
 		Method:     "format",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;",
-	},
-		code.Codes[code.CodeLength+1:code.CodeLength+3])
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression {
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
 	}
-
 	return
 }

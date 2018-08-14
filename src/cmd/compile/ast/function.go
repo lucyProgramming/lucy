@@ -237,7 +237,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 	if f.Type.NoReturnValue() == false {
 		//handler return
 		for _, v := range f.Type.ReturnList {
-			v.IsFunctionReturnVariable = true
+			v.IsReturn = true
 			if len(v.Type.getParameterType()) > 0 {
 				if f.TemplateFunction == nil {
 					f.TemplateFunction = &TemplateFunction{}
