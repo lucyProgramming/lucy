@@ -70,12 +70,17 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		if err != nil {
 			return nil, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Type = ast.ExpressionTypeList
-		newExpression.Pos = left.Pos
-		list := []*ast.Expression{left, left2}
-		newExpression.Data = list
-		left = newExpression
+		if left.Type == ast.ExpressionTypeList {
+			left.Data = append(left.Data.([]*ast.Expression), left2)
+		} else {
+			newExpression := &ast.Expression{}
+			newExpression.Type = ast.ExpressionTypeList
+			newExpression.Pos = left.Pos
+			list := []*ast.Expression{left, left2}
+			newExpression.Data = list
+			left = newExpression
+		}
+
 	}
 
 	mustBeOneExpression := func(left *ast.Expression) {

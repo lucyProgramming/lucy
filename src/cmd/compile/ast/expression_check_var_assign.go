@@ -7,67 +7,69 @@ import (
 
 func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
-	var names []*Expression
+	var lefts []*Expression
 	if bin.Left.Type == ExpressionTypeList {
-		names = bin.Left.Data.([]*Expression)
+		lefts = bin.Left.Data.([]*Expression)
 	} else {
-		names = []*Expression{bin.Left}
+		lefts = []*Expression{bin.Left}
 	}
 	noErr := true
 	values := bin.Right.Data.([]*Expression)
 	assignTypes := checkExpressions(block, values, errs, false)
-	if len(names) > len(assignTypes) {
+	if len(lefts) > len(assignTypes) {
 		pos := e.Pos
 		getLastPosFromArgs(assignTypes, &pos)
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(pos),
 			len(assignTypes),
-			len(names)))
+			len(lefts)))
 		noErr = false
-	} else if len(names) < len(assignTypes) {
+	} else if len(lefts) < len(assignTypes) {
 		pos := e.Pos
-		getFirstPosFromArgs(assignTypes[len(names):], &pos)
+		getFirstPosFromArgs(assignTypes[len(lefts):], &pos)
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(pos),
 			len(assignTypes),
-			len(names)))
+			len(lefts)))
 	}
 	var err error
 	noNewVariable := true
 	assign := &ExpressionVarAssign{}
+	assign.Lefts = lefts
 	assign.InitValues = values
-	for k, v := range names {
+	assign.IfDeclaredBefore = make([]bool, len(lefts))
+	for k, v := range lefts {
+		var variableType *Type = nil
+		if k < len(assignTypes) {
+			variableType = assignTypes[k]
+		}
 		if v.Type != ExpressionTypeIdentifier {
-			*errs = append(*errs, fmt.Errorf("%s not a name on the left,but '%s'",
-				errMsgPrefix(v.Pos), v.OpName()))
-			noErr = false
+			t := v.getLeftValue(block, errs)
+			if t == nil || variableType == nil {
+				continue
+			}
+			if t.Equal(errs, variableType) == false {
+				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					errMsgPrefix(t.Pos), variableType.TypeString(), t.TypeString()))
+			}
 			continue
 		}
 		identifier := v.Data.(*ExpressionIdentifier)
 		if identifier.Name == NoNameIdentifier {
-			vd := &Variable{}
-			vd.Name = identifier.Name
-			assign.Variables = append(assign.Variables, vd)
-			assign.IfDeclaredBefore = append(assign.IfDeclaredBefore, false)
 			continue
-		}
-		var variableType *Type
-		if k < len(assignTypes) {
-			variableType = assignTypes[k]
 		}
 		if variable, ok := block.Variables[identifier.Name]; ok {
 			if variableType != nil {
-				if variable.Type.Equal(errs, assignTypes[k]) == false {
+				if variable.Type.Equal(errs, variableType) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(assignTypes[k].Pos),
 						variable.Type.TypeString(),
-						assignTypes[k].TypeString()))
+						variableType.TypeString()))
 					noErr = false
 				}
 			}
 			identifier.Variable = variable
-			assign.Variables = append(assign.Variables, variable)
-			assign.IfDeclaredBefore = append(assign.IfDeclaredBefore, true)
+			assign.IfDeclaredBefore[k] = true
 		} else { // should be no error
 			noNewVariable = false
 			vd := &Variable{}
@@ -95,8 +97,6 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 				noErr = false
 				continue
 			}
-			assign.Variables = append(assign.Variables, vd)
-			assign.IfDeclaredBefore = append(assign.IfDeclaredBefore, false)
 			if e.IsPublic { // only use when is is global
 				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}

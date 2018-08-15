@@ -548,7 +548,7 @@ type ExpressionVar struct {
 }
 
 type ExpressionVarAssign struct {
-	Variables        []*Variable
+	Lefts            []*Expression
 	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
 }

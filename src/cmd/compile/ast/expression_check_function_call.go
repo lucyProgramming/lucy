@@ -86,10 +86,10 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	ret := ft.getReturnTypes(e.Pos)
-	var es []error
-	_, call.VArgs, es = ft.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
+	var err error
+	call.VArgs, err = ft.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+	if err != nil {
+		*errs = append(*errs, err)
 	}
 	return ret
 }
@@ -117,10 +117,10 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 			f = tf
 		}
 		ret = f.Type.getReturnTypes(e.Pos)
-		var es []error
-		_, call.VArgs, es = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
+		var err error
+		call.VArgs, err = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+		if err != nil {
+			*errs = append(*errs, err)
 		}
 	}
 	return ret

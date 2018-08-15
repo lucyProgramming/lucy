@@ -348,14 +348,18 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 			if tf == nil {
 				return nil
 			}
-			var es []error
-			_, call.VArgs, es = tf.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, tf)
-			*errs = append(*errs, es...)
+			var err error
+			call.VArgs, err = tf.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, tf)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
 			return tf.Type.getReturnTypes(e.Pos)
 		} else {
-			var es []error
-			_, call.VArgs, es = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
-			*errs = append(*errs, es...)
+			var err error
+			call.VArgs, err = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
 			return f.Type.getReturnTypes(e.Pos)
 		}
 	}

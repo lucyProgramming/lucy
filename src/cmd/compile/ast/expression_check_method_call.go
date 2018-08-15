@@ -41,9 +41,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				methodCall := e.Data.(*ExpressionMethodCall)
 				methodCall.PackageFunction = f
 				callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
-				var es []error
-				_, methodCall.VArgs, es = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
-				*errs = append(*errs, es...)
+				var err error
+				methodCall.VArgs, err = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+				if err != nil {
+					*errs = append(*errs, err)
+				}
+
 				return f.Type.getReturnTypes(e.Pos)
 			}
 		case *Variable:
@@ -63,11 +66,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					errMsgPrefix(call.ParameterTypes[0].Pos), call.Name))
 			}
 			callArgsTypes := checkExpressions(block, call.Args, errs, true)
-			_, vArgs, es := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
-			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
-			if esNotEmpty(es) {
+			vArgs, err := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+			if err != nil {
 				*errs = append(*errs, es...)
 			}
+			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
 			call.PackageGlobalVariableFunction = v
 			call.VArgs = vArgs
 			return ret

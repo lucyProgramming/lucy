@@ -419,8 +419,8 @@ func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *Expressi
 		args = &call.Args
 	}
 	for _, v := range c.Methods[SpecialMethodInit] {
-		fit, vArgs, _ := v.Function.Type.fitCallArgs(from, args, callArgs, v.Function)
-		if fit {
+		vArgs, err := v.Function.Type.fitCallArgs(from, args, callArgs, v.Function)
+		if err == nil {
 			if no != nil {
 				no.VArgs = vArgs
 			} else {

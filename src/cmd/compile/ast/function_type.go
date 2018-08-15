@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -60,22 +59,24 @@ func (ft FunctionType) getParameterTypes() []*Type {
 }
 
 func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
-	callArgsTypes []*Type, f *Function) (fit bool, vArgs *CallVArgs, errs []error) {
+	callArgsTypes []*Type, f *Function) (vArgs *CallVArgs, err error) {
 	//trying to convert literal
 	convertExpressionsToNeeds(*args, ft.getParameterTypes(), callArgsTypes)
-	errs = []error{}
+
 	if ft.VArgs != nil {
 		vArgs = &CallVArgs{}
 		vArgs.NoArgs = true
 		vArgs.Type = ft.VArgs.Type
 	}
+	msg := fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+	msg += fmt.Sprintf("\twant %s\n", callWant(ft))
+	errs := []error{}
 	if len(callArgsTypes) > len(ft.ParameterList) {
 		if ft.VArgs == nil {
 			errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
-			errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-			errMsg += fmt.Sprintf("\twant %s\n", callWant(ft))
-			errs = append(errs, fmt.Errorf(errMsg))
-			return // no further check
+			errMsg += msg
+			err = fmt.Errorf(errMsg)
+			return
 		}
 		v := ft.VArgs
 		for _, t := range callArgsTypes[len(ft.ParameterList):] {
@@ -86,24 +87,23 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 				if len(callArgsTypes[len(ft.ParameterList):]) > 1 {
 					errMsg := fmt.Sprintf("%s too many argument to call\n",
 						errMsgPrefix(t.Pos))
-					errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-					errMsg += fmt.Sprintf("\twant %s\n", callWant(ft))
-					errs = append(errs, errors.New(errMsg))
+					errMsg += msg
+					err = fmt.Errorf(errMsg)
 					return
 				}
 				if false == v.Type.Equal(&errs, t) {
-					errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+					err = fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(t.Pos),
-						t.TypeString(), v.Type.TypeString()))
+						t.TypeString())
 					return
 				}
 				vArgs.PackageJavaArray2VArgs = true
 				continue
 			}
 			if false == v.Type.Array.Equal(&errs, t) {
-				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+				err = fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(t.Pos),
-					t.TypeString(), v.Type.TypeString()))
+					t.TypeString(), v.Type.TypeString())
 				return
 			}
 		}
@@ -122,21 +122,23 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 			}
 		} else { // no default value
 			errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
-			errMsg += fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-			errMsg += fmt.Sprintf("\twant %s\n", callWant(ft))
-			errs = append(errs, fmt.Errorf(errMsg))
+			errMsg += msg
+			err = fmt.Errorf(errMsg)
+			return
 		}
 	}
 	for k, v := range ft.ParameterList {
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
 			if false == v.Type.Equal(&errs, callArgsTypes[k]) {
-				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+				errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
 					errMsgPrefix((callArgsTypes)[k].Pos),
-					callArgsTypes[k].TypeString(), v.Type.TypeString()))
+					callArgsTypes[k].TypeString(), v.Type.TypeString())
+				errMsg += msg
+				err = fmt.Errorf(errMsg)
+				return
 			}
 		}
 	}
-	fit = len(errs) == 0
 	return
 }
 

@@ -4,6 +4,7 @@ type Annotation struct {
 	Type              string
 	ElementValuePairs []*ElementValuePair
 }
+
 type ElementValuePair struct {
 	ElementName string
 	Value       ElementValue

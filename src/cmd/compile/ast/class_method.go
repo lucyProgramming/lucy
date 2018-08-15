@@ -95,7 +95,7 @@ func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, cal
 			}
 			var fit bool
 			var es []error
-			fit, call.VArgs, es = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, nil)
+			call.VArgs, err = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, nil)
 			if fit {
 				return []*ClassMethod{m}, true, nil
 			} else {
@@ -139,9 +139,8 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 		if fromSub && f.IsPrivate() {
 			//cannot access this field
 		} else {
-			var fit bool
-			fit, call.VArgs, _ = c.Fields[name].Type.FunctionType.fitCallArgs(from, &call.Args, callArgTypes, nil)
-			if fit {
+			call.VArgs, err = c.Fields[name].Type.FunctionType.fitCallArgs(from, &call.Args, callArgTypes, nil)
+			if err == nil {
 				*fieldMethodHandler = f
 			}
 		}
@@ -153,9 +152,8 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 					return nil, false, fmt.Errorf("method '%s' not found", name)
 				}
 			}
-			var fit bool
-			fit, call.VArgs, _ = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
-			if fit {
+			call.VArgs, err = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
+			if err == nil {
 				return []*ClassMethod{m}, true, nil
 			} else {
 				ms = append(ms, m)
@@ -183,9 +181,8 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	for _, m := range c.Methods[name] {
-		var fit bool
-		fit, call.VArgs, _ = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
-		if fit {
+		call.VArgs, err = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
+		if err == nil {
 			return []*ClassMethod{m}, true, nil
 		}
 	}
