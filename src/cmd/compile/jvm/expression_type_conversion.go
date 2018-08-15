@@ -101,19 +101,59 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 	if conversion.Type.Type == ast.VariableTypeString &&
 		conversion.Expression.Value.Type == ast.VariableTypeArray &&
 		conversion.Expression.Value.Array.Type == ast.VariableTypeByte {
+		type autoVar struct {
+			start  uint16
+			length uint16
+		}
+		var a autoVar
+		a.start = code.MaxLocals
+		a.length = code.MaxLocals + 1
+		state.appendLocals(class, &ast.Type{
+			Type: ast.VariableTypeInt,
+		})
+		state.appendLocals(class, &ast.Type{
+			Type: ast.VariableTypeInt,
+		})
+		code.MaxLocals += 2
+		currentStack = 3
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
 		meta := ArrayMetas[ast.VariableTypeByte]
+		code.Codes[code.CodeLength] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      meta.className,
+			Field:      "start",
+			Descriptor: "I",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.start)...)
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
-			Method:     "getJavaArray",
-			Descriptor: "()[B",
+			Method:     "size",
+			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length)...)
+		code.Codes[code.CodeLength] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      meta.className,
+			Field:      "elements",
+			Descriptor: meta.elementsFieldDescriptor,
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.start)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
+		if 5 > maxStack { // stack is ... stringRef stringRef byte[] start length
+			maxStack = 5
+		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,
 			Method:     specialMethodInit,
-			Descriptor: "([B)V",
+			Descriptor: "([BII)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return

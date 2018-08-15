@@ -115,21 +115,6 @@ public class ArrayTTT   {
 	    s += "]";
 	    return s;
 	}
-	public TTT[] getJavaArray(){
-		if(this.start == 0 && this.end == this.cap){
-			return this.elements;
-		}
-		int length = this.end - this.start;
-		TTT[] elements = new TTT[length];
-		for(int i = 0; i < length; i ++){
-			elements[i] = this.elements[i + this.start];
-		}
-		this.start = 0;
-		this.end = length;
-		this.elements = elements;
-		this.cap = length;
-		return elements;
-	}
 }
 
 `

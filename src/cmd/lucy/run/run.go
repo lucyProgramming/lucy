@@ -185,7 +185,8 @@ func (r *Run) findPackageIn(packageName string) []string {
 /*
 	check package if need rebuild
 */
-func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.PackageMeta, need bool, lucyFiles []string, err error) {
+func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.PackageMeta,
+	need bool, lucyFiles []string, err error) {
 	need = true
 	sourceFileDir := filepath.Join(lucyPath, common.DirForLucySourceFile, packageName)
 	fis, err := ioutil.ReadDir(sourceFileDir)
@@ -200,7 +201,8 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 		}
 	}
 	if len(lucyFiles) == 0 {
-		err = fmt.Errorf("no lucy source files in '%s'", filepath.Join(lucyPath, common.DirForLucySourceFile, packageName))
+		err = fmt.Errorf("no lucy source files in '%s'",
+			filepath.Join(lucyPath, common.DirForLucySourceFile, packageName))
 		return
 	}
 	if p, ok := r.PackagesCompiled[packageName]; ok {

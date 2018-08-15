@@ -21,7 +21,6 @@ func printUsage() {
 }
 
 func main() {
-
 	if len(os.Args) == 1 {
 		printUsage()
 		os.Exit(0)
