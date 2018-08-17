@@ -15,7 +15,6 @@ type ClassField struct {
 func (f *ClassField) IsStatic() bool {
 	return (f.AccessFlags & cg.ACC_FIELD_STATIC) != 0
 }
-
 func (f *ClassField) IsPublic() bool {
 	return (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
 }
@@ -25,50 +24,19 @@ func (f *ClassField) IsProtected() bool {
 func (f *ClassField) IsPrivate() bool {
 	return (f.AccessFlags & cg.ACC_FIELD_PRIVATE) != 0
 }
-
-/*
-	ret is *ClassField or *ClassMethod
-*/
-func (c *Class) getFieldOrMethod(from *Pos, name string, fromSub bool) (interface{}, error) {
-	err := c.loadSelf(from)
-	if err != nil {
-		return nil, err
-	}
-	notFoundErr := fmt.Errorf("%s field or method named '%s' not found", errMsgPrefix(from), name)
-	if c.Fields != nil && nil != c.Fields[name] {
-		if fromSub && c.Fields[name].IsPrivate() {
-			// private field
-			return nil, notFoundErr
-		} else {
-			return c.Fields[name], nil
-		}
-	}
-	if c.Methods != nil && nil != c.Methods[name] {
-		m := c.Methods[name][0]
-		if fromSub && m.IsPrivate() {
-			return nil, notFoundErr
-		} else {
-			return m, nil
-		}
-	}
-	if c.Name == JavaRootClass { // root class
-		return nil, notFoundErr
-	}
-	err = c.loadSuperClass(from)
-	if err != nil {
-		return nil, err
-	}
-	return c.SuperClass.getFieldOrMethod(from, name, true)
+func (f *ClassField) ableAccessFromSubClass() bool {
+	return f.IsPublic() ||
+		f.IsProtected()
 }
 
-func (c *Class) accessField(from *Pos, name string, fromSub bool) (*ClassField, error) {
-	err := c.loadSelf(from)
+func (c *Class) accessField(pos *Pos, name string, fromSub bool) (*ClassField, error) {
+	err := c.loadSelf(pos)
 	if err != nil {
 		return nil, err
 	}
-	notFoundErr := fmt.Errorf("%s field named '%s' not found", errMsgPrefix(from), name)
+	notFoundErr := fmt.Errorf("%s field named '%s' not found", errMsgPrefix(pos), name)
 	if c.Fields != nil && nil != c.Fields[name] {
-		if fromSub && c.Fields[name].IsPrivate() {
+		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
 			// private field
 			return nil, notFoundErr
 		} else {
@@ -78,9 +46,9 @@ func (c *Class) accessField(from *Pos, name string, fromSub bool) (*ClassField, 
 	if c.Name == JavaRootClass { // root class
 		return nil, notFoundErr
 	}
-	err = c.loadSuperClass(from)
+	err = c.loadSuperClass(pos)
 	if err != nil {
 		return nil, err
 	}
-	return c.SuperClass.accessField(from, name, true)
+	return c.SuperClass.accessField(pos, name, true)
 }

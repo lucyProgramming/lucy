@@ -17,6 +17,14 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 		len(ft.ReturnList) != len(compare.ReturnList) {
 		return false
 	}
+	if (ft.VArgs == nil) != (compare.VArgs == nil) {
+		return false
+	}
+	if ft.VArgs != nil {
+		if ft.VArgs.Type.StrictEqual(compare.VArgs.Type) == false {
+			return false
+		}
+	}
 	for k, v := range ft.ParameterList {
 		if false == v.Type.StrictEqual(compare.ParameterList[k].Type) {
 			return false
@@ -58,18 +66,30 @@ func (ft FunctionType) getParameterTypes() []*Type {
 	return ret
 }
 
+func (ft *FunctionType) callArgsHaveSureType(ts []*Type) bool {
+	for _, t := range ts {
+		if t == nil {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 	callArgsTypes []*Type, f *Function) (vArgs *CallVArgs, err error) {
 	//trying to convert literal
 	convertExpressionsToNeeds(*args, ft.getParameterTypes(), callArgsTypes)
-
 	if ft.VArgs != nil {
 		vArgs = &CallVArgs{}
 		vArgs.NoArgs = true
 		vArgs.Type = ft.VArgs.Type
 	}
-	msg := fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-	msg += fmt.Sprintf("\twant %s\n", callWant(ft))
+	var msg string
+	if ft.callArgsHaveSureType(callArgsTypes) {
+		msg = fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+		msg += fmt.Sprintf("\twant %s\n", callWant(ft))
+	}
 	errs := []error{}
 	if len(callArgsTypes) > len(ft.ParameterList) {
 		if ft.VArgs == nil {

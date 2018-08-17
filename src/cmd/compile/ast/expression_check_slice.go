@@ -14,7 +14,8 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if sliceOn == nil {
 		return nil
 	}
-	if sliceOn.Type != VariableTypeArray && sliceOn.Type != VariableTypeString {
+	if sliceOn.Type != VariableTypeArray &&
+		sliceOn.Type != VariableTypeString {
 		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
 			errMsgPrefix(sliceOn.Pos), sliceOn.TypeString()))
 	}

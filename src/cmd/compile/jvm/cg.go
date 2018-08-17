@@ -300,10 +300,6 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		method := &cg.MethodHighLevel{}
 		method.Name = name
 		method.AccessFlags = vv.Function.AccessFlags
-		if c.IsInterface() {
-			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
-			method.AccessFlags |= cg.ACC_METHOD_ABSTRACT
-		}
 		if vv.Function.Type.VArgs != nil {
 			method.AccessFlags |= cg.ACC_METHOD_VARARGS
 		}

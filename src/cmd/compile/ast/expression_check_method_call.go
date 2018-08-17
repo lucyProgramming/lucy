@@ -24,7 +24,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
-			if f.IsPublic() == false && object.Package.Name != PackageBeenCompile.Name {
+			if f.IsPublic() == false &&
+				object.Package.Name != PackageBeenCompile.Name {
 				*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
 					errMsgPrefix(e.Pos), call.Name))
 			}
@@ -187,7 +188,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 			return []*Type{ret}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on map", errMsgPrefix(e.Pos), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on map",
+				errMsgPrefix(e.Pos), call.Name))
 			return nil
 		}
 		return nil
@@ -260,7 +262,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		//var fieldMethodHandler *ClassField
 		args := checkExpressions(block, call.Args, errs, true)
-		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, call, args, false, nil)
+		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, call, args,
+			false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
@@ -318,12 +321,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		if matched {
 			m := ms[0]
-
 			if (object.Class.SuperClass.LoadFromOutSide && m.IsPublic() == false) ||
 				(object.Class.SuperClass.LoadFromOutSide == false && m.IsPrivate() == true) {
 				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(e.Pos)))
 			}
-
 			call.Name = "<init>"
 			call.Method = m
 			call.Class = object.Class.SuperClass
@@ -385,6 +386,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
 	}
+	if fieldMethodHandler != nil && matched {
+		*errs = append(*errs, fmt.Errorf("%s method '%s' is ambiguous",
+			errMsgPrefix(e.Pos), call.Name))
+	}
+
 	if fieldMethodHandler != nil {
 		if object.Type == VariableTypeObject {
 			if fieldMethodHandler.IsStatic() {

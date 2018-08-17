@@ -22,7 +22,7 @@ func (c *Closure) ClosureFunctionExist(v *Function) bool {
 }
 
 func (c *Closure) NotEmpty(f *Function) bool {
-	filterOutNotClosureFunction := func() {
+	keepClosureFunction := func() {
 		fs := make(map[*Function]struct{})
 		for f, _ := range c.Functions {
 			if f.IsClosureFunction {
@@ -33,14 +33,11 @@ func (c *Closure) NotEmpty(f *Function) bool {
 	}
 	if c.Variables != nil && len(c.Variables) > 0 {
 		f.IsClosureFunction = true // in case capture it self
-		filterOutNotClosureFunction()
+		keepClosureFunction()
 		return true
 	}
-	if c.Functions == nil || len(c.Functions) > 0 {
-		return false
-	}
-	filterOutNotClosureFunction()
-	return true
+	keepClosureFunction()
+	return len(c.Functions) > 0
 }
 
 func (c *Closure) InsertVar(v *Variable) {

@@ -47,7 +47,8 @@ func (f *Function) NameLiteralFunction() string {
 	return t
 }
 
-type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos)
+type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall, block *Block,
+	errs *[]error, args []*Type, pos *Pos)
 
 type AutoVariableForReturnBecauseOfDefer struct {
 	Offset uint16

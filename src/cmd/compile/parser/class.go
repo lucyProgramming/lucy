@@ -85,6 +85,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 	classParser.ret = classDefinition
 	if isInterface {
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE
+		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
 	classParser.ret.Pos = classParser.parser.mkPos()
 	classParser.Next(lfIsToken) // skip class key word

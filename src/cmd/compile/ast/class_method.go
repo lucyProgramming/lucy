@@ -11,6 +11,38 @@ type ClassMethod struct {
 	LoadFromOutSide bool
 }
 
+func (m *ClassMethod) narrowDownAccessRange(implementation *ClassMethod) bool {
+	if m.IsPublic() {
+		return !implementation.IsPublic()
+	}
+	if m.IsProtected() {
+		return implementation.IsPrivate() == false &&
+			implementation.isAccessFlagDefault()
+	}
+	if m.isAccessFlagDefault() {
+		return implementation.IsPrivate()
+	}
+	return false
+}
+
+func (m *ClassMethod) accessString() string {
+	if m.IsPublic() {
+		return "public"
+	}
+	if m.IsProtected() {
+		return "protected"
+	}
+	if m.IsPrivate() {
+		return "private"
+	}
+	return "default"
+}
+
+func (m *ClassMethod) isAccessFlagDefault() bool {
+	return m.IsPublic() == false &&
+		m.IsProtected() == false &&
+		m.IsPrivate() == false
+}
 func (m *ClassMethod) IsPublic() bool {
 	return (m.Function.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0
 }
@@ -30,6 +62,11 @@ func (m *ClassMethod) IsFinal() bool {
 }
 func (m *ClassMethod) IsAbstract() bool {
 	return (m.Function.AccessFlags & cg.ACC_METHOD_ABSTRACT) != 0
+}
+
+func (m *ClassMethod) ableAccessFromSubClass() bool {
+	return m.IsPublic() ||
+		m.IsProtected()
 }
 
 func (m *ClassMethod) checkModifierOk() []error {
@@ -67,79 +104,81 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	}
 	return true
 }
-func (c *Class) accessInterfaceObjectMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+func (c *Class) accessInterfaceObjectMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	ms, matched, err = c.accessInterfaceMethod(from, errs, name, call, callArgTypes, fromSub)
+	ms, matched, err = c.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
+	if err != nil {
+		return nil, false, err
+	}
 	if matched {
 		return ms, matched, err
 	}
-	err = c.loadSuperClass(from)
+	err = c.loadSuperClass(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	return c.SuperClass.accessMethod(from, errs, name, call, callArgTypes, fromSub, nil)
+	return c.SuperClass.accessMethod(pos, errs, name, call, callArgTypes, fromSub, nil)
 }
 
-func (c *Class) accessInterfaceMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+func (c *Class) accessInterfaceMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf(from)
+	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if len(c.Methods[name]) > 0 {
+	if nil != c.Methods {
 		for _, m := range c.Methods[name] {
-			if fromSub {
-				if m.IsPrivate() { // break the looking
-					return nil, false, fmt.Errorf("method '%s' not found", name)
-				}
+			if fromSub && m.ableAccessFromSubClass() == false {
+				continue
 			}
-			var fit bool
-			var es []error
-			call.VArgs, err = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, nil)
-			if fit {
+			call.VArgs, err = m.Function.Type.fitCallArgs(pos, &call.Args, callArgTypes, nil)
+			if err == nil {
 				return []*ClassMethod{m}, true, nil
 			} else {
-				*errs = append(*errs, es[1:]...)
-				return nil, false, es[0] // not match
+				return nil, false, err
 			}
 		}
 	}
 	for _, v := range c.Interfaces {
-		err := v.loadSelf(from)
+		err := v.loadSelf(pos)
 		if err != nil {
 			return nil, false, err
 		}
-		ms_, matched, err := v.accessInterfaceMethod(from, errs, name, call, callArgTypes, true)
+		ms2, matched2, err2 := v.accessInterfaceMethod(pos, errs, name, call, callArgTypes, true)
+		if err2 != nil {
+			return nil, false, err2
+		}
 		if matched {
-			return ms_, matched, err
-		} else {
-			ms = append(ms, ms_...)
+			return ms2, matched2, nil
 		}
 	}
-	return ms, false, fmt.Errorf("%s method '%s' not found", errMsgPrefix(from), name)
+	return nil, false, nil // no found , no error
 }
 
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *ExpressionMethodCall,
+func (c *Class) accessMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool, fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf(from)
+	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if err := c.checkIfLoadFromAnotherPackageAndPrivate(from); err != nil {
+	if err := c.classAccessAble(pos); err != nil {
 		*errs = append(*errs, err)
 	}
 	if c.IsJava {
-		return c.accessMethodAsJava(from, errs, name, call, callArgTypes, false)
+		return c.accessMethodAsJava(pos, errs, name, call, callArgTypes, false)
 	}
 	//TODO:: can be accessed or not ???
-	if f := c.Fields[name]; f != nil && f.Type.Type == VariableTypeFunction {
-		if fromSub && f.IsPrivate() {
+	if f := c.Fields[name]; f != nil &&
+		f.Type.Type == VariableTypeFunction &&
+		fieldMethodHandler != nil {
+		if fromSub && f.ableAccessFromSubClass() == false {
 			//cannot access this field
 		} else {
-			call.VArgs, err = c.Fields[name].Type.FunctionType.fitCallArgs(from, &call.Args, callArgTypes, nil)
+			call.VArgs, err = c.Fields[name].Type.FunctionType.fitCallArgs(pos, &call.Args,
+				callArgTypes, nil)
 			if err == nil {
 				*fieldMethodHandler = f
 			}
@@ -147,57 +186,52 @@ func (c *Class) accessMethod(from *Pos, errs *[]error, name string, call *Expres
 	}
 	if len(c.Methods[name]) > 0 {
 		for _, m := range c.Methods[name] {
-			if fromSub {
-				if m.IsPrivate() { // break the looking
-					return nil, false, fmt.Errorf("method '%s' not found", name)
-				}
+			if fromSub && m.ableAccessFromSubClass() == false {
+				return nil, false, fmt.Errorf("%s method '%s' not found",
+					errMsgPrefix(pos), name)
 			}
-			call.VArgs, err = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
+			call.VArgs, err = m.Function.Type.fitCallArgs(pos, &call.Args,
+				callArgTypes, m.Function)
 			if err == nil {
 				return []*ClassMethod{m}, true, nil
 			} else {
-				ms = append(ms, m)
+				return nil, false, err
 			}
 		}
 	}
-	// don`t try father, when is is construction method
-	if name == SpecialMethodInit {
-		return ms, false, nil
-	}
-	err = c.loadSuperClass(from)
+	err = c.loadSuperClass(pos)
 	if err != nil {
 		return ms, false, err
 	}
-	ms_, matched, err := c.SuperClass.accessMethod(from, errs, name, call, callArgTypes, true, fieldMethodHandler)
-	if matched {
-		return ms_, matched, err
-	}
-	return append(ms, ms_...), matched, err
+	return c.SuperClass.accessMethod(pos, errs, name, call,
+		callArgTypes, true, fieldMethodHandler)
 }
 
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(from *Pos, errs *[]error, name string, call *ExpressionMethodCall,
+func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	for _, m := range c.Methods[name] {
-		call.VArgs, err = m.Function.Type.fitCallArgs(from, &call.Args, callArgTypes, m.Function)
-		if err == nil {
-			return []*ClassMethod{m}, true, nil
+	if c.Methods != nil {
+		for _, m := range c.Methods[name] {
+			if fromSub == true && m.ableAccessFromSubClass() == false {
+				//cannot access from sub
+				continue
+			}
+			call.VArgs, err = m.Function.Type.fitCallArgs(pos, &call.Args, callArgTypes, m.Function)
+			if err == nil {
+				return []*ClassMethod{m}, true, nil
+			}
 		}
-	}
-	// don`t try father, when is is construction method
-	if name == SpecialMethodInit {
-		return ms, false, nil
 	}
 	if c.Name == JavaRootClass {
 		return ms, false, nil
 	}
-	err = c.loadSuperClass(from)
+	err = c.loadSuperClass(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	ms_, matched, err := c.SuperClass.accessMethodAsJava(from, errs, name, call, callArgTypes, true)
+	ms_, matched, err := c.SuperClass.accessMethodAsJava(pos, errs, name, call, callArgTypes, true)
 	if err != nil {
 		return ms, false, err
 	}

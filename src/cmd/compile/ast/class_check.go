@@ -34,7 +34,6 @@ func (c *Class) checkPhase1() []error {
 	if esNotEmpty(es) {
 		errs = append(errs, es...)
 	}
-
 	return errs
 }
 
@@ -53,11 +52,17 @@ func (c *Class) checkPhase2() []error {
 	for name, ms := range c.Methods {
 		if c.Fields != nil && c.Fields[name] != nil {
 			f := c.Fields[name]
-			errMsg := fmt.Sprintf("%s class method named '%s' already declared as field,at:\n",
-				errMsgPrefix(ms[0].Function.Pos), ms[0].Function.Name)
-
-			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
-			errs = append(errs, errors.New(errMsg))
+			if f.Pos.StartLine < ms[0].Function.Pos.StartLine {
+				errMsg := fmt.Sprintf("%s method named '%s' already declared as field,at:\n",
+					errMsgPrefix(ms[0].Function.Pos), name)
+				errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
+				errs = append(errs, errors.New(errMsg))
+			} else {
+				errMsg := fmt.Sprintf("%s field named '%s' already declared as method,at:\n",
+					errMsgPrefix(f.Pos), name)
+				errMsg += fmt.Sprintf("\t%s", errMsgPrefix(ms[0].Function.Pos))
+				errs = append(errs, errors.New(errMsg))
+			}
 			continue
 		}
 		if len(ms) > 1 {
@@ -77,7 +82,42 @@ func (c *Class) checkPhase2() []error {
 	errs = append(errs, c.checkIfOverrideFinalMethod()...)
 	errs = append(errs, c.resolveInterfaces()...)
 	errs = append(errs, c.suitableForInterfaces()...)
+	if c.IsInterface() {
+		errs = append(errs, c.checkOverrideInterfaceMethod()...)
+	}
+	return errs
+}
 
+func (c *Class) methodExistsInInterface(name string) *Class {
+	if c.IsInterface() == false {
+		panic("not a interface")
+	}
+	if c.Methods != nil && len(c.Methods[name]) > 0 {
+		return c
+	}
+	for _, v := range c.Interfaces {
+		if v.methodExistsInInterface(name) != nil {
+			return v
+		}
+	}
+	return nil
+}
+
+func (c *Class) checkOverrideInterfaceMethod() []error {
+	errs := []error{}
+	for name, v := range c.Methods {
+		var exist *Class
+		for _, vv := range c.Interfaces {
+			exist = vv.methodExistsInInterface(name)
+			if exist != nil {
+				break
+			}
+		}
+		if exist != nil {
+			errs = append(errs, fmt.Errorf("%s method '%s' override '%s'",
+				errMsgPrefix(v[0].Function.Pos), name, exist.Name))
+		}
+	}
 	return errs
 }
 
@@ -189,43 +229,44 @@ func (c *Class) suitableForInterfaces() []error {
 		return errs
 	}
 	for _, i := range c.Interfaces {
-		errs = append(errs, c.suitableForInterface(i, false)...)
+		errs = append(errs, c.suitableForInterface(i)...)
 	}
 	return errs
 }
 
-func (c *Class) suitableForInterface(inter *Class, fromSub bool) []error {
+func (c *Class) suitableForInterface(inter *Class) []error {
 	errs := []error{}
+	err := inter.loadSelf(c.Pos)
+	if err != nil {
+		errs = append(errs, err)
+		return errs
+	}
 	for name, v := range inter.Methods {
 		m := v[0]
-		im, match := c.implementMethod(m, false, &errs, c.Pos)
-		if match {
-			if im.IsPublic() == false {
-				err := fmt.Errorf("%s method '%s' is not public",
-					errMsgPrefix(c.Pos), name)
-				errs = append(errs, err)
-			}
-			if im.IsStatic() {
+		implementation := c.implementMethod(c.Pos, m, false, &errs)
+		if implementation != nil {
+			if implementation.IsStatic() {
 				err := fmt.Errorf("%s method '%s' is static",
 					errMsgPrefix(c.Pos), name)
 				errs = append(errs, err)
 			}
-			return errs
+			if m.narrowDownAccessRange(implementation) {
+				pos := c.Pos
+				if implementation.Function.Pos != nil {
+					pos = implementation.Function.Pos
+				}
+				err := fmt.Errorf("%s implementation of method '%s' should not narrow down access range, %s -> %s",
+					errMsgPrefix(pos), name, m.accessString(), implementation.accessString())
+				errs = append(errs, err)
+			}
 		} else {
-			errs = append(errs, fmt.Errorf("%s missing implements method '%s' define on interface '%s'",
+			errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on interface '%s'",
 				errMsgPrefix(c.Pos), m.Function.readableMsg(), inter.Name))
 		}
 	}
-	for _, vv := range inter.Interfaces {
-		err := vv.loadSelf(c.Pos)
-		if err != nil {
-			errs = append(errs, err)
-			return errs
-		}
-		es := c.suitableForInterface(vv, true)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+	for _, v := range inter.Interfaces {
+		es := c.suitableForInterface(v)
+		errs = append(errs, es...)
 	}
 	return errs
 }

@@ -203,18 +203,22 @@ func (c *Class) resolveFather() error {
 		t := strings.Split(c.SuperClassName, ".")
 		i := PackageBeenCompile.getImport(c.Pos.Filename, t[0])
 		if i == nil {
+			c.SuperClassName = ""
 			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
 		}
 		i.Used = true
 		r, err := PackageBeenCompile.load(i.Import)
 		if err != nil {
+			c.SuperClassName = ""
 			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
 		}
 		if p, ok := r.(*Package); ok && p != nil { // if package
 			if _, ok := p.Block.NameExists(t[1]); ok == false {
+				c.SuperClassName = ""
 				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
 			}
 			if p.Block.Classes == nil || p.Block.Classes[t[1]] == nil {
+				c.SuperClassName = ""
 				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
 			}
 			c.SuperClass = p.Block.Classes[t[1]]
@@ -223,6 +227,7 @@ func (c *Class) resolveFather() error {
 			c.SuperClassName = t.Name
 			c.SuperClass = t
 		} else {
+			c.SuperClassName = ""
 			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		}
 	} else {
@@ -232,9 +237,11 @@ func (c *Class) resolveFather() error {
 		variableType.Pos = c.Pos
 		err := variableType.resolve(&c.Block, false)
 		if err != nil {
+			c.SuperClassName = ""
 			return err
 		}
 		if variableType.Type != VariableTypeObject {
+			c.SuperClassName = ""
 			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
 		}
 		c.SuperClassName = variableType.Class.Name
@@ -242,12 +249,14 @@ func (c *Class) resolveFather() error {
 	}
 	err := c.loadSuperClass(c.Pos)
 	if err != nil {
+		c.SuperClassName = ""
 		return err
 	}
 	if c.IsInterface() {
 		if c.SuperClass.Name == JavaRootClass {
 			//nothing
 		} else {
+			c.SuperClassName = ""
 			return fmt.Errorf("%s interface`s super-class must be '%s'",
 				errMsgPrefix(c.Pos), JavaRootClass)
 		}
@@ -256,7 +265,7 @@ func (c *Class) resolveFather() error {
 }
 func (c *Class) resolveInterfaces() []error {
 	if c.resolveInterfacesCalled {
-		return []error{}
+		return nil
 	}
 	defer func() {
 		c.resolveInterfacesCalled = true
@@ -272,12 +281,7 @@ func (c *Class) resolveInterfaces() []error {
 			errs = append(errs, err)
 			continue
 		}
-		if t.Type != VariableTypeObject {
-			errs = append(errs, fmt.Errorf("%s '%s' is not a interface",
-				errMsgPrefix(i.Pos), i.Name))
-			continue
-		}
-		if t.Class.IsInterface() == false {
+		if t.Type != VariableTypeObject || t.Class.IsInterface() == false {
 			errs = append(errs, fmt.Errorf("%s '%s' is not a interface",
 				errMsgPrefix(i.Pos), i.Name))
 			continue
@@ -287,63 +291,33 @@ func (c *Class) resolveInterfaces() []error {
 	return errs
 }
 
-func (c *Class) implementMethod(m *ClassMethod, fromSub bool, errs *[]error, pos *Pos) (*ClassMethod, bool) {
-	for _, v := range c.Methods[m.Function.Name] {
-		if v.IsAbstract() {
-			continue
-		}
-		if fromSub && v.IsPrivate() {
-			return nil, false
-		}
-		if len(v.Function.Type.ParameterList) != len(m.Function.Type.ParameterList) {
-			// parameter count not match
-			continue
-		}
-		if (v.Function.Type.VArgs != nil) != (m.Function.Type.VArgs != nil) {
-			continue
-		}
-
-		if len(v.Function.Type.ReturnList) != len(m.Function.Type.ReturnList) {
-			// return list count not match
-			continue
-		}
-		match := true
-		if v.Function.Type.VArgs != nil && v.Function.Type.VArgs.Type.StrictEqual(m.Function.Type.VArgs.Type) {
-			match = false
-		}
-		if match {
-			for kk, p := range v.Function.Type.ParameterList {
-				if p.Type.StrictEqual(m.Function.Type.ParameterList[kk].Type) == false {
-					match = false
-					break
-				}
+func (c *Class) implementMethod(pos *Pos, m *ClassMethod, fromSub bool, errs *[]error) *ClassMethod {
+	if c.Methods != nil {
+		for _, v := range c.Methods[m.Function.Name] {
+			if v.IsAbstract() {
+				continue
 			}
-		}
-		if match {
-			for kk, p := range v.Function.Type.ReturnList {
-				if p.Type.StrictEqual(m.Function.Type.ReturnList[kk].Type) == false {
-					match = false
-					break
-				}
+			if fromSub && v.ableAccessFromSubClass() == false {
+				return nil
 			}
-		}
-		if match {
-			return v, true
+			if v.Function.Type.equal(&m.Function.Type) {
+				return v
+			}
 		}
 	}
 	//no same name method at current class
 	if c.Name == JavaRootClass {
-		return nil, false
+		return nil
 	}
 	err := c.loadSuperClass(pos)
 	if err != nil {
 		*errs = append(*errs, err)
-		return nil, false
+		return nil
 	} else {
 		//trying find fathte`s implementation
-		return c.SuperClass.implementMethod(m, true, errs, pos)
+		return c.SuperClass.implementMethod(pos, m, true, errs)
 	}
-	return nil, false
+	return nil
 }
 
 func (c *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
@@ -403,13 +377,13 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	return nil
 }
 
-func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *ExpressionNew,
+func (c *Class) matchConstructionFunction(pos *Pos, errs *[]error, no *ExpressionNew,
 	call *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf(from)
+	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if err := c.checkIfLoadFromAnotherPackageAndPrivate(from); err != nil {
+	if err := c.classAccessAble(pos); err != nil {
 		*errs = append(*errs, err)
 	}
 	var args *CallArgs
@@ -419,7 +393,7 @@ func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *Expressi
 		args = &call.Args
 	}
 	for _, v := range c.Methods[SpecialMethodInit] {
-		vArgs, err := v.Function.Type.fitCallArgs(from, args, callArgs, v.Function)
+		vArgs, err := v.Function.Type.fitCallArgs(pos, args, callArgs, v.Function)
 		if err == nil {
 			if no != nil {
 				no.VArgs = vArgs
@@ -434,7 +408,7 @@ func (c *Class) matchConstructionFunction(from *Pos, errs *[]error, no *Expressi
 	return ms, false, nil
 }
 
-func (c *Class) checkIfLoadFromAnotherPackageAndPrivate(pos *Pos) error {
+func (c *Class) classAccessAble(pos *Pos) error {
 	if c.LoadFromOutSide == false {
 		return nil
 	}
@@ -446,4 +420,39 @@ func (c *Class) checkIfLoadFromAnotherPackageAndPrivate(pos *Pos) error {
 		return fmt.Errorf("%s class '%s' is not public", errMsgPrefix(pos), c.Name)
 	}
 	return nil
+}
+
+/*
+	ret is *ClassField or *ClassMethod
+*/
+func (c *Class) getFieldOrMethod(pos *Pos, name string, fromSub bool) (interface{}, error) {
+	err := c.loadSelf(pos)
+	if err != nil {
+		return nil, err
+	}
+	notFoundErr := fmt.Errorf("%s field or method named '%s' not found", errMsgPrefix(pos), name)
+	if c.Fields != nil && nil != c.Fields[name] {
+		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
+			// private field
+			return nil, notFoundErr
+		} else {
+			return c.Fields[name], nil
+		}
+	}
+	if c.Methods != nil && nil != c.Methods[name] {
+		m := c.Methods[name][0]
+		if fromSub && m.ableAccessFromSubClass() == false {
+			return nil, notFoundErr
+		} else {
+			return m, nil
+		}
+	}
+	if c.Name == JavaRootClass { // root class
+		return nil, notFoundErr
+	}
+	err = c.loadSuperClass(pos)
+	if err != nil {
+		return nil, err
+	}
+	return c.SuperClass.getFieldOrMethod(pos, name, true)
 }
