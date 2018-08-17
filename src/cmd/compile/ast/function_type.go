@@ -9,6 +9,7 @@ type FunctionType struct {
 	ReturnList    ReturnList
 	VArgs         *Variable
 }
+
 type ParameterList []*Variable
 type ReturnList []*Variable
 
@@ -66,13 +67,12 @@ func (ft FunctionType) getParameterTypes() []*Type {
 	return ret
 }
 
-func (ft *FunctionType) callArgsHaveSureType(ts []*Type) bool {
+func (ft *FunctionType) callArgsIsSure(ts []*Type) bool {
 	for _, t := range ts {
 		if t == nil {
 			return false
 		}
 	}
-
 	return true
 }
 
@@ -85,16 +85,16 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 		vArgs.NoArgs = true
 		vArgs.Type = ft.VArgs.Type
 	}
-	var msg string
-	if ft.callArgsHaveSureType(callArgsTypes) {
-		msg = fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-		msg += fmt.Sprintf("\twant %s\n", callWant(ft))
+	var haveAndWant string
+	if ft.callArgsIsSure(callArgsTypes) {
+		haveAndWant = fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+		haveAndWant += fmt.Sprintf("\twant %s\n", callWant(ft))
 	}
 	errs := []error{}
 	if len(callArgsTypes) > len(ft.ParameterList) {
 		if ft.VArgs == nil {
 			errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
-			errMsg += msg
+			errMsg += haveAndWant
 			err = fmt.Errorf(errMsg)
 			return
 		}
@@ -107,7 +107,7 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 				if len(callArgsTypes[len(ft.ParameterList):]) > 1 {
 					errMsg := fmt.Sprintf("%s too many argument to call\n",
 						errMsgPrefix(t.Pos))
-					errMsg += msg
+					errMsg += haveAndWant
 					err = fmt.Errorf(errMsg)
 					return
 				}
@@ -134,7 +134,6 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 		*args = (*args)[:k]
 		vArgs.Length = len(callArgsTypes) - k
 	}
-
 	if len(callArgsTypes) < len(ft.ParameterList) {
 		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
@@ -142,7 +141,7 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 			}
 		} else { // no default value
 			errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
-			errMsg += msg
+			errMsg += haveAndWant
 			err = fmt.Errorf(errMsg)
 			return
 		}
@@ -151,9 +150,9 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
 			if false == v.Type.Equal(&errs, callArgsTypes[k]) {
 				errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
-					errMsgPrefix((callArgsTypes)[k].Pos),
+					errMsgPrefix(callArgsTypes[k].Pos),
 					callArgsTypes[k].TypeString(), v.Type.TypeString())
-				errMsg += msg
+				errMsg += haveAndWant
 				err = fmt.Errorf(errMsg)
 				return
 			}

@@ -88,7 +88,7 @@ func (c *Class) checkPhase2() []error {
 	return errs
 }
 
-func (c *Class) methodExistsInInterface(name string) *Class {
+func (c *Class) interfaceMethodExists(name string) *Class {
 	if c.IsInterface() == false {
 		panic("not a interface")
 	}
@@ -96,7 +96,7 @@ func (c *Class) methodExistsInInterface(name string) *Class {
 		return c
 	}
 	for _, v := range c.Interfaces {
-		if v.methodExistsInInterface(name) != nil {
+		if v.interfaceMethodExists(name) != nil {
 			return v
 		}
 	}
@@ -108,7 +108,7 @@ func (c *Class) checkOverrideInterfaceMethod() []error {
 	for name, v := range c.Methods {
 		var exist *Class
 		for _, vv := range c.Interfaces {
-			exist = vv.methodExistsInInterface(name)
+			exist = vv.interfaceMethodExists(name)
 			if exist != nil {
 				break
 			}
