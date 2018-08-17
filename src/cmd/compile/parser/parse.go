@@ -322,7 +322,8 @@ func (parser *Parser) validAfterFinal() error {
 */
 func (parser *Parser) isStatementEnding() bool {
 	return parser.token.Type == lex.TokenSemicolon ||
-		parser.token.Type == lex.TokenLf
+		parser.token.Type == lex.TokenLf ||
+		parser.token.Type == lex.TokenRc
 }
 func (parser *Parser) validStatementEnding() error {
 	if parser.isStatementEnding() {
