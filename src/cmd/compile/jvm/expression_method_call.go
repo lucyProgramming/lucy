@@ -105,7 +105,7 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		}
 		return
 	}
-	d := call.Method.Function.Descriptor
+	d := call.Method.Function.JvmDescriptor
 	if call.Class.LoadFromOutSide == false {
 		d = Descriptor.methodDescriptor(&call.Method.Function.Type)
 	}

@@ -45,7 +45,7 @@ func (c *Closure) InsertVar(v *Variable) {
 		c.Variables = make(map[*Variable]struct{})
 	}
 	c.Variables[v] = struct{}{}
-	v.BeenCaptured = true
+	v.BeenCaptured++
 }
 
 func (c *Closure) InsertFunction(f *Function) {

@@ -5,13 +5,14 @@ type Variable struct {
 	IsGlobal            bool
 	IsFunctionParameter bool
 	IsReturn            bool
-	BeenCaptured        bool
+	BeenCaptured        int
 	Used                bool   // use as right value
 	AccessFlags         uint16 // public private or protected
 	Pos                 *Pos
 	Expression          *Expression
 	Name                string
 	Type                *Type
-	LocalValOffset      uint16 // offset in stack frame
-	JvmDescriptor       string // jvm
+	LocalValOffset      uint16    // offset in stack frame
+	JvmDescriptor       string    // jvm
+	Function            *Function // belong to which  function
 }

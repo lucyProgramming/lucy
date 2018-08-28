@@ -34,7 +34,7 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 	maxStack = 2
 	maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	d := n.Construction.Function.Descriptor
+	d := n.Construction.Function.JvmDescriptor
 	if d == "" {
 		d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
 	}

@@ -56,7 +56,7 @@ func (buildExpression *BuildExpression) buildIdentifier(class *cg.ClassHighLevel
 		maxStack = jvmSlotSize(identifier.Variable.Type)
 		return
 	}
-	if identifier.Variable.BeenCaptured {
+	if identifier.Variable.BeenCaptured > 0 {
 		return buildExpression.buildCapturedIdentifier(class, code, e, context)
 	}
 	maxStack = jvmSlotSize(e.Value)

@@ -78,7 +78,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		m.Function = &ast.Function{}
 		m.LoadFromOutSide = true
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
-		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		m.Function.AccessFlags = v.AccessFlags
 		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
@@ -165,7 +165,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		}
 		m.Function.AccessFlags = v.AccessFlags
 		m.LoadFromOutSide = true
-		m.Function.Descriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&m.Function.Type, c.ConstPool[index].Info)
@@ -319,7 +319,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function := &ast.Function{}
 		function.Name = name
 		function.AccessFlags = m.AccessFlags
-		function.Descriptor = string(c.ConstPool[m.DescriptorIndex].Info)
+		function.JvmDescriptor = string(c.ConstPool[m.DescriptorIndex].Info)
 		function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
 		if err != nil {
 			return err
@@ -353,7 +353,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		function.ClassMethod = &cg.MethodHighLevel{}
 		function.ClassMethod.Name = function.Name
 		function.ClassMethod.Class = mainClassName
-		function.ClassMethod.Descriptor = function.Descriptor
+		function.ClassMethod.Descriptor = function.JvmDescriptor
 		function.IsGlobal = true
 		pack.Block.Functions[name] = function
 	}

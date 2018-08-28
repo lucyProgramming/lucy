@@ -33,11 +33,22 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			return nil,
 				fmt.Errorf("%s '%s' must in class scope", errMsgPrefix(e.Pos), identifier.Name)
 		}
-		t := &Type{}
-		t.Type = VariableTypeClass
-		t.Pos = e.Pos
-		t.Class = block.InheritedAttribute.Class
-		return t, nil
+		result := &Type{}
+		result.Type = VariableTypeClass
+		result.Pos = e.Pos
+		result.Class = block.InheritedAttribute.Class
+		return result, nil
+	case MagicIdentifierFunction:
+		if block.InheritedAttribute.Function.isGlobalVariableDefinition ||
+			block.InheritedAttribute.Function.isPackageInitBlockFunction {
+			return nil,
+				fmt.Errorf("%s '%s' function scope", errMsgPrefix(e.Pos), identifier.Name)
+		}
+		result := &Type{}
+		result.Type = VariableTypeMagicFunction
+		result.Pos = e.Pos
+		result.Function = block.InheritedAttribute.Function
+		return result, nil
 	}
 	fromImport := false
 	d, err := block.searchIdentifier(e.Pos, identifier.Name)

@@ -17,7 +17,8 @@ type Function struct {
 	Name                             string // if name is nil string,means no name function
 	Block                            Block
 	Pos                              *Pos
-	Descriptor                       string
+	JvmDescriptor                    string
+	ExpressionCount                  int
 	ClosureVariableOffSet            uint16 // for closure
 	SourceCodes                      []byte // source code for template function
 	HasDefer                         bool
@@ -30,6 +31,7 @@ type Function struct {
 	TemplateClonedFunction           bool
 	IsClosureFunction                bool
 	isGlobalVariableDefinition       bool
+	isPackageInitBlockFunction       bool
 }
 
 func (f *Function) IsPublic() bool {

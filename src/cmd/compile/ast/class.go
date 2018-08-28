@@ -235,7 +235,7 @@ func (c *Class) resolveFather() error {
 		variableType.Type = VariableTypeName // naming
 		variableType.Name = c.SuperClassName
 		variableType.Pos = c.Pos
-		err := variableType.resolve(&c.Block, false)
+		err := variableType.resolve(&c.Block)
 		if err != nil {
 			c.SuperClassName = ""
 			return err

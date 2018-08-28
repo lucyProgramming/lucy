@@ -10,7 +10,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 	vs := e.Data.(*ast.ExpressionVar)
 	// make offset
 	for _, v := range vs.Variables {
-		if v.BeenCaptured {
+		if v.BeenCaptured > 0 {
 			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 		} else {
@@ -21,7 +21,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 	index := len(vs.Variables) - 1
 	currentStack := uint16(0)
 	for index >= 0 {
-		if vs.Variables[index].BeenCaptured {
+		if vs.Variables[index].BeenCaptured > 0 {
 			v := vs.Variables[index]
 			closure.createClosureVar(class, code, v.Type)
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -39,7 +39,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 			buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
 		} else {
 			buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
-			if vs.Variables[index].BeenCaptured {
+			if vs.Variables[index].BeenCaptured > 0 {
 				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, vs.Variables[index].LocalValOffset)...)
 				state.popStack(2)
 				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))

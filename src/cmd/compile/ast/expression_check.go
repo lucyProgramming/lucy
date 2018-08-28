@@ -8,6 +8,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 	if e == nil {
 		return nil, []error{}
 	}
+	block.InheritedAttribute.Function.ExpressionCount++
 	_, err := e.constantFold()
 	if err != nil {
 		return nil, []error{err}

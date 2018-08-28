@@ -10,28 +10,30 @@ type LoadImport interface {
 }
 
 const (
-	MagicIdentifierFile   = "__FILE__"
-	MagicIdentifierLine   = "__LINE__"
-	MagicIdentifierTime   = "__TIME__"
-	MagicIdentifierClass  = "__CLASS__"
-	MainFunctionName      = "main"
-	THIS                  = "this"
-	NoNameIdentifier      = "_"
-	LucyRootClass         = "lucy/lang/Lucy"
-	JavaRootClass         = "java/lang/Object"
-	DefaultExceptionClass = "java/lang/Exception"
-	JavaThrowableClass    = "java/lang/Throwable"
-	JavaStringClass       = "java/lang/String"
-	SUPER                 = "super"
-	SpecialMethodInit     = "<init>"
-	ClassInitMethod       = "<clinit>"
+	MagicIdentifierFile     = "__FILE__"
+	MagicIdentifierLine     = "__LINE__"
+	MagicIdentifierTime     = "__TIME__"
+	MagicIdentifierClass    = "__CLASS__"
+	MagicIdentifierFunction = "__FUNCTION__"
+	MainFunctionName        = "main"
+	THIS                    = "this"
+	NoNameIdentifier        = "_"
+	LucyRootClass           = "lucy/lang/Lucy"
+	JavaRootClass           = "java/lang/Object"
+	DefaultExceptionClass   = "java/lang/Exception"
+	JavaThrowableClass      = "java/lang/Throwable"
+	JavaStringClass         = "java/lang/String"
+	SUPER                   = "super"
+	SpecialMethodInit       = "<init>"
+	ClassInitMethod         = "<clinit>"
 )
 
 func isMagicIdentifier(name string) bool {
 	return name == MagicIdentifierFile ||
 		name == MagicIdentifierLine ||
 		name == MagicIdentifierTime ||
-		name == MagicIdentifierClass
+		name == MagicIdentifierClass ||
+		name == MagicIdentifierFunction
 }
 
 var (

@@ -33,6 +33,7 @@ const (
 	VariableTypePackage
 	VariableTypeNull
 	VariableTypeSelectGlobal
+	VariableTypeMagicFunction
 )
 
 type Type struct {
@@ -166,7 +167,7 @@ func (typ *Type) Clone() *Type {
 	return ret
 }
 
-func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
+func (typ *Type) resolve(block *Block) error {
 	if typ == nil {
 		return nil
 	}
@@ -191,7 +192,7 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 		return nil
 	}
 	if typ.Type == VariableTypeName { //
-		return typ.resolveName(block, len(isSubPart) > 0)
+		return typ.resolveName(block)
 	}
 	if typ.Type == VariableTypeSelectGlobal {
 		d, exists := PackageBeenCompile.Block.NameExists(typ.Name)
@@ -217,18 +218,18 @@ func (typ *Type) resolve(block *Block, isSubPart ...bool) error {
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
-		return typ.Array.resolve(block, true)
+		return typ.Array.resolve(block)
 	}
 	if typ.Type == VariableTypeMap {
 		var err error
 		if typ.Map.K != nil {
-			err = typ.Map.K.resolve(block, true)
+			err = typ.Map.K.resolve(block)
 			if err != nil {
 				return err
 			}
 		}
 		if typ.Map.V != nil {
-			return typ.Map.V.resolve(block, true)
+			return typ.Map.V.resolve(block)
 		}
 	}
 	if typ.Type == VariableTypeFunction {
@@ -315,7 +316,7 @@ func (typ *Type) makeTypeFrom(d interface{}, loadFromImport bool) error {
 		errMsgPrefix(typ.Pos), typ.Name)
 }
 
-func (typ *Type) resolveName(block *Block, subPart bool) error {
+func (typ *Type) resolveName(block *Block) error {
 	var err error
 	var d interface{}
 	var loadFromImport bool
@@ -366,12 +367,6 @@ func (typ *Type) resolveName(block *Block, subPart bool) error {
 	err = typ.makeTypeFrom(d, loadFromImport)
 	if err != nil {
 		return err
-	}
-	if typ.Type == VariableTypeEnum && subPart {
-		if typ.Enum.Enums[0].Value != 0 {
-			return fmt.Errorf("%s enum named '%s' as subPart of a type,first enum value named by '%s' must have value '0'",
-				errMsgPrefix(typ.Pos), typ.Enum.Name, typ.Enum.Enums[0].Name)
-		}
 	}
 	return nil
 }
@@ -493,6 +488,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += typ.Name // resolve wrong, but typeString is ok to return
 	case VariableTypeTemplate:
 		*ret += typ.Name
+
 	case VariableTypeVoid:
 		*ret += "void"
 	case VariableTypeTypeAlias:
@@ -503,6 +499,8 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "null"
 	case VariableTypeSelectGlobal:
 		*ret += typ.Name
+	case VariableTypeMagicFunction:
+		*ret = MagicIdentifierFunction
 	default:
 		panic(typ.Type)
 	}
