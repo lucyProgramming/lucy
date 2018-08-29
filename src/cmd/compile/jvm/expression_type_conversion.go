@@ -2,19 +2,16 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	{
-		length := len(state.Stacks)
-		defer func() {
-			state.popStack(len(state.Stacks) - length)
-		}()
-	}
+	stackLength := len(state.Stacks)
+	defer func() {
+		state.popStack(len(state.Stacks) - stackLength)
+	}()
 	conversion := e.Data.(*ast.ExpressionTypeConversion)
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
@@ -57,7 +54,55 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		}
 		return
 	}
-	//  []byte("hello world")
+	// int(enum)
+	if conversion.Type.Type == ast.VariableTypeInt &&
+		conversion.Expression.Value.Type == ast.VariableTypeEnum {
+		return
+	}
+	// enum(int)
+	if conversion.Type.Type == ast.VariableTypeEnum &&
+		conversion.Expression.Value.Type == ast.VariableTypeInt {
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		loadInt32(class, code, conversion.Type.Enum.DefaultValue)
+		wrongExit := (&cg.Exit{}).Init(cg.OP_if_icmplt, code)
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		loadInt32(class, code, conversion.Type.Enum.Enums[len(conversion.Type.Enum.Enums)-1].Value)
+		wrongExit2 := (&cg.Exit{}).Init(cg.OP_if_icmpgt, code)
+		okExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		state.pushStack(class, conversion.Expression.Value)
+		defer state.popStack(1)
+		context.MakeStackMap(code, state, code.CodeLength)
+		writeExits([]*cg.Exit{wrongExit, wrongExit2}, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_pop
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_new
+		class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_dup
+		code.CodeLength += 4
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertStringConst("int value not found in enum names",
+			code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if 3 > maxStack {
+			maxStack = 3
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      javaExceptionClass,
+			Method:     specialMethodInit,
+			Descriptor: "(Ljava/lang/String;)V",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_athrow
+		code.CodeLength++
+		context.MakeStackMap(code, state, code.CodeLength)
+		writeExits([]*cg.Exit{okExit}, code.CodeLength)
+		return
+	}
+
+	// []byte("hello world")
 	if conversion.Type.Type == ast.VariableTypeArray && conversion.Type.Array.Type == ast.VariableTypeByte &&
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string

@@ -45,7 +45,16 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 		on.Type == VariableTypeJavaArray && on.Array.Type == VariableTypeByte {
 		return ret
 	}
-
+	// int(enum)
+	if conversion.Type.Type == VariableTypeInt &&
+		on.Type == VariableTypeEnum {
+		return ret
+	}
+	// enum(int)
+	if conversion.Type.Type == VariableTypeEnum &&
+		on.Type == VariableTypeInt {
+		return ret
+	}
 	// []byte("hello world")
 	if conversion.Type.Type == VariableTypeArray && conversion.Type.Array.Type == VariableTypeByte &&
 		on.Type == VariableTypeString {

@@ -1,9 +1,9 @@
 import "java/io";
-//import "lucy/lang";
 
 
 
-public fn readFile(filepath string)->(bs byte[],err error){
+
+public fn readFile(filepath string) -> ( bs byte[],err error){
 	f := new io.File(filepath)	 
 	if f.exists() == false {
 		err = new error("file not exits")

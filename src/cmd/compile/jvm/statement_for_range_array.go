@@ -292,9 +292,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)
 	forState.addTop(blockState)
 	if s.Block.WillNotExecuteToEnd == false {
-		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
+		gotoOffset(code, s.ContinueCodeOffset)
 	}
-
 	//pop index on stack
 	writeExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
 	forState.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})

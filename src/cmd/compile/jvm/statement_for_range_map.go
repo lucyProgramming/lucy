@@ -251,7 +251,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)
 	forState.addTop(blockState)
 	if s.Block.WillNotExecuteToEnd == false {
-		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
+		gotoOffset(code, s.ContinueCodeOffset)
 	}
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	{

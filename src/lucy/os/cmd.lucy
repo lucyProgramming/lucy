@@ -83,7 +83,7 @@ public class Command implements Runnable{
 		}
 
 	}
-	fn mkCmdArray() -> (arr string[]) {
+	private fn mkCmdArray() -> (arr string[]) {
 		arr  = new string[] (1 + this.args.size())  
 		arr[0] = this.cmd
 		for k,v := range this.args {
@@ -96,7 +96,7 @@ public class Command implements Runnable{
 			err = new error("errcode:" + code )
 		}
 	}
-
+	
 	//for io copy only
 	public fn run() {
 		if this.in == null && this.out == null {

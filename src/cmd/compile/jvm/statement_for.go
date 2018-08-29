@@ -165,7 +165,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 	}
 	buildPackage.buildBlock(class, code, s.Block, context, forState)
 	if s.Block.WillNotExecuteToEnd == false {
-		jumpTo(cg.OP_goto, code, s.ContinueCodeOffset)
+		gotoOffset(code, s.ContinueCodeOffset)
 		if s.Condition == nil {
 			context.MakeStackMap(code, forState, code.CodeLength)
 		}

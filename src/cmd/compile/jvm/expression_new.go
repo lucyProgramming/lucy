@@ -89,6 +89,13 @@ func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLev
 	class.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = dimensions
 	code.CodeLength += 4
+	if e.Value.Array.Type == ast.VariableTypeEnum {
+		state.pushStack(class, e.Value)
+		defer state.popStack(1)
+		if t := 3 + setEnumArray(class, code, state, context, e.Value.Array.Enum); t > maxStack {
+			maxStack = t
+		}
+	}
 	return
 }
 func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
@@ -115,6 +122,16 @@ func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, 
 		maxStack = t
 	}
 	newArrayBaseOnType(class, code, e.Value.Array)
+	if e.Value.Array.Type == ast.VariableTypeEnum {
+		state.pushStack(class, &ast.Type{
+			Type:  ast.VariableTypeJavaArray,
+			Array: e.Value.Array,
+		})
+		defer state.popStack(1)
+		if t := 3 + setEnumArray(class, code, state, context, e.Value.Array.Enum); t > maxStack {
+			maxStack = t
+		}
+	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      meta.className,

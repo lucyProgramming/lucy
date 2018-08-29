@@ -26,7 +26,7 @@ fn main(args []string){
 		print(err)
 		return 
 	}
-	(new Test(lucyRoot , lcyPaths ,args[0]) ).test()
+	new Test(lucyRoot , lcyPaths ,args[0]) .test()
 }
 
 

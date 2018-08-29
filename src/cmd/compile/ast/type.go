@@ -110,7 +110,7 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 		e.Data = float64(0)
 	case VariableTypeEnum:
 		e.Type = ExpressionTypeInt
-		e.Data = typ.Enum.Enums[0].Value
+		e.Data = typ.Enum.DefaultValue
 	case VariableTypeFunction:
 		fallthrough
 	case VariableTypeString:

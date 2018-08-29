@@ -318,7 +318,7 @@ func (parser *Parser) validAfterFinal() error {
 }
 
 /*
-	statment ending
+	statement ending
 */
 func (parser *Parser) isStatementEnding() bool {
 	return parser.token.Type == lex.TokenSemicolon ||

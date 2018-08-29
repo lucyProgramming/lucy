@@ -9,10 +9,10 @@ import "java/lang/System"
 public fn getEnv(k string)->
 (
 	v string = System.getenv(k)
-)
-{
+){
 	
 }
+
 
 
 

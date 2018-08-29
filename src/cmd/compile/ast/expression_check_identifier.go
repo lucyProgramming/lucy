@@ -158,7 +158,25 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result := &Type{}
 		result.Pos = e.Pos
 		result.Type = VariableTypeTypeAlias
-		result.AliasType = typ
+		result.AliasType = typ.Clone()
+		result.AliasType.Pos = e.Pos
+		return result, nil
+	case *Enum:
+		en := d.(*Enum)
+		if fromImport == false && en.IsBuildIn == false { // try from import
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, en.Pos)
+			if should {
+				return e.checkIdentifierThroughImports(i)
+			}
+		}
+		result := &Type{}
+		result.Pos = e.Pos
+		result.Type = VariableTypeTypeAlias
+		result.AliasType = &Type{
+			Type: VariableTypeEnum,
+			Enum: en,
+			Pos:  e.Pos,
+		}
 		return result, nil
 	case *Package:
 		// must load from import

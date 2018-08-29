@@ -16,12 +16,12 @@ func writeExits(es []*cg.Exit, to int) {
 	}
 }
 
-func jumpTo(op byte, code *cg.AttributeCode, to int) {
-	if to < 0 {
+func gotoOffset(code *cg.AttributeCode, offset int) {
+	if offset < 0 {
 		panic("to is negative")
 	}
-	exit := (&cg.Exit{}).Init(op, code)
-	writeExits([]*cg.Exit{exit}, to)
+	exit := (&cg.Exit{}).Init(cg.OP_goto, code)
+	writeExits([]*cg.Exit{exit}, offset)
 }
 
 func copyOPs(code *cg.AttributeCode, op ...byte) {
@@ -255,4 +255,53 @@ func functionReturnJvmSize(ft *ast.FunctionType) uint16 {
 	} else {
 		return jvmSlotSize(ft.ReturnList[0].Type)
 	}
+}
+
+func setEnumArray(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState, context *Context, e *ast.Enum) (maxStack uint16) {
+	if e.DefaultValue == 0 {
+		return
+	}
+	type autoVar = struct {
+		k      uint16
+		length uint16
+	}
+	var a autoVar
+	a.k = code.MaxLocals
+	a.length = code.MaxLocals + 1
+	code.MaxLocals += 2
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.CodeLength++
+	code.Codes[code.CodeLength] = cg.OP_arraylength
+	code.CodeLength++
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length)...)
+	code.Codes[code.CodeLength] = cg.OP_iconst_0
+	code.CodeLength++
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.k)...)
+	state.appendLocals(class, &ast.Type{
+		Type: ast.VariableTypeInt,
+	})
+	state.appendLocals(class, &ast.Type{
+		Type: ast.VariableTypeInt,
+	})
+	context.MakeStackMap(code, state, code.CodeLength)
+	offset := code.CodeLength
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k)...)
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
+	exit := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.CodeLength++
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k)...)
+	loadInt32(class, code, e.DefaultValue)
+	code.Codes[code.CodeLength] = cg.OP_iastore
+	code.CodeLength++
+	maxStack = 3
+	code.Codes[code.CodeLength] = cg.OP_iinc
+	code.Codes[code.CodeLength+1] = byte(a.k)
+	code.Codes[code.CodeLength+2] = 1
+	code.CodeLength += 3
+	gotoOffset(code, offset)
+	writeExits([]*cg.Exit{exit}, code.CodeLength)
+	context.MakeStackMap(code, state, code.CodeLength)
+	return
+
 }

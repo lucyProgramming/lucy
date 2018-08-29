@@ -44,7 +44,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		if len(s.StatementContinue.Defers) > 0 {
 			buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		}
-		jumpTo(cg.OP_goto, code, s.StatementContinue.StatementFor.ContinueCodeOffset)
+		gotoOffset(code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.StatementTypeBreak:
 		if len(s.StatementBreak.Defers) > 0 {
 			buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
@@ -75,7 +75,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			buildPackage.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
 		}
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
-			jumpTo(cg.OP_goto, code, s.StatementGoTo.StatementLabel.CodeOffset)
+			gotoOffset(code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {
 			exit := (&cg.Exit{}).Init(cg.OP_goto, code)
 			s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, exit)

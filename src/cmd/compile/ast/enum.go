@@ -6,13 +6,14 @@ import (
 )
 
 type Enum struct {
-	IsBuildIn   bool
-	AccessFlags uint16
-	Name        string
-	Pos         *Pos
-	Enums       []*EnumName
-	Init        *Expression //should be a int expression
-	Used        bool
+	IsBuildIn    bool
+	AccessFlags  uint16
+	Name         string
+	Pos          *Pos
+	Enums        []*EnumName
+	Init         *Expression //should be a int expression
+	Used         bool
+	DefaultValue int32
 }
 
 func (e *Enum) IsPublic() bool {
@@ -46,6 +47,7 @@ func (e *Enum) check() (err error) {
 			initV = t
 		}
 	}
+	e.DefaultValue = initV
 	for k, v := range e.Enums {
 		v.Value = int32(k) + initV
 	}
