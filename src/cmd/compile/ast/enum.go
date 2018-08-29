@@ -30,6 +30,7 @@ type EnumName struct {
 func (e *Enum) check() (err error) {
 	if e.Init == nil {
 		e.Init = &Expression{}
+		e.Init.Description = "compileAuto"
 		e.Init.Type = ExpressionTypeInt
 		e.Init.Data = int32(0)
 		e.Init.Pos = e.Pos

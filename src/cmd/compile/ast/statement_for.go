@@ -203,7 +203,7 @@ func (s *StatementFor) check(block *Block) []error {
 		s.Init.IsStatementExpression = true
 		if s.Init.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(s.Init.Pos), s.Init.OpName()))
+				errMsgPrefix(s.Init.Pos), s.Init.Description))
 		}
 		_, es := s.Init.check(s.Block)
 		if esNotEmpty(es) {
@@ -213,7 +213,7 @@ func (s *StatementFor) check(block *Block) []error {
 	if s.Condition != nil {
 		if s.Condition.canBeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
+				errMsgPrefix(s.Condition.Pos), s.Condition.Description))
 		}
 		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
 		if esNotEmpty(es) {
@@ -228,7 +228,7 @@ func (s *StatementFor) check(block *Block) []error {
 		s.Increment.IsStatementExpression = true
 		if s.Increment.canBeUsedAsStatement() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(s.Increment.Pos), s.Increment.OpName()))
+				errMsgPrefix(s.Increment.Pos), s.Increment.Description))
 		}
 		_, es := s.Increment.check(s.Block)
 		if esNotEmpty(es) {

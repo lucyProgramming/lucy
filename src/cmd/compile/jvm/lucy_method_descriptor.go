@@ -37,7 +37,7 @@ func (signature *LucyMethodSignature) Encode(ft *ast.FunctionType) (descriptor s
 		descriptor += LucyFieldSignatureParser.Encode(ft.VArgs.Type)
 	}
 	descriptor += ")"
-	if ft.NoReturnValue() {
+	if ft.VoidReturn() {
 		descriptor += "V"
 	} else {
 		descriptor += "("

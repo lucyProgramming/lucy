@@ -295,7 +295,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 	case ExpressionTypeList:
 		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 			"this may be cause be compiler error,please contact the author",
-			errMsgPrefix(e.Pos), e.OpName()))
+			errMsgPrefix(e.Pos), e.Description))
 	case ExpressionTypeGlobal:
 		returnValueTypes = make([]*Type, 1)
 		returnValueTypes[0] = &Type{
@@ -325,7 +325,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 		t.IsVArgs = true
 	default:
-		panic(fmt.Sprintf("unhandled type:%v", e.OpName()))
+		panic(fmt.Sprintf("unhandled type:%v", e.Description))
 	}
 	return returnValueTypes, errs
 }
@@ -350,25 +350,25 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 				return nil
 			}
 			var err error
-			call.VArgs, err = tf.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, tf)
+			call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, tf)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			return tf.Type.getReturnTypes(e.Pos)
+			return tf.Type.mkReturnTypes(e.Pos)
 		} else {
 			var err error
-			call.VArgs, err = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			return f.Type.getReturnTypes(e.Pos)
+			return f.Type.mkReturnTypes(e.Pos)
 		}
 	}
 	length := len(*errs)
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
-		return f.Type.getReturnTypes(e.Pos)
+		return f.Type.mkReturnTypes(e.Pos)
 	}
 	return nil //
 }

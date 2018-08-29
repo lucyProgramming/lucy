@@ -31,6 +31,7 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 		return left, nil
 	}
 	newExpression := &ast.Expression{}
+	newExpression.Description = "question"
 	newExpression.Pos = expressionParser.parser.mkPos()
 	newExpression.Type = ast.ExpressionTypeQuestion
 	question := &ast.ExpressionQuestion{}

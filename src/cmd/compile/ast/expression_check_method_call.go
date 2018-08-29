@@ -43,12 +43,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				methodCall.PackageFunction = f
 				callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
 				var err error
-				methodCall.VArgs, err = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+				methodCall.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 				if err != nil {
 					*errs = append(*errs, err)
 				}
 
-				return f.Type.getReturnTypes(e.Pos)
+				return f.Type.mkReturnTypes(e.Pos)
 			}
 		case *Variable:
 			v := d.(*Variable)
@@ -67,11 +67,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					errMsgPrefix(call.ParameterTypes[0].Pos), call.Name))
 			}
 			callArgsTypes := checkExpressions(block, call.Args, errs, true)
-			vArgs, err := v.Type.FunctionType.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+			vArgs, err := v.Type.FunctionType.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
 			if err != nil {
 				*errs = append(*errs, es...)
 			}
-			ret := v.Type.FunctionType.getReturnTypes(e.Pos)
+			ret := v.Type.FunctionType.mkReturnTypes(e.Pos)
 			call.PackageGlobalVariableFunction = v
 			call.VArgs = vArgs
 			return ret
@@ -275,7 +275,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Function.Type.getReturnTypes(e.Pos)
+			return ms[0].Function.Type.mkReturnTypes(e.Pos)
 		}
 		if len(ms) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
@@ -367,7 +367,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 					errMsgPrefix(e.Pos), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Function.Type.getReturnTypes(e.Pos)
+			return ms[0].Function.Type.mkReturnTypes(e.Pos)
 		}
 		if len(ms) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
@@ -416,7 +416,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 		}
 		call.FieldMethodHandler = fieldMethodHandler
-		return fieldMethodHandler.Type.FunctionType.getReturnTypes(e.Pos)
+		return fieldMethodHandler.Type.FunctionType.mkReturnTypes(e.Pos)
 	}
 	if matched {
 		m := ms[0]
@@ -444,7 +444,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 		}
 		call.Method = m
-		return m.Function.Type.getReturnTypes(e.Pos)
+		return m.Function.Type.mkReturnTypes(e.Pos)
 	}
 	if len(ms) == 0 {
 		*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))

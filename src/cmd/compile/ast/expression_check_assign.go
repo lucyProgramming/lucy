@@ -12,6 +12,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	} else {
 		lefts[0] = bin.Left
 		bin.Left = &Expression{}
+		bin.Left.Description = "compilerAuto"
 		bin.Left.Pos = bin.Left.Pos
 		bin.Left.Type = ExpressionTypeList
 		bin.Left.Data = lefts // rewrite to list anyway

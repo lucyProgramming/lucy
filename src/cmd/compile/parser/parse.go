@@ -122,10 +122,11 @@ func (parser *Parser) Parse() []error {
 			}
 			isPublic := isPublic()
 			e := &ast.Expression{
-				Type:     ast.ExpressionTypeVar,
-				Data:     vs,
-				Pos:      pos,
-				IsPublic: isPublic,
+				Type:        ast.ExpressionTypeVar,
+				Data:        vs,
+				Pos:         pos,
+				IsPublic:    isPublic,
+				Description: "var",
 			}
 			*parser.tops = append(*parser.tops, &ast.Top{
 				Data: e,
@@ -147,7 +148,7 @@ func (parser *Parser) Parse() []error {
 				})
 			} else {
 				parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
-					parser.errorMsgPrefix(e.Pos), e.OpName()))
+					parser.errorMsgPrefix(e.Pos), e.Description))
 			}
 			resetProperty()
 		case lex.TokenEnum:
@@ -267,7 +268,7 @@ func (parser *Parser) Parse() []error {
 					})
 				} else {
 					parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
-						parser.errorMsgPrefix(e.Pos), e.OpName()))
+						parser.errorMsgPrefix(e.Pos), e.Description))
 				}
 				continue
 			}

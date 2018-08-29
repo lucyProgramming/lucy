@@ -48,7 +48,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	buildPackage.mkParametersOffset(class, code, f, state)
 	maxStack = buildPackage.mkCapturedParameters(class, code, f, state)
-	if f.Type.NoReturnValue() == false {
+	if f.Type.VoidReturn() == false {
 		for _, v := range f.Type.ReturnList {
 			currentStack := uint16(0)
 			if v.BeenCaptured > 0 { //create closure object
@@ -169,7 +169,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 			method.AttributeMethodParameters.Parameters = append(method.AttributeMethodParameters.Parameters, p)
 		}
 	}
-	if f.NoReturnValue() == false {
+	if f.VoidReturn() == false {
 		method.AttributeLucyReturnListNames = &cg.AttributeMethodParameters{}
 		for _, v := range f.Type.ReturnList {
 			p := &cg.MethodParameter{}

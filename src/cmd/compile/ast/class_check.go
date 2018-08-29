@@ -308,12 +308,14 @@ func (c *Class) checkFields() []error {
 			}
 			bin := &ExpressionBinary{}
 			bin.Right = &Expression{
-				Type: ExpressionTypeList,
-				Data: []*Expression{v.Expression},
+				Type:        ExpressionTypeList,
+				Description: "list",
+				Data:        []*Expression{v.Expression},
 			}
 			{
 				selection := &ExpressionSelection{}
 				selection.Expression = &Expression{}
+				selection.Expression.Description = "selection"
 				selection.Expression.Value = &Type{
 					Type:  VariableTypeClass,
 					Class: c,
@@ -321,8 +323,9 @@ func (c *Class) checkFields() []error {
 				selection.Name = v.Name
 				selection.Field = v
 				left := &Expression{
-					Type: ExpressionTypeSelection,
-					Data: selection,
+					Type:        ExpressionTypeSelection,
+					Data:        selection,
+					Description: "selection",
 				}
 				left.Value = v.Type
 				bin.Left = &Expression{
@@ -334,6 +337,7 @@ func (c *Class) checkFields() []error {
 				Type: ExpressionTypeAssign,
 				Data: bin,
 				IsStatementExpression: true,
+				Description:           "assign",
 			}
 			staticFieldAssignStatements = append(staticFieldAssignStatements, &Statement{
 				Type:                      StatementTypeExpression,
@@ -400,7 +404,7 @@ func (c *Class) checkMethods() []error {
 						Class: c,
 					}
 				}
-				if isConstruction && method.Function.NoReturnValue() == false {
+				if isConstruction && method.Function.VoidReturn() == false {
 					errs = append(errs, fmt.Errorf("%s construction method expect no return values",
 						errMsgPrefix(method.Function.Type.ParameterList[0].Pos)))
 				}

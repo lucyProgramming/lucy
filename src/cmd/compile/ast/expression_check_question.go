@@ -16,7 +16,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		}
 		if question.Selection.canBeUsedAsCondition() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as condition",
-				errMsgPrefix(question.Selection.Pos), question.Selection.OpName()))
+				errMsgPrefix(question.Selection.Pos), question.Selection.Description))
 		}
 	}
 	True, es := question.True.checkSingleValueContextExpression(block)

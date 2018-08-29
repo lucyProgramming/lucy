@@ -131,7 +131,7 @@ func (c *Class) accessInterfaceMethod(pos *Pos, errs *[]error, name string, call
 			if fromSub && m.ableAccessFromSubClass() == false {
 				continue
 			}
-			call.VArgs, err = m.Function.Type.fitCallArgs(pos, &call.Args, callArgTypes, nil)
+			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args, callArgTypes, nil)
 			if err == nil {
 				return []*ClassMethod{m}, true, nil
 			} else {
@@ -177,7 +177,7 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, name string, call *Express
 		if fromSub && f.ableAccessFromSubClass() == false {
 			//cannot access this field
 		} else {
-			call.VArgs, err = c.Fields[name].Type.FunctionType.fitCallArgs(pos, &call.Args,
+			call.VArgs, err = c.Fields[name].Type.FunctionType.fitArgs(pos, &call.Args,
 				callArgTypes, nil)
 			if err == nil {
 				*fieldMethodHandler = f
@@ -190,7 +190,7 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, name string, call *Express
 				return nil, false, fmt.Errorf("%s method '%s' not found",
 					errMsgPrefix(pos), name)
 			}
-			call.VArgs, err = m.Function.Type.fitCallArgs(pos, &call.Args,
+			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args,
 				callArgTypes, m.Function)
 			if err == nil {
 				return []*ClassMethod{m}, true, nil
@@ -218,7 +218,7 @@ func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, name string, call *E
 				//cannot access from sub
 				continue
 			}
-			call.VArgs, err = m.Function.Type.fitCallArgs(pos, &call.Args, callArgTypes, m.Function)
+			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args, callArgTypes, m.Function)
 			if err == nil {
 				return []*ClassMethod{m}, true, nil
 			}

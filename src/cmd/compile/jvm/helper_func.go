@@ -229,7 +229,7 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 */
 func popCallResult(code *cg.AttributeCode, e *ast.Expression, ft *ast.FunctionType) (stackSize uint16) {
 	stackSize = functionReturnJvmSize(ft)
-	if ft.NoReturnValue() == false && e.IsStatementExpression {
+	if ft.VoidReturn() == false && e.IsStatementExpression {
 		if len(ft.ReturnList) == 1 {
 			if jvmSlotSize(ft.ReturnList[0].Type) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
@@ -247,7 +247,7 @@ func popCallResult(code *cg.AttributeCode, e *ast.Expression, ft *ast.FunctionTy
 }
 
 func functionReturnJvmSize(ft *ast.FunctionType) uint16 {
-	if ft.NoReturnValue() {
+	if ft.VoidReturn() {
 		return 0
 	}
 	if len(ft.ReturnList) > 1 {

@@ -56,8 +56,8 @@ type AutoVariableForReturnBecauseOfDefer struct {
 	Offset uint16
 }
 
-func (f *Function) NoReturnValue() bool {
-	return f.Type.NoReturnValue()
+func (f *Function) VoidReturn() bool {
+	return f.Type.VoidReturn()
 }
 
 func (f *Function) readableMsg(name ...string) string {
@@ -71,7 +71,7 @@ func (f *Function) readableMsg(name ...string) string {
 		s += v.Name + " "
 		s += v.Type.TypeString()
 		if v.Expression != nil {
-			s += " = " + v.Expression.OpName()
+			s += " = " + v.Expression.Description
 		}
 		if k != len(f.Type.ParameterList)-1 {
 			s += ","
@@ -85,7 +85,7 @@ func (f *Function) readableMsg(name ...string) string {
 		s += f.Type.VArgs.Type.TypeString()
 	}
 	s += ")"
-	if len(f.Type.ReturnList) > 0 && f.NoReturnValue() == false {
+	if len(f.Type.ReturnList) > 0 && f.VoidReturn() == false {
 		s += "->( "
 		for k, v := range f.Type.ReturnList {
 			s += v.Name + " "
@@ -237,7 +237,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			}
 		}
 	}
-	if f.Type.NoReturnValue() == false {
+	if f.Type.VoidReturn() == false {
 		//handler return
 		for _, v := range f.Type.ReturnList {
 			v.IsReturn = true

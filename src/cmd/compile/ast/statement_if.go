@@ -26,7 +26,7 @@ func (s *StatementIf) check(father *Block) []error {
 		}
 		if v.canBeUsedAsStatement() == false {
 			err := fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(v.Pos), v.OpName())
+				errMsgPrefix(v.Pos), v.Description)
 			errs = append(errs, err)
 		}
 	}
@@ -41,7 +41,7 @@ func (s *StatementIf) check(father *Block) []error {
 		}
 		if s.Condition.canBeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), s.Condition.OpName()))
+				errMsgPrefix(s.Condition.Pos), s.Condition.Description))
 		}
 	}
 	s.Block.inherit(&s.ConditionBlock)
@@ -50,7 +50,7 @@ func (s *StatementIf) check(father *Block) []error {
 		v.Block.inherit(&s.ConditionBlock)
 		if v.Condition.canBeUsedAsCondition() == false {
 			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), v.Condition.OpName()))
+				errMsgPrefix(s.Condition.Pos), v.Condition.Description))
 		}
 		conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
 		if esNotEmpty(es) {

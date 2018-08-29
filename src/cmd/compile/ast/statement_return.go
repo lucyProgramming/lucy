@@ -34,7 +34,7 @@ func (s *StatementReturn) check(b *Block) []error {
 		errs = append(errs, fmt.Errorf("%s too many arguments to return", errMsgPrefix(pos)))
 	}
 	convertExpressionsToNeeds(s.Expressions,
-		b.InheritedAttribute.Function.Type.getReturnTypes(s.Expressions[0].Pos), returnValueTypes)
+		b.InheritedAttribute.Function.Type.mkReturnTypes(s.Expressions[0].Pos), returnValueTypes)
 	for k, v := range rs {
 		if k < len(returnValueTypes) && returnValueTypes[k] != nil {
 			if false == v.Type.Equal(&errs, returnValueTypes[k]) {

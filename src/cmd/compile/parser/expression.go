@@ -96,9 +96,11 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	}
 	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
+		name := expressionParser.parser.token.Description
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
 		result.Type = expressionType
+		result.Description = name
 		bin := &ast.ExpressionBinary{}
 		result.Data = bin
 		bin.Left = left

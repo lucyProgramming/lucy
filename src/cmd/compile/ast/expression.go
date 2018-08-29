@@ -1,9 +1,5 @@
 package ast
 
-import (
-	"fmt"
-)
-
 type ExpressionTypeKind int
 
 const (
@@ -76,149 +72,6 @@ const (
 	ExpressionTypeVArgs                                     // a ...
 )
 
-func (e *Expression) OpName() string {
-	switch e.Type {
-	case ExpressionTypeBool:
-		return fmt.Sprintf("%v", e.Data.(bool))
-	case ExpressionTypeByte:
-		return fmt.Sprintf("%vb", e.Data.(byte))
-	case ExpressionTypeShort:
-		return fmt.Sprintf("%vs", e.Data.(int32))
-	case ExpressionTypeInt:
-		return fmt.Sprintf("%v", e.Data.(int32))
-	case ExpressionTypeLong:
-		return fmt.Sprintf("%vL", e.Data.(int64))
-	case ExpressionTypeFloat:
-		return fmt.Sprintf("%vf", e.Data.(float32))
-	case ExpressionTypeDouble:
-		return fmt.Sprintf("%vd", e.Data.(float64))
-	case ExpressionTypeString:
-		return fmt.Sprintf("\"%v\"", e.Data)
-	case ExpressionTypeArray:
-		return "array_literal"
-	case ExpressionTypeLogicalOr:
-		return "||"
-	case ExpressionTypeLogicalAnd:
-		return "&&"
-	case ExpressionTypeOr:
-		return "|"
-	case ExpressionTypeAnd:
-		return "&"
-	case ExpressionTypeXor:
-		return "^"
-	case ExpressionTypeLsh:
-		return "<<"
-	case ExpressionTypeRsh:
-		return ">>"
-	case ExpressionTypeAssign:
-		return "="
-	case ExpressionTypeVarAssign:
-		return ":="
-	case ExpressionTypePlusAssign:
-		return "+="
-	case ExpressionTypeMinusAssign:
-		return "-="
-	case ExpressionTypeMulAssign:
-		return "*="
-	case ExpressionTypeDivAssign:
-		return "/="
-	case ExpressionTypeModAssign:
-		return "%="
-	case ExpressionTypeAndAssign:
-		return "&="
-	case ExpressionTypeOrAssign:
-		return "|="
-	case ExpressionTypeLshAssign:
-		return "<<="
-	case ExpressionTypeRshAssign:
-		return ">>="
-	case ExpressionTypeXorAssign:
-		return "^="
-	case ExpressionTypeEq:
-		return "=="
-	case ExpressionTypeNe:
-		return "!="
-	case ExpressionTypeGe:
-		return ">="
-	case ExpressionTypeGt:
-		return ">"
-	case ExpressionTypeLe:
-		return "<="
-	case ExpressionTypeLt:
-		return "<"
-	case ExpressionTypeAdd:
-		return "+"
-	case ExpressionTypeSub:
-		return "-"
-	case ExpressionTypeMul:
-		return "*"
-	case ExpressionTypeDiv:
-		return "/"
-	case ExpressionTypeMod:
-		return "%"
-	case ExpressionTypeIndex: // a["b"]
-		t := e.Data.(*ExpressionIndex)
-		return fmt.Sprintf("%s[%s]", t.Expression.OpName(), t.Index.OpName())
-	case ExpressionTypeSelection: //a.b
-		t := e.Data.(*ExpressionSelection)
-		return fmt.Sprintf("%s.%s", t.Expression.OpName(), t.Name)
-	case ExpressionTypeMethodCall:
-		t := e.Data.(*ExpressionMethodCall)
-		return fmt.Sprintf("%s.%s()", t.Expression.OpName(), t.Name)
-	case ExpressionTypeFunctionCall:
-		t := e.Data.(*ExpressionFunctionCall)
-		return fmt.Sprintf("function_call(%s)", t.Expression.OpName())
-	case ExpressionTypeIncrement:
-		return "++"
-	case ExpressionTypeDecrement:
-		return "--"
-	case ExpressionTypePrefixIncrement:
-		return "++"
-	case ExpressionTypePrefixDecrement:
-		return "--"
-	case ExpressionTypeNegative:
-		return "negative(-)"
-	case ExpressionTypeQuestion:
-		return "question(?:)"
-	case ExpressionTypeNot:
-		return "not(!)"
-	case ExpressionTypeBitwiseNot:
-		return "~"
-	case ExpressionTypeIdentifier:
-		return e.Data.(*ExpressionIdentifier).Name
-	case ExpressionTypeNull:
-		return "null"
-	case ExpressionTypeNew:
-		return "new"
-	case ExpressionTypeList:
-		return "expression_list"
-	case ExpressionTypeFunctionLiteral:
-		return "function_literal"
-	case ExpressionTypeConst:
-		return "const"
-	case ExpressionTypeVar:
-		return "var"
-	case ExpressionTypeRange:
-		return "range"
-	case ExpressionTypeSlice:
-		return "slice"
-	case ExpressionTypeMap:
-		return "map_literal"
-	case ExpressionTypeCheckCast:
-		return "conversion of type"
-	case ExpressionTypeTypeAssert:
-		return "type assert"
-	case ExpressionTypeGlobal:
-		return "global"
-	case ExpressionTypeParenthesis:
-		return "(" + e.Data.(*Expression).OpName() + ")"
-	case ExpressionTypeVArgs:
-		return fmt.Sprintf("%s...", e.Data.(*Expression).OpName())
-	default:
-		return fmt.Sprintf("op[%d](missing handle)", e.Type)
-	}
-}
-
 type Expression struct {
 	Type ExpressionTypeKind
 	/*
@@ -232,6 +85,7 @@ type Expression struct {
 	Pos                   *Pos
 	Data                  interface{}
 	IsStatementExpression bool
+	Description           string
 }
 
 func (e *Expression) IsRelation() bool {
@@ -296,6 +150,7 @@ func (e *Expression) IsPointerCompare() bool {
 func (e *Expression) ConvertTo(to *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
+	c.Expression.Description = "compilerAuto"
 	*c.Expression = *e // copy
 	c.Type = to
 	e.Value = to

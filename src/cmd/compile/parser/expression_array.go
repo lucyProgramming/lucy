@@ -27,9 +27,10 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			expressionParser.Next(lfIsToken) // skip ]
 		}
 		return &ast.Expression{
-			Type: ast.ExpressionTypeArray,
-			Data: arr,
-			Pos:  pos,
+			Type:        ast.ExpressionTypeArray,
+			Data:        arr,
+			Pos:         pos,
+			Description: "arrayLiteral",
 		}, err
 	}
 	expressionParser.Next(lfIsToken) // skip ]
@@ -53,6 +54,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		}
 		expressionParser.Next(lfIsToken) // skip )
 		ret := &ast.Expression{}
+		ret.Description = "checkCast"
 		ret.Pos = pos
 		ret.Type = ast.ExpressionTypeCheckCast
 		data := &ast.ExpressionTypeConversion{}
@@ -77,9 +79,10 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	*/
 	arr.Expressions, err = expressionParser.parseArrayValues()
 	return &ast.Expression{
-		Type: ast.ExpressionTypeArray,
-		Data: arr,
-		Pos:  pos,
+		Type:        ast.ExpressionTypeArray,
+		Data:        arr,
+		Pos:         pos,
+		Description: "arrayLiteral",
 	}, err
 
 }
@@ -100,6 +103,7 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 				return es, err
 			}
 			arrayExpression := &ast.Expression{Type: ast.ExpressionTypeArray}
+			arrayExpression.Description = "arrayLiteral"
 			data := ast.ExpressionArray{}
 			data.Expressions = ees
 			arrayExpression.Data = data

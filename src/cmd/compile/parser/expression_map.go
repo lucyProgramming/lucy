@@ -23,8 +23,9 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 	}
 	expressionParser.Next(lfNotToken) // skip {
 	ret := &ast.Expression{
-		Type: ast.ExpressionTypeMap,
-		Pos:  pos,
+		Type:        ast.ExpressionTypeMap,
+		Pos:         pos,
+		Description: "mapLiteral",
 	}
 	m := &ast.ExpressionMap{}
 	m.Type = typ

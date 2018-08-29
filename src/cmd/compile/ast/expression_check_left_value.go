@@ -137,7 +137,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 	default:
 		*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
 			errMsgPrefix(e.Pos),
-			e.OpName()))
+			e.Description))
 		return nil
 	}
 	return nil

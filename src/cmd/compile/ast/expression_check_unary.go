@@ -60,7 +60,7 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type
 	}
 	if !increment.IsNumber() {
 		*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s'",
-			errMsgPrefix(on.Pos), on.OpName(), increment.TypeString()))
+			errMsgPrefix(on.Pos), on.Description, increment.TypeString()))
 	}
 	result := increment.Clone()
 	result.Pos = e.Pos

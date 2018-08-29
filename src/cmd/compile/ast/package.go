@@ -110,7 +110,7 @@ func (p *Package) TypeCheck() []error {
 					errMain()
 				}
 			}
-			if v.Type.NoReturnValue() == false {
+			if v.Type.VoidReturn() == false {
 				errMain()
 			}
 		}

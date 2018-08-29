@@ -18,7 +18,7 @@ func (description *Description) methodDescriptor(functionType *ast.FunctionType)
 		s += description.typeDescriptor(functionType.VArgs.Type)
 	}
 	s += ")"
-	if functionType.NoReturnValue() {
+	if functionType.VoidReturn() {
 		s += "V"
 	} else if len(functionType.ReturnList) == 1 {
 		s += description.typeDescriptor(functionType.ReturnList[0].Type)

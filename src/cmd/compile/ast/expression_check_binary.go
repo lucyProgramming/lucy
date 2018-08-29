@@ -153,7 +153,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if right.IsPointer() == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					errMsgPrefix(e.Pos),
-					e.OpName(),
+					e.Description,
 					right.TypeString()))
 			}
 		case VariableTypeMap:
@@ -166,14 +166,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if left.Equal(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 					errMsgPrefix(e.Pos),
-					e.OpName(),
+					e.Description,
 					left.TypeString(),
 					right.TypeString()))
 			}
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 				errMsgPrefix(e.Pos),
-				e.OpName(),
+				e.Description,
 				left.TypeString(),
 				right.TypeString()))
 		}

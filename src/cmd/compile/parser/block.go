@@ -70,9 +70,10 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			statement := &ast.Statement{
 				Type: ast.StatementTypeExpression,
 				Expression: &ast.Expression{
-					Type: ast.ExpressionTypeVar,
-					Data: vs,
-					Pos:  pos,
+					Type:        ast.ExpressionTypeVar,
+					Data:        vs,
+					Pos:         pos,
+					Description: "var",
 				},
 				Pos: pos,
 			}
@@ -140,9 +141,10 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			statement.Type = ast.StatementTypeExpression
 			statement.Pos = pos
 			statement.Expression = &ast.Expression{
-				Type: ast.ExpressionTypeConst,
-				Data: cs,
-				Pos:  pos,
+				Type:        ast.ExpressionTypeConst,
+				Data:        cs,
+				Pos:         pos,
+				Description: "const",
 			}
 			block.Statements = append(block.Statements, statement)
 			blockParser.parser.validStatementEnding()

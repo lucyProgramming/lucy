@@ -54,7 +54,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	if on.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
 			errMsgPrefix(e.Pos),
-			call.Expression.OpName(), on.TypeString()))
+			call.Expression.Description, on.TypeString()))
 		return nil
 	}
 	if call.Expression.Type == ExpressionTypeFunctionLiteral {
@@ -85,9 +85,9 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
-	ret := ft.getReturnTypes(e.Pos)
+	ret := ft.mkReturnTypes(e.Pos)
 	var err error
-	call.VArgs, err = ft.fitCallArgs(e.Pos, &call.Args, callArgsTypes, nil)
+	call.VArgs, err = ft.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -116,9 +116,9 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if f.TemplateFunction != nil {
 			f = tf
 		}
-		ret = f.Type.getReturnTypes(e.Pos)
+		ret = f.Type.mkReturnTypes(e.Pos)
 		var err error
-		call.VArgs, err = f.Type.fitCallArgs(e.Pos, &call.Args, callArgsTypes, f)
+		call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 		if err != nil {
 			*errs = append(*errs, err)
 		}

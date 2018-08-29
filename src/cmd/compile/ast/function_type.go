@@ -9,9 +9,24 @@ type FunctionType struct {
 	ReturnList    ReturnList
 	VArgs         *Variable
 }
-
 type ParameterList []*Variable
 type ReturnList []*Variable
+
+func (ft *FunctionType) searchName(name string) *Variable {
+	for _, v := range ft.ParameterList {
+		if name == v.Name {
+			return v
+		}
+	}
+	if ft.VoidReturn() == false {
+		for _, v := range ft.ReturnList {
+			if name == v.Name {
+				return v
+			}
+		}
+	}
+	return nil
+}
 
 func (ft *FunctionType) equal(compare *FunctionType) bool {
 	if len(ft.ParameterList) != len(compare.ParameterList) ||
@@ -39,12 +54,12 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 	return true
 }
 
-func (ft *FunctionType) NoReturnValue() bool {
+func (ft *FunctionType) VoidReturn() bool {
 	return len(ft.ReturnList) == 0 ||
 		ft.ReturnList[0].Type.Type == VariableTypeVoid
 }
 
-func (ft FunctionType) getReturnTypes(pos *Pos) []*Type {
+func (ft FunctionType) mkReturnTypes(pos *Pos) []*Type {
 	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
 		t := &Type{}
 		t.Type = VariableTypeVoid // means no return ;
@@ -67,7 +82,7 @@ func (ft FunctionType) getParameterTypes() []*Type {
 	return ret
 }
 
-func (ft *FunctionType) callArgsIsSure(ts []*Type) bool {
+func (ft *FunctionType) callArgsHasNoNil(ts []*Type) bool {
 	for _, t := range ts {
 		if t == nil {
 			return false
@@ -76,7 +91,7 @@ func (ft *FunctionType) callArgsIsSure(ts []*Type) bool {
 	return true
 }
 
-func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
+func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 	callArgsTypes []*Type, f *Function) (vArgs *CallVArgs, err error) {
 	//trying to convert literal
 	convertExpressionsToNeeds(*args, ft.getParameterTypes(), callArgsTypes)
@@ -86,7 +101,7 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 		vArgs.Type = ft.VArgs.Type
 	}
 	var haveAndWant string
-	if ft.callArgsIsSure(callArgsTypes) {
+	if ft.callArgsHasNoNil(callArgsTypes) {
 		haveAndWant = fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
 		haveAndWant += fmt.Sprintf("\twant %s\n", callWant(ft))
 	}
@@ -117,7 +132,7 @@ func (ft *FunctionType) fitCallArgs(from *Pos, args *CallArgs,
 						t.TypeString())
 					return
 				}
-				vArgs.PackageJavaArray2VArgs = true
+				vArgs.PackArray2VArgs = true
 				continue
 			}
 			if false == v.Type.Array.Equal(&errs, t) {
@@ -168,7 +183,7 @@ type CallVArgs struct {
 		a := new int[](10)
 		print(a...)
 	*/
-	PackageJavaArray2VArgs bool
-	NoArgs                 bool
-	Type                   *Type
+	PackArray2VArgs bool
+	NoArgs          bool
+	Type            *Type
 }

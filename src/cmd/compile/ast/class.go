@@ -85,6 +85,7 @@ func (c *Class) mkDefaultConstruction() {
 	m.Function.Name = SpecialMethodInit
 	{
 		e := &Expression{}
+		e.Description = "methodCall"
 		e.Type = ExpressionTypeMethodCall
 		e.Pos = c.Pos
 		call := &ExpressionMethodCall{}
@@ -94,7 +95,8 @@ func (c *Class) mkDefaultConstruction() {
 			Data: &ExpressionIdentifier{
 				Name: THIS,
 			},
-			Pos: c.Pos,
+			Pos:         c.Pos,
+			Description: "methodCall",
 		}
 		e.Data = call
 		m.Function.Block.Statements = make([]*Statement, 1)
@@ -393,7 +395,7 @@ func (c *Class) matchConstructionFunction(pos *Pos, errs *[]error, no *Expressio
 		args = &call.Args
 	}
 	for _, v := range c.Methods[SpecialMethodInit] {
-		vArgs, err := v.Function.Type.fitCallArgs(pos, args, callArgs, v.Function)
+		vArgs, err := v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
 		if err == nil {
 			if no != nil {
 				no.VArgs = vArgs
