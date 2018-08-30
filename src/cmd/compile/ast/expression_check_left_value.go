@@ -67,7 +67,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 						errMsgPrefix(e.Pos), selection.Name))
 				}
 				// not this and private
-				if selection.Expression.isThis() == false {
+				if selection.Expression.IsIdentifier(THIS) == false {
 					if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
 						(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
 						*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
@@ -128,7 +128,23 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				return nil
 			}
-
+		case VariableTypeMagicFunction:
+			v := object.Function.Type.searchName(selection.Name)
+			if v == nil {
+				err := fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
+				*errs = append(*errs, err)
+				return nil
+			}
+			e.Value = v.Type.Clone()
+			e.Value.Pos = e.Pos
+			e.Type = ExpressionTypeIdentifier
+			identifier := &ExpressionIdentifier{}
+			identifier.Name = selection.Name
+			identifier.Variable = v
+			e.Data = identifier
+			result := v.Type.Clone()
+			result.Pos = e.Pos
+			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
 				errMsgPrefix(e.Pos), selection.Name, object.TypeString()))

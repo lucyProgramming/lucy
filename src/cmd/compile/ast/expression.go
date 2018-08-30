@@ -459,16 +459,9 @@ type ExpressionArray struct {
 	Length      int // elements length
 }
 
-func (e *Expression) isThis() bool {
+func (e *Expression) IsIdentifier(identifier string) bool {
 	if e.Type != ExpressionTypeIdentifier {
 		return false
 	}
-	return e.Data.(*ExpressionIdentifier).Name == THIS
-}
-
-func (e *Expression) IsNoNameIdentifier() bool {
-	if e.Type != ExpressionTypeIdentifier {
-		return false
-	}
-	return e.Data.(*ExpressionIdentifier).Name == NoNameIdentifier
+	return e.Data.(*ExpressionIdentifier).Name == identifier
 }

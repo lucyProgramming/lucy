@@ -270,7 +270,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		if matched {
 			call.Class = javaStringClass
-			if false == call.Expression.isThis() &&
+			if false == call.Expression.IsIdentifier(THIS) &&
 				ms[0].IsPublic() == false {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
@@ -298,7 +298,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				errMsgPrefix(e.Pos), object.TypeString()))
 			return nil
 		}
-		if call.Expression.isThis() == false {
+		if call.Expression.IsIdentifier(THIS) == false {
 			*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'this'",
 				errMsgPrefix(e.Pos)))
 			return nil
@@ -397,7 +397,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			if false == call.Expression.isThis() {
+			if false == call.Expression.IsIdentifier(THIS) {
 				if (call.Expression.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
 					(call.Expression.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
 					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
@@ -425,7 +425,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
 					errMsgPrefix(e.Pos), call.Name))
 			}
-			if false == call.Expression.isThis() {
+			if false == call.Expression.IsIdentifier(THIS) {
 				if (call.Expression.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
 					(call.Expression.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
 					*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))

@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -15,20 +14,29 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 	if object == nil {
 		return nil
 	}
-	//
-	if object.Type != VariableTypeObject &&
-		object.Type != VariableTypeClass &&
-		object.Type != VariableTypePackage {
-		*errs = append(*errs, fmt.Errorf("%s cannot access field '%s' on '%s'",
-			errMsgPrefix(e.Pos), selection.Name, object.TypeString()))
-		return nil
-	}
-	var err error
+
 	switch object.Type {
+	case VariableTypeMagicFunction:
+		v := object.Function.Type.searchName(selection.Name)
+		if v == nil {
+			err := fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
+			*errs = append(*errs, err)
+			return nil
+		}
+		e.Value = v.Type.Clone()
+		e.Value.Pos = e.Pos
+		e.Type = ExpressionTypeIdentifier
+		identifier := &ExpressionIdentifier{}
+		identifier.Name = selection.Name
+		identifier.Variable = v
+		e.Data = identifier
+		result := v.Type.Clone()
+		result.Pos = e.Pos
+		return result
 	case VariableTypePackage:
 		d, ok := object.Package.Block.NameExists(selection.Name)
 		if ok == false {
-			err = fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
+			err := fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
 			*errs = append(*errs, err)
 			return nil
 		}
@@ -38,7 +46,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result := v.Type.Clone()
 			result.Pos = e.Pos
 			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
-				err = fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
+				err := fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			selection.PackageVariable = v
@@ -49,7 +57,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result := c.Type.Clone()
 			result.Pos = e.Pos
 			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
-				err = fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
+				err := fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			return result
@@ -60,14 +68,14 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Type = VariableTypeClass
 			result.Class = c
 			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
-				err = fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
+				err := fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			return result
 		case *EnumName:
 			n := d.(*EnumName)
 			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
-				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
+				err := fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			result := &Type{}
@@ -80,7 +88,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		case *Function:
 			f := d.(*Function)
 			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
-				err = fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
+				err := fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			result := &Type{}
@@ -90,7 +98,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			selection.PackageFunction = f
 			return result
 		default:
-			err = fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
+			err := fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
 			*errs = append(*errs, err)
 			return nil
 		}
@@ -101,7 +109,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 					errMsgPrefix(e.Pos), JavaRootClass))
 				return object
 			}
-			err = object.Class.loadSuperClass(e.Pos)
+			err := object.Class.loadSuperClass(e.Pos)
 			if err != nil {
 				*errs = append(*errs, err)
 				return object
@@ -117,7 +125,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {
-			if selection.Expression.isThis() == false {
+			if selection.Expression.IsIdentifier(THIS) == false {
 				if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
 					(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
 					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
@@ -139,7 +147,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 					errMsgPrefix(e.Pos),
 					selection.Name))
 			}
-			if selection.Expression.isThis() == false {
+			if selection.Expression.IsIdentifier(THIS) == false {
 				if (selection.Expression.Value.Class.LoadFromOutSide && method.IsPublic() == false) ||
 					(selection.Expression.Value.Class.LoadFromOutSide == false && method.IsPrivate()) {
 					*errs = append(*errs, fmt.Errorf("%s method '%s' is private",
@@ -202,6 +210,10 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.FunctionType = &method.Function.Type
 			return result
 		}
+	default:
+		*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
+			errMsgPrefix(e.Pos), selection.Name, object.TypeString()))
+		return nil
 	}
 	return nil
 }

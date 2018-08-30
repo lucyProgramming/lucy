@@ -20,6 +20,111 @@ type FileLoader struct {
 	caches map[string]interface{}
 }
 
+func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
+	if loader.caches != nil && loader.caches[importName] != nil {
+		return loader.caches[importName], nil
+	}
+	var realPaths []*Resource
+	for _, v := range compiler.lucyPaths {
+		p := filepath.Join(v, "class", importName)
+		f, err := os.Stat(p)
+		if err == nil && f.IsDir() { // directory is package
+			realPaths = append(realPaths, &Resource{
+				kind:     ResourceKindLucyPackage,
+				realPath: p,
+				name:     importName,
+			})
+		}
+		p = filepath.Join(v, "class", importName+".class")
+		f, err = os.Stat(p)
+		if err == nil && f.IsDir() == false { // class file
+			realPaths = append(realPaths, &Resource{
+				kind:     ResourceKindLucyClass,
+				realPath: p,
+				name:     importName,
+			})
+		}
+	}
+	for _, v := range compiler.ClassPaths {
+		p := filepath.Join(v, importName)
+		f, err := os.Stat(p)
+		if err == nil && f.IsDir() { // directory is package
+			realPaths = append(realPaths, &Resource{
+				kind:     ResourceKindJavaPackage,
+				realPath: p,
+				name:     importName,
+			})
+		}
+		p = filepath.Join(v, importName+".class")
+		f, err = os.Stat(p)
+		if err == nil && f.IsDir() == false { // directory is package
+			realPaths = append(realPaths, &Resource{
+				kind:     ResourceKindJavaClass,
+				realPath: p,
+				name:     importName,
+			})
+		}
+	}
+	if len(realPaths) == 0 {
+		return nil, fmt.Errorf("resource '%v' not found", importName)
+	}
+	realPathMap := make(map[string][]*Resource)
+	for _, v := range realPaths {
+		_, ok := realPathMap[v.realPath]
+		if ok {
+			realPathMap[v.realPath] = append(realPathMap[v.realPath], v)
+		} else {
+			realPathMap[v.realPath] = []*Resource{v}
+		}
+	}
+	if len(realPathMap) > 1 {
+		errMsg := "not 1 resource named '" + importName + "' present:\n"
+		for _, v := range realPathMap {
+			switch v[0].kind {
+			case ResourceKindJavaClass:
+				errMsg += fmt.Sprintf("\t in '%s' is a java class\n", v[0].realPath)
+			case ResourceKindJavaPackage:
+				errMsg += fmt.Sprintf("\t in '%s' is a java package\n", v[0].realPath)
+			case ResourceKindLucyClass:
+				errMsg += fmt.Sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
+			case ResourceKindLucyPackage:
+				errMsg += fmt.Sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
+			}
+		}
+		return nil, fmt.Errorf(errMsg)
+	}
+	if realPaths[0].kind == ResourceKindLucyClass {
+		if filepath.Base(realPaths[0].realPath) == mainClassName {
+			return nil, fmt.Errorf("%s is special class for global variable and other things", mainClassName)
+		}
+	}
+	if realPaths[0].kind == ResourceKindJavaClass {
+		class, err := loader.loadClass(realPaths[0])
+		if class != nil {
+			loader.caches[importName] = class
+		}
+		return class, err
+	} else if realPaths[0].kind == ResourceKindLucyClass {
+		t, err := loader.loadClass(realPaths[0])
+		if t != nil {
+			loader.caches[importName] = t
+		}
+		return t, err
+	} else if realPaths[0].kind == ResourceKindJavaPackage {
+		p, err := loader.loadJavaPackage(realPaths[0])
+		if p != nil {
+			loader.caches[importName] = p
+		}
+		return p, err
+	} else { // lucy package
+		p, err := loader.loadLucyPackage(realPaths[0])
+		if p != nil {
+			loader.caches[importName] = p
+		}
+		return p, err
+	}
+}
+
 /*
 	lucy and java have no difference
 */
@@ -507,110 +612,4 @@ func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 		}
 	}
 	return loader.loadAsJava(c)
-}
-
-func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
-
-	if loader.caches != nil && loader.caches[importName] != nil {
-		return loader.caches[importName], nil
-	}
-	var realPaths []*Resource
-	for _, v := range compiler.lucyPaths {
-		p := filepath.Join(v, "class", importName)
-		f, err := os.Stat(p)
-		if err == nil && f.IsDir() { // directory is package
-			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindLucyPackage,
-				realPath: p,
-				name:     importName,
-			})
-		}
-		p = filepath.Join(v, "class", importName+".class")
-		f, err = os.Stat(p)
-		if err == nil && f.IsDir() == false { // class file
-			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindLucyClass,
-				realPath: p,
-				name:     importName,
-			})
-		}
-	}
-	for _, v := range compiler.ClassPaths {
-		p := filepath.Join(v, importName)
-		f, err := os.Stat(p)
-		if err == nil && f.IsDir() { // directory is package
-			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindJavaPackage,
-				realPath: p,
-				name:     importName,
-			})
-		}
-		p = filepath.Join(v, importName+".class")
-		f, err = os.Stat(p)
-		if err == nil && f.IsDir() == false { // directory is package
-			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindJavaClass,
-				realPath: p,
-				name:     importName,
-			})
-		}
-	}
-	if len(realPaths) == 0 {
-		return nil, fmt.Errorf("resource '%v' not found", importName)
-	}
-	realPathMap := make(map[string][]*Resource)
-	for _, v := range realPaths {
-		_, ok := realPathMap[v.realPath]
-		if ok {
-			realPathMap[v.realPath] = append(realPathMap[v.realPath], v)
-		} else {
-			realPathMap[v.realPath] = []*Resource{v}
-		}
-	}
-	if len(realPathMap) > 1 {
-		errMsg := "not 1 resource named '" + importName + "' present:\n"
-		for _, v := range realPathMap {
-			switch v[0].kind {
-			case ResourceKindJavaClass:
-				errMsg += fmt.Sprintf("\t in '%s' is a java class\n", v[0].realPath)
-			case ResourceKindJavaPackage:
-				errMsg += fmt.Sprintf("\t in '%s' is a java package\n", v[0].realPath)
-			case ResourceKindLucyClass:
-				errMsg += fmt.Sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
-			case ResourceKindLucyPackage:
-				errMsg += fmt.Sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
-			}
-		}
-		return nil, fmt.Errorf(errMsg)
-	}
-	if realPaths[0].kind == ResourceKindLucyClass {
-		if filepath.Base(realPaths[0].realPath) == mainClassName {
-			return nil, fmt.Errorf("%s is special class for global variable and other things", mainClassName)
-		}
-	}
-	if realPaths[0].kind == ResourceKindJavaClass {
-		class, err := loader.loadClass(realPaths[0])
-		if class != nil {
-			loader.caches[importName] = class
-		}
-		return class, err
-	} else if realPaths[0].kind == ResourceKindLucyClass {
-		t, err := loader.loadClass(realPaths[0])
-		if t != nil {
-			loader.caches[importName] = t
-		}
-		return t, err
-	} else if realPaths[0].kind == ResourceKindJavaPackage {
-		p, err := loader.loadJavaPackage(realPaths[0])
-		if p != nil {
-			loader.caches[importName] = p
-		}
-		return p, err
-	} else { // lucy package
-		p, err := loader.loadLucyPackage(realPaths[0])
-		if p != nil {
-			loader.caches[importName] = p
-		}
-		return p, err
-	}
 }

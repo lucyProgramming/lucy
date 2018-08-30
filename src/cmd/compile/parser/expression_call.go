@@ -17,7 +17,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 			return nil, err
 		}
 	}
-	expressionParser.parser.unExpectNewLineAndSkip()
+	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s except ')' ,but '%s'",
 			expressionParser.parser.errorMsgPrefix(),

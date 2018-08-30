@@ -134,14 +134,14 @@ func (s *StatementFor) checkRange() []error {
 		}
 	} else { // k,v = range arr
 		if modelKv {
-			if false == lefts[0].IsNoNameIdentifier() {
+			if false == lefts[0].IsIdentifier(NoNameIdentifier) {
 				s.RangeAttr.ExpressionKey = lefts[0]
 			}
-			if false == lefts[1].IsNoNameIdentifier() {
+			if false == lefts[1].IsIdentifier(NoNameIdentifier) {
 				s.RangeAttr.ExpressionValue = lefts[1]
 			}
 		} else {
-			if false == lefts[0].IsNoNameIdentifier() {
+			if false == lefts[0].IsIdentifier(NoNameIdentifier) {
 				s.RangeAttr.ExpressionValue = lefts[0]
 			}
 		}
