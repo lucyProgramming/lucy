@@ -19,8 +19,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 			errMsgPrefix(bin.Right.Pos), right.TypeString()))
 		return result
 	}
-
-	if bin.Left.Type == ExpressionTypeIdentifier && e.IsStatementExpression == false {
+	if bin.Left.Type == ExpressionTypeIdentifier &&
+		e.IsStatementExpression == false {
 		t := bin.Left.Data.(*ExpressionIdentifier)
 		if t.Variable != nil {
 			t.Variable.Used = true
