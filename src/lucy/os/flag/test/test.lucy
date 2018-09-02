@@ -14,9 +14,9 @@ fn main(args []string) {
 	no,_ := flag.parse(["-b","-i" ,"-456" , "121" ,"-aaa" , "-f" ,"-93232.21"])
 
 	print(no)
-	print(b.getBoolValue())
-	print(i.getIntValue())
-	print(f.getFloatValue())
+	print(b.getValue())
+	print(i.getValue())
+	print(f.getValue())
 	print(flag.helpMsg());
 }
 
