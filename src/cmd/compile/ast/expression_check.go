@@ -398,3 +398,56 @@ func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []e
 	}
 	return ret, es
 }
+
+func (by *Expression) methodAccessAble(block *Block, m *ClassMethod, errs *[]error) {
+	if by.Value.Type == VariableTypeObject {
+		if m.IsStatic() {
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
+				errMsgPrefix(by.Pos), m.Function.Name))
+		}
+		if false == by.IsIdentifier(THIS) {
+			if (by.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+				(by.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(by.Pos), m.Function.Name))
+			}
+		}
+	} else {
+		if m.IsStatic() == false {
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
+				errMsgPrefix(by.Pos), m.Function.Name))
+		}
+		if by.Value.Class != block.InheritedAttribute.Class {
+			if (by.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+				(by.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(by.Pos), m.Function.Name))
+			}
+		}
+	}
+}
+
+func (by *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassField, errs *[]error) {
+	if by.Value.Type == VariableTypeObject {
+		if fieldMethodHandler.IsStatic() {
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
+				errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+		}
+		if false == by.IsIdentifier(THIS) {
+			if (by.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+				(by.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+			}
+		}
+	} else { // class
+		if fieldMethodHandler.IsStatic() == false {
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
+				errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+		}
+		if by.Value.Class != block.InheritedAttribute.Class {
+			if (by.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+				(by.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public",
+					errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+			}
+		}
+	}
+}

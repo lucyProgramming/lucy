@@ -116,62 +116,43 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		}
 		return
 	}
-	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(javaStringBuilderClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringBuilderClass,
-		Method:     specialMethodInit,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.Codes[code.CodeLength] = cg.OP_ldc_w
+	class.InsertStringConst("", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	if 3 > maxStack {
-		maxStack = 3
-	}
-	currentStack := uint16(2)
-	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
-	appendString := func(isLast bool) {
+	state.pushStack(class, state.newObjectVariableType(javaStringClass))
+	defer state.popStack(1)
+	for k, v := range call.Args {
+		variableType := v.Value
+		stack := buildExpression.build(class, code, v, context, state)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		if t := 1 + buildExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
+			maxStack = t
+		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      "java/lang/StringBuilder",
-			Method:     "append",
-			Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
+			Class:      javaStringClass,
+			Method:     "concat",
+			Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if isLast == false {
+		if k != len(call.Args)-1 {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
 			class.InsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+			if 2 > maxStack {
+				maxStack = 2
+			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-				Class:      "java/lang/StringBuilder",
-				Method:     "append",
-				Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
+				Class:      javaStringClass,
+				Method:     "concat",
+				Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}
-	for k, v := range call.Args {
-		variableType := v.Value
-		stack := buildExpression.build(class, code, v, context, state)
-		if t := currentStack + stack; t > maxStack {
-			maxStack = t
-		}
-		if t := currentStack + buildExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
-			maxStack = t
-		}
-		appendString(k == len(call.Args)-1)
-	}
-	// toString
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      "java/lang/StringBuilder",
-		Method:     "toString",
-		Descriptor: "()Ljava/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
 	// call println
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

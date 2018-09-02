@@ -37,7 +37,6 @@ const (
 	javaFloatClass              = "java/lang/Float"
 	javaDoubleClass             = "java/lang/Double"
 	javaLongClass               = "java/lang/Long"
-	javaStringBuilderClass      = "java/lang/StringBuilder"
 	throwableClass              = "java/lang/Throwable"
 	javaPrintStreamClass        = "java/io/PrintStream"
 	mapClass                    = "java/util/HashMap"

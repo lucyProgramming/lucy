@@ -12,7 +12,6 @@ public final class IntOption  extends Option{
 		this.intValue = .intDefaultValue 
 	}
 	
-	
 	protected fn parse(s string) -> (err error) {
 		bs := []byte(s)
 		isNegative := false 
@@ -34,7 +33,7 @@ public final class IntOption  extends Option{
 		}
 		this.intValue = value 
 	} 
-	public fn getIntValue() -> (v int){
+	public fn getValue() -> (v int){
 		v = this.intValue
 	}
 	

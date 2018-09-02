@@ -9,7 +9,7 @@ public final class StringOption  extends Option{
 	
 	fn StringOption(d string) {
 		this.super() 
-		.stringDefaultValue = d 
+		.stringDefaultValue = d   // this.stringDefaultValue = d 
 	}
 	
 	protected fn reset() {
@@ -18,9 +18,9 @@ public final class StringOption  extends Option{
 	
 	
 	protected fn parse(s string) -> (err error) {
-		
+		this.stringValue = s 
 	} 
-	public fn getFloatValue() -> (v string){
+	public fn getValue() -> (v string){
 		v = this.stringValue
 	}
 	

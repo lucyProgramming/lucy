@@ -141,6 +141,18 @@ func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCo
 	if typ == target {
 		return
 	}
+	{
+		t1 := &ast.Type{
+			Type: typ,
+		}
+		t2 := &ast.Type{
+			Type: target,
+		}
+		if t1.IsNumber() == false ||
+			t2.IsNumber() == false {
+			panic("not a number type")
+		}
+	}
 	switch target {
 	case ast.VariableTypeByte:
 		buildExpression.stackTop2Byte(code, typ)
@@ -162,7 +174,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 	if typ.Type == ast.VariableTypeString {
 		return
 	}
-	maxStack = jvmSlotSize(typ)
+	maxStack = jvmSlotSize(typ) * 2
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

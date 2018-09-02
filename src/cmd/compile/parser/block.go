@@ -25,8 +25,10 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		block.EndPos = blockParser.parser.mkPos()
 	}()
 	isDefer := false
+	isAbstract := false
 	resetDefer := func() {
 		isDefer = false
+		isAbstract = false
 	}
 	validAfterDefer := func() error {
 		if blockParser.parser.ExpressionParser.looksLikeExpression() ||
@@ -107,6 +109,12 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				StatementFor: statement,
 				Pos:          pos,
 			})
+		case lex.TokenAbstract:
+			blockParser.parser.Next(lfIsToken)
+			blockParser.parser.unExpectNewLineAndSkip()
+			if err := blockParser.parser.validAfterAbstract(); err == nil {
+				isAbstract = true
+			}
 		case lex.TokenSwitch:
 			pos := blockParser.parser.mkPos()
 			statement, err := blockParser.parseSwitch()
@@ -284,7 +292,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next(lfNotToken)
 		case lex.TokenClass, lex.TokenInterface:
 			pos := blockParser.parser.mkPos()
-			class, err := blockParser.parser.ClassParser.parse(false)
+			class, err := blockParser.parser.ClassParser.parse(isAbstract)
 			if err != nil {
 				continue
 			}

@@ -23,7 +23,6 @@ func (buildExpression *BuildExpression) buildConditionNotOk(class *cg.ClassHighL
 		exit = (&cg.Exit{}).Init(cg.OP_ifeq, code)
 		return
 	}
-
 }
 
 func (buildExpression *BuildExpression) buildIntCompareConditionNotOk(class *cg.ClassHighLevel, code *cg.AttributeCode,

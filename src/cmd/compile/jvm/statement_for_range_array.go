@@ -109,7 +109,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
-	} else { // java_array
+	} else { // java array
 		//get length
 		code.Codes[code.CodeLength] = cg.OP_dup //dup top
 		code.CodeLength++
@@ -167,12 +167,11 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 	// mk index
 	code.Codes[code.CodeLength] = cg.OP_iadd
-	code.Codes[code.CodeLength+1] = cg.OP_dup
-	code.CodeLength += 2
+	code.CodeLength++
 	// load end
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
-	if 3 > maxStack {
-		maxStack = 3
+	if 2 > maxStack {
+		maxStack = 2
 	}
 	/*
 		k + start >= end,break loop,pop index on stack
@@ -182,8 +181,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	//load elements
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
-		code.Codes[code.CodeLength] = cg.OP_swap
-		code.CodeLength++
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 		// load value
 		switch s.RangeAttr.RangeOn.Value.Array.Type {
 		case ast.VariableTypeBool:
@@ -225,9 +223,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 				autoVar.V)...)
 
 		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Array)
-	} else {
-		code.Codes[code.CodeLength] = cg.OP_pop
-		code.CodeLength++ // pop  k on stack
 	}
 	//current stack is 0
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
@@ -296,10 +291,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	}
 	//pop index on stack
 	writeExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
-	forState.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 	context.MakeStackMap(code, forState, code.CodeLength)
-	forState.popStack(1)
-	code.Codes[code.CodeLength] = cg.OP_pop
-	code.CodeLength++
 	return
 }

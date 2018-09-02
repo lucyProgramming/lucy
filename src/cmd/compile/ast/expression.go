@@ -89,7 +89,7 @@ type Expression struct {
 	Description           string
 }
 
-func (e *Expression) IsRelation() bool {
+func (e *Expression) isRelation() bool {
 	return e.Type == ExpressionTypeEq ||
 		e.Type == ExpressionTypeNe ||
 		e.Type == ExpressionTypeGe ||
@@ -104,7 +104,7 @@ func (e *Expression) IsRelation() bool {
 	1s > 2s
 */
 func (e *Expression) IsIntCompare() bool {
-	if e.IsRelation() == false {
+	if e.isRelation() == false {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
@@ -117,7 +117,7 @@ func (e *Expression) IsIntCompare() bool {
 	a == null
 */
 func (e *Expression) IsNullCompare() bool {
-	if e.IsRelation() == false {
+	if e.isRelation() == false {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
@@ -129,7 +129,7 @@ func (e *Expression) IsNullCompare() bool {
 	a > "b"
 */
 func (e *Expression) IsStringCompare() bool {
-	if e.IsRelation() == false {
+	if e.isRelation() == false {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
@@ -141,7 +141,7 @@ func (e *Expression) IsStringCompare() bool {
 	a == b
 */
 func (e *Expression) IsPointerCompare() bool {
-	if e.IsRelation() == false {
+	if e.isRelation() == false {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
@@ -364,8 +364,9 @@ func (e *Expression) HaveMultiValue() bool {
 		e.Type == ExpressionTypeMethodCall ||
 		e.Type == ExpressionTypeTypeAssert {
 		return len(e.MultiValues) > 1
+	} else {
+		return false
 	}
-	return false
 }
 
 type CallArgs []*Expression // f(1,2)

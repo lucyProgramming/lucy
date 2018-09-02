@@ -150,35 +150,14 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {
-			if selection.Expression.IsIdentifier(THIS) == false {
-				if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
-					(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
-					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
-						errMsgPrefix(e.Pos), selection.Name))
-				}
-			}
-			if field.IsStatic() {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is static,cannot access by className",
-					errMsgPrefix(e.Pos), selection.Name))
-			}
+			selection.Expression.fieldAccessAble(block, field, errs)
 			result := field.Type.Clone()
 			result.Pos = e.Pos
 			selection.Field = field
 			return result
 		} else {
 			method := fieldOrMethod.(*ClassMethod)
-			if method.IsStatic() {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is static,should access by className",
-					errMsgPrefix(e.Pos),
-					selection.Name))
-			}
-			if selection.Expression.IsIdentifier(THIS) == false {
-				if (selection.Expression.Value.Class.LoadFromOutSide && method.IsPublic() == false) ||
-					(selection.Expression.Value.Class.LoadFromOutSide == false && method.IsPrivate()) {
-					*errs = append(*errs, fmt.Errorf("%s method '%s' is private",
-						errMsgPrefix(e.Pos), selection.Name))
-				}
-			}
+			selection.Expression.methodAccessAble(block, method, errs)
 			selection.Method = method
 			result := &Type{}
 			result.Type = VariableTypeFunction
@@ -198,40 +177,18 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return nil
 		}
 		if field, ok := fieldOrMethod.(*ClassField); ok {
-			if block.InheritedAttribute.Class != selection.Expression.Value.Class {
-				if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
-					(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
-					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
-						errMsgPrefix(e.Pos), selection.Name))
-				}
-			}
-			if field.IsStatic() == false {
-				*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by object ref",
-					errMsgPrefix(e.Pos),
-					selection.Name))
-			}
+			selection.Expression.fieldAccessAble(block, field, errs)
 			result := field.Type.Clone()
 			result.Pos = e.Pos
 			selection.Field = field
 			return result
 		} else {
 			method := fieldOrMethod.(*ClassMethod)
-			if block.InheritedAttribute.Class != selection.Expression.Value.Class {
-				if (selection.Expression.Value.Class.LoadFromOutSide && method.IsPublic() == false) ||
-					(selection.Expression.Value.Class.LoadFromOutSide == false && method.IsPrivate()) {
-					*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
-						errMsgPrefix(e.Pos), selection.Name))
-				}
-			}
+			selection.Expression.methodAccessAble(block, method, errs)
 			selection.Method = method
 			result := &Type{}
 			result.Type = VariableTypeFunction
 			result.Pos = e.Pos
-			if method.IsStatic() == false {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,should access by object ref",
-					errMsgPrefix(e.Pos),
-					selection.Name))
-			}
 			result.FunctionType = &method.Function.Type
 			return result
 		}

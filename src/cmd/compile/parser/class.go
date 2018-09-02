@@ -78,7 +78,7 @@ func (classParser *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos,
 	return ret, nil
 }
 
-func (classParser *ClassParser) parse(isAbstact bool) (classDefinition *ast.Class, err error) {
+func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err error) {
 	classParser.resetProperty()
 	isInterface := classParser.parser.token.Type == lex.TokenInterface
 	classDefinition = &ast.Class{}
@@ -87,7 +87,7 @@ func (classParser *ClassParser) parse(isAbstact bool) (classDefinition *ast.Clas
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
-	if isAbstact {
+	if isAbstract {
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
 	classParser.ret.Pos = classParser.parser.mkPos()

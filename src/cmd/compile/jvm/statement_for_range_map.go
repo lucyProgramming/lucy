@@ -126,20 +126,19 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	code.CodeLength += 3
 	// load k
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
+
 	// load length
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Length)...)
-	if 5 > maxStack {
-		maxStack = 5
+	if 2 > maxStack {
+		maxStack = 2
 	}
 	exit := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		// load k sets
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
+
 		// swap
-		code.Codes[code.CodeLength] = cg.OP_swap
-		code.CodeLength++
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
 		//get object for hashMap
 		code.Codes[code.CodeLength] = cg.OP_aaload
 		code.CodeLength++
@@ -165,9 +164,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		//store to V
 		copyOPs(code, storeLocalVariableOps(s.RangeAttr.RangeOn.Value.Map.V.Type, autoVar.V)...)
 		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Map.V)
-	} else {
-		code.Codes[code.CodeLength] = cg.OP_pop
-		code.CodeLength++
 	}
 
 	// store to k,if need
@@ -254,14 +250,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 		gotoOffset(code, s.ContinueCodeOffset)
 	}
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
-	{
-		forState.pushStack(class,
-			&ast.Type{Type: ast.VariableTypeInt})
-		context.MakeStackMap(code, forState, code.CodeLength)
-		forState.popStack(1)
-	}
-	// pop 1
-	code.Codes[code.CodeLength] = cg.OP_pop
-	code.CodeLength++
+	context.MakeStackMap(code, forState, code.CodeLength)
 	return
 }

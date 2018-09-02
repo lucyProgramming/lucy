@@ -32,6 +32,7 @@ type Function struct {
 	IsClosureFunction                bool
 	isGlobalVariableDefinition       bool
 	isPackageInitBlockFunction       bool
+	AccessByName                     int
 }
 
 func (f *Function) IsPublic() bool {

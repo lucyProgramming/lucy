@@ -81,18 +81,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			selection.Field = field
 			if field != nil {
-				if field.IsStatic() {
-					*errs = append(*errs, fmt.Errorf("%s field '%s' is static,should access by class",
-						errMsgPrefix(e.Pos), selection.Name))
-				}
-				// not this and private
-				if selection.Expression.IsIdentifier(THIS) == false {
-					if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
-						(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
-						*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
-							errMsgPrefix(e.Pos), selection.Name))
-					}
-				}
+				selection.Expression.fieldAccessAble(block, field, errs)
 				result = field.Type.Clone()
 				result.Pos = e.Pos
 				e.Value = result
@@ -106,17 +95,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			selection.Field = field
 			if field != nil {
-				if field.IsStatic() == false {
-					*errs = append(*errs, fmt.Errorf("%s field '%s' is not static,should access by instance",
-						errMsgPrefix(e.Pos), selection.Name))
-				}
-				if block.InheritedAttribute.Class != selection.Expression.Value.Class {
-					if (selection.Expression.Value.Class.LoadFromOutSide && field.IsPublic() == false) ||
-						(selection.Expression.Value.Class.LoadFromOutSide == false && field.IsPrivate()) {
-						*errs = append(*errs, fmt.Errorf("%s field '%s' is private",
-							errMsgPrefix(e.Pos), selection.Name))
-					}
-				}
+				selection.Expression.fieldAccessAble(block, field, errs)
 				result = field.Type.Clone()
 				result.Pos = e.Pos
 				e.Value = result

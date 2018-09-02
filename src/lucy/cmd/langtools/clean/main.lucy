@@ -35,7 +35,7 @@ fn main(args []string){
 	}
 	c := new Clean(
 		lucyRoot ,lucyPaths ,  
-		packageName[0] , recursive.getBoolValue()
+		packageName[0] , recursive.getValue()
 	)
 	c.clean()
 }

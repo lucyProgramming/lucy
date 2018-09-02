@@ -213,31 +213,7 @@ func registerBuildInFunctions() {
 			e.Args = e.Args[1:]
 		}
 	}
-	{
-		// typeOf
-		typeOf := &Function{}
-		buildInFunctionsMap[common.BuildInFunctionTypeOf] = typeOf
-		typeOf.Name = common.BuildInFunctionTypeOf
-		typeOf.IsBuildIn = true
-		typeOf.Type.ReturnList = make([]*Variable, 1)
-		typeOf.Type.ReturnList[0] = &Variable{}
-		typeOf.Type.ReturnList[0].Name = "returnValue"
-		typeOf.Type.ReturnList[0].Type = &Type{}
-		typeOf.Type.ReturnList[0].Type.Type = VariableTypeString
-		typeOf.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
-			args []*Type, pos *Pos) {
-			if len(e.ParameterTypes) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					errMsgPrefix(e.ParameterTypes[0].Pos)))
-			}
-			if len(args) == 0 {
-				err := fmt.Errorf("%s '%s' expect one argument at lease",
-					errMsgPrefix(pos), typeOf.Name)
-				*errs = append(*errs, err)
-				return
-			}
-		}
-	}
+
 	{
 		// sure
 		typeOf := &Function{}
@@ -324,6 +300,31 @@ func registerBuildInFunctions() {
 		IsBuildIn: true,
 		Name:      common.BuildInFunctionBlockHole,
 	}
+	//{
+	//	// typeOf
+	//	typeOf := &Function{}
+	//	buildInFunctionsMap[common.BuildInFunctionTypeOf] = typeOf
+	//	typeOf.Name = common.BuildInFunctionTypeOf
+	//	typeOf.IsBuildIn = true
+	//	typeOf.Type.ReturnList = make([]*Variable, 1)
+	//	typeOf.Type.ReturnList[0] = &Variable{}
+	//	typeOf.Type.ReturnList[0].Name = "returnValue"
+	//	typeOf.Type.ReturnList[0].Type = &Type{}
+	//	typeOf.Type.ReturnList[0].Type.Type = VariableTypeString
+	//	typeOf.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
+	//		args []*Type, pos *Pos) {
+	//		if len(e.ParameterTypes) > 0 {
+	//			*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
+	//				errMsgPrefix(e.ParameterTypes[0].Pos)))
+	//		}
+	//		if len(args) == 0 {
+	//			err := fmt.Errorf("%s '%s' expect one argument at lease",
+	//				errMsgPrefix(pos), typeOf.Name)
+	//			*errs = append(*errs, err)
+	//			return
+	//		}
+	//	}
+	//}
 }
 
 func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,

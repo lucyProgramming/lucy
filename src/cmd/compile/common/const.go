@@ -23,8 +23,8 @@ const (
 	BuildInFunctionMonitorEnter = "monitorEnter"
 	BuildInFunctionMonitorExit  = "monitorExit"
 	BuildInFunctionBlockHole    = "blackHole"
-	BuildInFunctionTypeOf       = "typeOf"
 	BuildInFunctionAssert       = "assert"
+	//BuildInFunctionTypeOf       = "typeOf"
 )
 
 const (

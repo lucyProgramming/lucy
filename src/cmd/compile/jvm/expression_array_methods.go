@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildJavaArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildMethodCallJavaOnArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxStack = buildExpression.build(class, code, call.Expression, context, state)
@@ -22,7 +22,7 @@ func (buildExpression *BuildExpression) buildJavaArrayMethodCall(class *cg.Class
 	return
 }
 
-func (buildExpression *BuildExpression) buildArrayMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildMethodCallOnArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {

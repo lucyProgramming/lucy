@@ -16,56 +16,28 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxStack, remainStack, op, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
-	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst("java/lang/StringBuilder", code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringBuilderClass,
-		Method:     specialMethodInit,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	if t := remainStack + 2; t > maxStack {
-		maxStack = t
-	}
-	state.pushStack(class, state.newObjectVariableType(javaStringBuilderClass))
-	currentStack := remainStack + 1 //
+	currentStack := remainStack
 	stack := buildExpression.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	//append origin string
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringBuilderClass,
-		Method:     `append`,
-		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
+	state.pushStack(class, bin.Left.Value)
+	currentStack += jvmSlotSize(bin.Left.Value)
 	stack = buildExpression.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
-	//append right
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringBuilderClass,
-		Method:     `append`,
-		Descriptor: "(Ljava/lang/String;)Ljava/lang/StringBuilder;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	// tostring
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringBuilderClass,
-		Method:     `toString`,
-		Descriptor: "()Ljava/lang/String;",
+		Class:      javaStringClass,
+		Method:     `concat`,
+		Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, bin.Left.Value)
+		if t := currentStack + buildExpression.controlStack2FitAssign(code, leftValueKind, e.Value); t > maxStack {
+			maxStack = t
+		}
 	}
 	//copy op
 	copyOPs(code, op...)

@@ -10,11 +10,10 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 	vs := e.Data.(*ast.ExpressionVar)
 	// make offset
 	for _, v := range vs.Variables {
+		v.LocalValOffset = code.MaxLocals
 		if v.BeenCaptured > 0 {
-			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 		} else {
-			v.LocalValOffset = code.MaxLocals
 			code.MaxLocals += jvmSlotSize(v.Type)
 		}
 	}
@@ -26,15 +25,15 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 			closure.createClosureVar(class, code, v.Type)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
-			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
-			state.pushStack(class, obj)
-			state.pushStack(class, obj)
+			closureObj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
+			state.pushStack(class, closureObj)
+			state.pushStack(class, closureObj)
 			currentStack += 2
 		}
 		index--
 	}
 	index = 0
-	store := func() {
+	store := func(index int) {
 		if vs.Variables[index].IsGlobal {
 			buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
 		} else {
@@ -61,7 +60,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 				if t := stack + currentStack; t > maxStack {
 					maxStack = t
 				}
-				store()
+				store(index)
 				index++
 			}
 			continue
@@ -71,7 +70,7 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		store()
+		store(index)
 		index++
 	}
 	return

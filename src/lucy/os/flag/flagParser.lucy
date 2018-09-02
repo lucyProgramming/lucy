@@ -11,7 +11,6 @@ public final class  FlagParser {
 	}
 	
 	
-	
 	public fn boolOption(name string , d bool ,usage string ) ->(o BoolOption){
 		if this.options.keyExist(name)  {
 			panic(new error(sprintf("name already '%s' exists" , name )))
@@ -93,15 +92,7 @@ public final class  FlagParser {
 			
 		}
 	}
-	/*
-	private fn parseInt(s string)->(value int, err error) {
-		
-	}
 	
-	private fn parseFloat(s string)->(value float, err error) {
-		
-	}
-	*/
 	public fn helpMsg() -> (msg string){
 		msg = "flag are:\n"
 		for k,v := range this.options {
