@@ -213,5 +213,6 @@ func (expressionParser *ExpressionParser) looksLikeExpression() bool {
 		expressionParser.parser.token.Type == lex.TokenSub ||
 		expressionParser.parser.token.Type == lex.TokenFn ||
 		expressionParser.parser.token.Type == lex.TokenNew ||
-		expressionParser.parser.token.Type == lex.TokenLb
+		expressionParser.parser.token.Type == lex.TokenLb ||
+		expressionParser.parser.token.Type == lex.TokenSelection
 }

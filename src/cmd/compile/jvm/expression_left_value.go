@@ -168,7 +168,8 @@ func (buildExpression *BuildExpression) getLeftValue(
 		}
 	case ast.ExpressionTypeSelection:
 		selection := e.Data.(*ast.ExpressionSelection)
-		if selection.Expression.Value.Type == ast.VariableTypePackage {
+		switch selection.Expression.Value.Type {
+		case ast.VariableTypePackage:
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_putstatic
 			if selection.PackageVariable.JvmDescriptor == "" {
@@ -182,7 +183,29 @@ func (buildExpression *BuildExpression) getLeftValue(
 			maxStack = 0
 			leftValueType = LeftValueTypePutStatic
 			remainStack = 0
-		} else { // class or object
+		case ast.VariableTypeDynamicSelector:
+			ops = make([]byte, 3)
+			if selection.Field.IsStatic() {
+				ops[0] = cg.OP_putstatic
+				leftValueType = LeftValueTypePutStatic
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_aload_0
+				code.CodeLength++
+				state.pushStack(class, state.newObjectVariableType(selection.Expression.Value.Class.Name))
+				ops[0] = cg.OP_putfield
+				remainStack = 1
+				maxStack = 1
+				leftValueType = LeftValueTypePutField
+			}
+			if selection.Field.JvmDescriptor == "" {
+				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
+			}
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      selection.Expression.Value.Class.Name,
+				Field:      selection.Name,
+				Descriptor: selection.Field.JvmDescriptor,
+			}, ops[1:3])
+		default:
 			ops = make([]byte, 3)
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)

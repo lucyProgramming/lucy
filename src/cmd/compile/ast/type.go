@@ -34,6 +34,7 @@ const (
 	VariableTypeNull
 	VariableTypeSelectGlobal
 	VariableTypeMagicFunction
+	VariableTypeDynamicSelector //
 )
 
 type Type struct {
@@ -489,7 +490,8 @@ func (typ *Type) typeString(ret *string) {
 		*ret += typ.Name // resolve wrong, but typeString is ok to return
 	case VariableTypeTemplate:
 		*ret += typ.Name
-
+	case VariableTypeDynamicSelector:
+		*ret += "dynamicSelector@" + typ.Class.Name
 	case VariableTypeVoid:
 		*ret += "void"
 	case VariableTypeTypeAlias:

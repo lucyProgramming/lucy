@@ -55,6 +55,25 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			return nil
 		}
 		switch object.Type {
+		case VariableTypeDynamicSelector:
+			if selection.Name == SUPER {
+				*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
+					errMsgPrefix(e.Pos), SUPER, object.TypeString()))
+				return nil
+			}
+			field, err := object.Class.accessField(e.Pos, selection.Name, false)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			if field != nil {
+				selection.Field = field
+				result = field.Type.Clone()
+				result.Pos = e.Pos
+				e.Value = result
+				return result
+			} else {
+				return nil
+			}
 		case VariableTypeObject:
 			field, err := object.Class.accessField(e.Pos, selection.Name, false)
 			if err != nil {

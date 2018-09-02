@@ -7,16 +7,15 @@ enum OptionType {
 }
 
 
-public class Option {
+public abstract class Option {
 	protected  typ OptionType
 	protected usage string 
 	
-	protected fn reset() {
+	protected abstract fn  formatDefaultValue() -> ( format string  ) 
+
+	protected abstract fn reset() 
 		
-	}
-	protected fn parse(s string) -> (err error ) {
-		
-	}
+	protected abstract fn parse(arg string) -> (err error )  
 	
 }
 

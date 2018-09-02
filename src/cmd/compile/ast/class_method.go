@@ -117,7 +117,7 @@ func (c *Class) accessInterfaceObjectMethod(pos *Pos, errs *[]error, name string
 	if err != nil {
 		return nil, false, err
 	}
-	return c.SuperClass.accessMethod(pos, errs, name, call, callArgTypes, fromSub, nil)
+	return c.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, nil)
 }
 
 func (c *Class) accessInterfaceMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
@@ -158,7 +158,7 @@ func (c *Class) accessInterfaceMethod(pos *Pos, errs *[]error, name string, call
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall,
+func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool, fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
@@ -168,27 +168,31 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, name string, call *Express
 		*errs = append(*errs, err)
 	}
 	if c.IsJava {
-		return c.accessMethodAsJava(pos, errs, name, call, callArgTypes, false)
+		return c.accessMethodAsJava(pos, errs, call, callArgTypes, false)
 	}
 	//TODO:: can be accessed or not ???
-	if f := c.Fields[name]; f != nil &&
+	if f := c.Fields[call.Name]; f != nil &&
 		f.Type.Type == VariableTypeFunction &&
 		fieldMethodHandler != nil {
 		if fromSub && f.ableAccessFromSubClass() == false {
 			//cannot access this field
 		} else {
-			call.VArgs, err = c.Fields[name].Type.FunctionType.fitArgs(pos, &call.Args,
+			call.VArgs, err = c.Fields[call.Name].Type.FunctionType.fitArgs(pos, &call.Args,
 				callArgTypes, nil)
 			if err == nil {
 				*fieldMethodHandler = f
+				matched = true
+				return
+			} else {
+				return nil, false, err
 			}
 		}
 	}
-	if len(c.Methods[name]) > 0 {
-		for _, m := range c.Methods[name] {
+	if len(c.Methods[call.Name]) > 0 {
+		for _, m := range c.Methods[call.Name] {
 			if fromSub && m.ableAccessFromSubClass() == false {
 				return nil, false, fmt.Errorf("%s method '%s' not found",
-					errMsgPrefix(pos), name)
+					errMsgPrefix(pos), call.Name)
 			}
 			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args,
 				callArgTypes, m.Function)
@@ -203,17 +207,17 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, name string, call *Express
 	if err != nil {
 		return ms, false, err
 	}
-	return c.SuperClass.accessMethod(pos, errs, name, call,
+	return c.SuperClass.accessMethod(pos, errs, call,
 		callArgTypes, true, fieldMethodHandler)
 }
 
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall,
+func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, call *ExpressionMethodCall,
 	callArgTypes []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	if c.Methods != nil {
-		for _, m := range c.Methods[name] {
+		for _, m := range c.Methods[call.Name] {
 			if fromSub == true && m.ableAccessFromSubClass() == false {
 				//cannot access from sub
 				continue
@@ -231,7 +235,7 @@ func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, name string, call *E
 	if err != nil {
 		return nil, false, err
 	}
-	ms_, matched, err := c.SuperClass.accessMethodAsJava(pos, errs, name, call, callArgTypes, true)
+	ms_, matched, err := c.SuperClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
 	if err != nil {
 		return ms, false, err
 	}
@@ -239,4 +243,18 @@ func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, name string, call *E
 		return ms_, matched, nil
 	}
 	return append(ms, ms_...), false, nil // methods have the same name
+}
+
+func (m *ClassMethod) implementationMethodIsOk(pos *Pos, implementation *ClassMethod) error {
+	if implementation.Function.Pos != nil {
+		pos = implementation.Function.Pos
+	}
+	if implementation.IsStatic() {
+		return fmt.Errorf("%s method '%s' is static", errMsgPrefix(pos), m.Function.Name)
+	}
+	if m.narrowDownAccessRange(implementation) {
+		return fmt.Errorf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
+			errMsgPrefix(pos), m.Function.Name, m.accessString(), implementation.accessString())
+	}
+	return nil
 }

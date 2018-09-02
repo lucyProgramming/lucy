@@ -63,6 +63,77 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 		}
 		return
 	}
+	if call.Expression.Value.Type == ast.VariableTypeDynamicSelector {
+		if call.FieldMethodHandler != nil {
+			if call.FieldMethodHandler.IsStatic() == false {
+				code.Codes[code.CodeLength] = cg.OP_aload_0
+				code.CodeLength++
+				if 1 > maxStack {
+					maxStack = 1
+				}
+				code.Codes[code.CodeLength] = cg.OP_getfield
+				code.CodeLength++
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_getstatic
+				code.CodeLength++
+			}
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      call.Expression.Value.Class.Name,
+				Field:      call.Name,
+				Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
+			}, code.Codes[code.CodeLength:code.CodeLength+2])
+			code.CodeLength += 2
+			state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
+			defer state.popStack(1)
+			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
+				context, state)
+			if t := 1 + stack; t > maxStack {
+				maxStack = t
+			}
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaMethodHandleClass,
+				Method:     functionPointerInvokeMethod,
+				Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			if t := popCallResult(code, e, call.FieldMethodHandler.Type.FunctionType); t > maxStack {
+				maxStack = t
+			}
+		} else {
+			currentStack := uint16(0)
+			if call.Method.IsStatic() == false {
+				code.Codes[code.CodeLength] = cg.OP_aload_0
+				code.CodeLength++
+				state.pushStack(class, state.newObjectVariableType(call.Expression.Value.Class.Name))
+				defer state.popStack(1)
+				currentStack = 1
+			}
+			stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
+				context, state)
+			if t := currentStack + stack; t > maxStack {
+				maxStack = t
+			}
+			if call.Method.IsStatic() {
+				code.Codes[code.CodeLength] = cg.OP_invokestatic
+				code.CodeLength++
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_invokevirtual
+				code.CodeLength++
+			}
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      call.Expression.Value.Class.Name,
+				Method:     call.Name,
+				Descriptor: Descriptor.methodDescriptor(&call.Method.Function.Type),
+			}, code.Codes[code.CodeLength:code.CodeLength+2])
+			code.CodeLength += 2
+			if t := popCallResult(code, e, call.FieldMethodHandler.Type.FunctionType); t > maxStack {
+				maxStack = t
+			}
+		}
+		return
+	}
+
 	if call.FieldMethodHandler != nil {
 		if call.FieldMethodHandler.IsStatic() == false {
 			stack := buildExpression.build(class, code, call.Expression, context, state)
@@ -70,21 +141,17 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 				maxStack = stack
 			}
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      call.Expression.Value.Class.Name,
-				Field:      call.Name,
-				Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_getstatic
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      call.Expression.Value.Class.Name,
-				Field:      call.Name,
-				Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			code.CodeLength++
 		}
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      call.Expression.Value.Class.Name,
+			Field:      call.Name,
+			Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
+		}, code.Codes[code.CodeLength:code.CodeLength+2])
+		code.CodeLength += 2
 		state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
 		defer state.popStack(1)
 		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
@@ -99,7 +166,6 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 			Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-
 		if t := popCallResult(code, e, call.FieldMethodHandler.Type.FunctionType); t > maxStack {
 			maxStack = t
 		}

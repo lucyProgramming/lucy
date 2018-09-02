@@ -78,13 +78,16 @@ func (classParser *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos,
 	return ret, nil
 }
 
-func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) {
+func (classParser *ClassParser) parse(isAbstact bool) (classDefinition *ast.Class, err error) {
 	classParser.resetProperty()
 	isInterface := classParser.parser.token.Type == lex.TokenInterface
 	classDefinition = &ast.Class{}
 	classParser.ret = classDefinition
 	if isInterface {
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE
+		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+	}
+	if isAbstact {
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
 	classParser.ret.Pos = classParser.parser.mkPos()
@@ -259,6 +262,10 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.isSynchronized = false
 			}
 		case lex.TokenFn:
+			if classParser.isAbstract && (classParser.ret.IsAbstract() == false && classParser.ret.IsInterface() == false) {
+				classParser.parser.errs = append(classParser.parser.errs,
+					fmt.Errorf("%s cannot  abstact method is non-abstract class", classParser.parser.errorMsgPrefix()))
+			}
 			isAbstract := classParser.isAbstract || isInterface
 			f, err := classParser.parser.FunctionParser.parse(true, isAbstract)
 			if err != nil {
@@ -266,6 +273,7 @@ func (classParser *ClassParser) parse() (classDefinition *ast.Class, err error) 
 				classParser.Next(lfNotToken)
 				continue
 			}
+
 			if classParser.ret.Methods == nil {
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
@@ -353,6 +361,12 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		f.Name = v.Name
 		f.Pos = v.Pos
 		f.Type = &ast.Type{}
+		if cs.Type == nil {
+			cs.Type = &ast.Type{
+				Type: ast.VariableTypeVoid,
+				Pos:  v.Pos,
+			}
+		}
 		f.Type = cs.Type.Clone()
 		f.AccessFlags = 0
 		if classParser.isStatic {

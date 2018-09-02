@@ -284,7 +284,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next(lfNotToken)
 		case lex.TokenClass, lex.TokenInterface:
 			pos := blockParser.parser.mkPos()
-			class, err := blockParser.parser.ClassParser.parse()
+			class, err := blockParser.parser.ClassParser.parse(false)
 			if err != nil {
 				continue
 			}

@@ -42,7 +42,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if block.InheritedAttribute.Function.isGlobalVariableDefinition ||
 			block.InheritedAttribute.Function.isPackageInitBlockFunction {
 			return nil,
-				fmt.Errorf("%s '%s' function scope", errMsgPrefix(e.Pos), identifier.Name)
+				fmt.Errorf("%s '%s' must in function scope", errMsgPrefix(e.Pos), identifier.Name)
 		}
 		result := &Type{}
 		result.Type = VariableTypeMagicFunction

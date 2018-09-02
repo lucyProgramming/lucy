@@ -14,7 +14,6 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 	if object == nil {
 		return nil
 	}
-
 	switch object.Type {
 	case VariableTypeMagicFunction:
 		v := object.Function.Type.searchName(selection.Name)
@@ -33,6 +32,32 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		result := v.Type.Clone()
 		result.Pos = e.Pos
 		return result
+	case VariableTypeDynamicSelector:
+		if selection.Name == SUPER {
+			*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
+				errMsgPrefix(e.Pos), SUPER, object.TypeString()))
+			return nil
+		}
+		access, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
+		if err != nil {
+			*errs = append(*errs, err)
+			return nil
+		}
+		if field, ok := access.(*ClassField); ok {
+			selection.Field = field
+			result := field.Type.Clone()
+			result.Pos = e.Pos
+			return result
+		} else {
+			method := access.(*ClassMethod)
+			selection.Method = method
+			result := &Type{
+				Type:         VariableTypeFunction,
+				FunctionType: &method.Function.Type,
+				Pos:          e.Pos,
+			}
+			return result
+		}
 	case VariableTypePackage:
 		d, ok := object.Package.Block.NameExists(selection.Name)
 		if ok == false {

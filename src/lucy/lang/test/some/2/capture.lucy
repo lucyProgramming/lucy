@@ -21,8 +21,7 @@ CaptureHandler := fn(c Capture) {
     }
     const helloWorld = "hello world"
     c.stringValue = helloWorld
-    if c.
-        stringValue != helloWorld
+    if c.stringValue != helloWorld
     {
         panic(new error("stringValue is wrong"))
     }

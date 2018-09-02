@@ -59,6 +59,81 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 			return
 		}
 	}
+	if selection.Expression.Value.Type == ast.VariableTypeDynamicSelector {
+		if selection.Field != nil {
+			if selection.Field.IsStatic() == false {
+				code.Codes[code.CodeLength] = cg.OP_aload_0
+				code.CodeLength++
+				if 1 > maxStack {
+					maxStack = 1
+				}
+				code.Codes[code.CodeLength] = cg.OP_getfield
+				code.CodeLength++
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_getstatic
+				code.CodeLength++
+			}
+			if selection.Field.JvmDescriptor == "" {
+				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
+			}
+			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+				Class:      selection.Expression.Value.Class.Name,
+				Field:      selection.Name,
+				Descriptor: selection.Field.JvmDescriptor,
+			},
+				code.Codes[code.CodeLength:code.CodeLength+2])
+			code.CodeLength += 2
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/lang/invoke/MethodHandles",
+				Method:     "lookup",
+				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertClassConst(selection.Expression.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_ldc_w
+			class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
+				Descriptor: Descriptor.methodDescriptor(&selection.Method.Function.Type),
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			if selection.Method.IsStatic() {
+				class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+					Class:      "java/lang/invoke/MethodHandles$Lookup",
+					Method:     "findStatic",
+					Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			} else {
+				class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+					Class:      "java/lang/invoke/MethodHandles$Lookup",
+					Method:     "findVirtual",
+					Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			}
+			code.CodeLength += 3
+			if 4 > maxStack {
+				maxStack = 4
+			}
+			if selection.Method.IsStatic() == false {
+				code.Codes[code.CodeLength] = cg.OP_aload_0
+				code.CodeLength++
+				code.Codes[code.CodeLength] = cg.OP_invokevirtual
+				class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+					Class:      "java/lang/invoke/MethodHandle",
+					Method:     "bindTo",
+					Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
+				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+				code.CodeLength += 3
+			}
+		}
+		return
+	}
 	// check cast to super class
 	if selection.Name == ast.SUPER {
 		maxStack = buildExpression.build(class, code, selection.Expression, context, state)
@@ -103,8 +178,8 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		}
 		if selection.Expression.Value.Type == ast.VariableTypeObject {
 			stack := buildExpression.build(class, code, selection.Expression, context, state)
-			if stack > maxStack {
-				maxStack = stack
+			if t := 1 + stack; t > maxStack {
+				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

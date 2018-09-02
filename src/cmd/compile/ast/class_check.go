@@ -81,9 +81,54 @@ func (c *Class) checkPhase2() []error {
 	}
 	errs = append(errs, c.checkIfOverrideFinalMethod()...)
 	errs = append(errs, c.resolveInterfaces()...)
-	errs = append(errs, c.suitableForInterfaces()...)
 	if c.IsInterface() {
 		errs = append(errs, c.checkOverrideInterfaceMethod()...)
+	}
+	if c.IsAbstract() {
+		errs = append(errs, c.checkOverrideAbstractMethod()...)
+	}
+	errs = append(errs, c.suitableForInterfaces()...)
+	{
+		err := c.loadSuperClass(c.Pos)
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			errs = append(errs, c.suitableSubClassForAbstract(c.SuperClass)...)
+		}
+	}
+	return errs
+}
+
+func (c *Class) suitableSubClassForAbstract(super *Class) []error {
+	errs := []error{}
+	if super.Name != JavaRootClass {
+		err := super.loadSuperClass(c.Pos)
+		if err != nil {
+			errs = append(errs, err)
+			return errs
+		}
+		length := len(errs)
+		errs = append(errs, c.suitableSubClassForAbstract(super.SuperClass)...)
+		if len(errs) > length {
+			return errs
+		}
+	}
+	if super.IsAbstract() {
+		for _, v := range super.Methods {
+			m := v[0]
+			if m.IsAbstract() == false {
+				continue
+			}
+			implementation := c.implementMethod(c.Pos, m, false, &errs)
+			if implementation != nil {
+				if err := m.implementationMethodIsOk(c.Pos, implementation); err != nil {
+					errs = append(errs, err)
+				}
+			} else {
+				errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
+					errMsgPrefix(c.Pos), m.Function.readableMsg(), super.Name))
+			}
+		}
 	}
 	return errs
 }
@@ -101,6 +146,51 @@ func (c *Class) interfaceMethodExists(name string) *Class {
 		}
 	}
 	return nil
+}
+
+func (c *Class) abstractMethodExists(pos *Pos, name string) (*Class, error) {
+	if c.IsAbstract() {
+		if c.Methods != nil && len(c.Methods[name]) > 0 {
+			method := c.Methods[name][0]
+			if method.IsAbstract() {
+				return c, nil
+			}
+		}
+	}
+	if c.Name == JavaRootClass {
+		return nil, nil
+	}
+	err := c.loadSuperClass(pos)
+	if err != nil {
+		return nil, err
+	}
+	return c.SuperClass.abstractMethodExists(pos, name)
+}
+
+func (c *Class) checkOverrideAbstractMethod() []error {
+	errs := []error{}
+	err := c.loadSuperClass(c.Pos)
+	if err != nil {
+		errs = append(errs, err)
+		return errs
+	}
+	for _, v := range c.Methods {
+		m := v[0]
+		name := m.Function.Name
+		if m.IsAbstract() == false {
+			continue
+		}
+		exist, err := c.SuperClass.abstractMethodExists(m.Function.Pos, name)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		if exist != nil {
+			errs = append(errs, fmt.Errorf("%s method '%s' override '%s'",
+				errMsgPrefix(v[0].Function.Pos), name, exist.Name))
+		}
+	}
+	return errs
 }
 
 func (c *Class) checkOverrideInterfaceMethod() []error {
@@ -210,19 +300,6 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 	return errs
 }
 
-func (c *Class) implementedAbstractMethod() []error {
-	errs := []error{}
-	if c.IsAbstract() {
-		return errs
-	}
-	err := c.loadSuperClass(c.Pos)
-	if err != nil {
-		errs = append(errs, err)
-		return errs
-	}
-	return errs
-}
-
 func (c *Class) suitableForInterfaces() []error {
 	errs := []error{}
 	if c.IsInterface() {
@@ -241,22 +318,11 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 		errs = append(errs, err)
 		return errs
 	}
-	for name, v := range inter.Methods {
+	for _, v := range inter.Methods {
 		m := v[0]
 		implementation := c.implementMethod(c.Pos, m, false, &errs)
 		if implementation != nil {
-			if implementation.IsStatic() {
-				err := fmt.Errorf("%s method '%s' is static",
-					errMsgPrefix(c.Pos), name)
-				errs = append(errs, err)
-			}
-			if m.narrowDownAccessRange(implementation) {
-				pos := c.Pos
-				if implementation.Function.Pos != nil {
-					pos = implementation.Function.Pos
-				}
-				err := fmt.Errorf("%s implementation of method '%s' should not narrow down access range, %s -> %s",
-					errMsgPrefix(pos), name, m.accessString(), implementation.accessString())
+			if err := m.implementationMethodIsOk(c.Pos, implementation); err != nil {
 				errs = append(errs, err)
 			}
 		} else {
@@ -365,13 +431,6 @@ func (c *Class) checkMethods() []error {
 	}
 	for name, methods := range c.Methods {
 		for _, method := range methods {
-			if name == SpecialMethodInit {
-				if c.IsAbstract() {
-					errs = append(errs, fmt.Errorf("%s abstract class cannot have construction method",
-						errMsgPrefix(method.Function.Pos)))
-					continue
-				}
-			}
 			errs = append(errs, method.checkModifierOk()...)
 			if method.IsAbstract() {
 				//nothing
@@ -381,7 +440,7 @@ func (c *Class) checkMethods() []error {
 						errMsgPrefix(method.Function.Pos)))
 					continue
 				}
-				isConstruction := (name == SpecialMethodInit)
+				isConstruction := name == SpecialMethodInit
 				if isConstruction {
 					if method.IsFirstStatementCallFatherConstruction() == false {
 						errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",

@@ -70,6 +70,7 @@ const (
 	ExpressionTypeGlobal                                    // global.XXX
 	ExpressionTypeParenthesis                               // ( a )
 	ExpressionTypeVArgs                                     // a ...
+	ExpressionTypeDot                                       // .
 )
 
 type Expression struct {

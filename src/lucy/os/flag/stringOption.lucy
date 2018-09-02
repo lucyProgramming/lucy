@@ -1,0 +1,43 @@
+
+
+
+
+
+public final class StringOption  extends Option{
+	private stringDefaultValue string 
+	private stringValue string 
+	
+	fn StringOption(d string) {
+		this.super() 
+		.stringDefaultValue = d 
+	}
+	
+	protected fn reset() {
+		this.stringValue = .stringDefaultValue 
+	}
+	
+	
+	protected fn parse(s string) -> (err error) {
+		
+	} 
+	public fn getFloatValue() -> (v string){
+		v = this.stringValue
+	}
+	
+	protected fn  formatDefaultValue() -> ( format string  ) {
+		format = this.stringDefaultValue
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+

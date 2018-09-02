@@ -262,7 +262,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		//var fieldMethodHandler *ClassField
 		args := checkExpressions(block, call.Args, errs, true)
-		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call.Name, call, args,
+		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call, args,
 			false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
@@ -343,6 +343,38 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		return nil
 	}
+	if object.Type == VariableTypeDynamicSelector {
+		if call.Name == SUPER {
+			*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
+				errMsgPrefix(e.Pos), SUPER, object.TypeString()))
+			return nil
+		}
+		var fieldMethodHandler *ClassField
+		callArgTypes := checkExpressions(block, call.Args, errs, true)
+		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
+		if err != nil {
+			*errs = append(*errs, err)
+			return nil
+		}
+		if matched {
+			if fieldMethodHandler != nil {
+				call.FieldMethodHandler = fieldMethodHandler
+				return fieldMethodHandler.Type.FunctionType.mkReturnTypes(e.Pos)
+			} else {
+				method := ms[0]
+				call.Method = method
+				return fieldMethodHandler.Type.FunctionType.mkReturnTypes(e.Pos)
+			}
+		} else {
+			if len(ms) == 0 {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
+			} else {
+				*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, callArgTypes))
+			}
+		}
+		return nil
+	}
+
 	if object.Type != VariableTypeObject && object.Type != VariableTypeClass {
 		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
@@ -358,7 +390,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		ms, matched, err := object.Class.accessInterfaceObjectMethod(e.Pos, errs, call.Name, call, callArgTypes, false)
 		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+			*errs = append(*errs, err)
 			return nil
 		}
 		if matched {
@@ -381,16 +413,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			errMsgPrefix(e.Pos)))
 	}
 	var fieldMethodHandler *ClassField
-	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call.Name, call, callArgTypes, false, &fieldMethodHandler)
+	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
 	}
-	if fieldMethodHandler != nil && matched {
-		*errs = append(*errs, fmt.Errorf("%s method '%s' is ambiguous",
-			errMsgPrefix(e.Pos), call.Name))
-	}
-
 	if fieldMethodHandler != nil {
 		if object.Type == VariableTypeObject {
 			if fieldMethodHandler.IsStatic() {

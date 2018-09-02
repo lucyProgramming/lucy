@@ -23,6 +23,20 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			},
 		}
 		e.Value = returnValueTypes[0]
+	case ExpressionTypeDot:
+		if block.InheritedAttribute.Class == nil {
+			errs = []error{fmt.Errorf("%s '%s' must in class scope",
+				errMsgPrefix(e.Pos), e.Description)}
+		} else {
+			returnValueTypes = []*Type{
+				{
+					Type:  VariableTypeDynamicSelector,
+					Pos:   e.Pos,
+					Class: block.InheritedAttribute.Class,
+				},
+			}
+			e.Value = returnValueTypes[0]
+		}
 	case ExpressionTypeBool:
 		returnValueTypes = []*Type{
 			{

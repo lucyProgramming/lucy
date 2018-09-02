@@ -161,7 +161,6 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 	}
 	if b.Variables != nil {
 		if t, ok := b.Variables[name]; ok {
-			t.Used = true
 			return t, nil
 		}
 	}
@@ -173,6 +172,7 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 	}
 	if b.EnumNames != nil {
 		if t, ok := b.EnumNames[name]; ok {
+			t.Enum.Used = true
 			return t, nil
 		}
 	}

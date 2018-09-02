@@ -164,18 +164,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			fallthrough
 		case VariableTypeObject:
 			if left.Equal(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
-				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-					errMsgPrefix(e.Pos),
-					e.Description,
-					left.TypeString(),
-					right.TypeString()))
+				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+			}
+		case VariableTypeFunction:
+			if right.Type != VariableTypeNull || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		default:
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-				errMsgPrefix(e.Pos),
-				e.Description,
-				left.TypeString(),
-				right.TypeString()))
+			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
 		return result
 	}
