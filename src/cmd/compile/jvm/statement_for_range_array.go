@@ -62,7 +62,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		autoVar.K = code.MaxLocals
 		code.MaxLocals++
 		forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
-
 	}
 
 	if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
@@ -161,13 +160,18 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	code.Codes[code.CodeLength+1] = byte(autoVar.K)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
-	// load start
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
-	// load k
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-	// mk index
-	code.Codes[code.CodeLength] = cg.OP_iadd
-	code.CodeLength++
+	if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
+		// load start
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
+		// load k
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+		// mk index
+		code.Codes[code.CodeLength] = cg.OP_iadd
+		code.CodeLength++
+	} else {
+		// load k
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+	}
 	// load end
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
 	if 2 > maxStack {
@@ -186,9 +190,9 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
 			code.Codes[code.CodeLength] = cg.OP_iadd
 			code.CodeLength++
-		}
-		if 3 > maxStack {
-			maxStack = 3
+			if 3 > maxStack {
+				maxStack = 3
+			}
 		}
 		// load value
 		switch s.RangeAttr.RangeOn.Value.Array.Type {
