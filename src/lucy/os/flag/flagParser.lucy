@@ -70,6 +70,7 @@ public final class  FlagParser {
 			v.reset()
 		}
 		noDefine = []string{} 
+		print(args )
 		for k := 0 ; k < len (args) ; k++{
 			v := args[k]
 			if false == this.options.keyExist(v) {
@@ -92,7 +93,6 @@ public final class  FlagParser {
 			
 		}
 	}
-	
 	public fn helpMsg() -> (msg string){
 		msg = "flag are:\n"
 		for k,v := range this.options {

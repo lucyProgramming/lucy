@@ -182,6 +182,14 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
+			code.Codes[code.CodeLength] = cg.OP_iadd
+			code.CodeLength++
+		}
+		if 3 > maxStack {
+			maxStack = 3
+		}
 		// load value
 		switch s.RangeAttr.RangeOn.Value.Array.Type {
 		case ast.VariableTypeBool:
