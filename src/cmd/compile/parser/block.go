@@ -322,6 +322,11 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				}
 				block.Statements = append(block.Statements, s)
 			}
+		case lex.TokenElse, lex.TokenElseif:
+			blockParser.parser.errs = append(blockParser.parser.errs,
+				fmt.Errorf("%s unexpected '%s'", blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
+			blockParser.Next(lfIsToken)
+
 		default:
 			// something I cannot handle
 			return

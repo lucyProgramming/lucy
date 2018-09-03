@@ -14,6 +14,7 @@ public final class BoolOption  extends Option{
 	protected fn reset() {
 		this.boolValue = this.boolDefaultValue 
 	}
+	
 	//special case 
 	protected fn parse(s string) -> (err error) {
 		this.boolValue = !this.boolDefaultValue

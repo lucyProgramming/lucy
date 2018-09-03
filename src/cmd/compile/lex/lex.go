@@ -166,7 +166,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		isScientificNotation = true
 		c, eof = lex.getChar()
 		if eof {
-			err = fmt.Errorf("unexpect EOF")
+			err = fmt.Errorf("unexpected EOF")
 		}
 		if c == '-' {
 			powerPositive = false
@@ -511,7 +511,7 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 			var c1, c2 byte
 			c1, eof = lex.getChar() //skip 'x'
 			if eof {
-				err = fmt.Errorf("unexpect EOF")
+				err = fmt.Errorf("unexpected EOF")
 				continue
 			}
 			if false == lex.isHex(c) {

@@ -47,10 +47,27 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 		blockParser.consume(untilRc)
 	}
 	blockParser.Next(lfIsToken) // skip }
+	if blockParser.parser.token.Type == lex.TokenLf {
+		pos := blockParser.parser.mkPos()
+		blockParser.Next(lfNotToken)
+		if blockParser.parser.token.Type == lex.TokenElseif ||
+			blockParser.parser.token.Type == lex.TokenElse {
+			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s unexpected new line",
+				blockParser.parser.errorMsgPrefix(pos)))
+		}
+	}
 	if blockParser.parser.token.Type == lex.TokenElseif {
 		statementIf.ElseIfList, err = blockParser.parseElseIfList()
 		if err != nil {
 			return statementIf, err
+		}
+	}
+	if blockParser.parser.token.Type == lex.TokenLf {
+		pos := blockParser.parser.mkPos()
+		blockParser.Next(lfNotToken)
+		if blockParser.parser.token.Type == lex.TokenElse {
+			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s unexpected new line",
+				blockParser.parser.errorMsgPrefix(pos)))
 		}
 	}
 	if blockParser.parser.token.Type == lex.TokenElse {

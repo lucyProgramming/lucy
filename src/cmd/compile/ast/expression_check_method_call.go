@@ -205,7 +205,7 @@ func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, er
 		} else {
 			method := ms[0]
 			call.Method = method
-			return fieldMethodHandler.Type.FunctionType.mkReturnTypes(e.Pos)
+			return method.Function.Type.mkReturnTypes(e.Pos)
 		}
 	} else {
 		if len(ms) == 0 {

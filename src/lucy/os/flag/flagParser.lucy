@@ -1,6 +1,6 @@
 
 /*
-	a simple but yet powerful args parse for lucy programing
+	a simple but yet powerful cmd parse for lucy programing
 */
 public final class  FlagParser {
 	options map{ string -> Option };
@@ -11,56 +11,54 @@ public final class  FlagParser {
 	}
 	
 	
-	public fn boolOption(name string , d bool ,usage string ) ->(o BoolOption){
+	private fn checkOptionExist(name string) {
 		if this.options.keyExist(name)  {
-			panic(new error(sprintf("name already '%s' exists" , name )))
+			panic(new error(sprintf("option already '%s' exists" , name )))
 		}
-		if name.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , name )))
+	}
+	
+	public fn boolOption(option string , d bool ,usage string ) ->(o BoolOption){
+		.checkOptionExist(option)
+		if option.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , option )))
 		}
 		o = new BoolOption(d)
 		o.typ = OptionTypeBool
 		o.usage = usage
-		this.options[name] = o
+		this.options[option] = o
 	} 
 	
-	public fn intOption(name string , d int ,usage string ) ->(o IntOption){
-		if this.options.keyExist(name)  {
-			panic(new error(sprintf("name already '%s' exists" , name )))
-		}
-		if name.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , name )))
+	public fn intOption(option string , d int ,usage string ) ->(o IntOption){
+		.checkOptionExist(option)
+		if option.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , option )))
 		}
 		o = new IntOption(d);
 		o.typ = OptionTypeInt
 		o.usage = usage 
-		this.options[name] = o
+		this.options[option] = o
 	} 
 	
-	public fn stringOption(name string , d string ,usage string ) ->(o StringOption){
-		if this.options.keyExist(name)  {
-			panic(new error(sprintf("name already '%s' exists" , name )))
-		}
-		if name.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , name )))
+	public fn stringOption(option string , d string ,usage string ) ->(o StringOption){
+		.checkOptionExist(option)
+		if option.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , option )))
 		}
 		o = new StringOption(d);
 		o.typ = OptionTypeString
 		o.usage = usage 
-		this.options[name] = o
+		this.options[option] = o
 	}
 
-	public fn floatOption(name string , d float ,usage string ) ->(o FloatOption){
-		if this.options.keyExist(name)  {
-			panic(new error(sprintf("name already '%s' exists" , name )))
-		}
-		if name.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , name )))
+	public fn floatOption(option string , d float ,usage string ) ->(o FloatOption){
+		.checkOptionExist(option)
+		if option.startsWith("-") == false {
+			panic(new error(sprintf("'%s' not a valid option" , option )))
 		}
 		o = new FloatOption(d);
 		o.typ = OptionTypeFloat
 		o.usage = usage 
-		this.options[name] = o
+		this.options[option] = o
 	} 
 	
 	

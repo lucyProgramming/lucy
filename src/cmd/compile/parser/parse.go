@@ -537,7 +537,7 @@ func (parser *Parser) unExpectNewLineAndSkip() {
 func (parser *Parser) unExpectNewLine() error {
 	var err error
 	if parser.token.Type == lex.TokenLf {
-		err = fmt.Errorf("%s unexpect new line",
+		err = fmt.Errorf("%s unexpected new line",
 			parser.errorMsgPrefix(parser.mkPos()))
 		parser.errs = append(parser.errs, err)
 	}

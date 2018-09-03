@@ -206,7 +206,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnDynamicSelector(class *
 			Descriptor: Descriptor.methodDescriptor(&call.Method.Function.Type),
 		}, code.Codes[code.CodeLength:code.CodeLength+2])
 		code.CodeLength += 2
-		if t := popCallResult(code, e, call.FieldMethodHandler.Type.FunctionType); t > maxStack {
+		if t := popCallResult(code, e, &call.Method.Function.Type); t > maxStack {
 			maxStack = t
 		}
 	}

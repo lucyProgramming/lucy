@@ -65,9 +65,6 @@ func (c *Class) mkDefaultConstruction() {
 	if c.IsInterface() {
 		return
 	}
-	//if c.IsAbstract() {
-	//	return
-	//}
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
 	}

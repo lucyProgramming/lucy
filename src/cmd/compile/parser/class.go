@@ -315,7 +315,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s cannot have import at this scope",
 				classParser.parser.errorMsgPrefix(pos)))
 		default:
-			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s unexpect '%s'",
+			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s unexpected '%s'",
 				classParser.parser.errorMsgPrefix(), classParser.parser.token.Description))
 			classParser.Next(lfNotToken)
 		}
