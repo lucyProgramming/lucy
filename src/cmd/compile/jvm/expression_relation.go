@@ -64,6 +64,7 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		code.CodeLength += 8
 		return
 	}
+
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
 		bin.Right.Value.Type == ast.VariableTypeBool { // bool type
 		maxStack = buildExpression.build(class, code, bin.Left, context, state)

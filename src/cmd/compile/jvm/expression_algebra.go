@@ -177,19 +177,21 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 		case ast.VariableTypeByte:
 			if e.Type == ast.ExpressionTypeLsh {
 				code.Codes[code.CodeLength] = cg.OP_ishl
+				code.Codes[code.CodeLength+1] = cg.OP_i2b
+				code.CodeLength += 2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
+				code.CodeLength++
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_i2b
-			code.CodeLength += 2
 		case ast.VariableTypeShort:
 			if e.Type == ast.ExpressionTypeLsh {
 				code.Codes[code.CodeLength] = cg.OP_ishl
+				code.Codes[code.CodeLength+1] = cg.OP_i2s
+				code.CodeLength += 2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr
+				code.CodeLength++
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_i2s
-			code.CodeLength += 2
 		case ast.VariableTypeInt:
 			if e.Type == ast.ExpressionTypeLsh {
 				code.Codes[code.CodeLength] = cg.OP_ishl

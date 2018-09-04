@@ -27,11 +27,12 @@ func (buildExpression *BuildExpression) buildArray(class *cg.ClassHighLevel, cod
 	}
 	loadInt32(class, code, int32(arr.Length))
 	newArrayBaseOnType(class, code, e.Value.Array)
-	arrayObject := &ast.Type{}
-	arrayObject.Type = ast.VariableTypeJavaArray
-	arrayObject.Array = e.Value.Array
+	arrayObject := &ast.Type{
+		Type:  ast.VariableTypeJavaArray,
+		Array: e.Value.Array,
+	}
 	state.pushStack(class, arrayObject)
-	maxStack = 4
+	maxStack = 3
 	storeOP := storeArrayElementOp(e.Value.Array.Type)
 	var index int32 = 0
 	for _, v := range arr.Expressions {
