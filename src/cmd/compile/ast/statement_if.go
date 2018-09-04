@@ -21,9 +21,7 @@ func (s *StatementIf) check(father *Block) []error {
 	for _, v := range s.PrefixExpressions {
 		v.IsStatementExpression = true
 		_, es := v.check(&s.ConditionBlock)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+		errs = append(errs, es...)
 		if v.canBeUsedAsStatement() == false {
 			err := fmt.Errorf("%s expression '%s' evaluate but not used",
 				errMsgPrefix(v.Pos), v.Description)
@@ -32,9 +30,7 @@ func (s *StatementIf) check(father *Block) []error {
 	}
 	if s.Condition != nil {
 		conditionType, es := s.Condition.checkSingleValueContextExpression(&s.ConditionBlock)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+		errs = append(errs, es...)
 		if conditionType != nil && conditionType.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 				errMsgPrefix(s.Condition.Pos)))
@@ -48,19 +44,20 @@ func (s *StatementIf) check(father *Block) []error {
 	errs = append(errs, s.Block.checkStatements()...)
 	for _, v := range s.ElseIfList {
 		v.Block.inherit(&s.ConditionBlock)
-		if v.Condition.canBeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), v.Condition.Description))
-		}
-		conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
-		if esNotEmpty(es) {
+		if v.Condition != nil {
+			conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
 			errs = append(errs, es...)
+			if v.Condition.canBeUsedAsCondition() == false {
+				errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
+					errMsgPrefix(s.Condition.Pos), v.Condition.Description))
+			}
+			if conditionType != nil &&
+				conditionType.Type != VariableTypeBool {
+				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+					errMsgPrefix(s.Condition.Pos)))
+			}
+			errs = append(errs, v.Block.checkStatements()...)
 		}
-		if conditionType != nil && conditionType.Type != VariableTypeBool {
-			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-				errMsgPrefix(s.Condition.Pos)))
-		}
-		errs = append(errs, v.Block.checkStatements()...)
 	}
 	if s.ElseBlock != nil {
 		s.ElseBlock.inherit(&s.ConditionBlock)

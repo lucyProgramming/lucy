@@ -8,10 +8,6 @@ func errMsgPrefix(pos *Pos) string {
 	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
 }
 
-func esNotEmpty(es []error) bool {
-	return len(es) > 0
-}
-
 func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
 }
@@ -52,22 +48,11 @@ func getFirstPosFromArgs(args []*Type, pos **Pos) {
 	}
 }
 
-func getLastPosFromArgs(args []*Type, pos **Pos) {
-	index := len(args) - 1
-	for index >= 0 {
-		if args[index] != nil {
-			*pos = args[index].Pos
-			break
-		}
-		index--
-	}
-}
-
 func mkVoidType(pos *Pos) *Type {
-	t := &Type{}
-	t.Type = VariableTypeVoid // means no return;
-	t.Pos = pos
-	return t
+	result := &Type{}
+	result.Type = VariableTypeVoid // means no return;
+	result.Pos = pos
+	return result
 }
 
 /*
@@ -101,7 +86,10 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 	return i, should
 }
 
-func msNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type) error {
+func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type) error {
+	if len(ms) == 0 {
+		fmt.Errorf("%s method '%s' not found", errMsgPrefix(pos), name)
+	}
 	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
 	errMsg += "\twant " + ms[0].Function.badParameterMsg(name, want) + "\n"
@@ -118,7 +106,7 @@ func searchBuildIns(name string) interface{} {
 	if ok {
 		return t
 	}
-	if lucyBuildInPackage != nil {
+	if lucyBuildInPackage != nil { // avoid lucy/lang package
 		t, _ = lucyBuildInPackage.Block.NameExists(name)
 		return t
 	}
@@ -158,26 +146,6 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 		c.Type = t
 	}
 	return nil
-}
-
-func callWant(ft *FunctionType) string {
-	s := "("
-	for k, v := range ft.ParameterList {
-		s += v.Name + " "
-		s += v.Type.TypeString()
-		if k != len(ft.ParameterList)-1 {
-			s += ","
-		}
-	}
-	if ft.VArgs != nil {
-		if len(ft.ParameterList) > 0 {
-			s += ","
-		}
-		s += ft.VArgs.Name + " "
-		s += ft.VArgs.Type.TypeString()
-	}
-	s += ")"
-	return s
 }
 
 func callHave(ts []*Type) string {
@@ -231,3 +199,14 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 	}
 	return
 }
+
+//func getLastPosFromArgs(args []*Type, pos **Pos) {
+//	index := len(args) - 1
+//	for index >= 0 {
+//		if args[index] != nil {
+//			*pos = args[index].Pos
+//			break
+//		}
+//		index--
+//	}
+//}

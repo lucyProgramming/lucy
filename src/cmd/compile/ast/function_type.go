@@ -103,7 +103,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 	var haveAndWant string
 	if ft.callArgsHasNoNil(callArgsTypes) {
 		haveAndWant = fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
-		haveAndWant += fmt.Sprintf("\twant %s\n", callWant(ft))
+		haveAndWant += fmt.Sprintf("\twant %s\n", ft.wantArgs())
 	}
 	errs := []error{}
 	if len(callArgsTypes) > len(ft.ParameterList) {
@@ -186,4 +186,24 @@ type CallVArgs struct {
 	PackArray2VArgs bool
 	NoArgs          bool
 	Type            *Type
+}
+
+func (ft *FunctionType) wantArgs() string {
+	s := "("
+	for k, v := range ft.ParameterList {
+		s += v.Name + " "
+		s += v.Type.TypeString()
+		if k != len(ft.ParameterList)-1 {
+			s += ","
+		}
+	}
+	if ft.VArgs != nil {
+		if len(ft.ParameterList) > 0 {
+			s += ","
+		}
+		s += ft.VArgs.Name + " "
+		s += ft.VArgs.Type.TypeString()
+	}
+	s += ")"
+	return s
 }

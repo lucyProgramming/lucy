@@ -7,9 +7,9 @@ import (
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionFunctionCall)
 	on, es := call.Expression.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if on == nil {
 		checkExpressions(block, call.Args, errs, true)
 		return nil
@@ -170,7 +170,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypes)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		cloneFunction, es := f.clone()
-		if esNotEmpty(es) {
+		if len(es) > 0 {
 			*errs = append(*errs, es...)
 			return nil
 		}

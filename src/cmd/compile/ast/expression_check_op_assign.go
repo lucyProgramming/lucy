@@ -6,9 +6,9 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	bin := e.Data.(*ExpressionBinary)
 	left := bin.Left.getLeftValue(block, errs)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if left == nil || right == nil {
 		return
 	}

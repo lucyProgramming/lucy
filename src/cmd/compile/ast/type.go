@@ -125,6 +125,8 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 		fallthrough
 	case VariableTypeArray:
 		e.Type = ExpressionTypeNull
+	default:
+		panic("missing default value")
 	}
 	return e
 }
@@ -146,7 +148,9 @@ func (typ *Type) RightValueValid() bool {
 	have type or not
 */
 func (typ *Type) isTyped() bool {
-	//null is only untyped right value
+	/*
+		null is only untyped right value
+	*/
 	return typ.RightValueValid() &&
 		typ.Type != VariableTypeNull
 }
@@ -166,13 +170,11 @@ func (typ *Type) Clone() *Type {
 		ret.Map.K = typ.Map.K.Clone()
 		ret.Map.V = typ.Map.V.Clone()
 	}
+	//TODO:: clone function
 	return ret
 }
 
 func (typ *Type) resolve(block *Block) error {
-	if typ == nil {
-		return nil
-	}
 	if typ.Resolved {
 		return nil
 	}
@@ -289,9 +291,11 @@ func (typ *Type) makeTypeFrom(d interface{}, loadFromImport bool) error {
 	switch d.(type) {
 	case *Class:
 		dd := d.(*Class)
-		if loadFromImport && dd.IsPublic() == false {
-			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, fmt.Errorf("%s class '%s' is not public",
-				errMsgPrefix(typ.Pos), dd.Name))
+		if loadFromImport &&
+			dd.IsPublic() == false {
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors,
+				fmt.Errorf("%s class '%s' is not public",
+					errMsgPrefix(typ.Pos), dd.Name))
 		}
 		if typ != nil {
 			typ.Type = VariableTypeObject

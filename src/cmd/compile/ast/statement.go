@@ -223,8 +223,8 @@ func (s *Statement) checkStatementExpression(block *Block) []error {
 		errs = append(errs, err)
 	}
 	_, es := s.Expression.check(block)
-	if esNotEmpty(es) {
-		errs = append(errs, es...)
-	}
+
+	errs = append(errs, es...)
+
 	return errs
 }

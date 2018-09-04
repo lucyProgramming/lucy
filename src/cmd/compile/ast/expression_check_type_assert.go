@@ -10,9 +10,9 @@ import (
 func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	assert := e.Data.(*ExpressionTypeAssert)
 	object, es := assert.Expression.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if object == nil {
 		return nil
 	}

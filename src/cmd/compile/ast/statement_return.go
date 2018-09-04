@@ -21,7 +21,7 @@ func (s *StatementReturn) mkDefers(b *Block) {
 
 func (s *StatementReturn) check(b *Block) []error {
 	s.mkDefers(b)
-	if len(s.Expressions) == 0 {
+	if len(s.Expressions) == 0 { // always ok
 		return nil
 	}
 	errs := make([]error, 0)

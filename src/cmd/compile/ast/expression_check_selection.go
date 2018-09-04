@@ -8,9 +8,7 @@ import (
 func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type {
 	selection := e.Data.(*ExpressionSelection)
 	object, es := selection.Expression.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	*errs = append(*errs, es...)
 	if object == nil {
 		return nil
 	}
@@ -29,9 +27,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		identifier.Name = selection.Name
 		identifier.Variable = v
 		e.Data = identifier
-		result := v.Type.Clone()
-		result.Pos = e.Pos
-		return result
+		return e.Value
 	case VariableTypeDynamicSelector:
 		if selection.Name == SUPER {
 			*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",

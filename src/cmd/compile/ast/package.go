@@ -148,19 +148,16 @@ func (p *Package) TypeCheck() []error {
 			p.Errors = append(p.Errors, err)
 		}
 		es := v.resolveInterfaces()
-		if esNotEmpty(es) {
-			p.Errors = append(p.Errors, es...)
-		}
+		p.Errors = append(p.Errors, es...)
 		es = v.resolveFieldsAndMethodsType()
-		if esNotEmpty(es) {
-			p.Errors = append(p.Errors, es...)
-		}
+		p.Errors = append(p.Errors, es...)
+
 	}
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase1()
-		if esNotEmpty(es) {
-			p.Errors = append(p.Errors, es...)
-		}
+
+		p.Errors = append(p.Errors, es...)
+
 		if p.shouldStop(nil) {
 			return p.Errors
 		}
@@ -173,9 +170,9 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase2()
-		if esNotEmpty(es) {
-			p.Errors = append(p.Errors, es...)
-		}
+
+		p.Errors = append(p.Errors, es...)
+
 		if p.shouldStop(nil) {
 			return p.Errors
 		}

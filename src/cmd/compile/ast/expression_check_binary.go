@@ -7,13 +7,9 @@ import (
 func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *Type) {
 	bin := e.Data.(*ExpressionBinary)
 	left, es := bin.Left.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	*errs = append(*errs, es...)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	*errs = append(*errs, es...)
 	if left != nil {
 		if left.RightValueValid() == false {
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",

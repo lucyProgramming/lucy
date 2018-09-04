@@ -11,9 +11,7 @@ func (c *Class) check(father *Block) []error {
 	c.Block.InheritedAttribute.Class = c
 	errs := c.checkPhase1()
 	es := c.checkPhase2()
-	if esNotEmpty(es) {
-		errs = append(errs, es...)
-	}
+	errs = append(errs, es...)
 	return errs
 }
 
@@ -31,9 +29,9 @@ func (c *Class) checkPhase1() []error {
 	}
 	errs = append(errs, c.checkModifierOk()...)
 	es := c.resolveFieldsAndMethodsType()
-	if esNotEmpty(es) {
-		errs = append(errs, es...)
-	}
+
+	errs = append(errs, es...)
+
 	return errs
 }
 
@@ -88,13 +86,11 @@ func (c *Class) checkPhase2() []error {
 		errs = append(errs, c.checkOverrideAbstractMethod()...)
 	}
 	errs = append(errs, c.suitableForInterfaces()...)
-	{
-		err := c.loadSuperClass(c.Pos)
-		if err != nil {
-			errs = append(errs, err)
-		} else {
-			errs = append(errs, c.suitableSubClassForAbstract(c.SuperClass)...)
-		}
+	err := c.loadSuperClass(c.Pos)
+	if err != nil {
+		errs = append(errs, err)
+	} else {
+		errs = append(errs, c.suitableSubClassForAbstract(c.SuperClass)...)
 	}
 	return errs
 }
@@ -241,15 +237,12 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		if err != nil {
 			return err
 		}
-		if class.SuperClass == nil {
-			panic("class is nil")
-		}
 		class = class.SuperClass
 	}
 	if is == false {
 		return nil
 	}
-	errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy\n",
+	errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy",
 		errMsgPrefix(c.Pos), c.Name)
 	tab := "\t"
 	index := len(arr) - 1
@@ -350,9 +343,7 @@ func (c *Class) checkFields() []error {
 	for _, v := range c.Fields {
 		if v.Expression != nil {
 			t, es := v.Expression.checkSingleValueContextExpression(&c.Block)
-			if esNotEmpty(es) {
-				errs = append(errs, es...)
-			}
+			errs = append(errs, es...)
 			if v.Type.Equal(&errs, t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
 					errMsgPrefix(v.Pos), t.TypeString(), v.Type.TypeString()))

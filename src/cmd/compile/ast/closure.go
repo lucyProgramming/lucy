@@ -36,7 +36,7 @@ func (c *Closure) NotEmpty(f *Function) bool {
 		keepClosureFunction()
 		return true
 	}
-	keepClosureFunction()
+	keepClosureFunction() // closure function is function too
 	return len(c.Functions) > 0
 }
 

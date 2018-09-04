@@ -188,7 +188,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	}
 	return nil, fmt.Errorf("%s identifier '%s' is not a expression , but '%s'",
-		errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIs(d))
+		errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIsWhat(d))
 }
 
 func (e *Expression) checkIdentifierThroughImports(it *Import) (*Type, error) {

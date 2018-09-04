@@ -53,11 +53,11 @@ func (c *Class) loadSelf(pos *Pos) error {
 	if c.NotImportedYet == false {
 		return nil
 	}
-	cc, err := PackageBeenCompile.loadClass(c.Name)
+	load, err := PackageBeenCompile.loadClass(c.Name)
 	if err != nil {
 		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
 	}
-	*c = *cc
+	*c = *load
 	return nil
 }
 
@@ -70,9 +70,6 @@ func (c *Class) mkDefaultConstruction() {
 	}
 	if len(c.Methods[SpecialMethodInit]) > 0 {
 		return
-	}
-	if c.Methods == nil {
-		c.Methods = make(map[string][]*ClassMethod)
 	}
 	m := &ClassMethod{}
 	m.isCompilerAuto = true
@@ -126,7 +123,8 @@ func (c *Class) mkClassInitMethod() {
 	f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	f.AccessFlags |= cg.ACC_METHOD_STATIC
 	f.AccessFlags |= cg.ACC_METHOD_FINAL
-	f.Name = ClassInitMethod
+	f.AccessFlags |= cg.ACC_METHOD_BRIDGE
+	f.Name = classInitMethod
 	f.Block.IsFunctionBlock = true
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
@@ -150,29 +148,30 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 		if v.Name == SUPER {
 			errs = append(errs, fmt.Errorf("%s super is special for access 'super'",
 				errMsgPrefix(v.Pos)))
+			continue
 		}
 		err = v.Type.resolve(&c.Block)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
-	for _, v := range c.Methods {
-		for _, vv := range v {
-			vv.Function.Block.inherit(&c.Block)
-			vv.Function.Block.InheritedAttribute.Function = vv.Function
-			vv.Function.Block.InheritedAttribute.ClassMethod = vv
-			vv.Function.checkParametersAndReturns(&errs)
+	for _, ms := range c.Methods {
+		for _, m := range ms {
+			m.Function.Block.inherit(&c.Block)
+			m.Function.Block.InheritedAttribute.Function = m.Function
+			m.Function.Block.InheritedAttribute.ClassMethod = m
+			m.Function.checkParametersAndReturns(&errs)
 			if c.IsInterface() {
-				for _, vvv := range vv.Function.Type.ParameterList {
-					if vvv.Expression != nil {
+				for _, p := range m.Function.Type.ParameterList {
+					if p.Expression != nil {
 						errs = append(errs, fmt.Errorf("%s interface method parameter '%s' cannot have default value",
-							errMsgPrefix(vvv.Pos), vvv.Name))
+							errMsgPrefix(p.Pos), p.Name))
 					}
 				}
-				for _, vvv := range vv.Function.Type.ReturnList {
-					if vvv.Expression != nil {
+				for _, r := range m.Function.Type.ReturnList {
+					if r.Expression != nil {
 						errs = append(errs, fmt.Errorf("%s interface method return variable '%s' cannot have default value",
-							errMsgPrefix(vvv.Pos), vvv.Name))
+							errMsgPrefix(r.Pos), r.Name))
 					}
 				}
 			}
@@ -262,6 +261,7 @@ func (c *Class) resolveFather() error {
 	}
 	return nil
 }
+
 func (c *Class) resolveInterfaces() []error {
 	if c.resolveInterfacesCalled {
 		return nil
@@ -334,7 +334,7 @@ func (c *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return c.SuperClass.haveSuperClass(pos, superclassName)
+	return c.SuperClass.haveSuperClass(pos, superclassName) // check father is implements
 }
 
 func (c *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
@@ -358,7 +358,7 @@ func (c *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return false, nil
+	return c.SuperClass.implementedInterface(pos, inter) // check father is implements
 }
 
 func (c *Class) loadSuperClass(pos *Pos) error {
@@ -376,8 +376,8 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	return nil
 }
 
-func (c *Class) matchConstructionFunction(pos *Pos, errs *[]error, no *ExpressionNew,
-	call *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) matchConstructionFunction(pos *Pos, errs *[]error, newCase *ExpressionNew,
+	callFatherCase *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
@@ -386,18 +386,18 @@ func (c *Class) matchConstructionFunction(pos *Pos, errs *[]error, no *Expressio
 		*errs = append(*errs, err)
 	}
 	var args *CallArgs
-	if no != nil {
-		args = &no.Args
+	if newCase != nil {
+		args = &newCase.Args
 	} else {
-		args = &call.Args
+		args = &callFatherCase.Args
 	}
 	for _, v := range c.Methods[SpecialMethodInit] {
 		vArgs, err := v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
 		if err == nil {
-			if no != nil {
-				no.VArgs = vArgs
+			if newCase != nil {
+				newCase.VArgs = vArgs
 			} else {
-				call.VArgs = vArgs
+				callFatherCase.VArgs = vArgs
 			}
 			return []*ClassMethod{v}, true, nil
 		} else {
@@ -433,6 +433,7 @@ func (c *Class) getFieldOrMethod(pos *Pos, name string, fromSub bool) (interface
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
 			// private field
+			// break find
 			return nil, notFoundErr
 		} else {
 			return c.Fields[name], nil

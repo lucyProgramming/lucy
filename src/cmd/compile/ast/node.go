@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-//代表语法数的一个节点
 type Top struct {
 	Data interface{}
 }

@@ -7,26 +7,14 @@ import (
 func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 	index := e.Data.(*ExpressionIndex)
 	on, es := index.Expression.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	*errs = append(*errs, es...)
 	if on == nil {
 		return nil
 	}
-	if on.Type != VariableTypeArray &&
-		on.Type != VariableTypeMap &&
-		on.Type != VariableTypeJavaArray {
-		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
-			errMsgPrefix(e.Pos), on.TypeString()))
-		return nil
-	}
-	// array
-	if on.Type == VariableTypeArray ||
-		on.Type == VariableTypeJavaArray {
+	switch on.Type {
+	case VariableTypeArray, VariableTypeJavaArray:
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
+		*errs = append(*errs, es...)
 		if indexType != nil {
 			if indexType.IsInteger() {
 				if indexType.Type == VariableTypeLong {
@@ -40,14 +28,11 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		result := on.Array.Clone()
 		result.Pos = e.Pos
 		return result
-	} else {
-		// map
+	case VariableTypeMap:
 		result := on.Map.V.Clone()
 		result.Pos = e.Pos
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
+		*errs = append(*errs, es...)
 		if indexType == nil {
 			return result
 		}
@@ -56,5 +41,9 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(e.Pos), indexType.TypeString(), on.Map.K.TypeString()))
 		}
 		return result
+	default:
+		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
+			errMsgPrefix(e.Pos), on.TypeString()))
+		return nil
 	}
 }

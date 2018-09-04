@@ -2,7 +2,7 @@ package cg
 
 type Exit struct {
 	CurrentCodeLength int
-	BranchBytes       []byte // [2]byte
+	BranchBytes       []byte //[2]byte
 }
 
 func (exit *Exit) Init(op byte, code *AttributeCode) *Exit {

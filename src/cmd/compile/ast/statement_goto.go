@@ -8,7 +8,6 @@ type StatementGoTo struct {
 	Defers         []*StatementDefer
 	LabelName      string
 	StatementLabel *StatementLabel
-	Block          *Block
 }
 
 func (s *Statement) checkStatementGoTo(b *Block) error {
@@ -18,20 +17,15 @@ func (s *Statement) checkStatementGoTo(b *Block) error {
 			errMsgPrefix(s.Pos), s.StatementGoTo.LabelName)
 	}
 	s.StatementGoTo.StatementLabel = label
-	s.StatementGoTo.Block = b
-	s.StatementGoTo.mkDefers()
+	s.StatementGoTo.mkDefers(b)
 	return s.StatementGoTo.StatementLabel.Ready(s.Pos)
 }
 
-func (s *StatementGoTo) mkDefers() {
+func (s *StatementGoTo) mkDefers(currentBlock *Block) {
 	bs := []*Block{}
-	bb := s.Block
-	for s.StatementLabel.Block != bb {
-		bs = append(bs, bb)
-		bb = bb.Outer
-	}
-	if len(bs) == 0 {
-		return
+	for s.StatementLabel.Block != currentBlock {
+		bs = append(bs, currentBlock)
+		currentBlock = currentBlock.Outer
 	}
 	for _, b := range bs {
 		if b.Defers != nil {

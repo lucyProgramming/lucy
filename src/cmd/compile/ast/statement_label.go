@@ -20,7 +20,7 @@ type StatementLabel struct {
 	defer {
 		xxx:
 	}
-	defer block could be compile multi time,
+	defer block could be compile multi times,
 	should reset the label
 
 */

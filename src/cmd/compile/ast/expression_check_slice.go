@@ -8,9 +8,9 @@ import (
 func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	on := e.Data.(*ExpressionSlice)
 	sliceOn, es := on.ExpressionOn.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if sliceOn == nil {
 		return nil
 	}
@@ -28,9 +28,9 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		on.Start.Data = int32(0)
 	}
 	startType, es := on.Start.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if startType != nil {
 		if startType.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
@@ -43,9 +43,9 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	}
 	if on.End != nil {
 		endType, es := on.End.checkSingleValueContextExpression(block)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
+
+		*errs = append(*errs, es...)
+
 		if endType != nil && endType.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'",
 				errMsgPrefix(endType.Pos), endType.TypeString()))

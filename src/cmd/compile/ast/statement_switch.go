@@ -25,9 +25,8 @@ func (s *StatementSwitch) check(block *Block) []error {
 		return errs
 	}
 	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		errs = append(errs, es...)
-	}
+	errs = append(errs, es...)
+
 	if conditionType == nil {
 		return errs
 	}
@@ -80,9 +79,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 				}
 			}
 			t, es := e.checkSingleValueContextExpression(block)
-			if esNotEmpty(es) {
-				errs = append(errs, es...)
-			}
+			errs = append(errs, es...)
 			if t == nil {
 				continue
 			}

@@ -46,9 +46,9 @@ func (s *StatementFor) checkRange() []error {
 		rangeExpression = t[0].Data.(*Expression)
 	}
 	rangeOn, es := rangeExpression.checkSingleValueContextExpression(s.Block.Outer)
-	if esNotEmpty(es) {
-		errs = append(errs, es...)
-	}
+
+	errs = append(errs, es...)
+
 	if rangeOn == nil {
 		return errs
 	}
@@ -206,9 +206,7 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Init.Pos), s.Init.Description))
 		}
 		_, es := s.Init.check(s.Block)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+		errs = append(errs, es...)
 	}
 	if s.Condition != nil {
 		if s.Condition.canBeUsedAsCondition() == false {
@@ -216,9 +214,9 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Condition.Pos), s.Condition.Description))
 		}
 		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+
+		errs = append(errs, es...)
+
 		if t != nil && t.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
 				errMsgPrefix(s.Condition.Pos), t.TypeString()))
@@ -231,13 +229,10 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Increment.Pos), s.Increment.Description))
 		}
 		_, es := s.Increment.check(s.Block)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
-	}
-	es := s.Block.checkStatements()
-	if esNotEmpty(es) {
+
 		errs = append(errs, es...)
+
 	}
+	errs = append(errs, s.Block.checkStatements()...)
 	return errs
 }

@@ -25,7 +25,7 @@ const (
 	JavaStringClass         = "java/lang/String"
 	SUPER                   = "super"
 	SpecialMethodInit       = "<init>"
-	ClassInitMethod         = "<clinit>"
+	classInitMethod         = "<clinit>"
 )
 
 func isMagicIdentifier(name string) bool {

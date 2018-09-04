@@ -7,9 +7,7 @@ import (
 func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 	question := e.Data.(*ExpressionQuestion)
 	condition, es := question.Selection.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	*errs = append(*errs, es...)
 	if condition != nil {
 		if condition.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(question.Selection.Pos)))
@@ -20,9 +18,9 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 	True, es := question.True.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if True != nil {
 		if True.RightValueValid() == false {
 			*errs = append(*errs, fmt.Errorf("%s not right value valid",
@@ -36,9 +34,9 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 	False, es := question.False.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if True != nil &&
 		False != nil &&
 		True.Equal(errs, False) == false {

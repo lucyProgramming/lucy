@@ -6,6 +6,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
+/*
+	true ? 1 : 2
+*/
 func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expression, error) {
 	left, err := expressionParser.parseLogicalOrExpression()
 	if err != nil {
@@ -21,7 +24,7 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 	}
 	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenColon {
-		return left, fmt.Errorf("%s expect ':',but '%s'",
+		return left, fmt.Errorf("%s expect ':' ,but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
 	}
 	expressionParser.Next(lfNotToken) // skip :

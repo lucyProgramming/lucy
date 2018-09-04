@@ -155,7 +155,7 @@ func (f *Function) check(b *Block) []error {
 
 func (f *Function) clone() (ret *Function, es []error) {
 	ret, es = ParseFunctionHandler(f.SourceCodes, f.Pos)
-	if esNotEmpty(es) {
+	if len(es) > 0 {
 		return ret, es
 	}
 	ret.TemplateClonedFunction = true
@@ -217,9 +217,9 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			}
 			f.HaveDefaultValue = true
 			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-			if esNotEmpty(es) {
-				*errs = append(*errs, es...)
-			}
+
+			*errs = append(*errs, es...)
+
 			if t != nil {
 				if v.Type.Equal(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
@@ -265,7 +265,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				continue
 			}
 			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-			if esNotEmpty(es) {
+			if len(es) > 0 {
 				*errs = append(*errs, es...)
 				continue
 			}

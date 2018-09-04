@@ -128,7 +128,7 @@ func (b *Block) searchType(name string) interface{} {
 	return nil
 }
 
-func (b *Block) searchedIdentifierIs(d interface{}) string {
+func (b *Block) searchedIdentifierIsWhat(d interface{}) string {
 	switch d.(type) {
 	case *Function:
 		return "function"
@@ -289,9 +289,7 @@ func (b *Block) checkConstants() []error {
 	}()
 	errs := make([]error, 0)
 	for _, c := range b.Constants {
-		if c.Name == NoNameIdentifier {
-			err := fmt.Errorf("%s '%s' is not a valid name",
-				errMsgPrefix(c.Pos), c.Name)
+		if err := b.nameIsValid(c.Name, c.Pos); err != nil {
 			errs = append(errs, err)
 			delete(b.Constants, c.Name)
 			continue
@@ -370,6 +368,7 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	return nil
 }
+
 func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
 		return fmt.Errorf("%s name is null string", errMsgPrefix(pos))

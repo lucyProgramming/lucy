@@ -50,8 +50,14 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(class *cg.ClassHi
 		}
 	case common.ArrayMethodAppend:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
-		for _, v := range call.Args {
+		for k, v := range call.Args {
 			currentStack := uint16(1)
+			if k != len(call.Args)-1 {
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				state.pushStack(class, call.Expression.Value)
+				currentStack++
+			}
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
@@ -63,11 +69,20 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(class *cg.ClassHi
 				Descriptor: meta.appendDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+			if k != len(call.Args)-1 {
+				state.popStack(1)
+			}
 		}
 	case common.ArrayMethodAppendAll:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
-		for _, v := range call.Args {
+		for k, v := range call.Args {
 			currentStack := uint16(1)
+			if k != len(call.Args)-1 {
+				code.Codes[code.CodeLength] = cg.OP_dup
+				code.CodeLength++
+				state.pushStack(class, call.Expression.Value)
+				currentStack++
+			}
 			stack := buildExpression.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
@@ -80,6 +95,9 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(class *cg.ClassHi
 				Descriptor: meta.appendAllDescriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+			if k != len(call.Args)-1 {
+				state.popStack(1)
+			}
 		}
 	}
 	return

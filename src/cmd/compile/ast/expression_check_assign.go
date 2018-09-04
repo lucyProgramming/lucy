@@ -21,21 +21,17 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	valueTypes := checkExpressions(block, values, errs, false)
 	leftTypes := []*Type{}
 	for _, v := range lefts {
-		if v.Type == ExpressionTypeIdentifier {
-			name := v.Data.(*ExpressionIdentifier)
-			if name.Name == NoNameIdentifier { // skip "_"
-				leftTypes = append(leftTypes, nil) // this is no assign situation
-				continue
-			}
+		if v.IsIdentifier(NoNameIdentifier) {
+			leftTypes = append(leftTypes, nil) // this is no assign situation
+		} else {
+			t := v.getLeftValue(block, errs)
+			leftTypes = append(leftTypes, t) // append even if it`s nil
 		}
-		t := v.getLeftValue(block, errs)
-		leftTypes = append(leftTypes, t) // append even if it`s nil
 	}
 	convertExpressionsToNeeds(values, leftTypes, valueTypes)
 	bin.Left.MultiValues = leftTypes
 	if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
-		pos := e.Pos
-		getLastPosFromArgs(valueTypes, &pos)
+		pos := values[len(values)-1].Pos
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
 			errMsgPrefix(pos),
 			len(valueTypes),

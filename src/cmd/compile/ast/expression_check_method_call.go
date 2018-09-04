@@ -9,9 +9,7 @@ import (
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	object, es := call.Expression.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+	*errs = append(*errs, es...)
 	if object == nil {
 		return nil
 	}
@@ -40,7 +38,6 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, err)
 			return nil
 		}
-		//var fieldMethodHandler *ClassField
 		args := checkExpressions(block, call.Args, errs, true)
 		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call, args,
 			false, nil)
@@ -56,13 +53,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			}
 			call.Method = ms[0]
 			return ms[0].Function.Type.mkReturnTypes(e.Pos)
-		}
-		if len(ms) == 0 {
-			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
 		} else {
-			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, args))
+
+			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, args))
+
+			return nil
 		}
-		return nil
 	case VariableTypeObject, VariableTypeClass:
 		call.Class = object.Class
 		callArgTypes := checkExpressions(block, call.Args, errs, true)
@@ -85,11 +81,9 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				call.Method = ms[0]
 				return ms[0].Function.Type.mkReturnTypes(e.Pos)
 			}
-			if len(ms) == 0 {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
-			} else {
-				*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, callArgTypes))
-			}
+
+			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
+
 			return nil
 		}
 		if len(call.ParameterTypes) > 0 {
@@ -113,34 +107,25 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			call.Method = m
 			return m.Function.Type.mkReturnTypes(e.Pos)
 		}
-		if len(ms) == 0 {
-			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
-		} else {
-			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, callArgTypes))
-		}
+		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 		return nil
 	default:
-		*errs = append(*errs, fmt.Errorf("%s cannot make method call named '%s' on '%s'",
+		*errs = append(*errs, fmt.Errorf("%s cannot make method call '%s' on '%s'",
 			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
 		return nil
 	}
 }
 func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]error, object *Type) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
+	if call.Expression.IsIdentifier(THIS) == false {
+		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'thi.super()'",
+			errMsgPrefix(e.Pos)))
+		return nil
+	}
 	if block.InheritedAttribute.IsConstructionMethod == false ||
 		block.IsFunctionBlock == false ||
 		block.InheritedAttribute.StatementOffset != 0 {
 		*errs = append(*errs, fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
-			errMsgPrefix(e.Pos)))
-		return nil
-	}
-	if object.Type != VariableTypeObject {
-		*errs = append(*errs, fmt.Errorf("%s cannot call father`s constuction on '%s'",
-			errMsgPrefix(e.Pos), object.TypeString()))
-		return nil
-	}
-	if call.Expression.IsIdentifier(THIS) == false {
-		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'this'",
 			errMsgPrefix(e.Pos)))
 		return nil
 	}
@@ -155,11 +140,6 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil
 	}
-	if block.InheritedAttribute.ClassMethod.isCompilerAuto && matched == false {
-		*errs = append(*errs, fmt.Errorf("%s compile auto constuction method not able to match appropriate father`s constuction",
-			errMsgPrefix(e.Pos)))
-		return nil
-	}
 	if matched {
 		m := ms[0]
 		if (object.Class.SuperClass.LoadFromOutSide && m.IsPublic() == false) ||
@@ -169,21 +149,17 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		call.Name = "<init>"
 		call.Method = m
 		call.Class = object.Class.SuperClass
-		ret := []*Type{&Type{}}
-		ret[0].Type = VariableTypeVoid
-		ret[0].Pos = e.Pos
+		ret := []*Type{mkVoidType(e.Pos)}
 		block.Statements[0].IsCallFatherConstructionStatement = true
 		block.InheritedAttribute.Function.CallFatherConstructionExpression = e
 		return ret
 	}
-	if len(ms) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s 'construction' not found",
-			errMsgPrefix(e.Pos)))
-	} else {
-		*errs = append(*errs, msNotMatchError(e.Pos, "constructor", ms, callArgsTypes))
-	}
+
+	*errs = append(*errs, methodsNotMatchError(e.Pos, "constructor", ms, callArgsTypes))
+
 	return nil
 }
+
 func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, errs *[]error, object *Type) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	if call.Name == SUPER {
@@ -208,11 +184,9 @@ func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, er
 			return method.Function.Type.mkReturnTypes(e.Pos)
 		}
 	} else {
-		if len(ms) == 0 {
-			*errs = append(*errs, fmt.Errorf("%s method '%s' not found", errMsgPrefix(e.Pos), call.Name))
-		} else {
-			*errs = append(*errs, msNotMatchError(e.Pos, call.Name, ms, callArgTypes))
-		}
+
+		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
+
 	}
 	return nil
 }
@@ -220,20 +194,21 @@ func (e *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs *[]
 	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
 	case common.ArrayMethodSize:
-		t := &Type{}
-		t.Type = VariableTypeInt
-		t.Pos = e.Pos
+		result := &Type{}
+		result.Type = VariableTypeInt
+		result.Pos = e.Pos
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' expect no arguments",
 				errMsgPrefix(e.Pos), call.Name))
 		}
-		return []*Type{t}
+		return []*Type{result}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on '%s'",
 			errMsgPrefix(e.Pos), call.Name, array.TypeString()))
 	}
 	return nil
 }
+
 func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]error, p *Package) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	d, exists := p.Block.NameExists(call.Name)
@@ -267,7 +242,6 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-
 			return f.Type.mkReturnTypes(e.Pos)
 		}
 	case *Variable:
@@ -393,9 +367,9 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		}
 		matchKey := call.Name == common.MapMethodKeyExist
 		t, es := call.Args[0].checkSingleValueContextExpression(block)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
+
+		*errs = append(*errs, es...)
+
 		if t == nil {
 			return []*Type{ret}
 		}

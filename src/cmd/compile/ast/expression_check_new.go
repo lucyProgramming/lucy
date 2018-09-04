@@ -63,12 +63,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		no.Construction = m
 		return ret
 	}
-	if len(ms) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s  'construction' not found",
-			errMsgPrefix(e.Pos)))
-	} else {
-		*errs = append(*errs, msNotMatchError(no.Type.Pos, "constructor", ms, callArgTypes))
-	}
+	*errs = append(*errs, methodsNotMatchError(no.Type.Pos, "constructor", ms, callArgTypes))
 	return ret
 }
 

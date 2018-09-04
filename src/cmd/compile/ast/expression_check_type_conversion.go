@@ -7,9 +7,9 @@ import (
 func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *Type {
 	conversion := e.Data.(*ExpressionTypeConversion)
 	on, es := conversion.Expression.checkSingleValueContextExpression(block)
-	if esNotEmpty(es) {
-		*errs = append(*errs, es...)
-	}
+
+	*errs = append(*errs, es...)
+
 	if on == nil {
 		return nil
 	}

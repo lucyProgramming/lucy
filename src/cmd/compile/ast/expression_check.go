@@ -289,9 +289,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 				fmt.Errorf("%s function literal named '%s' expect no name", errMsgPrefix(e.Pos), f.Name))
 		}
 		es := f.check(block)
-		if esNotEmpty(es) {
-			errs = append(errs, es...)
-		}
+		errs = append(errs, es...)
 		f.IsClosureFunction = f.Closure.NotEmpty(f)
 		if e.IsStatementExpression {
 			err := block.Insert(f.Name, f.Pos, f)
@@ -324,7 +322,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 	case ExpressionTypeVArgs:
 		var t *Type
 		t, errs = e.Data.(*Expression).checkSingleValueContextExpression(block)
-		if esNotEmpty(errs) {
+		if len(errs) > 0 {
 			return returnValueTypes, errs
 		}
 		e.Value = t
@@ -399,54 +397,57 @@ func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []e
 	return ret, es
 }
 
-func (by *Expression) methodAccessAble(block *Block, m *ClassMethod, errs *[]error) {
-	if by.Value.Type == VariableTypeObject {
+func (e *Expression) methodAccessAble(block *Block, m *ClassMethod, errs *[]error) {
+	if e.Value.Type == VariableTypeObject {
 		if m.IsStatic() {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
-				errMsgPrefix(by.Pos), m.Function.Name))
+				errMsgPrefix(e.Pos), m.Function.Name))
 		}
-		if false == by.IsIdentifier(THIS) {
-			if (by.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
-				(by.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(by.Pos), m.Function.Name))
+		if false == e.IsIdentifier(THIS) {
+			if (e.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+				(e.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
+					errMsgPrefix(e.Pos), m.Function.Name))
 			}
 		}
 	} else {
 		if m.IsStatic() == false {
-			*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
-				errMsgPrefix(by.Pos), m.Function.Name))
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from objectref",
+				errMsgPrefix(e.Pos), m.Function.Name))
 		}
-		if by.Value.Class != block.InheritedAttribute.Class {
-			if (by.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
-				(by.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(by.Pos), m.Function.Name))
+		if e.Value.Class != block.InheritedAttribute.Class {
+			if (e.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+				(e.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
+					errMsgPrefix(e.Pos), m.Function.Name))
 			}
 		}
 	}
 }
 
-func (by *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassField, errs *[]error) {
-	if by.Value.Type == VariableTypeObject {
+func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassField, errs *[]error) {
+	if e.Value.Type == VariableTypeObject {
 		if fieldMethodHandler.IsStatic() {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' is static,shoule make call from class",
-				errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+				errMsgPrefix(e.Pos), fieldMethodHandler.Name))
 		}
-		if false == by.IsIdentifier(THIS) {
-			if (by.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
-				(by.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+		if false == e.IsIdentifier(THIS) {
+			if (e.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+				(e.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
+					errMsgPrefix(e.Pos), fieldMethodHandler.Name))
 			}
 		}
 	} else { // class
 		if fieldMethodHandler.IsStatic() == false {
-			*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from object",
-				errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+			*errs = append(*errs, fmt.Errorf("%s method '%s' is not static,shoule make call from objectref",
+				errMsgPrefix(e.Pos), fieldMethodHandler.Name))
 		}
-		if by.Value.Class != block.InheritedAttribute.Class {
-			if (by.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
-				(by.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public",
-					errMsgPrefix(by.Pos), fieldMethodHandler.Name))
+		if e.Value.Class != block.InheritedAttribute.Class {
+			if (e.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+				(e.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
+					errMsgPrefix(e.Pos), fieldMethodHandler.Name))
 			}
 		}
 	}

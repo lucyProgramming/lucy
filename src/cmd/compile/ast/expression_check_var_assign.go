@@ -17,8 +17,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	values := bin.Right.Data.([]*Expression)
 	assignTypes := checkExpressions(block, values, errs, false)
 	if len(lefts) > len(assignTypes) {
-		pos := e.Pos
-		getLastPosFromArgs(assignTypes, &pos)
+		pos := values[len(values)-1].Pos
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d values to %d destinations",
 			errMsgPrefix(pos),
 			len(assignTypes),

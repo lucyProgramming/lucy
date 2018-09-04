@@ -38,7 +38,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier '%s' is '%s' , cannot be used as left value",
-				errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIs(d)))
+				errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIsWhat(d)))
 			return nil
 		}
 	case ExpressionTypeIndex:
@@ -48,9 +48,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 	case ExpressionTypeSelection:
 		selection := e.Data.(*ExpressionSelection)
 		object, es := selection.Expression.checkSingleValueContextExpression(block)
-		if esNotEmpty(es) {
-			*errs = append(*errs, es...)
-		}
+		*errs = append(*errs, es...)
 		if object == nil {
 			return nil
 		}
@@ -74,21 +72,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			} else {
 				return nil
 			}
-		case VariableTypeObject:
-			field, err := object.Class.accessField(e.Pos, selection.Name, false)
-			if err != nil {
-				*errs = append(*errs, err)
-			}
-			selection.Field = field
-			if field != nil {
-				selection.Expression.fieldAccessAble(block, field, errs)
-				result = field.Type.Clone()
-				result.Pos = e.Pos
-				e.Value = result
-				return result
-			}
-			return nil
-		case VariableTypeClass:
+		case VariableTypeObject, VariableTypeClass:
 			field, err := object.Class.accessField(e.Pos, selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, err)
