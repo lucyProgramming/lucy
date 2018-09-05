@@ -62,13 +62,13 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	}
 	maxStack = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
-	var exit *cg.Exit
+	var noMatch *cg.Exit
 	size := jvmSlotSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
 	for _, c := range s.StatementSwitchCases {
-		if exit != nil {
-			writeExits([]*cg.Exit{exit}, code.CodeLength)
+		if noMatch != nil {
+			writeExits([]*cg.Exit{noMatch}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		matches := []*cg.Exit{}
@@ -120,7 +120,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
-		exit = (&cg.Exit{}).Init(cg.OP_goto, code)
+		noMatch = (&cg.Exit{}).Init(cg.OP_goto, code)
 		// if match goto here
 		writeExits(matches, code.CodeLength)
 		//before block,pop off stack
@@ -142,7 +142,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 				(&cg.Exit{}).Init(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
-	writeExits([]*cg.Exit{exit}, code.CodeLength)
+	writeExits([]*cg.Exit{noMatch}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	if size == 1 {
 		code.Codes[code.CodeLength] = cg.OP_pop
