@@ -169,7 +169,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 			method.AttributeMethodParameters.Parameters = append(method.AttributeMethodParameters.Parameters, p)
 		}
 	}
-	if f.VoidReturn() == false {
+	if f.Type.VoidReturn() == false {
 		method.AttributeLucyReturnListNames = &cg.AttributeMethodParameters{}
 		for _, v := range f.Type.ReturnList {
 			p := &cg.MethodParameter{}

@@ -16,7 +16,7 @@ type Package struct {
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
 	Errors                       []error
-	TriggerPackageInitMethodName string
+	TriggerPackageInitMethodName string //
 	UnUsedPackage                map[string]*Import
 }
 
@@ -29,39 +29,38 @@ func (p *Package) loadBuildInPackage() error {
 		return err
 	}
 	lucyBuildInPackage = pp.(*Package)
-	lucyBuildInPackage.mkBuildInMark()
-	p.Block.Outer = &lucyBuildInPackage.Block
-	return nil
-}
-func (p *Package) mkBuildInMark() {
-	for _, v := range p.Block.Variables {
+	for _, v := range lucyBuildInPackage.Block.Variables {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Constants {
+	for _, v := range lucyBuildInPackage.Block.Constants {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Enums {
+	for _, v := range lucyBuildInPackage.Block.Enums {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Classes {
+	for _, v := range lucyBuildInPackage.Block.Classes {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Functions {
+	for _, v := range lucyBuildInPackage.Block.Functions {
 		v.IsBuildIn = true
 		v.LoadedFromLucyLangPackage = true
 	}
-	for _, v := range p.Block.TypeAliases {
+	for _, v := range lucyBuildInPackage.Block.TypeAliases {
 		v.IsBuildIn = true
 	}
+	p.Block.Outer = &lucyBuildInPackage.Block
+	return nil
 }
+
 func (p *Package) getImport(file string, accessName string) *Import {
 	if p.Files == nil {
 		return nil
 	}
-	if _, ok := p.Files[file]; ok == false {
+	if file, ok := p.Files[file]; ok == false {
 		return nil
+	} else {
+		return file.Imports[accessName]
 	}
-	return p.Files[file].Imports[accessName]
 }
 
 func (p *Package) mkInitFunctions(bs []*Block) {
@@ -79,7 +78,7 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 }
 
 func (p *Package) shouldStop(errs []error) bool {
-	return (len(p.Errors) + len(errs)) >= p.NErrors2Stop
+	return len(p.Errors)+len(errs) >= p.NErrors2Stop
 }
 
 func (p *Package) TypeCheck() []error {

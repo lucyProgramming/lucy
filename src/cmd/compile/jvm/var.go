@@ -39,5 +39,5 @@ const (
 	javaLongClass               = "java/lang/Long"
 	throwableClass              = "java/lang/Throwable"
 	javaPrintStreamClass        = "java/io/PrintStream"
-	mapClass                    = "java/util/HashMap"
+	mapClass                    = "java/util/concurrent/ConcurrentHashMap"
 )

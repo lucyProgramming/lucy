@@ -22,7 +22,7 @@ func newMultiValueAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, stat
 
 func (packer *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	valueIndex int, typ *ast.Type) (maxStack uint16) {
-	maxStack = packer.unPackObject(class, code, valueIndex)
+	maxStack = packer.unPack2Object(class, code, valueIndex)
 	if typ.IsPointer() == false {
 		typeConverter.unPackPrimitives(class, code, typ)
 		if t := jvmSlotSize(typ); t > maxStack {
@@ -37,7 +37,7 @@ func (packer *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.Attri
 /*
 	object is all i need
 */
-func (packer *MultiValueAutoVar) unPackObject(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (packer *MultiValueAutoVar) unPack2Object(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	valueIndex int) (maxStack uint16) {
 	if valueIndex > 127 {
 		panic("over 127")

@@ -17,51 +17,29 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		currentStack := uint16(0)
 		if v.BeenCaptured > 0 {
 			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
-			if vs.IfDeclaredBefore[0] {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-				currentStack = 1
-				state.pushStack(class, obj)
-			} else {
-				closure.createClosureVar(class, code, v.Type)
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				currentStack = 2
-				state.pushStack(class, obj)
-				state.pushStack(class, obj)
-			}
+			closure.createClosureVar(class, code, v.Type)
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+			currentStack = 2
+			state.pushStack(class, obj)
+			state.pushStack(class, obj)
 		}
 		stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if v.Name == ast.NoNameIdentifier {
-			if jvmSlotSize(vs.InitValues[0].Value) == 1 {
-				code.Codes[code.CodeLength] = cg.OP_pop
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_pop2
-			}
-			code.CodeLength++
-			return
-		}
 		if v.IsGlobal {
 			buildExpression.BuildPackage.storeGlobalVariable(class, code, v)
 		} else {
-			if vs.IfDeclaredBefore[0] {
-				buildExpression.BuildPackage.storeLocalVar(class, code, v)
+			v.LocalValOffset = code.MaxLocals
+			buildExpression.BuildPackage.storeLocalVar(class, code, v)
+			if v.BeenCaptured > 0 {
+				code.MaxLocals++
+				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
+				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 			} else {
-				v.LocalValOffset = code.MaxLocals
-				if v.BeenCaptured > 0 {
-					code.MaxLocals++
-				} else {
-					code.MaxLocals += jvmSlotSize(v.Type)
-				}
-				buildExpression.BuildPackage.storeLocalVar(class, code, v)
-				if v.BeenCaptured > 0 {
-					copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-					state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
-				} else {
-					state.appendLocals(class, v.Type)
-				}
+				code.MaxLocals += jvmSlotSize(v.Type)
+				state.appendLocals(class, v.Type)
 			}
 		}
 		return

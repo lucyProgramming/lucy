@@ -454,7 +454,7 @@ func (c *Class) checkMethods() []error {
 						Class: c,
 					}
 				}
-				if isConstruction && method.Function.VoidReturn() == false {
+				if isConstruction && method.Function.Type.VoidReturn() == false {
 					errs = append(errs, fmt.Errorf("%s construction method expect no return values",
 						errMsgPrefix(method.Function.Type.ParameterList[0].Pos)))
 				}

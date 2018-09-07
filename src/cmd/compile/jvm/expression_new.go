@@ -127,10 +127,11 @@ func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, 
 			Type:  ast.VariableTypeJavaArray,
 			Array: e.Value.Array,
 		})
-		defer state.popStack(1)
+
 		if t := 3 + setEnumArray(class, code, state, context, e.Value.Array.Enum); t > maxStack {
 			maxStack = t
 		}
+		state.popStack(1)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

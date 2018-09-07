@@ -214,7 +214,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 		e.Value = tt
 	case ExpressionTypeQuestion:
-		tt := e.checkTernaryExpression(block, &errs)
+		tt := e.checkQuestionExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}

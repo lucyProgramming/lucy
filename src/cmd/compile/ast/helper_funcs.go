@@ -61,13 +61,13 @@ func mkVoidType(pos *Pos) *Type {
 func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import, bool) {
 	//fmt.Println(name, from, alreadyHave)
 	// different file
+	// should access from import
 	if from.Filename != alreadyHave.Filename {
 		i := PackageBeenCompile.getImport(from.Filename, name)
-		should := i != nil
-		if should {
+		if i != nil {
 			i.Used = true
 		}
-		return i, should
+		return i, i != nil
 	}
 	i := PackageBeenCompile.getImport(from.Filename, name)
 	if i == nil {
@@ -148,23 +148,6 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	return nil
 }
 
-func callHave(ts []*Type) string {
-	s := "("
-	for k, v := range ts {
-		if v == nil {
-			continue
-		}
-		if v.Name != "" {
-			s += v.Name + " "
-		}
-		s += v.TypeString()
-		if k != len(ts)-1 {
-			s += ","
-		}
-	}
-	s += ")"
-	return s
-}
 func convertExpressionToNeed(e *Expression, need *Type, eval *Type) {
 	convertExpressionsToNeeds([]*Expression{e}, []*Type{need}, []*Type{eval})
 }

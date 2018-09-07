@@ -16,12 +16,12 @@ func writeExits(es []*cg.Exit, to int) {
 	}
 }
 
-func gotoOffset(code *cg.AttributeCode, offset int) {
-	if offset < 0 {
+func jumpTo(code *cg.AttributeCode, to int) {
+	if to < 0 {
 		panic("to is negative")
 	}
 	exit := (&cg.Exit{}).Init(cg.OP_goto, code)
-	writeExits([]*cg.Exit{exit}, offset)
+	writeExits([]*cg.Exit{exit}, to)
 }
 
 func copyOPs(code *cg.AttributeCode, op ...byte) {
@@ -299,7 +299,7 @@ func setEnumArray(class *cg.ClassHighLevel, code *cg.AttributeCode, state *Stack
 	code.Codes[code.CodeLength+1] = byte(a.k)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
-	gotoOffset(code, offset)
+	jumpTo(code, offset)
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	return

@@ -5,7 +5,7 @@ import (
 )
 
 type AttributeDefaultParameters struct {
-	Start     uint16 // first
+	Start     uint16 // start
 	Constants []uint16
 }
 

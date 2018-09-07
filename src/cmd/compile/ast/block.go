@@ -37,7 +37,8 @@ type Block struct {
 }
 
 func (b *Block) HaveVariableDefinition() bool {
-	return len(b.ClosureFunctions) > 0 || len(b.Variables) > 0
+	return len(b.ClosureFunctions) > 0 ||
+		len(b.Variables) > 0
 }
 
 func (b *Block) NameExists(name string) (interface{}, bool) {

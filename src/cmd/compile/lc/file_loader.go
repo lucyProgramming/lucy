@@ -210,7 +210,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 }
 
 func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
-	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyCompilerAuto); t != nil && len(t) > 0 {
+	if c.IsSynthetic() {
 		return nil, nil
 	}
 	//name
@@ -394,7 +394,8 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 					return err
 				}
 				if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.ACC_METHOD_VARARGS != 0 {
-					if vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1].Type.Type != ast.VariableTypeJavaArray {
+					if vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1].Type.Type !=
+						ast.VariableTypeJavaArray {
 						panic("not a java array")
 					}
 					vd.Type.FunctionType.VArgs = vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1]
@@ -411,9 +412,6 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	for _, m := range c.Methods {
 		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != nil && len(t) > 0 {
 			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
-			continue
-		}
-		if m.AccessFlags&cg.ACC_METHOD_BRIDGE != 0 {
 			continue
 		}
 		name := string(c.ConstPool[m.NameIndex].Info)

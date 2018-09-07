@@ -54,6 +54,24 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 	return true
 }
 
+func (ft *FunctionType) callHave(ts []*Type) string {
+	s := "("
+	for k, v := range ts {
+		if v == nil {
+			continue
+		}
+		if v.Name != "" {
+			s += v.Name + " "
+		}
+		s += v.TypeString()
+		if k != len(ts)-1 {
+			s += ","
+		}
+	}
+	s += ")"
+	return s
+}
+
 func (ft *FunctionType) VoidReturn() bool {
 	return len(ft.ReturnList) == 0 ||
 		ft.ReturnList[0].Type.Type == VariableTypeVoid
@@ -92,17 +110,17 @@ func (ft *FunctionType) callArgsHasNoNil(ts []*Type) bool {
 }
 
 func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
-	callArgsTypes []*Type, f *Function) (vArgs *CallVArgs, err error) {
+	callArgsTypes []*Type, f *Function) (vArgs *CallVariableArgs, err error) {
 	//trying to convert literal
 	convertExpressionsToNeeds(*args, ft.getParameterTypes(), callArgsTypes)
 	if ft.VArgs != nil {
-		vArgs = &CallVArgs{}
+		vArgs = &CallVariableArgs{}
 		vArgs.NoArgs = true
 		vArgs.Type = ft.VArgs.Type
 	}
 	var haveAndWant string
 	if ft.callArgsHasNoNil(callArgsTypes) {
-		haveAndWant = fmt.Sprintf("\thave %s\n", callHave(callArgsTypes))
+		haveAndWant = fmt.Sprintf("\thave %s\n", ft.callHave(callArgsTypes))
 		haveAndWant += fmt.Sprintf("\twant %s\n", ft.wantArgs())
 	}
 	errs := []error{}
@@ -176,7 +194,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 	return
 }
 
-type CallVArgs struct {
+type CallVariableArgs struct {
 	Expressions []*Expression
 	Length      int
 	/*

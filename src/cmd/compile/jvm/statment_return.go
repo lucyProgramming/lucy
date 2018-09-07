@@ -8,7 +8,7 @@ import (
 
 func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxStack uint16) {
-	if context.function.VoidReturn() { // no return value
+	if context.function.Type.VoidReturn() { // no return value
 		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
@@ -96,7 +96,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 						code.Codes[code.CodeLength] = cg.OP_dup // dup array list
 						code.CodeLength++
 						currentStack++
-						stack = autoVar.unPackObject(class, code, kk)
+						stack = autoVar.unPack2Object(class, code, kk)
 						if t := stack + currentStack; t > maxStack {
 							maxStack = t
 						}
@@ -165,7 +165,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 
 func (buildPackage *BuildPackage) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context) (maxStack uint16) {
-	if context.function.VoidReturn() { // when has no return,should not call this function
+	if context.function.Type.VoidReturn() { // when has no return,should not call this function
 		return
 	}
 	if len(context.function.Type.ReturnList) == 1 {

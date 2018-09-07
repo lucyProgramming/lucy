@@ -29,7 +29,6 @@ type Class struct {
 	Fields                 []*FieldInfo
 	Methods                []*MethodInfo
 	Attributes             []*AttributeInfo
-	AttributeCompilerAuto  *AttributeCompilerAuto
 	AttributeGroupedByName AttributeGroupedByName
 	TypeAlias              []*AttributeLucyTypeAlias
 	AttributeLucyEnum      *AttributeLucyEnum
@@ -46,6 +45,10 @@ type Class struct {
 	MethodrefConstants          map[CONSTANT_Methodref_info_high_level]*ConstPool
 	InterfaceMethodrefConstants map[CONSTANT_InterfaceMethodref_info_high_level]*ConstPool
 	MethodTypeConstants         map[CONSTANT_MethodType_info_high_level]*ConstPool
+}
+
+func (c *Class) IsSynthetic() bool {
+	return (c.AccessFlag & ACC_CLASS_SYNTHETIC) != 0
 }
 
 func (c *Class) InsertMethodTypeConst(n CONSTANT_MethodType_info_high_level) uint16 {
@@ -333,9 +336,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 					info.Attributes = append(info.Attributes, t)
 				}
 			}
-			if m.AttributeCompilerAuto != nil {
-				info.Attributes = append(info.Attributes, m.AttributeCompilerAuto.ToAttributeInfo(c))
-			}
+
 			if m.AttributeLucyReturnListNames != nil {
 				t := m.AttributeLucyReturnListNames.ToAttributeInfo(c, AttributeNameLucyReturnListNames)
 				if t != nil {
@@ -347,9 +348,7 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 	}
 	//source file
 	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
-	if c.AttributeCompilerAuto != nil {
-		c.Attributes = append(c.Attributes, c.AttributeCompilerAuto.ToAttributeInfo(c))
-	}
+
 	for _, v := range c.TypeAlias {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
 	}

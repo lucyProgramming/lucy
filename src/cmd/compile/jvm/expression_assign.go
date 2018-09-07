@@ -14,19 +14,34 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	bin := e.Data.(*ast.ExpressionBinary)
 	left := bin.Left.Data.([]*ast.Expression)[0]
 	right := bin.Right.Data.([]*ast.Expression)[0]
-	maxStack, remainStack, op, LeftValueKind := buildExpression.getLeftValue(class, code, left, context, state)
+	var remainStack uint16
+	var op []byte
+	var leftValueKind LeftValueKind
+	if left.IsIdentifier(ast.NoNameIdentifier) == false {
+		maxStack, remainStack, op, leftValueKind =
+			buildExpression.getLeftValue(class, code, left, context, state)
+	}
 	stack := buildExpression.build(class, code, right, context, state)
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t
 	}
-	currentStack := remainStack + jvmSlotSize(left.Value)
-	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, LeftValueKind, left.Value)
-		if currentStack > maxStack {
-			maxStack = currentStack
+	if left.IsIdentifier(ast.NoNameIdentifier) {
+		if jvmSlotSize(right.Value) == 1 {
+			code.Codes[code.CodeLength] = cg.OP_pop
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_pop2
 		}
+		code.CodeLength++
+	} else {
+		currentStack := remainStack + jvmSlotSize(left.Value)
+		if e.IsStatementExpression == false {
+			currentStack += buildExpression.dupStackLeaveValueBelow(code, leftValueKind, left.Value)
+			if currentStack > maxStack {
+				maxStack = currentStack
+			}
+		}
+		copyOPs(code, op...)
 	}
-	copyOPs(code, op...)
 	return
 }
 
@@ -46,6 +61,9 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	}
 	autoVar := newMultiValueAutoVar(class, code, state)
 	for k, v := range lefts {
+		if v.IsIdentifier(ast.NoNameIdentifier) {
+			continue
+		}
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, _ :=
 			buildExpression.getLeftValue(class, code, v, context, state)
@@ -62,7 +80,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	return
 }
 
-func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.AttributeCode, leftValueKind LeftValueKind,
+func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.AttributeCode, leftValueKind LeftValueKind,
 	stackTopType *ast.Type) (increment uint16) {
 	switch leftValueKind {
 	case LeftValueTypeLocalVar:
@@ -83,7 +101,6 @@ func (buildExpression *BuildExpression) controlStack2FitAssign(code *cg.Attribut
 			increment = 2
 		}
 		code.CodeLength++
-
 	case LeftValueTypePutField:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1

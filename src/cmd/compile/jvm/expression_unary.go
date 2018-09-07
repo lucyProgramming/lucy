@@ -80,10 +80,10 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 		context.MakeStackMap(code, state, code.CodeLength+8)
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_ifeq
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], uint16(7))
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], 7)
 		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
 		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], uint16(4))
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], 4)
 		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
 		code.CodeLength += 8
 	}

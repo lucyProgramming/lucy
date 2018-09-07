@@ -50,16 +50,7 @@ func (f *Function) NameLiteralFunction() string {
 	return t
 }
 
-type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall, block *Block,
-	errs *[]error, args []*Type, pos *Pos)
-
-type AutoVariableForReturnBecauseOfDefer struct {
-	Offset uint16
-}
-
-func (f *Function) VoidReturn() bool {
-	return f.Type.VoidReturn()
-}
+type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos)
 
 func (f *Function) readableMsg(name ...string) string {
 	var s string
@@ -86,7 +77,7 @@ func (f *Function) readableMsg(name ...string) string {
 		s += f.Type.VArgs.Type.TypeString()
 	}
 	s += ")"
-	if len(f.Type.ReturnList) > 0 && f.VoidReturn() == false {
+	if len(f.Type.ReturnList) > 0 && f.Type.VoidReturn() == false {
 		s += "->( "
 		for k, v := range f.Type.ReturnList {
 			s += v.Name + " "
@@ -175,6 +166,7 @@ func (f *Function) makeLastReturnStatement() {
 func (f *Function) IsGlobalMain() bool {
 	return f.IsGlobal && f.Name == MainFunctionName
 }
+
 func (f *Function) checkParametersAndReturns(errs *[]error) {
 	var err error
 	for k, v := range f.Type.ParameterList {

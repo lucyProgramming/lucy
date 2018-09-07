@@ -375,7 +375,7 @@ type ExpressionFunctionCall struct {
 	BuildInFunctionMeta      interface{} // for build in function only
 	Expression               *Expression
 	Args                     CallArgs
-	VArgs                    *CallVArgs
+	VArgs                    *CallVariableArgs
 	Function                 *Function
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionCallPair
@@ -386,7 +386,7 @@ type ExpressionMethodCall struct {
 	Class              *Class // for object or class
 	Expression         *Expression
 	Args               CallArgs
-	VArgs              *CallVArgs
+	VArgs              *CallVariableArgs
 	Name               string
 	Method             *ClassMethod
 	FieldMethodHandler *ClassField
@@ -439,7 +439,7 @@ type ExpressionNew struct {
 	Type         *Type
 	Args         CallArgs
 	Construction *ClassMethod
-	VArgs        *CallVArgs
+	VArgs        *CallVariableArgs
 }
 
 type ExpressionMap struct {

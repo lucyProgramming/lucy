@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
+func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type {
 	question := e.Data.(*ExpressionQuestion)
 	condition, es := question.Selection.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
@@ -18,9 +18,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 	True, es := question.True.checkSingleValueContextExpression(block)
-
 	*errs = append(*errs, es...)
-
 	if True != nil {
 		if True.RightValueValid() == false {
 			*errs = append(*errs, fmt.Errorf("%s not right value valid",
@@ -34,9 +32,7 @@ func (e *Expression) checkTernaryExpression(block *Block, errs *[]error) *Type {
 		}
 	}
 	False, es := question.False.checkSingleValueContextExpression(block)
-
 	*errs = append(*errs, es...)
-
 	if True != nil &&
 		False != nil &&
 		True.Equal(errs, False) == false {

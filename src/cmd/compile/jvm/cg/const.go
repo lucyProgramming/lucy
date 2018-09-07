@@ -11,7 +11,6 @@ const (
 	// lucy attribute
 	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
 	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
-	AttributeNameLucyCompilerAuto       = "LucyCompilerAuto"
 	AttributeNameLucyTriggerPackageInit = "LucyTriggerPackageInitMethod"
 	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"
 	AttributeNameLucyTypeAlias          = "LucyTypeAlias"

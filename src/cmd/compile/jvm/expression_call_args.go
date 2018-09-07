@@ -6,7 +6,7 @@ import (
 )
 
 func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	args []*ast.Expression, vArgs *ast.CallVArgs, context *Context, state *StackMapState) (maxStack uint16) {
+	args []*ast.Expression, vArgs *ast.CallVariableArgs, context *Context, state *StackMapState) (maxStack uint16) {
 	currentStack := uint16(0)
 	stackLength := len(state.Stacks)
 	defer func() {

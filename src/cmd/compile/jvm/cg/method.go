@@ -22,3 +22,10 @@ type MethodInfo struct {
 	Attributes             []*AttributeInfo
 	AttributeGroupedByName AttributeGroupedByName
 }
+
+func (m *MethodInfo) IsBridge() bool {
+	return m.AccessFlags&ACC_METHOD_BRIDGE != 0
+}
+func (m *MethodInfo) IsSynthetic() bool {
+	return m.AccessFlags&ACC_METHOD_BRIDGE != 0
+}

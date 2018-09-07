@@ -54,10 +54,9 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}
-
 	buildPackage.buildBlock(class, code, s.Block, context, forState)
 	if s.Block.WillNotExecuteToEnd == false {
-		gotoOffset(code, s.ContinueCodeOffset)
+		jumpTo(code, s.ContinueCodeOffset)
 		if s.Condition == nil {
 			context.MakeStackMap(code, forState, code.CodeLength)
 		}

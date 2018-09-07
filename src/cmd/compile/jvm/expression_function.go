@@ -48,7 +48,6 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 	closureClass.AccessFlags = 0
 	closureClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	closureClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	closureClass.Class.AttributeCompilerAuto = &cg.AttributeCompilerAuto{}
 	buildPackage.mkClassDefaultConstruction(closureClass)
 	buildPackage.putClass(closureClass)
 	method := &cg.MethodHighLevel{}

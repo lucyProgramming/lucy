@@ -35,7 +35,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(class *cg.ClassHighLe
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		if t := currentStack + buildExpression.controlStack2FitAssign(code, leftValueKind, e.Value); t > maxStack {
+		if t := currentStack + buildExpression.dupStackLeaveValueBelow(code, leftValueKind, e.Value); t > maxStack {
 			maxStack = t
 		}
 	}
@@ -213,7 +213,7 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.controlStack2FitAssign(code, leftValueKind, bin.Left.Value)
+		currentStack += buildExpression.dupStackLeaveValueBelow(code, leftValueKind, bin.Left.Value)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}
