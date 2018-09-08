@@ -410,34 +410,20 @@ func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
 		vd.Pos = v.Pos
 		ret.Variables[k] = vd
 	}
-	if parser.isStatementEnding() {
-		err = fmt.Errorf("%s missing type after identifier",
-			parser.errorMsgPrefix())
-		parser.errs = append(parser.errs, err)
-		ret.Type = &ast.Type{
-			Type: ast.VariableTypeInt,
-			Pos:  parser.mkPos(),
-		}
-		return
-	}
-	ret.Type, err = parser.parseType()
-	if err != nil {
-		parser.errs = append(parser.errs, err)
-		return
-	}
-	if parser.token.Type != lex.TokenAssign &&
-		parser.token.Type != lex.TokenVarAssign {
-
-		return
-	}
 	if parser.token.Type != lex.TokenAssign {
-		parser.errs = append(parser.errs, fmt.Errorf("%s missing assign",
-			parser.errorMsgPrefix()))
+		ret.Type, err = parser.parseType()
+		if err != nil {
+			parser.errs = append(parser.errs, err)
+			return
+		}
 	}
-	parser.Next(lfNotToken) // skip = or :=
-	ret.InitValues, err = parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
-	if err != nil {
-		return
+	if parser.token.Type == lex.TokenAssign {
+		parser.Next(lfNotToken) // skip = or :=
+		ret.InitValues, err = parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+		if err != nil {
+			parser.errs = append(parser.errs, err)
+			return
+		}
 	}
 	return
 }

@@ -2,27 +2,29 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	ev := e.Data.(*ExpressionVar)
-	if ev.Type == nil {
+	if ev.Type != nil {
+		if err := ev.Type.resolve(block); err != nil {
+			*errs = append(*errs, err)
+			return
+		}
+		for _, v := range ev.Variables {
+			v.Type = ev.Type.Clone()
+		}
+	}
+	if ev.Type == nil && len(ev.InitValues) == 0 {
+		*errs = append(*errs, fmt.Errorf("%s expression var have not type and no initValues",
+			errMsgPrefix(e.Pos)))
 		return
 	}
-	if err := ev.Type.resolve(block); err != nil {
-		*errs = append(*errs, err)
-		return
-	}
-	for _, v := range ev.Variables {
-		v.Type = ev.Type.Clone()
-	}
-	noErr := true
 	var err error
 	if len(ev.InitValues) > 0 {
 		valueTypes := checkExpressions(block, ev.InitValues, errs, false)
-		{
+		if ev.Type != nil {
 			needs := make([]*Type, len(ev.Variables))
 			for k, _ := range needs {
 				needs[k] = ev.Type
@@ -30,7 +32,6 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
 		}
 		if len(valueTypes) != len(ev.Variables) {
-			noErr = false
 			*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
 				errMsgPrefix(e.Pos),
 				len(valueTypes),
@@ -40,31 +41,30 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			if v.Name == NoNameIdentifier {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
-				noErr = false
 				continue
 			}
-			err = v.Type.resolve(block)
-			if err != nil {
-				*errs = append(*errs, err)
-				noErr = false
+			if k < len(valueTypes) && valueTypes[k] != nil {
+				if v.Type != nil {
+					if v.Type.Equal(errs, valueTypes[k]) == false {
+						err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
+							errMsgPrefix(valueTypes[k].Pos),
+							valueTypes[k].TypeString(),
+							v.Type.TypeString())
+						*errs = append(*errs, err)
+						continue
+					}
+				} else {
+					v.Type = valueTypes[k].Clone()
+					v.Type.Pos = v.Pos
+				}
+			}
+			if v.Type == nil {
 				continue
 			}
 			err = block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
-				noErr = false
 				continue
-			}
-			if k < len(valueTypes) && valueTypes[k] != nil {
-				if ev.Variables[k].Type.Equal(errs, valueTypes[k]) == false {
-					err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
-						errMsgPrefix(valueTypes[k].Pos),
-						valueTypes[k].TypeString(),
-						v.Type.TypeString())
-					*errs = append(*errs, err)
-					noErr = false
-					continue
-				}
 			}
 			if e.IsPublic {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
@@ -75,19 +75,11 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			if v.Name == NoNameIdentifier {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
 					errMsgPrefix(v.Pos), v.Name))
-				noErr = false
-				continue
-			}
-			err = v.Type.resolve(block)
-			if err != nil {
-				*errs = append(*errs, err)
-				noErr = false
 				continue
 			}
 			err := block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)
-				noErr = false
 				continue
 			}
 			ev.InitValues = append(ev.InitValues, v.Type.mkDefaultValueExpression())
@@ -95,8 +87,5 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}
 		}
-	}
-	if noErr == false {
-		return
 	}
 }

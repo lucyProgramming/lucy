@@ -77,17 +77,14 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			}
 			vd.Name = identifier.Name
 			vd.Pos = v.Pos
-			if variableType != nil {
-				vd.Type = variableType.Clone()
-				vd.Type.Pos = e.Pos
-				if variableType.isTyped() == false {
-					*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
-						errMsgPrefix(v.Pos), variableType.TypeString()))
-				}
-			} else {
-				vd.Type = &Type{}
-				vd.Type.Type = VariableTypeVoid
-				vd.Type.Pos = v.Pos
+			if variableType == nil {
+				continue
+			}
+			vd.Type = variableType.Clone()
+			vd.Type.Pos = e.Pos
+			if variableType.isTyped() == false {
+				*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
+					errMsgPrefix(v.Pos), variableType.TypeString()))
 			}
 			err = block.Insert(vd.Name, v.Pos, vd)
 			identifier.Variable = vd

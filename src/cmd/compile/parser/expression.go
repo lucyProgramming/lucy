@@ -80,7 +80,6 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			newExpression.Data = list
 			left = newExpression
 		}
-
 	}
 
 	mustBeOneExpression := func(left *ast.Expression) {
