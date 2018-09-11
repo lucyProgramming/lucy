@@ -3,7 +3,6 @@ package ast
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*Type {
@@ -26,7 +25,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return e.checkMethodCallExpressionOnJavaArray(block, errs, object)
 	}
 	// call father`s construction method
-	if call.Name == SUPER {
+	if call.Name == SUPER && call.Expression.Value.Type == VariableTypeObject {
 		return e.checkMethodCallExpressionOnSuper(block, errs, object)
 	}
 	if object.Type == VariableTypeDynamicSelector {
@@ -115,6 +114,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	}
 }
+
+/*
+	this.super()
+*/
 func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]error, object *Type) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	if call.Expression.IsIdentifier(THIS) == false {
@@ -142,10 +145,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 	}
 	if matched {
 		m := ms[0]
-		if (object.Class.SuperClass.LoadFromOutSide && m.IsPublic() == false) ||
-			(object.Class.SuperClass.LoadFromOutSide == false && m.IsPrivate() == true) {
-			*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(e.Pos)))
-		}
+		call.Expression.methodAccessAble(block, m, errs)
 		call.Name = "<init>"
 		call.Method = m
 		call.Class = object.Class.SuperClass
@@ -154,9 +154,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		block.InheritedAttribute.Function.CallFatherConstructionExpression = e
 		return ret
 	}
-
 	*errs = append(*errs, methodsNotMatchError(e.Pos, "constructor", ms, callArgsTypes))
-
 	return nil
 }
 
@@ -184,9 +182,7 @@ func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, er
 			return method.Function.Type.mkReturnTypes(e.Pos)
 		}
 	} else {
-
 		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
-
 	}
 	return nil
 }
@@ -246,7 +242,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		}
 	case *Variable:
 		v := d.(*Variable)
-		if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && p.Name != PackageBeenCompile.Name {
+		if v.isPublic() == false && p.Name != PackageBeenCompile.Name {
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
 				errMsgPrefix(e.Pos), call.Name))
 		}
@@ -316,7 +312,9 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]error, array *Type) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
-	case common.ArrayMethodSize:
+	case common.ArrayMethodSize, common.ArrayMethodCap,
+		common.ArrayMethodStart,
+		common.ArrayMethodEnd:
 		result := &Type{}
 		result.Type = VariableTypeInt
 		result.Pos = e.Pos
@@ -347,6 +345,17 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		result := &Type{}
 		result.Type = VariableTypeVoid
 		result.Pos = e.Pos
+		return []*Type{result}
+	case common.ArrayMethodGetUnderlyingArray:
+		result := &Type{}
+		result.Type = VariableTypeJavaArray
+		result.Pos = e.Pos
+		result.Array = array.Array.Clone()
+		result.Array.Pos = e.Pos
+		if len(call.Args) > 0 {
+			*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
+				errMsgPrefix(e.Pos), call.Name))
+		}
 		return []*Type{result}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))

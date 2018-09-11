@@ -1,5 +1,7 @@
 package ast
 
+import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+
 type Variable struct {
 	IsBuildIn           bool
 	IsGlobal            bool
@@ -14,4 +16,8 @@ type Variable struct {
 	Type                *Type
 	LocalValOffset      uint16 // offset in stack frame
 	JvmDescriptor       string // jvm
+}
+
+func (v *Variable) isPublic() bool {
+	return v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0
 }

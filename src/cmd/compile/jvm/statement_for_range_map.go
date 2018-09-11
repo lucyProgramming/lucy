@@ -8,10 +8,10 @@ import (
 )
 
 type AutoVariableForRangeMap struct {
-	MapObject        uint16
-	KeySets          uint16
-	KeySetsK, Length uint16
-	K, V             uint16
+	MapObject               uint16
+	KeySets                 uint16
+	KeySetsK, KeySetsLength uint16
+	K, V                    uint16
 }
 
 func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
@@ -65,7 +65,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	}
 	var autoVar AutoVariableForRangeMap
 	{
-		autoVar.Length = code.MaxLocals
+		autoVar.KeySetsLength = code.MaxLocals
 		code.MaxLocals++
 		forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
 		t := &ast.Type{}
@@ -84,7 +84,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	}
 	code.Codes[code.CodeLength] = cg.OP_arraylength
 	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Length)...)
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsLength)...)
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.MapObject)...)
 	// k set to -1
@@ -128,7 +128,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
 
 	// load length
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Length)...)
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsLength)...)
 	if 2 > maxStack {
 		maxStack = 2
 	}

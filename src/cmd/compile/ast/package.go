@@ -225,6 +225,34 @@ func (p *Package) load(resource string) (interface{}, error) {
 	return t, err
 }
 
+// check out package name is valid or not
+func (p *Package) NameIsValid(name string) bool {
+	t := strings.Split(name, `/`)
+	if len(t) == 1 {
+		return true
+	}
+	if t[0] == "" || t[1] == "" {
+		return false
+	}
+	for _, v := range t {
+		allOK := true
+		for _, vv := range []byte(v) {
+			if (vv >= '0' && vv <= '9') ||
+				(vv >= 'a' && vv <= 'z') ||
+				(vv >= 'A' && vv <= 'Z') ||
+				vv == '$' {
+			} else {
+				allOK = false
+				break
+			}
+		}
+		if allOK == false {
+			return false
+		}
+	}
+	return true
+}
+
 func (p *Package) checkUnUsedPackage() {
 	for _, v := range p.Files {
 		for _, i := range v.Imports {
@@ -308,7 +336,7 @@ func (i *Import) MkAccessName() error {
 		}
 	}
 	//check if legal
-	if false == packageAccessNameReg.Match([]byte(name)) {
+	if false == PackageBeenCompile.NameIsValid(name) {
 		return fmt.Errorf("%s is not legal package name", name)
 	}
 	i.AccessName = name

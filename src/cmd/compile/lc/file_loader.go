@@ -453,10 +453,10 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			function.Type.ParameterList = function.Type.ParameterList[:len(function.Type.ParameterList)-1]
 		}
 
-		function.ClassMethod = &cg.MethodHighLevel{}
-		function.ClassMethod.Name = function.Name
-		function.ClassMethod.Class = mainClassName
-		function.ClassMethod.Descriptor = function.JvmDescriptor
+		function.Entrance = &cg.MethodHighLevel{}
+		function.Entrance.Name = function.Name
+		function.Entrance.Class = mainClassName
+		function.Entrance.Descriptor = function.JvmDescriptor
 		function.IsGlobal = true
 		pack.Block.Functions[name] = function
 	}

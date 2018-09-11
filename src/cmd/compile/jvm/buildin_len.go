@@ -15,27 +15,27 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 	if 2 > maxStack {
 		maxStack = 2
 	}
+	a0 := call.Args[0]
 	code.Codes[code.CodeLength] = cg.OP_ifnonnull
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 8)
 	code.Codes[code.CodeLength+3] = cg.OP_pop
 	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
 	code.CodeLength += 5
-	exit := (&cg.Exit{}).Init(cg.OP_goto, code)
+	noNullExit := (&cg.Exit{}).Init(cg.OP_goto, code)
 	state.pushStack(class, call.Args[0].Value)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
-	if call.Args[0].Value.Type == ast.VariableTypeJavaArray {
+	if a0.Value.Type == ast.VariableTypeJavaArray {
 		code.Codes[code.CodeLength] = cg.OP_arraylength
 		code.CodeLength++
-	} else if call.Args[0].Value.Type == ast.VariableTypeArray {
-		meta := ArrayMetas[call.Args[0].Value.Array.Type]
+	} else if a0.Value.Type == ast.VariableTypeArray {
+		meta := ArrayMetas[a0.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
-		},
-			code.Codes[code.CodeLength+1:code.CodeLength+3])
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else if call.Args[0].Value.Type == ast.VariableTypeMap {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -43,20 +43,18 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 			Class:      mapClass,
 			Method:     "size",
 			Descriptor: "()I",
-		},
-			code.Codes[code.CodeLength+1:code.CodeLength+3])
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else if call.Args[0].Value.Type == ast.VariableTypeString {
+	} else if a0.Value.Type == ast.VariableTypeString {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,
 			Method:     "length",
 			Descriptor: "()I",
-		},
-			code.Codes[code.CodeLength+1:code.CodeLength+3])
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
-	writeExits([]*cg.Exit{exit}, code.CodeLength)
+	writeExits([]*cg.Exit{noNullExit}, code.CodeLength)
 	state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)

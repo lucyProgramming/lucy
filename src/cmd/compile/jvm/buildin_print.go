@@ -127,7 +127,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
-		if t := 1 + buildExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
+		if t := 2 + buildExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

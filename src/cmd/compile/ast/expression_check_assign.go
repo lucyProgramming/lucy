@@ -11,12 +11,6 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		lefts = bin.Left.Data.([]*Expression)
 	} else {
 		lefts[0] = bin.Left
-		bin.Left = &Expression{}
-		bin.Left.Description = "compilerAuto"
-		bin.Left.Pos = bin.Left.Pos
-		bin.Left.Type = ExpressionTypeList
-		bin.Left.Data = lefts // rewrite to list anyway
-
 	}
 	values := bin.Right.Data.([]*Expression)
 	valueTypes := checkExpressions(block, values, errs, false)
@@ -60,6 +54,10 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(valueTypes[k].Pos),
 				valueTypes[k].TypeString(), leftTypes[k].TypeString()))
 		}
+	}
+	e.Data = &ExpressionAssign{
+		Lefts:  lefts,
+		Values: values,
 	}
 	voidReturn := mkVoidType(e.Pos)
 	if len(lefts) > 1 {

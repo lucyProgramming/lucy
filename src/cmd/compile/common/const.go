@@ -2,12 +2,13 @@ package common
 
 const (
 	//array
-	ArrayMethodSize      = "size"
-	ArrayMethodCap       = "cap"   // for debug
-	ArrayMethodStart     = "start" // for debug
-	ArrayMethodEnd       = "end"   // for debug
-	ArrayMethodAppend    = "append"
-	ArrayMethodAppendAll = "appendAll"
+	ArrayMethodSize               = "size"
+	ArrayMethodCap                = "cap"
+	ArrayMethodStart              = "start"
+	ArrayMethodEnd                = "end"
+	ArrayMethodGetUnderlyingArray = "getUnderlyingArray"
+	ArrayMethodAppend             = "append"
+	ArrayMethodAppendAll          = "appendAll"
 	// map
 	MapMethodRemove    = "remove"
 	MapMethodRemoveAll = "removeAll"
@@ -24,7 +25,9 @@ const (
 	BuildInFunctionMonitorExit  = "monitorExit"
 	BuildInFunctionBlockHole    = "blackHole"
 	BuildInFunctionAssert       = "assert"
-	//BuildInFunctionTypeOf       = "typeOf"
+	// ToObject
+	//ToObject = "toObject"
+	//UnPack   = "unPack"
 )
 
 const (

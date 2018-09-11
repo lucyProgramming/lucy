@@ -123,23 +123,26 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			*errs = append(*errs, err)
 			return nil
 		}
-	case VariableTypeObject:
-		if selection.Name == SUPER {
-			if object.Class.Name == JavaRootClass {
-				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
-					errMsgPrefix(e.Pos), JavaRootClass))
-				return object
+	case VariableTypeObject, VariableTypeClass:
+		if selection.Expression.Value.Type == VariableTypeObject {
+			if selection.Name == SUPER {
+				if object.Class.Name == JavaRootClass {
+					*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
+						errMsgPrefix(e.Pos), JavaRootClass))
+					return object
+				}
+				err := object.Class.loadSuperClass(e.Pos)
+				if err != nil {
+					*errs = append(*errs, err)
+					return object
+				}
+				result := object.Clone()
+				result.Pos = e.Pos
+				result.Class = result.Class.SuperClass
+				return result
 			}
-			err := object.Class.loadSuperClass(e.Pos)
-			if err != nil {
-				*errs = append(*errs, err)
-				return object
-			}
-			result := object.Clone()
-			result.Pos = e.Pos
-			result.Class = result.Class.SuperClass
-			return result
 		}
+
 		fieldOrMethod, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
 		if err != nil {
 			*errs = append(*errs, err)
@@ -161,33 +164,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Pos = e.Pos
 			return result
 		}
-	case VariableTypeClass:
-		if selection.Name == SUPER {
-			*errs = append(*errs, fmt.Errorf("%s cannot access super on class named '%s'",
-				errMsgPrefix(e.Pos), object.Class.Name))
-			return nil
-		}
-		fieldOrMethod, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
-		if err != nil {
-			*errs = append(*errs, err)
-			return nil
-		}
-		if field, ok := fieldOrMethod.(*ClassField); ok {
-			selection.Expression.fieldAccessAble(block, field, errs)
-			result := field.Type.Clone()
-			result.Pos = e.Pos
-			selection.Field = field
-			return result
-		} else {
-			method := fieldOrMethod.(*ClassMethod)
-			selection.Expression.methodAccessAble(block, method, errs)
-			selection.Method = method
-			result := &Type{}
-			result.Type = VariableTypeFunction
-			result.Pos = e.Pos
-			result.FunctionType = &method.Function.Type
-			return result
-		}
+
 	default:
 		*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
 			errMsgPrefix(e.Pos), selection.Name, object.TypeString()))

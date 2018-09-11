@@ -414,7 +414,6 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 	if err != nil {
 		return
 	}
-
 	for _, i := range is {
 		if _, ok := r.PackagesCompiled[i]; ok {
 			continue
@@ -456,7 +455,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 	fmt.Println("compiling.... ", packageName) // compile this package
 	// cd to destDir
 	os.Chdir(destinationDir)
-	args := []string{"-package-name", packageName, "-jvm-version", strconv.Itoa(r.Flags.JvmVersion)}
+	args := []string{"-package-name", packageName, "-jvm-major-version", strconv.Itoa(r.Flags.JvmVersion)}
 	args = append(args, lucyFiles...)
 	cmd := exec.Command(r.compilerAt, args...)
 	cmd.Stderr = os.Stderr

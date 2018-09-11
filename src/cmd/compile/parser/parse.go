@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyParseImport bool, nErrors2Stop int) []error {
+func Parse(tops *[]*ast.TopNode, filename string, bs []byte, onlyParseImport bool, nErrors2Stop int) []error {
 	p := &Parser{
 		bs:              bs,
 		tops:            tops,
@@ -21,7 +21,7 @@ func Parse(tops *[]*ast.Top, filename string, bs []byte, onlyParseImport bool, n
 type Parser struct {
 	onlyParseImport        bool
 	bs                     []byte
-	tops                   *[]*ast.Top
+	tops                   *[]*ast.TopNode
 	lexer                  *lex.Lexer
 	filename               string
 	lastToken              *lex.Token
@@ -127,7 +127,7 @@ func (parser *Parser) Parse() []error {
 				IsPublic:    isPublic,
 				Description: "var",
 			}
-			*parser.tops = append(*parser.tops, &ast.Top{
+			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Data: e,
 			})
 			resetProperty()
@@ -142,7 +142,7 @@ func (parser *Parser) Parse() []error {
 			e.IsPublic = isPublic()
 			parser.validStatementEnding()
 			if e.Type == ast.ExpressionTypeVarAssign {
-				*parser.tops = append(*parser.tops, &ast.Top{
+				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Data: e,
 				})
 			} else {
@@ -161,7 +161,7 @@ func (parser *Parser) Parse() []error {
 				e.AccessFlags |= cg.ACC_CLASS_PUBLIC
 			}
 			if e != nil {
-				*parser.tops = append(*parser.tops, &ast.Top{
+				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Data: e,
 				})
 			}
@@ -176,7 +176,7 @@ func (parser *Parser) Parse() []error {
 			if isPublic {
 				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			}
-			*parser.tops = append(*parser.tops, &ast.Top{
+			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Data: f,
 			})
 			resetProperty()
@@ -190,7 +190,7 @@ func (parser *Parser) Parse() []error {
 				parser.consume(untilRc)
 			}
 			parser.Next(lfNotToken) // skip }
-			*parser.tops = append(*parser.tops, &ast.Top{
+			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Data: b,
 			})
 
@@ -200,7 +200,7 @@ func (parser *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
-			*parser.tops = append(*parser.tops, &ast.Top{
+			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Data: c,
 			})
 			isPublic := isPublic()
@@ -229,7 +229,7 @@ func (parser *Parser) Parse() []error {
 				if isPublic {
 					v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 				}
-				*parser.tops = append(*parser.tops, &ast.Top{
+				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Data: v,
 				})
 
@@ -244,7 +244,7 @@ func (parser *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
-			*parser.tops = append(*parser.tops, &ast.Top{
+			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Data: a,
 			})
 		case lex.TokenImport:
@@ -262,7 +262,7 @@ func (parser *Parser) Parse() []error {
 					continue
 				}
 				if e.Type == ast.ExpressionTypeVarAssign {
-					*parser.tops = append(*parser.tops, &ast.Top{
+					*parser.tops = append(*parser.tops, &ast.TopNode{
 						Data: e,
 					})
 				} else {
@@ -439,7 +439,8 @@ func (parser *Parser) Next(lfIsToken bool) {
 	for {
 		tok, err = parser.lexer.Next()
 		if err != nil {
-			parser.errs = append(parser.errs, fmt.Errorf("%s %s", parser.errorMsgPrefix(), err.Error()))
+			parser.errs = append(parser.errs,
+				fmt.Errorf("%s %s", parser.errorMsgPrefix(), err.Error()))
 		}
 		if tok == nil {
 			continue
@@ -486,7 +487,19 @@ func (parser *Parser) consume(until map[lex.TokenKind]bool) {
 			parser.token.Type == lex.TokenEnum ||
 			parser.token.Type == lex.TokenConst ||
 			parser.token.Type == lex.TokenVar ||
-			parser.token.Type == lex.TokenImport {
+			parser.token.Type == lex.TokenImport ||
+			parser.token.Type == lex.TokenType ||
+			parser.token.Type == lex.TokenGoto ||
+			parser.token.Type == lex.TokenBreak ||
+			parser.token.Type == lex.TokenContinue ||
+			parser.token.Type == lex.TokenDefer ||
+			parser.token.Type == lex.TokenReturn ||
+			parser.token.Type == lex.TokenPass ||
+			parser.token.Type == lex.TokenExtends ||
+			parser.token.Type == lex.TokenImplements ||
+			parser.token.Type == lex.TokenGlobal ||
+			parser.token.Type == lex.TokenCase ||
+			parser.token.Type == lex.TokenDefault {
 			parser.consumeFoundValidToken = true
 			return
 		}

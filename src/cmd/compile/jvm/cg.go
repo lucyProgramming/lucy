@@ -349,7 +349,7 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 			method.AccessFlags |= cg.ACC_METHOD_VARARGS
 		}
 		ms[k] = method
-		f.ClassMethod = method
+		f.Entrance = method
 		method.Code = &cg.AttributeCode{}
 		buildPackage.mainClass.AppendMethod(method)
 	}
@@ -367,7 +367,7 @@ func (buildPackage *BuildPackage) DumpClass() error {
 	if err != nil {
 		return err
 	}
-	if err := buildPackage.mainClass.ToLow(common.CompileFlags.JvmVersion).OutPut(f); err != nil {
+	if err := buildPackage.mainClass.ToLow(common.CompileFlags.JvmMajorVersion).OutPut(f); err != nil {
 		f.Close()
 		return err
 	}
@@ -377,7 +377,7 @@ func (buildPackage *BuildPackage) DumpClass() error {
 		if err != nil {
 			return err
 		}
-		if err = c.ToLow(common.CompileFlags.JvmVersion).OutPut(f); err != nil {
+		if err = c.ToLow(common.CompileFlags.JvmMajorVersion).OutPut(f); err != nil {
 			f.Close()
 			return err
 		} else {

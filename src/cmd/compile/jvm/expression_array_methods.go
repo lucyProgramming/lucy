@@ -99,6 +99,24 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(class *cg.ClassHi
 				state.popStack(1)
 			}
 		}
+	case common.ArrayMethodGetUnderlyingArray:
+		meta := ArrayMetas[call.Expression.Value.Array.Type]
+		code.Codes[code.CodeLength] = cg.OP_getfield
+		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			Class:      meta.className,
+			Field:      "elements",
+			Descriptor: meta.elementsFieldDescriptor,
+		},
+			code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if meta.elementsFieldDescriptor != Descriptor.typeDescriptor(e.Value) {
+			typeConverter.castPointer(class, code, e.Value)
+		}
+		if e.IsStatementExpression {
+			code.Codes[code.CodeLength] = cg.OP_pop
+			code.CodeLength++
+		}
 	}
+
 	return
 }

@@ -37,18 +37,17 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 	if call.Function.IsBuildIn {
 		return buildExpression.mkBuildInFunctionCall(class, code, e, context, state)
 	}
-	if call.Expression != nil {
-		if call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
-			maxStack = buildExpression.build(class, code, call.Expression, context, state)
-		}
+	if call.Expression != nil && call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
+		maxStack =
+			buildExpression.build(class, code, call.Expression, context, state)
 	}
 	if call.Function.IsClosureFunction == false {
 		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Function.ClassMethod.Class.Name,
-			Method:     call.Function.ClassMethod.Name,
-			Descriptor: call.Function.ClassMethod.Descriptor,
+			Class:      call.Function.Entrance.Class.Name,
+			Method:     call.Function.Entrance.Name,
+			Descriptor: call.Function.Entrance.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	} else {
@@ -60,13 +59,13 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      class.Name,
 				Field:      call.Function.Name,
-				Descriptor: "L" + call.Function.ClassMethod.Class.Name + ";",
+				Descriptor: "L" + call.Function.Entrance.Class.Name + ";",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, call.Function.ClosureVariableOffSet)...)
 		}
-		state.pushStack(class, state.newObjectVariableType(call.Function.ClassMethod.Class.Name))
+		state.pushStack(class, state.newObjectVariableType(call.Function.Entrance.Class.Name))
 		defer state.popStack(1)
 		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		if t := 1 + stack; t > maxStack {
@@ -74,9 +73,9 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      call.Function.ClassMethod.Class.Name,
+			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Name,
-			Descriptor: call.Function.ClassMethod.Descriptor,
+			Descriptor: call.Function.Entrance.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}

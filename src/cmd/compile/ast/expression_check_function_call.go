@@ -7,9 +7,7 @@ import (
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionFunctionCall)
 	on, es := call.Expression.checkSingleValueContextExpression(block)
-
 	*errs = append(*errs, es...)
-
 	if on == nil {
 		checkExpressions(block, call.Args, errs, true)
 		return nil
@@ -61,6 +59,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		on.Function = call.Expression.Data.(*Function)
 		/*
 			fn() {
+
 			}()
 			no name function is statement too
 		*/

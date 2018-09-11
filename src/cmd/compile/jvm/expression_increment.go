@@ -7,9 +7,10 @@ import (
 
 func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	ee := e.Data.(*ast.Expression)
+	increment := e.Data.(*ast.Expression)
 	// identifier  and not captured and type`s int
-	if identifier, ok := ee.Data.(*ast.ExpressionIdentifier); ok && ee.Type == ast.ExpressionTypeIdentifier &&
+	if identifier, ok := increment.Data.(*ast.ExpressionIdentifier); ok &&
+		increment.Type == ast.ExpressionTypeIdentifier &&
 		identifier.Variable.BeenCaptured == 0 &&
 		identifier.Variable.Type.Type == ast.VariableTypeInt &&
 		identifier.Variable.IsGlobal == false {
@@ -44,11 +45,11 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	maxStack, remainStack, op, leftValueKind :=
-		buildExpression.getLeftValue(class, code, ee, context, state)
+		buildExpression.getLeftValue(class, code, increment, context, state)
 	/*
 		left value must can be used as right value
 	*/
-	stack := buildExpression.build(class, code, ee, context, state) // load it`s value
+	stack := buildExpression.build(class, code, increment, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}

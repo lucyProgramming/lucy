@@ -31,7 +31,7 @@ func Main(files []string) {
 }
 
 type Compiler struct {
-	Tops             []*ast.Top
+	Tops             []*ast.TopNode
 	Files            []string
 	Errs             []error
 	NErrsStopCompile int

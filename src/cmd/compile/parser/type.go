@@ -8,6 +8,7 @@ import (
 )
 
 func (parser *Parser) parseType() (*ast.Type, error) {
+
 	var err error
 	var ret *ast.Type
 	pos := parser.mkPos()
@@ -82,10 +83,8 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 	case lex.TokenIdentifier:
 		ret, err = parser.parseIdentifierType()
-	case lex.TokenMap, lex.TokenLc:
-		if parser.token.Type == lex.TokenMap {
-			parser.Next(lfNotToken) // skip map key word
-		}
+	case lex.TokenMap:
+		parser.Next(lfNotToken) // skip map key word
 		if parser.token.Type != lex.TokenLc {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
 				parser.errorMsgPrefix(), parser.token.Description)
@@ -159,7 +158,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			parser.Next(lfIsToken)
 		}
 	default:
-		err = fmt.Errorf("%s unkown begining '%s' token for a type",
+		return nil, fmt.Errorf("%s unkown begining '%s' token for a type",
 			parser.errorMsgPrefix(), parser.token.Description)
 	}
 	if err != nil {
@@ -212,7 +211,8 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenString ||
 		parser.token.Type == lex.TokenMap ||
 		parser.token.Type == lex.TokenIdentifier ||
-		parser.token.Type == lex.TokenTemplate
+		parser.token.Type == lex.TokenTemplate ||
+		parser.token.Type == lex.TokenFn
 }
 func (parser *Parser) looksLikeType() bool {
 	return parser.isValidTypeBegin() &&

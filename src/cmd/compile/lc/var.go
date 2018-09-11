@@ -12,7 +12,6 @@ var (
 func init() {
 	ast.ImportsLoader = &loader
 	loader.caches = make(map[string]interface{})
-
 }
 
 const (

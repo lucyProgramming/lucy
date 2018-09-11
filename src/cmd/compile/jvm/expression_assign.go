@@ -11,9 +11,9 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	bin := e.Data.(*ast.ExpressionBinary)
-	left := bin.Left.Data.([]*ast.Expression)[0]
-	right := bin.Right.Data.([]*ast.Expression)[0]
+	assign := e.Data.(*ast.ExpressionAssign)
+	left := assign.Lefts[0]
+	right := assign.Values[0]
 	var remainStack uint16
 	var op []byte
 	var leftValueKind LeftValueKind
@@ -48,19 +48,17 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 // a,b,c = 122,fdfd2232,"hello";
 func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	bin := e.Data.(*ast.ExpressionBinary)
-	rights := bin.Right.Data.([]*ast.Expression)
-	lefts := bin.Left.Data.([]*ast.Expression)
-	if e.IsStatementExpression == false || len(lefts) == 1 {
+	assign := e.Data.(*ast.ExpressionAssign)
+	if e.IsStatementExpression == false || len(assign.Lefts) == 1 {
 		return buildExpression.buildExpressionAssign(class, code, e, context, state)
 	}
-	if len(rights) == 1 {
-		maxStack = buildExpression.build(class, code, rights[0], context, state)
+	if len(assign.Values) == 1 {
+		maxStack = buildExpression.build(class, code, assign.Values[0], context, state)
 	} else {
-		maxStack = buildExpression.buildExpressions(class, code, rights, context, state)
+		maxStack = buildExpression.buildExpressions(class, code, assign.Values, context, state)
 	}
 	autoVar := newMultiValueAutoVar(class, code, state)
-	for k, v := range lefts {
+	for k, v := range assign.Lefts {
 		if v.IsIdentifier(ast.NoNameIdentifier) {
 			continue
 		}

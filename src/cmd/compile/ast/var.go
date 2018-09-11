@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-	"regexp"
 )
 
 type LoadImport interface {
@@ -37,7 +36,6 @@ func isMagicIdentifier(name string) bool {
 }
 
 var (
-	packageAccessNameReg *regexp.Regexp
 	ImportsLoader        LoadImport
 	PackageBeenCompile   Package
 	buildInFunctionsMap  = make(map[string]*Function)
@@ -45,14 +43,6 @@ var (
 	ParseFunctionHandler func(bs []byte, pos *Pos) (f *Function, es []error)
 	javaStringClass      *Class
 )
-
-func init() {
-	var err error
-	packageAccessNameReg, err = regexp.Compile(`^[a-zA-Z][[a-zA-Z1-9\_]+$`)
-	if err != nil {
-		panic(err)
-	}
-}
 
 func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {

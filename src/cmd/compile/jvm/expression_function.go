@@ -31,7 +31,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 		if function.Type.VArgs != nil {
 			method.AccessFlags |= cg.ACC_METHOD_VARARGS
 		}
-		function.ClassMethod = method
+		function.Entrance = method
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
@@ -59,7 +59,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 	}
 	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 	method.Class = closureClass
-	function.ClassMethod = method
+	function.Entrance = method
 	closureClass.AppendMethod(method)
 	//new a object to hold this closure function
 	code.Codes[code.CodeLength] = cg.OP_new
@@ -128,7 +128,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		filed.Name = v.Name
-		filed.Descriptor = "L" + v.ClassMethod.Class.Name + ";"
+		filed.Descriptor = "L" + v.Entrance.Class.Name + ";"
 		closureClass.Fields[v.Name] = filed
 		if total != 0 {
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -178,14 +178,14 @@ func (buildPackage *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighL
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
-	class.InsertClassConst(function.ClassMethod.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
-	class.InsertStringConst(function.ClassMethod.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	class.InsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
 	class.InsertMethodTypeConst(cg.CONSTANT_MethodType_info_high_level{
-		Descriptor: function.ClassMethod.Descriptor,
+		Descriptor: function.Entrance.Descriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -213,7 +213,7 @@ func (buildPackage *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighL
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      class.Name,
 				Field:      function.Name,
-				Descriptor: "L" + function.ClassMethod.Class.Name + ";",
+				Descriptor: "L" + function.Entrance.Class.Name + ";",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		} else {

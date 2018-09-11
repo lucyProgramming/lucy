@@ -131,7 +131,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if s.RangeAttr.IdentifierValue != nil && s.RangeAttr.IdentifierValue.Variable.BeenCaptured > 0 {
+		if s.RangeAttr.IdentifierValue != nil &&
+			s.RangeAttr.IdentifierValue.Variable.BeenCaptured > 0 {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Variable.Type)
 			s.RangeAttr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -140,7 +141,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.Array.Type).className))
 		}
-		if s.RangeAttr.IdentifierKey != nil && s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
+		if s.RangeAttr.IdentifierKey != nil &&
+			s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierKey.Variable.Type)
 			s.RangeAttr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++

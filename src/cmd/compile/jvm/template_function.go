@@ -22,7 +22,7 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(class *cg.Clas
 		method.Descriptor = Descriptor.methodDescriptor(&call.TemplateFunctionCallPair.Function.Type)
 		method.Code = &cg.AttributeCode{}
 		class.AppendMethod(method)
-		call.TemplateFunctionCallPair.Function.ClassMethod = method
+		call.TemplateFunctionCallPair.Function.Entrance = method
 		//build function
 		buildExpression.BuildPackage.buildFunction(class, nil, method, call.TemplateFunctionCallPair.Function)
 		call.TemplateFunctionCallPair.Generated = method

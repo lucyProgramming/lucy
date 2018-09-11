@@ -455,6 +455,12 @@ type ExpressionBinary struct {
 	Right *Expression
 }
 
+// for package jvm
+type ExpressionAssign struct {
+	Lefts  []*Expression
+	Values []*Expression
+}
+
 type ExpressionArray struct {
 	Type        *Type
 	Expressions []*Expression

@@ -88,7 +88,7 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 
 func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type) error {
 	if len(ms) == 0 {
-		fmt.Errorf("%s method '%s' not found", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s method '%s' not found", errMsgPrefix(pos), name)
 	}
 	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)

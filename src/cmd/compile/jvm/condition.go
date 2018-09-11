@@ -6,7 +6,7 @@ import (
 )
 
 /*
-	condition is false and generate exit
+	compile condition for false  &&  generate exit
 */
 func (buildExpression *BuildExpression) buildConditionNotOk(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	context *Context, state *StackMapState, condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {

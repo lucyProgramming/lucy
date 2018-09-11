@@ -60,7 +60,7 @@ func (parser *Parser) insertImports(im *ast.Import) {
 		parser.errs = append(parser.errs, fmt.Errorf("%s %v", parser.errorMsgPrefix(im.Pos), err))
 		return
 	}
-	*parser.tops = append(*parser.tops, &ast.Top{
+	*parser.tops = append(*parser.tops, &ast.TopNode{
 		Data: im,
 	})
 	if im.AccessName != ast.NoNameIdentifier {

@@ -9,7 +9,7 @@ type Function struct {
 	CallFatherConstructionExpression *Expression
 	TemplateFunction                 *TemplateFunction
 	parameterTypes                   map[string]*Type     //typed parameters
-	ClassMethod                      *cg.MethodHighLevel  // make call from
+	Entrance                         *cg.MethodHighLevel  // make call from
 	buildInFunctionChecker           buildFunctionChecker // used in build function
 	AccessFlags                      uint16
 	Type                             FunctionType
