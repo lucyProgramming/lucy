@@ -16,6 +16,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		bin.Left.Pos = bin.Left.Pos
 		bin.Left.Type = ExpressionTypeList
 		bin.Left.Data = lefts // rewrite to list anyway
+
 	}
 	values := bin.Right.Data.([]*Expression)
 	valueTypes := checkExpressions(block, values, errs, false)
@@ -54,7 +55,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		if valueTypes[k] == nil {
 			continue
 		}
-		if false == leftTypes[k].Equal(errs, valueTypes[k]) {
+		if false == leftTypes[k].assignAble(errs, valueTypes[k]) {
 			*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 				errMsgPrefix(valueTypes[k].Pos),
 				valueTypes[k].TypeString(), leftTypes[k].TypeString()))

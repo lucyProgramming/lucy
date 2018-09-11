@@ -26,7 +26,7 @@ func (t *TemplateFunction) callPairExists(parameterTypes map[string]*Type) *Temp
 				//not found
 				return false
 			}
-			if tType.StrictEqual(t) == false {
+			if tType.Equal(t) == false {
 				//not equal
 				return false
 			}

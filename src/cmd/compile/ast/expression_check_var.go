@@ -38,14 +38,9 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				len(ev.Variables)))
 		}
 		for k, v := range ev.Variables {
-			if v.Name == NoNameIdentifier {
-				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
-					errMsgPrefix(v.Pos), v.Name))
-				continue
-			}
 			if k < len(valueTypes) && valueTypes[k] != nil {
 				if v.Type != nil {
-					if v.Type.Equal(errs, valueTypes[k]) == false {
+					if v.Type.assignAble(errs, valueTypes[k]) == false {
 						err = fmt.Errorf("%s cannot assign  '%s' to '%s'",
 							errMsgPrefix(valueTypes[k].Pos),
 							valueTypes[k].TypeString(),
@@ -72,11 +67,6 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 		}
 	} else {
 		for _, v := range ev.Variables {
-			if v.Name == NoNameIdentifier {
-				*errs = append(*errs, fmt.Errorf("%s '%s' is not a available name",
-					errMsgPrefix(v.Pos), v.Name))
-				continue
-			}
 			err := block.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				*errs = append(*errs, err)

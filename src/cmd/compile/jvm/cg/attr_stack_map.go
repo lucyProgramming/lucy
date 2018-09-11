@@ -142,7 +142,7 @@ type StackMapVerificationTypeInfo struct {
 }
 
 //
-//func (s *StackMap_verification_type_info) Equal(s2 *StackMap_verification_type_info) bool {
+//func (s *StackMap_verification_type_info) assignAble(s2 *StackMap_verification_type_info) bool {
 //	if s == s2 {
 //		return true
 //	}

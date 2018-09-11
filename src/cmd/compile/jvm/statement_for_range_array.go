@@ -7,9 +7,9 @@ import (
 )
 
 type AutoVariableForRangeArray struct {
-	Elements      uint16
-	Start, End, K uint16
-	V             uint16
+	Elements   uint16
+	Start, End uint16
+	K, V       uint16
 }
 
 func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.ClassHighLevel,

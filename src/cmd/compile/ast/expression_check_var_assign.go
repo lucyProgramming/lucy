@@ -13,7 +13,6 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	} else {
 		lefts = []*Expression{bin.Left}
 	}
-	noErr := true
 	values := bin.Right.Data.([]*Expression)
 	assignTypes := checkExpressions(block, values, errs, false)
 	if len(lefts) > len(assignTypes) {
@@ -22,7 +21,6 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			errMsgPrefix(pos),
 			len(assignTypes),
 			len(lefts)))
-		noErr = false
 	} else if len(lefts) < len(assignTypes) {
 		pos := e.Pos
 		getFirstPosFromArgs(assignTypes[len(lefts):], &pos)
@@ -47,7 +45,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			if t == nil || variableType == nil {
 				continue
 			}
-			if t.Equal(errs, variableType) == false {
+			if t.assignAble(errs, variableType) == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(t.Pos), variableType.TypeString(), t.TypeString()))
 			}
@@ -59,12 +57,11 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 		}
 		if variable, ok := block.Variables[identifier.Name]; ok {
 			if variableType != nil {
-				if variable.Type.Equal(errs, variableType) == false {
+				if variable.Type.assignAble(errs, variableType) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot assign '%s' to '%s'",
 						errMsgPrefix(assignTypes[k].Pos),
 						variable.Type.TypeString(),
 						variableType.TypeString()))
-					noErr = false
 				}
 			}
 			identifier.Variable = variable
@@ -90,7 +87,6 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			identifier.Variable = vd
 			if err != nil {
 				*errs = append(*errs, err)
-				noErr = false
 				continue
 			}
 			if e.IsPublic { // only use when is is global
@@ -100,11 +96,6 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	}
 	if noNewVariable {
 		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
-		noErr = false
 	}
-	if noErr == false {
-		return
-	}
-	// no error,rewrite data
 	e.Data = assign
 }

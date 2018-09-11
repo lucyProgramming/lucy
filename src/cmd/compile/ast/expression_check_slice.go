@@ -8,9 +8,7 @@ import (
 func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	on := e.Data.(*ExpressionSlice)
 	sliceOn, es := on.ExpressionOn.checkSingleValueContextExpression(block)
-
 	*errs = append(*errs, es...)
-
 	if sliceOn == nil {
 		return nil
 	}

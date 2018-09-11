@@ -25,9 +25,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 	}
 	for _, v := range arr.Expressions {
 		eTypes, es := v.check(block)
-
 		*errs = append(*errs, es...)
-
 		if eTypes != nil {
 			arr.Length += len(eTypes)
 		}
@@ -36,12 +34,10 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 				continue
 			}
 			if noType && arr.Type == nil {
-				if eType.RightValueValid() && eType.isTyped() {
-					tmp := eType.Clone()
-					tmp.Pos = e.Pos
+				if eType.isTyped() {
 					arr.Type = &Type{}
 					arr.Type.Type = VariableTypeArray
-					arr.Type.Array = tmp
+					arr.Type.Array = eType.Clone()
 					arr.Type.Pos = e.Pos
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
@@ -49,7 +45,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 				}
 			}
 			if arr.Type != nil {
-				if arr.Type.Array.Equal(errs, eType) == false {
+				if arr.Type.Array.assignAble(errs, eType) == false {
 					if noType {
 						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
 							errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString()))

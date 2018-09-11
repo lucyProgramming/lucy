@@ -6,9 +6,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	bin := e.Data.(*ExpressionBinary)
 	left := bin.Left.getLeftValue(block, errs)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
-
 	*errs = append(*errs, es...)
-
 	if left == nil || right == nil {
 		return
 	}
@@ -31,11 +29,11 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		var  s string;
 		s += "11111111";
 	*/
-
 	if left.Type == VariableTypeString {
 		if right.Type != VariableTypeString || (e.Type != ExpressionTypePlusAssign) {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on string and '%s'",
+			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 				errMsgPrefix(e.Pos),
+				left.TypeString(),
 				e.Description,
 				right.TypeString()))
 		}
@@ -48,7 +46,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		e.Type == ExpressionTypeMulAssign ||
 		e.Type == ExpressionTypeDivAssign ||
 		e.Type == ExpressionTypeModAssign {
-		if left.Equal(errs, right) {
+		if left.assignAble(errs, right) {
 			return result
 		}
 		if left.IsInteger() && right.IsInteger() && bin.Right.IsLiteral() {
@@ -59,12 +57,11 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 			bin.Right.ConvertToNumber(left.Type)
 			return result
 		}
-
 	}
 	if e.Type == ExpressionTypeAndAssign ||
 		e.Type == ExpressionTypeOrAssign ||
 		e.Type == ExpressionTypeXorAssign {
-		if left.IsInteger() && left.Equal(errs, right) {
+		if left.IsInteger() && left.assignAble(errs, right) {
 			return result
 		}
 	}

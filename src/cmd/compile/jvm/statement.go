@@ -38,17 +38,13 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
 		if len(s.StatementFor.Exits) > 0 {
 			writeExits(s.StatementFor.Exits, code.CodeLength)
-			context.MakeStackMap(code, state, code.CodeLength)
 		}
+		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeContinue:
-		if len(s.StatementContinue.Defers) > 0 {
-			buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
-		}
+		buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		jumpTo(code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.StatementTypeBreak:
-		if len(s.StatementBreak.Defers) > 0 {
-			buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
-		}
+		buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		exit := (&cg.Exit{}).Init(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
 			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
@@ -71,9 +67,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeGoTo:
-		if len(s.StatementGoTo.Defers) > 0 {
-			buildPackage.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
-		}
+		buildPackage.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 			jumpTo(code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {

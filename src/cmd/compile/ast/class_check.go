@@ -284,7 +284,7 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 				Type:         VariableTypeFunction,
 				FunctionType: &v.Function.Type,
 			}
-			if f1.Equal(&errs, f2) == true {
+			if f1.assignAble(&errs, f2) == true {
 				errs = append(errs, fmt.Errorf("%s override final method",
 					errMsgPrefix(m.Function.Pos)))
 			}
@@ -344,7 +344,7 @@ func (c *Class) checkFields() []error {
 		if v.Expression != nil {
 			t, es := v.Expression.checkSingleValueContextExpression(&c.Block)
 			errs = append(errs, es...)
-			if v.Type.Equal(&errs, t) == false {
+			if v.Type.assignAble(&errs, t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
 					errMsgPrefix(v.Pos), t.TypeString(), v.Type.TypeString()))
 				continue

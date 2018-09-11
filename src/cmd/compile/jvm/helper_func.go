@@ -198,9 +198,8 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 		op = cg.OP_bastore
 	case ast.VariableTypeShort:
 		op = cg.OP_sastore
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeInt:
+	case ast.VariableTypeEnum,
+		ast.VariableTypeInt:
 		op = cg.OP_iastore
 	case ast.VariableTypeLong:
 		op = cg.OP_lastore

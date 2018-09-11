@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -18,7 +17,7 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 	}
 	parser.Next(lfNotToken)               // skip (
 	if parser.token.Type != lex.TokenRp { // not )
-		functionType.ParameterList, err = parser.parseReturnLists()
+		functionType.ParameterList, err = parser.parseParameterOrReturnList()
 		if err != nil {
 			parser.consume(untilRp)
 			parser.Next(lfNotToken)
@@ -42,7 +41,7 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 		}
 		parser.Next(lfNotToken) // skip (
 		if parser.token.Type != lex.TokenRp {
-			functionType.ReturnList, err = parser.parseReturnLists()
+			functionType.ReturnList, err = parser.parseParameterOrReturnList()
 			if err != nil { // skip until next (,continue to analyse
 				parser.consume(untilRp)
 				parser.Next(lfIsToken)
@@ -67,7 +66,13 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 	return functionType, err
 }
 
-func (parser *Parser) parseTypedNameForReturnVar() (returnList []*ast.Variable, err error) {
+/*
+	parse default value
+	a int = ""
+	int = 1
+
+*/
+func (parser *Parser) parseTypedNameDefaultValue() (returnList []*ast.Variable, err error) {
 	returnList, err = parser.parseTypedName()
 	if parser.token.Type != lex.TokenAssign {
 		return
@@ -83,7 +88,8 @@ func (parser *Parser) parseTypedNameForReturnVar() (returnList []*ast.Variable, 
 			parser.Next(lfNotToken)
 			continue
 		}
-		if parser.token.Type != lex.TokenComma || k == len(returnList)-1 {
+		if parser.token.Type != lex.TokenComma ||
+			k == len(returnList)-1 {
 			break
 		} else {
 			parser.Next(lfNotToken) // skip ,
@@ -91,9 +97,15 @@ func (parser *Parser) parseTypedNameForReturnVar() (returnList []*ast.Variable, 
 	}
 	return returnList, err
 }
-func (parser *Parser) parseReturnLists() (returnList []*ast.Variable, err error) {
-	for parser.token.Type == lex.TokenIdentifier {
-		v, err := parser.parseTypedNameForReturnVar()
+func (parser *Parser) parseParameterOrReturnList() (returnList []*ast.Variable, err error) {
+	for parser.token.Type != lex.TokenRp {
+		if parser.token.Type == lex.TokenComma {
+			parser.errs = append(parser.errs, fmt.Errorf("%s extra comma",
+				parser.errorMsgPrefix()))
+			parser.Next(lfNotToken)
+			continue
+		}
+		v, err := parser.parseTypedNameDefaultValue()
 		if v != nil {
 			returnList = append(returnList, v...)
 		}

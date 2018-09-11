@@ -37,17 +37,17 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 		return false
 	}
 	if ft.VArgs != nil {
-		if ft.VArgs.Type.StrictEqual(compare.VArgs.Type) == false {
+		if ft.VArgs.Type.Equal(compare.VArgs.Type) == false {
 			return false
 		}
 	}
 	for k, v := range ft.ParameterList {
-		if false == v.Type.StrictEqual(compare.ParameterList[k].Type) {
+		if false == v.Type.Equal(compare.ParameterList[k].Type) {
 			return false
 		}
 	}
 	for k, v := range ft.ReturnList {
-		if false == v.Type.StrictEqual(compare.ReturnList[k].Type) {
+		if false == v.Type.Equal(compare.ReturnList[k].Type) {
 			return false
 		}
 	}
@@ -144,7 +144,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 					err = fmt.Errorf(errMsg)
 					return
 				}
-				if false == v.Type.Equal(&errs, t) {
+				if false == v.Type.assignAble(&errs, t) {
 					err = fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(t.Pos),
 						t.TypeString())
@@ -153,7 +153,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 				vArgs.PackArray2VArgs = true
 				continue
 			}
-			if false == v.Type.Array.Equal(&errs, t) {
+			if false == v.Type.Array.assignAble(&errs, t) {
 				err = fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(t.Pos),
 					t.TypeString(), v.Type.TypeString())
@@ -181,7 +181,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 	}
 	for k, v := range ft.ParameterList {
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
-			if false == v.Type.Equal(&errs, callArgsTypes[k]) {
+			if false == v.Type.assignAble(&errs, callArgsTypes[k]) {
 				errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(callArgsTypes[k].Pos),
 					callArgsTypes[k].TypeString(), v.Type.TypeString())

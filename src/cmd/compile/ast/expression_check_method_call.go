@@ -333,12 +333,12 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		ts := checkExpressions(block, call.Args, errs, true)
 		for _, t := range ts {
 			if call.Name == common.ArrayMethodAppend {
-				if array.Array.Equal(errs, t) == false {
+				if array.Array.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
 						errMsgPrefix(t.Pos), t.TypeString(), array.Array.TypeString(), call.Name))
 				}
 			} else {
-				if array.Equal(errs, t) == false {
+				if array.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
 						errMsgPrefix(t.Pos), t.TypeString(), array.Array.TypeString(), call.Name))
 				}
@@ -374,12 +374,12 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 			return []*Type{ret}
 		}
 		if matchKey {
-			if false == m.K.Equal(errs, t) {
+			if false == m.K.assignAble(errs, t) {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(e.Pos), t.TypeString(), m.K.TypeString()))
 			}
 		} else {
-			if false == m.V.Equal(errs, t) {
+			if false == m.V.assignAble(errs, t) {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(e.Pos), t.TypeString(), m.V.TypeString()))
 			}
@@ -398,7 +398,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 			if t == nil {
 				continue
 			}
-			if m.K.Equal(errs, t) == false {
+			if m.K.assignAble(errs, t) == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for key",
 					errMsgPrefix(e.Pos), t.TypeString(), m.K.TypeString()))
 			}

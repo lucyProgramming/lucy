@@ -171,7 +171,7 @@ func (s *StatementFor) checkRange() []error {
 			vType = rangeOn.Map.V
 		}
 		if receiverKType != nil {
-			if receiverKType.Equal(&errs, kType) == false {
+			if receiverKType.assignAble(&errs, kType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
 					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
@@ -179,7 +179,7 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 		if receiverVType != nil {
-			if receiverVType.Equal(&errs, vType) == false {
+			if receiverVType.assignAble(&errs, vType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
 					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)

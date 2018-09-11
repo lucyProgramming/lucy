@@ -213,7 +213,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			*errs = append(*errs, es...)
 
 			if t != nil {
-				if v.Type.Equal(errs, t) == false {
+				if v.Type.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Type.TypeString()))
 					continue
@@ -261,7 +261,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				*errs = append(*errs, es...)
 				continue
 			}
-			if t != nil && t.Equal(errs, v.Type) == false {
+			if t != nil && t.assignAble(errs, v.Type) == false {
 				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
 					t.TypeString(), v.Type.TypeString())
 				*errs = append(*errs, err)

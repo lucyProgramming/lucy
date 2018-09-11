@@ -50,7 +50,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 				}
 			}
 			if rightValueValid && mapK != nil {
-				if mapK.Equal(errs, kType) == false {
+				if mapK.assignAble(errs, kType) == false {
 					if noType {
 						*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map value",
 							errMsgPrefix(v.Left.Pos),
@@ -84,7 +84,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 		if mapV != nil {
-			if mapV.Equal(errs, vType) == false {
+			if mapV.assignAble(errs, vType) == false {
 				if noType {
 					*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map key",
 						errMsgPrefix(v.Right.Pos),

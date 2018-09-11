@@ -626,7 +626,7 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())
 }
 
-func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
+func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 	if leftValue == rightValue { // equal
 		return true
 	}
@@ -641,20 +641,20 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 		return true
 	}
 	if leftValue.Type == VariableTypeArray && rightValue.Type == VariableTypeArray {
-		return leftValue.Array.Equal(errs, rightValue.Array)
+		return leftValue.Array.assignAble(errs, rightValue.Array)
 	}
 	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
 		if leftValue.IsVArgs != rightValue.IsVArgs {
 			return false
 		}
-		return leftValue.Array.Equal(errs, rightValue.Array)
+		return leftValue.Array.assignAble(errs, rightValue.Array)
 	}
 
 	if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
 		return leftValue.Enum.Name == rightValue.Enum.Name
 	}
 	if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
-		return leftValue.Map.K.Equal(errs, rightValue.Map.K) && leftValue.Map.V.Equal(errs, rightValue.Map.V)
+		return leftValue.Map.K.assignAble(errs, rightValue.Map.K) && leftValue.Map.V.assignAble(errs, rightValue.Map.V)
 	}
 	if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
 		if leftValue.Class.NotImportedYet {
@@ -689,7 +689,7 @@ func (leftValue *Type) Equal(errs *[]error, rightValue *Type) bool {
 	return false
 }
 
-func (typ *Type) StrictEqual(compareTo *Type) bool {
+func (typ *Type) Equal(compareTo *Type) bool {
 	if typ.Type != compareTo.Type {
 		return false
 	}
@@ -703,13 +703,13 @@ func (typ *Type) StrictEqual(compareTo *Type) bool {
 				return false
 			}
 		}
-		return typ.Array.StrictEqual(compareTo.Array)
+		return typ.Array.Equal(compareTo.Array)
 	}
 	if typ.Type == VariableTypeMap {
-		if false == typ.Map.K.StrictEqual(compareTo.Map.K) {
+		if false == typ.Map.K.Equal(compareTo.Map.K) {
 			return false
 		}
-		return typ.Map.V.StrictEqual(compareTo.Map.V)
+		return typ.Map.V.Equal(compareTo.Map.V)
 	}
 	if typ.Type == VariableTypeEnum {
 		return typ.Enum.Name == compareTo.Enum.Name

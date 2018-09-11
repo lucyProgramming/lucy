@@ -57,7 +57,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			}
 			return nil
 		}
-		if left.IsInteger() == false || left.Equal(errs, right) == false {
+		if left.IsInteger() == false || left.assignAble(errs, right) == false {
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
 		result = left.Clone()
@@ -104,7 +104,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeEnum:
-			if left.Equal(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if left.assignAble(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeByte:
@@ -120,7 +120,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VariableTypeDouble:
 			if (left.IsInteger() && right.IsInteger()) ||
 				(left.IsFloat() && right.IsFloat()) {
-				if left.Equal(errs, right) == false {
+				if left.assignAble(errs, right) == false {
 					if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
 						*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 					} else {
@@ -159,7 +159,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VariableTypeArray:
 			fallthrough
 		case VariableTypeObject:
-			if left.Equal(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if left.assignAble(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeFunction:
@@ -202,7 +202,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		if (left.IsInteger() && right.IsInteger()) ||
 			(left.IsFloat() && right.IsFloat()) {
-			if left.Equal(errs, right) == false {
+			if left.assignAble(errs, right) == false {
 				if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
 					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 				} else {

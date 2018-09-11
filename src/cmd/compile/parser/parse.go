@@ -570,25 +570,69 @@ func (parser *Parser) parseTypeAlias() (*ast.TypeAlias, error) {
 	return ret, err
 }
 
+/*
+	a int
+	int
+*/
 func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
+	if parser.token.Type != lex.TokenIdentifier {
+		/*
+			not identifier begin
+			must be type
+			// int
+		*/
+		pos := parser.mkPos()
+		t, err := parser.parseType()
+		if err != nil {
+			return nil, err
+		}
+		v := &ast.Variable{}
+		v.Type = t
+		v.Pos = pos
+		return []*ast.Variable{v}, nil
+	}
 	names, err := parser.parseNameList()
 	if err != nil {
 		return nil, err
 	}
-	t, err := parser.parseType()
-	if err != nil {
-		return nil, err
+	if parser.isValidTypeBegin() {
+		/*
+			a , b int
+		*/
+		t, err := parser.parseType()
+		if err != nil {
+			return nil, err
+		}
+		vs = make([]*ast.Variable, len(names))
+		for k, v := range names {
+			vd := &ast.Variable{}
+			vs[k] = vd
+			vd.Name = v.Name
+			vd.Pos = v.Pos
+			vd.Type = t.Clone()
+			vd.Type.Pos = v.Pos // override pos
+		}
+		return vs, nil
+	} else {
+		/*
+			syntax a,b
+			not valid type begins, "a" and b must indicate types not double
+		*/
+
+		vs = make([]*ast.Variable, len(names))
+		for k, v := range names {
+			vd := &ast.Variable{}
+			vs[k] = vd
+			vd.Pos = v.Pos
+			vd.Type = &ast.Type{
+				Type: ast.VariableTypeName,
+				Pos:  v.Pos,
+				Name: v.Name,
+			}
+			vd.Type.Pos = v.Pos // override pos
+		}
+		return vs, nil
 	}
-	vs = make([]*ast.Variable, len(names))
-	for k, v := range names {
-		vd := &ast.Variable{}
-		vs[k] = vd
-		vd.Name = v.Name
-		vd.Pos = v.Pos
-		vd.Type = t.Clone()
-		vd.Type.Pos = v.Pos // override pos
-	}
-	return vs, nil
 }
 
 // a,b int or int,bool  c xxx

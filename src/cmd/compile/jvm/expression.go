@@ -257,6 +257,9 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 					maxStack = t
 				}
 				loadInt32(class, code, index)
+				if 4 > maxStack { // current stack is  arrayRef arrayRef value index
+					maxStack = 4
+				}
 				code.Codes[code.CodeLength] = cg.OP_swap
 				code.Codes[code.CodeLength+1] = cg.OP_aastore
 				code.CodeLength += 2
@@ -276,6 +279,9 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 			typeConverter.packPrimitives(class, code, v.Value)
 		}
 		loadInt32(class, code, index)
+		if 4 > maxStack { // current stack is  arrayRef arrayRef value index
+			maxStack = 4
+		}
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.Codes[code.CodeLength+1] = cg.OP_aastore
 		code.CodeLength += 2

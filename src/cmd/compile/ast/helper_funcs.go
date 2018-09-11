@@ -136,7 +136,7 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	c.Value = c.Expression.Data
 	t, _ := c.Expression.checkSingleValueContextExpression(block)
 	if c.Type != nil {
-		if c.Type.Equal(errs, t) == false {
+		if c.Type.assignAble(errs, t) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
 				errMsgPrefix(c.Pos), c.Type.TypeString(), t.TypeString())
 			*errs = append(*errs, err)
@@ -169,7 +169,7 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 		if eval[k] == nil {
 			continue
 		}
-		if needs[k].Equal(&errs, eval[k]) {
+		if needs[k].assignAble(&errs, eval[k]) {
 			continue // no need
 		}
 		if (needs[k].IsInteger() && eval[k].IsInteger()) ||

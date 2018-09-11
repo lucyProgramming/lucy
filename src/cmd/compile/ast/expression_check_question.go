@@ -35,7 +35,7 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 	*errs = append(*errs, es...)
 	if True != nil &&
 		False != nil &&
-		True.Equal(errs, False) == false {
+		True.assignAble(errs, False) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
 			errMsgPrefix(question.False.Pos), False.TypeString(), True.TypeString()))
 	}

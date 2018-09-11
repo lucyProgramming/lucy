@@ -14,5 +14,4 @@ type Variable struct {
 	Type                *Type
 	LocalValOffset      uint16 // offset in stack frame
 	JvmDescriptor       string // jvm
-	//Function            *Function // belong to which  function
 }

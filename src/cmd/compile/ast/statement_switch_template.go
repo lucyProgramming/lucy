@@ -35,7 +35,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 	typesChecked := []*Type{}
 	checkIfAlreadyExist := func(ts []*Type, t *Type) *Type {
 		for _, v := range ts {
-			if v.StrictEqual(t) {
+			if v.Equal(t) {
 				return v
 			}
 		}
@@ -55,7 +55,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 				return
 			}
 			typesChecked = append(typesChecked, tt)
-			if s.Condition.StrictEqual(tt) == false {
+			if s.Condition.Equal(tt) == false {
 				//no match here
 				continue
 			}

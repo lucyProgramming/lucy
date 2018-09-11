@@ -37,7 +37,7 @@ func (s *StatementReturn) check(b *Block) []error {
 		b.InheritedAttribute.Function.Type.mkReturnTypes(s.Expressions[0].Pos), returnValueTypes)
 	for k, v := range rs {
 		if k < len(returnValueTypes) && returnValueTypes[k] != nil {
-			if false == v.Type.Equal(&errs, returnValueTypes[k]) {
+			if false == v.Type.assignAble(&errs, returnValueTypes[k]) {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s' to return",
 					errMsgPrefix(returnValueTypes[k].Pos),
 					returnValueTypes[k].TypeString(),

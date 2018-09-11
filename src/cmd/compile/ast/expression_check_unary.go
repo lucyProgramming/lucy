@@ -53,12 +53,19 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type
 	}
 	if on.Type == ExpressionTypeIdentifier &&
 		e.IsStatementExpression == false {
-		// special case
-		on.Data.(*ExpressionIdentifier).Variable.Used = true
+		/*
+			special case
+			fn1(a++)
+		*/
+		t := on.Data.(*ExpressionIdentifier)
+		if t.Variable != nil {
+			t.Variable.Used = true
+		}
 	}
-	if !increment.IsNumber() {
-		*errs = append(*errs, fmt.Errorf("%s cannot apply '%s' on '%s'",
-			errMsgPrefix(on.Pos), on.Description, increment.TypeString()))
+	if false == increment.IsNumber() {
+		*errs = append(*errs,
+			fmt.Errorf("%s cannot apply '%s' on '%s'",
+				errMsgPrefix(on.Pos), on.Description, increment.TypeString()))
 	}
 	result := increment.Clone()
 	result.Pos = e.Pos
