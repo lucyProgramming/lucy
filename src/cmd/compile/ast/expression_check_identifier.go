@@ -80,7 +80,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			}
 		}
 		if f.IsGlobalMain() {
-			return nil, fmt.Errorf("%s fucntion is main", errMsgPrefix(e.Pos))
+			return nil, fmt.Errorf("%s fucntion is global main", errMsgPrefix(e.Pos))
 		}
 		f.Used = true
 		result := &Type{}

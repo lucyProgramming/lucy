@@ -17,10 +17,10 @@ public class ArrayTTT   {
 	public synchronized int start(){
         return this.start;
 	}
-	public int end(){
+	public synchronized int end(){
          return this.end;
 	}
-	public int cap(){
+	public synchronized int cap(){
          return this.cap;
 	}
 	public ArrayTTT(TTT[] values){
@@ -31,7 +31,7 @@ public class ArrayTTT   {
 		DEFAULT_INIT
 	}
 	public ArrayTTT(){
-
+		
 	}
 	public synchronized void set(int index , TTT value) {
 		if (index < 0 ){
@@ -53,7 +53,7 @@ public class ArrayTTT   {
 		}
 		return this.elements[index]  ; 
 	}	
-
+	
 
 	public  synchronized ArrayTTT slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
@@ -87,7 +87,7 @@ public class ArrayTTT   {
 		this.end += es.size();
 		 
 	}
-	private void expand(int cap){
+	private synchronized void expand(int cap){
 		if(cap <= 0){
 		    cap = 10;
 		}

@@ -26,12 +26,10 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		on.Start.Data = int32(0)
 	}
 	startType, es := on.Start.checkSingleValueContextExpression(block)
-
 	*errs = append(*errs, es...)
-
 	if startType != nil {
 		if startType.IsInteger() == false {
-			*errs = append(*errs, fmt.Errorf("%s slice start must be integer,but '%s'",
+			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for slice",
 				errMsgPrefix(startType.Pos), startType.TypeString()))
 		} else {
 			if startType.Type == VariableTypeLong {
@@ -41,11 +39,9 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	}
 	if on.End != nil {
 		endType, es := on.End.checkSingleValueContextExpression(block)
-
 		*errs = append(*errs, es...)
-
 		if endType != nil && endType.IsInteger() == false {
-			*errs = append(*errs, fmt.Errorf("%s slice end must be integer,but '%s'",
+			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for slice",
 				errMsgPrefix(endType.Pos), endType.TypeString()))
 		}
 		if endType != nil && endType.Type == VariableTypeLong {

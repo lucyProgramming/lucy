@@ -13,6 +13,9 @@ type ParameterList []*Variable
 type ReturnList []*Variable
 
 func (ft *FunctionType) searchName(name string) *Variable {
+	if name == "" {
+		return nil
+	}
 	for _, v := range ft.ParameterList {
 		if name == v.Name {
 			return v
@@ -168,6 +171,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 		vArgs.Length = len(callArgsTypes) - k
 	}
 	if len(callArgsTypes) < len(ft.ParameterList) {
+		fmt.Println(f != nil, f.HaveDefaultValue)
 		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
 				*args = append(*args, f.Type.ParameterList[i].Expression)

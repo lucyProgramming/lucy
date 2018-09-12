@@ -302,7 +302,8 @@ func (e *Expression) canBeUsedAsStatement() bool {
 }
 
 func (e *Expression) isNumber() bool {
-	return e.isInteger() || e.isFloat()
+	return e.isInteger() ||
+		e.isFloat()
 }
 
 func (e *Expression) isInteger() bool {
@@ -314,6 +315,11 @@ func (e *Expression) isInteger() bool {
 func (e *Expression) isFloat() bool {
 	return e.Type == ExpressionTypeFloat ||
 		e.Type == ExpressionTypeDouble
+}
+
+func (e *Expression) isEqOrNe() bool {
+	return e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe
 }
 
 /*

@@ -49,6 +49,11 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		}
 		return []*Type{ret}
 	}
+	if on.Function != nil && on.Function.IsGlobalMain() {
+		*errs = append(*errs, fmt.Errorf("%s function is global main",
+			errMsgPrefix(e.Pos)))
+		return nil
+	}
 	if on.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
 			errMsgPrefix(e.Pos),

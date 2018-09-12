@@ -153,7 +153,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		method.AttributeLucyMethodDescriptor = d
 	}
 	if f.HaveDefaultValue {
-		method.AttributeDefaultParameters = FunctionDefaultValueParser.Encode(class, f)
+		method.AttributeDefaultParameters = DefaultValueParser.Encode(class, f)
 	}
 	if method.IsConstruction == false {
 		if t := buildPackage.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {

@@ -312,7 +312,8 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]error, array *Type) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
-	case common.ArrayMethodSize, common.ArrayMethodCap,
+	case common.ArrayMethodSize,
+		common.ArrayMethodCap,
 		common.ArrayMethodStart,
 		common.ArrayMethodEnd:
 		result := &Type{}
@@ -323,7 +324,8 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 				errMsgPrefix(e.Pos), call.Name))
 		}
 		return []*Type{result}
-	case common.ArrayMethodAppend, common.ArrayMethodAppendAll:
+	case common.ArrayMethodAppend,
+		common.ArrayMethodAppendAll:
 		if len(call.Args) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s too few arguments to call %s,expect at least one argument",
 				errMsgPrefix(e.Pos), call.Name))
@@ -376,9 +378,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		}
 		matchKey := call.Name == common.MapMethodKeyExist
 		t, es := call.Args[0].checkSingleValueContextExpression(block)
-
 		*errs = append(*errs, es...)
-
 		if t == nil {
 			return []*Type{ret}
 		}

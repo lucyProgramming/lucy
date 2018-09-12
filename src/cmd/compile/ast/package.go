@@ -43,7 +43,7 @@ func (p *Package) loadBuildInPackage() error {
 	}
 	for _, v := range lucyBuildInPackage.Block.Functions {
 		v.IsBuildIn = true
-		v.LoadedFromLucyLangPackage = true
+		v.LoadedFromCorePackage = true
 	}
 	for _, v := range lucyBuildInPackage.Block.TypeAliases {
 		v.IsBuildIn = true

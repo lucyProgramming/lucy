@@ -1,9 +1,9 @@
-import "java/io"
+
 import "java/lang/System"
 
-public var stdin io.InputStream = System.in
-public var stdout io.PrintStream = System.out
-public var stderr io.PrintStream = System.err
+public var stdin  = System.in
+public var stdout = System.out
+public var stderr  = System.err
 
 
 

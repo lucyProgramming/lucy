@@ -100,11 +100,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		//number
 		switch left.Type {
 		case VariableTypeBool:
-			if right.Type != VariableTypeBool || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if right.Type != VariableTypeBool || e.isEqOrNe() == false {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeEnum:
-			if left.assignAble(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeByte:
@@ -146,7 +146,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				}
 			}
 		case VariableTypeNull:
-			if right.IsPointer() == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if right.IsPointer() == false || e.isEqOrNe() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					errMsgPrefix(e.Pos),
 					e.Description,
@@ -159,11 +159,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VariableTypeArray:
 			fallthrough
 		case VariableTypeObject:
-			if left.assignAble(errs, right) == false || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeFunction:
-			if right.Type != VariableTypeNull || (e.Type != ExpressionTypeEq && e.Type != ExpressionTypeNe) {
+			if right.Type != VariableTypeNull || e.isEqOrNe() == false {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		default:

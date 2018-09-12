@@ -6,10 +6,10 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type FunctionDefaultValueParse struct {
+type DefaultValueParse struct {
 }
 
-func (fd *FunctionDefaultValueParse) Encode(class *cg.ClassHighLevel, f *ast.Function) *cg.AttributeDefaultParameters {
+func (fd *DefaultValueParse) Encode(class *cg.ClassHighLevel, f *ast.Function) *cg.AttributeDefaultParameters {
 	ret := &cg.AttributeDefaultParameters{}
 	ret.Start = uint16(f.DefaultValueStartAt)
 	for i := ret.Start; i < uint16(len(f.Type.ParameterList)); i++ {
@@ -45,7 +45,7 @@ func (fd *FunctionDefaultValueParse) Encode(class *cg.ClassHighLevel, f *ast.Fun
 	return ret
 }
 
-func (fd *FunctionDefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.AttributeDefaultParameters) {
+func (fd *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.AttributeDefaultParameters) {
 	f.HaveDefaultValue = true
 	f.DefaultValueStartAt = int(dp.Start)
 	for i := uint16(0); i < uint16(len(dp.Constants)); i++ {

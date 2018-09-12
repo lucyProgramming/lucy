@@ -4,6 +4,12 @@ import "java/io";
 
 
 public fn readFile(filepath string) -> ( bs byte[],err error){
+	defer {
+		e := catch()
+		if e != null {
+			err = e 
+		}
+	}
 	f := new io.File(filepath)	 
 	if f.exists() == false {
 		err = new error("file not exits")
@@ -24,18 +30,25 @@ public fn readFile(filepath string) -> ( bs byte[],err error){
 }
 
 
-public fn writeFile( filepath string , bs byte[]) -> (err error){
+public fn writeFile( filepath string , bs byte[] , start int = 0 , length int = -1) -> (err error){
+	defer {
+		e := catch()
+		if e != null {
+			err = e 
+		}
+	}
+	if length == -1 {
+		length = bs.size() 
+	}
 	f := new io.File(filepath)	 
-	if f.isDirectory() == false {
+	if f.isDirectory() {
 		err = new error("file is a directory")
 		return
 	}
-	if f.exists() == false {
-		err = new error("file not exits")
-		return 
-	}
-	
-
+	f.createNewFile()  // create new file 
+	stream := new io.FileOutputStream(f, false  ) // override 
+	defer stream.close()
+	stream.write(bs) 
 }
 
 	

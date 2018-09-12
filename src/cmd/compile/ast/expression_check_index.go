@@ -41,6 +41,24 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 				errMsgPrefix(e.Pos), indexType.TypeString(), on.Map.K.TypeString()))
 		}
 		return result
+	case VariableTypeString:
+		indexType, es := index.Index.checkSingleValueContextExpression(block)
+		*errs = append(*errs, es...)
+		if indexType != nil {
+			if indexType.IsInteger() {
+				if indexType.Type == VariableTypeLong {
+					index.Index.ConvertToNumber(VariableTypeInt) //  convert to int
+				}
+			} else {
+				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
+					errMsgPrefix(e.Pos), indexType.TypeString()))
+			}
+		}
+		result := &Type{
+			Type: VariableTypeByte,
+			Pos:  e.Pos,
+		}
+		return result
 	default:
 		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
 			errMsgPrefix(e.Pos), on.TypeString()))

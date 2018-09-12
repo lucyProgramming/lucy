@@ -46,11 +46,30 @@ func (s *StatementFor) checkRange() []error {
 		rangeExpression = t[0].Data.(*Expression)
 	}
 	rangeOn, es := rangeExpression.checkSingleValueContextExpression(s.Block.Outer)
-
 	errs = append(errs, es...)
-
 	if rangeOn == nil {
 		return errs
+	}
+	if rangeOn.Type == VariableTypeString {
+		//
+		conversion := &ExpressionTypeConversion{}
+		conversion.Type = &Type{
+			Type: VariableTypeJavaArray,
+			Array: &Type{
+				Type: VariableTypeByte,
+				Pos:  rangeOn.Pos,
+			},
+			Pos: rangeOn.Pos,
+		}
+		conversion.Expression = rangeExpression
+		bs := &Expression{
+			Type: ExpressionTypeCheckCast,
+			Data: conversion,
+			Pos:  rangeOn.Pos,
+		}
+		bs.Value = conversion.Type
+		rangeExpression = bs
+		rangeOn = conversion.Type
 	}
 	if rangeOn.Type != VariableTypeArray &&
 		rangeOn.Type != VariableTypeJavaArray &&
@@ -59,7 +78,6 @@ func (s *StatementFor) checkRange() []error {
 			errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
 		return errs
 	}
-	rangeExpression.Value = rangeOn
 	var lefts []*Expression
 	if bin.Left.Type == ExpressionTypeList {
 		lefts = bin.Left.Data.([]*Expression)

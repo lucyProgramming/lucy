@@ -3,14 +3,14 @@ package jvm
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 var (
-	ArrayMetas                 = map[ast.VariableTypeKind]*ArrayMeta{}
-	typeConverter              TypeConverterAndPrimitivePacker
-	Descriptor                 Description
-	LucyMethodSignatureParser  LucyMethodSignature
-	LucyFieldSignatureParser   LucyFieldSignature
-	LucyTypeAliasParser        LucyTypeAlias
-	FunctionDefaultValueParser FunctionDefaultValueParse
-	closure                    Closure
+	ArrayMetas                = map[ast.VariableTypeKind]*ArrayMeta{}
+	typeConverter             TypeConverterAndPrimitivePacker
+	Descriptor                Description
+	LucyMethodSignatureParser LucyMethodSignature
+	LucyFieldSignatureParser  LucyFieldSignature
+	LucyTypeAliasParser       LucyTypeAlias
+	DefaultValueParser        DefaultValueParse
+	closure                   Closure
 )
 
 type LeftValueKind int

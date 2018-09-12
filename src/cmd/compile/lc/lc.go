@@ -23,7 +23,7 @@ func Main(files []string) {
 			os.Exit(1)
 		}
 	}
-	compiler.NErrsStopCompile = 10
+	compiler.NErrs2StopCompile = 10
 	compiler.Errs = []error{}
 	compiler.Files = files
 	compiler.Init()
@@ -31,17 +31,17 @@ func Main(files []string) {
 }
 
 type Compiler struct {
-	Tops             []*ast.TopNode
-	Files            []string
-	Errs             []error
-	NErrsStopCompile int
-	lucyPaths        []string
-	ClassPaths       []string
-	Maker            jvm.BuildPackage
+	Tops              []*ast.TopNode
+	Files             []string
+	Errs              []error
+	NErrs2StopCompile int
+	lucyPaths         []string
+	ClassPaths        []string
+	Maker             jvm.BuildPackage
 }
 
 func (compiler *Compiler) shouldExit() {
-	if len(compiler.Errs) > compiler.NErrsStopCompile {
+	if len(compiler.Errs) > compiler.NErrs2StopCompile {
 		compiler.exit()
 	}
 }
@@ -128,7 +128,7 @@ func (compiler *Compiler) compile() {
 			bs = bs[3:]
 		}
 		compiler.Errs = append(compiler.Errs, parser.Parse(&compiler.Tops, v, bs,
-			compileCommon.CompileFlags.OnlyImport, compiler.NErrsStopCompile)...)
+			compileCommon.CompileFlags.OnlyImport, compiler.NErrs2StopCompile)...)
 		compiler.shouldExit()
 	}
 	// parse import only

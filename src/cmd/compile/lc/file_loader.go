@@ -281,7 +281,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != nil && len(t) > 0 {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBytes(t[0].Info)
-			jvm.FunctionDefaultValueParser.Decode(c, m.Function, dp)
+			jvm.DefaultValueParser.Decode(c, m.Function, dp)
 		}
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
@@ -444,6 +444,12 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, function)
 		}
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != nil && len(t) > 0 {
+			dp := &cg.AttributeDefaultParameters{}
+			dp.FromBytes(t[0].Info)
+			jvm.DefaultValueParser.Decode(c, function, dp)
+		}
+
 		if (function.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
 			function.Type.VArgs = function.Type.ParameterList[len(function.Type.ParameterList)-1]
 			if function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
