@@ -64,34 +64,50 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		code.CodeLength += 8
 		return
 	}
-
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
 		bin.Right.Value.Type == ast.VariableTypeBool { // bool type
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
-		state.pushStack(class, bin.Left.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
-		state.pushStack(class, bin.Right.Value)
-		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
-			maxStack = t
+		var dependOnOne *ast.Expression
+		if bin.Left.IsBool(true) && e.Type == ast.ExpressionTypeEq {
+			/*
+				a == true <==> a
+			*/
+			dependOnOne = bin.Right
+		} else if bin.Left.IsBool(false) && e.Type == ast.ExpressionTypeNe {
+			dependOnOne = bin.Right
+		} else if bin.Right.IsBool(true) && e.Type == ast.ExpressionTypeEq {
+			dependOnOne = bin.Left
+		} else if bin.Right.IsBool(false) && e.Type == ast.ExpressionTypeNe {
+			dependOnOne = bin.Left
 		}
-		state.popStack(2) // 2 bool value
-		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.Type{
-			Type: ast.VariableTypeBool,
-		})
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.ExpressionTypeEq {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
+		if dependOnOne != nil {
+			return buildExpression.build(class, code, dependOnOne, context, state)
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpne
+			maxStack = buildExpression.build(class, code, bin.Left, context, state)
+			state.pushStack(class, bin.Left.Value)
+			stack := buildExpression.build(class, code, bin.Right, context, state)
+			state.pushStack(class, bin.Right.Value)
+			if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
+				maxStack = t
+			}
+			state.popStack(2) // 2 bool value
+			context.MakeStackMap(code, state, code.CodeLength+7)
+			state.pushStack(class, &ast.Type{
+				Type: ast.VariableTypeBool,
+			})
+			context.MakeStackMap(code, state, code.CodeLength+8)
+			if e.Type == ast.ExpressionTypeEq {
+				code.Codes[code.CodeLength] = cg.OP_if_icmpeq
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_if_icmpne
+			}
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+			code.Codes[code.CodeLength+3] = cg.OP_iconst_0
+			code.Codes[code.CodeLength+4] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+			code.Codes[code.CodeLength+7] = cg.OP_iconst_1
+			code.CodeLength += 8
+			return
 		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
-		return
 	}
 	if bin.Left.Value.Type == ast.VariableTypeNull ||
 		bin.Right.Value.Type == ast.VariableTypeNull { // must not null-null

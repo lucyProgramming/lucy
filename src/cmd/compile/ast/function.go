@@ -137,7 +137,7 @@ func (f *Function) check(b *Block) []error {
 	errs := make([]error, 0)
 	f.Block.inherit(b)
 	f.Block.InheritedAttribute.Function = f
-	f.checkParametersAndReturns(&errs)
+	f.checkParametersAndReturns(&errs, true, false)
 	if f.TemplateFunction == nil {
 		f.checkBlock(&errs)
 	}
@@ -167,7 +167,7 @@ func (f *Function) IsGlobalMain() bool {
 	return f.IsGlobal && f.Name == MainFunctionName
 }
 
-func (f *Function) checkParametersAndReturns(errs *[]error) {
+func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpression bool, isAbstract bool) {
 	var err error
 	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true
@@ -180,10 +180,12 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			err = f.Block.Insert(v.Name, v.Pos, v)
-			if err != nil {
-				*errs = append(*errs, err)
-				continue
+			if isAbstract == false {
+				err = f.Block.Insert(v.Name, v.Pos, v)
+				if err != nil {
+					*errs = append(*errs, err)
+					continue
+				}
 			}
 		}
 		if v.Type.IsVArgs && v.Expression != nil {
@@ -209,9 +211,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 			}
 			f.HaveDefaultValue = true
 			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
-
 			*errs = append(*errs, es...)
-
 			if t != nil {
 				if v.Type.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
@@ -243,10 +243,12 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				if err != nil {
 					*errs = append(*errs, err)
 				}
-				err = f.Block.Insert(v.Name, v.Pos, v)
-				if err != nil {
-					*errs = append(*errs, err)
-					continue
+				if isAbstract == false {
+					err = f.Block.Insert(v.Name, v.Pos, v)
+					if err != nil {
+						*errs = append(*errs, err)
+						continue
+					}
 				}
 			}
 			if f.TemplateFunction != nil {
@@ -256,12 +258,16 @@ func (f *Function) checkParametersAndReturns(errs *[]error) {
 				v.Expression = v.Type.mkDefaultValueExpression()
 				continue
 			}
+			if evalReturnVarExpression == false {
+				// eval expression later
+				continue
+			}
 			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
 			if len(es) > 0 {
 				*errs = append(*errs, es...)
 				continue
 			}
-			if t != nil && t.assignAble(errs, v.Type) == false {
+			if t != nil && v.Type.assignAble(errs, t) == false {
 				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
 					t.TypeString(), v.Type.TypeString())
 				*errs = append(*errs, err)

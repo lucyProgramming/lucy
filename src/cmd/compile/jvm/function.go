@@ -113,7 +113,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 				method.Code.MaxStack = stack
 			}
 			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
-			buildPackage.mkNonStaticFieldDefaultValue(class, method.Code, context, state)
+			buildPackage.mkFieldDefaultValue(class, method.Code, astClass, context, state)
 			buildPackage.mkCapturedParameters(class, method.Code, f, state)
 		} else {
 			method.Code.MaxLocals = 1
@@ -209,12 +209,9 @@ func (buildPackage *BuildPackage) buildFunctionMultiReturnOffset(class *cg.Class
 	return
 }
 
-func (buildPackage *BuildPackage) mkNonStaticFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	context *Context, state *StackMapState) {
-	if context.class == nil {
-		return // closure function class have no class
-	}
-	for _, v := range context.class.Fields {
+func (buildPackage *BuildPackage) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	astClass *ast.Class, context *Context, state *StackMapState) {
+	for _, v := range astClass.Fields {
 		if v.IsStatic() || v.Expression == nil {
 			continue
 		}

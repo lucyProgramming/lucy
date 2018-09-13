@@ -12,8 +12,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 	notToHere := false
 	for _, s := range b.Statements {
 		if notToHere == true && s.Type == ast.StatementTypeLabel {
-			jumpForwards := len(s.StatementLabel.Exits) > 0 // jump forward
-			notToHere = !jumpForwards
+			notToHere = len(s.StatementLabel.Exits) == 0
 			//continue compile block from this label statement
 		}
 		if notToHere {

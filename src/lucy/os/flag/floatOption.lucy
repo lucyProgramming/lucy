@@ -56,14 +56,10 @@ public final class FloatOption  extends Option{
 		.floatValue = value 
 		
 	} 
-	public fn getValue() -> (v float){
-		v = this.floatValue
-	}
+	public fn getValue() -> (v float = this.floatValue ){ }
 	
 	
-	protected fn  formatDefaultValue() -> ( format string  ) {
-		format = "" + .floatDefaultValue 
-	}
+	protected fn  formatDefaultValue() -> ( format string = "" + .floatDefaultValue  ) { }
 	
 	
 }

@@ -342,15 +342,30 @@ func (classParser *ClassParser) parseConst() error {
 }
 
 func (classParser *ClassParser) parseField(errs *[]error) error {
-	cs, err := classParser.parser.parseVar()
+	names, err := classParser.parser.parseNameList()
+	if err != nil {
+		return err
+	}
+	t, err := classParser.parser.parseType()
+	if err != nil {
+		return err
+	}
+	var initValues []*ast.Expression
+	if classParser.parser.token.Type == lex.TokenAssign {
+		classParser.parser.Next(lfNotToken) // skip = or :=
+		initValues, err = classParser.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+		if err != nil {
+			classParser.parser.errs = append(classParser.parser.errs, err)
+			classParser.consume(untilSemicolonOrLf)
+		}
+	}
 	if err == nil {
 		classParser.parser.validStatementEnding()
 	}
 	if classParser.ret.Fields == nil {
 		classParser.ret.Fields = make(map[string]*ast.ClassField)
 	}
-
-	for _, v := range cs.Variables {
+	for k, v := range names {
 		if _, ok := classParser.ret.Fields[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
@@ -360,15 +375,11 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		f := &ast.ClassField{}
 		f.Name = v.Name
 		f.Pos = v.Pos
-		f.Type = &ast.Type{}
-		if cs.Type == nil {
-			cs.Type = &ast.Type{
-				Type: ast.VariableTypeVoid,
-				Pos:  v.Pos,
-			}
-		}
-		f.Type = cs.Type.Clone()
+		f.Type = t.Clone()
 		f.AccessFlags = 0
+		if k < len(initValues) {
+			f.Expression = initValues[k]
+		}
 		if classParser.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
 		}

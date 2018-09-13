@@ -89,6 +89,20 @@ type Expression struct {
 	Description           string
 }
 
+func (e *Expression) IsString(s string) bool {
+	if e.Type != ExpressionTypeString {
+		return false
+	}
+	return e.Data.(string) == s
+}
+
+func (e *Expression) IsBool(b bool) bool {
+	if e.Type != ExpressionTypeBool {
+		return false
+	}
+	return e.Data.(bool) == b
+}
+
 func (e *Expression) isRelation() bool {
 	return e.Type == ExpressionTypeEq ||
 		e.Type == ExpressionTypeNe ||
@@ -103,7 +117,7 @@ func (e *Expression) isRelation() bool {
 	'a' > 'b'
 	1s > 2s
 */
-func (e *Expression) IsIntCompare() bool {
+func (e *Expression) Is2IntCompare() bool {
 	if e.isRelation() == false {
 		return false
 	}
@@ -116,7 +130,7 @@ func (e *Expression) IsIntCompare() bool {
 /*
 	a == null
 */
-func (e *Expression) IsNullCompare() bool {
+func (e *Expression) IsCompare2Null() bool {
 	if e.isRelation() == false {
 		return false
 	}
@@ -128,7 +142,7 @@ func (e *Expression) IsNullCompare() bool {
 /*
 	a > "b"
 */
-func (e *Expression) IsStringCompare() bool {
+func (e *Expression) Is2StringCompare() bool {
 	if e.isRelation() == false {
 		return false
 	}
@@ -140,7 +154,7 @@ func (e *Expression) IsStringCompare() bool {
 	var a ,b []int
 	a == b
 */
-func (e *Expression) IsPointerCompare() bool {
+func (e *Expression) Is2PointerCompare() bool {
 	if e.isRelation() == false {
 		return false
 	}

@@ -68,7 +68,6 @@ public final class  FlagParser {
 			v.reset()
 		}
 		noDefine = []string{} 
-		print(args )
 		for k := 0 ; k < len (args) ; k++{
 			v := args[k]
 			if false == this.options.keyExist(v) {
@@ -80,8 +79,8 @@ public final class  FlagParser {
 				o.parse(v)
 			}else {
 				if k == len(args) -1 {
-						err = new error(sprintf("no value  after '%s'" , v ))
-						return 
+					err = new error(sprintf("no value  after '%s'" , v ))
+					return 
 				}
 				err = o.parse(args[++k])
 				if err != null {

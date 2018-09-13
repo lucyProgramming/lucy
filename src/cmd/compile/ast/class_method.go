@@ -16,7 +16,7 @@ func (m *ClassMethod) narrowDownAccessRange(implementation *ClassMethod) bool {
 		return !implementation.IsPublic()
 	}
 	if m.IsProtected() {
-		return implementation.IsPrivate() == false &&
+		return implementation.IsPrivate() ||
 			implementation.isAccessFlagDefault()
 	}
 	if m.isAccessFlagDefault() {
@@ -35,14 +35,16 @@ func (m *ClassMethod) accessString() string {
 	if m.IsPrivate() {
 		return "private"
 	}
-	return "default"
+	return "default" //TODO:: ???
 }
 
 func (m *ClassMethod) isAccessFlagDefault() bool {
-	return m.IsPublic() == false &&
-		m.IsProtected() == false &&
-		m.IsPrivate() == false
+	return m.Function.AccessFlags&
+		(cg.ACC_METHOD_PUBLIC|
+			cg.ACC_METHOD_PRIVATE|
+			cg.ACC_METHOD_PROTECTED) == 0
 }
+
 func (m *ClassMethod) IsPublic() bool {
 	return (m.Function.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0
 }

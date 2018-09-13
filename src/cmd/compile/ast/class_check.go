@@ -28,10 +28,7 @@ func (c *Class) checkPhase1() []error {
 		}
 	}
 	errs = append(errs, c.checkModifierOk()...)
-	es := c.resolveFieldsAndMethodsType()
-
-	errs = append(errs, es...)
-
+	errs = append(errs, c.resolveFieldsAndMethodsType()...)
 	return errs
 }
 
@@ -121,8 +118,12 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 					errs = append(errs, err)
 				}
 			} else {
+				pos := c.Pos
+				if implementation.Function.Pos != nil {
+					pos = implementation.Function.Pos
+				}
 				errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
-					errMsgPrefix(c.Pos), m.Function.readableMsg(), super.Name))
+					errMsgPrefix(pos), m.Function.readableMsg(), super.Name))
 			}
 		}
 	}
@@ -216,9 +217,8 @@ func (c *Class) checkIfClassHierarchyErr() error {
 	if err := c.loadSuperClass(pos); err != nil {
 		return err
 	}
-	if c.SuperClass.LoadFromOutSide && c.SuperClass.IsPublic() == false {
-		return fmt.Errorf("%s class`s super-class named '%s' is not public",
-			errMsgPrefix(c.Pos), c.SuperClass.Name)
+	if err := c.SuperClass.classAccessAble(pos); err != nil {
+		return err
 	}
 	if c.SuperClass.IsFinal() {
 		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
@@ -284,7 +284,7 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 				Type:         VariableTypeFunction,
 				FunctionType: &v.Function.Type,
 			}
-			if f1.assignAble(&errs, f2) == true {
+			if f1.Equal(f2) {
 				errs = append(errs, fmt.Errorf("%s override final method",
 					errMsgPrefix(m.Function.Pos)))
 			}
@@ -342,20 +342,24 @@ func (c *Class) checkFields() []error {
 	staticFieldAssignStatements := []*Statement{}
 	for _, v := range c.Fields {
 		if v.Expression != nil {
-			t, es := v.Expression.checkSingleValueContextExpression(&c.Block)
+			assignment, es := v.Expression.checkSingleValueContextExpression(&c.Methods[SpecialMethodInit][0].Function.Block)
 			errs = append(errs, es...)
-			if v.Type.assignAble(&errs, t) == false {
+			if assignment == nil {
+				continue
+			}
+			if v.Type.assignAble(&errs, assignment) == false {
 				errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
-					errMsgPrefix(v.Pos), t.TypeString(), v.Type.TypeString()))
+					errMsgPrefix(v.Pos), assignment.TypeString(), v.Type.TypeString()))
 				continue
 			}
 			//TODO:: should check or not ???
-			if t.Type == VariableTypeNull {
+			if assignment.Type == VariableTypeNull {
 				errs = append(errs, fmt.Errorf("%s pointer types default value is '%s' already",
-					errMsgPrefix(v.Pos), t.TypeString()))
+					errMsgPrefix(v.Pos), assignment.TypeString()))
 				continue
 			}
-			if v.IsStatic() && v.Expression.IsLiteral() {
+			if v.IsStatic() &&
+				v.Expression.IsLiteral() {
 				v.DefaultValue = v.Expression.Data
 				continue
 			}
@@ -431,6 +435,16 @@ func (c *Class) checkMethods() []error {
 						errMsgPrefix(method.Function.Pos)))
 					continue
 				}
+				for _, v := range method.Function.Type.ReturnList {
+					t, es := v.Expression.checkSingleValueContextExpression(&method.Function.Block)
+					errs = append(errs, es...)
+					if t != nil && v.Type.assignAble(&errs, t) == false {
+						err := fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+							t.TypeString(), v.Type.TypeString())
+						errs = append(errs, err)
+					}
+				}
+
 				isConstruction := name == SpecialMethodInit
 				if isConstruction {
 					if method.IsFirstStatementCallFatherConstruction() == false {
@@ -440,18 +454,6 @@ func (c *Class) checkMethods() []error {
 					if method.IsFinal() {
 						errs = append(errs, fmt.Errorf("%s construction method cannot be final",
 							errMsgPrefix(method.Function.Pos)))
-					}
-				}
-				if method.IsStatic() == false { // bind this
-					if method.Function.Block.Variables == nil {
-						method.Function.Block.Variables = make(map[string]*Variable)
-					}
-					method.Function.Block.Variables[THIS] = &Variable{}
-					method.Function.Block.Variables[THIS].Name = THIS
-					method.Function.Block.Variables[THIS].Pos = method.Function.Pos
-					method.Function.Block.Variables[THIS].Type = &Type{
-						Type:  VariableTypeObject,
-						Class: c,
 					}
 				}
 				if isConstruction && method.Function.Type.VoidReturn() == false {

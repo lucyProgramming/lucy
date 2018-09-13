@@ -20,7 +20,7 @@ type MethodParameter struct {
 }
 
 func (a *AttributeMethodParameters) FromBs(class *Class, bs []byte) {
-	if len(bs) != int(byte(bs[0])*4+1) {
+	if len(bs) != int(bs[0])*4+1 {
 		panic("impossible")
 	}
 	bs = bs[1:]

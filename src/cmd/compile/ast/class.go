@@ -146,7 +146,7 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 	var err error
 	for _, v := range c.Fields {
 		if v.Name == SUPER {
-			errs = append(errs, fmt.Errorf("%s super is special for access 'super'",
+			errs = append(errs, fmt.Errorf("%s 'super' not allow for field name",
 				errMsgPrefix(v.Pos)))
 			continue
 		}
@@ -157,22 +157,34 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 	}
 	for _, ms := range c.Methods {
 		for _, m := range ms {
+			if m.IsAbstract() {
+				for _, v := range m.Function.Type.ParameterList {
+					if v.Expression != nil {
+						errs = append(errs, fmt.Errorf("%s abstract method parameter '%s' cannot have default value '%s'",
+							errMsgPrefix(v.Pos), v.Name, v.Expression.Description))
+					}
+				}
+				for _, v := range m.Function.Type.ReturnList {
+					if v.Expression != nil {
+						errs = append(errs, fmt.Errorf("%s abstract method return variable '%s' cannot have default value '%s'",
+							errMsgPrefix(v.Pos), v.Name, v.Expression.Description))
+					}
+				}
+			}
 			m.Function.Block.inherit(&c.Block)
 			m.Function.Block.InheritedAttribute.Function = m.Function
 			m.Function.Block.InheritedAttribute.ClassMethod = m
-			m.Function.checkParametersAndReturns(&errs)
-			if c.IsInterface() {
-				for _, p := range m.Function.Type.ParameterList {
-					if p.Expression != nil {
-						errs = append(errs, fmt.Errorf("%s interface method parameter '%s' cannot have default value",
-							errMsgPrefix(p.Pos), p.Name))
-					}
+			m.Function.checkParametersAndReturns(&errs, false, m.IsAbstract())
+			if m.IsStatic() == false { // bind this
+				if m.Function.Block.Variables == nil {
+					m.Function.Block.Variables = make(map[string]*Variable)
 				}
-				for _, r := range m.Function.Type.ReturnList {
-					if r.Expression != nil {
-						errs = append(errs, fmt.Errorf("%s interface method return variable '%s' cannot have default value",
-							errMsgPrefix(r.Pos), r.Name))
-					}
+				m.Function.Block.Variables[THIS] = &Variable{}
+				m.Function.Block.Variables[THIS].Name = THIS
+				m.Function.Block.Variables[THIS].Pos = m.Function.Pos
+				m.Function.Block.Variables[THIS].Type = &Type{
+					Type:  VariableTypeObject,
+					Class: c,
 				}
 			}
 		}
@@ -376,7 +388,7 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	return nil
 }
 
-func (c *Class) matchConstructionFunction(pos *Pos, errs *[]error, newCase *ExpressionNew,
+func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *ExpressionNew,
 	callFatherCase *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
@@ -416,7 +428,8 @@ func (c *Class) classAccessAble(pos *Pos) error {
 		return err
 	}
 	if c.IsPublic() == false {
-		return fmt.Errorf("%s class '%s' is not public", errMsgPrefix(pos), c.Name)
+		return fmt.Errorf("%s class '%s' is not public",
+			errMsgPrefix(pos), c.Name)
 	}
 	return nil
 }

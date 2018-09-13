@@ -413,7 +413,6 @@ func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
 	if parser.token.Type != lex.TokenAssign {
 		ret.Type, err = parser.parseType()
 		if err != nil {
-			parser.errs = append(parser.errs, err)
 			return
 		}
 	}

@@ -19,6 +19,10 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	}
 	if bin.Left.Type == ExpressionTypeIdentifier &&
 		e.IsStatementExpression == false {
+		/*
+			var a = 1
+			print(a += 1)
+		*/
 		t := bin.Left.Data.(*ExpressionIdentifier)
 		if t.Variable != nil {
 			t.Variable.Used = true

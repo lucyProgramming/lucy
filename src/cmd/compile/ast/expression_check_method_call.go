@@ -138,7 +138,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		return nil
 	}
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
-	ms, matched, err := object.Class.SuperClass.matchConstructionFunction(e.Pos, errs, nil, call, callArgsTypes)
+	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs, nil, call, callArgsTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil

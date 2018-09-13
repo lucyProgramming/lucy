@@ -17,16 +17,11 @@ public final class StringOption  extends Option{
 	}
 	
 	
-	protected fn parse(s string) -> (err error) {
-		this.stringValue = s 
-	} 
-	public fn getValue() -> (v string){
-		v = this.stringValue
-	}
+	protected fn parse(s string) -> (err error) {	this.stringValue = s } 
 	
-	protected fn  formatDefaultValue() -> ( format string  ) {
-		format = this.stringDefaultValue
-	}
+	public fn getValue() -> (v string = this.stringValue ){ }
+	
+	protected fn  formatDefaultValue() -> ( format string  = this.stringDefaultValue) { }
 	
 }
 

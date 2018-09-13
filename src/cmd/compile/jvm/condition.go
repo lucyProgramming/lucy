@@ -10,13 +10,13 @@ import (
 */
 func (buildExpression *BuildExpression) buildConditionNotOk(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	context *Context, state *StackMapState, condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
-	if condition.IsIntCompare() {
+	if condition.Is2IntCompare() {
 		return buildExpression.buildIntCompareConditionNotOk(class, code, context, state, condition)
-	} else if condition.IsNullCompare() {
+	} else if condition.IsCompare2Null() {
 		return buildExpression.buildNullCompareConditionNotOk(class, code, context, state, condition)
-	} else if condition.IsStringCompare() {
+	} else if condition.Is2StringCompare() {
 		return buildExpression.buildStringCompareConditionNotOk(class, code, context, state, condition)
-	} else if condition.IsPointerCompare() {
+	} else if condition.Is2PointerCompare() {
 		return buildExpression.buildPointerCompareConditionNotOk(class, code, context, state, condition)
 	} else {
 		maxStack = buildExpression.build(class, code, condition, context, state)

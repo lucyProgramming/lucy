@@ -11,24 +11,36 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	maxStack = buildExpression.build(class, code, e.Left, context, state)
-	if t := buildExpression.stackTop2String(class, code, e.Left.Value, context, state); t > maxStack {
-		maxStack = t
+	if e.Left.IsString("") || e.Right.IsString("") {
+		not := e.Left
+		if e.Right.IsString("") == false {
+			not = e.Right
+		}
+		maxStack = buildExpression.build(class, code, not, context, state)
+		if t := buildExpression.stackTop2String(class, code, not.Value, context, state); t > maxStack {
+			maxStack = t
+		}
+		return
+	} else {
+		maxStack = buildExpression.build(class, code, e.Left, context, state)
+		if t := buildExpression.stackTop2String(class, code, e.Left.Value, context, state); t > maxStack {
+			maxStack = t
+		}
+		state.pushStack(class, state.newObjectVariableType(javaStringClass))
+		stack := buildExpression.build(class, code, e.Right, context, state)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		if t := 1 + buildExpression.stackTop2String(class, code, e.Right.Value, context, state); t > maxStack {
+			maxStack = t
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      javaStringClass,
+			Method:     `concat`,
+			Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		return
 	}
-	state.pushStack(class, state.newObjectVariableType(javaStringClass))
-	stack := buildExpression.build(class, code, e.Right, context, state)
-	if t := 1 + stack; t > maxStack {
-		maxStack = t
-	}
-	if t := 1 + buildExpression.stackTop2String(class, code, e.Right.Value, context, state); t > maxStack {
-		maxStack = t
-	}
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringClass,
-		Method:     `concat`,
-		Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
 }

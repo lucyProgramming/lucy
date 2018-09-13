@@ -11,10 +11,10 @@ public abstract class Option {
 	protected  typ OptionType
 	protected usage string 
 	
-	protected abstract fn formatDefaultValue() -> ( format string  ) 
-
+	protected abstract fn formatDefaultValue() -> (format string  ) 
+	
 	protected abstract fn reset() 
-		
+	
 	protected abstract fn parse(arg string) -> (err error )  
 	
 }

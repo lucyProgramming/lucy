@@ -33,11 +33,8 @@ public final class IntOption  extends Option{
 		}
 		this.intValue = value 
 	} 
-	public fn getValue() -> (v int){
-		v = this.intValue
-	}
 	
-	protected fn  formatDefaultValue() -> ( format string  ) {
-		format = "" + .intDefaultValue 
-	}
+	public fn getValue() -> (v int = this.intValue ){ }
+	
+	protected fn  formatDefaultValue() -> ( format string  = "" + .intDefaultValue  ) { }
 }

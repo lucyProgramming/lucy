@@ -191,7 +191,6 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				v.Type.bindWithParameterTypes(parameterTypes)
 			}
 		}
-
 		//check this function
 		cloneFunction.Block.inherit(&PackageBeenCompile.Block)
 		if cloneFunction.Block.Functions == nil {
@@ -199,13 +198,13 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		cloneFunction.Block.Functions[cloneFunction.Name] = cloneFunction
 		cloneFunction.Block.InheritedAttribute.Function = cloneFunction
-		cloneFunction.checkParametersAndReturns(errs)
+		cloneFunction.checkParametersAndReturns(errs, true, false)
 		cloneFunction.checkBlock(errs)
 	}
 	ret = call.TemplateFunctionCallPair.Function
 	// when all ok ,ret is not a template function any more
 	if len(tps) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s to many parameter type  to call template function",
+		*errs = append(*errs, fmt.Errorf("%s to many parameter type to call template function",
 			errMsgPrefix(e.Pos)))
 	}
 	return ret
