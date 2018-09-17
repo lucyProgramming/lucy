@@ -11,7 +11,7 @@ type Block struct {
 	/*
 		should analyse at ast stage
 	*/
-	WillNotExecuteToEnd             bool
+	NotExecuteToLastStatement       bool
 	Defers                          []*StatementDefer
 	IsGlobalVariableDefinitionBlock bool
 	IsFunctionBlock                 bool // function block
@@ -34,11 +34,6 @@ type Block struct {
 	Variables                       map[string]*Variable
 	ClosureFunctions                map[string]*Function //in "Functions" too
 	checkConstantsCalled            bool
-}
-
-func (b *Block) HaveVariableDefinition() bool {
-	return len(b.ClosureFunctions) > 0 ||
-		len(b.Variables) > 0
 }
 
 func (b *Block) NameExists(name string) (interface{}, bool) {

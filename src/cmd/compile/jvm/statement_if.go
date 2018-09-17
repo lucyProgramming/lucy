@@ -15,39 +15,33 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 			maxStack = stack
 		}
 	}
-	var trueState *StackMapState
-	if s.Block.HaveVariableDefinition() {
-		trueState = (&StackMapState{}).FromLast(ifState)
-	} else {
-		trueState = ifState
-	}
-	stack, exit := buildPackage.BuildExpression.buildConditionNotOk(class, code, context, trueState, s.Condition)
+
+	trueBlockState := (&StackMapState{}).FromLast(ifState)
+
+	stack, exit := buildPackage.BuildExpression.buildConditionNotOk(class, code, context, trueBlockState, s.Condition)
 	if stack > maxStack {
 		maxStack = stack
 	}
-	buildPackage.buildBlock(class, code, &s.Block, context, trueState)
-	ifState.addTop(trueState)
+	buildPackage.buildBlock(class, code, &s.Block, context, trueBlockState)
+	ifState.addTop(trueBlockState)
 	if s.ElseBlock != nil || len(s.ElseIfList) > 0 {
-		if s.Block.WillNotExecuteToEnd == false {
+		if s.Block.NotExecuteToLastStatement == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
 	}
 	for k, v := range s.ElseIfList {
 		context.MakeStackMap(code, ifState, code.CodeLength) // state is not change,all block var should be access from outside
 		writeExits([]*cg.Exit{exit}, code.CodeLength)
-		var elseIfState *StackMapState
-		if v.Block.HaveVariableDefinition() {
-			elseIfState = (&StackMapState{}).FromLast(ifState)
-		} else {
-			elseIfState = ifState
-		}
+
+		elseIfState := (&StackMapState{}).FromLast(ifState)
+
 		stack, exit = buildPackage.BuildExpression.buildConditionNotOk(class, code, context, elseIfState, v.Condition)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		buildPackage.buildBlock(class, code, v.Block, context, elseIfState)
 		if s.ElseBlock != nil || k != len(s.ElseIfList)-1 {
-			if v.Block.WillNotExecuteToEnd == false {
+			if v.Block.NotExecuteToLastStatement == false {
 				s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 			}
 		}
@@ -57,17 +51,11 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	context.MakeStackMap(code, ifState, code.CodeLength)
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	if s.ElseBlock != nil {
-		var elseBlockState *StackMapState
-		if s.ElseBlock.HaveVariableDefinition() {
-			elseBlockState = (&StackMapState{}).FromLast(ifState)
-		} else {
-			elseBlockState = ifState
-		}
+
+		elseBlockState := (&StackMapState{}).FromLast(ifState)
+
 		buildPackage.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
 		ifState.addTop(elseBlockState)
-		if s.ElseBlock.WillNotExecuteToEnd == false {
-			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
-		}
 	}
 	return
 }

@@ -12,7 +12,8 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		return nil
 	}
 	switch on.Type {
-	case VariableTypeArray, VariableTypeJavaArray:
+	case VariableTypeArray,
+		VariableTypeJavaArray:
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
 		if indexType != nil {

@@ -42,6 +42,7 @@ var (
 	lucyBuildInPackage   *Package
 	ParseFunctionHandler func(bs []byte, pos *Pos) (f *Function, es []error)
 	javaStringClass      *Class
+	javaStringClassName  = "java/lang/String"
 )
 
 func loadJavaStringClass(pos *Pos) error {

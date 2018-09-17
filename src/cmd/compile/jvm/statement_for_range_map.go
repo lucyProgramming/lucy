@@ -246,7 +246,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	// build block
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)
 	forState.addTop(blockState)
-	if s.Block.WillNotExecuteToEnd == false {
+	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)
 	}
 	writeExits([]*cg.Exit{exit}, code.CodeLength)

@@ -300,7 +300,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	// build block
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)
 	forState.addTop(blockState)
-	if s.Block.WillNotExecuteToEnd == false {
+	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)
 	}
 	//pop index on stack

@@ -1,6 +1,5 @@
 package optimizer
 
-//
 //import (
 //	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 //)

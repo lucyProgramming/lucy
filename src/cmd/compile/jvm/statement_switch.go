@@ -137,7 +137,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			buildPackage.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if c.Block == nil || c.Block.WillNotExecuteToEnd == false {
+		if c.Block == nil || c.Block.NotExecuteToLastStatement == false {
 			s.Exits = append(s.Exits,
 				(&cg.Exit{}).Init(cg.OP_goto, code)) // matched,goto switch outside
 		}
@@ -153,12 +153,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	state.popStack(1)
 	// build default
 	if s.Default != nil {
-		var ss *StackMapState
-		if s.Default.HaveVariableDefinition() {
-			ss = (&StackMapState{}).FromLast(state)
-		} else {
-			ss = state
-		}
+		ss := (&StackMapState{}).FromLast(state)
 		buildPackage.buildBlock(class, code, s.Default, context, ss)
 		state.addTop(ss)
 	}

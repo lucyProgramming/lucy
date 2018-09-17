@@ -56,6 +56,11 @@ type Type struct {
 	AliasType    *Type
 }
 
+func (typ *Type) IsString() bool {
+	return typ.Type == VariableTypeObject &&
+		typ.Class.Name == javaStringClass
+}
+
 type Map struct {
 	K *Type
 	V *Type

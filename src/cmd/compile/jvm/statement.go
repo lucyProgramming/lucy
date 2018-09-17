@@ -20,12 +20,8 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeBlock:
-		var blockState *StackMapState
-		if s.Block.HaveVariableDefinition() {
-			blockState = (&StackMapState{}).FromLast(state)
-		} else {
-			blockState = state
-		}
+
+		blockState := (&StackMapState{}).FromLast(state)
 		s.Block.Exits = []*cg.Exit{}
 		buildPackage.buildBlock(class, code, s.Block, context, blockState)
 		state.addTop(blockState)
@@ -36,9 +32,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 	case ast.StatementTypeFor:
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
-		if len(s.StatementFor.Exits) > 0 {
-			writeExits(s.StatementFor.Exits, code.CodeLength)
-		}
+		writeExits(s.StatementFor.Exits, code.CodeLength)
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeContinue:
 		buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)

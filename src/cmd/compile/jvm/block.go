@@ -41,38 +41,38 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 		}
 		//block deadEnd
 		if s.Type == ast.StatementTypeBlock {
-			notToHere = s.Block.WillNotExecuteToEnd
+			notToHere = s.Block.NotExecuteToLastStatement
 			continue
 		}
 		if s.Type == ast.StatementTypeIf && s.StatementIf.ElseBlock != nil {
-			t := s.StatementIf.Block.WillNotExecuteToEnd
+			t := s.StatementIf.Block.NotExecuteToLastStatement
 			for _, v := range s.StatementIf.ElseIfList {
-				t = t && v.Block.WillNotExecuteToEnd
+				t = t && v.Block.NotExecuteToLastStatement
 			}
-			t = t && s.StatementIf.ElseBlock.WillNotExecuteToEnd
+			t = t && s.StatementIf.ElseBlock.NotExecuteToLastStatement
 			notToHere = t
 			continue
 		}
 		if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != nil {
-			t := s.StatementSwitch.Default.WillNotExecuteToEnd
+			t := s.StatementSwitch.Default.NotExecuteToLastStatement
 			for _, v := range s.StatementSwitch.StatementSwitchCases {
 				if v.Block != nil {
-					t = t && v.Block.WillNotExecuteToEnd
+					t = t && v.Block.NotExecuteToLastStatement
 				} else {
 					//this will fallthrough
 					t = false
 					break
 				}
 			}
-			t = t && s.StatementSwitch.Default.WillNotExecuteToEnd
+			t = t && s.StatementSwitch.Default.NotExecuteToLastStatement
 			notToHere = t
 			continue
 		}
 	}
-	b.WillNotExecuteToEnd = notToHere
+	b.NotExecuteToLastStatement = notToHere
 	if b.IsFunctionBlock == false &&
 		len(b.Defers) > 0 &&
-		b.WillNotExecuteToEnd == false {
+		b.NotExecuteToLastStatement == false {
 		buildPackage.buildDefers(class, code, context, b.Defers, state)
 	}
 	return
