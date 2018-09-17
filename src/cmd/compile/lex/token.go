@@ -79,6 +79,7 @@ const (
 	TokenInterface               // interface
 	TokenByte                    // byte
 	TokenShort                   // short
+	TokenChar                    // char
 	TokenInt                     // int
 	TokenFloat                   // float
 	TokenDouble                  // double
@@ -86,6 +87,7 @@ const (
 	TokenString                  // string
 	TokenIdentifier              // identifier
 	TokenLiteralByte             // 'a'
+	TokenLiteralChar             // 'a'
 	TokenLiteralShort            // 1s
 	TokenLiteralInt              // 123
 	TokenLiteralString           // ""
@@ -143,6 +145,7 @@ var (
 		"interface":    TokenInterface,
 		"byte":         TokenByte,
 		"short":        TokenShort,
+		"char":         TokenChar,
 		"int":          TokenInt,
 		"float":        TokenFloat,
 		"double":       TokenDouble,

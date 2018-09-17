@@ -36,6 +36,8 @@ func (description *Description) typeDescriptor(typ *ast.Type) string {
 		return "B"
 	case ast.VariableTypeShort:
 		return "S"
+	case ast.VariableTypeChar:
+		return "C"
 	case ast.VariableTypeInt, ast.VariableTypeEnum:
 		return "I"
 	case ast.VariableTypeLong:
@@ -95,7 +97,12 @@ func (description *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) 
 		return bs, &ast.Type{
 			Type: ast.VariableTypeLong,
 		}, nil
-	case 'S', 'C':
+	case 'C':
+		bs = bs[1:]
+		return bs, &ast.Type{
+			Type: ast.VariableTypeChar,
+		}, nil
+	case 'S':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeShort,

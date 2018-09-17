@@ -363,6 +363,8 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VariableTypeShort:
 				fallthrough
+			case ast.VariableTypeChar:
+				fallthrough
 			case ast.VariableTypeInt:
 				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
 			case ast.VariableTypeLong:

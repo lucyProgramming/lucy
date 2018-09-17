@@ -26,6 +26,8 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			fallthrough
 		case ast.VariableTypeShort:
 			fallthrough
+		case ast.VariableTypeChar:
+			fallthrough
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_isub
 		case ast.VariableTypeLong:

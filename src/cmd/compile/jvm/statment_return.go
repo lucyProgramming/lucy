@@ -55,6 +55,8 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 				fallthrough
 			case ast.VariableTypeEnum:
 				fallthrough
+			case ast.VariableTypeChar:
+				fallthrough
 			case ast.VariableTypeInt:
 				code.Codes[code.CodeLength] = cg.OP_ireturn
 			case ast.VariableTypeLong:
@@ -183,6 +185,8 @@ func (buildPackage *BuildPackage) buildReturnFromFunctionReturnList(class *cg.Cl
 			case ast.VariableTypeShort:
 				fallthrough
 			case ast.VariableTypeEnum:
+				fallthrough
+			case ast.VariableTypeChar:
 				fallthrough
 			case ast.VariableTypeInt:
 				code.Codes[code.CodeLength] = cg.OP_ireturn

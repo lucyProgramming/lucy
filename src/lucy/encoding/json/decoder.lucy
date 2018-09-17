@@ -99,7 +99,7 @@ class Decoder {
 
 	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object,err error) {
 		typeName := c.getName()
-		switch typeName{ 
+		switch typeName { 
 			case "java.lang.Boolean":
 				if tree.Type != JsonSyntaxTreeTypeBool {
 					return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
@@ -140,7 +140,7 @@ class Decoder {
 				if longValue > long(Character.MAX_VALUE) {
 					return null , new error(sprintf("%d exceeds character max value" ,longValue))
 				}
-				return Character.valueOf(short(longValue)) , null 
+				return Character.valueOf(char(longValue)) , null
 			case "java.lang.Integer" :
 				if tree.Type != JsonSyntaxTreeTypeNumber {
 					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()))
@@ -423,16 +423,19 @@ class Decoder {
 					bs.append('\t')
 					b = this.bs[this.offset++]
 				case 'u':  // unicode
-					var t  = 0 
+					var c char  
 					for i := 0 ;i < 4 ;i ++ {
 						if b = this.bs[this.offset++] ; .isHex(b) == false {
 							panic(new error("expect hex number"))
 						}
-						t = t * 16 + .hexByte2Int(b)
+						c = c * 16 + char(.hexByte2Int(b))
 					}
-					
-					
-					 
+					t := new char[](1)
+					t[0] = c 
+					for v := range new String(t).getBytes("utf-8") {
+						bs.append(v)
+					}
+					b = this.bs[this.offset++ ]
 			}
 		}
 		// b == '"'
@@ -443,9 +446,11 @@ class Decoder {
 	// no check 
 	private fn hexByte2Int(b byte ) -> (v int ) {
 		if b >= 'a' && b <= 'z' {
-			return int(b - 'a')
+			return int(b - 'a') + 10 
+		}else if b >= 'A' && b <= 'Z' {
+			return int(b - 'A') + 10 
 		}else {
-			return int(b - 'A')
+			return int(b - '0')
 		}
 	}
 	

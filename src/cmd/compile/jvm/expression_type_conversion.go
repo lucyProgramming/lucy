@@ -190,14 +190,17 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		code.CodeLength += 3
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.start)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
-		if 5 > maxStack { // stack is ... stringRef stringRef byte[] start length
-			maxStack = 5
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if 6 > maxStack { // stack is ... stringRef stringRef byte[] start length "utf-8"
+			maxStack = 6
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,
 			Method:     specialMethodInit,
-			Descriptor: "([BII)V",
+			Descriptor: "([BIILjava/lang/String;)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
@@ -215,14 +218,12 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		code.CodeLength += 3
 		return
 	}
-
 	if conversion.Type.Type == ast.VariableTypeString {
 		code.Codes[code.CodeLength] = cg.OP_checkcast
 		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
 	}
-
 	// objects
 	code.Codes[code.CodeLength] = cg.OP_checkcast
 	code.CodeLength++

@@ -3,6 +3,7 @@ package lex
 import (
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 type Lexer struct {
@@ -552,6 +553,26 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 			}
 			bs = append(bs, b)
 			c, eof = lex.getChar()
+		case 'u', 'U':
+			var r rune
+			n := 4
+			if c == 'U' {
+				n = 8
+			}
+			for i := 0; i < n; i++ {
+				c, eof = lex.getChar()
+				if eof {
+					err = fmt.Errorf("unexcepted EOF")
+					break
+				}
+				if lex.isHex(c) == false {
+					err = fmt.Errorf("expect hex number")
+					break
+				}
+				r = r*16 + rune(lex.hexByte2ByteValue(c))
+			}
+			bs = append(bs, []byte(string([]rune{r}))...)
+			c, eof = lex.getChar()
 		default:
 			err = fmt.Errorf("unknown escape sequence")
 		}
@@ -863,11 +884,16 @@ redo:
 	case '\'':
 		token, err = lex.lexString('\'')
 		if err == nil {
-			if t := []byte(token.Data.(string)); len(t) != 1 {
+			if t := []rune(token.Data.(string)); len(t) != 1 {
 				err = fmt.Errorf("expect one char")
 			} else { // correct token
-				token.Type = TokenLiteralByte
-				token.Data = byte([]byte(t)[0])
+				if utf8.RuneLen(t[0]) == 1 {
+					token.Type = TokenLiteralByte
+					token.Data = byte(t[0])
+				} else {
+					token.Type = TokenLiteralChar
+					token.Data = int32(t[0])
+				}
 			}
 		}
 		return

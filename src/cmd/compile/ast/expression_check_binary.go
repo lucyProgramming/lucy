@@ -111,6 +111,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			fallthrough
 		case VariableTypeShort:
 			fallthrough
+		case VariableTypeChar:
+			fallthrough
 		case VariableTypeInt:
 			fallthrough
 		case VariableTypeFloat:

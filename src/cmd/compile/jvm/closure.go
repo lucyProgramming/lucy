@@ -71,6 +71,8 @@ func (closure *Closure) getMeta(t ast.VariableTypeKind) (meta *ClosureObjectMeta
 		fallthrough
 	case ast.VariableTypeEnum:
 		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
 	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[ClosureClassInt]
 	case ast.VariableTypeLong:
@@ -110,6 +112,8 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 	case ast.VariableTypeShort:
 		fallthrough
 	case ast.VariableTypeEnum:
+		fallthrough
+	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[ClosureClassInt]
@@ -156,6 +160,8 @@ func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.
 	case ast.VariableTypeShort:
 		fallthrough
 	case ast.VariableTypeEnum:
+		fallthrough
+	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[ClosureClassInt]
@@ -211,6 +217,8 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	case ast.VariableTypeShort:
 		fallthrough
 	case ast.VariableTypeEnum:
+		fallthrough
+	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
 		meta = closure.ClosureObjectMetas[ClosureClassInt]

@@ -32,7 +32,7 @@ final class Test {
 		}
 	}
 	
-	fn testDir(packageName  ,  dir string) ->(err error ){
+	private fn testDir(packageName  ,  dir string) ->(err error ){
 		fis  := (new io.File (dir)) .listFiles() 
 		lucyFiles := []io.File{} 
 		for v := range fis {

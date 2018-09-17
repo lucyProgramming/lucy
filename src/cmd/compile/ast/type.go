@@ -12,6 +12,7 @@ const (
 	//value types
 	VariableTypeBool
 	VariableTypeByte
+	VariableTypeChar
 	VariableTypeShort
 	VariableTypeInt
 	VariableTypeLong
@@ -56,11 +57,6 @@ type Type struct {
 	AliasType    *Type
 }
 
-func (typ *Type) IsString() bool {
-	return typ.Type == VariableTypeObject &&
-		typ.Class.Name == javaStringClass
-}
-
 type Map struct {
 	K *Type
 	V *Type
@@ -101,6 +97,9 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 		e.Type = ExpressionTypeByte
 		e.Data = byte(0)
 	case VariableTypeShort:
+		e.Type = ExpressionTypeInt
+		e.Data = int32(0)
+	case VariableTypeChar:
 		e.Type = ExpressionTypeInt
 		e.Data = int32(0)
 	case VariableTypeInt:
@@ -394,14 +393,14 @@ func (typ *Type) IsPointer() bool {
 		typ.Type == VariableTypeString ||
 		typ.Type == VariableTypeNull ||
 		typ.Type == VariableTypeFunction
-
 }
 
 func (typ *Type) IsInteger() bool {
 	return typ.Type == VariableTypeByte ||
 		typ.Type == VariableTypeShort ||
 		typ.Type == VariableTypeInt ||
-		typ.Type == VariableTypeLong
+		typ.Type == VariableTypeLong ||
+		typ.Type == VariableTypeChar
 }
 
 /*
@@ -429,6 +428,8 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "bool"
 	case VariableTypeByte:
 		*ret += "byte"
+	case VariableTypeChar:
+		*ret += "char"
 	case VariableTypeShort:
 		*ret += "short"
 	case VariableTypeInt:

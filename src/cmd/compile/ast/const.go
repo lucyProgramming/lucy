@@ -13,6 +13,8 @@ func (c *Constant) mkDefaultValue() {
 		c.Value = byte(0)
 	case VariableTypeShort:
 		c.Value = int32(0)
+	case VariableTypeChar:
+		c.Value = int32(0)
 	case VariableTypeInt:
 		c.Value = int32(0)
 	case VariableTypeLong:

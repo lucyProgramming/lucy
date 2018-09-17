@@ -82,6 +82,8 @@ func (stackMapState *StackMapState) newStackMapVerificationTypeInfo(class *cg.Cl
 		fallthrough
 	case ast.VariableTypeEnum:
 		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
 	case ast.VariableTypeInt:
 		ret.Verify = &cg.StackMapIntegerVariableInfo{}
 	case ast.VariableTypeLong:

@@ -51,6 +51,12 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Type: ast.VariableTypeShort,
 			Pos:  pos,
 		}
+	case lex.TokenChar:
+		parser.Next(lfIsToken)
+		ret = &ast.Type{
+			Type: ast.VariableTypeChar,
+			Pos:  pos,
+		}
 	case lex.TokenInt:
 		parser.Next(lfIsToken)
 		ret = &ast.Type{
@@ -212,7 +218,8 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenMap ||
 		parser.token.Type == lex.TokenIdentifier ||
 		parser.token.Type == lex.TokenTemplate ||
-		parser.token.Type == lex.TokenFn
+		parser.token.Type == lex.TokenFn ||
+		parser.token.Type == lex.TokenChar
 }
 func (parser *Parser) looksLikeType() bool {
 	return parser.isValidTypeBegin() &&

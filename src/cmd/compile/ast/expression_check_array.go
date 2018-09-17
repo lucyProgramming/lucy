@@ -23,7 +23,6 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 			return nil
 		}
 	}
-
 	for _, v := range arr.Expressions {
 		eTypes, es := v.check(block)
 		*errs = append(*errs, es...)

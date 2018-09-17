@@ -17,6 +17,8 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 			fallthrough
 		case ast.VariableTypeShort:
 			fallthrough
+		case ast.VariableTypeChar:
+			fallthrough
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_ineg
 		case ast.VariableTypeFloat:
@@ -45,6 +47,15 @@ func (buildExpression *BuildExpression) buildUnary(class *cg.ClassHighLevel, cod
 				maxStack = 2
 			}
 		case ast.VariableTypeShort:
+			code.Codes[code.CodeLength] = cg.OP_sipush
+			code.Codes[code.CodeLength+1] = 255
+			code.Codes[code.CodeLength+2] = 255
+			code.Codes[code.CodeLength+3] = cg.OP_ixor
+			code.CodeLength += 4
+			if 2 > maxStack {
+				maxStack = 2
+			}
+		case ast.VariableTypeChar:
 			code.Codes[code.CodeLength] = cg.OP_sipush
 			code.Codes[code.CodeLength+1] = 255
 			code.Codes[code.CodeLength+2] = 255

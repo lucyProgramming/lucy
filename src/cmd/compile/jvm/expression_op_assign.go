@@ -138,7 +138,42 @@ func (buildExpression *BuildExpression) buildOpAssign(class *cg.ClassHighLevel, 
 			code.Codes[code.CodeLength] = cg.OP_ixor
 			code.CodeLength++
 		}
-
+	case ast.VariableTypeChar:
+		if e.Type == ast.ExpressionTypePlusAssign {
+			code.Codes[code.CodeLength] = cg.OP_iadd
+			code.Codes[code.CodeLength+1] = cg.OP_i2c
+			code.CodeLength += 2
+		} else if e.Type == ast.ExpressionTypeMinusAssign {
+			code.Codes[code.CodeLength] = cg.OP_isub
+			code.Codes[code.CodeLength+1] = cg.OP_i2c
+			code.CodeLength += 2
+		} else if e.Type == ast.ExpressionTypeMulAssign {
+			code.Codes[code.CodeLength] = cg.OP_imul
+			code.Codes[code.CodeLength+1] = cg.OP_i2c
+			code.CodeLength += 2
+		} else if e.Type == ast.ExpressionTypeDivAssign {
+			code.Codes[code.CodeLength] = cg.OP_idiv
+			code.CodeLength++
+		} else if e.Type == ast.ExpressionTypeModAssign {
+			code.Codes[code.CodeLength] = cg.OP_irem
+			code.CodeLength++
+		} else if e.Type == ast.ExpressionTypeAndAssign {
+			code.Codes[code.CodeLength] = cg.OP_iand
+			code.CodeLength++
+		} else if e.Type == ast.ExpressionTypeOrAssign {
+			code.Codes[code.CodeLength] = cg.OP_ior
+			code.CodeLength++
+		} else if e.Type == ast.ExpressionTypeLshAssign {
+			code.Codes[code.CodeLength] = cg.OP_ishl
+			code.Codes[code.CodeLength+1] = cg.OP_i2c
+			code.CodeLength += 2
+		} else if e.Type == ast.ExpressionTypeRshAssign {
+			code.Codes[code.CodeLength] = cg.OP_ishr
+			code.CodeLength++
+		} else if e.Type == ast.ExpressionTypeXorAssign {
+			code.Codes[code.CodeLength] = cg.OP_ixor
+			code.CodeLength++
+		}
 	case ast.VariableTypeInt:
 		if e.Type == ast.ExpressionTypePlusAssign {
 			code.Codes[code.CodeLength] = cg.OP_iadd

@@ -272,7 +272,29 @@ func (e *Expression) getByteValue() byte {
 	}
 	return 0
 }
+
 func (e *Expression) getShortValue() int32 {
+	if e.isNumber() == false {
+		panic("not number")
+	}
+	switch e.Type {
+	case ExpressionTypeByte:
+		return int32(e.Data.(byte))
+	case ExpressionTypeShort:
+		fallthrough
+	case ExpressionTypeInt:
+		return int32(e.Data.(int32))
+	case ExpressionTypeLong:
+		return int32(e.Data.(int64))
+	case ExpressionTypeFloat:
+		return int32(e.Data.(float32))
+	case ExpressionTypeDouble:
+		return int32(e.Data.(float64))
+	}
+	return 0
+}
+
+func (e *Expression) getCharValue() int32 {
 	if e.isNumber() == false {
 		panic("not number")
 	}
@@ -385,6 +407,9 @@ func (e *Expression) convertNumberLiteralTo(t VariableTypeKind) {
 		e.Type = ExpressionTypeByte
 	case VariableTypeShort:
 		e.Data = e.getShortValue()
+		e.Type = ExpressionTypeShort
+	case VariableTypeChar:
+		e.Data = e.getCharValue()
 		e.Type = ExpressionTypeShort
 	case VariableTypeInt:
 		e.Data = e.getIntValue()

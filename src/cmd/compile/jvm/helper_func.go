@@ -145,6 +145,10 @@ func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *a
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ArrayTypeShort
 		code.CodeLength += 2
+	case ast.VariableTypeChar:
+		code.Codes[code.CodeLength] = cg.OP_newarray
+		code.Codes[code.CodeLength+1] = ArrayTypeChar
+		code.CodeLength += 2
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:
@@ -198,6 +202,8 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 		op = cg.OP_bastore
 	case ast.VariableTypeShort:
 		op = cg.OP_sastore
+	case ast.VariableTypeChar:
+		op = cg.OP_castore
 	case ast.VariableTypeEnum,
 		ast.VariableTypeInt:
 		op = cg.OP_iastore

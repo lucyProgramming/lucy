@@ -18,6 +18,8 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			fallthrough
 		case ast.VariableTypeEnum:
 			fallthrough
+		case ast.VariableTypeChar:
+			fallthrough
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_isub
 			code.CodeLength++

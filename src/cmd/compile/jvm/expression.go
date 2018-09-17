@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 		code.Codes[code.CodeLength+1] = e.Data.(byte)
 		code.CodeLength += 2
 		maxStack = 1
-	case ast.ExpressionTypeInt, ast.ExpressionTypeShort:
+	case ast.ExpressionTypeInt, ast.ExpressionTypeShort, ast.ExpressionTypeChar:
 		loadInt32(class, code, e.Data.(int32))
 		maxStack = 1
 	case ast.ExpressionTypeLong:

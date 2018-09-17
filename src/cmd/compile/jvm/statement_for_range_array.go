@@ -204,6 +204,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 			code.Codes[code.CodeLength] = cg.OP_baload
 		case ast.VariableTypeShort:
 			code.Codes[code.CodeLength] = cg.OP_saload
+		case ast.VariableTypeChar:
+			code.Codes[code.CodeLength] = cg.OP_caload
 		case ast.VariableTypeEnum:
 			fallthrough
 		case ast.VariableTypeInt:

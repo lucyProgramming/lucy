@@ -44,6 +44,8 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 			code.Codes[code.CodeLength] = cg.OP_baload
 		case ast.VariableTypeShort:
 			code.Codes[code.CodeLength] = cg.OP_saload
+		case ast.VariableTypeChar:
+			code.Codes[code.CodeLength] = cg.OP_caload
 		case ast.VariableTypeEnum:
 			fallthrough
 		case ast.VariableTypeInt:
@@ -140,6 +142,8 @@ func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
 		case ast.VariableTypeByte:
 			fallthrough
 		case ast.VariableTypeShort:
+			fallthrough
+		case ast.VariableTypeChar:
 			fallthrough
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_pop

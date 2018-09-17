@@ -27,13 +27,6 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		suffix.Data = true
 		suffix.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
-	case lex.TokenSelection:
-		suffix = &ast.Expression{}
-		suffix.Description = "."
-		suffix.Type = ast.ExpressionTypeDot
-		suffix.Data = true
-		suffix.Pos = expressionParser.parser.mkPos()
-		//special case , no next
 	case lex.TokenFalse:
 		suffix = &ast.Expression{}
 		suffix.Description = "false"
@@ -41,6 +34,13 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		suffix.Data = false
 		suffix.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
+	case lex.TokenSelection:
+		suffix = &ast.Expression{}
+		suffix.Description = "."
+		suffix.Type = ast.ExpressionTypeDot
+		suffix.Data = true
+		suffix.Pos = expressionParser.parser.mkPos()
+		//special case , no next
 	case lex.TokenGlobal:
 		suffix = &ast.Expression{}
 		suffix.Description = "global"
@@ -58,6 +58,14 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 	case lex.TokenLiteralShort:
 		suffix = &ast.Expression{
 			Type:        ast.ExpressionTypeShort,
+			Data:        expressionParser.parser.token.Data,
+			Pos:         expressionParser.parser.mkPos(),
+			Description: "shortLiteral",
+		}
+		expressionParser.Next(lfIsToken)
+	case lex.TokenLiteralChar:
+		suffix = &ast.Expression{
+			Type:        ast.ExpressionTypeChar,
 			Data:        expressionParser.parser.token.Data,
 			Pos:         expressionParser.parser.mkPos(),
 			Description: "shortLiteral",
@@ -260,6 +268,12 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		}
 		//short()
 	case lex.TokenShort:
+		suffix, err = expressionParser.parseTypeConversionExpression()
+		if err != nil {
+			return suffix, err
+		}
+		//char()
+	case lex.TokenChar:
 		suffix, err = expressionParser.parseTypeConversionExpression()
 		if err != nil {
 			return suffix, err

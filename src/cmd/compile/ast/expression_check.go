@@ -68,6 +68,14 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			},
 		}
 		e.Value = returnValueTypes[0]
+	case ExpressionTypeChar:
+		returnValueTypes = []*Type{
+			{
+				Type: VariableTypeChar,
+				Pos:  e.Pos,
+			},
+		}
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeFloat:
 		returnValueTypes = []*Type{
 			{

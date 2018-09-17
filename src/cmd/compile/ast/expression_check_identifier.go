@@ -8,7 +8,7 @@ import (
 func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	identifier := e.Data.(*ExpressionIdentifier)
 	if identifier.Name == NoNameIdentifier {
-		// _ is not valid
+		//_ is not valid
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
 			errMsgPrefix(e.Pos), NoNameIdentifier)
 	}

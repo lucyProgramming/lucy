@@ -8,6 +8,7 @@ const (
 	ExpressionTypeBool                                      // true or false
 	ExpressionTypeByte                                      // 'a' or 97b
 	ExpressionTypeShort                                     // 100s
+	ExpressionTypeChar                                      //
 	ExpressionTypeInt                                       // 100
 	ExpressionTypeLong                                      // 100L
 	ExpressionTypeFloat                                     // 1.0
@@ -204,6 +205,9 @@ func (e *Expression) fromConst(c *Constant) {
 		e.Data = c.Value.(byte)
 	case VariableTypeShort:
 		e.Type = ExpressionTypeShort
+		e.Data = c.Value.(int32)
+	case VariableTypeChar:
+		e.Type = ExpressionTypeChar
 		e.Data = c.Value.(int32)
 	case VariableTypeInt:
 		e.Type = ExpressionTypeInt

@@ -46,6 +46,18 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel
 			Descriptor: "()S",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+	case ast.VariableTypeChar:
+		c := "java/lang/Character"
+		code.Codes[code.CodeLength] = cg.OP_checkcast
+		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      c,
+			Method:     "shortValue",
+			Descriptor: "()C",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:
@@ -120,6 +132,12 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 			Class:      "java/lang/Short",
 			Method:     "valueOf",
 			Descriptor: "(S)Ljava/lang/Short;",
+		}, bs[1:3])
+	case ast.VariableTypeChar:
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      "java/lang/Character",
+			Method:     "valueOf",
+			Descriptor: "(C)Ljava/lang/Character;",
 		}, bs[1:3])
 	case ast.VariableTypeEnum:
 		fallthrough

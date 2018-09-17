@@ -85,6 +85,15 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 		code.Codes[code.CodeLength+1] = cg.OP_iadd
 		code.Codes[code.CodeLength+2] = cg.OP_i2s
 		code.CodeLength += 3
+	case ast.VariableTypeChar:
+		if e.IsIncrement() {
+			code.Codes[code.CodeLength] = cg.OP_iconst_1
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_iconst_m1
+		}
+		code.Codes[code.CodeLength+1] = cg.OP_iadd
+		code.Codes[code.CodeLength+2] = cg.OP_i2c
+		code.CodeLength += 3
 	case ast.VariableTypeInt:
 		if e.IsIncrement() {
 			code.Codes[code.CodeLength] = cg.OP_iconst_1

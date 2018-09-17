@@ -26,6 +26,8 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 			fallthrough
 		case ast.VariableTypeShort:
 			fallthrough
+		case ast.VariableTypeChar:
+			fallthrough
 		case ast.VariableTypeInt:
 			if e.Type == ast.ExpressionTypeAnd {
 				code.Codes[code.CodeLength] = cg.OP_iand
@@ -97,6 +99,27 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 			case ast.ExpressionTypeMul:
 				code.Codes[code.CodeLength] = cg.OP_imul
 				code.Codes[code.CodeLength+1] = cg.OP_i2s
+				code.CodeLength += 2
+			case ast.ExpressionTypeDiv:
+				code.Codes[code.CodeLength] = cg.OP_idiv
+				code.CodeLength++
+			case ast.ExpressionTypeMod:
+				code.Codes[code.CodeLength] = cg.OP_irem
+				code.CodeLength++
+			}
+		case ast.VariableTypeChar:
+			switch e.Type {
+			case ast.ExpressionTypeAdd:
+				code.Codes[code.CodeLength] = cg.OP_iadd
+				code.Codes[code.CodeLength+1] = cg.OP_i2c
+				code.CodeLength += 2
+			case ast.ExpressionTypeSub:
+				code.Codes[code.CodeLength] = cg.OP_isub
+				code.Codes[code.CodeLength+1] = cg.OP_i2c
+				code.CodeLength += 2
+			case ast.ExpressionTypeMul:
+				code.Codes[code.CodeLength] = cg.OP_imul
+				code.Codes[code.CodeLength+1] = cg.OP_i2c
 				code.CodeLength += 2
 			case ast.ExpressionTypeDiv:
 				code.Codes[code.CodeLength] = cg.OP_idiv
@@ -187,6 +210,15 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 			if e.Type == ast.ExpressionTypeLsh {
 				code.Codes[code.CodeLength] = cg.OP_ishl
 				code.Codes[code.CodeLength+1] = cg.OP_i2s
+				code.CodeLength += 2
+			} else {
+				code.Codes[code.CodeLength] = cg.OP_ishr
+				code.CodeLength++
+			}
+		case ast.VariableTypeChar:
+			if e.Type == ast.ExpressionTypeLsh {
+				code.Codes[code.CodeLength] = cg.OP_ishl
+				code.Codes[code.CodeLength+1] = cg.OP_i2c
 				code.CodeLength += 2
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ishr

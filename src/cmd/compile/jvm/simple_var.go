@@ -23,6 +23,8 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		fallthrough
 	case ast.VariableTypeEnum:
 		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
 	case ast.VariableTypeInt:
 		switch offset {
 		case 0:
@@ -115,6 +117,8 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 	case ast.VariableTypeShort:
 		fallthrough
 	case ast.VariableTypeEnum:
+		fallthrough
+	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
 		switch offset {

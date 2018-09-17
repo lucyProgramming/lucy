@@ -46,6 +46,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
+	charMap := make(map[int32]*Pos)
 	enumNamesMap := make(map[string]*Pos)
 	enumPackageName := ""
 	for _, v := range s.StatementSwitchCases {
@@ -58,6 +59,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 			var doubleValue float64
 			var stringValue string
 			var enumName string
+			var charValue int32
 			valueValid := false
 			//literal value
 			valueFromExpression := func() {
@@ -70,6 +72,8 @@ func (s *StatementSwitch) check(block *Block) []error {
 					int32Value = e.Data.(int32)
 				case ExpressionTypeLong:
 					int64Value = e.Data.(int64)
+				case ExpressionTypeChar:
+					charValue = e.Data.(int32)
 				case ExpressionTypeFloat:
 					floatValue = e.Data.(float32)
 				case ExpressionTypeDouble:
@@ -135,6 +139,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 						continue // no check body
 					} else {
 						shortMap[shortValue] = e.Pos
+					}
+				case VariableTypeChar:
+					if first, ok := charMap[charValue]; ok {
+						errs = append(errs, fmt.Errorf(errMsg(first)))
+						continue // no check body
+					} else {
+						charMap[charValue] = e.Pos
 					}
 				case VariableTypeInt:
 					if first, ok := int32Map[int32Value]; ok {

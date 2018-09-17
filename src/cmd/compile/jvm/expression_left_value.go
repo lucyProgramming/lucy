@@ -141,6 +141,8 @@ func (buildExpression *BuildExpression) getLeftValue(
 				ops = []byte{cg.OP_bastore}
 			case ast.VariableTypeShort:
 				ops = []byte{cg.OP_sastore}
+			case ast.VariableTypeChar:
+				ops = []byte{cg.OP_castore}
 			case ast.VariableTypeEnum:
 				fallthrough
 			case ast.VariableTypeInt:

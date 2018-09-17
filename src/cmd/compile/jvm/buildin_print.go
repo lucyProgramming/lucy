@@ -51,6 +51,14 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 				Descriptor: "(Z)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
+		case ast.VariableTypeChar:
+			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      "java/io/PrintStream",
+				Method:     "println",
+				Descriptor: "(C)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
 		case ast.VariableTypeByte:
 			fallthrough
 		case ast.VariableTypeShort:

@@ -12,6 +12,8 @@ func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, ty
 		// already is
 	case ast.VariableTypeShort:
 		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2b
 		code.CodeLength++
@@ -36,6 +38,8 @@ func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, t
 		// already is
 	case ast.VariableTypeShort:
 		// already is
+	case ast.VariableTypeChar:
+		// already is
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2s
 		code.CodeLength++
@@ -54,11 +58,41 @@ func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, t
 	}
 }
 
+func (buildExpression *BuildExpression) stackTop2Char(code *cg.AttributeCode, typ ast.VariableTypeKind) {
+	switch typ {
+	case ast.VariableTypeByte:
+		// already is
+	case ast.VariableTypeShort:
+		// already is
+	case ast.VariableTypeChar:
+		// already is
+	case ast.VariableTypeInt:
+		code.Codes[code.CodeLength] = cg.OP_i2c
+		code.CodeLength++
+	case ast.VariableTypeFloat:
+		code.Codes[code.CodeLength] = cg.OP_f2i
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_i2c
+		code.CodeLength++
+	case ast.VariableTypeDouble:
+		code.Codes[code.CodeLength] = cg.OP_d2i
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_i2c
+		code.CodeLength++
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2i
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_i2c
+		code.CodeLength++
+	}
+}
 func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ ast.VariableTypeKind) {
 	switch typ {
 	case ast.VariableTypeByte:
 		// already is
 	case ast.VariableTypeShort:
+		// already is
+	case ast.VariableTypeChar:
 		// already is
 	case ast.VariableTypeInt:
 		// already is
@@ -80,6 +114,8 @@ func (buildExpression *BuildExpression) stackTop2Float(code *cg.AttributeCode, t
 		fallthrough
 	case ast.VariableTypeShort:
 		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2f
 		code.CodeLength++
@@ -100,6 +136,8 @@ func (buildExpression *BuildExpression) stackTop2Long(code *cg.AttributeCode, ty
 		fallthrough
 	case ast.VariableTypeShort:
 		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2l
 		code.CodeLength++
@@ -119,6 +157,8 @@ func (buildExpression *BuildExpression) stackTop2Double(code *cg.AttributeCode, 
 	case ast.VariableTypeByte:
 		fallthrough
 	case ast.VariableTypeShort:
+		fallthrough
+	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2d
@@ -158,6 +198,8 @@ func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCo
 		buildExpression.stackTop2Byte(code, typ)
 	case ast.VariableTypeShort:
 		buildExpression.stackTop2Short(code, typ)
+	case ast.VariableTypeChar:
+		buildExpression.stackTop2Char(code, typ)
 	case ast.VariableTypeInt:
 		buildExpression.stackTop2Int(code, typ)
 	case ast.VariableTypeLong:
@@ -187,6 +229,8 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 	case ast.VariableTypeByte:
 		fallthrough
 	case ast.VariableTypeShort:
+		fallthrough
+	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeEnum:
 		fallthrough
