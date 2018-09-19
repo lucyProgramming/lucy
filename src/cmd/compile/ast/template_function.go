@@ -5,18 +5,18 @@ import (
 )
 
 type TemplateFunction struct {
-	Pairs []*TemplateFunctionCallPair
+	Instances []*TemplateFunctionInstance
 }
 
-type TemplateFunctionCallPair struct {
+type TemplateFunctionInstance struct {
 	parameterTypes map[string]*Type
 	Generated      *cg.MethodHighLevel
 	Function       *Function
 	ClassName      string
 }
 
-func (t *TemplateFunction) callPairExists(parameterTypes map[string]*Type) *TemplateFunctionCallPair {
-	equal := func(p *TemplateFunctionCallPair) bool {
+func (t *TemplateFunction) instanceExists(parameterTypes map[string]*Type) *TemplateFunctionInstance {
+	equal := func(p *TemplateFunctionInstance) bool {
 		if len(p.parameterTypes) != len(parameterTypes) {
 			return false
 		}
@@ -33,7 +33,7 @@ func (t *TemplateFunction) callPairExists(parameterTypes map[string]*Type) *Temp
 		}
 		return true
 	}
-	for _, v := range t.Pairs {
+	for _, v := range t.Instances {
 		if equal(v) {
 			return v
 		}
@@ -41,13 +41,13 @@ func (t *TemplateFunction) callPairExists(parameterTypes map[string]*Type) *Temp
 	return nil
 }
 
-func (t *TemplateFunction) insert(parameterTypes map[string]*Type) *TemplateFunctionCallPair {
-	if t := t.callPairExists(parameterTypes); t != nil {
+func (t *TemplateFunction) insert(parameterTypes map[string]*Type) *TemplateFunctionInstance {
+	if t := t.instanceExists(parameterTypes); t != nil {
 		return t
 	}
-	ret := &TemplateFunctionCallPair{
+	ret := &TemplateFunctionInstance{
 		parameterTypes: parameterTypes,
 	}
-	t.Pairs = append(t.Pairs, ret)
+	t.Instances = append(t.Instances, ret)
 	return ret
 }

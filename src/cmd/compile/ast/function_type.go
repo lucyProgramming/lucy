@@ -25,7 +25,7 @@ func (ft *FunctionType) typeString() string {
 		if v.Expression != nil {
 			s += " = " + v.Expression.Description
 		}
-		if k != len(f.Type.ParameterList)-1 {
+		if k != len(ft.ParameterList)-1 {
 			s += ","
 		}
 	}

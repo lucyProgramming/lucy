@@ -4,15 +4,15 @@ import "java/io";
 
 
 public fn ioCopy(dest io.OutputStream , in io.InputStream) {
-	size := 4 << 10 ;
-	bs := new byte[] (size) ;
-	var n int ;
+	size := 4 << 10  
+	bs := new byte[] (size)  
+	var n int  
 	for n != -1 {
-		n = in.read(bs);
+		n = in.read(bs) 
 		if n == -1 {
-			break;
+			break 
 		}
-		dest.write(bs , 0 , n);
+		dest.write(bs , 0 , n) 
 	}
 }
 

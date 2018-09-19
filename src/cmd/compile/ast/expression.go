@@ -402,7 +402,7 @@ type ExpressionFunctionCall struct {
 	VArgs                    *CallVariableArgs
 	Function                 *Function
 	ParameterTypes           []*Type // for template function
-	TemplateFunctionCallPair *TemplateFunctionCallPair
+	TemplateFunctionCallPair *TemplateFunctionInstance
 	FunctionPointer          *FunctionType
 }
 

@@ -12,26 +12,21 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 	if object == nil {
 		return nil
 	}
-	if object.Type == VariableTypePackage {
-		return e.checkMethodCallExpressionOnPackage(block, errs, object.Package)
-	}
-	if object.Type == VariableTypeMap {
-		return e.checkMethodCallExpressionOnMap(block, errs, object.Map)
-	}
-	if object.Type == VariableTypeArray {
-		return e.checkMethodCallExpressionOnArray(block, errs, object)
-	}
-	if object.Type == VariableTypeJavaArray {
-		return e.checkMethodCallExpressionOnJavaArray(block, errs, object)
-	}
 	// call father`s construction method
 	if call.Name == SUPER && call.Expression.Value.Type == VariableTypeObject {
 		return e.checkMethodCallExpressionOnSuper(block, errs, object)
 	}
-	if object.Type == VariableTypeDynamicSelector {
-		return e.checkMethodCallExpressionOnDynamicSelector(block, errs, object)
-	}
 	switch object.Type {
+	case VariableTypePackage:
+		return e.checkMethodCallExpressionOnPackage(block, errs, object.Package)
+	case VariableTypeMap:
+		return e.checkMethodCallExpressionOnMap(block, errs, object.Map)
+	case VariableTypeArray:
+		return e.checkMethodCallExpressionOnArray(block, errs, object)
+	case VariableTypeJavaArray:
+		return e.checkMethodCallExpressionOnJavaArray(block, errs, object)
+	case VariableTypeDynamicSelector:
+		return e.checkMethodCallExpressionOnDynamicSelector(block, errs, object)
 	case VariableTypeString:
 		if err := loadJavaStringClass(e.Pos); err != nil {
 			*errs = append(*errs, err)
@@ -53,9 +48,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			call.Method = ms[0]
 			return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 		} else {
-
 			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, args))
-
 			return nil
 		}
 	case VariableTypeObject, VariableTypeClass:

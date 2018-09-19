@@ -51,7 +51,7 @@ func (s *StatementFor) checkRange() []error {
 		return errs
 	}
 	if rangeOn.Type == VariableTypeString {
-		//
+		// byte[]("")
 		conversion := &ExpressionTypeConversion{}
 		conversion.Type = &Type{
 			Type: VariableTypeJavaArray,
