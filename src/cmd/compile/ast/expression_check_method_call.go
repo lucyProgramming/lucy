@@ -147,7 +147,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		block.InheritedAttribute.Function.CallFatherConstructionExpression = e
 		return ret
 	}
-	*errs = append(*errs, methodsNotMatchError(e.Pos, "constructor", ms, callArgsTypes))
+	*errs = append(*errs, methodsNotMatchError(e.Pos, object.TypeString(), ms, callArgsTypes))
 	return nil
 }
 

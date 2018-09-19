@@ -51,31 +51,12 @@ func (f *Function) NameLiteralFunction() string {
 	return t
 }
 
-func (f *Function) readableMsg(name ...string) string {
-	var s string
-	if len(name) > 0 {
-		s = "fn " + name[0] + "("
+func (f *Function) readableMsg() string {
+	if f.Name == "" {
+		return "fn " + f.Type.typeString()
 	} else {
-		s = "fn " + f.Name + "("
+		return "fn " + f.Name + " " + f.Type.typeString()
 	}
-	s += f.Type.typeString()
-	return s
-
-}
-
-/*
-	no need return list
-*/
-func (f *Function) badParameterMsg(name string, args []*Type) string {
-	s := "fn " + name + "("
-	for k, v := range args {
-		s += " " + v.TypeString() + " "
-		if k != len(args)-1 {
-			s += ","
-		}
-	}
-	s += ")"
-	return s
 }
 
 func (f *Function) makeName() {

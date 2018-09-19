@@ -422,7 +422,7 @@ func (typ *Type) typeString(ret *string) {
 	case VariableTypeString:
 		*ret += "string"
 	case VariableTypeObject: // class name
-		*ret += "object@(" + typ.Class.Name + ")"
+		*ret += "object@" + typ.Class.Name
 	case VariableTypeMap:
 		*ret += "map{"
 		*ret += typ.Map.K.TypeString()
@@ -443,7 +443,7 @@ func (typ *Type) typeString(ret *string) {
 	case VariableTypeEnum:
 		*ret += "enum(" + typ.Enum.Name + ")"
 	case VariableTypeClass:
-		*ret += fmt.Sprintf("class(%s)", typ.Class.Name)
+		*ret += fmt.Sprintf("class@%s", typ.Class.Name)
 	case VariableTypeName:
 		*ret += typ.Name // resolve wrong, but typeString is ok to return
 	case VariableTypeTemplate:

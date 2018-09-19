@@ -146,17 +146,14 @@ func (description *Description) ParseFunctionType(bs []byte) (ast.FunctionType, 
 		return t, fmt.Errorf("function descriptor does not start with '('")
 	}
 	bs = bs[1:]
-	i := 1
 	var err error
 	for bs[0] != ')' {
 		vd := &ast.Variable{}
-		vd.Name = fmt.Sprintf("var_%d", i)
 		bs, vd.Type, err = description.ParseType(bs)
 		if err != nil {
 			return t, err
 		}
 		t.ParameterList = append(t.ParameterList, vd)
-		i++
 	}
 	bs = bs[1:] // skip )
 	vd := &ast.Variable{}

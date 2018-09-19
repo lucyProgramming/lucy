@@ -66,7 +66,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			v := d.(*Variable)
 			result := v.Type.Clone()
 			result.Pos = e.Pos
-			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
+			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 &&
+				object.Package.Name != PackageBeenCompile.Name {
 				err := fmt.Errorf("%s variable '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -77,7 +78,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			e.fromConst(c) //
 			result := c.Type.Clone()
 			result.Pos = e.Pos
-			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
+			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 &&
+				object.Package.Name != PackageBeenCompile.Name {
 				err := fmt.Errorf("%s const '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -88,14 +90,16 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Pos = e.Pos
 			result.Type = VariableTypeClass
 			result.Class = c
-			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
+			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 &&
+				object.Package.Name != PackageBeenCompile.Name {
 				err := fmt.Errorf("%s class '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
 			return result
 		case *EnumName:
 			n := d.(*EnumName)
-			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
+			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 &&
+				object.Package.Name != PackageBeenCompile.Name {
 				err := fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -108,7 +112,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return result
 		case *Function:
 			f := d.(*Function)
-			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 && object.Package.Name != PackageBeenCompile.Name {
+			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 &&
+				object.Package.Name != PackageBeenCompile.Name {
 				err := fmt.Errorf("%s enum '%s' is not public", errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
 			}
@@ -119,7 +124,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			selection.PackageFunction = f
 			return result
 		default:
-			err := fmt.Errorf("%s name '%s' cannot be used as right value", errMsgPrefix(e.Pos), selection.Name)
+			err := fmt.Errorf("%s name '%s' cannot be used as right value",
+				errMsgPrefix(e.Pos), selection.Name)
 			*errs = append(*errs, err)
 			return nil
 		}

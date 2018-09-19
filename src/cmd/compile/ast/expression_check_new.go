@@ -54,16 +54,11 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	}
 	if matched {
 		m := ms[0]
-		if block.InheritedAttribute.Class != ret.Class {
-			if (ret.Class.LoadFromOutSide && m.IsPublic() == false) ||
-				(ret.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
-				*errs = append(*errs, fmt.Errorf("%s constuction cannot access from here", errMsgPrefix(no.Type.Pos)))
-			}
-		}
+		e.methodAccessAble(block, m, errs)
 		no.Construction = m
 		return ret
 	}
-	*errs = append(*errs, methodsNotMatchError(no.Type.Pos, "constructor", ms, callArgTypes))
+	*errs = append(*errs, methodsNotMatchError(no.Type.Pos, no.Type.TypeString(), ms, callArgTypes))
 	return ret
 }
 

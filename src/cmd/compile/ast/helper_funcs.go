@@ -93,9 +93,17 @@ func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type
 	}
 	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
 		errMsgPrefix(pos), name)
-	errMsg += "\twant " + ms[0].Function.badParameterMsg(name, want) + "\n"
+	wantString := "fn " + name + " ("
+	for k, v := range want {
+		wantString += v.TypeString()
+		if k != len(want)-1 {
+			wantString += ","
+		}
+	}
+	wantString += ")"
+	errMsg += "\twant " + wantString + "\n"
 	for _, m := range ms {
-		errMsg += "\thave " + m.Function.readableMsg(name) + "\n"
+		errMsg += "\thave fn " + name + " " + m.Function.Type.typeString() + "\n"
 	}
 	return fmt.Errorf(errMsg)
 }

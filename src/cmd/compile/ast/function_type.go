@@ -20,7 +20,9 @@ func (ft *FunctionType) Clone() (c *FunctionType) {
 func (ft *FunctionType) typeString() string {
 	s := "("
 	for k, v := range ft.ParameterList {
-		s += v.Name + " "
+		if v.Name != "" {
+			s += v.Name + " "
+		}
 		s += v.Type.TypeString()
 		if v.Expression != nil {
 			s += " = " + v.Expression.Description
@@ -33,14 +35,18 @@ func (ft *FunctionType) typeString() string {
 		if len(ft.ParameterList) > 0 {
 			s += ","
 		}
-		s += ft.VArgs.Name + " "
+		if ft.VArgs.Name != "" {
+			s += ft.VArgs.Name + " "
+		}
 		s += ft.VArgs.Type.TypeString()
 	}
 	s += ")"
 	if ft.VoidReturn() == false {
 		s += "->( "
 		for k, v := range ft.ReturnList {
-			s += v.Name + " "
+			if v.Name != "" {
+				s += v.Name + " "
+			}
 			s += v.Type.TypeString()
 			if k != len(ft.ReturnList)-1 {
 				s += ","
@@ -210,7 +216,6 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 		vArgs.Length = len(callArgsTypes) - k
 	}
 	if len(callArgsTypes) < len(ft.ParameterList) {
-		fmt.Println(f != nil, f.HaveDefaultValue)
 		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
 				*args = append(*args, f.Type.ParameterList[i].Expression)

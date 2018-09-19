@@ -26,8 +26,8 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 			return nil
 		}
 		if True.isTyped() == false {
-			*errs = append(*errs, fmt.Errorf("%s not typed",
-				errMsgPrefix(question.True.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
+				errMsgPrefix(question.True.Pos), True.TypeString()))
 			return nil
 		}
 	}
