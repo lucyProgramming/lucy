@@ -117,7 +117,7 @@ fn testJavaArray () {
 
 
 
-fn testLucyArray (arr []T  ) {
+fn testLucyArray (arr []T   ,printErrAndExit fn(string)) {
 	length := 10 
 	if arr.size() != length {
 		printErrAndExit("length should be 10")

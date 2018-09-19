@@ -2,13 +2,12 @@ package jvm
 
 import (
 	"fmt"
-	"math"
-	"os"
-	"path/filepath"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"math"
+	"os"
+	"path/filepath"
 )
 
 type BuildPackage struct {

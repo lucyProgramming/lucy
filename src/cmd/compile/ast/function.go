@@ -18,7 +18,6 @@ type Function struct {
 	Block                            Block
 	Pos                              *Pos
 	JvmDescriptor                    string
-	ExpressionCount                  int
 	ClosureVariableOffSet            uint16 // for closure
 	SourceCodes                      []byte // source code for template function
 	HasDefer                         bool
@@ -32,8 +31,10 @@ type Function struct {
 	IsClosureFunction                bool
 	isGlobalVariableDefinition       bool
 	isPackageInitBlockFunction       bool
-	AccessByName                     int
 }
+
+type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall,
+	block *Block, errs *[]error, args []*Type, pos *Pos)
 
 func (f *Function) IsPublic() bool {
 	return f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0
@@ -50,8 +51,6 @@ func (f *Function) NameLiteralFunction() string {
 	return t
 }
 
-type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos)
-
 func (f *Function) readableMsg(name ...string) string {
 	var s string
 	if len(name) > 0 {
@@ -59,35 +58,7 @@ func (f *Function) readableMsg(name ...string) string {
 	} else {
 		s = "fn " + f.Name + "("
 	}
-	for k, v := range f.Type.ParameterList {
-		s += v.Name + " "
-		s += v.Type.TypeString()
-		if v.Expression != nil {
-			s += " = " + v.Expression.Description
-		}
-		if k != len(f.Type.ParameterList)-1 {
-			s += ","
-		}
-	}
-	if f.Type.VArgs != nil {
-		if len(f.Type.ParameterList) > 0 {
-			s += ","
-		}
-		s += f.Type.VArgs.Name + " "
-		s += f.Type.VArgs.Type.TypeString()
-	}
-	s += ")"
-	if len(f.Type.ReturnList) > 0 && f.Type.VoidReturn() == false {
-		s += "->( "
-		for k, v := range f.Type.ReturnList {
-			s += v.Name + " "
-			s += v.Type.TypeString()
-			if k != len(f.Type.ReturnList)-1 {
-				s += ","
-			}
-		}
-		s += " )"
-	}
+	s += f.Type.typeString()
 	return s
 
 }
@@ -153,18 +124,16 @@ func (f *Function) clone() (ret *Function, es []error) {
 	return ret, es
 }
 func (f *Function) makeLastReturnStatement() {
-	if len(f.Block.Statements) == 0 ||
-		(f.Block.Statements[len(f.Block.Statements)-1].Type != StatementTypeReturn) {
-		s := &StatementReturn{}
-		f.Block.Statements = append(f.Block.Statements, &Statement{
-			Type:            StatementTypeReturn,
-			StatementReturn: s,
-			Pos:             f.Block.EndPos,
-		})
-	}
+	s := &StatementReturn{}
+	f.Block.Statements = append(f.Block.Statements, &Statement{
+		Type:            StatementTypeReturn,
+		StatementReturn: s,
+		Pos:             f.Block.EndPos,
+	})
 }
 func (f *Function) IsGlobalMain() bool {
-	return f.IsGlobal && f.Name == MainFunctionName
+	return f.IsGlobal &&
+		f.Name == MainFunctionName
 }
 
 func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpression bool, isAbstract bool) {

@@ -3,7 +3,6 @@ package lex
 import (
 	"fmt"
 	"math"
-	"unicode/utf8"
 )
 
 type Lexer struct {
@@ -27,7 +26,7 @@ func (lex *Lexer) getChar() (c byte, eof bool) {
 		return
 	}
 	offset := lex.offset
-	lex.offset++
+	lex.offset++ // next
 	c = lex.bs[offset]
 	lex.lastLine = lex.line
 	lex.lastColumn = lex.column
@@ -566,7 +565,9 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 					break
 				}
 				if lex.isHex(c) == false {
-					err = fmt.Errorf("expect hex number")
+					err = fmt.Errorf("not enough hex number for unicode, expect %d , but %d",
+						n, i)
+					lex.unGetChar()
 					break
 				}
 				r = r*16 + rune(lex.hexByte2ByteValue(c))
@@ -882,17 +883,18 @@ redo:
 	case '"':
 		return lex.lexString('"')
 	case '\'':
+		isChar := lex.isChar()
 		token, err = lex.lexString('\'')
 		if err == nil {
 			if t := []rune(token.Data.(string)); len(t) != 1 {
 				err = fmt.Errorf("expect one char")
 			} else { // correct token
-				if utf8.RuneLen(t[0]) == 1 {
-					token.Type = TokenLiteralByte
-					token.Data = byte(t[0])
-				} else {
+				if isChar {
 					token.Type = TokenLiteralChar
 					token.Data = int32(t[0])
+				} else {
+					token.Type = TokenLiteralByte
+					token.Data = byte(t[0])
 				}
 			}
 		}
@@ -914,4 +916,18 @@ redo:
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	return
+}
+
+func (lex *Lexer) isChar() bool {
+	if lex.offset+1 >= lex.end {
+		return false
+	}
+	if '\\' != lex.bs[lex.offset] {
+		return false
+	}
+
+	if 'u' != lex.bs[lex.offset+1] && 'U' != lex.bs[lex.offset+1] {
+		return false
+	}
+	return true
 }

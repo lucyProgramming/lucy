@@ -20,14 +20,12 @@ func registerBuildInFunctions() {
 				}
 			},
 			IsBuildIn: true,
-			Name:      common.BuildInFunctionPrint,
 		}
 	}
 	{
 		//catch
 		catch := &Function{}
 		catch.IsBuildIn = true
-		catch.Name = common.BuildInFunctionCatch
 		buildInFunctionsMap[common.BuildInFunctionCatch] = catch
 		catch.Type.ReturnList = make([]*Variable, 1)
 		catch.Type.ReturnList[0] = &Variable{}
@@ -123,19 +121,16 @@ func registerBuildInFunctions() {
 				}
 			},
 			IsBuildIn: true,
-			Name:      common.BuildInFunctionPanic,
 		}
 	}
 	{
 		buildInFunctionsMap[common.BuildInFunctionMonitorEnter] = &Function{
 			buildInFunctionChecker: monitorChecker,
 			IsBuildIn:              true,
-			Name:                   common.BuildInFunctionMonitorEnter,
 		}
 		buildInFunctionsMap[common.BuildInFunctionMonitorExit] = &Function{
 			buildInFunctionChecker: monitorChecker,
 			IsBuildIn:              true,
-			Name:                   common.BuildInFunctionMonitorExit,
 		}
 	}
 	{
@@ -161,7 +156,6 @@ func registerBuildInFunctions() {
 				}
 			},
 			IsBuildIn: true,
-			Name:      common.BuildInFunctionLen,
 		}
 		Len := buildInFunctionsMap[common.BuildInFunctionLen]
 		Len.Type.ReturnList = make(ReturnList, 1)
@@ -173,7 +167,6 @@ func registerBuildInFunctions() {
 		// sprintf
 		sprintf := &Function{}
 		buildInFunctionsMap[common.BuildInFunctionSprintf] = sprintf
-		sprintf.Name = common.BuildInFunctionSprintf
 		sprintf.IsBuildIn = true
 		sprintf.Type.ReturnList = make([]*Variable, 1)
 		sprintf.Type.ReturnList[0] = &Variable{}
@@ -215,10 +208,9 @@ func registerBuildInFunctions() {
 	}
 
 	{
-		// sure
+		// assert
 		typeOf := &Function{}
 		buildInFunctionsMap[common.BuildInFunctionAssert] = typeOf
-		typeOf.Name = common.BuildInFunctionAssert
 		typeOf.IsBuildIn = true
 		typeOf.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
 			args []*Type, pos *Pos) {
@@ -286,10 +278,9 @@ func registerBuildInFunctions() {
 				}
 				meta.Format = e.Args[0]
 				e.Args = e.Args[1:]
-				meta.Length = len(args)
+				meta.ArgsLength = len(args)
 			},
 			IsBuildIn: true,
-			Name:      common.BuildInFunctionPrintf,
 		}
 	}
 
@@ -298,7 +289,9 @@ func registerBuildInFunctions() {
 			args []*Type, pos *Pos) {
 		},
 		IsBuildIn: true,
-		Name:      common.BuildInFunctionBlockHole,
+	}
+	for k, v := range buildInFunctionsMap {
+		v.Name = k
 	}
 }
 

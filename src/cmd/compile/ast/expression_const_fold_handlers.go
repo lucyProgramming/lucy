@@ -213,13 +213,13 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 		}
 		return
 	}
-
 	return
 }
 
-func (e *Expression) numberTypeAlgebra(typ ExpressionTypeKind, value1, value2 interface{}) (value interface{}, support bool, err error) {
+func (e *Expression) numberTypeAlgebra(resultType ExpressionTypeKind, value1,
+	value2 interface{}) (value interface{}, support bool, err error) {
 	support = true
-	switch typ {
+	switch resultType {
 	case ExpressionTypeByte:
 		switch e.Type {
 		case ExpressionTypeAdd:

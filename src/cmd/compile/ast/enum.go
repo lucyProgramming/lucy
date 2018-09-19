@@ -6,14 +6,15 @@ import (
 )
 
 type Enum struct {
-	IsBuildIn    bool
-	AccessFlags  uint16
-	Name         string
-	Pos          *Pos
-	Enums        []*EnumName
-	Init         *Expression //should be a int expression
-	Used         bool
-	DefaultValue int32
+	IsBuildIn       bool
+	AccessFlags     uint16
+	Name            string
+	Pos             *Pos
+	Enums           []*EnumName
+	Init            *Expression //should be a int expression
+	Used            bool
+	DefaultValue    int32
+	LoadFromOutSide bool
 }
 
 func (e *Enum) IsPublic() bool {

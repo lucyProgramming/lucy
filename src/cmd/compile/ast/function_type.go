@@ -9,8 +9,47 @@ type FunctionType struct {
 	ReturnList    ReturnList
 	VArgs         *Variable
 }
+
 type ParameterList []*Variable
 type ReturnList []*Variable
+
+func (ft *FunctionType) Clone() (c *FunctionType) {
+	c = ft
+	return
+}
+func (ft *FunctionType) typeString() string {
+	s := "("
+	for k, v := range ft.ParameterList {
+		s += v.Name + " "
+		s += v.Type.TypeString()
+		if v.Expression != nil {
+			s += " = " + v.Expression.Description
+		}
+		if k != len(f.Type.ParameterList)-1 {
+			s += ","
+		}
+	}
+	if ft.VArgs != nil {
+		if len(ft.ParameterList) > 0 {
+			s += ","
+		}
+		s += ft.VArgs.Name + " "
+		s += ft.VArgs.Type.TypeString()
+	}
+	s += ")"
+	if ft.VoidReturn() == false {
+		s += "->( "
+		for k, v := range ft.ReturnList {
+			s += v.Name + " "
+			s += v.Type.TypeString()
+			if k != len(ft.ReturnList)-1 {
+				s += ","
+			}
+		}
+		s += ")"
+	}
+	return s
+}
 
 func (ft *FunctionType) searchName(name string) *Variable {
 	if name == "" {
@@ -80,7 +119,7 @@ func (ft *FunctionType) VoidReturn() bool {
 		ft.ReturnList[0].Type.Type == VariableTypeVoid
 }
 
-func (ft FunctionType) mkReturnTypes(pos *Pos) []*Type {
+func (ft FunctionType) mkCallReturnTypes(pos *Pos) []*Type {
 	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
 		t := &Type{}
 		t.Type = VariableTypeVoid // means no return ;

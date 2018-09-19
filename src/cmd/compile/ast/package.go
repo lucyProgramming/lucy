@@ -20,7 +20,7 @@ type Package struct {
 	UnUsedPackage                map[string]*Import
 }
 
-func (p *Package) loadBuildInPackage() error {
+func (p *Package) loadCorePackage() error {
 	if p.Name == common.CorePackage {
 		return nil
 	}
@@ -95,20 +95,13 @@ func (p *Package) TypeCheck() []error {
 		v.Block.inherit(&p.Block)
 		v.Block.InheritedAttribute.Function = v
 		v.checkParametersAndReturns(&p.Errors, true, false)
-		if v.Name == MainFunctionName {
-			defineMainOK := true
-			if len(v.Type.ParameterList) != 1 {
-				defineMainOK = false
-			} else { //
+		if v.IsGlobalMain() {
+			defineMainOK := false
+			if len(v.Type.ParameterList) == 1 {
 				if v.Type.ParameterList[0].Type.Type == VariableTypeArray &&
 					v.Type.ParameterList[0].Type.Array.Type == VariableTypeString {
-				} else {
-
-					defineMainOK = false
 				}
-			}
-			if v.Type.VoidReturn() == false {
-				defineMainOK = false
+				defineMainOK = true
 			}
 			if defineMainOK == false {
 				p.Errors = append(p.Errors,
@@ -135,24 +128,20 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
-		es := v.Block.checkConstants()
-		p.Errors = append(p.Errors, es...)
+		p.Errors = append(p.Errors, v.Block.checkConstants()...)
 		v.mkDefaultConstruction()
 		v.Block.inherit(&PackageBeenCompile.Block)
 		v.Block.InheritedAttribute.Class = v
-		es = v.resolveInterfaces()
-		p.Errors = append(p.Errors, es...)
+		p.Errors = append(p.Errors, v.resolveInterfaces()...)
 	}
+
 	for _, v := range p.Block.Classes {
 		err := v.resolveFather()
 		if err != nil {
 			p.Errors = append(p.Errors, err)
 		}
-		es := v.resolveInterfaces()
-		p.Errors = append(p.Errors, es...)
-		es = v.resolveFieldsAndMethodsType()
-		p.Errors = append(p.Errors, es...)
-
+		p.Errors = append(p.Errors, v.resolveInterfaces()...)
+		p.Errors = append(p.Errors, v.resolveFieldsAndMethodsType()...)
 	}
 
 	for _, v := range p.Block.Classes {
@@ -169,10 +158,7 @@ func (p *Package) TypeCheck() []error {
 		}
 	}
 	for _, v := range p.Block.Classes {
-		es := v.checkPhase2()
-
-		p.Errors = append(p.Errors, es...)
-
+		p.Errors = append(p.Errors, v.checkPhase2()...)
 		if p.shouldStop(nil) {
 			return p.Errors
 		}
@@ -189,7 +175,7 @@ func (p *Package) TypeCheck() []error {
 			return p.Errors
 		}
 	}
-	p.checkUnUsedPackage()
+	p.Errors = append(p.Errors, p.checkUnUsedPackage()...)
 	return p.Errors
 }
 
@@ -203,11 +189,11 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if p.loadedClasses == nil {
 		p.loadedClasses = make(map[string]*Class)
 	}
-	if p.LoadedPackages == nil {
-		p.LoadedPackages = make(map[string]*Package)
-	}
 	if t, ok := p.loadedClasses[resource]; ok {
 		return t, nil
+	}
+	if p.LoadedPackages == nil {
+		p.LoadedPackages = make(map[string]*Package)
 	}
 	if t, ok := p.LoadedPackages[resource]; ok {
 		return t, nil
@@ -226,39 +212,12 @@ func (p *Package) load(resource string) (interface{}, error) {
 	return t, err
 }
 
-// check out package name is valid or not
-func (p *Package) NameIsValid(name string) bool {
-	t := strings.Split(name, `/`)
-	if len(t) == 1 {
-		return true
-	}
-	if t[0] == "" || t[1] == "" {
-		return false
-	}
-	for _, v := range t {
-		allOK := true
-		for _, vv := range []byte(v) {
-			if (vv >= '0' && vv <= '9') ||
-				(vv >= 'a' && vv <= 'z') ||
-				(vv >= 'A' && vv <= 'Z') ||
-				vv == '$' {
-			} else {
-				allOK = false
-				break
-			}
-		}
-		if allOK == false {
-			return false
-		}
-	}
-	return true
-}
-
-func (p *Package) checkUnUsedPackage() {
+func (p *Package) checkUnUsedPackage() []error {
+	ret := []error{}
 	for _, v := range p.Files {
 		for _, i := range v.Imports {
 			if i.Used == false {
-				p.Errors = append(p.Errors, fmt.Errorf("%s '%s' imported not used",
+				ret = append(ret, fmt.Errorf("%s '%s' imported not used",
 					errMsgPrefix(i.Pos), i.Import))
 			}
 		}
@@ -266,21 +225,22 @@ func (p *Package) checkUnUsedPackage() {
 	for _, i := range p.UnUsedPackage {
 		pp, err := p.load(i.Import)
 		if err != nil {
-			p.Errors = append(p.Errors, fmt.Errorf("%s %v",
+			ret = append(ret, fmt.Errorf("%s %v",
 				errMsgPrefix(i.Pos), err))
 			continue
 		}
 		if ppp, ok := pp.(*Package); ok == false {
-			p.Errors = append(p.Errors, fmt.Errorf("%s '%s' not a package",
+			ret = append(ret, fmt.Errorf("%s '%s' not a package",
 				errMsgPrefix(i.Pos), i.Import))
 		} else {
 			if ppp.TriggerPackageInitMethodName == "" {
-				p.Errors = append(p.Errors, fmt.Errorf("%s  package named '%s' have no global vars and package "+
+				ret = append(ret, fmt.Errorf("%s  package named '%s' have no global vars and package "+
 					"init blocks, no need to trigger package init method",
 					errMsgPrefix(i.Pos), i.Import))
 			}
 		}
 	}
+	return ret
 }
 
 func (p *Package) loadClass(className string) (*Class, error) {
@@ -302,8 +262,8 @@ func (p *Package) loadClass(className string) (*Class, error) {
 	return cc, nil
 }
 
-func (p *Package) mkClassCache(load *Package) {
-	for _, v := range load.Block.Classes {
+func (p *Package) mkClassCache(loadedPackage *Package) {
+	for _, v := range loadedPackage.Block.Classes {
 		p.loadedClasses[v.Name] = v // binary name
 	}
 }
@@ -337,7 +297,7 @@ func (i *Import) MkAccessName() error {
 		}
 	}
 	//check if legal
-	if false == PackageBeenCompile.NameIsValid(name) {
+	if false == PackageNameIsValid(name) {
 		return fmt.Errorf("%s is not legal package name", name)
 	}
 	i.AccessName = name

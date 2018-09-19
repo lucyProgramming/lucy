@@ -51,7 +51,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Function.Type.mkReturnTypes(e.Pos)
+			return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 		} else {
 
 			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, args))
@@ -78,7 +78,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 						errMsgPrefix(e.Pos), call.Name))
 				}
 				call.Method = ms[0]
-				return ms[0].Function.Type.mkReturnTypes(e.Pos)
+				return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 			}
 
 			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
@@ -98,13 +98,13 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		if fieldMethodHandler != nil {
 			call.Expression.fieldAccessAble(block, fieldMethodHandler, errs)
 			call.FieldMethodHandler = fieldMethodHandler
-			return fieldMethodHandler.Type.FunctionType.mkReturnTypes(e.Pos)
+			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		}
 		if matched {
 			m := ms[0]
 			call.Expression.methodAccessAble(block, m, errs)
 			call.Method = m
-			return m.Function.Type.mkReturnTypes(e.Pos)
+			return m.Function.Type.mkCallReturnTypes(e.Pos)
 		}
 		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 		return nil
@@ -175,11 +175,11 @@ func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, er
 	if matched {
 		if fieldMethodHandler != nil {
 			call.FieldMethodHandler = fieldMethodHandler
-			return fieldMethodHandler.Type.FunctionType.mkReturnTypes(e.Pos)
+			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		} else {
 			method := ms[0]
 			call.Method = method
-			return method.Function.Type.mkReturnTypes(e.Pos)
+			return method.Function.Type.mkCallReturnTypes(e.Pos)
 		}
 	} else {
 		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
@@ -238,7 +238,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			return f.Type.mkReturnTypes(e.Pos)
+			return f.Type.mkCallReturnTypes(e.Pos)
 		}
 	case *Variable:
 		v := d.(*Variable)
@@ -261,7 +261,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		if err != nil {
 			*errs = append(*errs, err)
 		}
-		ret := v.Type.FunctionType.mkReturnTypes(e.Pos)
+		ret := v.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		call.PackageGlobalVariableFunction = v
 		call.VArgs = vArgs
 		return ret

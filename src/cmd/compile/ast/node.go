@@ -21,7 +21,7 @@ type ConvertTops2Package struct {
 
 func (conversion *ConvertTops2Package) ConvertTops2Package(t []*TopNode) (redeclareErrors []*RedeclareError, errs []error) {
 	//
-	if err := PackageBeenCompile.loadBuildInPackage(); err != nil {
+	if err := PackageBeenCompile.loadCorePackage(); err != nil {
 		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
 		os.Exit(1)
 	}

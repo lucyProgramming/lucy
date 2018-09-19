@@ -30,7 +30,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(class *cg.ClassHighLevel
 		maxStack = t
 	}
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
-	loadInt32(class, code, int32(meta.Length))
+	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

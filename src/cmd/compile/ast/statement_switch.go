@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 
+	"errors"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -26,7 +27,6 @@ func (s *StatementSwitch) check(block *Block) []error {
 	}
 	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
 	errs = append(errs, es...)
-
 	if conditionType == nil {
 		return errs
 	}
@@ -42,26 +42,25 @@ func (s *StatementSwitch) check(block *Block) []error {
 	byteMap := make(map[byte]*Pos)
 	shortMap := make(map[int32]*Pos)
 	int32Map := make(map[int32]*Pos)
+	charMap := make(map[int32]*Pos)
 	int64Map := make(map[int64]*Pos)
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
-	charMap := make(map[int32]*Pos)
 	enumNamesMap := make(map[string]*Pos)
 	enumPackageName := ""
+	var byteValue byte
+	var shortValue int32
+	var int32Value int32
+	var int64Value int64
+	var floatValue float32
+	var doubleValue float64
+	var stringValue string
+	var enumName string
+	var charValue int32
 	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
-			var byteValue byte
-			var shortValue int32
-			var int32Value int32
-			var int64Value int64
-			var floatValue float32
-			var doubleValue float64
-			var stringValue string
-			var enumName string
-			var charValue int32
 			valueValid := false
-			//literal value
 			valueFromExpression := func() {
 				switch e.Type {
 				case ExpressionTypeByte:
@@ -120,71 +119,71 @@ func (s *StatementSwitch) check(block *Block) []error {
 					errMsgPrefix(e.Pos)))
 			}
 			if valueValid {
-				errMsg := func(first *Pos) string {
-					errMsg := fmt.Sprintf("%s duplicate case ,first declared at:\n", errMsgPrefix(e.Pos))
+				errMsg := func(first *Pos, which string) error {
+					errMsg := fmt.Sprintf("%s  '%s' duplicate case,first declared at:\n", errMsgPrefix(e.Pos), which)
 					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
-					return errMsg
+					return errors.New(errMsg)
 				}
 				switch conditionType.Type {
 				case VariableTypeByte:
 					if first, ok := byteMap[byteValue]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", byteValue)))
 						continue // no check body
 					} else {
 						byteMap[byteValue] = e.Pos
 					}
 				case VariableTypeShort:
 					if first, ok := shortMap[shortValue]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", shortValue)))
 						continue // no check body
 					} else {
 						shortMap[shortValue] = e.Pos
 					}
 				case VariableTypeChar:
 					if first, ok := charMap[charValue]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", charValue)))
 						continue // no check body
 					} else {
 						charMap[charValue] = e.Pos
 					}
 				case VariableTypeInt:
 					if first, ok := int32Map[int32Value]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", int32Value)))
 						continue // no check body
 					} else {
 						int32Map[int32Value] = e.Pos
 					}
 				case VariableTypeLong:
 					if first, ok := int64Map[int64Value]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", int64Value)))
 						continue // no check body
 					} else {
 						int64Map[int64Value] = e.Pos
 					}
 				case VariableTypeFloat:
 					if first, found := floatMap[floatValue]; found {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", floatValue)))
 						continue // no check body
 					} else {
 						floatMap[floatValue] = e.Pos
 					}
 				case VariableTypeDouble:
 					if first, found := doubleMap[doubleValue]; found {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", doubleValue)))
 						continue // no check body
 					} else {
 						doubleMap[doubleValue] = e.Pos
 					}
 				case VariableTypeString:
 					if first, ok := stringMap[stringValue]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", stringValue)))
 						continue // no check body
 					} else {
 						stringMap[stringValue] = e.Pos
 					}
 				case VariableTypeEnum:
 					if first, ok := enumNamesMap[enumName]; ok {
-						errs = append(errs, fmt.Errorf(errMsg(first)))
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", enumName)))
 						continue // no check body
 					} else {
 						enumNamesMap[enumName] = e.Pos
@@ -215,6 +214,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 		for _, v := range conditionType.Enum.Enums {
 			_, ok := enumNamesMap[v.Name]
 			if ok {
+				//handled
 				continue
 			}
 			if enumPackageName == "" {
@@ -223,7 +223,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 				errMsg += fmt.Sprintf("\t\tcase %s.%s:\n", enumPackageName, v.Name)
 			}
 		}
-		errs = append(errs, fmt.Errorf(errMsg))
+		errs = append(errs, errors.New(errMsg))
 	}
 	return errs
 }

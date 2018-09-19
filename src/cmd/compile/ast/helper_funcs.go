@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 )
 
 func errMsgPrefix(pos *Pos) string {
@@ -104,6 +105,11 @@ func searchBuildIns(name string) interface{} {
 	var ok bool
 	t, ok = buildInFunctionsMap[name]
 	if ok {
+		//check
+		if _, exists := lucyBuildInPackage.Block.NameExists(name); exists {
+			panic(fmt.Sprintf("%s both exits in 'build function' and 'core package'",
+				name))
+		}
 		return t
 	}
 	if lucyBuildInPackage != nil { // avoid lucy/lang package
@@ -183,13 +189,30 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 	return
 }
 
-//func getLastPosFromArgs(args []*Type, pos **Pos) {
-//	index := len(args) - 1
-//	for index >= 0 {
-//		if args[index] != nil {
-//			*pos = args[index].Pos
-//			break
-//		}
-//		index--
-//	}
-//}
+// check out package name is valid or not
+func PackageNameIsValid(name string) bool {
+	t := strings.Split(name, `/`)
+	if len(t) == 1 {
+		return true
+	}
+	if t[0] == "" || t[1] == "" {
+		return false
+	}
+	for _, v := range t {
+		allOK := true
+		for _, vv := range []byte(v) {
+			if (vv >= '0' && vv <= '9') ||
+				(vv >= 'a' && vv <= 'z') ||
+				(vv >= 'A' && vv <= 'Z') ||
+				vv == '$' {
+			} else {
+				allOK = false
+				break
+			}
+		}
+		if allOK == false {
+			return false
+		}
+	}
+	return true
+}

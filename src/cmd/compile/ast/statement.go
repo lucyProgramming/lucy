@@ -151,23 +151,24 @@ func (s *Statement) check(block *Block) []error { // block is father
 		}
 	case StatementTypeNop:
 		//nop , should be never execute to here
+		//
 	case StatementTypeSwitchTemplate:
 		return s.StatementSwitchTemplate.check(block, s)
 	case StatementTypeImport:
 		if block.InheritedAttribute.Function.TemplateClonedFunction == false {
 			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",
-				errMsgPrefix(s.Pos)))
+				errMsgPrefix(s.Import.Pos)))
 			return errs
 		}
 		err := s.Import.MkAccessName()
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s %v",
-				errMsgPrefix(s.Pos), err))
+				errMsgPrefix(s.Import.Pos), err))
 			return errs
 		}
 		if s.Import.AccessName == NoNameIdentifier {
 			errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
-				errMsgPrefix(s.Pos)))
+				errMsgPrefix(s.Import.Pos)))
 			return nil
 		}
 		if PackageBeenCompile.Files == nil {
@@ -189,17 +190,18 @@ func (s *Statement) check(block *Block) []error { // block is father
 		_, ok := is.Imports[s.Import.AccessName]
 		if ok {
 			errs = append(errs, fmt.Errorf("%s package '%s' reimported",
-				errMsgPrefix(s.Pos), s.Import.AccessName))
+				errMsgPrefix(s.Import.Pos), s.Import.AccessName))
 			return nil
 		}
 		_, ok = is.ImportsByResources[s.Import.Import]
 		if ok {
 			errs = append(errs, fmt.Errorf("%s package '%s' reimported",
-				errMsgPrefix(s.Pos), s.Import.Import))
+				errMsgPrefix(s.Import.Pos), s.Import.Import))
 			return nil
 		}
 		is.Imports[s.Import.AccessName] = s.Import
 		is.ImportsByResources[s.Import.Import] = s.Import
+
 	case StatementTypeTypeAlias:
 		err := s.TypeAlias.Type.resolve(block)
 		if err != nil {

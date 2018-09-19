@@ -259,6 +259,8 @@ func (e *Expression) getByteValue() byte {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return e.Data.(byte)
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -280,6 +282,8 @@ func (e *Expression) getShortValue() int32 {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return int32(e.Data.(byte))
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -301,6 +305,8 @@ func (e *Expression) getCharValue() int32 {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return int32(e.Data.(byte))
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -321,6 +327,8 @@ func (e *Expression) getIntValue() int32 {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return int32(e.Data.(byte))
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -342,6 +350,8 @@ func (e *Expression) getLongValue() int64 {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return int64(e.Data.(byte))
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -362,6 +372,8 @@ func (e *Expression) getFloatValue() float32 {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return float32(e.Data.(byte))
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -383,6 +395,8 @@ func (e *Expression) getDoubleValue() float64 {
 	switch e.Type {
 	case ExpressionTypeByte:
 		return float64(e.Data.(byte))
+	case ExpressionTypeChar:
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeInt:
@@ -410,7 +424,7 @@ func (e *Expression) convertNumberLiteralTo(t VariableTypeKind) {
 		e.Type = ExpressionTypeShort
 	case VariableTypeChar:
 		e.Data = e.getCharValue()
-		e.Type = ExpressionTypeShort
+		e.Type = ExpressionTypeChar
 	case VariableTypeInt:
 		e.Data = e.getIntValue()
 		e.Type = ExpressionTypeInt

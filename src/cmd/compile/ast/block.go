@@ -84,18 +84,18 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 	search label
 */
 func (b *Block) searchLabel(name string) *StatementLabel {
-	bb := b
+	outer := b
 	for {
-		if bb.Labels != nil {
-			if l, ok := bb.Labels[name]; ok {
+		if outer.Labels != nil {
+			if l, ok := outer.Labels[name]; ok {
 				l.Used = true
 				return l
 			}
 		}
-		if bb.IsFunctionBlock {
+		if outer.IsFunctionBlock {
 			return nil
 		}
-		bb = bb.Outer
+		outer = outer.Outer
 	}
 	return nil
 }
@@ -104,27 +104,27 @@ func (b *Block) searchLabel(name string) *StatementLabel {
 	search type
 */
 func (b *Block) searchType(name string) interface{} {
-	bb := b
-	for bb != nil {
-		if bb.Classes != nil {
-			if t, ok := bb.Classes[name]; ok {
+	outer := b
+	for outer != nil {
+		if outer.Classes != nil {
+			if t, ok := outer.Classes[name]; ok {
 				t.Used = true
 				return t
 			}
-			if t, ok := bb.Enums[name]; ok {
+			if t, ok := outer.Enums[name]; ok {
 				t.Used = true
 				return t
 			}
-			if t, ok := bb.TypeAliases[name]; ok {
+			if t, ok := outer.TypeAliases[name]; ok {
 				return t
 			}
 		}
-		bb = bb.Outer
+		outer = outer.Outer
 	}
 	return nil
 }
 
-func (b *Block) searchedIdentifierIsWhat(d interface{}) string {
+func (b *Block) identifierIsWhat(d interface{}) string {
 	switch d.(type) {
 	case *Function:
 		return "function"
@@ -149,6 +149,7 @@ func (b *Block) searchedIdentifierIsWhat(d interface{}) string {
 	search identifier
 */
 func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
+
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			t.Used = true
@@ -196,6 +197,10 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 			return v, nil
 		}
 	}
+	if b.IsFunctionBlock &&
+		len(b.InheritedAttribute.Function.parameterTypes) > 0 {
+		return searchBuildIns(name), nil
+	}
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
@@ -204,32 +209,33 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 		return t, err
 	}
 	if t != nil { //
-		if _, ok := t.(*Variable); ok && b.IsFunctionBlock &&
-			len(b.InheritedAttribute.Function.parameterTypes) > 0 { // template function
-			return nil, nil
-		}
-		if v, ok := t.(*Variable); ok && v.IsGlobal == false { // not a global variable
-			if b.IsFunctionBlock &&
-				b.InheritedAttribute.Function.IsGlobal == false {
-				if v.Name == THIS {
-					return nil, fmt.Errorf("%s capture '%s' not allow",
-						errMsgPrefix(from), name) // capture this not allow
+		switch t.(type) {
+		case *Variable:
+			v := t.(*Variable)
+			if v.IsGlobal == false { // not a global variable
+				if b.IsFunctionBlock &&
+					b.InheritedAttribute.Function.IsGlobal == false {
+					if v.Name == THIS {
+						return nil, fmt.Errorf("%s capture '%s' not allow",
+							errMsgPrefix(from), name) // capture this not allow
+					}
+					b.InheritedAttribute.Function.Closure.InsertVar(v)
 				}
-				b.InheritedAttribute.Function.Closure.InsertVar(v)
+				//cannot search variable from class body
+				if b.InheritedAttribute.Class != nil && b.IsClassBlock {
+					return nil, nil //
+				}
 			}
-			//cannot search variable from class body
-			if b.InheritedAttribute.Class != nil && b.IsClassBlock {
-				return nil, nil //
-			}
-		}
-		// if it is a function
-		if f, ok := t.(*Function); ok && f.IsGlobal == false {
-			if b.IsFunctionBlock {
-				b.InheritedAttribute.Function.Closure.InsertFunction(f)
-			}
-			if b.IsClassBlock && f.IsClosureFunction {
-				return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
-					errMsgPrefix(from), name)
+		case *Function:
+			f := t.(*Function)
+			if f.IsGlobal == false {
+				if b.IsFunctionBlock {
+					b.InheritedAttribute.Function.Closure.InsertFunction(f)
+				}
+				if b.IsClassBlock && f.IsClosureFunction {
+					return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
+						errMsgPrefix(from), name)
+				}
 			}
 		}
 	}
@@ -264,6 +270,8 @@ func (b *Block) checkStatements() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
 		if s.isStaticFieldDefaultValue {
+			// no need to check
+			// compile auto statement
 			continue
 		}
 		b.InheritedAttribute.StatementOffset = k
@@ -367,7 +375,7 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 
 func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
-		return fmt.Errorf("%s name is null string", errMsgPrefix(pos))
+		return fmt.Errorf(`%s "" is not a valid name`, errMsgPrefix(pos))
 	}
 	if name == THIS {
 		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)
@@ -378,18 +386,18 @@ func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if isMagicIdentifier(name) {
 		return fmt.Errorf("%s '%s' is not a magic identifier", errMsgPrefix(pos), name)
 	}
-	if lucyBuildInPackage != nil {
-		if searchBuildIns(name) != nil {
-			return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
-		}
+	if searchBuildIns(name) != nil {
+		return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
 	}
 	return nil
 }
+
 func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	if err := b.nameIsValid(name, pos); err != nil {
 		return err
 	}
-	if v, ok := d.(*Variable); ok && b.InheritedAttribute.Function.isGlobalVariableDefinition {
+	if v, ok := d.(*Variable); ok &&
+		b.InheritedAttribute.Function.isGlobalVariableDefinition {
 		b := PackageBeenCompile.Block
 		err := b.checkNameExist(name, pos)
 		if err != nil {
@@ -399,6 +407,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		v.IsGlobal = true // it`s global
 		return nil
 	}
+	// handle label
 	if label, ok := d.(*StatementLabel); ok && label != nil {
 		if b.Labels == nil {
 			b.Labels = make(map[string]*StatementLabel)

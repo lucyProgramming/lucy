@@ -38,7 +38,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier '%s' is '%s' , cannot be used as left value",
-				errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIsWhat(d)))
+				errMsgPrefix(e.Pos), identifier.Name, block.identifierIsWhat(d)))
 			return nil
 		}
 	case ExpressionTypeIndex:

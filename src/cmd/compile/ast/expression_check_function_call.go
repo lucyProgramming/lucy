@@ -89,7 +89,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
-	ret := ft.mkReturnTypes(e.Pos)
+	ret := ft.mkCallReturnTypes(e.Pos)
 	var err error
 	call.VArgs, err = ft.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
 	if err != nil {
@@ -120,7 +120,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if f.TemplateFunction != nil {
 			f = tf
 		}
-		ret = f.Type.mkReturnTypes(e.Pos)
+		ret = f.Type.mkCallReturnTypes(e.Pos)
 		var err error
 		call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 		if err != nil {

@@ -8,7 +8,6 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 	if e == nil {
 		return nil, []error{}
 	}
-	block.InheritedAttribute.Function.ExpressionCount++
 	_, err := e.constantFold()
 	if err != nil {
 		return nil, []error{err}
@@ -374,14 +373,14 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			return tf.Type.mkReturnTypes(e.Pos)
+			return tf.Type.mkCallReturnTypes(e.Pos)
 		} else {
 			var err error
 			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			return f.Type.mkReturnTypes(e.Pos)
+			return f.Type.mkCallReturnTypes(e.Pos)
 		}
 	}
 
@@ -389,7 +388,7 @@ func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Fu
 	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 	if len(*errs) == length {
 		//special case ,avoid null pointer
-		return f.Type.mkReturnTypes(e.Pos)
+		return f.Type.mkCallReturnTypes(e.Pos)
 	}
 	return nil //
 }

@@ -65,18 +65,19 @@ class Decoder {
 	public fn decode() -> (err error){
 		defer {
 			x := catch()
-			if x != null {
+			if x != null  &&
+				err == null {
 				err = x 
 			}
 		}
-		err = this.generateSyntaxTree()
+		err = this.parseSyntaxTree()
 		if err != null {
 			return  
 		}
 		return this.decodeFromTree(this.tree , this . x )
 	}
 	
-	private fn generateSyntaxTree() -> (err error) {
+	private fn parseSyntaxTree() -> (err error) {
 		this.skipWhiteSpace()
 		b := this.bs[this.offset]  
 		if b != '[' && b != '{' {
@@ -235,7 +236,6 @@ class Decoder {
 			return  new error(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
 		}
 		
-
 	}
 	
 
@@ -287,7 +287,7 @@ class Decoder {
 				}
 				n = new JsonSyntaxTreeNode()
 				n.Type = JsonSyntaxTreeTypeNull
-				return   
+				return
 			default:
 				if this.isDigit(b) == false && b != '-' {
 					err = new error("unkown begining of value: " +  string(this.bs[this.offset:]))

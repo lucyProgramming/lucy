@@ -11,7 +11,7 @@ class Encoder {
 	x Object
 	c Class
 	format bool  
-
+	
 	public fn Encoder(x Object,format bool ) {
 		this.super()
 		this.x = x
@@ -41,7 +41,7 @@ class Encoder {
 		return this.encodeObject()
 	}
 
-	fn isMap() ->(is bool) {
+	private  fn isMap() ->(is bool) {
 		c := this.c
 		for c.getTypeName() != "java.lang.Object" {
 			if c.getTypeName() == "java.util.AbstractMap"{

@@ -27,12 +27,12 @@ fn main(args []string) {
 		os.exit(1)
 	}
 	testJavaArray()
-	testLucyArray(new []byte(10))
-	testLucyArray(new []short(10))
-	testLucyArray(new []int(10))
-	testLucyArray(new []long(10))
-	testLucyArray(new []float(10))
-	testLucyArray(new []double(10))
+	testLucyArray(new []byte(10) ,printErrAndExit )
+	testLucyArray(new []short(10) ,printErrAndExit )
+	testLucyArray(new []int(10) ,printErrAndExit )
+	testLucyArray(new []long(10) ,printErrAndExit )
+	testLucyArray(new []float(10),printErrAndExit )
+	testLucyArray(new []double(10),printErrAndExit)
 	testAppendArray()
 }
 

@@ -175,6 +175,7 @@ func (typ *Type) Clone() *Type {
 		ret.Map.V = typ.Map.V.Clone()
 	}
 	//TODO:: clone function
+	ret.FunctionType = typ.FunctionType.Clone()
 	return ret
 }
 
@@ -182,10 +183,9 @@ func (typ *Type) resolve(block *Block) error {
 	if typ.Resolved {
 		return nil
 	}
-	defer func() {
-		typ.Resolved = true
-	}()
-	if typ.Type == VariableTypeTemplate {
+	typ.Resolved = true // single threading
+	switch typ.Type {
+	case VariableTypeTemplate:
 		if block.InheritedAttribute.Function.parameterTypes == nil {
 			return fmt.Errorf("%s parameter type '%s' not in a template function",
 				errMsgPrefix(typ.Pos), typ.Name)
@@ -198,37 +198,18 @@ func (typ *Type) resolve(block *Block) error {
 		*typ = *block.InheritedAttribute.Function.parameterTypes[typ.Name]
 		typ.Pos = pos // keep pos
 		return nil
-	}
-	if typ.Type == VariableTypeName { //
+	case VariableTypeName:
 		return typ.resolveName(block)
-	}
-	if typ.Type == VariableTypeSelectGlobal {
+	case VariableTypeSelectGlobal:
 		d, exists := PackageBeenCompile.Block.NameExists(typ.Name)
 		if exists == false {
 			return fmt.Errorf("%s '%s' not found",
 				errMsgPrefix(typ.Pos), typ.Name)
 		}
-		switch d.(type) {
-		case *Class:
-			typ.Type = VariableTypeObject
-			typ.Class = d.(*Class)
-		case *Enum:
-			typ.Type = VariableTypeEnum
-			typ.Enum = d.(*Enum)
-		case *Type:
-			pos := typ.Pos
-			*typ = *d.(*Type)
-			typ.Pos = pos
-		default:
-			return fmt.Errorf("%s '%s' is not a type",
-				errMsgPrefix(typ.Pos), typ.Name)
-		}
-	}
-	if typ.Type == VariableTypeArray ||
-		typ.Type == VariableTypeJavaArray {
+		return typ.makeTypeFrom(d)
+	case VariableTypeArray, VariableTypeJavaArray:
 		return typ.Array.resolve(block)
-	}
-	if typ.Type == VariableTypeMap {
+	case VariableTypeMap:
 		var err error
 		if typ.Map.K != nil {
 			err = typ.Map.K.resolve(block)
@@ -239,8 +220,7 @@ func (typ *Type) resolve(block *Block) error {
 		if typ.Map.V != nil {
 			return typ.Map.V.resolve(block)
 		}
-	}
-	if typ.Type == VariableTypeFunction {
+	case VariableTypeFunction:
 		for _, v := range typ.FunctionType.ParameterList {
 			if err := v.Type.resolve(block); err != nil {
 				return err
@@ -255,7 +235,60 @@ func (typ *Type) resolve(block *Block) error {
 	return nil
 }
 
-func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
+func (typ *Type) resolveName(block *Block) error {
+	var err error
+	var d interface{}
+	var loadFromImport bool
+	if strings.Contains(typ.Name, ".") == false {
+		d = block.searchType(typ.Name)
+		if d != nil {
+			switch d.(type) {
+			case *Class:
+				if t := d.(*Class); t != nil && t.IsBuildIn {
+					loadFromImport = false
+				} else {
+					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
+				}
+			case *Type:
+				if t := d.(*Type); t != nil && t.IsBuildIn {
+					loadFromImport = false
+				} else {
+					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
+				}
+			case *Enum:
+				if t := d.(*Enum); t != nil && t.IsBuildIn {
+					loadFromImport = true
+				} else {
+					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
+				}
+			}
+		} else {
+			loadFromImport = true
+		}
+		if loadFromImport {
+			d, err = typ.getNameFromImport()
+			if err != nil {
+				return err
+			}
+		}
+	} else { // a.b  in type situation,must be package name
+		loadFromImport = true
+		d, err = typ.getNameFromImport()
+		if err != nil {
+			return err
+		}
+	}
+	if d == nil {
+		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(typ.Pos), typ.Name)
+	}
+	err = typ.makeTypeFrom(d)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (typ *Type) getNameFromImport() (d interface{}, err error) {
 	if strings.Contains(typ.Name, ".") == false {
 		i := PackageBeenCompile.getImport(typ.Pos.Filename, typ.Name)
 		if i != nil {
@@ -277,7 +310,8 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 		return nil, fmt.Errorf("%s %v",
 			errMsgPrefix(typ.Pos), err)
 	}
-	if pp, ok := p.(*Package); ok && pp != nil {
+	if pp, ok := p.(*Package); ok &&
+		pp != nil {
 		var exists bool
 		d, exists = pp.Block.NameExists(packageAndName[1])
 		if exists == false {
@@ -291,12 +325,11 @@ func (typ *Type) resolveNameFromImport() (d interface{}, err error) {
 	}
 }
 
-func (typ *Type) makeTypeFrom(d interface{}, loadFromImport bool) error {
+func (typ *Type) makeTypeFrom(d interface{}) error {
 	switch d.(type) {
 	case *Class:
 		dd := d.(*Class)
-		if loadFromImport &&
-			dd.IsPublic() == false {
+		if dd.LoadFromOutSide && dd.IsPublic() == false {
 			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors,
 				fmt.Errorf("%s class '%s' is not public",
 					errMsgPrefix(typ.Pos), dd.Name))
@@ -314,7 +347,7 @@ func (typ *Type) makeTypeFrom(d interface{}, loadFromImport bool) error {
 		return nil
 	case *Enum:
 		dd := d.(*Enum)
-		if loadFromImport && dd.IsPublic() == false {
+		if dd.LoadFromOutSide && dd.IsPublic() == false {
 			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, fmt.Errorf("%s enum '%s' is not public",
 				errMsgPrefix(typ.Pos), dd.Name))
 		}
@@ -326,63 +359,9 @@ func (typ *Type) makeTypeFrom(d interface{}, loadFromImport bool) error {
 		errMsgPrefix(typ.Pos), typ.Name)
 }
 
-func (typ *Type) resolveName(block *Block) error {
-	var err error
-	var d interface{}
-	var loadFromImport bool
-	if strings.Contains(typ.Name, ".") == false {
-		d = block.searchType(typ.Name)
-		if d != nil {
-			if loadFromImport == false { // d is not nil
-				switch d.(type) {
-				case *Class:
-					if t := d.(*Class); t != nil && t.IsBuildIn {
-						loadFromImport = false
-					} else {
-						_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
-					}
-				case *Type:
-					if t := d.(*Type); t != nil && t.IsBuildIn {
-						loadFromImport = false
-					} else {
-						_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
-					}
-				case *Enum:
-					if t := d.(*Enum); t != nil && t.IsBuildIn {
-						loadFromImport = true
-					} else {
-						_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
-					}
-				}
-			}
-		} else {
-			loadFromImport = true
-		}
-		if loadFromImport {
-			d, err = typ.resolveNameFromImport()
-			if err != nil {
-				return err
-			}
-		}
-	} else { // a.b  in type situation,must be package name
-		loadFromImport = true
-		d, err = typ.resolveNameFromImport()
-		if err != nil {
-			return err
-		}
-	}
-	if d == nil {
-		return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(typ.Pos), typ.Name)
-	}
-	err = typ.makeTypeFrom(d, loadFromImport)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (typ *Type) IsNumber() bool {
-	return typ.IsInteger() || typ.IsFloat()
+	return typ.IsInteger() ||
+		typ.IsFloat()
 }
 
 func (typ *Type) IsPointer() bool {
@@ -460,38 +439,7 @@ func (typ *Type) typeString(ret *string) {
 			*ret += typ.Array.TypeString() + "[]"
 		}
 	case VariableTypeFunction:
-		s := "fn ("
-		for k, v := range typ.FunctionType.ParameterList {
-			if v.Name != "" {
-				s += v.Name + " "
-			}
-			s += v.Type.TypeString()
-			if k != len(typ.FunctionType.ParameterList)-1 {
-				s += " , "
-			}
-		}
-		if typ.FunctionType.VArgs != nil {
-			if len(typ.FunctionType.ParameterList) > 0 {
-				s += ","
-			}
-			s += typ.FunctionType.VArgs.Name + " "
-			s += typ.FunctionType.VArgs.Type.TypeString()
-		}
-		s += ")"
-		if len(typ.FunctionType.ReturnList) > 0 {
-			s += " -> ("
-			for k, v := range typ.FunctionType.ReturnList {
-				if v.Name != "" {
-					s += v.Name + " "
-				}
-				s += v.Type.TypeString()
-				if k != len(typ.FunctionType.ReturnList)-1 {
-					s += ","
-				}
-			}
-			s += ")"
-		}
-		*ret += s
+		*ret += "fn " + typ.FunctionType.typeString()
 	case VariableTypeEnum:
 		*ret += "enum(" + typ.Enum.Name + ")"
 	case VariableTypeClass:
@@ -566,7 +514,6 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 		return typ.Map.V.canBeBindWithParameterTypes(parameterTypes)
 	}
 	return nil
-	//return fmt.Errorf("not T") // looks impossible
 }
 
 /*

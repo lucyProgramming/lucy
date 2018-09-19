@@ -87,7 +87,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Type = VariableTypeFunction
 		result.FunctionType = &f.Type
 		result.Pos = e.Pos
-		f.AccessByName++
 		identifier.Function = f
 		return result, nil
 	case *Variable:
@@ -188,7 +187,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	}
 	return nil, fmt.Errorf("%s identifier '%s' is not a expression , but '%s'",
-		errMsgPrefix(e.Pos), identifier.Name, block.searchedIdentifierIsWhat(d))
+		errMsgPrefix(e.Pos), identifier.Name, block.identifierIsWhat(d))
 }
 
 func (e *Expression) checkIdentifierThroughImports(it *Import) (*Type, error) {
