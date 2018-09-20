@@ -9,6 +9,9 @@ type AttributeSignature struct {
 }
 
 func (a *AttributeSignature) ToAttributeInfo(class *Class) *AttributeInfo {
+	if a.Signature == "" {
+		return nil
+	}
 	ret := &AttributeInfo{}
 	ret.attributeLength = 2
 	ret.NameIndex = class.InsertUtf8Const("Signature")

@@ -15,6 +15,7 @@ type Enum struct {
 	Used            bool
 	DefaultValue    int32
 	LoadFromOutSide bool
+	Comment         string
 }
 
 func (e *Enum) IsPublic() bool {
@@ -22,36 +23,38 @@ func (e *Enum) IsPublic() bool {
 }
 
 type EnumName struct {
-	Enum  *Enum
-	Name  string
-	Pos   *Pos
-	Value int32 // int32 is bigger enough
+	Enum       *Enum
+	Name       string
+	Pos        *Pos
+	Value      int32 // int32 is bigger enough
+	Comment    string
+	Expression *Expression
 }
 
 func (e *Enum) check() (err error) {
-	if e.Init == nil {
-		e.Init = &Expression{}
-		e.Init.Description = "compileAuto"
-		e.Init.Type = ExpressionTypeInt
-		e.Init.Data = int32(0)
-		e.Init.Pos = e.Pos
-	}
-	is, err := e.Init.constantFold()
-	if err != nil || is == false || e.Init.Type != ExpressionTypeInt {
-		if err == nil {
-			err = fmt.Errorf("%s enum type must inited by integer_expression",
-				errMsgPrefix(e.Pos))
-		}
-	}
 	var initV int32 = 0
-	if e.Init.Data != nil {
-		if t, ok := e.Init.Data.(int32); ok {
-			initV = t
+	if e.Init != nil {
+		is, err := e.Init.constantFold()
+		if err != nil {
+			return err
 		}
+		if is == false ||
+			e.Init.Type != ExpressionTypeInt {
+			if err == nil {
+				err = fmt.Errorf("%s enum type must inited by 'int' literal",
+					errMsgPrefix(e.Pos))
+				return err
+			}
+		}
+		initV = e.Init.Data.(int32)
 	}
 	e.DefaultValue = initV
 	for k, v := range e.Enums {
+		if v.Expression != nil && err == nil {
+			err = fmt.Errorf("%s enum only expect 1 init value",
+				errMsgPrefix(v.Pos))
+		}
 		v.Value = int32(k) + initV
 	}
-	return nil
+	return err
 }

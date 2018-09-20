@@ -18,4 +18,5 @@ const (
 	AttributeNameLucyConst              = "LucyConst" // indicate a package const
 	AttributeNameLucyReturnListNames    = "LucyReturnListName"
 	AttributeNameLucyTemplateFunction   = "LucyTemplateFunction"
+	AttributeNameLucyComment            = "LucyComment"
 )

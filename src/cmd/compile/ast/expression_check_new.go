@@ -49,12 +49,16 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	callArgTypes := checkExpressions(block, no.Args, errs, true)
 	ms, matched, err := no.Type.Class.accessConstructionFunction(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(no.Type.Pos), err))
+		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return ret
 	}
 	if matched {
 		m := ms[0]
-		e.methodAccessAble(block, m, errs)
+		if (no.Type.Class.LoadFromOutSide && m.IsPublic() == false) ||
+			(no.Type.Class.LoadFromOutSide == false && m.IsPrivate()) {
+			*errs = append(*errs, fmt.Errorf("%s construction method is not public",
+				errMsgPrefix(no.Type.Pos)))
+		}
 		no.Construction = m
 		return ret
 	}

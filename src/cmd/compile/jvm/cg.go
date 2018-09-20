@@ -94,12 +94,22 @@ func (buildPackage *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	class.SuperClass = ast.JavaRootClass
 	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Class.AttributeLucyEnum = &cg.AttributeLucyEnum{}
+	if e.Comment != "" {
+		class.Class.AttributeLucyComment = &cg.AttributeLucyComment{
+			Comment: e.Comment,
+		}
+	}
 	for _, v := range e.Enums {
 		field := &cg.FieldHighLevel{}
 		if e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0 {
 			field.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		} else {
 			field.AccessFlags |= cg.ACC_FIELD_PRIVATE
+		}
+		if v.Comment != "" {
+			field.AttributeLucyComment = &cg.AttributeLucyComment{
+				Comment: v.Comment,
+			}
 		}
 		field.Name = v.Name
 		field.Descriptor = "I"
@@ -123,6 +133,11 @@ func (buildPackage *BuildPackage) mkGlobalConstants() {
 		f.AttributeConstantValue = &cg.AttributeConstantValue{}
 		f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(buildPackage.mainClass, v.Type, v.Value)
 		f.AttributeLucyConst = &cg.AttributeLucyConst{}
+		if v.Comment != "" {
+			f.AttributeLucyComment = &cg.AttributeLucyComment{
+				Comment: v.Comment,
+			}
+		}
 		f.Descriptor = Descriptor.typeDescriptor(v.Type)
 		buildPackage.mainClass.Fields[k] = f
 	}
@@ -150,6 +165,11 @@ func (buildPackage *BuildPackage) mkGlobalVariables() {
 			if v.Type.Type == ast.VariableTypeFunction {
 				f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
 					cg.ACC_METHOD_VARARGS
+			}
+		}
+		if v.Comment != "" {
+			f.AttributeLucyComment = &cg.AttributeLucyComment{
+				Comment: v.Comment,
 			}
 		}
 		f.Name = v.Name
@@ -273,6 +293,11 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 	} else {
 		class.SuperClass = c.SuperClassName
 	}
+	if c.Comment != "" {
+		class.Class.AttributeLucyComment = &cg.AttributeLucyComment{
+			Comment: c.Comment,
+		}
+	}
 	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range c.Interfaces {
@@ -291,6 +316,11 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 			t := &cg.AttributeLucyFieldDescriptor{}
 			t.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
 			f.AttributeLucyFieldDescriptor = t
+		}
+		if v.Comment != "" {
+			f.AttributeLucyComment = &cg.AttributeLucyComment{
+				Comment: v.Comment,
+			}
 		}
 		class.Fields[v.Name] = f
 	}
@@ -343,6 +373,11 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MainFunctionName {
 			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		}
+		if f.Comment != "" {
+			method.AttributeLucyComment = &cg.AttributeLucyComment{
+				Comment: f.Comment,
+			}
 		}
 		if f.Type.VArgs != nil {
 			method.AccessFlags |= cg.ACC_METHOD_VARARGS

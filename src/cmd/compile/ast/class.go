@@ -30,6 +30,7 @@ type Class struct {
 	Interfaces                        []*Class
 	LoadFromOutSide                   bool
 	StaticBlocks                      []*Block
+	Comment                           string
 }
 
 func (c *Class) HaveStaticsCodes() bool {

@@ -48,6 +48,7 @@ func (parser *Parser) initParser() {
 	parser.ClassParser.parser = parser
 	parser.BlockParser = &BlockParser{}
 	parser.BlockParser.parser = parser
+
 }
 
 func (parser *Parser) Parse() []error {
@@ -68,11 +69,15 @@ func (parser *Parser) Parse() []error {
 	isFinal := false
 	isAbstract := false
 	var finalPos *ast.Pos
+	comment := &CommentParser{
+		parser: parser,
+	}
 	resetProperty := func() {
 		accessControlToken = nil
 		isFinal = false
 		isAbstract = false
 		finalPos = nil
+		comment.reset()
 	}
 	isPublic := func() bool {
 		return accessControlToken != nil && accessControlToken.Type == lex.TokenPublic
@@ -82,6 +87,8 @@ func (parser *Parser) Parse() []error {
 			break
 		}
 		switch parser.token.Type {
+		case lex.TokenComment, lex.TokenCommentMultiLine:
+			comment.read()
 		case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
 			parser.Next(lfNotToken)
 			continue
@@ -156,6 +163,7 @@ func (parser *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
+			e.Comment = comment.Comment
 			isPublic := isPublic()
 			if isPublic {
 				e.AccessFlags |= cg.ACC_CLASS_PUBLIC
@@ -172,6 +180,7 @@ func (parser *Parser) Parse() []error {
 				parser.Next(lfNotToken)
 				continue
 			}
+			f.Comment = comment.Comment
 			isPublic := isPublic()
 			if isPublic {
 				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
@@ -200,6 +209,7 @@ func (parser *Parser) Parse() []error {
 				resetProperty()
 				continue
 			}
+			c.Comment = comment.Comment
 			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Data: c,
 			})
@@ -323,7 +333,9 @@ func (parser *Parser) validAfterFinal() error {
 func (parser *Parser) isStatementEnding() bool {
 	return parser.token.Type == lex.TokenSemicolon ||
 		parser.token.Type == lex.TokenLf ||
-		parser.token.Type == lex.TokenRc
+		parser.token.Type == lex.TokenRc ||
+		parser.token.Type == lex.TokenComment ||
+		parser.token.Type == lex.TokenCommentMultiLine
 }
 func (parser *Parser) validStatementEnding() error {
 	if parser.isStatementEnding() {
@@ -548,7 +560,8 @@ func (parser *Parser) expectNewLineAndSkip() {
 }
 func (parser *Parser) expectNewLine() error {
 	var err error
-	if parser.token.Type != lex.TokenLf {
+	if parser.token.Type != lex.TokenLf &&
+		parser.token.Type != lex.TokenComment {
 		err = fmt.Errorf("%s expect new line , but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)

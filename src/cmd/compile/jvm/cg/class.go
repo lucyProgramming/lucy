@@ -32,6 +32,7 @@ type Class struct {
 	AttributeGroupedByName AttributeGroupedByName
 	TypeAlias              []*AttributeLucyTypeAlias
 	AttributeLucyEnum      *AttributeLucyEnum
+	AttributeLucyComment   *AttributeLucyComment
 	//const caches
 	Utf8Constants               map[string]*ConstPool
 	IntConstants                map[int32]*ConstPool
@@ -309,6 +310,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 		if f.AttributeLucyConst != nil {
 			field.Attributes = append(field.Attributes, f.AttributeLucyConst.ToAttributeInfo(c))
 		}
+		if f.AttributeLucyComment != nil {
+			field.Attributes = append(field.Attributes, f.AttributeLucyComment.ToAttributeInfo(c))
+		}
 		c.Fields = append(c.Fields, field)
 	}
 	for _, ms := range high.Methods {
@@ -329,6 +333,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 			}
 			if m.AttributeDefaultParameters != nil {
 				info.Attributes = append(info.Attributes, m.AttributeDefaultParameters.ToAttributeInfo(c))
+			}
+			if m.AttributeLucyComment != nil {
+				info.Attributes = append(info.Attributes, m.AttributeLucyComment.ToAttributeInfo(c))
 			}
 			if m.AttributeMethodParameters != nil {
 				t := m.AttributeMethodParameters.ToAttributeInfo(c)
@@ -354,6 +361,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 	}
 	if c.AttributeLucyEnum != nil {
 		c.Attributes = append(c.Attributes, c.AttributeLucyEnum.ToAttributeInfo(c))
+	}
+	if c.AttributeLucyComment != nil {
+		c.Attributes = append(c.Attributes, c.AttributeLucyComment.ToAttributeInfo(c))
 	}
 	for _, v := range high.TemplateFunctions {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))

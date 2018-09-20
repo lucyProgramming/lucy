@@ -171,11 +171,16 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 		return fmt.Errorf("%s not a valid token after 'final'", classParser.parser.errorMsgPrefix())
 	}
 	classParser.Next(lfNotToken) // skip {
+	comment := &CommentParser{
+		parser: classParser.parser,
+	}
 	for classParser.parser.token.Type != lex.TokenEof {
 		if len(classParser.parser.errs) > classParser.parser.nErrors2Stop {
 			break
 		}
 		switch classParser.parser.token.Type {
+		case lex.TokenComment, lex.TokenCommentMultiLine:
+			comment.read()
 		case lex.TokenRc:
 			classParser.Next(lfNotToken)
 			return
@@ -240,7 +245,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 				classParser.isFinal = false
 			}
 		case lex.TokenIdentifier:
-			err = classParser.parseField(&classParser.parser.errs)
+			err = classParser.parseField(&classParser.parser.errs, comment)
 			if err != nil {
 				classParser.consume(untilSemicolonOrLf)
 				classParser.Next(lfNotToken)
@@ -273,7 +278,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 				classParser.Next(lfNotToken)
 				continue
 			}
-
+			f.Comment = comment.Comment
 			if classParser.ret.Methods == nil {
 				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
 			}
@@ -341,7 +346,7 @@ func (classParser *ClassParser) parseConst() error {
 	return nil
 }
 
-func (classParser *ClassParser) parseField(errs *[]error) error {
+func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser) error {
 	names, err := classParser.parser.parseNameList()
 	if err != nil {
 		return err
@@ -359,9 +364,15 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 			classParser.consume(untilSemicolonOrLf)
 		}
 	}
-	if err == nil {
+	fieldComment := ""
+	if classParser.parser.token.Type == lex.TokenComment {
+		fieldComment = classParser.parser.token.Data.(string)
+		classParser.Next(lfIsToken)
+	} else {
+		fieldComment = comment.Comment
 		classParser.parser.validStatementEnding()
 	}
+
 	if classParser.ret.Fields == nil {
 		classParser.ret.Fields = make(map[string]*ast.ClassField)
 	}
@@ -380,6 +391,7 @@ func (classParser *ClassParser) parseField(errs *[]error) error {
 		if k < len(initValues) {
 			f.Expression = initValues[k]
 		}
+		f.Comment = fieldComment
 		if classParser.isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
 		}

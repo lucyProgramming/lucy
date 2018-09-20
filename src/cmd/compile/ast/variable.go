@@ -16,6 +16,7 @@ type Variable struct {
 	Type                *Type
 	LocalValOffset      uint16 // offset in stack frame
 	JvmDescriptor       string // jvm
+	Comment             string
 }
 
 func (v *Variable) isPublic() bool {

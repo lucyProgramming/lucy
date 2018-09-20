@@ -31,6 +31,7 @@ type Function struct {
 	IsClosureFunction                bool
 	isGlobalVariableDefinition       bool
 	isPackageInitBlockFunction       bool
+	Comment                          string
 }
 
 type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall,

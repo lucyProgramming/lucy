@@ -25,9 +25,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 	}()
 	isDefer := false
 	isAbstract := false
-	resetDefer := func() {
+	comment := &CommentParser{
+		parser: blockParser.parser,
+	}
+	resetPrefix := func() {
 		isDefer = false
 		isAbstract = false
+		comment.reset()
 	}
 	validAfterDefer := func() error {
 		if blockParser.parser.ExpressionParser.looksLikeExpression() ||
@@ -44,12 +48,14 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		}
 		if blockParser.parser.ExpressionParser.looksLikeExpression() {
 			blockParser.parseExpressionStatement(block, isDefer)
-			resetDefer()
+			resetPrefix()
 			continue
 		}
 		switch blockParser.parser.token.Type {
+		case lex.TokenComment, lex.TokenCommentMultiLine:
+			comment.read()
 		case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
-			resetDefer()
+			resetPrefix()
 			blockParser.Next(lfNotToken) // look up next
 			continue
 		case lex.TokenDefer:
@@ -220,7 +226,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 					Pos:   pos,
 				})
 			}
-			resetDefer()
+			resetPrefix()
 		case lex.TokenPass:
 			pos := blockParser.parser.mkPos()
 			if isGlobal == false {

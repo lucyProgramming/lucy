@@ -12,4 +12,5 @@ type MethodHighLevel struct {
 	AttributeDefaultParameters            *AttributeDefaultParameters
 	AttributeMethodParameters             *AttributeMethodParameters
 	AttributeLucyReturnListNames          *AttributeMethodParameters
+	AttributeLucyComment                  *AttributeLucyComment
 }

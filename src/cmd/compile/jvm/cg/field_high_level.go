@@ -7,4 +7,5 @@ type FieldHighLevel struct {
 	AttributeConstantValue       *AttributeConstantValue
 	AttributeLucyFieldDescriptor *AttributeLucyFieldDescriptor
 	AttributeLucyConst           *AttributeLucyConst
+	AttributeLucyComment         *AttributeLucyComment
 }
