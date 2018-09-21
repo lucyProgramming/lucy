@@ -6,49 +6,67 @@ import "java/util/AbstractMap"
 
 
 
-
 class Encoder {
 	x Object
 	c Class
 	indent string  
-	
-	public fn Encoder(x Object,indent string = "" ) {
+	indents string 
+	lastIsArray bool 
+	public fn Encoder(x Object, indents string   ,indent string ,lastIsArray bool = false  ) {
 		this.super()
 		this.x = x
 		if x != null {
 			this.c = x.getClass()
 		}
+		this.indents = indents 
 		this.indent = indent  
+		this.lastIsArray = lastIsArray 
 	}
 	
 	
 	public fn encode()->(bs []byte ,err error){
 		if this.x == null {
-			return []byte("null") , null 
+			if this.lastIsArray  {
+				return []byte( this.indents + "null") , null 
+			}else {
+				return []byte("null") , null 
+			}
 		}
 		if this.c.isPrimitive(){
-			return []byte(this.x.toString()) , null 
+			if this.lastIsArray {
+				return []byte( this.indents +  this.x.toString()) , null 
+			}else {
+				return []byte(this.x.toString()) , null 
+			}
 		} 
+		if this.c.getTypeName() == "java.lang.String" {
+			if this.lastIsArray {
+				return []byte(sprintf(`%s"%s"` , this.indents ,  this.x.toString())) , null 
+			}else {
+				return []byte(sprintf(`"%s"` , this.x.toString())) , null 
+			}
+			
+		}
 		if isMap(this.c) {
 			return this.encodeMap()
-		}
-		if this.c.getTypeName() == "java.lang.String" {
-			return []byte(sprintf(`"%s"` , this.x.toString())) , null 
 		}
 		if this.c.isArray() {
 			return this.encodeArray()
 		}
-		return this.encodeObject( )
+		return this.encodeObject()
 	}
 	
 
-	
 	
 
 	public fn encodeMap() -> (bs []byte ,err error){
 		x , _ := this.x.(AbstractMap)
 		ks := x.keySet().toArray()
-		bs = []byte("{")  
+		if this.lastIsArray {
+			bs = []byte(this.indents + "{")
+		}else {
+			bs = []byte("{")
+		}
 		if this.indent != "" {
 			bs.append('\n') 
 		}
@@ -56,11 +74,10 @@ class Encoder {
 			if err = Encoder.validForMapKey(v) ; err != null  {
 				return null , err  
 			}
-			bs.appendAll([]byte(this.indent))
+			bs.appendAll([]byte(this.indents + this.indent ))
             bs.append('"')
-            bs.appendAll( []byte(v.toString()))
-            bs.append('"')
-			bs.append(':')
+            bs.appendAll([]byte(v.toString()))
+            bs.append('"' , ':')
 			vv := x.get(v)
 			var bs2 []byte 
 			var err error 
@@ -77,7 +94,7 @@ class Encoder {
 			if .isPrimitiveObject(vv) {
 				bs2 = []byte(vv.toString())
 			}else {
-				bs2 , err = (new Encoder(x.get(v) , this.indent + this.indent)).encode()
+				bs2 , err = (new Encoder(x.get(v) , this.indents + this.indent , this.indent  )).encode()
 				if err != null {
 					return null , err  
 				}
@@ -91,8 +108,7 @@ class Encoder {
             }
 
 		}
-
-		bs.appendAll([]byte(this.indent + "}"))
+		bs.appendAll([]byte(this.indents + "}"))
 
 		
 	}
@@ -107,7 +123,6 @@ class Encoder {
 			name == "java.lang.Float" ||
 			name == "java.lang.Double"
 	}
-
 
 
 	public static fn validForMapKey(x Object) -> (err error ){
@@ -129,9 +144,13 @@ class Encoder {
 
 	public fn encodeArray() -> (bs []byte ,err error){
 		bs = []byte("[")
+		if this.indent != "" {
+			bs.append('\n')
+		}
 		length := Array.getLength(this.x)
 		for i := 0; i < length; i ++ {
-			bs2,err := ( new Encoder( Array.get(this.x  , i) ,   this.indent )) . encode()
+			bs.appendAll([]byte(this.indents))
+			bs2,err := ( new Encoder( Array.get(this.x  , i) , this.indents + this.indent ,  this.indent , true )) . encode()
 			if err != null {
 				return null,err  
 			}
@@ -139,15 +158,26 @@ class Encoder {
 			if i != length -1 {
 				bs.append(',')
 			}
+			if this.indent != "" {
+				bs.append('\n')
+			}
 		}
-		bs.append(']')
+		bs.appendAll( []byte(this.indents +  "]"))
 	}
 
 	
-	public fn encodeObject() ->  (bs []byte ,err error){
-		bs = []byte("{") 
+	public fn encodeObject()->  (bs []byte ,err error){
+		if this.lastIsArray {
+			bs = []byte(this.indents + "{")
+		}else {
+			bs = []byte("{")
+		}
+		if this.indent != "" {
+			bs.append('\n')
+		}
 		fs := this.c.getFields()
 		for k,f := range fs {
+			bs.appendAll([]byte(this.indents + this.indent))
 			bs.appendAll([]byte("\"" + f.getName() + "\":"))
 			if f.getType().isPrimitive() {
 				bsv := []byte(f.get(this.x).toString())
@@ -155,8 +185,11 @@ class Encoder {
 				if k != fs.size() - 1 {
 					bs.appendAll([]byte{ ',' })
 				}
+				if this.indent != "" {
+					bs.append('\n')
+				}
 			}else {
-				bsv,err := ( new Encoder(f.get(this.x) , this.indent)).encode()
+				bsv,err := ( new Encoder(f.get(this.x) ,this.indents + this.indent, this.indent)).encode()
 				if err != null {
 					return null,err
 				}
@@ -164,9 +197,12 @@ class Encoder {
 				if k != fs.size() - 1 {
 					bs.appendAll([','])
 				}
+				if this.indent != "" {
+					bs.append('\n')
+				}
 			}
 		}
-		bs.append('}') 
+		bs.appendAll([]byte(this.indents +  "}"))
 	}
 }
 

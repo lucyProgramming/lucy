@@ -62,7 +62,7 @@ class Decoder {
 		this.x = x
 		this.bs = bs
 	}
-
+	
 	public fn decode() -> (x2 Object , err error){
 		defer {
 			x := catch()
@@ -80,6 +80,13 @@ class Decoder {
 	
 	private fn parseSyntaxTree() -> (err error) {
 		this.skipWhiteSpace()
+		if this.bs.size() == 4  && 
+			this.bs[0] == 'n' &&
+			this.bs[1] == 'u' &&
+			this.bs[2] == 'l' && 
+			this.bs[3] == 'l'{
+			return null 
+		}
 		b := this.bs[this.offset]  
 		if b != '[' && b != '{' {
 			err = new error("unkown begining of json input")
@@ -89,7 +96,7 @@ class Decoder {
 			return  
 		}
 	}
-
+	
 	
 	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object , err error ){
 		c := x.getClass()
@@ -186,24 +193,25 @@ class Decoder {
 				}
 				return Double.valueOf(doubleValue) , null
 			default:
-			    panic(new error(typeName))
+			    panic(new error(typeName))  // not a primitive type , panic 
 		}
 	}
+	
 	
 	private fn decodeObjectFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object, err error ){
 		if tree.Type == JsonSyntaxTreeTypeNull {
 		    return null , null
 		}
+		if tree.Type == JsonSyntaxTreeTypeString {
+			return tree.stringValue , null
+		}
 		if tree.Type != JsonSyntaxTreeTypeObject  {
 			return null, new error(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()))
 		}
-
 		fs := c.getFields()
 		for f := range fs {
-			if null == tree.object {
-				continue 
-			}
-			if false == tree.object.keyExist(f.getName()) {
+			if tree.object == null || 
+				false == tree.object.keyExist(f.getName()) {
 				continue  
 			}
 			cc := f.getType()
@@ -216,29 +224,24 @@ class Decoder {
 				f.set(x , obj) 
 				continue  
 			}
-			if cc.getName() == "java.lang.String" {
-				tree :=  tree.object[f.getName()]
-				if tree.Type != JsonSyntaxTreeTypeString {
-					return null, new error(sprintf("cannot decode '%s' as 'string'" , tree.nodeType()))
-				}
-				f.set(x , tree.stringValue)
-				continue
-			}
 			t, err := this.decodeObjectFromTree( tree.object[f.getName()] , f.get(x) , cc )
 			if err != null {
 				return null, err
 			}
 			f.set(x , t )
-		} 
+		}
 	}
 	
 	
 	private fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object , err error ){
+		componentClass := c.getComponentType()
+		if tree.Type == JsonSyntaxTreeTypeNull {
+			x2 = Array.newInstance( componentClass, 0)
+			return 
+		}
 		if tree.Type != JsonSyntaxTreeTypeArray {
 			return  null , new error(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
 		}
-		componentClass := c.getComponentType()
-		print(componentClass.getTypeName() ,componentClass.isPrimitive() )
 		x2 = Array.newInstance( componentClass, tree.arrayElements.size())
 		for k,v := range tree.arrayElements {
 			if componentClass.isPrimitive() {
@@ -259,14 +262,10 @@ class Decoder {
 		return x2, null
 	}
 	
-
+	
+	
 	private fn skipWhiteSpace() {
-		b := this.bs[this.offset]
-		if b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' {
-			
-		}else {
-			return  
-		}
+		b := this.bs[this.offset++] // 
 		for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' { // 13 stands for CR
 			b = this.bs[this.offset++]
 		}
@@ -311,7 +310,7 @@ class Decoder {
 				return
 			default:
 				if .isDigit(b) == false && b != '-' {
-					err = new error("malformed json string: " +  string(this.bs[this.offset:]))
+					err = new error("malformed json format: " + this.getErrMsg() )
 					return 
 				}
 				var number Number  
@@ -327,11 +326,10 @@ class Decoder {
 	} 
 
 	private fn parseArray() -> (n JsonSyntaxTreeNode,err error ) {
-		this.offset++  // skip [
 		n = new JsonSyntaxTreeNode()
 		n.Type = JsonSyntaxTreeTypeArray
 		n.arrayElements = []JsonSyntaxTreeNode{}
-		b := this.bs[this.offset]
+		b := this.bs[this.offset ++ ]
 		for b != ']' {
 			value,err := this.parseValue()
 			if err != null {
@@ -339,16 +337,10 @@ class Decoder {
 			}
 			n.arrayElements.append(value)
 			this.skipWhiteSpace()
-			b = this.bs[this.offset]
-			if b == ',' {
-				this.offset++ 	
-				this.skipWhiteSpace()
-				b = this.bs[this.offset]
-				if b == ']' {
-					return null , new error(sprintf("expect array element, but '%s'" , this.getErrMsg()))
-				}
+			b = this.bs[this.offset++]
+			if b == ',' {	
 			}else if b == ']' {
-				//nothing to do 
+				break 
 			}else {
 				return null , new error(sprintf("expect ']' or ',' but '%s'" , this.getErrMsg()))
 			}
@@ -356,7 +348,6 @@ class Decoder {
 		if b != ']' {
 			return null , new error ("'[' and ']' not match")
 		}
-		this.offset++ // skip ] 
 		return n , null  
 	}
 

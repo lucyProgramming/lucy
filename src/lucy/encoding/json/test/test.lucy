@@ -1,11 +1,5 @@
 
 import "lucy/encoding/json"
-
-
-
-
-
-
 public class xxx {
 	public boolValue bool
 	public y string  
@@ -23,7 +17,6 @@ public class xxx {
 	}
 }
 
-
 fn main(args []string) {
 	x := new xxx()
 	x.y = "11111111111"
@@ -35,18 +28,15 @@ fn main(args []string) {
 	if err != null {
 		print(err)
 	}
-	
 	print(string(bs))
-
-	x2 := new xxx[](10)
-
+	x2 := new xxx[](2)
 	for k, _:= range x2 {
 		if k == 0 {
 			continue  
 		}
 		x2[k] = new xxx()
 	} 
-	bs,err = json.encode(x2)
+	bs,err = json.encode(x2 , "\t")
 	if err != null {
 		print(err)
 	}
@@ -60,8 +50,7 @@ fn main(args []string) {
 			"stringValue" :"\u4e2d\u6587hello world",
 			"floatValue" : 1e3 
 		} 
-	`  
-
+	`
 	y2 , err := json.decode([]byte(s) , y )
 	if err != null {
 		panic(err)
@@ -79,6 +68,9 @@ fn main(args []string) {
 	arr2 , err := json.decode([]byte(s) ,arr )
 	if err != null {
 		panic(err)
+	}
+	if len(byte[](arr2)) != 2 {
+		panic(new error("not 2"))
 	}
 	for v := range byte[](arr2)  {
 		print(v)

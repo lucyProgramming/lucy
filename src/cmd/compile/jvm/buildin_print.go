@@ -132,7 +132,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 	for k, v := range call.Args {
 		variableType := v.Value
 		stack := buildExpression.build(class, code, v, context, state)
-		if t := 1 + stack; t > maxStack {
+		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
 		if t := 2 + buildExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {

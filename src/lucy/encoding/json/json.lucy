@@ -3,8 +3,8 @@ import "java/lang/Object"
 import "java/lang/Class"
 
 
-public fn encode(x Object,indent string = "") -> (bs []byte ,err error){
-	e := new Encoder(x,indent)
+public fn encode(x Object , indent string = "") -> (bs []byte ,err error){
+	e := new Encoder( x, "" , indent)
 	return e.encode()
 }
 

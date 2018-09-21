@@ -5,7 +5,6 @@ import "lucy/os/flag"
 flagParser := new flag.FlagParser()
 recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
 
-
 fn printUsageAndExit(code int){
 	print("Usage: clean compiled class files ")
 	print(flagParser.helpMsg())
