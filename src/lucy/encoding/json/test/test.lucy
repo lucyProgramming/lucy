@@ -30,13 +30,12 @@ fn main(args []string) {
 	x.c = new map { int -> string }()
 	x.c[1] = "hello world"
 	x.c[2] = "hello world"
-	x.d = { "hello world" -> 1 , "11111111111111111" -> 222 } 
-	bs,err := json.encode(x , true )
+    x.d = { "hello world" -> 1 , "11111111111111111" -> 222 }
+	bs,err := json.encode(x , "\t"  )
 	if err != null {
 		print(err)
 	}
-
-	//print(bs)
+	
 	print(string(bs))
 
 	x2 := new xxx[](10)
@@ -63,14 +62,29 @@ fn main(args []string) {
 		} 
 	`  
 
-	err = json.decode([]byte(s) , y )
+	y2 , err := json.decode([]byte(s) , y )
 	if err != null {
 		panic(err)
 	}
 
-	print(y)
-
-
+	print(y2)
+	s = `
+		[
+			1 ,2 
+		]
+	`
+	
+	arr := new byte[](0)
+	
+	arr2 , err := json.decode([]byte(s) ,arr )
+	if err != null {
+		panic(err)
+	}
+	for v := range byte[](arr2)  {
+		print(v)
+	}
+	
+	
 
 }
 

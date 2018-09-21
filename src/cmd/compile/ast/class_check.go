@@ -217,9 +217,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 	if err := c.loadSuperClass(pos); err != nil {
 		return err
 	}
-	if err := c.SuperClass.classAccessAble(pos); err != nil {
-		return err
-	}
+
 	if c.SuperClass.IsFinal() {
 		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
 			errMsgPrefix(c.Pos), c.Name, c.SuperClassName)

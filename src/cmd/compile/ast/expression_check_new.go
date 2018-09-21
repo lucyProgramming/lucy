@@ -90,7 +90,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 		*errs = append(*errs,
 			fmt.Errorf("%s new array expect at least 1 argument ",
 				errMsgPrefix(e.Pos)))
-		newArray.Args = []*Expression{} // reset to 0,continue to analyse
+		return ret
 	}
 	amount, es := newArray.Args[0].checkSingleValueContextExpression(block)
 	if es != nil {

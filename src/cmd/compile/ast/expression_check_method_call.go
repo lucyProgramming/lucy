@@ -85,7 +85,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		var fieldMethodHandler *ClassField
 		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
 		if err != nil {
-			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+			*errs = append(*errs, err)
+			if len(ms) > 0 {
+				return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
+			}
 			return nil
 		}
 		if fieldMethodHandler != nil {
@@ -329,6 +332,9 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		}
 		ts := checkExpressions(block, call.Args, errs, true)
 		for _, t := range ts {
+			if t == nil {
+				continue
+			}
 			if call.Name == common.ArrayMethodAppend {
 				if array.Array.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",

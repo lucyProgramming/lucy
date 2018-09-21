@@ -29,11 +29,11 @@ public fn getLucyPath()->(paths []string, err error){
 	osName := System.getProperty("os.name").toLowerCase()
 	if osName.startsWith("windows") {
 	    for v := range lucyPath.split(";"){
-        		ps[v] = true
+        	ps[v] = true
         }
 	} else {  // unix style
 	    for v := range lucyPath.split(":"){
-        		ps[v] = true
+        	ps[v] = true
         }
 	}
 	paths = new []string(ps.size())

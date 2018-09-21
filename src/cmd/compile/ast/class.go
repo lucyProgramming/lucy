@@ -395,9 +395,7 @@ func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *Exp
 	if err != nil {
 		return nil, false, err
 	}
-	if err := c.classAccessAble(pos); err != nil {
-		*errs = append(*errs, err)
-	}
+
 	var args *CallArgs
 	if newCase != nil {
 		args = &newCase.Args
@@ -420,20 +418,20 @@ func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *Exp
 	return ms, false, nil
 }
 
-func (c *Class) classAccessAble(pos *Pos) error {
-	if c.LoadFromOutSide == false {
-		return nil
-	}
-	err := c.loadSelf(pos)
-	if err != nil {
-		return err
-	}
-	if c.IsPublic() == false {
-		return fmt.Errorf("%s class '%s' is not public",
-			errMsgPrefix(pos), c.Name)
-	}
-	return nil
-}
+//func (c *Class) classAccessAble(pos *Pos) error {
+//	if c.LoadFromOutSide == false {
+//		return nil
+//	}
+//	err := c.loadSelf(pos)
+//	if err != nil {
+//		return err
+//	}
+//	if c.IsPublic() == false {
+//		return fmt.Errorf("%s class '%s' is not public",
+//			errMsgPrefix(pos), c.Name)
+//	}
+//	return nil
+//}
 
 /*
 	ret is *ClassField or *ClassMethod

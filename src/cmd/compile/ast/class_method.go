@@ -166,9 +166,7 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall
 	if err != nil {
 		return nil, false, err
 	}
-	if err := c.classAccessAble(pos); err != nil {
-		*errs = append(*errs, err)
-	}
+
 	if c.IsJava {
 		return c.accessMethodAsJava(pos, errs, call, callArgTypes, false)
 	}
@@ -201,7 +199,7 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall
 			if err == nil {
 				return []*ClassMethod{m}, true, nil
 			} else {
-				return nil, false, err
+				return []*ClassMethod{m}, false, err
 			}
 		}
 	}
