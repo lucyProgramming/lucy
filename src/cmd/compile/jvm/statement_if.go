@@ -30,9 +30,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	for k, v := range s.ElseIfList {
 		context.MakeStackMap(code, ifState, code.CodeLength) // state is not change,all block var should be access from outside
 		writeExits([]*cg.Exit{exit}, code.CodeLength)
-
 		elseIfState := (&StackMapState{}).FromLast(ifState)
-
 		stack, exit = buildPackage.BuildExpression.buildConditionNotOk(class, code, context, elseIfState, v.Condition)
 		if stack > maxStack {
 			maxStack = stack
@@ -49,9 +47,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	context.MakeStackMap(code, ifState, code.CodeLength)
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	if s.ElseBlock != nil {
-
 		elseBlockState := (&StackMapState{}).FromLast(ifState)
-
 		buildPackage.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
 		ifState.addTop(elseBlockState)
 	}

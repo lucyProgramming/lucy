@@ -45,16 +45,12 @@ func registerBuildInFunctions() {
 					errMsgPrefix(pos), common.BuildInFunctionCatch))
 				return
 			}
-			if len(args) > 1 {
-				pos := pos
-				getFirstPosFromArgs(args[1:], &pos)
+			if len(e.Args) > 1 {
 				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect at most 1 argument",
-					errMsgPrefix(pos), common.BuildInFunctionCatch))
+					errMsgPrefix(e.Args[1].Pos), common.BuildInFunctionCatch))
 				return
 			}
-			if len(args) == 0 {
-				// make default exception class
-				// load java/lang/Exception this is default exception level to catch
+			if len(e.Args) == 0 {
 				if block.InheritedAttribute.Defer.ExceptionClass == nil {
 					c, err := PackageBeenCompile.loadClass(DefaultExceptionClass)
 					if err != nil {
@@ -70,22 +66,24 @@ func registerBuildInFunctions() {
 				} else {
 					f.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
 				}
-				return
 			}
-			if args[0] == nil {
-				return
-			}
-			if args[0].Type != VariableTypeObject {
-				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect a object ref argument",
+			if e.Args[0].Type != ExpressionTypeString {
+				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect string argument",
 					errMsgPrefix(args[0].Pos), common.BuildInFunctionCatch))
+			}
+			className := e.Args[0].Data.(string)
+			c, err := PackageBeenCompile.loadClass(className)
+			if err != nil {
+				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Args[0].Pos), err))
 				return
 			}
-			if has, _ := args[0].Class.haveSuperClass(args[0].Pos, JavaThrowableClass); has == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s' does not have super-class '%s'",
-					errMsgPrefix(args[0].Pos), args[0].Class.Name, JavaThrowableClass))
+			have, _ := c.haveSuperClass(e.Args[0].Pos, JavaThrowableClass)
+			if have == false {
+				*errs = append(*errs, fmt.Errorf("%s '%s' does't have super class '%s'",
+					errMsgPrefix(e.Args[0].Pos), className, JavaThrowableClass))
 				return
 			}
-			err := block.InheritedAttribute.Defer.registerExceptionClass(args[0].Class)
+			err = block.InheritedAttribute.Defer.registerExceptionClass(c)
 			if err != nil {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(args[0].Pos), err))
 			}
@@ -109,15 +107,10 @@ func registerBuildInFunctions() {
 				if len(args) == 0 || args[0] == nil {
 					return
 				}
-				if args[0].Type != VariableTypeObject {
-					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
-						errMsgPrefix(pos), args[0].TypeString()))
-					return
-				}
-				if have, _ := args[0].Class.haveSuperClass(args[0].Pos, JavaThrowableClass); have == false {
-					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for panic",
-						errMsgPrefix(pos), args[0].TypeString()))
-					return
+				meta := &BuildInFunctionPanicMeta{}
+				e.BuildInFunctionMeta = meta
+				if args[0].Type == VariableTypeObject {
+					meta.ArgThrowable, _ = args[0].Class.haveSuperClass(args[0].Pos, JavaThrowableClass)
 				}
 			},
 			IsBuildIn: true,

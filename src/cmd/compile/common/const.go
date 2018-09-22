@@ -25,9 +25,6 @@ const (
 	BuildInFunctionMonitorExit  = "monitorExit"
 	BuildInFunctionBlockHole    = "blackHole"
 	BuildInFunctionAssert       = "assert"
-	// ToObject
-	//ToObject = "toObject"
-	//UnPack   = "unPack"
 )
 
 const (

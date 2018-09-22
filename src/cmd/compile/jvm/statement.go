@@ -20,7 +20,6 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeBlock:
-
 		blockState := (&StackMapState{}).FromLast(state)
 		s.Block.Exits = []*cg.Exit{}
 		buildPackage.buildBlock(class, code, s.Block, context, blockState)
@@ -48,7 +47,8 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			s.StatementBreak.SwitchTemplateBlock.Exits = append(s.StatementBreak.SwitchTemplateBlock.Exits, exit)
 		}
 	case ast.StatementTypeReturn:
-		maxStack = buildPackage.buildReturnStatement(class, code, s.StatementReturn, context, state)
+		maxStack = buildPackage.buildReturnStatement(class, code,
+			s.StatementReturn, context, state)
 	case ast.StatementTypeSwitch:
 		s.StatementSwitch.Exits = []*cg.Exit{} //could compile multi times
 		maxStack = buildPackage.buildSwitchStatement(class, code, s.StatementSwitch, context, state)

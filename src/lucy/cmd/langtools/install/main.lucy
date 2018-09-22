@@ -3,6 +3,7 @@ import "lucy/os/flag"
 
 flagParser := new flag.FlagParser()
 
+
 fn printUsage() {
 	print("install directory and sub directories")
 	print(flagParser.helpMsg()) 

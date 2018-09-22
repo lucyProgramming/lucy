@@ -28,7 +28,8 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
 	}
-	// string
+	// string(byte[])
+	// string ([]byte)
 	if (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Type == ast.VariableTypeArray &&
 		conversion.Expression.Value.Array.Type == ast.VariableTypeByte) ||
 		(conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Type == ast.VariableTypeJavaArray &&

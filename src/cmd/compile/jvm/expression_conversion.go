@@ -17,6 +17,10 @@ func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, ty
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2b
 		code.CodeLength++
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2i
+		code.Codes[code.CodeLength+1] = cg.OP_i2b
+		code.CodeLength += 2
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_f2i
 		code.Codes[code.CodeLength+1] = cg.OP_i2b
@@ -25,10 +29,7 @@ func (buildExpression *BuildExpression) stackTop2Byte(code *cg.AttributeCode, ty
 		code.Codes[code.CodeLength] = cg.OP_d2i
 		code.Codes[code.CodeLength+1] = cg.OP_i2b
 		code.CodeLength += 2
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_l2i
-		code.Codes[code.CodeLength+1] = cg.OP_i2b
-		code.CodeLength += 2
+
 	}
 }
 
@@ -39,10 +40,15 @@ func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, t
 	case ast.VariableTypeShort:
 		// already is
 	case ast.VariableTypeChar:
-		// already is
+		code.Codes[code.CodeLength] = cg.OP_i2s
+		code.CodeLength++
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2s
 		code.CodeLength++
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2i
+		code.Codes[code.CodeLength+1] = cg.OP_i2s
+		code.CodeLength += 2
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_f2i
 		code.Codes[code.CodeLength+1] = cg.OP_i2s
@@ -51,10 +57,7 @@ func (buildExpression *BuildExpression) stackTop2Short(code *cg.AttributeCode, t
 		code.Codes[code.CodeLength] = cg.OP_d2i
 		code.Codes[code.CodeLength+1] = cg.OP_i2s
 		code.CodeLength += 2
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_l2i
-		code.Codes[code.CodeLength+1] = cg.OP_i2s
-		code.CodeLength += 2
+
 	}
 }
 
@@ -69,6 +72,11 @@ func (buildExpression *BuildExpression) stackTop2Char(code *cg.AttributeCode, ty
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2c
 		code.CodeLength++
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2i
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_i2c
+		code.CodeLength++
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_f2i
 		code.CodeLength++
@@ -79,11 +87,7 @@ func (buildExpression *BuildExpression) stackTop2Char(code *cg.AttributeCode, ty
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_i2c
 		code.CodeLength++
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_l2i
-		code.CodeLength++
-		code.Codes[code.CodeLength] = cg.OP_i2c
-		code.CodeLength++
+
 	}
 }
 func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ ast.VariableTypeKind) {
@@ -96,15 +100,16 @@ func (buildExpression *BuildExpression) stackTop2Int(code *cg.AttributeCode, typ
 		// already is
 	case ast.VariableTypeInt:
 		// already is
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2i
+		code.CodeLength++
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_f2i
 		code.CodeLength++
 	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_d2i
 		code.CodeLength++
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_l2i
-		code.CodeLength++
+
 	}
 }
 
@@ -119,14 +124,15 @@ func (buildExpression *BuildExpression) stackTop2Float(code *cg.AttributeCode, t
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2f
 		code.CodeLength++
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2f
+		code.CodeLength++
 	case ast.VariableTypeFloat:
 		// already is
 	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_d2f
 		code.CodeLength++
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_l2f
-		code.CodeLength++
+
 	}
 }
 
@@ -141,14 +147,15 @@ func (buildExpression *BuildExpression) stackTop2Long(code *cg.AttributeCode, ty
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2l
 		code.CodeLength++
+	case ast.VariableTypeLong:
+		// already is
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_f2l
 		code.CodeLength++
 	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_d2l
 		code.CodeLength++
-	case ast.VariableTypeLong:
-		// already is
+
 	}
 }
 
@@ -163,21 +170,22 @@ func (buildExpression *BuildExpression) stackTop2Double(code *cg.AttributeCode, 
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_i2d
 		code.CodeLength++
+	case ast.VariableTypeLong:
+		code.Codes[code.CodeLength] = cg.OP_l2d
+		code.CodeLength++
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_f2d
 		code.CodeLength++
 	case ast.VariableTypeDouble:
 		// already is
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_l2d
-		code.CodeLength++
 	}
 }
 
 /*
 	convert stack top to target
 */
-func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCode, typ ast.VariableTypeKind, target ast.VariableTypeKind) {
+func (buildExpression *BuildExpression) numberTypeConverter(code *cg.AttributeCode,
+	typ ast.VariableTypeKind, target ast.VariableTypeKind) {
 	if typ == target {
 		return
 	}
@@ -217,62 +225,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		return
 	}
 	maxStack = jvmSlotSize(typ) * 2
-	switch typ.Type {
-	case ast.VariableTypeBool:
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaStringClass,
-			Method:     "valueOf",
-			Descriptor: "(Z)Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VariableTypeByte:
-		fallthrough
-	case ast.VariableTypeShort:
-		fallthrough
-	case ast.VariableTypeChar:
-		fallthrough
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeInt:
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaStringClass,
-			Method:     "valueOf",
-			Descriptor: "(I)Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaStringClass,
-			Method:     "valueOf",
-			Descriptor: "(J)Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VariableTypeFloat:
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaStringClass,
-			Method:     "valueOf",
-			Descriptor: "(F)Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VariableTypeDouble:
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaStringClass,
-			Method:     "valueOf",
-			Descriptor: "(D)Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	case ast.VariableTypeObject:
-		fallthrough
-	case ast.VariableTypeArray:
-		fallthrough
-	case ast.VariableTypeJavaArray:
-		fallthrough
-	case ast.VariableTypeMap:
+	if typ.IsPointer() {
 		if 2 > maxStack {
 			maxStack = 2
 		}
@@ -300,7 +253,63 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 			Descriptor: "()Ljava/lang/String;",
 		}, code.Codes[code.CodeLength+11:code.CodeLength+13])
 		code.CodeLength += 13
+	} else {
+		switch typ.Type {
+		case ast.VariableTypeBool:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaStringClass,
+				Method:     "valueOf",
+				Descriptor: "(Z)Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VariableTypeChar:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaStringClass,
+				Method:     "valueOf",
+				Descriptor: "(C)Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VariableTypeByte:
+			fallthrough
+		case ast.VariableTypeShort:
+			fallthrough
+		case ast.VariableTypeEnum:
+			fallthrough
+		case ast.VariableTypeInt:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaStringClass,
+				Method:     "valueOf",
+				Descriptor: "(I)Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VariableTypeLong:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaStringClass,
+				Method:     "valueOf",
+				Descriptor: "(J)Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VariableTypeFloat:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaStringClass,
+				Method:     "valueOf",
+				Descriptor: "(F)Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		case ast.VariableTypeDouble:
+			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      javaStringClass,
+				Method:     "valueOf",
+				Descriptor: "(D)Ljava/lang/String;",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
 	}
-
 	return
 }

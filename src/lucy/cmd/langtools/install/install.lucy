@@ -24,6 +24,8 @@ class Install {
 		this.installDir(this.dir , this.packageName)
 	}
 	
+	
+	
 	fn installDir(dir string , packageName string ) {
 		f := new io.File(dir) 
 		fs := f.listFiles()
@@ -56,10 +58,11 @@ class Install {
         if err := cmd.wait() ;  err != null {
 			printf("install failed,err:%s\n" ,err .toString() )
         } 
-		
-		
-		
+			
 	}
+	
+	
+	
 	
 	
 	

@@ -9,3 +9,6 @@ type BuildInFunctionSprintfMeta struct {
 	Format     *Expression
 	ArgsLength int
 }
+type BuildInFunctionPanicMeta struct {
+	ArgThrowable bool
+}

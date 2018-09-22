@@ -39,9 +39,11 @@ func (buildExpression *BuildExpression) buildVar(class *cg.ClassHighLevel, code 
 		} else {
 			buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
 			if vs.Variables[index].BeenCaptured > 0 {
-				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, vs.Variables[index].LocalValOffset)...)
+				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+					vs.Variables[index].LocalValOffset)...)
 				state.popStack(2)
-				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
+				state.appendLocals(class,
+					state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
 				currentStack -= 2
 			} else {
 				state.appendLocals(class, vs.Variables[index].Type)

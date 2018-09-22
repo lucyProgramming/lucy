@@ -16,11 +16,11 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		v := vs.Lefts[0].Data.(*ast.ExpressionIdentifier).Variable
 		currentStack := uint16(0)
 		if v.BeenCaptured > 0 {
-			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			closure.createClosureVar(class, code, v.Type)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 			currentStack = 2
+			obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
 			state.pushStack(class, obj)
 			state.pushStack(class, obj)
 		}
@@ -50,7 +50,6 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		maxStack = buildExpression.buildExpressions(class, code, vs.InitValues, context, state)
 	}
 	autoVar := newMultiValueAutoVar(class, code, state)
-	//first round
 	for k, v := range vs.Lefts {
 		if v.Type != ast.ExpressionTypeIdentifier {
 			stack, remainStack, ops, _ := buildExpression.getLeftValue(class, code, v, context, state)
@@ -63,6 +62,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 			copyOPs(code, ops...)
 			continue
 		}
+		//identifier
 		identifier := v.Data.(*ast.ExpressionIdentifier)
 		if identifier.Name == ast.NoNameIdentifier {
 			continue

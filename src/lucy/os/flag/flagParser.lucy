@@ -91,7 +91,7 @@ public final class  FlagParser {
 		}
 	}
 	public fn helpMsg() -> (msg string){
-		msg = "flag are:\n"
+		msg = "flag provides are:\n"
 		for k,v := range this.options {
 			msg += sprintf("\t '%s' default:'%s' usage:'%s'\n" , k , v.formatDefaultValue() , v.usage )
 		}

@@ -153,7 +153,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	}
 	code.CodeLength++
 	state.popStack(1)
-	// build default
+
 	if s.Default != nil {
 		ss := (&StackMapState{}).FromLast(state)
 		buildPackage.buildBlock(class, code, s.Default, context, ss)

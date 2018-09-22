@@ -10,12 +10,38 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 	context *Context, state *StackMapState) (
 	maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
-		maxStack = buildExpression.build(class, code, call.Args[0], context, state)
+	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPanicMeta)
+	if meta.ArgThrowable {
+		if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
+			maxStack = buildExpression.build(class, code, call.Args[0], context, state)
+		} else {
+			code.Codes[code.CodeLength] = cg.OP_new
+			className := call.Args[0].Value.Class.Name
+			class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.Codes[code.CodeLength+3] = cg.OP_dup
+			code.CodeLength += 4
+			{
+				verificationTypeInfo := &cg.StackMapVerificationTypeInfo{}
+				uninitializedVariableInfo := &cg.StackMapUninitializedVariableInfo{}
+				uninitializedVariableInfo.CodeOffset = uint16(code.CodeLength - 4)
+				verificationTypeInfo.Verify = uninitializedVariableInfo
+				state.Stacks = append(state.Stacks, verificationTypeInfo)
+				state.Stacks = append(state.Stacks, verificationTypeInfo)
+			}
+			stack := buildExpression.build(class, code, call.Args[0], context, state)
+			state.popStack(2)
+			maxStack = 2 + stack
+			code.Codes[code.CodeLength] = cg.OP_invokespecial
+			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+				Class:      className,
+				Method:     specialMethodInit,
+				Descriptor: "(Ljava/lang/Throwable;)V",
+			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+		}
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_new
-		className := call.Args[0].Value.Class.Name
-		class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		{
@@ -28,12 +54,17 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 		}
 		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		state.popStack(2)
-		maxStack = 2 + stack
+		if t := 2 + stack; t > maxStack {
+			maxStack = t
+		}
+		if t := 2 + buildExpression.stackTop2String(class, code, call.Args[0].Value, context, state); t > maxStack {
+			maxStack = t
+		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      className,
+			Class:      javaExceptionClass,
 			Method:     specialMethodInit,
-			Descriptor: "(Ljava/lang/Throwable;)V",
+			Descriptor: "(Ljava/lang/String;)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
