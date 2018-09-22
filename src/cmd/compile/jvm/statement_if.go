@@ -15,9 +15,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 			maxStack = stack
 		}
 	}
-
 	trueBlockState := (&StackMapState{}).FromLast(ifState)
-
 	stack, exit := buildPackage.BuildExpression.buildConditionNotOk(class, code, context, trueBlockState, s.Condition)
 	if stack > maxStack {
 		maxStack = stack

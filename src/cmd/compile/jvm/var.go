@@ -17,27 +17,27 @@ type LeftValueKind int
 
 const (
 	_ LeftValueKind = iota
-	LeftValueTypeLucyArray
-	LeftValueTypeMap
-	LeftValueTypeLocalVar
-	LeftValueTypePutStatic
-	LeftValueTypePutField
-	LeftValueTypeArray
+	LeftValueKindLucyArray
+	LeftValueKindMap
+	LeftValueKindLocalVar
+	LeftValueKindPutStatic
+	LeftValueKindPutField
+	LeftValueKindArray
 )
 
 const (
-	functionPointerInvokeMethod = "invoke"
-	specialMethodInit           = "<init>"
-	javaRootObjectArray         = "[Ljava/lang/Object;"
-	javaStringClass             = "java/lang/String"
-	javaExceptionClass          = "java/lang/Exception"
-	javaMethodHandleClass       = "java/lang/invoke/MethodHandle"
-	javaRootClass               = "java/lang/Object"
-	javaIntegerClass            = "java/lang/Integer"
-	javaFloatClass              = "java/lang/Float"
-	javaDoubleClass             = "java/lang/Double"
-	javaLongClass               = "java/lang/Long"
-	throwableClass              = "java/lang/Throwable"
-	javaPrintStreamClass        = "java/io/PrintStream"
-	mapClass                    = "java/util/concurrent/ConcurrentHashMap"
+	functionPointerInvokeMethodName = "invoke"
+	specialMethodInit               = "<init>"
+	javaRootObjectArray             = "[Ljava/lang/Object;"
+	javaStringClass                 = "java/lang/String"
+	javaExceptionClass              = "java/lang/Exception"
+	javaMethodHandleClass           = "java/lang/invoke/MethodHandle"
+	javaRootClass                   = "java/lang/Object"
+	javaIntegerClass                = "java/lang/Integer"
+	javaFloatClass                  = "java/lang/Float"
+	javaDoubleClass                 = "java/lang/Double"
+	javaLongClass                   = "java/lang/Long"
+	throwableClass                  = "java/lang/Throwable"
+	javaPrintStreamClass            = "java/io/PrintStream"
+	mapClass                        = "java/util/concurrent/ConcurrentHashMap"
 )

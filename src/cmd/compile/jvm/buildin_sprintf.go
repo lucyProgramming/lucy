@@ -38,7 +38,6 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 		stack := buildExpression.build(class, code, v, context, state)
-		state.popStack(2)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -48,6 +47,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(class *cg.ClassHighLeve
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++
 		index++
+		state.popStack(2)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

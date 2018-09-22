@@ -255,7 +255,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		}
 		if s.RangeAttr.IdentifierKey != nil {
 			if s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
+					s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 				buildPackage.storeLocalVar(class, code, s.RangeAttr.IdentifierKey.Variable)

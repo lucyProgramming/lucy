@@ -26,7 +26,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		// execute defer first
 		if len(statementReturn.Defers) > 0 {
 			//return value  is on stack,  store to local var
-			if len(statementReturn.Expressions) > 0 { //rewrite return value
+			if len(statementReturn.Expressions) > 0 {
 				buildPackage.storeLocalVar(class, code, context.function.Type.ReturnList[0])
 			}
 			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
@@ -75,68 +75,10 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		if len(statementReturn.Expressions) == 1 {
 			maxStack = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 		} else {
-			loadInt32(class, code, int32(len(context.function.Type.ReturnList)))
-			code.Codes[code.CodeLength] = cg.OP_anewarray
-			class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			maxStack = 2 // max stack is 2
-			arrayListObject := state.newObjectVariableType(javaRootObjectArray)
-			state.pushStack(class, arrayListObject)
-			state.pushStack(class, arrayListObject)
-			defer state.popStack(2)
-			index := int32(0)
-			for _, v := range statementReturn.Expressions {
-				currentStack := uint16(1)
-				if v.HaveMultiValue() {
-					stack := buildPackage.BuildExpression.build(class, code, v, context, state)
-					if t := currentStack + stack; t > maxStack {
-						maxStack = t
-					}
-					autoVar := newMultiValueAutoVar(class, code, state)
-					for kk, _ := range v.MultiValues {
-						currentStack := uint16(1)
-						code.Codes[code.CodeLength] = cg.OP_dup // dup array list
-						code.CodeLength++
-						currentStack++
-						stack = autoVar.unPack2Object(class, code, kk)
-						if t := stack + currentStack; t > maxStack {
-							maxStack = t
-						}
-						loadInt32(class, code, index)
-						if t := currentStack + 2; t > maxStack {
-							maxStack = t
-						}
-						code.Codes[code.CodeLength] = cg.OP_swap
-						code.Codes[code.CodeLength+1] = cg.OP_aastore
-						code.CodeLength += 2
-						index++
-					}
-					continue
-				}
-				code.Codes[code.CodeLength] = cg.OP_dup // dup array list
-				code.CodeLength++
-				currentStack++
-				stack := buildPackage.BuildExpression.build(class, code, v, context, state)
-				if t := stack + currentStack; t > maxStack {
-					maxStack = t
-				}
-				//convert to object
-				if v.Value.IsPointer() == false {
-					typeConverter.packPrimitives(class, code, v.Value)
-				}
-				// append
-				loadInt32(class, code, index)
-				if t := currentStack + 2; t > maxStack {
-					maxStack = t
-				}
-				code.Codes[code.CodeLength] = cg.OP_swap
-				code.Codes[code.CodeLength+1] = cg.OP_aastore
-				code.CodeLength += 2
-				index++
-			}
+			maxStack = buildPackage.BuildExpression.buildExpressions(class, code, statementReturn.Expressions, context, state)
 		}
 	}
-	if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
+	if len(statementReturn.Defers) > 0 {
 		//store a simple var,should be no exception
 		if len(statementReturn.Expressions) > 0 {
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
@@ -158,14 +100,14 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		code.CodeLength++
 		return
 	}
-	stack := buildPackage.buildReturnFromFunctionReturnList(class, code, context)
+	stack := buildPackage.buildReturnFromFunctionReturnVars(class, code, context)
 	if stack > maxStack {
 		maxStack = stack
 	}
 	return
 }
 
-func (buildPackage *BuildPackage) buildReturnFromFunctionReturnList(class *cg.ClassHighLevel,
+func (buildPackage *BuildPackage) buildReturnFromFunctionReturnVars(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context) (maxStack uint16) {
 	if context.function.Type.VoidReturn() { // when has no return,should not call this function
 		return
@@ -184,9 +126,9 @@ func (buildPackage *BuildPackage) buildReturnFromFunctionReturnList(class *cg.Cl
 				fallthrough
 			case ast.VariableTypeShort:
 				fallthrough
-			case ast.VariableTypeEnum:
-				fallthrough
 			case ast.VariableTypeChar:
+				fallthrough
+			case ast.VariableTypeEnum:
 				fallthrough
 			case ast.VariableTypeInt:
 				code.Codes[code.CodeLength] = cg.OP_ireturn
@@ -235,7 +177,8 @@ func (buildPackage *BuildPackage) buildReturnFromFunctionReturnList(class *cg.Cl
 	return
 }
 
-func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode, context *Context, from *StackMapState,
+func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	context *Context, from *StackMapState,
 	statementReturn *ast.StatementReturn) (maxStack uint16) {
 	if len(statementReturn.Defers) == 0 {
 		return
@@ -302,7 +245,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 				length := code.CodeLength + 3
 				code.CodeLength += 6
 				context.MakeStackMap(code, state, code.CodeLength)
-				buildPackage.buildReturnFromFunctionReturnList(class, code, context)
+				buildPackage.buildReturnFromFunctionReturnVars(class, code, context)
 				context.MakeStackMap(code, state, code.CodeLength)
 				binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
 			}

@@ -309,7 +309,8 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		f.AccessFlags = v.AccessFlags
 		if v.IsStatic() && v.DefaultValue != nil {
 			f.AttributeConstantValue = &cg.AttributeConstantValue{}
-			f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(class, v.Type, v.DefaultValue)
+			f.AttributeConstantValue.Index = buildPackage.insertDefaultValue(class, v.Type,
+				v.DefaultValue)
 		}
 		f.Descriptor = Descriptor.typeDescriptor(v.Type)
 		if LucyFieldSignatureParser.Need(v.Type) {
@@ -351,13 +352,14 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 	ms := make(map[string]*cg.MethodHighLevel)
 	for k, f := range buildPackage.Package.Block.Functions { // first round
 		if f.TemplateFunction != nil {
-			buildPackage.mainClass.TemplateFunctions = append(buildPackage.mainClass.TemplateFunctions, &cg.AttributeTemplateFunction{
-				Name:        f.Name,
-				Filename:    f.Pos.Filename,
-				StartLine:   uint16(f.Pos.StartLine),
-				StartColumn: uint16(f.Pos.StartColumn),
-				Code:        string(f.SourceCodes),
-			})
+			buildPackage.mainClass.TemplateFunctions = append(buildPackage.mainClass.TemplateFunctions,
+				&cg.AttributeTemplateFunction{
+					Name:        f.Name,
+					Filename:    f.Pos.Filename,
+					StartLine:   uint16(f.Pos.StartLine),
+					StartColumn: uint16(f.Pos.StartColumn),
+					Code:        string(f.SourceCodes),
+				})
 			continue
 		}
 		if f.IsBuildIn { //

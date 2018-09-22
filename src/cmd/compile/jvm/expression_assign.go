@@ -81,7 +81,7 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.AttributeCode, leftValueKind LeftValueKind,
 	stackTopType *ast.Type) (increment uint16) {
 	switch leftValueKind {
-	case LeftValueTypeLocalVar:
+	case LeftValueKindLocalVar:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -90,7 +90,7 @@ func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.Attribu
 			increment = 2
 		}
 		code.CodeLength++
-	case LeftValueTypePutStatic:
+	case LeftValueKindPutStatic:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup
@@ -99,7 +99,7 @@ func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.Attribu
 			increment = 2
 		}
 		code.CodeLength++
-	case LeftValueTypePutField:
+	case LeftValueKindPutField:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x1
@@ -108,7 +108,7 @@ func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.Attribu
 			code.Codes[code.CodeLength] = cg.OP_dup2_x1
 		}
 		code.CodeLength++
-	case LeftValueTypeArray, LeftValueTypeLucyArray:
+	case LeftValueKindArray, LeftValueKindLucyArray:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2
@@ -119,7 +119,7 @@ func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.Attribu
 			code.CodeLength++
 		}
 
-	case LeftValueTypeMap:
+	case LeftValueKindMap:
 		if jvmSlotSize(stackTopType) == 1 {
 			increment = 1
 			code.Codes[code.CodeLength] = cg.OP_dup_x2

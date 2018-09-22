@@ -34,7 +34,7 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 		Field:      meta.fieldName,
 		Descriptor: meta.fieldDescription,
 	}, ops[1:3])
-	leftValueType = LeftValueTypePutField
+	leftValueType = LeftValueKindPutField
 	return
 }
 
@@ -69,7 +69,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	}, bs4[1:3])
 	bs4[3] = cg.OP_pop
 	ops = append(ops, bs4...)
-	leftValueType = LeftValueTypeMap
+	leftValueType = LeftValueKindMap
 	return
 }
 
@@ -86,7 +86,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 		}
 		if identifier.Variable.IsGlobal {
 			ops = make([]byte, 3)
-			leftValueType = LeftValueTypePutStatic
+			leftValueType = LeftValueKindPutStatic
 			ops[0] = cg.OP_putstatic
 			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 				Class:      buildExpression.BuildPackage.mainClass.Name,
@@ -98,7 +98,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 		if identifier.Variable.BeenCaptured > 0 {
 			return buildExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
-		leftValueType = LeftValueTypeLocalVar
+		leftValueType = LeftValueKindLocalVar
 		ops = storeLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
@@ -120,7 +120,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			state.pushStack(class, &ast.Type{
 				Type: ast.VariableTypeInt,
 			})
-			leftValueType = LeftValueTypeLucyArray
+			leftValueType = LeftValueKindLucyArray
 			remainStack = 2 // [arrayref ,index]
 		} else if index.Expression.Value.Type == ast.VariableTypeMap { // map
 			return buildExpression.getMapLeftValue(class, code, e, context, state)
@@ -131,7 +131,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
-			leftValueType = LeftValueTypeArray
+			leftValueType = LeftValueKindArray
 			remainStack = 2 // [objectref ,index]
 			state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
 			switch e.Value.Type {
@@ -183,13 +183,13 @@ func (buildExpression *BuildExpression) getLeftValue(
 				Descriptor: selection.PackageVariable.JvmDescriptor,
 			}, ops[1:3])
 			maxStack = 0
-			leftValueType = LeftValueTypePutStatic
+			leftValueType = LeftValueKindPutStatic
 			remainStack = 0
 		case ast.VariableTypeDynamicSelector:
 			ops = make([]byte, 3)
 			if selection.Field.IsStatic() {
 				ops[0] = cg.OP_putstatic
-				leftValueType = LeftValueTypePutStatic
+				leftValueType = LeftValueKindPutStatic
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_aload_0
 				code.CodeLength++
@@ -197,7 +197,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 				ops[0] = cg.OP_putfield
 				remainStack = 1
 				maxStack = 1
-				leftValueType = LeftValueTypePutField
+				leftValueType = LeftValueKindPutField
 			}
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
@@ -218,10 +218,10 @@ func (buildExpression *BuildExpression) getLeftValue(
 				Descriptor: selection.Field.JvmDescriptor,
 			}, ops[1:3])
 			if selection.Field.IsStatic() {
-				leftValueType = LeftValueTypePutStatic
+				leftValueType = LeftValueKindPutStatic
 				ops[0] = cg.OP_putstatic
 			} else {
-				leftValueType = LeftValueTypePutField
+				leftValueType = LeftValueKindPutField
 				ops[0] = cg.OP_putfield
 				maxStack = buildExpression.build(class, code, selection.Expression, context, state)
 				remainStack = 1
