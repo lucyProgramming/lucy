@@ -166,7 +166,6 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	astClass.LoadFromOutSide = true
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
-		f.LoadFromOutSide = true
 		f.AccessFlags = v.AccessFlags
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
@@ -231,7 +230,6 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		f := &ast.ClassField{}
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
-		f.LoadFromOutSide = true
 		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
 		if err != nil {
 			return nil, err

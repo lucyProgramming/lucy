@@ -1,0 +1,99 @@
+import "java/io"
+import "lucy/os"
+
+
+class Install {
+	dir  string 
+	verbose bool 
+	packageName string 
+	lucyRoot string 
+	fn Install(lucyRoot string , dir string  ,  packageName string , verbose bool) {
+	    this.super()
+		this.dir = dir
+		this.packageName = packageName 
+		this.verbose = verbose
+		this.lucyRoot = lucyRoot 
+	}
+	
+	fn install() {
+		f := new io.File(this.dir)
+		if f.isDirectory()  == false {
+			printf("'%s' is not a directory" , this.dir)
+			return 
+		}
+		this.installDir(this.dir , this.packageName)
+	}
+	
+	fn installDir(dir string , packageName string ) {
+		f := new io.File(dir) 
+		fs := f.listFiles()
+		hasLucyFile := false
+		for f := range fs {
+			if f.isDirectory() {
+				this.installDir(dir + "/" + f.getName() , packageName + "/" + f.getName())
+				continue 
+			}
+			if f.getName().endsWith(".lucy") {
+				hasLucyFile = true
+			}
+		}
+		if false == hasLucyFile {
+			return 
+		}
+		if this.verbose {
+			printf("install:%s\n" , packageName)
+		}
+		args := new string[](2)
+		args[0] = "build"  
+        args[1] =  packageName
+        cmd := new os.Command(this.lucyRoot + "/bin/lucy", args  , null ,null)
+        cmd.stdout = os.stdout 
+        cmd.stderr = os.stderr  
+        if err :=  cmd.start() ; err != null {
+			printf("start program failed,err:%s\n" , err.toString())
+        	return 
+        }
+        if err := cmd.wait() ;  err != null {
+			printf("install failed,err:%s\n" ,err .toString() )
+        } 
+		
+		
+		
+	}
+	
+	
+	
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,7 +6,8 @@ import (
 )
 
 type ClassMethod struct {
-	isCompilerAuto  bool // compile auto method
+	// compile auto method
+	IsCompilerAuto  bool
 	Function        *Function
 	LoadFromOutSide bool
 }

@@ -339,8 +339,8 @@ func (c *Class) checkFields() []error {
 	}
 	staticFieldAssignStatements := []*Statement{}
 	for _, v := range c.Fields {
-		if v.Expression != nil {
-			assignment, es := v.Expression.checkSingleValueContextExpression(&c.Methods[SpecialMethodInit][0].Function.Block)
+		if v.DefaultValueExpression != nil {
+			assignment, es := v.DefaultValueExpression.checkSingleValueContextExpression(&c.Methods[SpecialMethodInit][0].Function.Block)
 			errs = append(errs, es...)
 			if assignment == nil {
 				continue
@@ -357,8 +357,8 @@ func (c *Class) checkFields() []error {
 				continue
 			}
 			if v.IsStatic() &&
-				v.Expression.IsLiteral() {
-				v.DefaultValue = v.Expression.Data
+				v.DefaultValueExpression.IsLiteral() {
+				v.DefaultValue = v.DefaultValueExpression.Data
 				continue
 			}
 			if v.IsStatic() == false {
@@ -369,7 +369,7 @@ func (c *Class) checkFields() []error {
 			bin.Right = &Expression{
 				Type:        ExpressionTypeList,
 				Description: "list",
-				Data:        []*Expression{v.Expression},
+				Data:        []*Expression{v.DefaultValueExpression},
 			}
 			{
 				selection := &ExpressionSelection{}
@@ -434,10 +434,10 @@ func (c *Class) checkMethods() []error {
 					continue
 				}
 				for _, v := range method.Function.Type.ReturnList {
-					t, es := v.Expression.checkSingleValueContextExpression(&method.Function.Block)
+					t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&method.Function.Block)
 					errs = append(errs, es...)
 					if t != nil && v.Type.assignAble(&errs, t) == false {
-						err := fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+						err := fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
 							t.TypeString(), v.Type.TypeString())
 						errs = append(errs, err)
 					}

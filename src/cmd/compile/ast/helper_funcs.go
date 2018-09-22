@@ -95,6 +95,9 @@ func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type
 		errMsgPrefix(pos), name)
 	wantString := "fn " + name + " ("
 	for k, v := range want {
+		if v == nil {
+			continue
+		}
 		wantString += v.TypeString()
 		if k != len(want)-1 {
 			wantString += ","
@@ -131,12 +134,12 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 	if c.Type != nil {
 		c.mkDefaultValue()
 	}
-	if c.Expression == nil {
+	if c.DefaultValueExpression == nil {
 		err := fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
 		*errs = append(*errs, err)
 		return err
 	}
-	is, err := c.Expression.constantFold()
+	is, err := c.DefaultValueExpression.constantFold()
 	if err != nil {
 		*errs = append(*errs, err)
 		return err
@@ -147,8 +150,8 @@ func checkConst(block *Block, c *Constant, errs *[]error) error {
 		*errs = append(*errs, err)
 		return err
 	}
-	c.Value = c.Expression.Data
-	t, _ := c.Expression.checkSingleValueContextExpression(block)
+	c.Value = c.DefaultValueExpression.Data
+	t, _ := c.DefaultValueExpression.checkSingleValueContextExpression(block)
 	if c.Type != nil {
 		if c.Type.assignAble(errs, t) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",

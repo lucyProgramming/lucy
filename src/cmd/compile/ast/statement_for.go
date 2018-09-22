@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -115,7 +114,8 @@ func (s *StatementFor) checkRange() []error {
 		}
 		if identifierV.Name != NoNameIdentifier {
 			vd := &Variable{}
-			if rangeOn.Type == VariableTypeArray || rangeOn.Type == VariableTypeJavaArray {
+			if rangeOn.Type == VariableTypeArray ||
+				rangeOn.Type == VariableTypeJavaArray {
 				vd.Type = rangeOn.Array.Clone()
 			} else {
 				vd.Type = rangeOn.Map.V.Clone()
@@ -129,7 +129,8 @@ func (s *StatementFor) checkRange() []error {
 			identifierV.Variable = vd
 			s.RangeAttr.IdentifierValue = identifierV
 		}
-		if modelKv && identifierK.Name != NoNameIdentifier {
+		if modelKv &&
+			identifierK.Name != NoNameIdentifier {
 			vd := &Variable{}
 			var vt *Type
 			if rangeOn.Type == VariableTypeArray ||
@@ -232,9 +233,7 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Condition.Pos), s.Condition.Description))
 		}
 		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
-
 		errs = append(errs, es...)
-
 		if t != nil && t.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
 				errMsgPrefix(s.Condition.Pos), t.TypeString()))
@@ -247,9 +246,10 @@ func (s *StatementFor) check(block *Block) []error {
 				errMsgPrefix(s.Increment.Pos), s.Increment.Description))
 		}
 		_, es := s.Increment.check(s.Block)
-
 		errs = append(errs, es...)
-
+	}
+	if len(errs) > 0 {
+		return errs
 	}
 	errs = append(errs, s.Block.checkStatements()...)
 	return errs

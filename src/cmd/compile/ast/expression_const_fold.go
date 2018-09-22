@@ -54,6 +54,8 @@ func (e *Expression) constantFold() (is bool, err error) {
 		switch ee.Type {
 		case ExpressionTypeByte:
 			e.Data = ^ee.Data.(byte)
+		case ExpressionTypeChar:
+			e.Data = ^ee.Data.(int32)
 		case ExpressionTypeShort:
 			e.Data = ^ee.Data.(int32)
 		case ExpressionTypeInt:
@@ -95,6 +97,8 @@ func (e *Expression) constantFold() (is bool, err error) {
 		case ExpressionTypeByte:
 			e.Data = -ee.Data.(byte)
 		case ExpressionTypeShort:
+			e.Data = -ee.Data.(int32)
+		case ExpressionTypeChar:
 			e.Data = -ee.Data.(int32)
 		case ExpressionTypeInt:
 			e.Data = -ee.Data.(int32)
@@ -156,6 +160,12 @@ func (e *Expression) constantFold() (is bool, err error) {
 				} else {
 					e.Data = int32(bin.Left.Data.(int32) >> bin.Right.getByteValue())
 				}
+			case ExpressionTypeChar:
+				if e.Type == ExpressionTypeLsh {
+					e.Data = int32(bin.Left.Data.(int32) << bin.Right.getByteValue())
+				} else {
+					e.Data = int32(bin.Left.Data.(int32) >> bin.Right.getByteValue())
+				}
 			case ExpressionTypeInt:
 				if e.Type == ExpressionTypeLsh {
 					e.Data = int32(bin.Left.Data.(int32) << bin.Right.getByteValue())
@@ -193,6 +203,14 @@ func (e *Expression) constantFold() (is bool, err error) {
 					e.Data = bin.Left.Data.(byte) ^ bin.Right.Data.(byte)
 				}
 			case ExpressionTypeShort:
+				if e.Type == ExpressionTypeAnd {
+					e.Data = bin.Left.Data.(int32) & bin.Right.Data.(int32)
+				} else if e.Type == ExpressionTypeOr {
+					e.Data = bin.Left.Data.(int32) | bin.Right.Data.(int32)
+				} else {
+					e.Data = bin.Left.Data.(int32) ^ bin.Right.Data.(int32)
+				}
+			case ExpressionTypeChar:
 				if e.Type == ExpressionTypeAnd {
 					e.Data = bin.Left.Data.(int32) & bin.Right.Data.(int32)
 				} else if e.Type == ExpressionTypeOr {
@@ -411,11 +429,11 @@ func (e *Expression) getDoubleValue() float64 {
 	return 0
 }
 
-func (e *Expression) convertNumberLiteralTo(t VariableTypeKind) {
+func (e *Expression) convertNumberLiteralTo(to VariableTypeKind) {
 	if e.isNumber() == false {
 		panic("not a number")
 	}
-	switch t {
+	switch to {
 	case VariableTypeByte:
 		e.Data = e.getByteValue()
 		e.Type = ExpressionTypeByte

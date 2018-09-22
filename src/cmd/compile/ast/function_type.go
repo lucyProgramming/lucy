@@ -24,8 +24,8 @@ func (ft *FunctionType) typeString() string {
 			s += v.Name + " "
 		}
 		s += v.Type.TypeString()
-		if v.Expression != nil {
-			s += " = " + v.Expression.Description
+		if v.DefaultValueExpression != nil {
+			s += " = " + v.DefaultValueExpression.Description
 		}
 		if k != len(ft.ParameterList)-1 {
 			s += ","
@@ -218,7 +218,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 	if len(callArgsTypes) < len(ft.ParameterList) {
 		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
-				*args = append(*args, f.Type.ParameterList[i].Expression)
+				*args = append(*args, f.Type.ParameterList[i].DefaultValueExpression)
 			}
 		} else { // no default value
 			errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(from))

@@ -80,7 +80,7 @@ func (parser *Parser) parseTypedNameDefaultValue() (returnList []*ast.Variable, 
 	parser.Next(lfIsToken) // skip =
 	for k, v := range returnList {
 		var er error
-		v.Expression, er = parser.ExpressionParser.parseExpression(false)
+		v.DefaultValueExpression, er = parser.ExpressionParser.parseExpression(false)
 		if er != nil {
 			parser.errs = append(parser.errs, err)
 			parser.consume(untilComma)

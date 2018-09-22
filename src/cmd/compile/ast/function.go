@@ -139,7 +139,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpress
 				}
 			}
 		}
-		if v.Type.IsVArgs && v.Expression != nil {
+		if v.Type.IsVArgs && v.DefaultValueExpression != nil {
 			*errs = append(*errs, fmt.Errorf("%s vargs cannot have default value",
 				errMsgPrefix(v.Type.Pos)))
 		}
@@ -156,28 +156,28 @@ func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpress
 		if f.TemplateFunction != nil {
 			continue
 		}
-		if v.Expression != nil {
+		if v.DefaultValueExpression != nil {
 			if f.HaveDefaultValue == false {
 				f.DefaultValueStartAt = k
 			}
 			f.HaveDefaultValue = true
-			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
+			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&f.Block)
 			*errs = append(*errs, es...)
 			if t != nil {
 				if v.Type.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(v.Expression.Pos), t.TypeString(), v.Type.TypeString()))
+						errMsgPrefix(v.DefaultValueExpression.Pos), t.TypeString(), v.Type.TypeString()))
 					continue
 				}
 			}
-			if v.Expression.IsLiteral() == false {
+			if v.DefaultValueExpression.IsLiteral() == false {
 				*errs = append(*errs, fmt.Errorf("%s default value must be literal",
-					errMsgPrefix(v.Expression.Pos)))
+					errMsgPrefix(v.DefaultValueExpression.Pos)))
 				continue
 			}
-			if v.Expression.Type == ExpressionTypeNull {
+			if v.DefaultValueExpression.Type == ExpressionTypeNull {
 				*errs = append(*errs, fmt.Errorf("%s cannot use 'null' as default value",
-					errMsgPrefix(v.Expression.Pos)))
+					errMsgPrefix(v.DefaultValueExpression.Pos)))
 			}
 		}
 	}
@@ -205,21 +205,21 @@ func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpress
 			if f.TemplateFunction != nil {
 				continue
 			}
-			if v.Expression == nil {
-				v.Expression = v.Type.mkDefaultValueExpression()
+			if v.DefaultValueExpression == nil {
+				v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
 				continue
 			}
 			if evalReturnVarExpression == false {
 				// eval expression later
 				continue
 			}
-			t, es := v.Expression.checkSingleValueContextExpression(&f.Block)
+			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&f.Block)
 			if len(es) > 0 {
 				*errs = append(*errs, es...)
 				continue
 			}
 			if t != nil && v.Type.assignAble(errs, t) == false {
-				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.Expression.Pos),
+				err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
 					t.TypeString(), v.Type.TypeString())
 				*errs = append(*errs, err)
 			}

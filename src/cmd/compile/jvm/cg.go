@@ -332,6 +332,9 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		if vv.Function.Type.VArgs != nil {
 			method.AccessFlags |= cg.ACC_METHOD_VARARGS
 		}
+		if vv.IsCompilerAuto {
+			method.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
+		}
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		method.IsConstruction = name == specialMethodInit

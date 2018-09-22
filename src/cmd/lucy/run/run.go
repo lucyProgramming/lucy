@@ -38,7 +38,7 @@ func (r *Run) parseCmd(args []string) error {
 	cmd := flag.NewFlagSet("run", flag.ErrorHandling(1))
 	cmd.BoolVar(&r.Flags.forceReBuild, "forceReBuild", false, "force rebuild all package")
 	cmd.IntVar(&r.Flags.JvmVersion, "jvm-version", 54, "jvm major version")
-	cmd.BoolVar(&r.Flags.Build, "-build", false, "build package no run")
+	cmd.BoolVar(&r.Flags.Build, "build", false, "build package no run")
 	err := cmd.Parse(args)
 	if err != nil {
 		return err

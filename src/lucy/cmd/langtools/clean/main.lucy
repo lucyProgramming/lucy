@@ -3,7 +3,7 @@ import "lucy/os" as os  //TODO :: same name no need
 import "lucy/os/flag"
 
 flagParser := new flag.FlagParser()
-recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
+
 
 fn printUsageAndExit(code int){
 	print("Usage: clean compiled class files ")
@@ -13,6 +13,8 @@ fn printUsageAndExit(code int){
 
 
 fn main(args []string){
+	recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
+	verbose := flagParser.boolOption("-v" , false , "verbose")
 	packageName ,err := flagParser.parse(args)
 	if err != null {
 		printf("parse command line failed,err:%s\n" , err.toString())
@@ -36,7 +38,8 @@ fn main(args []string){
 		lucyRoot ,
 		lucyPaths ,  
 		packageName[0] , 
-		recursive.getValue()
+		recursive.getValue() ,
+		verbose.getValue()
 	)
 	c.clean()
 }

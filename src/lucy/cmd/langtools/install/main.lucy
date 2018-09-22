@@ -1,0 +1,78 @@
+import "lucy/cmd/langtools/common"
+import "lucy/os/flag"
+
+flagParser := new flag.FlagParser()
+
+fn printUsage() {
+	print("install directory and sub directories")
+	print(flagParser.helpMsg()) 
+}
+
+
+fn main(args []string) {
+	lucyRoot, err  := common.getLucyRoot() 
+	if err != null {
+		print(err)
+		return 
+	}
+	verbose := flagParser.boolOption("-v" , false  , "package name" ) 
+	packageName, err := flagParser.parse(args )
+	if err != null {
+		print(err)
+		return 
+	}
+	if 0 == packageName.size() {
+		printUsage()
+		return 
+	}
+	
+	paths , err := common.getLucyPath()
+	if err != null {
+		print(err)
+		return 
+	}
+	
+	w , err := common.findPackageLiesIn( paths ,packageName[0] )
+	if err != null {
+		print(err)
+		return 
+	}	
+	new Install(lucyRoot ,
+		w + "/src/" + packageName[0] ,
+		packageName[0] ,
+		verbose.getValue() ) . install ()
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

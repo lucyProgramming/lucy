@@ -1,6 +1,6 @@
 package clean
 
-//  implemented by lucy
+// implemented by lucy
 //
 //import (
 //	"encoding/json"

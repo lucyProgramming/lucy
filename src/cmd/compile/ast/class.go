@@ -73,7 +73,7 @@ func (c *Class) mkDefaultConstruction() {
 		return
 	}
 	m := &ClassMethod{}
-	m.isCompilerAuto = true
+	m.IsCompilerAuto = true
 	m.Function = &Function{}
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
@@ -160,15 +160,15 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 		for _, m := range ms {
 			if m.IsAbstract() {
 				for _, v := range m.Function.Type.ParameterList {
-					if v.Expression != nil {
+					if v.DefaultValueExpression != nil {
 						errs = append(errs, fmt.Errorf("%s abstract method parameter '%s' cannot have default value '%s'",
-							errMsgPrefix(v.Pos), v.Name, v.Expression.Description))
+							errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
 					}
 				}
 				for _, v := range m.Function.Type.ReturnList {
-					if v.Expression != nil {
+					if v.DefaultValueExpression != nil {
 						errs = append(errs, fmt.Errorf("%s abstract method return variable '%s' cannot have default value '%s'",
-							errMsgPrefix(v.Pos), v.Name, v.Expression.Description))
+							errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
 					}
 				}
 			}
@@ -417,21 +417,6 @@ func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *Exp
 	}
 	return ms, false, nil
 }
-
-//func (c *Class) classAccessAble(pos *Pos) error {
-//	if c.LoadFromOutSide == false {
-//		return nil
-//	}
-//	err := c.loadSelf(pos)
-//	if err != nil {
-//		return err
-//	}
-//	if c.IsPublic() == false {
-//		return fmt.Errorf("%s class '%s' is not public",
-//			errMsgPrefix(pos), c.Name)
-//	}
-//	return nil
-//}
 
 /*
 	ret is *ClassField or *ClassMethod

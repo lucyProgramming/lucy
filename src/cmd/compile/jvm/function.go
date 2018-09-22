@@ -72,7 +72,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 				v.LocalValOffset = code.MaxLocals
 				code.MaxLocals += jvmSlotSize(v.Type)
 			}
-			stack := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
+			stack := buildPackage.BuildExpression.build(class, code, v.DefaultValueExpression, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -212,13 +212,13 @@ func (buildPackage *BuildPackage) buildFunctionMultiReturnOffset(class *cg.Class
 func (buildPackage *BuildPackage) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	astClass *ast.Class, context *Context, state *StackMapState) {
 	for _, v := range astClass.Fields {
-		if v.IsStatic() || v.Expression == nil {
+		if v.IsStatic() || v.DefaultValueExpression == nil {
 			continue
 		}
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(class.Name))
-		stack := buildPackage.BuildExpression.build(class, code, v.Expression, context, state)
+		stack := buildPackage.BuildExpression.build(class, code, v.DefaultValueExpression, context, state)
 		if t := 1 + stack; t > code.MaxStack {
 			code.MaxStack = t
 		}

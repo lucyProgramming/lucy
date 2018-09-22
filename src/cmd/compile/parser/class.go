@@ -389,7 +389,7 @@ func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser
 		f.Type = t.Clone()
 		f.AccessFlags = 0
 		if k < len(initValues) {
-			f.Expression = initValues[k]
+			f.DefaultValueExpression = initValues[k]
 		}
 		f.Comment = fieldComment
 		if classParser.isStatic {

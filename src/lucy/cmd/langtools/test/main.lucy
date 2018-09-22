@@ -9,9 +9,6 @@ fn printUsageAndExit(code int){
 
 
 
-
-
-
 fn main(args []string){
 	if args.size() == 0 {
 		printUsageAndExit(1)

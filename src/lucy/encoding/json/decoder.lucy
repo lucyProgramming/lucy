@@ -79,7 +79,6 @@ class Decoder {
 	}
 	
 	private fn parseSyntaxTree() -> (err error) {
-		this.skipWhiteSpace()
 		if this.bs.size() == 4  && 
 			this.bs[0] == 'n' &&
 			this.bs[1] == 'u' &&
@@ -87,6 +86,7 @@ class Decoder {
 			this.bs[3] == 'l'{
 			return null 
 		}
+		this.skipWhiteSpace()
 		b := this.bs[this.offset]  
 		if b != '[' && b != '{' {
 			err = new error("unkown begining of json input")
@@ -450,8 +450,6 @@ class Decoder {
 					b = this.bs[this.offset++ ]
 			}
 		}
-		// b == '"'
-		// this.offset++  // skip "
 		s = string(bs)
 	}
 

@@ -328,7 +328,8 @@ func (e *Expression) isInteger() bool {
 	return e.Type == ExpressionTypeByte ||
 		e.Type == ExpressionTypeShort ||
 		e.Type == ExpressionTypeInt ||
-		e.Type == ExpressionTypeLong
+		e.Type == ExpressionTypeLong ||
+		e.Type == ExpressionTypeChar
 }
 func (e *Expression) isFloat() bool {
 	return e.Type == ExpressionTypeFloat ||

@@ -7,12 +7,14 @@ final class Clean {
 	packageName string 
 	lucyRoot string 
 	recursive bool 
-	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool  ) {
+	verbose bool 
+	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool , verbose bool   ) {
 	    this.super() 
 		this.lucyRoot = lucyRoot 
 		this.lucyPaths = lucyPaths
 		this.packageName = packageName
 		this.recursive = recursive 
+		this.verbose = verbose 
 	}
 
 	fn clean() {
@@ -35,7 +37,9 @@ final class Clean {
 			}
 			if  name := f.getName() ; name == "maintain.json" || 
 				f.getName().endsWith(".class"){
-				print( sprintf("clean: %s/%s" , dir , name))
+				if this.verbose {
+					print( sprintf("clean: %s/%s" , dir , name))
+				}
 				new File(dir + "/" + name ).delete()
 			}
 		}

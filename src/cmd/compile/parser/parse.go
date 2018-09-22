@@ -402,7 +402,7 @@ func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 	}
 	for k, _ := range constants {
 		if k < len(es) {
-			constants[k].Expression = es[k]
+			constants[k].DefaultValueExpression = es[k]
 		}
 	}
 	return

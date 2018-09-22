@@ -396,7 +396,6 @@ func (typ *Type) IsPrimitive() bool {
 		typ.Type == VariableTypeBool
 }
 
-//可读的类型信息
 func (typ *Type) typeString(ret *string) {
 	if typ.Alias != "" {
 		*ret += typ.Alias

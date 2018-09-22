@@ -10,7 +10,7 @@ type TemplateFunction struct {
 
 type TemplateFunctionInstance struct {
 	parameterTypes map[string]*Type
-	Generated      *cg.MethodHighLevel
+	Entrance       *cg.MethodHighLevel
 	Function       *Function
 	ClassName      string
 }

@@ -6,11 +6,15 @@ import (
 )
 
 type ClassField struct {
-	Variable
-	Class           *Class
-	LoadFromOutSide bool
-	DefaultValue    interface{} // value base on type
-
+	Class                  *Class
+	DefaultValueExpression *Expression
+	Name                   string
+	Type                   *Type
+	Pos                    *Pos
+	Comment                string
+	AccessFlags            uint16
+	JvmDescriptor          string      // jvm
+	DefaultValue           interface{} // value base on type
 }
 
 func (f *ClassField) IsStatic() bool {
@@ -35,7 +39,8 @@ func (c *Class) accessField(pos *Pos, name string, fromSub bool) (*ClassField, e
 	if err != nil {
 		return nil, err
 	}
-	notFoundErr := fmt.Errorf("%s field named '%s' not found", errMsgPrefix(pos), name)
+	notFoundErr := fmt.Errorf("%s field named '%s' not found",
+		errMsgPrefix(pos), name)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
 			// private field

@@ -63,7 +63,7 @@ func (s *Statement) isVariableDefinition() bool {
 		s.Expression.Type == ExpressionTypeVar
 }
 
-func (s *Statement) check(block *Block) []error { // block is father
+func (s *Statement) check(block *Block) []error {
 	defer func() {
 		s.Checked = true
 	}()
@@ -78,24 +78,21 @@ func (s *Statement) check(block *Block) []error { // block is father
 	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:
-		if block.InheritedAttribute.StatementFor == nil &&
-			block.InheritedAttribute.StatementSwitch == nil &&
-			block.InheritedAttribute.SwitchTemplateBlock == nil {
+		if block.InheritedAttribute.ForBreak == nil {
 			return []error{fmt.Errorf("%s 'break' cannot in this scope", errMsgPrefix(s.Pos))}
-		} else {
-			if block.InheritedAttribute.Defer != nil {
-				return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
-					errMsgPrefix(s.Pos))}
-			}
-			if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
-				s.StatementBreak.StatementFor = t
-			} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
-				s.StatementBreak.StatementSwitch = t
-			} else {
-				s.StatementBreak.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
-			}
-			s.StatementBreak.mkDefers(block)
 		}
+		if block.InheritedAttribute.Defer != nil {
+			return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
+				errMsgPrefix(s.Pos))}
+		}
+		if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
+			s.StatementBreak.StatementFor = t
+		} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
+			s.StatementBreak.StatementSwitch = t
+		} else {
+			s.StatementBreak.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
+		}
+		s.StatementBreak.mkDefers(block)
 	case StatementTypeContinue:
 		if block.InheritedAttribute.StatementFor == nil {
 			return []error{fmt.Errorf("%s 'continue' can`t in this scope",
@@ -214,19 +211,4 @@ func (s *Statement) check(block *Block) []error { // block is father
 		return nil
 	}
 	return nil
-}
-
-func (s *Statement) checkStatementExpression(block *Block) []error {
-	errs := []error{}
-	s.Expression.IsStatementExpression = true
-	if s.Expression.canBeUsedAsStatement() == false {
-		err := fmt.Errorf("%s expression '%s' evaluate but not used",
-			errMsgPrefix(s.Expression.Pos), s.Expression.Description)
-		errs = append(errs, err)
-	}
-	_, es := s.Expression.check(block)
-
-	errs = append(errs, es...)
-
-	return errs
 }

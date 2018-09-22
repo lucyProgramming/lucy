@@ -1,9 +1,8 @@
 package ast
 
 import (
-	"fmt"
-
 	"errors"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -22,12 +21,17 @@ type StatementSwitchCase struct {
 
 func (s *StatementSwitch) check(block *Block) []error {
 	errs := []error{}
-	if s.Condition == nil { // must be a error must parse stage
+	if s.Condition == nil { // must be a error at parse stage
 		return errs
 	}
 	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
 	errs = append(errs, es...)
 	if conditionType == nil {
+		return errs
+	}
+	if conditionType.isTyped() == false {
+		errs = append(errs, fmt.Errorf("%s condtion is not typed",
+			errMsgPrefix(conditionType.Pos)))
 		return errs
 	}
 	if conditionType.Type == VariableTypeBool {
@@ -38,6 +42,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 	if len(s.StatementSwitchCases) == 0 {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
 			errMsgPrefix(s.Pos)))
+		return errs
 	}
 	byteMap := make(map[byte]*Pos)
 	shortMap := make(map[int32]*Pos)
@@ -51,36 +56,16 @@ func (s *StatementSwitch) check(block *Block) []error {
 	enumPackageName := ""
 	var byteValue byte
 	var shortValue int32
-	var int32Value int32
-	var int64Value int64
+	var intValue int32
+	var charValue int32
+	var longValue int64
 	var floatValue float32
 	var doubleValue float64
 	var stringValue string
 	var enumName string
-	var charValue int32
 	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
 			valueValid := false
-			valueFromExpression := func() {
-				switch e.Type {
-				case ExpressionTypeByte:
-					byteValue = e.Data.(byte)
-				case ExpressionTypeShort:
-					shortValue = e.Data.(int32)
-				case ExpressionTypeInt:
-					int32Value = e.Data.(int32)
-				case ExpressionTypeLong:
-					int64Value = e.Data.(int64)
-				case ExpressionTypeChar:
-					charValue = e.Data.(int32)
-				case ExpressionTypeFloat:
-					floatValue = e.Data.(float32)
-				case ExpressionTypeDouble:
-					doubleValue = e.Data.(float64)
-				case ExpressionTypeString:
-					stringValue = e.Data.(string)
-				}
-			}
 			t, es := e.checkSingleValueContextExpression(block)
 			errs = append(errs, es...)
 			if t == nil {
@@ -107,20 +92,40 @@ func (s *StatementSwitch) check(block *Block) []error {
 			}
 			if conditionType.IsPrimitive() {
 				if e.IsLiteral() {
-					valueFromExpression()
+					switch e.Type {
+					case ExpressionTypeByte:
+						byteValue = e.Data.(byte)
+					case ExpressionTypeShort:
+						shortValue = e.Data.(int32)
+					case ExpressionTypeChar:
+						charValue = e.Data.(int32)
+					case ExpressionTypeInt:
+						intValue = e.Data.(int32)
+					case ExpressionTypeLong:
+						longValue = e.Data.(int64)
+					case ExpressionTypeFloat:
+						floatValue = e.Data.(float32)
+					case ExpressionTypeDouble:
+						doubleValue = e.Data.(float64)
+					case ExpressionTypeString:
+						stringValue = e.Data.(string)
+					}
 					valueValid = true
 				} else {
-					errs = append(errs, fmt.Errorf("%s expression is not a literal value", errMsgPrefix(e.Pos)))
+					errs = append(errs, fmt.Errorf("%s expression is not a literal value",
+						errMsgPrefix(e.Pos)))
 					continue
 				}
 			}
 			if e.canBeUsedAsCondition() == false {
 				errs = append(errs, fmt.Errorf("%s expression cannot use as condition",
 					errMsgPrefix(e.Pos)))
+				continue
 			}
 			if valueValid {
 				errMsg := func(first *Pos, which string) error {
-					errMsg := fmt.Sprintf("%s  '%s' duplicate case,first declared at:\n", errMsgPrefix(e.Pos), which)
+					errMsg := fmt.Sprintf("%s  '%s' duplicate case,first declared at:\n",
+						errMsgPrefix(e.Pos), which)
 					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
 					return errors.New(errMsg)
 				}
@@ -147,18 +152,18 @@ func (s *StatementSwitch) check(block *Block) []error {
 						charMap[charValue] = e.Pos
 					}
 				case VariableTypeInt:
-					if first, ok := int32Map[int32Value]; ok {
-						errs = append(errs, errMsg(first, fmt.Sprintf("%v", int32Value)))
+					if first, ok := int32Map[intValue]; ok {
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", intValue)))
 						continue // no check body
 					} else {
-						int32Map[int32Value] = e.Pos
+						int32Map[intValue] = e.Pos
 					}
 				case VariableTypeLong:
-					if first, ok := int64Map[int64Value]; ok {
-						errs = append(errs, errMsg(first, fmt.Sprintf("%v", int64Value)))
+					if first, ok := int64Map[longValue]; ok {
+						errs = append(errs, errMsg(first, fmt.Sprintf("%v", longValue)))
 						continue // no check body
 					} else {
-						int64Map[int64Value] = e.Pos
+						int64Map[longValue] = e.Pos
 					}
 				case VariableTypeFloat:
 					if first, found := floatMap[floatValue]; found {
@@ -193,14 +198,12 @@ func (s *StatementSwitch) check(block *Block) []error {
 		}
 		if v.Block != nil {
 			v.Block.inherit(block)
-			v.Block.InheritedAttribute.StatementSwitch = s
 			v.Block.InheritedAttribute.ForBreak = s
 			errs = append(errs, v.Block.checkStatements()...)
 		}
 	}
 	if s.Default != nil {
 		s.Default.inherit(block)
-		s.Default.InheritedAttribute.StatementSwitch = s
 		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
 	}
