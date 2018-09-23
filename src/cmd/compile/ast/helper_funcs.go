@@ -40,13 +40,19 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error, singleValue
 	return ret
 }
 
-func getFirstPosFromArgs(args []*Type, pos **Pos) {
+func getExtraExpressionPos(args []*Expression, n int) *Pos {
+	i := 0
 	for _, a := range args {
-		if a != nil {
-			*pos = a.Pos
-			break
+		if a.HaveMultiValue() {
+			i += len(a.MultiValues)
+		} else {
+			i++
+		}
+		if i > n {
+			return a.Pos
 		}
 	}
+	return nil
 }
 
 func mkVoidType(pos *Pos) *Type {
@@ -91,8 +97,14 @@ func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type
 	if len(ms) == 0 {
 		return fmt.Errorf("%s method '%s' not found", errMsgPrefix(pos), name)
 	}
-	errMsg := fmt.Sprintf("%s method named '%s' have no suitable match:\n",
-		errMsgPrefix(pos), name)
+	var errMsg string
+	if len(ms) == 1 {
+		errMsg = fmt.Sprintf("%s cannot call method '%s':\n",
+			errMsgPrefix(pos), name)
+	} else {
+		errMsg = fmt.Sprintf("%s method named '%s' have no suitable match:\n",
+			errMsgPrefix(pos), name)
+	}
 	wantString := "fn " + name + " ("
 	for k, v := range want {
 		if v == nil {

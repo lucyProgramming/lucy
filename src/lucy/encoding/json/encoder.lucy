@@ -11,8 +11,8 @@ class Encoder {
 	c Class
 	indent string  
 	indents string 
-	lastIsArray bool 
-	public fn Encoder(x Object, indents string   ,indent string ,lastIsArray bool = false  ) {
+	outerIsArray bool 
+	public fn Encoder(x Object, indents string   ,indent string ,outerIsArray bool = false  ) {
 		this.super()
 		this.x = x
 		if x != null {
@@ -20,27 +20,27 @@ class Encoder {
 		}
 		this.indents = indents 
 		this.indent = indent  
-		this.lastIsArray = lastIsArray 
+		this.outerIsArray = outerIsArray 
 	}
 	
 	
 	public fn encode()->(bs []byte ,err error){
 		if this.x == null {
-			if this.lastIsArray  {
+			if this.outerIsArray  {
 				return []byte( this.indents + "null") , null 
 			}else {
 				return []byte("null") , null 
 			}
 		}
 		if this.c.isPrimitive(){
-			if this.lastIsArray {
+			if this.outerIsArray {
 				return []byte( this.indents +  this.x.toString()) , null 
 			}else {
 				return []byte(this.x.toString()) , null 
 			}
 		} 
 		if this.c.getTypeName() == "java.lang.String" {
-			if this.lastIsArray {
+			if this.outerIsArray {
 				return []byte(sprintf(`%s"%s"` , this.indents ,  this.x.toString())) , null 
 			}else {
 				return []byte(sprintf(`"%s"` , this.x.toString())) , null 
@@ -62,7 +62,7 @@ class Encoder {
 	public fn encodeMap() -> (bs []byte ,err error){
 		x , _ := this.x.(AbstractMap)
 		ks := x.keySet().toArray()
-		if this.lastIsArray {
+		if this.outerIsArray {
 			bs = []byte(this.indents + "{")
 		}else {
 			bs = []byte("{")
@@ -167,7 +167,7 @@ class Encoder {
 
 	
 	public fn encodeObject()->  (bs []byte ,err error){
-		if this.lastIsArray {
+		if this.outerIsArray {
 			bs = []byte(this.indents + "{")
 		}else {
 			bs = []byte("{")

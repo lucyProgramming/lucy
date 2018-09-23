@@ -42,32 +42,29 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 		if len(statementReturn.Expressions) == 0 {
 			buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		}
-		if context.function.Type.ReturnList[0].Type.IsPointer() {
+		switch context.function.Type.ReturnList[0].Type.Type {
+		case ast.VariableTypeBool:
+			fallthrough
+		case ast.VariableTypeByte:
+			fallthrough
+		case ast.VariableTypeShort:
+			fallthrough
+		case ast.VariableTypeEnum:
+			fallthrough
+		case ast.VariableTypeChar:
+			fallthrough
+		case ast.VariableTypeInt:
+			code.Codes[code.CodeLength] = cg.OP_ireturn
+		case ast.VariableTypeLong:
+			code.Codes[code.CodeLength] = cg.OP_lreturn
+		case ast.VariableTypeFloat:
+			code.Codes[code.CodeLength] = cg.OP_freturn
+		case ast.VariableTypeDouble:
+			code.Codes[code.CodeLength] = cg.OP_dreturn
+		default:
 			code.Codes[code.CodeLength] = cg.OP_areturn
-			code.CodeLength++
-		} else {
-			switch context.function.Type.ReturnList[0].Type.Type {
-			case ast.VariableTypeBool:
-				fallthrough
-			case ast.VariableTypeByte:
-				fallthrough
-			case ast.VariableTypeShort:
-				fallthrough
-			case ast.VariableTypeEnum:
-				fallthrough
-			case ast.VariableTypeChar:
-				fallthrough
-			case ast.VariableTypeInt:
-				code.Codes[code.CodeLength] = cg.OP_ireturn
-			case ast.VariableTypeLong:
-				code.Codes[code.CodeLength] = cg.OP_lreturn
-			case ast.VariableTypeFloat:
-				code.Codes[code.CodeLength] = cg.OP_freturn
-			case ast.VariableTypeDouble:
-				code.Codes[code.CodeLength] = cg.OP_dreturn
-			}
-			code.CodeLength++
 		}
+		code.CodeLength++
 		return
 	}
 	//multi returns

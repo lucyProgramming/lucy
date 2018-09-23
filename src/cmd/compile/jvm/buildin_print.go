@@ -35,13 +35,13 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 		// print have no return value,stack is empty
 		state.popStack(len(state.Stacks) - length)
 	}()
-
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	if len(call.Args) == 1 {
 		stack := buildExpression.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
+
 		switch call.Args[0].Value.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -105,15 +105,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 				Descriptor: "(Ljava/lang/String;)V",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeJavaArray:
-			fallthrough
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeArray:
-			fallthrough
-		case ast.VariableTypeMap:
+		default:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 				Class:      "java/io/PrintStream",
@@ -122,6 +114,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
+
 		return
 	}
 	code.Codes[code.CodeLength] = cg.OP_ldc_w

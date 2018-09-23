@@ -1,8 +1,6 @@
 package jvm
 
 import (
-	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -77,17 +75,7 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		default:
 			return []byte{cg.OP_dstore, byte(offset)}
 		}
-	case ast.VariableTypeJavaArray:
-		fallthrough
-	case ast.VariableTypeString:
-		fallthrough
-	case ast.VariableTypeObject:
-		fallthrough
-	case ast.VariableTypeFunction:
-		fallthrough
-	case ast.VariableTypeMap:
-		fallthrough
-	case ast.VariableTypeArray:
+	default:
 		switch offset {
 		case 0:
 			return []byte{cg.OP_astore_0}
@@ -100,8 +88,6 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 		default:
 			return []byte{cg.OP_astore, byte(offset)}
 		}
-	default:
-		panic(fmt.Sprintf("typ:%v", variableType))
 	}
 }
 
@@ -109,6 +95,7 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 	if offset > 255 { // early check
 		panic("over 255")
 	}
+
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough
@@ -172,17 +159,7 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		default:
 			return []byte{cg.OP_dload, byte(offset)}
 		}
-	case ast.VariableTypeString:
-		fallthrough
-	case ast.VariableTypeObject:
-		fallthrough
-	case ast.VariableTypeMap:
-		fallthrough
-	case ast.VariableTypeFunction:
-		fallthrough
-	case ast.VariableTypeJavaArray:
-		fallthrough
-	case ast.VariableTypeArray:
+	default:
 		switch offset {
 		case 0:
 			return []byte{cg.OP_aload_0}
@@ -195,7 +172,5 @@ func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []by
 		default:
 			return []byte{cg.OP_aload, byte(offset)}
 		}
-	default:
-		panic(fmt.Sprintf("typ:%d", variableType))
 	}
 }

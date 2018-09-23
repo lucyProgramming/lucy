@@ -253,7 +253,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			classParser.resetProperty()
 		case lex.TokenConst: // const is for local use
 			classParser.Next(lfIsToken)
-			err := classParser.parseConst()
+			err := classParser.parseConst(comment)
 			if err != nil {
 				classParser.consume(untilSemicolonOrLf)
 				classParser.Next(lfNotToken)
@@ -328,10 +328,18 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	return
 }
 
-func (classParser *ClassParser) parseConst() error {
+func (classParser *ClassParser) parseConst(comment *CommentParser) error {
 	cs, err := classParser.parser.parseConst()
 	if err != nil {
 		return err
+	}
+	constComment := ""
+	if classParser.parser.token.Type == lex.TokenComment {
+		constComment = classParser.parser.token.Data.(string)
+		classParser.Next(lfIsToken)
+	} else {
+		constComment = comment.Comment
+		classParser.parser.validStatementEnding()
 	}
 	if classParser.ret.Block.Constants == nil {
 		classParser.ret.Block.Constants = make(map[string]*ast.Constant)
@@ -343,6 +351,7 @@ func (classParser *ClassParser) parseConst() error {
 			continue
 		}
 		classParser.ret.Block.Constants[v.Name] = v
+		v.Comment = constComment
 	}
 	return nil
 }

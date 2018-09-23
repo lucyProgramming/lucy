@@ -9,6 +9,7 @@ import "java/lang/Thread"
 import "java/io/File"
 
 public class Command implements Runnable{
+	const str = "hello world"  // const comment
 	cmd string  
 	args string []  
 	envs string [] 

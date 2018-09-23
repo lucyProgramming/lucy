@@ -295,10 +295,12 @@ func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *
 		*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 			errMsgPrefix(e.ParameterTypes[0].Pos)))
 	}
-	if len(args) != 1 {
-		pos := pos
-		getFirstPosFromArgs(args[1:], &pos)
-		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(pos)))
+	if len(e.Args) == 0 {
+		*errs = append(*errs, fmt.Errorf("%s expect one argument", errMsgPrefix(pos)))
+		return
+	}
+	if len(e.Args) > 1 {
+		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(e.Args[1].Pos)))
 		return
 	}
 	if args[0] == nil {

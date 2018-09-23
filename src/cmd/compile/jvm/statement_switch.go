@@ -40,13 +40,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 				Descriptor: "(Ljava/lang/String;)I",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeMap:
-			fallthrough
-		case ast.VariableTypeArray:
+		default:
 			context.MakeStackMap(code, state, code.CodeLength+7)
 			state.pushStack(class, &ast.Type{
 				Type: ast.VariableTypeBool,
@@ -64,13 +58,13 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	}
 	maxStack = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
 	//value is on stack
-	var noMatch *cg.Exit
+	var notMatch *cg.Exit
 	size := jvmSlotSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
 	for _, c := range s.StatementSwitchCases {
-		if noMatch != nil {
-			writeExits([]*cg.Exit{noMatch}, code.CodeLength)
+		if notMatch != nil {
+			writeExits([]*cg.Exit{notMatch}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 		matches := []*cg.Exit{}
@@ -93,8 +87,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 					if currentStack > maxStack {
 						maxStack = currentStack
 					}
-					stack = autoVar.unPack(class, code, kkk, ttt)
-					if t := stack + currentStack; t > maxStack {
+					if t := autoVar.unPack(class, code, kkk, ttt) + currentStack; t > maxStack {
 						maxStack = t
 					}
 					compare(s.Condition.Value)
@@ -122,7 +115,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
-		noMatch = (&cg.Exit{}).Init(cg.OP_goto, code)
+		notMatch = (&cg.Exit{}).Init(cg.OP_goto, code)
 		// if match goto here
 		writeExits(matches, code.CodeLength)
 		//before block,pop off stack
@@ -144,7 +137,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 				(&cg.Exit{}).Init(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
-	writeExits([]*cg.Exit{noMatch}, code.CodeLength)
+	writeExits([]*cg.Exit{notMatch}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	if size == 1 {
 		code.Codes[code.CodeLength] = cg.OP_pop
@@ -153,7 +146,6 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	}
 	code.CodeLength++
 	state.popStack(1)
-
 	if s.Default != nil {
 		ss := (&StackMapState{}).FromLast(state)
 		buildPackage.buildBlock(class, code, s.Default, context, ss)

@@ -303,6 +303,7 @@ func (buildPackage *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighL
 		for _, v := range astClass.Block.Constants {
 			c := &cg.LucyClassConst{}
 			c.Name = v.Name
+			c.Comment = v.Comment
 			c.Descriptor = Descriptor.typeDescriptor(v.Type)
 			c.ValueIndex = buildPackage.insertDefaultValue(class, v.Type, v.Value)
 			attr.Constants = append(attr.Constants, c)

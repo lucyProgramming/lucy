@@ -31,9 +31,16 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			}
 			convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
 		}
-		if len(valueTypes) != len(ev.Variables) {
-			*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
-				errMsgPrefix(e.Pos),
+		if len(ev.Variables) > len(valueTypes) {
+			pos := ev.InitValues[len(ev.InitValues)-1].Pos
+			*errs = append(*errs, fmt.Errorf("%s too few values , assign %d values to %d destinations",
+				errMsgPrefix(pos),
+				len(valueTypes),
+				len(ev.Variables)))
+		} else if len(ev.Variables) < len(valueTypes) {
+			pos := getExtraExpressionPos(ev.InitValues, len(ev.Variables))
+			*errs = append(*errs, fmt.Errorf("%s too many values , assign %d values to %d destinations",
+				errMsgPrefix(pos),
 				len(valueTypes),
 				len(ev.Variables)))
 		}
