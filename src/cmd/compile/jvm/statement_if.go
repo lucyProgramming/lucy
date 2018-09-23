@@ -20,10 +20,10 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	if stack > maxStack {
 		maxStack = stack
 	}
-	buildPackage.buildBlock(class, code, &s.Block, context, trueBlockState)
+	buildPackage.buildBlock(class, code, &s.TrueBlock, context, trueBlockState)
 	ifState.addTop(trueBlockState)
 	if s.ElseBlock != nil || len(s.ElseIfList) > 0 {
-		if s.Block.NotExecuteToLastStatement == false {
+		if s.TrueBlock.NotExecuteToLastStatement == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
 	}

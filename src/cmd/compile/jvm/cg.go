@@ -282,28 +282,39 @@ func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *as
 	return
 }
 
-func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
+func (buildPackage *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
-	class.Name = c.Name
+	class.Name = astClass.Name
 	class.SourceFiles = make(map[string]struct{})
-	class.SourceFiles[c.Pos.Filename] = struct{}{}
-	class.AccessFlags = c.AccessFlags
-	if c.SuperClass != nil {
-		class.SuperClass = c.SuperClass.Name
+	class.SourceFiles[astClass.Pos.Filename] = struct{}{}
+	class.AccessFlags = astClass.AccessFlags
+	if astClass.SuperClass != nil {
+		class.SuperClass = astClass.SuperClass.Name
 	} else {
-		class.SuperClass = c.SuperClassName
+		class.SuperClass = astClass.SuperClassName
 	}
-	if c.Comment != "" {
+	if astClass.Comment != "" {
 		class.Class.AttributeLucyComment = &cg.AttributeLucyComment{
-			Comment: c.Comment,
+			Comment: astClass.Comment,
 		}
+	}
+	if len(astClass.Block.Constants) > 0 {
+		attr := &cg.AttributeLucyClassConst{}
+		for _, v := range astClass.Block.Constants {
+			c := &cg.LucyClassConst{}
+			c.Name = v.Name
+			c.Descriptor = Descriptor.typeDescriptor(v.Type)
+			c.ValueIndex = buildPackage.insertDefaultValue(class, v.Type, v.Value)
+			attr.Constants = append(attr.Constants, c)
+		}
+		class.Class.AttributeLucyClassConst = attr
 	}
 	class.Fields = make(map[string]*cg.FieldHighLevel)
 	class.Methods = make(map[string][]*cg.MethodHighLevel)
-	for _, v := range c.Interfaces {
+	for _, v := range astClass.Interfaces {
 		class.Interfaces = append(class.Interfaces, v.Name)
 	}
-	for _, v := range c.Fields {
+	for _, v := range astClass.Fields {
 		f := &cg.FieldHighLevel{}
 		f.Name = v.Name
 		f.AccessFlags = v.AccessFlags
@@ -325,7 +336,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		}
 		class.Fields[v.Name] = f
 	}
-	for name, v := range c.Methods {
+	for name, v := range astClass.Methods {
 		vv := v[0]
 		method := &cg.MethodHighLevel{}
 		method.Name = name
@@ -341,7 +352,7 @@ func (buildPackage *BuildPackage) buildClass(c *ast.Class) *cg.ClassHighLevel {
 		method.IsConstruction = name == specialMethodInit
 		if vv.IsAbstract() == false {
 			method.Code = &cg.AttributeCode{}
-			buildPackage.buildFunction(class, c, method, vv.Function)
+			buildPackage.buildFunction(class, astClass, method, vv.Function)
 		}
 		class.AppendMethod(method)
 	}

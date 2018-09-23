@@ -140,9 +140,7 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 	if c.resolveFieldsAndMethodsTypeCalled {
 		return []error{}
 	}
-	defer func() {
-		c.resolveFieldsAndMethodsTypeCalled = true
-	}()
+	c.resolveFieldsAndMethodsTypeCalled = true
 	errs := []error{}
 	var err error
 	for _, v := range c.Fields {
@@ -176,6 +174,18 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 			m.Function.Block.InheritedAttribute.Function = m.Function
 			m.Function.Block.InheritedAttribute.ClassMethod = m
 			m.Function.checkParametersAndReturns(&errs, false, m.IsAbstract())
+			for _, v := range m.Function.Type.ParameterList {
+				if v.Type.Type == VariableTypeTemplate {
+					errs = append(errs, fmt.Errorf("%s cannot use template for method",
+						errMsgPrefix(v.Type.Pos)))
+				}
+			}
+			for _, v := range m.Function.Type.ReturnList {
+				if v.Type.Type == VariableTypeTemplate {
+					errs = append(errs, fmt.Errorf("%s cannot use template for method",
+						errMsgPrefix(v.Type.Pos)))
+				}
+			}
 			if m.IsStatic() == false { // bind this
 				if m.Function.Block.Variables == nil {
 					m.Function.Block.Variables = make(map[string]*Variable)
@@ -279,9 +289,7 @@ func (c *Class) resolveInterfaces() []error {
 	if c.resolveInterfacesCalled {
 		return nil
 	}
-	defer func() {
-		c.resolveInterfacesCalled = true
-	}()
+	c.resolveInterfacesCalled = true
 	errs := []error{}
 	for _, i := range c.InterfaceNames {
 		t := &Type{}

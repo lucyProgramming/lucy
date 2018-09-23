@@ -12,7 +12,6 @@ type TemplateFunctionInstance struct {
 	parameterTypes map[string]*Type
 	Entrance       *cg.MethodHighLevel
 	Function       *Function
-	ClassName      string
 }
 
 func (t *TemplateFunction) instanceExists(parameterTypes map[string]*Type) *TemplateFunctionInstance {

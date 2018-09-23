@@ -66,6 +66,7 @@ func registerBuildInFunctions() {
 				} else {
 					f.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
 				}
+				return
 			}
 			if e.Args[0].Type != ExpressionTypeString {
 				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect string argument",

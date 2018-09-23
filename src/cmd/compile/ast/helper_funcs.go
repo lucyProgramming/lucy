@@ -130,33 +130,30 @@ func searchBuildIns(name string) interface{} {
 	return nil
 }
 
-func checkConst(block *Block, c *Constant, errs *[]error) error {
+func checkConst(block *Block, c *Constant) error {
 	if c.Type != nil {
 		c.mkDefaultValue()
 	}
 	if c.DefaultValueExpression == nil {
 		err := fmt.Errorf("%s const have no expression", errMsgPrefix(c.Pos))
-		*errs = append(*errs, err)
 		return err
 	}
 	is, err := c.DefaultValueExpression.constantFold()
 	if err != nil {
-		*errs = append(*errs, err)
 		return err
 	}
 	if is == false {
 		err := fmt.Errorf("%s const named '%s' is not defined by const value",
 			errMsgPrefix(c.Pos), c.Name)
-		*errs = append(*errs, err)
 		return err
 	}
 	c.Value = c.DefaultValueExpression.Data
 	t, _ := c.DefaultValueExpression.checkSingleValueContextExpression(block)
 	if c.Type != nil {
-		if c.Type.assignAble(errs, t) == false {
+		es := []error{}
+		if c.Type.assignAble(&es, t) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
 				errMsgPrefix(c.Pos), c.Type.TypeString(), t.TypeString())
-			*errs = append(*errs, err)
 			return err
 		}
 	} else { // means use old type

@@ -226,6 +226,26 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	astClass.LoadFromOutSide = true
 	var err error
 	astClass.Fields = make(map[string]*ast.ClassField)
+	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyClassConst); len(t) > 0 {
+		attr := &cg.AttributeLucyClassConst{}
+		attr.FromBs(c, t[0].Info)
+		var t *ast.Type
+		var err error
+		for _, v := range attr.Constants {
+			_, t, err = jvm.LucyFieldSignatureParser.Decode([]byte(v.Descriptor))
+			if err != nil {
+				return nil, err
+			}
+			constant := &ast.Constant{}
+			constant.Name = v.Name
+			constant.Type = t
+			constant.Value = loader.loadConst(c, v.ValueIndex, t)
+			if astClass.Block.Constants == nil {
+				astClass.Block.Constants = make(map[string]*ast.Constant)
+			}
+			astClass.Block.Constants[v.Name] = constant
+		}
+	}
 	for _, v := range c.Fields {
 		f := &ast.ClassField{}
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
@@ -242,7 +262,8 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 				return nil, err
 			}
 			if f.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.ACC_METHOD_VARARGS != 0 {
-				if f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1].Type.Type != ast.VariableTypeJavaArray {
+				if f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1].Type.Type !=
+					ast.VariableTypeJavaArray {
 					panic("not a java array")
 				}
 				f.Type.FunctionType.VArgs = f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1]
@@ -326,6 +347,31 @@ func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	return e, nil
 }
 
+func (loader *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) (value interface{}) {
+	switch t.Type {
+	case ast.VariableTypeBool:
+		return binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info) != 0
+	case ast.VariableTypeByte:
+		return byte(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
+	case ast.VariableTypeShort:
+		fallthrough
+	case ast.VariableTypeChar:
+		fallthrough
+	case ast.VariableTypeInt:
+		return int32(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
+	case ast.VariableTypeLong:
+		return int64(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
+	case ast.VariableTypeFloat:
+		return float32(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
+	case ast.VariableTypeDouble:
+		return float64(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
+	case ast.VariableTypeString:
+		valueIndex := binary.BigEndian.Uint16(c.ConstPool[nameIndex].Info)
+		return string(c.ConstPool[valueIndex].Info)
+	}
+	return nil
+}
+
 func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
@@ -345,37 +391,17 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		}
 		if len(f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyConst)) > 0 {
 			//const
-			cos := &ast.Constant{}
-			cos.Name = name
-			cos.AccessFlags = f.AccessFlags
-			cos.Type = typ
-			_, cos.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+			constant := &ast.Constant{}
+			constant.Name = name
+			constant.AccessFlags = f.AccessFlags
+			constant.Type = typ
+			_, constant.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
 			if err != nil {
 				return err
 			}
 			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
-			switch cos.Type.Type {
-			case ast.VariableTypeBool:
-				cos.Value = binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info) != 0
-			case ast.VariableTypeByte:
-				cos.Value = byte(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VariableTypeShort:
-				fallthrough
-			case ast.VariableTypeChar:
-				fallthrough
-			case ast.VariableTypeInt:
-				cos.Value = int32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VariableTypeLong:
-				cos.Value = int64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
-			case ast.VariableTypeFloat:
-				cos.Value = float32(binary.BigEndian.Uint32(c.ConstPool[valueIndex].Info))
-			case ast.VariableTypeDouble:
-				cos.Value = float64(binary.BigEndian.Uint64(c.ConstPool[valueIndex].Info))
-			case ast.VariableTypeString:
-				valueIndex = binary.BigEndian.Uint16(c.ConstPool[valueIndex].Info) // const_string_info
-				cos.Value = string(c.ConstPool[valueIndex].Info)                   // utf 8
-			}
-			pack.Block.Constants[name] = cos
+			constant.Value = loader.loadConst(c, valueIndex, constant.Type)
+			pack.Block.Constants[name] = constant
 		} else {
 			//global vars
 			vd := &ast.Variable{}
@@ -397,9 +423,11 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 						ast.VariableTypeJavaArray {
 						panic("not a java array")
 					}
-					vd.Type.FunctionType.VArgs = vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1]
+					vd.Type.FunctionType.VArgs =
+						vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1]
 					vd.Type.FunctionType.VArgs.Type.IsVArgs = true
-					vd.Type.FunctionType.ParameterList = vd.Type.FunctionType.ParameterList[:len(vd.Type.FunctionType.ParameterList)-1]
+					vd.Type.FunctionType.ParameterList =
+						vd.Type.FunctionType.ParameterList[:len(vd.Type.FunctionType.ParameterList)-1]
 				}
 			}
 			if typ.Type == ast.VariableTypeEnum {

@@ -288,9 +288,7 @@ func (b *Block) checkConstants() []error {
 	if b.checkConstantsCalled {
 		return []error{}
 	}
-	defer func() {
-		b.checkConstantsCalled = true
-	}()
+	b.checkConstantsCalled = true
 	errs := make([]error, 0)
 	for _, c := range b.Constants {
 		if err := b.nameIsValid(c.Name, c.Pos); err != nil {
@@ -298,7 +296,10 @@ func (b *Block) checkConstants() []error {
 			delete(b.Constants, c.Name)
 			continue
 		}
-		err := checkConst(b, c, &errs)
+		err := checkConst(b, c)
+		if err != nil {
+			errs = append(errs, err)
+		}
 		if err != nil && c.Type == nil {
 			delete(b.Constants, c.Name)
 		}

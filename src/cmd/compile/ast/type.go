@@ -48,7 +48,7 @@ type Type struct {
 	Array        *Type
 	Class        *Class
 	Enum         *Enum
-	EnumName     *EnumName // is a const
+	EnumName     *EnumName // indicate a const
 	Function     *Function
 	FunctionType *FunctionType
 	Map          *Map
@@ -89,48 +89,38 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	e.IsCompileAuto = true
 	e.Pos = typ.Pos
 	e.Value = typ.Clone()
-	switch typ.Type {
-	case VariableTypeBool:
-		e.Type = ExpressionTypeBool
-		e.Data = false
-	case VariableTypeByte:
-		e.Type = ExpressionTypeByte
-		e.Data = byte(0)
-	case VariableTypeShort:
-		e.Type = ExpressionTypeInt
-		e.Data = int32(0)
-	case VariableTypeChar:
-		e.Type = ExpressionTypeInt
-		e.Data = int32(0)
-	case VariableTypeInt:
-		e.Type = ExpressionTypeInt
-		e.Data = int32(0)
-	case VariableTypeLong:
-		e.Type = ExpressionTypeLong
-		e.Data = int64(0)
-	case VariableTypeFloat:
-		e.Type = ExpressionTypeFloat
-		e.Data = float32(0)
-	case VariableTypeDouble:
-		e.Type = ExpressionTypeDouble
-		e.Data = float64(0)
-	case VariableTypeEnum:
-		e.Type = ExpressionTypeInt
-		e.Data = typ.Enum.DefaultValue
-	case VariableTypeFunction:
-		fallthrough
-	case VariableTypeString:
-		fallthrough
-	case VariableTypeObject:
-		fallthrough
-	case VariableTypeJavaArray:
-		fallthrough
-	case VariableTypeMap:
-		fallthrough
-	case VariableTypeArray:
+	if typ.IsPointer() {
 		e.Type = ExpressionTypeNull
-	default:
-		panic("missing default value")
+	} else {
+		switch typ.Type {
+		case VariableTypeBool:
+			e.Type = ExpressionTypeBool
+			e.Data = false
+		case VariableTypeByte:
+			e.Type = ExpressionTypeByte
+			e.Data = byte(0)
+		case VariableTypeShort:
+			e.Type = ExpressionTypeInt
+			e.Data = int32(0)
+		case VariableTypeChar:
+			e.Type = ExpressionTypeInt
+			e.Data = int32(0)
+		case VariableTypeInt:
+			e.Type = ExpressionTypeInt
+			e.Data = int32(0)
+		case VariableTypeLong:
+			e.Type = ExpressionTypeLong
+			e.Data = int64(0)
+		case VariableTypeFloat:
+			e.Type = ExpressionTypeFloat
+			e.Data = float32(0)
+		case VariableTypeDouble:
+			e.Type = ExpressionTypeDouble
+			e.Data = float64(0)
+		case VariableTypeEnum:
+			e.Type = ExpressionTypeInt
+			e.Data = typ.Enum.DefaultValue
+		}
 	}
 	return e
 }
@@ -174,8 +164,9 @@ func (typ *Type) Clone() *Type {
 		ret.Map.K = typ.Map.K.Clone()
 		ret.Map.V = typ.Map.V.Clone()
 	}
-	//TODO:: clone function
-	ret.FunctionType = typ.FunctionType.Clone()
+	if typ.Type == VariableTypeFunction {
+		ret.FunctionType = typ.FunctionType.Clone()
+	}
 	return ret
 }
 
@@ -238,27 +229,21 @@ func (typ *Type) resolve(block *Block) error {
 func (typ *Type) resolveName(block *Block) error {
 	var err error
 	var d interface{}
-	var loadFromImport bool
 	if strings.Contains(typ.Name, ".") == false {
+		var loadFromImport bool
 		d = block.searchType(typ.Name)
 		if d != nil {
 			switch d.(type) {
 			case *Class:
-				if t := d.(*Class); t != nil && t.IsBuildIn {
-					loadFromImport = false
-				} else {
+				if t, ok := d.(*Class); ok && t.IsBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
 				}
 			case *Type:
-				if t := d.(*Type); t != nil && t.IsBuildIn {
-					loadFromImport = false
-				} else {
+				if t, ok := d.(*Type); ok && t.IsBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
 				}
 			case *Enum:
-				if t := d.(*Enum); t != nil && t.IsBuildIn {
-					loadFromImport = true
-				} else {
+				if t, ok := d.(*Enum); ok && t.IsBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
 				}
 			}
@@ -272,7 +257,6 @@ func (typ *Type) resolveName(block *Block) error {
 			}
 		}
 	} else { // a.b  in type situation,must be package name
-		loadFromImport = true
 		d, err = typ.getNameFromImport()
 		if err != nil {
 			return err
@@ -603,10 +587,15 @@ func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 	}
 
 	if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
-		return leftValue.Enum.Name == rightValue.Enum.Name
+		return leftValue.Enum.Name == rightValue.Enum.Name // same enum
 	}
 	if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
-		return leftValue.Map.K.assignAble(errs, rightValue.Map.K) && leftValue.Map.V.assignAble(errs, rightValue.Map.V)
+		return leftValue.Map.K.assignAble(errs, rightValue.Map.K) &&
+			leftValue.Map.V.assignAble(errs, rightValue.Map.V)
+	}
+	if leftValue.Type == VariableTypeFunction &&
+		rightValue.Type == VariableTypeFunction {
+		return leftValue.FunctionType.equal(rightValue.FunctionType)
 	}
 	if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
 		if leftValue.Class.NotImportedYet {
@@ -635,23 +624,21 @@ func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 			return has
 		}
 	}
-	if leftValue.Type == VariableTypeFunction && rightValue.Type == VariableTypeFunction {
-		return leftValue.FunctionType.equal(rightValue.FunctionType)
-	}
 	return false
 }
 
 func (typ *Type) Equal(compareTo *Type) bool {
 	if typ.Type != compareTo.Type {
-		return false
+		return false //early check
 	}
 	if typ.IsPrimitive() {
-		return typ.Type == compareTo.Type
+		return true //
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
 		if typ.Type == VariableTypeJavaArray {
-			if typ.IsVArgs != compareTo.IsVArgs {
+			if typ.Type == VariableTypeJavaArray &&
+				typ.IsVArgs != compareTo.IsVArgs {
 				return false
 			}
 		}

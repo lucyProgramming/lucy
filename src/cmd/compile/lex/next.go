@@ -276,7 +276,10 @@ func (lex *Lexer) Next() (token *Token, err error) {
 		c, eof = lex.getChar()
 		if c == '=' {
 			token.Type = TokenVarAssign
-			token.Description = ":= "
+			token.Description = ":="
+		} else if c == ':' {
+			token.Type = Token2Colon
+			token.Description = "::"
 		} else {
 			token.Type = TokenColon
 			token.Description = ":"

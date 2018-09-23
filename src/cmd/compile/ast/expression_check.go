@@ -238,6 +238,12 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 			returnValueTypes = []*Type{tt}
 			e.Value = tt
 		}
+	case ExpressionTypeSelectionConst:
+		tt := e.checkSelectConstExpression(block, &errs)
+		if tt != nil {
+			returnValueTypes = []*Type{tt}
+			e.Value = tt
+		}
 	case ExpressionTypeCheckCast:
 		tt := e.checkTypeConversionExpression(block, &errs)
 		if tt != nil {

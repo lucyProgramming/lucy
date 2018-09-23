@@ -40,7 +40,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 		blockParser.consume(untilLc)
 	}
 	blockParser.Next(lfNotToken) //skip {
-	blockParser.parseStatementList(&statementIf.Block, false)
+	blockParser.parseStatementList(&statementIf.TrueBlock, false)
 	if blockParser.parser.token.Type != lex.TokenRc {
 		blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))

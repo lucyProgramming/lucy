@@ -17,22 +17,23 @@ const (
 )
 
 type Class struct {
-	writer                 io.Writer
-	magic                  uint32 //0xCAFEBABE
-	MinorVersion           uint16
-	MajorVersion           uint16
-	ConstPool              []*ConstPool
-	AccessFlag             uint16
-	ThisClass              uint16
-	SuperClass             uint16
-	Interfaces             []uint16
-	Fields                 []*FieldInfo
-	Methods                []*MethodInfo
-	Attributes             []*AttributeInfo
-	AttributeGroupedByName AttributeGroupedByName
-	TypeAlias              []*AttributeLucyTypeAlias
-	AttributeLucyEnum      *AttributeLucyEnum
-	AttributeLucyComment   *AttributeLucyComment
+	writer                  io.Writer
+	magic                   uint32 //0xCAFEBABE
+	MinorVersion            uint16
+	MajorVersion            uint16
+	ConstPool               []*ConstPool
+	AccessFlag              uint16
+	ThisClass               uint16
+	SuperClass              uint16
+	Interfaces              []uint16
+	Fields                  []*FieldInfo
+	Methods                 []*MethodInfo
+	Attributes              []*AttributeInfo
+	AttributeGroupedByName  AttributeGroupedByName
+	TypeAlias               []*AttributeLucyTypeAlias
+	AttributeLucyEnum       *AttributeLucyEnum
+	AttributeLucyComment    *AttributeLucyComment
+	AttributeLucyClassConst *AttributeLucyClassConst
 	//const caches
 	Utf8Constants               map[string]*ConstPool
 	IntConstants                map[int32]*ConstPool
@@ -364,6 +365,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 	}
 	if c.AttributeLucyComment != nil {
 		c.Attributes = append(c.Attributes, c.AttributeLucyComment.ToAttributeInfo(c))
+	}
+	if c.AttributeLucyClassConst != nil {
+		c.Attributes = append(c.Attributes, c.AttributeLucyClassConst.ToAttributeInfo(c))
 	}
 	for _, v := range high.TemplateFunctions {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))

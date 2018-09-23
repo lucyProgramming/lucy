@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type ExpressionTypeKind int
 
 const (
@@ -47,6 +49,7 @@ const (
 	ExpressionTypeLt                                        // a < b
 	ExpressionTypeIndex                                     // a["b"]
 	ExpressionTypeSelection                                 // a.b
+	ExpressionTypeSelectionConst                            // ::
 	ExpressionTypeMethodCall                                // a.b()
 	ExpressionTypeFunctionCall                              // a()
 	ExpressionTypeIncrement                                 // a++
@@ -247,8 +250,8 @@ func (e *Expression) IsLiteral() bool {
 /*
 	valid for condition
 */
-func (e *Expression) canBeUsedAsCondition() bool {
-	return e.Type == ExpressionTypeNull ||
+func (e *Expression) canBeUsedAsCondition() error {
+	if e.Type == ExpressionTypeNull ||
 		e.Type == ExpressionTypeBool ||
 		e.Type == ExpressionTypeByte ||
 		e.Type == ExpressionTypeShort ||
@@ -292,11 +295,15 @@ func (e *Expression) canBeUsedAsCondition() bool {
 		e.Type == ExpressionTypeCheckCast ||
 		e.Type == ExpressionTypeSlice ||
 		e.Type == ExpressionTypeMap ||
-		e.Type == ExpressionTypeQuestion
+		e.Type == ExpressionTypeQuestion {
+		return nil
+	}
+	return fmt.Errorf("%s cannot use '%s' as condition",
+		errMsgPrefix(e.Pos), e.Description)
 }
 
-func (e *Expression) canBeUsedAsStatement() bool {
-	return e.Type == ExpressionTypeVarAssign ||
+func (e *Expression) canBeUsedAsStatement() error {
+	if e.Type == ExpressionTypeVarAssign ||
 		e.Type == ExpressionTypeAssign ||
 		e.Type == ExpressionTypeFunctionCall ||
 		e.Type == ExpressionTypeMethodCall ||
@@ -316,7 +323,11 @@ func (e *Expression) canBeUsedAsStatement() bool {
 		e.Type == ExpressionTypePrefixIncrement ||
 		e.Type == ExpressionTypePrefixDecrement ||
 		e.Type == ExpressionTypeVar ||
-		e.Type == ExpressionTypeConst
+		e.Type == ExpressionTypeConst {
+		return nil
+	}
+	return fmt.Errorf("%s expression '%s' evaluate but not used",
+		errMsgPrefix(e.Pos), e.Description)
 }
 
 func (e *Expression) isNumber() bool {
@@ -368,7 +379,8 @@ func (e *Expression) isListAndMoreThanNElements(n int) bool {
 	k,v = range arr
 */
 func (e *Expression) canBeUsedForRange() bool {
-	if e.Type != ExpressionTypeAssign && e.Type != ExpressionTypeVarAssign {
+	if e.Type != ExpressionTypeAssign &&
+		e.Type != ExpressionTypeVarAssign {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
@@ -451,6 +463,7 @@ type ExpressionIndex struct {
 	Index      *Expression
 }
 type ExpressionSelection struct {
+	Pos             *Pos
 	Expression      *Expression
 	Name            string
 	Field           *ClassField  // expression is class or object

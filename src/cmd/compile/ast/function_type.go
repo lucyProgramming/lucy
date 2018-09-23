@@ -13,8 +13,21 @@ type FunctionType struct {
 type ParameterList []*Variable
 type ReturnList []*Variable
 
-func (ft *FunctionType) Clone() (c *FunctionType) {
-	c = ft
+func (ft *FunctionType) Clone() (ret *FunctionType) {
+	ret = &FunctionType{}
+	ret.ParameterList = make(ParameterList, len(ft.ParameterList))
+	for k, _ := range ret.ParameterList {
+		p := &Variable{}
+		*p = *ft.ParameterList[k]
+		p.Type = ft.ParameterList[k].Type.Clone()
+		ret.ParameterList[k] = p
+	}
+	for k, _ := range ret.ReturnList {
+		p := &Variable{}
+		*p = *ft.ReturnList[k]
+		p.Type = ft.ReturnList[k].Type.Clone()
+		ret.ReturnList[k] = p
+	}
 	return
 }
 func (ft *FunctionType) typeString() string {
@@ -77,8 +90,7 @@ func (ft *FunctionType) searchName(name string) *Variable {
 }
 
 func (ft *FunctionType) equal(compare *FunctionType) bool {
-	if len(ft.ParameterList) != len(compare.ParameterList) ||
-		len(ft.ReturnList) != len(compare.ReturnList) {
+	if len(ft.ParameterList) != len(compare.ParameterList) {
 		return false
 	}
 	if (ft.VArgs == nil) != (compare.VArgs == nil) {
@@ -94,9 +106,11 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 			return false
 		}
 	}
-	for k, v := range ft.ReturnList {
-		if false == v.Type.Equal(compare.ReturnList[k].Type) {
-			return false
+	if ft.VoidReturn() == false {
+		for k, v := range ft.ReturnList {
+			if false == v.Type.Equal(compare.ReturnList[k].Type) {
+				return false
+			}
 		}
 	}
 	return true

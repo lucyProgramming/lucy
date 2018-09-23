@@ -12,9 +12,8 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 		if condition.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(question.Selection.Pos)))
 		}
-		if question.Selection.canBeUsedAsCondition() == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as condition",
-				errMsgPrefix(question.Selection.Pos), question.Selection.Description))
+		if err := question.Selection.canBeUsedAsCondition(); err != nil {
+			*errs = append(*errs, err)
 		}
 	}
 	True, es := question.True.checkSingleValueContextExpression(block)

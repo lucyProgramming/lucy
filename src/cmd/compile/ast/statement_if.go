@@ -9,7 +9,7 @@ type StatementIf struct {
 	PrefixExpressions []*Expression
 	Condition         *Expression
 	ConditionBlock    Block
-	Block             Block
+	TrueBlock         Block
 	ElseIfList        []*StatementElseIf
 	ElseBlock         *Block
 	Exits             []*cg.Exit
@@ -22,9 +22,7 @@ func (s *StatementIf) check(father *Block) []error {
 		v.IsStatementExpression = true
 		_, es := v.check(&s.ConditionBlock)
 		errs = append(errs, es...)
-		if v.canBeUsedAsStatement() == false {
-			err := fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(v.Pos), v.Description)
+		if err := v.canBeUsedAsStatement(); err != nil {
 			errs = append(errs, err)
 		}
 	}
@@ -35,21 +33,19 @@ func (s *StatementIf) check(father *Block) []error {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 				errMsgPrefix(s.Condition.Pos)))
 		}
-		if s.Condition.canBeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), s.Condition.Description))
+		if err := s.Condition.canBeUsedAsCondition(); err != nil {
+			errs = append(errs, err)
 		}
 	}
-	s.Block.inherit(&s.ConditionBlock)
-	errs = append(errs, s.Block.checkStatements()...)
+	s.TrueBlock.inherit(&s.ConditionBlock)
+	errs = append(errs, s.TrueBlock.checkStatements()...)
 	for _, v := range s.ElseIfList {
 		v.Block.inherit(&s.ConditionBlock)
 		if v.Condition != nil {
 			conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
 			errs = append(errs, es...)
-			if v.Condition.canBeUsedAsCondition() == false {
-				errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-					errMsgPrefix(s.Condition.Pos), v.Condition.Description))
+			if err := v.Condition.canBeUsedAsCondition(); err != nil {
+				errs = append(errs, err)
 			}
 			if conditionType != nil &&
 				conditionType.Type != VariableTypeBool {

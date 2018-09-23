@@ -19,4 +19,5 @@ const (
 	AttributeNameLucyReturnListNames    = "LucyReturnListName"
 	AttributeNameLucyTemplateFunction   = "LucyTemplateFunction"
 	AttributeNameLucyComment            = "LucyComment"
+	AttributeNameLucyClassConst         = "LucyClassConst"
 )

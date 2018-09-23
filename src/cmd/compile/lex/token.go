@@ -54,6 +54,7 @@ const (
 	TokenVar                        // var a
 	TokenNew                        // new Object()
 	TokenColon                      // :
+	Token2Colon                     // ::
 	TokenVarAssign                  // :=
 	TokenAddAssign                  // +=
 	TokenSubAssign                  // -=

@@ -214,23 +214,24 @@ func (s *StatementFor) check(block *Block) []error {
 	s.Block.InheritedAttribute.StatementFor = s
 	s.Block.InheritedAttribute.ForBreak = s
 	errs := []error{}
-	if s.Init == nil && s.Increment == nil && s.Condition != nil && s.Condition.canBeUsedForRange() {
+	if s.Init == nil &&
+		s.Increment == nil &&
+		s.Condition != nil &&
+		s.Condition.canBeUsedForRange() {
 		// for k,v := range arr
 		return s.checkRange()
 	}
 	if s.Init != nil {
 		s.Init.IsStatementExpression = true
-		if s.Init.canBeUsedAsStatement() == false {
-			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(s.Init.Pos), s.Init.Description))
+		if err := s.Init.canBeUsedAsStatement(); err != nil {
+			errs = append(errs, err)
 		}
 		_, es := s.Init.check(s.Block)
 		errs = append(errs, es...)
 	}
 	if s.Condition != nil {
-		if s.Condition.canBeUsedAsCondition() == false {
-			errs = append(errs, fmt.Errorf("%s expression '%s' cannot used as condition",
-				errMsgPrefix(s.Condition.Pos), s.Condition.Description))
+		if err := s.Condition.canBeUsedAsCondition(); err != nil {
+			errs = append(errs, err)
 		}
 		t, es := s.Condition.checkSingleValueContextExpression(s.Block)
 		errs = append(errs, es...)
@@ -241,9 +242,8 @@ func (s *StatementFor) check(block *Block) []error {
 	}
 	if s.Increment != nil {
 		s.Increment.IsStatementExpression = true
-		if s.Increment.canBeUsedAsStatement() == false {
-			errs = append(errs, fmt.Errorf("%s expression '%s' evaluate but not used",
-				errMsgPrefix(s.Increment.Pos), s.Increment.Description))
+		if err := s.Increment.canBeUsedAsStatement(); err != nil {
+			errs = append(errs, err)
 		}
 		_, es := s.Increment.check(s.Block)
 		errs = append(errs, es...)

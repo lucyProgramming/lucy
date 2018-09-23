@@ -16,7 +16,8 @@ func (e *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is
 		err = err2
 		return
 	}
-	if is1 == false || is2 == false {
+	if is1 == false ||
+		is2 == false {
 		is = false
 		err = nil
 		return

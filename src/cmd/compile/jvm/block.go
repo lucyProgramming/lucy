@@ -45,7 +45,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 			continue
 		}
 		if s.Type == ast.StatementTypeIf && s.StatementIf.ElseBlock != nil {
-			t := s.StatementIf.Block.NotExecuteToLastStatement
+			t := s.StatementIf.TrueBlock.NotExecuteToLastStatement
 			for _, v := range s.StatementIf.ElseIfList {
 				t = t && v.Block.NotExecuteToLastStatement
 			}

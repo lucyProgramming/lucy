@@ -342,6 +342,7 @@ func (classParser *ClassParser) parseConst() error {
 				classParser.parser.errorMsgPrefix(), v.Name))
 			continue
 		}
+		classParser.ret.Block.Constants[v.Name] = v
 	}
 	return nil
 }
