@@ -2,7 +2,7 @@ package cg
 
 const (
 	ConstantPoolMaxSize                  = 65536
-	ClassMagic                    uint32 = 0xcafebabe
+	ClassMagicNumber              uint32 = 0xcafebabe
 	AttributeNameSourceFile              = "SourceFile"
 	AttributeNameConstValue              = "ConstantValue"
 	AttributeNameStackMap                = "StackMapTable"

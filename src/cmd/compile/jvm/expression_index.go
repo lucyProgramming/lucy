@@ -14,9 +14,9 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 	if index.Expression.Value.Type == ast.VariableTypeString {
 		return buildExpression.buildStringIndex(class, code, e, context, state)
 	}
-	length := len(state.Stacks)
+	stackLength := len(state.Stacks)
 	defer func() {
-		state.popStack(len(state.Stacks) - length)
+		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.Value)
@@ -56,17 +56,7 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 			code.Codes[code.CodeLength] = cg.OP_faload
 		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_daload
-		case ast.VariableTypeString:
-			fallthrough
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeMap:
-			fallthrough
-		case ast.VariableTypeArray:
-			fallthrough
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeJavaArray:
+		default:
 			code.Codes[code.CodeLength] = cg.OP_aaload
 		}
 		code.CodeLength++

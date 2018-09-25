@@ -458,6 +458,7 @@ type ExpressionIdentifier struct {
 	Variable *Variable
 	Function *Function
 	EnumName *EnumName
+	Comment  string
 }
 
 type ExpressionIndex struct {
@@ -490,9 +491,8 @@ type ExpressionMap struct {
 	for some general purpose
 */
 type ExpressionBinary struct {
-	Left    *Expression
-	Right   *Expression
-	Comment string // special usage
+	Left  *Expression
+	Right *Expression
 }
 
 // for package jvm

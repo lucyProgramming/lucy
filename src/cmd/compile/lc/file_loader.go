@@ -498,11 +498,13 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		pack.Block.TypeAliases = make(map[string]*ast.Type)
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTypeAlias) {
-		index := binary.BigEndian.Uint16(v.Info)
-		name, typ, err := jvm.LucyTypeAliasParser.Decode(c.ConstPool[index].Info)
+		attr := &cg.AttributeLucyTypeAlias{}
+		attr.FromBs(c, v.Info)
+		name, typ, err := jvm.LucyTypeAliasParser.Decode([]byte(attr.Alias))
 		if err != nil {
 			return err
 		}
+		typ.Comment = attr.Comment
 		typ.Alias = name
 		pack.Block.TypeAliases[name] = typ
 		if typ.Type == ast.VariableTypeEnum {

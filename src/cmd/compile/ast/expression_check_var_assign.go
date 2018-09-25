@@ -76,7 +76,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			if variableType == nil {
 				continue
 			}
-			vd.Comment = bin.Comment
+			vd.Comment = identifier.Comment
 			vd.Type = variableType.Clone()
 			vd.Type.Pos = e.Pos
 			if variableType.isTyped() == false {

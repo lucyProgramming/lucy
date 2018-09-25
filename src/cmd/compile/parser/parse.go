@@ -157,8 +157,20 @@ func (parser *Parser) Parse() []error {
 				} else {
 					varComment = comment.Comment
 				}
-				v := e.Data.(*ast.ExpressionBinary)
-				v.Comment = varComment
+				{
+					bin := e.Data.(*ast.ExpressionBinary)
+					var lefts []*ast.Expression
+					if bin.Left.Type == ast.ExpressionTypeList {
+						lefts = bin.Left.Data.([]*ast.Expression)
+					} else {
+						lefts = []*ast.Expression{bin.Left}
+					}
+					for _, v := range lefts {
+						if v.Type == ast.ExpressionTypeIdentifier {
+							v.Data.(*ast.ExpressionIdentifier).Comment = varComment
+						}
+					}
+				}
 				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Data: e,
 				})

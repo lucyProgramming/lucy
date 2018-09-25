@@ -14,7 +14,7 @@ type ClassDecoder struct {
 
 func (c *ClassDecoder) decode(bs []byte) (*cg.Class, error) {
 	c.bs = bs
-	if binary.BigEndian.Uint32(bs) != cg.ClassMagic {
+	if binary.BigEndian.Uint32(bs) != cg.ClassMagicNumber {
 		return nil, fmt.Errorf("magic number is not right")
 	}
 	c.bs = c.bs[4:]

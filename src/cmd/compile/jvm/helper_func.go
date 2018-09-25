@@ -213,17 +213,7 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 		op = cg.OP_fastore
 	case ast.VariableTypeDouble:
 		op = cg.OP_dastore
-	case ast.VariableTypeString:
-		fallthrough
-	case ast.VariableTypeMap:
-		fallthrough
-	case ast.VariableTypeFunction:
-		fallthrough
-	case ast.VariableTypeObject:
-		fallthrough
-	case ast.VariableTypeArray:
-		fallthrough
-	case ast.VariableTypeJavaArray:
+	default:
 		op = cg.OP_aastore
 	}
 	return
