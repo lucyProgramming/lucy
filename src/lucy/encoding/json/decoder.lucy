@@ -193,7 +193,7 @@ class Decoder {
 				}
 				return Double.valueOf(doubleValue) , null
 			default:
-			    panic(new error(typeName))  // not a primitive type , panic 
+			    panic(sprintf("not a primitive type , but '%s'" , typeName ))  // not a primitive type , panic 
 		}
 	}
 	
@@ -455,9 +455,9 @@ class Decoder {
 
 	// no check 
 	private fn hexByte2Int(b byte ) -> (v int ) {
-		if b >= 'a' && b <= 'z' {
+		if b >= 'a' && b <= 'f' {
 			return int(b - 'a') + 10 
-		}else if b >= 'A' && b <= 'Z' {
+		}else if b >= 'A' && b <= 'F' {
 			return int(b - 'A') + 10 
 		}else {
 			return int(b - '0')

@@ -282,7 +282,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next(lfNotToken)
 		case lex.TokenType:
 			pos := blockParser.parser.mkPos()
-			alias, err := blockParser.parser.parseTypeAlias()
+			alias, err := blockParser.parser.parseTypeAlias(comment)
 			if err != nil {
 				blockParser.consume(untilSemicolonOrLf)
 				blockParser.Next(lfNotToken)

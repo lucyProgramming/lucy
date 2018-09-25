@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -21,6 +20,9 @@ const (
 
 func GetClassPaths() []string {
 	lp := os.Getenv("CLASSPATH")
+	if lp == "" {
+		return []string{}
+	}
 	if runtime.GOOS == "windows" {
 		return strings.Split(lp, ";")
 	} else {
@@ -84,27 +86,27 @@ func GetLucyRoot() (string, error) {
 	return r, nil
 }
 
-func FindLucyPackageDirectory(packageName string, paths []string) []string {
-	ret := []string{}
-	for _, v := range paths {
-		f, err := os.Stat(filepath.Join(v, DirForLucySourceFile, packageName))
-		if err == nil && f.IsDir() {
-			ret = append(ret, v)
-		}
-	}
-	return ret
-}
-
-func SourceFileExist(path string) bool {
-	f, _ := os.Stat(path)
-	if f == nil || f.IsDir() == false {
-		return false
-	}
-	fis, _ := ioutil.ReadDir(path)
-	for _, f := range fis {
-		if strings.HasSuffix(f.Name(), ".lucy") {
-			return true
-		}
-	}
-	return false
-}
+//func FindLucyPackageDirectory(packageName string, paths []string) []string {
+//	ret := []string{}
+//	for _, v := range paths {
+//		f, err := os.Stat(filepath.Join(v, DirForLucySourceFile, packageName))
+//		if err == nil && f.IsDir() {
+//			ret = append(ret, v)
+//		}
+//	}
+//	return ret
+//}
+//
+//func SourceFileExist(path string) bool {
+//	f, _ := os.Stat(path)
+//	if f == nil || f.IsDir() == false {
+//		return false
+//	}
+//	fis, _ := ioutil.ReadDir(path)
+//	for _, f := range fis {
+//		if strings.HasSuffix(f.Name(), ".lucy") {
+//			return true
+//		}
+//	}
+//	return false
+//}

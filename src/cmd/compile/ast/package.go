@@ -121,7 +121,9 @@ func (p *Package) TypeCheck() []error {
 		}
 	}
 	for _, v := range p.Block.TypeAliases {
+		comment := v.Comment
 		err := v.resolve(&PackageBeenCompile.Block)
+		v.Comment = comment
 		if err != nil {
 			p.Errors = append(p.Errors, err)
 		}

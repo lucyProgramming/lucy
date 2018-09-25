@@ -56,7 +56,8 @@ class Install {
         	return 
         }
         if err := cmd.wait() ;  err != null {
-			printf("install failed,err:%s\n" ,err .toString() )
+			printf("install failed,err:%s\n" ,err .toString())
+			os.exit(2)
         } 
 			
 	}

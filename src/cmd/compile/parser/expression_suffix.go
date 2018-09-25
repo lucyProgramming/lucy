@@ -468,24 +468,19 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			newExpression.Pos = pos
 			newExpression.Description = "selectConst"
 			newExpression.Type = ast.ExpressionTypeSelectionConst
-			selection := &ast.ExpressionSelection{
-				Pos: expressionParser.parser.mkPos(),
-			}
+			selection := &ast.ExpressionSelection{}
 			selection.Expression = prefix
 			selection.Name = constName
 			newExpression.Data = selection
 			prefix = newExpression
 		case lex.TokenSelection:
-			pos := expressionParser.parser.mkPos()
 			expressionParser.Next(lfNotToken) // skip .
 			if expressionParser.parser.token.Type == lex.TokenIdentifier {
 				newExpression := &ast.Expression{}
-				newExpression.Pos = pos
+				newExpression.Pos = expressionParser.parser.mkPos()
 				newExpression.Description = "selection"
 				newExpression.Type = ast.ExpressionTypeSelection
-				selection := &ast.ExpressionSelection{
-					Pos: expressionParser.parser.mkPos(),
-				}
+				selection := &ast.ExpressionSelection{}
 				selection.Expression = prefix
 				selection.Name = expressionParser.parser.token.Data.(string)
 				newExpression.Data = selection
@@ -504,7 +499,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				}
 				expressionParser.Next(lfIsToken) // skip  )
 				newExpression := &ast.Expression{}
-				newExpression.Pos = pos
+				newExpression.Pos = expressionParser.parser.mkPos()
 				newExpression.Description = "assert"
 				newExpression.Type = ast.ExpressionTypeTypeAssert
 				typeAssert := &ast.ExpressionTypeAssert{}

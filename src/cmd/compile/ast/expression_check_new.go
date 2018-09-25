@@ -88,7 +88,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	ret.Pos = e.Pos
 	if len(newArray.Args) != 1 { // 0 and 1 is accept
 		*errs = append(*errs,
-			fmt.Errorf("%s new array expect at least 1 argument ",
+			fmt.Errorf("%s new array expect at least 1 argument",
 				errMsgPrefix(e.Pos)))
 		return ret
 	}

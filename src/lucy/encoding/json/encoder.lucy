@@ -11,8 +11,8 @@ class Encoder {
 	c Class
 	indent string  
 	indents string 
-	outerIsArray bool 
-	public fn Encoder(x Object, indents string   ,indent string ,outerIsArray bool = false  ) {
+	
+	public fn Encoder(x Object, indents string   ,indent string   ) {
 		this.super()
 		this.x = x
 		if x != null {
@@ -20,32 +20,19 @@ class Encoder {
 		}
 		this.indents = indents 
 		this.indent = indent  
-		this.outerIsArray = outerIsArray 
+		 
 	}
 	
 	
 	public fn encode()->(bs []byte ,err error){
 		if this.x == null {
-			if this.outerIsArray  {
-				return []byte( this.indents + "null") , null 
-			}else {
-				return []byte("null") , null 
-			}
+			return []byte("null") , null
 		}
 		if this.c.isPrimitive(){
-			if this.outerIsArray {
-				return []byte( this.indents +  this.x.toString()) , null 
-			}else {
-				return []byte(this.x.toString()) , null 
-			}
+			return []byte(this.x.toString()) , null
 		} 
 		if this.c.getTypeName() == "java.lang.String" {
-			if this.outerIsArray {
-				return []byte(sprintf(`%s"%s"` , this.indents ,  this.x.toString())) , null 
-			}else {
-				return []byte(sprintf(`"%s"` , this.x.toString())) , null 
-			}
-			
+			return []byte(sprintf(`"%s"` , this.x.toString())) , null
 		}
 		if isMap(this.c) {
 			return this.encodeMap()
@@ -62,11 +49,9 @@ class Encoder {
 	public fn encodeMap() -> (bs []byte ,err error){
 		x , _ := this.x.(AbstractMap)
 		ks := x.keySet().toArray()
-		if this.outerIsArray {
-			bs = []byte(this.indents + "{")
-		}else {
-			bs = []byte("{")
-		}
+
+		bs = []byte("{")
+
 		if this.indent != "" {
 			bs.append('\n') 
 		}
@@ -109,8 +94,6 @@ class Encoder {
 
 		}
 		bs.appendAll([]byte(this.indents + "}"))
-
-		
 	}
 	
 	static fn isPrimitiveObject(o Object) -> (is bool) {
@@ -150,10 +133,11 @@ class Encoder {
 		length := Array.getLength(this.x)
 		for i := 0; i < length; i ++ {
 			bs.appendAll([]byte(this.indents))
-			bs2,err := ( new Encoder( Array.get(this.x  , i) , this.indents + this.indent ,  this.indent , true )) . encode()
+			bs2 , err :=  new Encoder( Array.get(this.x  , i) , this.indents + this.indent ,  this.indent  ) . encode()
 			if err != null {
 				return null,err  
 			}
+			bs.appendAll([]byte(this.indents + this.indent) )
 			bs.appendAll(bs2)
 			if i != length -1 {
 				bs.append(',')
@@ -167,11 +151,7 @@ class Encoder {
 
 	
 	public fn encodeObject()->  (bs []byte ,err error){
-		if this.outerIsArray {
-			bs = []byte(this.indents + "{")
-		}else {
-			bs = []byte("{")
-		}
+		bs = []byte("{")
 		if this.indent != "" {
 			bs.append('\n')
 		}

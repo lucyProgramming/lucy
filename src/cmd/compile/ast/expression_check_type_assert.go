@@ -20,7 +20,8 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 		return nil
 	}
 	if object.IsPointer() == false {
-		*errs = append(*errs, fmt.Errorf("%s expression is not pointer", errMsgPrefix(object.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s expression is not pointer",
+			errMsgPrefix(object.Pos)))
 		return nil
 	}
 	err := assert.Type.resolve(block)

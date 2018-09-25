@@ -209,7 +209,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 				if false == v.Type.assignAble(&errs, t) {
 					err = fmt.Errorf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(t.Pos),
-						t.TypeString())
+						t.TypeString(), v.Type.TypeString())
 					return
 				}
 				vArgs.PackArray2VArgs = true

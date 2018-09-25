@@ -1,9 +1,10 @@
 import "lucy/cmd/langtools/common"
-import "lucy/os" as os  //TODO :: same name no need 
+import "lucy/os" as os  //TODO :: same name need check or not  
 import "lucy/os/flag"
 
-flagParser := new flag.FlagParser()
 
+
+flagParser := new flag.FlagParser()
 
 fn printUsageAndExit(code int){
 	print("Usage: clean compiled class files ")

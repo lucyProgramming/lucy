@@ -73,7 +73,7 @@ func (r *Run) RunCommand(command string, args []string) {
 		return
 	}
 	if r.Flags.JvmVersion <= 50 {
-		fmt.Println("jvm version must great than 50")
+		fmt.Println("jvm major version must greater than 50")
 		os.Exit(1)
 	}
 	r.LucyRoot, err = common.GetLucyRoot()

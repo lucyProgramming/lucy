@@ -146,9 +146,19 @@ func (parser *Parser) Parse() []error {
 				parser.Next(lfNotToken)
 				continue
 			}
+
 			e.IsPublic = isPublic()
 			parser.validStatementEnding()
 			if e.Type == ast.ExpressionTypeVarAssign {
+				varComment := ""
+				if parser.token.Type == lex.TokenComment {
+					varComment = parser.token.Data.(string)
+					parser.Next(lfIsToken)
+				} else {
+					varComment = comment.Comment
+				}
+				v := e.Data.(*ast.ExpressionBinary)
+				v.Comment = varComment
 				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Data: e,
 				})
@@ -247,7 +257,7 @@ func (parser *Parser) Parse() []error {
 			resetProperty()
 			continue
 		case lex.TokenType:
-			a, err := parser.parseTypeAlias()
+			a, err := parser.parseTypeAlias(comment)
 			if err != nil {
 				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
@@ -272,6 +282,17 @@ func (parser *Parser) Parse() []error {
 					continue
 				}
 				if e.Type == ast.ExpressionTypeVarAssign {
+					varComment := ""
+					if parser.token.Type == lex.TokenComment {
+						varComment = parser.token.Data.(string)
+						parser.Next(lfIsToken)
+					} else {
+						varComment = comment.Comment
+					}
+					v := e.Data.(*ast.ExpressionVar)
+					for _, v := range v.Variables {
+						v.Comment = varComment
+					}
 					*parser.tops = append(*parser.tops, &ast.TopNode{
 						Data: e,
 					})
@@ -569,7 +590,7 @@ func (parser *Parser) expectNewLine() error {
 	return err
 }
 
-func (parser *Parser) parseTypeAlias() (*ast.TypeAlias, error) {
+func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, error) {
 	parser.Next(lfIsToken) // skip type key word
 	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
@@ -591,6 +612,12 @@ func (parser *Parser) parseTypeAlias() (*ast.TypeAlias, error) {
 	ret.Type, err = parser.parseType()
 	if err != nil {
 		return nil, err
+	}
+	if parser.token.Type == lex.TokenComment {
+		ret.Type.Comment = parser.token.Data.(string)
+		parser.Next(lfIsToken)
+	} else {
+		ret.Type.Comment = comment.Comment
 	}
 	return ret, err
 }

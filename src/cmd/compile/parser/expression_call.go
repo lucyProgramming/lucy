@@ -8,7 +8,6 @@ import (
 
 func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression) (*ast.Expression, error) {
 	var err error
-	pos := expressionParser.parser.mkPos()
 	expressionParser.Next(lfNotToken) // skip (
 	args := []*ast.Expression{}
 	if expressionParser.parser.token.Type != lex.TokenRp { //a(123)
@@ -37,6 +36,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		call.Args = args
 		call.Name = index.Name
 		result.Data = call
+		result.Pos = expressionParser.parser.mkPos()
 		result.Pos = expressionParser.parser.mkPos()
 	} else {
 		/*
@@ -75,6 +75,6 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 			result.Data.(*ast.ExpressionMethodCall).ParameterTypes = ts
 		}
 	}
-	result.Pos = pos
+	result.Pos = expressionParser.parser.mkPos()
 	return result, nil
 }

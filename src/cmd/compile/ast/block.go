@@ -223,7 +223,8 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 				}
 				//cannot search variable from class body
 				if b.InheritedAttribute.Class != nil && b.IsClassBlock {
-					return nil, nil //
+					return nil, fmt.Errorf("%s trying to access variable '%s' from class",
+						errMsgPrefix(from), name)
 				}
 			}
 		case *Function:

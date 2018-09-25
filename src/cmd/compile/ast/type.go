@@ -55,6 +55,7 @@ type Type struct {
 	Package      *Package
 	Alias        string
 	AliasType    *Type
+	Comment      string
 }
 
 type Map struct {

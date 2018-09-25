@@ -10,7 +10,7 @@ const (
 	ExpressionTypeBool                                      // true or false
 	ExpressionTypeByte                                      // 'a' or 97b
 	ExpressionTypeShort                                     // 100s
-	ExpressionTypeChar                                      //
+	ExpressionTypeChar                                      // '\u0000'
 	ExpressionTypeInt                                       // 100
 	ExpressionTypeLong                                      // 100L
 	ExpressionTypeFloat                                     // 1.0
@@ -445,7 +445,9 @@ type ExpressionVarAssign struct {
 	Lefts            []*Expression
 	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
+
 }
+
 type ExpressionTypeConversion struct {
 	Type       *Type
 	Expression *Expression
@@ -463,7 +465,6 @@ type ExpressionIndex struct {
 	Index      *Expression
 }
 type ExpressionSelection struct {
-	Pos             *Pos
 	Expression      *Expression
 	Name            string
 	Field           *ClassField  // expression is class or object
@@ -489,8 +490,9 @@ type ExpressionMap struct {
 	for some general purpose
 */
 type ExpressionBinary struct {
-	Left  *Expression
-	Right *Expression
+	Left    *Expression
+	Right   *Expression
+	Comment string // special usage
 }
 
 // for package jvm

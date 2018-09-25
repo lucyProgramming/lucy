@@ -146,6 +146,7 @@ func (buildPackage *BuildPackage) mkGlobalTypeAlias() {
 	for name, v := range buildPackage.Package.Block.TypeAliases {
 		t := &cg.AttributeLucyTypeAlias{}
 		t.Alias = LucyTypeAliasParser.Encode(name, v)
+		t.Comment = v.Comment
 		buildPackage.mainClass.Class.TypeAlias = append(buildPackage.mainClass.Class.TypeAlias, t)
 	}
 }

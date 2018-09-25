@@ -51,6 +51,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, args))
 			return nil
 		}
+
 	case VariableTypeObject, VariableTypeClass:
 		call.Class = object.Class
 		callArgTypes := checkExpressions(block, call.Args, errs, true)
@@ -343,7 +344,7 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 			} else {
 				if array.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-						errMsgPrefix(t.Pos), t.TypeString(), array.Array.TypeString(), call.Name))
+						errMsgPrefix(t.Pos), t.TypeString(), array.TypeString(), call.Name))
 				}
 			}
 		}
