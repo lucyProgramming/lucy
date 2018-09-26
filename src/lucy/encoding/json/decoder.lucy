@@ -108,16 +108,17 @@ class Decoder {
 
 	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object,err error) {
 		typeName := c.getName()
-		switch typeName { 
-			case "boolean":
-				if tree.Type != JsonSyntaxTreeTypeBool {
-					return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
-				} 
-				return Boolean.valueOf(tree.boolValue), null
+		if typeName == "boolean" {
+			if tree.Type != JsonSyntaxTreeTypeBool {
+				return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
+			} 
+			return Boolean.valueOf(tree.boolValue), null
+		}else {
+			if tree.Type != JsonSyntaxTreeTypeNumber {
+				return null, new error(sprintf("cannot decode '%s' to '%s'" , tree.nodeType() , typeName))
+			} 
+			switch typeName { 
 			case "byte":
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()))
-				} 
 				longValue,err := tree.numberValue.getLong()
 				if err != null {
 					return null , err 
@@ -127,9 +128,6 @@ class Decoder {
 				}
 				return Byte.valueOf(byte(longValue)) , null 
 			case "short":
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'short'" , tree.nodeType()))
-				} 
 				longValue,err := tree.numberValue.getLong()
 				if err != null {
 					return null , err 
@@ -139,9 +137,6 @@ class Decoder {
 				}
 				return Short.valueOf(short(longValue)) , null 
 			case "char":
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'character'" , tree.nodeType()))
-				} 
 				longValue,err := tree.numberValue.getLong()
 				if err != null {
 					return null , err 
@@ -151,9 +146,6 @@ class Decoder {
 				}
 				return Character.valueOf(char(longValue)) , null
 			case "int" :
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'byte'" , tree.nodeType()))
-				} 
 				longValue,err := tree.numberValue.getLong()
 				if err != null {
 					return null , err 
@@ -163,18 +155,12 @@ class Decoder {
 				}
 				return Integer.valueOf(int(longValue)) , null 
 			case "long" :
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'long'" , tree.nodeType()))
-				} 
 				longValue,err := tree.numberValue.getLong()
 				if err != null {
 					return null , err 
 				}
 				return Long.valueOf(longValue) , null 
 			case "float" :
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'float'" , tree.nodeType()))
-				} 
 				doubleValue,err := tree.numberValue.getDouble()
 				if err != null {
 					return null , err 
@@ -184,9 +170,6 @@ class Decoder {
 				}
 				return Float.valueOf(float(doubleValue)) , null 
 			case "double":
-				if tree.Type != JsonSyntaxTreeTypeNumber {
-					return null, new error(sprintf("cannot decode '%s' to 'double'" , tree.nodeType()))
-				} 
 				doubleValue,err := tree.numberValue.getDouble()
 				if err != null {
 					return null , err 
@@ -194,7 +177,9 @@ class Decoder {
 				return Double.valueOf(doubleValue) , null
 			default:
 			    panic(sprintf("not a primitive type , but '%s'" , typeName ))  // not a primitive type , panic 
+			}
 		}
+		
 	}
 	
 	
