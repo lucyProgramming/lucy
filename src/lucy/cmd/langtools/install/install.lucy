@@ -7,7 +7,7 @@ class Install {
 	verbose bool 
 	packageName string 
 	lucyRoot string 
-	fn Install(lucyRoot string , dir string  ,  packageName string , verbose bool) {
+	fn Install(lucyRoot string , dir string   ,  packageName string , verbose bool) {
 	    this.super()
 		this.dir = dir
 		this.packageName = packageName 
@@ -59,7 +59,7 @@ class Install {
 			printf("install failed,err:%s\n" ,err .toString())
 			os.exit(2)
         } 
-			
+		
 	}
 	
 	

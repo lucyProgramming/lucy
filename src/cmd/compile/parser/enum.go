@@ -89,6 +89,18 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 			reset()
 		}
 	}
+	if len(e.Enums) == 0 {
+		enumName := &ast.EnumName{
+			Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //
+			Pos:  parser.mkPos(),
+			Enum: e,
+		}
+		e.Enums = []*ast.EnumName{
+			enumName,
+		}
+		parser.errs = append(parser.errs, fmt.Errorf("%s enum expect at least 1 enumName",
+			parser.errorMsgPrefix()))
+	}
 	parser.ifTokenIsLfThenSkip()
 	if parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}',but '%s'", parser.errorMsgPrefix(), parser.token.Description)
@@ -96,15 +108,5 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 		parser.consume(untilRc)
 	}
 	parser.Next(lfNotToken)
-	if len(e.Enums) == 0 {
-		enumName := &ast.EnumName{
-			Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-			Pos:  parser.mkPos(),
-			Enum: e,
-		}
-		e.Enums = []*ast.EnumName{
-			enumName,
-		}
-	}
 	return e, err
 }

@@ -76,9 +76,10 @@ public final class  FlagParser {
 			}
 			o := this.options[v]
 			if o.typ == OptionTypeBool {
+				//special case 
 				o.parse(v)
 			}else {
-				if k == len(args) -1 {
+				if k == len(args) - 1 {
 					err = new error(sprintf("no value  after '%s'" , v ))
 					return 
 				}

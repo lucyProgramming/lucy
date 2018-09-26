@@ -20,7 +20,6 @@ class Encoder {
 		}
 		this.indents = indents 
 		this.indent = indent  
-		 
 	}
 	
 	
@@ -79,7 +78,7 @@ class Encoder {
 			if .isPrimitiveObject(vv) {
 				bs2 = []byte(vv.toString())
 			}else {
-				bs2 , err = (new Encoder(x.get(v) , this.indents + this.indent , this.indent  )).encode()
+				bs2 , err = (new Encoder(x.get(v) , this.indents + this.indent , this.indent )).encode()
 				if err != null {
 					return null , err  
 				}
@@ -91,7 +90,6 @@ class Encoder {
 			if this.indent != "" {
             	bs.append('\n')
             }
-
 		}
 		bs.appendAll([]byte(this.indents + "}"))
 	}

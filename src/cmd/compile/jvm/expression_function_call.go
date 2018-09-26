@@ -37,9 +37,9 @@ func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLev
 	if call.Function.IsBuildIn {
 		return buildExpression.mkBuildInFunctionCall(class, code, e, context, state)
 	}
-	if call.Expression != nil && call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
-		maxStack =
-			buildExpression.build(class, code, call.Expression, context, state)
+	if call.Expression != nil &&
+		call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
+		maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	}
 	if call.Function.IsClosureFunction == false {
 		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)

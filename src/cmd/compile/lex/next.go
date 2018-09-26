@@ -11,7 +11,9 @@ func (lex *Lexer) Next() (token *Token, err error) {
 		token.Description = "EOF"
 		return
 	}
-	for c == ' ' || c == '\t' || c == '\r' { // skip empty
+	for c == ' ' ||
+		c == '\t' ||
+		c == '\r' { // skip empty
 		c, eof = lex.getChar()
 	}
 	token.StartLine = lex.line

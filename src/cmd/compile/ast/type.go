@@ -30,7 +30,7 @@ const (
 	VariableTypeName
 	VariableTypeTemplate
 	VariableTypeVoid
-	VariableTypeTypeAlias
+
 	VariableTypePackage
 	VariableTypeNull
 	VariableTypeSelectGlobal
@@ -436,8 +436,6 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "dynamicSelector@" + typ.Class.Name
 	case VariableTypeVoid:
 		*ret += "void"
-	case VariableTypeTypeAlias:
-		*ret += "type_alias@" + typ.AliasType.TypeString()
 	case VariableTypePackage:
 		*ret += "package@" + typ.Package.Name
 	case VariableTypeNull:

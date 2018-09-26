@@ -6,52 +6,66 @@ import (
 
 func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
 	call := e.Data.(*ExpressionFunctionCall)
+	if call.Expression.Type == ExpressionTypeIdentifier {
+		identifier := call.Expression.Data.(*ExpressionIdentifier)
+		d, err := block.searchIdentifier(call.Expression.Pos, identifier.Name)
+		if err != nil {
+			*errs = append(*errs, err)
+			return nil
+		}
+		switch d.(type) {
+		case *Function:
+			f := d.(*Function)
+			call.Function = f
+			if f.IsBuildIn {
+				return e.checkBuildInFunctionCall(block, errs, f, call)
+			} else {
+				return e.checkFunctionCall(block, errs, f, call)
+			}
+		case *Type:
+			typeConversion := &ExpressionTypeConversion{}
+			typeConversion.Type = d.(*Type)
+			if len(call.Args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
+					errMsgPrefix(e.Pos)))
+				return nil
+			}
+			e.Type = ExpressionTypeCheckCast
+			typeConversion.Expression = call.Args[0]
+			e.Data = typeConversion
+			ret := e.checkTypeConversionExpression(block, errs)
+			if ret == nil {
+				return nil
+			}
+			return []*Type{ret}
+		case *Class:
+			typeConversion := &ExpressionTypeConversion{}
+			typeConversion.Type = &Type{}
+			typeConversion.Type.Type = VariableTypeObject
+			typeConversion.Type.Class = d.(*Class)
+			typeConversion.Type.Pos = e.Pos
+			if len(call.Args) != 1 {
+				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
+					errMsgPrefix(e.Pos)))
+				return nil
+			}
+			e.Type = ExpressionTypeCheckCast
+			typeConversion.Expression = call.Args[0]
+			e.Data = typeConversion
+			ret := e.checkTypeConversionExpression(block, errs)
+			if ret == nil {
+				return nil
+			}
+			return []*Type{ret}
+		default:
+			*errs = append(*errs, fmt.Errorf("%s cannot make call on '%s'",
+				errMsgPrefix(call.Expression.Pos), block.identifierIsWhat(d)))
+			return nil
+		}
+	}
 	on, es := call.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if on == nil {
-		checkExpressions(block, call.Args, errs, true)
-		return nil
-	}
-	if on.Type == VariableTypeClass { // cast type
-		typeConversion := &ExpressionTypeConversion{}
-		typeConversion.Type = &Type{}
-		typeConversion.Type.Type = VariableTypeObject
-		typeConversion.Type.Class = on.Class
-		typeConversion.Type.Pos = e.Pos
-		if len(call.Args) != 1 {
-			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-				errMsgPrefix(e.Pos)))
-			return nil
-		}
-		e.Type = ExpressionTypeCheckCast
-		typeConversion.Expression = call.Args[0]
-		e.Data = typeConversion
-		ret := e.checkTypeConversionExpression(block, errs)
-		if ret == nil {
-			return nil
-		}
-		return []*Type{ret}
-	}
-	if on.Type == VariableTypeTypeAlias {
-		typeConversion := &ExpressionTypeConversion{}
-		typeConversion.Type = on.AliasType
-		if len(call.Args) != 1 {
-			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-				errMsgPrefix(e.Pos)))
-			return nil
-		}
-		e.Type = ExpressionTypeCheckCast
-		typeConversion.Expression = call.Args[0]
-		e.Data = typeConversion
-		ret := e.checkTypeConversionExpression(block, errs)
-		if ret == nil {
-			return nil
-		}
-		return []*Type{ret}
-	}
-	if on.Function != nil && on.Function.IsGlobalMain() {
-		*errs = append(*errs, fmt.Errorf("%s function is global main",
-			errMsgPrefix(e.Pos)))
 		return nil
 	}
 	if on.Type != VariableTypeFunction {
@@ -61,28 +75,14 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		return nil
 	}
 	if call.Expression.Type == ExpressionTypeFunctionLiteral {
-		on.Function = call.Expression.Data.(*Function)
 		/*
 			fn() {
 
 			}()
 			no name function is statement too
 		*/
+		on.Function = call.Expression.Data.(*Function)
 		call.Expression.IsStatementExpression = true
-	}
-	if call.Expression.Type == ExpressionTypeIdentifier {
-		t := call.Expression.Data.(*ExpressionIdentifier)
-		if t.Function != nil {
-			on.Function = t.Function
-		}
-	}
-	if on.Function != nil {
-		call.Function = on.Function
-		if on.Function.IsBuildIn {
-			return e.checkBuildInFunctionCall(block, errs, on.Function, call)
-		} else {
-			return e.checkFunctionCall(block, errs, on.Function, call)
-		}
 	}
 	return e.checkFunctionPointerCall(block, errs, on.FunctionType, call)
 }

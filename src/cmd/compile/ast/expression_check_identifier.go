@@ -82,6 +82,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if f.IsGlobalMain() {
 			return nil, fmt.Errorf("%s fucntion is global main", errMsgPrefix(e.Pos))
 		}
+		if f.IsBuildIn {
+			return nil, fmt.Errorf("%s fucntion '%s' is buildin",
+				errMsgPrefix(e.Pos), f.Name)
+		}
 		f.Used = true
 		result := &Type{}
 		result.Type = VariableTypeFunction
@@ -147,37 +151,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			identifier.EnumName = enumName
 			return result, nil
 		}
-	case *Type:
-		typ := d.(*Type)
-		if fromImport == false && typ.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, typ.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
-		}
-		result := &Type{}
-		result.Pos = e.Pos
-		result.Type = VariableTypeTypeAlias
-		result.AliasType = typ.Clone()
-		result.AliasType.Pos = e.Pos
-		return result, nil
-	case *Enum:
-		en := d.(*Enum)
-		if fromImport == false && en.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, en.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
-		}
-		result := &Type{}
-		result.Pos = e.Pos
-		result.Type = VariableTypeTypeAlias
-		result.AliasType = &Type{
-			Type: VariableTypeEnum,
-			Enum: en,
-			Pos:  e.Pos,
-		}
-		return result, nil
 	case *Package:
 		// must load from import
 		result := &Type{}
