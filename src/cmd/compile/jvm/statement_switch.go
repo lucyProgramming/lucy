@@ -56,7 +56,16 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 			code.CodeLength += 8
 		}
 	}
-	maxStack = buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
+	for _, v := range s.PrefixExpressions {
+		stack := buildPackage.BuildExpression.build(class, code, v, context, state)
+		if stack > maxStack {
+			maxStack = stack
+		}
+	}
+	stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
+	if stack > maxStack {
+		maxStack = stack
+	}
 	//value is on stack
 	var notMatch *cg.Exit
 	size := jvmSlotSize(s.Condition.Value)
@@ -69,50 +78,32 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 		}
 		matches := []*cg.Exit{}
 		for _, ee := range c.Matches {
-			if ee.HaveMultiValue() {
+			if ee.Value.Type == ast.VariableTypeBool {
+				currentStack = size
 				stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				autoVar := newMultiValueAutoVar(class, code, state)
-				for kkk, ttt := range ee.MultiValues {
-					currentStack = size
-					if size == 1 {
-						code.Codes[code.CodeLength] = cg.OP_dup
-					} else {
-						code.Codes[code.CodeLength] = cg.OP_dup2
-					}
-					code.CodeLength++
-					currentStack += size
-					if currentStack > maxStack {
-						maxStack = currentStack
-					}
-					if t := autoVar.unPack(class, code, kkk, ttt) + currentStack; t > maxStack {
-						maxStack = t
-					}
-					compare(s.Condition.Value)
-					// consume result on stack
-					matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code))
-				}
-				continue
-			}
-			currentStack = size
-			// mk stack ready
-			if size == 1 {
-				code.Codes[code.CodeLength] = cg.OP_dup
+				matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifne, code)) // comsume result on stack
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_dup2
+				currentStack = size
+				// mk stack ready
+				if size == 1 {
+					code.Codes[code.CodeLength] = cg.OP_dup
+				} else {
+					code.Codes[code.CodeLength] = cg.OP_dup2
+				}
+				code.CodeLength++
+				currentStack += size
+				state.pushStack(class, s.Condition.Value)
+				stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
+				if t := currentStack + stack; t > maxStack {
+					maxStack = t
+				}
+				state.popStack(1)
+				compare(s.Condition.Value)
+				matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code)) // comsume result on stack
 			}
-			code.CodeLength++
-			currentStack += size
-			state.pushStack(class, s.Condition.Value)
-			stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
-			if t := currentStack + stack; t > maxStack {
-				maxStack = t
-			}
-			state.popStack(1)
-			compare(s.Condition.Value)
-			matches = append(matches, (&cg.Exit{}).Init(cg.OP_ifeq, code)) // comsume result on stack
 		}
 		// should be goto next,here is no match
 		notMatch = (&cg.Exit{}).Init(cg.OP_goto, code)

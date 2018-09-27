@@ -86,6 +86,10 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			return nil, fmt.Errorf("%s fucntion '%s' is buildin",
 				errMsgPrefix(e.Pos), f.Name)
 		}
+		if f.TemplateFunction != nil {
+			return nil, fmt.Errorf("%s fucntion '%s' a template function",
+				errMsgPrefix(e.Pos), f.Name)
+		}
 		f.Used = true
 		result := &Type{}
 		result.Type = VariableTypeFunction

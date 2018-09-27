@@ -7,6 +7,8 @@ import (
 )
 
 type StatementSwitch struct {
+	PrefixExpressions    []*Expression
+	Block                Block
 	Pos                  *Pos
 	Condition            *Expression //switch
 	StatementSwitchCases []*StatementSwitchCase
@@ -24,7 +26,19 @@ func (s *StatementSwitch) check(block *Block) []error {
 	if s.Condition == nil { // must be a error at parse stage
 		return errs
 	}
-	conditionType, es := s.Condition.checkSingleValueContextExpression(block)
+	s.Block.inherit(block)
+	for _, v := range s.PrefixExpressions {
+		v.IsStatementExpression = true
+		_, es := v.check(&s.Block)
+		errs = append(errs, es...)
+		if err := v.canBeUsedAsStatement(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if s.Condition == nil {
+		return errs
+	}
+	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.Block)
 	errs = append(errs, es...)
 	if conditionType == nil {
 		return errs
@@ -46,9 +60,9 @@ func (s *StatementSwitch) check(block *Block) []error {
 	}
 	byteMap := make(map[byte]*Pos)
 	shortMap := make(map[int32]*Pos)
-	int32Map := make(map[int32]*Pos)
+	intMap := make(map[int32]*Pos)
 	charMap := make(map[int32]*Pos)
-	int64Map := make(map[int64]*Pos)
+	longMap := make(map[int64]*Pos)
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
@@ -63,12 +77,17 @@ func (s *StatementSwitch) check(block *Block) []error {
 	var doubleValue float64
 	var stringValue string
 	var enumName string
+	containsBool := false
 	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
 			valueValid := false
-			t, es := e.checkSingleValueContextExpression(block)
+			t, es := e.checkSingleValueContextExpression(&s.Block)
 			errs = append(errs, es...)
 			if t == nil {
+				continue
+			}
+			if t.Type == VariableTypeBool { // bool condition
+				containsBool = true
 				continue
 			}
 			if conditionType.assignAble(&errs, t) == false {
@@ -151,18 +170,18 @@ func (s *StatementSwitch) check(block *Block) []error {
 						charMap[charValue] = e.Pos
 					}
 				case VariableTypeInt:
-					if first, ok := int32Map[intValue]; ok {
+					if first, ok := intMap[intValue]; ok {
 						errs = append(errs, errMsg(first, fmt.Sprintf("%v", intValue)))
 						continue // no check body
 					} else {
-						int32Map[intValue] = e.Pos
+						intMap[intValue] = e.Pos
 					}
 				case VariableTypeLong:
-					if first, ok := int64Map[longValue]; ok {
+					if first, ok := longMap[longValue]; ok {
 						errs = append(errs, errMsg(first, fmt.Sprintf("%v", longValue)))
 						continue // no check body
 					} else {
-						int64Map[longValue] = e.Pos
+						longMap[longValue] = e.Pos
 					}
 				case VariableTypeFloat:
 					if first, found := floatMap[floatValue]; found {
@@ -196,19 +215,20 @@ func (s *StatementSwitch) check(block *Block) []error {
 			}
 		}
 		if v.Block != nil {
-			v.Block.inherit(block)
+			v.Block.inherit(&s.Block)
 			v.Block.InheritedAttribute.ForBreak = s
 			errs = append(errs, v.Block.checkStatements()...)
 		}
 	}
 	if s.Default != nil {
-		s.Default.inherit(block)
+		s.Default.inherit(&s.Block)
 		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatements()...)
 	}
 	if conditionType.Type == VariableTypeEnum &&
 		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
-		s.Default == nil {
+		s.Default == nil &&
+		containsBool == false {
 		//some enum are missing, not allow
 		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
 			errMsgPrefix(s.Pos), conditionType.Enum.Name)

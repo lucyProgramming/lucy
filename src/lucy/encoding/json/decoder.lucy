@@ -29,8 +29,8 @@ class JsonSyntaxTreeNode {
 	numberValue Number   // number value
 	stringValue string 
 	arrayElements []JsonSyntaxTreeNode 
-	object map{ string -> JsonSyntaxTreeNode} 
-	fn nodeType() -> (t string ) {
+	object map{ string -> JsonSyntaxTreeNode } 
+	fn nodeType() -> (name string ) {
 		switch this.Type {
 			case JsonSyntaxTreeTypeArray :
 				return "array" 
@@ -50,7 +50,6 @@ class JsonSyntaxTreeNode {
 
 
 
-
 class Decoder {
 	x Object 
 	bs []byte
@@ -63,7 +62,7 @@ class Decoder {
 		this.bs = bs
 	}
 	
-	public fn decode() -> (x2 Object , err error){
+	public fn decode() -> (x2 Object, err error){
 		defer {
 			x := catch()
 			if x != null  &&
@@ -71,31 +70,14 @@ class Decoder {
 				err = x 
 			}
 		}
-		err = this.parseSyntaxTree()
+		this.tree , err = this.parseJsonSyntaxTree()
 		if err != null {
 			return  
 		}
 		return this.decodeFromTree(this.tree , this . x )
 	}
 	
-	private fn parseSyntaxTree() -> (err error) {
-		if this.bs.size() == 4  && 
-			this.bs[0] == 'n' &&
-			this.bs[1] == 'u' &&
-			this.bs[2] == 'l' && 
-			this.bs[3] == 'l'{
-			return null 
-		}
-		this.skipWhiteSpace()
-		b := this.bs[this.offset]  
-		if b != '[' && b != '{' {
-			err = new error("unkown begining of json input")
-		}
-		this.tree ,err = this.parseValue()
-		if err != null {
-			return  
-		}
-	}
+	
 	
 	
 	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object , err error ){
@@ -107,8 +89,7 @@ class Decoder {
 	}
 
 	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object,err error) {
-		typeName := c.getName()
-		if typeName == "boolean" {
+		if typeName := c.getName() ; typeName == "boolean" {
 			if tree.Type != JsonSyntaxTreeTypeBool {
 				return null, new error(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
 			} 
@@ -250,14 +231,14 @@ class Decoder {
 	
 	
 	private fn skipWhiteSpace() {
-		b := this.bs[this.offset++] // 
-		for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' { // 13 stands for CR
+		b := this.bs[this.offset++] //read next 
+		for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' { 
 			b = this.bs[this.offset++]
 		}
-		this.offset -- 
+		this.offset --   // 
 	}
-
-	private fn parseValue() -> (n JsonSyntaxTreeNode,err error ) {
+	
+	private fn parseJsonSyntaxTree() -> (n JsonSyntaxTreeNode,err error ) {
 		this.skipWhiteSpace()
 		b := this.bs[this.offset]
 		switch b {
@@ -316,7 +297,7 @@ class Decoder {
 		n.arrayElements = []JsonSyntaxTreeNode{}
 		b := this.bs[this.offset ++ ]
 		for b != ']' {
-			value,err := this.parseValue()
+			value,err := this.parseJsonSyntaxTree()
 			if err != null {
 				return null,err 
 			}
@@ -343,7 +324,7 @@ class Decoder {
 		n.Type = JsonSyntaxTreeTypeObject
 		n.object = new map {string -> JsonSyntaxTreeNode } ()
 		for b != '}' {
-			k ,err := this.parseValue()
+			k ,err := this.parseJsonSyntaxTree()
 			if err != null {
 				return null , err  
 			}
@@ -355,7 +336,7 @@ class Decoder {
 			if b != ':' {
 				return null , new error("expect colon, but :" +  this.getErrMsg())
 			}
-			v,err := this.parseValue()
+			v,err := this.parseJsonSyntaxTree()
 			if err != null {
 				return null ,err 
 			}

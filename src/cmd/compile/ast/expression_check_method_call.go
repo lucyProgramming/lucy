@@ -74,9 +74,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				call.Method = ms[0]
 				return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 			}
-
 			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
-
 			return nil
 		}
 		if len(call.ParameterTypes) > 0 {
@@ -125,8 +123,9 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 	if block.InheritedAttribute.IsConstructionMethod == false ||
 		block.IsFunctionBlock == false ||
 		block.InheritedAttribute.StatementOffset != 0 {
-		*errs = append(*errs, fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
-			errMsgPrefix(e.Pos)))
+		*errs = append(*errs,
+			fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
+				errMsgPrefix(e.Pos)))
 		return nil
 	}
 	err := object.Class.loadSuperClass(e.Pos)
@@ -135,7 +134,8 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		return nil
 	}
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
-	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs, nil, call, callArgsTypes)
+	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs,
+		nil, call, callArgsTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
 		return nil

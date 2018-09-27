@@ -14,56 +14,72 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	if bin.Left.Value.IsNumber() { // in this case ,right must be a number type
+	if bin.Left.Value.IsNumber() ||
+		bin.Left.Value.Type == ast.VariableTypeEnum { // in this case ,right must be a number type
 		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack := buildExpression.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
-		switch bin.Left.Value.Type {
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
-			code.Codes[code.CodeLength] = cg.OP_isub
-		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_lcmp
-		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_fcmpl
-		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_dcmpl
+		if bin.Left.Value.Type == ast.VariableTypeByte ||
+			bin.Left.Value.Type == ast.VariableTypeShort ||
+			bin.Left.Value.Type == ast.VariableTypeChar ||
+			bin.Left.Value.Type == ast.VariableTypeInt ||
+			bin.Left.Value.Type == ast.VariableTypeEnum {
+			switch e.Type {
+			case ast.ExpressionTypeGt:
+				code.Codes[code.CodeLength] = cg.OP_if_icmpgt
+			case ast.ExpressionTypeLe:
+				code.Codes[code.CodeLength] = cg.OP_if_icmple
+			case ast.ExpressionTypeLt:
+				code.Codes[code.CodeLength] = cg.OP_if_icmplt
+			case ast.ExpressionTypeGe:
+				code.Codes[code.CodeLength] = cg.OP_if_icmpge
+			case ast.ExpressionTypeEq:
+				code.Codes[code.CodeLength] = cg.OP_if_icmpeq
+			case ast.ExpressionTypeNe:
+				code.Codes[code.CodeLength] = cg.OP_if_icmpne
+			}
+			code.CodeLength++
+		} else {
+			switch bin.Left.Value.Type {
+			case ast.VariableTypeLong:
+				code.Codes[code.CodeLength] = cg.OP_lcmp
+			case ast.VariableTypeFloat:
+				code.Codes[code.CodeLength] = cg.OP_fcmpl
+			case ast.VariableTypeDouble:
+				code.Codes[code.CodeLength] = cg.OP_dcmpl
+			}
+			code.CodeLength++
+			switch e.Type {
+			case ast.ExpressionTypeGt:
+				code.Codes[code.CodeLength] = cg.OP_ifgt
+			case ast.ExpressionTypeLe:
+				code.Codes[code.CodeLength] = cg.OP_ifle
+			case ast.ExpressionTypeLt:
+				code.Codes[code.CodeLength] = cg.OP_iflt
+			case ast.ExpressionTypeGe:
+				code.Codes[code.CodeLength] = cg.OP_ifge
+			case ast.ExpressionTypeEq:
+				code.Codes[code.CodeLength] = cg.OP_ifeq
+			case ast.ExpressionTypeNe:
+				code.Codes[code.CodeLength] = cg.OP_ifne
+			}
+			code.CodeLength++
 		}
-		code.CodeLength++
 		state.popStack(1)
-		context.MakeStackMap(code, state, code.CodeLength+7)
+		context.MakeStackMap(code, state, code.CodeLength+6)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,
 		})
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		switch e.Type {
-		case ast.ExpressionTypeGt:
-			code.Codes[code.CodeLength] = cg.OP_ifgt
-		case ast.ExpressionTypeLe:
-			code.Codes[code.CodeLength] = cg.OP_ifle
-		case ast.ExpressionTypeLt:
-			code.Codes[code.CodeLength] = cg.OP_iflt
-		case ast.ExpressionTypeGe:
-			code.Codes[code.CodeLength] = cg.OP_ifge
-		case ast.ExpressionTypeEq:
-			code.Codes[code.CodeLength] = cg.OP_ifeq
-		case ast.ExpressionTypeNe:
-			code.Codes[code.CodeLength] = cg.OP_ifne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
+		context.MakeStackMap(code, state, code.CodeLength+7)
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength:code.CodeLength+2], 7)
+		code.Codes[code.CodeLength+2] = cg.OP_iconst_0
+		code.Codes[code.CodeLength+3] = cg.OP_goto
+		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
+		code.Codes[code.CodeLength+6] = cg.OP_iconst_1
+		code.CodeLength += 7
 		return
 	}
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
@@ -203,35 +219,6 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
 		} else { // ne
 			code.Codes[code.CodeLength] = cg.OP_if_acmpne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
-		return
-	}
-
-	// enum
-	if bin.Left.Value.Type == ast.VariableTypeEnum {
-		stack := buildExpression.build(class, code, bin.Left, context, state)
-		if stack > maxStack {
-			maxStack = stack
-		}
-		state.pushStack(class, bin.Left.Value)
-		stack = buildExpression.build(class, code, bin.Right, context, state)
-		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
-			maxStack = t
-		}
-		state.popStack(1) //
-		context.MakeStackMap(code, state, code.CodeLength+7)
-		state.pushStack(class, &ast.Type{Type: ast.VariableTypeBool})
-		context.MakeStackMap(code, state, code.CodeLength+8) //result on stack
-		if e.Type == ast.ExpressionTypeEq {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpne
 		}
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
 		code.Codes[code.CodeLength+3] = cg.OP_iconst_0

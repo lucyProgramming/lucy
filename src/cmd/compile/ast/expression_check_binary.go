@@ -104,7 +104,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeEnum:
-			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
+			if left.assignAble(errs, right) == false {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		case VariableTypeByte:

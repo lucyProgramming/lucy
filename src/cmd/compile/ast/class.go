@@ -159,14 +159,16 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 			if m.IsAbstract() {
 				for _, v := range m.Function.Type.ParameterList {
 					if v.DefaultValueExpression != nil {
-						errs = append(errs, fmt.Errorf("%s abstract method parameter '%s' cannot have default value '%s'",
-							errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
+						errs = append(errs,
+							fmt.Errorf("%s abstract method parameter '%s' cannot have default value '%s'",
+								errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
 					}
 				}
 				for _, v := range m.Function.Type.ReturnList {
 					if v.DefaultValueExpression != nil {
-						errs = append(errs, fmt.Errorf("%s abstract method return variable '%s' cannot have default value '%s'",
-							errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
+						errs = append(errs,
+							fmt.Errorf("%s abstract method return variable '%s' cannot have default value '%s'",
+								errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
 					}
 				}
 			}
@@ -420,7 +422,11 @@ func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *Exp
 			}
 			return []*ClassMethod{v}, true, nil
 		} else {
-			ms = append(ms, v)
+			if c.IsJava {
+				ms = append(ms, v)
+			} else {
+				return nil, false, err
+			}
 		}
 	}
 	return ms, false, nil

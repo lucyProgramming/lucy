@@ -195,7 +195,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
 			}
-			m.Function.Type.VArgs.Type.IsVArgs = true
+			m.Function.Type.VArgs.Type.IsVariableArgs = true
 			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
 		if astClass.Methods[m.Function.Name] == nil {
@@ -267,7 +267,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 					panic("not a java array")
 				}
 				f.Type.FunctionType.VArgs = f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1]
-				f.Type.FunctionType.VArgs.Type.IsVArgs = true
+				f.Type.FunctionType.VArgs.Type.IsVariableArgs = true
 				f.Type.FunctionType.ParameterList = f.Type.FunctionType.ParameterList[:len(f.Type.FunctionType.ParameterList)-1]
 			}
 		}
@@ -316,7 +316,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
 			}
-			m.Function.Type.VArgs.Type.IsVArgs = true
+			m.Function.Type.VArgs.Type.IsVariableArgs = true
 			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
 		if astClass.Methods[m.Function.Name] == nil {
@@ -425,7 +425,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 					}
 					vd.Type.FunctionType.VArgs =
 						vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1]
-					vd.Type.FunctionType.VArgs.Type.IsVArgs = true
+					vd.Type.FunctionType.VArgs.Type.IsVariableArgs = true
 					vd.Type.FunctionType.ParameterList =
 						vd.Type.FunctionType.ParameterList[:len(vd.Type.FunctionType.ParameterList)-1]
 				}
@@ -482,7 +482,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			if function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
 			}
-			function.Type.VArgs.Type.IsVArgs = true
+			function.Type.VArgs.Type.IsVariableArgs = true
 			function.Type.ParameterList = function.Type.ParameterList[:len(function.Type.ParameterList)-1]
 		}
 

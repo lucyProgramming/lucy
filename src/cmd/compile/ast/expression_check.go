@@ -348,7 +348,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 				errMsgPrefix(e.Pos)))
 			return
 		}
-		t.IsVArgs = true
+		t.IsVariableArgs = true
 	default:
 		panic(fmt.Sprintf("unhandled type:%v", e.Description))
 	}

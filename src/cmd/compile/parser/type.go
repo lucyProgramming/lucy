@@ -174,10 +174,10 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 	if parser.token.Type == lex.TokenVArgs {
 		parser.Next(lfIsToken) // skip ...
 		newRet := &ast.Type{
-			Pos:     pos,
-			Type:    ast.VariableTypeJavaArray,
-			Array:   ret,
-			IsVArgs: true,
+			Pos:            pos,
+			Type:           ast.VariableTypeJavaArray,
+			Array:          ret,
+			IsVariableArgs: true,
 		}
 		ret = newRet
 		return ret, nil

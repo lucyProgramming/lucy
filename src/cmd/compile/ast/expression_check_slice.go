@@ -40,11 +40,13 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if on.End != nil {
 		endType, es := on.End.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
-		if endType != nil && endType.IsInteger() == false {
+		if endType != nil &&
+			endType.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for slice",
 				errMsgPrefix(endType.Pos), endType.TypeString()))
 		}
-		if endType != nil && endType.Type == VariableTypeLong {
+		if endType != nil &&
+			endType.Type == VariableTypeLong {
 			on.End.ConvertToNumber(VariableTypeInt)
 		}
 	} else {

@@ -39,23 +39,23 @@ const (
 )
 
 type Type struct {
-	Type         VariableTypeKind
-	IsBuildIn    bool // build in type alias
-	IsVArgs      bool // int ...
-	Resolved     bool
-	Pos          *Pos
-	Name         string
-	Array        *Type
-	Class        *Class
-	Enum         *Enum
-	EnumName     *EnumName // indicate a const
-	Function     *Function
-	FunctionType *FunctionType
-	Map          *Map
-	Package      *Package
-	Alias        string
-	AliasType    *Type
-	Comment      string
+	Type           VariableTypeKind
+	IsBuildIn      bool // build in type alias
+	IsVariableArgs bool // int ...
+	Resolved       bool
+	Pos            *Pos
+	Name           string
+	Array          *Type
+	Class          *Class
+	Enum           *Enum
+	EnumName       *EnumName // indicate a const
+	Function       *Function
+	FunctionType   *FunctionType
+	Map            *Map
+	Package        *Package
+	Alias          string
+	AliasType      *Type
+	Comment        string
 }
 
 type Map struct {
@@ -417,7 +417,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "[]"
 		typ.Array.typeString(ret)
 	case VariableTypeJavaArray:
-		if typ.IsVArgs {
+		if typ.IsVariableArgs {
 			*ret += typ.Array.TypeString() + "..."
 		} else {
 			*ret += typ.Array.TypeString() + "[]"
@@ -579,7 +579,7 @@ func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 		return leftValue.Array.assignAble(errs, rightValue.Array)
 	}
 	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
-		if leftValue.IsVArgs != rightValue.IsVArgs {
+		if leftValue.IsVariableArgs != rightValue.IsVariableArgs {
 			return false
 		}
 		return leftValue.Array.assignAble(errs, rightValue.Array)
@@ -637,7 +637,7 @@ func (typ *Type) Equal(compareTo *Type) bool {
 		typ.Type == VariableTypeJavaArray {
 		if typ.Type == VariableTypeJavaArray {
 			if typ.Type == VariableTypeJavaArray &&
-				typ.IsVArgs != compareTo.IsVArgs {
+				typ.IsVariableArgs != compareTo.IsVariableArgs {
 				return false
 			}
 		}

@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	//"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -14,6 +15,7 @@ func (buildExpression *BuildExpression) build(class *cg.ClassHighLevel, code *cg
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
+	//fmt.Println(e.Pos)
 	switch e.Type {
 	case ast.ExpressionTypeNull:
 		code.Codes[code.CodeLength] = cg.OP_aconst_null

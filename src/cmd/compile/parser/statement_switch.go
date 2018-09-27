@@ -90,12 +90,28 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	if blockParser.parser.token.Type == lex.TokenTemplate {
 		return blockParser.parseSwitchTemplate(pos)
 	}
-	condition, err := blockParser.parser.ExpressionParser.parseExpression(false)
+	statementSwitch := &ast.StatementSwitch{}
+	statementSwitch.Pos = pos
+	var err error
+	statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 	}
 	blockParser.parser.ifTokenIsLfThenSkip()
+	for blockParser.parser.token.Type == lex.TokenSemicolon {
+		if statementSwitch.Condition != nil {
+			statementSwitch.PrefixExpressions = append(statementSwitch.PrefixExpressions, statementSwitch.Condition)
+			statementSwitch.Condition = nil
+		}
+		blockParser.parser.Next(lfNotToken)
+		statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+		if err != nil {
+			blockParser.parser.errs = append(blockParser.parser.errs, err)
+			blockParser.consume(untilLc)
+		}
+		blockParser.parser.ifTokenIsLfThenSkip()
+	}
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
@@ -110,9 +126,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
-	statementSwitch := &ast.StatementSwitch{}
-	statementSwitch.Pos = pos
-	statementSwitch.Condition = condition
+
 	for blockParser.parser.token.Type == lex.TokenCase {
 		blockParser.Next(lfIsToken) // skip case
 		blockParser.parser.unExpectNewLineAndSkip()

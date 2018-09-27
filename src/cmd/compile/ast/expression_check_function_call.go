@@ -57,6 +57,20 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 				return nil
 			}
 			return []*Type{ret}
+		case *Variable:
+			v := d.(*Variable)
+			if v.Type.Type != VariableTypeFunction {
+				*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s' ",
+					errMsgPrefix(call.Expression.Pos), v.Name, v.Type.TypeString()))
+				return nil
+			}
+			call.Expression.Value = &Type{
+				Pos:          e.Pos,
+				Type:         VariableTypeFunction,
+				FunctionType: v.Type.FunctionType,
+			}
+			identifier.Variable = v
+			return e.checkFunctionPointerCall(block, errs, v.Type.FunctionType, call)
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot make call on '%s'",
 				errMsgPrefix(call.Expression.Pos), block.identifierIsWhat(d)))

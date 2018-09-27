@@ -139,11 +139,11 @@ func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpress
 				}
 			}
 		}
-		if v.Type.IsVArgs && v.DefaultValueExpression != nil {
+		if v.Type.IsVariableArgs && v.DefaultValueExpression != nil {
 			*errs = append(*errs, fmt.Errorf("%s vargs cannot have default value",
 				errMsgPrefix(v.Type.Pos)))
 		}
-		if v.Type.IsVArgs {
+		if v.Type.IsVariableArgs {
 			if k != len(f.Type.ParameterList)-1 {
 				*errs = append(*errs, fmt.Errorf("%s only last parameter can be use as vargs",
 					errMsgPrefix(v.Type.Pos)))

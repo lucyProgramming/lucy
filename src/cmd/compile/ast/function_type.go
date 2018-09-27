@@ -198,7 +198,7 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 			if t == nil { // some error before
 				return
 			}
-			if t.IsVArgs {
+			if t.IsVariableArgs {
 				if len(callArgsTypes[len(ft.ParameterList):]) > 1 {
 					errMsg := fmt.Sprintf("%s too many argument to call\n",
 						errMsgPrefix(t.Pos))
