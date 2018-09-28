@@ -21,7 +21,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 		function.Name = function.NameLiteralFunction()
 	}
 	if function.IsClosureFunction == false {
-		function.Name = class.NewFunctionName(function.Name) // new a function name
+		function.Name = class.NewMethodName(function.Name) // new a function name
 		method := &cg.MethodHighLevel{}
 		method.Name = function.Name
 		method.AccessFlags |= cg.ACC_METHOD_FINAL

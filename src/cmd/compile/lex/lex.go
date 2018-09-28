@@ -64,6 +64,7 @@ func (lex *Lexer) isOctal(c byte) bool {
 	return '0' <= c && c <= '7'
 }
 func (lex *Lexer) isHex(c byte) bool {
+
 	return '0' <= c && c <= '9' ||
 		('a' <= c && c <= 'f') ||
 		('A' <= c && c <= 'F')

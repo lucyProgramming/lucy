@@ -11,7 +11,7 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(class *cg.Clas
 	if call.TemplateFunctionCallPair.Entrance == nil {
 		method := &cg.MethodHighLevel{}
 		method.Class = class
-		method.Name = class.NewFunctionName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
+		method.Name = class.NewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
 		method.AccessFlags |= cg.ACC_CLASS_PUBLIC
 		method.AccessFlags |= cg.ACC_CLASS_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_STATIC

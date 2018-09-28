@@ -198,7 +198,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 		method.AccessFlags |= cg.ACC_METHOD_STATIC
 		method.AccessFlags |= cg.ACC_METHOD_FINAL
 		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
-		method.Name = buildPackage.mainClass.NewFunctionName("block")
+		method.Name = buildPackage.mainClass.NewMethodName("block")
 		method.Class = buildPackage.mainClass
 		method.Descriptor = "()V"
 		method.Code = &cg.AttributeCode{}
@@ -242,7 +242,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 
 	// trigger init
 	trigger := &cg.MethodHighLevel{}
-	trigger.Name = buildPackage.mainClass.NewFunctionName("triggerPackageInit")
+	trigger.Name = buildPackage.mainClass.NewMethodName("triggerPackageInit")
 	trigger.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
 	trigger.AccessFlags |= cg.ACC_METHOD_STATIC

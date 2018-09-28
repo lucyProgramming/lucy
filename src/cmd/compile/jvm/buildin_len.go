@@ -9,20 +9,20 @@ import (
 func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	maxStack = buildExpression.build(class, code, call.Args[0], context, state)
+	a0 := call.Args[0]
+	maxStack = buildExpression.build(class, code, a0, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	if 2 > maxStack {
 		maxStack = 2
 	}
-	a0 := call.Args[0]
 	code.Codes[code.CodeLength] = cg.OP_ifnonnull
 	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 8)
 	code.Codes[code.CodeLength+3] = cg.OP_pop
 	code.Codes[code.CodeLength+4] = cg.OP_iconst_0
 	code.CodeLength += 5
 	noNullExit := (&cg.Exit{}).Init(cg.OP_goto, code)
-	state.pushStack(class, call.Args[0].Value)
+	state.pushStack(class, a0.Value)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)
 	if a0.Value.Type == ast.VariableTypeJavaArray {
@@ -37,7 +37,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, c
 			Descriptor: "()I",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-	} else if call.Args[0].Value.Type == ast.VariableTypeMap {
+	} else if a0.Value.Type == ast.VariableTypeMap {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      mapClass,
