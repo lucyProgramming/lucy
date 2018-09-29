@@ -28,21 +28,21 @@ func (buildExpression *BuildExpression) buildMapLiteral(class *cg.ClassHighLevel
 		code.CodeLength++
 		currentStack := uint16(2)
 		state.pushStack(class, hashMapObject)
-		stack := buildExpression.build(class, code, v.Left, context, state)
+		stack := buildExpression.build(class, code, v.Key, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if v.Left.Value.IsPointer() == false {
-			typeConverter.packPrimitives(class, code, v.Left.Value)
+		if v.Key.Value.IsPointer() == false {
+			typeConverter.packPrimitives(class, code, v.Key.Value)
 		}
 		state.pushStack(class, state.newObjectVariableType(javaRootClass))
 		currentStack = 3 // stack is ... mapref mapref kref
-		stack = buildExpression.build(class, code, v.Right, context, state)
+		stack = buildExpression.build(class, code, v.Value, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if v.Right.Value.IsPointer() == false {
-			typeConverter.packPrimitives(class, code, v.Right.Value)
+		if v.Value.Value.IsPointer() == false {
+			typeConverter.packPrimitives(class, code, v.Value.Value)
 		}
 		// put in hashmap
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

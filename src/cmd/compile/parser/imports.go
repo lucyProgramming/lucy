@@ -10,7 +10,14 @@ import (
 //atBeginningOfFile bool
 func (parser *Parser) parseImports() []*ast.Import {
 	ret := []*ast.Import{}
-	for parser.token.Type == lex.TokenImport {
+	for parser.token.Type == lex.TokenImport ||
+		parser.token.Type == lex.TokenComment ||
+		parser.token.Type == lex.TokenCommentMultiLine {
+		if parser.token.Type == lex.TokenComment ||
+			parser.token.Type == lex.TokenCommentMultiLine {
+			parser.Next(lfNotToken)
+			continue
+		}
 		parser.Next(lfIsToken) // skip import key word
 		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenLiteralString {
@@ -43,7 +50,7 @@ func (parser *Parser) parseImports() []*ast.Import {
 		}
 		parser.validStatementEnding()
 		parser.Next(lfNotToken)
-		continue
+
 	}
 	return ret
 }

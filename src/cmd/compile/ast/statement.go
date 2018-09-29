@@ -127,7 +127,8 @@ func (s *Statement) check(block *Block) []error {
 		return s.Block.checkStatements()
 	case StatementTypeLabel:
 		if block.InheritedAttribute.Defer != nil {
-			block.InheritedAttribute.Defer.Labels = append(block.InheritedAttribute.Defer.Labels, s.StatementLabel)
+			block.InheritedAttribute.Defer.Labels =
+				append(block.InheritedAttribute.Defer.Labels, s.StatementLabel)
 		}
 	case StatementTypeClass:
 		err := block.Insert(s.Class.Name, s.Pos, s.Class)

@@ -28,22 +28,29 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	if m.Type.Map == nil {
 		m.Type.Map = &Map{}
 	}
+	//byteMap := make(map[byte]*Pos)
+	//shortMap := make(map[int32]*Pos)
+	//intMap := make(map[int32]*Pos)
+	//charMap := make(map[int32]*Pos)
+	//longMap := make(map[int64]*Pos)
+	//floatMap := make(map[float32]*Pos)
+	//doubleMap := make(map[float64]*Pos)
+	//stringMap := make(map[string]*Pos)
+	//enumNamesMap := make(map[string]*Pos)
 	for _, v := range m.KeyValuePairs {
 		// map k
-		kType, es := v.Left.checkSingleValueContextExpression(block)
-
+		kType, es := v.Key.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
-
 		if kType != nil {
 			rightValueValid := kType.RightValueValid()
 			if false == rightValueValid {
 				*errs = append(*errs, fmt.Errorf("%s k is not right value valid",
-					errMsgPrefix(v.Left.Pos)))
+					errMsgPrefix(v.Key.Pos)))
 			}
 			if noType && m.Type.Map.K == nil {
 				if kType.isTyped() == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k",
-						errMsgPrefix(v.Left.Pos)))
+						errMsgPrefix(v.Key.Pos)))
 				} else {
 					m.Type.Map.K = kType
 					mapK = m.Type.Map.K
@@ -53,31 +60,32 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 				if mapK.assignAble(errs, kType) == false {
 					if noType {
 						*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map value",
-							errMsgPrefix(v.Left.Pos),
+							errMsgPrefix(v.Key.Pos),
 							kType.TypeString(), mapK.TypeString()))
 					} else {
 						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(v.Left.Pos),
+							errMsgPrefix(v.Key.Pos),
 							kType.TypeString(), mapK.TypeString()))
 					}
 				}
 			}
 		}
+
 		// map v
-		vType, es := v.Right.checkSingleValueContextExpression(block)
+		vType, es := v.Value.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
 		if vType == nil {
 			continue
 		}
 		if false == kType.RightValueValid() {
 			*errs = append(*errs, fmt.Errorf("%s k is not right value valid",
-				errMsgPrefix(v.Right.Pos)))
+				errMsgPrefix(v.Value.Pos)))
 			continue
 		}
 		if noType && m.Type.Map.V == nil {
 			if vType.isTyped() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
-					errMsgPrefix(v.Right.Pos)))
+					errMsgPrefix(v.Value.Pos)))
 			} else {
 				m.Type.Map.V = vType
 				mapV = m.Type.Map.V
@@ -87,11 +95,11 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			if mapV.assignAble(errs, vType) == false {
 				if noType {
 					*errs = append(*errs, fmt.Errorf("%s mix '%s' and '%s' for map key",
-						errMsgPrefix(v.Right.Pos),
+						errMsgPrefix(v.Value.Pos),
 						vType.TypeString(), mapV.TypeString()))
 				} else {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(v.Right.Pos),
+						errMsgPrefix(v.Value.Pos),
 						vType.TypeString(), mapV.TypeString()))
 				}
 			}

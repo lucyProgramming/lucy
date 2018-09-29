@@ -77,15 +77,15 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			return nil
 		}
 	}
-	on, es := call.Expression.checkSingleValueContextExpression(block)
+	functionPointer, es := call.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
-	if on == nil {
+	if functionPointer == nil {
 		return nil
 	}
-	if on.Type != VariableTypeFunction {
+	if functionPointer.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
 			errMsgPrefix(e.Pos),
-			call.Expression.Description, on.TypeString()))
+			call.Expression.Description, functionPointer.TypeString()))
 		return nil
 	}
 	if call.Expression.Type == ExpressionTypeFunctionLiteral {
@@ -95,10 +95,10 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			}()
 			no name function is statement too
 		*/
-		on.Function = call.Expression.Data.(*Function)
+		functionPointer.Function = call.Expression.Data.(*Function)
 		call.Expression.IsStatementExpression = true
 	}
-	return e.checkFunctionPointerCall(block, errs, on.FunctionType, call)
+	return e.checkFunctionPointerCall(block, errs, functionPointer.FunctionType, call)
 }
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {

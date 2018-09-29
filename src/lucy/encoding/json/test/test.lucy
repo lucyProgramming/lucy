@@ -27,7 +27,7 @@ fn main(args []string) {
 	x.intValue = 100
 	x.floatValue = 99.9999
 	x.stringValue = "hello world"
-	bs,err := json.encode(x  )
+	bs,err := json.encode(x , "\t" )
 	if err != null {
 		print(err)
 	}

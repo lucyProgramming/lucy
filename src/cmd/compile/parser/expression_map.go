@@ -49,9 +49,9 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 		if err != nil {
 			return ret, err
 		}
-		m.KeyValuePairs = append(m.KeyValuePairs, &ast.ExpressionBinary{
-			Left:  k,
-			Right: v,
+		m.KeyValuePairs = append(m.KeyValuePairs, &ast.ExpressionKV{
+			Key:   k,
+			Value: v,
 		})
 		if expressionParser.parser.token.Type == lex.TokenComma {
 			// read next  key value pair

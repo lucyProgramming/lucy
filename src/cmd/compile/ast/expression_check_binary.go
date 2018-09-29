@@ -161,11 +161,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VariableTypeArray:
 			fallthrough
 		case VariableTypeObject:
-			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
-				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-			}
+			fallthrough
 		case VariableTypeFunction:
-			if right.Type != VariableTypeNull || e.isEqOrNe() == false {
+			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}
 		default:
@@ -173,7 +171,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		return result
 	}
-	//
+	// + - * / %
 	if e.Type == ExpressionTypeAdd ||
 		e.Type == ExpressionTypeSub ||
 		e.Type == ExpressionTypeMul ||
@@ -193,7 +191,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return nil
 		}
 		//check string first
-		if left.Type == VariableTypeString || right.Type == VariableTypeString { // string is always ok
+		if left.Type == VariableTypeString ||
+			right.Type == VariableTypeString { // string is always ok
 			if e.Type != ExpressionTypeAdd {
 				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 			}

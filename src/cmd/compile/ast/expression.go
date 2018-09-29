@@ -484,7 +484,12 @@ type ExpressionNew struct {
 
 type ExpressionMap struct {
 	Type          *Type
-	KeyValuePairs []*ExpressionBinary
+	KeyValuePairs []*ExpressionKV
+}
+
+type ExpressionKV struct {
+	Key   *Expression
+	Value *Expression
 }
 
 /*

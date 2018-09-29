@@ -70,9 +70,11 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 	//multi returns
 	if len(statementReturn.Expressions) > 0 {
 		if len(statementReturn.Expressions) == 1 {
-			maxStack = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack = buildPackage.BuildExpression.build(class, code,
+				statementReturn.Expressions[0], context, state)
 		} else {
-			maxStack = buildPackage.BuildExpression.buildExpressions(class, code, statementReturn.Expressions, context, state)
+			maxStack = buildPackage.BuildExpression.buildExpressions(class, code,
+				statementReturn.Expressions, context, state)
 		}
 	}
 	if len(statementReturn.Defers) > 0 {
@@ -92,19 +94,20 @@ func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel,
 					context.multiValueVarOffset)...)
 		}
 	}
+	// return value is on stack
 	if len(statementReturn.Expressions) > 0 {
 		code.Codes[code.CodeLength] = cg.OP_areturn
 		code.CodeLength++
 		return
 	}
-	stack := buildPackage.buildReturnFromFunctionReturnVars(class, code, context)
+	stack := buildPackage.buildReturnFromReturnVars(class, code, context)
 	if stack > maxStack {
 		maxStack = stack
 	}
 	return
 }
 
-func (buildPackage *BuildPackage) buildReturnFromFunctionReturnVars(class *cg.ClassHighLevel,
+func (buildPackage *BuildPackage) buildReturnFromReturnVars(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context) (maxStack uint16) {
 	if context.function.Type.VoidReturn() { // when has no return,should not call this function
 		return
@@ -112,32 +115,29 @@ func (buildPackage *BuildPackage) buildReturnFromFunctionReturnVars(class *cg.Cl
 	if len(context.function.Type.ReturnList) == 1 {
 		buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		maxStack = jvmSlotSize(context.function.Type.ReturnList[0].Type)
-		if context.function.Type.ReturnList[0].Type.IsPointer() {
+		switch context.function.Type.ReturnList[0].Type.Type {
+		case ast.VariableTypeBool:
+			fallthrough
+		case ast.VariableTypeByte:
+			fallthrough
+		case ast.VariableTypeShort:
+			fallthrough
+		case ast.VariableTypeChar:
+			fallthrough
+		case ast.VariableTypeEnum:
+			fallthrough
+		case ast.VariableTypeInt:
+			code.Codes[code.CodeLength] = cg.OP_ireturn
+		case ast.VariableTypeLong:
+			code.Codes[code.CodeLength] = cg.OP_lreturn
+		case ast.VariableTypeFloat:
+			code.Codes[code.CodeLength] = cg.OP_freturn
+		case ast.VariableTypeDouble:
+			code.Codes[code.CodeLength] = cg.OP_dreturn
+		default:
 			code.Codes[code.CodeLength] = cg.OP_areturn
-			code.CodeLength++
-		} else {
-			switch context.function.Type.ReturnList[0].Type.Type {
-			case ast.VariableTypeBool:
-				fallthrough
-			case ast.VariableTypeByte:
-				fallthrough
-			case ast.VariableTypeShort:
-				fallthrough
-			case ast.VariableTypeChar:
-				fallthrough
-			case ast.VariableTypeEnum:
-				fallthrough
-			case ast.VariableTypeInt:
-				code.Codes[code.CodeLength] = cg.OP_ireturn
-			case ast.VariableTypeLong:
-				code.Codes[code.CodeLength] = cg.OP_lreturn
-			case ast.VariableTypeFloat:
-				code.Codes[code.CodeLength] = cg.OP_freturn
-			case ast.VariableTypeDouble:
-				code.Codes[code.CodeLength] = cg.OP_dreturn
-			}
-			code.CodeLength++
 		}
+		code.CodeLength++
 		return
 	}
 	//multi returns
@@ -230,21 +230,15 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		if index != 0 {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-		}
-		if index == 0 {
+		} else {
 			//exception that have been handled
 			if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
 				//load when function have multi returns if read to end
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset)...)
-				code.Codes[code.CodeLength] = cg.OP_ifnull
-				binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-				code.Codes[code.CodeLength+3] = cg.OP_goto
-				length := code.CodeLength + 3
-				code.CodeLength += 6
+				exit := (&cg.Exit{}).Init(cg.OP_ifnonnull , code)
+				buildPackage.buildReturnFromReturnVars(class, code, context)
 				context.MakeStackMap(code, state, code.CodeLength)
-				buildPackage.buildReturnFromFunctionReturnVars(class, code, context)
-				context.MakeStackMap(code, state, code.CodeLength)
-				binary.BigEndian.PutUint16(code.Codes[length+1:length+3], uint16(code.CodeLength-length))
+				writeExits([]*cg.Exit{exit}, code.CodeLength)
 			}
 		}
 		index--

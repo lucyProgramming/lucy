@@ -141,8 +141,12 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, 1)...)
 		{
 			// String[] java style
-			t := &ast.Type{Type: ast.VariableTypeJavaArray}
-			t.Array = &ast.Type{Type: ast.VariableTypeString}
+			t := &ast.Type{
+				Type: ast.VariableTypeJavaArray,
+			}
+			t.Array = &ast.Type{
+				Type: ast.VariableTypeString,
+			}
 			state.appendLocals(class, t)
 		}
 		method.Code.MaxLocals = 1

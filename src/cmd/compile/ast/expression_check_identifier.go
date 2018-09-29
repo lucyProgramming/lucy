@@ -16,18 +16,18 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	case MagicIdentifierFile:
 		e.Type = ExpressionTypeString
 		e.Data = e.Pos.Filename
-		ts, _ := e.check(block)
-		return ts[0], nil
+		result, _ := e.checkSingleValueContextExpression(block)
+		return result, nil
 	case MagicIdentifierLine:
 		e.Type = ExpressionTypeInt
 		e.Data = int32(e.Pos.StartLine)
-		ts, _ := e.check(block)
-		return ts[0], nil
+		result, _ := e.checkSingleValueContextExpression(block)
+		return result, nil
 	case MagicIdentifierTime:
 		e.Type = ExpressionTypeLong
 		e.Data = int64(time.Now().UnixNano())
-		ts, _ := e.check(block)
-		return ts[0], nil
+		result, _ := e.checkSingleValueContextExpression(block)
+		return result, nil
 	case MagicIdentifierClass:
 		if block.InheritedAttribute.Class == nil {
 			return nil,
