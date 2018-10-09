@@ -16,7 +16,7 @@ public final class BoolOption  extends Option{
 	}
 	
 	//special case 
-	protected fn parse(s string) -> (err error) {
+	protected fn parse(s string)   {
 		this.boolValue = !this.boolDefaultValue
 	} 
 	public fn getValue() -> (b bool = this.boolValue){ }

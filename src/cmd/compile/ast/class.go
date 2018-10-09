@@ -313,7 +313,7 @@ func (c *Class) resolveInterfaces() []error {
 	return errs
 }
 
-func (c *Class) implementMethod(pos *Pos, m *ClassMethod, fromSub bool, errs *[]error) *ClassMethod {
+func (c *Class) implementMethod(pos *Pos, m *ClassMethod, nameMatched **ClassMethod, fromSub bool, errs *[]error) *ClassMethod {
 	if c.Methods != nil {
 		for _, v := range c.Methods[m.Function.Name] {
 			if v.IsAbstract() {
@@ -321,6 +321,9 @@ func (c *Class) implementMethod(pos *Pos, m *ClassMethod, fromSub bool, errs *[]
 			}
 			if fromSub && v.ableAccessFromSubClass() == false {
 				return nil
+			}
+			if *nameMatched == nil {
+				*nameMatched = v
 			}
 			if v.Function.Type.equal(&m.Function.Type) {
 				return v
@@ -337,7 +340,7 @@ func (c *Class) implementMethod(pos *Pos, m *ClassMethod, fromSub bool, errs *[]
 		return nil
 	} else {
 		//trying find fathte`s implementation
-		return c.SuperClass.implementMethod(pos, m, true, errs)
+		return c.SuperClass.implementMethod(pos, m, nameMatched, true, errs)
 	}
 	return nil
 }

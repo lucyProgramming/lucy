@@ -6,7 +6,6 @@ import (
 )
 
 type ClassMethod struct {
-	// compile auto method
 	IsCompilerAuto  bool
 	Function        *Function
 	LoadFromOutSide bool
@@ -36,7 +35,7 @@ func (m *ClassMethod) accessString() string {
 	if m.IsPrivate() {
 		return "private"
 	}
-	return "default" //TODO:: ???
+	return `default ""` //TODO:: ???
 }
 
 func (m *ClassMethod) isAccessFlagDefault() bool {

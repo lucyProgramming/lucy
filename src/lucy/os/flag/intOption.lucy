@@ -12,7 +12,7 @@ public final class IntOption  extends Option{
 		this.intValue = .intDefaultValue 
 	}
 	
-	protected fn parse(s string) -> (err error) {
+	protected fn parse(s string) {
 		bs := []byte(s)
 		isNegative := false 
 		if bs[0] == '-' {
@@ -24,8 +24,8 @@ public final class IntOption  extends Option{
 			if '0' <= b  && b <= '9'{
 				value = value * 10 + int(b - '0')
 			}else {
-				err = new error(sprintf("'%s' format int wrong" , s ))
-				return 
+				panic(sprintf("'%s' format int wrong" , s ))
+
 			}
 		}
 		if isNegative {

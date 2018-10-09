@@ -112,18 +112,26 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 			if m.IsAbstract() == false {
 				continue
 			}
-			implementation := c.implementMethod(c.Pos, m, false, &errs)
+			var nameMatch *ClassMethod
+			implementation := c.implementMethod(c.Pos, m, &nameMatch, false, &errs)
 			if implementation != nil {
 				if err := m.implementationMethodIsOk(c.Pos, implementation); err != nil {
 					errs = append(errs, err)
 				}
 			} else {
 				pos := c.Pos
-				if implementation.Function.Pos != nil {
-					pos = implementation.Function.Pos
+				if nameMatch != nil && nameMatch.Function.Pos != nil {
+					pos = nameMatch.Function.Pos
 				}
-				errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
-					errMsgPrefix(pos), m.Function.readableMsg(), super.Name))
+				if nameMatch != nil {
+					errmsg := fmt.Sprintf("%s method is suitable for abstract super class\n", errMsgPrefix(pos))
+					errmsg += fmt.Sprintf("\t have %s\n", nameMatch.Function.readableMsg())
+					errmsg += fmt.Sprintf("\t want %s\n", m.Function.readableMsg())
+					errs = append(errs, errors.New(errmsg))
+				} else {
+					errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
+						errMsgPrefix(pos), m.Function.readableMsg(), super.Name))
+				}
 			}
 		}
 	}
@@ -311,14 +319,19 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 	}
 	for _, v := range inter.Methods {
 		m := v[0]
-		implementation := c.implementMethod(c.Pos, m, false, &errs)
+		var nameMatch *ClassMethod
+		implementation := c.implementMethod(c.Pos, m, &nameMatch, false, &errs)
 		if implementation != nil {
 			if err := m.implementationMethodIsOk(c.Pos, implementation); err != nil {
 				errs = append(errs, err)
 			}
 		} else {
+			pos := c.Pos
+			if nameMatch != nil && nameMatch.Function.Pos != nil {
+				pos = nameMatch.Function.Pos
+			}
 			errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on interface '%s'",
-				errMsgPrefix(c.Pos), m.Function.readableMsg(), inter.Name))
+				errMsgPrefix(pos), m.Function.readableMsg(), inter.Name))
 		}
 	}
 	for _, v := range inter.Interfaces {

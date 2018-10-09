@@ -64,6 +64,12 @@ public final class  FlagParser {
 	
 	
 	public fn parse(args []string)->(noDefine []string , err error){
+	    defer {
+	        e := catch()
+			if e != null && err == null {
+				err = e 
+			}
+		}
 		for v := range this.options{
 			v.reset()
 		}
@@ -83,10 +89,7 @@ public final class  FlagParser {
 					err = new error(sprintf("no value  after '%s'" , v ))
 					return 
 				}
-				err = o.parse(args[++k])
-				if err != null {
-					return 
-				}
+				o.parse(args[++k])
 			}
 			
 		}

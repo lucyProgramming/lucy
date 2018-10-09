@@ -13,7 +13,7 @@ public final class FloatOption  extends Option{
 	}
 	
 	
-	protected fn parse(s string) -> (err error) {
+	protected fn parse(s string)  {
 		bs := []byte(s)
 		var k int 
 		var b byte 
@@ -30,7 +30,7 @@ public final class FloatOption  extends Option{
 			if '0' <= b  && b <= '9'{
 				value = value * 10.0 + float(b- '0')
 			}else {
-				err = new error(sprintf("'%s' format float wrong" , s ))
+				panic(sprintf("'%s' format float wrong" , s ))
 				return  
 			}
 		}
@@ -43,7 +43,7 @@ public final class FloatOption  extends Option{
 				if '0' <= b  && b <= '9'{
 					t = t * 0.1 + float(b - '0') / 10.0
 				}else {
-					err = new error(sprintf("'%s' format float wrong" , s ))
+					panic(sprintf("'%s' format float wrong" , s ))
 					return 
 				}
 				index --

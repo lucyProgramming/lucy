@@ -17,7 +17,7 @@ public final class StringOption  extends Option{
 	}
 	
 	
-	protected fn parse(s string) -> (err error) {	.stringValue = s } 
+	protected fn parse(s string)  {	.stringValue = s }
 	
 	public fn getValue() -> (v string = this.stringValue ){ }
 	
