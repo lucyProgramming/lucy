@@ -69,8 +69,12 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		left := lefts[0]
 		if left.Type == ExpressionTypeIdentifier {
 			t := left.Data.(*ExpressionIdentifier)
-			if nil != t.Variable {
-				t.Variable.Used = true
+			if t.Name == NoNameIdentifier {
+				return voidReturn
+			} else {
+				if nil != t.Variable {
+					t.Variable.Used = true
+				}
 			}
 		}
 	}

@@ -9,7 +9,7 @@ type VariableTypeKind int
 
 const (
 	_ VariableTypeKind = iota
-	//value types
+	//primitive types
 	VariableTypeBool
 	VariableTypeByte
 	VariableTypeChar
@@ -55,7 +55,7 @@ type Type struct {
 	Package        *Package
 	Alias          string
 	AliasType      *Type
-	Comment        string
+	Comment        string // for type alias
 }
 
 type Map struct {

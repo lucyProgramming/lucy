@@ -98,10 +98,8 @@ func (p *Package) TypeCheck() []error {
 		if v.IsGlobalMain() {
 			defineMainOK := false
 			if len(v.Type.ParameterList) == 1 {
-				if v.Type.ParameterList[0].Type.Type == VariableTypeArray &&
-					v.Type.ParameterList[0].Type.Array.Type == VariableTypeString {
-				}
-				defineMainOK = true
+				defineMainOK = v.Type.ParameterList[0].Type.Type == VariableTypeArray &&
+					v.Type.ParameterList[0].Type.Array.Type == VariableTypeString
 			}
 			if defineMainOK == false {
 				p.Errors = append(p.Errors,
@@ -284,8 +282,8 @@ type Import struct {
 }
 
 /*
-	import "github.com/lucy" should access by lucy.Println
-	import "github.com/std" as std should access by std.Println
+	import "github.com/lucy" should access by lucy.doSomething()
+	import "github.com/std" as std2 should access by std2.doSomething()
 */
 func (i *Import) MkAccessName() error {
 	if i.AccessName != "" {

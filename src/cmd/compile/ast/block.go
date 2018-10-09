@@ -243,6 +243,9 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 }
 
 func (b *Block) inherit(father *Block) {
+	if b.Outer != nil {
+		return
+	}
 	if b == father {
 		panic("inherit from self")
 	}

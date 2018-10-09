@@ -7,7 +7,6 @@ import (
 
 func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	ev := e.Data.(*ExpressionVar)
-
 	if ev.Type != nil {
 		if err := ev.Type.resolve(block); err != nil {
 			*errs = append(*errs, err)

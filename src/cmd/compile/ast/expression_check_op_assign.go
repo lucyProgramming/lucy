@@ -4,6 +4,14 @@ import "fmt"
 
 func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
 	bin := e.Data.(*ExpressionBinary)
+	if bin.Left.Type == ExpressionTypeList {
+		list := bin.Left.Data.([]*Expression)
+		if len(list) > 1 {
+			*errs = append(*errs,
+				fmt.Errorf("%s expect 1 expression on left", errMsgPrefix(e.Pos)))
+		}
+		bin.Left = list[0]
+	}
 	left := bin.Left.getLeftValue(block, errs)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
@@ -30,8 +38,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	}
 	convertExpressionToNeed(bin.Right, left, right)
 	/*
-		var  s string;
-		s += "11111111";
+		var  s string
+		s += "11111111"
 	*/
 	if left.Type == VariableTypeString {
 		if right.Type != VariableTypeString || (e.Type != ExpressionTypePlusAssign) {

@@ -3,23 +3,27 @@ import "java/lang/Object"
 import "java/lang/Class"
 
 
-public fn encode(x Object , indent string = "") -> (bs []byte ,err error){
-	e := new Encoder( x, "" , indent)
-	return e.encode()
+public fn encode(x Object , indent string = "") -> (bs []byte , err error){
+	defer {
+	    err = catch()
+	}
+	bs =  new Encoder( x, "" , indent).encode()
 }
 
 
-public fn decode( bs []byte , x Object ) -> (x2 Object , err error){
-	e := new Decoder( x , bs   )
-	return e.decode()
+public fn decode( bs []byte , x Object ) -> (x2 Object , err error ){
+	defer {
+        err = catch()
+    }
+	x2 =  new Decoder( x , bs   ).decode()
 }
 
 
 
 
-fn isMap(c Class ) ->(is bool) {
+fn isMap(c Class ) ->(is bool = false ) { // default is false too 
 	for c.getTypeName() != "java.lang.Object" {
-		if c.getTypeName() == "java.util.AbstractMap"{
+		if c.getTypeName() == "java.util.AbstractMap" {
 			is = true
 			return 
 		}

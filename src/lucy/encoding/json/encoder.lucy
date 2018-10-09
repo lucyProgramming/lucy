@@ -6,13 +6,13 @@ import "java/util/AbstractMap"
 
 
 
-class Encoder {
+public class Encoder {
 	x Object
 	c Class
 	indent string  
 	indents string 
 	
-	public fn Encoder(x Object, indents string   ,indent string   ) {
+	public fn Encoder(x Object, indents string  = "", indent string  = "" ) {
 		this.super()
 		this.x = x
 		if x != null {
@@ -23,15 +23,15 @@ class Encoder {
 	}
 	
 	
-	public fn encode()->(bs []byte ,err error){
+	public fn encode()->(bs []byte ){
 		if this.x == null {
-			return []byte("null") , null
+			return []byte("null")
 		}
 		if this.c.isPrimitive(){
-			return []byte(this.x.toString()) , null
+			return []byte(this.x.toString())
 		} 
 		if this.c.getTypeName() == "java.lang.String" {
-			return []byte(sprintf(`"%s"` , this.x.toString())) , null
+			return []byte(sprintf(`"%s"` , this.x.toString()))
 		}
 		if isMap(this.c) {
 			return this.encodeMap()
@@ -45,7 +45,7 @@ class Encoder {
 
 	
 
-	public fn encodeMap() -> (bs []byte ,err error){
+	private fn encodeMap() -> (bs []byte){
 		x , _ := this.x.(AbstractMap)
 		ks := x.keySet().toArray()
 
@@ -55,16 +55,13 @@ class Encoder {
 			bs.append('\n') 
 		}
 		for k , v := range ks {
-			if err = Encoder.validForMapKey(v) ; err != null  {
-				return null , err  
-			}
+			Encoder.validForMapKey(v)
 			bs.appendAll([]byte(this.indents + this.indent ))
             bs.append('"')
             bs.appendAll([]byte(v.toString()))
             bs.append('"' , ':')
 			vv := x.get(v)
-			var bs2 []byte 
-			var err error 
+			var bs2 []byte
 			if vv == null {
 				bs.appendAll([]byte("null"))
 				if k != ks.size() - 1 {
@@ -78,10 +75,7 @@ class Encoder {
 			if .isPrimitiveObject(vv) {
 				bs2 = []byte(vv.toString())
 			}else {
-				bs2 , err = (new Encoder(x.get(v) , this.indents + this.indent , this.indent )).encode()
-				if err != null {
-					return null , err  
-				}
+				bs2  = (new Encoder(x.get(v) , this.indents + this.indent , this.indent )).encode()
 			}
 			bs.appendAll(bs2)
 			if k != ks.size() - 1 {
@@ -94,7 +88,7 @@ class Encoder {
 		bs.appendAll([]byte(this.indents + "}"))
 	}
 	
-	static fn isPrimitiveObject(o Object) -> (is bool) {
+	private static fn isPrimitiveObject(o Object) -> (is bool) {
 		name := o.getClass().getName()
 		is = name == "java.lang.Boolean" ||
 			name == "java.lang.Byte" ||
@@ -106,7 +100,7 @@ class Encoder {
 	}
 
 
-	public static fn validForMapKey(x Object) -> (err error ){
+	private static fn validForMapKey(x Object) {
 		c := x.getClass()
 		typeName := c.getTypeName()
 		if  typeName ==  "java.lang.Byte" || 
@@ -118,12 +112,12 @@ class Encoder {
 			typeName == "java.lang.String" {
 				
 			}else {
-				err = new error(sprintf("'%s' not valid for map key" , typeName))
+				panic(sprintf("'%s' not valid for map key" , typeName))
 			}
 	}
 
 
-	public fn encodeArray() -> (bs []byte ,err error){
+	private fn encodeArray() -> (bs []byte ){
 		bs = []byte("[")
 		if this.indent != "" {
 			bs.append('\n')
@@ -131,10 +125,7 @@ class Encoder {
 		length := Array.getLength(this.x)
 		for i := 0; i < length; i ++ {
 			bs.appendAll([]byte(this.indents))
-			bs2 , err :=  new Encoder( Array.get(this.x  , i) , this.indents + this.indent ,  this.indent  ) . encode()
-			if err != null {
-				return null,err  
-			}
+			bs2  :=  new Encoder( Array.get(this.x  , i) , this.indents + this.indent ,  this.indent  ) . encode()
 			bs.appendAll([]byte(this.indents + this.indent) )
 			bs.appendAll(bs2)
 			if i != length -1 {
@@ -148,7 +139,7 @@ class Encoder {
 	}
 
 	
-	public fn encodeObject()->  (bs []byte ,err error){
+	private fn encodeObject()->  (bs []byte ){
 		bs = []byte("{")
 		if this.indent != "" {
 			bs.append('\n')
@@ -167,10 +158,7 @@ class Encoder {
 					bs.append('\n')
 				}
 			}else {
-				bsv,err := ( new Encoder(f.get(this.x) ,this.indents + this.indent, this.indent)).encode()
-				if err != null {
-					return null,err
-				}
+				bsv := ( new Encoder(f.get(this.x) ,this.indents + this.indent, this.indent)).encode()
 				bs.appendAll(bsv)
 				if k != fs.size() - 1 {
 					bs.appendAll([','])

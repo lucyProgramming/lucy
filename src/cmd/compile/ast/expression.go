@@ -367,12 +367,12 @@ func (e *Expression) IsIncrement() bool {
 		e.Type == ExpressionTypePrefixIncrement
 }
 
-func (e *Expression) isListAndMoreThanNElements(n int) bool {
-	if e.Type != ExpressionTypeList {
-		return false
-	}
-	return len(e.Data.([]*Expression)) > n
-}
+//func (e *Expression) isListAndMoreThanNElements(n int) bool {
+//	if e.Type != ExpressionTypeList {
+//		return false
+//	}
+//	return len(e.Data.([]*Expression)) > n
+//}
 
 /*
 	k,v := range arr

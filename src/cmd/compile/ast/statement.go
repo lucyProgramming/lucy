@@ -138,9 +138,6 @@ func (s *Statement) check(block *Block) []error {
 		return append(errs, s.Class.check(block)...)
 	case StatementTypeEnum:
 		err := s.Enum.check()
-		if err != nil {
-			return []error{err}
-		}
 		err = block.Insert(s.Enum.Name, s.Pos, s.Enum)
 		if err != nil {
 			return []error{err}

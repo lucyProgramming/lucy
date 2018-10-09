@@ -12,6 +12,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
 			errMsgPrefix(e.Pos), NoNameIdentifier)
 	}
+	//handle magic identifier
 	switch identifier.Name {
 	case MagicIdentifierFile:
 		e.Type = ExpressionTypeString
@@ -146,15 +147,13 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 				return e.checkIdentifierThroughImports(i)
 			}
 		}
-		if enumName != nil {
-			result := &Type{}
-			result.Pos = enumName.Pos
-			result.Type = VariableTypeEnum
-			result.EnumName = enumName
-			result.Enum = enumName.Enum
-			identifier.EnumName = enumName
-			return result, nil
-		}
+		result := &Type{}
+		result.Pos = enumName.Pos
+		result.Type = VariableTypeEnum
+		result.EnumName = enumName
+		result.Enum = enumName.Enum
+		identifier.EnumName = enumName
+		return result, nil
 	case *Package:
 		// must load from import
 		result := &Type{}

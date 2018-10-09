@@ -82,17 +82,6 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		}
 	}
 
-	mustBeOneExpression := func(left *ast.Expression) {
-		if left.Type == ast.ExpressionTypeList {
-			es := left.Data.([]*ast.Expression)
-			left = es[0]
-			if len(es) > 1 {
-				expressionParser.parser.errs = append(expressionParser.parser.errs,
-					fmt.Errorf("%s expect one expression on left",
-						expressionParser.parser.errorMsgPrefix(es[1].Pos)))
-			}
-		}
-	}
 	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
 		name := expressionParser.parser.token.Description
@@ -120,41 +109,31 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		}
 		return result, err
 	}
-	// := += -= *= /= %=
+
 	switch expressionParser.parser.token.Type {
 	case lex.TokenAssign:
 		return parseRight(ast.ExpressionTypeAssign, true)
 	case lex.TokenVarAssign:
 		return parseRight(ast.ExpressionTypeVarAssign, true)
 	case lex.TokenAddAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypePlusAssign, false)
 	case lex.TokenSubAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeMinusAssign, false)
 	case lex.TokenMulAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeMulAssign, false)
 	case lex.TokenDivAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeDivAssign, false)
 	case lex.TokenModAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeModAssign, false)
 	case lex.TokenLshAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeLshAssign, false)
 	case lex.TokenRshAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeRshAssign, false)
 	case lex.TokenAndAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeAndAssign, false)
 	case lex.TokenOrAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeOrAssign, false)
 	case lex.TokenXorAssign:
-		mustBeOneExpression(left)
 		return parseRight(ast.ExpressionTypeXorAssign, false)
 	}
 	return left, nil
