@@ -34,7 +34,7 @@ func (f *ClassField) ableAccessFromSubClass() bool {
 		f.IsProtected()
 }
 
-func (c *Class) accessField(pos *Pos, name string, fromSub bool) (*ClassField, error) {
+func (c *Class) getField(pos *Pos, name string, fromSub bool) (*ClassField, error) {
 	err := c.loadSelf(pos)
 	if err != nil {
 		return nil, err
@@ -56,5 +56,8 @@ func (c *Class) accessField(pos *Pos, name string, fromSub bool) (*ClassField, e
 	if err != nil {
 		return nil, err
 	}
-	return c.SuperClass.accessField(pos, name, true)
+	if c.SuperClass == nil {
+		return nil, notFoundErr
+	}
+	return c.SuperClass.getField(pos, name, true)
 }

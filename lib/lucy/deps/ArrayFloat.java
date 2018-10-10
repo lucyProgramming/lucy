@@ -14,10 +14,10 @@ public class ArrayFloat   {
 	public synchronized int start(){
         return this.start;
 	}
-	public int end(){
+	public synchronized int end(){
          return this.end;
 	}
-	public int cap(){
+	public synchronized int cap(){
          return this.cap;
 	}
 	public ArrayFloat(float[] values){
@@ -28,7 +28,7 @@ public class ArrayFloat   {
 		
 	}
 	public ArrayFloat(){
-
+		
 	}
 	public synchronized void set(int index , float value) {
 		if (index < 0 ){
@@ -50,7 +50,7 @@ public class ArrayFloat   {
 		}
 		return this.elements[index]  ; 
 	}	
-
+	
 
 	public  synchronized ArrayFloat slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
@@ -84,7 +84,7 @@ public class ArrayFloat   {
 		this.end += es.size();
 		 
 	}
-	private void expand(int cap){
+	private synchronized void expand(int cap){
 		if(cap <= 0){
 		    cap = 10;
 		}

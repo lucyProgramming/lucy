@@ -24,7 +24,7 @@ enum JsonSyntaxTreeType {
 
 
 
-class JsonSyntaxTreeNode {
+class JsonSyntaxTreeNode  {
 	Type JsonSyntaxTreeType
 	boolValue bool 
 	numberValue Number   // number value
@@ -234,8 +234,7 @@ public class Decoder {
 					panic("malformed json format: " + this.getErrMsg() )
 
 				}
-				var number Number  
-				number = this.parseNumber()
+				number := this.parseNumber()
 				n = new JsonSyntaxTreeNode()
 				n.Type = JsonSyntaxTreeTypeNumber
 				n.numberValue = number 
@@ -380,45 +379,45 @@ public class Decoder {
 	
 	
 	// 
-	private fn parseTrue () ->(err error ) {
+	private fn parseTrue () {
 		this.offset++  // skip 't' 
 		if this.bs[ this.offset ++ ] != 'r' {
-			err = new error("wrong true")
+			panic("wrong true")
 		} 
 		if this.bs[ this.offset ++ ] != 'u' {
-			err = new error("wrong true")
+			panic("wrong true")
 		} 
 		if this.bs[ this.offset ++ ] != 'e' {
-			err = new error("wrong true")
+			panic("wrong true")
 		} 
 	}
 
-	private fn parseNull () ->(err error ) {
+	private fn parseNull ()  {
 		this.offset++  // skip 'n' 
 		if this.bs[ this.offset ++ ] != 'u' {
-			err = new error("wrong null")
+			panic("wrong null")
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong null")
+			panic("wrong null")
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong null")
+			panic("wrong null")
 		} 
 	}
 
-	private fn parseFalse () ->(err error ) {
+	private fn parseFalse ()  {
 		this.offset++  // skip 'f' 
 		if this.bs[ this.offset ++ ] != 'a' {
-			err = new error("wrong false")
+			panic("wrong false")
 		} 
 		if this.bs[ this.offset ++ ] != 'l' {
-			err = new error("wrong false")
+			panic("wrong false")
 		} 
 		if this.bs[ this.offset ++ ] != 's' {
-			err = new error("wrong false")
+			panic("wrong false")
 		} 
 		if this.bs[ this.offset ++ ] != 'e' {
-			err = new error("wrong false")
+			panic("wrong false")
 		} 
 	}
 	
@@ -439,7 +438,6 @@ public class Decoder {
 			b = this.bs[this.offset++]
 			if false == .isDigit(b) {
 				panic("expect number after '-'")
-
 			}
 		}
 		if b == '0' { // 
@@ -472,7 +470,6 @@ public class Decoder {
 			}
 			if false ==  .isDigit(b) {
 				panic("expect number after 'e' or 'E' ," + this.getErrMsg() )
-
 			}
 			for .isDigit(b) {
 				n.e.append(b)

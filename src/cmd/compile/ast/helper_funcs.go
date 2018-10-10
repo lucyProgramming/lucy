@@ -6,11 +6,10 @@ import (
 )
 
 func errMsgPrefix(pos *Pos) string {
-	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.StartLine, pos.StartColumn)
+	return pos.errMsgPrefix()
 }
-
 func divisionByZeroErr(pos *Pos) error {
-	return fmt.Errorf("%s division by zero", errMsgPrefix(pos))
+	return fmt.Errorf("%s division by zero", pos.errMsgPrefix())
 }
 
 func checkExpressions(block *Block, es []*Expression, errs *[]error, singleValueContext bool) []*Type {
@@ -73,8 +72,10 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 		i := PackageBeenCompile.getImport(from.Filename, name)
 		if i != nil {
 			i.Used = true
+			return i, true
+		} else {
+			return nil, false
 		}
-		return i, i != nil
 	}
 	i := PackageBeenCompile.getImport(from.Filename, name)
 	if i == nil {
@@ -86,7 +87,7 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 		from
 		alreadyHave
 	*/
-	should := from.StartLine < alreadyHave.StartLine
+	should := from.Line < alreadyHave.Line
 	if should {
 		i.Used = true
 	}

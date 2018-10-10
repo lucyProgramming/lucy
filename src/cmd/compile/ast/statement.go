@@ -137,13 +137,12 @@ func (s *Statement) check(block *Block) []error {
 		}
 		return append(errs, s.Class.check(block)...)
 	case StatementTypeEnum:
-		err := s.Enum.check()
-		err = block.Insert(s.Enum.Name, s.Pos, s.Enum)
+		es := s.Enum.check()
+		err := block.Insert(s.Enum.Name, s.Pos, s.Enum)
 		if err != nil {
-			return []error{err}
-		} else {
-			return nil
+			es = append(es, err)
 		}
+		return es
 	case StatementTypeNop:
 		//nop , should be never execute to here
 		//

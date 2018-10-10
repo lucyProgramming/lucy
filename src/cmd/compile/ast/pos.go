@@ -1,16 +1,22 @@
 package ast
 
+import "fmt"
+
 type Pos struct {
-	Filename    string
-	StartLine   int
-	StartColumn int
+	Filename string
+	Line     int
+	Column   int
 	/*
 		offset at bs , for special use。
 		for template function only currently
 	*/
 	Offset int
-	//EndLint int
+	//EndLint   int
 	//EndColumn int
+}
+
+func (pos *Pos) errMsgPrefix() string {
+	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.Line, pos.Column)
 }
 
 type NameWithPos struct {

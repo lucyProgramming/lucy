@@ -4,25 +4,25 @@ import "java/lang/System"
 import "java/io"
 
 
-public fn getLucyRoot()->(path string , err error ){
+public fn getLucyRoot()->(path string  ){
 	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
-		err = new error("env variable LUCYROOT is not set")
-		return 
+		panic("env variable LUCYROOT is not set")
+
 	}
 	path = envs["LUCYROOT"]
 }
 
 
-public fn getLucyPath()->(paths []string, err error){
+public fn getLucyPath()->(paths []string){
 	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
-		err = new error("env variable LUCYROOT is not set")
-		return 
+		panic("env variable LUCYROOT is not set")
+
 	}
 	if envs.keyExist("LUCYPATH") == false {
-		err = new error("env variable LUCYPATH is not set")
-		return 
+		panic("env variable LUCYPATH is not set")
+
 	}
 	ps := { envs["LUCYROOT"] -> true }
 	lucyPath := envs["LUCYPATH"]
@@ -44,7 +44,7 @@ public fn getLucyPath()->(paths []string, err error){
 	}
 }
 
-public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which string ,err error ){
+public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which string  ){
 	ps := []string{}  
 	for _,v := range lucyPaths {
 		if true == new io.File(v + "/src/" + packageName).isDirectory() {
@@ -52,13 +52,11 @@ public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which str
 		}
 	}
 	if ps.size() == 0 {
-		err = new error(sprintf("package '%s' not found" , packageName))
-		return  
+		panic(sprintf("package '%s' not found" , packageName))  
 	}
 	if ps.size() > 1 {
 		errMsg := sprintf("more than 1 package named '%s'" , packageName)
-		err = new error(errMsg)
-		return  
+		panic(errMsg)   
 	}
 	which = ps[0]
 }

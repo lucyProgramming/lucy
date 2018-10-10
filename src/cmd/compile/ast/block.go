@@ -216,14 +216,14 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 					b.InheritedAttribute.Function.IsGlobal == false {
 					if v.Name == THIS {
 						return nil, fmt.Errorf("%s capture '%s' not allow",
-							errMsgPrefix(from), name) // capture this not allow
+							from.errMsgPrefix(), name) // capture this not allow
 					}
 					b.InheritedAttribute.Function.Closure.InsertVar(v)
 				}
 				//cannot search variable from class body
 				if b.InheritedAttribute.Class != nil && b.IsClassBlock {
 					return nil, fmt.Errorf("%s trying to access variable '%s' from class",
-						errMsgPrefix(from), name)
+						from.errMsgPrefix(), name)
 				}
 			}
 		case *Function:
@@ -234,7 +234,7 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 				}
 				if b.IsClassBlock && f.IsClosureFunction {
 					return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
-						errMsgPrefix(from), name)
+						from.errMsgPrefix(), name)
 				}
 			}
 		}
@@ -264,7 +264,7 @@ func (b *Block) checkUnUsedVariables() (es []error) {
 			continue
 		}
 		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",
-			errMsgPrefix(v.Pos), v.Name))
+			v.Pos.errMsgPrefix(), v.Name))
 	}
 	return es
 }
@@ -316,8 +316,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if v, ok := b.Variables[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(v.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", v.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Classes == nil {
@@ -325,8 +325,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if c, ok := b.Classes[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", c.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Functions == nil {
@@ -334,8 +334,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if f, ok := b.Functions[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", f.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Constants == nil {
@@ -343,8 +343,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if c, ok := b.Constants[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(c.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", c.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.EnumNames == nil {
@@ -352,8 +352,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if en, ok := b.EnumNames[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(en.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", en.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.TypeAliases == nil {
@@ -361,8 +361,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if t, ok := b.TypeAliases[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(t.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", t.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Enums == nil {
@@ -370,8 +370,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if e, ok := b.Enums[name]; ok {
 		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:\n",
-			errMsgPrefix(pos), name)
-		errMsg += fmt.Sprintf("\t%s", errMsgPrefix(e.Pos))
+			pos.errMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", e.Pos.errMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	return nil
@@ -379,19 +379,19 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 
 func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
-		return fmt.Errorf(`%s "" is not a valid name`, errMsgPrefix(pos))
+		return fmt.Errorf(`%s "" is not a valid name`, pos.errMsgPrefix())
 	}
 	if name == THIS {
-		return fmt.Errorf("%s '%s' already been taken", errMsgPrefix(pos), THIS)
+		return fmt.Errorf("%s '%s' already been taken", pos.errMsgPrefix(), THIS)
 	}
 	if name == "_" {
-		return fmt.Errorf("%s '%s' is not a valid name", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s '%s' is not a valid name", pos.errMsgPrefix(), name)
 	}
 	if isMagicIdentifier(name) {
-		return fmt.Errorf("%s '%s' is not a magic identifier", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s '%s' is not a magic identifier", pos.errMsgPrefix(), name)
 	}
 	if searchBuildIns(name) != nil {
-		return fmt.Errorf("%s '%s' is buildin", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s '%s' is buildin", pos.errMsgPrefix(), name)
 	}
 	return nil
 }
@@ -418,8 +418,8 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		}
 		if l, ok := b.Labels[name]; ok {
 			errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
-				errMsgPrefix(pos), name)
-			errMsg += fmt.Sprintf("\t%s", errMsgPrefix(l.Statement.Pos))
+				pos.errMsgPrefix(), name)
+			errMsg += fmt.Sprintf("\t%s", l.Statement.Pos.errMsgPrefix())
 			return fmt.Errorf(errMsg)
 		}
 		b.Labels[name] = label
@@ -436,7 +436,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		t := d.(*Function)
 		if buildInFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
-				errMsgPrefix(pos), name)
+				pos.errMsgPrefix(), name)
 		}
 		b.Functions[name] = t
 	case *Constant:

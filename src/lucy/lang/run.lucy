@@ -1,7 +1,7 @@
 
-/*
-import "java/lang/Runnable";
 
+import "java/lang/Runnable"
+import "java/lang/Thread"
 
 
 
@@ -10,12 +10,16 @@ import "java/lang/Runnable";
 public  final class Run implements Runnable{
 	private f fn() 
 	public fn Run(f fn () ) {
-		this.f = f 
+		this.super()
+		this.f = f
 	}
 	public fn run() {
 		this.f()
 	}
+	
+	public static fn runFn(f fn() ) {
+		r := new Run(f)
+		new Thread(r) . start() 
+	}
+	
 }
-
-
-*/

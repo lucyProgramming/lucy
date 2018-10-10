@@ -19,6 +19,7 @@ func (c *Class) checkPhase1() []error {
 	c.mkDefaultConstruction()
 	errs := c.Block.checkConstants()
 	err := c.resolveFather()
+
 	if err != nil {
 		errs = append(errs, err)
 	} else {
@@ -47,7 +48,7 @@ func (c *Class) checkPhase2() []error {
 	for name, ms := range c.Methods {
 		if c.Fields != nil && c.Fields[name] != nil {
 			f := c.Fields[name]
-			if f.Pos.StartLine < ms[0].Function.Pos.StartLine {
+			if f.Pos.Line < ms[0].Function.Pos.Line {
 				errMsg := fmt.Sprintf("%s method named '%s' already declared as field,at:\n",
 					errMsgPrefix(ms[0].Function.Pos), name)
 				errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
@@ -83,10 +84,7 @@ func (c *Class) checkPhase2() []error {
 		errs = append(errs, c.checkOverrideAbstractMethod()...)
 	}
 	errs = append(errs, c.suitableForInterfaces()...)
-	err := c.loadSuperClass(c.Pos)
-	if err != nil {
-		errs = append(errs, err)
-	} else {
+	if c.SuperClass != nil {
 		errs = append(errs, c.suitableSubClassForAbstract(c.SuperClass)...)
 	}
 	return errs
@@ -98,6 +96,9 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 		err := super.loadSuperClass(c.Pos)
 		if err != nil {
 			errs = append(errs, err)
+			return errs
+		}
+		if super.SuperClass == nil {
 			return errs
 		}
 		length := len(errs)
@@ -124,13 +125,14 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 					pos = nameMatch.Function.Pos
 				}
 				if nameMatch != nil {
-					errmsg := fmt.Sprintf("%s method is suitable for abstract super class\n", errMsgPrefix(pos))
-					errmsg += fmt.Sprintf("\t have %s\n", nameMatch.Function.readableMsg())
-					errmsg += fmt.Sprintf("\t want %s\n", m.Function.readableMsg())
-					errs = append(errs, errors.New(errmsg))
+					errMsg := fmt.Sprintf("%s method is suitable for abstract super class\n", errMsgPrefix(pos))
+					errMsg += fmt.Sprintf("\t have %s\n", nameMatch.Function.readableMsg())
+					errMsg += fmt.Sprintf("\t want %s\n", m.Function.readableMsg())
+					errs = append(errs, errors.New(errMsg))
 				} else {
-					errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
-						errMsgPrefix(pos), m.Function.readableMsg(), super.Name))
+					errs = append(errs,
+						fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
+							errMsgPrefix(pos), m.Function.readableMsg(), super.Name))
 				}
 			}
 		}
@@ -169,6 +171,9 @@ func (c *Class) abstractMethodExists(pos *Pos, name string) (*Class, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.SuperClass == nil {
+		return nil, nil
+	}
 	return c.SuperClass.abstractMethodExists(pos, name)
 }
 
@@ -177,6 +182,9 @@ func (c *Class) checkOverrideAbstractMethod() []error {
 	err := c.loadSuperClass(c.Pos)
 	if err != nil {
 		errs = append(errs, err)
+		return errs
+	}
+	if c.SuperClass == nil {
 		return errs
 	}
 	for _, v := range c.Methods {
@@ -225,6 +233,9 @@ func (c *Class) checkIfClassHierarchyErr() error {
 	if err := c.loadSuperClass(pos); err != nil {
 		return err
 	}
+	if c.SuperClass == nil {
+		return nil
+	}
 
 	if c.SuperClass.IsFinal() {
 		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
@@ -242,6 +253,9 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		err := class.loadSuperClass(pos)
 		if err != nil {
 			return err
+		}
+		if c.SuperClass == nil {
+			return nil
 		}
 		class = class.SuperClass
 	}
@@ -261,38 +275,36 @@ func (c *Class) checkIfClassHierarchyErr() error {
 }
 
 func (c *Class) checkIfOverrideFinalMethod() []error {
-	err := c.loadSuperClass(c.Pos)
-	if err != nil {
-		return []error{err}
-	}
 	errs := []error{}
-	for name, v := range c.Methods {
-		if name == SpecialMethodInit {
-			continue
-		}
-		if len(v) == 0 {
-			continue
-		}
-		if len(c.SuperClass.Methods[name]) == 0 {
-			// this class not found at super
-			continue
-		}
-		m := v[0]
-		for _, v := range c.SuperClass.Methods[name] {
-			if v.IsFinal() == false {
+	if c.SuperClass != nil {
+		for name, v := range c.Methods {
+			if name == SpecialMethodInit {
 				continue
 			}
-			f1 := &Type{
-				Type:         VariableTypeFunction,
-				FunctionType: &m.Function.Type,
+			if len(v) == 0 {
+				continue
 			}
-			f2 := &Type{
-				Type:         VariableTypeFunction,
-				FunctionType: &v.Function.Type,
+			if len(c.SuperClass.Methods[name]) == 0 {
+				// this class not found at super
+				continue
 			}
-			if f1.Equal(f2) {
-				errs = append(errs, fmt.Errorf("%s override final method",
-					errMsgPrefix(m.Function.Pos)))
+			m := v[0]
+			for _, v := range c.SuperClass.Methods[name] {
+				if v.IsFinal() == false {
+					continue
+				}
+				f1 := &Type{
+					Type:         VariableTypeFunction,
+					FunctionType: &m.Function.Type,
+				}
+				f2 := &Type{
+					Type:         VariableTypeFunction,
+					FunctionType: &v.Function.Type,
+				}
+				if f1.Equal(f2) {
+					errs = append(errs, fmt.Errorf("%s override final method",
+						errMsgPrefix(m.Function.Pos)))
+				}
 			}
 		}
 	}
@@ -353,7 +365,8 @@ func (c *Class) checkFields() []error {
 	staticFieldAssignStatements := []*Statement{}
 	for _, v := range c.Fields {
 		if v.DefaultValueExpression != nil {
-			assignment, es := v.DefaultValueExpression.checkSingleValueContextExpression(&c.Methods[SpecialMethodInit][0].Function.Block)
+			assignment, es := v.DefaultValueExpression.
+				checkSingleValueContextExpression(&c.Methods[SpecialMethodInit][0].Function.Block)
 			errs = append(errs, es...)
 			if assignment == nil {
 				continue

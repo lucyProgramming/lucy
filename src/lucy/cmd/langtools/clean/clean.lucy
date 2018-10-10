@@ -18,11 +18,7 @@ final class Clean {
 	}
 
 	fn clean() {
-		w,err := common.findPackageLiesIn(this.lucyPaths , this.packageName)
-		if err != null {
-			print(err)
-			return  
-		}
+		w := common.findPackageLiesIn(this.lucyPaths , this.packageName)
 		dir := w + "/class/" + this.packageName
 		this.cleanDir(dir) 
 	}

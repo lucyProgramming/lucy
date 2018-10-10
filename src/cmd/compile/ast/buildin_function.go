@@ -16,7 +16,7 @@ func registerBuildInFunctions() {
 			buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 				if len(e.ParameterTypes) > 0 {
 					*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-						errMsgPrefix(e.ParameterTypes[0].Pos)))
+						e.ParameterTypes[0].Pos.errMsgPrefix()))
 				}
 			},
 			IsBuildIn: true,
@@ -38,16 +38,16 @@ func registerBuildInFunctions() {
 		catch.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) {
 			if len(e.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					errMsgPrefix(e.ParameterTypes[0].Pos)))
+					e.ParameterTypes[0].Pos.errMsgPrefix()))
 			}
 			if block.InheritedAttribute.Defer == nil {
 				*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
-					errMsgPrefix(pos), common.BuildInFunctionCatch))
+					pos.errMsgPrefix(), common.BuildInFunctionCatch))
 				return
 			}
 			if len(e.Args) > 1 {
 				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect at most 1 argument",
-					errMsgPrefix(e.Args[1].Pos), common.BuildInFunctionCatch))
+					e.Args[1].Pos.errMsgPrefix(), common.BuildInFunctionCatch))
 				return
 			}
 			if len(e.Args) == 0 {
@@ -55,13 +55,13 @@ func registerBuildInFunctions() {
 					c, err := PackageBeenCompile.loadClass(DefaultExceptionClass)
 					if err != nil {
 						*errs = append(*errs, fmt.Errorf("%s load exception class failed,err:%v",
-							errMsgPrefix(pos), err))
+							pos.errMsgPrefix(), err))
 						return
 					}
 					f.Type.ReturnList[0].Type.Class = c
 					err = block.InheritedAttribute.Defer.registerExceptionClass(c)
 					if err != nil {
-						*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(pos), err))
+						*errs = append(*errs, fmt.Errorf("%s %v", pos.errMsgPrefix(), err))
 					}
 				} else {
 					f.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
@@ -75,18 +75,18 @@ func registerBuildInFunctions() {
 			className := e.Args[0].Data.(string)
 			c, err := PackageBeenCompile.loadClass(className)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Args[0].Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", e.Args[0].Pos.errMsgPrefix(), err))
 				return
 			}
 			have, _ := c.haveSuperClass(e.Args[0].Pos, JavaThrowableClass)
 			if have == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s' does't have super class '%s'",
-					errMsgPrefix(e.Args[0].Pos), className, JavaThrowableClass))
+					e.Args[0].Pos.errMsgPrefix(), className, JavaThrowableClass))
 				return
 			}
 			err = block.InheritedAttribute.Defer.registerExceptionClass(c)
 			if err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(args[0].Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %v", args[0].Pos.errMsgPrefix(), err))
 			}
 		}
 	}

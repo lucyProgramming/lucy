@@ -2,8 +2,8 @@ package ast
 
 import (
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"strings"
 )
 
 /*
@@ -13,6 +13,7 @@ type Class struct {
 	IsBuildIn                         bool
 	Used                              bool
 	resolveFatherCalled               bool
+	loadSuperClassCalled              bool
 	resolveInterfacesCalled           bool
 	resolveFieldsAndMethodsTypeCalled bool
 	NotImportedYet                    bool   // not imported
@@ -51,9 +52,10 @@ func (c *Class) IsPublic() bool {
 }
 
 func (c *Class) loadSelf(pos *Pos) error {
-	if c.NotImportedYet == false {
+	if c.NotImportedYet == false { // current compile class
 		return nil
 	}
+	c.NotImportedYet = false
 	load, err := PackageBeenCompile.loadClass(c.Name)
 	if err != nil {
 		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
@@ -209,49 +211,21 @@ func (c *Class) resolveFather() error {
 	if c.resolveFatherCalled {
 		return nil
 	}
-	defer func() {
-		if c.SuperClassName == "" {
-			if c.IsInterface() == false {
-				c.SuperClassName = LucyRootClass
-			} else {
-				c.SuperClassName = JavaRootClass
-			}
-		}
-		c.resolveFatherCalled = true
-	}()
+	c.resolveFatherCalled = true
 	if c.SuperClassName == "" {
-		return nil
-	}
-	if strings.Contains(c.SuperClassName, ".") {
-		t := strings.Split(c.SuperClassName, ".")
-		i := PackageBeenCompile.getImport(c.Pos.Filename, t[0])
-		if i == nil {
-			c.SuperClassName = ""
-			return fmt.Errorf("%s package name '%s' not imported", errMsgPrefix(c.Pos), t[0])
-		}
-		i.Used = true
-		r, err := PackageBeenCompile.load(i.Import)
-		if err != nil {
-			c.SuperClassName = ""
-			return fmt.Errorf("%s %v", errMsgPrefix(c.Pos), err)
-		}
-		if p, ok := r.(*Package); ok && p != nil { // if package
-			if _, ok := p.Block.NameExists(t[1]); ok == false {
-				c.SuperClassName = ""
-				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
-			}
-			if p.Block.Classes == nil || p.Block.Classes[t[1]] == nil {
-				c.SuperClassName = ""
-				return fmt.Errorf("%s class not exists in package '%s' ", errMsgPrefix(c.Pos), t[1])
-			}
-			c.SuperClass = p.Block.Classes[t[1]]
-		} else if ss, ok := r.(*Class); ok && ss != nil { // must be class now
-			t := ss
-			c.SuperClassName = t.Name
-			c.SuperClass = t
+		superClassName := ""
+		if PackageBeenCompile.Name == common.CorePackage {
+			superClassName = JavaRootClass
 		} else {
-			c.SuperClassName = ""
-			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+			if c.IsInterface() {
+				superClassName = JavaRootClass
+			} else {
+				superClassName = LucyRootClass
+			}
+		}
+		c.SuperClass = &Class{
+			Name:           superClassName,
+			NotImportedYet: true,
 		}
 	} else {
 		variableType := Type{}
@@ -260,28 +234,20 @@ func (c *Class) resolveFather() error {
 		variableType.Pos = c.Pos
 		err := variableType.resolve(&c.Block)
 		if err != nil {
-			c.SuperClassName = ""
 			return err
 		}
 		if variableType.Type != VariableTypeObject {
-			c.SuperClassName = ""
-			return fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+			err := fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+			return err
 		}
-		c.SuperClassName = variableType.Class.Name
 		c.SuperClass = variableType.Class
-	}
-	err := c.loadSuperClass(c.Pos)
-	if err != nil {
-		c.SuperClassName = ""
-		return err
-	}
-	if c.IsInterface() {
-		if c.SuperClass.Name == JavaRootClass {
-			//nothing
-		} else {
-			c.SuperClassName = ""
-			return fmt.Errorf("%s interface`s super-class must be '%s'",
-				errMsgPrefix(c.Pos), JavaRootClass)
+		if c.IsInterface() {
+			if c.SuperClass.Name != JavaRootClass {
+				err := fmt.Errorf("%s interface`s super-class must be '%s'",
+					errMsgPrefix(c.Pos), JavaRootClass)
+
+				return err
+			}
 		}
 	}
 	return nil
@@ -334,15 +300,18 @@ func (c *Class) implementMethod(pos *Pos, m *ClassMethod, nameMatched **ClassMet
 	if c.Name == JavaRootClass {
 		return nil
 	}
+
 	err := c.loadSuperClass(pos)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil
-	} else {
-		//trying find fathte`s implementation
-		return c.SuperClass.implementMethod(pos, m, nameMatched, true, errs)
 	}
-	return nil
+
+	if c.SuperClass == nil {
+		return nil
+	}
+
+	return c.SuperClass.implementMethod(pos, m, nameMatched, true, errs)
 }
 
 func (c *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
@@ -356,10 +325,16 @@ func (c *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
 	if c.Name == JavaRootClass {
 		return false, nil
 	}
+
 	err = c.loadSuperClass(pos)
 	if err != nil {
 		return false, err
 	}
+
+	if c.SuperClass == nil {
+		return false, nil
+	}
+
 	return c.SuperClass.haveSuperClass(pos, superclassName) // check father is implements
 }
 
@@ -384,19 +359,32 @@ func (c *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if c.SuperClass == nil {
+		return false, nil
+	}
 	return c.SuperClass.implementedInterface(pos, inter) // check father is implements
 }
 
 func (c *Class) loadSuperClass(pos *Pos) error {
 	if c.SuperClass != nil {
+		return c.SuperClass.loadSelf(pos)
+	}
+	if c.resolveFatherCalled ||
+		c.loadSuperClassCalled {
 		return nil
 	}
+	c.loadSuperClassCalled = true
 	if c.Name == JavaRootClass {
-		return fmt.Errorf("%s root class already", errMsgPrefix(pos))
+		err := fmt.Errorf("%s root class already", errMsgPrefix(pos))
+		return err
+	}
+	if c.SuperClassName == "" {
+		c.SuperClassName = JavaRootClass
 	}
 	class, err := PackageBeenCompile.loadClass(c.SuperClassName)
 	if err != nil {
-		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
+		err := fmt.Errorf("%s %v", errMsgPrefix(pos), err)
+		return err
 	}
 	c.SuperClass = class
 	return nil
@@ -467,6 +455,9 @@ func (c *Class) getFieldOrMethod(pos *Pos, name string, fromSub bool) (interface
 	err = c.loadSuperClass(pos)
 	if err != nil {
 		return nil, err
+	}
+	if c.SuperClass == nil {
+		return nil, notFoundErr
 	}
 	return c.SuperClass.getFieldOrMethod(pos, name, true)
 }

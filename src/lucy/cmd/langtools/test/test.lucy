@@ -15,11 +15,7 @@ final class Test {
 	
 	//real test method
 	public fn test(){
-    	w,err := common.findPackageLiesIn(this.lucyPaths , this.packageName)
-		if err != null  {
-			print(err)
-			os.exit(1)
-		}
+    	w := common.findPackageLiesIn(this.lucyPaths , this.packageName)
 		//check is test exist
 		dir := w + "/src/" + this.packageName + "/test" 
 		if f := new io.File(dir) ;  f.isDirectory() == false {

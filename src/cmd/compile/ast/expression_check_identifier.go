@@ -21,7 +21,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case MagicIdentifierLine:
 		e.Type = ExpressionTypeInt
-		e.Data = int32(e.Pos.StartLine)
+		e.Data = int32(e.Pos.Line)
 		result, _ := e.checkSingleValueContextExpression(block)
 		return result, nil
 	case MagicIdentifierTime:

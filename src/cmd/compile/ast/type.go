@@ -53,9 +53,7 @@ type Type struct {
 	FunctionType   *FunctionType
 	Map            *Map
 	Package        *Package
-	Alias          string
-	AliasType      *Type
-	Comment        string // for type alias
+	Alias          *TypeAlias
 }
 
 type Map struct {
@@ -325,10 +323,11 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 			return nil
 		}
 	case *Type:
-		dd := d.(*Type)
-		tt := dd.Clone()
-		tt.Pos = typ.Pos
-		*typ = *tt
+		pos := typ.Pos
+		alias := typ.Alias
+		*typ = *d.(*Type)
+		typ.Pos = pos
+		typ.Alias = alias
 		return nil
 	case *Enum:
 		dd := d.(*Enum)
@@ -382,8 +381,8 @@ func (typ *Type) IsPrimitive() bool {
 }
 
 func (typ *Type) typeString(ret *string) {
-	if typ.Alias != "" {
-		*ret += typ.Alias
+	if typ.Alias != nil {
+		*ret += typ.Alias.Name
 		return
 	}
 	switch typ.Type {
@@ -565,20 +564,24 @@ func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 	if leftValue == rightValue { // equal
 		return true
 	}
-	if leftValue.IsPrimitive() && rightValue.IsPrimitive() {
+	if leftValue.IsPrimitive() &&
+		rightValue.IsPrimitive() {
 		return leftValue.Type == rightValue.Type
 	}
 	if leftValue.IsPointer() && rightValue.Type == VariableTypeNull {
 		return true
 	}
-	if leftValue.Type == VariableTypeObject && leftValue.Class.Name == JavaRootClass &&
+	if leftValue.Type == VariableTypeObject &&
+		leftValue.Class.Name == JavaRootClass &&
 		rightValue.IsPointer() {
 		return true
 	}
-	if leftValue.Type == VariableTypeArray && rightValue.Type == VariableTypeArray {
+	if leftValue.Type == VariableTypeArray &&
+		rightValue.Type == VariableTypeArray {
 		return leftValue.Array.assignAble(errs, rightValue.Array)
 	}
-	if leftValue.Type == VariableTypeJavaArray && rightValue.Type == VariableTypeJavaArray {
+	if leftValue.Type == VariableTypeJavaArray &&
+		rightValue.Type == VariableTypeJavaArray {
 		if leftValue.IsVariableArgs != rightValue.IsVariableArgs {
 			return false
 		}
@@ -597,17 +600,13 @@ func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 		return leftValue.FunctionType.equal(rightValue.FunctionType)
 	}
 	if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
-		if leftValue.Class.NotImportedYet {
-			if err := leftValue.Class.loadSelf(leftValue.Pos); err != nil {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
-				return false
-			}
+		if err := leftValue.Class.loadSelf(leftValue.Pos); err != nil {
+			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
+			return false
 		}
-		if rightValue.Class.NotImportedYet {
-			if err := rightValue.Class.loadSelf(rightValue.Pos); err != nil {
-				*errs = append(*errs, err)
-				return false
-			}
+		if err := rightValue.Class.loadSelf(rightValue.Pos); err != nil {
+			*errs = append(*errs, err)
+			return false
 		}
 		if leftValue.Class.IsInterface() {
 			i, err := rightValue.Class.implementedInterface(leftValue.Pos, leftValue.Class.Name)

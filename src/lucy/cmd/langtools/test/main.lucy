@@ -13,16 +13,8 @@ fn main(args []string){
 	if args.size() == 0 {
 		printUsageAndExit(1)
 	}
-	lucyRoot,err := common.getLucyRoot()
-	if err != null {
-		print(err)
-		return 
-	}
-	lcyPaths ,err := common.getLucyPath()
-	if err != null {
-		print(err)
-		return 
-	}
+	lucyRoot := common.getLucyRoot()
+	lcyPaths  := common.getLucyPath()
 	new Test(lucyRoot , lcyPaths ,args[0]) .test()
 }
 

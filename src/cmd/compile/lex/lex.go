@@ -12,10 +12,6 @@ type Lexer struct {
 	offset, end          int
 }
 
-func (lex *Lexer) GetLineAndColumn() (int, int) {
-	return lex.line, lex.column
-}
-
 func (lex *Lexer) GetOffSet() int {
 	return lex.offset
 }
@@ -629,14 +625,6 @@ func (lex *Lexer) lexVArgs() (is bool) {
 		lex.unGetChar2(1)
 		return
 	}
-	// current '...'
-	c, _ = lex.getChar()
-	if c == '.' {
-		lex.unGetChar()
-		lex.unGetChar2(2)
-		return
-	}
-	lex.unGetChar2(1)
 	is = true
 	return
 }

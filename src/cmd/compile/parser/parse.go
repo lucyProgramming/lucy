@@ -376,9 +376,9 @@ func (parser *Parser) validStatementEnding() error {
 	}
 	token := parser.token
 	err := fmt.Errorf("%s expect semicolon or new line", parser.errorMsgPrefix(&ast.Pos{
-		Filename:    parser.filename,
-		StartLine:   token.StartLine,
-		StartColumn: token.StartColumn,
+		Filename: parser.filename,
+		Line:     token.StartLine,
+		Column:   token.StartColumn,
 	}))
 	parser.errs = append(parser.errs, err)
 	return nil
@@ -386,10 +386,10 @@ func (parser *Parser) validStatementEnding() error {
 
 func (parser *Parser) mkPos() *ast.Pos {
 	return &ast.Pos{
-		Filename:    parser.filename,
-		StartLine:   parser.token.StartLine,
-		StartColumn: parser.token.StartColumn,
-		Offset:      parser.lexer.GetOffSet(),
+		Filename: parser.filename,
+		Line:     parser.token.EndLine,
+		Column:   parser.token.EndColumn,
+		Offset:   parser.lexer.GetOffSet(),
 	}
 }
 
@@ -506,10 +506,10 @@ func (parser *Parser) Next(lfIsToken bool) {
 func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	var line, column int
 	if len(pos) > 0 {
-		line = pos[0].StartLine
-		column = pos[0].StartColumn
+		line = pos[0].Line
+		column = pos[0].Column
 	} else {
-		line, column = parser.token.StartLine, parser.token.StartColumn
+		line, column = parser.token.EndLine, parser.token.EndColumn
 	}
 	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
 }
@@ -626,10 +626,10 @@ func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, er
 		return nil, err
 	}
 	if parser.token.Type == lex.TokenComment {
-		ret.Type.Comment = parser.token.Data.(string)
+		ret.Comment = parser.token.Data.(string)
 		parser.Next(lfIsToken)
 	} else {
-		ret.Type.Comment = comment.Comment
+		ret.Comment = comment.Comment
 	}
 	return ret, err
 }

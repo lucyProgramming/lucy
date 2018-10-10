@@ -1,5 +1,7 @@
 
 import "lucy/encoding/json"
+
+
 public class xxx {
 	public boolValue bool
 	public y string  

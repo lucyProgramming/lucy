@@ -115,13 +115,11 @@ func (p *Package) TypeCheck() []error {
 		v.Name = p.Name + "/" + v.Name
 		err := v.check()
 		if err != nil {
-			p.Errors = append(p.Errors, err)
+			p.Errors = append(p.Errors, err...)
 		}
 	}
 	for _, v := range p.Block.TypeAliases {
-		comment := v.Comment
 		err := v.resolve(&PackageBeenCompile.Block)
-		v.Comment = comment
 		if err != nil {
 			p.Errors = append(p.Errors, err)
 		}

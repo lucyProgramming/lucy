@@ -14,10 +14,10 @@ public class ArrayBool   {
 	public synchronized int start(){
         return this.start;
 	}
-	public int end(){
+	public synchronized int end(){
          return this.end;
 	}
-	public int cap(){
+	public synchronized int cap(){
          return this.cap;
 	}
 	public ArrayBool(boolean[] values){
@@ -28,7 +28,7 @@ public class ArrayBool   {
 		
 	}
 	public ArrayBool(){
-
+		
 	}
 	public synchronized void set(int index , boolean value) {
 		if (index < 0 ){
@@ -50,7 +50,7 @@ public class ArrayBool   {
 		}
 		return this.elements[index]  ; 
 	}	
-
+	
 
 	public  synchronized ArrayBool slice(int start,int end){
 		if(start < 0 || start > end || end + this.start > this.end){
@@ -84,7 +84,7 @@ public class ArrayBool   {
 		this.end += es.size();
 		 
 	}
-	private void expand(int cap){
+	private synchronized void expand(int cap){
 		if(cap <= 0){
 		    cap = 10;
 		}

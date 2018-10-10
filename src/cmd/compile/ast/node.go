@@ -19,8 +19,13 @@ type ConvertTops2Package struct {
 	TypeAlias []*TypeAlias
 }
 
-func (conversion *ConvertTops2Package) ConvertTops2Package(t []*TopNode) (redeclareErrors []*RedeclareError, errs []error) {
+func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (redeclareErrors []*RedeclareError, errs []error) {
 	//
+	if len(nodes) == 0 {
+		errs = make([]error, 1)
+		errs[0] = fmt.Errorf("nothing to compile")
+		return
+	}
 	if err := PackageBeenCompile.loadCorePackage(); err != nil {
 		fmt.Printf("load lucy buildin package failed,err:%v\n", err)
 		os.Exit(1)
@@ -33,7 +38,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*TopNode) (redecl
 	conversion.Enums = make([]*Enum, 0)
 	conversion.Constants = make([]*Constant, 0)
 	expressions := []*Expression{}
-	for _, v := range t {
+	for _, v := range nodes {
 		switch v.Data.(type) {
 		case *Block:
 			t := v.Data.(*Block)
@@ -111,13 +116,13 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(t []*TopNode) (redecl
 		}
 	}
 	PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
-	//after class inserted,then resolve type
+
 	for _, v := range conversion.TypeAlias {
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
 		}
 		PackageBeenCompile.Block.TypeAliases[v.Name] = v.Type
-		v.Type.Alias = v.Name
+		v.Type.Alias = v
 	}
 	if len(expressions) > 0 {
 		s := make([]*Statement, len(expressions))

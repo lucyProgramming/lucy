@@ -146,7 +146,10 @@ func (buildPackage *BuildPackage) mkGlobalTypeAlias() {
 	for name, v := range buildPackage.Package.Block.TypeAliases {
 		t := &cg.AttributeLucyTypeAlias{}
 		t.Alias = LucyTypeAliasParser.Encode(name, v)
-		t.Comment = v.Comment
+		if v.Alias != nil {
+			t.Comment = v.Alias.Comment
+		}
+
 		buildPackage.mainClass.Class.TypeAlias = append(buildPackage.mainClass.Class.TypeAlias, t)
 	}
 }
@@ -369,8 +372,8 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 				&cg.AttributeTemplateFunction{
 					Name:        f.Name,
 					Filename:    f.Pos.Filename,
-					StartLine:   uint16(f.Pos.StartLine),
-					StartColumn: uint16(f.Pos.StartColumn),
+					StartLine:   uint16(f.Pos.Line),
+					StartColumn: uint16(f.Pos.Column),
 					Code:        string(f.SourceCodes),
 				})
 			continue

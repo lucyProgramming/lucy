@@ -63,10 +63,10 @@ func (f *Function) readableMsg() string {
 func (f *Function) makeName() {
 	if f.Name == "" {
 		if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-			f.Name = fmt.Sprintf("literal$%d", f.Pos.StartLine)
+			f.Name = fmt.Sprintf("literal$%d", f.Pos.Line)
 		} else {
 			f.Name = fmt.Sprintf("%s$literal%d",
-				f.Block.InheritedAttribute.ClassAndFunctionNames, f.Pos.StartLine)
+				f.Block.InheritedAttribute.ClassAndFunctionNames, f.Pos.Line)
 		}
 	}
 	name := f.Name

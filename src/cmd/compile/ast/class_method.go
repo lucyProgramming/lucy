@@ -119,6 +119,9 @@ func (c *Class) accessInterfaceObjectMethod(pos *Pos, errs *[]error, name string
 	if err != nil {
 		return nil, false, err
 	}
+	if c.SuperClass == nil {
+		return nil, false, nil
+	}
 	return c.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, nil)
 }
 
@@ -166,46 +169,52 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall
 	if err != nil {
 		return nil, false, err
 	}
-
 	if c.IsJava {
 		return c.accessMethodAsJava(pos, errs, call, callArgTypes, false)
 	}
-	//TODO:: can be accessed or not ???
-	if f := c.Fields[call.Name]; f != nil &&
-		f.Type.Type == VariableTypeFunction &&
-		fieldMethodHandler != nil {
-		if fromSub && f.ableAccessFromSubClass() == false {
-			//cannot access this field
-		} else {
-			call.VArgs, err = c.Fields[call.Name].Type.FunctionType.fitArgs(pos, &call.Args,
-				callArgTypes, nil)
-			if err == nil {
-				*fieldMethodHandler = f
-				matched = true
-				return
+	if c.Fields != nil {
+		if f := c.Fields[call.Name]; f != nil &&
+			f.Type.Type == VariableTypeFunction &&
+			fieldMethodHandler != nil {
+			if fromSub && f.ableAccessFromSubClass() == false {
+				//cannot access this field
 			} else {
-				return nil, false, err
+				call.VArgs, err = c.Fields[call.Name].Type.FunctionType.fitArgs(pos, &call.Args,
+					callArgTypes, nil)
+				if err == nil {
+					*fieldMethodHandler = f
+					matched = true
+					return
+				} else {
+					return nil, false, err
+				}
 			}
 		}
 	}
-	if len(c.Methods[call.Name]) > 0 {
-		for _, m := range c.Methods[call.Name] {
-			if fromSub && m.ableAccessFromSubClass() == false {
-				return nil, false, fmt.Errorf("%s method '%s' not found",
-					errMsgPrefix(pos), call.Name)
-			}
-			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args,
-				callArgTypes, m.Function)
-			if err == nil {
-				return []*ClassMethod{m}, true, nil
-			} else {
-				return []*ClassMethod{m}, false, err
+	if c.Methods != nil {
+		if len(c.Methods[call.Name]) > 0 {
+			for _, m := range c.Methods[call.Name] {
+				if fromSub && m.ableAccessFromSubClass() == false {
+					return nil, false, fmt.Errorf("%s method '%s' not found",
+						errMsgPrefix(pos), call.Name)
+				}
+				call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args,
+					callArgTypes, m.Function)
+				if err == nil {
+					return []*ClassMethod{m}, true, nil
+				} else {
+					return []*ClassMethod{m}, false, err
+				}
 			}
 		}
 	}
+
 	err = c.loadSuperClass(pos)
 	if err != nil {
 		return ms, false, err
+	}
+	if c.SuperClass == nil {
+		return ms, false, nil
 	}
 	return c.SuperClass.accessMethod(pos, errs, call,
 		callArgTypes, true, fieldMethodHandler)
@@ -234,6 +243,9 @@ func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, call *ExpressionMeth
 	err = c.loadSuperClass(pos)
 	if err != nil {
 		return nil, false, err
+	}
+	if c.SuperClass == nil {
+		return ms, false, nil
 	}
 	ms_, matched, err := c.SuperClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
 	if err != nil {

@@ -71,74 +71,74 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 		if m.Type.Map.K != nil &&
-			v.Key.IsLiteral() {
+			v.Key.IsLiteral() &&
+			m.Type.Map.K.Type == v.Key.Value.Type {
 			errMsg := func(pos *Pos, first *Pos, which interface{}) error {
 				errMsg := fmt.Sprintf("%s  '%v' duplicate key,first declared at:\n",
 					errMsgPrefix(pos), which)
 				errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
 				return errors.New(errMsg)
 			}
-			if m.Type.Map.K.assignAble(nil, v.Key.Value) {
-				switch m.Type.Map.K.Type {
-				case VariableTypeByte:
-					value := v.Key.Data.(byte)
-					if t, ok := byteMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						byteMap[value] = v.Key.Pos
-					}
-				case VariableTypeChar:
-					value := v.Key.Data.(int32)
-					if t, ok := charMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						charMap[value] = v.Key.Pos
-					}
-				case VariableTypeShort:
-					value := v.Key.Data.(int32)
-					if t, ok := shortMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						shortMap[value] = v.Key.Pos
-					}
-				case VariableTypeInt:
-					value := v.Key.Data.(int32)
-					if t, ok := intMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						intMap[value] = v.Key.Pos
-					}
-				case VariableTypeLong:
-					value := v.Key.Data.(int64)
-					if t, ok := longMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						longMap[value] = v.Key.Pos
-					}
-				case VariableTypeFloat:
-					value := v.Key.Data.(float32)
-					if t, ok := floatMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						floatMap[value] = v.Key.Pos
-					}
-				case VariableTypeDouble:
-					value := v.Key.Data.(float64)
-					if t, ok := doubleMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						doubleMap[value] = v.Key.Pos
-					}
-				case VariableTypeString:
-					value := v.Key.Data.(string)
-					if t, ok := stringMap[value]; ok {
-						*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
-					} else {
-						stringMap[value] = v.Key.Pos
-					}
+			switch m.Type.Map.K.Type {
+			case VariableTypeByte:
+				value := v.Key.Data.(byte)
+				if t, ok := byteMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					byteMap[value] = v.Key.Pos
+				}
+			case VariableTypeChar:
+				value := v.Key.Data.(int32)
+				if t, ok := charMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					charMap[value] = v.Key.Pos
+				}
+			case VariableTypeShort:
+				value := v.Key.Data.(int32)
+				if t, ok := shortMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					shortMap[value] = v.Key.Pos
+				}
+			case VariableTypeInt:
+				value := v.Key.Data.(int32)
+				if t, ok := intMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					intMap[value] = v.Key.Pos
+				}
+			case VariableTypeLong:
+				value := v.Key.Data.(int64)
+				if t, ok := longMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					longMap[value] = v.Key.Pos
+				}
+			case VariableTypeFloat:
+				value := v.Key.Data.(float32)
+				if t, ok := floatMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					floatMap[value] = v.Key.Pos
+				}
+			case VariableTypeDouble:
+				value := v.Key.Data.(float64)
+				if t, ok := doubleMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					doubleMap[value] = v.Key.Pos
+				}
+			case VariableTypeString:
+				value := v.Key.Data.(string)
+				if t, ok := stringMap[value]; ok {
+					*errs = append(*errs, errMsg(v.Key.Pos, t, v.Key.Data))
+				} else {
+					stringMap[value] = v.Key.Pos
 				}
 			}
 		}
+
 		// map v
 		vType, es := v.Value.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)

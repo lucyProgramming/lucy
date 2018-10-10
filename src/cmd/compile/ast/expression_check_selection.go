@@ -148,6 +148,9 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 					*errs = append(*errs, err)
 					return object
 				}
+				if object.Class.SuperClass == nil {
+					return object
+				}
 				result := object.Clone()
 				result.Pos = e.Pos
 				result.Class = result.Class.SuperClass

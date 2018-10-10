@@ -28,11 +28,11 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 		if len(context.stackMapOffsets) > 0 {
 			context.lastStackMapOffset = context.stackMapOffsets[len(context.stackMapOffsets)-1]
 		} else {
-			context.lastStackMapOffset = 0
+			context.lastStackMapOffset = -1
 		}
 	}
 	var delta uint16
-	if context.lastStackMapOffset == 0 {
+	if context.lastStackMapOffset == -1 {
 		/*
 			first one
 		*/
@@ -116,12 +116,12 @@ func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos,
 		}
 		class.SourceFiles[pos.Filename] = struct{}{}
 		context.currentSourceFile = pos.Filename
-		context.currentLineNumber = pos.StartLine
-		code.MKLineNumber(pos.StartLine)
+		context.currentLineNumber = pos.Line
+		code.MKLineNumber(pos.Line)
 		return
 	}
-	if context.currentLineNumber != pos.StartLine {
-		code.MKLineNumber(pos.StartLine)
-		context.currentLineNumber = pos.StartLine
+	if context.currentLineNumber != pos.Line {
+		code.MKLineNumber(pos.Line)
+		context.currentLineNumber = pos.Line
 	}
 }

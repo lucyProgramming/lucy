@@ -71,11 +71,11 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 				value = nil
 			}
 			enumName := &ast.EnumName{
-				Name:       name,
-				Pos:        pos,
-				Expression: value,
-				Enum:       e,
-				Comment:    enumComment,
+				Name:    name,
+				Pos:     pos,
+				NoNeed:  value,
+				Enum:    e,
+				Comment: enumComment,
 			}
 			e.Enums = append(e.Enums, enumName)
 			reset()

@@ -14,7 +14,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 	}
 	// call father`s construction method
 	if call.Name == SUPER && call.Expression.Value.Type == VariableTypeObject {
-		return e.checkMethodCallExpressionOnSuper(block, errs, object)
+		e.checkMethodCallExpressionOnSuper(block, errs, object)
+		return []*Type{mkVoidType(e.Pos)}
 	}
 	switch object.Type {
 	case VariableTypePackage:
@@ -113,12 +114,12 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 /*
 	this.super()
 */
-func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]error, object *Type) []*Type {
+func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]error, object *Type) {
 	call := e.Data.(*ExpressionMethodCall)
 	if call.Expression.IsIdentifier(THIS) == false {
 		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'thi.super()'",
 			errMsgPrefix(e.Pos)))
-		return nil
+		return
 	}
 	if block.InheritedAttribute.IsConstructionMethod == false ||
 		block.IsFunctionBlock == false ||
@@ -126,19 +127,28 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		*errs = append(*errs,
 			fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
 				errMsgPrefix(e.Pos)))
-		return nil
+		return
 	}
-	err := object.Class.loadSuperClass(e.Pos)
-	if err != nil {
-		*errs = append(*errs, err)
-		return nil
+	if object.Class.LoadFromOutSide {
+		err := object.Class.loadSuperClass(e.Pos)
+		if err != nil {
+			*errs = append(*errs, err)
+			return
+		}
+		if object.Class.SuperClass == nil {
+			return
+		}
+	} else {
+		if object.Class.SuperClass == nil {
+			return
+		}
 	}
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs,
 		nil, call, callArgsTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
-		return nil
+		return
 	}
 	if matched {
 		m := ms[0]
@@ -150,13 +160,11 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		call.Name = "<init>"
 		call.Method = m
 		call.Class = object.Class.SuperClass
-		ret := []*Type{mkVoidType(e.Pos)}
 		block.Statements[0].IsCallFatherConstructionStatement = true
 		block.InheritedAttribute.Function.CallFatherConstructionExpression = e
-		return ret
+		return
 	}
 	*errs = append(*errs, methodsNotMatchError(e.Pos, object.TypeString(), ms, callArgsTypes))
-	return nil
 }
 
 func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, errs *[]error, object *Type) []*Type {

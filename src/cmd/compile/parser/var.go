@@ -46,7 +46,7 @@ func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
 	parser.nErrors2Stop = 10
 	parser.bs = bs
 	parser.initParser()
-	parser.lexer = lex.New(parser.bs, pos.StartLine, pos.StartColumn)
+	parser.lexer = lex.New(parser.bs, pos.Line, pos.Column)
 	parser.Next(lfNotToken) //
 	f, err := parser.FunctionParser.parse(true, false)
 	if err != nil {

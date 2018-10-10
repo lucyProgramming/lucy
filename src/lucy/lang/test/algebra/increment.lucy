@@ -3,9 +3,7 @@ var i int = 1
 
 {
 	global.i++
-	if global.i != 2 {
-		panic(new error("++ is wrong"))
-	} 
+	assert(global.i == 2)
 	global.i--
 	if global.i != 1 {
 		panic(new error("-- is wrong"))
@@ -18,7 +16,7 @@ var i int = 1
 	if global.i != 1 {
 		panic(new error("-- is wrong"))
 	}
-
+	
 	if global.i++ != 1 {
         panic(new error("++ is wrong"))
     }

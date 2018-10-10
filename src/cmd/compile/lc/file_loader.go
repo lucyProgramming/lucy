@@ -504,8 +504,11 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		if err != nil {
 			return err
 		}
-		typ.Comment = attr.Comment
-		typ.Alias = name
+		alias := &ast.TypeAlias{
+			Name:    name,
+			Comment: attr.Comment,
+		}
+		typ.Alias = alias
 		pack.Block.TypeAliases[name] = typ
 		if typ.Type == ast.VariableTypeEnum {
 			err = loadEnumForVariableType(typ)
@@ -518,9 +521,9 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 		attr := &cg.AttributeTemplateFunction{}
 		attr.FromBytes(c, v.Info)
 		f, es := ast.ParseFunctionHandler([]byte(attr.Code), &ast.Pos{
-			Filename:    attr.Filename,
-			StartLine:   int(attr.StartLine),
-			StartColumn: int(attr.StartColumn),
+			Filename: attr.Filename,
+			Line:     int(attr.StartLine),
+			Column:   int(attr.StartColumn),
 		})
 		if len(es) > 0 { // looks impossible
 			return es[0]
