@@ -13,7 +13,6 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 	blockParser.parser.unExpectNewLineAndSkip()
 	condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 		blockParser.Next(lfNotToken)
 	}
@@ -27,7 +26,6 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 		blockParser.Next(lfNotToken) // skip ;
 		statementIf.Condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
 			blockParser.Next(lfNotToken)
 		}
@@ -99,7 +97,6 @@ func (blockParser *BlockParser) parseElseIfList() (elseIfList []*ast.StatementEl
 		blockParser.parser.unExpectNewLineAndSkip()
 		condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
 		}
 		if blockParser.parser.token.Type != lex.TokenLc {

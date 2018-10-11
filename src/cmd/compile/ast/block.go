@@ -253,7 +253,7 @@ func (b *Block) inherit(father *Block) {
 	b.Outer = father
 }
 
-func (b *Block) checkUnUsedVariables() (es []error) {
+func (b *Block) checkUnUsed() (es []error) {
 	es = []error{}
 	for _, v := range b.Variables {
 		if v.Used ||
@@ -266,6 +266,7 @@ func (b *Block) checkUnUsedVariables() (es []error) {
 		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",
 			v.Pos.errMsgPrefix(), v.Name))
 	}
+
 	return es
 }
 
@@ -274,7 +275,7 @@ func (b *Block) checkStatements() []error {
 	for k, s := range b.Statements {
 		if s.isStaticFieldDefaultValue {
 			// no need to check
-			// compile auto statement
+			// compile auto statement , checked before
 			continue
 		}
 		b.InheritedAttribute.StatementOffset = k
@@ -283,7 +284,7 @@ func (b *Block) checkStatements() []error {
 			return errs
 		}
 	}
-	errs = append(errs, b.checkUnUsedVariables()...)
+	errs = append(errs, b.checkUnUsed()...)
 	return errs
 }
 

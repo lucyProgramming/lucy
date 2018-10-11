@@ -14,7 +14,7 @@ import "java/lang/reflect/Array"
 
 
 enum JsonSyntaxTreeType {
-	JsonSyntaxTreeTypeArray = 1  ,
+	JsonSyntaxTreeTypeArray = 1 ,  
 	JsonSyntaxTreeTypeObject ,
 	JsonSyntaxTreeTypeNumber ,
 	JsonSyntaxTreeTypeBool ,
@@ -271,7 +271,7 @@ public class Decoder {
 		b := this.bs[this.offset]
 		n = new JsonSyntaxTreeNode()
 		n.Type = JsonSyntaxTreeTypeObject
-		n.object = new map {string -> JsonSyntaxTreeNode } ()
+		n.object = new map { string -> JsonSyntaxTreeNode } ()
 		for b != '}' {
 			k  := this.parseJsonSyntaxTree()
 			if k.Type != JsonSyntaxTreeTypeString {
@@ -294,7 +294,6 @@ public class Decoder {
 				b = this.bs[this.offset]
 				if b == '}' {
 				    panic(sprintf("expect key value list, but '%s'",this.getErrMsg()))
-
 				}
 			}else if b == '}' {
 					//nothing to do 
@@ -329,8 +328,8 @@ public class Decoder {
 				case '\\':
 					bs.append('\\')
 					b = this.bs[this.offset++]
-				case 47b:
-					bs.append(47b)
+				case '/':
+					bs.append('/')
 					b = this.bs[this.offset++]
 				case 'b':
 					bs.append('\b')
@@ -367,13 +366,14 @@ public class Decoder {
 	}
 
 	// no check 
-	private fn hexByte2Int(b byte ) -> (v int ) {
-		if b >= 'a' && b <= 'f' {
-			return int(b - 'a') + 10 
-		}else if b >= 'A' && b <= 'F' {
-			return int(b - 'A') + 10 
-		}else {
-			return int(b - '0')
+	private static fn hexByte2Int(b byte ) -> (v int ) {
+		switch b {
+			case b >= 'a' && b <= 'f':
+				return int(b - 'a') + 10 
+			case b >= 'A' && b <= 'F':
+				return int(b - 'A') + 10 
+			default:
+				return int(b - '0')
 		}
 	}
 	
@@ -381,44 +381,30 @@ public class Decoder {
 	// 
 	private fn parseTrue () {
 		this.offset++  // skip 't' 
-		if this.bs[ this.offset ++ ] != 'r' {
+		if this.bs[ this.offset ++ ] != 'r' ||
+		    this.bs[ this.offset ++ ] != 'u' ||
+		    this.bs[ this.offset ++ ] != 'e' {
 			panic("wrong true")
-		} 
-		if this.bs[ this.offset ++ ] != 'u' {
-			panic("wrong true")
-		} 
-		if this.bs[ this.offset ++ ] != 'e' {
-			panic("wrong true")
-		} 
+		}
 	}
 
 	private fn parseNull ()  {
 		this.offset++  // skip 'n' 
-		if this.bs[ this.offset ++ ] != 'u' {
+		if this.bs[ this.offset ++ ] != 'u' ||
+		    this.bs[ this.offset ++ ] != 'l' ||
+		    this.bs[ this.offset ++ ] != 'l' {
 			panic("wrong null")
-		} 
-		if this.bs[ this.offset ++ ] != 'l' {
-			panic("wrong null")
-		} 
-		if this.bs[ this.offset ++ ] != 'l' {
-			panic("wrong null")
-		} 
+		}
 	}
 
 	private fn parseFalse ()  {
 		this.offset++  // skip 'f' 
-		if this.bs[ this.offset ++ ] != 'a' {
+		if this.bs[ this.offset ++ ] != 'a' ||
+		    this.bs[ this.offset ++ ] != 'l' ||
+		    this.bs[ this.offset ++ ] != 's' ||
+		    this.bs[ this.offset ++ ] != 'e' {
 			panic("wrong false")
-		} 
-		if this.bs[ this.offset ++ ] != 'l' {
-			panic("wrong false")
-		} 
-		if this.bs[ this.offset ++ ] != 's' {
-			panic("wrong false")
-		} 
-		if this.bs[ this.offset ++ ] != 'e' {
-			panic("wrong false")
-		} 
+		}
 	}
 	
 	private static fn isDigit(b byte) -> (is bool) {

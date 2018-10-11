@@ -8,34 +8,32 @@ import (
 type Function struct {
 	CallFatherConstructionExpression *Expression
 	TemplateFunction                 *TemplateFunction
-	parameterTypes                   map[string]*Type     //typed parameters
-	Entrance                         *cg.MethodHighLevel  // make call from
-	buildInFunctionChecker           buildFunctionChecker // used in build function
-	AccessFlags                      uint16
-	Type                             FunctionType
-	Closure                          Closure
-	Name                             string // if name is nil string,means no name function
-	Block                            Block
-	Pos                              *Pos
-	JvmDescriptor                    string
-	ClosureVariableOffSet            uint16 // for closure
-	SourceCodes                      []byte // source code for template function
-	HasDefer                         bool
-	HaveDefaultValue                 bool
-	DefaultValueStartAt              int
-	IsGlobal                         bool
-	IsBuildIn                        bool
-	LoadedFromCorePackage            bool
-	Used                             bool
-	TemplateClonedFunction           bool
-	IsClosureFunction                bool
-	isGlobalVariableDefinition       bool
-	isPackageInitBlockFunction       bool
-	Comment                          string
+	parameterTypes                   map[string]*Type    //typed parameters
+	Entrance                         *cg.MethodHighLevel // make call from
+	buildInFunctionChecker           func(
+		f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) // used in build function
+	AccessFlags                uint16
+	Type                       FunctionType
+	Closure                    Closure
+	Name                       string // if name is nil string,means no name function
+	Block                      Block
+	Pos                        *Pos
+	JvmDescriptor              string
+	ClosureVariableOffSet      uint16 // for closure
+	SourceCode                 []byte // source code for template function
+	HasDefer                   bool
+	HaveDefaultValue           bool
+	DefaultValueStartAt        int
+	IsGlobal                   bool
+	IsBuildIn                  bool
+	LoadedFromCorePackage      bool
+	Used                       bool
+	TemplateClonedFunction     bool
+	IsClosureFunction          bool
+	isGlobalVariableDefinition bool
+	isPackageInitBlockFunction bool
+	Comment                    string
 }
-
-type buildFunctionChecker func(f *Function, e *ExpressionFunctionCall,
-	block *Block, errs *[]error, args []*Type, pos *Pos)
 
 func (f *Function) IsPublic() bool {
 	return f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0
@@ -98,7 +96,7 @@ func (f *Function) check(b *Block) []error {
 }
 
 func (f *Function) clone() (ret *Function, es []error) {
-	ret, es = ParseFunctionHandler(f.SourceCodes, f.Pos)
+	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
 	if len(es) > 0 {
 		return ret, es
 	}

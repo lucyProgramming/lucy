@@ -193,7 +193,9 @@ func (e *Expression) ConvertToNumber(typ VariableTypeKind) {
 	}
 }
 
-type ExpressionTypeAssert ExpressionTypeConversion
+type ExpressionTypeAssert struct {
+	ExpressionTypeConversion
+}
 
 /*
 	const spread

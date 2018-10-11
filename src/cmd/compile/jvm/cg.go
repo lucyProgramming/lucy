@@ -374,7 +374,7 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 					Filename:    f.Pos.Filename,
 					StartLine:   uint16(f.Pos.Line),
 					StartColumn: uint16(f.Pos.Column),
-					Code:        string(f.SourceCodes),
+					Code:        string(f.SourceCode),
 				})
 			continue
 		}

@@ -6,11 +6,7 @@ import "java/lang/Object" as javaRootClass;
 /*
 	root object for lucy language default object
 */
-public class Lucy extends javaRootClass {
-	public fn Lucy() {
-		this.super() 
-	}
-}
+public class Lucy extends javaRootClass { }
 
 
 

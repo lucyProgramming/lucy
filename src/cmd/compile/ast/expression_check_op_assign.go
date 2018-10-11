@@ -42,14 +42,9 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		s += "11111111"
 	*/
 	if left.Type == VariableTypeString {
-		if right.Type != VariableTypeString || (e.Type != ExpressionTypePlusAssign) {
-			*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-				errMsgPrefix(e.Pos),
-				left.TypeString(),
-				e.Description,
-				right.TypeString()))
+		if right.Type == VariableTypeString && (e.Type == ExpressionTypePlusAssign) {
+			return result
 		}
-		return result
 	}
 
 	//number

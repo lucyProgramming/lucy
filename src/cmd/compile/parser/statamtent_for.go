@@ -17,7 +17,6 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 		blockParser.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
 		statementFor.Condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
 			goto parseBlock
 		}
@@ -31,7 +30,6 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 		if blockParser.parser.token.Type != lex.TokenSemicolon {
 			statementFor.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
-				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilLc)
 				goto parseBlock
 			}
@@ -47,7 +45,6 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 		if blockParser.parser.token.Type != lex.TokenLc {
 			statementFor.Increment, err = blockParser.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
-				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilLc)
 				goto parseBlock
 			}

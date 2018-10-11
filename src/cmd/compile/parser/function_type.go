@@ -82,7 +82,6 @@ func (parser *Parser) parseTypedNameDefaultValue() (returnList []*ast.Variable, 
 		var er error
 		v.DefaultValueExpression, er = parser.ExpressionParser.parseExpression(false)
 		if er != nil {
-			parser.errs = append(parser.errs, err)
 			parser.consume(untilComma)
 			err = er
 			parser.Next(lfNotToken)

@@ -6,9 +6,9 @@ import (
 )
 
 type ClassMethod struct {
-	IsCompilerAuto  bool
-	Function        *Function
-	LoadFromOutSide bool
+	IsCompilerAuto bool
+	Function       *Function
+	//LoadFromOutSide bool
 }
 
 func (m *ClassMethod) narrowDownAccessRange(implementation *ClassMethod) bool {

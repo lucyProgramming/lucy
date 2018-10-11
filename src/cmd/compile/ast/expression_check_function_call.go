@@ -17,11 +17,11 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		case *Function:
 			f := d.(*Function)
 			call.Function = f
-			if f.IsBuildIn {
-				return e.checkBuildInFunctionCall(block, errs, f, call)
-			} else {
-				return e.checkFunctionCall(block, errs, f, call)
-			}
+			//if f.IsBuildIn {
+			//	return e.checkBuildInFunctionCall(block, errs, f, call)
+			//} else {
+			return e.checkFunctionCall(block, errs, f, call)
+			//}
 		case *Type:
 			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Type = d.(*Type)
@@ -122,25 +122,44 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if len(*errs) != length { // if no
 			return nil
 		}
-		ret := f.Type.mkCallReturnTypes(e.Pos)
+		ret := tf.Type.mkCallReturnTypes(e.Pos)
 		var err error
-		call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+		call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, tf)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
 		return ret
 	} else { // not template function
-		if len(call.ParameterTypes) > 0 {
-			*errs = append(*errs, fmt.Errorf("%s function is not a template function",
-				errMsgPrefix(e.Pos)))
+		if f.IsBuildIn {
+			if f.LoadedFromCorePackage {
+				var err error
+				call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+				if err != nil {
+					*errs = append(*errs, err)
+				}
+				return f.Type.mkCallReturnTypes(e.Pos)
+			} else {
+				length := len(*errs)
+				f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
+				if len(*errs) == length {
+					//special case ,avoid null pointer
+					return f.Type.mkCallReturnTypes(e.Pos)
+				}
+				return nil //
+			}
+		} else {
+			if len(call.ParameterTypes) > 0 {
+				*errs = append(*errs, fmt.Errorf("%s function is not a template function",
+					errMsgPrefix(e.Pos)))
+			}
+			ret := f.Type.mkCallReturnTypes(e.Pos)
+			var err error
+			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
+			return ret
 		}
-		ret := f.Type.mkCallReturnTypes(e.Pos)
-		var err error
-		call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
-		if err != nil {
-			*errs = append(*errs, err)
-		}
-		return ret
 	}
 }
 
@@ -148,8 +167,11 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	argTypes []*Type, f *Function) (ret *Function) {
 	call := e.Data.(*ExpressionFunctionCall)
 	parameterTypes := make(map[string]*Type)
+	parameterTypeArray := []*Type{}
 	for k, v := range f.Type.ParameterList {
-		if v == nil || v.Type == nil || len(v.Type.getParameterType()) == 0 {
+		if v == nil ||
+			v.Type == nil ||
+			len(v.Type.getParameterType()) == 0 {
 			continue
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
@@ -162,6 +184,9 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(argTypes[k].Pos), err))
 			return
 		}
+		t := v.Type.Clone()
+		t.bindWithParameterTypes(parameterTypes)
+		parameterTypeArray = append(parameterTypeArray, t)
 	}
 	tps := call.ParameterTypes
 	for k, v := range f.Type.ReturnList {
@@ -172,6 +197,9 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 			//trying already have
 			if err := v.Type.canBeBindWithParameterTypes(parameterTypes); err == nil {
 				//very good no error
+				t := v.Type.Clone()
+				t.bindWithParameterTypes(parameterTypes)
+				parameterTypeArray = append(parameterTypeArray, t)
 				continue
 			}
 			*errs = append(*errs, fmt.Errorf("%s missing typed return value,index at %d",
@@ -183,9 +211,12 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				errMsgPrefix(tps[0].Pos), err))
 			return nil
 		}
+		t := v.Type.Clone()
+		t.bindWithParameterTypes(parameterTypes)
+		parameterTypeArray = append(parameterTypeArray, t)
 		tps = tps[1:]
 	}
-	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypes)
+	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypeArray)
 	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
 		cloneFunction, es := f.clone()
 		if len(es) > 0 {
@@ -197,12 +228,14 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		cloneFunction.parameterTypes = parameterTypes
 		for _, v := range cloneFunction.Type.ParameterList {
 			if len(v.Type.getParameterType()) > 0 {
-				v.Type.bindWithParameterTypes(parameterTypes)
+				v.Type = parameterTypeArray[0]
+				parameterTypeArray = parameterTypeArray[1:]
 			}
 		}
 		for _, v := range cloneFunction.Type.ReturnList {
 			if len(v.Type.getParameterType()) > 0 {
-				v.Type.bindWithParameterTypes(parameterTypes)
+				v.Type = parameterTypeArray[0]
+				parameterTypeArray = parameterTypeArray[1:]
 			}
 		}
 		//check this function

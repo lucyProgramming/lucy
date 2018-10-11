@@ -247,7 +247,6 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 				errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(callArgsTypes[k].Pos),
 					callArgsTypes[k].TypeString(), v.Type.TypeString())
-				errMsg += haveAndWant
 				err = fmt.Errorf(errMsg)
 				return
 			}

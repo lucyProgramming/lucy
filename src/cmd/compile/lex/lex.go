@@ -498,6 +498,9 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 		case '\\':
 			bs = append(bs, '\\')
 			c, eof = lex.getChar()
+		//case '/':
+		//	bs = append(bs, '/')
+		//	c, eof = lex.getChar()
 		case '\'':
 			bs = append(bs, '\'')
 			c, eof = lex.getChar()

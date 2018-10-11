@@ -9,23 +9,18 @@ type TemplateFunction struct {
 }
 
 type TemplateFunctionInstance struct {
-	parameterTypes map[string]*Type
+	parameterTypes []*Type
 	Entrance       *cg.MethodHighLevel
 	Function       *Function
 }
 
-func (t *TemplateFunction) instanceExists(parameterTypes map[string]*Type) *TemplateFunctionInstance {
-	equal := func(p *TemplateFunctionInstance) bool {
-		if len(p.parameterTypes) != len(parameterTypes) {
+func (t *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunctionInstance {
+	equal := func(instance *TemplateFunctionInstance) bool {
+		if len(instance.parameterTypes) != len(parameterTypes) {
 			return false
 		}
-		for tName, tType := range parameterTypes {
-			t, ok := p.parameterTypes[tName]
-			if ok == false {
-				//not found
-				return false
-			}
-			if tType.Equal(t) == false {
+		for k, tType := range parameterTypes {
+			if tType.Equal(instance.parameterTypes[k]) == false {
 				//not equal
 				return false
 			}
@@ -40,7 +35,7 @@ func (t *TemplateFunction) instanceExists(parameterTypes map[string]*Type) *Temp
 	return nil
 }
 
-func (t *TemplateFunction) insert(parameterTypes map[string]*Type) *TemplateFunctionInstance {
+func (t *TemplateFunction) insert(parameterTypes []*Type) *TemplateFunctionInstance {
 	if t := t.instanceExists(parameterTypes); t != nil {
 		return t
 	}

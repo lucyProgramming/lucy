@@ -366,38 +366,6 @@ func (e *Expression) mustBeOneValueContext(ts []*Type) (*Type, error) {
 	return ts[0], err
 }
 
-func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs, true)
-	if f.LoadedFromCorePackage {
-		if f.TemplateFunction != nil {
-			tf := e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
-			if tf == nil {
-				return nil
-			}
-			var err error
-			call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, tf)
-			if err != nil {
-				*errs = append(*errs, err)
-			}
-			return tf.Type.mkCallReturnTypes(e.Pos)
-		} else {
-			var err error
-			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
-			if err != nil {
-				*errs = append(*errs, err)
-			}
-			return f.Type.mkCallReturnTypes(e.Pos)
-		}
-	}
-
-	length := len(*errs)
-	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
-	if len(*errs) == length {
-		//special case ,avoid null pointer
-		return f.Type.mkCallReturnTypes(e.Pos)
-	}
-	return nil //
-}
 func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []error) {
 	ts, es := e.check(block)
 	ret, err := e.mustBeOneValueContext(ts)
@@ -418,7 +386,7 @@ func (e *Expression) methodAccessAble(block *Block, m *ClassMethod, errs *[]erro
 				errMsgPrefix(e.Pos), m.Function.Name))
 		}
 		if false == e.IsIdentifier(THIS) {
-			if (e.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+			if (e.Value.Class.LoadFromOutSide && (m.IsPublic() == false || e.Value.Class.IsPublic() == false)) ||
 				(e.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
 					errMsgPrefix(e.Pos), m.Function.Name))
@@ -430,7 +398,7 @@ func (e *Expression) methodAccessAble(block *Block, m *ClassMethod, errs *[]erro
 				errMsgPrefix(e.Pos), m.Function.Name))
 		}
 		if e.Value.Class != block.InheritedAttribute.Class {
-			if (e.Value.Class.LoadFromOutSide && m.IsPublic() == false) ||
+			if (e.Value.Class.LoadFromOutSide && (m.IsPublic() == false || e.Value.Class.IsPublic() == false)) ||
 				(e.Value.Class.LoadFromOutSide == false && m.IsPrivate() == true) {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
 					errMsgPrefix(e.Pos), m.Function.Name))
@@ -446,7 +414,7 @@ func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassFiel
 				errMsgPrefix(e.Pos), fieldMethodHandler.Name))
 		}
 		if false == e.IsIdentifier(THIS) {
-			if (e.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+			if (e.Value.Class.LoadFromOutSide && (fieldMethodHandler.IsPublic() == false || e.Value.Class.IsPublic() == false)) ||
 				(e.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
 					errMsgPrefix(e.Pos), fieldMethodHandler.Name))
@@ -458,7 +426,7 @@ func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassFiel
 				errMsgPrefix(e.Pos), fieldMethodHandler.Name))
 		}
 		if e.Value.Class != block.InheritedAttribute.Class {
-			if (e.Value.Class.LoadFromOutSide && fieldMethodHandler.IsPublic() == false) ||
+			if (e.Value.Class.LoadFromOutSide && (fieldMethodHandler.IsPublic() == false || e.Value.Class.IsPublic() == false)) ||
 				(e.Value.Class.LoadFromOutSide == false && fieldMethodHandler.IsPrivate() == true) {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not accessable",
 					errMsgPrefix(e.Pos), fieldMethodHandler.Name))
@@ -466,3 +434,36 @@ func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassFiel
 		}
 	}
 }
+
+//func (e *Expression) checkBuildInFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
+//	callArgsTypes := checkExpressions(block, call.Args, errs, true)
+//	if f.LoadedFromCorePackage {
+//		if f.TemplateFunction != nil {
+//			tf := e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
+//			if tf == nil {
+//				return nil
+//			}
+//			var err error
+//			call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, tf)
+//			if err != nil {
+//				*errs = append(*errs, err)
+//			}
+//			return tf.Type.mkCallReturnTypes(e.Pos)
+//		} else {
+//			var err error
+//			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+//			if err != nil {
+//				*errs = append(*errs, err)
+//			}
+//			return f.Type.mkCallReturnTypes(e.Pos)
+//		}
+//	}
+//
+//	length := len(*errs)
+//	f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
+//	if len(*errs) == length {
+//		//special case ,avoid null pointer
+//		return f.Type.mkCallReturnTypes(e.Pos)
+//	}
+//	return nil //
+//}

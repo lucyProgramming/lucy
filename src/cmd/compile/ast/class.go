@@ -26,6 +26,7 @@ type Class struct {
 	Fields                            map[string]*ClassField
 	Methods                           map[string][]*ClassMethod
 	SuperClassName                    string
+	SuperClassNamePos                 *Pos
 	SuperClass                        *Class
 	InterfaceNames                    []*NameWithPos
 	Interfaces                        []*Class
@@ -77,6 +78,7 @@ func (c *Class) mkDefaultConstruction() {
 	m := &ClassMethod{}
 	m.IsCompilerAuto = true
 	m.Function = &Function{}
+	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
 	m.Function.Name = SpecialMethodInit
@@ -231,7 +233,7 @@ func (c *Class) resolveFather() error {
 		variableType := Type{}
 		variableType.Type = VariableTypeName // naming
 		variableType.Name = c.SuperClassName
-		variableType.Pos = c.Pos
+		variableType.Pos = c.SuperClassNamePos
 		err := variableType.resolve(&c.Block)
 		if err != nil {
 			return err
@@ -244,7 +246,7 @@ func (c *Class) resolveFather() error {
 		if c.IsInterface() {
 			if c.SuperClass.Name != JavaRootClass {
 				err := fmt.Errorf("%s interface`s super-class must be '%s'",
-					errMsgPrefix(c.Pos), JavaRootClass)
+					errMsgPrefix(c.SuperClassNamePos), JavaRootClass)
 
 				return err
 			}
@@ -279,7 +281,8 @@ func (c *Class) resolveInterfaces() []error {
 	return errs
 }
 
-func (c *Class) implementMethod(pos *Pos, m *ClassMethod, nameMatched **ClassMethod, fromSub bool, errs *[]error) *ClassMethod {
+func (c *Class) implementMethod(pos *Pos, m *ClassMethod,
+	nameMatched **ClassMethod, fromSub bool, errs *[]error) *ClassMethod {
 	if c.Methods != nil {
 		for _, v := range c.Methods[m.Function.Name] {
 			if v.IsAbstract() {

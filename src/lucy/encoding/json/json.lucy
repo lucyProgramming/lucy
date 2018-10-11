@@ -33,26 +33,3 @@ fn isMap(c Class ) ->(is bool = false ) { // default is false too
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

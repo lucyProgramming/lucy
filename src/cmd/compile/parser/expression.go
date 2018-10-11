@@ -19,7 +19,8 @@ func (expressionParser *ExpressionParser) Next(lfIsToken bool) {
 func (expressionParser *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
 	for expressionParser.parser.token.Type != lex.TokenEof {
-		if expressionParser.parser.token.Type == lex.TokenComment || expressionParser.parser.token.Type == lex.TokenCommentMultiLine {
+		if expressionParser.parser.token.Type == lex.TokenComment ||
+			expressionParser.parser.token.Type == lex.TokenCommentMultiLine {
 			expressionParser.Next(lfIsToken)
 			continue
 		}
@@ -149,8 +150,10 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	}
 	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenLp {
-		return nil, fmt.Errorf("%s not '(' after a type",
+		err := fmt.Errorf("%s not '(' after a type",
 			expressionParser.parser.errorMsgPrefix())
+		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+		return nil, err
 	}
 	expressionParser.Next(lfNotToken) // skip (
 	e, err := expressionParser.parseExpression(false)
@@ -159,7 +162,9 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	}
 	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRp {
-		return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
+		err := fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
+		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+		return nil, err
 	}
 	pos := expressionParser.parser.mkPos()
 	expressionParser.Next(lfIsToken) // skip )

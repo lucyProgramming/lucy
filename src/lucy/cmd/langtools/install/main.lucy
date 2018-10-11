@@ -11,8 +11,8 @@ fn printUsage() {
 
 
 fn main(args []string) {
-	lucyRoot  := common.getLucyRoot()
-	verbose := flagParser.boolOption("-v" , false  , "package name" ) 
+	var lucyRoot = common.getLucyRoot()
+	var verbose = flagParser.boolOption("-v" , false  , "package name" ) 
 	packageName , err := flagParser.parse(args )
 	if null != err {
 	    printUsage()
@@ -27,7 +27,7 @@ fn main(args []string) {
 	
 	
 	w  := common.findPackageLiesIn( paths ,packageName[0] )
-
+	
 	new Install(lucyRoot ,
 		w + "/src/" + packageName[0] ,
 		packageName[0] ,

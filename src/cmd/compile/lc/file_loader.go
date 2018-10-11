@@ -179,7 +179,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	for _, v := range c.Methods {
 		m := &ast.ClassMethod{}
 		m.Function = &ast.Function{}
-		m.LoadFromOutSide = true
+		//m.LoadFromOutSide = true
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
 		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		m.Function.AccessFlags = v.AccessFlags
@@ -287,7 +287,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			return nil, err
 		}
 		m.Function.AccessFlags = v.AccessFlags
-		m.LoadFromOutSide = true
+		//m.LoadFromOutSide = true
 		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)

@@ -165,7 +165,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next(lfNotToken)
 			}
 		case lex.TokenReturn:
-			pos := blockParser.parser.mkPos()
 			if isGlobal {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s 'return' cannot used in packge init block",
@@ -176,7 +175,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:            ast.StatementTypeReturn,
 				StatementReturn: r,
-				Pos:             pos,
+				Pos:             blockParser.parser.mkPos(),
 			})
 			if blockParser.parser.token.Type == lex.TokenRc {
 				continue
@@ -190,7 +189,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			var es []*ast.Expression
 			es, err = blockParser.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != nil {
-				blockParser.parser.errs = append(blockParser.parser.errs, err)
 				blockParser.consume(untilSemicolonOrLf)
 				blockParser.Next(lfNotToken)
 				continue
@@ -228,7 +226,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			resetPrefix()
 		case lex.TokenPass:
-			pos := blockParser.parser.mkPos()
 			if isGlobal == false {
 				blockParser.parser.errs = append(blockParser.parser.errs,
 					fmt.Errorf("%s 'pass' can only be used in package init block",
@@ -238,29 +235,26 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:            ast.StatementTypeReturn,
-				Pos:             pos,
+				Pos:             blockParser.parser.mkPos(),
 				StatementReturn: &ast.StatementReturn{},
 			})
 		case lex.TokenContinue:
-			pos := blockParser.parser.mkPos()
 			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:              ast.StatementTypeContinue,
 				StatementContinue: &ast.StatementContinue{},
-				Pos:               pos,
+				Pos:               blockParser.parser.mkPos(),
 			})
 		case lex.TokenBreak:
-			pos := blockParser.parser.mkPos()
 			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:           ast.StatementTypeBreak,
 				StatementBreak: &ast.StatementBreak{},
-				Pos:            pos,
+				Pos:            blockParser.parser.mkPos(),
 			})
 		case lex.TokenGoto:
-			pos := blockParser.parser.mkPos()
 			blockParser.Next(lfIsToken) // skip goto key word
 			if blockParser.parser.token.Type != lex.TokenIdentifier {
 				blockParser.parser.errs = append(blockParser.parser.errs,
@@ -275,7 +269,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:          ast.StatementTypeGoTo,
 				StatementGoTo: statementGoto,
-				Pos:           pos,
+				Pos:           blockParser.parser.mkPos(),
 			})
 			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
@@ -318,12 +312,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			s.Enum = e
 			block.Statements = append(block.Statements, s)
 		case lex.TokenImport:
+			pos := blockParser.parser.mkPos()
 			ims := blockParser.parser.parseImports()
 			for _, t := range ims {
 				s := &ast.Statement{
 					Type:   ast.StatementTypeImport,
 					Import: t,
-					Pos:    t.Pos,
+					Pos:    pos,
 				}
 				block.Statements = append(block.Statements, s)
 			}
@@ -344,7 +339,6 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 	pos := blockParser.parser.mkPos()
 	e, err := blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilSemicolonOrLf)
 		blockParser.Next(lfNotToken)
 		return

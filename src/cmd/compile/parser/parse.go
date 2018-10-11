@@ -141,7 +141,6 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenIdentifier:
 			e, err := parser.ExpressionParser.parseExpression(true)
 			if err != nil {
-				parser.errs = append(parser.errs, err)
 				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
 				continue
@@ -290,7 +289,6 @@ func (parser *Parser) Parse() []error {
 			if parser.ExpressionParser.looksLikeExpression() {
 				e, err := parser.ExpressionParser.parseExpression(true)
 				if err != nil {
-					parser.errs = append(parser.errs, err)
 					continue
 				}
 				if e.Type == ast.ExpressionTypeVarAssign {
@@ -465,7 +463,6 @@ func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
 		parser.Next(lfNotToken) // skip = or :=
 		ret.InitValues, err = parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 		if err != nil {
-			parser.errs = append(parser.errs, err)
 			return
 		}
 	}

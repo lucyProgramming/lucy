@@ -69,7 +69,6 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 				}
 				PackageBeenCompile.UnUsedPackage[i.Import] = i
 			}
-
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
 			expressions = append(expressions, t)

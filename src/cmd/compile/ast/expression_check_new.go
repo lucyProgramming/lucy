@@ -55,7 +55,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	}
 	if matched {
 		m := ms[0]
-		if (no.Type.Class.LoadFromOutSide && m.IsPublic() == false) ||
+		if (no.Type.Class.LoadFromOutSide && (m.IsPublic() == false || no.Type.Class.IsPublic() == false)) ||
 			(no.Type.Class.LoadFromOutSide == false && m.IsPrivate()) {
 			*errs = append(*errs,
 				fmt.Errorf("%s construction method is not accessable",

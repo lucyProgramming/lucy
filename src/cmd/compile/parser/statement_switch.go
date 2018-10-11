@@ -95,7 +95,6 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	var err error
 	statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 	}
 	blockParser.parser.ifTokenIsLfThenSkip()
@@ -107,7 +106,6 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.Next(lfNotToken)
 		statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			blockParser.consume(untilLc)
 		}
 		blockParser.parser.ifTokenIsLfThenSkip()
@@ -132,7 +130,6 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.unExpectNewLineAndSkip()
 		es, err := blockParser.parser.ExpressionParser.parseExpressions(lex.TokenColon)
 		if err != nil {
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return statementSwitch, err
 		}
 		if blockParser.parser.token.Type != lex.TokenColon {

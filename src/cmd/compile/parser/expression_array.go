@@ -48,8 +48,10 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			return nil, err
 		}
 		if expressionParser.parser.token.Type != lex.TokenRp {
-			return nil, fmt.Errorf("%s '(' and  ')' not match",
+			err = fmt.Errorf("%s '(' and  ')' not match",
 				expressionParser.parser.errorMsgPrefix())
+			expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+			return nil, err
 		}
 		ret := &ast.Expression{}
 		ret.Description = "checkCast"
@@ -90,8 +92,10 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 //{1,2,3}  {{1,2,3},{456}}
 func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 	if expressionParser.parser.token.Type != lex.TokenLc {
-		return nil, fmt.Errorf("%s expect '{',but '%s'",
+		err := fmt.Errorf("%s expect '{',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
+		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+		return nil, err
 	}
 	expressionParser.Next(lfNotToken) // skip {
 	es := []*ast.Expression{}
@@ -133,8 +137,10 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 	}
 	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRc {
-		return es, fmt.Errorf("%s expect '}',but '%s'",
+		err := fmt.Errorf("%s expect '}',but '%s'",
 			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
+		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+		expressionParser.parser.consume(untilRc)
 	}
 	expressionParser.Next(lfIsToken)
 	return es, nil

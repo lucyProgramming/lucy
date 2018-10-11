@@ -65,7 +65,7 @@ func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilRc)
 	} else {
-		f.SourceCodes =
+		f.SourceCode =
 			functionParser.parser.
 				bs[offset : functionParser.parser.token.Offset+1]
 	}

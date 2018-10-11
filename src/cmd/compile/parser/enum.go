@@ -55,7 +55,6 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 				parser.Next(lfNotToken)
 				value, err = parser.ExpressionParser.parseExpression(false)
 				if err != nil {
-					parser.errs = append(parser.errs, err)
 					parser.consume(untilSemicolonOrLf)
 				}
 			}

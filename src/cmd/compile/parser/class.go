@@ -47,7 +47,8 @@ func (classParser *ClassParser) parseClassName() (string, error) {
 	if classParser.parser.token.Type == lex.TokenSelection {
 		classParser.Next(lfNotToken) // skip .
 		if classParser.parser.token.Type != lex.TokenIdentifier {
-			err := fmt.Errorf("%s expect identifer for class`s name,but '%s'", classParser.parser.errorMsgPrefix(),
+			err := fmt.Errorf("%s expect identifer for class`s name,but '%s'",
+				classParser.parser.errorMsgPrefix(),
 				classParser.parser.token.Description)
 			classParser.parser.errs = append(classParser.parser.errs, err)
 		}
@@ -103,7 +104,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	classParser.ret.Pos = classParser.parser.mkPos()
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		classParser.Next(lfNotToken) // skip extends
-		classParser.ret.Pos = classParser.parser.mkPos()
+		classParser.ret.SuperClassNamePos = classParser.parser.mkPos()
 		t, err := classParser.parseClassName()
 		classParser.ret.SuperClassName = t
 		if err != nil {
@@ -121,7 +122,8 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	}
 	classParser.parser.ifTokenIsLfThenSkip()
 	if classParser.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{' but '%s'", classParser.parser.errorMsgPrefix(), classParser.parser.token.Description)
+		err = fmt.Errorf("%s expect '{' but '%s'",
+			classParser.parser.errorMsgPrefix(), classParser.parser.token.Description)
 		classParser.parser.errs = append(classParser.parser.errs, err)
 		return nil, err
 	}
@@ -134,26 +136,30 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			classParser.parser.token.Type == lex.TokenAbstract {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after '%s'", classParser.parser.errorMsgPrefix(), keyWord)
+		return fmt.Errorf("%s not a valid token after '%s'",
+			classParser.parser.errorMsgPrefix(), keyWord)
 	}
 	validAfterVolatile := func(token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'volatile'", classParser.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after 'volatile'",
+			classParser.parser.errorMsgPrefix())
 	}
 	validAfterAbstract := func() error {
 		if classParser.parser.token.Type == lex.TokenFn {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'abstract'", classParser.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after 'abstract'",
+			classParser.parser.errorMsgPrefix())
 	}
 	validAfterSynchronized := func() error {
 		if classParser.parser.token.Type == lex.TokenFn ||
 			classParser.parser.token.Type == lex.TokenFinal {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'synchronized'", classParser.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after 'synchronized'",
+			classParser.parser.errorMsgPrefix())
 	}
 	validAfterStatic := func() error {
 		if classParser.parser.token.Type == lex.TokenIdentifier ||
@@ -161,14 +167,16 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			classParser.parser.token.Type == lex.TokenFinal {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'static'", classParser.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after 'static'",
+			classParser.parser.errorMsgPrefix())
 	}
 	validAfterFinal := func() error {
 		if classParser.parser.token.Type == lex.TokenFn ||
 			classParser.parser.token.Type == lex.TokenSynchronized {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'final'", classParser.parser.errorMsgPrefix())
+		return fmt.Errorf("%s not a valid token after 'final'",
+			classParser.parser.errorMsgPrefix())
 	}
 	classParser.Next(lfNotToken) // skip {
 	comment := &CommentParser{
@@ -267,9 +275,11 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 				classParser.isSynchronized = false
 			}
 		case lex.TokenFn:
-			if classParser.isAbstract && (classParser.ret.IsAbstract() == false && classParser.ret.IsInterface() == false) {
+			if classParser.isAbstract &&
+				(classParser.ret.IsAbstract() == false && classParser.ret.IsInterface() == false) {
 				classParser.parser.errs = append(classParser.parser.errs,
-					fmt.Errorf("%s cannot  abstact method is non-abstract class", classParser.parser.errorMsgPrefix()))
+					fmt.Errorf("%s cannot  abstact method is non-abstract class",
+						classParser.parser.errorMsgPrefix()))
 			}
 			isAbstract := classParser.isAbstract || isInterface
 			f, err := classParser.parser.FunctionParser.parse(true, isAbstract)
@@ -317,11 +327,13 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 		case lex.TokenImport:
 			pos := classParser.parser.mkPos()
 			classParser.parser.parseImports()
-			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s cannot have import at this scope",
-				classParser.parser.errorMsgPrefix(pos)))
+			classParser.parser.errs = append(classParser.parser.errs,
+				fmt.Errorf("%s cannot have import at this scope",
+					classParser.parser.errorMsgPrefix(pos)))
 		default:
-			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s unexpected '%s'",
-				classParser.parser.errorMsgPrefix(), classParser.parser.token.Description))
+			classParser.parser.errs = append(classParser.parser.errs,
+				fmt.Errorf("%s unexpected '%s'",
+					classParser.parser.errorMsgPrefix(), classParser.parser.token.Description))
 			classParser.Next(lfNotToken)
 		}
 	}
@@ -346,8 +358,9 @@ func (classParser *ClassParser) parseConst(comment *CommentParser) error {
 	}
 	for _, v := range cs {
 		if _, ok := classParser.ret.Block.Constants[v.Name]; ok {
-			classParser.parser.errs = append(classParser.parser.errs, fmt.Errorf("%s const %s alreay declared",
-				classParser.parser.errorMsgPrefix(), v.Name))
+			classParser.parser.errs = append(classParser.parser.errs,
+				fmt.Errorf("%s const %s alreay declared",
+					classParser.parser.errorMsgPrefix(), v.Name))
 			continue
 		}
 		classParser.ret.Block.Constants[v.Name] = v
@@ -370,7 +383,6 @@ func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser
 		classParser.parser.Next(lfNotToken) // skip = or :=
 		initValues, err = classParser.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 		if err != nil {
-			classParser.parser.errs = append(classParser.parser.errs, err)
 			classParser.consume(untilSemicolonOrLf)
 		}
 	}

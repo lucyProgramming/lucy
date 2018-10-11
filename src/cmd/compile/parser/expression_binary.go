@@ -161,10 +161,8 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		newExpression.Description = name
 		if typ == lex.TokenEqual {
 			newExpression.Type = ast.ExpressionTypeEq
-
 		} else {
 			newExpression.Type = ast.ExpressionTypeNe
-
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left
