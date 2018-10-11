@@ -22,8 +22,9 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 					index.Index.ConvertToNumber(VariableTypeInt) //  convert to int
 				}
 			} else {
-				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
-					errMsgPrefix(e.Pos), indexType.TypeString()))
+				*errs = append(*errs,
+					fmt.Errorf("%s only integer can be used as index,but '%s'",
+						index.Index.Pos.errMsgPrefix(), indexType.TypeString()))
 			}
 		}
 		result := on.Array.Clone()
@@ -39,7 +40,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		}
 		if on.Map.K.assignAble(errs, indexType) == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-				errMsgPrefix(e.Pos), indexType.TypeString(), on.Map.K.TypeString()))
+				index.Index.Pos.errMsgPrefix(), indexType.TypeString(), on.Map.K.TypeString()))
 		}
 		return result
 	case VariableTypeString:
@@ -52,7 +53,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 				}
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
-					errMsgPrefix(e.Pos), indexType.TypeString()))
+					index.Index.Pos.errMsgPrefix(), indexType.TypeString()))
 			}
 		}
 		result := &Type{
@@ -62,7 +63,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		return result
 	default:
 		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
-			errMsgPrefix(e.Pos), on.TypeString()))
+			on.Pos.errMsgPrefix(), on.TypeString()))
 		return nil
 	}
 }

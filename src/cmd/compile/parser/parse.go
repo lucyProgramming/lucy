@@ -645,14 +645,13 @@ func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
 			must be type
 			// int
 		*/
-		pos := parser.mkPos()
 		t, err := parser.parseType()
 		if err != nil {
 			return nil, err
 		}
 		v := &ast.Variable{}
 		v.Type = t
-		v.Pos = pos
+		v.Pos = parser.mkPos()
 		return []*ast.Variable{v}, nil
 	}
 	names, err := parser.parseNameList()
@@ -680,7 +679,7 @@ func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
 	} else {
 		/*
 			syntax a,b
-			not valid type begins, "a" and b must indicate types not double
+			not valid type after name list, "a" and "b" must indicate types
 		*/
 
 		vs = make([]*ast.Variable, len(names))

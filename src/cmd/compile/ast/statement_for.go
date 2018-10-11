@@ -39,8 +39,9 @@ func (s *StatementFor) checkRange() []error {
 	} else if bin.Right.Type == ExpressionTypeList {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
-			errs = append(errs, fmt.Errorf("%s for range statement only allow one argument on the right",
-				errMsgPrefix(t[1].Pos)))
+			errs = append(errs,
+				fmt.Errorf("%s for range statement only allow one argument on the right",
+					errMsgPrefix(t[1].Pos)))
 		}
 		rangeExpression = t[0].Data.(*Expression)
 	}

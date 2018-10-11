@@ -37,20 +37,15 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		call.Args = args
 		call.Name = index.Name
 		result.Data = call
-		result.Pos = expressionParser.parser.mkPos()
-		result.Pos = expressionParser.parser.mkPos()
 	} else {
-		/*
-			x()
-		*/
 		result.Type = ast.ExpressionTypeFunctionCall
 		result.Description = "functionCall"
 		call := &ast.ExpressionFunctionCall{}
 		call.Expression = on
 		call.Args = args
 		result.Data = call
-		result.Pos = expressionParser.parser.mkPos()
 	}
+	result.Pos = pos
 	if expressionParser.parser.token.Type == lex.TokenLt { // <
 		/*
 			template function call return type binds
@@ -76,6 +71,5 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 			result.Data.(*ast.ExpressionMethodCall).ParameterTypes = ts
 		}
 	}
-	result.Pos = pos
 	return result, nil
 }

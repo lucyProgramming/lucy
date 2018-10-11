@@ -22,14 +22,15 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	}
 	// new object
 	if no.Type.Type != VariableTypeObject {
-		*errs = append(*errs, fmt.Errorf("%s cannot have new on type '%s'",
-			errMsgPrefix(e.Pos), no.Type.TypeString()))
+		*errs = append(*errs,
+			fmt.Errorf("%s cannot have new on type '%s'",
+				no.Type.Pos.errMsgPrefix(), no.Type.TypeString()))
 		return nil
 	}
 	err = no.Type.Class.loadSelf(e.Pos)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v",
-			errMsgPrefix(no.Type.Pos), err))
+			no.Type.Pos.errMsgPrefix(), err))
 		return nil
 	}
 	if no.Type.Class.IsInterface() {
@@ -56,8 +57,9 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		m := ms[0]
 		if (no.Type.Class.LoadFromOutSide && m.IsPublic() == false) ||
 			(no.Type.Class.LoadFromOutSide == false && m.IsPrivate()) {
-			*errs = append(*errs, fmt.Errorf("%s construction method is not public",
-				errMsgPrefix(no.Type.Pos)))
+			*errs = append(*errs,
+				fmt.Errorf("%s construction method is not accessable",
+					errMsgPrefix(no.Type.Pos)))
 		}
 		no.Construction = m
 		return ret
@@ -69,8 +71,9 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
 	errs *[]error) *Type {
 	if len(newMap.Args) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s new 'map' expect no arguments",
-			errMsgPrefix(newMap.Args[0].Pos)))
+		*errs = append(*errs,
+			fmt.Errorf("%s new 'map' expect no arguments",
+				errMsgPrefix(newMap.Args[0].Pos)))
 	}
 	ret := newMap.Type.Clone()
 	ret.Pos = e.Pos
@@ -86,7 +89,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	errs *[]error) *Type {
 	ret := newArray.Type.Clone() // clone the type
 	ret.Pos = e.Pos
-	if len(newArray.Args) != 1 { // 0 and 1 is accept
+	if len(newArray.Args) != 1 { //
 		*errs = append(*errs,
 			fmt.Errorf("%s new array expect at least 1 argument",
 				errMsgPrefix(e.Pos)))
@@ -99,9 +102,12 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	if amount == nil {
 		return ret
 	}
-	if amount.Type != VariableTypeInt {
+	if amount.IsInteger() == false {
 		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
 			errMsgPrefix(amount.Pos), amount.TypeString()))
+	}
+	if amount.Type == VariableTypeLong {
+		newArray.Args[0].ConvertToNumber(VariableTypeLong)
 	}
 	//no further checks
 	return ret

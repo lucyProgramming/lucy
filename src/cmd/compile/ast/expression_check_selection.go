@@ -16,7 +16,8 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 	case VariableTypeMagicFunction:
 		v := object.Function.Type.searchName(selection.Name)
 		if v == nil {
-			err := fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
+			err := fmt.Errorf("%s '%s' not found",
+				errMsgPrefix(e.Pos), selection.Name)
 			*errs = append(*errs, err)
 			return nil
 		}

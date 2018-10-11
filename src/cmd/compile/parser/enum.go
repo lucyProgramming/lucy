@@ -8,25 +8,23 @@ import (
 )
 
 func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
-	enumName := &ast.NameWithPos{
-		Pos: parser.mkPos(),
-	}
+	var enumName string
 	parser.Next(lfIsToken) // skip enum
 	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect 'identifier' for enum name, but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
-		enumName.Name = compileAutoName()
+		enumName = compileAutoName()
 		parser.consume(untilLc)
 
 	} else {
-		enumName.Name = parser.token.Data.(string)
+		enumName = parser.token.Data.(string)
 		parser.Next(lfNotToken) // skip enum name
 	}
 	e = &ast.Enum{}
-	e.Name = enumName.Name
-	e.Pos = enumName.Pos
+	e.Name = enumName
+	e.Pos = parser.mkPos()
 	comment := &CommentParser{
 		parser: parser,
 	}
@@ -91,7 +89,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 	}
 	if len(e.Enums) == 0 {
 		enumName := &ast.EnumName{
-			Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //
+			Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //easter egg
 			Pos:  parser.mkPos(),
 			Enum: e,
 		}

@@ -210,6 +210,7 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenBool ||
 		parser.token.Type == lex.TokenByte ||
 		parser.token.Type == lex.TokenShort ||
+		parser.token.Type == lex.TokenChar ||
 		parser.token.Type == lex.TokenInt ||
 		parser.token.Type == lex.TokenFloat ||
 		parser.token.Type == lex.TokenDouble ||
@@ -218,13 +219,10 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenMap ||
 		parser.token.Type == lex.TokenIdentifier ||
 		parser.token.Type == lex.TokenTemplate ||
-		parser.token.Type == lex.TokenFn ||
-		parser.token.Type == lex.TokenChar
+		parser.token.Type == lex.TokenFn
+
 }
-func (parser *Parser) looksLikeType() bool {
-	return parser.isValidTypeBegin() &&
-		parser.token.Type != lex.TokenIdentifier
-}
+
 func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 	name := parser.token.Data.(string)
 	ret := &ast.Type{

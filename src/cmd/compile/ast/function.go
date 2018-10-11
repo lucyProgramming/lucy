@@ -118,7 +118,7 @@ func (f *Function) IsGlobalMain() bool {
 		f.Name == MainFunctionName
 }
 
-func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpression bool, isAbstract bool) {
+func (f *Function) checkParametersAndReturns(errs *[]error, checkReturnVarExpression bool, isAbstract bool) {
 	var err error
 	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true
@@ -209,7 +209,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error, evalReturnVarExpress
 				v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
 				continue
 			}
-			if evalReturnVarExpression == false {
+			if checkReturnVarExpression == false {
 				// eval expression later
 				continue
 			}

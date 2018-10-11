@@ -199,6 +199,7 @@ type ExpressionTypeAssert ExpressionTypeConversion
 	const spread
 */
 func (e *Expression) fromConst(c *Constant) {
+	e.Description = c.Name
 	switch c.Type.Type {
 	case VariableTypeBool:
 		e.Type = ExpressionTypeBool

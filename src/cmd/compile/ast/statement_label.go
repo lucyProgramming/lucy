@@ -22,7 +22,6 @@ type StatementLabel struct {
 	}
 	defer block could be compile multi times,
 	should reset the label
-
 */
 func (s *StatementLabel) Reset() {
 	s.CodeOffsetGenerated = false

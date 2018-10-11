@@ -212,12 +212,12 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 
 // check out package name is valid or not
 func PackageNameIsValid(name string) bool {
+	if strings.HasPrefix(name, `/`) || strings.HasSuffix(name, `/`) {
+		return false
+	}
 	t := strings.Split(name, `/`)
 	if len(t) == 1 {
 		return true
-	}
-	if t[0] == "" || t[1] == "" {
-		return false
 	}
 	for _, v := range t {
 		allOK := true
@@ -225,7 +225,8 @@ func PackageNameIsValid(name string) bool {
 			if (vv >= '0' && vv <= '9') ||
 				(vv >= 'a' && vv <= 'z') ||
 				(vv >= 'A' && vv <= 'Z') ||
-				vv == '$' {
+				vv == '$' ||
+				vv == '_' {
 			} else {
 				allOK = false
 				break

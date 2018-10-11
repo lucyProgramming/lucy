@@ -1,8 +1,15 @@
 package ast
 
 type Constant struct {
-	Variable
-	Value interface{} // value base on type
+	Used                   bool
+	Pos                    *Pos
+	Type                   *Type
+	Name                   string
+	IsBuildIn              bool
+	DefaultValueExpression *Expression
+	AccessFlags            uint16
+	Comment                string
+	Value                  interface{} // value base on type
 }
 
 func (c *Constant) mkDefaultValue() {

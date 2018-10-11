@@ -13,14 +13,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	if left != nil {
 		if left.RightValueValid() == false {
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-				errMsgPrefix(bin.Left.Pos), left.TypeString()))
+				bin.Left.Pos.errMsgPrefix(), left.TypeString()))
 			return nil
 		}
 	}
 	if right != nil {
 		if right.RightValueValid() == false {
 			*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-				errMsgPrefix(bin.Right.Pos), right.TypeString()))
+				bin.Right.Pos.errMsgPrefix(), right.TypeString()))
 			return nil
 		}
 	}

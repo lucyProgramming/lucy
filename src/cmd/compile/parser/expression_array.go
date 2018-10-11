@@ -9,7 +9,6 @@ import (
 
 // []int{1,2,3}
 func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
-	pos := expressionParser.parser.mkPos()
 	expressionParser.parser.Next(lfIsToken) // skip [
 	expressionParser.parser.unExpectNewLineAndSkip()
 	var err error
@@ -23,9 +22,9 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		if expressionParser.parser.token.Type != lex.TokenRb {
 			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
 			return nil, err
-		} else {
-			expressionParser.Next(lfIsToken) // skip ]
 		}
+		pos := expressionParser.parser.mkPos()
+		expressionParser.Next(lfIsToken) // skip ]
 		return &ast.Expression{
 			Type:        ast.ExpressionTypeArray,
 			Data:        arr,
@@ -52,9 +51,9 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			return nil, fmt.Errorf("%s '(' and  ')' not match",
 				expressionParser.parser.errorMsgPrefix())
 		}
-		expressionParser.Next(lfIsToken) // skip )
 		ret := &ast.Expression{}
 		ret.Description = "checkCast"
+		pos := expressionParser.parser.mkPos()
 		ret.Pos = pos
 		ret.Type = ast.ExpressionTypeCheckCast
 		data := &ast.ExpressionTypeConversion{}
@@ -64,6 +63,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		data.Type.Array = array
 		data.Expression = e
 		ret.Data = data
+		expressionParser.Next(lfIsToken) // skip )
 		return ret, nil
 	}
 	expressionParser.parser.unExpectNewLineAndSkip()
@@ -72,7 +72,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		arr.Type = &ast.Type{}
 		arr.Type.Type = ast.VariableTypeArray
 		arr.Type.Array = array
-		arr.Type.Pos = pos
+		arr.Type.Pos = array.Pos
 	}
 	/*
 		[]int { 1, 2}
@@ -81,7 +81,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	return &ast.Expression{
 		Type:        ast.ExpressionTypeArray,
 		Data:        arr,
-		Pos:         pos,
+		Pos:         expressionParser.parser.mkPos(),
 		Description: "arrayLiteral",
 	}, err
 
@@ -97,12 +97,20 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 	es := []*ast.Expression{}
 	for expressionParser.parser.token.Type != lex.TokenEof &&
 		expressionParser.parser.token.Type != lex.TokenRc {
+		if expressionParser.parser.token.Type == lex.TokenComment ||
+			expressionParser.parser.token.Type == lex.TokenCommentMultiLine {
+			expressionParser.Next(lfIsToken)
+			continue
+		}
 		if expressionParser.parser.token.Type == lex.TokenLc {
 			ees, err := expressionParser.parseArrayValues()
 			if err != nil {
 				return es, err
 			}
-			arrayExpression := &ast.Expression{Type: ast.ExpressionTypeArray}
+			arrayExpression := &ast.Expression{
+				Type: ast.ExpressionTypeArray,
+				Pos:  expressionParser.parser.mkPos(),
+			}
 			arrayExpression.Description = "arrayLiteral"
 			data := ast.ExpressionArray{}
 			data.Expressions = ees

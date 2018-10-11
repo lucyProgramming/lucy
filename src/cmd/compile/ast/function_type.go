@@ -260,7 +260,7 @@ type CallVariableArgs struct {
 	Expressions []*Expression
 	Length      int
 	/*
-			a := new int[](10)
+		a := new int[](10)
 		print(a...)
 	*/
 	PackArray2VArgs bool

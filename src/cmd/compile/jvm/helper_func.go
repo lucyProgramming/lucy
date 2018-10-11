@@ -16,6 +16,14 @@ func writeExits(es []*cg.Exit, to int) {
 	}
 }
 
+//func writeExits2(to int, es ...*cg.Exit) {
+//	for _, e := range es {
+//		offset := int16(to - int(e.CurrentCodeLength))
+//		e.BranchBytes[0] = byte(offset >> 8)
+//		e.BranchBytes[1] = byte(offset)
+//	}
+//}
+
 func jumpTo(code *cg.AttributeCode, to int) {
 	if to < 0 {
 		panic("to is negative")
@@ -252,7 +260,8 @@ func functionReturnJvmSize(ft *ast.FunctionType) uint16 {
 	}
 }
 
-func setEnumArray(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState, context *Context, e *ast.Enum) (maxStack uint16) {
+func setEnumArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
+	state *StackMapState, context *Context, e *ast.Enum) (maxStack uint16) {
 	if e.DefaultValue == 0 {
 		return
 	}

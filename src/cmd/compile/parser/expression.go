@@ -19,6 +19,10 @@ func (expressionParser *ExpressionParser) Next(lfIsToken bool) {
 func (expressionParser *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast.Expression, error) {
 	es := []*ast.Expression{}
 	for expressionParser.parser.token.Type != lex.TokenEof {
+		if expressionParser.parser.token.Type == lex.TokenComment || expressionParser.parser.token.Type == lex.TokenCommentMultiLine {
+			expressionParser.Next(lfIsToken)
+			continue
+		}
 		e, err := expressionParser.parseExpression(false)
 		if err != nil {
 			return es, err
@@ -81,7 +85,6 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			left = newExpression
 		}
 	}
-
 	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
 		name := expressionParser.parser.token.Description
@@ -140,7 +143,6 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 }
 
 func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, error) {
-	pos := expressionParser.parser.mkPos()
 	to, err := expressionParser.parser.parseType()
 	if err != nil {
 		return nil, err
@@ -159,6 +161,7 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	if expressionParser.parser.token.Type != lex.TokenRp {
 		return nil, fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
 	}
+	pos := expressionParser.parser.mkPos()
 	expressionParser.Next(lfIsToken) // skip )
 	return &ast.Expression{
 		Type: ast.ExpressionTypeCheckCast,

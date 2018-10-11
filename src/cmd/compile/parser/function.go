@@ -24,7 +24,6 @@ func (functionParser *FunctionParser) consume(until map[lex.TokenKind]bool) {
 */
 func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
-	f.Pos = functionParser.parser.mkPos()
 	offset := functionParser.parser.token.Offset
 	functionParser.Next(lfIsToken) // skip fn key word
 	functionParser.parser.unExpectNewLineAndSkip()
@@ -34,6 +33,7 @@ func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilLp)
 	}
+	f.Pos = functionParser.parser.mkPos()
 	if functionParser.parser.token.Type == lex.TokenIdentifier {
 		f.Name = functionParser.parser.token.Data.(string)
 		functionParser.Next(lfNotToken)

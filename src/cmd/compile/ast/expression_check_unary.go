@@ -19,7 +19,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	}
 	if unary.RightValueValid() == false {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-			errMsgPrefix(ee.Pos), unary.TypeString()))
+			unary.Pos.errMsgPrefix(), unary.TypeString()))
 		return nil
 	}
 	if e.Type == ExpressionTypeNot {
@@ -31,13 +31,13 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	if e.Type == ExpressionTypeNegative {
 		if unary.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'",
-				errMsgPrefix(unary.Pos), unary.TypeString()))
+				unary.Pos.errMsgPrefix(), unary.TypeString()))
 		}
 	}
 	if e.Type == ExpressionTypeBitwiseNot {
 		if unary.IsInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
-				errMsgPrefix(unary.Pos), unary.TypeString()))
+				unary.Pos.errMsgPrefix(), unary.TypeString()))
 		}
 	}
 	result := unary.Clone()

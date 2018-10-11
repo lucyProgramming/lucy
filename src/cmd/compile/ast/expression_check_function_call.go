@@ -27,7 +27,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			typeConversion.Type = d.(*Type)
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					errMsgPrefix(e.Pos)))
+					e.Pos.errMsgPrefix()))
 				return nil
 			}
 			e.Type = ExpressionTypeCheckCast
@@ -46,7 +46,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			typeConversion.Type.Pos = e.Pos
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					errMsgPrefix(e.Pos)))
+					e.Pos.errMsgPrefix()))
 				return nil
 			}
 			e.Type = ExpressionTypeCheckCast
@@ -61,7 +61,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			v := d.(*Variable)
 			if v.Type.Type != VariableTypeFunction {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s' ",
-					errMsgPrefix(call.Expression.Pos), v.Name, v.Type.TypeString()))
+					call.Expression.Pos.errMsgPrefix(), v.Name, v.Type.TypeString()))
 				return nil
 			}
 			call.Expression.Value = &Type{
@@ -73,7 +73,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			return e.checkFunctionPointerCall(block, errs, v.Type.FunctionType, call)
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot make call on '%s'",
-				errMsgPrefix(call.Expression.Pos), block.identifierIsWhat(d)))
+				call.Expression.Pos.errMsgPrefix(), block.identifierIsWhat(d)))
 			return nil
 		}
 	}
@@ -122,26 +122,26 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if len(*errs) != length { // if no
 			return nil
 		}
+		ret := f.Type.mkCallReturnTypes(e.Pos)
+		var err error
+		call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+		if err != nil {
+			*errs = append(*errs, err)
+		}
+		return ret
 	} else { // not template function
 		if len(call.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s function is not a template function",
 				errMsgPrefix(e.Pos)))
 		}
-	}
-	var ret []*Type
-	{
-		f := f // override f
-		if f.TemplateFunction != nil {
-			f = tf
-		}
-		ret = f.Type.mkCallReturnTypes(e.Pos)
+		ret := f.Type.mkCallReturnTypes(e.Pos)
 		var err error
 		call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
+		return ret
 	}
-	return ret
 }
 
 func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,

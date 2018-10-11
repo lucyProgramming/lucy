@@ -19,7 +19,8 @@ type ConvertTops2Package struct {
 	TypeAlias []*TypeAlias
 }
 
-func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (redeclareErrors []*RedeclareError, errs []error) {
+func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
+	redeclareErrors []*RedeclareError, errs []error) {
 	//
 	if len(nodes) == 0 {
 		errs = make([]error, 1)
@@ -116,7 +117,6 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (re
 		}
 	}
 	PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
-
 	for _, v := range conversion.TypeAlias {
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)

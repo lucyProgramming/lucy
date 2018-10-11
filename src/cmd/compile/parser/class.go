@@ -90,7 +90,6 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	if isAbstract {
 		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
-	classParser.ret.Pos = classParser.parser.mkPos()
 	classParser.Next(lfIsToken) // skip class key word
 	classParser.parser.unExpectNewLineAndSkip()
 	classParser.ret.Name, err = classParser.parseClassName()
@@ -101,6 +100,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 		}
 		classParser.consume(untilLc)
 	}
+	classParser.ret.Pos = classParser.parser.mkPos()
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		classParser.Next(lfNotToken) // skip extends
 		classParser.ret.Pos = classParser.parser.mkPos()
