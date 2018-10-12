@@ -12,7 +12,7 @@ fn main(args []string) {
 	
 	f := flag.floatOption("-f" , 1f, "")
 	no,err := flag.parse(["-b","-i" ,"-456" , "121" ,"-aaa" , "-f" ,"-93232.21" , "fdfdfd"])
-	print(err )
+	print(err)
 	print(no)
 	print(b.getValue())
 	print(i.getValue())

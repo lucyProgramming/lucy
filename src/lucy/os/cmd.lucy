@@ -1,23 +1,18 @@
 
 import "java/io/InputStream"
-import "java/lang/Runnable"
 import "java/io/OutputStream"
 import "lucy/io"
 import "java/lang/Process"
 import "java/lang/Runtime"
-import "java/lang/Thread"
 import "java/io/File"
 
-public class Command implements Runnable{
-	const str = "hello world"  // const comment
+public class Command{
 	cmd string  
 	args string []  
 	envs string [] 
 	file File 
 	public stdin  InputStream
 	public stdout , stderr  OutputStream 
-	public in InputStream 
-	public out OutputStream  
 	p Process
 	
 	public fn Command(cmd string , args  , envs string []   ,file File  ){
@@ -62,23 +57,21 @@ public class Command implements Runnable{
 			this.p = Runtime.getRuntime().exec(this.cmd)
 		}
 		// copy io 
+		var that = this
 		if this.stdin != null {
-			r := new Command("" , null , null ,null )
-			r.out = this.p.getOutputStream() 
-			r.in = this.stdin
-			(new Thread(r)).start()
+			Run.runFn(fn () {
+			    io.ioCopy(  that.p.getOutputStream() , that.stdin )
+			})
 		}
 		if this.stdout != null {
-			r := new Command("", null , null ,null)
-			r.out =  this.stdout 
-			r.in = this.p.getInputStream()
-			(new Thread(r)).start()
+			Run.runFn(fn () {
+			    io.ioCopy(that.stdout , that.p.getInputStream())
+			})
 		}
 		if this.stderr != null {
-			r := new Command("", null , null ,null)
-			r.out = this.stderr 
-			r.in = this.p.getErrorStream()
-			(new Thread(r)).start()
+			Run.runFn(fn () {
+			    io.ioCopy(that.stderr , that.p.getErrorStream()  )
+			})
 		}
 
 	}
@@ -96,14 +89,7 @@ public class Command implements Runnable{
 		}
 	}
 	
-	//for io copy only
-	public fn run() {
-		if this.in == null && this.out == null {
-			return 
-		}
-		io.ioCopy(this.out, this.in)
-	}
-
+	
 }
 
 

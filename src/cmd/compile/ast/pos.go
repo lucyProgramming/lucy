@@ -11,8 +11,6 @@ type Pos struct {
 		for template function only currently
 	*/
 	Offset int
-	//EndLint   int
-	//EndColumn int
 }
 
 func (pos *Pos) errMsgPrefix() string {

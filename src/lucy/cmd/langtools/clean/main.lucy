@@ -13,6 +13,7 @@ fn printUsageAndExit(code int){
 }
 
 
+
 fn main(args []string){
 	recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
 	verbose := flagParser.boolOption("-v" , false , "verbose")
@@ -20,21 +21,19 @@ fn main(args []string){
 	if err != null {
 		printf("parse command line failed,err:%s\n" , err.toString())
 		os.exit(2)
-		return 
 	}
 	if len(packageName) == 0 {
 		printUsageAndExit(1)
 	}
 	lucyRoot := common.getLucyRoot()
 	lucyPaths  := common.getLucyPath()
-	c := new Clean(
+	new Clean(
 		lucyRoot ,
 		lucyPaths ,  
 		packageName[0] , 
 		recursive.getValue() ,
 		verbose.getValue()
-	)
-	c.clean()
+	) .clean()
 }
 
 

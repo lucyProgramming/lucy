@@ -26,7 +26,7 @@ class Number {
 		}
 		if this.eIsNegative == false {
 			if e >= len(this.floatPart) {
-				this.integerPart.appendAll(this.floatPart , this.mkAscii0Bytes (e - len(this.floatPart))) 
+				this.integerPart.appendAll(this.floatPart , .mkAscii0Bytes (e - len(this.floatPart)))
 				this.isFloat = false  
 			}else {
 				this.integerPart.appendAll(this.floatPart[0:e])
@@ -35,7 +35,7 @@ class Number {
 		}else {
 			this.isFloat = true
 			if e >= len(this.integerPart) {
-				bs := this.mkAscii0Bytes (e - len(this.integerPart) ) 
+				bs := .mkAscii0Bytes (e - len(this.integerPart) )
 				bs.appendAll(this.integerPart , this.floatPart) 	
 				this.integerPart = []byte{} 
 				this.floatPart = bs  
@@ -50,39 +50,38 @@ class Number {
 		}
 	}
 
-	private fn mkAscii0Bytes(length int) -> (bs []byte ){
+	private static fn mkAscii0Bytes(length int) -> (bs []byte ){
 		bs = new []byte(length)
 		for k,_ := range bs {
 			bs[k] = '0'  
 		}
 	}
-
-	fn getLong() -> ( v long){
+	
+	fn getLong() -> ( longValue long){
 		this.prepare()
-		ret := 0l
 		for v := range this.integerPart {
-			ret = ret * 10 + long(v - '0')  
+			longValue = longValue * 10 + long(v - '0')
 		}
-		v = ret  
 		if this.isNegative {
-			v = -v 
+			longValue = -longValue
 		}
 	}
-
-	fn getDouble() -> (v double) {
+	
+	fn getDouble() -> (doubleValue double) {
 		this.prepare()
-		ret := 0.0d
 		for v := range this.integerPart {
-			ret = ret * 10.0  + double(v - '0')  
+			doubleValue = doubleValue * 10.0  + double(v - '0')
 		}
 		f := 0.0d
 		index := len(this.floatPart) - 1 
 		for index >= 0 {
-			f = f * 0.1 + double (this.floatPart[index] - '0' ) * 0.1  
+			f = f * 0.1 + double (this.floatPart[index] - '0' ) * 0.1
 			index -- 
 		}
-		ret += f 
-		v = ret 
+		doubleValue += f
+		if this.isNegative {
+            doubleValue = -doubleValue
+        }
 	}
 }
 

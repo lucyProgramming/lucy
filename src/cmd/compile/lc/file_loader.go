@@ -145,6 +145,9 @@ func (loader *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error
 }
 
 func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
+	if c.IsSynthetic() {
+		return nil, nil
+	}
 	//name
 	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameSignature); t != nil && len(t) > 0 {
 		//TODO:: support signature???
@@ -287,7 +290,6 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			return nil, err
 		}
 		m.Function.AccessFlags = v.AccessFlags
-		//m.LoadFromOutSide = true
 		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
@@ -580,7 +582,6 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 		}
 	}
 	for _, v := range fisM {
-
 		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))
 		if err != nil {
 			return p, fmt.Errorf("read class failed,err:%v", err)
@@ -601,10 +602,12 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 		if err != nil {
 			return nil, fmt.Errorf("decode class failed,err:%v", err)
 		}
-		if p.Block.Classes == nil {
-			p.Block.Classes = make(map[string]*ast.Class)
+		if class != nil {
+			if p.Block.Classes == nil {
+				p.Block.Classes = make(map[string]*ast.Class)
+			}
+			p.Block.Classes[filepath.Base(class.Name)] = class
 		}
-		p.Block.Classes[filepath.Base(class.Name)] = class
 	}
 	return p, nil
 }
@@ -617,19 +620,26 @@ func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	ret := &ast.Package{}
 	ret.Block.Classes = make(map[string]*ast.Class)
 	for _, v := range fis {
-		var rr Resource
-		rr.kind = ResourceKindJavaClass
-		if strings.HasSuffix(v.Name(), ".class") == false || strings.Contains(v.Name(), "$") {
+		if strings.HasSuffix(v.Name(), ".class") == false ||
+			strings.Contains(v.Name(), "$") {
 			continue
 		}
-		rr.realPath = filepath.Join(r.realPath, v.Name())
-		class, err := loader.loadClass(&rr)
+		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))
 		if err != nil {
 			return nil, err
 		}
-		if c, ok := class.(*ast.Class); ok && class != nil {
-			ret.Block.Classes[filepath.Base(c.Name)] = c
+		c, err := (&ClassDecoder{}).decode(bs)
+		class, err := loader.loadAsJava(c)
+		if err != nil {
+			return nil, err
 		}
+		if class != nil {
+			if ret.Block.Classes == nil {
+				ret.Block.Classes = make(map[string]*ast.Class)
+			}
+			ret.Block.Classes[filepath.Base(class.Name)] = class
+		}
+
 	}
 	return ret, nil
 }

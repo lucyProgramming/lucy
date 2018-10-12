@@ -6,12 +6,7 @@ import "java/lang/System"
 /*
 	get env by k
 */
-public fn getEnv(k string)->
-(
-	v string = System.getenv(k)
-){
-	
-}
+public fn getEnv(k string)->(	v string = System.getenv(k) ){ }
 
 
 
@@ -21,7 +16,7 @@ public fn getEnv(k string)->
 */
 public fn getEnvs()->
 (
-	envs map{string -> string} = new map{string -> string}()
+	envs map{ string -> string } = new map{ string -> string }()
 )
 {
 	es := System.getenv()	
@@ -35,9 +30,7 @@ public fn getEnvs()->
 /*
 	get current working directory
 */
-public fn getCwd()->(d string = System.getProperty("user.dir")){
-	
-}
+public fn getCwd()->(d string = System.getProperty("user.dir")){ }
 
 
 /*
@@ -50,25 +43,19 @@ public fn chCwd(to string){
 /*
 	get current user
 */
-public fn getUser()->(r string = System.getProperty("user.name")){
-	
-}
+public fn getUser()->(r string = System.getProperty("user.name")){ }
 
 /*
 	exit program
 */
 
-public fn exit(code int){
-	System.exit(code)
-}
+public fn exit(code int){	System.exit(code) }
 
 /*
 	run gc
 */
 
-public fn gc(){
-	System.gc()
-}
+public fn gc(){	System.gc() }
 
 
 

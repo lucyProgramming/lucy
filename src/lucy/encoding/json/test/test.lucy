@@ -53,15 +53,15 @@ fn main(args []string) {
 			"boolValue" : true , 
 			"intValue" : 110e2 ,
 			"stringValue" :"\u4e2d\u6587hello world",
-			"floatValue" : 1e3 
+			"floatValue" : -8772.12388239121
 		} 
 	`
-	y2 , err := json.decode([]byte(s) , y )
+	_ , err = json.decode([]byte(s) , y )
 	if err != null {
 		panic(err)
 	}
 
-	print(y2)
+	print(y)
 	s = `
 		[
 			1 ,2 

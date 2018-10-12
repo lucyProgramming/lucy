@@ -344,7 +344,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 					info.Attributes = append(info.Attributes, t)
 				}
 			}
-
 			if m.AttributeLucyReturnListNames != nil {
 				t := m.AttributeLucyReturnListNames.ToAttributeInfo(c, AttributeNameLucyReturnListNames)
 				if t != nil {
@@ -356,7 +355,6 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 	}
 	//source file
 	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
-
 	for _, v := range c.TypeAlias {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
 	}

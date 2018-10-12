@@ -16,7 +16,6 @@ public final class Run implements Runnable{
 	public fn run() {
 		this.f()
 	}
-	
 	public static fn runFn(f fn() ) {
 		r := new Run(f)
 		new Thread(r) . start() 
