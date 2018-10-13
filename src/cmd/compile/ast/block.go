@@ -270,7 +270,7 @@ func (b *Block) checkUnUsed() (es []error) {
 	return es
 }
 
-func (b *Block) checkStatements() []error {
+func (b *Block) checkStatementsAndUnused() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
 		if s.isStaticFieldDefaultValue {

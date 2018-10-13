@@ -94,7 +94,7 @@ func (s *Statement) check(block *Block) []error {
 		}
 		s.StatementBreak.mkDefers(block)
 	case StatementTypeContinue:
-		if block.InheritedAttribute.StatementFor == nil {
+		if block.InheritedAttribute.ForContinue == nil {
 			return []error{fmt.Errorf("%s 'continue' can`t in this scope",
 				errMsgPrefix(s.Pos))}
 		}
@@ -102,7 +102,7 @@ func (s *Statement) check(block *Block) []error {
 			return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
 				errMsgPrefix(s.Pos))}
 		}
-		s.StatementContinue.StatementFor = block.InheritedAttribute.StatementFor
+		s.StatementContinue.StatementFor = block.InheritedAttribute.ForContinue
 		s.StatementContinue.mkDefers(block)
 	case StatementTypeReturn:
 		if block.InheritedAttribute.Defer != nil {
@@ -119,12 +119,12 @@ func (s *Statement) check(block *Block) []error {
 		block.InheritedAttribute.Function.HasDefer = true
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		es := s.Defer.Block.checkStatements()
+		es := s.Defer.Block.checkStatementsAndUnused()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
 	case StatementTypeBlock:
 		s.Block.inherit(block)
-		return s.Block.checkStatements()
+		return s.Block.checkStatementsAndUnused()
 	case StatementTypeLabel:
 		if block.InheritedAttribute.Defer != nil {
 			block.InheritedAttribute.Defer.Labels =

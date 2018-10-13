@@ -217,13 +217,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 		if v.Block != nil {
 			v.Block.inherit(&s.Block)
 			v.Block.InheritedAttribute.ForBreak = s
-			errs = append(errs, v.Block.checkStatements()...)
+			errs = append(errs, v.Block.checkStatementsAndUnused()...)
 		}
 	}
 	if s.Default != nil {
 		s.Default.inherit(&s.Block)
 		s.Default.InheritedAttribute.ForBreak = s
-		errs = append(errs, s.Default.checkStatements()...)
+		errs = append(errs, s.Default.checkStatementsAndUnused()...)
 	}
 	if conditionType.Type == VariableTypeEnum &&
 		len(enumNamesMap) < len(conditionType.Enum.Enums) &&

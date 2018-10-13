@@ -207,12 +207,12 @@ func (s *StatementFor) checkRange() []error {
 			}
 		}
 	}
-	errs = append(errs, s.Block.checkStatements()...)
+	errs = append(errs, s.Block.checkStatementsAndUnused()...)
 	return errs
 }
 func (s *StatementFor) check(block *Block) []error {
 	s.Block.inherit(block)
-	s.Block.InheritedAttribute.StatementFor = s
+	s.Block.InheritedAttribute.ForContinue = s
 	s.Block.InheritedAttribute.ForBreak = s
 	errs := []error{}
 	if s.Init == nil &&
@@ -252,6 +252,6 @@ func (s *StatementFor) check(block *Block) []error {
 	if len(errs) > 0 {
 		return errs
 	}
-	errs = append(errs, s.Block.checkStatements()...)
+	errs = append(errs, s.Block.checkStatementsAndUnused()...)
 	return errs
 }

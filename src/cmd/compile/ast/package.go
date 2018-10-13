@@ -113,10 +113,7 @@ func (p *Package) TypeCheck() []error {
 	}
 	for _, v := range p.Block.Enums {
 		v.Name = p.Name + "/" + v.Name
-		err := v.check()
-		if err != nil {
-			p.Errors = append(p.Errors, err...)
-		}
+		p.Errors = append(p.Errors, v.check()...)
 	}
 	for _, v := range p.Block.TypeAliases {
 		err := v.resolve(&PackageBeenCompile.Block)
@@ -130,7 +127,6 @@ func (p *Package) TypeCheck() []error {
 		v.mkDefaultConstruction()
 		v.Block.inherit(&PackageBeenCompile.Block)
 		v.Block.InheritedAttribute.Class = v
-		p.Errors = append(p.Errors, v.resolveInterfaces()...)
 	}
 
 	for _, v := range p.Block.Classes {

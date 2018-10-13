@@ -80,7 +80,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 			switchStatement.Block.inherit(block)
 			switchStatement.Block.IsSwitchTemplateBlock = true
 			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-			errs = append(errs, switchStatement.Block.checkStatements()...)
+			errs = append(errs, switchStatement.Block.checkStatementsAndUnused()...)
 		}
 		return
 	}
@@ -94,6 +94,6 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 		switchStatement.Block.inherit(block)
 		switchStatement.Block.IsSwitchTemplateBlock = true
 		switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-		return append(errs, switchStatement.Block.checkStatements()...)
+		return append(errs, switchStatement.Block.checkStatementsAndUnused()...)
 	}
 }

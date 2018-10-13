@@ -38,7 +38,7 @@ func (s *StatementIf) check(father *Block) []error {
 		}
 	}
 	s.TrueBlock.inherit(&s.ConditionBlock)
-	errs = append(errs, s.TrueBlock.checkStatements()...)
+	errs = append(errs, s.TrueBlock.checkStatementsAndUnused()...)
 	for _, v := range s.ElseIfList {
 		v.Block.inherit(&s.ConditionBlock)
 		if v.Condition != nil {
@@ -52,12 +52,12 @@ func (s *StatementIf) check(father *Block) []error {
 				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
 					errMsgPrefix(s.Condition.Pos)))
 			}
-			errs = append(errs, v.Block.checkStatements()...)
+			errs = append(errs, v.Block.checkStatementsAndUnused()...)
 		}
 	}
 	if s.ElseBlock != nil {
 		s.ElseBlock.inherit(&s.ConditionBlock)
-		errs = append(errs, s.ElseBlock.checkStatements()...)
+		errs = append(errs, s.ElseBlock.checkStatementsAndUnused()...)
 	}
 	return errs
 }

@@ -79,7 +79,6 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 			panic("tops have unKnow  type")
 		}
 	}
-	//errs = append(errs, checkEnum(conversion.Enums)...)
 	redeclareErrors = conversion.redeclareErrors()
 	PackageBeenCompile.Block.Constants = make(map[string]*Constant)
 	for _, v := range conversion.Constants {
