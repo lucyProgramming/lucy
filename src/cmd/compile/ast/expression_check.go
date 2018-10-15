@@ -318,9 +318,10 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 		e.Value = returnValueTypes[0]
 	case ExpressionTypeList:
-		errs = append(errs, fmt.Errorf("%s cannot have expression '%s' at this scope,"+
-			"this may be cause be compiler error,please contact the author",
-			errMsgPrefix(e.Pos), e.Description))
+		errs = append(errs,
+			fmt.Errorf("%s cannot have expression '%s' at this scope,"+
+				"this may be cause by the compiler error,please contact the author",
+				errMsgPrefix(e.Pos), e.Description))
 	case ExpressionTypeGlobal:
 		returnValueTypes = make([]*Type, 1)
 		returnValueTypes[0] = &Type{

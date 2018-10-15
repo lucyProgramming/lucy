@@ -1,11 +1,11 @@
 package ast
 
 type Constant struct {
+	IsBuildIn              bool
 	Used                   bool
 	Pos                    *Pos
 	Type                   *Type
 	Name                   string
-	IsBuildIn              bool
 	DefaultValueExpression *Expression
 	AccessFlags            uint16
 	Comment                string

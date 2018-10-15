@@ -5,34 +5,36 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
+type buildInFunctionChecker func(f *Function, e *ExpressionFunctionCall,
+	block *Block, errs *[]error, args []*Type, pos *Pos) // used in build function
+
 type Function struct {
 	CallFatherConstructionExpression *Expression
 	TemplateFunction                 *TemplateFunction
 	parameterTypes                   map[string]*Type    //typed parameters
 	Entrance                         *cg.MethodHighLevel // make call from
-	buildInFunctionChecker           func(
-		f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos *Pos) // used in build function
-	AccessFlags                uint16
-	Type                       FunctionType
-	Closure                    Closure
-	Name                       string // if name is nil string,means no name function
-	Block                      Block
-	Pos                        *Pos
-	JvmDescriptor              string
-	ClosureVariableOffSet      uint16 // for closure
-	SourceCode                 []byte // source code for template function
-	HasDefer                   bool
-	HaveDefaultValue           bool
-	DefaultValueStartAt        int
-	IsGlobal                   bool
-	IsBuildIn                  bool
-	LoadedFromCorePackage      bool
-	Used                       bool
-	TemplateClonedFunction     bool
-	IsClosureFunction          bool
-	isGlobalVariableDefinition bool
-	isPackageInitBlockFunction bool
-	Comment                    string
+	buildInFunctionChecker           buildInFunctionChecker
+	AccessFlags                      uint16
+	Type                             FunctionType
+	Closure                          Closure
+	Name                             string // if name is nil string,means no name function
+	Block                            Block
+	Pos                              *Pos
+	JvmDescriptor                    string
+	ClosureVariableOffSet            uint16 // for closure
+	SourceCode                       []byte // source code for template function
+	HasDefer                         bool
+	HaveDefaultValue                 bool
+	DefaultValueStartAt              int
+	IsGlobal                         bool
+	IsBuildIn                        bool
+	LoadedFromCorePackage            bool
+	Used                             bool
+	TemplateClonedFunction           bool
+	IsClosureFunction                bool
+	isGlobalVariableDefinition       bool
+	isPackageInitBlockFunction       bool
+	Comment                          string
 }
 
 func (f *Function) IsPublic() bool {

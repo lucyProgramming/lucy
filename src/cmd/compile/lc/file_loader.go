@@ -29,7 +29,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err := os.Stat(p)
 		if err == nil && f.IsDir() { // directory is package
 			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindLucyPackage,
+				kind:     resourceKindLucyPackage,
 				realPath: p,
 				name:     importName,
 			})
@@ -38,7 +38,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err = os.Stat(p)
 		if err == nil && f.IsDir() == false { // class file
 			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindLucyClass,
+				kind:     resourceKindLucyClass,
 				realPath: p,
 				name:     importName,
 			})
@@ -49,7 +49,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err := os.Stat(p)
 		if err == nil && f.IsDir() { // directory is package
 			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindJavaPackage,
+				kind:     resourceKindJavaPackage,
 				realPath: p,
 				name:     importName,
 			})
@@ -58,7 +58,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		f, err = os.Stat(p)
 		if err == nil && f.IsDir() == false { // directory is package
 			realPaths = append(realPaths, &Resource{
-				kind:     ResourceKindJavaClass,
+				kind:     resourceKindJavaClass,
 				realPath: p,
 				name:     importName,
 			})
@@ -80,36 +80,36 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		errMsg := "not 1 resource named '" + importName + "' present:\n"
 		for _, v := range realPathMap {
 			switch v[0].kind {
-			case ResourceKindJavaClass:
+			case resourceKindJavaClass:
 				errMsg += fmt.Sprintf("\t in '%s' is a java class\n", v[0].realPath)
-			case ResourceKindJavaPackage:
+			case resourceKindJavaPackage:
 				errMsg += fmt.Sprintf("\t in '%s' is a java package\n", v[0].realPath)
-			case ResourceKindLucyClass:
+			case resourceKindLucyClass:
 				errMsg += fmt.Sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
-			case ResourceKindLucyPackage:
+			case resourceKindLucyPackage:
 				errMsg += fmt.Sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
 			}
 		}
 		return nil, fmt.Errorf(errMsg)
 	}
-	if realPaths[0].kind == ResourceKindLucyClass {
+	if realPaths[0].kind == resourceKindLucyClass {
 		if filepath.Base(realPaths[0].realPath) == mainClassName {
 			return nil, fmt.Errorf("%s is special class for global variable and other things", mainClassName)
 		}
 	}
-	if realPaths[0].kind == ResourceKindJavaClass {
+	if realPaths[0].kind == resourceKindJavaClass {
 		class, err := loader.loadClass(realPaths[0])
 		if class != nil {
 			loader.caches[importName] = class
 		}
 		return class, err
-	} else if realPaths[0].kind == ResourceKindLucyClass {
+	} else if realPaths[0].kind == resourceKindLucyClass {
 		t, err := loader.loadClass(realPaths[0])
 		if t != nil {
 			loader.caches[importName] = t
 		}
 		return t, err
-	} else if realPaths[0].kind == ResourceKindJavaPackage {
+	} else if realPaths[0].kind == resourceKindJavaPackage {
 		p, err := loader.loadJavaPackage(realPaths[0])
 		if p != nil {
 			loader.caches[importName] = p
@@ -650,7 +650,7 @@ func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 		return nil, err
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
-	if r.kind == ResourceKindLucyClass {
+	if r.kind == resourceKindLucyClass {
 		if t := c.AttributeGroupedByName[cg.AttributeNameLucyEnum]; len(t) > 0 {
 			return loader.loadLucyEnum(c)
 		} else {

@@ -157,7 +157,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 				parser.errorMsgPrefix(), parser.token.Description))
 		} else {
 			ret = &ast.Type{
-				Type: ast.VariableTypeSelectGlobal,
+				Type: ast.VariableTypeGlobal,
 				Pos:  pos,
 				Name: parser.token.Data.(string),
 			}

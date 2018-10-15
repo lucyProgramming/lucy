@@ -93,6 +93,11 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 	if len(ft.ParameterList) != len(compare.ParameterList) {
 		return false
 	}
+	for k, v := range ft.ParameterList {
+		if false == v.Type.Equal(compare.ParameterList[k].Type) {
+			return false
+		}
+	}
 	if (ft.VArgs == nil) != (compare.VArgs == nil) {
 		return false
 	}
@@ -101,10 +106,8 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 			return false
 		}
 	}
-	for k, v := range ft.ParameterList {
-		if false == v.Type.Equal(compare.ParameterList[k].Type) {
-			return false
-		}
+	if ft.VoidReturn() != compare.VoidReturn() {
+		return false
 	}
 	if ft.VoidReturn() == false {
 		for k, v := range ft.ReturnList {

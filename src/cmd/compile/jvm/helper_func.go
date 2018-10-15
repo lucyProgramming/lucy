@@ -93,9 +93,6 @@ func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
 }
 
 func jvmSlotSize(typ *ast.Type) uint16 {
-	if typ.RightValueValid() == false {
-		panic("right value is not valid:" + typ.TypeString())
-	}
 	if typ.Type == ast.VariableTypeDouble ||
 		typ.Type == ast.VariableTypeLong {
 		return 2

@@ -85,8 +85,9 @@ func (s *StatementFor) checkRange() []error {
 		lefts = []*Expression{bin.Left}
 	}
 	if len(lefts) > 2 {
-		errs = append(errs, fmt.Errorf("%s cannot have more than 2 expressions on the left",
-			errMsgPrefix(lefts[2].Pos)))
+		errs = append(errs,
+			fmt.Errorf("%s cannot have more than 2 expressions on the left",
+				errMsgPrefix(lefts[2].Pos)))
 		lefts = lefts[0:2]
 	}
 	modelKv := len(lefts) == 2
@@ -96,8 +97,9 @@ func (s *StatementFor) checkRange() []error {
 	if s.Condition.Type == ExpressionTypeVarAssign {
 		for _, v := range lefts {
 			if v.Type != ExpressionTypeIdentifier {
-				errs = append(errs, fmt.Errorf("%s not a identifier on left",
-					errMsgPrefix(v.Pos)))
+				errs = append(errs,
+					fmt.Errorf("%s not a identifier on left",
+						errMsgPrefix(v.Pos)))
 				return errs
 			}
 		}
@@ -193,7 +195,8 @@ func (s *StatementFor) checkRange() []error {
 		if receiverKType != nil {
 			if receiverKType.assignAble(&errs, kType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
-					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), receiverKType.TypeString(), kType.TypeString())
+					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos),
+					receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
 				return errs
 			}
@@ -201,7 +204,8 @@ func (s *StatementFor) checkRange() []error {
 		if receiverVType != nil {
 			if receiverVType.assignAble(&errs, vType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
-					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos), receiverKType.TypeString(), kType.TypeString())
+					errMsgPrefix(s.RangeAttr.ExpressionKey.Pos),
+					receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
 				return errs
 			}

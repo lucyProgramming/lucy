@@ -20,6 +20,10 @@ type Package struct {
 	UnUsedPackage                map[string]*Import
 }
 
+func (p *Package) isSame(pp *Package) bool {
+	return p.Name == pp.Name
+}
+
 func (p *Package) loadCorePackage() error {
 	if p.Name == common.CorePackage {
 		return nil
@@ -87,7 +91,10 @@ func (p *Package) TypeCheck() []error {
 	}
 	p.Errors = []error{}
 	p.Errors = append(p.Errors, p.Block.checkConstants()...)
-	//
+	for _, v := range p.Block.Enums {
+		v.Name = p.Name + "/" + v.Name
+		p.Errors = append(p.Errors, v.check()...)
+	}
 	for _, v := range p.Block.Functions {
 		if v.IsBuildIn {
 			continue
@@ -111,10 +118,7 @@ func (p *Package) TypeCheck() []error {
 			return p.Errors
 		}
 	}
-	for _, v := range p.Block.Enums {
-		v.Name = p.Name + "/" + v.Name
-		p.Errors = append(p.Errors, v.check()...)
-	}
+
 	for _, v := range p.Block.TypeAliases {
 		err := v.resolve(&PackageBeenCompile.Block)
 		if err != nil {

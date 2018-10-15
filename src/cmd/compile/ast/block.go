@@ -148,7 +148,6 @@ func (b *Block) identifierIsWhat(d interface{}) string {
 	search identifier
 */
 func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
-
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			t.Used = true

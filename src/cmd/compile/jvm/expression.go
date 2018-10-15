@@ -214,9 +214,6 @@ func (buildExpression *BuildExpression) jvmSize(e *ast.Expression) (size uint16)
 	if len(e.MultiValues) > 1 {
 		return 1
 	}
-	if e.Value.RightValueValid() == false {
-		return 0
-	}
 	return jvmSlotSize(e.Value)
 }
 

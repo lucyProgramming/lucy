@@ -15,6 +15,7 @@ type Enum struct {
 	Used            bool
 	DefaultValue    int32
 	LoadFromOutSide bool
+	FirstValueIndex int
 	Comment         string
 }
 
@@ -35,12 +36,16 @@ func (e *Enum) check() (errs []error) {
 	var initV int32 = 0
 	errs = []error{}
 	if e.Init != nil {
-		if e.Init.isInteger() == false {
-			err := fmt.Errorf("%s enum type must inited by 'int' literal",
-				e.Pos.errMsgPrefix())
+		if is, err := e.Init.constantFold(); err != nil {
 			errs = append(errs, err)
 		} else {
-			initV = e.Init.getIntValue()
+			if is == false {
+				err := fmt.Errorf("%s enum type must inited by 'int' literal",
+					e.Pos.errMsgPrefix())
+				errs = append(errs, err)
+			} else {
+				initV = e.Init.getIntValue()
+			}
 		}
 	}
 	e.DefaultValue = initV
@@ -48,9 +53,12 @@ func (e *Enum) check() (errs []error) {
 		if v.NoNeed != nil {
 			errs = append(errs, fmt.Errorf("%s enum only expect 1 init value",
 				v.Pos.errMsgPrefix()))
-
 		}
-		v.Value = int32(k) + initV
+		if k < e.FirstValueIndex {
+			v.Value = initV - int32(e.FirstValueIndex-k)
+		} else {
+			v.Value = initV + int32(k-e.FirstValueIndex)
+		}
 	}
 	return errs
 }

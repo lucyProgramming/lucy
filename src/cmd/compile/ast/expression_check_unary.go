@@ -17,9 +17,8 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 		}
 		return nil
 	}
-	if unary.RightValueValid() == false {
-		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-			unary.Pos.errMsgPrefix(), unary.TypeString()))
+	if err := unary.rightValueValid(); err != nil {
+		*errs = append(*errs, err)
 		return nil
 	}
 	if e.Type == ExpressionTypeNot {

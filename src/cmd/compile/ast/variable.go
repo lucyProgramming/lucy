@@ -20,5 +20,6 @@ type Variable struct {
 }
 
 func (v *Variable) isPublic() bool {
-	return v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0
+	return v.AccessFlags&
+		cg.ACC_FIELD_PUBLIC != 0
 }

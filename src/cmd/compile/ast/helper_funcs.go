@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-func errMsgPrefix(pos *Pos) string {
-	return pos.errMsgPrefix()
-}
 func divisionByZeroErr(pos *Pos) error {
 	return fmt.Errorf("%s division by zero", pos.errMsgPrefix())
 }
@@ -28,9 +25,8 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error, singleValue
 				if t == nil {
 					continue
 				}
-				if false == t.RightValueValid() {
-					*errs = append(*errs, fmt.Errorf("%s '%s' cannot used as right value",
-						errMsgPrefix(t.Pos), t.TypeString()))
+				if err := t.rightValueValid(); err != nil {
+					*errs = append(*errs, err)
 				}
 			}
 			ret = append(ret, ts...)

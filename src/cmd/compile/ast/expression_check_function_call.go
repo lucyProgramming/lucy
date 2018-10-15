@@ -13,15 +13,16 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			*errs = append(*errs, err)
 			return nil
 		}
+		if d == nil {
+			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
+				call.Expression.Pos.errMsgPrefix(), identifier.Name))
+			return nil
+		}
 		switch d.(type) {
 		case *Function:
 			f := d.(*Function)
 			call.Function = f
-			//if f.IsBuildIn {
-			//	return e.checkBuildInFunctionCall(block, errs, f, call)
-			//} else {
 			return e.checkFunctionCall(block, errs, f, call)
-			//}
 		case *Type:
 			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Type = d.(*Type)
@@ -101,7 +102,8 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	return e.checkFunctionPointerCall(block, errs, functionPointer.FunctionType, call)
 }
 
-func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error, ft *FunctionType, call *ExpressionFunctionCall) []*Type {
+func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error,
+	ft *FunctionType, call *ExpressionFunctionCall) []*Type {
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	ret := ft.mkCallReturnTypes(e.Pos)
 	var err error

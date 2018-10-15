@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type StatementBreak struct {
 	Defers              []*StatementDefer
 	StatementFor        *StatementFor
@@ -7,26 +9,45 @@ type StatementBreak struct {
 	SwitchTemplateBlock *Block
 }
 
-func (s *StatementBreak) mkDefers(block *Block) {
-	if s.StatementFor != nil {
+func (b *StatementBreak) check(s *Statement, block *Block) []error {
+	if block.InheritedAttribute.ForBreak == nil {
+		return []error{fmt.Errorf("%s 'break' cannot in this scope", errMsgPrefix(s.Pos))}
+	}
+	if block.InheritedAttribute.Defer != nil {
+		return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
+			errMsgPrefix(s.Pos))}
+	}
+	if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
+		s.StatementBreak.StatementFor = t
+	} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
+		s.StatementBreak.StatementSwitch = t
+	} else {
+		s.StatementBreak.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
+	}
+	s.StatementBreak.mkDefers(block)
+	return nil
+}
+
+func (b *StatementBreak) mkDefers(block *Block) {
+	if b.StatementFor != nil {
 		if block.IsForBlock {
-			s.Defers = append(s.Defers, block.Defers...)
+			b.Defers = append(b.Defers, block.Defers...)
 			return
 		}
-		s.mkDefers(block.Outer)
+		b.mkDefers(block.Outer)
 		return
-	} else if s.StatementSwitch != nil {
+	} else if b.StatementSwitch != nil {
 		//switch
 		if block.IsSwitchBlock {
-			s.Defers = append(s.Defers, block.Defers...)
+			b.Defers = append(b.Defers, block.Defers...)
 			return
 		}
-		s.mkDefers(block.Outer)
+		b.mkDefers(block.Outer)
 	} else { //s.SwitchTemplateBlock != nil
 		if block.IsSwitchTemplateBlock {
-			s.Defers = append(s.Defers, block.Defers...)
+			b.Defers = append(b.Defers, block.Defers...)
 			return
 		}
-		s.mkDefers(block.Outer)
+		b.mkDefers(block.Outer)
 	}
 }

@@ -38,6 +38,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		call.Expression = index.Expression
 		call.Args = args
 		call.Name = index.Name
+		result.Pos = on.Pos
 		result.Data = call
 	} else {
 		result.Type = ast.ExpressionTypeFunctionCall
@@ -46,8 +47,9 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		call.Expression = on
 		call.Args = args
 		result.Data = call
+		result.Pos = pos
 	}
-	result.Pos = pos
+
 	if expressionParser.parser.token.Type == lex.TokenLt { // <
 		/*
 			template function call return type binds

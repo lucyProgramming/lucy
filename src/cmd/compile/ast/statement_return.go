@@ -10,36 +10,41 @@ type StatementReturn struct {
 	Expressions  []*Expression
 }
 
-func (s *StatementReturn) mkDefers(b *Block) {
+func (r *StatementReturn) mkDefers(b *Block) {
 	if b.IsFunctionBlock == false { // not top block
-		s.mkDefers(b.Outer) // recursive
+		r.mkDefers(b.Outer) // recursive
 	}
 	if b.Defers != nil {
-		s.Defers = append(s.Defers, b.Defers...)
+		r.Defers = append(r.Defers, b.Defers...)
 	}
 }
 
-func (s *StatementReturn) check(b *Block) []error {
-	s.mkDefers(b)
-	if len(s.Expressions) == 0 { // always ok
-		return nil
+func (r *StatementReturn) check(s *Statement, b *Block) []error {
+	if b.InheritedAttribute.Defer != nil {
+		return []error{fmt.Errorf("%s cannot has 'return' in 'defer'",
+			errMsgPrefix(s.Pos))}
 	}
 	errs := []error{}
-	returnValueTypes := checkExpressions(b, s.Expressions, &errs, false)
-	rs := b.InheritedAttribute.Function.Type.ReturnList
-	pos := s.Expressions[len(s.Expressions)-1].Pos
-	if len(returnValueTypes) < len(rs) {
-		errs = append(errs, fmt.Errorf("%s too few arguments to return", errMsgPrefix(pos)))
-	} else if len(returnValueTypes) > len(rs) {
-		errs = append(errs, fmt.Errorf("%s too many arguments to return", errMsgPrefix(pos)))
+	r.mkDefers(b)
+	if len(r.Expressions) == 0 { // always ok
+		return errs
 	}
-	convertExpressionsToNeeds(s.Expressions,
-		b.InheritedAttribute.Function.Type.mkCallReturnTypes(s.Expressions[0].Pos), returnValueTypes)
+
+	returnValueTypes := checkExpressions(b, r.Expressions, &errs, false)
+	rs := b.InheritedAttribute.Function.Type.ReturnList
+	pos := r.Expressions[len(r.Expressions)-1].Pos
+	if len(returnValueTypes) < len(rs) {
+		errs = append(errs, fmt.Errorf("%s too few arguments to return", pos.errMsgPrefix()))
+	} else if len(returnValueTypes) > len(rs) {
+		errs = append(errs, fmt.Errorf("%s too many arguments to return", pos.errMsgPrefix()))
+	}
+	convertExpressionsToNeeds(r.Expressions,
+		b.InheritedAttribute.Function.Type.mkCallReturnTypes(r.Expressions[0].Pos), returnValueTypes)
 	for k, v := range rs {
 		if k < len(returnValueTypes) && returnValueTypes[k] != nil {
 			if false == v.Type.assignAble(&errs, returnValueTypes[k]) {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s' to return",
-					errMsgPrefix(returnValueTypes[k].Pos),
+					returnValueTypes[k].Pos.errMsgPrefix(),
 					returnValueTypes[k].TypeString(),
 					v.Type.TypeString()))
 			}

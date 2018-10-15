@@ -63,15 +63,14 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			if field != nil {
-				selection.Field = field
-				result = field.Type.Clone()
-				result.Pos = e.Pos
-				e.Value = result
-				return result
-			} else {
+			if field == nil {
 				return nil
 			}
+			selection.Field = field
+			result = field.Type.Clone()
+			result.Pos = e.Pos
+			e.Value = result
+			return result
 		case VariableTypeObject, VariableTypeClass:
 			field, err := object.Class.getField(e.Pos, selection.Name, false)
 			if err != nil {
@@ -96,7 +95,8 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			switch variable.(type) {
 			case *Variable:
 				v := variable.(*Variable)
-				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 && object.Package.Name != PackageBeenCompile.Name {
+				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 &&
+					object.Package.isSame(&PackageBeenCompile) == false {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
 				}
@@ -106,8 +106,8 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				e.Value = result
 				return result
 			default:
-				*errs = append(*errs, fmt.Errorf("%s '%s.%s' is not variable",
-					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
+				*errs = append(*errs, fmt.Errorf("%s '%s' is not variable",
+					errMsgPrefix(e.Pos), selection.Name))
 				return nil
 			}
 		case VariableTypeMagicFunction:

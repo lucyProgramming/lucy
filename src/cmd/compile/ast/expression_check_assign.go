@@ -13,6 +13,9 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		lefts[0] = bin.Left
 	}
 	values := bin.Right.Data.([]*Expression)
+	for _, v := range values {
+		v.Lefts = lefts
+	}
 	valueTypes := checkExpressions(block, values, errs, false)
 	leftTypes := []*Type{}
 	for _, v := range lefts {

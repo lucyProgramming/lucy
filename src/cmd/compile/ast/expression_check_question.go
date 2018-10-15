@@ -10,43 +10,38 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 	*errs = append(*errs, es...)
 	if condition != nil {
 		if condition.Type != VariableTypeBool {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression", errMsgPrefix(question.Selection.Pos)))
+			*errs = append(*errs,
+				fmt.Errorf("%s not a bool expression",
+					errMsgPrefix(question.Selection.Pos)))
 		}
 		if err := question.Selection.canBeUsedAsCondition(); err != nil {
 			*errs = append(*errs, err)
 		}
 	}
-	True, es := question.True.checkSingleValueContextExpression(block)
+	tType, es := question.True.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
-	if True != nil {
-		if True.RightValueValid() == false {
-			*errs = append(*errs, fmt.Errorf("%s not right value valid",
-				errMsgPrefix(question.True.Pos)))
-			return nil
-		}
-		if True.isTyped() == false {
-			*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
-				errMsgPrefix(question.True.Pos), True.TypeString()))
-			return nil
-		}
+	if tType == nil {
+		return nil
 	}
-	False, es := question.False.checkSingleValueContextExpression(block)
+	if err := tType.rightValueValid(); err != nil {
+		*errs = append(*errs, err)
+		return nil
+	}
+	if tType.isTyped() == false {
+		*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
+			errMsgPrefix(question.True.Pos), tType.TypeString()))
+		return nil
+	}
+	ret := tType.Clone()
+	ret.Pos = e.Pos
+	fType, es := question.False.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
-	if True != nil &&
-		False != nil &&
-		True.assignAble(errs, False) == false {
+	if fType == nil {
+		return ret
+	}
+	if tType.assignAble(errs, fType) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-			errMsgPrefix(question.False.Pos), False.TypeString(), True.TypeString()))
+			errMsgPrefix(question.False.Pos), fType.TypeString(), tType.TypeString()))
 	}
-	if True != nil {
-		result := True.Clone()
-		result.Pos = e.Pos
-		return result
-	}
-	if False != nil {
-		result := False.Clone()
-		result.Pos = e.Pos
-		return result
-	}
-	return nil
+	return ret
 }

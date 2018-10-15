@@ -82,7 +82,10 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	redeclareErrors = conversion.redeclareErrors()
 	PackageBeenCompile.Block.Constants = make(map[string]*Constant)
 	for _, v := range conversion.Constants {
-		PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 	PackageBeenCompile.Block.Variables = make(map[string]*Variable)
 	PackageBeenCompile.Block.Functions = make(map[string]*Function)
@@ -192,12 +195,12 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 
-	for k, v := range m {
+	for name, v := range m {
 		if len(v) == 1 || len(v) == 0 { //very good  , 0 looks is impossible
 			continue
 		}
 		r := &RedeclareError{}
-		r.Name = k
+		r.Name = name
 		r.Positions = make([]*Pos, len(v))
 		r.Types = make([]string, len(v))
 		for kk, vv := range v {
@@ -226,8 +229,6 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 				t := vv.(*EnumName)
 				r.Positions[kk] = t.Pos
 				r.Types[kk] = "enum name"
-			default:
-				panic("make error")
 			}
 		}
 		ret = append(ret, r)

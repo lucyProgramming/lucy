@@ -11,16 +11,14 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 	right, es := bin.Right.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if left != nil {
-		if left.RightValueValid() == false {
-			*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-				bin.Left.Pos.errMsgPrefix(), left.TypeString()))
+		if err := left.rightValueValid(); err != nil {
+			*errs = append(*errs, err)
 			return nil
 		}
 	}
 	if right != nil {
-		if right.RightValueValid() == false {
-			*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-				bin.Right.Pos.errMsgPrefix(), right.TypeString()))
+		if err := right.rightValueValid(); err != nil {
+			*errs = append(*errs, err)
 			return nil
 		}
 	}
@@ -123,9 +121,16 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if (left.IsInteger() && right.IsInteger()) ||
 				(left.IsFloat() && right.IsFloat()) {
 				if left.assignAble(errs, right) == false {
-					if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
+					switch {
+					case bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false:
 						*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-					} else {
+					case bin.Left.IsLiteral() && bin.Right.IsLiteral():
+						if bin.Right.Value.Type > bin.Left.Value.Type {
+							bin.Left.ConvertToNumber(bin.Right.Value.Type)
+						} else {
+							bin.Right.ConvertToNumber(bin.Left.Value.Type)
+						}
+					default:
 						if bin.Left.IsLiteral() {
 							bin.Left.ConvertToNumber(right.Type)
 						} else {
@@ -204,9 +209,16 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if (left.IsInteger() && right.IsInteger()) ||
 			(left.IsFloat() && right.IsFloat()) {
 			if left.assignAble(errs, right) == false {
-				if bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false {
+				switch {
+				case bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false:
 					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-				} else {
+				case bin.Left.IsLiteral() && bin.Right.IsLiteral():
+					if bin.Right.Value.Type > bin.Left.Value.Type {
+						bin.Left.ConvertToNumber(bin.Right.Value.Type)
+					} else {
+						bin.Right.ConvertToNumber(bin.Left.Value.Type)
+					}
+				default:
 					if bin.Left.IsLiteral() {
 						bin.Left.ConvertToNumber(right.Type)
 					} else {

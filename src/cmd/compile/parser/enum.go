@@ -63,8 +63,9 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 				enumComment = parser.token.Data.(string)
 				parser.Next(lfIsToken)
 			}
-			if len(e.Enums) == 0 {
+			if e.Init == nil && value != nil {
 				e.Init = value
+				e.FirstValueIndex = len(e.Enums)
 				value = nil
 			}
 			enumName := &ast.EnumName{

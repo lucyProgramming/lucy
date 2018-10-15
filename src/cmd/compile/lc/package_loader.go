@@ -4,10 +4,10 @@ type ResourceKind int
 
 const (
 	_ ResourceKind = iota
-	ResourceKindJavaClass
-	ResourceKindJavaPackage
-	ResourceKindLucyClass
-	ResourceKindLucyPackage
+	resourceKindJavaClass
+	resourceKindJavaPackage
+	resourceKindLucyClass
+	resourceKindLucyPackage
 )
 
 type Resource struct {

@@ -91,6 +91,7 @@ type Expression struct {
 	Data                  interface{}
 	IsStatementExpression bool
 	Description           string
+	Lefts                 []*Expression // left values
 }
 
 func (e *Expression) IsString(s string) bool {
@@ -195,6 +196,7 @@ func (e *Expression) ConvertToNumber(typ VariableTypeKind) {
 
 type ExpressionTypeAssert struct {
 	ExpressionTypeConversion
+	MultiValueContext bool
 }
 
 /*
@@ -370,13 +372,6 @@ func (e *Expression) IsIncrement() bool {
 		e.Type == ExpressionTypePrefixIncrement
 }
 
-//func (e *Expression) isListAndMoreThanNElements(n int) bool {
-//	if e.Type != ExpressionTypeList {
-//		return false
-//	}
-//	return len(e.Data.([]*Expression)) > n
-//}
-
 /*
 	k,v := range arr
 	k,v = range arr
@@ -404,9 +399,9 @@ func (e *Expression) HaveMultiValue() bool {
 		e.Type == ExpressionTypeMethodCall ||
 		e.Type == ExpressionTypeTypeAssert {
 		return len(e.MultiValues) > 1
-	} else {
-		return false
 	}
+	return false
+
 }
 
 type CallArgs []*Expression // f(1,2)
@@ -419,7 +414,6 @@ type ExpressionFunctionCall struct {
 	Function                 *Function
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionInstance
-	FunctionPointer          *FunctionType
 }
 
 type ExpressionMethodCall struct {
@@ -448,7 +442,6 @@ type ExpressionVarAssign struct {
 	Lefts            []*Expression
 	InitValues       []*Expression
 	IfDeclaredBefore []bool // used for colon assign
-
 }
 
 type ExpressionTypeConversion struct {

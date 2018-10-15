@@ -271,7 +271,12 @@ func (c *Class) resolveInterfaces() []error {
 			errs = append(errs, err)
 			continue
 		}
-		if t.Type != VariableTypeObject || t.Class.IsInterface() == false {
+		if t.Type != VariableTypeObject {
+			errs = append(errs, fmt.Errorf("%s '%s' is not a object , but '%s'",
+				errMsgPrefix(i.Pos), i.Name, t.TypeString()))
+			continue
+		}
+		if t.Class.IsInterface() == false {
 			errs = append(errs, fmt.Errorf("%s '%s' is not a interface",
 				errMsgPrefix(i.Pos), i.Name))
 			continue
@@ -303,7 +308,6 @@ func (c *Class) implementMethod(pos *Pos, m *ClassMethod,
 	if c.Name == JavaRootClass {
 		return nil
 	}
-
 	err := c.loadSuperClass(pos)
 	if err != nil {
 		*errs = append(*errs, err)

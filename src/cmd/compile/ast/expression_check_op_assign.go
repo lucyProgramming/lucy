@@ -12,6 +12,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		}
 		bin.Left = list[0]
 	}
+
 	left := bin.Left.getLeftValue(block, errs)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
@@ -20,9 +21,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	}
 	result := left.Clone()
 	result.Pos = e.Pos
-	if right.RightValueValid() == false {
-		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-			errMsgPrefix(bin.Right.Pos), right.TypeString()))
+	if err := right.rightValueValid(); err != nil {
+		*errs = append(*errs, err)
 		return result
 	}
 	if bin.Left.Type == ExpressionTypeIdentifier &&
@@ -42,11 +42,11 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		s += "11111111"
 	*/
 	if left.Type == VariableTypeString {
-		if right.Type == VariableTypeString && (e.Type == ExpressionTypePlusAssign) {
+		if right.Type == VariableTypeString &&
+			(e.Type == ExpressionTypePlusAssign) {
 			return result
 		}
 	}
-
 	//number
 	if e.Type == ExpressionTypePlusAssign ||
 		e.Type == ExpressionTypeMinusAssign ||

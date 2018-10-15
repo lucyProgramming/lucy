@@ -78,38 +78,11 @@ func (s *Statement) check(block *Block) []error {
 	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:
-		if block.InheritedAttribute.ForBreak == nil {
-			return []error{fmt.Errorf("%s 'break' cannot in this scope", errMsgPrefix(s.Pos))}
-		}
-		if block.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
-				errMsgPrefix(s.Pos))}
-		}
-		if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
-			s.StatementBreak.StatementFor = t
-		} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
-			s.StatementBreak.StatementSwitch = t
-		} else {
-			s.StatementBreak.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
-		}
-		s.StatementBreak.mkDefers(block)
+		return s.StatementBreak.check(s, block)
 	case StatementTypeContinue:
-		if block.InheritedAttribute.ForContinue == nil {
-			return []error{fmt.Errorf("%s 'continue' can`t in this scope",
-				errMsgPrefix(s.Pos))}
-		}
-		if block.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
-				errMsgPrefix(s.Pos))}
-		}
-		s.StatementContinue.StatementFor = block.InheritedAttribute.ForContinue
-		s.StatementContinue.mkDefers(block)
+		return s.StatementContinue.check(s, block)
 	case StatementTypeReturn:
-		if block.InheritedAttribute.Defer != nil {
-			return []error{fmt.Errorf("%s cannot has 'return' in 'defer'",
-				errMsgPrefix(s.Pos))}
-		}
-		return s.StatementReturn.check(block)
+		return s.StatementReturn.check(s, block)
 	case StatementTypeGoTo:
 		err := s.checkStatementGoTo(block)
 		if err != nil {

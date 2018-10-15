@@ -14,9 +14,8 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 	if object == nil {
 		return nil
 	}
-	if object.RightValueValid() == false {
-		*errs = append(*errs, fmt.Errorf("%s '%s' is not right value valid",
-			errMsgPrefix(object.Pos), object.TypeString()))
+	if err := object.rightValueValid(); err != nil {
+		*errs = append(*errs, err)
 		return nil
 	}
 	if object.IsPointer() == false {
@@ -29,16 +28,24 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 		*errs = append(*errs, err)
 		return nil
 	}
-	result := make([]*Type, 2)
-	result[0] = assert.Type.Clone()
-	result[0].Pos = e.Pos
-	result[1] = &Type{}
-	result[1].Pos = e.Pos
-	result[1].Type = VariableTypeBool // if  assert is ok
 	if assert.Type.validForTypeAssertOrConversion() == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for type assertion",
 			errMsgPrefix(assert.Type.Pos), assert.Type.TypeString()))
-		return result
+		return nil
+	}
+	var result []*Type
+	if len(e.Lefts) > 1 {
+		assert.MultiValueContext = true
+		result = make([]*Type, 2)
+		result[0] = assert.Type.Clone()
+		result[0].Pos = e.Pos
+		result[1] = &Type{}
+		result[1].Pos = e.Pos
+		result[1].Type = VariableTypeBool // if  assert is ok
+	} else {
+		result = make([]*Type, 1)
+		result[0] = assert.Type.Clone()
+		result[0].Pos = e.Pos
 	}
 	return result
 }

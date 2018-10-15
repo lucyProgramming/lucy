@@ -21,3 +21,7 @@ type NameWithPos struct {
 	Name string
 	Pos  *Pos
 }
+
+func errMsgPrefix(pos *Pos) string {
+	return pos.errMsgPrefix()
+}

@@ -143,8 +143,8 @@ func (s *StatementSwitch) check(block *Block) []error {
 			if valueValid {
 				errMsg := func(first *Pos, which interface{}) error {
 					errMsg := fmt.Sprintf("%s  '%v' duplicate case,first declared at:\n",
-						errMsgPrefix(e.Pos), which)
-					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
+						e.Pos.errMsgPrefix(), which)
+					errMsg += fmt.Sprintf("\t%s", first.errMsgPrefix())
 					return errors.New(errMsg)
 				}
 				switch conditionType.Type {
@@ -231,7 +231,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 		containsBool == false {
 		//some enum are missing, not allow
 		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
-			errMsgPrefix(s.Pos), conditionType.Enum.Name)
+			s.Pos.errMsgPrefix(), conditionType.Enum.Name)
 		errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 		for _, v := range conditionType.Enum.Enums {
 			_, ok := enumNamesMap[v.Name]

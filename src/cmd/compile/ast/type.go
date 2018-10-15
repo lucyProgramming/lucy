@@ -12,8 +12,8 @@ const (
 	//primitive types
 	VariableTypeBool
 	VariableTypeByte
-	VariableTypeChar
 	VariableTypeShort
+	VariableTypeChar
 	VariableTypeInt
 	VariableTypeLong
 	VariableTypeFloat
@@ -33,7 +33,7 @@ const (
 
 	VariableTypePackage
 	VariableTypeNull
-	VariableTypeSelectGlobal
+	VariableTypeGlobal
 	VariableTypeMagicFunction
 	VariableTypeDynamicSelector //
 )
@@ -124,8 +124,8 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	return e
 }
 
-func (typ *Type) RightValueValid() bool {
-	return typ.Type == VariableTypeBool ||
+func (typ *Type) rightValueValid() error {
+	if typ.Type == VariableTypeBool ||
 		typ.IsNumber() ||
 		typ.Type == VariableTypeString ||
 		typ.Type == VariableTypeObject ||
@@ -134,7 +134,23 @@ func (typ *Type) RightValueValid() bool {
 		typ.Type == VariableTypeNull ||
 		typ.Type == VariableTypeJavaArray ||
 		typ.Type == VariableTypeEnum ||
-		typ.Type == VariableTypeFunction
+		typ.Type == VariableTypeFunction {
+		return nil
+	}
+	switch typ.Type {
+	case VariableTypePackage:
+		return fmt.Errorf("%s use package '%s' without selector",
+			typ.Pos.errMsgPrefix(), typ.Package.Name)
+	case VariableTypeClass:
+		return fmt.Errorf("%s use class '%s' without selector",
+			typ.Pos.errMsgPrefix(), typ.Class.Name)
+	case VariableTypeMagicFunction:
+		return fmt.Errorf("%s use '%s' without selector",
+			typ.Pos.errMsgPrefix(), MagicIdentifierFunction)
+	default:
+		return fmt.Errorf("%s '%s' is not right value valid",
+			typ.Pos.errMsgPrefix(), typ.TypeString())
+	}
 }
 
 /*
@@ -144,8 +160,15 @@ func (typ *Type) isTyped() bool {
 	/*
 		null is only untyped right value
 	*/
-	return typ.RightValueValid() &&
-		typ.Type != VariableTypeNull
+	return typ.Type == VariableTypeBool ||
+		typ.IsNumber() ||
+		typ.Type == VariableTypeString ||
+		typ.Type == VariableTypeObject ||
+		typ.Type == VariableTypeArray ||
+		typ.Type == VariableTypeMap ||
+		typ.Type == VariableTypeJavaArray ||
+		typ.Type == VariableTypeEnum ||
+		typ.Type == VariableTypeFunction
 }
 
 /*
@@ -190,7 +213,7 @@ func (typ *Type) resolve(block *Block) error {
 		return nil
 	case VariableTypeName:
 		return typ.resolveName(block)
-	case VariableTypeSelectGlobal:
+	case VariableTypeGlobal:
 		d, exists := PackageBeenCompile.Block.NameExists(typ.Name)
 		if exists == false {
 			return fmt.Errorf("%s '%s' not found",
@@ -234,15 +257,18 @@ func (typ *Type) resolveName(block *Block) error {
 		if d != nil {
 			switch d.(type) {
 			case *Class:
-				if t, ok := d.(*Class); ok && t.IsBuildIn == false {
+				if t, ok := d.(*Class); ok &&
+					t.IsBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
 				}
 			case *Type:
-				if t, ok := d.(*Type); ok && t.IsBuildIn == false {
+				if t, ok := d.(*Type); ok &&
+					t.IsBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
 				}
 			case *Enum:
-				if t, ok := d.(*Enum); ok && t.IsBuildIn == false {
+				if t, ok := d.(*Enum); ok &&
+					t.IsBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(typ.Name, typ.Pos, t.Pos)
 				}
 			}
@@ -317,11 +343,9 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 				fmt.Errorf("%s class '%s' is not public",
 					errMsgPrefix(typ.Pos), dd.Name))
 		}
-		if typ != nil {
-			typ.Type = VariableTypeObject
-			typ.Class = dd
-			return nil
-		}
+		typ.Type = VariableTypeObject
+		typ.Class = dd
+		return nil
 	case *Type:
 		pos := typ.Pos
 		alias := typ.Alias
@@ -332,8 +356,9 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 	case *Enum:
 		dd := d.(*Enum)
 		if dd.LoadFromOutSide && dd.IsPublic() == false {
-			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, fmt.Errorf("%s enum '%s' is not public",
-				errMsgPrefix(typ.Pos), dd.Name))
+			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors,
+				fmt.Errorf("%s enum '%s' is not public",
+					errMsgPrefix(typ.Pos), dd.Name))
 		}
 		typ.Type = VariableTypeEnum
 		typ.Enum = dd
@@ -439,7 +464,7 @@ func (typ *Type) typeString(ret *string) {
 		*ret += "package@" + typ.Package.Name
 	case VariableTypeNull:
 		*ret += "null"
-	case VariableTypeSelectGlobal:
+	case VariableTypeGlobal:
 		*ret += typ.Name
 	case VariableTypeMagicFunction:
 		*ret = MagicIdentifierFunction
@@ -530,8 +555,8 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 
  */
 func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type) error {
-	if bind.RightValueValid() == false {
-		return fmt.Errorf("'%s' is not right value valid", bind.TypeString())
+	if err := bind.rightValueValid(); err != nil {
+		return err
 	}
 	if bind.Type == VariableTypeNull {
 		return fmt.Errorf("'%s' is un typed", bind.TypeString())
