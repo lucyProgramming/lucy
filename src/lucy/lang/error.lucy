@@ -1,7 +1,7 @@
 
 import "java/lang/Exception"
 
-type error  = Exception
+typealias error  = Exception
 
 
 

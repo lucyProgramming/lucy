@@ -8,8 +8,8 @@ import (
 
 type StatementSwitch struct {
 	PrefixExpressions    []*Expression
-	Block                Block
-	Pos                  *Pos
+	initExpressionBlock  Block
+	EndPos               *Pos
 	Condition            *Expression //switch
 	StatementSwitchCases []*StatementSwitchCase
 	Default              *Block
@@ -26,10 +26,10 @@ func (s *StatementSwitch) check(block *Block) []error {
 	if s.Condition == nil { // must be a error at parse stage
 		return errs
 	}
-	s.Block.inherit(block)
+	s.initExpressionBlock.inherit(block)
 	for _, v := range s.PrefixExpressions {
 		v.IsStatementExpression = true
-		_, es := v.check(&s.Block)
+		_, es := v.check(&s.initExpressionBlock)
 		errs = append(errs, es...)
 		if err := v.canBeUsedAsStatement(); err != nil {
 			errs = append(errs, err)
@@ -38,14 +38,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 	if s.Condition == nil {
 		return errs
 	}
-	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.Block)
+	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.initExpressionBlock)
 	errs = append(errs, es...)
 	if conditionType == nil {
 		return errs
 	}
-	if conditionType.isTyped() == false {
-		errs = append(errs, fmt.Errorf("%s condtion is not typed",
-			conditionType.Pos.errMsgPrefix()))
+	if err := conditionType.isTyped(); err != nil {
+		errs = append(errs, err)
 		return errs
 	}
 	if conditionType.Type == VariableTypeBool {
@@ -55,7 +54,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 	}
 	if len(s.StatementSwitchCases) == 0 {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
-			s.Pos.errMsgPrefix()))
+			s.EndPos.errMsgPrefix()))
 		return errs
 	}
 	byteMap := make(map[byte]*Pos)
@@ -81,7 +80,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 	for _, v := range s.StatementSwitchCases {
 		for _, e := range v.Matches {
 			valueValid := false
-			t, es := e.checkSingleValueContextExpression(&s.Block)
+			t, es := e.checkSingleValueContextExpression(&s.initExpressionBlock)
 			errs = append(errs, es...)
 			if t == nil {
 				continue
@@ -110,7 +109,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 				}
 			}
 			if conditionType.IsPrimitive() {
-				if e.IsLiteral() {
+				if e.isLiteral() {
 					switch e.Type {
 					case ExpressionTypeByte:
 						byteValue = e.Data.(byte)
@@ -215,13 +214,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 			}
 		}
 		if v.Block != nil {
-			v.Block.inherit(&s.Block)
+			v.Block.inherit(&s.initExpressionBlock)
 			v.Block.InheritedAttribute.ForBreak = s
 			errs = append(errs, v.Block.checkStatementsAndUnused()...)
 		}
 	}
 	if s.Default != nil {
-		s.Default.inherit(&s.Block)
+		s.Default.inherit(&s.initExpressionBlock)
 		s.Default.InheritedAttribute.ForBreak = s
 		errs = append(errs, s.Default.checkStatementsAndUnused()...)
 	}
@@ -231,7 +230,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 		containsBool == false {
 		//some enum are missing, not allow
 		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
-			s.Pos.errMsgPrefix(), conditionType.Enum.Name)
+			s.EndPos.errMsgPrefix(), conditionType.Enum.Name)
 		errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 		for _, v := range conditionType.Enum.Enums {
 			_, ok := enumNamesMap[v.Name]

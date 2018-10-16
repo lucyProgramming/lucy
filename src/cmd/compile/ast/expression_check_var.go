@@ -79,7 +79,8 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				*errs = append(*errs, err)
 				continue
 			}
-			ev.InitValues = append(ev.InitValues, v.Type.mkDefaultValueExpression())
+			ev.InitValues = append(ev.InitValues,
+				v.Type.mkDefaultValueExpression())
 			if e.IsPublic {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}

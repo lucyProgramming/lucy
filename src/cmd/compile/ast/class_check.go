@@ -383,7 +383,7 @@ func (c *Class) checkFields() []error {
 				continue
 			}
 			if v.IsStatic() &&
-				v.DefaultValueExpression.IsLiteral() {
+				v.DefaultValueExpression.isLiteral() {
 				v.DefaultValue = v.DefaultValueExpression.Data
 				continue
 			}
@@ -419,8 +419,8 @@ func (c *Class) checkFields() []error {
 				}
 			}
 			e := &Expression{
-				Type: ExpressionTypeAssign,
-				Data: bin,
+				Type:                  ExpressionTypeAssign,
+				Data:                  bin,
 				IsStatementExpression: true,
 				Description:           "assign",
 			}

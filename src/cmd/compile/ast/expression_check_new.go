@@ -107,7 +107,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 			errMsgPrefix(amount.Pos), amount.TypeString()))
 	}
 	if amount.Type == VariableTypeLong {
-		newArray.Args[0].ConvertToNumber(VariableTypeLong)
+		newArray.Args[0].convertToNumber(VariableTypeLong)
 	}
 	//no further checks
 	return ret

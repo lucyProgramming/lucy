@@ -82,9 +82,8 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			vd.Comment = identifier.Comment
 			vd.Type = variableType.Clone()
 			vd.Type.Pos = e.Pos
-			if variableType.isTyped() == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
-					errMsgPrefix(v.Pos), variableType.TypeString()))
+			if err := variableType.isTyped(); err != nil {
+				*errs = append(*errs, err)
 			}
 			err = block.Insert(vd.Name, v.Pos, vd)
 			identifier.Variable = vd

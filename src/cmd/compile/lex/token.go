@@ -96,7 +96,7 @@ const (
 	TokenLiteralDouble              // 0.0d
 	TokenLiteralLong                // 100L
 	TokenDefer                      // defer
-	TokenType                       // type
+	TokenTypeAlias                  // type
 	TokenArrow                      // ->
 	TokenExtends                    // extends
 	TokenImplements                 // implements
@@ -155,7 +155,7 @@ var (
 		"long":         TokenLong,
 		"string":       TokenString,
 		"defer":        TokenDefer,
-		"type":         TokenType,
+		"typealias":    TokenTypeAlias,
 		"extends":      TokenExtends,
 		"implements":   TokenImplements,
 		"goto":         TokenGoto,

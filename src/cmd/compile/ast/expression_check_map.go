@@ -47,9 +47,8 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 				continue
 			}
 			if noType && m.Type.Map.K == nil {
-				if kType.isTyped() == false {
-					*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for k",
-						kType.Pos.errMsgPrefix()))
+				if err := kType.isTyped(); err != nil {
+					*errs = append(*errs, err)
 				} else {
 					m.Type.Map.K = kType
 					mapK = m.Type.Map.K
@@ -70,7 +69,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			}
 		}
 		if m.Type.Map.K != nil &&
-			v.Key.IsLiteral() &&
+			v.Key.isLiteral() &&
 			m.Type.Map.K.Type == v.Key.Value.Type {
 			errMsg := func(pos *Pos, first *Pos, which interface{}) error {
 				errMsg := fmt.Sprintf("%s  '%v' duplicate key,first declared at:\n",
@@ -149,9 +148,8 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			continue
 		}
 		if noType && m.Type.Map.V == nil {
-			if vType.isTyped() == false {
-				*errs = append(*errs, fmt.Errorf("%s cannot use untyped value for v",
-					errMsgPrefix(v.Value.Pos)))
+			if err := vType.isTyped(); err != nil {
+				*errs = append(*errs, err)
 			} else {
 				m.Type.Map.V = vType
 				mapV = m.Type.Map.V

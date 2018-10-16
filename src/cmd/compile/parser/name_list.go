@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-	"runtime/debug"
 )
 
 //at least one name
@@ -13,7 +12,6 @@ func (parser *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		err = fmt.Errorf("%s expect identifier,but '%s'",
 			parser.errorMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
-		debug.PrintStack()
 		return nil, err
 	}
 	names = []*ast.NameWithPos{}

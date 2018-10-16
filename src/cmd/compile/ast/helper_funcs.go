@@ -180,7 +180,7 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 		return
 	}
 	for k, e := range es {
-		if e.IsLiteral() == false {
+		if e.isLiteral() == false {
 			continue
 		}
 		if k >= len(needs) {

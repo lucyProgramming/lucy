@@ -14,7 +14,7 @@ type Pos struct {
 }
 
 func (pos *Pos) errMsgPrefix() string {
-	return fmt.Sprintf("%s:%d:%d", pos.Filename, pos.Line, pos.Column)
+	return fmt.Sprintf("%s:%d:%d:", pos.Filename, pos.Line, pos.Column)
 }
 
 type NameWithPos struct {

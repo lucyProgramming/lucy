@@ -10,9 +10,11 @@ fn main(args []string) {
 	b := flag.boolOption("-b",false,"bool")
 	i := flag.intOption("-i" , 123 ,"")
 	
-	f := flag.floatOption("-f" , 1f, "")
-	no,err := flag.parse(["-b","-i" ,"-456" , "121" ,"-aaa" , "-f" ,"-93232.21" , "fdfdfd"])
-	print(err)
+	f := flag.floatOption("-f" )
+	no,err := flag.parse(["-b","-i" ,"-456" , "121" ,"-aaa" , "-f" ,"-11111" , "fdfdfd"])
+	if err != null {
+	    panic(err)
+	}
 	print(no)
 	print(b.getValue())
 	print(i.getValue())

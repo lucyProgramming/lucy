@@ -23,7 +23,7 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 	ret := conversion.Type.Clone()
 	ret.Pos = e.Pos
 	if on.IsNumber() && conversion.Type.IsNumber() {
-		if conversion.Expression.IsLiteral() {
+		if conversion.Expression.isLiteral() {
 			conversion.Expression.convertNumberLiteralTo(conversion.Type.Type)
 			//rewrite
 			pos := e.Pos

@@ -7,7 +7,7 @@ import (
 )
 
 //TODO:: missing format
-func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Pos) (*ast.StatementSwitchTemplate, error) {
+func (blockParser *BlockParser) parseSwitchTemplate() (*ast.StatementSwitchTemplate, error) {
 	condition, err := blockParser.parser.parseType()
 	if err != nil {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
@@ -27,7 +27,6 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Pos) (*ast.Statemen
 		return nil, err
 	}
 	statementSwitchTemplate := &ast.StatementSwitchTemplate{}
-	statementSwitchTemplate.Pos = pos
 	statementSwitchTemplate.Condition = condition
 	for blockParser.parser.token.Type == lex.TokenCase {
 		blockParser.Next(lfNotToken) // skip case
@@ -84,14 +83,14 @@ func (blockParser *BlockParser) parseSwitchTemplate(pos *ast.Pos) (*ast.Statemen
 }
 
 func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
-	pos := blockParser.parser.mkPos()
+
 	blockParser.Next(lfIsToken) // skip switch key word
 	blockParser.parser.unExpectNewLineAndSkip()
 	if blockParser.parser.token.Type == lex.TokenTemplate {
-		return blockParser.parseSwitchTemplate(pos)
+		return blockParser.parseSwitchTemplate()
 	}
 	statementSwitch := &ast.StatementSwitch{}
-	statementSwitch.Pos = pos
+	statementSwitch.EndPos = blockParser.parser.mkPos()
 	var err error
 	statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
@@ -124,7 +123,6 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
-
 	for blockParser.parser.token.Type == lex.TokenCase {
 		blockParser.Next(lfIsToken) // skip case
 		blockParser.parser.unExpectNewLineAndSkip()
@@ -177,6 +175,11 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return statementSwitch, err
+	}
+	statementSwitch.EndPos = &ast.Pos{
+		Filename: blockParser.parser.filename,
+		Line:     blockParser.parser.lastToken.EndLine,
+		Column:   blockParser.parser.lastToken.EndColumn,
 	}
 	blockParser.Next(lfNotToken) //  skip }
 	return statementSwitch, nil

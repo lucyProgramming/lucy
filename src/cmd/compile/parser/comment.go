@@ -12,7 +12,6 @@ func (c *CommentParser) reset() {
 }
 
 func (c *CommentParser) read() {
-	c.reset()
 	if c.parser.token.Type == lex.TokenComment {
 		for c.parser.token.Type == lex.TokenComment {
 			c.Comment += c.parser.token.Data.(string)

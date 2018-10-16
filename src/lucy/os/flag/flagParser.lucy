@@ -7,57 +7,52 @@ public final class  FlagParser {
 	
 	public fn FlagParser() {
 	    this.super()
-		this.options = new map{string -> Option}()
+		this.options = new map{ string -> Option }()
 	}
 	
 	
-	private fn checkOptionExist(name string) {
-		if this.options.keyExist(name)  {
-			panic(new error(sprintf("option already '%s' exists" , name )))
+	private fn check(option string) {
+	    if option.startsWith("-") == false {
+    	    panic(new error(sprintf("'%s' not a valid option" , option )))
+    	}
+		if this.options.keyExist(option)  {
+			panic(new error(sprintf("option already '%s' exists" , option )))
 		}
 	}
 	
-	public fn boolOption(option string , d bool ,usage string ) ->(o BoolOption){
-		.checkOptionExist(option)
-		if option.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , option )))
-		}
+	public fn boolOption(option string , d bool = false ,usage string = "" ) ->(o BoolOption){
+		.check(option)
 		o = new BoolOption(d)
 		o.typ = OptionTypeBool
 		o.usage = usage
+		o.defaultValueString = "" + d
 		this.options[option] = o
 	} 
 	
-	public fn intOption(option string , d int ,usage string ) ->(o IntOption){
-		.checkOptionExist(option)
-		if option.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , option )))
-		}
+	public fn intOption(option string , d int = 0 ,usage string = "") ->(o IntOption){
+		.check(option)
 		o = new IntOption(d);
 		o.typ = OptionTypeInt
 		o.usage = usage 
+		o.defaultValueString = "" + d
 		this.options[option] = o
 	} 
 	
-	public fn stringOption(option string , d string ,usage string ) ->(o StringOption){
-		.checkOptionExist(option)
-		if option.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , option )))
-		}
+	public fn stringOption(option string , d string = "" ,usage string = "") ->(o StringOption){
+		.check(option)
 		o = new StringOption(d);
 		o.typ = OptionTypeString
 		o.usage = usage 
+		o.defaultValueString = "" + d
 		this.options[option] = o
 	}
 
-	public fn floatOption(option string , d float ,usage string ) ->(o FloatOption){
-		.checkOptionExist(option)
-		if option.startsWith("-") == false {
-			panic(new error(sprintf("'%s' not a valid option" , option )))
-		}
+	public fn floatOption(option string , d float = 0f,usage string = "") ->(o FloatOption){
+		.check(option)
 		o = new FloatOption(d);
 		o.typ = OptionTypeFloat
 		o.usage = usage 
+		o.defaultValueString = "" + d
 		this.options[option] = o
 	} 
 	
@@ -74,7 +69,7 @@ public final class  FlagParser {
 			v.reset()
 		}
 		noDefine = []string{} 
-		for k := 0 ; k < len (args) ; k++{
+		for k := 0 ; k < args.size() ; k++{
 			v := args[k]
 			if false == this.options.keyExist(v) {
 				noDefine.append(v)
@@ -94,10 +89,10 @@ public final class  FlagParser {
 			
 		}
 	}
-	public fn helpMsg() -> (msg string){
-		msg = "flag provides are:\n"
+	public fn helpMsg(prefix string = "") -> (msg string){
+		msg = prefix + "flag provides are:\n"
 		for k,v := range this.options {
-			msg += sprintf("\t '%s' default:'%s' usage:'%s'\n" , k , v.formatDefaultValue() , v.usage )
+			msg += prefix + sprintf("\t '%s' default:'%s' usage:'%s'\n" , k , v.defaultValueString , v.usage )
 		}
 	}
 

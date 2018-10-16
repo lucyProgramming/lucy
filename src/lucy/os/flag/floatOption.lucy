@@ -21,6 +21,9 @@ public final class FloatOption  extends Option{
 		if bs[0] == '-' {
 			isNegative = true 
 			bs = bs[1:]
+			if false == ('0' <= bs[0]  && bs[0] <= '9') {
+				panic("expect number")
+			}
 		}
 		var value float
 		for k,b = range bs {
@@ -58,8 +61,6 @@ public final class FloatOption  extends Option{
 	} 
 	public fn getValue() -> (v float = this.floatValue ){ }
 	
-	
-	protected fn  formatDefaultValue() -> ( format string = "" + .floatDefaultValue  ) { }
-	
+
 	
 }

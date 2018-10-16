@@ -170,7 +170,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error, checkReturnVarExpres
 					continue
 				}
 			}
-			if v.DefaultValueExpression.IsLiteral() == false {
+			if v.DefaultValueExpression.isLiteral() == false {
 				*errs = append(*errs, fmt.Errorf("%s default value must be literal",
 					errMsgPrefix(v.DefaultValueExpression.Pos)))
 				continue

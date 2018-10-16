@@ -36,7 +36,7 @@ func (e *Expression) makeWrongOpErr(typ1, typ2 string) error {
 }
 
 func (e *Expression) constantFold() (is bool, err error) {
-	if e.IsLiteral() {
+	if e.isLiteral() {
 		return true, nil
 	}
 	// ~

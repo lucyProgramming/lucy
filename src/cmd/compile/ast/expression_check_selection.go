@@ -69,7 +69,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result := v.Type.Clone()
 			result.Pos = e.Pos
 			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 &&
-				object.Package.Name != PackageBeenCompile.Name {
+				object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s variable '%s' is not public",
 					errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
@@ -82,7 +82,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result := c.Type.Clone()
 			result.Pos = e.Pos
 			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 &&
-				object.Package.Name != PackageBeenCompile.Name {
+				object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s const '%s' is not public",
 					errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
@@ -95,7 +95,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Type = VariableTypeClass
 			result.Class = c
 			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 &&
-				object.Package.Name != PackageBeenCompile.Name {
+				object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s class '%s' is not public",
 					errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
@@ -104,7 +104,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		case *EnumName:
 			n := d.(*EnumName)
 			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 &&
-				object.Package.Name != PackageBeenCompile.Name {
+				object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s enum '%s' is not public",
 					errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
@@ -119,10 +119,16 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 		case *Function:
 			f := d.(*Function)
 			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 &&
-				object.Package.Name != PackageBeenCompile.Name {
-				err := fmt.Errorf("%s enum '%s' is not public",
+				object.Package.isSame(&PackageBeenCompile) == false {
+				err := fmt.Errorf("%s function '%s' is not public",
 					errMsgPrefix(e.Pos), selection.Name)
 				*errs = append(*errs, err)
+			}
+			if f.TemplateFunction != nil {
+				err := fmt.Errorf("%s function '%s' is a template function",
+					e.Pos.errMsgPrefix(), selection.Name)
+				*errs = append(*errs, err)
+				return nil
 			}
 			result := &Type{}
 			result.Pos = e.Pos

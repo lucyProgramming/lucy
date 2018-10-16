@@ -27,9 +27,8 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 		*errs = append(*errs, err)
 		return nil
 	}
-	if tType.isTyped() == false {
-		*errs = append(*errs, fmt.Errorf("%s '%s' not typed",
-			errMsgPrefix(question.True.Pos), tType.TypeString()))
+	if err := tType.isTyped(); err != nil {
+		*errs = append(*errs, err)
 		return nil
 	}
 	ret := tType.Clone()

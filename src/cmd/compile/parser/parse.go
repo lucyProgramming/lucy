@@ -267,7 +267,7 @@ func (parser *Parser) Parse() []error {
 			}
 			resetProperty()
 			continue
-		case lex.TokenType:
+		case lex.TokenTypeAlias:
 			a, err := parser.parseTypeAlias(comment)
 			if err != nil {
 				parser.consume(untilSemicolonOrLf)
@@ -508,7 +508,7 @@ func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
 	} else {
 		line, column = parser.token.EndLine, parser.token.EndColumn
 	}
-	return fmt.Sprintf("%s:%d:%d", parser.filename, line, column)
+	return fmt.Sprintf("%s:%d:%d:", parser.filename, line, column)
 }
 
 func (parser *Parser) consume(until map[lex.TokenKind]bool) {
@@ -529,7 +529,7 @@ func (parser *Parser) consume(until map[lex.TokenKind]bool) {
 			parser.token.Type == lex.TokenConst ||
 			parser.token.Type == lex.TokenVar ||
 			parser.token.Type == lex.TokenImport ||
-			parser.token.Type == lex.TokenType ||
+			parser.token.Type == lex.TokenTypeAlias ||
 			parser.token.Type == lex.TokenGoto ||
 			parser.token.Type == lex.TokenBreak ||
 			parser.token.Type == lex.TokenContinue ||

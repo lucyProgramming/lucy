@@ -35,14 +35,13 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 				continue
 			}
 			if noType && arr.Type == nil {
-				if eType.isTyped() {
+				if err := eType.isTyped(); err == nil {
 					arr.Type = &Type{}
 					arr.Type.Type = VariableTypeArray
 					arr.Type.Array = eType.Clone()
 					arr.Type.Pos = e.Pos
 				} else {
-					*errs = append(*errs, fmt.Errorf("%s right value '%s' untyped",
-						errMsgPrefix(eType.Pos), eType.TypeString()))
+					*errs = append(*errs, err)
 				}
 			}
 			if arr.Type != nil {

@@ -33,7 +33,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 				errMsgPrefix(startType.Pos), startType.TypeString()))
 		} else {
 			if startType.Type == VariableTypeLong {
-				on.Start.ConvertToNumber(VariableTypeInt)
+				on.Start.convertToNumber(VariableTypeInt)
 			}
 		}
 	}
@@ -47,7 +47,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		}
 		if endType != nil &&
 			endType.Type == VariableTypeLong {
-			on.End.ConvertToNumber(VariableTypeInt)
+			on.End.convertToNumber(VariableTypeInt)
 		}
 	} else {
 		on.End = &Expression{}

@@ -155,8 +155,7 @@ public class Decoder {
 			cc := f.getType()
 			if  (cc.isPrimitive()) {
 				tree :=  tree.object[f.getName()]
-				obj  :=  __CLASS__.decodePrimitives( cc , tree  )
-
+				obj  :=  .decodePrimitives( cc , tree  )
 				f.set(x , obj) 
 				continue  
 			}
@@ -257,7 +256,6 @@ public class Decoder {
 				break 
 			}else {
 			    panic(sprintf("expect ']' or ',' but '%s'" , this.getErrMsg()))
-
 			}
 		}
 		if b != ']' {

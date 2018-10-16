@@ -167,7 +167,7 @@ func (e *Expression) Is2PointerCompare() bool {
 	return bin.Left.Value.IsPointer()
 }
 
-func (e *Expression) ConvertTo(to *Type) {
+func (e *Expression) convertTo(to *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
 	c.Expression.Description = "compilerAuto"
@@ -179,15 +179,15 @@ func (e *Expression) ConvertTo(to *Type) {
 	e.Data = c
 }
 
-func (e *Expression) ConvertToNumber(typ VariableTypeKind) {
-	if e.IsLiteral() {
+func (e *Expression) convertToNumber(typ VariableTypeKind) {
+	if e.isLiteral() {
 		e.convertNumberLiteralTo(typ)
 		e.Value = &Type{
 			Type: typ,
 			Pos:  e.Pos,
 		}
 	} else {
-		e.ConvertTo(&Type{
+		e.convertTo(&Type{
 			Pos:  e.Pos,
 			Type: typ,
 		})
@@ -246,7 +246,7 @@ type ExpressionSlice struct {
 	Start, End   *Expression
 }
 
-func (e *Expression) IsLiteral() bool {
+func (e *Expression) isLiteral() bool {
 	return e.Type == ExpressionTypeBool ||
 		e.Type == ExpressionTypeString ||
 		e.isNumber()

@@ -4,7 +4,7 @@ public final class IntOption  extends Option{
 	private intValue int 
 	
 	fn IntOption(d int) {
-		this.super() 
+		this.super() ;
 		.intDefaultValue = d 
 	}
 	
@@ -18,6 +18,9 @@ public final class IntOption  extends Option{
 		if bs[0] == '-' {
 			isNegative = true 
 			bs = bs[1:]
+			if false == ('0' <= bs[0]  && bs[0] <= '9') {
+				panic("expect number")
+			}
 		}
 		var value int 
 		for b := range bs {
@@ -35,6 +38,5 @@ public final class IntOption  extends Option{
 	} 
 	
 	public fn getValue() -> (v int = this.intValue ){ }
-	
-	protected fn  formatDefaultValue() -> ( format string  = "" + .intDefaultValue  ) { }
+
 }

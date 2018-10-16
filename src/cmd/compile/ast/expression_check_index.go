@@ -19,7 +19,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		if indexType != nil {
 			if indexType.IsInteger() {
 				if indexType.Type == VariableTypeLong {
-					index.Index.ConvertToNumber(VariableTypeInt) //  convert to int
+					index.Index.convertToNumber(VariableTypeInt) //  convert to int
 				}
 			} else {
 				*errs = append(*errs,
@@ -49,7 +49,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		if indexType != nil {
 			if indexType.IsInteger() {
 				if indexType.Type == VariableTypeLong {
-					index.Index.ConvertToNumber(VariableTypeInt) //  convert to int
+					index.Index.convertToNumber(VariableTypeInt) //  convert to int
 				}
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",

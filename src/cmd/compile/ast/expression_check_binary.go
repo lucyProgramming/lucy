@@ -76,7 +76,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
 		if right.Type == VariableTypeLong {
-			bin.Right.ConvertToNumber(VariableTypeInt)
+			bin.Right.convertToNumber(VariableTypeInt)
 		}
 		result = left.Clone()
 		result.Pos = e.Pos
@@ -122,19 +122,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				(left.IsFloat() && right.IsFloat()) {
 				if left.assignAble(errs, right) == false {
 					switch {
-					case bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false:
+					case bin.Left.isLiteral() == false && bin.Right.isLiteral() == false:
 						*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-					case bin.Left.IsLiteral() && bin.Right.IsLiteral():
+					case bin.Left.isLiteral() && bin.Right.isLiteral():
 						if bin.Right.Value.Type > bin.Left.Value.Type {
-							bin.Left.ConvertToNumber(bin.Right.Value.Type)
+							bin.Left.convertToNumber(bin.Right.Value.Type)
 						} else {
-							bin.Right.ConvertToNumber(bin.Left.Value.Type)
+							bin.Right.convertToNumber(bin.Left.Value.Type)
 						}
 					default:
-						if bin.Left.IsLiteral() {
-							bin.Left.ConvertToNumber(right.Type)
+						if bin.Left.isLiteral() {
+							bin.Left.convertToNumber(right.Type)
 						} else {
-							bin.Right.ConvertToNumber(left.Type)
+							bin.Right.convertToNumber(left.Type)
 						}
 					}
 				}
@@ -210,19 +210,19 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			(left.IsFloat() && right.IsFloat()) {
 			if left.assignAble(errs, right) == false {
 				switch {
-				case bin.Left.IsLiteral() == false && bin.Right.IsLiteral() == false:
+				case bin.Left.isLiteral() == false && bin.Right.isLiteral() == false:
 					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-				case bin.Left.IsLiteral() && bin.Right.IsLiteral():
+				case bin.Left.isLiteral() && bin.Right.isLiteral():
 					if bin.Right.Value.Type > bin.Left.Value.Type {
-						bin.Left.ConvertToNumber(bin.Right.Value.Type)
+						bin.Left.convertToNumber(bin.Right.Value.Type)
 					} else {
-						bin.Right.ConvertToNumber(bin.Left.Value.Type)
+						bin.Right.convertToNumber(bin.Left.Value.Type)
 					}
 				default:
-					if bin.Left.IsLiteral() {
-						bin.Left.ConvertToNumber(right.Type)
+					if bin.Left.isLiteral() {
+						bin.Left.convertToNumber(right.Type)
 					} else {
-						bin.Right.ConvertToNumber(left.Type)
+						bin.Right.convertToNumber(left.Type)
 					}
 				}
 			}

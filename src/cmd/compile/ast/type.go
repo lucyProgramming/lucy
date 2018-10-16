@@ -88,38 +88,36 @@ func (typ *Type) mkDefaultValueExpression() *Expression {
 	e.IsCompileAuto = true
 	e.Pos = typ.Pos
 	e.Value = typ.Clone()
-	if typ.IsPointer() {
+	switch typ.Type {
+	case VariableTypeBool:
+		e.Type = ExpressionTypeBool
+		e.Data = false
+	case VariableTypeByte:
+		e.Type = ExpressionTypeByte
+		e.Data = byte(0)
+	case VariableTypeShort:
+		e.Type = ExpressionTypeInt
+		e.Data = int32(0)
+	case VariableTypeChar:
+		e.Type = ExpressionTypeInt
+		e.Data = int32(0)
+	case VariableTypeInt:
+		e.Type = ExpressionTypeInt
+		e.Data = int32(0)
+	case VariableTypeLong:
+		e.Type = ExpressionTypeLong
+		e.Data = int64(0)
+	case VariableTypeFloat:
+		e.Type = ExpressionTypeFloat
+		e.Data = float32(0)
+	case VariableTypeDouble:
+		e.Type = ExpressionTypeDouble
+		e.Data = float64(0)
+	case VariableTypeEnum:
+		e.Type = ExpressionTypeInt
+		e.Data = typ.Enum.DefaultValue
+	default:
 		e.Type = ExpressionTypeNull
-	} else {
-		switch typ.Type {
-		case VariableTypeBool:
-			e.Type = ExpressionTypeBool
-			e.Data = false
-		case VariableTypeByte:
-			e.Type = ExpressionTypeByte
-			e.Data = byte(0)
-		case VariableTypeShort:
-			e.Type = ExpressionTypeInt
-			e.Data = int32(0)
-		case VariableTypeChar:
-			e.Type = ExpressionTypeInt
-			e.Data = int32(0)
-		case VariableTypeInt:
-			e.Type = ExpressionTypeInt
-			e.Data = int32(0)
-		case VariableTypeLong:
-			e.Type = ExpressionTypeLong
-			e.Data = int64(0)
-		case VariableTypeFloat:
-			e.Type = ExpressionTypeFloat
-			e.Data = float32(0)
-		case VariableTypeDouble:
-			e.Type = ExpressionTypeDouble
-			e.Data = float64(0)
-		case VariableTypeEnum:
-			e.Type = ExpressionTypeInt
-			e.Data = typ.Enum.DefaultValue
-		}
 	}
 	return e
 }
@@ -156,11 +154,14 @@ func (typ *Type) rightValueValid() error {
 /*
 	have type or not
 */
-func (typ *Type) isTyped() bool {
+func (typ *Type) isTyped() error {
+	if err := typ.rightValueValid(); err != nil {
+		return err
+	}
 	/*
 		null is only untyped right value
 	*/
-	return typ.Type == VariableTypeBool ||
+	if typ.Type == VariableTypeBool ||
 		typ.IsNumber() ||
 		typ.Type == VariableTypeString ||
 		typ.Type == VariableTypeObject ||
@@ -168,7 +169,11 @@ func (typ *Type) isTyped() bool {
 		typ.Type == VariableTypeMap ||
 		typ.Type == VariableTypeJavaArray ||
 		typ.Type == VariableTypeEnum ||
-		typ.Type == VariableTypeFunction
+		typ.Type == VariableTypeFunction {
+		return nil
+	}
+	return fmt.Errorf("%s '%s' is not typed",
+		typ.Pos.errMsgPrefix(), typ.TypeString())
 }
 
 /*
