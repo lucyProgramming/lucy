@@ -394,7 +394,7 @@ func (e *Expression) canBeUsedAsCondition() error {
 		return nil
 	}
 	return fmt.Errorf("%s cannot use '%s' as condition",
-		errMsgPrefix(e.Pos), e.Description)
+		e.Pos.ErrMsgPrefix(), e.Description)
 }
 
 func (e *Expression) canBeUsedAsStatement() error {
@@ -422,7 +422,7 @@ func (e *Expression) canBeUsedAsStatement() error {
 		return nil
 	}
 	return fmt.Errorf("%s expression '%s' evaluate but not used",
-		errMsgPrefix(e.Pos), e.Description)
+		e.Pos.ErrMsgPrefix(), e.Description)
 }
 
 func (e *Expression) isNumber() bool {

@@ -50,7 +50,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	callArgTypes := checkExpressions(block, no.Args, errs, true)
 	ms, matched, err := no.Type.Class.accessConstructionFunction(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))
 		return ret
 	}
 	if matched {

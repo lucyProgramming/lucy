@@ -10,7 +10,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	if identifier.Name == NoNameIdentifier {
 		//_ is not valid
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
-			errMsgPrefix(e.Pos), NoNameIdentifier)
+			e.Pos.ErrMsgPrefix(), NoNameIdentifier)
 	}
 	//handle magic identifier
 	switch identifier.Name {
@@ -32,7 +32,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	case magicIdentifierClass:
 		if block.InheritedAttribute.Class == nil {
 			return nil,
-				fmt.Errorf("%s '%s' must in class scope", errMsgPrefix(e.Pos), identifier.Name)
+				fmt.Errorf("%s '%s' must in class scope", e.Pos.ErrMsgPrefix(), identifier.Name)
 		}
 		result := &Type{}
 		result.Type = VariableTypeClass
@@ -43,7 +43,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if block.InheritedAttribute.Function.isGlobalVariableDefinition ||
 			block.InheritedAttribute.Function.isPackageInitBlockFunction {
 			return nil,
-				fmt.Errorf("%s '%s' must in function scope", errMsgPrefix(e.Pos), identifier.Name)
+				fmt.Errorf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name)
 		}
 		result := &Type{}
 		result.Type = VariableTypeMagicFunction
@@ -64,7 +64,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		}
 	}
 	if d == nil {
-		return nil, fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), identifier.Name)
+		return nil, fmt.Errorf("%s '%s' not found", e.Pos.ErrMsgPrefix(), identifier.Name)
 	}
 	switch d.(type) {
 	case *Function:
@@ -80,11 +80,11 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		}
 		if f.IsBuildIn {
 			return nil, fmt.Errorf("%s fucntion '%s' is buildin",
-				errMsgPrefix(e.Pos), f.Name)
+				e.Pos.ErrMsgPrefix(), f.Name)
 		}
 		if f.TemplateFunction != nil {
 			return nil, fmt.Errorf("%s fucntion '%s' a template function",
-				errMsgPrefix(e.Pos), f.Name)
+				e.Pos.ErrMsgPrefix(), f.Name)
 		}
 		f.Used = true
 		result := &Type{}
@@ -152,13 +152,13 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	}
 	return nil, fmt.Errorf("%s identifier '%s' is not a expression , but '%s'",
-		errMsgPrefix(e.Pos), identifier.Name, block.identifierIsWhat(d))
+		e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d))
 }
 
 func (e *Expression) checkIdentifierThroughImports(it *Import) (*Type, error) {
 	p, err := PackageBeenCompile.load(it.Import)
 	if err != nil {
-		return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
+		return nil, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err)
 	}
 	result := &Type{}
 	result.Pos = e.Pos

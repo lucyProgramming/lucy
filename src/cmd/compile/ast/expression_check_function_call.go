@@ -85,7 +85,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	}
 	if functionPointer.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
-			errMsgPrefix(e.Pos),
+			e.Pos.ErrMsgPrefix(),
 			call.Expression.Description, functionPointer.TypeString()))
 		return nil
 	}
@@ -178,7 +178,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
 			*errs = append(*errs, fmt.Errorf("%s missing typed parameter,index at %d",
-				errMsgPrefix(e.Pos), k))
+				e.Pos.ErrMsgPrefix(), k))
 			return
 		}
 		if err := v.Type.canBeBindWithType(parameterTypes, argTypes[k]); err != nil {
@@ -205,7 +205,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				continue
 			}
 			*errs = append(*errs, fmt.Errorf("%s missing typed return value,index at %d",
-				errMsgPrefix(e.Pos), k))
+				e.Pos.ErrMsgPrefix(), k))
 			return
 		}
 		if err := v.Type.canBeBindWithType(parameterTypes, tps[0]); err != nil {

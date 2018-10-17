@@ -11,12 +11,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		identifier := e.Data.(*ExpressionIdentifier)
 		if identifier.Name == NoNameIdentifier {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as left value",
-				errMsgPrefix(e.Pos), identifier.Name))
+				e.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil
 		}
 		if identifier.Name == THIS {
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
-				errMsgPrefix(e.Pos), THIS))
+				e.Pos.ErrMsgPrefix(), THIS))
 		}
 		isCaptureVar := false
 		d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)
@@ -26,7 +26,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		}
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
-				errMsgPrefix(e.Pos), identifier.Name))
+				e.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil
 		}
 		switch d.(type) {
@@ -47,7 +47,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier '%s' is '%s' , cannot be used as left value",
-				errMsgPrefix(e.Pos), identifier.Name, block.identifierIsWhat(d)))
+				e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d)))
 			return nil
 		}
 	case ExpressionTypeIndex:
@@ -65,7 +65,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		case VariableTypeDynamicSelector:
 			if selection.Name == SUPER {
 				*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
-					errMsgPrefix(e.Pos), SUPER, object.TypeString()))
+					e.Pos.ErrMsgPrefix(), SUPER, object.TypeString()))
 				return nil
 			}
 			field, err := object.Class.getField(e.Pos, selection.Name, false)
@@ -87,7 +87,10 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			}
 			selection.Field = field
 			if field != nil {
-				selection.Expression.fieldAccessAble(block, field, errs)
+				err := selection.Expression.fieldAccessAble(block, field)
+				if err != nil {
+					*errs = append(*errs, err)
+				}
 				result = field.Type.Clone()
 				result.Pos = e.Pos
 				e.Value = result
@@ -98,7 +101,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			variable, exists := object.Package.Block.NameExists(selection.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
-					errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
+					e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))
 				return nil
 			}
 			switch variable.(type) {
@@ -107,7 +110,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 &&
 					object.Package.isSame(&PackageBeenCompile) == false {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
-						errMsgPrefix(e.Pos), object.Package.Name, selection.Name))
+						e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))
 				}
 				selection.PackageVariable = v
 				result = v.Type.Clone()
@@ -116,13 +119,13 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				return result
 			default:
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not variable",
-					errMsgPrefix(e.Pos), selection.Name))
+					e.Pos.ErrMsgPrefix(), selection.Name))
 				return nil
 			}
 		case VariableTypeMagicFunction:
 			v := object.Function.Type.searchName(selection.Name)
 			if v == nil {
-				err := fmt.Errorf("%s '%s' not found", errMsgPrefix(e.Pos), selection.Name)
+				err := fmt.Errorf("%s '%s' not found", e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
 				return nil
 			}
@@ -138,12 +141,12 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
-				errMsgPrefix(e.Pos), selection.Name, object.TypeString()))
+				e.Pos.ErrMsgPrefix(), selection.Name, object.TypeString()))
 			return nil
 		}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
-			errMsgPrefix(e.Pos),
+			e.Pos.ErrMsgPrefix(),
 			e.Description))
 		return nil
 	}

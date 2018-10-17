@@ -91,7 +91,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 			}
 			if conditionType.assignAble(&errs, t) == false {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-					errMsgPrefix(e.Pos), t.TypeString(), conditionType.TypeString()))
+					e.Pos.ErrMsgPrefix(), t.TypeString(), conditionType.TypeString()))
 				continue
 			}
 			if conditionType.Type == VariableTypeEnum {

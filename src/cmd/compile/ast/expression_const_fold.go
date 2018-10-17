@@ -29,7 +29,7 @@ type binaryConstFolder func(bin *ExpressionBinary) (is bool, err error)
 
 func (e *Expression) makeWrongOpErr(typ1, typ2 string) error {
 	return fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
-		errMsgPrefix(e.Pos),
+		e.Pos.ErrMsgPrefix(),
 		e.Description,
 		typ1,
 		typ2)
@@ -90,7 +90,7 @@ func (e *Expression) constantFold() (is bool, err error) {
 		if ee.isNumber() == false {
 			is = false
 			err = fmt.Errorf("%s cannot apply '-' on '%s'",
-				errMsgPrefix(e.Pos), ee.Description)
+				e.Pos.ErrMsgPrefix(), ee.Description)
 			return
 		}
 		e.Type = ee.Type

@@ -8,6 +8,7 @@ const (
 	AttributeNameStackMap                = "StackMapTable"
 	AttributeNameSignature               = "Signature"
 	AttributeNameMethodParameters        = "MethodParameters"
+	AttributeNameInnerClasses            = "InnerClasses"
 	// lucy attribute
 	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
 	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"

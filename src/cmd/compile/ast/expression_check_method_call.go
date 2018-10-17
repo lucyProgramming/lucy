@@ -44,7 +44,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			call.Class = javaStringClass
 			if false == call.Expression.IsIdentifier(THIS) &&
 				ms[0].IsPublic() == false {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", errMsgPrefix(e.Pos), call.Name))
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", e.Pos.ErrMsgPrefix(), call.Name))
 			}
 			call.Method = ms[0]
 			return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
@@ -59,7 +59,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		if object.Class.IsInterface() {
 			if object.Type == VariableTypeClass {
 				*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",
-					errMsgPrefix(e.Pos), object.Class.Name))
+					e.Pos.ErrMsgPrefix(), object.Class.Name))
 				return nil
 			}
 			ms, matched, err :=
@@ -71,7 +71,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			if matched {
 				if ms[0].IsStatic() {
 					*errs = append(*errs, fmt.Errorf("%s method '%s' is static",
-						errMsgPrefix(e.Pos), call.Name))
+						e.Pos.ErrMsgPrefix(), call.Name))
 				}
 				call.Method = ms[0]
 				return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
@@ -93,13 +93,19 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			return nil
 		}
 		if fieldMethodHandler != nil {
-			call.Expression.fieldAccessAble(block, fieldMethodHandler, errs)
+			err := call.Expression.fieldAccessAble(block, fieldMethodHandler)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
 			call.FieldMethodHandler = fieldMethodHandler
 			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		}
 		if matched {
 			m := ms[0]
-			call.Expression.methodAccessAble(block, m, errs)
+			err := call.Expression.methodAccessAble(block, m)
+			if err != nil {
+				*errs = append(*errs, err)
+			}
 			call.Method = m
 			return m.Function.Type.mkCallReturnTypes(e.Pos)
 		}
@@ -107,7 +113,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		return nil
 	default:
 		*errs = append(*errs, fmt.Errorf("%s cannot make method call '%s' on '%s'",
-			errMsgPrefix(e.Pos), call.Name, object.TypeString()))
+			e.Pos.ErrMsgPrefix(), call.Name, object.TypeString()))
 		return nil
 	}
 }
@@ -119,7 +125,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 	call := e.Data.(*ExpressionMethodCall)
 	if call.Expression.IsIdentifier(THIS) == false {
 		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'thi.super()'",
-			errMsgPrefix(e.Pos)))
+			e.Pos.ErrMsgPrefix()))
 		return
 	}
 	if block.InheritedAttribute.IsConstructionMethod == false ||
@@ -127,7 +133,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		block.InheritedAttribute.StatementOffset != 0 {
 		*errs = append(*errs,
 			fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
-				errMsgPrefix(e.Pos)))
+				e.Pos.ErrMsgPrefix()))
 		return
 	}
 	if object.Class.LoadFromOutSide {
@@ -148,7 +154,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs,
 		nil, call, callArgsTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err))
+		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))
 		return
 	}
 	if matched {
@@ -156,7 +162,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 		if (object.Class.SuperClass.LoadFromOutSide && (m.IsPublic() == false || object.Class.SuperClass.IsPublic() == false)) ||
 			(object.Class.SuperClass.LoadFromOutSide == false && m.IsPrivate()) {
 			*errs = append(*errs, fmt.Errorf("%s construction method is not public",
-				errMsgPrefix(e.Pos)))
+				e.Pos.ErrMsgPrefix()))
 		}
 		call.Name = "<init>"
 		call.Method = m
@@ -172,7 +178,7 @@ func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, er
 	call := e.Data.(*ExpressionMethodCall)
 	if call.Name == SUPER {
 		*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
-			errMsgPrefix(e.Pos), SUPER, object.TypeString()))
+			e.Pos.ErrMsgPrefix(), SUPER, object.TypeString()))
 		return nil
 	}
 	var fieldMethodHandler *ClassField
@@ -210,7 +216,7 @@ func (e *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs *[]
 		return []*Type{result}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on '%s'",
-			errMsgPrefix(e.Pos), call.Name, array.TypeString()))
+			e.Pos.ErrMsgPrefix(), call.Name, array.TypeString()))
 	}
 	return nil
 }
@@ -219,7 +225,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 	call := e.Data.(*ExpressionMethodCall)
 	d, exists := p.Block.NameExists(call.Name)
 	if exists == false {
-		*errs = append(*errs, fmt.Errorf("%s function '%s' not found", errMsgPrefix(e.Pos), call.Name))
+		*errs = append(*errs, fmt.Errorf("%s function '%s' not found", e.Pos.ErrMsgPrefix(), call.Name))
 		return nil
 	}
 	switch d.(type) {
@@ -228,7 +234,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		if f.IsPublic() == false &&
 			p.isSame(&PackageBeenCompile) == false {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
-				errMsgPrefix(e.Pos), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		if f.TemplateFunction != nil {
 			// better convert to function call
@@ -255,11 +261,11 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		v := d.(*Variable)
 		if v.isPublic() == false && p.isSame(&PackageBeenCompile) == false {
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
-				errMsgPrefix(e.Pos), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		if v.Type.Type != VariableTypeFunction {
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' is not a function",
-				errMsgPrefix(e.Pos), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 			return nil
 		}
 		call := e.Data.(*ExpressionMethodCall)
@@ -281,7 +287,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		class := d.(*Class)
 		if class.IsPublic() == false && p.isSame(&PackageBeenCompile) == false {
 			*errs = append(*errs, fmt.Errorf("%s class '%s' is not public",
-				errMsgPrefix(e.Pos), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		conversion := &ExpressionTypeConversion{}
 		conversion.Type = &Type{}
@@ -294,14 +300,14 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		}
 		e.Data = conversion
 		if len(call.Args) != 1 {
-			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", errMsgPrefix(e.Pos)))
+			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", e.Pos.ErrMsgPrefix()))
 			return []*Type{conversion.Type.Clone()}
 		}
 		return []*Type{e.checkTypeConversionExpression(block, errs)}
 	case *Type:
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-				errMsgPrefix(e.Pos)))
+				e.Pos.ErrMsgPrefix()))
 			result := p.Block.TypeAliases[call.Name].Clone()
 			result.Pos = e.Pos
 			return []*Type{result}
@@ -316,7 +322,7 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		return []*Type{e.checkTypeConversionExpression(block, errs)}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
-			errMsgPrefix(e.Pos), call.Name))
+			e.Pos.ErrMsgPrefix(), call.Name))
 		return nil
 	}
 }
@@ -341,7 +347,7 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		if len(call.Args) == 0 {
 			*errs = append(*errs,
 				fmt.Errorf("%s too few arguments to call %s,expect at least one argument",
-					errMsgPrefix(e.Pos), call.Name))
+					e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		ts := checkExpressions(block, call.Args, errs, true)
 		for _, t := range ts {
@@ -376,7 +382,7 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		}
 		return []*Type{result}
 	default:
-		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", errMsgPrefix(e.Pos), call.Name))
+		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", e.Pos.ErrMsgPrefix(), call.Name))
 	}
 	return nil
 }
@@ -446,7 +452,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		return []*Type{ret}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on map",
-			errMsgPrefix(e.Pos), call.Name))
+			e.Pos.ErrMsgPrefix(), call.Name))
 		return nil
 	}
 	return nil
