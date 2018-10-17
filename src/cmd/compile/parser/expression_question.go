@@ -25,7 +25,7 @@ func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expres
 	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenColon {
 		err := fmt.Errorf("%s expect ':' ,but '%s'",
-			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
+			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		return left, err
 	}

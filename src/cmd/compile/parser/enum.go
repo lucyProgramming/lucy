@@ -13,7 +13,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect 'identifier' for enum name, but '%s'",
-			parser.errorMsgPrefix(), parser.token.Description)
+			parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		enumName = compileAutoName()
 		parser.consume(untilLc)
@@ -32,7 +32,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 		comment.reset()
 	}
 	if parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{',but '%s'", parser.errorMsgPrefix(), parser.token.Description)
+		err = fmt.Errorf("%s expect '{',but '%s'", parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		parser.consume(untilLc)
 	}
@@ -81,7 +81,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 			parser.Next(lfNotToken)
 		default:
 			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
-				parser.errorMsgPrefix(), parser.token.Description))
+				parser.errMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolonOrLf)
 			parser.Next(lfNotToken)
 			reset()
@@ -97,11 +97,11 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 			enumName,
 		}
 		parser.errs = append(parser.errs, fmt.Errorf("%s enum expect at least 1 enumName",
-			parser.errorMsgPrefix()))
+			parser.errMsgPrefix()))
 	}
 	parser.ifTokenIsLfThenSkip()
 	if parser.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}',but '%s'", parser.errorMsgPrefix(), parser.token.Description)
+		err = fmt.Errorf("%s expect '}',but '%s'", parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		parser.consume(untilRc)
 	}

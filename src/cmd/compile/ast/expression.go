@@ -101,29 +101,17 @@ func (e *Expression) IsStringLiteral(s string) bool {
 	return e.Data.(string) == s
 }
 
-func (e *Expression) DependOnSub() *Expression {
+func (e *Expression) binaryExpressionDependOnSub() *Expression {
 	switch e.Type {
 	case ExpressionTypeAdd:
 		bin := e.Data.(*ExpressionBinary)
-		if e.Value.Type == VariableTypeString {
-			if bin.Left.IsStringLiteral("") {
-				return bin.Right
-			} else if bin.Right.IsStringLiteral("") {
-				return bin.Left
-			}
-			return nil
-		}
 		// 0 + a
-		if bin.Left.isNumber() {
-			if bin.Left.getDoubleValue() == 0 {
-				return bin.Right
-			}
+		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
+			return bin.Right
 		}
 		// a + 0
-		if bin.Right.isNumber() {
-			if bin.Right.getDoubleValue() == 0 {
-				return bin.Left
-			}
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
+			return bin.Left
 		}
 	case ExpressionTypeSub:
 		// a - 0
@@ -155,10 +143,51 @@ func (e *Expression) DependOnSub() *Expression {
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
 			return bin.Left
 		}
-	case ExpressionTypeMod:
-
+	case ExpressionTypeEq:
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Left.Value.Type == VariableTypeBool {
+			// true == a
+			if bin.Left.IsBoolLiteral(true) {
+				return bin.Right
+			}
+			// a == true
+			if bin.Right.IsBoolLiteral(true) {
+				return bin.Left
+			}
+		}
+	case ExpressionTypeNe:
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Left.Value.Type == VariableTypeBool {
+			// false != a
+			if bin.Left.IsBoolLiteral(false) {
+				return bin.Right
+			}
+			// a != false
+			if bin.Right.IsBoolLiteral(false) {
+				return bin.Left
+			}
+		}
+	case ExpressionTypeLogicalAnd:
+		bin := e.Data.(*ExpressionBinary)
+		// true && a
+		if bin.Left.IsBoolLiteral(true) {
+			return bin.Right
+		}
+		// a && true
+		if bin.Right.IsBoolLiteral(true) {
+			return bin.Left
+		}
+	case ExpressionTypeLogicalOr:
+		bin := e.Data.(*ExpressionBinary)
+		// false || a
+		if bin.Left.IsBoolLiteral(false) {
+			return bin.Right
+		}
+		// a || false
+		if bin.Right.IsBoolLiteral(false) {
+			return bin.Left
+		}
 	}
-
 	return nil
 }
 

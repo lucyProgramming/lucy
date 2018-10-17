@@ -213,7 +213,7 @@ func (c *Class) resolveFather() error {
 		return nil
 	}
 	c.resolveFatherCalled = true
-	if c.SuperClassName != nil {
+	if c.SuperClassName == nil {
 		superClassName := ""
 		if PackageBeenCompile.Name == common.CorePackage {
 			superClassName = JavaRootClass

@@ -44,12 +44,13 @@ final class Test {
 		if lucyFiles.size() == 0 {  // no lucy files
 		    return 
 		}
-		print("############################")
-        printf("test package: %s\n" , packageName)
-        printf("directory: %s\n" , dir)
-        args  := new string[](2)
+		//print("############################")
+        //printf("test package: %s\n" , packageName)
+       // printf("directory: %s\n" , dir)
+        args  := new string[](3)
         args[0] = "run"  
-        args[1] =  packageName
+		args[1] = "-v"
+        args[2] =  packageName
         cmd := new os.Command(this.lucyRoot + "/bin/lucy", args  , null ,null)
         cmd.stdout = os.stdout 
         cmd.stderr = os.stderr  
@@ -58,11 +59,8 @@ final class Test {
         	return 
         }
         if err =  cmd.wait() ;  err != null {
-			 print("test failed....",err)
-        }else {
-             print("test ok....")
+			panic(err)
         }
-        printf("\n\n\n")
 	}
 }
 

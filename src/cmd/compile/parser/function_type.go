@@ -11,7 +11,7 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 	functionType = ast.FunctionType{}
 	if parser.token.Type != lex.TokenLp {
 		err = fmt.Errorf("%s fn declared wrong,missing '(',but '%s'",
-			parser.errorMsgPrefix(), parser.token.Description)
+			parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return
 	}
@@ -26,7 +26,7 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 	parser.ifTokenIsLfThenSkip()
 	if parser.token.Type != lex.TokenRp { // not )
 		err = fmt.Errorf("%s fn declared wrong,missing ')',but '%s'",
-			parser.errorMsgPrefix(), parser.token.Description)
+			parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return
 	}
@@ -35,7 +35,7 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 		parser.Next(lfNotToken) // skip ->
 		if parser.token.Type != lex.TokenLp {
 			err = fmt.Errorf("%s fn declared wrong, not '(' after '->'",
-				parser.errorMsgPrefix())
+				parser.errMsgPrefix())
 			parser.errs = append(parser.errs, err)
 			return
 		}
@@ -50,7 +50,7 @@ func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err er
 		parser.ifTokenIsLfThenSkip()
 		if parser.token.Type != lex.TokenRp {
 			err = fmt.Errorf("%s fn declared wrong,expected ')',but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description)
+				parser.errMsgPrefix(), parser.token.Description)
 			parser.errs = append(parser.errs, err)
 			return
 		}
@@ -100,7 +100,7 @@ func (parser *Parser) parseParameterOrReturnList() (returnList []*ast.Variable, 
 	for parser.token.Type != lex.TokenRp {
 		if parser.token.Type == lex.TokenComma {
 			parser.errs = append(parser.errs, fmt.Errorf("%s extra comma",
-				parser.errorMsgPrefix()))
+				parser.errMsgPrefix()))
 			parser.Next(lfNotToken)
 			continue
 		}

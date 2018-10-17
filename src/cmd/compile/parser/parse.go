@@ -179,7 +179,7 @@ func (parser *Parser) Parse() []error {
 				})
 			} else {
 				parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
-					parser.errorMsgPrefix(e.Pos), e.Description))
+					parser.errMsgPrefix(e.Pos), e.Description))
 			}
 			resetProperty()
 		case lex.TokenEnum:
@@ -220,7 +220,7 @@ func (parser *Parser) Parse() []error {
 			parser.BlockParser.parseStatementList(b, true)
 			if parser.token.Type != lex.TokenRc {
 				parser.errs = append(parser.errs, fmt.Errorf("%s expect '}', but '%s'",
-					parser.errorMsgPrefix(), parser.token.Description))
+					parser.errMsgPrefix(), parser.token.Description))
 				parser.consume(untilRc)
 			}
 			parser.Next(lfNotToken) // skip }
@@ -286,7 +286,7 @@ func (parser *Parser) Parse() []error {
 			pos := parser.mkPos()
 			parser.parseImports()
 			parser.errs = append(parser.errs, fmt.Errorf("%s cannot have import at this scope",
-				parser.errorMsgPrefix(pos)))
+				parser.errMsgPrefix(pos)))
 		case lex.TokenEof:
 			break
 		default:
@@ -312,12 +312,12 @@ func (parser *Parser) Parse() []error {
 					})
 				} else {
 					parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
-						parser.errorMsgPrefix(e.Pos), e.Description))
+						parser.errMsgPrefix(e.Pos), e.Description))
 				}
 				continue
 			}
 			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
-				parser.errorMsgPrefix(), parser.token.Description))
+				parser.errMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolonOrLf)
 			resetProperty()
 		}
@@ -338,7 +338,7 @@ func (parser *Parser) validAfterPublic() error {
 		return nil
 	}
 	err := fmt.Errorf("%s cannot have token '%s' after 'public'",
-		parser.errorMsgPrefix(), parser.token.Description)
+		parser.errMsgPrefix(), parser.token.Description)
 	parser.errs = append(parser.errs, err)
 	return err
 }
@@ -347,7 +347,7 @@ func (parser *Parser) validAfterAbstract() error {
 		return nil
 	}
 	err := fmt.Errorf("%s cannot have token '%s' after 'abstract'",
-		parser.errorMsgPrefix(), parser.token.Description)
+		parser.errMsgPrefix(), parser.token.Description)
 	parser.errs = append(parser.errs, err)
 	return err
 }
@@ -357,7 +357,7 @@ func (parser *Parser) validAfterFinal() error {
 		return nil
 	}
 	err := fmt.Errorf("%s cannot have token '%s' after 'final'",
-		parser.errorMsgPrefix(), parser.token.Description)
+		parser.errMsgPrefix(), parser.token.Description)
 	parser.errs = append(parser.errs, err)
 	return err
 }
@@ -377,7 +377,7 @@ func (parser *Parser) validStatementEnding() error {
 		return nil
 	}
 	token := parser.token
-	err := fmt.Errorf("%s expect semicolon or new line", parser.errorMsgPrefix(&ast.Pos{
+	err := fmt.Errorf("%s expect semicolon or new line", parser.errMsgPrefix(&ast.Pos{
 		Filename: parser.filename,
 		Line:     token.StartLine,
 		Column:   token.StartColumn,
@@ -438,7 +438,7 @@ func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 		}
 	}
 	if parser.token.Type != lex.TokenAssign {
-		err = fmt.Errorf("%s missing assign", parser.errorMsgPrefix())
+		err = fmt.Errorf("%s missing assign", parser.errMsgPrefix())
 		parser.errs = append(parser.errs, err)
 		return
 	}
@@ -449,7 +449,7 @@ func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 	}
 	if len(es) != len(constants) {
 		err = fmt.Errorf("%s cannot assign %d value to %d constant",
-			parser.errorMsgPrefix(), len(es), len(constants))
+			parser.errMsgPrefix(), len(es), len(constants))
 		parser.errs = append(parser.errs, err)
 	}
 	for k, _ := range constants {
@@ -507,7 +507,7 @@ func (parser *Parser) Next(lfIsToken bool) {
 		tok, err = parser.lexer.Next()
 		if err != nil {
 			parser.errs = append(parser.errs,
-				fmt.Errorf("%s %s", parser.errorMsgPrefix(), err.Error()))
+				fmt.Errorf("%s %s", parser.errMsgPrefix(), err.Error()))
 		}
 		if tok == nil {
 			continue
@@ -524,9 +524,9 @@ func (parser *Parser) Next(lfIsToken bool) {
 }
 
 /*
-	errorMsgPrefix(pos) only receive one argument
+	errMsgPrefix(pos) only receive one argument
 */
-func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
+func (parser *Parser) errMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
 		return pos[0].ErrMsgPrefix()
 	}
@@ -600,7 +600,7 @@ func (parser *Parser) unExpectNewLine() error {
 	var err error
 	if parser.token.Type == lex.TokenLf {
 		err = fmt.Errorf("%s unexpected new line",
-			parser.errorMsgPrefix(parser.mkPos()))
+			parser.errMsgPrefix(parser.mkPos()))
 		parser.errs = append(parser.errs, err)
 	}
 	return err
@@ -615,7 +615,7 @@ func (parser *Parser) expectNewLine() error {
 	if parser.token.Type != lex.TokenLf &&
 		parser.token.Type != lex.TokenComment {
 		err = fmt.Errorf("%s expect new line , but '%s'",
-			parser.errorMsgPrefix(), parser.token.Description)
+			parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 	}
 	return err
@@ -625,7 +625,7 @@ func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, er
 	parser.Next(lfIsToken) // skip type key word
 	parser.unExpectNewLineAndSkip()
 	if parser.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect identifer,but '%s'", parser.errorMsgPrefix(), parser.token.Description)
+		err := fmt.Errorf("%s expect identifer,but '%s'", parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}
@@ -634,7 +634,7 @@ func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, er
 	ret.Name = parser.token.Data.(string)
 	parser.Next(lfIsToken) // skip identifier
 	if parser.token.Type != lex.TokenAssign {
-		err := fmt.Errorf("%s expect '=',but '%s'", parser.errorMsgPrefix(), parser.token.Description)
+		err := fmt.Errorf("%s expect '=',but '%s'", parser.errMsgPrefix(), parser.token.Description)
 		parser.errs = append(parser.errs, err)
 		return nil, err
 	}

@@ -22,7 +22,7 @@ func (parser *Parser) parseImports() []*ast.Import {
 		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenLiteralString {
 			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description))
+				parser.errMsgPrefix(), parser.token.Description))
 			parser.consume(untilSemicolonOrLf)
 			parser.Next(lfNotToken)
 			continue
@@ -39,7 +39,7 @@ func (parser *Parser) parseImports() []*ast.Import {
 			parser.Next(lfNotToken) // skip as
 			if parser.token.Type != lex.TokenIdentifier {
 				parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
-					parser.errorMsgPrefix(), parser.token.Description))
+					parser.errMsgPrefix(), parser.token.Description))
 				parser.consume(untilSemicolonOrLf)
 				parser.Next(lfNotToken)
 				continue
@@ -64,7 +64,7 @@ func (parser *Parser) insertImports(im *ast.Import) {
 	}
 	err := im.MkAccessName()
 	if err != nil {
-		parser.errs = append(parser.errs, fmt.Errorf("%s %v", parser.errorMsgPrefix(im.Pos), err))
+		parser.errs = append(parser.errs, fmt.Errorf("%s %v", parser.errMsgPrefix(im.Pos), err))
 		return
 	}
 	*parser.tops = append(*parser.tops, &ast.TopNode{
@@ -73,14 +73,14 @@ func (parser *Parser) insertImports(im *ast.Import) {
 	if im.AccessName != ast.NoNameIdentifier {
 		if parser.importsByAccessName[im.AccessName] != nil {
 			parser.errs = append(parser.errs, fmt.Errorf("%s '%s' reImported",
-				parser.errorMsgPrefix(im.Pos), im.AccessName))
+				parser.errMsgPrefix(im.Pos), im.AccessName))
 			return
 		}
 		parser.importsByAccessName[im.AccessName] = im
 	}
 	if parser.importsByResourceName[im.Import] != nil {
 		parser.errs = append(parser.errs, fmt.Errorf("%s '%s' reImported",
-			parser.errorMsgPrefix(im.Pos), im.Import))
+			parser.errMsgPrefix(im.Pos), im.Import))
 		return
 	}
 	parser.importsByResourceName[im.Import] = im

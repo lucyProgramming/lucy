@@ -20,7 +20,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		arr.Expressions, err = expressionParser.parseExpressions(lex.TokenRb)
 		expressionParser.parser.ifTokenIsLfThenSkip()
 		if expressionParser.parser.token.Type != lex.TokenRb {
-			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errorMsgPrefix())
+			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errMsgPrefix())
 			return nil, err
 		}
 		pos := expressionParser.parser.mkPos()
@@ -49,7 +49,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		}
 		if expressionParser.parser.token.Type != lex.TokenRp {
 			err = fmt.Errorf("%s '(' and  ')' not match",
-				expressionParser.parser.errorMsgPrefix())
+				expressionParser.parser.errMsgPrefix())
 			expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 			return nil, err
 		}
@@ -93,7 +93,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 	if expressionParser.parser.token.Type != lex.TokenLc {
 		err := fmt.Errorf("%s expect '{',but '%s'",
-			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
+			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRc {
 		err := fmt.Errorf("%s expect '}',but '%s'",
-			expressionParser.parser.errorMsgPrefix(), expressionParser.parser.token.Description)
+			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		expressionParser.parser.consume(untilRc)
 	}

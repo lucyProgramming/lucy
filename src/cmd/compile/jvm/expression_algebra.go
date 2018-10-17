@@ -62,9 +62,6 @@ func (buildExpression *BuildExpression) buildArithmetic(
 			bin.Right.Value.Type == ast.VariableTypeString {
 			return buildExpression.buildStrCat(class, code, e, context, state)
 		}
-		if e := e.DependOnSub(); e != nil {
-			return buildExpression.build(class, code, e, context, state)
-		}
 		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.Value)
 		stack := buildExpression.build(class, code, bin.Right, context, state)

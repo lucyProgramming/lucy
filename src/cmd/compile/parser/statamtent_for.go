@@ -35,7 +35,7 @@ func (blockParser *BlockParser) parseFor() (statementFor *ast.StatementFor, err 
 			}
 			if blockParser.parser.token.Type != lex.TokenSemicolon {
 				blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s missing semicolon after expression",
-					blockParser.parser.errorMsgPrefix()))
+					blockParser.parser.errMsgPrefix()))
 				blockParser.consume(untilLc)
 				goto parseBlock
 			}
@@ -54,7 +54,7 @@ parseBlock:
 	blockParser.parser.ifTokenIsLfThenSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return
 	}
@@ -62,7 +62,7 @@ parseBlock:
 	blockParser.parseStatementList(statementFor.Block, false)
 	if blockParser.parser.token.Type != lex.TokenRc {
 		blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description))
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description))
 		blockParser.consume(untilRc)
 	}
 	blockParser.Next(lfNotToken) // skip }

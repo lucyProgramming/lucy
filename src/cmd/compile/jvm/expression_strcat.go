@@ -12,33 +12,27 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	if sub := e.DependOnSub(); sub != nil {
-		maxStack = buildExpression.build(class, code, sub, context, state)
-		if t := buildExpression.stackTop2String(class, code, sub.Value, context, state); t > maxStack {
-			maxStack = t
-		}
-		return
-	} else {
-		bin := e.Data.(*ast.ExpressionBinary)
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
-		if t := buildExpression.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {
-			maxStack = t
-		}
-		state.pushStack(class, state.newObjectVariableType(javaStringClass))
-		stack := buildExpression.build(class, code, bin.Right, context, state)
-		if t := 1 + stack; t > maxStack {
-			maxStack = t
-		}
-		if t := 1 + buildExpression.stackTop2String(class, code, bin.Right.Value, context, state); t > maxStack {
-			maxStack = t
-		}
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-			Class:      javaStringClass,
-			Method:     `concat`,
-			Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		return
+
+	bin := e.Data.(*ast.ExpressionBinary)
+	maxStack = buildExpression.build(class, code, bin.Left, context, state)
+	if t := buildExpression.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {
+		maxStack = t
 	}
+	state.pushStack(class, state.newObjectVariableType(javaStringClass))
+	stack := buildExpression.build(class, code, bin.Right, context, state)
+	if t := 1 + stack; t > maxStack {
+		maxStack = t
+	}
+	if t := 1 + buildExpression.stackTop2String(class, code, bin.Right.Value, context, state); t > maxStack {
+		maxStack = t
+	}
+	code.Codes[code.CodeLength] = cg.OP_invokevirtual
+	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		Class:      javaStringClass,
+		Method:     `concat`,
+		Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
+	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	code.CodeLength += 3
+	return
+
 }

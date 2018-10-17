@@ -19,7 +19,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRp {
 		err := fmt.Errorf("%s except ')' ,but '%s'",
-			expressionParser.parser.errorMsgPrefix(),
+			expressionParser.parser.errMsgPrefix(),
 			expressionParser.parser.token.Description)
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		return nil, err
@@ -66,7 +66,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		if expressionParser.parser.token.Type != lex.TokenGt {
 			expressionParser.parser.errs = append(expressionParser.parser.errs,
 				fmt.Errorf("%s '<' and '>' not match",
-					expressionParser.parser.errorMsgPrefix()))
+					expressionParser.parser.errMsgPrefix()))
 			expressionParser.parser.consume(untilGt)
 		}
 		expressionParser.Next(lfIsToken)

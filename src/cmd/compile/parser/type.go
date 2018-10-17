@@ -17,7 +17,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenRb {
 			// [ and ] not match
-			err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
+			err = fmt.Errorf("%s '[' and ']' not match", parser.errMsgPrefix())
 			parser.errs = append(parser.errs, err)
 			return nil, err
 		}
@@ -92,7 +92,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.Next(lfNotToken) // skip map key word
 		if parser.token.Type != lex.TokenLc {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description)
+				parser.errMsgPrefix(), parser.token.Description)
 		}
 		parser.Next(lfNotToken) // skip {
 		var k, v *ast.Type
@@ -103,7 +103,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.ifTokenIsLfThenSkip()
 		if parser.token.Type != lex.TokenArrow {
 			return nil, fmt.Errorf("%s expect '->',but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description)
+				parser.errMsgPrefix(), parser.token.Description)
 		}
 		parser.Next(lfNotToken) // skip ->
 		v, err := parser.parseType()
@@ -113,7 +113,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.ifTokenIsLfThenSkip()
 		if parser.token.Type != lex.TokenRc {
 			return nil, fmt.Errorf("%s expect '}',but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description)
+				parser.errMsgPrefix(), parser.token.Description)
 		}
 		parser.Next(lfIsToken)
 		m := &ast.Map{
@@ -148,12 +148,12 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenSelection {
 			return nil, fmt.Errorf("%s expect '.' , but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description)
+				parser.errMsgPrefix(), parser.token.Description)
 		}
 		parser.Next(lfNotToken)
 		if parser.token.Type != lex.TokenIdentifier {
 			parser.errs = append(parser.errs, fmt.Errorf("%s expect identifier , but '%s'",
-				parser.errorMsgPrefix(), parser.token.Description))
+				parser.errMsgPrefix(), parser.token.Description))
 		} else {
 			ret = &ast.Type{
 				Type: ast.VariableTypeGlobal,
@@ -164,7 +164,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		}
 	default:
 		return nil, fmt.Errorf("%s unkown begining '%s' token for a type",
-			parser.errorMsgPrefix(), parser.token.Description)
+			parser.errMsgPrefix(), parser.token.Description)
 	}
 	if err != nil {
 		parser.errs = append(parser.errs, err)
@@ -186,7 +186,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.Next(lfIsToken) // skip [
 		parser.unExpectNewLineAndSkip()
 		if parser.token.Type != lex.TokenRb {
-			err = fmt.Errorf("%s '[' and ']' not match", parser.errorMsgPrefix())
+			err = fmt.Errorf("%s '[' and ']' not match", parser.errMsgPrefix())
 			parser.errs = append(parser.errs, err)
 			return ret, err
 		}
@@ -232,7 +232,7 @@ func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
 		parser.Next(lfNotToken) // skip .
 		if parser.token.Type != lex.TokenIdentifier {
 			return nil, fmt.Errorf("%s not a identifier after dot",
-				parser.errorMsgPrefix())
+				parser.errMsgPrefix())
 		}
 		name += "." + parser.token.Data.(string)
 		parser.Next(lfIsToken) // skip identifier
@@ -252,7 +252,7 @@ func (parser *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error
 		if parser.token.Type != lex.TokenComma {
 			if parser.isValidTypeBegin() {
 				parser.errs = append(parser.errs, fmt.Errorf("%s missing comma",
-					parser.errorMsgPrefix()))
+					parser.errMsgPrefix()))
 				continue
 			}
 			break
@@ -260,7 +260,7 @@ func (parser *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error
 		parser.Next(lfNotToken) // skip ,
 		for _, v := range endTokens {
 			if v == parser.token.Type {
-				parser.errs = append(parser.errs, fmt.Errorf("%s extra comma", parser.errorMsgPrefix()))
+				parser.errs = append(parser.errs, fmt.Errorf("%s extra comma", parser.errMsgPrefix()))
 				goto end
 			}
 		}

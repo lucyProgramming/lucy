@@ -167,7 +167,7 @@ func (e *Expression) checkIdentifierThroughImports(it *Import) (*Type, error) {
 		result.Type = VariableTypePackage
 	} else {
 		result.Class = p.(*Class)
-		result.Type = VariableTypeObject
+		result.Type = VariableTypeClass
 	}
 	return result, nil
 }

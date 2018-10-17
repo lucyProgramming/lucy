@@ -29,7 +29,7 @@ func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *
 	functionParser.parser.unExpectNewLineAndSkip()
 	if needName && functionParser.parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect function name,but '%s'",
-			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+			functionParser.parser.errMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilLp)
 	}
@@ -52,7 +52,7 @@ func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *
 	functionParser.parser.ifTokenIsLfThenSkip()
 	if functionParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s except '{' but '%s'",
-			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+			functionParser.parser.errMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilLc)
 	}
@@ -61,7 +61,7 @@ func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *
 	functionParser.parser.BlockParser.parseStatementList(&f.Block, false)
 	if functionParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}', but '%s'",
-			functionParser.parser.errorMsgPrefix(), functionParser.parser.token.Description)
+			functionParser.parser.errMsgPrefix(), functionParser.parser.token.Description)
 		functionParser.parser.errs = append(functionParser.parser.errs, err)
 		functionParser.consume(untilRc)
 	} else {

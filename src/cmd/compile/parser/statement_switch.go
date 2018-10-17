@@ -15,14 +15,14 @@ func (blockParser *BlockParser) parseSwitchTemplate() (*ast.StatementSwitchTempl
 	}
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 	}
 	blockParser.Next(lfNotToken) // skip {  , must be case
 	if blockParser.parser.token.Type != lex.TokenCase {
 		err = fmt.Errorf("%s expect 'case',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (blockParser *BlockParser) parseSwitchTemplate() (*ast.StatementSwitchTempl
 		}
 		if blockParser.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s expect ':',but '%s'",
-				blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return statementSwitchTemplate, err
 		}
@@ -60,7 +60,7 @@ func (blockParser *BlockParser) parseSwitchTemplate() (*ast.StatementSwitchTempl
 		blockParser.Next(lfIsToken) // skip default key word
 		if blockParser.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s missing colon after default",
-				blockParser.parser.errorMsgPrefix())
+				blockParser.parser.errMsgPrefix())
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		} else {
 			blockParser.Next(lfNotToken)
@@ -74,7 +74,7 @@ func (blockParser *BlockParser) parseSwitchTemplate() (*ast.StatementSwitchTempl
 	}
 	if blockParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return statementSwitchTemplate, err
 	}
@@ -111,7 +111,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	}
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 	}
@@ -119,7 +119,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	blockParser.parser.expectNewLineAndSkip()
 	if blockParser.parser.token.Type != lex.TokenCase {
 		err = fmt.Errorf("%s expect 'case',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		}
 		if blockParser.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s expect ':',but '%s'",
-				blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return statementSwitch, err
 		}
@@ -157,7 +157,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.unExpectNewLineAndSkip()
 		if blockParser.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s missing colon after 'default'",
-				blockParser.parser.errorMsgPrefix())
+				blockParser.parser.errMsgPrefix())
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		} else {
 			blockParser.Next(lfIsToken)
@@ -172,7 +172,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 	}
 	if blockParser.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}',but '%s'",
-			blockParser.parser.errorMsgPrefix(), blockParser.parser.token.Description)
+			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return statementSwitch, err
 	}

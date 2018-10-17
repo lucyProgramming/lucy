@@ -36,7 +36,7 @@ func (expressionParser *ExpressionParser) parseExpressions(endTokens ...lex.Toke
 					a(1 2)
 				*/
 				expressionParser.parser.errs = append(expressionParser.parser.errs, fmt.Errorf("%s missing comma",
-					expressionParser.parser.errorMsgPrefix()))
+					expressionParser.parser.errMsgPrefix()))
 				continue
 			}
 			break
@@ -45,14 +45,14 @@ func (expressionParser *ExpressionParser) parseExpressions(endTokens ...lex.Toke
 		expressionParser.Next(lfNotToken) // skip ,
 		for expressionParser.parser.token.Type == lex.TokenComma {
 			expressionParser.parser.errs = append(expressionParser.parser.errs,
-				fmt.Errorf("%s missing expression", expressionParser.parser.errorMsgPrefix()))
+				fmt.Errorf("%s missing expression", expressionParser.parser.errMsgPrefix()))
 			expressionParser.Next(lfNotToken) // skip ,
 		}
 		for _, v := range endTokens {
 			if v == expressionParser.parser.token.Type {
 				// found end token
 				expressionParser.parser.errs = append(expressionParser.parser.errs,
-					fmt.Errorf("%s extra comma", expressionParser.parser.errorMsgPrefix()))
+					fmt.Errorf("%s extra comma", expressionParser.parser.errMsgPrefix()))
 				goto end
 			}
 		}
@@ -151,7 +151,7 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenLp {
 		err := fmt.Errorf("%s not '(' after a type",
-			expressionParser.parser.errorMsgPrefix())
+			expressionParser.parser.errMsgPrefix())
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	}
 	expressionParser.parser.ifTokenIsLfThenSkip()
 	if expressionParser.parser.token.Type != lex.TokenRp {
-		err := fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errorMsgPrefix())
+		err := fmt.Errorf("%s '(' and ')' not match", expressionParser.parser.errMsgPrefix())
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		return nil, err
 	}

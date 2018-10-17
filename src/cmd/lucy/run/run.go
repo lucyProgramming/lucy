@@ -39,6 +39,7 @@ func (r *Run) parseCmd(args []string) error {
 	cmd.BoolVar(&r.Flags.forceReBuild, "forceReBuild", false, "force rebuild all package")
 	cmd.IntVar(&r.Flags.JvmVersion, "jvm-version", 54, "jvm major version")
 	cmd.BoolVar(&r.Flags.Build, "build", false, "build package no run")
+	cmd.BoolVar(&r.Flags.Verbose, "v", false, "verbose")
 	err := cmd.Parse(args)
 	if err != nil {
 		return err
@@ -452,7 +453,9 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 			}
 		}
 	}
-	fmt.Println("compiling.... ", packageName) // compile this package
+	if r.Flags.Verbose {
+		fmt.Printf("# %s\n", packageName) // compile this package
+	}
 	// cd to destDir
 	os.Chdir(destinationDir)
 	args := []string{"-package-name", packageName, "-jvm-major-version", strconv.Itoa(r.Flags.JvmVersion)}
