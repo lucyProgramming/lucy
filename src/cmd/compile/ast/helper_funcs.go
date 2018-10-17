@@ -6,7 +6,7 @@ import (
 )
 
 func divisionByZeroErr(pos *Pos) error {
-	return fmt.Errorf("%s division by zero", pos.errMsgPrefix())
+	return fmt.Errorf("%s division by zero", pos.ErrMsgPrefix())
 }
 
 func checkExpressions(block *Block, es []*Expression, errs *[]error, singleValueContext bool) []*Type {
@@ -195,8 +195,8 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 		if needs[k].assignAble(&errs, eval[k]) {
 			continue // no need
 		}
-		if (needs[k].IsInteger() && eval[k].IsInteger()) ||
-			(needs[k].IsFloat() && eval[k].IsFloat()) {
+		if (needs[k].isInteger() && eval[k].isInteger()) ||
+			(needs[k].isFloat() && eval[k].isFloat()) {
 			pos := eval[k].Pos // keep pos
 			e.convertNumberLiteralTo(needs[k].Type)
 			*eval[k] = *needs[k]

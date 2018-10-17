@@ -17,14 +17,14 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
 		if indexType != nil {
-			if indexType.IsInteger() {
+			if indexType.isInteger() {
 				if indexType.Type == VariableTypeLong {
 					index.Index.convertToNumber(VariableTypeInt) //  convert to int
 				}
 			} else {
 				*errs = append(*errs,
 					fmt.Errorf("%s only integer can be used as index,but '%s'",
-						index.Index.Pos.errMsgPrefix(), indexType.TypeString()))
+						index.Index.Pos.ErrMsgPrefix(), indexType.TypeString()))
 			}
 		}
 		result := on.Array.Clone()
@@ -40,20 +40,20 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		}
 		if on.Map.K.assignAble(errs, indexType) == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-				index.Index.Pos.errMsgPrefix(), indexType.TypeString(), on.Map.K.TypeString()))
+				index.Index.Pos.ErrMsgPrefix(), indexType.TypeString(), on.Map.K.TypeString()))
 		}
 		return result
 	case VariableTypeString:
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
 		if indexType != nil {
-			if indexType.IsInteger() {
+			if indexType.isInteger() {
 				if indexType.Type == VariableTypeLong {
 					index.Index.convertToNumber(VariableTypeInt) //  convert to int
 				}
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
-					index.Index.Pos.errMsgPrefix(), indexType.TypeString()))
+					index.Index.Pos.ErrMsgPrefix(), indexType.TypeString()))
 			}
 		}
 		result := &Type{
@@ -63,7 +63,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		return result
 	default:
 		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
-			on.Pos.errMsgPrefix(), on.TypeString()))
+			on.Pos.ErrMsgPrefix(), on.TypeString()))
 		return nil
 	}
 }

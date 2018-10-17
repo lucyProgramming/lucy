@@ -93,7 +93,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if s.RangeAttr.IdentifierValue != nil && s.RangeAttr.IdentifierValue.Variable.BeenCaptured > 0 {
+		if s.RangeAttr.IdentifierValue != nil && s.RangeAttr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Variable.Type)
 			s.RangeAttr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -103,7 +103,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.IdentifierValue.Variable.Type.Type).className))
 		}
 		if s.RangeAttr.IdentifierKey != nil &&
-			s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
+			s.RangeAttr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierKey.Variable.Type)
 			s.RangeAttr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -189,7 +189,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 	//store v in real v
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if s.RangeAttr.IdentifierValue != nil {
-			if s.RangeAttr.IdentifierValue.Variable.BeenCaptured > 0 {
+			if s.RangeAttr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(s.RangeAttr.IdentifierValue.Variable.Type.Type,
@@ -200,7 +200,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			}
 		}
 		if s.RangeAttr.IdentifierKey != nil {
-			if s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
+			if s.RangeAttr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(s.RangeAttr.IdentifierKey.Variable.Type.Type, autoVar.K)...)

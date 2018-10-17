@@ -11,7 +11,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	// identifier  and not captured and type`s int
 	if identifier, ok := increment.Data.(*ast.ExpressionIdentifier); ok &&
 		increment.Type == ast.ExpressionTypeIdentifier &&
-		identifier.Variable.BeenCaptured == 0 &&
+		identifier.Variable.BeenCapturedAsLeftValue == 0 &&
 		identifier.Variable.Type.Type == ast.VariableTypeInt &&
 		identifier.Variable.IsGlobal == false {
 		if identifier.Variable.LocalValOffset > 255 { // early check

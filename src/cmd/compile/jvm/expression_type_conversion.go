@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildTypeConversion(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -14,8 +18,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 	conversion := e.Data.(*ast.ExpressionTypeConversion)
 	currentStack := uint16(0)
 	// []byte("aaaaaaaaaaaa")
-	if conversion.Type.Type == ast.VariableTypeArray &&
-		conversion.Type.Array.Type == ast.VariableTypeByte {
+	if conversion.Type.Equal(ast.LucyBytesType) {
 		currentStack = 2
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -30,10 +33,9 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 	}
 	// string(byte[])
 	// string ([]byte)
-	if (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Type == ast.VariableTypeArray &&
-		conversion.Expression.Value.Array.Type == ast.VariableTypeByte) ||
-		(conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Type == ast.VariableTypeJavaArray &&
-			conversion.Expression.Value.Array.Type == ast.VariableTypeByte) {
+	if (conversion.Type.Type == ast.VariableTypeString &&
+		conversion.Expression.Value.Equal(ast.LucyBytesType)) ||
+		(conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Equal(ast.JavaBytesType)) {
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_new
 		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -103,7 +105,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 	}
 
 	// []byte("hello world")
-	if conversion.Type.Type == ast.VariableTypeArray && conversion.Type.Array.Type == ast.VariableTypeByte &&
+	if conversion.Type.Equal(ast.LucyBytesType) &&
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -113,7 +115,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 			Descriptor: "()[B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if 3 > maxStack { // arraybyteref arraybyteref byte[]
+		if 3 > maxStack { //arraybyteref arraybyteref byte[]
 			maxStack = 3
 		}
 		meta := ArrayMetas[ast.VariableTypeByte]
@@ -127,7 +129,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		return
 	}
 	// byte[]("hello world")
-	if conversion.Type.Type == ast.VariableTypeJavaArray && conversion.Type.Array.Type == ast.VariableTypeByte &&
+	if conversion.Type.Equal(ast.LucyBytesType) &&
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -137,15 +139,14 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 			Descriptor: "()[B",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if 3 > maxStack { // arraybyteref arraybyteref byte[]
+		if 3 > maxStack { //arraybyteref arraybyteref byte[]
 			maxStack = 3
 		}
 		return
 	}
 	//  string(['h','e'])
 	if conversion.Type.Type == ast.VariableTypeString &&
-		conversion.Expression.Value.Type == ast.VariableTypeArray &&
-		conversion.Expression.Value.Array.Type == ast.VariableTypeByte {
+		conversion.Expression.Value.Equal(ast.LucyBytesType) {
 		type autoVar struct {
 			start  uint16
 			length uint16
@@ -206,10 +207,9 @@ func (buildExpression *BuildExpression) buildTypeConversion(class *cg.ClassHighL
 		code.CodeLength += 3
 		return
 	}
-	//  string(byte[])
+	// string(byte[])
 	if conversion.Type.Type == ast.VariableTypeString &&
-		conversion.Expression.Value.Type == ast.VariableTypeJavaArray &&
-		conversion.Expression.Value.Array.Type == ast.VariableTypeByte {
+		conversion.Expression.Value.Equal(ast.JavaBytesType) {
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaStringClass,

@@ -54,9 +54,9 @@ func (s *StatementLabel) Ready(from *Pos) error {
 		some:
 
 	*/
-	errMsg := fmt.Sprintf("%s cannot jump over variable definition:\n", from.errMsgPrefix())
+	errMsg := fmt.Sprintf("%s cannot jump over variable definition:\n", from.ErrMsgPrefix())
 	for _, v := range ss {
-		errMsg += fmt.Sprintf("\t%s constains variable definition\n", v.Pos.errMsgPrefix())
+		errMsg += fmt.Sprintf("\t%s constains variable definition\n", v.Pos.ErrMsgPrefix())
 	}
 	return errors.New(errMsg)
 }

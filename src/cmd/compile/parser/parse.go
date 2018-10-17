@@ -7,7 +7,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func Parse(tops *[]*ast.TopNode, filename string, bs []byte, onlyParseImport bool, nErrors2Stop int) []error {
+func Parse(
+	tops *[]*ast.TopNode,
+	filename string,
+	bs []byte,
+	onlyParseImport bool,
+	nErrors2Stop int) []error {
 	p := &Parser{
 		bs:              bs,
 		tops:            tops,
@@ -48,7 +53,6 @@ func (parser *Parser) initParser() {
 	parser.ClassParser.parser = parser
 	parser.BlockParser = &BlockParser{}
 	parser.BlockParser.parser = parser
-
 }
 
 func (parser *Parser) Parse() []error {
@@ -391,6 +395,23 @@ func (parser *Parser) mkPos() *ast.Pos {
 	}
 }
 
+func (parser *Parser) mkEndPos() *ast.Pos {
+	if parser.lastToken == nil {
+		return &ast.Pos{
+			Filename: parser.filename,
+			Line:     parser.token.EndLine,
+			Column:   parser.token.EndColumn,
+			Offset:   parser.lexer.GetOffSet(),
+		}
+	} else {
+		return &ast.Pos{
+			Filename: parser.filename,
+			Line:     parser.lastToken.EndLine,
+			Column:   parser.lastToken.EndColumn,
+		}
+	}
+}
+
 // str := "hello world"   a,b = 123 or a b ;
 func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 	names, err := parser.parseNameList()
@@ -477,6 +498,11 @@ func (parser *Parser) Next(lfIsToken bool) {
 	var err error
 	var tok *lex.Token
 	parser.lastToken = parser.token
+	defer func() {
+		if parser.lastToken == nil {
+			parser.lastToken = parser.token
+		}
+	}()
 	for {
 		tok, err = parser.lexer.Next()
 		if err != nil {
@@ -501,14 +527,10 @@ func (parser *Parser) Next(lfIsToken bool) {
 	errorMsgPrefix(pos) only receive one argument
 */
 func (parser *Parser) errorMsgPrefix(pos ...*ast.Pos) string {
-	var line, column int
 	if len(pos) > 0 {
-		line = pos[0].Line
-		column = pos[0].Column
-	} else {
-		line, column = parser.token.EndLine, parser.token.EndColumn
+		return pos[0].ErrMsgPrefix()
 	}
-	return fmt.Sprintf("%s:%d:%d:", parser.filename, line, column)
+	return parser.mkPos().ErrMsgPrefix()
 }
 
 func (parser *Parser) consume(until map[lex.TokenKind]bool) {

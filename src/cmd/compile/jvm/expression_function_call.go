@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildFunctionPointerCall(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	maxStack = buildExpression.build(class, code, call.Expression, context, state)
 	stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
@@ -25,8 +29,12 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(class *cg.Class
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildFunctionCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildFunctionCall(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Function == nil {
 		return buildExpression.buildFunctionPointerCall(class, code, e, context, state)

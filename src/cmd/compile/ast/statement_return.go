@@ -5,9 +5,8 @@ import (
 )
 
 type StatementReturn struct {
-	ResultOffset uint16
-	Defers       []*StatementDefer
-	Expressions  []*Expression
+	Defers      []*StatementDefer
+	Expressions []*Expression
 }
 
 func (r *StatementReturn) mkDefers(b *Block) {
@@ -29,14 +28,13 @@ func (r *StatementReturn) check(s *Statement, b *Block) []error {
 	if len(r.Expressions) == 0 { // always ok
 		return errs
 	}
-
 	returnValueTypes := checkExpressions(b, r.Expressions, &errs, false)
 	rs := b.InheritedAttribute.Function.Type.ReturnList
 	pos := r.Expressions[len(r.Expressions)-1].Pos
 	if len(returnValueTypes) < len(rs) {
-		errs = append(errs, fmt.Errorf("%s too few arguments to return", pos.errMsgPrefix()))
+		errs = append(errs, fmt.Errorf("%s too few arguments to return", pos.ErrMsgPrefix()))
 	} else if len(returnValueTypes) > len(rs) {
-		errs = append(errs, fmt.Errorf("%s too many arguments to return", pos.errMsgPrefix()))
+		errs = append(errs, fmt.Errorf("%s too many arguments to return", pos.ErrMsgPrefix()))
 	}
 	convertExpressionsToNeeds(r.Expressions,
 		b.InheritedAttribute.Function.Type.mkCallReturnTypes(r.Expressions[0].Pos), returnValueTypes)
@@ -44,7 +42,7 @@ func (r *StatementReturn) check(s *Statement, b *Block) []error {
 		if k < len(returnValueTypes) && returnValueTypes[k] != nil {
 			if false == v.Type.assignAble(&errs, returnValueTypes[k]) {
 				errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s' to return",
-					returnValueTypes[k].Pos.errMsgPrefix(),
+					returnValueTypes[k].Pos.ErrMsgPrefix(),
 					returnValueTypes[k].TypeString(),
 					v.Type.TypeString()))
 			}

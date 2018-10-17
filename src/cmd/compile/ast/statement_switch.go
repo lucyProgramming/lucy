@@ -49,12 +49,12 @@ func (s *StatementSwitch) check(block *Block) []error {
 	}
 	if conditionType.Type == VariableTypeBool {
 		errs = append(errs, fmt.Errorf("%s bool expression not allow for switch",
-			conditionType.Pos.errMsgPrefix()))
+			conditionType.Pos.ErrMsgPrefix()))
 		return errs
 	}
 	if len(s.StatementSwitchCases) == 0 {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
-			s.EndPos.errMsgPrefix()))
+			s.EndPos.ErrMsgPrefix()))
 		return errs
 	}
 	byteMap := make(map[byte]*Pos)
@@ -142,8 +142,8 @@ func (s *StatementSwitch) check(block *Block) []error {
 			if valueValid {
 				errMsg := func(first *Pos, which interface{}) error {
 					errMsg := fmt.Sprintf("%s  '%v' duplicate case,first declared at:\n",
-						e.Pos.errMsgPrefix(), which)
-					errMsg += fmt.Sprintf("\t%s", first.errMsgPrefix())
+						e.Pos.ErrMsgPrefix(), which)
+					errMsg += fmt.Sprintf("\t%s", first.ErrMsgPrefix())
 					return errors.New(errMsg)
 				}
 				switch conditionType.Type {
@@ -216,13 +216,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 		if v.Block != nil {
 			v.Block.inherit(&s.initExpressionBlock)
 			v.Block.InheritedAttribute.ForBreak = s
-			errs = append(errs, v.Block.checkStatementsAndUnused()...)
+			errs = append(errs, v.Block.check()...)
 		}
 	}
 	if s.Default != nil {
 		s.Default.inherit(&s.initExpressionBlock)
 		s.Default.InheritedAttribute.ForBreak = s
-		errs = append(errs, s.Default.checkStatementsAndUnused()...)
+		errs = append(errs, s.Default.check()...)
 	}
 	if conditionType.Type == VariableTypeEnum &&
 		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
@@ -230,7 +230,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 		containsBool == false {
 		//some enum are missing, not allow
 		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
-			s.EndPos.errMsgPrefix(), conditionType.Enum.Name)
+			s.EndPos.ErrMsgPrefix(), conditionType.Enum.Name)
 		errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 		for _, v := range conditionType.Enum.Enums {
 			_, ok := enumNamesMap[v.Name]

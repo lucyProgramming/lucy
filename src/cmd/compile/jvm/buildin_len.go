@@ -6,8 +6,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInLen(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) mkBuildInLen(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	a0 := call.Args[0]
 	maxStack = buildExpression.build(class, code, a0, context, state)

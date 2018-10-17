@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildMethodCall(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler != nil {
 		return buildExpression.buildMethodCallOnFieldHandler(class, code, e, context, state)
@@ -101,8 +105,12 @@ func (buildExpression *BuildExpression) buildMethodCall(class *cg.ClassHighLevel
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler.IsStatic() == false {
 		stack := buildExpression.build(class, code, call.Expression, context, state)

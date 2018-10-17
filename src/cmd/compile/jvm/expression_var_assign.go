@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 	if len(vs.Lefts) == 1 {
 		v := vs.Lefts[0].Data.(*ast.ExpressionIdentifier).Variable
 		currentStack := uint16(0)
-		if v.BeenCaptured > 0 {
+		if v.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, v.Type)
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
@@ -33,7 +33,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		} else {
 			v.LocalValOffset = code.MaxLocals
 			buildExpression.BuildPackage.storeLocalVar(class, code, v)
-			if v.BeenCaptured > 0 {
+			if v.BeenCapturedAsLeftValue > 0 {
 				code.MaxLocals++
 				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
@@ -78,7 +78,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		}
 		//this variable not been captured,also not declared here
 		if vs.IfDeclaredBefore[k] {
-			if variable.BeenCaptured > 0 {
+			if variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, variable.LocalValOffset)...)
 				stack := autoVar.unPack(class, code, k, variable.Type)
 				if t := 1 + stack; t > maxStack {
@@ -94,7 +94,7 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 		} else {
 			variable.LocalValOffset = code.MaxLocals
 			currentStack := uint16(0)
-			if variable.BeenCaptured > 0 {
+			if variable.BeenCapturedAsLeftValue > 0 {
 				code.MaxLocals++
 				stack := closure.createClosureVar(class, code, variable.Type)
 				if stack > maxStack {

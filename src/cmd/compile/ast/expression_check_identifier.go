@@ -14,22 +14,22 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	}
 	//handle magic identifier
 	switch identifier.Name {
-	case MagicIdentifierFile:
+	case magicIdentifierFile:
 		e.Type = ExpressionTypeString
 		e.Data = e.Pos.Filename
 		result, _ := e.checkSingleValueContextExpression(block)
 		return result, nil
-	case MagicIdentifierLine:
+	case magicIdentifierLine:
 		e.Type = ExpressionTypeInt
 		e.Data = int32(e.Pos.Line)
 		result, _ := e.checkSingleValueContextExpression(block)
 		return result, nil
-	case MagicIdentifierTime:
+	case magicIdentifierTime:
 		e.Type = ExpressionTypeLong
 		e.Data = int64(time.Now().UnixNano())
 		result, _ := e.checkSingleValueContextExpression(block)
 		return result, nil
-	case MagicIdentifierClass:
+	case magicIdentifierClass:
 		if block.InheritedAttribute.Class == nil {
 			return nil,
 				fmt.Errorf("%s '%s' must in class scope", errMsgPrefix(e.Pos), identifier.Name)
@@ -39,7 +39,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Pos = e.Pos
 		result.Class = block.InheritedAttribute.Class
 		return result, nil
-	case MagicIdentifierFunction:
+	case magicIdentifierFunction:
 		if block.InheritedAttribute.Function.isGlobalVariableDefinition ||
 			block.InheritedAttribute.Function.isPackageInitBlockFunction {
 			return nil,
@@ -51,8 +51,8 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Function = block.InheritedAttribute.Function
 		return result, nil
 	}
-	fromImport := false
-	d, err := block.searchIdentifier(e.Pos, identifier.Name)
+	isCaptureVar := false
+	d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)
 	if err != nil {
 		return nil, err
 	}
@@ -60,11 +60,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
 		if i != nil {
 			i.Used = true
-			fromImport = true
-			d, err = PackageBeenCompile.load(i.Import)
-			if err != nil {
-				return nil, fmt.Errorf("%s %v", errMsgPrefix(e.Pos), err)
-			}
+			return e.checkIdentifierThroughImports(i)
 		}
 	}
 	if d == nil {
@@ -73,8 +69,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
-		if fromImport == false &&
-			f.IsBuildIn == false { // try from import
+		if f.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
 			if should {
 				return e.checkIdentifierThroughImports(i)
@@ -100,12 +95,14 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Variable:
 		t := d.(*Variable)
-		if fromImport == false &&
-			t.IsBuildIn == false { // try from import
+		if t.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
 				return e.checkIdentifierThroughImports(i)
 			}
+		}
+		if isCaptureVar {
+			t.BeenCapturedAsRightValue++
 		}
 		t.Used = true
 		result := t.Type.Clone()
@@ -114,7 +111,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Constant:
 		t := d.(*Constant)
-		if fromImport == false && t.IsBuildIn == false { // try from import
+		if t.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 			if should {
 				return e.checkIdentifierThroughImports(i)
@@ -127,7 +124,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *Class:
 		c := d.(*Class)
-		if fromImport == false && c.IsBuildIn == false { // try from import
+		if c.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 			if should {
 				return e.checkIdentifierThroughImports(i)
@@ -140,8 +137,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case *EnumName:
 		enumName := d.(*EnumName)
-		if fromImport == false &&
-			enumName.Enum.IsBuildIn == false { // try from import
+		if enumName.Enum.IsBuildIn == false { // try from import
 			i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
 			if should {
 				return e.checkIdentifierThroughImports(i)
@@ -153,13 +149,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.EnumName = enumName
 		result.Enum = enumName.Enum
 		identifier.EnumName = enumName
-		return result, nil
-	case *Package:
-		// must load from import
-		result := &Type{}
-		result.Pos = e.Pos
-		result.Type = VariableTypePackage
-		result.Package = d.(*Package)
 		return result, nil
 	}
 	return nil, fmt.Errorf("%s identifier '%s' is not a expression , but '%s'",

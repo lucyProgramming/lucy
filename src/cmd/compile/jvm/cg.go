@@ -295,7 +295,7 @@ func (buildPackage *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighL
 	if astClass.SuperClass != nil {
 		class.SuperClass = astClass.SuperClass.Name
 	} else {
-		class.SuperClass = astClass.SuperClassName
+		class.SuperClass = astClass.SuperClassName.Name
 	}
 	if astClass.Comment != "" {
 		class.Class.AttributeLucyComment = &cg.AttributeLucyComment{

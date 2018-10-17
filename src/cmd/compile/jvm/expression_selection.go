@@ -3,8 +3,12 @@ package jvm
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
-func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildSelection(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	selection := e.Data.(*ast.ExpressionSelection)
 
 	// check cast to super class
@@ -21,7 +25,8 @@ func (buildExpression *BuildExpression) buildSelection(class *cg.ClassHighLevel,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertClassConst(selection.Expression.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		class.InsertClassConst(selection.Expression.Value.Class.Name,
+			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])

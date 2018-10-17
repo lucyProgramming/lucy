@@ -55,7 +55,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			}
 			return nil
 		}
-		if left.IsInteger() == false || left.assignAble(errs, right) == false {
+		if left.isInteger() == false || left.assignAble(errs, right) == false {
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
 		result = left.Clone()
@@ -72,7 +72,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			}
 			return nil
 		}
-		if false == left.IsInteger() || right.IsInteger() == false {
+		if false == left.isInteger() || right.isInteger() == false {
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
 		if right.Type == VariableTypeLong {
@@ -118,8 +118,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		case VariableTypeLong:
 			fallthrough
 		case VariableTypeDouble:
-			if (left.IsInteger() && right.IsInteger()) ||
-				(left.IsFloat() && right.IsFloat()) {
+			if (left.isInteger() && right.isInteger()) ||
+				(left.isFloat() && right.isFloat()) {
 				if left.assignAble(errs, right) == false {
 					switch {
 					case bin.Left.isLiteral() == false && bin.Right.isLiteral() == false:
@@ -206,8 +206,8 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			result.Pos = e.Pos
 			return result
 		}
-		if (left.IsInteger() && right.IsInteger()) ||
-			(left.IsFloat() && right.IsFloat()) {
+		if (left.isInteger() && right.isInteger()) ||
+			(left.isFloat() && right.isFloat()) {
 			if left.assignAble(errs, right) == false {
 				switch {
 				case bin.Left.isLiteral() == false && bin.Right.isLiteral() == false:

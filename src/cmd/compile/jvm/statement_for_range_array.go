@@ -132,7 +132,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if s.RangeAttr.IdentifierValue != nil &&
-			s.RangeAttr.IdentifierValue.Variable.BeenCaptured > 0 {
+			s.RangeAttr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Variable.Type)
 			s.RangeAttr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -142,7 +142,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.Array.Type).className))
 		}
 		if s.RangeAttr.IdentifierKey != nil &&
-			s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
+			s.RangeAttr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, s.RangeAttr.IdentifierKey.Variable.Type)
 			s.RangeAttr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -243,7 +243,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	//current stack is 0
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if s.RangeAttr.IdentifierValue != nil {
-			if s.RangeAttr.IdentifierValue.Variable.BeenCaptured > 0 {
+			if s.RangeAttr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Array.Type,
@@ -254,7 +254,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 			}
 		}
 		if s.RangeAttr.IdentifierKey != nil {
-			if s.RangeAttr.IdentifierKey.Variable.BeenCaptured > 0 {
+			if s.RangeAttr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
 					s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,

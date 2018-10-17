@@ -4,18 +4,19 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 type MultiValueAutoVar struct {
-	offset uint16
+	localVarOffset uint16
 }
 
 /*
 	stack is 1 ,expect value on stack
 */
-func newMultiValueAutoVar(class *cg.ClassHighLevel, code *cg.AttributeCode, state *StackMapState) *MultiValueAutoVar {
+func newMultiValueAutoVar(class *cg.ClassHighLevel,
+	code *cg.AttributeCode, state *StackMapState) *MultiValueAutoVar {
 	ret := &MultiValueAutoVar{}
-	ret.offset = code.MaxLocals
+	ret.localVarOffset = code.MaxLocals
 	code.MaxLocals++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-		ret.offset)...)
+		ret.localVarOffset)...)
 	state.appendLocals(class, state.newObjectVariableType(javaRootObjectArray))
 	return ret
 }
@@ -45,7 +46,7 @@ func (packer *MultiValueAutoVar) unPack2Object(class *cg.ClassHighLevel, code *c
 	maxStack = 2
 	//a.buildLoadArrayListAutoVar(code, context) // local array list on stack
 	copyOPs(code,
-		loadLocalVariableOps(ast.VariableTypeObject, packer.offset)...)
+		loadLocalVariableOps(ast.VariableTypeObject, packer.localVarOffset)...)
 	loadInt32(class, code, int32(valueIndex))
 	code.Codes[code.CodeLength] = cg.OP_aaload
 	code.CodeLength++

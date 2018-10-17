@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildArithmetic(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -56,7 +60,10 @@ func (buildExpression *BuildExpression) buildArithmetic(class *cg.ClassHighLevel
 		//handle string first
 		if bin.Left.Value.Type == ast.VariableTypeString ||
 			bin.Right.Value.Type == ast.VariableTypeString {
-			return buildExpression.buildStrCat(class, code, bin, context, state)
+			return buildExpression.buildStrCat(class, code, e, context, state)
+		}
+		if e := e.DependOnSub(); e != nil {
+			return buildExpression.build(class, code, e, context, state)
 		}
 		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.Value)

@@ -158,7 +158,9 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		astClass.Name = string(c.ConstPool[nameIndex].Info)
 		if astClass.Name != ast.JavaRootClass {
 			nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
-			astClass.SuperClassName = string(c.ConstPool[nameIndex].Info)
+			astClass.SuperClassName = &ast.NameWithPos{
+				Name: string(c.ConstPool[nameIndex].Info),
+			}
 		}
 	}
 	loader.loadInterfaces(astClass, c)
@@ -221,7 +223,9 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		astClass.Name = string(c.ConstPool[nameIndex].Info)
 		if astClass.Name != ast.JavaRootClass {
 			nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.SuperClass].Info)
-			astClass.SuperClassName = string(c.ConstPool[nameIndex].Info)
+			astClass.SuperClassName = &ast.NameWithPos{
+				Name: string(c.ConstPool[nameIndex].Info),
+			}
 		}
 	}
 	loader.loadInterfaces(astClass, c)

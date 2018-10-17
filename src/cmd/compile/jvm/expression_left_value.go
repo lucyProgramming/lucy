@@ -95,7 +95,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			}, ops[1:3])
 			return
 		}
-		if identifier.Variable.BeenCaptured > 0 {
+		if identifier.Variable.BeenCapturedAsLeftValue > 0 {
 			return buildExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
 		leftValueType = LeftValueKindLocalVar

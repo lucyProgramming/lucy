@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
@@ -15,9 +14,15 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				errMsgPrefix(e.Pos), identifier.Name))
 			return nil
 		}
-		d, err := block.searchIdentifier(e.Pos, identifier.Name)
+		if identifier.Name == THIS {
+			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
+				errMsgPrefix(e.Pos), THIS))
+		}
+		isCaptureVar := false
+		d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)
 		if err != nil {
 			*errs = append(*errs, err)
+			return nil
 		}
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
@@ -26,11 +31,15 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 		}
 		switch d.(type) {
 		case *Variable:
-			if identifier.Name == THIS {
-				*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
-					errMsgPrefix(e.Pos), THIS))
-			}
 			v := d.(*Variable)
+			if isCaptureVar {
+
+				v.BeenCapturedAsLeftValue++
+			}
+			// variable is modifying , capture right value should not be ok
+			// if no variable not change,after been captured, right value should ok too
+			v.BeenCapturedAsLeftValue += v.BeenCapturedAsRightValue
+			v.BeenCapturedAsRightValue = 0
 			identifier.Variable = v
 			result = identifier.Variable.Type.Clone()
 			result.Pos = e.Pos

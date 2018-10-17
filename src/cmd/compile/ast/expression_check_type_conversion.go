@@ -34,12 +34,12 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 	}
 	// string([]byte)
 	if conversion.Type.Type == VariableTypeString &&
-		on.Type == VariableTypeArray && on.Array.Type == VariableTypeByte {
+		on.Equal(LucyBytesType) {
 		return ret
 	}
 	// string(byte[])
 	if conversion.Type.Type == VariableTypeString &&
-		on.Type == VariableTypeJavaArray && on.Array.Type == VariableTypeByte {
+		on.Equal(JavaBytesType) {
 		return ret
 	}
 	// int(enum)
@@ -53,12 +53,12 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 		return ret
 	}
 	// []byte("hello world")
-	if conversion.Type.Type == VariableTypeArray && conversion.Type.Array.Type == VariableTypeByte &&
+	if conversion.Type.Equal(LucyBytesType) &&
 		on.Type == VariableTypeString {
 		return ret
 	}
 	// byte[]("hello world")
-	if conversion.Type.Type == VariableTypeJavaArray && conversion.Type.Array.Type == VariableTypeByte &&
+	if conversion.Type.Equal(JavaBytesType) &&
 		on.Type == VariableTypeString {
 		return ret
 	}

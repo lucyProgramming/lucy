@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildFunctionExpression(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	function := e.Data.(*ast.Function)
 	defer func(function *ast.Function) {
 		if e.IsStatementExpression {
@@ -85,40 +89,64 @@ func (buildPackage *BuildPackage) buildFunctionExpression(class *cg.ClassHighLev
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
 	total := len(function.Closure.Variables) + len(function.Closure.Functions) - 1
 	for v, _ := range function.Closure.Variables {
-		filed := &cg.FieldHighLevel{}
-		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
-		filed.Name = v.Name
-		closureClass.Fields[v.Name] = filed
+		field := &cg.FieldHighLevel{}
+		field.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
+		field.Name = v.Name
+		closureClass.Fields[v.Name] = field
 		if total != 0 {
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 		}
-		meta := closure.getMeta(v.Type.Type)
-		filed.Descriptor = "L" + meta.className + ";"
-		if context.function.Closure.ClosureVariableExist(v) {
-			// I Know class at 0 offset
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-			if 3 > maxStack {
-				maxStack = 3
+		if v.BeenCapturedAsLeftValue > 0 {
+			meta := closure.getMeta(v.Type.Type)
+			field.Descriptor = "L" + meta.className + ";"
+			if context.function.Closure.ClosureVariableExist(v) {
+				// I Know class object at offset 0
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+				if 3 > maxStack {
+					maxStack = 3
+				}
+				code.Codes[code.CodeLength] = cg.OP_getfield
+				class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+					Class:      class.Name,
+					Field:      v.Name,
+					Descriptor: field.Descriptor,
+				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+				code.CodeLength += 3
+			} else { // not exits
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
+				if 3 > maxStack {
+					maxStack = 3
+				}
 			}
-			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-				Class:      class.Name,
-				Field:      v.Name,
-				Descriptor: filed.Descriptor,
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		} else { // not exits
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-			if 3 > maxStack {
-				maxStack = 3
+
+		} else {
+			field.Descriptor = Descriptor.typeDescriptor(v.Type)
+			if context.function.Closure.ClosureVariableExist(v) {
+				// I Know class object at offset 0
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+				if 3 > maxStack {
+					maxStack = 3
+				}
+				code.Codes[code.CodeLength] = cg.OP_getfield
+				class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+					Class:      class.Name,
+					Field:      v.Name,
+					Descriptor: field.Descriptor,
+				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+				code.CodeLength += 3
+			} else { // not exits
+				copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+				if 3 > maxStack {
+					maxStack = 3
+				}
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
 		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
 			Class:      className,
 			Field:      v.Name,
-			Descriptor: filed.Descriptor,
+			Descriptor: field.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		total--

@@ -94,14 +94,75 @@ type Expression struct {
 	Lefts                 []*Expression // left values
 }
 
-func (e *Expression) IsString(s string) bool {
+func (e *Expression) IsStringLiteral(s string) bool {
 	if e.Type != ExpressionTypeString {
 		return false
 	}
 	return e.Data.(string) == s
 }
 
-func (e *Expression) IsBool(b bool) bool {
+func (e *Expression) DependOnSub() *Expression {
+	switch e.Type {
+	case ExpressionTypeAdd:
+		bin := e.Data.(*ExpressionBinary)
+		if e.Value.Type == VariableTypeString {
+			if bin.Left.IsStringLiteral("") {
+				return bin.Right
+			} else if bin.Right.IsStringLiteral("") {
+				return bin.Left
+			}
+			return nil
+		}
+		// 0 + a
+		if bin.Left.isNumber() {
+			if bin.Left.getDoubleValue() == 0 {
+				return bin.Right
+			}
+		}
+		// a + 0
+		if bin.Right.isNumber() {
+			if bin.Right.getDoubleValue() == 0 {
+				return bin.Left
+			}
+		}
+	case ExpressionTypeSub:
+		// a - 0
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
+			return bin.Left
+		}
+	case ExpressionTypeMul:
+		// a * 0 == 0
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
+			return bin.Right
+		}
+		// 0 * a == 0
+		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
+			return bin.Left
+		}
+		// a * 1 == a
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
+			return bin.Left
+		}
+		// 1 * a == a
+		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 1 {
+			return bin.Right
+		}
+	case ExpressionTypeDiv:
+		// a / 1 == a
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
+			return bin.Left
+		}
+	case ExpressionTypeMod:
+
+	}
+
+	return nil
+}
+
+func (e *Expression) IsBoolLiteral(b bool) bool {
 	if e.Type != ExpressionTypeBool {
 		return false
 	}
@@ -127,8 +188,8 @@ func (e *Expression) Is2IntCompare() bool {
 		return false
 	}
 	bin := e.Data.(*ExpressionBinary)
-	i1 := bin.Left.Value.IsInteger() && bin.Left.Value.Type != VariableTypeLong
-	i2 := bin.Right.Value.IsInteger() && bin.Right.Value.Type != VariableTypeLong
+	i1 := bin.Left.Value.isInteger() && bin.Left.Value.Type != VariableTypeLong
+	i2 := bin.Right.Value.isInteger() && bin.Right.Value.Type != VariableTypeLong
 	return i1 && i2
 }
 

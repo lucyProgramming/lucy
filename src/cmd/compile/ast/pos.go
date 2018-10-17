@@ -13,7 +13,7 @@ type Pos struct {
 	Offset int
 }
 
-func (pos *Pos) errMsgPrefix() string {
+func (pos *Pos) ErrMsgPrefix() string {
 	return fmt.Sprintf("%s:%d:%d:", pos.Filename, pos.Line, pos.Column)
 }
 
@@ -23,5 +23,5 @@ type NameWithPos struct {
 }
 
 func errMsgPrefix(pos *Pos) string {
-	return pos.errMsgPrefix()
+	return pos.ErrMsgPrefix()
 }

@@ -41,7 +41,7 @@ func (e *Enum) check() (errs []error) {
 		} else {
 			if is == false {
 				err := fmt.Errorf("%s enum type must inited by 'int' literal",
-					e.Pos.errMsgPrefix())
+					e.Pos.ErrMsgPrefix())
 				errs = append(errs, err)
 			} else {
 				initV = e.Init.getIntValue()
@@ -52,7 +52,7 @@ func (e *Enum) check() (errs []error) {
 	for k, v := range e.Enums {
 		if v.NoNeed != nil {
 			errs = append(errs, fmt.Errorf("%s enum only expect 1 init value",
-				v.Pos.errMsgPrefix()))
+				v.Pos.ErrMsgPrefix()))
 		}
 		if k < e.FirstValueIndex {
 			v.Value = initV - int32(e.FirstValueIndex-k)

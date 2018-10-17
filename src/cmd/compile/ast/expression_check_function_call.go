@@ -15,7 +15,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		}
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
-				call.Expression.Pos.errMsgPrefix(), identifier.Name))
+				call.Expression.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil
 		}
 		switch d.(type) {
@@ -28,7 +28,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			typeConversion.Type = d.(*Type)
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					e.Pos.errMsgPrefix()))
+					e.Pos.ErrMsgPrefix()))
 				return nil
 			}
 			e.Type = ExpressionTypeCheckCast
@@ -47,7 +47,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			typeConversion.Type.Pos = e.Pos
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					e.Pos.errMsgPrefix()))
+					e.Pos.ErrMsgPrefix()))
 				return nil
 			}
 			e.Type = ExpressionTypeCheckCast
@@ -62,7 +62,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			v := d.(*Variable)
 			if v.Type.Type != VariableTypeFunction {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s' ",
-					call.Expression.Pos.errMsgPrefix(), v.Name, v.Type.TypeString()))
+					call.Expression.Pos.ErrMsgPrefix(), v.Name, v.Type.TypeString()))
 				return nil
 			}
 			call.Expression.Value = &Type{
@@ -74,7 +74,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			return e.checkFunctionPointerCall(block, errs, v.Type.FunctionType, call)
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot make call on '%s'",
-				call.Expression.Pos.errMsgPrefix(), block.identifierIsWhat(d)))
+				call.Expression.Pos.ErrMsgPrefix(), block.identifierIsWhat(d)))
 			return nil
 		}
 	}
@@ -96,7 +96,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			}()
 			no name function is statement too
 		*/
-		functionPointer.Function = call.Expression.Data.(*Function)
+		call.Function = call.Expression.Data.(*Function)
 		call.Expression.IsStatementExpression = true
 	}
 	return e.checkFunctionPointerCall(block, errs, functionPointer.FunctionType, call)

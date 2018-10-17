@@ -20,8 +20,8 @@ type Package struct {
 	UnUsedPackage                map[string]*Import
 }
 
-func (p *Package) isSame(pp *Package) bool {
-	return p.Name == pp.Name
+func (p *Package) isSame(compare *Package) bool {
+	return p.Name == compare.Name
 }
 
 func (p *Package) loadCorePackage() error {
@@ -211,11 +211,11 @@ func (p *Package) load(resource string) (interface{}, error) {
 }
 
 func (p *Package) checkUnUsedPackage() []error {
-	ret := []error{}
+	errs := []error{}
 	for _, v := range p.Files {
 		for _, i := range v.Imports {
 			if i.Used == false {
-				ret = append(ret, fmt.Errorf("%s '%s' imported not used",
+				errs = append(errs, fmt.Errorf("%s '%s' imported not used",
 					errMsgPrefix(i.Pos), i.Import))
 			}
 		}
@@ -223,22 +223,23 @@ func (p *Package) checkUnUsedPackage() []error {
 	for _, i := range p.UnUsedPackage {
 		pp, err := p.load(i.Import)
 		if err != nil {
-			ret = append(ret, fmt.Errorf("%s %v",
+			errs = append(errs, fmt.Errorf("%s %v",
 				errMsgPrefix(i.Pos), err))
 			continue
 		}
 		if ppp, ok := pp.(*Package); ok == false {
-			ret = append(ret, fmt.Errorf("%s '%s' not a package",
+			errs = append(errs, fmt.Errorf("%s '%s' not a package",
 				errMsgPrefix(i.Pos), i.Import))
 		} else {
 			if ppp.TriggerPackageInitMethodName == "" {
-				ret = append(ret, fmt.Errorf("%s  package named '%s' have no global vars and package "+
-					"init blocks, no need to trigger package init method",
-					errMsgPrefix(i.Pos), i.Import))
+				errs = append(errs,
+					fmt.Errorf("%s  package named '%s' have no global vars and package "+
+						"init blocks, no need to trigger package init method",
+						errMsgPrefix(i.Pos), i.Import))
 			}
 		}
 	}
-	return ret
+	return errs
 }
 
 func (p *Package) loadClass(className string) (*Class, error) {

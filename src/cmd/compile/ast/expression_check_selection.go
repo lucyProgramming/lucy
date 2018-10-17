@@ -126,7 +126,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			}
 			if f.TemplateFunction != nil {
 				err := fmt.Errorf("%s function '%s' is a template function",
-					e.Pos.errMsgPrefix(), selection.Name)
+					e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
 				return nil
 			}

@@ -2,7 +2,6 @@ package jvm
 
 import (
 	"encoding/binary"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -85,16 +84,16 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
 		bin.Right.Value.Type == ast.VariableTypeBool { // bool type
 		var dependOnOne *ast.Expression
-		if bin.Left.IsBool(true) && e.Type == ast.ExpressionTypeEq {
+		if bin.Left.IsBoolLiteral(true) && e.Type == ast.ExpressionTypeEq {
 			/*
 				a == true <==> a
 			*/
 			dependOnOne = bin.Right
-		} else if bin.Left.IsBool(false) && e.Type == ast.ExpressionTypeNe {
+		} else if bin.Left.IsBoolLiteral(false) && e.Type == ast.ExpressionTypeNe {
 			dependOnOne = bin.Right
-		} else if bin.Right.IsBool(true) && e.Type == ast.ExpressionTypeEq {
+		} else if bin.Right.IsBoolLiteral(true) && e.Type == ast.ExpressionTypeEq {
 			dependOnOne = bin.Left
-		} else if bin.Right.IsBool(false) && e.Type == ast.ExpressionTypeNe {
+		} else if bin.Right.IsBoolLiteral(false) && e.Type == ast.ExpressionTypeNe {
 			dependOnOne = bin.Left
 		}
 		if dependOnOne != nil {

@@ -25,8 +25,7 @@ type Class struct {
 	AccessFlags                       uint16
 	Fields                            map[string]*ClassField
 	Methods                           map[string][]*ClassMethod
-	SuperClassName                    string
-	SuperClassNamePos                 *Pos
+	SuperClassName                    *NameWithPos
 	SuperClass                        *Class
 	InterfaceNames                    []*NameWithPos
 	Interfaces                        []*Class
@@ -214,7 +213,7 @@ func (c *Class) resolveFather() error {
 		return nil
 	}
 	c.resolveFatherCalled = true
-	if c.SuperClassName == "" {
+	if c.SuperClassName != nil {
 		superClassName := ""
 		if PackageBeenCompile.Name == common.CorePackage {
 			superClassName = JavaRootClass
@@ -232,8 +231,8 @@ func (c *Class) resolveFather() error {
 	} else {
 		variableType := Type{}
 		variableType.Type = VariableTypeName // naming
-		variableType.Name = c.SuperClassName
-		variableType.Pos = c.SuperClassNamePos
+		variableType.Name = c.SuperClassName.Name
+		variableType.Pos = c.SuperClassName.Pos
 		err := variableType.resolve(&c.Block)
 		if err != nil {
 			return err
@@ -246,7 +245,7 @@ func (c *Class) resolveFather() error {
 		if c.IsInterface() {
 			if c.SuperClass.Name != JavaRootClass {
 				err := fmt.Errorf("%s interface`s super-class must be '%s'",
-					errMsgPrefix(c.SuperClassNamePos), JavaRootClass)
+					errMsgPrefix(c.SuperClassName.Pos), JavaRootClass)
 
 				return err
 			}
@@ -385,10 +384,13 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 		err := fmt.Errorf("%s root class already", errMsgPrefix(pos))
 		return err
 	}
-	if c.SuperClassName == "" {
-		c.SuperClassName = JavaRootClass
+	if c.SuperClassName == nil {
+		c.SuperClassName = &NameWithPos{
+			Name: JavaRootClass,
+			Pos:  c.Pos,
+		}
 	}
-	class, err := PackageBeenCompile.loadClass(c.SuperClassName)
+	class, err := PackageBeenCompile.loadClass(c.SuperClassName.Name)
 	if err != nil {
 		err := fmt.Errorf("%s %v", errMsgPrefix(pos), err)
 		return err

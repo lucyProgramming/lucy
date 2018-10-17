@@ -5,15 +5,18 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	if e.Value.Type == ast.VariableTypeArray {
+func (buildExpression *BuildExpression) buildNew(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
+	switch e.Value.Type {
+	case ast.VariableTypeArray:
 		return buildExpression.buildNewArray(class, code, e, context, state)
-	}
-	if e.Value.Type == ast.VariableTypeJavaArray {
+	case ast.VariableTypeJavaArray:
 		return buildExpression.buildNewJavaArray(class, code, e, context, state)
-	}
-	if e.Value.Type == ast.VariableTypeMap {
+	case ast.VariableTypeMap:
 		return buildExpression.buildNewMap(class, code, e, context)
 	}
 	stackLength := len(state.Stacks)
@@ -47,8 +50,11 @@ func (buildExpression *BuildExpression) buildNew(class *cg.ClassHighLevel, code 
 	return
 }
 
-func (buildExpression *BuildExpression) buildNewMap(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildNewMap(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context) (maxStack uint16) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -64,8 +70,12 @@ func (buildExpression *BuildExpression) buildNewMap(class *cg.ClassHighLevel, co
 	return
 }
 
-func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildNewJavaArray(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	dimensions := byte(0)
 	{
 		// get dimension
@@ -98,8 +108,12 @@ func (buildExpression *BuildExpression) buildNewJavaArray(class *cg.ClassHighLev
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildNewArray(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildNewArray(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	//new
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.Value.Array.Type]

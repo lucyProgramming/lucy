@@ -212,7 +212,6 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		return
 	}
 	maxStack = jvmSlotSize(typ) * 2
-
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic

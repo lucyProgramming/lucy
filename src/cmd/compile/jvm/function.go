@@ -22,7 +22,7 @@ func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, c
 func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Type.ParameterList {
-		if v.BeenCaptured == 0 { // not capture
+		if v.BeenCapturedAsLeftValue == 0 { // not capture
 			continue
 		}
 		stack := closure.createClosureVar(class, code, v.Type)
@@ -51,7 +51,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 	if f.Type.VoidReturn() == false {
 		for _, v := range f.Type.ReturnList {
 			currentStack := uint16(0)
-			if v.BeenCaptured > 0 { //create closure object
+			if v.BeenCapturedAsLeftValue > 0 { //create closure object
 				v.LocalValOffset = code.MaxLocals
 				code.MaxLocals++
 				stack := closure.createClosureVar(class, code, v.Type)
@@ -77,7 +77,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 				maxStack = t
 			}
 			buildPackage.storeLocalVar(class, code, v)
-			if v.BeenCaptured > 0 {
+			if v.BeenCapturedAsLeftValue > 0 {
 				state.popStack(1)
 				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 			} else {

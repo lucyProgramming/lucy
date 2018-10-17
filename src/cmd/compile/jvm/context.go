@@ -22,7 +22,8 @@ type Context struct {
 
 func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
 	if context.lastStackMapOffset == offset {
-		code.AttributeStackMap.StackMaps = code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
+		code.AttributeStackMap.StackMaps =
+			code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
 		context.stackMapOffsets = context.stackMapOffsets[0 : len(context.stackMapOffsets)-1]
 		context.lastStackMapState = nil
 		if len(context.stackMapOffsets) > 0 {

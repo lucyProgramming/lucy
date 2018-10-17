@@ -16,8 +16,8 @@ func (c *StatementContinue) check(s *Statement, block *Block) []error {
 		return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
 			errMsgPrefix(s.Pos))}
 	}
-	s.StatementContinue.StatementFor = block.InheritedAttribute.ForContinue
-	s.StatementContinue.mkDefers(block)
+	c.StatementFor = block.InheritedAttribute.ForContinue
+	c.mkDefers(block)
 	return nil
 }
 

@@ -61,26 +61,16 @@ func (buildExpression *BuildExpression) mkBuildInAssert(class *cg.ClassHighLevel
 	})
 	code.Codes[code.CodeLength] = cg.OP_aastore
 	code.CodeLength++
-	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringClass,
-		Method:     "format",
-		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
+	class.InsertMethodCall(code, cg.OP_invokestatic, javaStringClass,
+		"format", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;")
+
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_dup_x1
 	code.Codes[code.CodeLength+1] = cg.OP_swap
 	code.CodeLength += 2
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaExceptionClass,
-		Method:     specialMethodInit,
-		Descriptor: "(Ljava/lang/String;)V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
+	class.InsertMethodCall(code, cg.OP_invokespecial, javaExceptionClass, specialMethodInit, "(Ljava/lang/String;)V")
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
 	writeExits([]*cg.Exit{okExit}, code.CodeLength)

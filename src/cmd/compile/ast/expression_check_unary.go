@@ -30,13 +30,13 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	if e.Type == ExpressionTypeNegative {
 		if unary.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'",
-				unary.Pos.errMsgPrefix(), unary.TypeString()))
+				unary.Pos.ErrMsgPrefix(), unary.TypeString()))
 		}
 	}
 	if e.Type == ExpressionTypeBitwiseNot {
-		if unary.IsInteger() == false {
+		if unary.isInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
-				unary.Pos.errMsgPrefix(), unary.TypeString()))
+				unary.Pos.ErrMsgPrefix(), unary.TypeString()))
 		}
 	}
 	result := unary.Clone()

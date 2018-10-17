@@ -18,6 +18,8 @@ const (
 	VariableTypeLong
 	VariableTypeFloat
 	VariableTypeDouble
+	//enum
+	VariableTypeEnum
 	//ref types
 	VariableTypeString
 	VariableTypeObject
@@ -25,7 +27,6 @@ const (
 	VariableTypeArray
 	VariableTypeJavaArray
 	VariableTypeFunction
-	VariableTypeEnum
 	VariableTypeClass
 	VariableTypeName
 	VariableTypeTemplate
@@ -138,16 +139,16 @@ func (typ *Type) rightValueValid() error {
 	switch typ.Type {
 	case VariableTypePackage:
 		return fmt.Errorf("%s use package '%s' without selector",
-			typ.Pos.errMsgPrefix(), typ.Package.Name)
+			typ.Pos.ErrMsgPrefix(), typ.Package.Name)
 	case VariableTypeClass:
 		return fmt.Errorf("%s use class '%s' without selector",
-			typ.Pos.errMsgPrefix(), typ.Class.Name)
+			typ.Pos.ErrMsgPrefix(), typ.Class.Name)
 	case VariableTypeMagicFunction:
 		return fmt.Errorf("%s use '%s' without selector",
-			typ.Pos.errMsgPrefix(), MagicIdentifierFunction)
+			typ.Pos.ErrMsgPrefix(), magicIdentifierFunction)
 	default:
 		return fmt.Errorf("%s '%s' is not right value valid",
-			typ.Pos.errMsgPrefix(), typ.TypeString())
+			typ.Pos.ErrMsgPrefix(), typ.TypeString())
 	}
 }
 
@@ -161,19 +162,11 @@ func (typ *Type) isTyped() error {
 	/*
 		null is only untyped right value
 	*/
-	if typ.Type == VariableTypeBool ||
-		typ.IsNumber() ||
-		typ.Type == VariableTypeString ||
-		typ.Type == VariableTypeObject ||
-		typ.Type == VariableTypeArray ||
-		typ.Type == VariableTypeMap ||
-		typ.Type == VariableTypeJavaArray ||
-		typ.Type == VariableTypeEnum ||
-		typ.Type == VariableTypeFunction {
-		return nil
+	if typ.Type == VariableTypeNull {
+		return fmt.Errorf("%s '%s' is not typed",
+			typ.Pos.ErrMsgPrefix(), typ.TypeString())
 	}
-	return fmt.Errorf("%s '%s' is not typed",
-		typ.Pos.errMsgPrefix(), typ.TypeString())
+	return nil
 }
 
 /*
@@ -374,8 +367,8 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 }
 
 func (typ *Type) IsNumber() bool {
-	return typ.IsInteger() ||
-		typ.IsFloat()
+	return typ.isInteger() ||
+		typ.isFloat()
 }
 
 func (typ *Type) IsPointer() bool {
@@ -388,7 +381,7 @@ func (typ *Type) IsPointer() bool {
 		typ.Type == VariableTypeFunction
 }
 
-func (typ *Type) IsInteger() bool {
+func (typ *Type) isInteger() bool {
 	return typ.Type == VariableTypeByte ||
 		typ.Type == VariableTypeShort ||
 		typ.Type == VariableTypeInt ||
@@ -399,7 +392,7 @@ func (typ *Type) IsInteger() bool {
 /*
 	float or double
 */
-func (typ *Type) IsFloat() bool {
+func (typ *Type) isFloat() bool {
 	return typ.Type == VariableTypeFloat ||
 		typ.Type == VariableTypeDouble
 }
@@ -472,7 +465,7 @@ func (typ *Type) typeString(ret *string) {
 	case VariableTypeGlobal:
 		*ret += typ.Name
 	case VariableTypeMagicFunction:
-		*ret = MagicIdentifierFunction
+		*ret = magicIdentifierFunction
 	default:
 		panic(typ.Type)
 	}

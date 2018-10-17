@@ -299,7 +299,8 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		f := e.Data.(*Function)
 		if e.IsStatementExpression == false && f.Name != "" {
 			errs = append(errs,
-				fmt.Errorf("%s function literal named '%s' expect no name", errMsgPrefix(e.Pos), f.Name))
+				fmt.Errorf("%s function literal named '%s' expect no name",
+					errMsgPrefix(e.Pos), f.Name))
 		}
 		es := f.check(block)
 		errs = append(errs, es...)

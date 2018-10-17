@@ -92,12 +92,12 @@ func (s *Statement) check(block *Block) []error {
 		block.InheritedAttribute.Function.HasDefer = true
 		s.Defer.Block.inherit(block)
 		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		es := s.Defer.Block.checkStatementsAndUnused()
+		es := s.Defer.Block.check()
 		block.Defers = append(block.Defers, s.Defer)
 		return es
 	case StatementTypeBlock:
 		s.Block.inherit(block)
-		return s.Block.checkStatementsAndUnused()
+		return s.Block.check()
 	case StatementTypeLabel:
 		if block.InheritedAttribute.Defer != nil {
 			block.InheritedAttribute.Defer.Labels =

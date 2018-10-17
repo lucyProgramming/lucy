@@ -8,8 +8,12 @@ import (
 /*
 	function print
 */
-func (buildExpression *BuildExpression) mkBuildInPrint(class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) mkBuildInPrint(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	// get stream from stdout
 	code.Codes[code.CodeLength] = cg.OP_getstatic

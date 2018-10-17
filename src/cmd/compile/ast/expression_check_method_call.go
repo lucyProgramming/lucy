@@ -205,7 +205,7 @@ func (e *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs *[]
 		result.Pos = e.Pos
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' expect no arguments",
-				call.Args[0].Pos.errMsgPrefix(), call.Name))
+				call.Args[0].Pos.ErrMsgPrefix(), call.Name))
 		}
 		return []*Type{result}
 	default:
@@ -333,7 +333,7 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		if len(call.Args) > 0 {
 			*errs = append(*errs,
 				fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
-					call.Args[0].Pos.errMsgPrefix(), call.Name))
+					call.Args[0].Pos.ErrMsgPrefix(), call.Name))
 		}
 		return []*Type{result}
 	case common.ArrayMethodAppend,
@@ -351,12 +351,12 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 			if call.Name == common.ArrayMethodAppend {
 				if array.Array.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-						t.Pos.errMsgPrefix(), t.TypeString(), array.Array.TypeString(), call.Name))
+						t.Pos.ErrMsgPrefix(), t.TypeString(), array.Array.TypeString(), call.Name))
 				}
 			} else {
 				if array.assignAble(errs, t) == false {
 					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' to call method '%s'",
-						t.Pos.errMsgPrefix(), t.TypeString(), array.TypeString(), call.Name))
+						t.Pos.ErrMsgPrefix(), t.TypeString(), array.TypeString(), call.Name))
 				}
 			}
 		}
@@ -372,7 +372,7 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 		result.Array.Pos = e.Pos
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
-				call.Args[0].Pos.errMsgPrefix(), call.Name))
+				call.Args[0].Pos.ErrMsgPrefix(), call.Name))
 		}
 		return []*Type{result}
 	default:
@@ -393,7 +393,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 				pos = call.Args[1].Pos
 			}
 			*errs = append(*errs, fmt.Errorf("%s call '%s' expect one argument",
-				pos.errMsgPrefix(), call.Name))
+				pos.ErrMsgPrefix(), call.Name))
 			return []*Type{ret}
 		}
 		t, es := call.Args[0].checkSingleValueContextExpression(block)
@@ -403,7 +403,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		}
 		if false == m.K.assignAble(errs, t) {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-				t.Pos.errMsgPrefix(), t.TypeString(), m.K.TypeString()))
+				t.Pos.ErrMsgPrefix(), t.TypeString(), m.K.TypeString()))
 		}
 		return []*Type{ret}
 	case common.MapMethodRemove:
@@ -412,7 +412,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		ret.Type = VariableTypeVoid
 		if len(call.Args) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s remove expect at last 1 argement",
-				e.Pos.errMsgPrefix()))
+				e.Pos.ErrMsgPrefix()))
 			return []*Type{ret}
 		}
 		ts := checkExpressions(block, call.Args, errs, true)
@@ -422,7 +422,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 			}
 			if m.K.assignAble(errs, t) == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for map-key",
-					t.Pos.errMsgPrefix(), t.TypeString(), m.K.TypeString()))
+					t.Pos.ErrMsgPrefix(), t.TypeString(), m.K.TypeString()))
 			}
 		}
 		return []*Type{ret}
@@ -432,7 +432,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		ret.Type = VariableTypeVoid
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s '%s' expect no arguments",
-				e.Pos.errMsgPrefix(), common.MapMethodRemoveAll))
+				e.Pos.ErrMsgPrefix(), common.MapMethodRemoveAll))
 		}
 		return []*Type{ret}
 	case common.MapMethodSize:
@@ -441,7 +441,7 @@ func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error,
 		ret.Type = VariableTypeInt
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s too many argument to call '%s''",
-				call.Args[0].Pos.errMsgPrefix(), call.Name))
+				call.Args[0].Pos.ErrMsgPrefix(), call.Name))
 		}
 		return []*Type{ret}
 	default:

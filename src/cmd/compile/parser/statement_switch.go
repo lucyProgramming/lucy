@@ -176,11 +176,7 @@ func (blockParser *BlockParser) parseSwitch() (interface{}, error) {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		return statementSwitch, err
 	}
-	statementSwitch.EndPos = &ast.Pos{
-		Filename: blockParser.parser.filename,
-		Line:     blockParser.parser.lastToken.EndLine,
-		Column:   blockParser.parser.lastToken.EndColumn,
-	}
+	statementSwitch.EndPos = blockParser.parser.mkEndPos()
 	blockParser.Next(lfNotToken) //  skip }
 	return statementSwitch, nil
 }

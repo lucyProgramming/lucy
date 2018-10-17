@@ -8,7 +8,6 @@ import (
 )
 
 func (parser *Parser) parseType() (*ast.Type, error) {
-
 	var err error
 	var ret *ast.Type
 	pos := parser.mkPos()
@@ -220,7 +219,6 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenIdentifier ||
 		parser.token.Type == lex.TokenTemplate ||
 		parser.token.Type == lex.TokenFn
-
 }
 
 func (parser *Parser) parseIdentifierType() (*ast.Type, error) {

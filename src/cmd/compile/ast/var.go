@@ -9,11 +9,11 @@ type LoadImport interface {
 }
 
 const (
-	MagicIdentifierFile     = "__FILE__"
-	MagicIdentifierLine     = "__LINE__"
-	MagicIdentifierTime     = "__TIME__"
-	MagicIdentifierClass    = "__CLASS__"
-	MagicIdentifierFunction = "__FUNCTION__"
+	magicIdentifierFile     = "__FILE__"
+	magicIdentifierLine     = "__LINE__"
+	magicIdentifierTime     = "__TIME__"
+	magicIdentifierClass    = "__CLASS__"
+	magicIdentifierFunction = "__FUNCTION__"
 	MainFunctionName        = "main"
 	THIS                    = "this"
 	NoNameIdentifier        = "_"
@@ -28,11 +28,11 @@ const (
 )
 
 func isMagicIdentifier(name string) bool {
-	return name == MagicIdentifierFile ||
-		name == MagicIdentifierLine ||
-		name == MagicIdentifierTime ||
-		name == MagicIdentifierClass ||
-		name == MagicIdentifierFunction
+	return name == magicIdentifierFile ||
+		name == magicIdentifierLine ||
+		name == magicIdentifierTime ||
+		name == magicIdentifierClass ||
+		name == magicIdentifierFunction
 }
 
 var (
@@ -42,7 +42,24 @@ var (
 	lucyBuildInPackage   *Package
 	ParseFunctionHandler func(bs []byte, pos *Pos) (f *Function, es []error)
 	javaStringClass      *Class
+	LucyBytesType        *Type // []byte
+	JavaBytesType        *Type // byte[]
 )
+
+func init() {
+	LucyBytesType = &Type{
+		Type: VariableTypeArray,
+		Array: &Type{
+			Type: VariableTypeByte,
+		},
+	}
+	JavaBytesType = &Type{
+		Type: VariableTypeJavaArray,
+		Array: &Type{
+			Type: VariableTypeByte,
+		},
+	}
+}
 
 func loadJavaStringClass(pos *Pos) error {
 	if javaStringClass != nil {

@@ -35,14 +35,15 @@ func (classParser *ClassParser) consume(m map[lex.TokenKind]bool) {
 	classParser.parser.consume(m)
 }
 
-func (classParser *ClassParser) parseClassName() (string, error) {
+func (classParser *ClassParser) parseClassName() (*ast.NameWithPos, error) {
 	if classParser.parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect identifier for class`s name,but '%s'",
 			classParser.parser.errorMsgPrefix(), classParser.parser.token.Description)
 		classParser.parser.errs = append(classParser.parser.errs, err)
-		return "", err
+		return nil, err
 	}
 	name := classParser.parser.token.Data.(string)
+	pos := classParser.parser.mkPos()
 	classParser.Next(lfNotToken)
 	if classParser.parser.token.Type == lex.TokenSelection {
 		classParser.Next(lfNotToken) // skip .
@@ -51,24 +52,27 @@ func (classParser *ClassParser) parseClassName() (string, error) {
 				classParser.parser.errorMsgPrefix(),
 				classParser.parser.token.Description)
 			classParser.parser.errs = append(classParser.parser.errs, err)
+		} else {
+			name += "." + classParser.parser.token.Data.(string)
+			classParser.Next(lfNotToken) // skip name identifier
 		}
-		name += "." + classParser.parser.token.Data.(string)
-		classParser.Next(lfNotToken) // skip name identifier
 	}
-	return name, nil
+	return &ast.NameWithPos{
+		Name: name,
+		Pos:  pos,
+	}, nil
 }
 
 func (classParser *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos, error) {
 	ret := []*ast.NameWithPos{}
 	for classParser.parser.token.Type != lex.TokenEof {
-		pos := classParser.parser.mkPos()
 		name, err := classParser.parseClassName()
 		if err != nil {
 			return nil, err
 		}
 		ret = append(ret, &ast.NameWithPos{
-			Name: name,
-			Pos:  pos,
+			Name: name.Name,
+			Pos:  name.Pos,
 		})
 		if classParser.parser.token.Type == lex.TokenComma {
 			classParser.Next(lfNotToken)
@@ -93,7 +97,10 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	}
 	classParser.Next(lfIsToken) // skip class key word
 	classParser.parser.unExpectNewLineAndSkip()
-	classParser.ret.Name, err = classParser.parseClassName()
+	t, err := classParser.parseClassName()
+	if t != nil {
+		classParser.ret.Name = t.Name
+	}
 	classParser.ret.Block.IsClassBlock = true
 	if err != nil {
 		if classParser.ret.Name == "" {
@@ -104,9 +111,8 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	classParser.ret.Pos = classParser.parser.mkPos()
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		classParser.Next(lfNotToken) // skip extends
-		classParser.ret.SuperClassNamePos = classParser.parser.mkPos()
-		t, err := classParser.parseClassName()
-		classParser.ret.SuperClassName = t
+		var err error
+		classParser.ret.SuperClassName, err = classParser.parseClassName()
 		if err != nil {
 			classParser.parser.errs = append(classParser.parser.errs, err)
 			classParser.consume(untilLc)

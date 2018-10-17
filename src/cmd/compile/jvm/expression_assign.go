@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildExpressionAssign(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -46,8 +50,12 @@ func (buildExpression *BuildExpression) buildExpressionAssign(class *cg.ClassHig
 }
 
 // a,b,c = 122,fdfd2232,"hello";
-func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildAssign(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	assign := e.Data.(*ast.ExpressionAssign)
 	if e.IsStatementExpression == false || len(assign.Lefts) == 1 {
 		return buildExpression.buildExpressionAssign(class, code, e, context, state)
@@ -78,7 +86,9 @@ func (buildExpression *BuildExpression) buildAssign(class *cg.ClassHighLevel, co
 	return
 }
 
-func (buildExpression *BuildExpression) dupStackLeaveValueBelow(code *cg.AttributeCode, leftValueKind LeftValueKind,
+func (buildExpression *BuildExpression) dupStackLeaveValueBelow(
+	code *cg.AttributeCode,
+	leftValueKind LeftValueKind,
 	stackTopType *ast.Type) (increment uint16) {
 	switch leftValueKind {
 	case LeftValueKindLocalVar:

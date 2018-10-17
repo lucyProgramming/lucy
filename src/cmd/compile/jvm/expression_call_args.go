@@ -5,8 +5,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildCallArgs(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	args []*ast.Expression, vArgs *ast.CallVariableArgs, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildCallArgs(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	args []*ast.Expression,
+	vArgs *ast.CallVariableArgs,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	currentStack := uint16(0)
 	stackLength := len(state.Stacks)
 	defer func() {

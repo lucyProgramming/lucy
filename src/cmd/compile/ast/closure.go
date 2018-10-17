@@ -45,7 +45,7 @@ func (c *Closure) InsertVar(v *Variable) {
 		c.Variables = make(map[*Variable]struct{})
 	}
 	c.Variables[v] = struct{}{}
-	v.BeenCaptured++
+
 }
 
 func (c *Closure) InsertFunction(f *Function) {
@@ -56,14 +56,9 @@ func (c *Closure) InsertFunction(f *Function) {
 }
 
 func (c *Closure) Search(name string) interface{} {
-	for v, _ := range c.Variables {
-		if v.Name == name {
-			return v
-		}
-	}
-	for v, _ := range c.Functions {
-		if v.Name == name {
-			return v
+	for f, _ := range c.Functions {
+		if f.Name == name {
+			return f
 		}
 	}
 	return nil

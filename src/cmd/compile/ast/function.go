@@ -83,7 +83,7 @@ func (f *Function) makeName() {
 func (f *Function) checkBlock(errs *[]error) {
 	f.makeName()
 	f.makeLastReturnStatement()
-	*errs = append(*errs, f.Block.checkStatementsAndUnused()...)
+	*errs = append(*errs, f.Block.check()...)
 }
 
 func (f *Function) check(b *Block) []error {

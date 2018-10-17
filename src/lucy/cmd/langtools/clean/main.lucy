@@ -17,7 +17,7 @@ fn printUsageAndExit(code int){
 fn main(args []string){
 	recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
 	verbose := flagParser.boolOption("-v" , false , "verbose")
-	packageName ,err := flagParser.parse(args)
+	packageName , err := flagParser.parse(args)
 	if err != null {
 		printf("parse command line failed,err:%s\n" , err.toString())
 		os.exit(2)

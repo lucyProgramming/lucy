@@ -24,13 +24,13 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	if no.Type.Type != VariableTypeObject {
 		*errs = append(*errs,
 			fmt.Errorf("%s cannot have new on type '%s'",
-				no.Type.Pos.errMsgPrefix(), no.Type.TypeString()))
+				no.Type.Pos.ErrMsgPrefix(), no.Type.TypeString()))
 		return nil
 	}
 	err = no.Type.Class.loadSelf(e.Pos)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v",
-			no.Type.Pos.errMsgPrefix(), err))
+			no.Type.Pos.ErrMsgPrefix(), err))
 		return nil
 	}
 	if no.Type.Class.IsInterface() {
@@ -102,7 +102,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 	if amount == nil {
 		return ret
 	}
-	if amount.IsInteger() == false {
+	if amount.isInteger() == false {
 		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
 			errMsgPrefix(amount.Pos), amount.TypeString()))
 	}

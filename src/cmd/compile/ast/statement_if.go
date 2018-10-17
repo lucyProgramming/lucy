@@ -32,14 +32,14 @@ func (s *StatementIf) check(father *Block) []error {
 		if conditionType != nil &&
 			conditionType.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-				s.Condition.Pos.errMsgPrefix()))
+				s.Condition.Pos.ErrMsgPrefix()))
 		}
 		if err := s.Condition.canBeUsedAsCondition(); err != nil {
 			errs = append(errs, err)
 		}
 	}
 	s.TrueBlock.inherit(&s.initExpressionBlock)
-	errs = append(errs, s.TrueBlock.checkStatementsAndUnused()...)
+	errs = append(errs, s.TrueBlock.check()...)
 	for _, v := range s.ElseIfList {
 		v.Block.inherit(&s.initExpressionBlock)
 		if v.Condition != nil {
@@ -52,14 +52,14 @@ func (s *StatementIf) check(father *Block) []error {
 				conditionType.Type != VariableTypeBool {
 				errs = append(errs,
 					fmt.Errorf("%s condition is not a bool expression",
-						conditionType.Pos.errMsgPrefix()))
+						conditionType.Pos.ErrMsgPrefix()))
 			}
-			errs = append(errs, v.Block.checkStatementsAndUnused()...)
+			errs = append(errs, v.Block.check()...)
 		}
 	}
 	if s.ElseBlock != nil {
 		s.ElseBlock.inherit(&s.initExpressionBlock)
-		errs = append(errs, s.ElseBlock.checkStatementsAndUnused()...)
+		errs = append(errs, s.ElseBlock.check()...)
 	}
 	return errs
 }

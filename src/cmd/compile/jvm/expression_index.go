@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildIndex(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	index := e.Data.(*ast.ExpressionIndex)
 	if index.Expression.Value.Type == ast.VariableTypeMap {
 		return buildExpression.buildMapIndex(class, code, e, context, state)
@@ -64,8 +68,12 @@ func (buildExpression *BuildExpression) buildIndex(class *cg.ClassHighLevel, cod
 	return
 }
 
-func (buildExpression *BuildExpression) buildStringIndex(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildStringIndex(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -88,8 +96,12 @@ func (buildExpression *BuildExpression) buildStringIndex(class *cg.ClassHighLeve
 	code.CodeLength++
 	return
 }
-func (buildExpression *BuildExpression) buildMapIndex(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildExpression *BuildExpression) buildMapIndex(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)

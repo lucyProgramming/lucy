@@ -212,7 +212,7 @@ func (f *StatementFor) checkRange() []error {
 			}
 		}
 	}
-	errs = append(errs, f.Block.checkStatementsAndUnused()...)
+	errs = append(errs, f.Block.check()...)
 	return errs
 }
 func (f *StatementFor) check(block *Block) []error {
@@ -258,6 +258,6 @@ func (f *StatementFor) check(block *Block) []error {
 	if len(errs) > 0 {
 		return errs
 	}
-	errs = append(errs, f.Block.checkStatementsAndUnused()...)
+	errs = append(errs, f.Block.check()...)
 	return errs
 }

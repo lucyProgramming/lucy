@@ -140,14 +140,14 @@ func (b *Block) identifierIsWhat(d interface{}) string {
 	case *Type:
 		return "type alias"
 	default:
-		return "new item,call author"
+		return "new item , call author"
 	}
 }
 
 /*
 	search identifier
 */
-func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
+func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar ...*bool) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			t.Used = true
@@ -199,10 +199,14 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 		len(b.InheritedAttribute.Function.parameterTypes) > 0 {
 		return searchBuildIns(name), nil
 	}
+	if b.IsFunctionBlock &&
+		name == THIS {
+		return nil, nil
+	}
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchIdentifier(from, name) // search by outer block
+	t, err := b.Outer.searchIdentifier(from, name, isCaptureVar...) // search by outer block
 	if err != nil {
 		return t, err
 	}
@@ -213,16 +217,15 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 			if v.IsGlobal == false { // not a global variable
 				if b.IsFunctionBlock &&
 					b.InheritedAttribute.Function.IsGlobal == false {
-					if v.Name == THIS {
-						return nil, fmt.Errorf("%s capture '%s' not allow",
-							from.errMsgPrefix(), name) // capture this not allow
-					}
 					b.InheritedAttribute.Function.Closure.InsertVar(v)
+					for _, v := range isCaptureVar {
+						*v = true
+					}
 				}
 				//cannot search variable from class body
 				if b.InheritedAttribute.Class != nil && b.IsClassBlock {
 					return nil, fmt.Errorf("%s trying to access variable '%s' from class",
-						from.errMsgPrefix(), name)
+						from.ErrMsgPrefix(), name)
 				}
 			}
 		case *Function:
@@ -233,7 +236,7 @@ func (b *Block) searchIdentifier(from *Pos, name string) (interface{}, error) {
 				}
 				if b.IsClassBlock && f.IsClosureFunction {
 					return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
-						from.errMsgPrefix(), name)
+						from.ErrMsgPrefix(), name)
 				}
 			}
 		}
@@ -263,13 +266,12 @@ func (b *Block) checkUnUsed() (es []error) {
 			continue
 		}
 		es = append(es, fmt.Errorf("%s variable '%s' has declared,but not used",
-			v.Pos.errMsgPrefix(), v.Name))
+			v.Pos.ErrMsgPrefix(), v.Name))
 	}
-
 	return es
 }
 
-func (b *Block) checkStatementsAndUnused() []error {
+func (b *Block) check() []error {
 	errs := []error{}
 	for k, s := range b.Statements {
 		if s.isStaticFieldDefaultValue {
@@ -284,6 +286,7 @@ func (b *Block) checkStatementsAndUnused() []error {
 		}
 	}
 	errs = append(errs, b.checkUnUsed()...)
+
 	return errs
 }
 
@@ -316,8 +319,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if v, ok := b.Variables[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", v.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", v.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Classes == nil {
@@ -325,8 +328,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if c, ok := b.Classes[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", c.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", c.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Functions == nil {
@@ -334,8 +337,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if f, ok := b.Functions[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", f.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", f.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Constants == nil {
@@ -343,8 +346,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if c, ok := b.Constants[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", c.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", c.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.EnumNames == nil {
@@ -352,8 +355,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if en, ok := b.EnumNames[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", en.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", en.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.TypeAliases == nil {
@@ -361,8 +364,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if t, ok := b.TypeAliases[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", t.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", t.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	if b.Enums == nil {
@@ -370,8 +373,8 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	}
 	if e, ok := b.Enums[name]; ok {
 		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:\n",
-			pos.errMsgPrefix(), name)
-		errMsg += fmt.Sprintf("\t%s", e.Pos.errMsgPrefix())
+			pos.ErrMsgPrefix(), name)
+		errMsg += fmt.Sprintf("\t%s", e.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
 	return nil
@@ -379,19 +382,19 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 
 func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
-		return fmt.Errorf(`%s "" is not a valid name`, pos.errMsgPrefix())
+		return fmt.Errorf(`%s "" is not a valid name`, pos.ErrMsgPrefix())
 	}
 	if name == THIS {
-		return fmt.Errorf("%s '%s' already been taken", pos.errMsgPrefix(), THIS)
+		return fmt.Errorf("%s '%s' already been taken", pos.ErrMsgPrefix(), THIS)
 	}
 	if name == "_" {
-		return fmt.Errorf("%s '%s' is not a valid name", pos.errMsgPrefix(), name)
+		return fmt.Errorf("%s '%s' is not a valid name", pos.ErrMsgPrefix(), name)
 	}
 	if isMagicIdentifier(name) {
-		return fmt.Errorf("%s '%s' is not a magic identifier", pos.errMsgPrefix(), name)
+		return fmt.Errorf("%s '%s' is not a magic identifier", pos.ErrMsgPrefix(), name)
 	}
 	if searchBuildIns(name) != nil {
-		return fmt.Errorf("%s '%s' is buildin", pos.errMsgPrefix(), name)
+		return fmt.Errorf("%s '%s' is buildin", pos.ErrMsgPrefix(), name)
 	}
 	return nil
 }
@@ -418,8 +421,8 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		}
 		if l, ok := b.Labels[name]; ok {
 			errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
-				pos.errMsgPrefix(), name)
-			errMsg += fmt.Sprintf("\t%s", l.Statement.Pos.errMsgPrefix())
+				pos.ErrMsgPrefix(), name)
+			errMsg += fmt.Sprintf("\t%s", l.Statement.Pos.ErrMsgPrefix())
 			return fmt.Errorf(errMsg)
 		}
 		b.Labels[name] = label
@@ -436,7 +439,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		t := d.(*Function)
 		if buildInFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
-				pos.errMsgPrefix(), name)
+				pos.ErrMsgPrefix(), name)
 		}
 		b.Functions[name] = t
 	case *Constant:
