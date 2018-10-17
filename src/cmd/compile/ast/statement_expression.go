@@ -1,7 +1,7 @@
 package ast
 
 func (s *Statement) checkStatementExpression(block *Block) []error {
-	errs := []error{}
+	var errs []error
 	s.Expression.IsStatementExpression = true
 	if err := s.Expression.canBeUsedAsStatement(); err != nil {
 		errs = append(errs, err)

@@ -9,22 +9,22 @@ type StatementBreak struct {
 	SwitchTemplateBlock *Block
 }
 
-func (b *StatementBreak) check(s *Statement, block *Block) []error {
+func (b *StatementBreak) check(pos *Pos, block *Block) []error {
 	if block.InheritedAttribute.ForBreak == nil {
-		return []error{fmt.Errorf("%s 'break' cannot in this scope", errMsgPrefix(s.Pos))}
+		return []error{fmt.Errorf("%s 'break' cannot in this scope", pos.ErrMsgPrefix())}
 	}
 	if block.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
-			errMsgPrefix(s.Pos))}
+			pos.ErrMsgPrefix())}
 	}
 	if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
-		s.StatementBreak.StatementFor = t
+		b.StatementFor = t
 	} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
-		s.StatementBreak.StatementSwitch = t
+		b.StatementSwitch = t
 	} else {
-		s.StatementBreak.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
+		b.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
 	}
-	s.StatementBreak.mkDefers(block)
+	b.mkDefers(block)
 	return nil
 }
 

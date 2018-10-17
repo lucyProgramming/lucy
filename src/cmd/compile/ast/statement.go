@@ -78,13 +78,13 @@ func (s *Statement) check(block *Block) []error {
 	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:
-		return s.StatementBreak.check(s, block)
+		return s.StatementBreak.check(s.Pos, block)
 	case StatementTypeContinue:
-		return s.StatementContinue.check(s, block)
+		return s.StatementContinue.check(s.Pos, block)
 	case StatementTypeReturn:
-		return s.StatementReturn.check(s, block)
+		return s.StatementReturn.check(s.Pos, block)
 	case StatementTypeGoTo:
-		err := s.checkStatementGoTo(block)
+		err := s.StatementGoTo.checkStatementGoTo(s.Pos, block)
 		if err != nil {
 			return []error{err}
 		}
@@ -168,7 +168,6 @@ func (s *Statement) check(block *Block) []error {
 		}
 		is.Imports[s.Import.AccessName] = s.Import
 		is.ImportsByResources[s.Import.Import] = s.Import
-
 	case StatementTypeTypeAlias:
 		err := s.TypeAlias.Type.resolve(block)
 		if err != nil {

@@ -347,9 +347,11 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 	case *Type:
 		pos := typ.Pos
 		alias := typ.Alias
+		resolved := typ.Resolved
 		*typ = *d.(*Type)
 		typ.Pos = pos
 		typ.Alias = alias
+		typ.Resolved = resolved
 		return nil
 	case *Enum:
 		dd := d.(*Enum)

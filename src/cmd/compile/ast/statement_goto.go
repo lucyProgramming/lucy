@@ -10,26 +10,26 @@ type StatementGoTo struct {
 	StatementLabel *StatementLabel
 }
 
-func (s *Statement) checkStatementGoTo(b *Block) error {
-	label := b.searchLabel(s.StatementGoTo.LabelName)
+func (g *StatementGoTo) checkStatementGoTo(pos *Pos, b *Block) error {
+	label := b.searchLabel(g.LabelName)
 	if label == nil {
 		return fmt.Errorf("%s label named '%s' not found",
-			s.Pos.ErrMsgPrefix(), s.StatementGoTo.LabelName)
+			pos.ErrMsgPrefix(), g.LabelName)
 	}
-	s.StatementGoTo.StatementLabel = label
-	s.StatementGoTo.mkDefers(b)
-	return s.StatementGoTo.StatementLabel.Ready(s.Pos)
+	g.StatementLabel = label
+	g.mkDefers(b)
+	return g.StatementLabel.Ready(pos)
 }
 
-func (s *StatementGoTo) mkDefers(currentBlock *Block) {
+func (g *StatementGoTo) mkDefers(currentBlock *Block) {
 	bs := []*Block{}
-	for s.StatementLabel.Block != currentBlock {
+	for g.StatementLabel.Block != currentBlock {
 		bs = append(bs, currentBlock)
 		currentBlock = currentBlock.Outer
 	}
 	for _, b := range bs {
 		if b.Defers != nil {
-			s.Defers = append(s.Defers, b.Defers...)
+			g.Defers = append(g.Defers, b.Defers...)
 		}
 	}
 }

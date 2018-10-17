@@ -7,14 +7,14 @@ type StatementContinue struct {
 	Defers       []*StatementDefer
 }
 
-func (c *StatementContinue) check(s *Statement, block *Block) []error {
+func (c *StatementContinue) check(pos *Pos, block *Block) []error {
 	if block.InheritedAttribute.ForContinue == nil {
 		return []error{fmt.Errorf("%s 'continue' can`t in this scope",
-			errMsgPrefix(s.Pos))}
+			pos.ErrMsgPrefix())}
 	}
 	if block.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
-			errMsgPrefix(s.Pos))}
+			pos.ErrMsgPrefix())}
 	}
 	c.StatementFor = block.InheritedAttribute.ForContinue
 	c.mkDefers(block)

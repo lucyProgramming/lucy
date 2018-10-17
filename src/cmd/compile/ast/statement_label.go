@@ -44,7 +44,7 @@ func (s *StatementLabel) Ready(from *Pos) error {
 		return nil
 	}
 	/*
-		{
+		if false {
 			if true {
 				// jump over variable definition not allow
 				goto some ;
@@ -52,7 +52,6 @@ func (s *StatementLabel) Ready(from *Pos) error {
 		}
 		a := false ;
 		some:
-
 	*/
 	errMsg := fmt.Sprintf("%s cannot jump over variable definition:\n", from.ErrMsgPrefix())
 	for _, v := range ss {

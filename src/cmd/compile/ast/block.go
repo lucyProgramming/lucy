@@ -139,6 +139,8 @@ func (b *Block) identifierIsWhat(d interface{}) string {
 		return "class"
 	case *Type:
 		return "type alias"
+	case *Package:
+		return "package" // impossible, no big deal
 	default:
 		return "new item , call author"
 	}
@@ -231,9 +233,6 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar ...*bool) 
 		case *Function:
 			f := t.(*Function)
 			if f.IsGlobal == false {
-				if b.IsFunctionBlock {
-					b.InheritedAttribute.Function.Closure.InsertFunction(f)
-				}
 				if b.IsClassBlock && f.IsClosureFunction {
 					return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
 						from.ErrMsgPrefix(), name)

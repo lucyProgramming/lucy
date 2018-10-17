@@ -8,6 +8,7 @@ import (
 
 /*
 	public abstract final class {}
+	unlike function class not accept capture
 */
 type Class struct {
 	IsBuildIn                         bool
