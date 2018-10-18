@@ -79,6 +79,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		s.Defer.StartPc = code.CodeLength
 		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
 	case ast.StatementTypeClass:
+		oldName := s.Class.Name
 		var name string
 		if block.InheritedAttribute.ClassAndFunctionNames == "" {
 			name = s.Class.Name
@@ -86,7 +87,16 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			name = block.InheritedAttribute.ClassAndFunctionNames + "$" + s.Class.Name
 		}
 		s.Class.Name = buildPackage.newClassName(name)
+		innerClass := &cg.InnerClass{
+			InnerClass:  s.Class.Name,
+			OuterClass:  class.Name,
+			Name:        oldName,
+			AccessFlags: 0,
+		}
+		class.Class.AttributeInnerClasses.Classes =
+			append(class.Class.AttributeInnerClasses.Classes, innerClass)
 		c := buildPackage.buildClass(s.Class)
+		c.Class.AttributeInnerClasses.Classes = append(c.Class.AttributeInnerClasses.Classes, innerClass)
 		buildPackage.putClass(c)
 	case ast.StatementTypeNop:
 		// nop

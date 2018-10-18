@@ -31,13 +31,13 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
 		pos := values[len(values)-1].Pos
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
-			errMsgPrefix(pos),
+			pos.ErrMsgPrefix(),
 			len(valueTypes),
 			len(lefts)))
 	} else if len(lefts) < len(valueTypes) {
 		pos := getExtraExpressionPos(values, len(lefts))
 		*errs = append(*errs, fmt.Errorf("%s cannot assign %d value to %d detinations",
-			errMsgPrefix(pos),
+			pos.ErrMsgPrefix(),
 			len(valueTypes),
 			len(lefts)))
 	}

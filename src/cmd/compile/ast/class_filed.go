@@ -40,7 +40,7 @@ func (c *Class) getField(pos *Pos, name string, fromSub bool) (*ClassField, erro
 		return nil, err
 	}
 	notFoundErr := fmt.Errorf("%s field named '%s' not found",
-		errMsgPrefix(pos), name)
+		pos.ErrMsgPrefix(), name)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
 			// private field

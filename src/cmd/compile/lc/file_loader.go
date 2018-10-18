@@ -148,6 +148,9 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	if c.IsSynthetic() {
 		return nil, nil
 	}
+	if c.IsInnerClass() {
+		return nil, nil
+	}
 	//name
 	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameSignature); t != nil && len(t) > 0 {
 		//TODO:: support signature???
@@ -214,6 +217,9 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 
 func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	if c.IsSynthetic() {
+		return nil, nil
+	}
+	if c.IsInnerClass() {
 		return nil, nil
 	}
 	//name
@@ -624,8 +630,7 @@ func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	ret := &ast.Package{}
 	ret.Block.Classes = make(map[string]*ast.Class)
 	for _, v := range fis {
-		if strings.HasSuffix(v.Name(), ".class") == false ||
-			strings.Contains(v.Name(), "$") {
+		if strings.HasSuffix(v.Name(), ".class") == false {
 			continue
 		}
 		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))

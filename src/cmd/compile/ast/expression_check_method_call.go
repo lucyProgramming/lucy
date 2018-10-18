@@ -159,10 +159,8 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 	}
 	if matched {
 		m := ms[0]
-		if (object.Class.SuperClass.LoadFromOutSide && (m.IsPublic() == false || object.Class.SuperClass.IsPublic() == false)) ||
-			(object.Class.SuperClass.LoadFromOutSide == false && m.IsPrivate()) {
-			*errs = append(*errs, fmt.Errorf("%s construction method is not public",
-				e.Pos.ErrMsgPrefix()))
+		if err := object.Class.SuperClass.constructionMethodAccessAble(e.Pos, m); err != nil {
+			*errs = append(*errs, err)
 		}
 		call.Name = "<init>"
 		call.Method = m

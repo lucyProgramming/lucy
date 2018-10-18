@@ -21,13 +21,13 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	if len(lefts) > len(assignTypes) {
 		pos := values[len(values)-1].Pos
 		*errs = append(*errs, fmt.Errorf("%s too few values , assign %d values to %d destinations",
-			errMsgPrefix(pos),
+			pos.ErrMsgPrefix(),
 			len(assignTypes),
 			len(lefts)))
 	} else if len(lefts) < len(assignTypes) {
 		pos := getExtraExpressionPos(values, len(lefts))
 		*errs = append(*errs, fmt.Errorf("%s too many values , assign %d values to %d destinations",
-			errMsgPrefix(pos),
+			pos.ErrMsgPrefix(),
 			len(assignTypes),
 			len(lefts)))
 	}

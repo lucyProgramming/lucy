@@ -92,15 +92,15 @@ func shouldAccessFromImports(name string, from *Pos, alreadyHave *Pos) (*Import,
 
 func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type) error {
 	if len(ms) == 0 {
-		return fmt.Errorf("%s method '%s' not found", errMsgPrefix(pos), name)
+		return fmt.Errorf("%s method '%s' not found", pos.ErrMsgPrefix(), name)
 	}
 	var errMsg string
 	if len(ms) == 1 {
 		errMsg = fmt.Sprintf("%s cannot call method '%s':\n",
-			errMsgPrefix(pos), name)
+			pos.ErrMsgPrefix(), name)
 	} else {
 		errMsg = fmt.Sprintf("%s method named '%s' have no suitable match:\n",
-			errMsgPrefix(pos), name)
+			pos.ErrMsgPrefix(), name)
 	}
 	wantString := "fn " + name + " ("
 	for k, v := range want {
@@ -153,7 +153,7 @@ func checkConst(block *Block, c *Constant) error {
 	}
 	if is == false {
 		err := fmt.Errorf("%s const named '%s' is not defined by const value",
-			errMsgPrefix(c.Pos), c.Name)
+			c.Pos.ErrMsgPrefix(), c.Name)
 		return err
 	}
 	c.Value = c.DefaultValueExpression.Data
@@ -162,7 +162,7 @@ func checkConst(block *Block, c *Constant) error {
 		es := []error{}
 		if c.Type.assignAble(&es, t) == false {
 			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
-				errMsgPrefix(c.Pos), c.Type.TypeString(), t.TypeString())
+				c.Pos.ErrMsgPrefix(), c.Type.TypeString(), t.TypeString())
 			return err
 		}
 	} else { // means use old type

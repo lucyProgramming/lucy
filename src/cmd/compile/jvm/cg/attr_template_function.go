@@ -14,6 +14,7 @@ type AttributeTemplateFunction struct {
 	StartColumn uint16
 	Code        string
 	AccessFlag  uint16
+	Comment     string
 }
 
 func (a *AttributeTemplateFunction) FromBytes(class *Class, bs []byte) {
@@ -28,7 +29,7 @@ func (a *AttributeTemplateFunction) FromBytes(class *Class, bs []byte) {
 func (a *AttributeTemplateFunction) ToAttributeInfo(class *Class) *AttributeInfo {
 	info := &AttributeInfo{}
 	info.NameIndex = class.InsertUtf8Const(AttributeNameLucyTemplateFunction)
-	info.attributeLength = 12
+	info.attributeLength = 14
 	info.Info = make([]byte, info.attributeLength)
 	binary.BigEndian.PutUint16(info.Info, class.InsertUtf8Const(a.Name))
 	binary.BigEndian.PutUint16(info.Info[2:], class.InsertUtf8Const(a.Filename))
@@ -36,5 +37,6 @@ func (a *AttributeTemplateFunction) ToAttributeInfo(class *Class) *AttributeInfo
 	binary.BigEndian.PutUint16(info.Info[6:], a.StartColumn)
 	binary.BigEndian.PutUint16(info.Info[8:], class.InsertUtf8Const(a.Code))
 	binary.BigEndian.PutUint16(info.Info[10:], a.AccessFlag)
+	binary.BigEndian.PutUint16(info.Info[12:], class.InsertUtf8Const(a.Comment))
 	return info
 }

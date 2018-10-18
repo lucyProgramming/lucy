@@ -351,12 +351,10 @@ func (classParser *ClassParser) parseConst(comment *CommentParser) error {
 	if err != nil {
 		return err
 	}
-	constComment := ""
+	constComment := comment.Comment
 	if classParser.parser.token.Type == lex.TokenComment {
-		constComment = classParser.parser.token.Data.(string)
 		classParser.Next(lfIsToken)
 	} else {
-		constComment = comment.Comment
 		classParser.parser.validStatementEnding()
 	}
 	if classParser.ret.Block.Constants == nil {
@@ -392,12 +390,10 @@ func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser
 			classParser.consume(untilSemicolonOrLf)
 		}
 	}
-	fieldComment := ""
+	fieldComment := comment.Comment
 	if classParser.parser.token.Type == lex.TokenComment {
-		fieldComment = classParser.parser.token.Data.(string)
 		classParser.Next(lfIsToken)
 	} else {
-		fieldComment = comment.Comment
 		classParser.parser.validStatementEnding()
 	}
 

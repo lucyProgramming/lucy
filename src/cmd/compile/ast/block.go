@@ -252,6 +252,14 @@ func (b *Block) inherit(father *Block) {
 	}
 	b.InheritedAttribute = father.InheritedAttribute
 	b.Outer = father
+	if b.IsFunctionBlock || b.IsClassBlock {
+		b.InheritedAttribute.ForBreak = nil
+		b.InheritedAttribute.ForContinue = nil
+		b.InheritedAttribute.StatementOffset = 0
+		b.InheritedAttribute.IsConstructionMethod = false
+		b.InheritedAttribute.ClassMethod = nil
+		b.InheritedAttribute.Defer = nil
+	}
 }
 
 func (b *Block) checkUnUsed() (es []error) {

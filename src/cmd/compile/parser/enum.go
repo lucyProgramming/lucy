@@ -59,10 +59,6 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 				}
 			}
 			enumComment := comment.Comment
-			if parser.token.Type == lex.TokenComment {
-				enumComment = parser.token.Data.(string)
-				parser.Next(lfIsToken)
-			}
 			if e.Init == nil && value != nil {
 				e.Init = value
 				e.FirstValueIndex = len(e.Enums)

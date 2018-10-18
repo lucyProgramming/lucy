@@ -132,7 +132,7 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 				} else {
 					errs = append(errs,
 						fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
-							errMsgPrefix(pos), m.Function.readableMsg(), super.Name))
+							pos.ErrMsgPrefix(), m.Function.readableMsg(), super.Name))
 				}
 			}
 		}
@@ -239,7 +239,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 
 	if c.SuperClass.IsFinal() {
 		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
-			errMsgPrefix(c.Pos), c.Name, c.SuperClassName)
+			c.Pos.ErrMsgPrefix(), c.Name, c.SuperClass.Name)
 	}
 	for class.Name != JavaRootClass {
 		_, ok := m[class.Name]
@@ -263,7 +263,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		return nil
 	}
 	errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy",
-		errMsgPrefix(c.Pos), c.Name)
+		c.Pos.ErrMsgPrefix(), c.Name)
 	tab := "\t"
 	index := len(arr) - 1
 	for index >= 0 {
@@ -343,7 +343,7 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 				pos = nameMatch.Function.Pos
 			}
 			errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on interface '%s'",
-				errMsgPrefix(pos), m.Function.readableMsg(), inter.Name))
+				pos.ErrMsgPrefix(), m.Function.readableMsg(), inter.Name))
 		}
 	}
 	for _, v := range inter.Interfaces {
@@ -376,10 +376,9 @@ func (c *Class) checkFields() []error {
 					errMsgPrefix(v.Pos), assignment.TypeString(), v.Type.TypeString()))
 				continue
 			}
-			//TODO:: should check or not ???
 			if assignment.Type == VariableTypeNull {
 				errs = append(errs, fmt.Errorf("%s pointer types default value is '%s' already",
-					errMsgPrefix(v.Pos), assignment.TypeString()))
+					v.Pos.ErrMsgPrefix(), assignment.TypeString()))
 				continue
 			}
 			if v.IsStatic() &&

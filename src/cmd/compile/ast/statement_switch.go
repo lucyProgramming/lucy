@@ -130,7 +130,7 @@ func (s *StatementSwitch) check(block *Block) []error {
 					}
 					valueValid = true
 				} else {
-					errs = append(errs, fmt.Errorf("%s expression is not a literal value",
+					errs = append(errs, fmt.Errorf("%s expression is not literal",
 						errMsgPrefix(e.Pos)))
 					continue
 				}

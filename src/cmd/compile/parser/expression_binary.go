@@ -272,10 +272,8 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		newExpression.Description = name
 		if typ == lex.TokenAdd {
 			newExpression.Type = ast.ExpressionTypeAdd
-
 		} else {
 			newExpression.Type = ast.ExpressionTypeSub
-
 		}
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left

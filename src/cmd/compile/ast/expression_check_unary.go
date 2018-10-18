@@ -24,7 +24,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	if e.Type == ExpressionTypeNot {
 		if unary.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
-				errMsgPrefix(unary.Pos)))
+				unary.Pos.ErrMsgPrefix()))
 		}
 	}
 	if e.Type == ExpressionTypeNegative {
@@ -64,7 +64,7 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type
 	if false == increment.IsNumber() {
 		*errs = append(*errs,
 			fmt.Errorf("%s cannot apply '%s' on '%s'",
-				errMsgPrefix(on.Pos), on.Description, increment.TypeString()))
+				on.Pos.ErrMsgPrefix(), on.Description, increment.TypeString()))
 	}
 	result := increment.Clone()
 	result.Pos = e.Pos

@@ -175,7 +175,7 @@ func registerBuildInFunctions() {
 			}
 			if len(args) == 0 {
 				err := fmt.Errorf("%s '%s' expect one argument at lease",
-					errMsgPrefix(pos), common.BuildInFunctionSprintf)
+					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf)
 				*errs = append(*errs, err)
 				return
 			}
@@ -184,7 +184,7 @@ func registerBuildInFunctions() {
 			}
 			if args[0].Type != VariableTypeString {
 				err := fmt.Errorf("%s '%s' first argument must be string",
-					errMsgPrefix(pos), common.BuildInFunctionSprintf)
+					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf)
 				*errs = append(*errs, err)
 				return
 			}
@@ -214,7 +214,7 @@ func registerBuildInFunctions() {
 			}
 			if len(args) == 0 {
 				err := fmt.Errorf("%s '%s' expect one argument at lease",
-					errMsgPrefix(pos), typeOf.Name)
+					pos.ErrMsgPrefix(), typeOf.Name)
 				*errs = append(*errs, err)
 				return
 			}
@@ -243,7 +243,7 @@ func registerBuildInFunctions() {
 				e.BuildInFunctionMeta = meta
 				if len(args) == 0 {
 					err := fmt.Errorf("%s '%s' expect one argument at least",
-						errMsgPrefix(pos), common.BuildInFunctionPrintf)
+						pos.ErrMsgPrefix(), common.BuildInFunctionPrintf)
 					*errs = append(*errs, err)
 					return
 				}

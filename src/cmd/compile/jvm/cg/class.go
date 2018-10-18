@@ -1,6 +1,7 @@
 package cg
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 )
@@ -34,6 +35,7 @@ type Class struct {
 	AttributeLucyEnum       *AttributeLucyEnum
 	AttributeLucyComment    *AttributeLucyComment
 	AttributeLucyClassConst *AttributeLucyClassConst
+	AttributeInnerClasses   AttributeInnerClasses
 	//const caches
 	Utf8Constants               map[string]*ConstPool
 	IntConstants                map[int32]*ConstPool
@@ -354,7 +356,8 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 		}
 	}
 	//source file
-	c.Attributes = append(c.Attributes, (&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
+	c.Attributes = append(c.Attributes,
+		(&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(c))
 	for _, v := range c.TypeAlias {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
 	}
@@ -366,6 +369,9 @@ func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
 	}
 	if c.AttributeLucyClassConst != nil {
 		c.Attributes = append(c.Attributes, c.AttributeLucyClassConst.ToAttributeInfo(c))
+	}
+	if a := c.AttributeInnerClasses.ToAttributeInfo(c); a != nil {
+		c.Attributes = append(c.Attributes, a)
 	}
 	for _, v := range high.TemplateFunctions {
 		c.Attributes = append(c.Attributes, v.ToAttributeInfo(c))
@@ -381,4 +387,20 @@ func (c *Class) ifConstPoolOverMaxSize() {
 	if len(c.ConstPool) > ConstantPoolMaxSize {
 		panic(fmt.Sprintf("const pool max size is:%d", ConstantPoolMaxSize))
 	}
+}
+
+func (c *Class) IsInnerClass() (is bool) {
+	if len(c.AttributeGroupedByName[AttributeNameInnerClasses]) == 0 {
+		return
+	}
+	innerClass := c.AttributeGroupedByName[AttributeNameInnerClasses][0]
+	var attr AttributeInnerClasses
+	thisClassName := string(c.ConstPool[binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)].Info)
+	attr.FromBs(c, innerClass.Info)
+	for _, v := range attr.Classes {
+		if thisClassName == v.InnerClass {
+			return true
+		}
+	}
+	return
 }

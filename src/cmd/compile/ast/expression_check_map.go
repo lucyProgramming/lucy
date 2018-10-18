@@ -73,7 +73,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			m.Type.Map.K.Type == v.Key.Value.Type {
 			errMsg := func(pos *Pos, first *Pos, which interface{}) error {
 				errMsg := fmt.Sprintf("%s  '%v' duplicate key,first declared at:\n",
-					errMsgPrefix(pos), which)
+					pos.ErrMsgPrefix(), which)
 				errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
 				return errors.New(errMsg)
 			}

@@ -60,7 +60,6 @@ func (parser *Parser) Parse() []error {
 	parser.lexer = lex.New(parser.bs, 1, 1)
 	parser.Next(lfNotToken) //
 	if parser.token.Type == lex.TokenEof {
-		//TODO::empty source file , should forbidden???
 		return nil
 	}
 	for _, t := range parser.parseImports() {
@@ -524,7 +523,7 @@ func (parser *Parser) Next(lfIsToken bool) {
 }
 
 /*
-	errMsgPrefix(pos) only receive one argument
+	pos.ErrMsgPrefix() only receive one argument
 */
 func (parser *Parser) errMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
@@ -644,11 +643,9 @@ func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, er
 	if err != nil {
 		return nil, err
 	}
+	ret.Comment = comment.Comment
 	if parser.token.Type == lex.TokenComment {
-		ret.Comment = parser.token.Data.(string)
 		parser.Next(lfIsToken)
-	} else {
-		ret.Comment = comment.Comment
 	}
 	return ret, err
 }

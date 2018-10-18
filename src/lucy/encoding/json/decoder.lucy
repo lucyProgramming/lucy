@@ -341,7 +341,7 @@ public class Decoder {
 				case 'r':
 					bs.append('\r')
 					b = this.bs[this.offset++]
-				case 't':  // 1 
+				case 't':  
 					bs.append('\t')
 					b = this.bs[this.offset++]
 				case 'u':  // unicode
@@ -350,7 +350,7 @@ public class Decoder {
 						if b = this.bs[this.offset++] ; .isHex(b) == false {
 							panic(new error("expect hex number"))
 						}
-						c = c * 16 + char(.hexByte2Int(b))
+						c = (c << 4) | char(.hexByte2Int(b))
 					}
 					t := new char[](1)
 					t[0] = c 

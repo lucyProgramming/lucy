@@ -74,6 +74,6 @@ func loadJavaStringClass(pos *Pos) error {
 		return nil
 	} else {
 		return fmt.Errorf("%s '%s' is not class",
-			errMsgPrefix(pos), JavaStringClass)
+			pos.ErrMsgPrefix(), JavaStringClass)
 	}
 }

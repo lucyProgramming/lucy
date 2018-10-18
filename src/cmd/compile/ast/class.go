@@ -59,7 +59,7 @@ func (c *Class) loadSelf(pos *Pos) error {
 	c.NotImportedYet = false
 	load, err := PackageBeenCompile.loadClass(c.Name)
 	if err != nil {
-		return fmt.Errorf("%s %v", errMsgPrefix(pos), err)
+		return fmt.Errorf("%s %v", pos.ErrMsgPrefix(), err)
 	}
 	*c = *load
 	return nil
@@ -239,7 +239,8 @@ func (c *Class) resolveFather() error {
 			return err
 		}
 		if variableType.Type != VariableTypeObject {
-			err := fmt.Errorf("%s '%s' is not a class", errMsgPrefix(c.Pos), c.SuperClassName)
+			err := fmt.Errorf("%s '%s' is not a class",
+				c.Pos.ErrMsgPrefix(), c.SuperClassName.Name)
 			return err
 		}
 		c.SuperClass = variableType.Class
@@ -393,7 +394,7 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	}
 	class, err := PackageBeenCompile.loadClass(c.SuperClassName.Name)
 	if err != nil {
-		err := fmt.Errorf("%s %v", errMsgPrefix(pos), err)
+		err := fmt.Errorf("%s %v", pos.ErrMsgPrefix(), err)
 		return err
 	}
 	c.SuperClass = class
@@ -441,7 +442,7 @@ func (c *Class) getFieldOrMethod(pos *Pos, name string, fromSub bool) (interface
 	if err != nil {
 		return nil, err
 	}
-	notFoundErr := fmt.Errorf("%s field or method named '%s' not found", errMsgPrefix(pos), name)
+	notFoundErr := fmt.Errorf("%s field or method named '%s' not found", pos.ErrMsgPrefix(), name)
 	if c.Fields != nil && nil != c.Fields[name] {
 		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
 			// private field
@@ -470,4 +471,23 @@ func (c *Class) getFieldOrMethod(pos *Pos, name string, fromSub bool) (interface
 		return nil, notFoundErr
 	}
 	return c.SuperClass.getFieldOrMethod(pos, name, true)
+}
+
+func (c *Class) constructionMethodAccessAble(pos *Pos, method *ClassMethod) error {
+	if c.LoadFromOutSide {
+		if c.IsPublic() == false {
+			return fmt.Errorf("%s class '%s' is not public",
+				pos.ErrMsgPrefix(), c.Name)
+		}
+		if method.IsPublic() == false {
+			return fmt.Errorf("%s method '%s' is not public",
+				pos.ErrMsgPrefix(), method.Function.Name)
+		}
+	} else {
+		if method.IsPrivate() {
+			return fmt.Errorf("%s method '%s' is private",
+				pos.ErrMsgPrefix(), method.Function.Name)
+		}
+	}
+	return nil
 }

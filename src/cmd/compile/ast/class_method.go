@@ -34,7 +34,7 @@ func (m *ClassMethod) accessString() string {
 	if m.IsPrivate() {
 		return "private"
 	}
-	return `default ""` //TODO:: ???
+	return `default ""`
 }
 
 func (m *ClassMethod) isAccessFlagDefault() bool {
@@ -195,7 +195,7 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall
 			for _, m := range c.Methods[call.Name] {
 				if fromSub && m.ableAccessFromSubClass() == false {
 					return nil, false, fmt.Errorf("%s method '%s' not found",
-						errMsgPrefix(pos), call.Name)
+						pos.ErrMsgPrefix(), call.Name)
 				}
 				call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args,
 					callArgTypes, m.Function)
@@ -261,11 +261,11 @@ func (m *ClassMethod) implementationMethodIsOk(pos *Pos, implementation *ClassMe
 		pos = implementation.Function.Pos
 	}
 	if implementation.IsStatic() {
-		return fmt.Errorf("%s method '%s' is static", errMsgPrefix(pos), m.Function.Name)
+		return fmt.Errorf("%s method '%s' is static", pos.ErrMsgPrefix(), m.Function.Name)
 	}
 	if m.narrowDownAccessRange(implementation) {
 		return fmt.Errorf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
-			errMsgPrefix(pos), m.Function.Name, m.accessString(), implementation.accessString())
+			pos.ErrMsgPrefix(), m.Function.Name, m.accessString(), implementation.accessString())
 	}
 	return nil
 }
