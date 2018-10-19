@@ -387,11 +387,11 @@ func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []e
 	return ret, es
 }
 
-func (e *Expression) methodAccessAble(block *Block, m *ClassMethod) error {
+func (e *Expression) methodAccessAble(block *Block, method *ClassMethod) error {
 	if e.Value.Type == VariableTypeObject {
-		if m.IsStatic() {
+		if method.IsStatic() {
 			return fmt.Errorf("%s method '%s' is static",
-				e.Pos.ErrMsgPrefix(), m.Function.Name)
+				e.Pos.ErrMsgPrefix(), method.Function.Name)
 		}
 		if false == e.IsIdentifier(THIS) {
 			if e.Value.Class.LoadFromOutSide {
@@ -399,21 +399,21 @@ func (e *Expression) methodAccessAble(block *Block, m *ClassMethod) error {
 					return fmt.Errorf("%s class '%s' is not public",
 						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
-				if m.IsPublic() == false {
+				if method.IsPublic() == false {
 					return fmt.Errorf("%s method '%s' is not public",
-						e.Pos.ErrMsgPrefix(), m.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			} else {
-				if m.IsPrivate() {
+				if method.IsPrivate() {
 					return fmt.Errorf("%s method '%s' is private",
-						e.Pos.ErrMsgPrefix(), m.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			}
 		}
 	} else {
-		if m.IsStatic() == false {
+		if method.IsStatic() == false {
 			return fmt.Errorf("%s method '%s' is a instance method",
-				e.Pos.ErrMsgPrefix(), m.Function.Name)
+				e.Pos.ErrMsgPrefix(), method.Function.Name)
 		}
 		if e.Value.Class != block.InheritedAttribute.Class {
 			if e.Value.Class.LoadFromOutSide {
@@ -421,14 +421,14 @@ func (e *Expression) methodAccessAble(block *Block, m *ClassMethod) error {
 					return fmt.Errorf("%s class '%s' is not public",
 						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
-				if m.IsPublic() == false {
+				if method.IsPublic() == false {
 					return fmt.Errorf("%s method '%s' is not public",
-						e.Pos.ErrMsgPrefix(), m.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			} else {
-				if m.IsPrivate() {
+				if method.IsPrivate() {
 					return fmt.Errorf("%s method '%s' is private",
-						e.Pos.ErrMsgPrefix(), m.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			}
 		}
@@ -436,11 +436,11 @@ func (e *Expression) methodAccessAble(block *Block, m *ClassMethod) error {
 	return nil
 }
 
-func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassField) error {
+func (e *Expression) fieldAccessAble(block *Block, field *ClassField) error {
 	if e.Value.Type == VariableTypeObject {
-		if fieldMethodHandler.IsStatic() {
+		if field.IsStatic() {
 			return fmt.Errorf("%s field '%s' is static",
-				e.Pos.ErrMsgPrefix(), fieldMethodHandler.Name)
+				e.Pos.ErrMsgPrefix(), field.Name)
 		}
 		if false == e.IsIdentifier(THIS) {
 			if e.Value.Class.LoadFromOutSide {
@@ -448,21 +448,21 @@ func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassFiel
 					return fmt.Errorf("%s class '%s' is not public",
 						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
-				if fieldMethodHandler.IsPublic() == false {
+				if field.IsPublic() == false {
 					return fmt.Errorf("%s field '%s' is not public",
-						e.Pos.ErrMsgPrefix(), fieldMethodHandler.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			} else {
-				if fieldMethodHandler.IsPrivate() {
+				if field.IsPrivate() {
 					return fmt.Errorf("%s field '%s' is private",
-						e.Pos.ErrMsgPrefix(), fieldMethodHandler.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			}
 		}
 	} else { // class
-		if fieldMethodHandler.IsStatic() == false {
+		if field.IsStatic() == false {
 			return fmt.Errorf("%s field '%s' is not static",
-				e.Pos.ErrMsgPrefix(), fieldMethodHandler.Name)
+				e.Pos.ErrMsgPrefix(), field.Name)
 		}
 		if e.Value.Class != block.InheritedAttribute.Class {
 			if e.Value.Class.LoadFromOutSide {
@@ -470,14 +470,14 @@ func (e *Expression) fieldAccessAble(block *Block, fieldMethodHandler *ClassFiel
 					return fmt.Errorf("%s class '%s' is not public",
 						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
-				if fieldMethodHandler.IsPublic() == false {
+				if field.IsPublic() == false {
 					return fmt.Errorf("%s field '%s' is not public",
-						e.Pos.ErrMsgPrefix(), fieldMethodHandler.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			} else {
-				if fieldMethodHandler.IsPrivate() {
+				if field.IsPrivate() {
 					return fmt.Errorf("%s field '%s' is private",
-						e.Pos.ErrMsgPrefix(), fieldMethodHandler.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			}
 		}

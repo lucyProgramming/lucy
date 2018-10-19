@@ -365,22 +365,6 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	return
 }
 
-func (lex *Lexer) looksLikeT(bs []byte) bool {
-	if len(bs) == 0 {
-		return false
-	}
-	if bs[0] != 'T' {
-		return false
-	}
-	bs = bs[1:]
-	for _, v := range bs {
-		if !(v >= '0' && v <= '9') {
-			return false
-		}
-	}
-	return true
-}
-
 func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
 	token.StartLine = lex.line
@@ -411,15 +395,9 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 			}
 		}
 	} else {
-		if lex.looksLikeT(bs) {
-			token.Type = TokenTemplate
-			token.Data = identifier
-			token.Description = identifier
-		} else {
-			token.Type = TokenIdentifier
-			token.Data = identifier
-			token.Description = "identifier_" + identifier
-		}
+		token.Type = TokenIdentifier
+		token.Data = identifier
+		token.Description = "identifier_" + identifier
 	}
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
@@ -428,7 +406,7 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 
 func (lex *Lexer) tryLexElseIf() (is bool) {
 	c, eof := lex.getChar()
-	for (c == ' ' || c == '\t') && eof == false {
+	for c == ' ' || c == '\t' {
 		c, eof = lex.getChar()
 	}
 	if eof {

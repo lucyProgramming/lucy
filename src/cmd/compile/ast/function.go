@@ -19,6 +19,7 @@ type Function struct {
 	Closure                          Closure
 	Name                             string // if name is nil string,means no name function
 	Block                            Block
+	Function                         *Function
 	Pos                              *Pos
 	JvmDescriptor                    string
 	ClosureVariableOffSet            uint16 // for closure
@@ -122,7 +123,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error, checkReturnVarExpres
 	var err error
 	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true
-		if len(v.Type.getParameterType()) > 0 {
+		if len(v.Type.getParameterType(&f.Type)) > 0 {
 			if f.TemplateFunction == nil {
 				f.TemplateFunction = &TemplateFunction{}
 			}
@@ -185,7 +186,7 @@ func (f *Function) checkParametersAndReturns(errs *[]error, checkReturnVarExpres
 		//handler return
 		for _, v := range f.Type.ReturnList {
 			v.IsReturn = true
-			if len(v.Type.getParameterType()) > 0 {
+			if len(v.Type.getParameterType(&f.Type)) > 0 {
 				if f.TemplateFunction == nil {
 					f.TemplateFunction = &TemplateFunction{}
 				}

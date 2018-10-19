@@ -103,7 +103,6 @@ const (
 	TokenGoto                       // goto
 	TokenRange                      // range
 	TokenMap                        // map
-	TokenTemplate                   // T or T1
 	TokenQuestion                   // ?
 	TokenVolatile                   // volatile
 	TokenSynchronized               // synchronized
@@ -113,7 +112,9 @@ const (
 	TokenVArgs                      // ...
 	TokenComment                    //
 	TokenCommentMultiLine           //
-	TokenEof                        // end of file
+	TokenWhen                       // when
+	//TokenIs                         // is
+	TokenEof // end of file
 )
 
 var (
@@ -166,6 +167,7 @@ var (
 		"final":        TokenFinal,
 		"global":       TokenGlobal,
 		"abstract":     TokenAbstract,
+		"when":         TokenWhen,
 	}
 )
 

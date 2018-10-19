@@ -8,7 +8,8 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	call := e.Data.(*ExpressionFunctionCall)
 	if call.Expression.Type == ExpressionTypeIdentifier {
 		identifier := call.Expression.Data.(*ExpressionIdentifier)
-		d, err := block.searchIdentifier(call.Expression.Pos, identifier.Name)
+		var isCaptureVar bool
+		d, err := block.searchIdentifier(call.Expression.Pos, identifier.Name, &isCaptureVar)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
@@ -60,6 +61,9 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			return []*Type{ret}
 		case *Variable:
 			v := d.(*Variable)
+			if isCaptureVar {
+				v.BeenCapturedAsRightValue++
+			}
 			if v.Type.Type != VariableTypeFunction {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s' ",
 					call.Expression.Pos.ErrMsgPrefix(), v.Name, v.Type.TypeString()))
@@ -173,7 +177,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	for k, v := range f.Type.ParameterList {
 		if v == nil ||
 			v.Type == nil ||
-			len(v.Type.getParameterType()) == 0 {
+			len(v.Type.getParameterType(&f.Type)) == 0 {
 			continue
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
@@ -181,18 +185,18 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				e.Pos.ErrMsgPrefix(), k))
 			return
 		}
-		if err := v.Type.canBeBindWithType(parameterTypes, argTypes[k]); err != nil {
+		if err := v.Type.canBeBindWithType(&f.Type, parameterTypes, argTypes[k]); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v",
 				errMsgPrefix(argTypes[k].Pos), err))
 			return
 		}
 		t := v.Type.Clone()
-		t.bindWithParameterTypes(parameterTypes)
+		t.bindWithParameterTypes(&f.Type, parameterTypes)
 		parameterTypeArray = append(parameterTypeArray, t)
 	}
 	tps := call.ParameterTypes
 	for k, v := range f.Type.ReturnList {
-		if v == nil || v.Type == nil || len(v.Type.getParameterType()) == 0 {
+		if v == nil || v.Type == nil || len(v.Type.getParameterType(&f.Type)) == 0 {
 			continue
 		}
 		if len(tps) == 0 || tps[0] == nil {
@@ -200,7 +204,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 			if err := v.Type.canBeBindWithParameterTypes(parameterTypes); err == nil {
 				//very good no error
 				t := v.Type.Clone()
-				t.bindWithParameterTypes(parameterTypes)
+				t.bindWithParameterTypes(&f.Type, parameterTypes)
 				parameterTypeArray = append(parameterTypeArray, t)
 				continue
 			}
@@ -208,13 +212,13 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				e.Pos.ErrMsgPrefix(), k))
 			return
 		}
-		if err := v.Type.canBeBindWithType(parameterTypes, tps[0]); err != nil {
+		if err := v.Type.canBeBindWithType(&f.Type, parameterTypes, tps[0]); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v",
 				errMsgPrefix(tps[0].Pos), err))
 			return nil
 		}
 		t := v.Type.Clone()
-		t.bindWithParameterTypes(parameterTypes)
+		t.bindWithParameterTypes(&f.Type, parameterTypes)
 		parameterTypeArray = append(parameterTypeArray, t)
 		tps = tps[1:]
 	}
@@ -229,13 +233,13 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		call.TemplateFunctionCallPair.Function = cloneFunction
 		cloneFunction.parameterTypes = parameterTypes
 		for _, v := range cloneFunction.Type.ParameterList {
-			if len(v.Type.getParameterType()) > 0 {
+			if len(v.Type.getParameterType(&f.Type)) > 0 {
 				v.Type = parameterTypeArray[0]
 				parameterTypeArray = parameterTypeArray[1:]
 			}
 		}
 		for _, v := range cloneFunction.Type.ReturnList {
-			if len(v.Type.getParameterType()) > 0 {
+			if len(v.Type.getParameterType(&f.Type)) > 0 {
 				v.Type = parameterTypeArray[0]
 				parameterTypeArray = parameterTypeArray[1:]
 			}

@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-type StatementSwitchTemplate struct {
-	Pos                  *Pos
-	Condition            *Type //switch
-	StatementSwitchCases []*StatementSwitchTemplateCase
-	Default              *Block
+type StatementWhen struct {
+	Pos       *Pos
+	Condition *Type //switch
+	Cases     []*StatementWhenIs
+	Default   *Block
 }
 
-type StatementSwitchTemplateCase struct {
+type StatementWhenIs struct {
 	Matches []*Type
 	Block   *Block
 }
@@ -20,7 +20,7 @@ type StatementSwitchTemplateCase struct {
 /*
 	switchStatement will be override
 */
-func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement) (errs []error) {
+func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []error) {
 	if s.Condition == nil { // must be a error must parse stage
 		return nil
 	}
@@ -41,7 +41,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 		}
 		return nil
 	}
-	for _, t := range s.StatementSwitchCases {
+	for _, t := range s.Cases {
 		for _, tt := range t.Matches {
 			if err := tt.resolve(block); err != nil {
 				errs = append(errs, err)
@@ -78,7 +78,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 			switchStatement.Type = StatementTypeBlock
 			switchStatement.Block = s.Default
 			switchStatement.Block.inherit(block)
-			switchStatement.Block.IsSwitchTemplateBlock = true
+			switchStatement.Block.IsWhenBlock = true
 			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
 			errs = append(errs, switchStatement.Block.check()...)
 		}
@@ -92,7 +92,7 @@ func (s *StatementSwitchTemplate) check(block *Block, switchStatement *Statement
 		switchStatement.Type = StatementTypeBlock
 		switchStatement.Block = matchBlock
 		switchStatement.Block.inherit(block)
-		switchStatement.Block.IsSwitchTemplateBlock = true
+		switchStatement.Block.IsWhenBlock = true
 		switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
 		return append(errs, switchStatement.Block.check()...)
 	}

@@ -12,7 +12,7 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 		if condition.Type != VariableTypeBool {
 			*errs = append(*errs,
 				fmt.Errorf("%s not a bool expression",
-					errMsgPrefix(question.Selection.Pos)))
+					question.Selection.Pos.ErrMsgPrefix()))
 		}
 		if err := question.Selection.canBeUsedAsCondition(); err != nil {
 			*errs = append(*errs, err)
@@ -40,7 +40,7 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 	}
 	if tType.assignAble(errs, fType) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-			errMsgPrefix(question.False.Pos), fType.TypeString(), tType.TypeString()))
+			fType.Pos.ErrMsgPrefix(), fType.TypeString(), tType.TypeString()))
 	}
 	return ret
 }

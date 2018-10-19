@@ -17,8 +17,9 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 		}
 	}
 	if ev.Type == nil && len(ev.InitValues) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s expression var have not type and no initValues",
-			errMsgPrefix(e.Pos)))
+		*errs = append(*errs,
+			fmt.Errorf("%s expression var have not type and no initValues",
+				errMsgPrefix(e.Pos)))
 		return
 	}
 	var err error

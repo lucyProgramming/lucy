@@ -1,11 +1,11 @@
 
 returnErr := new error("return value is wrong")
 
-fn returnTemplateFunction1(a T) ->(r T = a ) {
+fn returnTemplateFunction1 <T> (a T) ->(r T = a ) {
 	
 }
 
-fn returnTemplateFunction2(a T ,b T2) ->(r T = a , r2 T2  = b ) {
+fn returnTemplateFunction2 <T , T2 > (a T ,b T2) ->(r T = a , r2 T2  = b ) {
 	
 }
 

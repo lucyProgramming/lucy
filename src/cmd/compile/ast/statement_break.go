@@ -44,7 +44,7 @@ func (b *StatementBreak) mkDefers(block *Block) {
 		}
 		b.mkDefers(block.Outer)
 	} else { //s.SwitchTemplateBlock != nil
-		if block.IsSwitchTemplateBlock {
+		if block.IsWhenBlock {
 			b.Defers = append(b.Defers, block.Defers...)
 			return
 		}

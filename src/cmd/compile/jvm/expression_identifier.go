@@ -1,6 +1,7 @@
 package jvm
 
 import (
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -11,7 +12,8 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(
 	e *ast.Expression,
 	context *Context) (maxStack uint16) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-	//fmt.Println(identifier.Name, identifier.Variable.BeenCapturedAsLeftValue, context.function.Closure.ClosureVariableExist(identifier.Variable))
+	fmt.Println(identifier.Name, identifier.Variable.BeenCapturedAsLeftValue,
+		context.function.Closure.ClosureVariableExist(identifier.Variable))
 	maxStack = jvmSlotSize(identifier.Variable.Type)
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) {
 		if identifier.Variable.BeenCapturedAsLeftValue > 0 {

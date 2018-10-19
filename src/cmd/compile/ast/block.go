@@ -14,10 +14,11 @@ type Block struct {
 	Defers                          []*StatementDefer
 	IsGlobalVariableDefinitionBlock bool
 	IsFunctionBlock                 bool // function block
+	Fn                              *Function
 	IsClassBlock                    bool // class block
 	IsForBlock                      bool // for top block
 	IsSwitchBlock                   bool // switch statement list block
-	IsSwitchTemplateBlock           bool // template swtich statement list block
+	IsWhenBlock                     bool // template swtich statement list block
 	Pos                             *Pos
 	EndPos                          *Pos
 	Outer                           *Block
@@ -103,22 +104,33 @@ func (b *Block) searchLabel(name string) *StatementLabel {
 	search type
 */
 func (b *Block) searchType(name string) interface{} {
-	outer := b
-	for outer != nil {
-		if outer.Classes != nil {
-			if t, ok := outer.Classes[name]; ok {
+	bb := b
+	for bb != nil {
+		if bb.Classes != nil {
+			if t, ok := bb.Classes[name]; ok {
 				t.Used = true
-				return t
-			}
-			if t, ok := outer.Enums[name]; ok {
-				t.Used = true
-				return t
-			}
-			if t, ok := outer.TypeAliases[name]; ok {
 				return t
 			}
 		}
-		outer = outer.Outer
+		if bb.Enums != nil {
+			if t, ok := bb.Enums[name]; ok {
+				t.Used = true
+				return t
+			}
+		}
+		if bb.TypeAliases != nil {
+			if t, ok := bb.TypeAliases[name]; ok {
+				return t
+			}
+		}
+		if bb.IsFunctionBlock && bb.Fn != nil {
+			if bb.Fn.parameterTypes != nil {
+				if t := bb.Fn.parameterTypes[name]; t != nil {
+					return t
+				}
+			}
+		}
+		bb = bb.Outer
 	}
 	return nil
 }
@@ -149,7 +161,7 @@ func (b *Block) identifierIsWhat(d interface{}) string {
 /*
 	search identifier
 */
-func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar ...*bool) (interface{}, error) {
+func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (interface{}, error) {
 	if b.Functions != nil {
 		if t, ok := b.Functions[name]; ok {
 			t.Used = true
@@ -190,6 +202,13 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar ...*bool) 
 			return t, nil
 		}
 	}
+	if b.IsFunctionBlock && b.Fn != nil {
+		if b.Fn.parameterTypes != nil {
+			if t := b.Fn.parameterTypes[name]; t != nil {
+				return t, nil
+			}
+		}
+	}
 	// search closure
 	if b.InheritedAttribute.Function != nil {
 		v := b.InheritedAttribute.Function.Closure.Search(name)
@@ -208,7 +227,7 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar ...*bool) 
 	if b.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchIdentifier(from, name, isCaptureVar...) // search by outer block
+	t, err := b.Outer.searchIdentifier(from, name, isCaptureVar) // search by outer block
 	if err != nil {
 		return t, err
 	}
@@ -220,8 +239,8 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar ...*bool) 
 				if b.IsFunctionBlock &&
 					b.InheritedAttribute.Function.IsGlobal == false {
 					b.InheritedAttribute.Function.Closure.InsertVar(v)
-					for _, v := range isCaptureVar {
-						*v = true
+					if isCaptureVar != nil {
+						*isCaptureVar = true
 					}
 				}
 				//cannot search variable from class body

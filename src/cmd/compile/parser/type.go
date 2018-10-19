@@ -125,13 +125,7 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Map:  m,
 			Pos:  pos,
 		}
-	case lex.TokenTemplate:
-		ret = &ast.Type{
-			Type: ast.VariableTypeTemplate,
-			Pos:  pos,
-			Name: parser.token.Data.(string),
-		}
-		parser.Next(lfIsToken)
+
 	case lex.TokenFn:
 		parser.Next(lfIsToken)
 		ft, err := parser.parseFunctionType()
@@ -217,7 +211,6 @@ func (parser *Parser) isValidTypeBegin() bool {
 		parser.token.Type == lex.TokenString ||
 		parser.token.Type == lex.TokenMap ||
 		parser.token.Type == lex.TokenIdentifier ||
-		parser.token.Type == lex.TokenTemplate ||
 		parser.token.Type == lex.TokenFn
 }
 

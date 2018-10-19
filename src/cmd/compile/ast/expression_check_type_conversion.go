@@ -66,6 +66,6 @@ func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) 
 		return ret
 	}
 	*errs = append(*errs, fmt.Errorf("%s cannot convert '%s' to '%s'",
-		errMsgPrefix(on.Pos), on.TypeString(), conversion.Type.TypeString()))
+		on.Pos.ErrMsgPrefix(), on.TypeString(), conversion.Type.TypeString()))
 	return ret
 }

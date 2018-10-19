@@ -57,6 +57,7 @@ func (functionParser *FunctionParser) parse(needName bool, isAbstract bool) (f *
 		functionParser.consume(untilLc)
 	}
 	f.Block.IsFunctionBlock = true
+	f.Block.Fn = f
 	functionParser.Next(lfNotToken) // skip {
 	functionParser.parser.BlockParser.parseStatementList(&f.Block, false)
 	if functionParser.parser.token.Type != lex.TokenRc {

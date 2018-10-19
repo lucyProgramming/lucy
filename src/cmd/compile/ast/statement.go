@@ -16,7 +16,7 @@ const (
 	StatementTypeReturn
 	StatementTypeBreak
 	StatementTypeSwitch
-	StatementTypeSwitchTemplate
+	StatementTypeWhen
 	StatementTypeLabel
 	StatementTypeGoTo
 	StatementTypeDefer
@@ -37,7 +37,7 @@ type Statement struct {
 	StatementFor              *StatementFor
 	StatementReturn           *StatementReturn
 	StatementSwitch           *StatementSwitch
-	StatementSwitchTemplate   *StatementSwitchTemplate
+	StatementWhen             *StatementWhen
 	StatementBreak            *StatementBreak
 	Block                     *Block
 	StatementContinue         *StatementContinue
@@ -119,8 +119,8 @@ func (s *Statement) check(block *Block) []error {
 	case StatementTypeNop:
 		//nop , should be never execute to here
 		//
-	case StatementTypeSwitchTemplate:
-		return s.StatementSwitchTemplate.check(block, s)
+	case StatementTypeWhen:
+		return s.StatementWhen.check(block, s)
 	case StatementTypeImport:
 		if block.InheritedAttribute.Function.TemplateClonedFunction == false {
 			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",

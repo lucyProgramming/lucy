@@ -128,19 +128,24 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next(lfNotToken)
 				continue
 			}
-			if _, ok := statement.(*ast.StatementSwitch); ok {
-				block.Statements = append(block.Statements, &ast.Statement{
-					Type:            ast.StatementTypeSwitch,
-					StatementSwitch: statement.(*ast.StatementSwitch),
-					Pos:             pos,
-				})
-			} else {
-				block.Statements = append(block.Statements, &ast.Statement{
-					Type: ast.StatementTypeSwitchTemplate,
-					StatementSwitchTemplate: statement.(*ast.StatementSwitchTemplate),
-					Pos: pos,
-				})
+			block.Statements = append(block.Statements, &ast.Statement{
+				Type:            ast.StatementTypeSwitch,
+				StatementSwitch: statement,
+				Pos:             pos,
+			})
+		case lex.TokenWhen:
+			pos := blockParser.parser.mkPos()
+			statement, err := blockParser.parseWhen()
+			if err != nil {
+				blockParser.consume(untilRc)
+				blockParser.Next(lfNotToken)
+				continue
 			}
+			block.Statements = append(block.Statements, &ast.Statement{
+				Type:          ast.StatementTypeWhen,
+				StatementWhen: statement,
+				Pos:           pos,
+			})
 		case lex.TokenConst:
 			pos := blockParser.parser.mkPos()
 			blockParser.Next(lfIsToken)

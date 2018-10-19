@@ -11,7 +11,7 @@ public class Lucy extends javaRootClass {}
 
 
 
-public fn copy(dest T , src T2 , start int = 0 , end int = -1) -> (r T = dest) {
+public fn copy < destArray, srcArray > (dest destArray , src srcArray , start int = 0 , end int = -1) -> (r destArray = dest) {
 	if end == -1 {
 		end = src.size();
 	}
@@ -20,14 +20,15 @@ public fn copy(dest T , src T2 , start int = 0 , end int = -1) -> (r T = dest) {
 	}
 }
 
+
  
-public fn javaArray2Lucy(java T[] ,start int = 0 , end int = -1 ) -> (lucy []T) {
+public fn javaArray2Lucy  <array > (java array[] ,start int = 0 , end int = -1 ) -> (lucy []array) {
 	import "lucy/deps"
 	if end == -1 {
 		end = java.size()  
 	}
-	typealias retType = []T
-	switch T {
+	typealias retType = []array
+	when array {
 		case bool:
 			a := new deps.ArrayBool()
 			a.start = start 

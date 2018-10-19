@@ -1,7 +1,7 @@
 import "lucy/lang"
 
-fn testT(t T) ->(typeString string) {
-	switch T {
+fn testT <T> (  t T) ->(typeString string) {
+	when T {
 		case bool:
 			typeString = "bool"
 	    case byte:

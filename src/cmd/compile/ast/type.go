@@ -479,20 +479,24 @@ func (typ *Type) TypeString() string {
 	typ.typeString(&t)
 	return t
 }
-func (typ *Type) getParameterType() []string {
+func (typ *Type) getParameterType(ft *FunctionType) []string {
+	if typ.Type == VariableTypeName &&
+		ft.haveTemplateName(typ.Name) {
+		typ.Type = VariableTypeTemplate // convert to type
+	}
 	if typ.Type == VariableTypeTemplate {
 		return []string{typ.Name}
 	}
 	if typ.Type == VariableTypeArray ||
 		typ.Type == VariableTypeJavaArray {
-		return typ.Array.getParameterType()
+		return typ.Array.getParameterType(ft)
 	}
 	if typ.Type == VariableTypeMap {
 		ret := []string{}
-		if t := typ.Map.K.getParameterType(); t != nil {
+		if t := typ.Map.K.getParameterType(ft); t != nil {
 			ret = append(ret, t...)
 		}
-		if t := typ.Map.V.getParameterType(); t != nil {
+		if t := typ.Map.V.getParameterType(ft); t != nil {
 			ret = append(ret, t...)
 		}
 		return ret
@@ -525,7 +529,7 @@ func (typ *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) er
 /*
 	if there is error,this function will crash
 */
-func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
+func (typ *Type) bindWithParameterTypes(ft *FunctionType, parameterTypes map[string]*Type) error {
 	if typ.Type == VariableTypeTemplate {
 		t, ok := parameterTypes[typ.Name]
 		if ok == false {
@@ -535,17 +539,17 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 		return nil
 	}
 	if typ.Type == VariableTypeArray || typ.Type == VariableTypeJavaArray {
-		return typ.Array.bindWithParameterTypes(parameterTypes)
+		return typ.Array.bindWithParameterTypes(ft, parameterTypes)
 	}
 	if typ.Type == VariableTypeMap {
-		if len(typ.Map.K.getParameterType()) > 0 {
-			err := typ.Map.K.bindWithParameterTypes(parameterTypes)
+		if len(typ.Map.K.getParameterType(ft)) > 0 {
+			err := typ.Map.K.bindWithParameterTypes(ft, parameterTypes)
 			if err != nil {
 				return err
 			}
 		}
-		if len(typ.Map.V.getParameterType()) > 0 {
-			return typ.Map.V.bindWithParameterTypes(parameterTypes)
+		if len(typ.Map.V.getParameterType(ft)) > 0 {
+			return typ.Map.V.bindWithParameterTypes(ft, parameterTypes)
 		}
 	}
 	panic("not T")
@@ -554,7 +558,7 @@ func (typ *Type) bindWithParameterTypes(parameterTypes map[string]*Type) error {
 /*
 
  */
-func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type) error {
+func (typ *Type) canBeBindWithType(ft *FunctionType, mkParameterTypes map[string]*Type, bind *Type) error {
 	if err := bind.rightValueValid(); err != nil {
 		return err
 	}
@@ -566,20 +570,20 @@ func (typ *Type) canBeBindWithType(mkParameterTypes map[string]*Type, bind *Type
 		return nil
 	}
 	if typ.Type == VariableTypeArray && bind.Type == VariableTypeArray {
-		return typ.Array.canBeBindWithType(mkParameterTypes, bind.Array)
+		return typ.Array.canBeBindWithType(ft, mkParameterTypes, bind.Array)
 	}
 	if typ.Type == VariableTypeJavaArray && bind.Type == VariableTypeJavaArray {
-		return typ.Array.canBeBindWithType(mkParameterTypes, bind.Array)
+		return typ.Array.canBeBindWithType(ft, mkParameterTypes, bind.Array)
 	}
 	if typ.Type == VariableTypeMap && bind.Type == VariableTypeMap {
-		if len(typ.Map.K.getParameterType()) > 0 {
-			err := typ.Map.K.canBeBindWithType(mkParameterTypes, bind.Map.K)
+		if len(typ.Map.K.getParameterType(ft)) > 0 {
+			err := typ.Map.K.canBeBindWithType(ft, mkParameterTypes, bind.Map.K)
 			if err != nil {
 				return err
 			}
 		}
-		if len(typ.Map.V.getParameterType()) > 0 {
-			return typ.Map.V.canBeBindWithType(mkParameterTypes, bind.Map.V)
+		if len(typ.Map.V.getParameterType(ft)) > 0 {
+			return typ.Map.V.canBeBindWithType(ft, mkParameterTypes, bind.Map.V)
 		}
 	}
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())

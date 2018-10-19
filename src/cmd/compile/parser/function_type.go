@@ -9,6 +9,19 @@ import (
 //(a,b int)->(total int)
 func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err error) {
 	functionType = ast.FunctionType{}
+	if parser.token.Type == lex.TokenLt {
+		parser.Next(lfNotToken)
+		var err error
+		functionType.TemplateNames, err = parser.parseNameList()
+		if err != nil {
+			parser.consume(untilLp)
+			goto skipTemplateNames
+		}
+		parser.errs = append(parser.errs, functionType.CheckTemplateNameDuplication()...)
+		parser.Next(lfIsToken)
+	}
+	parser.unExpectNewLineAndSkip()
+skipTemplateNames:
 	if parser.token.Type != lex.TokenLp {
 		err = fmt.Errorf("%s fn declared wrong,missing '(',but '%s'",
 			parser.errMsgPrefix(), parser.token.Description)

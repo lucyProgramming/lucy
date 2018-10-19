@@ -1,13 +1,41 @@
 package ast
 
 import (
+	"errors"
 	"fmt"
 )
 
 type FunctionType struct {
+	TemplateNames []*NameWithPos
 	ParameterList ParameterList
 	ReturnList    ReturnList
 	VArgs         *Variable
+}
+
+func (ft *FunctionType) CheckTemplateNameDuplication() []error {
+	errs := []error{}
+	m := make(map[string]*Pos)
+	for _, v := range ft.TemplateNames {
+		if p, ok := m[v.Name]; ok {
+			errMsg :=
+				fmt.Sprintf("%s duplicated name '%s' , first declaraed at:\n",
+					v.Pos.ErrMsgPrefix(), v.Name)
+			errMsg += fmt.Sprintf("\t%s\n", p.ErrMsgPrefix())
+			errs = append(errs, errors.New(errMsg))
+			continue
+		}
+		m[v.Name] = v.Pos
+	}
+	return errs
+}
+
+func (ft *FunctionType) haveTemplateName(name string) bool {
+	for _, v := range ft.TemplateNames {
+		if v.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 type ParameterList []*Variable

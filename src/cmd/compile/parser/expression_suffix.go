@@ -313,12 +313,6 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		if err != nil {
 			return prefix, err
 		}
-		// T()
-	case lex.TokenTemplate:
-		prefix, err = expressionParser.parseTypeConversionExpression()
-		if err != nil {
-			return prefix, err
-		}
 		// range
 	case lex.TokenRange:
 		pos := expressionParser.parser.mkPos()
