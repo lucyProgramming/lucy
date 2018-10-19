@@ -180,17 +180,9 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 			m.Function.Block.InheritedAttribute.Function = m.Function
 			m.Function.Block.InheritedAttribute.ClassMethod = m
 			m.Function.checkParametersAndReturns(&errs, false, m.IsAbstract())
-			for _, v := range m.Function.Type.ParameterList {
-				if v.Type.Type == VariableTypeTemplate {
-					errs = append(errs, fmt.Errorf("%s cannot use template for method",
-						errMsgPrefix(v.Type.Pos)))
-				}
-			}
-			for _, v := range m.Function.Type.ReturnList {
-				if v.Type.Type == VariableTypeTemplate {
-					errs = append(errs, fmt.Errorf("%s cannot use template for method",
-						errMsgPrefix(v.Type.Pos)))
-				}
+			if len(m.Function.Type.TemplateNames) > 0 {
+				errs = append(errs, fmt.Errorf("%s cannot use template for method",
+					errMsgPrefix(m.Function.Pos)))
 			}
 			if m.IsStatic() == false { // bind this
 				if m.Function.Block.Variables == nil {

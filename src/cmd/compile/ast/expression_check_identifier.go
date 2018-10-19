@@ -40,8 +40,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		result.Class = block.InheritedAttribute.Class
 		return result, nil
 	case magicIdentifierFunction:
-		if block.InheritedAttribute.Function.isGlobalVariableDefinition ||
-			block.InheritedAttribute.Function.isPackageInitBlockFunction {
+		if block.InheritedAttribute.Function.isPackageInitBlockFunction {
 			return nil,
 				fmt.Errorf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name)
 		}

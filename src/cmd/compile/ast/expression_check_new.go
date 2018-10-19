@@ -100,8 +100,9 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 		return ret
 	}
 	if amount.isInteger() == false {
-		*errs = append(*errs, fmt.Errorf("%s argument must be 'int',but '%s'",
-			errMsgPrefix(amount.Pos), amount.TypeString()))
+		*errs = append(*errs,
+			fmt.Errorf("%s argument must be 'int',but '%s'",
+				errMsgPrefix(amount.Pos), amount.TypeString()))
 	}
 	if amount.Type == VariableTypeLong {
 		newArray.Args[0].convertToNumber(VariableTypeLong)

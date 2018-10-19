@@ -6,13 +6,13 @@ import (
 )
 
 type StatementWhen struct {
-	Pos       *Pos
-	Condition *Type //switch
-	Cases     []*StatementWhenIs
-	Default   *Block
+	Pos     *Pos
+	When    *Type
+	Cases   []*StatementWhenCase
+	Default *Block
 }
 
-type StatementWhenIs struct {
+type StatementWhenCase struct {
 	Matches []*Type
 	Block   *Block
 }
@@ -21,12 +21,12 @@ type StatementWhenIs struct {
 	switchStatement will be override
 */
 func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []error) {
-	if s.Condition == nil { // must be a error must parse stage
+	if s.When == nil { // must be a error must parse stage
 		return nil
 	}
 	errs = []error{}
-	TName := s.Condition.Name
-	if err := s.Condition.resolve(block); err != nil {
+	TName := s.When.Name
+	if err := s.When.resolve(block); err != nil {
 		errs = append(errs, err)
 		return
 	}
@@ -55,7 +55,7 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 				return
 			}
 			typesChecked = append(typesChecked, tt)
-			if s.Condition.Equal(tt) == false {
+			if s.When.Equal(tt) == false {
 				//no match here
 				continue
 			}
@@ -73,7 +73,7 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 		if s.Default == nil {
 			errs = append(errs,
 				fmt.Errorf("%s parameter type named '%s',resolve as '%s' has no match and no 'default block'",
-					errMsgPrefix(s.Condition.Pos), TName, s.Condition.TypeString()))
+					errMsgPrefix(s.When.Pos), TName, s.When.TypeString()))
 		} else {
 			switchStatement.Type = StatementTypeBlock
 			switchStatement.Block = s.Default

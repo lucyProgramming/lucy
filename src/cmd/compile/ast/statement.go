@@ -63,6 +63,26 @@ func (s *Statement) isVariableDefinition() bool {
 		s.Expression.Type == ExpressionTypeVar
 }
 
+func (s *Statement) simplifyIf() {
+	if len(s.StatementIf.ElseIfList) > 0 {
+		return
+	}
+	if s.StatementIf.Condition.Type != ExpressionTypeBool {
+		return
+	}
+	c := s.StatementIf.Condition.Data.(bool)
+	if c {
+		s.Type = StatementTypeBlock
+		s.Block = &s.StatementIf.TrueBlock
+	} else {
+		if s.StatementIf.ElseBlock != nil {
+			s.Type = StatementTypeBlock
+			s.Block = s.StatementIf.ElseBlock
+		} else {
+			s.Type = StatementTypeNop
+		}
+	}
+}
 func (s *Statement) check(block *Block) []error {
 	defer func() {
 		s.Checked = true
@@ -72,7 +92,9 @@ func (s *Statement) check(block *Block) []error {
 	case StatementTypeExpression:
 		return s.checkStatementExpression(block)
 	case StatementTypeIf:
-		return s.StatementIf.check(block)
+		es := s.StatementIf.check(block)
+		s.simplifyIf()
+		return es
 	case StatementTypeFor:
 		return s.StatementFor.check(block)
 	case StatementTypeSwitch:

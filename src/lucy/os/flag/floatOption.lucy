@@ -21,9 +21,9 @@ public final class FloatOption  extends Option{
 		if bs[0] == '-' {
 			isNegative = true 
 			bs = bs[1:]
-			if false == ('0' <= bs[0]  && bs[0] <= '9') {
-				panic("expect number")
-			}
+		}
+		if false == ('0' <= bs[0]  && bs[0] <= '9') {
+			panic("expect number")
 		}
 		var value float
 		for k,b = range bs {
@@ -34,7 +34,7 @@ public final class FloatOption  extends Option{
 				value = value * 10.0 + float(b- '0')
 			}else {
 				panic(sprintf("'%s' format float wrong" , s ))
-				return  
+				
 			}
 		}
 		if b == '.' {
@@ -47,7 +47,7 @@ public final class FloatOption  extends Option{
 					t = t * 0.1 + float(b - '0') / 10.0
 				}else {
 					panic(sprintf("'%s' format float wrong" , s ))
-					return 
+					 
 				}
 				index --
 			} 

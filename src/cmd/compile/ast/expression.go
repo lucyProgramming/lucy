@@ -83,7 +83,8 @@ type Expression struct {
 		only for global variable definition
 		public hello := "hai...."
 	*/
-	IsPublic              bool
+	IsPublic              bool // for global
+	IsGlobal              bool
 	IsCompileAuto         bool // compile auto expression
 	Value                 *Type
 	MultiValues           []*Type

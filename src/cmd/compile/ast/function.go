@@ -33,7 +33,6 @@ type Function struct {
 	Used                             bool
 	TemplateClonedFunction           bool
 	IsClosureFunction                bool
-	isGlobalVariableDefinition       bool
 	isPackageInitBlockFunction       bool
 	Comment                          string
 }

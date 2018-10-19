@@ -10,30 +10,28 @@ type Block struct {
 	/*
 		should analyse at ast stage
 	*/
-	NotExecuteToLastStatement       bool
-	Defers                          []*StatementDefer
-	IsGlobalVariableDefinitionBlock bool
-	IsFunctionBlock                 bool // function block
-	Fn                              *Function
-	IsClassBlock                    bool // class block
-	IsForBlock                      bool // for top block
-	IsSwitchBlock                   bool // switch statement list block
-	IsWhenBlock                     bool // template swtich statement list block
-	Pos                             *Pos
-	EndPos                          *Pos
-	Outer                           *Block
-	InheritedAttribute              InheritedAttribute
-	Statements                      []*Statement
-	Constants                       map[string]*Constant
-	Functions                       map[string]*Function
-	Classes                         map[string]*Class
-	Enums                           map[string]*Enum
-	EnumNames                       map[string]*EnumName
-	Labels                          map[string]*StatementLabel
-	TypeAliases                     map[string]*Type
-	Variables                       map[string]*Variable
-	ClosureFunctions                map[string]*Function //in "Functions" too
-	checkConstantsCalled            bool
+	NotExecuteToLastStatement bool
+	Defers                    []*StatementDefer
+	Fn                        *Function
+	IsFunctionBlock           bool // function block
+	IsClassBlock              bool // class block
+	IsForBlock                bool // for top block
+	IsSwitchBlock             bool // switch statement list block
+	IsWhenBlock               bool // template swtich statement list block
+	Pos                       *Pos
+	EndPos                    *Pos
+	Outer                     *Block
+	InheritedAttribute        InheritedAttribute
+	Statements                []*Statement
+	Constants                 map[string]*Constant
+	Functions                 map[string]*Function
+	Classes                   map[string]*Class
+	Enums                     map[string]*Enum
+	EnumNames                 map[string]*EnumName
+	Labels                    map[string]*StatementLabel
+	TypeAliases               map[string]*Type
+	Variables                 map[string]*Variable
+	checkConstantsCalled      bool
 }
 
 func (b *Block) NameExists(name string) (interface{}, bool) {
@@ -428,17 +426,6 @@ func (b *Block) nameIsValid(name string, pos *Pos) error {
 func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 	if err := b.nameIsValid(name, pos); err != nil {
 		return err
-	}
-	if v, ok := d.(*Variable); ok &&
-		b.InheritedAttribute.Function.isGlobalVariableDefinition {
-		b := PackageBeenCompile.Block
-		err := b.checkNameExist(name, pos)
-		if err != nil {
-			return err
-		}
-		b.Variables[name] = v
-		v.IsGlobal = true // it`s global
-		return nil
 	}
 	// handle label
 	if label, ok := d.(*StatementLabel); ok && label != nil {

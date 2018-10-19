@@ -135,6 +135,7 @@ func (parser *Parser) Parse() []error {
 				Data:        vs,
 				Pos:         pos,
 				IsPublic:    isPublic,
+				IsGlobal:    true,
 				Description: "var",
 			}
 			*parser.tops = append(*parser.tops, &ast.TopNode{
@@ -148,7 +149,7 @@ func (parser *Parser) Parse() []error {
 				parser.Next(lfNotToken)
 				continue
 			}
-
+			e.IsGlobal = true
 			e.IsPublic = isPublic()
 			parser.validStatementEnding()
 			if e.Type == ast.ExpressionTypeVarAssign {

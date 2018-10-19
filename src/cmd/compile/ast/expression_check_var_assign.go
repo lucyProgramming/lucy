@@ -85,7 +85,12 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			if err := variableType.isTyped(); err != nil {
 				*errs = append(*errs, err)
 			}
-			err = block.Insert(vd.Name, v.Pos, vd)
+			if e.IsGlobal {
+				err = PackageBeenCompile.Block.Insert(vd.Name, v.Pos, vd)
+				vd.IsGlobal = true
+			} else {
+				err = block.Insert(vd.Name, v.Pos, vd)
+			}
 			identifier.Variable = vd
 			if err != nil {
 				*errs = append(*errs, err)

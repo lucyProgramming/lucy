@@ -64,27 +64,41 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			if v.Type == nil {
 				continue
 			}
-			err = block.Insert(v.Name, v.Pos, v)
+			if e.IsGlobal {
+				err = PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+			} else {
+				err = block.Insert(v.Name, v.Pos, v)
+			}
 			if err != nil {
 				*errs = append(*errs, err)
 				continue
 			}
-			if e.IsPublic {
-				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
-			}
 		}
 	} else {
 		for _, v := range ev.Variables {
-			err := block.Insert(v.Name, v.Pos, v)
+			var err error
+			if e.IsGlobal {
+				err = PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+			} else {
+				err = block.Insert(v.Name, v.Pos, v)
+			}
 			if err != nil {
 				*errs = append(*errs, err)
 				continue
 			}
 			ev.InitValues = append(ev.InitValues,
 				v.Type.mkDefaultValueExpression())
-			if e.IsPublic {
+		}
+	}
+	if e.IsGlobal {
+		for _, v := range ev.Variables {
+			v.IsGlobal = true
+		}
+		if e.IsPublic {
+			for _, v := range ev.Variables {
 				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			}
 		}
 	}
+
 }

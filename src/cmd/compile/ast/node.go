@@ -137,7 +137,6 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 		b := &Block{}
 		b.Pos = expressions[0].Pos
 		b.Statements = s
-		b.IsGlobalVariableDefinitionBlock = true
 		conversion.Blocks = append([]*Block{b}, conversion.Blocks...)
 	}
 	PackageBeenCompile.mkInitFunctions(conversion.Blocks)

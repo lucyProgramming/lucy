@@ -1,7 +1,7 @@
 
 
 
-public fn <array> quickSort(s array, l int, r int,asc bool) {  
+public fn quickSort <array> (s array, l int, r int,asc bool) {
     if  l< r  && asc{        
         i ,j := l, r
         x := s[l]
