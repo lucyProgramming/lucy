@@ -110,11 +110,10 @@ const (
 	TokenAbstract                   // abstract
 	TokenGlobal                     // global
 	TokenVArgs                      // ...
+	TokenWhen                       // when
 	TokenComment                    //
 	TokenCommentMultiLine           //
-	TokenWhen                       // when
-	//TokenIs                         // is
-	TokenEof // end of file
+	TokenEof                        // end of file
 )
 
 var (
