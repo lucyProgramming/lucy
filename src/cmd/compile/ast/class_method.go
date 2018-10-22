@@ -233,6 +233,8 @@ func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, call *ExpressionMeth
 			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args, callArgTypes, m.Function)
 			if err == nil {
 				return []*ClassMethod{m}, true, nil
+			} else {
+				ms = append(ms, m)
 			}
 		}
 	}
