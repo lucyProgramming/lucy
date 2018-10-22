@@ -18,9 +18,9 @@ public final class IntOption  extends Option{
 		if bs[0] == '-' {
 			isNegative = true 
 			bs = bs[1:]
-			if false == ('0' <= bs[0]  && bs[0] <= '9') {
-				panic("expect number")
-			}
+		}
+		if false == ('0' <= bs[0]  && bs[0] <= '9') {
+			panic("expect number")
 		}
 		var value int 
 		for b := range bs {

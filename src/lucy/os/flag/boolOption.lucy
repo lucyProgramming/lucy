@@ -21,6 +21,5 @@ public final class BoolOption  extends Option{
 	} 
 	public fn getValue() -> (b bool = this.boolValue){ }
 	
-	protected fn  formatDefaultValue() -> ( format string = "" +  .boolDefaultValue ) { }
 	
 }

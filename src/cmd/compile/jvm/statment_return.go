@@ -216,6 +216,9 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
+		if 2 > maxStack {
+			maxStack = 2
+		}
 		state.pushStack(class, state.newObjectVariableType(throwableClass))
 		context.MakeStackMap(code, state, code.CodeLength+6)
 		context.MakeStackMap(code, state, code.CodeLength+7)
@@ -235,7 +238,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 			if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
 				//load when function have multi returns if read to end
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset)...)
-				exit := (&cg.Exit{}).Init(cg.OP_ifnonnull , code)
+				exit := (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
 				buildPackage.buildReturnFromReturnVars(class, code, context)
 				context.MakeStackMap(code, state, code.CodeLength)
 				writeExits([]*cg.Exit{exit}, code.CodeLength)

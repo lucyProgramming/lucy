@@ -6,7 +6,7 @@ final class Test {
 	lucyPaths []string
 	packageName string 
 	lucyRoot string
-	public fn Test(lucyRoot string, lucyPaths []string,packageName string){
+	public fn Test(lucyRoot string , lucyPaths []string , packageName string){
 	    this.super()
 		this.lucyRoot = lucyRoot
 		this.lucyPaths = lucyPaths
@@ -44,9 +44,6 @@ final class Test {
 		if lucyFiles.size() == 0 {  // no lucy files
 		    return 
 		}
-		//print("############################")
-        //printf("test package: %s\n" , packageName)
-       // printf("directory: %s\n" , dir)
         args  := new string[](3)
         args[0] = "run"  
 		args[1] = "-v"

@@ -10,7 +10,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	if identifier.Name == NoNameIdentifier {
 		//_ is not valid
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
-			e.Pos.ErrMsgPrefix(), NoNameIdentifier)
+			e.Pos.ErrMsgPrefix(), identifier.Name)
 	}
 	//handle magic identifier
 	switch identifier.Name {
