@@ -15,7 +15,7 @@ type Package struct {
 	Files                        map[string]*SourceFile
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
-	Errors                       []error
+	errors                       []error
 	TriggerPackageInitMethodName string //
 	UnUsedPackage                map[string]*Import
 	statementLevelFunctions      []*Function
@@ -83,23 +83,23 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 }
 
 func (p *Package) shouldStop(errs []error) bool {
-	return len(p.Errors)+len(errs) >= p.NErrors2Stop
+	return len(p.errors)+len(errs) >= p.NErrors2Stop
 }
 
-func (p *Package) TypeCheck() {
+func (p *Package) TypeCheck() []error {
 	if p.NErrors2Stop <= 2 {
 		p.NErrors2Stop = 10
 	}
-	p.Errors = []error{}
-	p.Errors = append(p.Errors, p.Block.checkConstants()...)
+	p.errors = []error{}
+	p.errors = append(p.errors, p.Block.checkConstants()...)
 	for _, v := range p.Block.Enums {
 		v.Name = p.Name + "/" + v.Name
-		p.Errors = append(p.Errors, v.check()...)
+		p.errors = append(p.errors, v.check()...)
 	}
 	for _, v := range p.Block.TypeAliases {
 		err := v.resolve(&PackageBeenCompile.Block)
 		if err != nil {
-			p.Errors = append(p.Errors, err)
+			p.errors = append(p.errors, err)
 		}
 	}
 	for _, v := range p.Block.Functions {
@@ -108,7 +108,7 @@ func (p *Package) TypeCheck() {
 		}
 		v.Block.inherit(&p.Block)
 		v.Block.InheritedAttribute.Function = v
-		v.checkParametersAndReturns(&p.Errors, false, false)
+		v.checkParametersAndReturns(&p.errors, false, false)
 		if v.IsGlobalMain() {
 			defineMainOK := false
 			if len(v.Type.ParameterList) == 1 {
@@ -116,18 +116,18 @@ func (p *Package) TypeCheck() {
 					v.Type.ParameterList[0].Type.Array.Type == VariableTypeString
 			}
 			if defineMainOK == false {
-				p.Errors = append(p.Errors,
+				p.errors = append(p.errors,
 					fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
 						errMsgPrefix(v.Pos), MainFunctionName))
 			}
 		}
 		if p.shouldStop(nil) {
-			return
+			return p.errors
 		}
 	}
 	for _, v := range p.Block.Classes {
 		v.Name = p.Name + "/" + v.Name
-		p.Errors = append(p.Errors, v.Block.checkConstants()...)
+		p.errors = append(p.errors, v.Block.checkConstants()...)
 		v.mkDefaultConstruction()
 		v.Block.inherit(&PackageBeenCompile.Block)
 		v.Block.InheritedAttribute.Class = v
@@ -136,35 +136,35 @@ func (p *Package) TypeCheck() {
 	for _, v := range p.Block.Classes {
 		err := v.resolveFather()
 		if err != nil {
-			p.Errors = append(p.Errors, err)
+			p.errors = append(p.errors, err)
 		}
-		p.Errors = append(p.Errors, v.resolveInterfaces()...)
-		p.Errors = append(p.Errors, v.resolveFieldsAndMethodsType()...)
+		p.errors = append(p.errors, v.resolveInterfaces()...)
+		p.errors = append(p.errors, v.resolveFieldsAndMethodsType()...)
 	}
 
 	for _, v := range p.Block.Classes {
 		es := v.checkPhase1()
-		p.Errors = append(p.Errors, es...)
+		p.errors = append(p.errors, es...)
 		if p.shouldStop(nil) {
-			return
+			return p.errors
 		}
 	}
 	for _, v := range p.Block.Functions {
 		if v.TemplateFunction != nil {
 			continue
 		}
-		p.Errors = append(p.Errors, v.checkReturnVarExpression()...)
+		p.errors = append(p.errors, v.checkReturnVarExpression()...)
 	}
 	for _, v := range p.InitFunctions {
-		p.Errors = append(p.Errors, v.check(&p.Block)...)
+		p.errors = append(p.errors, v.check(&p.Block)...)
 		if p.shouldStop(nil) {
-			return
+			return p.errors
 		}
 	}
 	for _, v := range p.Block.Classes {
-		p.Errors = append(p.Errors, v.checkPhase2()...)
+		p.errors = append(p.errors, v.checkPhase2()...)
 		if p.shouldStop(nil) {
-			return
+			return p.errors
 		}
 	}
 	for _, v := range p.Block.Functions {
@@ -174,9 +174,9 @@ func (p *Package) TypeCheck() {
 		if v.TemplateFunction != nil {
 			continue
 		}
-		v.checkBlock(&p.Errors)
+		v.checkBlock(&p.errors)
 		if PackageBeenCompile.shouldStop(nil) {
-			return
+			return p.errors
 		}
 	}
 	for _, v := range p.statementLevelFunctions {
@@ -187,13 +187,13 @@ func (p *Package) TypeCheck() {
 			if f.IsClosureFunction == false {
 				continue
 			}
-			p.Errors = append(p.Errors,
+			p.errors = append(p.errors,
 				fmt.Errorf("%s trying to access capture function '%s' from outside",
 					meta.pos.ErrMsgPrefix(), f.Name))
 		}
 	}
-	p.Errors = append(p.Errors, p.checkUnUsedPackage()...)
-	return
+	p.errors = append(p.errors, p.checkUnUsedPackage()...)
+	return p.errors
 }
 
 /*

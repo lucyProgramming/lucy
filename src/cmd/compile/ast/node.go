@@ -92,14 +92,14 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	for _, v := range conversion.Functions {
 		v.IsGlobal = true
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
-			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
+			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}
 		PackageBeenCompile.Block.Functions[v.Name] = v
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range conversion.Classes {
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
-			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
+			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}
 		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
@@ -110,7 +110,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range conversion.Enums {
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
-			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
+			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}
 		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
@@ -120,7 +120,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
 	for _, v := range conversion.TypeAlias {
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
-			PackageBeenCompile.Errors = append(PackageBeenCompile.Errors, err)
+			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}
 		PackageBeenCompile.Block.TypeAliases[v.Name] = v.Type
 		v.Type.Alias = v
