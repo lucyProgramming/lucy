@@ -26,6 +26,15 @@ func (buildPackage *BuildPackage) Make(p *ast.Package) {
 	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
+	if mainClass.SourceFiles == nil {
+		mainClass.SourceFiles = make(map[string]struct{})
+	}
+	if p.Block.Functions != nil {
+		for _, v := range p.Block.Functions {
+			mainClass.SourceFiles[v.Pos.Filename] = struct{}{}
+			break
+		}
+	}
 	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
 	buildPackage.mkClassDefaultConstruction(buildPackage.mainClass)
 	buildPackage.BuildExpression.BuildPackage = buildPackage

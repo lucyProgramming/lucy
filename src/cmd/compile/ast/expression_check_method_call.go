@@ -33,7 +33,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 			*errs = append(*errs, err)
 			return nil
 		}
+		errsLength := len(*errs)
 		args := checkExpressions(block, call.Args, errs, true)
+		if len(*errs) > errsLength {
+			return nil
+		}
 		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call, args,
 			false, nil)
 		if err != nil {
@@ -55,7 +59,11 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 
 	case VariableTypeObject, VariableTypeClass:
 		call.Class = object.Class
+		errsLength := len(*errs)
 		callArgTypes := checkExpressions(block, call.Args, errs, true)
+		if len(*errs) > errsLength {
+			return nil
+		}
 		if object.Class.IsInterface() {
 			if object.Type == VariableTypeClass {
 				*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",
@@ -84,7 +92,8 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 				errMsgPrefix(e.Pos)))
 		}
 		var fieldMethodHandler *ClassField
-		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
+		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes,
+			false, &fieldMethodHandler)
 		if err != nil {
 			*errs = append(*errs, err)
 			if len(ms) > 0 {
@@ -150,7 +159,11 @@ func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]erro
 			return
 		}
 	}
+	errsLength := len(*errs)
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
+	if len(*errs) > errsLength {
+		return
+	}
 	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs,
 		nil, call, callArgsTypes)
 	if err != nil {
@@ -180,7 +193,11 @@ func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, er
 		return nil
 	}
 	var fieldMethodHandler *ClassField
+	errsLength := len(*errs)
 	callArgTypes := checkExpressions(block, call.Args, errs, true)
+	if len(*errs) > errsLength {
+		return nil
+	}
 	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
 	if err != nil {
 		*errs = append(*errs, err)
@@ -247,13 +264,18 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		} else {
 			methodCall := e.Data.(*ExpressionMethodCall)
 			methodCall.PackageFunction = f
+			ret := f.Type.mkCallReturnTypes(e.Pos)
+			errsLength := len(*errs)
 			callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
+			if len(*errs) > errsLength {
+				return ret
+			}
 			var err error
 			methodCall.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
-			return f.Type.mkCallReturnTypes(e.Pos)
+			return ret
 		}
 	case *Variable:
 		v := d.(*Variable)
@@ -271,12 +293,17 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' cannot be a template fucntion",
 				errMsgPrefix(call.ParameterTypes[0].Pos), call.Name))
 		}
+		ret := v.Type.FunctionType.mkCallReturnTypes(e.Pos)
+		errsLength := len(*errs)
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)
+		if len(*errs) > errsLength {
+			return ret
+		}
 		vArgs, err := v.Type.FunctionType.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
-		ret := v.Type.FunctionType.mkCallReturnTypes(e.Pos)
+
 		call.PackageGlobalVariableFunction = v
 		call.VArgs = vArgs
 		return ret

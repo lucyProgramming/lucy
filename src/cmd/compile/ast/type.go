@@ -493,12 +493,8 @@ func (typ *Type) getParameterType(ft *FunctionType) []string {
 	}
 	if typ.Type == VariableTypeMap {
 		ret := []string{}
-		if t := typ.Map.K.getParameterType(ft); t != nil {
-			ret = append(ret, t...)
-		}
-		if t := typ.Map.V.getParameterType(ft); t != nil {
-			ret = append(ret, t...)
-		}
+		ret = append(ret, typ.Map.K.getParameterType(ft)...)
+		ret = append(ret, typ.Map.V.getParameterType(ft)...)
 		return ret
 	}
 	return nil

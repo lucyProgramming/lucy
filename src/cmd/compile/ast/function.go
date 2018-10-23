@@ -226,3 +226,23 @@ func (f *Function) checkParametersAndReturns(errs *[]error, checkReturnVarExpres
 		}
 	}
 }
+
+func (f *Function) checkReturnVarExpression() []error {
+	if f.Type.VoidReturn() {
+		return nil
+	}
+	var errs []error
+	for _, v := range f.Type.ReturnList {
+		t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&f.Block)
+		if len(es) > 0 {
+			errs = append(errs, es...)
+			continue
+		}
+		if t != nil && v.Type.assignAble(&errs, t) == false {
+			err := fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
+				t.TypeString(), v.Type.TypeString())
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}

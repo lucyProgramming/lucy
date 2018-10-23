@@ -144,7 +144,8 @@ func (compiler *Compiler) compile() {
 		compiler.Errs = append(compiler.Errs, v.Error())
 	}
 	compiler.shouldExit()
-	compiler.Errs = append(compiler.Errs, ast.PackageBeenCompile.TypeCheck()...)
+	ast.PackageBeenCompile.TypeCheck()
+	compiler.Errs = append(compiler.Errs, ast.PackageBeenCompile.Errors...)
 	if len(compiler.Errs) > 0 {
 		compiler.exit()
 	}

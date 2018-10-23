@@ -84,7 +84,7 @@ func (p *Package) shouldStop(errs []error) bool {
 	return len(p.Errors)+len(errs) >= p.NErrors2Stop
 }
 
-func (p *Package) TypeCheck() []error {
+func (p *Package) TypeCheck() {
 	if p.NErrors2Stop <= 2 {
 		p.NErrors2Stop = 10
 	}
@@ -94,13 +94,19 @@ func (p *Package) TypeCheck() []error {
 		v.Name = p.Name + "/" + v.Name
 		p.Errors = append(p.Errors, v.check()...)
 	}
+	for _, v := range p.Block.TypeAliases {
+		err := v.resolve(&PackageBeenCompile.Block)
+		if err != nil {
+			p.Errors = append(p.Errors, err)
+		}
+	}
 	for _, v := range p.Block.Functions {
 		if v.IsBuildIn {
 			continue
 		}
 		v.Block.inherit(&p.Block)
 		v.Block.InheritedAttribute.Function = v
-		v.checkParametersAndReturns(&p.Errors, true, false)
+		v.checkParametersAndReturns(&p.Errors, false, false)
 		if v.IsGlobalMain() {
 			defineMainOK := false
 			if len(v.Type.ParameterList) == 1 {
@@ -114,14 +120,7 @@ func (p *Package) TypeCheck() []error {
 			}
 		}
 		if p.shouldStop(nil) {
-			return p.Errors
-		}
-	}
-
-	for _, v := range p.Block.TypeAliases {
-		err := v.resolve(&PackageBeenCompile.Block)
-		if err != nil {
-			p.Errors = append(p.Errors, err)
+			return
 		}
 	}
 	for _, v := range p.Block.Classes {
@@ -145,19 +144,25 @@ func (p *Package) TypeCheck() []error {
 		es := v.checkPhase1()
 		p.Errors = append(p.Errors, es...)
 		if p.shouldStop(nil) {
-			return p.Errors
+			return
 		}
+	}
+	for _, v := range p.Block.Functions {
+		if v.TemplateFunction != nil {
+			continue
+		}
+		p.Errors = append(p.Errors, v.checkReturnVarExpression()...)
 	}
 	for _, v := range p.InitFunctions {
 		p.Errors = append(p.Errors, v.check(&p.Block)...)
 		if p.shouldStop(nil) {
-			return p.Errors
+			return
 		}
 	}
 	for _, v := range p.Block.Classes {
 		p.Errors = append(p.Errors, v.checkPhase2()...)
 		if p.shouldStop(nil) {
-			return p.Errors
+			return
 		}
 	}
 	for _, v := range p.Block.Functions {
@@ -169,11 +174,11 @@ func (p *Package) TypeCheck() []error {
 		}
 		v.checkBlock(&p.Errors)
 		if PackageBeenCompile.shouldStop(nil) {
-			return p.Errors
+			return
 		}
 	}
 	p.Errors = append(p.Errors, p.checkUnUsedPackage()...)
-	return p.Errors
+	return
 }
 
 /*

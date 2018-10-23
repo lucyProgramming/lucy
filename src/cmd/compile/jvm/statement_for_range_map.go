@@ -234,7 +234,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(class *cg.ClassHi
 			copyOPs(code, op...)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
-
 	}
 	// build block
 	buildPackage.buildBlock(class, code, s.Block, context, blockState)

@@ -10,8 +10,10 @@ type MultiValueAutoVar struct {
 /*
 	stack is 1 ,expect value on stack
 */
-func newMultiValueAutoVar(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, state *StackMapState) *MultiValueAutoVar {
+func newMultiValueAutoVar(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	state *StackMapState) *MultiValueAutoVar {
 	ret := &MultiValueAutoVar{}
 	ret.localVarOffset = code.MaxLocals
 	code.MaxLocals++
@@ -38,7 +40,9 @@ func (packer *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.Attri
 /*
 	object is all i need
 */
-func (packer *MultiValueAutoVar) unPack2Object(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (packer *MultiValueAutoVar) unPack2Object(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
 	valueIndex int) (maxStack uint16) {
 	if valueIndex > 127 {
 		panic("over 127")

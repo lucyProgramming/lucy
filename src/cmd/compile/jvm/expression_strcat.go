@@ -12,7 +12,6 @@ func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, co
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxStack = buildExpression.build(class, code, bin.Left, context, state)
 	if t := buildExpression.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {

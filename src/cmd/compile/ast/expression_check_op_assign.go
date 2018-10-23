@@ -8,7 +8,8 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		list := bin.Left.Data.([]*Expression)
 		if len(list) > 1 {
 			*errs = append(*errs,
-				fmt.Errorf("%s expect 1 expression on left", errMsgPrefix(e.Pos)))
+				fmt.Errorf("%s expect 1 expression on left",
+					errMsgPrefix(e.Pos)))
 		}
 		bin.Left = list[0]
 	}

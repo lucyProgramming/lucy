@@ -573,6 +573,12 @@ func (parser *Parser) consume(until map[lex.TokenKind]bool) {
 				return
 			}
 		}
+		if parser.token.Type == lex.TokenRc {
+			if _, ok := until[lex.TokenRc]; ok == false {
+				parser.consumeFoundValidToken = true
+				return
+			}
+		}
 		if _, ok := until[parser.token.Type]; ok {
 			return
 		}

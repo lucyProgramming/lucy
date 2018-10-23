@@ -8,7 +8,10 @@ import (
 type TypeConverterAndPrimitivePacker struct {
 }
 
-func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
+func (TypeConverterAndPrimitivePacker) unPackPrimitives(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	t *ast.Type) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		c := "java/lang/Boolean"
@@ -107,11 +110,16 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(class *cg.ClassHighLevel
 	}
 }
 
-func (c *TypeConverterAndPrimitivePacker) packPrimitives(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
+func (c *TypeConverterAndPrimitivePacker) packPrimitives(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	t *ast.Type) {
 	copyOPs(code, c.packPrimitivesBytes(class, t)...)
 }
 
-func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLevel, t *ast.Type) (bs []byte) {
+func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(
+	class *cg.ClassHighLevel,
+	t *ast.Type) (bs []byte) {
 	bs = make([]byte, 3)
 	bs[0] = cg.OP_invokestatic
 	switch t.Type {
@@ -171,9 +179,12 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(class *cg.ClassHighLe
 	return
 }
 
-func (TypeConverterAndPrimitivePacker) castPointer(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
+func (TypeConverterAndPrimitivePacker) castPointer(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	t *ast.Type) {
 	if t.IsPointer() == false {
-		panic("...")
+		panic("not pointer at all , compiler error")
 	}
 	if t.Type == ast.VariableTypeObject && t.Class.Name == javaRootClass {
 		// no need  ,try to cast to root class

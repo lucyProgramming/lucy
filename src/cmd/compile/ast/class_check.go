@@ -458,16 +458,7 @@ func (c *Class) checkMethods() []error {
 						errMsgPrefix(method.Function.Pos)))
 					continue
 				}
-				for _, v := range method.Function.Type.ReturnList {
-					t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&method.Function.Block)
-					errs = append(errs, es...)
-					if t != nil && v.Type.assignAble(&errs, t) == false {
-						err := fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
-							t.TypeString(), v.Type.TypeString())
-						errs = append(errs, err)
-					}
-				}
-
+				errs = append(errs, method.Function.checkReturnVarExpression()...)
 				isConstruction := name == SpecialMethodInit
 				if isConstruction {
 					if method.IsFirstStatementCallFatherConstruction() == false {

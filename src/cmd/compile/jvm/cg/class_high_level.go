@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"path/filepath"
 )
 
 type ClassHighLevel struct {
@@ -133,16 +134,19 @@ func (classHighLevel *ClassHighLevel) getSourceFile() string {
 		}
 	}
 	var s string
-	if len(classHighLevel.SourceFiles) > 1 {
-		s = "multi source compile into one class file,which are:\n"
+	for k, _ := range classHighLevel.SourceFiles {
+		s = filepath.Dir(k)
+		break
 	}
-	prefix := ""
-	if len(classHighLevel.SourceFiles) > 1 {
-		prefix = "\t\t: "
-	}
+	s += "\\{"
+	i := 0
 	for f, _ := range classHighLevel.SourceFiles {
-		s += prefix + f
-		s += "\n"
+		s += filepath.Base(f)
+		if i != len(classHighLevel.SourceFiles)-1 {
+			s += ","
+		}
+		i++
 	}
+	s += "}"
 	return s
 }

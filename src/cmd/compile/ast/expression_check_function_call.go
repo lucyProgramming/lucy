@@ -108,8 +108,12 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 
 func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error,
 	ft *FunctionType, call *ExpressionFunctionCall) []*Type {
+	length := len(*errs)
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
 	ret := ft.mkCallReturnTypes(e.Pos)
+	if len(*errs) > length {
+		return nil
+	}
 	var err error
 	call.VArgs, err = ft.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
 	if err != nil {
@@ -119,13 +123,18 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error,
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-	callArgsTypes := checkExpressions(block, call.Args, errs, true)
+
 	var tf *Function
 	if f.TemplateFunction != nil {
-		length := len(*errs)
+		errsLength := len(*errs)
+		callArgsTypes := checkExpressions(block, call.Args, errs, true)
+		if len(*errs) > errsLength {
+			return nil
+		}
+		errsLength = len(*errs)
 		//rewrite
 		tf = e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
-		if len(*errs) != length { // if no
+		if len(*errs) != errsLength { // if no
 			return nil
 		}
 		ret := tf.Type.mkCallReturnTypes(e.Pos)
@@ -136,6 +145,12 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 		return ret
 	} else { // not template function
+		ret := f.Type.mkCallReturnTypes(e.Pos)
+		errsLength := len(*errs)
+		callArgsTypes := checkExpressions(block, call.Args, errs, true)
+		if len(*errs) > errsLength {
+			return ret
+		}
 		if f.IsBuildIn {
 			if f.LoadedFromCorePackage {
 				var err error
@@ -143,13 +158,13 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 				if err != nil {
 					*errs = append(*errs, err)
 				}
-				return f.Type.mkCallReturnTypes(e.Pos)
+				return ret
 			} else {
 				length := len(*errs)
 				f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
 				if len(*errs) == length {
 					//special case ,avoid null pointer
-					return f.Type.mkCallReturnTypes(e.Pos)
+					return ret
 				}
 				return nil //
 			}
@@ -158,7 +173,6 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 				*errs = append(*errs, fmt.Errorf("%s function is not a template function",
 					errMsgPrefix(e.Pos)))
 			}
-			ret := f.Type.mkCallReturnTypes(e.Pos)
 			var err error
 			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 			if err != nil {
