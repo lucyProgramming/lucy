@@ -16,6 +16,7 @@ type Block struct {
 	Fn                        *Function
 	IsFunctionBlock           bool // function block
 	IsClassBlock              bool // class block
+	Class                     *Class
 	IsForBlock                bool // for top block
 	IsSwitchBlock             bool // switch statement list block
 	IsWhenBlock               bool // template swtich statement list block
@@ -237,13 +238,14 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 			if v.IsGlobal == false { // not a global variable
 				if b.IsFunctionBlock &&
 					b.InheritedAttribute.Function.IsGlobal == false {
-					b.InheritedAttribute.Function.Closure.InsertVar(v)
+					b.InheritedAttribute.Function.Closure.InsertVar(from, v)
 					if isCaptureVar != nil {
 						*isCaptureVar = true
 					}
 				}
 				//cannot search variable from class body
-				if b.InheritedAttribute.Class != nil && b.IsClassBlock {
+				if b.InheritedAttribute.Class != nil &&
+					b.IsClassBlock {
 					return nil, fmt.Errorf("%s trying to access variable '%s' from class",
 						from.ErrMsgPrefix(), name)
 				}
@@ -251,9 +253,11 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 		case *Function:
 			f := t.(*Function)
 			if f.IsGlobal == false {
-				if b.IsClassBlock && f.IsClosureFunction {
-					return nil, fmt.Errorf("%s trying to access closure function '%s' from class",
-						from.ErrMsgPrefix(), name)
+				if b.IsClassBlock {
+					b.Class.closure.InsertFunction(from, f)
+				}
+				if b.IsFunctionBlock {
+					b.Fn.Closure.InsertFunction(from, f)
 				}
 			}
 		}

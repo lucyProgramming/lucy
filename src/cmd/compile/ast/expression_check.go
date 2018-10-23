@@ -303,20 +303,21 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 	case ExpressionTypeFunctionLiteral:
 		f := e.Data.(*Function)
+		PackageBeenCompile.statementLevelFunctions =
+			append(PackageBeenCompile.statementLevelFunctions, f)
 		if e.IsStatementExpression == false && f.Name != "" {
 			errs = append(errs,
 				fmt.Errorf("%s function literal named '%s' expect no name",
 					e.Pos.ErrMsgPrefix(), f.Name))
 		}
-		es := f.check(block)
-		errs = append(errs, es...)
-		f.IsClosureFunction = f.Closure.NotEmpty(f)
 		if e.IsStatementExpression {
 			err := block.Insert(f.Name, f.Pos, f)
 			if err != nil {
 				errs = append(errs, err)
 			}
 		}
+		es := f.check(block)
+		errs = append(errs, es...)
 		returnValueTypes = make([]*Type, 1)
 		returnValueTypes[0] = &Type{
 			Type:         VariableTypeFunction,

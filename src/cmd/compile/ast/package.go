@@ -18,6 +18,8 @@ type Package struct {
 	Errors                       []error
 	TriggerPackageInitMethodName string //
 	UnUsedPackage                map[string]*Import
+	statementLevelFunctions      []*Function
+	statementLevelClass          []*Class
 }
 
 func (p *Package) isSame(compare *Package) bool {
@@ -175,6 +177,19 @@ func (p *Package) TypeCheck() {
 		v.checkBlock(&p.Errors)
 		if PackageBeenCompile.shouldStop(nil) {
 			return
+		}
+	}
+	for _, v := range p.statementLevelFunctions {
+		v.IsClosureFunction = v.Closure.CaptureCount(v) > 0
+	}
+	for _, v := range p.statementLevelClass {
+		for f, meta := range v.closure.Functions {
+			if f.IsClosureFunction == false {
+				continue
+			}
+			p.Errors = append(p.Errors,
+				fmt.Errorf("%s trying to access capture function '%s' from outside",
+					meta.pos.ErrMsgPrefix(), f.Name))
 		}
 	}
 	p.Errors = append(p.Errors, p.checkUnUsedPackage()...)

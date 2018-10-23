@@ -33,6 +33,7 @@ type Class struct {
 	LoadFromOutSide                   bool
 	StaticBlocks                      []*Block
 	Comment                           string
+	closure                           Closure
 }
 
 func (c *Class) HaveStaticsCodes() bool {
@@ -131,6 +132,7 @@ func (c *Class) mkClassInitMethod() {
 	f.AccessFlags |= cg.ACC_METHOD_BRIDGE
 	f.Name = classInitMethod
 	f.Block.IsFunctionBlock = true
+	f.Block.Fn = method.Function
 	if c.Methods == nil {
 		c.Methods = make(map[string][]*ClassMethod)
 	}

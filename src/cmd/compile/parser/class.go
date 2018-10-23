@@ -102,6 +102,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 		classParser.ret.Name = t.Name
 	}
 	classParser.ret.Block.IsClassBlock = true
+	classParser.ret.Block.Class = classParser.ret
 	if err != nil {
 		if classParser.ret.Name == "" {
 			compileAutoName()

@@ -141,6 +141,8 @@ func (s *Statement) check(block *Block) []error {
 				append(block.InheritedAttribute.Defer.Labels, s.StatementLabel)
 		}
 	case StatementTypeClass:
+		PackageBeenCompile.statementLevelClass =
+			append(PackageBeenCompile.statementLevelClass, s.Class)
 		err := block.Insert(s.Class.Name, s.Pos, s.Class)
 		if err != nil {
 			errs = append(errs, err)

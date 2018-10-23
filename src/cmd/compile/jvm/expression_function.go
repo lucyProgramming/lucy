@@ -119,7 +119,6 @@ func (buildPackage *BuildPackage) buildFunctionExpression(
 					maxStack = 3
 				}
 			}
-
 		} else {
 			field.Descriptor = Descriptor.typeDescriptor(v.Type)
 			if context.function.Closure.ClosureVariableExist(v) {
@@ -152,6 +151,9 @@ func (buildPackage *BuildPackage) buildFunctionExpression(
 		total--
 	}
 	for v, _ := range function.Closure.Functions {
+		if v.IsClosureFunction == false {
+			continue
+		}
 		filed := &cg.FieldHighLevel{}
 		filed.AccessFlags |= cg.ACC_FIELD_PUBLIC
 		filed.AccessFlags |= cg.ACC_FIELD_SYNTHETIC

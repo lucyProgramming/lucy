@@ -1,8 +1,12 @@
 package ast
 
 type Closure struct {
-	Variables map[*Variable]struct{}
-	Functions map[*Function]struct{}
+	Variables map[*Variable]*ClosureMeta
+	Functions map[*Function]*ClosureMeta
+}
+
+type ClosureMeta struct {
+	pos *Pos
 }
 
 func (c *Closure) ClosureVariableExist(v *Variable) bool {
@@ -21,38 +25,36 @@ func (c *Closure) ClosureFunctionExist(v *Function) bool {
 	return ok
 }
 
-func (c *Closure) NotEmpty(f *Function) bool {
-	keepClosureFunction := func() {
-		fs := make(map[*Function]struct{})
-		for f, _ := range c.Functions {
-			if f.IsClosureFunction {
-				fs[f] = struct{}{}
-			}
+func (c *Closure) CaptureCount(f *Function) int {
+	sum := len(c.Variables)
+	for v, _ := range c.Functions {
+		if f == v {
+			continue
 		}
-		c.Functions = fs
+		if v.IsClosureFunction ||
+			v.Closure.CaptureCount(f) > 0 {
+			sum++
+		}
 	}
-	if c.Variables != nil && len(c.Variables) > 0 {
-		f.IsClosureFunction = true // in case capture it self
-		keepClosureFunction()
-		return true
-	}
-	keepClosureFunction() // closure function is function too
-	return len(c.Functions) > 0
+	return sum
 }
 
-func (c *Closure) InsertVar(v *Variable) {
+func (c *Closure) InsertVar(pos *Pos, v *Variable) {
 	if c.Variables == nil {
-		c.Variables = make(map[*Variable]struct{})
+		c.Variables = make(map[*Variable]*ClosureMeta)
 	}
-	c.Variables[v] = struct{}{}
-
+	c.Variables[v] = &ClosureMeta{
+		pos: pos,
+	}
 }
 
-func (c *Closure) InsertFunction(f *Function) {
+func (c *Closure) InsertFunction(pos *Pos, f *Function) {
 	if c.Functions == nil {
-		c.Functions = make(map[*Function]struct{})
+		c.Functions = make(map[*Function]*ClosureMeta)
 	}
-	c.Functions[f] = struct{}{}
+	c.Functions[f] = &ClosureMeta{
+		pos: pos,
+	}
 }
 
 func (c *Closure) Search(name string) interface{} {

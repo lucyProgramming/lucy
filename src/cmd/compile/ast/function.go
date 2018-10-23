@@ -32,9 +32,9 @@ type Function struct {
 	LoadedFromCorePackage            bool
 	Used                             bool
 	TemplateClonedFunction           bool
-	IsClosureFunction                bool
 	isPackageInitBlockFunction       bool
 	Comment                          string
+	IsClosureFunction                bool
 }
 
 func (f *Function) IsPublic() bool {
