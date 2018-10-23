@@ -139,7 +139,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      javaMethodHandleClass,
-		Method:     functionPointerInvokeMethodName,
+		Method:     methodHandleInvokeMethodName,
 		Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -180,7 +180,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnDynamicSelector(class *
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      javaMethodHandleClass,
-			Method:     functionPointerInvokeMethodName,
+			Method:     methodHandleInvokeMethodName,
 			Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -256,7 +256,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnPackage(class *cg.Class
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 			Class:      "java/lang/invoke/MethodHandle",
-			Method:     functionPointerInvokeMethodName,
+			Method:     methodHandleInvokeMethodName,
 			Descriptor: Descriptor.methodDescriptor(call.PackageGlobalVariableFunction.Type.FunctionType),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3

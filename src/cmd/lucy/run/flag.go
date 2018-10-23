@@ -1,8 +1,9 @@
 package run
 
 type Flags struct {
-	forceReBuild bool
-	JvmVersion   int
-	Build        bool
-	Verbose      bool
+	forceReBuild  bool
+	build         bool
+	verbose       bool
+	compilerFlags string
+	help          bool
 }

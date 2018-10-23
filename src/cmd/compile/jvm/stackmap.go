@@ -64,7 +64,7 @@ func (stackMapState *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.T
 	}
 	stackMapState.Stacks = append(stackMapState.Stacks, stackMapState.newStackMapVerificationTypeInfo(class, v))
 }
-func (stackMapState *StackMapState) FromLast(last *StackMapState) *StackMapState {
+func (stackMapState *StackMapState) initFromLast(last *StackMapState) *StackMapState {
 	stackMapState.Locals = make([]*cg.StackMapVerificationTypeInfo, len(last.Locals))
 	copy(stackMapState.Locals, last.Locals)
 	return stackMapState

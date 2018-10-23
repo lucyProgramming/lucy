@@ -56,7 +56,8 @@ final class Test {
         	return 
         }
         if err =  cmd.wait() ;  err != null {
-			panic(err)
+			printf("test failed,err:%s\n",err.toString())
+			os.exit(2)
         }
 	}
 }

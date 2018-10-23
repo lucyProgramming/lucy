@@ -30,7 +30,6 @@ func (i *ImportStack) insert(c *PackageCompiled) error {
 		errMsg += c.packageName
 		return fmt.Errorf(errMsg)
 	}
-
 	i.Stacks = append(i.Stacks, c)
 	i.M[c.packageName] = c
 	return nil

@@ -20,7 +20,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeBlock:
-		blockState := (&StackMapState{}).FromLast(state)
+		blockState := (&StackMapState{}).initFromLast(state)
 		s.Block.Exits = []*cg.Exit{}
 		buildPackage.buildBlock(class, code, s.Block, context, blockState)
 		state.addTop(blockState)
@@ -77,7 +77,7 @@ func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code 
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
 		s.Defer.StartPc = code.CodeLength
-		s.Defer.StackMapState = (&StackMapState{}).FromLast(state)
+		s.Defer.StackMapState = (&StackMapState{}).initFromLast(state)
 	case ast.StatementTypeClass:
 		oldName := s.Class.Name
 		var name string
@@ -116,7 +116,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		state := ds[index].StackMapState.(*StackMapState)
-		state = (&StackMapState{}).FromLast(state) // clone
+		state = (&StackMapState{}).initFromLast(state) // clone
 		state.addTop(from)
 		state.pushStack(class, state.newObjectVariableType(throwableClass))
 		context.MakeStackMap(code, state, code.CodeLength)

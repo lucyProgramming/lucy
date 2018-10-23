@@ -67,6 +67,9 @@ func (s *Statement) simplifyIf() {
 	if len(s.StatementIf.ElseIfList) > 0 {
 		return
 	}
+	if len(s.StatementIf.PrefixExpressions) > 0 {
+		return
+	}
 	if s.StatementIf.Condition.Type != ExpressionTypeBool {
 		return
 	}
@@ -83,6 +86,16 @@ func (s *Statement) simplifyIf() {
 		}
 	}
 }
+
+func (s *Statement) simplifyFor() {
+	if s.StatementFor.Init == nil &&
+		s.StatementFor.Increment == nil &&
+		s.StatementFor.Condition.Type == ExpressionTypeBool &&
+		s.StatementFor.Condition.Data.(bool) == false {
+		s.Type = StatementTypeNop
+		s.StatementFor = nil
+	}
+}
 func (s *Statement) check(block *Block) []error {
 	defer func() {
 		s.Checked = true
@@ -96,7 +109,9 @@ func (s *Statement) check(block *Block) []error {
 		s.simplifyIf()
 		return es
 	case StatementTypeFor:
-		return s.StatementFor.check(block)
+		es := s.StatementFor.check(block)
+		s.simplifyFor()
+		return es
 	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:

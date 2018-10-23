@@ -9,8 +9,9 @@ enum OptionType {
 
 public abstract class Option {
 	protected typ OptionType
-	protected usage string 
-	protected defaultValueString string 
+	public usage string 
+	public defaultValueString string 
+	public name string 
 	
 	protected abstract fn reset() 
 	

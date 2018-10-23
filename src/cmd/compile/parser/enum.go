@@ -78,7 +78,6 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 		default:
 			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
 				parser.errMsgPrefix(), parser.token.Description))
-			parser.consume(untilSemicolonOrLf)
 			parser.Next(lfNotToken)
 			reset()
 		}

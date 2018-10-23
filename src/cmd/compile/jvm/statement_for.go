@@ -15,7 +15,7 @@ func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, co
 			return buildPackage.buildForRangeStatementForMap(class, code, s, context, state)
 		}
 	}
-	forState := (&StackMapState{}).FromLast(state)
+	forState := (&StackMapState{}).initFromLast(state)
 	defer func() {
 		state.addTop(forState)
 	}()

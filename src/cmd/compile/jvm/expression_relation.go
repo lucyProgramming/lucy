@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -21,6 +20,7 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
+		var exit *cg.Exit
 		if bin.Left.Value.Type == ast.VariableTypeByte ||
 			bin.Left.Value.Type == ast.VariableTypeShort ||
 			bin.Left.Value.Type == ast.VariableTypeChar ||
@@ -28,19 +28,18 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			bin.Left.Value.Type == ast.VariableTypeEnum {
 			switch e.Type {
 			case ast.ExpressionTypeGt:
-				code.Codes[code.CodeLength] = cg.OP_if_icmpgt
+				exit = (&cg.Exit{}).Init(cg.OP_if_icmpgt, code)
 			case ast.ExpressionTypeLe:
-				code.Codes[code.CodeLength] = cg.OP_if_icmple
+				exit = (&cg.Exit{}).Init(cg.OP_if_icmple, code)
 			case ast.ExpressionTypeLt:
-				code.Codes[code.CodeLength] = cg.OP_if_icmplt
+				exit = (&cg.Exit{}).Init(cg.OP_if_icmplt, code)
 			case ast.ExpressionTypeGe:
-				code.Codes[code.CodeLength] = cg.OP_if_icmpge
+				exit = (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
 			case ast.ExpressionTypeEq:
-				code.Codes[code.CodeLength] = cg.OP_if_icmpeq
+				exit = (&cg.Exit{}).Init(cg.OP_if_icmpeq, code)
 			case ast.ExpressionTypeNe:
-				code.Codes[code.CodeLength] = cg.OP_if_icmpne
+				exit = (&cg.Exit{}).Init(cg.OP_if_icmpne, code)
 			}
-			code.CodeLength++
 		} else {
 			switch bin.Left.Value.Type {
 			case ast.VariableTypeLong:
@@ -53,32 +52,33 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			code.CodeLength++
 			switch e.Type {
 			case ast.ExpressionTypeGt:
-				code.Codes[code.CodeLength] = cg.OP_ifgt
+				exit = (&cg.Exit{}).Init(cg.OP_ifgt, code)
 			case ast.ExpressionTypeLe:
-				code.Codes[code.CodeLength] = cg.OP_ifle
+				exit = (&cg.Exit{}).Init(cg.OP_ifle, code)
 			case ast.ExpressionTypeLt:
-				code.Codes[code.CodeLength] = cg.OP_iflt
+				exit = (&cg.Exit{}).Init(cg.OP_iflt, code)
 			case ast.ExpressionTypeGe:
-				code.Codes[code.CodeLength] = cg.OP_ifge
+				exit = (&cg.Exit{}).Init(cg.OP_ifge, code)
 			case ast.ExpressionTypeEq:
-				code.Codes[code.CodeLength] = cg.OP_ifeq
+				exit = (&cg.Exit{}).Init(cg.OP_ifeq, code)
 			case ast.ExpressionTypeNe:
-				code.Codes[code.CodeLength] = cg.OP_ifne
+				exit = (&cg.Exit{}).Init(cg.OP_ifne, code)
 			}
-			code.CodeLength++
 		}
 		state.popStack(1)
-		context.MakeStackMap(code, state, code.CodeLength+6)
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		falseExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+		writeExits([]*cg.Exit{falseExit}, code.CodeLength)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,
 		})
-		context.MakeStackMap(code, state, code.CodeLength+7)
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength:code.CodeLength+2], 7)
-		code.Codes[code.CodeLength+2] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+3] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4)
-		code.Codes[code.CodeLength+6] = cg.OP_iconst_1
-		code.CodeLength += 7
+		context.MakeStackMap(code, state, code.CodeLength)
+		defer state.popStack(1)
 		return
 	}
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
@@ -86,27 +86,29 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		maxStack = buildExpression.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
 		stack := buildExpression.build(class, code, bin.Right, context, state)
-		state.pushStack(class, bin.Right.Value)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
-		state.popStack(2) // 2 bool value
-		context.MakeStackMap(code, state, code.CodeLength+7)
+		state.popStack(1) // 1 bool value
+		var exit *cg.Exit
+		if e.Type == ast.ExpressionTypeEq {
+			exit = (&cg.Exit{}).Init(cg.OP_if_icmpeq, code)
+		} else {
+			exit = (&cg.Exit{}).Init(cg.OP_if_icmpne, code)
+		}
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		falseExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+		writeExits([]*cg.Exit{falseExit}, code.CodeLength)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,
 		})
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.ExpressionTypeEq {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpeq
-		} else {
-			code.Codes[code.CodeLength] = cg.OP_if_icmpne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
+		context.MakeStackMap(code, state, code.CodeLength)
+		defer state.popStack(1)
 		return
 	}
 	if bin.Left.Value.Type == ast.VariableTypeNull ||
@@ -118,22 +120,25 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			notNullExpression = bin.Right
 		}
 		maxStack = buildExpression.build(class, code, notNullExpression, context, state)
+		var exit *cg.Exit
 		if e.Type == ast.ExpressionTypeEq {
-			code.Codes[code.CodeLength] = cg.OP_ifnull
+			exit = (&cg.Exit{}).Init(cg.OP_ifnull, code)
 		} else { // ne
-			code.Codes[code.CodeLength] = cg.OP_ifnonnull
+			exit = (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
 		}
-		context.MakeStackMap(code, state, code.CodeLength+7)
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		falseExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+		writeExits([]*cg.Exit{falseExit}, code.CodeLength)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,
 		})
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
+		context.MakeStackMap(code, state, code.CodeLength)
+		defer state.popStack(1)
 		return
 	}
 
@@ -153,31 +158,34 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		state.popStack(1) // pop left string
-		context.MakeStackMap(code, state, code.CodeLength+7)
+		var exit *cg.Exit
+		switch e.Type {
+		case ast.ExpressionTypeGt:
+			exit = (&cg.Exit{}).Init(cg.OP_ifgt, code)
+		case ast.ExpressionTypeLe:
+			exit = (&cg.Exit{}).Init(cg.OP_ifle, code)
+		case ast.ExpressionTypeLt:
+			exit = (&cg.Exit{}).Init(cg.OP_iflt, code)
+		case ast.ExpressionTypeGe:
+			exit = (&cg.Exit{}).Init(cg.OP_ifge, code)
+		case ast.ExpressionTypeEq:
+			exit = (&cg.Exit{}).Init(cg.OP_ifeq, code)
+		case ast.ExpressionTypeNe:
+			exit = (&cg.Exit{}).Init(cg.OP_ifne, code)
+		}
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		falseExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+		writeExits([]*cg.Exit{falseExit}, code.CodeLength)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,
 		})
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		switch e.Type {
-		case ast.ExpressionTypeGt:
-			code.Codes[code.CodeLength] = cg.OP_ifgt
-		case ast.ExpressionTypeLe:
-			code.Codes[code.CodeLength] = cg.OP_ifle
-		case ast.ExpressionTypeLt:
-			code.Codes[code.CodeLength] = cg.OP_iflt
-		case ast.ExpressionTypeGe:
-			code.Codes[code.CodeLength] = cg.OP_ifge
-		case ast.ExpressionTypeEq:
-			code.Codes[code.CodeLength] = cg.OP_ifeq
-		case ast.ExpressionTypeNe:
-			code.Codes[code.CodeLength] = cg.OP_ifne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
+		context.MakeStackMap(code, state, code.CodeLength)
+		defer state.popStack(1)
 		return
 	}
 
@@ -191,23 +199,26 @@ func (buildExpression *BuildExpression) buildRelations(class *cg.ClassHighLevel,
 		if t := stack + 1; t > maxStack {
 			maxStack = t
 		}
-		state.popStack(1) // pop bin left
-		context.MakeStackMap(code, state, code.CodeLength+7)
+		state.popStack(1)
+		var exit *cg.Exit
+		if e.Type == ast.ExpressionTypeEq {
+			exit = (&cg.Exit{}).Init(cg.OP_if_acmpeq, code)
+		} else { // ne
+			exit = (&cg.Exit{}).Init(cg.OP_if_acmpne, code)
+		}
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		falseExit := (&cg.Exit{}).Init(cg.OP_goto, code)
+		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
+		writeExits([]*cg.Exit{falseExit}, code.CodeLength)
 		state.pushStack(class, &ast.Type{
 			Type: ast.VariableTypeBool,
 		})
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		if e.Type == ast.ExpressionTypeEq {
-			code.Codes[code.CodeLength] = cg.OP_if_acmpeq
-		} else { // ne
-			code.Codes[code.CodeLength] = cg.OP_if_acmpne
-		}
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
+		context.MakeStackMap(code, state, code.CodeLength)
+		defer state.popStack(1)
 		return
 	}
 	return

@@ -14,6 +14,8 @@ func (buildExpression *BuildExpression) buildVarAssign(class *cg.ClassHighLevel,
 	}()
 	if len(vs.Lefts) == 1 {
 		v := vs.Lefts[0].Data.(*ast.ExpressionIdentifier).Variable
+		////TODO:: debug
+		//fmt.Println(v.Name, v.Pos.ErrMsgPrefix())
 		currentStack := uint16(0)
 		if v.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, v.Type)

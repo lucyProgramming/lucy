@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"math"
 )
 
 type Block struct {
@@ -459,6 +460,7 @@ func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
 		b.Constants[name] = d.(*Constant)
 	case *Variable:
 		t := d.(*Variable)
+		t.LocalValOffset = math.MaxUint16 // overflow
 		b.Variables[name] = t
 	case *Enum:
 		e := d.(*Enum)

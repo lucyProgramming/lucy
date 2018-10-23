@@ -119,7 +119,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 		code.CodeLength++
 		//block is here
 		if c.Block != nil {
-			ss := (&StackMapState{}).FromLast(state)
+			ss := (&StackMapState{}).initFromLast(state)
 			buildPackage.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
@@ -138,7 +138,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel,
 	code.CodeLength++
 	state.popStack(1)
 	if s.Default != nil {
-		ss := (&StackMapState{}).FromLast(state)
+		ss := (&StackMapState{}).initFromLast(state)
 		buildPackage.buildBlock(class, code, s.Default, context, ss)
 		state.addTop(ss)
 	}

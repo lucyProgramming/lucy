@@ -54,7 +54,7 @@ const (
 	TokenVar                        // var a
 	TokenNew                        // new Object()
 	TokenColon                      // :
-	Token2Colon                     // ::
+	TokenSelectConst                // ::
 	TokenVarAssign                  // :=
 	TokenAddAssign                  // +=
 	TokenSubAssign                  // -=
@@ -122,7 +122,6 @@ var (
 		"enum":         TokenEnum,
 		"const":        TokenConst,
 		"if":           TokenIf,
-		"elseif":       TokenElseif,
 		"else":         TokenElse,
 		"for":          TokenFor,
 		"break":        TokenBreak,

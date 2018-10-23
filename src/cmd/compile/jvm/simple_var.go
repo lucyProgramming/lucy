@@ -3,12 +3,16 @@ package jvm
 import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+	"math"
 )
 
 /*
 	store local var according on type and offset
 */
 func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
+	if offset == math.MaxUint16 {
+		panic("local variable missing assign offset , this is cause by serious compiler error")
+	}
 	if offset > 255 { // early check
 		panic("over 255")
 	}
@@ -92,10 +96,12 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 }
 
 func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
+	if offset == math.MaxUint16 {
+		panic("local variable missing assign offset , this is cause by serious compiler error")
+	}
 	if offset > 255 { // early check
 		panic("over 255")
 	}
-
 	switch variableType {
 	case ast.VariableTypeBool:
 		fallthrough

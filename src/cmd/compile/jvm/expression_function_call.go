@@ -20,7 +20,7 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
 		Class:      "java/lang/invoke/MethodHandle",
-		Method:     functionPointerInvokeMethodName,
+		Method:     methodHandleInvokeMethodName,
 		Descriptor: Descriptor.methodDescriptor(call.Expression.Value.FunctionType),
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3

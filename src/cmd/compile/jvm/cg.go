@@ -124,7 +124,6 @@ func (buildPackage *BuildPackage) mkGlobalConstants() {
 	for k, v := range buildPackage.Package.Block.Constants {
 		f := &cg.FieldHighLevel{}
 		f.AccessFlags |= cg.ACC_FIELD_STATIC
-		f.AccessFlags |= cg.ACC_FIELD_SYNTHETIC
 		f.AccessFlags |= cg.ACC_FIELD_FINAL
 		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
 			f.AccessFlags |= cg.ACC_FIELD_PUBLIC

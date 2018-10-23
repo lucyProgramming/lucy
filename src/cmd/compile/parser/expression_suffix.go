@@ -354,7 +354,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		expressionParser.parser.token.Type == lex.TokenLb ||
 		expressionParser.parser.token.Type == lex.TokenSelection ||
 		expressionParser.parser.token.Type == lex.TokenVArgs ||
-		expressionParser.parser.token.Type == lex.Token2Colon {
+		expressionParser.parser.token.Type == lex.TokenSelectConst {
 		switch expressionParser.parser.token.Type {
 		case lex.TokenVArgs:
 			newExpression := &ast.Expression{}
@@ -456,7 +456,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 					expressionParser.Next(lfIsToken)
 				}
 			}
-		case lex.Token2Colon:
+		case lex.TokenSelectConst:
 			pos := expressionParser.parser.mkPos()
 			expressionParser.Next(lfNotToken) // skip ::
 			var constName string

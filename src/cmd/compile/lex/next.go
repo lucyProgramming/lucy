@@ -280,7 +280,7 @@ func (lex *Lexer) Next() (token *Token, err error) {
 			token.Type = TokenVarAssign
 			token.Description = ":="
 		} else if c == ':' {
-			token.Type = Token2Colon
+			token.Type = TokenSelectConst
 			token.Description = "::"
 		} else {
 			token.Type = TokenColon

@@ -188,7 +188,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 	index := len(statementReturn.Defers) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
 		state := statementReturn.Defers[index].StackMapState.(*StackMapState)
-		state = (&StackMapState{}).FromLast(state) // clone
+		state = (&StackMapState{}).initFromLast(state) // clone
 		state.addTop(from)
 		state.pushStack(class, state.newObjectVariableType(throwableClass))
 		context.MakeStackMap(code, state, code.CodeLength)

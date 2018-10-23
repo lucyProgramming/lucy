@@ -25,7 +25,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 
 	// &&  ||
 	if e.Type == ExpressionTypeLogicalOr ||
-		ExpressionTypeLogicalAnd == e.Type {
+		e.Type == ExpressionTypeLogicalAnd {
 		result = &Type{
 			Type: VariableTypeBool,
 			Pos:  e.Pos,

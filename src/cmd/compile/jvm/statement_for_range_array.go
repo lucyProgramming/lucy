@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -16,25 +15,18 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
 	//build array expression
 	maxStack = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
-
-	// if null skip
-	code.Codes[code.CodeLength] = cg.OP_dup //dup top
-	code.Codes[code.CodeLength+1] = cg.OP_ifnull
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+2:code.CodeLength+4], 6) // goto pop
-	code.Codes[code.CodeLength+4] = cg.OP_goto
-	binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 7) //goto for
-	code.Codes[code.CodeLength+7] = cg.OP_pop
-	state.pushStack(class, s.RangeAttr.RangeOn.Value)
-	context.MakeStackMap(code, state, code.CodeLength+7)
-	context.MakeStackMap(code, state, code.CodeLength+11)
-	state.popStack(1)
-	code.CodeLength += 8
-	// code.CodeLength += 3
+	code.Codes[code.CodeLength] = cg.OP_dup
+	code.CodeLength++
+	noNullExit := (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
+	code.Codes[code.CodeLength] = cg.OP_pop
+	code.CodeLength++
 	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
-	forState := (&StackMapState{}).FromLast(state)
-	defer func() {
-		state.addTop(forState) // add top
-	}()
+	writeExits([]*cg.Exit{noNullExit}, code.CodeLength)
+	state.pushStack(class, s.RangeAttr.RangeOn.Value)
+	context.MakeStackMap(code, state, code.CodeLength)
+	state.popStack(1)
+	forState := (&StackMapState{}).initFromLast(state)
+	defer state.addTop(forState) // add top
 	var autoVar AutoVariableForRangeArray
 	{
 		// else
@@ -154,7 +146,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 	}
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
-	blockState := (&StackMapState{}).FromLast(forState)
+	blockState := (&StackMapState{}).initFromLast(forState)
 	code.Codes[code.CodeLength] = cg.OP_iinc
 	if autoVar.K > 255 {
 		panic("over 255")

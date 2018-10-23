@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -11,51 +12,71 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"strconv"
-
-	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 )
 
-type Run struct {
-	LucyRoot            string
-	LucyPaths           []string
-	MainPackageLucyPath string
+type RunLucyPackage struct {
+	lucyRoot            string
+	lucyPaths           []string
+	mainPackageLucyPath string
 	Package             string
 	command             string
-	compilerAt          string
+	compilerExe         string
 	classPaths          []string
-	Flags               Flags
-	PackagesCompiled    map[string]*PackageCompiled
-	Args                []string // lucy application args
+	flags               Flags
+	packagesCompiled    map[string]*PackageCompiled
+	lucyProgramArgs     []string // lucy application args
+	flagSet             *flag.FlagSet
 }
 
-func (r *Run) Help(command string) {
-
+func (runLucyPackage *RunLucyPackage) Help() {
+	fmt.Println("run a lucy package")
+	var fs flagSet
+	runLucyPackage.flagSet.VisitAll(func(f *flag.Flag) {
+		t := &flag.Flag{}
+		*t = *f
+		t.DefValue = fmt.Sprintf(`'%s'`, t.DefValue)
+		fs = append(fs, t)
+	})
+	fs.makeSureLengthIsSame()
+	for _, v := range fs {
+		fmt.Printf("\t -%s\t default:%s\t%s\n", v.Name, v.DefValue, v.Usage)
+	}
 }
 
-func (r *Run) parseCmd(args []string) error {
+func (runLucyPackage *RunLucyPackage) parseCmd(args []string) error {
 	cmd := flag.NewFlagSet("run", flag.ErrorHandling(1))
-	cmd.BoolVar(&r.Flags.forceReBuild, "forceReBuild", false, "force rebuild all package")
-	cmd.IntVar(&r.Flags.JvmVersion, "jvm-version", 54, "jvm major version")
-	cmd.BoolVar(&r.Flags.Build, "build", false, "build package no run")
-	cmd.BoolVar(&r.Flags.Verbose, "v", false, "verbose")
-	err := cmd.Parse(args)
+	runLucyPackage.flagSet = cmd
+	cmd.BoolVar(&runLucyPackage.flags.forceReBuild,
+		"forceReBuild", false, "force rebuild all package")
+	cmd.StringVar(&runLucyPackage.flags.compilerFlags,
+		"cf", "", "compiler flags")
+	cmd.BoolVar(&runLucyPackage.flags.build,
+		"build", false, "build package and no run")
+	cmd.BoolVar(&runLucyPackage.flags.verbose,
+		"v", false, "verbose")
+	cmd.BoolVar(&runLucyPackage.flags.help, "h", false,
+		"print help message")
+	var runArgs []string
+	var lucyProgramArgs []string
+	for k, v := range args {
+		if strings.HasPrefix(v, "-") == false {
+			runLucyPackage.Package = v
+			lucyProgramArgs = args[k+1:]
+			break
+		}
+		runArgs = append(runArgs, v)
+	}
+	err := cmd.Parse(runArgs)
 	if err != nil {
 		return err
 	}
-	args = cmd.Args()
-	if len(args) == 0 {
-		return fmt.Errorf("no package to run")
-	}
-	r.Package = args[0]
-	r.Args = args[1:]
+	runLucyPackage.lucyProgramArgs = lucyProgramArgs
 	return nil
 }
 
-func (r *Run) setCompiler() error {
-	r.compilerAt = filepath.Join(r.LucyRoot, "bin", "compile") //compiler at
-	t := r.compilerAt
+func (runLucyPackage *RunLucyPackage) setCompiler() error {
+	runLucyPackage.compilerExe = filepath.Join(runLucyPackage.lucyRoot, "bin", "compile") //compiler at
+	t := runLucyPackage.compilerExe
 	if runtime.GOOS == "windows" {
 		t += ".exe"
 	}
@@ -66,71 +87,77 @@ func (r *Run) setCompiler() error {
 	return nil
 }
 
-func (r *Run) RunCommand(command string, args []string) {
-	r.command = command
-	err := r.parseCmd(args)
+func (runLucyPackage *RunLucyPackage) RunCommand(command string, args []string) {
+	runLucyPackage.command = command
+	err := runLucyPackage.parseCmd(args) // skip run
 	if err != nil {
 		fmt.Println(err)
+		runLucyPackage.Help()
 		return
 	}
-	if r.Flags.JvmVersion <= 50 {
-		fmt.Println("jvm major version must greater than 50")
+	if runLucyPackage.flags.help {
+		runLucyPackage.Help()
+		return
+	}
+	if runLucyPackage.Package == "" {
+		fmt.Println("no package to run")
 		os.Exit(1)
 	}
-	r.LucyRoot, err = common.GetLucyRoot()
+	runLucyPackage.lucyRoot, err = common.GetLucyRoot()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	r.LucyPaths, err = common.GetLucyPaths()
+	runLucyPackage.lucyPaths, err = common.GetLucyPaths()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
-	r.classPaths = common.GetClassPaths()
-	err = r.setCompiler()
+	runLucyPackage.classPaths = common.GetClassPaths()
+	err = runLucyPackage.setCompiler()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
-	r.PackagesCompiled = make(map[string]*PackageCompiled)
-	founds := r.findPackageIn(r.Package)
-	err = r.foundError(r.Package, founds)
+	runLucyPackage.packagesCompiled = make(map[string]*PackageCompiled)
+	founds := runLucyPackage.findPackageIn(runLucyPackage.Package)
+	err = runLucyPackage.foundError(runLucyPackage.Package, founds)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
-	r.MainPackageLucyPath = founds[0]
+	runLucyPackage.mainPackageLucyPath = founds[0]
 	//
 	{
-		_, _, err = r.buildPackage("", common.CorePackage, &ImportStack{})
+		_, _, err = runLucyPackage.buildPackage("", common.CorePackage, &ImportStack{})
 		if err != nil {
 			fmt.Printf("build  buildin package '%s' failed,err:%v\n", common.CorePackage, err)
 			os.Exit(3)
 		}
 	}
-	_, _, err = r.buildPackage(r.MainPackageLucyPath, r.Package, &ImportStack{})
+	_, _, err = runLucyPackage.buildPackage(runLucyPackage.mainPackageLucyPath, runLucyPackage.Package, &ImportStack{})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
-	if r.Flags.Build {
+	if runLucyPackage.flags.build {
 		os.Exit(0)
 	}
 	//
-	cmd := exec.Command("java", append([]string{r.Package + "/" + "main"}, r.Args...)...)
+	cmd := exec.Command("java",
+		append([]string{runLucyPackage.Package + "/" + "main"}, runLucyPackage.lucyProgramArgs...)...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	//set CLASSPATHS
 	classpath := make(map[string]struct{}) // if duplicate
-	for _, v := range r.classPaths {
+	for _, v := range runLucyPackage.classPaths {
 		classpath[v] = struct{}{}
 	}
-	for _, v := range r.LucyPaths {
+	for _, v := range runLucyPackage.lucyPaths {
 		classpath[filepath.Join(v, common.DirForCompiledClass)] = struct{}{}
 	}
-	classpath[filepath.Join(r.LucyRoot, "lib")] = struct{}{}
+	classpath[filepath.Join(runLucyPackage.lucyRoot, "lib")] = struct{}{}
 	classPathArray := make([]string, len(classpath))
 	{
 		i := 0
@@ -171,9 +198,9 @@ func (r *Run) RunCommand(command string, args []string) {
 /*
 	find package in which directory
 */
-func (r *Run) findPackageIn(packageName string) []string {
+func (runLucyPackage *RunLucyPackage) findPackageIn(packageName string) []string {
 	pathHavePackage := []string{}
-	for _, v := range r.LucyPaths {
+	for _, v := range runLucyPackage.lucyPaths {
 		dir := filepath.Join(v, common.DirForLucySourceFile, packageName)
 		f, err := os.Stat(dir)
 		if err == nil && f.IsDir() {
@@ -186,7 +213,7 @@ func (r *Run) findPackageIn(packageName string) []string {
 /*
 	check package if need rebuild
 */
-func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.PackageMeta,
+func (runLucyPackage *RunLucyPackage) needCompile(lucyPath string, packageName string) (meta *common.PackageMeta,
 	need bool, lucyFiles []string, err error) {
 	need = true
 	sourceFileDir := filepath.Join(lucyPath, common.DirForLucySourceFile, packageName)
@@ -206,10 +233,10 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 			filepath.Join(lucyPath, common.DirForLucySourceFile, packageName))
 		return
 	}
-	if p, ok := r.PackagesCompiled[packageName]; ok {
+	if p, ok := runLucyPackage.packagesCompiled[packageName]; ok {
 		return p.meta, false, nil, nil
 	}
-	if r.Flags.forceReBuild {
+	if runLucyPackage.flags.forceReBuild {
 		return
 	}
 	destinationDir := filepath.Join(lucyPath, "class", packageName)
@@ -261,9 +288,9 @@ func (r *Run) needCompile(lucyPath string, packageName string) (meta *common.Pac
 	return
 }
 
-func (r *Run) parseImports(files []string) ([]string, error) {
+func (runLucyPackage *RunLucyPackage) parseImports(files []string) ([]string, error) {
 	args := append([]string{"-only-import"}, files...)
-	cmd := exec.Command(r.compilerAt, args...)
+	cmd := exec.Command(runLucyPackage.compilerExe, args...)
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
 	if err != nil {
@@ -283,16 +310,16 @@ func (r *Run) parseImports(files []string) ([]string, error) {
 	for k, _ := range isM {
 		is = append(is, k)
 	}
-	is, err = r.javaPackageFilter(is)
+	is, err = runLucyPackage.javaPackageFilter(is)
 	if err != nil {
 		err = fmt.Errorf("parse import failed,err:%v", err)
 	}
 	return is, err
 }
 
-func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) {
+func (runLucyPackage *RunLucyPackage) javaPackageFilter(is []string) (lucyPackages []string, err error) {
 	existInClassPath := func(name string) (found []string) {
-		for _, v := range r.classPaths {
+		for _, v := range runLucyPackage.classPaths {
 			dir := filepath.Join(v, name)
 			f, _ := os.Stat(dir)
 			if f != nil && f.IsDir() {
@@ -314,9 +341,8 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 		return
 	}
 	existInLucyPath := func(name string) (found []string) {
-		for _, v := range r.LucyPaths {
+		for _, v := range runLucyPackage.lucyPaths {
 			dir := filepath.Join(v, common.DirForLucySourceFile, name)
-			//fmt.Println(dir)
 			f, _ := os.Stat(dir)
 			if f != nil && f.IsDir() {
 				found = append(found, v)
@@ -346,19 +372,19 @@ func (r *Run) javaPackageFilter(is []string) (lucyPackages []string, err error) 
 		found = existInClassPath(i)
 		if len(found) > 1 {
 			errMsg := fmt.Sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n", i)
-			errMsg += formatPaths(r.classPaths)
+			errMsg += formatPaths(runLucyPackage.classPaths)
 			return nil, fmt.Errorf(errMsg)
 		}
 		if len(found) == 0 {
 			errMsg := fmt.Sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n", i)
-			errMsg += formatPaths(r.classPaths)
+			errMsg += formatPaths(runLucyPackage.classPaths)
 			return nil, fmt.Errorf(errMsg)
 		}
 	}
 	return
 }
 
-func (r *Run) foundError(packageName string, founds []string) error {
+func (runLucyPackage *RunLucyPackage) foundError(packageName string, founds []string) error {
 	if len(founds) == 0 {
 		return fmt.Errorf("package '%s' not found", packageName)
 	}
@@ -368,20 +394,20 @@ func (r *Run) foundError(packageName string, founds []string) error {
 	return nil
 }
 
-func (r *Run) buildPackage(lucyPath string, packageName string, importStack *ImportStack) (needBuild bool,
+func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName string, importStack *ImportStack) (needBuild bool,
 	meta *common.PackageMeta, err error) {
-	if p, ok := r.PackagesCompiled[packageName]; ok {
+	if p, ok := runLucyPackage.packagesCompiled[packageName]; ok {
 		return false, p.meta, nil
 	}
 	if lucyPath == "" {
-		founds := r.findPackageIn(packageName)
-		err = r.foundError(packageName, founds)
+		founds := runLucyPackage.findPackageIn(packageName)
+		err = runLucyPackage.foundError(packageName, founds)
 		if err != nil {
 			return false, nil, err
 		}
 		lucyPath = founds[0]
 	}
-	meta, needBuild, lucyFiles, err := r.needCompile(lucyPath, packageName)
+	meta, needBuild, lucyFiles, err := runLucyPackage.needCompile(lucyPath, packageName)
 	if err != nil {
 		err = fmt.Errorf("check if need compile,err:%v", err)
 		return
@@ -389,7 +415,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 	if needBuild == false { //current package no need to compile,but I need to check dependies
 		need := false
 		for _, v := range meta.Imports {
-			if _, ok := r.PackagesCompiled[v]; ok {
+			if _, ok := runLucyPackage.packagesCompiled[v]; ok {
 				continue
 			}
 			i := (&ImportStack{}).fromLast(importStack)
@@ -397,7 +423,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 			if err != nil {
 				return
 			}
-			needBuild, _, err = r.buildPackage("", v, i)
+			needBuild, _, err = runLucyPackage.buildPackage("", v, i)
 			if err != nil {
 				return
 			}
@@ -411,12 +437,12 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 		return
 	}
 	//compile this package really
-	is, err := r.parseImports(lucyFiles)
+	is, err := runLucyPackage.parseImports(lucyFiles)
 	if err != nil {
 		return
 	}
 	for _, i := range is {
-		if _, ok := r.PackagesCompiled[i]; ok {
+		if _, ok := runLucyPackage.packagesCompiled[i]; ok {
 			continue
 		}
 		im := (&ImportStack{}).fromLast(importStack)
@@ -424,7 +450,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 		if err != nil {
 			return
 		}
-		_, _, err = r.buildPackage("", i, im) // compile depend
+		_, _, err = runLucyPackage.buildPackage("", i, im) // compile depend
 		if err != nil {
 			return
 		}
@@ -453,18 +479,21 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 			}
 		}
 	}
-	if r.Flags.Verbose {
+	if runLucyPackage.flags.verbose {
 		fmt.Printf("# %s\n", packageName) // compile this package
 	}
 	// cd to destDir
 	os.Chdir(destinationDir)
-	args := []string{"-package-name", packageName, "-jvm-major-version", strconv.Itoa(r.Flags.JvmVersion)}
+	args := []string{"-package-name", packageName}
+	if runLucyPackage.flags.compilerFlags != "" {
+		args = append(args, strings.Split(runLucyPackage.flags.compilerFlags, " ")...)
+	}
 	args = append(args, lucyFiles...)
-	cmd := exec.Command(r.compilerAt, args...)
+	cmd := exec.Command(runLucyPackage.compilerExe, args...)
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
 	if err != nil {
-		fmt.Println(string(bs))
+		err = fmt.Errorf("compiler err:%v", err)
 		return
 	}
 	// make maitain.json
@@ -499,7 +528,7 @@ func (r *Run) buildPackage(lucyPath string, packageName string, importStack *Imp
 		filepath.Join(lucyPath, common.DirForCompiledClass, packageName, common.LucyMaintainFile),
 		bs,
 		0644)
-	r.PackagesCompiled[packageName] = &PackageCompiled{
+	runLucyPackage.packagesCompiled[packageName] = &PackageCompiled{
 		meta:        meta,
 		packageName: packageName,
 	}

@@ -20,6 +20,10 @@ fn main(args []string) {
 	print(i.getValue())
 	print(f.getValue())
 	print(flag.helpMsg());
+	
+	flag.walkOptions(fn ( o flag.Option) {
+	    print(o.name , o.defaultValueString , o.usage)
+	})
 }
 
 

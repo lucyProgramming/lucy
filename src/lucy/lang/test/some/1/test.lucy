@@ -2,8 +2,7 @@ import "lucy/os"
 
 
 fn printErrAndExit(msg string) {
-	print(msg)
-	os.exit(1)
+	panic(msg)
 }
 
 

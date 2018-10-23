@@ -314,12 +314,11 @@ func (parser *Parser) Parse() []error {
 					parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
 						parser.errMsgPrefix(e.Pos), e.Description))
 				}
-				continue
+			} else {
+				parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
+					parser.errMsgPrefix(), parser.token.Description))
+				parser.Next(lfNotToken)
 			}
-			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
-				parser.errMsgPrefix(), parser.token.Description))
-			parser.consume(untilSemicolonOrLf)
-			resetProperty()
 		}
 	}
 	return parser.errs
@@ -563,17 +562,13 @@ func (parser *Parser) consume(until map[lex.TokenKind]bool) {
 			parser.token.Type == lex.TokenGlobal ||
 			parser.token.Type == lex.TokenCase ||
 			parser.token.Type == lex.TokenDefault {
-			parser.consumeFoundValidToken = true
-			return
-		}
-		if parser.token.Type == lex.TokenLc {
-			if _, ok := until[lex.TokenLc]; ok == false {
+			if _, ok := until[parser.token.Type]; ok == false {
 				parser.consumeFoundValidToken = true
 				return
 			}
 		}
-		if parser.token.Type == lex.TokenRc {
-			if _, ok := until[lex.TokenRc]; ok == false {
+		if parser.token.Type == lex.TokenLc {
+			if _, ok := until[lex.TokenLc]; ok == false {
 				parser.consumeFoundValidToken = true
 				return
 			}

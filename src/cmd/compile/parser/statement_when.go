@@ -6,7 +6,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-//TODO:: missing format
 func (blockParser *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 	blockParser.parser.Next(lfIsToken)
 	blockParser.parser.unExpectNewLineAndSkip()
@@ -15,6 +14,7 @@ func (blockParser *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		blockParser.parser.errs = append(blockParser.parser.errs, err)
 		blockParser.consume(untilLc)
 	}
+	blockParser.parser.ifTokenIsLfThenSkip()
 	if blockParser.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
 			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
@@ -31,19 +31,22 @@ func (blockParser *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 	when := &ast.StatementWhen{}
 	when.When = condition
 	for blockParser.parser.token.Type == lex.TokenCase {
-		blockParser.Next(lfNotToken) // skip case
+		blockParser.Next(lfIsToken) // skip case
+		blockParser.parser.unExpectNewLineAndSkip()
 		ts, err := blockParser.parser.parseTypes(lex.TokenColon)
 		if err != nil {
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return when, err
 		}
+		blockParser.parser.unExpectNewLineAndSkip()
 		if blockParser.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s expect ':',but '%s'",
 				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 			return when, err
 		}
-		blockParser.Next(lfNotToken) // skip :
+		blockParser.Next(lfIsToken) // skip :
+		blockParser.parser.expectNewLineAndSkip()
 		var block *ast.Block
 		if blockParser.parser.token.Type != lex.TokenCase &&
 			blockParser.parser.token.Type != lex.TokenDefault &&
@@ -61,12 +64,14 @@ func (blockParser *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 	//default value
 	if blockParser.parser.token.Type == lex.TokenDefault {
 		blockParser.Next(lfIsToken) // skip default key word
+		blockParser.parser.unExpectNewLineAndSkip()
 		if blockParser.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s missing colon after default",
 				blockParser.parser.errMsgPrefix())
 			blockParser.parser.errs = append(blockParser.parser.errs, err)
 		} else {
-			blockParser.Next(lfNotToken)
+			blockParser.Next(lfIsToken)
+			blockParser.parser.expectNewLineAndSkip()
 		}
 		if blockParser.parser.token.Type != lex.TokenRc {
 			block := ast.Block{}

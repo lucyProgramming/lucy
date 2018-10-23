@@ -31,27 +31,27 @@ func main() {
 		fmt.Printf("lucy-%v@(%s/%s)\n", common.VERSION, runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
 	case "build":
-		(&run.Run{}).RunCommand("run", append([]string{"-build"}, os.Args[2:]...))
+		(&run.RunLucyPackage{}).RunCommand("run", append([]string{"-build"}, os.Args[2:]...))
 	case "run":
-		(&run.Run{}).RunCommand(os.Args[1], os.Args[2:])
+		(&run.RunLucyPackage{}).RunCommand(os.Args[1], os.Args[2:])
 	case "install":
 		args := []string{"lucy/cmd/langtools/install"}
 		args = append(args, os.Args[2:]...)
-		(&run.Run{}).RunCommand("run", args)
+		(&run.RunLucyPackage{}).RunCommand("run", args)
 	case "clean":
 		args := []string{"lucy/cmd/langtools/clean"}
 		args = append(args, os.Args[2:]...)
-		(&run.Run{}).RunCommand("run", args)
+		(&run.RunLucyPackage{}).RunCommand("run", args)
 	case "test":
 		args := []string{"lucy/cmd/langtools/test"}
 		args = append(args, os.Args[2:]...)
-		(&run.Run{}).RunCommand("run", args)
+		(&run.RunLucyPackage{}).RunCommand("run", args)
 	case "install_lucy_array":
 		(&install_lucy_array.InstallLucyArray{}).RunCommand("install_lucy_array", nil)
 	case "pack":
 		args := []string{"lucy/cmd/langtools/pack"}
 		args = append(args, os.Args[2:]...)
-		(&run.Run{}).RunCommand("run", args)
+		(&run.RunLucyPackage{}).RunCommand("run", args)
 	default:
 		printUsage()
 		os.Exit(1)
