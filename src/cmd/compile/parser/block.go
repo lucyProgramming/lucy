@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
@@ -25,10 +26,13 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 	}()
 	isDefer := false
 	isAbstract := false
+	isFinal := false
+	var finalPos *ast.Pos
 	comment := &CommentParser{
 		parser: blockParser.parser,
 	}
 	resetPrefix := func() {
+		isFinal = false
 		isDefer = false
 		isAbstract = false
 		comment.reset()
@@ -57,6 +61,17 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 		case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
 			resetPrefix()
 			blockParser.Next(lfNotToken) // look up next
+			continue
+		case lex.TokenFinal:
+			pos := blockParser.parser.mkPos()
+			blockParser.parser.Next(lfIsToken)
+			blockParser.parser.unExpectNewLineAndSkip()
+			if err := blockParser.parser.validAfterFinal(); err != nil {
+				isFinal = false
+			} else {
+				isFinal = true
+				finalPos = pos
+			}
 			continue
 		case lex.TokenDefer:
 			blockParser.Next(lfIsToken)
@@ -302,6 +317,11 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			}
 			statement := &ast.Statement{}
 			statement.Pos = pos
+			class.FinalPos = finalPos
+			if isFinal {
+				class.AccessFlags |= cg.ACC_CLASS_FINAL
+			}
+
 			statement.Type = ast.StatementTypeClass
 			statement.Class = class
 			block.Statements = append(block.Statements, statement)
@@ -364,6 +384,7 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		statement.Pos = pos
 		statement.Type = ast.StatementTypeLabel
 		label := &ast.StatementLabel{}
+		label.Pos = blockParser.parser.mkPos()
 		label.CodeOffset = -1
 		statement.StatementLabel = label
 		label.Statement = statement

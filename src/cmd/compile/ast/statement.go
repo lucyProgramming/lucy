@@ -90,6 +90,7 @@ func (s *Statement) simplifyIf() {
 func (s *Statement) simplifyFor() {
 	if s.StatementFor.Init == nil &&
 		s.StatementFor.Increment == nil &&
+		s.StatementFor.Condition != nil &&
 		s.StatementFor.Condition.Type == ExpressionTypeBool &&
 		s.StatementFor.Condition.Data.(bool) == false {
 		s.Type = StatementTypeNop
@@ -147,6 +148,7 @@ func (s *Statement) check(block *Block) []error {
 		if err != nil {
 			errs = append(errs, err)
 		}
+		fmt.Println(s.Class.Name)
 		return append(errs, s.Class.check(block)...)
 	case StatementTypeEnum:
 		es := s.Enum.check()

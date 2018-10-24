@@ -85,7 +85,6 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 			return nil, fmt.Errorf("%s fucntion '%s' a template function",
 				e.Pos.ErrMsgPrefix(), f.Name)
 		}
-		f.Used = true
 		result := &Type{}
 		result.Type = VariableTypeFunction
 		result.FunctionType = &f.Type

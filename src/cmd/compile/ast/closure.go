@@ -49,6 +49,9 @@ func (c *Closure) InsertVar(pos *Pos, v *Variable) {
 }
 
 func (c *Closure) InsertFunction(pos *Pos, f *Function) {
+	if c == nil {
+		panic(".........")
+	}
 	if c.Functions == nil {
 		c.Functions = make(map[*Function]*ClosureMeta)
 	}

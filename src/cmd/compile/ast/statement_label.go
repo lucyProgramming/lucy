@@ -14,6 +14,7 @@ type StatementLabel struct {
 	Name                string
 	Exits               []*cg.Exit
 	Statement           *Statement
+	Pos                 *Pos
 }
 
 /*

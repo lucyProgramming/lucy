@@ -1,6 +1,7 @@
 package ast
 
 type Constant struct {
+	IsGlobal               bool
 	IsBuildIn              bool
 	Used                   bool
 	Pos                    *Pos

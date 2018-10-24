@@ -6,6 +6,7 @@ import (
 )
 
 type Enum struct {
+	IsGlobal        bool
 	IsBuildIn       bool
 	AccessFlags     uint16
 	Name            string

@@ -11,6 +11,7 @@ import (
 	unlike function class not accept capture
 */
 type Class struct {
+	IsGlobal                          bool
 	IsBuildIn                         bool
 	Used                              bool
 	resolveFatherCalled               bool
@@ -82,6 +83,7 @@ func (c *Class) mkDefaultConstruction() {
 	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
+	m.Function.Block.Fn = m.Function
 	m.Function.Name = SpecialMethodInit
 	{
 		e := &Expression{}

@@ -17,12 +17,6 @@ func Main(files []string) {
 		fmt.Println("no file specfied")
 		os.Exit(1)
 	}
-	if compileCommon.CompileFlags.OnlyImport == false {
-		if compileCommon.CompileFlags.PackageName == "" {
-			fmt.Println("package name not specfied")
-			os.Exit(1)
-		}
-	}
 	compiler.NErrs2StopCompile = 10
 	compiler.Errs = []error{}
 	compiler.Files = files
@@ -86,7 +80,6 @@ func (compiler *Compiler) compile() {
 			compiler.Errs = append(compiler.Errs, err)
 			continue
 		}
-
 		//UTF-16 (BE)
 		if len(bs) >= 2 &&
 			bs[0] == 0xfe &&
@@ -135,6 +128,11 @@ func (compiler *Compiler) compile() {
 	if compileCommon.CompileFlags.OnlyImport {
 		compiler.dumpImports()
 		return
+	}
+
+	if compileCommon.CompileFlags.PackageName == "" {
+		fmt.Println("package name not specfied")
+		os.Exit(1)
 	}
 	c := ast.ConvertTops2Package{}
 	ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName

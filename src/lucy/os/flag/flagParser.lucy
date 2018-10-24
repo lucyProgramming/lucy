@@ -7,14 +7,19 @@ public final class  FlagParser {
 	
 	public fn FlagParser() {
 	    this.super()
+		
 		this.options = new map{ string -> Option }()
 	}
 	
 	
 	public fn walkOptions(walkFn fn (o Option)) {
+		
 		for v := range this.options {
 			walkFn(v)
 		}
+		class xxx {
+			fn xxx () {}
+		} 
 	}
 	
 	private fn check(option string) {

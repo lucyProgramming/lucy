@@ -74,6 +74,7 @@ func (p *Package) mkInitFunctions(bs []*Block) {
 	for k, b := range bs {
 		b.IsFunctionBlock = true
 		f := &Function{}
+		b.Fn = f
 		f.Pos = b.Pos
 		f.Block = *b
 		p.InitFunctions[k] = f

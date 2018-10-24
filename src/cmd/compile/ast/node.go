@@ -82,6 +82,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	redeclareErrors = conversion.redeclareErrors()
 	PackageBeenCompile.Block.Constants = make(map[string]*Constant)
 	for _, v := range conversion.Constants {
+		v.IsGlobal = true
 		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
 			errs = append(errs, err)
@@ -98,6 +99,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
 	for _, v := range conversion.Classes {
+		v.IsGlobal = true
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}
@@ -109,6 +111,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
 	for _, v := range conversion.Enums {
+		v.IsGlobal = true
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}

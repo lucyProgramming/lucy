@@ -10,8 +10,7 @@ func (c *Class) check(father *Block) []error {
 	c.Block.inherit(father)
 	c.Block.InheritedAttribute.Class = c
 	errs := c.checkPhase1()
-	es := c.checkPhase2()
-	errs = append(errs, es...)
+	errs = append(errs, c.checkPhase2()...)
 	return errs
 }
 
@@ -19,7 +18,6 @@ func (c *Class) checkPhase1() []error {
 	c.mkDefaultConstruction()
 	errs := c.Block.checkConstants()
 	err := c.resolveFather()
-
 	if err != nil {
 		errs = append(errs, err)
 	} else {
@@ -463,10 +461,6 @@ func (c *Class) checkMethods() []error {
 				if isConstruction {
 					if method.IsFirstStatementCallFatherConstruction() == false {
 						errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",
-							errMsgPrefix(method.Function.Pos)))
-					}
-					if method.IsFinal() {
-						errs = append(errs, fmt.Errorf("%s construction method cannot be final",
 							errMsgPrefix(method.Function.Pos)))
 					}
 				}

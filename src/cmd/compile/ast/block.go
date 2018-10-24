@@ -244,8 +244,7 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 					}
 				}
 				//cannot search variable from class body
-				if b.InheritedAttribute.Class != nil &&
-					b.IsClassBlock {
+				if b.IsClassBlock {
 					return nil, fmt.Errorf("%s trying to access variable '%s' from class",
 						from.ErrMsgPrefix(), name)
 				}
@@ -286,6 +285,45 @@ func (b *Block) inherit(father *Block) {
 
 func (b *Block) checkUnUsed() (es []error) {
 	es = []error{}
+	for _, v := range b.Constants {
+		if v.Used ||
+			v.IsGlobal {
+			continue
+		}
+		es = append(es, fmt.Errorf("%s const '%s' has declared,but not used",
+			v.Pos.ErrMsgPrefix(), v.Name))
+	}
+	for _, v := range b.Enums {
+		if v.Used ||
+			v.IsGlobal {
+			continue
+		}
+		es = append(es, fmt.Errorf("%s enum '%s' has declared,but not used",
+			v.Pos.ErrMsgPrefix(), v.Name))
+	}
+	for _, v := range b.Classes {
+		if v.Used ||
+			v.IsGlobal {
+			continue
+		}
+		es = append(es, fmt.Errorf("%s class '%s' has declared,but not used",
+			v.Pos.ErrMsgPrefix(), v.Name))
+	}
+	for _, v := range b.Functions {
+		if v.Used ||
+			v.IsGlobal {
+			continue
+		}
+		es = append(es, fmt.Errorf("%s function '%s' has declared,but not used",
+			v.Pos.ErrMsgPrefix(), v.Name))
+	}
+	for _, v := range b.Labels {
+		if v.Used {
+			continue
+		}
+		es = append(es, fmt.Errorf("%s enum '%s' has declared,but not used",
+			v.Pos.ErrMsgPrefix(), v.Name))
+	}
 	for _, v := range b.Variables {
 		if v.Used ||
 			v.IsGlobal ||
