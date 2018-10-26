@@ -44,6 +44,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 			})
 		}
 	}
+
 	for _, v := range compiler.ClassPaths {
 		p := filepath.Join(v, importName)
 		f, err := os.Stat(p)

@@ -74,6 +74,8 @@ func (compiler *Compiler) dumpImports() {
 }
 
 func (compiler *Compiler) compile() {
+	fileNodes := make(map[string][]*ast.TopNode)
+
 	for _, v := range compiler.Files {
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
@@ -120,13 +122,20 @@ func (compiler *Compiler) compile() {
 			// utf8 bom
 			bs = bs[3:]
 		}
+		length := len(compiler.Tops)
 		compiler.Errs = append(compiler.Errs, parser.Parse(&compiler.Tops, v, bs,
 			compileCommon.CompileFlags.OnlyImport, compiler.NErrs2StopCompile)...)
+		fileNodes[v] = compiler.Tops[length:len(compiler.Tops)]
 		compiler.shouldExit()
 	}
 	// parse import only
 	if compileCommon.CompileFlags.OnlyImport {
 		compiler.dumpImports()
+		return
+	}
+
+	if compileCommon.CompileFlags.DumpParseFile {
+		visualization.VisualNodes(fileNodes)
 		return
 	}
 

@@ -5,8 +5,9 @@ import (
 )
 
 var (
-	compiler Compiler
-	loader   FileLoader
+	compiler      Compiler
+	loader        FileLoader
+	visualization = &GraphvizVisualization{}
 )
 
 func init() {

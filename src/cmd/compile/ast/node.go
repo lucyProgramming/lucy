@@ -71,7 +71,13 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 			}
 		case *Expression: // a,b = f();
 			t := v.Data.(*Expression)
-			expressions = append(expressions, t)
+			if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
+				expressions = append(expressions, t)
+			} else {
+				errs = append(errs, fmt.Errorf("%s cannot have '%s' in top",
+					t.Pos.ErrMsgPrefix(), t.Description))
+			}
+
 		case *TypeAlias:
 			t := v.Data.(*TypeAlias)
 			conversion.TypeAlias = append(conversion.TypeAlias, t)

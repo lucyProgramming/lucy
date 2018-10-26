@@ -89,6 +89,17 @@ func (parser *Parser) Parse() []error {
 		if len(parser.errs) > parser.nErrors2Stop {
 			break
 		}
+		if parser.ExpressionParser.looksLikeExpression() {
+			e, err := parser.ExpressionParser.parseExpression(true)
+			if err != nil {
+				continue
+			}
+			e.IsPublic = isPublic()
+			e.IsGlobal = true
+			*parser.tops = append(*parser.tops, &ast.TopNode{
+				Data: e,
+			})
+		}
 		switch parser.token.Type {
 		case lex.TokenComment, lex.TokenCommentMultiLine:
 			comment.read()
@@ -142,46 +153,7 @@ func (parser *Parser) Parse() []error {
 				Data: e,
 			})
 			resetProperty()
-		case lex.TokenIdentifier:
-			e, err := parser.ExpressionParser.parseExpression(true)
-			if err != nil {
-				parser.consume(untilSemicolonOrLf)
-				parser.Next(lfNotToken)
-				continue
-			}
-			e.IsGlobal = true
-			e.IsPublic = isPublic()
-			parser.validStatementEnding()
-			if e.Type == ast.ExpressionTypeVarAssign {
-				varComment := ""
-				if parser.token.Type == lex.TokenComment {
-					varComment = parser.token.Data.(string)
-					parser.Next(lfIsToken)
-				} else {
-					varComment = comment.Comment
-				}
-				{
-					bin := e.Data.(*ast.ExpressionBinary)
-					var lefts []*ast.Expression
-					if bin.Left.Type == ast.ExpressionTypeList {
-						lefts = bin.Left.Data.([]*ast.Expression)
-					} else {
-						lefts = []*ast.Expression{bin.Left}
-					}
-					for _, v := range lefts {
-						if v.Type == ast.ExpressionTypeIdentifier {
-							v.Data.(*ast.ExpressionIdentifier).Comment = varComment
-						}
-					}
-				}
-				*parser.tops = append(*parser.tops, &ast.TopNode{
-					Data: e,
-				})
-			} else {
-				parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
-					parser.errMsgPrefix(e.Pos), e.Description))
-			}
-			resetProperty()
+
 		case lex.TokenEnum:
 			e, err := parser.parseEnum()
 			if err != nil {
@@ -267,7 +239,6 @@ func (parser *Parser) Parse() []error {
 				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Data: v,
 				})
-
 			}
 			resetProperty()
 			continue
@@ -290,35 +261,9 @@ func (parser *Parser) Parse() []error {
 		case lex.TokenEof:
 			break
 		default:
-			if parser.ExpressionParser.looksLikeExpression() {
-				e, err := parser.ExpressionParser.parseExpression(true)
-				if err != nil {
-					continue
-				}
-				if e.Type == ast.ExpressionTypeVarAssign {
-					varComment := ""
-					if parser.token.Type == lex.TokenComment {
-						varComment = parser.token.Data.(string)
-						parser.Next(lfIsToken)
-					} else {
-						varComment = comment.Comment
-					}
-					v := e.Data.(*ast.ExpressionVar)
-					for _, v := range v.Variables {
-						v.Comment = varComment
-					}
-					*parser.tops = append(*parser.tops, &ast.TopNode{
-						Data: e,
-					})
-				} else {
-					parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
-						parser.errMsgPrefix(e.Pos), e.Description))
-				}
-			} else {
-				parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
-					parser.errMsgPrefix(), parser.token.Description))
-				parser.Next(lfNotToken)
-			}
+			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
+				parser.errMsgPrefix(), parser.token.Description))
+			parser.Next(lfNotToken)
 		}
 	}
 	return parser.errs
