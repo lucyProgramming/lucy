@@ -8,23 +8,7 @@ import (
 )
 
 type ClassParser struct {
-	parser             *Parser
-	ret                *ast.Class
-	isStatic           bool
-	isVolatile         bool
-	isSynchronized     bool
-	isFinal            bool
-	isAbstract         bool
-	accessControlToken *lex.Token
-}
-
-func (classParser *ClassParser) resetProperty() {
-	classParser.isStatic = false
-	classParser.isVolatile = false
-	classParser.isSynchronized = false
-	classParser.isFinal = false
-	classParser.isAbstract = false
-	classParser.accessControlToken = nil
+	parser *Parser
 }
 
 func (classParser *ClassParser) Next(lfIsToken bool) {
@@ -84,36 +68,34 @@ func (classParser *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos,
 }
 
 func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err error) {
-	classParser.resetProperty()
 	isInterface := classParser.parser.token.Type == lex.TokenInterface
 	classDefinition = &ast.Class{}
-	classParser.ret = classDefinition
 	if isInterface {
-		classParser.ret.AccessFlags |= cg.ACC_CLASS_INTERFACE
-		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+		classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE
+		classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
 	if isAbstract {
-		classParser.ret.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+		classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
 	}
 	classParser.Next(lfIsToken) // skip class key word
 	classParser.parser.unExpectNewLineAndSkip()
 	t, err := classParser.parseClassName()
 	if t != nil {
-		classParser.ret.Name = t.Name
+		classDefinition.Name = t.Name
 	}
-	classParser.ret.Block.IsClassBlock = true
-	classParser.ret.Block.Class = classParser.ret
+	classDefinition.Block.IsClassBlock = true
+	classDefinition.Block.Class = classDefinition
 	if err != nil {
-		if classParser.ret.Name == "" {
+		if classDefinition.Name == "" {
 			compileAutoName()
 		}
 		classParser.consume(untilLc)
 	}
-	classParser.ret.Pos = classParser.parser.mkPos()
+	classDefinition.Pos = classParser.parser.mkPos()
 	if classParser.parser.token.Type == lex.TokenExtends { // parse father expression
 		classParser.Next(lfNotToken) // skip extends
 		var err error
-		classParser.ret.SuperClassName, err = classParser.parseClassName()
+		classDefinition.SuperClassName, err = classParser.parseClassName()
 		if err != nil {
 			classParser.parser.errs = append(classParser.parser.errs, err)
 			classParser.consume(untilLc)
@@ -121,7 +103,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	}
 	if classParser.parser.token.Type == lex.TokenImplements {
 		classParser.Next(lfNotToken) // skip key word
-		classParser.ret.InterfaceNames, err = classParser.parseImplementsInterfaces()
+		classDefinition.InterfaceNames, err = classParser.parseImplementsInterfaces()
 		if err != nil {
 			classParser.parser.errs = append(classParser.parser.errs, err)
 			classParser.consume(untilLc)
@@ -189,6 +171,21 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	comment := &CommentParser{
 		parser: classParser.parser,
 	}
+	var (
+		isStatic           bool
+		isVolatile         bool
+		isSynchronized     bool
+		isFinal            bool
+		accessControlToken *lex.Token
+	)
+	resetProperty := func() {
+		isStatic = false
+		isVolatile = false
+		isSynchronized = false
+		isFinal = false
+		isAbstract = false
+		accessControlToken = nil
+	}
 	for classParser.parser.token.Type != lex.TokenEof {
 		if len(classParser.parser.errs) > classParser.parser.nErrors2Stop {
 			break
@@ -203,7 +200,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			classParser.Next(lfNotToken)
 			continue
 		case lex.TokenStatic:
-			classParser.isStatic = true
+			isStatic = true
 			classParser.Next(lfIsToken)
 			classParser.parser.unExpectNewLineAndSkip()
 			if classParser.parser.token.Type == lex.TokenLc {
@@ -216,24 +213,24 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 							classParser.parser.token.Description))
 				} else {
 					classParser.Next(lfNotToken) // skip }
-					classParser.ret.StaticBlocks = append(classParser.ret.StaticBlocks, block)
+					classDefinition.StaticBlocks = append(classDefinition.StaticBlocks, block)
 				}
 				continue
 			}
 			err := validAfterStatic()
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-				classParser.isStatic = false
+				isStatic = false
 			}
 		//access private
 		case lex.TokenPublic, lex.TokenProtected, lex.TokenPrivate:
-			classParser.accessControlToken = classParser.parser.token
+			accessControlToken = classParser.parser.token
 			classParser.Next(lfIsToken)
 			classParser.parser.unExpectNewLineAndSkip()
-			err = validAfterAccessControlToken(classParser.accessControlToken.Description)
+			err = validAfterAccessControlToken(accessControlToken.Description)
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-				classParser.accessControlToken = nil // set to nil
+				accessControlToken = nil // set to nil
 			}
 		case lex.TokenAbstract:
 			classParser.Next(lfIsToken)
@@ -241,71 +238,71 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			err = validAfterAbstract()
 			if err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-				classParser.accessControlToken = nil // set to nil
+				accessControlToken = nil // set to nil
 			} else {
-				classParser.isAbstract = true
+				isAbstract = true
 			}
 		case lex.TokenVolatile:
-			classParser.isVolatile = true
+			isVolatile = true
 			classParser.Next(lfIsToken)
 			if err := validAfterVolatile(classParser.parser.token); err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-				classParser.isVolatile = false
+				isVolatile = false
 			}
 		case lex.TokenFinal:
-			classParser.isFinal = true
+			isFinal = true
 			classParser.Next(lfIsToken)
 			if err := validAfterFinal(); err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-				classParser.isFinal = false
+				isFinal = false
 			}
 		case lex.TokenIdentifier:
-			err = classParser.parseField(&classParser.parser.errs, comment)
+			err = classParser.parseField(classDefinition, &classParser.parser.errs, isStatic, isVolatile, accessControlToken, comment)
 			if err != nil {
 				classParser.consume(untilSemicolonOrLf)
 				classParser.Next(lfNotToken)
 			}
-			classParser.resetProperty()
+			resetProperty()
 		case lex.TokenConst: // const is for local use
 			classParser.Next(lfIsToken)
-			err := classParser.parseConst(comment)
+			err := classParser.parseConst(classDefinition, comment)
 			if err != nil {
 				classParser.consume(untilSemicolonOrLf)
 				classParser.Next(lfNotToken)
 				continue
 			}
 		case lex.TokenSynchronized:
-			classParser.isSynchronized = true
+			isSynchronized = true
 			classParser.Next(lfIsToken)
 			if err := validAfterSynchronized(); err != nil {
 				classParser.parser.errs = append(classParser.parser.errs, err)
-				classParser.isSynchronized = false
+				isSynchronized = false
 			}
 		case lex.TokenFn:
-			if classParser.isAbstract &&
-				(classParser.ret.IsAbstract() == false && classParser.ret.IsInterface() == false) {
+			if isAbstract &&
+				(classDefinition.IsAbstract() == false && classDefinition.IsInterface() == false) {
 				classParser.parser.errs = append(classParser.parser.errs,
 					fmt.Errorf("%s cannot  abstact method is non-abstract class",
 						classParser.parser.errMsgPrefix()))
 			}
-			isAbstract := classParser.isAbstract || isInterface
+			isAbstract := isAbstract || isInterface
 			f, err := classParser.parser.FunctionParser.parse(true, isAbstract)
 			if err != nil {
-				classParser.resetProperty()
+				resetProperty()
 				classParser.Next(lfNotToken)
 				continue
 			}
 			f.Comment = comment.Comment
-			if classParser.ret.Methods == nil {
-				classParser.ret.Methods = make(map[string][]*ast.ClassMethod)
+			if classDefinition.Methods == nil {
+				classDefinition.Methods = make(map[string][]*ast.ClassMethod)
 			}
 			if f.Name == "" {
 				f.Name = compileAutoName()
 			}
 			m := &ast.ClassMethod{}
 			m.Function = f
-			if classParser.accessControlToken != nil {
-				switch classParser.accessControlToken.Type {
+			if accessControlToken != nil {
+				switch accessControlToken.Type {
 				case lex.TokenPrivate:
 					m.Function.AccessFlags |= cg.ACC_METHOD_PRIVATE
 				case lex.TokenProtected:
@@ -314,23 +311,23 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 					m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
 				}
 			}
-			if classParser.isSynchronized {
+			if isSynchronized {
 				m.Function.AccessFlags |= cg.ACC_METHOD_SYNCHRONIZED
 			}
-			if classParser.isStatic {
+			if isStatic {
 				f.AccessFlags |= cg.ACC_METHOD_STATIC
 			}
 			if isAbstract {
 				f.AccessFlags |= cg.ACC_METHOD_ABSTRACT
 			}
-			if classParser.isFinal {
+			if isFinal {
 				f.AccessFlags |= cg.ACC_METHOD_FINAL
 			}
-			if f.Name == classParser.ret.Name && isInterface == false {
+			if f.Name == classDefinition.Name && isInterface == false {
 				f.Name = ast.SpecialMethodInit
 			}
-			classParser.ret.Methods[f.Name] = append(classParser.ret.Methods[f.Name], m)
-			classParser.resetProperty()
+			classDefinition.Methods[f.Name] = append(classDefinition.Methods[f.Name], m)
+			resetProperty()
 		case lex.TokenImport:
 			pos := classParser.parser.mkPos()
 			classParser.parser.parseImports()
@@ -347,7 +344,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 	return
 }
 
-func (classParser *ClassParser) parseConst(comment *CommentParser) error {
+func (classParser *ClassParser) parseConst(classDefinition *ast.Class, comment *CommentParser) error {
 	cs, err := classParser.parser.parseConst()
 	if err != nil {
 		return err
@@ -358,23 +355,29 @@ func (classParser *ClassParser) parseConst(comment *CommentParser) error {
 	} else {
 		classParser.parser.validStatementEnding()
 	}
-	if classParser.ret.Block.Constants == nil {
-		classParser.ret.Block.Constants = make(map[string]*ast.Constant)
+	if classDefinition.Block.Constants == nil {
+		classDefinition.Block.Constants = make(map[string]*ast.Constant)
 	}
 	for _, v := range cs {
-		if _, ok := classParser.ret.Block.Constants[v.Name]; ok {
+		if _, ok := classDefinition.Block.Constants[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs,
 				fmt.Errorf("%s const %s alreay declared",
 					classParser.parser.errMsgPrefix(), v.Name))
 			continue
 		}
-		classParser.ret.Block.Constants[v.Name] = v
+		classDefinition.Block.Constants[v.Name] = v
 		v.Comment = constComment
 	}
 	return nil
 }
 
-func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser) error {
+func (classParser *ClassParser) parseField(
+	classDefinition *ast.Class,
+	errs *[]error,
+	isStatic bool,
+	isVolatile bool,
+	accessControlToken *lex.Token,
+	comment *CommentParser) error {
 	names, err := classParser.parser.parseNameList()
 	if err != nil {
 		return err
@@ -398,11 +401,11 @@ func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser
 		classParser.parser.validStatementEnding()
 	}
 
-	if classParser.ret.Fields == nil {
-		classParser.ret.Fields = make(map[string]*ast.ClassField)
+	if classDefinition.Fields == nil {
+		classDefinition.Fields = make(map[string]*ast.ClassField)
 	}
 	for k, v := range names {
-		if _, ok := classParser.ret.Fields[v.Name]; ok {
+		if _, ok := classDefinition.Fields[v.Name]; ok {
 			classParser.parser.errs = append(classParser.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
 					classParser.parser.errMsgPrefix(), v.Name))
@@ -417,11 +420,11 @@ func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser
 			f.DefaultValueExpression = initValues[k]
 		}
 		f.Comment = fieldComment
-		if classParser.isStatic {
+		if isStatic {
 			f.AccessFlags |= cg.ACC_FIELD_STATIC
 		}
-		if classParser.accessControlToken != nil {
-			switch classParser.accessControlToken.Type {
+		if accessControlToken != nil {
+			switch accessControlToken.Type {
 			case lex.TokenPublic:
 				f.AccessFlags |= cg.ACC_FIELD_PUBLIC
 			case lex.TokenProtected:
@@ -430,10 +433,10 @@ func (classParser *ClassParser) parseField(errs *[]error, comment *CommentParser
 				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
 			}
 		}
-		if classParser.isVolatile {
+		if isVolatile {
 			f.AccessFlags |= cg.ACC_FIELD_VOLATILE
 		}
-		classParser.ret.Fields[v.Name] = f
+		classDefinition.Fields[v.Name] = f
 	}
 	return nil
 }

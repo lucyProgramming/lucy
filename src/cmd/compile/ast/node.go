@@ -6,7 +6,7 @@ import (
 )
 
 type TopNode struct {
-	Data interface{}
+	Node interface{}
 }
 
 type ConvertTops2Package struct {
@@ -40,24 +40,24 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	conversion.Constants = make([]*Constant, 0)
 	expressions := []*Expression{}
 	for _, v := range nodes {
-		switch v.Data.(type) {
+		switch v.Node.(type) {
 		case *Block:
-			t := v.Data.(*Block)
+			t := v.Node.(*Block)
 			conversion.Blocks = append(conversion.Blocks, t)
 		case *Function:
-			t := v.Data.(*Function)
+			t := v.Node.(*Function)
 			conversion.Functions = append(conversion.Functions, t)
 		case *Enum:
-			t := v.Data.(*Enum)
+			t := v.Node.(*Enum)
 			conversion.Enums = append(conversion.Enums, t)
 		case *Class:
-			t := v.Data.(*Class)
+			t := v.Node.(*Class)
 			conversion.Classes = append(conversion.Classes, t)
 		case *Constant:
-			t := v.Data.(*Constant)
+			t := v.Node.(*Constant)
 			conversion.Constants = append(conversion.Constants, t)
 		case *Import:
-			i := v.Data.(*Import)
+			i := v.Node.(*Import)
 			if i.AccessName != NoNameIdentifier {
 				if PackageBeenCompile.Files[i.Pos.Filename] == nil {
 					PackageBeenCompile.Files[i.Pos.Filename] = &SourceFile{Imports: make(map[string]*Import)}
@@ -70,10 +70,10 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 				PackageBeenCompile.UnUsedPackage[i.Import] = i
 			}
 		case *Expression: // a,b = f();
-			t := v.Data.(*Expression)
+			t := v.Node.(*Expression)
 			expressions = append(expressions, t)
 		case *TypeAlias:
-			t := v.Data.(*TypeAlias)
+			t := v.Node.(*TypeAlias)
 			conversion.TypeAlias = append(conversion.TypeAlias, t)
 		default:
 			panic("tops have unKnow  type")

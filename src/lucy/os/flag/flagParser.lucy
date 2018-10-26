@@ -18,8 +18,9 @@ public final class  FlagParser {
 			walkFn(v)
 		}
 		class xxx {
-			fn xxx () {}
-		} 
+			fn xxx () {} fdfdfdfdfd
+		}
+		 
 	}
 	
 	private fn check(option string) {

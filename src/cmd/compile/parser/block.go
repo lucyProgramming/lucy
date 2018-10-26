@@ -321,7 +321,6 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			if isFinal {
 				class.AccessFlags |= cg.ACC_CLASS_FINAL
 			}
-
 			statement.Type = ast.StatementTypeClass
 			statement.Class = class
 			block.Statements = append(block.Statements, statement)

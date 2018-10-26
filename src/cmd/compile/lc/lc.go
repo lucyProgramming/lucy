@@ -67,7 +67,7 @@ func (compiler *Compiler) dumpImports() {
 	}
 	is := make([]string, len(compiler.Tops))
 	for k, v := range compiler.Tops {
-		is[k] = v.Data.(*ast.Import).Import
+		is[k] = v.Node.(*ast.Import).Import
 	}
 	bs, _ := json.Marshal(is)
 	fmt.Println(string(bs))

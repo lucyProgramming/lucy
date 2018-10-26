@@ -32,8 +32,6 @@ type Parser struct {
 	lastToken              *lex.Token
 	token                  *lex.Token
 	errs                   []error
-	importsByAccessName    map[string]*ast.Import
-	importsByResourceName  map[string]*ast.Import
 	nErrors2Stop           int
 	consumeFoundValidToken bool
 	ExpressionParser       *ExpressionParser
@@ -63,7 +61,9 @@ func (parser *Parser) Parse() []error {
 		return nil
 	}
 	for _, t := range parser.parseImports() {
-		parser.insertImports(t)
+		*parser.tops = append(*parser.tops, &ast.TopNode{
+			Node: t,
+		})
 	}
 	if parser.onlyParseImport { // only parse imports
 		return parser.errs
@@ -139,7 +139,7 @@ func (parser *Parser) Parse() []error {
 				Description: "var",
 			}
 			*parser.tops = append(*parser.tops, &ast.TopNode{
-				Data: e,
+				Node: e,
 			})
 			resetProperty()
 		case lex.TokenIdentifier:
@@ -175,7 +175,7 @@ func (parser *Parser) Parse() []error {
 					}
 				}
 				*parser.tops = append(*parser.tops, &ast.TopNode{
-					Data: e,
+					Node: e,
 				})
 			} else {
 				parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
@@ -195,7 +195,7 @@ func (parser *Parser) Parse() []error {
 			}
 			if e != nil {
 				*parser.tops = append(*parser.tops, &ast.TopNode{
-					Data: e,
+					Node: e,
 				})
 			}
 			resetProperty()
@@ -211,7 +211,7 @@ func (parser *Parser) Parse() []error {
 				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
 			}
 			*parser.tops = append(*parser.tops, &ast.TopNode{
-				Data: f,
+				Node: f,
 			})
 			resetProperty()
 		case lex.TokenLc:
@@ -225,7 +225,7 @@ func (parser *Parser) Parse() []error {
 			}
 			parser.Next(lfNotToken) // skip }
 			*parser.tops = append(*parser.tops, &ast.TopNode{
-				Data: b,
+				Node: b,
 			})
 
 		case lex.TokenClass, lex.TokenInterface:
@@ -236,7 +236,7 @@ func (parser *Parser) Parse() []error {
 			}
 			c.Comment = comment.Comment
 			*parser.tops = append(*parser.tops, &ast.TopNode{
-				Data: c,
+				Node: c,
 			})
 			isPublic := isPublic()
 			if isPublic {
@@ -265,7 +265,7 @@ func (parser *Parser) Parse() []error {
 					v.AccessFlags |= cg.ACC_FIELD_PUBLIC
 				}
 				*parser.tops = append(*parser.tops, &ast.TopNode{
-					Data: v,
+					Node: v,
 				})
 
 			}
@@ -280,7 +280,7 @@ func (parser *Parser) Parse() []error {
 				continue
 			}
 			*parser.tops = append(*parser.tops, &ast.TopNode{
-				Data: a,
+				Node: a,
 			})
 		case lex.TokenImport:
 			pos := parser.mkPos()
@@ -308,7 +308,7 @@ func (parser *Parser) Parse() []error {
 						v.Comment = varComment
 					}
 					*parser.tops = append(*parser.tops, &ast.TopNode{
-						Data: e,
+						Node: e,
 					})
 				} else {
 					parser.errs = append(parser.errs, fmt.Errorf("%s cannot have expression '%s' in top",
