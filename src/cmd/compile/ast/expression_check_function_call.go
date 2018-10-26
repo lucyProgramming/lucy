@@ -123,8 +123,6 @@ func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error,
 }
 
 func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
-
-	var tf *Function
 	if f.TemplateFunction != nil {
 		errsLength := len(*errs)
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)
@@ -133,7 +131,7 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 		errsLength = len(*errs)
 		//rewrite
-		tf = e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
+		tf := e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
 		if len(*errs) != errsLength { // if no
 			return nil
 		}
@@ -243,6 +241,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 			*errs = append(*errs, es...)
 			return nil
 		}
+		cloneFunction.Used = true
 		cloneFunction.TemplateFunction = nil
 		call.TemplateFunctionCallPair.Function = cloneFunction
 		cloneFunction.parameterTypes = parameterTypes

@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"math"
 )
@@ -284,6 +285,9 @@ func (b *Block) inherit(father *Block) {
 }
 
 func (b *Block) checkUnUsed() (es []error) {
+	if common.CompileFlags.DisableCheckUnUse {
+		return nil
+	}
 	es = []error{}
 	for _, v := range b.Constants {
 		if v.Used ||

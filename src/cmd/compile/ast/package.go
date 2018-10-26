@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
-	"strings"
+	"path/filepath"
 )
 
 type Package struct {
@@ -287,10 +287,45 @@ func (p *Package) mkClassCache(loadedPackage *Package) {
 	}
 }
 
+func (p *Package) insertImport(i *Import) error {
+	if p.Files == nil {
+		p.Files = make(map[string]*SourceFile)
+	}
+	x, ok := p.Files[i.Pos.Filename]
+	if ok == false {
+		x = &SourceFile{}
+		p.Files[i.Pos.Filename] = x
+	}
+	return x.insertImport(i)
+}
+
 //different from different source file
 type SourceFile struct {
 	Imports            map[string]*Import // accessName -> *Import
 	ImportsByResources map[string]*Import // resourceName -> *Import
+}
+
+func (s *SourceFile) insertImport(i *Import) error {
+	if s.Imports == nil {
+		s.Imports = make(map[string]*Import)
+	}
+	if s.ImportsByResources == nil {
+		s.ImportsByResources = make(map[string]*Import)
+	}
+	if err := i.MkAccessName(); err != nil {
+		return err
+	}
+	if _, ok := s.Imports[i.Import]; ok {
+		return fmt.Errorf("%s '%s' reimported",
+			i.Pos.ErrMsgPrefix(), i.Import)
+	}
+	if _, ok := s.ImportsByResources[i.AccessName]; ok {
+		return fmt.Errorf("%s '%s' reimported",
+			i.Pos.ErrMsgPrefix(), i.AccessName)
+	}
+	s.Imports[i.Import] = i
+	s.Imports[i.AccessName] = i
+	return nil
 }
 
 type Import struct {
@@ -308,18 +343,11 @@ func (i *Import) MkAccessName() error {
 	if i.AccessName != "" {
 		return nil
 	}
-	name := i.Import
-	if strings.Contains(i.Import, "/") {
-		name = name[strings.LastIndex(name, "/")+1:]
-		if name == "" {
-			return fmt.Errorf("no last element after/")
-		}
+	if false == PackageNameIsValid(i.Import) {
+		return fmt.Errorf("%s '%s' is not a valid name",
+			i.Pos.ErrMsgPrefix(), i.Import)
 	}
-	//check if legal
-	if false == PackageNameIsValid(name) {
-		return fmt.Errorf("%s is not legal package name", name)
-	}
-	i.AccessName = name
+	i.AccessName = filepath.Base(i.Import)
 	return nil
 }
 

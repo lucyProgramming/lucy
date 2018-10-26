@@ -105,7 +105,12 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	}
 	return true
 }
-func (c *Class) accessInterfaceObjectMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+func (c *Class) accessInterfaceObjectMethod(
+	pos *Pos,
+	errs *[]error,
+	name string,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	ms, matched, err = c.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
 	if err != nil {
@@ -124,7 +129,12 @@ func (c *Class) accessInterfaceObjectMethod(pos *Pos, errs *[]error, name string
 	return c.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, nil)
 }
 
-func (c *Class) accessInterfaceMethod(pos *Pos, errs *[]error, name string, call *ExpressionMethodCall, callArgTypes []*Type,
+func (c *Class) accessInterfaceMethod(
+	pos *Pos,
+	errs *[]error,
+	name string,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
@@ -162,8 +172,13 @@ func (c *Class) accessInterfaceMethod(pos *Pos, errs *[]error, name string, call
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall,
-	callArgTypes []*Type, fromSub bool, fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessMethod(
+	pos *Pos,
+	errs *[]error,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
+	fromSub bool,
+	fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
@@ -222,8 +237,12 @@ func (c *Class) accessMethod(pos *Pos, errs *[]error, call *ExpressionMethodCall
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, call *ExpressionMethodCall,
-	callArgTypes []*Type, fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessMethodAsJava(
+	pos *Pos,
+	errs *[]error,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
+	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
 	if c.Methods != nil {
 		for _, m := range c.Methods[call.Name] {
 			if fromSub == true && m.ableAccessFromSubClass() == false {
@@ -258,7 +277,9 @@ func (c *Class) accessMethodAsJava(pos *Pos, errs *[]error, call *ExpressionMeth
 	return append(ms, ms_...), false, nil // methods have the same name
 }
 
-func (m *ClassMethod) implementationMethodIsOk(pos *Pos, implementation *ClassMethod) error {
+func (m *ClassMethod) implementationMethodIsOk(
+	pos *Pos,
+	implementation *ClassMethod) error {
 	if implementation.Function.Pos != nil {
 		pos = implementation.Function.Pos
 	}

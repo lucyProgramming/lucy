@@ -6,7 +6,7 @@ type Flags struct {
 	JvmMajorVersion   int
 	JvmMinorVersion   int
 	DisableCheckUnUse bool
-	DumpParseFile     bool
+	//DumpParseFile     bool
 }
 
 var (
