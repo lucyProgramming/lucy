@@ -12,7 +12,7 @@ type Function struct {
 	CallFatherConstructionExpression *Expression
 	TemplateFunction                 *TemplateFunction
 	parameterTypes                   map[string]*Type    //typed parameters
-	Entrance                         *cg.MethodHighLevel // make call from
+	Entrance                         *cg.MethodHighLevel // make_node_objects call from
 	buildInFunctionChecker           buildInFunctionChecker
 	AccessFlags                      uint16
 	Type                             FunctionType
@@ -54,9 +54,9 @@ func (f *Function) NameLiteralFunction() string {
 
 func (f *Function) readableMsg() string {
 	if f.Name == "" {
-		return "fn " + f.Type.typeString()
+		return "fn " + f.Type.TypeString()
 	} else {
-		return "fn " + f.Name + " " + f.Type.typeString()
+		return "fn " + f.Name + " " + f.Type.TypeString()
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 type StatementSwitch struct {
 	PrefixExpressions    []*Expression
 	initExpressionBlock  Block
+	Pos                  *Pos
 	EndPos               *Pos
 	Condition            *Expression //switch
 	StatementSwitchCases []*StatementSwitchCase

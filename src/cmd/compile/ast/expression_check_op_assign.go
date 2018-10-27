@@ -84,7 +84,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 	}
 	*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
 		e.Pos.ErrMsgPrefix(),
-		e.Description,
+		e.Op,
 		left.TypeString(),
 		right.TypeString()))
 

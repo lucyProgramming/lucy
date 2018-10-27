@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/parser"
+	"gitee.com/yuyang-fine/lucy/src/cmd/debug/past/make_node_objects"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -36,8 +37,7 @@ func main() {
 	for _, v := range errs {
 		fmt.Println(v)
 	}
-	for _, v := range lucyFiles {
-		bs, _ := json.Marshal(v)
-		fmt.Println(string(bs))
-	}
+	ret := (&make_node_objects.MakeNodesObjects{}).Make(lucyFiles)
+	bs, _ := json.Marshal(ret)
+	fmt.Println(string(bs))
 }

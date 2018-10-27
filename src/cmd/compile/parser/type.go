@@ -157,8 +157,10 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			parser.Next(lfIsToken)
 		}
 	default:
-		return nil, fmt.Errorf("%s unkown begining '%s' token for a type",
+		err := fmt.Errorf("%s unkown begining '%s' token for a type",
 			parser.errMsgPrefix(), parser.token.Description)
+		parser.errs = append(parser.errs, err)
+		return nil, err
 	}
 	if err != nil {
 		parser.errs = append(parser.errs, err)

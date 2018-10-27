@@ -7,6 +7,7 @@ import (
 type StatementReturn struct {
 	Defers      []*StatementDefer
 	Expressions []*Expression
+	Pos         *Pos
 }
 
 func (r *StatementReturn) mkDefers(b *Block) {
@@ -18,10 +19,10 @@ func (r *StatementReturn) mkDefers(b *Block) {
 	}
 }
 
-func (r *StatementReturn) check(pos *Pos, b *Block) []error {
+func (r *StatementReturn) check(b *Block) []error {
 	if b.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'return' in 'defer'",
-			pos.ErrMsgPrefix())}
+			r.Pos.ErrMsgPrefix())}
 	}
 	errs := []error{}
 	r.mkDefers(b)
@@ -30,7 +31,7 @@ func (r *StatementReturn) check(pos *Pos, b *Block) []error {
 	}
 	returnValueTypes := checkExpressions(b, r.Expressions, &errs, false)
 	rs := b.InheritedAttribute.Function.Type.ReturnList
-	pos = r.Expressions[len(r.Expressions)-1].Pos
+	pos := r.Expressions[len(r.Expressions)-1].Pos
 	if len(returnValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few arguments to return", pos.ErrMsgPrefix()))
 	} else if len(returnValueTypes) > len(rs) {

@@ -115,7 +115,7 @@ func methodsNotMatchError(pos *Pos, name string, ms []*ClassMethod, want []*Type
 	wantString += ")"
 	errMsg += "\twant " + wantString + "\n"
 	for _, m := range ms {
-		errMsg += "\thave fn " + name + " " + m.Function.Type.typeString() + "\n"
+		errMsg += "\thave fn " + name + " " + m.Function.Type.TypeString() + "\n"
 	}
 	return fmt.Errorf(errMsg)
 }

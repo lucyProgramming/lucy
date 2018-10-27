@@ -29,7 +29,7 @@ func (blockParser *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		return nil, err
 	}
 	when := &ast.StatementWhen{}
-	when.When = condition
+	when.Condition = condition
 	for blockParser.parser.token.Type == lex.TokenCase {
 		blockParser.Next(lfIsToken) // skip case
 		blockParser.parser.unExpectNewLineAndSkip()

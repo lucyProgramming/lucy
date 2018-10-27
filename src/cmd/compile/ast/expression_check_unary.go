@@ -64,7 +64,7 @@ func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type
 	if false == increment.IsNumber() {
 		*errs = append(*errs,
 			fmt.Errorf("%s cannot apply '%s' on '%s'",
-				on.Pos.ErrMsgPrefix(), on.Description, increment.TypeString()))
+				on.Pos.ErrMsgPrefix(), on.Op, increment.TypeString()))
 	}
 	result := increment.Clone()
 	result.Pos = e.Pos

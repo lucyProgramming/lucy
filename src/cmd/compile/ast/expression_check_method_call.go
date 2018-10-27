@@ -66,7 +66,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		if object.Class.IsInterface() {
 			if object.Type == VariableTypeClass {
-				*errs = append(*errs, fmt.Errorf("%s cannot make call on interface '%s'",
+				*errs = append(*errs, fmt.Errorf("%s cannot make_node_objects call on interface '%s'",
 					e.Pos.ErrMsgPrefix(), object.Class.Name))
 				return nil
 			}
@@ -121,7 +121,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 		return nil
 	default:
-		*errs = append(*errs, fmt.Errorf("%s cannot make method call '%s' on '%s'",
+		*errs = append(*errs, fmt.Errorf("%s cannot make_node_objects method call '%s' on '%s'",
 			e.Pos.ErrMsgPrefix(), call.Name, object.TypeString()))
 		return nil
 	}

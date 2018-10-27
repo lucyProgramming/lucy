@@ -58,7 +58,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 			conversion.Constants = append(conversion.Constants, t)
 		case *Import:
 			i := v.Node.(*Import)
-			if i.AccessName != NoNameIdentifier {
+			if i.Alias != NoNameIdentifier {
 				err := PackageBeenCompile.insertImport(i)
 				if err != nil {
 					errs = append(errs, err)
@@ -75,7 +75,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 				expressions = append(expressions, t)
 			} else {
 				errs = append(errs, fmt.Errorf("%s cannot have '%s' in top",
-					t.Pos.ErrMsgPrefix(), t.Description))
+					t.Pos.ErrMsgPrefix(), t.Op))
 			}
 		case *TypeAlias:
 			t := v.Node.(*TypeAlias)

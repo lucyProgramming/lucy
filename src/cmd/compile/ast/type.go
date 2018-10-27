@@ -85,7 +85,7 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 
 func (typ *Type) mkDefaultValueExpression() *Expression {
 	e := &Expression{}
-	e.Description = "compilerAuto"
+	e.Op = "compilerAuto"
 	e.IsCompileAuto = true
 	e.Pos = typ.Pos
 	e.Value = typ.Clone()
@@ -447,13 +447,13 @@ func (typ *Type) typeString(ret *string) {
 			*ret += typ.Array.TypeString() + "[]"
 		}
 	case VariableTypeFunction:
-		*ret += "fn " + typ.FunctionType.typeString()
+		*ret += "fn " + typ.FunctionType.TypeString()
 	case VariableTypeEnum:
 		*ret += "enum(" + typ.Enum.Name + ")"
 	case VariableTypeClass:
 		*ret += fmt.Sprintf("class@%s", typ.Class.Name)
 	case VariableTypeName:
-		*ret += typ.Name // resolve wrong, but typeString is ok to return
+		*ret += typ.Name // resolve wrong, but TypeString is ok to return
 	case VariableTypeTemplate:
 		*ret += typ.Name
 	case VariableTypeDynamicSelector:

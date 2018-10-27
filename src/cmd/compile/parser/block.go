@@ -92,10 +92,10 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			statement := &ast.Statement{
 				Type: ast.StatementTypeExpression,
 				Expression: &ast.Expression{
-					Type:        ast.ExpressionTypeVar,
-					Data:        vs,
-					Pos:         pos,
-					Description: "var",
+					Type: ast.ExpressionTypeVar,
+					Data: vs,
+					Pos:  pos,
+					Op:   "var",
 				},
 				Pos: pos,
 			}
@@ -174,10 +174,10 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			statement.Type = ast.StatementTypeExpression
 			statement.Pos = pos
 			statement.Expression = &ast.Expression{
-				Type:        ast.ExpressionTypeConst,
-				Data:        cs,
-				Pos:         pos,
-				Description: "const",
+				Type: ast.ExpressionTypeConst,
+				Data: cs,
+				Pos:  pos,
+				Op:   "const",
 			}
 			block.Statements = append(block.Statements, statement)
 			blockParser.parser.validStatementEnding()
@@ -191,7 +191,9 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 						blockParser.parser.errMsgPrefix()))
 			}
 			blockParser.Next(lfIsToken)
-			r := &ast.StatementReturn{}
+			r := &ast.StatementReturn{
+				Pos: blockParser.parser.mkPos(),
+			}
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:            ast.StatementTypeReturn,
 				StatementReturn: r,
@@ -254,25 +256,31 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:            ast.StatementTypeReturn,
-				Pos:             blockParser.parser.mkPos(),
-				StatementReturn: &ast.StatementReturn{},
+				Type: ast.StatementTypeReturn,
+				Pos:  blockParser.parser.mkPos(),
+				StatementReturn: &ast.StatementReturn{
+					Pos: blockParser.parser.mkPos(),
+				},
 			})
 		case lex.TokenContinue:
 			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:              ast.StatementTypeContinue,
-				StatementContinue: &ast.StatementContinue{},
-				Pos:               blockParser.parser.mkPos(),
+				Type: ast.StatementTypeContinue,
+				StatementContinue: &ast.StatementContinue{
+					Pos: blockParser.parser.mkPos(),
+				},
+				Pos: blockParser.parser.mkPos(),
 			})
 		case lex.TokenBreak:
 			blockParser.Next(lfIsToken)
 			blockParser.parser.validStatementEnding()
 			block.Statements = append(block.Statements, &ast.Statement{
-				Type:           ast.StatementTypeBreak,
-				StatementBreak: &ast.StatementBreak{},
-				Pos:            blockParser.parser.mkPos(),
+				Type: ast.StatementTypeBreak,
+				StatementBreak: &ast.StatementBreak{
+					Pos: blockParser.parser.mkPos(),
+				},
+				Pos: blockParser.parser.mkPos(),
 			})
 		case lex.TokenGoto:
 			blockParser.Next(lfIsToken) // skip goto key word
@@ -284,7 +292,9 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 				blockParser.Next(lfNotToken)
 				continue
 			}
-			statementGoto := &ast.StatementGoTo{}
+			statementGoto := &ast.StatementGoTo{
+				Pos: blockParser.parser.mkPos(),
+			}
 			statementGoto.LabelName = blockParser.parser.token.Data.(string)
 			block.Statements = append(block.Statements, &ast.Statement{
 				Type:          ast.StatementTypeGoTo,
@@ -311,30 +321,29 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			blockParser.Next(lfNotToken)
 		case lex.TokenClass, lex.TokenInterface:
 			pos := blockParser.parser.mkPos()
-			class, err := blockParser.parser.ClassParser.parse(isAbstract)
-			if err != nil {
-				continue
+			class, _ := blockParser.parser.ClassParser.parse(isAbstract)
+			if class != nil {
+				statement := &ast.Statement{}
+				statement.Pos = pos
+				class.FinalPos = finalPos
+				if isFinal {
+					class.AccessFlags |= cg.ACC_CLASS_FINAL
+				}
+				statement.Type = ast.StatementTypeClass
+				statement.Class = class
+				block.Statements = append(block.Statements, statement)
 			}
-			statement := &ast.Statement{}
-			statement.Pos = pos
-			class.FinalPos = finalPos
-			if isFinal {
-				class.AccessFlags |= cg.ACC_CLASS_FINAL
-			}
-			statement.Type = ast.StatementTypeClass
-			statement.Class = class
-			block.Statements = append(block.Statements, statement)
+
 		case lex.TokenEnum:
 			pos := blockParser.parser.mkPos()
-			e, err := blockParser.parser.parseEnum()
-			if err != nil {
-				continue
+			e, _ := blockParser.parser.parseEnum()
+			if e != nil {
+				s := &ast.Statement{}
+				s.Pos = pos
+				s.Type = ast.StatementTypeEnum
+				s.Enum = e
+				block.Statements = append(block.Statements, s)
 			}
-			s := &ast.Statement{}
-			s.Pos = pos
-			s.Type = ast.StatementTypeEnum
-			s.Enum = e
-			block.Statements = append(block.Statements, s)
 		case lex.TokenImport:
 			pos := blockParser.parser.mkPos()
 			ims := blockParser.parser.parseImports()

@@ -319,20 +319,20 @@ func (s *SourceFile) insertImport(i *Import) error {
 		return fmt.Errorf("%s '%s' reimported",
 			i.Pos.ErrMsgPrefix(), i.Import)
 	}
-	if _, ok := s.ImportsByResources[i.AccessName]; ok {
+	if _, ok := s.ImportsByResources[i.Alias]; ok {
 		return fmt.Errorf("%s '%s' reimported",
-			i.Pos.ErrMsgPrefix(), i.AccessName)
+			i.Pos.ErrMsgPrefix(), i.Alias)
 	}
 	s.Imports[i.Import] = i
-	s.Imports[i.AccessName] = i
+	s.Imports[i.Alias] = i
 	return nil
 }
 
 type Import struct {
-	AccessName string
-	Import     string // full name
-	Pos        *Pos
-	Used       bool
+	Alias  string
+	Import string // full name
+	Pos    *Pos
+	Used   bool
 }
 
 /*
@@ -340,14 +340,14 @@ type Import struct {
 	import "github.com/std" as std2 should access by std2.doSomething()
 */
 func (i *Import) MkAccessName() error {
-	if i.AccessName != "" {
+	if i.Alias != "" {
 		return nil
 	}
 	if false == PackageNameIsValid(i.Import) {
 		return fmt.Errorf("%s '%s' is not a valid name",
 			i.Pos.ErrMsgPrefix(), i.Import)
 	}
-	i.AccessName = filepath.Base(i.Import)
+	i.Alias = filepath.Base(i.Import)
 	return nil
 }
 

@@ -258,7 +258,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.Class
 		}
 	} else { // for k,v = range arr
 		// store v
-		//get ops,make ops ready
+		//get ops,make_node_objects ops ready
 		if s.RangeAttr.ExpressionValue != nil {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := buildPackage.BuildExpression.getLeftValue(class,

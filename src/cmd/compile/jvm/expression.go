@@ -207,7 +207,7 @@ func (buildExpression *BuildExpression) build(
 	case ast.ExpressionTypeVArgs:
 		maxStack = buildExpression.build(class, code, e.Data.(*ast.Expression), context, state)
 	default:
-		panic("missing handle:" + e.Description)
+		panic("missing handle:" + e.Op)
 	}
 	return
 }

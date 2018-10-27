@@ -40,7 +40,7 @@ func (classHighLevel *ClassHighLevel) InsertMethodCall(code *AttributeCode, op b
 }
 
 /*
-	new a method name,make sure it does exists before
+	new a method name,make_node_objects sure it does exists before
 */
 func (classHighLevel *ClassHighLevel) NewMethodName(prefix string) string {
 	if classHighLevel.Methods == nil ||

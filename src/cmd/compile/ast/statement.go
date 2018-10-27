@@ -76,11 +76,11 @@ func (s *Statement) simplifyIf() {
 	c := s.StatementIf.Condition.Data.(bool)
 	if c {
 		s.Type = StatementTypeBlock
-		s.Block = &s.StatementIf.TrueBlock
+		s.Block = &s.StatementIf.Block
 	} else {
-		if s.StatementIf.ElseBlock != nil {
+		if s.StatementIf.Else != nil {
 			s.Type = StatementTypeBlock
-			s.Block = s.StatementIf.ElseBlock
+			s.Block = s.StatementIf.Else
 		} else {
 			s.Type = StatementTypeNop
 		}
@@ -116,13 +116,13 @@ func (s *Statement) check(block *Block) []error {
 	case StatementTypeSwitch:
 		return s.StatementSwitch.check(block)
 	case StatementTypeBreak:
-		return s.StatementBreak.check(s.Pos, block)
+		return s.StatementBreak.check(block)
 	case StatementTypeContinue:
-		return s.StatementContinue.check(s.Pos, block)
+		return s.StatementContinue.check(block)
 	case StatementTypeReturn:
-		return s.StatementReturn.check(s.Pos, block)
+		return s.StatementReturn.check(block)
 	case StatementTypeGoTo:
-		err := s.StatementGoTo.checkStatementGoTo(s.Pos, block)
+		err := s.StatementGoTo.checkStatementGoTo(block)
 		if err != nil {
 			return []error{err}
 		}
@@ -173,7 +173,7 @@ func (s *Statement) check(block *Block) []error {
 			errs = append(errs, err)
 			return errs
 		}
-		if s.Import.AccessName == NoNameIdentifier {
+		if s.Import.Alias == NoNameIdentifier {
 			errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
 				errMsgPrefix(s.Import.Pos)))
 			return nil

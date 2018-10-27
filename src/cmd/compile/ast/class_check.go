@@ -390,14 +390,14 @@ func (c *Class) checkFields() []error {
 			}
 			bin := &ExpressionBinary{}
 			bin.Right = &Expression{
-				Type:        ExpressionTypeList,
-				Description: "list",
-				Data:        []*Expression{v.DefaultValueExpression},
+				Type: ExpressionTypeList,
+				Op:   "list",
+				Data: []*Expression{v.DefaultValueExpression},
 			}
 			{
 				selection := &ExpressionSelection{}
 				selection.Expression = &Expression{}
-				selection.Expression.Description = "selection"
+				selection.Expression.Op = "selection"
 				selection.Expression.Value = &Type{
 					Type:  VariableTypeClass,
 					Class: c,
@@ -405,9 +405,9 @@ func (c *Class) checkFields() []error {
 				selection.Name = v.Name
 				selection.Field = v
 				left := &Expression{
-					Type:        ExpressionTypeSelection,
-					Data:        selection,
-					Description: "selection",
+					Type: ExpressionTypeSelection,
+					Data: selection,
+					Op:   "selection",
 				}
 				left.Value = v.Type
 				bin.Left = &Expression{
@@ -416,10 +416,10 @@ func (c *Class) checkFields() []error {
 				}
 			}
 			e := &Expression{
-				Type:                  ExpressionTypeAssign,
-				Data:                  bin,
+				Type: ExpressionTypeAssign,
+				Data: bin,
 				IsStatementExpression: true,
-				Description:           "assign",
+				Op: "assign",
 			}
 			staticFieldAssignStatements = append(staticFieldAssignStatements, &Statement{
 				Type:                      StatementTypeExpression,

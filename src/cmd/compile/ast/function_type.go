@@ -58,7 +58,7 @@ func (ft *FunctionType) Clone() (ret *FunctionType) {
 	}
 	return
 }
-func (ft *FunctionType) typeString() string {
+func (ft *FunctionType) TypeString() string {
 	s := "("
 	for k, v := range ft.ParameterList {
 		if v.Name != "" {
@@ -66,7 +66,7 @@ func (ft *FunctionType) typeString() string {
 		}
 		s += v.Type.TypeString()
 		if v.DefaultValueExpression != nil {
-			s += " = " + v.DefaultValueExpression.Description
+			s += " = " + v.DefaultValueExpression.Op
 		}
 		if k != len(ft.ParameterList)-1 {
 			s += ","

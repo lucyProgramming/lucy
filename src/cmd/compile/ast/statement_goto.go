@@ -8,17 +8,18 @@ type StatementGoTo struct {
 	Defers         []*StatementDefer
 	LabelName      string
 	StatementLabel *StatementLabel
+	Pos            *Pos
 }
 
-func (g *StatementGoTo) checkStatementGoTo(pos *Pos, b *Block) error {
+func (g *StatementGoTo) checkStatementGoTo(b *Block) error {
 	label := b.searchLabel(g.LabelName)
 	if label == nil {
 		return fmt.Errorf("%s label named '%s' not found",
-			pos.ErrMsgPrefix(), g.LabelName)
+			g.Pos.ErrMsgPrefix(), g.LabelName)
 	}
 	g.StatementLabel = label
 	g.mkDefers(b)
-	return g.StatementLabel.Ready(pos)
+	return g.StatementLabel.Ready(g.Pos)
 }
 
 func (g *StatementGoTo) mkDefers(currentBlock *Block) {

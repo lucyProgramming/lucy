@@ -87,7 +87,7 @@ func (c *Class) mkDefaultConstruction() {
 	m.Function.Name = SpecialMethodInit
 	{
 		e := &Expression{}
-		e.Description = "methodCall"
+		e.Op = "methodCall"
 		e.Type = ExpressionTypeMethodCall
 		e.Pos = c.Pos
 		call := &ExpressionMethodCall{}
@@ -97,8 +97,8 @@ func (c *Class) mkDefaultConstruction() {
 			Data: &ExpressionIdentifier{
 				Name: THIS,
 			},
-			Pos:         c.Pos,
-			Description: "methodCall",
+			Pos: c.Pos,
+			Op:  "methodCall",
 		}
 		e.Data = call
 		m.Function.Block.Statements = make([]*Statement, 1)
@@ -169,14 +169,14 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 					if v.DefaultValueExpression != nil {
 						errs = append(errs,
 							fmt.Errorf("%s abstract method parameter '%s' cannot have default value '%s'",
-								errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
+								errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op))
 					}
 				}
 				for _, v := range m.Function.Type.ReturnList {
 					if v.DefaultValueExpression != nil {
 						errs = append(errs,
 							fmt.Errorf("%s abstract method return variable '%s' cannot have default value '%s'",
-								errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Description))
+								errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op))
 					}
 				}
 			}

@@ -91,7 +91,7 @@ type Expression struct {
 	Pos                   *Pos
 	Data                  interface{}
 	IsStatementExpression bool
-	Description           string
+	Op                    string
 	Lefts                 []*Expression // left values
 }
 
@@ -261,7 +261,7 @@ func (e *Expression) Is2PointerCompare() bool {
 func (e *Expression) convertTo(to *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
-	c.Expression.Description = "compilerAuto"
+	c.Expression.Op = "compilerAuto"
 	*c.Expression = *e // copy
 	c.Type = to
 	e.Value = to
@@ -294,7 +294,7 @@ type ExpressionTypeAssert struct {
 	const spread
 */
 func (e *Expression) fromConst(c *Constant) {
-	e.Description = c.Name
+	e.Op = c.Name
 	switch c.Type.Type {
 	case VariableTypeBool:
 		e.Type = ExpressionTypeBool
@@ -395,7 +395,7 @@ func (e *Expression) canBeUsedAsCondition() error {
 		return nil
 	}
 	return fmt.Errorf("%s cannot use '%s' as condition",
-		e.Pos.ErrMsgPrefix(), e.Description)
+		e.Pos.ErrMsgPrefix(), e.Op)
 }
 
 func (e *Expression) canBeUsedAsStatement() error {
@@ -423,7 +423,7 @@ func (e *Expression) canBeUsedAsStatement() error {
 		return nil
 	}
 	return fmt.Errorf("%s expression '%s' evaluate but not used",
-		e.Pos.ErrMsgPrefix(), e.Description)
+		e.Pos.ErrMsgPrefix(), e.Op)
 }
 
 func (e *Expression) isNumber() bool {

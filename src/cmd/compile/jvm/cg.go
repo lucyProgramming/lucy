@@ -451,7 +451,7 @@ func (buildPackage *BuildPackage) DumpClass() error {
 }
 
 /*
-	make a default construction
+	make_node_objects a default construction
 */
 func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHighLevel) {
 	method := &cg.MethodHighLevel{}

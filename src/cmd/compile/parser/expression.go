@@ -81,6 +81,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 			newExpression := &ast.Expression{}
 			newExpression.Type = ast.ExpressionTypeList
 			newExpression.Pos = left.Pos
+			newExpression.Op = "list"
 			list := []*ast.Expression{left, left2}
 			newExpression.Data = list
 			left = newExpression
@@ -92,7 +93,7 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
 		result.Type = expressionType
-		result.Description = name
+		result.Op = name
 		bin := &ast.ExpressionBinary{}
 		result.Data = bin
 		bin.Left = left

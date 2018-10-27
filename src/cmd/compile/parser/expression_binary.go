@@ -21,7 +21,7 @@ func (expressionParser *ExpressionParser) parseLogicalOrExpression() (*ast.Expre
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		newExpression.Type = ast.ExpressionTypeLogicalOr
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left
@@ -48,7 +48,7 @@ func (expressionParser *ExpressionParser) parseLogicalAndExpression() (*ast.Expr
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		newExpression.Type = ast.ExpressionTypeLogicalAnd
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left
@@ -75,7 +75,7 @@ func (expressionParser *ExpressionParser) parseOrExpression() (*ast.Expression, 
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		newExpression.Type = ast.ExpressionTypeOr
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left
@@ -102,7 +102,7 @@ func (expressionParser *ExpressionParser) parseXorExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		newExpression.Type = ast.ExpressionTypeXor
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left
@@ -130,7 +130,7 @@ func (expressionParser *ExpressionParser) parseAndExpression() (*ast.Expression,
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
 		newExpression.Type = ast.ExpressionTypeAnd
-		newExpression.Description = name
+		newExpression.Op = name
 		binary := &ast.ExpressionBinary{}
 		binary.Left = left
 		binary.Right = right
@@ -158,7 +158,7 @@ func (expressionParser *ExpressionParser) parseEqualExpression() (*ast.Expressio
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		if typ == lex.TokenEqual {
 			newExpression.Type = ast.ExpressionTypeEq
 		} else {
@@ -193,7 +193,7 @@ func (expressionParser *ExpressionParser) parseRelationExpression() (*ast.Expres
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		if typ == lex.TokenGt {
 			newExpression.Type = ast.ExpressionTypeGt
 
@@ -234,7 +234,7 @@ func (expressionParser *ExpressionParser) parseShiftExpression() (*ast.Expressio
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		if typ == lex.TokenLsh {
 			newExpression.Type = ast.ExpressionTypeLsh
 
@@ -269,7 +269,7 @@ func (expressionParser *ExpressionParser) parseAddExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		if typ == lex.TokenAdd {
 			newExpression.Type = ast.ExpressionTypeAdd
 		} else {
@@ -303,7 +303,7 @@ func (expressionParser *ExpressionParser) parseMulExpression() (*ast.Expression,
 		}
 		newExpression := &ast.Expression{}
 		newExpression.Pos = pos
-		newExpression.Description = name
+		newExpression.Op = name
 		if typ == lex.TokenMul {
 			newExpression.Type = ast.ExpressionTypeMul
 		} else if typ == lex.TokenDiv {

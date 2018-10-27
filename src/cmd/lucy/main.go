@@ -16,7 +16,7 @@ func printUsage() {
     install                install directory and it's sub directories 
 	run                    run a lucy package
 	clean                  clean compiled files
-	pack                   make jar
+	pack                   make_node_objects jar
 	test                   test a package`
 	fmt.Println(msg)
 }

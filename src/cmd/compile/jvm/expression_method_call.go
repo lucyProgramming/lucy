@@ -55,7 +55,7 @@ func (buildExpression *BuildExpression) buildMethodCall(
 		defer state.popStack(1)
 		if call.Name == ast.SpecialMethodInit {
 			state.popStack(1)
-			v := &cg.StackMapUninitializedThisVariableInfo{} // make it right
+			v := &cg.StackMapUninitializedThisVariableInfo{} // make_node_objects it right
 			state.Stacks = append(state.Stacks, &cg.StackMapVerificationTypeInfo{
 				Verify: v,
 			})

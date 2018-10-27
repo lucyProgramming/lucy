@@ -5,16 +5,17 @@ import "fmt"
 type StatementContinue struct {
 	StatementFor *StatementFor
 	Defers       []*StatementDefer
+	Pos          *Pos
 }
 
-func (c *StatementContinue) check(pos *Pos, block *Block) []error {
+func (c *StatementContinue) check(block *Block) []error {
 	if block.InheritedAttribute.ForContinue == nil {
 		return []error{fmt.Errorf("%s 'continue' can`t in this scope",
-			pos.ErrMsgPrefix())}
+			c.Pos.ErrMsgPrefix())}
 	}
 	if block.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
-			pos.ErrMsgPrefix())}
+			c.Pos.ErrMsgPrefix())}
 	}
 	c.StatementFor = block.InheritedAttribute.ForContinue
 	c.mkDefers(block)

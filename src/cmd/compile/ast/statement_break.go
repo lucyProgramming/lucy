@@ -7,15 +7,16 @@ type StatementBreak struct {
 	StatementFor        *StatementFor
 	StatementSwitch     *StatementSwitch
 	SwitchTemplateBlock *Block
+	Pos                 *Pos
 }
 
-func (b *StatementBreak) check(pos *Pos, block *Block) []error {
+func (b *StatementBreak) check(block *Block) []error {
 	if block.InheritedAttribute.ForBreak == nil {
-		return []error{fmt.Errorf("%s 'break' cannot in this scope", pos.ErrMsgPrefix())}
+		return []error{fmt.Errorf("%s 'break' cannot in this scope", b.Pos.ErrMsgPrefix())}
 	}
 	if block.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
-			pos.ErrMsgPrefix())}
+			b.Pos.ErrMsgPrefix())}
 	}
 	if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
 		b.StatementFor = t

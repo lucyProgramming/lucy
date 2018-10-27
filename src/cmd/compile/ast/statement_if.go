@@ -8,10 +8,11 @@ import (
 type StatementIf struct {
 	PrefixExpressions   []*Expression
 	Condition           *Expression
+	Pos                 *Pos
 	initExpressionBlock Block
-	TrueBlock           Block
+	Block               Block
 	ElseIfList          []*StatementElseIf
-	ElseBlock           *Block
+	Else                *Block
 	Exits               []*cg.Exit
 }
 
@@ -38,8 +39,8 @@ func (s *StatementIf) check(father *Block) []error {
 			errs = append(errs, err)
 		}
 	}
-	s.TrueBlock.inherit(&s.initExpressionBlock)
-	errs = append(errs, s.TrueBlock.check()...)
+	s.Block.inherit(&s.initExpressionBlock)
+	errs = append(errs, s.Block.check()...)
 	for _, v := range s.ElseIfList {
 		v.Block.inherit(&s.initExpressionBlock)
 		if v.Condition != nil {
@@ -57,9 +58,9 @@ func (s *StatementIf) check(father *Block) []error {
 			errs = append(errs, v.Block.check()...)
 		}
 	}
-	if s.ElseBlock != nil {
-		s.ElseBlock.inherit(&s.initExpressionBlock)
-		errs = append(errs, s.ElseBlock.check()...)
+	if s.Else != nil {
+		s.Else.inherit(&s.initExpressionBlock)
+		errs = append(errs, s.Else.check()...)
 	}
 	return errs
 }

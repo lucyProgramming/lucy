@@ -25,7 +25,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 	case ExpressionTypeDot:
 		if block.InheritedAttribute.Class == nil {
 			errs = []error{fmt.Errorf("%s '%s' must in class scope",
-				e.Pos.ErrMsgPrefix(), e.Description)}
+				e.Pos.ErrMsgPrefix(), e.Op)}
 		} else {
 			returnValueTypes = []*Type{
 				{
@@ -329,7 +329,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		errs = append(errs,
 			fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 				"this may be cause by the compiler error,please contact the author",
-				e.Pos.ErrMsgPrefix(), e.Description))
+				e.Pos.ErrMsgPrefix(), e.Op))
 	case ExpressionTypeGlobal:
 		returnValueTypes = make([]*Type, 1)
 		returnValueTypes[0] = &Type{
@@ -359,7 +359,7 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		}
 		t.IsVariableArgs = true
 	default:
-		panic(fmt.Sprintf("unhandled type:%v", e.Description))
+		panic(fmt.Sprintf("unhandled type:%v", e.Op))
 	}
 	return returnValueTypes, errs
 }

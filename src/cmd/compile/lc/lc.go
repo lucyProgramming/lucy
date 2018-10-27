@@ -77,6 +77,7 @@ func (compiler *Compiler) compile() {
 	fileNodes := make(map[string][]*ast.TopNode)
 
 	for _, v := range compiler.Files {
+
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
 			compiler.Errs = append(compiler.Errs, err)

@@ -21,10 +21,10 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	if stack > maxStack {
 		maxStack = stack
 	}
-	buildPackage.buildBlock(class, code, &s.TrueBlock, context, trueBlockState)
+	buildPackage.buildBlock(class, code, &s.Block, context, trueBlockState)
 	ifState.addTop(trueBlockState)
-	if s.ElseBlock != nil || len(s.ElseIfList) > 0 {
-		if s.TrueBlock.NotExecuteToLastStatement == false {
+	if s.Else != nil || len(s.ElseIfList) > 0 {
+		if s.Block.NotExecuteToLastStatement == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
 	}
@@ -38,7 +38,7 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 			maxStack = stack
 		}
 		buildPackage.buildBlock(class, code, v.Block, context, elseIfState)
-		if s.ElseBlock != nil || k != len(s.ElseIfList)-1 {
+		if s.Else != nil || k != len(s.ElseIfList)-1 {
 			if v.Block.NotExecuteToLastStatement == false {
 				s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 			}
@@ -48,9 +48,9 @@ func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
 	}
 	context.MakeStackMap(code, ifState, code.CodeLength)
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
-	if s.ElseBlock != nil {
+	if s.Else != nil {
 		elseBlockState := (&StackMapState{}).initFromLast(ifState)
-		buildPackage.buildBlock(class, code, s.ElseBlock, context, elseBlockState)
+		buildPackage.buildBlock(class, code, s.Else, context, elseBlockState)
 		ifState.addTop(elseBlockState)
 	}
 	return

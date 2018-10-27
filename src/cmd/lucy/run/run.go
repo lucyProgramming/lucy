@@ -496,7 +496,7 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 		err = fmt.Errorf("compiler err:%v", err)
 		return
 	}
-	// make maitain.json
+	// make_node_objects maitain.json
 	meta = &common.PackageMeta{}
 	meta.CompiledFrom = make(map[string]*common.FileMeta)
 	for _, v := range lucyFiles {

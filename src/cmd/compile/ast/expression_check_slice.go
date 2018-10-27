@@ -21,7 +21,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if on.Start == nil {
 		on.Start = &Expression{}
 		on.Start.Pos = e.Pos
-		on.Start.Description = "compilerAuto"
+		on.Start.Op = "compilerAuto"
 		on.Start.Type = ExpressionTypeInt
 		on.Start.Data = int32(0)
 	}
@@ -51,7 +51,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		}
 	} else {
 		on.End = &Expression{}
-		on.End.Description = "compilerAuto"
+		on.End.Op = "compilerAuto"
 		on.End.Type = ExpressionTypeFunctionCall
 		on.End.Pos = e.Pos
 		on.End.Value = &Type{

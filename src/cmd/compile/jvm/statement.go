@@ -132,7 +132,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-			context.exceptionVarOffset)...) // this code will make stack is empty
+			context.exceptionVarOffset)...) // this code will make_node_objects stack is empty
 		state.popStack(1)
 		// build block
 		context.Defer = ds[index]

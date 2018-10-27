@@ -157,7 +157,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if right.IsPointer() == false || e.isEqOrNe() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
 					e.Pos.ErrMsgPrefix(),
-					e.Description,
+					e.Op,
 					right.TypeString()))
 			}
 		case VariableTypeMap:

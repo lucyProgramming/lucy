@@ -132,12 +132,12 @@ func (parser *Parser) Parse() []error {
 			}
 			isPublic := isPublic()
 			e := &ast.Expression{
-				Type:        ast.ExpressionTypeVar,
-				Data:        vs,
-				Pos:         pos,
-				IsPublic:    isPublic,
-				IsGlobal:    true,
-				Description: "var",
+				Type:     ast.ExpressionTypeVar,
+				Data:     vs,
+				Pos:      pos,
+				IsPublic: isPublic,
+				IsGlobal: true,
+				Op:       "var",
 			}
 			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Node: e,

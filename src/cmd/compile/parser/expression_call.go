@@ -32,7 +32,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 			x.x()
 		*/
 		result.Type = ast.ExpressionTypeMethodCall
-		result.Description = "methodCall"
+		result.Op = "methodCall"
 		call := &ast.ExpressionMethodCall{}
 		index := on.Data.(*ast.ExpressionSelection)
 		call.Expression = index.Expression
@@ -42,7 +42,7 @@ func (expressionParser *ExpressionParser) parseCallExpression(on *ast.Expression
 		result.Data = call
 	} else {
 		result.Type = ast.ExpressionTypeFunctionCall
-		result.Description = "functionCall"
+		result.Op = "functionCall"
 		call := &ast.ExpressionFunctionCall{}
 		call.Expression = on
 		call.Args = args

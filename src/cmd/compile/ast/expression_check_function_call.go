@@ -77,7 +77,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			identifier.Variable = v
 			return e.checkFunctionPointerCall(block, errs, v.Type.FunctionType, call)
 		default:
-			*errs = append(*errs, fmt.Errorf("%s cannot make call on '%s'",
+			*errs = append(*errs, fmt.Errorf("%s cannot make_node_objects call on '%s'",
 				call.Expression.Pos.ErrMsgPrefix(), block.identifierIsWhat(d)))
 			return nil
 		}
@@ -90,7 +90,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	if functionPointer.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
 			e.Pos.ErrMsgPrefix(),
-			call.Expression.Description, functionPointer.TypeString()))
+			call.Expression.Op, functionPointer.TypeString()))
 		return nil
 	}
 	if call.Expression.Type == ExpressionTypeFunctionLiteral {
@@ -235,7 +235,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		tps = tps[1:]
 	}
 	call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypeArray)
-	if call.TemplateFunctionCallPair.Function == nil { // not called before,make the binds
+	if call.TemplateFunctionCallPair.Function == nil { // not called before,make_node_objects the binds
 		cloneFunction, es := f.clone()
 		if len(es) > 0 {
 			*errs = append(*errs, es...)

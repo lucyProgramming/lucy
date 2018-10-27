@@ -9,7 +9,9 @@ import (
 func (blockParser *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 	blockParser.Next(lfIsToken) // skip switch key word
 	blockParser.parser.unExpectNewLineAndSkip()
-	statementSwitch := &ast.StatementSwitch{}
+	statementSwitch := &ast.StatementSwitch{
+		Pos: blockParser.parser.mkPos(),
+	}
 	statementSwitch.EndPos = blockParser.parser.mkPos()
 	var err error
 	statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)

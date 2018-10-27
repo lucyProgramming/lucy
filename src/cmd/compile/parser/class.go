@@ -400,7 +400,6 @@ func (classParser *ClassParser) parseField(
 	} else {
 		classParser.parser.validStatementEnding()
 	}
-
 	if classDefinition.Fields == nil {
 		classDefinition.Fields = make(map[string]*ast.ClassField)
 	}

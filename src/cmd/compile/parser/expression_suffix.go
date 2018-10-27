@@ -12,7 +12,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 	switch expressionParser.parser.token.Type {
 	case lex.TokenIdentifier:
 		prefix = &ast.Expression{}
-		prefix.Description = expressionParser.parser.token.Data.(string)
+		prefix.Op = expressionParser.parser.token.Data.(string)
 		prefix.Type = ast.ExpressionTypeIdentifier
 		identifier := &ast.ExpressionIdentifier{}
 		identifier.Name = expressionParser.parser.token.Data.(string)
@@ -21,100 +21,100 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		expressionParser.Next(lfIsToken)
 	case lex.TokenTrue:
 		prefix = &ast.Expression{}
-		prefix.Description = "true"
+		prefix.Op = "true"
 		prefix.Type = ast.ExpressionTypeBool
 		prefix.Data = true
 		prefix.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 	case lex.TokenFalse:
 		prefix = &ast.Expression{}
-		prefix.Description = "false"
+		prefix.Op = "false"
 		prefix.Type = ast.ExpressionTypeBool
 		prefix.Data = false
 		prefix.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 	case lex.TokenSelection:
 		prefix = &ast.Expression{}
-		prefix.Description = "."
+		prefix.Op = "."
 		prefix.Type = ast.ExpressionTypeDot
 		prefix.Data = true
 		prefix.Pos = expressionParser.parser.mkPos()
 		//special case , no next
 	case lex.TokenGlobal:
 		prefix = &ast.Expression{}
-		prefix.Description = "global"
+		prefix.Op = "global"
 		prefix.Type = ast.ExpressionTypeGlobal
 		prefix.Pos = expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralByte:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeByte,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "byteLiteral",
+			Type: ast.ExpressionTypeByte,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "byteLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralShort:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeShort,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "shortLiteral",
+			Type: ast.ExpressionTypeShort,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "shortLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralChar:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeChar,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "shortLiteral",
+			Type: ast.ExpressionTypeChar,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "shortLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralInt:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeInt,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "intLiteral",
+			Type: ast.ExpressionTypeInt,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "intLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralLong:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeLong,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "longLiteral",
+			Type: ast.ExpressionTypeLong,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "longLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralFloat:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeFloat,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "floatLiteral",
+			Type: ast.ExpressionTypeFloat,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "floatLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralDouble:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeDouble,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "doubleLiteral",
+			Type: ast.ExpressionTypeDouble,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "doubleLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralString:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeString,
-			Data:        expressionParser.parser.token.Data,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "stringLiteral",
+			Type: ast.ExpressionTypeString,
+			Data: expressionParser.parser.token.Data,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "stringLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenNull:
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeNull,
-			Pos:         expressionParser.parser.mkPos(),
-			Description: "null",
+			Type: ast.ExpressionTypeNull,
+			Pos:  expressionParser.parser.mkPos(),
+			Op:   "null",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLp:
@@ -132,10 +132,10 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			return nil, err
 		}
 		newExpression := &ast.Expression{
-			Type:        ast.ExpressionTypeParenthesis,
-			Pos:         pos,
-			Data:        prefix,
-			Description: "(" + prefix.Description + ")",
+			Type: ast.ExpressionTypeParenthesis,
+			Pos:  pos,
+			Data: prefix,
+			Op:   "(" + prefix.Op + ")",
 		}
 		prefix = newExpression
 		expressionParser.Next(lfIsToken)
@@ -148,7 +148,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		}
 		newE := &ast.Expression{}
 		newE.Pos = pos
-		newE.Description = expressionParser.parser.token.Description
+		newE.Op = "++()"
 		newE.Type = ast.ExpressionTypePrefixIncrement
 		newE.Data = prefix
 		prefix = newE
@@ -160,16 +160,17 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			return nil, err
 		}
 		newE := &ast.Expression{}
-		newE.Description = expressionParser.parser.token.Description
+		newE.Op = "--()"
 		newE.Type = ast.ExpressionTypePrefixDecrement
 		newE.Data = prefix
 		newE.Pos = pos
 		prefix = newE
 	case lex.TokenNot:
+		op := expressionParser.parser.token.Description
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 		newE := &ast.Expression{}
-		newE.Description = expressionParser.parser.token.Description
+		newE.Op = op
 		prefix, err = expressionParser.parseSuffixExpression()
 		if err != nil {
 			return nil, err
@@ -179,6 +180,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		newE.Pos = pos
 		prefix = newE
 	case lex.TokenBitNot:
+		op := expressionParser.parser.token.Description
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 		prefix, err = expressionParser.parseSuffixExpression()
@@ -186,12 +188,13 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			return nil, err
 		}
 		newE := &ast.Expression{}
-		newE.Description = expressionParser.parser.token.Description
+		newE.Op = op
 		newE.Type = ast.ExpressionTypeBitwiseNot
 		newE.Data = prefix
 		newE.Pos = pos
 		prefix = newE
 	case lex.TokenSub:
+		op := expressionParser.parser.token.Description
 		pos := expressionParser.parser.mkPos()
 		expressionParser.Next(lfIsToken)
 		prefix, err = expressionParser.parseSuffixExpression()
@@ -199,7 +202,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			return nil, err
 		}
 		newE := &ast.Expression{}
-		newE.Description = expressionParser.parser.token.Description
+		newE.Op = op
 		newE.Type = ast.ExpressionTypeNegative
 		newE.Data = prefix
 		newE.Pos = pos
@@ -211,10 +214,10 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			return nil, err
 		}
 		prefix = &ast.Expression{
-			Type:        ast.ExpressionTypeFunctionLiteral,
-			Data:        f,
-			Pos:         pos,
-			Description: "functionLiteral",
+			Type: ast.ExpressionTypeFunctionLiteral,
+			Data: f,
+			Pos:  pos,
+			Op:   "functionLiteral",
 		}
 	case lex.TokenNew:
 		pos := expressionParser.parser.mkPos()
@@ -252,7 +255,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				Args: es,
 				Type: t,
 			},
-			Description: "new",
+			Op: "new",
 		}
 	case lex.TokenLb:
 		prefix, err = expressionParser.parseArrayExpression()
@@ -323,7 +326,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			return nil, err
 		}
 		prefix = &ast.Expression{}
-		prefix.Description = "range"
+		prefix.Op = "range"
 		prefix.Type = ast.ExpressionTypeRange
 		prefix.Pos = pos
 		prefix.Data = e
@@ -358,7 +361,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		switch expressionParser.parser.token.Type {
 		case lex.TokenVArgs:
 			newExpression := &ast.Expression{}
-			newExpression.Description = "..."
+			newExpression.Op = "..."
 			newExpression.Type = ast.ExpressionTypeVArgs
 			newExpression.Data = prefix
 			newExpression.Pos = expressionParser.parser.mkPos()
@@ -367,10 +370,11 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 		case lex.TokenIncrement,
 			lex.TokenDecrement:
 			newExpression := &ast.Expression{}
-			newExpression.Description = expressionParser.parser.token.Description
 			if expressionParser.parser.token.Type == lex.TokenIncrement {
+				newExpression.Op = "()++"
 				newExpression.Type = ast.ExpressionTypeIncrement
 			} else {
+				newExpression.Op = "()--"
 				newExpression.Type = ast.ExpressionTypeDecrement
 			}
 			newExpression.Data = prefix
@@ -400,7 +404,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				}
 				newExpression := &ast.Expression{}
 				newExpression.Type = ast.ExpressionTypeSlice
-				newExpression.Description = "slice"
+				newExpression.Op = "slice"
 				newExpression.Pos = expressionParser.parser.mkPos()
 				slice := &ast.ExpressionSlice{}
 				newExpression.Data = slice
@@ -429,7 +433,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 					}
 					newExpression := &ast.Expression{}
 					newExpression.Type = ast.ExpressionTypeSlice
-					newExpression.Description = "slice"
+					newExpression.Op = "slice"
 					newExpression.Pos = expressionParser.parser.mkPos()
 					slice := &ast.ExpressionSlice{}
 					newExpression.Data = slice
@@ -446,7 +450,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 					}
 					newExpression := &ast.Expression{}
 					newExpression.Pos = pos
-					newExpression.Description = "index"
+					newExpression.Op = "index"
 					newExpression.Type = ast.ExpressionTypeIndex
 					index := &ast.ExpressionIndex{}
 					index.Expression = prefix
@@ -471,7 +475,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			}
 			newExpression := &ast.Expression{}
 			newExpression.Pos = pos
-			newExpression.Description = "selectConst"
+			newExpression.Op = "selectConst"
 			newExpression.Type = ast.ExpressionTypeSelectionConst
 			selection := &ast.ExpressionSelection{}
 			selection.Expression = prefix
@@ -483,7 +487,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			if expressionParser.parser.token.Type == lex.TokenIdentifier {
 				newExpression := &ast.Expression{}
 				newExpression.Pos = expressionParser.parser.mkPos()
-				newExpression.Description = "selection"
+				newExpression.Op = "selection"
 				newExpression.Type = ast.ExpressionTypeSelection
 				selection := &ast.ExpressionSelection{}
 				selection.Expression = prefix
@@ -506,7 +510,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 				}
 				newExpression := &ast.Expression{}
 				newExpression.Pos = expressionParser.parser.mkPos()
-				newExpression.Description = "assert"
+				newExpression.Op = "assert"
 				newExpression.Type = ast.ExpressionTypeTypeAssert
 				typeAssert := &ast.ExpressionTypeAssert{}
 				typeAssert.Type = typ

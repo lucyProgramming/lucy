@@ -44,7 +44,7 @@ func (parser *Parser) parseImports() []*ast.Import {
 				parser.Next(lfNotToken)
 				continue
 			} else {
-				i.AccessName = parser.token.Data.(string)
+				i.Alias = parser.token.Data.(string)
 				parser.Next(lfIsToken) // skip identifier
 			}
 		}

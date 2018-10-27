@@ -10,13 +10,16 @@ import (
 func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 	blockParser.Next(lfIsToken) // skip if
 	var condition *ast.Expression
+	pos := blockParser.parser.mkPos()
 	blockParser.parser.unExpectNewLineAndSkip()
 	condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		blockParser.consume(untilLc)
 		blockParser.Next(lfNotToken)
 	}
-	statementIf = &ast.StatementIf{}
+	statementIf = &ast.StatementIf{
+		Pos: pos,
+	}
 	statementIf.Condition = condition
 	blockParser.parser.ifTokenIsLfThenSkip()
 	for blockParser.parser.token.Type == lex.TokenSemicolon {
@@ -38,7 +41,7 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 		blockParser.consume(untilLc)
 	}
 	blockParser.Next(lfNotToken) //skip {
-	blockParser.parseStatementList(&statementIf.TrueBlock, false)
+	blockParser.parseStatementList(&statementIf.Block, false)
 	if blockParser.parser.token.Type != lex.TokenRc {
 		blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
 			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description))
@@ -76,8 +79,8 @@ func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err err
 			blockParser.consume(untilLc)
 		}
 		blockParser.Next(lfNotToken) // skip {
-		statementIf.ElseBlock = &ast.Block{}
-		blockParser.parseStatementList(statementIf.ElseBlock, false)
+		statementIf.Else = &ast.Block{}
+		blockParser.parseStatementList(statementIf.Else, false)
 		if blockParser.parser.token.Type != lex.TokenRc {
 			err = fmt.Errorf("%s expect '}', but '%s'",
 				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
