@@ -14,6 +14,7 @@ func newMultiValueAutoVar(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	state *StackMapState) *MultiValueAutoVar {
+
 	ret := &MultiValueAutoVar{}
 	ret.localVarOffset = code.MaxLocals
 	code.MaxLocals++

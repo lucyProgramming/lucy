@@ -5,9 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildStrCat(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (buildExpression *BuildExpression) buildStrCat(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
 	e *ast.Expression,
-	context *Context, state *StackMapState) (maxStack uint16) {
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)

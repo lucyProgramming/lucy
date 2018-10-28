@@ -3,6 +3,7 @@ package cg
 import (
 	"encoding/binary"
 	"fmt"
+	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"io"
 )
 
@@ -279,14 +280,14 @@ func (c *Class) InsertStringConst(s string) uint16 {
 	return info.selfIndex
 }
 
-func (classHighLevel *ClassHighLevel) ToLow(jvmVersion int) *Class {
-	classHighLevel.Class.fromHighLevel(classHighLevel, jvmVersion)
+func (classHighLevel *ClassHighLevel) ToLow() *Class {
+	classHighLevel.Class.fromHighLevel(classHighLevel)
 	return &classHighLevel.Class
 }
 
-func (c *Class) fromHighLevel(high *ClassHighLevel, jvmVersion int) {
-	c.MinorVersion = 0
-	c.MajorVersion = uint16(jvmVersion)
+func (c *Class) fromHighLevel(high *ClassHighLevel) {
+	c.MajorVersion = uint16(common.CompileFlags.JvmMajorVersion)
+	c.MinorVersion = uint16(common.CompileFlags.JvmMajorVersion)
 	if len(c.ConstPool) == 0 {
 		c.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}

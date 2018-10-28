@@ -11,8 +11,12 @@ type AutoVariableForRangeArray struct {
 	K, V       uint16
 }
 
-func (buildPackage *BuildPackage) buildForRangeStatementForArray(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildForRangeStatementForArray(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	s *ast.StatementFor,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	//build array expression
 	maxStack = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
 	code.Codes[code.CodeLength] = cg.OP_dup

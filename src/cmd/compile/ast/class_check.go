@@ -15,6 +15,11 @@ func (c *Class) check(father *Block) []error {
 }
 
 func (c *Class) checkPhase1() []error {
+	if c.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+		c.Block.InheritedAttribute.ClassAndFunctionNames = filepath.Base(c.Name)
+	} else {
+		c.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(c.Name)
+	}
 	c.mkDefaultConstruction()
 	errs := c.Block.checkConstants()
 	err := c.resolveFather()
@@ -33,11 +38,6 @@ func (c *Class) checkPhase1() []error {
 
 func (c *Class) checkPhase2() []error {
 	errs := []error{}
-	if c.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-		c.Block.InheritedAttribute.ClassAndFunctionNames = filepath.Base(c.Name)
-	} else {
-		c.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(c.Name)
-	}
 	errs = append(errs, c.checkFields()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs

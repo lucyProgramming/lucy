@@ -6,8 +6,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildStatement(class *cg.ClassHighLevel, code *cg.AttributeCode, block *ast.Block, s *ast.Statement,
-	context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildStatement(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	block *ast.Block,
+	s *ast.Statement,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	//fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.StatementTypeExpression:

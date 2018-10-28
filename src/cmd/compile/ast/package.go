@@ -231,6 +231,7 @@ func (p *Package) load(resource string) (interface{}, error) {
 }
 
 func (p *Package) checkUnUsedPackage() []error {
+
 	errs := []error{}
 	for _, v := range p.Files {
 		for _, i := range v.Imports {

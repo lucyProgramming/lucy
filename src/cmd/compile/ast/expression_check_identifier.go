@@ -41,8 +41,7 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		return result, nil
 	case magicIdentifierFunction:
 		if block.InheritedAttribute.Function.isPackageInitBlockFunction {
-			return nil,
-				fmt.Errorf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name)
+			return nil, fmt.Errorf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name)
 		}
 		result := &Type{}
 		result.Type = VariableTypeMagicFunction
@@ -68,13 +67,8 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	switch d.(type) {
 	case *Function:
 		f := d.(*Function)
-		if f.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
-		}
 		if f.IsGlobalMain() {
+			// not allow
 			return nil, fmt.Errorf("%s fucntion is global main", errMsgPrefix(e.Pos))
 		}
 		if f.IsBuildIn {
@@ -84,6 +78,13 @@ func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 		if f.TemplateFunction != nil {
 			return nil, fmt.Errorf("%s fucntion '%s' a template function",
 				e.Pos.ErrMsgPrefix(), f.Name)
+		}
+		// try from import
+		if f.IsBuildIn == false {
+			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
+			if should {
+				return e.checkIdentifierThroughImports(i)
+			}
 		}
 		result := &Type{}
 		result.Type = VariableTypeFunction

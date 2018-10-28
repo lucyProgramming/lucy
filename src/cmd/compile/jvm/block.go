@@ -6,8 +6,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.AttributeCode, b *ast.Block,
-	context *Context, state *StackMapState) {
+func (buildPackage *BuildPackage) buildBlock(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	b *ast.Block,
+	context *Context,
+	state *StackMapState) {
 	notToHere := false
 	for _, s := range b.Statements {
 		if notToHere == true && s.Type == ast.StatementTypeLabel {
@@ -27,14 +31,17 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 		if maxStack > code.MaxStack {
 			code.MaxStack = maxStack
 		}
+
 		if len(state.Stacks) > 0 {
+			var ss []string
 			for _, v := range state.Stacks {
-				fmt.Println(v.Verify)
+				ss = append(ss, v.ToString())
 			}
+			fmt.Println("stacks:", ss)
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 		//unCondition goto
-		if buildPackage.statementIsUnConditionGoto(s) {
+		if buildPackage.statementIsUnConditionJump(s) {
 			notToHere = true
 			continue
 		}
@@ -77,7 +84,7 @@ func (buildPackage *BuildPackage) buildBlock(class *cg.ClassHighLevel, code *cg.
 	return
 }
 
-func (buildPackage *BuildPackage) statementIsUnConditionGoto(s *ast.Statement) bool {
+func (buildPackage *BuildPackage) statementIsUnConditionJump(s *ast.Statement) bool {
 	return s.Type == ast.StatementTypeReturn ||
 		s.Type == ast.StatementTypeGoTo ||
 		s.Type == ast.StatementTypeContinue ||

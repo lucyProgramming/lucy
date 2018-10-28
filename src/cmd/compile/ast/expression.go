@@ -261,7 +261,7 @@ func (e *Expression) Is2PointerCompare() bool {
 func (e *Expression) convertTo(to *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
-	c.Expression.Op = "compilerAuto"
+	c.Expression.Op = "checkcast"
 	*c.Expression = *e // copy
 	c.Type = to
 	e.Value = to

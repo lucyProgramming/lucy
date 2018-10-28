@@ -17,9 +17,6 @@ public final class  FlagParser {
 		for v := range this.options {
 			walkFn(v)
 		}
-		class xxx {
-			fn xxx () {} fdfdfdfdfd
-		}
 		 
 	}
 	

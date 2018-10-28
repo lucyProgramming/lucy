@@ -8,17 +8,16 @@ import (
 )
 
 func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
+	statementIf = &ast.StatementIf{
+		Pos: blockParser.parser.mkPos(),
+	}
 	blockParser.Next(lfIsToken) // skip if
 	var condition *ast.Expression
-	pos := blockParser.parser.mkPos()
 	blockParser.parser.unExpectNewLineAndSkip()
 	condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
 		blockParser.consume(untilLc)
 		blockParser.Next(lfNotToken)
-	}
-	statementIf = &ast.StatementIf{
-		Pos: pos,
 	}
 	statementIf.Condition = condition
 	blockParser.parser.ifTokenIsLfThenSkip()

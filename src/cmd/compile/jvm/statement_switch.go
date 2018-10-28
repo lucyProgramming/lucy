@@ -7,8 +7,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildSwitchStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	s *ast.StatementSwitch, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildSwitchStatement(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	s *ast.StatementSwitch,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	// if equal,leave 0 on stack
 	compare := func(t *ast.Type) {
 		switch t.Type {

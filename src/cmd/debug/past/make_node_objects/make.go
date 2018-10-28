@@ -19,6 +19,7 @@ func (makeNodes *MakeNodesObjects) Make(files map[string][]*ast.TopNode) interfa
 		ret[k] = makeNodes.MakeNodes(v)
 	}
 	return ret
+
 }
 
 func (makeNodes *MakeNodesObjects) MakeNodes(nodes []*ast.TopNode) (ret []interface{}) {
@@ -110,8 +111,9 @@ func (makeNodes *MakeNodesObjects) makeEnum(e *ast.Enum) interface{} {
 			en := make(map[string]interface{})
 			en["name"] = v.Name
 			if v.NoNeed != nil {
-				en["noneed"] = makeNodes.makeExpression(v.NoNeed)
+				en["value"] = makeNodes.makeExpression(v.NoNeed)
 			}
+			t = append(t, en)
 		}
 		ret["enums"] = t
 	}
@@ -166,14 +168,23 @@ func (makeNodes *MakeNodesObjects) makeClass(c *ast.Class) interface{} {
 	if len(c.Methods) > 0 {
 		methods := make(map[string]interface{})
 		for name, ms := range c.Methods {
-			var t []interface{}
-			for _, method := range ms {
+			if len(ms) != 1 {
+				var t []interface{}
+				for _, method := range ms {
+					m := make(map[string]interface{})
+					m["accessFlags"] = method.Function.AccessFlags
+					m["function"] = makeNodes.makeFunction(method.Function)
+					t = append(t, m)
+				}
+				methods[name] = t
+			} else {
+				method := ms[0]
 				m := make(map[string]interface{})
 				m["accessFlags"] = method.Function.AccessFlags
 				m["function"] = makeNodes.makeFunction(method.Function)
-				t = append(t, m)
+				methods[name] = m
 			}
-			methods[name] = t
+
 		}
 		ret["methods"] = methods
 	}
@@ -265,7 +276,9 @@ func (makeNodes *MakeNodesObjects) makeStatementSwitch(s *ast.StatementSwitch) i
 		}
 		ret["cases"] = cases
 	}
-	ret["block"] = makeNodes.makeBlock(s.Default)
+	if s.Default != nil {
+		ret["block"] = makeNodes.makeBlock(s.Default)
+	}
 	return map[string]interface{}{
 		fmt.Sprintf("switch@%d", s.Pos.Line): ret,
 	}
@@ -292,7 +305,9 @@ func (makeNodes *MakeNodesObjects) makeStatementWhen(w *ast.StatementWhen) inter
 	if w.Default != nil {
 		ret["block"] = makeNodes.makeBlock(w.Default)
 	}
-	return ret
+	return map[string]interface{}{
+		fmt.Sprintf("when%d", w.Pos.Line): ret,
+	}
 }
 
 func (makeNodes *MakeNodesObjects) makeStatementLabel(label *ast.StatementLabel) interface{} {
@@ -304,13 +319,15 @@ func (makeNodes *MakeNodesObjects) makeStatementGoto(g *ast.StatementGoTo) inter
 
 func (makeNodes *MakeNodesObjects) makeStatementDefer(d *ast.StatementDefer) interface{} {
 	return map[string]interface{}{
-		"block": makeNodes.makeBlock(&d.Block),
+		fmt.Sprintf("defer%d", d.Pos.Line): makeNodes.makeBlock(&d.Block),
 	}
 }
 func (makeNodes *MakeNodesObjects) makeStatement(s *ast.Statement) interface{} {
 	switch s.Type {
 	case ast.StatementTypeExpression:
-		return map[string]interface{}{fmt.Sprintf("expression@%d", s.Pos.Line): makeNodes.makeExpression(s.Expression)}
+		return map[string]interface{}{
+			fmt.Sprintf("statementExpression@%d", s.Pos.Line): makeNodes.makeExpression(s.Expression),
+		}
 	case ast.StatementTypeIf:
 		return makeNodes.makeStatementIf(s.StatementIf)
 	case ast.StatementTypeBlock:
@@ -323,12 +340,18 @@ func (makeNodes *MakeNodesObjects) makeStatement(s *ast.Statement) interface{} {
 		return fmt.Sprintf("continue@%d", s.Pos.Line)
 	case ast.StatementTypeReturn:
 		if len(s.StatementReturn.Expressions) == 0 {
-			return fmt.Sprintf("continue@%d", s.Pos.Line)
+			return fmt.Sprintf("return@%d", s.Pos.Line)
 		} else {
-			key := fmt.Sprintf("continue@%d", s.Pos.Line)
-			ret := make(map[string][]interface{})
-			for _, v := range s.StatementReturn.Expressions {
-				ret[key] = append(ret[key], makeNodes.makeExpression(v))
+			key := fmt.Sprintf("return@%d", s.Pos.Line)
+			ret := make(map[string]interface{})
+			if len(s.StatementReturn.Expressions) == 1 {
+				ret[key] = makeNodes.makeExpression(s.StatementReturn.Expressions[0])
+			} else {
+				var t []interface{}
+				for _, v := range s.StatementReturn.Expressions {
+					t = append(t, makeNodes.makeExpression(v))
+				}
+				ret[key] = t
 			}
 			return ret
 		}
@@ -382,7 +405,7 @@ func (makeNodes *MakeNodesObjects) makeExpression(e *ast.Expression) interface{}
 	case ast.ExpressionTypeDouble:
 		return e.Data.(float64)
 	case ast.ExpressionTypeString:
-		return fmt.Sprintf(`"%s"`, e.Data.(string))
+		return fmt.Sprintf(`literal string@%d "%s"`, e.Pos.Line, e.Data.(string))
 	case ast.ExpressionTypeArray:
 		array := e.Data.(*ast.ExpressionArray)
 		ret := make(map[string]interface{})
@@ -584,14 +607,16 @@ func (makeNodes *MakeNodesObjects) makeExpression(e *ast.Expression) interface{}
 	case ast.ExpressionTypeList:
 		ret := make(map[string]interface{})
 		ret["op"] = e.Op
-		{
-			var t []interface{}
-			for _, v := range e.Data.([]*ast.Expression) {
-				t = append(t, makeNodes.makeExpression(v))
-			}
-			ret["list"] = t
-
+		list := e.Data.([]*ast.Expression)
+		if len(list) == 1 {
+			return makeNodes.makeExpression(list[0])
 		}
+		var t []interface{}
+		for _, v := range list {
+			t = append(t, makeNodes.makeExpression(v))
+		}
+		ret["list"] = t
+
 		return ret
 	case ast.ExpressionTypeFunctionLiteral:
 		return makeNodes.makeFunction(e.Data.(*ast.Function))
@@ -629,7 +654,7 @@ func (makeNodes *MakeNodesObjects) makeExpression(e *ast.Expression) interface{}
 					m["type"] = v.Type.TypeString()
 				}
 				if v.DefaultValueExpression != nil {
-					m["defalutValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+					m["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
 				}
 				t = append(t, m)
 			}

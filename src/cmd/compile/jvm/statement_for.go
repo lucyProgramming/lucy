@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildForStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	s *ast.StatementFor, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildForStatement(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	s *ast.StatementFor,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	if s.RangeAttr != nil {
 		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray ||
 			s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {

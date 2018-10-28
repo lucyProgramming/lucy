@@ -6,8 +6,11 @@ import (
 )
 
 func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
-	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
 	leftValueType LeftValueKind) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
@@ -39,8 +42,11 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 }
 
 func (buildExpression *BuildExpression) getMapLeftValue(
-	class *cg.ClassHighLevel, code *cg.AttributeCode, e *ast.Expression,
-	context *Context, state *StackMapState) (
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
 	leftValueType LeftValueKind) {
 	index := e.Data.(*ast.ExpressionIndex)
@@ -74,8 +80,11 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 }
 
 func (buildExpression *BuildExpression) getLeftValue(
-	class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (
 	maxStack, remainStack uint16, ops []byte,
 	leftValueType LeftValueKind) {
 	switch e.Type {

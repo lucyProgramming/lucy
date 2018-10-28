@@ -144,15 +144,14 @@ func (s *Statement) check(block *Block) []error {
 	case StatementTypeClass:
 		PackageBeenCompile.statementLevelClass =
 			append(PackageBeenCompile.statementLevelClass, s.Class)
-		err := block.Insert(s.Class.Name, s.Pos, s.Class)
+		err := block.Insert(s.Class.Name, s.Class.Pos, s.Class)
 		if err != nil {
 			errs = append(errs, err)
 		}
-		fmt.Println(s.Class.Name)
 		return append(errs, s.Class.check(block)...)
 	case StatementTypeEnum:
 		es := s.Enum.check()
-		err := block.Insert(s.Enum.Name, s.Pos, s.Enum)
+		err := block.Insert(s.Enum.Name, s.Enum.Pos, s.Enum)
 		if err != nil {
 			es = append(es, err)
 		}

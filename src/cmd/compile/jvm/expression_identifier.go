@@ -44,7 +44,6 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(
 			copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
 		}
 	}
-
 	return
 }
 
@@ -57,7 +56,6 @@ func (buildExpression *BuildExpression) buildIdentifier(
 		panic("this is not happening")
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
-
 	switch {
 	case e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != nil:
 		loadInt32(class, code, identifier.EnumName.Value)

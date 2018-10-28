@@ -6,8 +6,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildReturnStatement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	statementReturn *ast.StatementReturn, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildReturnStatement(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	statementReturn *ast.StatementReturn,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	if context.function.Type.VoidReturn() { // no return value
 		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
 			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)

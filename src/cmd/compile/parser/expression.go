@@ -89,11 +89,11 @@ func (expressionParser *ExpressionParser) parseExpression(statementLevel bool) (
 	}
 	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
 		pos := expressionParser.parser.mkPos()
-		name := expressionParser.parser.token.Description
+		opName := expressionParser.parser.token.Description
 		expressionParser.Next(lfNotToken) // skip = :=
 		result := &ast.Expression{}
 		result.Type = expressionType
-		result.Op = name
+		result.Op = opName
 		bin := &ast.ExpressionBinary{}
 		result.Data = bin
 		bin.Left = left
@@ -149,6 +149,7 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 	if err != nil {
 		return nil, err
 	}
+	pos := expressionParser.parser.mkPos()
 	expressionParser.parser.unExpectNewLineAndSkip()
 	if expressionParser.parser.token.Type != lex.TokenLp {
 		err := fmt.Errorf("%s not '(' after a type",
@@ -167,7 +168,6 @@ func (expressionParser *ExpressionParser) parseTypeConversionExpression() (*ast.
 		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
 		return nil, err
 	}
-	pos := expressionParser.parser.mkPos()
 	expressionParser.Next(lfIsToken) // skip )
 	return &ast.Expression{
 		Type: ast.ExpressionTypeCheckCast,

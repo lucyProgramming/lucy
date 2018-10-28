@@ -85,7 +85,7 @@ func (typ *Type) validForTypeAssertOrConversion() bool {
 
 func (typ *Type) mkDefaultValueExpression() *Expression {
 	e := &Expression{}
-	e.Op = "compilerAuto"
+	e.Op = "defaultValueByCompiler"
 	e.IsCompileAuto = true
 	e.Pos = typ.Pos
 	e.Value = typ.Clone()

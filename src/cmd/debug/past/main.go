@@ -17,12 +17,12 @@ func main() {
 	var errs []error
 	if len(os.Args) == 1 {
 		fmt.Println("no file to parse")
-		os.Exit(2)
+		os.Exit(1)
 	}
 	for _, v := range os.Args[1:] {
 		if strings.HasSuffix(v, ".lucy") == false {
 			fmt.Printf("'%s' not a lucy file\n", v)
-			os.Exit(1)
+			os.Exit(2)
 		}
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {

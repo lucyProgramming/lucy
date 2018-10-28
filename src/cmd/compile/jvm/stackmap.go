@@ -96,29 +96,35 @@ func (stackMapState *StackMapState) newStackMapVerificationTypeInfo(class *cg.Cl
 		ret.Verify = &cg.StackMapNullVariableInfo{}
 	case ast.VariableTypeString:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(javaStringClass),
+			Index:    class.Class.InsertClassConst(javaStringClass),
+			Readable: javaStringClass,
 		}
 	case ast.VariableTypeObject:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(t.Class.Name),
+			Index:    class.Class.InsertClassConst(t.Class.Name),
+			Readable: t.Class.Name,
 		}
 	case ast.VariableTypeFunction:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(javaMethodHandleClass),
+			Index:    class.Class.InsertClassConst(javaMethodHandleClass),
+			Readable: javaMethodHandleClass,
 		}
 	case ast.VariableTypeMap:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(mapClass),
+			Index:    class.Class.InsertClassConst(mapClass),
+			Readable: mapClass,
 		}
 	case ast.VariableTypeArray:
 		meta := ArrayMetas[t.Array.Type]
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(meta.className),
+			Index:    class.Class.InsertClassConst(meta.className),
+			Readable: meta.className,
 		}
 	case ast.VariableTypeJavaArray:
 		d := Descriptor.typeDescriptor(t)
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index: class.Class.InsertClassConst(d),
+			Index:    class.Class.InsertClassConst(d),
+			Readable: d,
 		}
 	default:
 		panic(1)

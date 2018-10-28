@@ -35,8 +35,7 @@ public fn javaArray2Lucy  <array > (java array[] ,start int = 0 , end int = -1 )
 			a.end = end 
 			a.cap = len(java)
 			a.elements = java
-			lucy = retType(a)
-			
+			lucy = retType(a)	
 		case byte:
 			a := new deps.ArrayByte()
 			a.start = start 

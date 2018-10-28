@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
@@ -38,6 +37,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	if err != nil {
 		return nil, err
 	}
+	pos := expressionParser.parser.mkPos()
 	if expressionParser.parser.token.Type == lex.TokenLp {
 		/*
 			[]byte("1111111111")
@@ -55,7 +55,6 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		}
 		ret := &ast.Expression{}
 		ret.Op = "checkCast"
-		pos := expressionParser.parser.mkPos()
 		ret.Pos = pos
 		ret.Type = ast.ExpressionTypeCheckCast
 		data := &ast.ExpressionTypeConversion{}
@@ -79,11 +78,12 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 	/*
 		[]int { 1, 2}
 	*/
+
 	arr.Expressions, err = expressionParser.parseArrayValues()
 	return &ast.Expression{
 		Type: ast.ExpressionTypeArray,
 		Data: arr,
-		Pos:  expressionParser.parser.mkPos(),
+		Pos:  pos,
 		Op:   "arrayLiteral",
 	}, err
 

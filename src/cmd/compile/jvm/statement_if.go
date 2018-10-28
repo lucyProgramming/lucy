@@ -5,8 +5,12 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildIfStatement(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, s *ast.StatementIf, context *Context, state *StackMapState) (maxStack uint16) {
+func (buildPackage *BuildPackage) buildIfStatement(
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	s *ast.StatementIf,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	ifState := (&StackMapState{}).initFromLast(state)
 	defer state.addTop(ifState)
 	for _, v := range s.PrefixExpressions {

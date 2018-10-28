@@ -25,7 +25,11 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 		return nil
 	}
 	errs = []error{}
-	TName := s.Condition.Name
+	if len(s.Condition.getParameterType(&block.InheritedAttribute.Function.Type)) == 0 {
+		errs = append(errs, fmt.Errorf("%s '%s' constains no parameter type",
+			s.Condition.Pos.ErrMsgPrefix(), s.Condition.TypeString()))
+		return errs
+	}
 	if err := s.Condition.resolve(block); err != nil {
 		errs = append(errs, err)
 		return
@@ -72,8 +76,8 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 	if match == nil {
 		if s.Default == nil {
 			errs = append(errs,
-				fmt.Errorf("%s parameter type named '%s',resolve as '%s' has no match and no 'default block'",
-					errMsgPrefix(s.Condition.Pos), TName, s.Condition.TypeString()))
+				fmt.Errorf("%s condition resolve as '%s' has no match and no 'default block'",
+					errMsgPrefix(s.Condition.Pos), s.Condition.TypeString()))
 		} else {
 			switchStatement.Type = StatementTypeBlock
 			switchStatement.Block = s.Default

@@ -2,6 +2,7 @@ package cg
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 type StackMap interface {
@@ -131,7 +132,8 @@ type StackMapDoubleVariableInfo struct{}
 type StackMapNullVariableInfo struct{}
 type StackMapUninitializedThisVariableInfo struct{}
 type StackMapObjectVariableInfo struct {
-	Index uint16
+	Index    uint16
+	Readable string
 }
 type StackMapUninitializedVariableInfo struct {
 	CodeOffset uint16
@@ -139,6 +141,30 @@ type StackMapUninitializedVariableInfo struct {
 
 type StackMapVerificationTypeInfo struct {
 	Verify interface{}
+}
+
+func (s *StackMapVerificationTypeInfo) ToString() string {
+	switch s.Verify.(type) {
+	case *StackMapTopVariableInfo:
+		return "top"
+	case *StackMapIntegerVariableInfo:
+		return "int"
+	case *StackMapFloatVariableInfo:
+		return "float"
+	case *StackMapDoubleVariableInfo:
+		return "double"
+	case *StackMapLongVariableInfo:
+		return "long"
+	case *StackMapNullVariableInfo:
+		return "null"
+	case *StackMapUninitializedThisVariableInfo:
+		return "unInitThis"
+	case *StackMapObjectVariableInfo:
+		return s.Verify.(*StackMapObjectVariableInfo).Readable
+	case *StackMapUninitializedVariableInfo:
+		return fmt.Sprintf("unInitVariable@%d", s.Verify.(*StackMapUninitializedVariableInfo).CodeOffset)
+	}
+	return ""
 }
 
 func (s *StackMapVerificationTypeInfo) ToBytes() []byte {

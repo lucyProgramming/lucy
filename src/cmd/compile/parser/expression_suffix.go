@@ -67,7 +67,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			Type: ast.ExpressionTypeChar,
 			Data: expressionParser.parser.token.Data,
 			Pos:  expressionParser.parser.mkPos(),
-			Op:   "shortLiteral",
+			Op:   "charLiteral",
 		}
 		expressionParser.Next(lfIsToken)
 	case lex.TokenLiteralInt:
@@ -382,7 +382,6 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			newExpression.Pos = expressionParser.parser.mkPos()
 			expressionParser.Next(lfIsToken)
 		case lex.TokenLb:
-			pos := expressionParser.parser.mkPos()
 			expressionParser.Next(lfNotToken) // skip [
 			if expressionParser.parser.token.Type == lex.TokenColon {
 				/*
@@ -449,7 +448,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 						return nil, err
 					}
 					newExpression := &ast.Expression{}
-					newExpression.Pos = pos
+					newExpression.Pos = expressionParser.parser.mkPos()
 					newExpression.Op = "index"
 					newExpression.Type = ast.ExpressionTypeIndex
 					index := &ast.ExpressionIndex{}
@@ -483,10 +482,11 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 			newExpression.Data = selection
 			prefix = newExpression
 		case lex.TokenSelection:
+			pos := expressionParser.parser.mkPos()
 			expressionParser.Next(lfNotToken) // skip .
 			if expressionParser.parser.token.Type == lex.TokenIdentifier {
 				newExpression := &ast.Expression{}
-				newExpression.Pos = expressionParser.parser.mkPos()
+				newExpression.Pos = pos
 				newExpression.Op = "selection"
 				newExpression.Type = ast.ExpressionTypeSelection
 				selection := &ast.ExpressionSelection{}
@@ -509,7 +509,7 @@ func (expressionParser *ExpressionParser) parseSuffixExpression() (*ast.Expressi
 					return nil, err
 				}
 				newExpression := &ast.Expression{}
-				newExpression.Pos = expressionParser.parser.mkPos()
+				newExpression.Pos = pos
 				newExpression.Op = "assert"
 				newExpression.Type = ast.ExpressionTypeTypeAssert
 				typeAssert := &ast.ExpressionTypeAssert{}

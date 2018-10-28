@@ -3,7 +3,6 @@ package jvm
 import (
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 	"math"
 	"os"
@@ -430,7 +429,7 @@ func (buildPackage *BuildPackage) DumpClass() error {
 	if err != nil {
 		return err
 	}
-	if err := buildPackage.mainClass.ToLow(common.CompileFlags.JvmMajorVersion).OutPut(f); err != nil {
+	if err := buildPackage.mainClass.ToLow().OutPut(f); err != nil {
 		f.Close()
 		return err
 	}
@@ -440,7 +439,7 @@ func (buildPackage *BuildPackage) DumpClass() error {
 		if err != nil {
 			return err
 		}
-		if err = c.ToLow(common.CompileFlags.JvmMajorVersion).OutPut(f); err != nil {
+		if err = c.ToLow().OutPut(f); err != nil {
 			f.Close()
 			return err
 		} else {
