@@ -43,7 +43,7 @@ func getExtraExpressionPos(args []*Expression, n int) *Pos {
 		} else {
 			i++
 		}
-		if i > n {
+		if i >= n {
 			return a.Pos
 		}
 	}

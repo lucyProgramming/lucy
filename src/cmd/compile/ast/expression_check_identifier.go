@@ -7,7 +7,7 @@ import (
 
 func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
 	identifier := e.Data.(*ExpressionIdentifier)
-	if identifier.Name == NoNameIdentifier {
+	if identifier.Name == UnderScore {
 		//_ is not valid
 		return nil, fmt.Errorf("%s '%s' is not a valid name",
 			e.Pos.ErrMsgPrefix(), identifier.Name)

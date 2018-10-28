@@ -226,7 +226,7 @@ func (lex *Lexer) Next() (token *Token, err error) {
 			if err != nil {
 				return nil, err
 			}
-			token.Type = TokenCommentMultiLine
+			token.Type = TokenMultiLineComment
 			token.Data = comment
 			token.Description = comment
 		} else {

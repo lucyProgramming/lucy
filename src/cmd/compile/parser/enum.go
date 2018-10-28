@@ -42,7 +42,7 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 		switch parser.token.Type {
 		case lex.TokenLf:
 			parser.Next(lfNotToken)
-		case lex.TokenCommentMultiLine,
+		case lex.TokenMultiLineComment,
 			lex.TokenComment:
 			comment.read()
 		case lex.TokenIdentifier:

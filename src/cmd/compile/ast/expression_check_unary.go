@@ -9,6 +9,7 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	unary, es := ee.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if unary == nil {
+		// !a , looks like a bool
 		if e.Type == ExpressionTypeNot {
 			return &Type{
 				Type: VariableTypeBool,
@@ -23,8 +24,8 @@ func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
 	}
 	if e.Type == ExpressionTypeNot {
 		if unary.Type != VariableTypeBool {
-			*errs = append(*errs, fmt.Errorf("%s not a bool expression",
-				unary.Pos.ErrMsgPrefix()))
+			*errs = append(*errs, fmt.Errorf("%s not a bool expression , but '%s'",
+				unary.Pos.ErrMsgPrefix(), unary.TypeString()))
 		}
 	}
 	if e.Type == ExpressionTypeNegative {

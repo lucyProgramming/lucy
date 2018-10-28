@@ -116,7 +116,7 @@ func (f *StatementFor) checkRange() []error {
 			identifierV = lefts[0].Data.(*ExpressionIdentifier)
 			posV = lefts[0].Pos
 		}
-		if identifierV.Name != NoNameIdentifier {
+		if identifierV.Name != UnderScore {
 			vd := &Variable{}
 			if rangeOn.Type == VariableTypeArray ||
 				rangeOn.Type == VariableTypeJavaArray {
@@ -134,7 +134,7 @@ func (f *StatementFor) checkRange() []error {
 			f.RangeAttr.IdentifierValue = identifierV
 		}
 		if modelKv &&
-			identifierK.Name != NoNameIdentifier {
+			identifierK.Name != UnderScore {
 			vd := &Variable{}
 			var vt *Type
 			if rangeOn.Type == VariableTypeArray ||
@@ -157,14 +157,14 @@ func (f *StatementFor) checkRange() []error {
 		}
 	} else { // k,v = range arr
 		if modelKv {
-			if false == lefts[0].IsIdentifier(NoNameIdentifier) {
+			if false == lefts[0].IsIdentifier(UnderScore) {
 				f.RangeAttr.ExpressionKey = lefts[0]
 			}
-			if false == lefts[1].IsIdentifier(NoNameIdentifier) {
+			if false == lefts[1].IsIdentifier(UnderScore) {
 				f.RangeAttr.ExpressionValue = lefts[1]
 			}
 		} else {
-			if false == lefts[0].IsIdentifier(NoNameIdentifier) {
+			if false == lefts[0].IsIdentifier(UnderScore) {
 				f.RangeAttr.ExpressionValue = lefts[0]
 			}
 		}

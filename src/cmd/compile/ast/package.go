@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
+	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 	"path/filepath"
 )
 
@@ -231,7 +232,9 @@ func (p *Package) load(resource string) (interface{}, error) {
 }
 
 func (p *Package) checkUnUsedPackage() []error {
-
+	if compileCommon.CompileFlags.DisableCheckUnUse {
+		return nil
+	}
 	errs := []error{}
 	for _, v := range p.Files {
 		for _, i := range v.Imports {

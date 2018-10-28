@@ -58,7 +58,7 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			continue
 		}
 		switch blockParser.parser.token.Type {
-		case lex.TokenComment, lex.TokenCommentMultiLine:
+		case lex.TokenComment, lex.TokenMultiLineComment:
 			comment.read()
 		case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
 			resetPrefix()
@@ -206,7 +206,11 @@ func (blockParser *BlockParser) parseStatementList(block *ast.Block, isGlobal bo
 			if blockParser.parser.token.Type == lex.TokenRc {
 				continue
 			}
-			if blockParser.parser.ExpressionParser.looksLikeExpression() == false {
+			if blockParser.parser.token.Type == lex.TokenRc ||
+				blockParser.parser.token.Type == lex.TokenSemicolon ||
+				blockParser.parser.token.Type == lex.TokenLf ||
+				blockParser.parser.token.Type == lex.TokenComma ||
+				blockParser.parser.token.Type == lex.TokenMultiLineComment {
 				blockParser.Next(lfNotToken)
 				continue
 			}

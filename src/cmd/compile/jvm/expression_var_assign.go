@@ -70,7 +70,7 @@ func (buildExpression *BuildExpression) buildVarAssign(
 		}
 		//identifier
 		identifier := v.Data.(*ast.ExpressionIdentifier)
-		if identifier.Name == ast.NoNameIdentifier {
+		if identifier.Name == ast.UnderScore {
 			continue
 		}
 		variable := identifier.Variable

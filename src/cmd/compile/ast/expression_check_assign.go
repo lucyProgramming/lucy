@@ -19,7 +19,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 	valueTypes := checkExpressions(block, values, errs, false)
 	leftTypes := []*Type{}
 	for _, v := range lefts {
-		if v.IsIdentifier(NoNameIdentifier) {
+		if v.IsIdentifier(UnderScore) {
 			leftTypes = append(leftTypes, nil) // this is no assign situation
 		} else {
 			t := v.getLeftValue(block, errs)
@@ -72,7 +72,7 @@ func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
 		left := lefts[0]
 		if left.Type == ExpressionTypeIdentifier {
 			t := left.Data.(*ExpressionIdentifier)
-			if t.Name == NoNameIdentifier {
+			if t.Name == UnderScore {
 				return voidReturn
 			} else {
 				if nil != t.Variable {

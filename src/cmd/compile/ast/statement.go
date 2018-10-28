@@ -172,7 +172,7 @@ func (s *Statement) check(block *Block) []error {
 			errs = append(errs, err)
 			return errs
 		}
-		if s.Import.Alias == NoNameIdentifier {
+		if s.Import.Alias == UnderScore {
 			errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
 				errMsgPrefix(s.Import.Pos)))
 			return nil

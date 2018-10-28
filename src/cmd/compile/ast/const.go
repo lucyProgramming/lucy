@@ -1,5 +1,7 @@
 package ast
 
+import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
+
 type Constant struct {
 	IsGlobal               bool
 	IsBuildIn              bool
@@ -11,6 +13,10 @@ type Constant struct {
 	AccessFlags            uint16
 	Comment                string
 	Value                  interface{} // value base on type
+}
+
+func (c *Constant) isPublic() bool {
+	return c.AccessFlags|cg.ACC_FIELD_PUBLIC != 0
 }
 
 func (c *Constant) mkDefaultValue() {

@@ -21,7 +21,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(
 	var remainStack uint16
 	var op []byte
 	var leftValueKind LeftValueKind
-	if left.IsIdentifier(ast.NoNameIdentifier) == false {
+	if left.IsIdentifier(ast.UnderScore) == false {
 		maxStack, remainStack, op, leftValueKind =
 			buildExpression.getLeftValue(class, code, left, context, state)
 	}
@@ -29,7 +29,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t
 	}
-	if left.IsIdentifier(ast.NoNameIdentifier) {
+	if left.IsIdentifier(ast.UnderScore) {
 		if jvmSlotSize(right.Value) == 1 {
 			code.Codes[code.CodeLength] = cg.OP_pop
 		} else {
@@ -67,7 +67,7 @@ func (buildExpression *BuildExpression) buildAssign(
 	}
 	autoVar := newMultiValueAutoVar(class, code, state)
 	for k, v := range assign.Lefts {
-		if v.IsIdentifier(ast.NoNameIdentifier) {
+		if v.IsIdentifier(ast.UnderScore) {
 			continue
 		}
 		stackLength := len(state.Stacks)

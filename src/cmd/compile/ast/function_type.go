@@ -6,10 +6,11 @@ import (
 )
 
 type FunctionType struct {
-	TemplateNames []*NameWithPos
-	ParameterList ParameterList
-	ReturnList    ReturnList
-	VArgs         *Variable
+	TemplateNames    []*NameWithPos
+	TemplateNamesMap map[string]*Pos
+	ParameterList    ParameterList
+	ReturnList       ReturnList
+	VArgs            *Variable
 }
 
 func (ft *FunctionType) CheckTemplateNameDuplication() []error {
@@ -26,16 +27,14 @@ func (ft *FunctionType) CheckTemplateNameDuplication() []error {
 		}
 		m[v.Name] = v.Pos
 	}
+	ft.TemplateNamesMap = m
 	return errs
 }
 
 func (ft *FunctionType) haveTemplateName(name string) bool {
-	for _, v := range ft.TemplateNames {
-		if v.Name == name {
-			return true
-		}
-	}
-	return false
+	_, ok := ft.TemplateNamesMap[name]
+	return ok
+
 }
 
 type ParameterList []*Variable

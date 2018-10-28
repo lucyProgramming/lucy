@@ -15,7 +15,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if sliceOn.Type != VariableTypeArray &&
 		sliceOn.Type != VariableTypeString {
 		*errs = append(*errs, fmt.Errorf("%s cannot have slice on '%s'",
-			errMsgPrefix(sliceOn.Pos), sliceOn.TypeString()))
+			sliceOn.Pos.ErrMsgPrefix(), sliceOn.TypeString()))
 	}
 	//start
 	if on.Start == nil {
@@ -30,7 +30,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	if startType != nil {
 		if startType.isInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for slice",
-				errMsgPrefix(startType.Pos), startType.TypeString()))
+				startType.Pos.ErrMsgPrefix(), startType.TypeString()))
 		} else {
 			if startType.Type == VariableTypeLong {
 				on.Start.convertToNumber(VariableTypeInt)
@@ -43,7 +43,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		if endType != nil &&
 			endType.isInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' for slice",
-				errMsgPrefix(endType.Pos), endType.TypeString()))
+				endType.Pos.ErrMsgPrefix(), endType.TypeString()))
 		}
 		if endType != nil &&
 			endType.Type == VariableTypeLong {

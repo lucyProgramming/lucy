@@ -102,7 +102,7 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 	for expressionParser.parser.token.Type != lex.TokenEof &&
 		expressionParser.parser.token.Type != lex.TokenRc {
 		if expressionParser.parser.token.Type == lex.TokenComment ||
-			expressionParser.parser.token.Type == lex.TokenCommentMultiLine {
+			expressionParser.parser.token.Type == lex.TokenMultiLineComment {
 			expressionParser.Next(lfIsToken)
 			continue
 		}

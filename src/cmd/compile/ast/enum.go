@@ -20,7 +20,7 @@ type Enum struct {
 	Comment         string
 }
 
-func (e *Enum) IsPublic() bool {
+func (e *Enum) isPublic() bool {
 	return e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
 }
 

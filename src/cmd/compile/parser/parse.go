@@ -91,7 +91,7 @@ func (parser *Parser) Parse() []error {
 		}
 
 		switch parser.token.Type {
-		case lex.TokenComment, lex.TokenCommentMultiLine:
+		case lex.TokenComment, lex.TokenMultiLineComment:
 			comment.read()
 		case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
 			parser.Next(lfNotToken)
@@ -315,7 +315,7 @@ func (parser *Parser) isStatementEnding() bool {
 		parser.token.Type == lex.TokenLf ||
 		parser.token.Type == lex.TokenRc ||
 		parser.token.Type == lex.TokenComment ||
-		parser.token.Type == lex.TokenCommentMultiLine
+		parser.token.Type == lex.TokenMultiLineComment
 }
 func (parser *Parser) validStatementEnding() error {
 	if parser.isStatementEnding() {

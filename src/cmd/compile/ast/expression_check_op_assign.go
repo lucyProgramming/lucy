@@ -13,7 +13,6 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		}
 		bin.Left = list[0]
 	}
-
 	left := bin.Left.getLeftValue(block, errs)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)

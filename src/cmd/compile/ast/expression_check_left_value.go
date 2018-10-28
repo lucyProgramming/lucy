@@ -9,7 +9,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 	switch e.Type {
 	case ExpressionTypeIdentifier:
 		identifier := e.Data.(*ExpressionIdentifier)
-		if identifier.Name == NoNameIdentifier {
+		if identifier.Name == UnderScore {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as left value",
 				e.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil

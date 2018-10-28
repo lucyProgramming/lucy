@@ -17,6 +17,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 		}
 	}
 	if ev.Type == nil && len(ev.InitValues) == 0 {
+		// looks impossible
 		*errs = append(*errs,
 			fmt.Errorf("%s expression var have not type and no initValues",
 				errMsgPrefix(e.Pos)))
@@ -33,7 +34,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
 		}
 		if len(ev.Variables) > len(valueTypes) {
-			pos := ev.InitValues[len(ev.InitValues)-1].Pos
+			pos := ev.InitValues[len(ev.InitValues)-1].Pos // last Pos
 			*errs = append(*errs, fmt.Errorf("%s too few values , assign %d values to %d destinations",
 				pos.ErrMsgPrefix(),
 				len(valueTypes),

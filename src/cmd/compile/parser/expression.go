@@ -20,7 +20,7 @@ func (expressionParser *ExpressionParser) parseExpressions(endTokens ...lex.Toke
 	es := []*ast.Expression{}
 	for expressionParser.parser.token.Type != lex.TokenEof {
 		if expressionParser.parser.token.Type == lex.TokenComment ||
-			expressionParser.parser.token.Type == lex.TokenCommentMultiLine {
+			expressionParser.parser.token.Type == lex.TokenMultiLineComment {
 			expressionParser.Next(lfIsToken)
 			continue
 		}

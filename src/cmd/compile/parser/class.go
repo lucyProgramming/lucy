@@ -191,7 +191,7 @@ func (classParser *ClassParser) parse(isAbstract bool) (classDefinition *ast.Cla
 			break
 		}
 		switch classParser.parser.token.Type {
-		case lex.TokenComment, lex.TokenCommentMultiLine:
+		case lex.TokenComment, lex.TokenMultiLineComment:
 			comment.read()
 		case lex.TokenRc:
 			classParser.Next(lfNotToken)

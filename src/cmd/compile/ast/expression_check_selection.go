@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
 func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type {
@@ -68,8 +67,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			v := d.(*Variable)
 			result := v.Type.Clone()
 			result.Pos = e.Pos
-			if (v.AccessFlags&cg.ACC_FIELD_PUBLIC) == 0 &&
-				object.Package.isSame(&PackageBeenCompile) == false {
+			if v.isPublic() == false && object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s variable '%s' is not public",
 					e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
@@ -81,8 +79,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			e.fromConst(c) //
 			result := c.Type.Clone()
 			result.Pos = e.Pos
-			if c.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 &&
-				object.Package.isSame(&PackageBeenCompile) == false {
+			if c.isPublic() == false && object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s const '%s' is not public",
 					e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
@@ -94,8 +91,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			result.Pos = e.Pos
 			result.Type = VariableTypeClass
 			result.Class = c
-			if (c.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 &&
-				object.Package.isSame(&PackageBeenCompile) == false {
+			if c.IsPublic() == false && object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s class '%s' is not public",
 					e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
@@ -103,8 +99,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return result
 		case *EnumName:
 			n := d.(*EnumName)
-			if (n.Enum.AccessFlags&cg.ACC_CLASS_PUBLIC) == 0 &&
-				object.Package.isSame(&PackageBeenCompile) == false {
+			if n.Enum.isPublic() == false && object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s enum '%s' is not public",
 					e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
@@ -118,8 +113,7 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return result
 		case *Function:
 			f := d.(*Function)
-			if (f.AccessFlags&cg.ACC_METHOD_PUBLIC) == 0 &&
-				object.Package.isSame(&PackageBeenCompile) == false {
+			if f.IsPublic() == false && object.Package.isSame(&PackageBeenCompile) == false {
 				err := fmt.Errorf("%s function '%s' is not public",
 					e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
@@ -143,26 +137,29 @@ func (e *Expression) checkSelectionExpression(block *Block, errs *[]error) *Type
 			return nil
 		}
 	case VariableTypeObject, VariableTypeClass:
-		if selection.Expression.Value.Type == VariableTypeObject {
-			if selection.Name == SUPER {
-				if object.Class.Name == JavaRootClass {
-					*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
-						e.Pos.ErrMsgPrefix(), JavaRootClass))
-					return object
-				}
-				err := object.Class.loadSuperClass(e.Pos)
-				if err != nil {
-					*errs = append(*errs, err)
-					return object
-				}
-				if object.Class.SuperClass == nil {
-					return object
-				}
-				result := object.Clone()
-				result.Pos = e.Pos
-				result.Class = result.Class.SuperClass
-				return result
+		if selection.Name == SUPER {
+			if object.Type == VariableTypeClass {
+				*errs = append(*errs, fmt.Errorf("%s cannot access class`s super",
+					object.Pos.ErrMsgPrefix()))
+				return object
 			}
+			if object.Class.Name == JavaRootClass {
+				*errs = append(*errs, fmt.Errorf("%s '%s' is root class",
+					object.Pos.ErrMsgPrefix(), JavaRootClass))
+				return object
+			}
+			err := object.Class.loadSuperClass(e.Pos)
+			if err != nil {
+				*errs = append(*errs, err)
+				return object
+			}
+			if object.Class.SuperClass == nil {
+				return object
+			}
+			result := object.Clone()
+			result.Pos = e.Pos
+			result.Class = result.Class.SuperClass
+			return result
 		}
 		fieldOrMethod, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
 		if err != nil {

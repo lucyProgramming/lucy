@@ -112,7 +112,7 @@ const (
 	TokenVArgs                      // ...
 	TokenWhen                       // when
 	TokenComment                    //
-	TokenCommentMultiLine           //
+	TokenMultiLineComment           //
 	TokenEof                        // end of file
 )
 

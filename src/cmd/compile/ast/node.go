@@ -58,7 +58,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 			conversion.Constants = append(conversion.Constants, t)
 		case *Import:
 			i := v.Node.(*Import)
-			if i.Alias != NoNameIdentifier {
+			if i.Alias != UnderScore {
 				err := PackageBeenCompile.insertImport(i)
 				if err != nil {
 					errs = append(errs, err)

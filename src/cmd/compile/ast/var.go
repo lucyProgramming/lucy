@@ -16,7 +16,7 @@ const (
 	magicIdentifierFunction = "__FUNCTION__"
 	MainFunctionName        = "main"
 	THIS                    = "this"
-	NoNameIdentifier        = "_"
+	UnderScore              = "_"
 	LucyRootClass           = "lucy/lang/Lucy"
 	JavaRootClass           = "java/lang/Object"
 	DefaultExceptionClass   = "java/lang/Exception"
@@ -36,10 +36,11 @@ func isMagicIdentifier(name string) bool {
 }
 
 var (
-	ImportsLoader        LoadImport
-	PackageBeenCompile   Package
-	buildInFunctionsMap  = make(map[string]*Function)
-	lucyBuildInPackage   *Package
+	ImportsLoader       LoadImport
+	PackageBeenCompile  Package
+	buildInFunctionsMap = make(map[string]*Function)
+	lucyBuildInPackage  *Package
+	// this function implemented by package parse , special for clone template function
 	ParseFunctionHandler func(bs []byte, pos *Pos) (f *Function, es []error)
 	javaStringClass      *Class
 	LucyBytesType        *Type // []byte

@@ -355,7 +355,7 @@ func (typ *Type) makeTypeFrom(d interface{}) error {
 		return nil
 	case *Enum:
 		dd := d.(*Enum)
-		if dd.LoadFromOutSide && dd.IsPublic() == false {
+		if dd.LoadFromOutSide && dd.isPublic() == false {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors,
 				fmt.Errorf("%s enum '%s' is not public",
 					errMsgPrefix(typ.Pos), dd.Name))

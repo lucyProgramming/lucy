@@ -90,7 +90,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 	switch e.Type {
 	case ast.ExpressionTypeIdentifier:
 		identifier := e.Data.(*ast.ExpressionIdentifier)
-		if identifier.Name == ast.NoNameIdentifier {
+		if identifier.Name == ast.UnderScore {
 			panic("this is not happening")
 		}
 		if identifier.Variable.IsGlobal {

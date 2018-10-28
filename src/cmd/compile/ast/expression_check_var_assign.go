@@ -54,7 +54,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			continue
 		}
 		identifier := v.Data.(*ExpressionIdentifier)
-		if identifier.Name == NoNameIdentifier {
+		if identifier.Name == UnderScore {
 			continue
 		}
 		if variable, ok := block.Variables[identifier.Name]; ok {

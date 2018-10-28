@@ -11,7 +11,7 @@ func (e *Expression) checkSelectConstExpression(block *Block, errs *[]error) *Ty
 	}
 	if object.Type != VariableTypeClass {
 		*errs = append(*errs, fmt.Errorf("%s not a class , but '%s'",
-			e.Pos.ErrMsgPrefix(), object.TypeString()))
+			object.Pos.ErrMsgPrefix(), object.TypeString()))
 		return nil
 	}
 	if object.Class.Block.Constants == nil ||
