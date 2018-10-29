@@ -55,14 +55,14 @@ public class ArrayTTT   {
 	}	
 	
 
-	public  synchronized ArrayTTT slice(int start,int end){
-		if(start < 0 || start > end || end + this.start > this.end){
+	public  synchronized ArrayTTT slice(int start,int length){
+		if(start < 0 || start > length || length + this.start > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
 		ArrayTTT result = new ArrayTTT();
 		result.elements = this.elements;
 		result.start = this.start + start;
-		result.end = this.start + end;
+		result.end = this.start + length;
 		result.cap = this.cap;
 		return result;
 	}
