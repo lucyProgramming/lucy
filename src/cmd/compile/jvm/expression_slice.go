@@ -48,6 +48,7 @@ func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, cod
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
+
 	meta := ArrayMetas[e.Value.Array.Type]
 	maxStack = buildExpression.build(class, code, slice.ExpressionOn, context, state)
 	state.pushStack(class, slice.ExpressionOn.Value)
@@ -58,7 +59,7 @@ func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, cod
 	}
 	state.pushStack(class, slice.Start.Value)
 	stack = buildExpression.build(class, code, slice.End, context, state)
-	if t := 2 + stack; t > maxStack {
+	if t := 3 + stack; t > maxStack {
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual

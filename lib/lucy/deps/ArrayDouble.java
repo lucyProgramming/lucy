@@ -53,13 +53,14 @@ public class ArrayDouble   {
 	
 
 	public  synchronized ArrayDouble slice(int start,int end){
-		if(start < 0 || start > end || end + this.start > this.end){
+		int length = end - start ;
+		if(start < 0 || length < 0 || (length + this.start + start) > this.end){
 			throw new ArrayIndexOutOfBoundsException(outOfRangeMsg);
 		}
 		ArrayDouble result = new ArrayDouble();
 		result.elements = this.elements;
 		result.start = this.start + start;
-		result.end = this.start + end;
+		result.end = result.start + length;
 		result.cap = this.cap;
 		return result;
 	}
