@@ -64,6 +64,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			if isCaptureVar {
 				v.BeenCapturedAsRightValue++
 			}
+			v.Used = true
 			if v.Type.Type != VariableTypeFunction {
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s' ",
 					call.Expression.Pos.ErrMsgPrefix(), v.Name, v.Type.TypeString()))

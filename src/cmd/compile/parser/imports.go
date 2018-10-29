@@ -8,7 +8,7 @@ import (
 
 //atBeginningOfFile bool
 func (parser *Parser) parseImports() []*ast.Import {
-	ret := []*ast.Import{}
+	var ret []*ast.Import
 	for parser.token.Type == lex.TokenImport ||
 		parser.token.Type == lex.TokenComment ||
 		parser.token.Type == lex.TokenMultiLineComment {

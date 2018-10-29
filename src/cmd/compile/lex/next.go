@@ -288,8 +288,8 @@ func (lex *Lexer) Next() (token *Token, err error) {
 			lex.unGetChar()
 		}
 	default:
-		err = fmt.Errorf("unkown beginning of token:%d", c)
-		return
+		err = fmt.Errorf("unkown beginning of token:%x", c)
+		return nil, err
 	}
 	token.EndLine = lex.line
 	token.EndColumn = lex.column

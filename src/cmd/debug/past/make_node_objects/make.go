@@ -83,17 +83,30 @@ func (makeNodes *MakeNodesObjects) makeFunction(fn *ast.Function) interface{} {
 		ret["parameterlist"] = t
 	}
 	if fn.Type.VoidReturn() == false {
-		var t []interface{}
-		for _, v := range fn.Type.ReturnList {
-			p := map[string]interface{}{}
-			p["name"] = v.Name
-			p["type"] = v.Type.TypeString()
-			if v.DefaultValueExpression != nil {
-				p["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+		if len(fn.Type.ParameterList) == 1 {
+			for _, v := range fn.Type.ReturnList {
+				p := map[string]interface{}{}
+				p["name"] = v.Name
+				p["type"] = v.Type.TypeString()
+				if v.DefaultValueExpression != nil {
+					p["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+				}
+				ret["returnlist"] = p
 			}
-			t = append(t, p)
+		} else {
+			var t []interface{}
+			for _, v := range fn.Type.ReturnList {
+				p := map[string]interface{}{}
+				p["name"] = v.Name
+				p["type"] = v.Type.TypeString()
+				if v.DefaultValueExpression != nil {
+					p["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+				}
+				t = append(t, p)
+			}
+			ret["returnlist"] = t
 		}
-		ret["returnlist"] = t
+
 	} else {
 		ret["returnlist"] = "VOID"
 	}

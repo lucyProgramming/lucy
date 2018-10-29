@@ -13,12 +13,12 @@ type Package struct {
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block
-	Files                        map[string]*SourceFile
+	files                        map[string]*SourceFile
 	InitFunctions                []*Function
 	NErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
 	TriggerPackageInitMethodName string //
-	UnUsedPackage                map[string]*Import
+	unUsedPackage                map[string]*Import
 	statementLevelFunctions      []*Function
 	statementLevelClass          []*Class
 }
@@ -60,10 +60,10 @@ func (p *Package) loadCorePackage() error {
 }
 
 func (p *Package) getImport(file string, accessName string) *Import {
-	if p.Files == nil {
+	if p.files == nil {
 		return nil
 	}
-	if file, ok := p.Files[file]; ok == false {
+	if file, ok := p.files[file]; ok == false {
 		return nil
 	} else {
 		return file.Imports[accessName]
@@ -236,7 +236,7 @@ func (p *Package) checkUnUsedPackage() []error {
 		return nil
 	}
 	errs := []error{}
-	for _, v := range p.Files {
+	for _, v := range p.files {
 		for _, i := range v.Imports {
 			if i.Used == false {
 				errs = append(errs, fmt.Errorf("%s '%s' imported not used",
@@ -244,7 +244,7 @@ func (p *Package) checkUnUsedPackage() []error {
 			}
 		}
 	}
-	for _, i := range p.UnUsedPackage {
+	for _, i := range p.unUsedPackage {
 		pp, err := p.load(i.Import)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s %v",
@@ -292,13 +292,13 @@ func (p *Package) mkClassCache(loadedPackage *Package) {
 }
 
 func (p *Package) insertImport(i *Import) error {
-	if p.Files == nil {
-		p.Files = make(map[string]*SourceFile)
+	if p.files == nil {
+		p.files = make(map[string]*SourceFile)
 	}
-	x, ok := p.Files[i.Pos.Filename]
+	x, ok := p.files[i.Pos.Filename]
 	if ok == false {
 		x = &SourceFile{}
-		p.Files[i.Pos.Filename] = x
+		p.files[i.Pos.Filename] = x
 	}
 	return x.insertImport(i)
 }

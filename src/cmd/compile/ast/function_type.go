@@ -34,7 +34,6 @@ func (ft *FunctionType) CheckTemplateNameDuplication() []error {
 func (ft *FunctionType) haveTemplateName(name string) bool {
 	_, ok := ft.TemplateNamesMap[name]
 	return ok
-
 }
 
 type ParameterList []*Variable
@@ -49,6 +48,7 @@ func (ft *FunctionType) Clone() (ret *FunctionType) {
 		p.Type = ft.ParameterList[k].Type.Clone()
 		ret.ParameterList[k] = p
 	}
+	ret.ReturnList = make(ReturnList, len(ft.ReturnList))
 	for k, _ := range ret.ReturnList {
 		p := &Variable{}
 		*p = *ft.ReturnList[k]
@@ -117,9 +117,11 @@ func (ft *FunctionType) searchName(name string) *Variable {
 }
 
 func (ft *FunctionType) equal(compare *FunctionType) bool {
+
 	if len(ft.ParameterList) != len(compare.ParameterList) {
 		return false
 	}
+
 	for k, v := range ft.ParameterList {
 		if false == v.Type.Equal(compare.ParameterList[k].Type) {
 			return false
@@ -128,6 +130,7 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 	if (ft.VArgs == nil) != (compare.VArgs == nil) {
 		return false
 	}
+
 	if ft.VArgs != nil {
 		if ft.VArgs.Type.Equal(compare.VArgs.Type) == false {
 			return false
@@ -136,6 +139,7 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 	if ft.VoidReturn() != compare.VoidReturn() {
 		return false
 	}
+
 	if ft.VoidReturn() == false {
 		for k, v := range ft.ReturnList {
 			if false == v.Type.Equal(compare.ReturnList[k].Type) {

@@ -12,8 +12,12 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			*errs = append(*errs, err)
 			return
 		}
-		for _, v := range ev.Variables {
-			v.Type = ev.Type.Clone()
+		if len(ev.Variables) == 1 {
+			ev.Variables[0].Type = ev.Type
+		} else {
+			for _, v := range ev.Variables {
+				v.Type = ev.Type.Clone()
+			}
 		}
 	}
 	if ev.Type == nil && len(ev.InitValues) == 0 {

@@ -32,7 +32,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 		os.Exit(1)
 	}
 	errs = make([]error, 0)
-	PackageBeenCompile.Files = make(map[string]*SourceFile)
+	PackageBeenCompile.files = make(map[string]*SourceFile)
 	conversion.Blocks = []*Block{}
 	conversion.Functions = make([]*Function, 0)
 	conversion.Classes = make([]*Class, 0)
@@ -64,10 +64,10 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 					errs = append(errs, err)
 				}
 			} else {
-				if PackageBeenCompile.UnUsedPackage == nil {
-					PackageBeenCompile.UnUsedPackage = make(map[string]*Import)
+				if PackageBeenCompile.unUsedPackage == nil {
+					PackageBeenCompile.unUsedPackage = make(map[string]*Import)
 				}
-				PackageBeenCompile.UnUsedPackage[i.Import] = i
+				PackageBeenCompile.unUsedPackage[i.Import] = i
 			}
 		case *Expression: // a,b = f();
 			t := v.Node.(*Expression)

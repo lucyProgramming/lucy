@@ -332,11 +332,21 @@ func (parser *Parser) validStatementEnding() error {
 }
 
 func (parser *Parser) mkPos() *ast.Pos {
-	return &ast.Pos{
-		Filename: parser.filename,
-		Line:     parser.token.EndLine,
-		Column:   parser.token.EndColumn,
-		Offset:   parser.lexer.GetOffSet(),
+	if parser.token != nil {
+		return &ast.Pos{
+			Filename: parser.filename,
+			Line:     parser.token.EndLine,
+			Column:   parser.token.EndColumn,
+			Offset:   parser.lexer.GetOffSet(),
+		}
+	} else {
+		line, column := parser.lexer.GetLineAndColumn()
+		pos := &ast.Pos{
+			Filename: parser.filename,
+			Line:     line,
+			Column:   column,
+		}
+		return pos
 	}
 }
 
@@ -450,6 +460,9 @@ func (parser *Parser) Next(lfIsToken bool) {
 	}()
 	for {
 		tok, err = parser.lexer.Next()
+		if tok != nil {
+			parser.token = tok
+		}
 		if err != nil {
 			parser.errs = append(parser.errs,
 				fmt.Errorf("%s %s", parser.errMsgPrefix(), err.Error()))

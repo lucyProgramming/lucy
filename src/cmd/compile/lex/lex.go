@@ -12,6 +12,9 @@ type Lexer struct {
 	offset, end          int
 }
 
+func (lex *Lexer) GetLineAndColumn() (int, int) {
+	return lex.line, lex.column
+}
 func (lex *Lexer) GetOffSet() int {
 	return lex.offset
 }

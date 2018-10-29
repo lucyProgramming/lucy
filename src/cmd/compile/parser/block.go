@@ -391,15 +391,17 @@ func (blockParser *BlockParser) parseExpressionStatement(block *ast.Block, isDef
 		blockParser.parser.token.Type == lex.TokenColon {
 		//lable found , good...
 		if isDefer {
-			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s defer mixup with statement lable has no meaning",
-				blockParser.parser.errMsgPrefix()))
+			blockParser.parser.errs = append(blockParser.parser.errs,
+				fmt.Errorf("%s defer mixup with statement lable has no meaning",
+					blockParser.parser.errMsgPrefix()))
 		}
 		isLabel = true
 		pos := blockParser.parser.mkPos()
 		blockParser.Next(lfIsToken) // skip :
 		if blockParser.parser.token.Type != lex.TokenLf {
-			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect new line",
-				blockParser.parser.errMsgPrefix()))
+			blockParser.parser.errs = append(blockParser.parser.errs,
+				fmt.Errorf("%s expect new line",
+					blockParser.parser.errMsgPrefix()))
 		}
 		statement := &ast.Statement{}
 		statement.Pos = pos

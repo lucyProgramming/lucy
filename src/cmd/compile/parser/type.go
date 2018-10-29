@@ -90,6 +90,9 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 		parser.Next(lfIsToken)
 	case lex.TokenIdentifier:
 		ret, err = parser.parseIdentifierType()
+		if err != nil {
+			parser.errs = append(parser.errs, err)
+		}
 	case lex.TokenMap:
 		parser.Next(lfNotToken) // skip map key word
 		if parser.token.Type != lex.TokenLc {

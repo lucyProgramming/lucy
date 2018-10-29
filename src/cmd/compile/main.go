@@ -11,7 +11,8 @@ func main() {
 		"only-import", false, "only parse import package")
 	flag.BoolVar(&common.CompileFlags.DisableCheckUnUse,
 		"disable-check-unuse", false, "disable check un use")
-
+	flag.BoolVar(&common.CompileFlags.Release,
+		"release", false, "release version")
 	flag.StringVar(&common.CompileFlags.PackageName,
 		"package-name", "", "package name")
 	flag.IntVar(&common.CompileFlags.JvmMajorVersion,
