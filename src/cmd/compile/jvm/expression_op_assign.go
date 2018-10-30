@@ -19,7 +19,8 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack, remainStack, op, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, leftValueKind :=
+		buildExpression.getLeftValue(class, code, bin.Left, context, state)
 	currentStack := remainStack
 	stack := buildExpression.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
@@ -39,7 +40,8 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
-		if t := currentStack + buildExpression.dupStackLeaveValueBelow(code, leftValueKind, e.Value); t > maxStack {
+		if t := currentStack +
+			buildExpression.dupStackLeaveValueBelow(code, leftValueKind, e.Value); t > maxStack {
 			maxStack = t
 		}
 	}

@@ -20,16 +20,18 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	assignTypes := checkExpressions(block, values, errs, false)
 	if len(lefts) > len(assignTypes) {
 		pos := values[len(values)-1].Pos
-		*errs = append(*errs, fmt.Errorf("%s too few values , assign %d values to %d destinations",
-			pos.ErrMsgPrefix(),
-			len(assignTypes),
-			len(lefts)))
+		*errs = append(*errs,
+			fmt.Errorf("%s too few values , assign %d values to %d destinations",
+				pos.ErrMsgPrefix(),
+				len(assignTypes),
+				len(lefts)))
 	} else if len(lefts) < len(assignTypes) {
 		pos := getExtraExpressionPos(values, len(lefts))
-		*errs = append(*errs, fmt.Errorf("%s too many values , assign %d values to %d destinations",
-			pos.ErrMsgPrefix(),
-			len(assignTypes),
-			len(lefts)))
+		*errs = append(*errs,
+			fmt.Errorf("%s too many values , assign %d values to %d destinations",
+				pos.ErrMsgPrefix(),
+				len(assignTypes),
+				len(lefts)))
 	}
 	var err error
 	noNewVariable := true

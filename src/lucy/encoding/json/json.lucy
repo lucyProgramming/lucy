@@ -21,7 +21,7 @@ public fn decode( bs []byte , x Object ) -> (x2 Object , err error ){
 
 
 
-fn isMap(c Class ) ->(is bool = false ) { // default is false too 
+fn isMap(c Class ) ->(is bool = false ) {  
 	for c.getTypeName() != "java.lang.Object" {
 		if c.getTypeName() == "java.util.AbstractMap" {
 			is = true

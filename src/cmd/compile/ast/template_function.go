@@ -5,7 +5,7 @@ import (
 )
 
 type TemplateFunction struct {
-	Instances []*TemplateFunctionInstance
+	instances []*TemplateFunctionInstance
 }
 
 type TemplateFunctionInstance struct {
@@ -27,7 +27,7 @@ func (t *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunct
 		}
 		return true
 	}
-	for _, v := range t.Instances {
+	for _, v := range t.instances {
 		if equal(v) {
 			return v
 		}
@@ -42,6 +42,6 @@ func (t *TemplateFunction) insert(parameterTypes []*Type) *TemplateFunctionInsta
 	ret := &TemplateFunctionInstance{
 		parameterTypes: parameterTypes,
 	}
-	t.Instances = append(t.Instances, ret)
+	t.instances = append(t.instances, ret)
 	return ret
 }

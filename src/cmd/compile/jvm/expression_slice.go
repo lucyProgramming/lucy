@@ -23,18 +23,28 @@ func (buildExpression *BuildExpression) buildStringSlice(
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	state.pushStack(class, slice.Start.Value)
-	stack = buildExpression.build(class, code, slice.End, context, state)
-	if t := 2 + stack; t > maxStack {
-		maxStack = t
+	if slice.End != nil {
+		state.pushStack(class, slice.Start.Value)
+		stack = buildExpression.build(class, code, slice.End, context, state)
+		if t := 2 + stack; t > maxStack {
+			maxStack = t
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      javaStringClass,
+			Method:     "substring",
+			Descriptor: "(II)Ljava/lang/String;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+	} else {
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      javaStringClass,
+			Method:     "substring",
+			Descriptor: "(I)Ljava/lang/String;",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
 	}
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
-		Class:      javaStringClass,
-		Method:     "substring",
-		Descriptor: "(II)Ljava/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
 	return
 }
 
@@ -48,19 +58,37 @@ func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, cod
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-
 	meta := ArrayMetas[e.Value.Array.Type]
 	maxStack = buildExpression.build(class, code, slice.ExpressionOn, context, state)
 	state.pushStack(class, slice.ExpressionOn.Value)
-	// build start
-	stack := buildExpression.build(class, code, slice.Start, context, state)
-	if t := 1 + stack; t > maxStack {
-		maxStack = t
-	}
-	state.pushStack(class, slice.Start.Value)
-	stack = buildExpression.build(class, code, slice.End, context, state)
-	if t := 3 + stack; t > maxStack {
-		maxStack = t
+	if slice.End != nil {
+		// build start
+		stack := buildExpression.build(class, code, slice.Start, context, state)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		state.pushStack(class, slice.Start.Value)
+		stack = buildExpression.build(class, code, slice.End, context, state)
+		if t := 3 + stack; t > maxStack {
+			maxStack = t
+		}
+	} else {
+		code.Codes[code.CodeLength] = cg.OP_dup
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			Class:      meta.className,
+			Method:     "size",
+			Descriptor: "()I",
+		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		state.pushStack(class, slice.Start.Value)
+		stack := buildExpression.build(class, code, slice.Start, context, state)
+		if t := 2 + stack; t > maxStack {
+			maxStack = t
+		}
+		code.Codes[code.CodeLength] = cg.OP_swap
+		code.CodeLength++
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{

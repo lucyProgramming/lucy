@@ -21,6 +21,14 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 				if indexType.Type == VariableTypeLong {
 					index.Index.convertToNumber(VariableTypeInt) //  convert to int
 				}
+				if index.Index.isLiteral() {
+					indexValue := index.Index.getIntValue()
+					if indexValue < 0 {
+						*errs = append(*errs,
+							fmt.Errorf("%s index '%d' is negative",
+								index.Index.Pos.ErrMsgPrefix(), indexValue))
+					}
+				}
 			} else {
 				*errs = append(*errs,
 					fmt.Errorf("%s only integer can be used as index,but '%s'",

@@ -107,10 +107,19 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 		*errs = append(*errs,
 			fmt.Errorf("%s argument must be 'int',but '%s'",
 				errMsgPrefix(amount.Pos), amount.TypeString()))
+	} else {
+		if amount.Type == VariableTypeLong {
+			newArray.Args[0].convertToNumber(VariableTypeLong)
+		}
+		if newArray.Args[0].isLiteral() {
+			if a := newArray.Args[0].getIntValue(); a < 0 {
+				*errs = append(*errs,
+					fmt.Errorf("%s '%d' is negative ",
+						errMsgPrefix(amount.Pos), a))
+			}
+		}
 	}
-	if amount.Type == VariableTypeLong {
-		newArray.Args[0].convertToNumber(VariableTypeLong)
-	}
+
 	//no further checks
 	return ret
 }
