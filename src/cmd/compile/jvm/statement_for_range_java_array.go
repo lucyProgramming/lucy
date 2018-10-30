@@ -5,12 +5,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type AutoVariableForRangeArray struct {
-	AutoVariableForRangeJavaArray
-	Start uint16
+type AutoVariableForRangeJavaArray struct {
+	Elements uint16
+	End      uint16
+	K, V     uint16
 }
 
-func (buildPackage *BuildPackage) buildForRangeStatementForArray(
+func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	s *ast.StatementFor,
@@ -30,87 +31,41 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	state.popStack(1)
 	forState := (&StackMapState{}).initFromLast(state)
 	defer state.addTop(forState) // add top
-	needK := s.RangeAttr.ExpressionKey != nil ||
-		s.RangeAttr.IdentifierKey != nil
-	var autoVar AutoVariableForRangeArray
+
+	var autoVar AutoVariableForRangeJavaArray
 	{
-		// else
-		t := &ast.Type{}
-		t.Type = ast.VariableTypeJavaArray
-		t.Array = s.RangeAttr.RangeOn.Value.Array
 		autoVar.Elements = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, t)
-		// start
-		autoVar.Start = code.MaxLocals
+		forState.appendLocals(class, s.RangeAttr.RangeOn.Value)
+		// K
+		autoVar.K = code.MaxLocals
 		code.MaxLocals++
 		forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
 		//end
 		autoVar.End = code.MaxLocals
 		code.MaxLocals++
 		forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
-		// K
-		if needK {
-			autoVar.K = code.MaxLocals
-			code.MaxLocals++
-			forState.appendLocals(class, &ast.Type{Type: ast.VariableTypeInt})
-		}
+
 	}
 
-	//get elements
+	//get length
 	code.Codes[code.CodeLength] = cg.OP_dup //dup top
+	code.CodeLength++
 	if 2 > maxStack {
 		maxStack = 2
 	}
-	meta := ArrayMetas[s.RangeAttr.RangeOn.Value.Array.Type]
-	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      meta.className,
-		Field:      "elements",
-		Descriptor: meta.elementsFieldDescriptor,
-	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
-	code.CodeLength += 4
-	if s.RangeAttr.RangeOn.Value.Array.IsPointer() &&
-		s.RangeAttr.RangeOn.Value.Array.Type != ast.VariableTypeString {
-		code.Codes[code.CodeLength] = cg.OP_checkcast
-		t := &ast.Type{}
-		t.Type = ast.VariableTypeJavaArray
-		t.Array = s.RangeAttr.RangeOn.Value.Array
-		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-	}
-
+	code.Codes[code.CodeLength] = cg.OP_arraylength
+	code.CodeLength++
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements)...)
-	//get start
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      meta.className,
-		Field:      "start",
-		Descriptor: "I",
-	}, code.Codes[code.CodeLength+2:code.CodeLength+4])
-	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
-	code.Codes[code.CodeLength] = cg.OP_iadd
-	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
-	//get end
-	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
-		Class:      meta.className,
-		Field:      "end",
-		Descriptor: "I",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 
-	// k set to -1
-	if needK {
-		code.Codes[code.CodeLength] = cg.OP_iconst_m1
-		code.CodeLength++
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-	}
+	code.Codes[code.CodeLength] = cg.OP_iconst_m1
+	code.CodeLength++
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if s.RangeAttr.IdentifierValue != nil &&
@@ -137,24 +92,17 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
 	blockState := (&StackMapState{}).initFromLast(forState)
+
 	code.Codes[code.CodeLength] = cg.OP_iinc
-	if autoVar.Start > 255 {
+	if autoVar.K > 255 {
 		panic("over 255")
 	}
-	code.Codes[code.CodeLength+1] = byte(autoVar.Start)
+	code.Codes[code.CodeLength+1] = byte(autoVar.K)
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
-	if needK {
-		code.Codes[code.CodeLength] = cg.OP_iinc
-		if autoVar.K > 255 {
-			panic("over 255")
-		}
-		code.Codes[code.CodeLength+1] = byte(autoVar.K)
-		code.Codes[code.CodeLength+2] = 1
-		code.CodeLength += 3
-	}
+
 	// load start
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 
 	// load end
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
@@ -165,7 +113,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	//load elements
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 		if 2 > maxStack {
 			maxStack = 2
 		}

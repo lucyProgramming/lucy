@@ -12,9 +12,10 @@ func (buildPackage *BuildPackage) buildForStatement(
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	if s.RangeAttr != nil {
-		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray ||
-			s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {
+		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
 			return buildPackage.buildForRangeStatementForArray(class, code, s, context, state)
+		} else if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {
+			return buildPackage.buildForRangeStatementForJavaArray(class, code, s, context, state)
 		} else { // for map
 			return buildPackage.buildForRangeStatementForMap(class, code, s, context, state)
 		}
