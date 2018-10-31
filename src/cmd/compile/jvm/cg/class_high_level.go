@@ -128,6 +128,9 @@ func (classHighLevel *ClassHighLevel) InsertDoubleConst(value float64, location 
 	source files
 */
 func (classHighLevel *ClassHighLevel) getSourceFile() string {
+	if len(classHighLevel.SourceFiles) == 0 {
+		return ""
+	}
 	if len(classHighLevel.SourceFiles) == 1 {
 		for k, _ := range classHighLevel.SourceFiles {
 			return k
