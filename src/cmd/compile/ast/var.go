@@ -15,7 +15,7 @@ const (
 	magicIdentifierClass    = "__CLASS__"
 	magicIdentifierFunction = "__FUNCTION__"
 	MainFunctionName        = "main"
-	THIS                    = "this"
+	ThisPointerName         = "this"
 	UnderScore              = "_"
 	LucyRootClass           = "lucy/lang/Lucy"
 	JavaRootClass           = "java/lang/Object"

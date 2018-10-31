@@ -95,7 +95,7 @@ func (c *Class) mkDefaultConstruction() {
 		call.Expression = &Expression{
 			Type: ExpressionTypeIdentifier,
 			Data: &ExpressionIdentifier{
-				Name: THIS,
+				Name: ThisPointerName,
 			},
 			Pos: c.Pos,
 			Op:  "methodCall",
@@ -192,10 +192,10 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 				if m.Function.Block.Variables == nil {
 					m.Function.Block.Variables = make(map[string]*Variable)
 				}
-				m.Function.Block.Variables[THIS] = &Variable{}
-				m.Function.Block.Variables[THIS].Name = THIS
-				m.Function.Block.Variables[THIS].Pos = m.Function.Pos
-				m.Function.Block.Variables[THIS].Type = &Type{
+				m.Function.Block.Variables[ThisPointerName] = &Variable{}
+				m.Function.Block.Variables[ThisPointerName].Name = ThisPointerName
+				m.Function.Block.Variables[ThisPointerName].Pos = m.Function.Pos
+				m.Function.Block.Variables[ThisPointerName].Type = &Type{
 					Type:  VariableTypeObject,
 					Class: c,
 				}
@@ -397,8 +397,12 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	return nil
 }
 
-func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *ExpressionNew,
-	callFatherCase *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessConstructionFunction(
+	pos *Pos,
+	errs *[]error,
+	newCase *ExpressionNew,
+	callFatherCase *ExpressionMethodCall,
+	callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err

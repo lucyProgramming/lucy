@@ -30,17 +30,7 @@ type RunLucyPackage struct {
 
 func (runLucyPackage *RunLucyPackage) Help() {
 	fmt.Println("run a lucy package")
-	var fs flagSet
-	runLucyPackage.flagSet.VisitAll(func(f *flag.Flag) {
-		t := &flag.Flag{}
-		*t = *f
-		t.DefValue = fmt.Sprintf(`'%s'`, t.DefValue)
-		fs = append(fs, t)
-	})
-	fs.makeSureLengthIsSame()
-	for _, v := range fs {
-		fmt.Printf("\t -%s\t default:%s\t%s\n", v.Name, v.DefValue, v.Usage)
-	}
+	runLucyPackage.flagSet.Usage()
 }
 
 func (runLucyPackage *RunLucyPackage) parseCmd(args []string) error {

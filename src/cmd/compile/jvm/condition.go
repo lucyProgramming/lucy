@@ -15,7 +15,7 @@ func (buildExpression *BuildExpression) buildConditionNotOk(
 	state *StackMapState,
 	condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
 	if condition.Is2IntCompare() {
-		return buildExpression.buildIntCompareConditionNotOk(class, code, context, state, condition)
+		return buildExpression.build2IntCompareConditionNotOk(class, code, context, state, condition)
 	} else if condition.IsCompare2Null() {
 		return buildExpression.buildNullCompareConditionNotOk(class, code, context, state, condition)
 	} else if condition.Is2StringCompare() {
@@ -29,7 +29,7 @@ func (buildExpression *BuildExpression) buildConditionNotOk(
 	}
 }
 
-func (buildExpression *BuildExpression) buildIntCompareConditionNotOk(
+func (buildExpression *BuildExpression) build2IntCompareConditionNotOk(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	context *Context,

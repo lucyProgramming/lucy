@@ -74,7 +74,11 @@ func (buildExpression *BuildExpression) mkBuildInAssert(
 	code.Codes[code.CodeLength] = cg.OP_dup_x1
 	code.Codes[code.CodeLength+1] = cg.OP_swap
 	code.CodeLength += 2
-	class.InsertMethodCall(code, cg.OP_invokespecial, javaExceptionClass, specialMethodInit, "(Ljava/lang/String;)V")
+	class.InsertMethodCall(code,
+		cg.OP_invokespecial,
+		javaExceptionClass,
+		specialMethodInit,
+		"(Ljava/lang/String;)V")
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++
 	writeExits([]*cg.Exit{okExit}, code.CodeLength)

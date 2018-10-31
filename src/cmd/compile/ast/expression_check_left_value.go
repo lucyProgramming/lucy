@@ -14,9 +14,9 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 				e.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil
 		}
-		if identifier.Name == THIS {
+		if identifier.Name == ThisPointerName {
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
-				e.Pos.ErrMsgPrefix(), THIS))
+				e.Pos.ErrMsgPrefix(), ThisPointerName))
 		}
 		isCaptureVar := false
 		d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)

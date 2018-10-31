@@ -29,7 +29,7 @@ func (buildExpression *BuildExpression) buildArray(
 		verify.Verify = unInit
 		state.Stacks = append(state.Stacks, verify, verify)
 	}
-	loadInt32(class, code, int32(arr.Length))
+	loadInt32(class, code, int32(len(arr.Expressions)))
 	newArrayBaseOnType(class, code, e.Value.Array)
 	arrayObject := &ast.Type{
 		Type:  ast.VariableTypeJavaArray,
@@ -40,27 +40,6 @@ func (buildExpression *BuildExpression) buildArray(
 	storeOP := storeArrayElementOp(e.Value.Array.Type)
 	var index int32 = 0
 	for _, v := range arr.Expressions {
-		if v.HaveMultiValue() {
-			// stack top is array list
-			stack := buildExpression.build(class, code, v, context, state)
-			if t := 3 + stack; t > maxStack {
-				maxStack = t
-			}
-			autoVar := newMultiValueAutoVar(class, code, state)
-			for k, t := range v.MultiValues {
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				loadInt32(class, code, index) // load index
-				stack := autoVar.unPack(class, code, k, t)
-				if t := 5 + stack; t > maxStack {
-					maxStack = t
-				}
-				code.Codes[code.CodeLength] = storeOP
-				code.CodeLength++
-				index++
-			}
-			continue
-		}
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		loadInt32(class, code, index) // load index

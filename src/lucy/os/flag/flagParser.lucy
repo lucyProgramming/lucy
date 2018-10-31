@@ -7,17 +7,14 @@ public final class  FlagParser {
 	
 	public fn FlagParser() {
 	    this.super()
-		
 		this.options = new map{ string -> Option }()
 	}
 	
 	
 	public fn walkOptions(walkFn fn (o Option)) {
-		
 		for v := range this.options {
 			walkFn(v)
 		}
-		 
 	}
 	
 	private fn check(option string) {
@@ -105,10 +102,22 @@ public final class  FlagParser {
 	public fn helpMsg(prefix string = "") -> (msg string){
 		msg = prefix + "flag provides are:\n"
 		for k,v := range this.options {
-			msg += prefix + sprintf("\t '%s' default:'%s' usage:'%s'\n" , k , v.defaultValueString , v.usage )
+			switch  v.typ{
+				case OptionTypeBool:
+					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
+					msg += prefix + "\t\tusage:" + v.usage + "\n"
+				case OptionTypeInt :
+					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
+					msg += prefix + "\t\tusage:" + v.usage + "\n"
+				case OptionTypeString :
+					msg += prefix + sprintf("\t %s default:'%s'\n" , k ,v.defaultValueString)
+					msg += prefix + "\t\tusage:" + v.usage + "\n"
+				case OptionTypeFloat :
+					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
+					msg += prefix + "\t\tusage:" + v.usage + "\n"
+			}
 		}
 	}
-
 } 
 
 

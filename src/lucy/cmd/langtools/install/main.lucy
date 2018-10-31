@@ -26,7 +26,7 @@ fn main(args []string) {
 	paths  := common.getLucyPath()
 	
 	
-	w  := common.findPackageLiesIn( paths ,packageName[0] )
+	w  := common.findPackageInWhichDirectory( paths ,packageName[0] )
 	
 	new Install(lucyRoot ,
 		w + "/src/" + packageName[0] ,

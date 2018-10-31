@@ -77,7 +77,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 		}
 		if right.Type == VariableTypeLong {
-			bin.Right.convertToNumber(VariableTypeInt)
+			bin.Right.convertToNumberType(VariableTypeInt)
 		}
 		result = left.Clone()
 		result.Pos = e.Pos
@@ -127,15 +127,15 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 						*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 					case bin.Left.isLiteral() && bin.Right.isLiteral():
 						if bin.Right.Value.Type > bin.Left.Value.Type {
-							bin.Left.convertToNumber(bin.Right.Value.Type)
+							bin.Left.convertToNumberType(bin.Right.Value.Type)
 						} else {
-							bin.Right.convertToNumber(bin.Left.Value.Type)
+							bin.Right.convertToNumberType(bin.Left.Value.Type)
 						}
 					default:
 						if bin.Left.isLiteral() {
-							bin.Left.convertToNumber(right.Type)
+							bin.Left.convertToNumberType(right.Type)
 						} else {
-							bin.Right.convertToNumber(left.Type)
+							bin.Right.convertToNumberType(left.Type)
 						}
 					}
 				}
@@ -215,15 +215,15 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
 				case bin.Left.isLiteral() && bin.Right.isLiteral():
 					if bin.Right.Value.Type > bin.Left.Value.Type {
-						bin.Left.convertToNumber(bin.Right.Value.Type)
+						bin.Left.convertToNumberType(bin.Right.Value.Type)
 					} else {
-						bin.Right.convertToNumber(bin.Left.Value.Type)
+						bin.Right.convertToNumberType(bin.Left.Value.Type)
 					}
 				default:
 					if bin.Left.isLiteral() {
-						bin.Left.convertToNumber(right.Type)
+						bin.Left.convertToNumberType(right.Type)
 					} else {
-						bin.Right.convertToNumber(left.Type)
+						bin.Right.convertToNumberType(left.Type)
 					}
 				}
 			}

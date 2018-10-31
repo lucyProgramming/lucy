@@ -24,35 +24,36 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 			return nil
 		}
 	}
+
 	for _, v := range arr.Expressions {
-		eTypes, es := v.check(block)
+		eType, es := v.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
-		if eTypes != nil {
-			arr.Length += len(eTypes)
+		if eType == nil {
+			continue
 		}
-		for _, eType := range eTypes {
-			if eType == nil {
-				continue
+		if arr.Type != nil &&
+			noType == false {
+			convertExpressionToNeed(v, arr.Type.Array, eType)
+			eType = v.Value
+		}
+		if noType && arr.Type == nil {
+			if err := eType.isTyped(); err == nil {
+				arr.Type = &Type{}
+				arr.Type.Type = VariableTypeArray
+				arr.Type.Array = eType.Clone()
+				arr.Type.Pos = e.Pos
+			} else {
+				*errs = append(*errs, err)
 			}
-			if noType && arr.Type == nil {
-				if err := eType.isTyped(); err == nil {
-					arr.Type = &Type{}
-					arr.Type.Type = VariableTypeArray
-					arr.Type.Array = eType.Clone()
-					arr.Type.Pos = e.Pos
+		}
+		if arr.Type != nil {
+			if arr.Type.Array.assignAble(errs, eType) == false {
+				if noType {
+					*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
+						errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString()))
 				} else {
-					*errs = append(*errs, err)
-				}
-			}
-			if arr.Type != nil {
-				if arr.Type.Array.assignAble(errs, eType) == false {
-					if noType {
-						*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
-							errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString()))
-					} else {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(eType.Pos), eType.TypeString(), arr.Type.Array.TypeString()))
-					}
+					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
+						errMsgPrefix(eType.Pos), eType.TypeString(), arr.Type.Array.TypeString()))
 				}
 			}
 		}

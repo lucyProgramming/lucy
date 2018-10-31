@@ -100,7 +100,7 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 		return false
 	}
 	call := s.Expression.Data.(*ExpressionMethodCall)
-	if call.Expression.IsIdentifier(THIS) == false || call.Name != SUPER {
+	if call.Expression.IsIdentifier(ThisPointerName) == false || call.Name != SUPER {
 		return false
 	}
 	return true

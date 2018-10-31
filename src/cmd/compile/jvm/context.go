@@ -106,16 +106,15 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	return
 }
 
-func (context *Context) appendLimeNumberAndSourceFile(pos *ast.Pos,
-	code *cg.AttributeCode, class *cg.ClassHighLevel) {
+func (context *Context) appendLimeNumberAndSourceFile(
+	pos *ast.Pos,
+	code *cg.AttributeCode,
+	class *cg.ClassHighLevel) {
 	if pos == nil {
 		return
 	}
 	if pos.Filename != context.currentSourceFile {
-		if class.SourceFiles == nil {
-			class.SourceFiles = make(map[string]struct{})
-		}
-		class.SourceFiles[pos.Filename] = struct{}{}
+		class.InsertSourceFile(pos.Filename)
 		context.currentSourceFile = pos.Filename
 		context.currentLineNumber = pos.Line
 		code.MKLineNumber(pos.Line)

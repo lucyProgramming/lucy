@@ -6,22 +6,22 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 	var typ *ast.Type
 	var err error
-	if expressionParser.parser.token.Type == lex.TokenMap {
-		typ, err = expressionParser.parser.parseType()
+	if ep.parser.token.Type == lex.TokenMap {
+		typ, err = ep.parser.parseType()
 		if err != nil {
 			return nil, err
 		}
-		expressionParser.parser.ifTokenIsLfThenSkip()
+		ep.parser.ifTokenIsLfThenSkip()
 	}
-	if expressionParser.parser.token.Type != lex.TokenLc {
-		err := fmt.Errorf("expect '{',but '%s'", expressionParser.parser.token.Description)
-		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+	if ep.parser.token.Type != lex.TokenLc {
+		err := fmt.Errorf("expect '{',but '%s'", ep.parser.token.Description)
+		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
 	}
-	expressionParser.Next(lfNotToken) // skip {
+	ep.Next(lfNotToken) // skip {
 	ret := &ast.Expression{
 		Type: ast.ExpressionTypeMap,
 		Op:   "mapLiteral",
@@ -29,24 +29,24 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 	m := &ast.ExpressionMap{}
 	m.Type = typ
 	ret.Data = m
-	for expressionParser.parser.token.Type != lex.TokenEof &&
-		expressionParser.parser.token.Type != lex.TokenRc {
+	for ep.parser.token.Type != lex.TokenEof &&
+		ep.parser.token.Type != lex.TokenRc {
 		// key
-		k, err := expressionParser.parseExpression(false)
+		k, err := ep.parseExpression(false)
 		if err != nil {
 			return ret, err
 		}
-		expressionParser.parser.unExpectNewLineAndSkip()
+		ep.parser.unExpectNewLineAndSkip()
 		// arrow
-		if expressionParser.parser.token.Type != lex.TokenArrow {
+		if ep.parser.token.Type != lex.TokenArrow {
 			err := fmt.Errorf("%s expect '->',but '%s'",
-				expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
-			expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+				ep.parser.errMsgPrefix(), ep.parser.token.Description)
+			ep.parser.errs = append(ep.parser.errs, err)
 			return ret, err
 		}
-		expressionParser.Next(lfNotToken) // skip ->
+		ep.Next(lfNotToken) // skip ->
 		// value
-		v, err := expressionParser.parseExpression(false)
+		v, err := ep.parseExpression(false)
 		if err != nil {
 			return ret, err
 		}
@@ -54,21 +54,21 @@ func (expressionParser *ExpressionParser) parseMapExpression() (*ast.Expression,
 			Key:   k,
 			Value: v,
 		})
-		if expressionParser.parser.token.Type == lex.TokenComma {
+		if ep.parser.token.Type == lex.TokenComma {
 			// read next  key value pair
-			expressionParser.Next(lfNotToken)
+			ep.Next(lfNotToken)
 		} else {
 			break
 		}
 	}
-	expressionParser.parser.ifTokenIsLfThenSkip()
-	if expressionParser.parser.token.Type != lex.TokenRc {
+	ep.parser.ifTokenIsLfThenSkip()
+	if ep.parser.token.Type != lex.TokenRc {
 		err := fmt.Errorf("%s expect '}',but '%s'",
-			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
-		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
-		expressionParser.parser.consume(untilRc)
+			ep.parser.errMsgPrefix(), ep.parser.token.Description)
+		ep.parser.errs = append(ep.parser.errs, err)
+		ep.parser.consume(untilRc)
 	}
-	ret.Pos = expressionParser.parser.mkPos()
-	expressionParser.Next(lfIsToken) // skip }
+	ret.Pos = ep.parser.mkPos()
+	ep.Next(lfIsToken) // skip }
 	return ret, nil
 }

@@ -57,11 +57,11 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 			return result
 		}
 		if left.isInteger() && right.isInteger() && bin.Right.isLiteral() {
-			bin.Right.convertToNumber(left.Type)
+			bin.Right.convertToNumberType(left.Type)
 			return result
 		}
 		if left.isFloat() && right.isFloat() && bin.Right.isLiteral() {
-			bin.Right.convertToNumber(left.Type)
+			bin.Right.convertToNumberType(left.Type)
 			return result
 		}
 	}
@@ -76,7 +76,7 @@ func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Ty
 		e.Type == ExpressionTypeRshAssign {
 		if left.isInteger() && right.isInteger() {
 			if right.Type == VariableTypeLong {
-				bin.Right.convertToNumber(VariableTypeInt)
+				bin.Right.convertToNumberType(VariableTypeInt)
 			}
 			return result
 		}

@@ -79,7 +79,7 @@ func (lex *Lexer) hexByte2ByteValue(c byte) byte {
 	return c - '0' //also valid for digit
 }
 
-func (lex *Lexer) parseInt64(bs []byte) int64 {
+func (lex *Lexer) parseInt64(bs []byte) (int64, error) {
 	base := int64(10)
 	if bs[0] == '0' {
 		base = 8
@@ -91,10 +91,23 @@ func (lex *Lexer) parseInt64(bs []byte) int64 {
 		bs = bs[2:]
 	}
 	var result int64 = 0
+	bit63is1 := false
 	for _, v := range bs {
 		result = result*base + int64(lex.hexByte2ByteValue(v))
+		if false == bit63is1 {
+			if (uint64(result) & (uint64(1) << 63)) != 0 {
+				bit63is1 = true
+				continue
+			}
+		}
+		if bit63is1 {
+			if (uint64(result) & (uint64(1) << 63)) == 0 {
+				bit63is1 = true
+			}
+			return result, fmt.Errorf("exceed max int64")
+		}
 	}
-	return result
+	return result, nil
 }
 
 func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
@@ -234,7 +247,10 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	if isScientificNotation == false {
-		int64Part := lex.parseInt64(integerPart)
+		int64Part, e := lex.parseInt64(integerPart)
+		if e != nil {
+			err = e
+		}
 		floatPart := parseFloat64(floatPart)
 		if haveFloatPart {
 			if isDouble {
@@ -247,43 +263,38 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		} else {
 			if isDouble {
 				token.Type = TokenLiteralDouble
-				token.Data = float64(int64Part) + floatPart
+				token.Data = float64(int64Part)
 			} else if isFloat {
 				token.Type = TokenLiteralFloat
-				token.Data = float32(int64Part) + float32(floatPart)
+				token.Data = float32(int64Part)
 			} else if isLong {
 				token.Type = TokenLiteralLong
 				token.Data = int64Part
 			} else if isByte {
 				token.Type = TokenLiteralByte
-				token.Data = byte(int64Part)
-				if int32(int64Part) > math.MaxUint8 {
-					err = fmt.Errorf("max byte is %v", math.MaxUint8)
-				}
+				token.Data = int64Part
 			} else if isShort {
 				token.Type = TokenLiteralShort
-				token.Data = int32(int64Part)
-				if int32(int64Part) > math.MaxInt16 {
-					err = fmt.Errorf("max short is %v", math.MaxUint8)
-				}
+				token.Data = int64Part
 			} else {
 				token.Type = TokenLiteralInt
-				token.Data = int32(int64Part)
-				if int32(int64Part) > math.MaxInt32 {
-					err = fmt.Errorf("max int is %v", math.MaxUint8)
-				}
+				token.Data = int64Part
 			}
 		}
 		return
 	}
 	//scientific notation
-	if t := lex.parseInt64(integerPart); t > 10 && t < 1 {
+	if t, _ := lex.parseInt64(integerPart); t > 10 && t < 1 {
 		err = fmt.Errorf("wrong format of scientific notation")
 		token.Type = TokenLiteralInt
 		token.Data = int32(0)
 		return
 	}
-	p := int(lex.parseInt64(power))
+	var p int
+	{
+		t, _ := lex.parseInt64(power)
+		p = int(t)
+	}
 	notationIsDouble := false
 	var notationDoubleValue float64
 	var notationLongValue int64
@@ -295,11 +306,20 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 				b[k] = '0'
 			}
 			integerPart = append(integerPart, b...)
-			notationLongValue = lex.parseInt64(integerPart)
+			var e error
+			notationLongValue, e = lex.parseInt64(integerPart)
+			if e != nil {
+				err = e
+			}
 		} else { // float
 			integerPart = append(integerPart, floatPart[:p]...)
 			notationIsDouble = true
-			notationDoubleValue = float64(lex.parseInt64(integerPart)) + parseFloat64(floatPart[p:])
+			var e error
+			notationLongValue, e = lex.parseInt64(integerPart)
+			if e != nil {
+				err = e
+			}
+			notationDoubleValue = float64(notationLongValue) + parseFloat64(floatPart[p:])
 		}
 	} else { // power is negative,must be float number
 		b := make([]byte, p-len(integerPart))
@@ -384,8 +404,6 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 			break
 		}
 	}
-	token.EndLine = lex.line
-	token.EndColumn = lex.column
 	identifier := string(bs)
 	if t, ok := keywordsMap[identifier]; ok {
 		token.Type = t
@@ -479,9 +497,6 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 		case '\\':
 			bs = append(bs, '\\')
 			c, eof = lex.getChar()
-		//case '/':
-		//	bs = append(bs, '/')
-		//	c, eof = lex.getChar()
 		case '\'':
 			bs = append(bs, '\'')
 			c, eof = lex.getChar()
@@ -546,12 +561,12 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 					break
 				}
 				if lex.isHex(c) == false {
-					err = fmt.Errorf("not enough hex number for unicode, expect %d , but %d",
+					err = fmt.Errorf("not enough hex number for unicode, expect '%d' , but '%d'",
 						n, i)
 					lex.unGetChar()
 					break
 				}
-				r = r*16 + rune(lex.hexByte2ByteValue(c))
+				r = (r << 4) | rune(lex.hexByte2ByteValue(c))
 			}
 			bs = append(bs, []byte(string([]rune{r}))...)
 			c, eof = lex.getChar()
@@ -559,11 +574,11 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 			err = fmt.Errorf("unknown escape sequence")
 		}
 	}
+	token.EndLine = lex.line
+	token.EndColumn = lex.column
 	if c == '\n' {
 		err = fmt.Errorf("string literal start new line")
 	}
-	token.EndLine = lex.line
-	token.EndColumn = lex.column
 	token.Data = string(bs)
 	token.Description = string(bs)
 	return

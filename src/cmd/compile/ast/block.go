@@ -222,7 +222,7 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 		return searchBuildIns(name), nil
 	}
 	if b.IsFunctionBlock &&
-		name == THIS {
+		name == ThisPointerName {
 		return nil, nil
 	}
 	if b.Outer == nil {
@@ -332,7 +332,7 @@ func (b *Block) checkUnUsed() (es []error) {
 		if v.Used ||
 			v.IsGlobal ||
 			v.IsFunctionParameter ||
-			v.Name == THIS ||
+			v.Name == ThisPointerName ||
 			v.IsReturn {
 			continue
 		}
@@ -455,8 +455,8 @@ func (b *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
 		return fmt.Errorf(`%s "" is not a valid name`, pos.ErrMsgPrefix())
 	}
-	if name == THIS {
-		return fmt.Errorf("%s '%s' already been taken", pos.ErrMsgPrefix(), THIS)
+	if name == ThisPointerName {
+		return fmt.Errorf("%s '%s' already been taken", pos.ErrMsgPrefix(), ThisPointerName)
 	}
 	if name == "_" {
 		return fmt.Errorf("%s '%s' is not a valid name", pos.ErrMsgPrefix(), name)
