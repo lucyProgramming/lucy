@@ -80,8 +80,7 @@ const (
 )
 
 type Expression struct {
-	NegativeExpression *Expression
-	Type               ExpressionTypeKind
+	Type ExpressionTypeKind
 	/*
 		only for global variable definition
 		public hello := "hai...."
@@ -96,6 +95,7 @@ type Expression struct {
 	IsStatementExpression bool
 	Op                    string
 	Lefts                 []*Expression // left values
+	AsSubForNegative      *Expression
 }
 
 func (e *Expression) IsStringLiteral(s string) bool {

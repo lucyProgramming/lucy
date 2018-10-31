@@ -2,7 +2,6 @@ package lex
 
 import (
 	"fmt"
-	"math"
 )
 
 type Lexer struct {
@@ -95,13 +94,13 @@ func (lex *Lexer) parseInt64(bs []byte) (int64, error) {
 	for _, v := range bs {
 		result = result*base + int64(lex.hexByte2ByteValue(v))
 		if false == bit63is1 {
-			if (uint64(result) & (uint64(1) << 63)) != 0 {
+			if (result >> 63) != 0 {
 				bit63is1 = true
 				continue
 			}
 		}
 		if bit63is1 {
-			if (uint64(result) & (uint64(1) << 63)) == 0 {
+			if (result >> 63) == 0 {
 				bit63is1 = true
 			}
 			return result, fmt.Errorf("exceed max int64")
@@ -301,11 +300,13 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	if powerPositive {
 		if p >= len(floatPart) { // int
 			integerPart = append(integerPart, floatPart...)
-			b := make([]byte, p-len(floatPart))
-			for k, _ := range b {
-				b[k] = '0'
+			{
+				b := make([]byte, p-len(floatPart))
+				for k, _ := range b {
+					b[k] = '0'
+				}
+				integerPart = append(integerPart, b...)
 			}
-			integerPart = append(integerPart, b...)
 			var e error
 			notationLongValue, e = lex.parseInt64(integerPart)
 			if e != nil {
@@ -363,18 +364,13 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		if notationIsDouble {
 			err = fmt.Errorf("number literal defined as 'byte' but notation is float")
 		}
-		if notationLongValue > math.MaxUint8 {
-			err = fmt.Errorf("max byte is %v", math.MaxUint8)
-		}
 	} else if isShort {
 		token.Type = TokenLiteralShort
 		token.Data = int32(notationLongValue)
 		if notationIsDouble {
 			err = fmt.Errorf("number literal defined as 'short' but notation is float")
 		}
-		if notationLongValue > math.MaxInt16 {
-			err = fmt.Errorf("max short is %v", math.MaxUint8)
-		}
+
 	} else {
 		if notationIsDouble {
 			token.Type = TokenLiteralDouble

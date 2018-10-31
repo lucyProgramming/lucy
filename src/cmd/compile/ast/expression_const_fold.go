@@ -41,94 +41,94 @@ func (e *Expression) constantFold() (is bool, err error) {
 		switch e.Type {
 		case ExpressionTypeByte:
 			t := e.Data.(int64)
-			if e.NegativeExpression == nil {
+			if e.AsSubForNegative == nil {
 				if t > int64(math.MaxInt8) {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s byte constant %d exceeds [-128 , 127 ]", e.Pos.ErrMsgPrefix(), t))
+						fmt.Errorf("%s constant %d exceeds [-128 , 127 ]", e.Pos.ErrMsgPrefix(), t))
 				}
 				e.Data = byte(t)
 			} else {
 				if t > (int64(math.MaxInt8) + 1) {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s byte constant %d exceeds [-128 , 127 ]", e.Pos.ErrMsgPrefix(), -t))
+						fmt.Errorf("%s constant %d exceeds [-128 , 127 ]", e.Pos.ErrMsgPrefix(), -t))
 				}
 				if t == (int64(math.MaxInt8) + 1) {
-					e.NegativeExpression.Data = byte(1 << 7)
+					e.AsSubForNegative.Data = byte(1 << 7)
 				} else {
-					e.NegativeExpression.Data = -byte(t)
+					e.AsSubForNegative.Data = -byte(t)
 				}
-				e.NegativeExpression.Type = ExpressionTypeByte
+				e.AsSubForNegative.Type = ExpressionTypeByte
 			}
 		case ExpressionTypeShort:
 			t := e.Data.(int64)
-			if e.NegativeExpression == nil {
+			if e.AsSubForNegative == nil {
 				if t > int64(math.MaxInt16) {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s short constant %d exceeds [-32768 , 32767 ]",
+						fmt.Errorf("%s constant %d exceeds [-32768 , 32767 ]",
 							e.Pos.ErrMsgPrefix(), t))
 				}
 				e.Data = int32(t)
 			} else {
 				if t > (int64(math.MaxInt16) + 1) {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s short constant %d exceeds [-128 , 127 ]",
+						fmt.Errorf("%s constant %d exceeds [-128 , 127 ]",
 							e.Pos.ErrMsgPrefix(), -t))
 				}
 				if t == (int64(math.MaxInt16) + 1) {
-					e.NegativeExpression.Data = int32(math.MinInt16)
+					e.AsSubForNegative.Data = int32(math.MinInt16)
 				} else {
-					e.NegativeExpression.Data = -int32(t)
+					e.AsSubForNegative.Data = -int32(t)
 				}
-				e.NegativeExpression.Type = ExpressionTypeShort
+				e.AsSubForNegative.Type = ExpressionTypeShort
 			}
 		case ExpressionTypeChar:
 			t := e.Data.(int64)
 			if t > int64(math.MaxUint16) {
 				PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-					fmt.Errorf("%s char constant %d exceeds [0 , 65535 ]",
+					fmt.Errorf("%s constant %d exceeds [0 , 65535 ]",
 						e.Pos.ErrMsgPrefix(), t))
 			}
 			e.Data = int32(t)
 		case ExpressionTypeInt:
 			t := e.Data.(int64)
-			if e.NegativeExpression == nil {
+			if e.AsSubForNegative == nil {
 				if t > int64(math.MaxInt32) {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s short constant %d exceeds [-32768 , 32767 ]",
+						fmt.Errorf("%s constant %d exceeds [-32768 , 32767 ]",
 							e.Pos.ErrMsgPrefix(), t))
 				}
 				e.Data = int32(t)
 			} else {
 				if t > (int64(math.MaxInt32) + 1) {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s int constant %d exceeds [-2147483648 , 2147483647 ]",
+						fmt.Errorf("%s constant %d exceeds [-2147483648 , 2147483647 ]",
 							e.Pos.ErrMsgPrefix(), -t))
 				}
 				if t == (int64(math.MaxInt32) + 1) {
-					e.NegativeExpression.Data = int32(math.MinInt32)
+					e.AsSubForNegative.Data = int32(math.MinInt32)
 				} else {
-					e.NegativeExpression.Data = -int32(t)
+					e.AsSubForNegative.Data = -int32(t)
 				}
-				e.NegativeExpression.Type = ExpressionTypeInt
+				e.AsSubForNegative.Type = ExpressionTypeInt
 
 			}
 		case ExpressionTypeLong:
 			t := e.Data.(int64)
-			if e.NegativeExpression == nil {
+			if e.AsSubForNegative == nil {
 				if t>>63 != 0 {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s long constant  exceeds [-9223372036854775808 , 9223372036854775807 ]",
+						fmt.Errorf("%s constant  exceeds [-9223372036854775808 , 9223372036854775807 ]",
 							e.Pos.ErrMsgPrefix()))
 				}
 			} else {
 				if (t>>63 != 0) &&
 					(t<<1) != 0 {
 					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-						fmt.Errorf("%s long constant exceeds [-9223372036854775808 , 9223372036854775807 ]",
+						fmt.Errorf("%s constant exceeds [-9223372036854775808 , 9223372036854775807 ]",
 							e.Pos.ErrMsgPrefix()))
 				}
-				e.NegativeExpression.Data = -e.Data.(int64)
-				e.NegativeExpression.Type = ExpressionTypeLong
+				e.AsSubForNegative.Data = -e.Data.(int64)
+				e.AsSubForNegative.Type = ExpressionTypeLong
 			}
 		}
 		return true, nil
@@ -174,6 +174,26 @@ func (e *Expression) constantFold() (is bool, err error) {
 		e.Type = ExpressionTypeBool
 		e.Data = !ee.Data.(bool)
 		return
+	}
+	// -
+	if e.Type == ExpressionTypeNegative {
+		ee := e.Data.(*Expression)
+		is, err = ee.constantFold()
+		if err != nil || is == false {
+			return
+		}
+		switch ee.Type {
+		case ExpressionTypeFloat:
+			is = true
+			e.Data = -ee.Data.(float32)
+			e.Type = ExpressionTypeFloat
+			return
+		case ExpressionTypeDouble:
+			is = true
+			e.Data = -ee.Data.(float64)
+			e.Type = ExpressionTypeDouble
+			return
+		}
 	}
 	// && and ||
 	if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {

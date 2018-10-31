@@ -206,7 +206,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 		newE.Type = ast.ExpressionTypeNegative
 		newE.Data = prefix
 		newE.Pos = pos
-		prefix.NegativeExpression = newE
+		prefix.AsSubForNegative = newE
 		prefix = newE
 	case lex.TokenFn:
 		pos := ep.parser.mkPos()
