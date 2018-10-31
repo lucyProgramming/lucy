@@ -19,7 +19,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		if indexType != nil {
 			if indexType.isInteger() {
 				if indexType.Type == VariableTypeLong {
-					index.Index.convertToNumber(VariableTypeInt) //  convert to int
+					index.Index.convertToNumberType(VariableTypeInt) //  convert to int
 				}
 				if index.Index.isLiteral() {
 					indexValue := index.Index.getIntValue()
@@ -57,7 +57,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 		if indexType != nil {
 			if indexType.isInteger() {
 				if indexType.Type == VariableTypeLong {
-					index.Index.convertToNumber(VariableTypeInt) //  convert to int
+					index.Index.convertToNumberType(VariableTypeInt) //  convert to int
 				}
 			} else {
 				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",

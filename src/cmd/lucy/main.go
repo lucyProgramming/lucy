@@ -13,7 +13,7 @@ func printUsage() {
 	msg := `lucy is a new programing language build on jvm
 	version                print version
 	build                  build package and don't run
-    install                install directory and it's sub directories 
+	install                install directory and it's sub directories 
 	run                    run a lucy package
 	clean                  clean compiled files
 	pack                   make_node_objects jar

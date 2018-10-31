@@ -5,8 +5,13 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-type buildInFunctionChecker func(f *Function, e *ExpressionFunctionCall,
-	block *Block, errs *[]error, args []*Type, pos *Pos) // used in build function
+type buildInFunctionChecker func(
+	f *Function,
+	e *ExpressionFunctionCall,
+	block *Block,
+	errs *[]error,
+	args []*Type,
+	pos *Pos) // used in build function
 
 type Function struct {
 	CallFatherConstructionExpression *Expression

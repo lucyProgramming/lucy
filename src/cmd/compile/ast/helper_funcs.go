@@ -192,14 +192,15 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 		if eval[k] == nil {
 			continue
 		}
+
 		if needs[k].assignAble(&errs, eval[k]) {
 			continue // no need
 		}
 		if (needs[k].isInteger() && eval[k].isInteger()) ||
 			(needs[k].isFloat() && eval[k].isFloat()) {
 			pos := eval[k].Pos // keep pos
-			e.convertNumberLiteralTo(needs[k].Type)
-			*eval[k] = *needs[k]
+			e.convertToNumberType(needs[k].Type)
+			eval[k] = e.Value
 			eval[k].Pos = pos
 		}
 	}

@@ -32,7 +32,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 				startType.Pos.ErrMsgPrefix(), startType.TypeString()))
 		} else {
 			if startType.Type == VariableTypeLong {
-				on.Start.convertToNumber(VariableTypeInt)
+				on.Start.convertToNumberType(VariableTypeInt)
 			}
 			if on.Start.isLiteral() {
 				startIndexValue := on.Start.getIntValue()
@@ -54,7 +54,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 					endType.Pos.ErrMsgPrefix(), endType.TypeString()))
 			} else {
 				if endType.Type == VariableTypeLong {
-					on.End.convertToNumber(VariableTypeInt)
+					on.End.convertToNumberType(VariableTypeInt)
 				}
 				if on.End.isLiteral() {
 					endIndexValue := on.End.getIntValue()

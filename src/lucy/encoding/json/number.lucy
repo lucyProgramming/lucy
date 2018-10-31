@@ -14,7 +14,6 @@ class Number {
 		this.floatPart = []byte{}  
 		this.e = []byte{}  
 	}
-
 	
 	private fn prepare()  {
 		if len(this.e) == 0 {

@@ -9,34 +9,34 @@ import (
 /*
 	true ? 1 : 2
 */
-func (expressionParser *ExpressionParser) parseQuestionExpression() (*ast.Expression, error) {
-	left, err := expressionParser.parseLogicalOrExpression()
+func (ep *ExpressionParser) parseQuestionExpression() (*ast.Expression, error) {
+	left, err := ep.parseLogicalOrExpression()
 	if err != nil {
 		return left, err
 	}
-	if expressionParser.parser.token.Type != lex.TokenQuestion {
+	if ep.parser.token.Type != lex.TokenQuestion {
 		return left, nil
 	}
-	expressionParser.Next(lfNotToken) // skip ?
-	True, err := expressionParser.parseLogicalOrExpression()
+	ep.Next(lfNotToken) // skip ?
+	True, err := ep.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
 	}
-	expressionParser.parser.unExpectNewLineAndSkip()
-	if expressionParser.parser.token.Type != lex.TokenColon {
+	ep.parser.unExpectNewLineAndSkip()
+	if ep.parser.token.Type != lex.TokenColon {
 		err := fmt.Errorf("%s expect ':' ,but '%s'",
-			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
-		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+			ep.parser.errMsgPrefix(), ep.parser.token.Description)
+		ep.parser.errs = append(ep.parser.errs, err)
 		return left, err
 	}
-	expressionParser.Next(lfNotToken) // skip :
-	False, err := expressionParser.parseLogicalOrExpression()
+	ep.Next(lfNotToken) // skip :
+	False, err := ep.parseLogicalOrExpression()
 	if err != nil {
 		return left, nil
 	}
 	newExpression := &ast.Expression{}
 	newExpression.Op = "question"
-	newExpression.Pos = expressionParser.parser.mkPos()
+	newExpression.Pos = ep.parser.mkPos()
 	newExpression.Type = ast.ExpressionTypeQuestion
 	question := &ast.ExpressionQuestion{}
 	question.Selection = left

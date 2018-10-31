@@ -6,67 +6,67 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (blockParser *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
+func (bp *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 	statementSwitch := &ast.StatementSwitch{
-		Pos: blockParser.parser.mkPos(),
+		Pos: bp.parser.mkPos(),
 	}
-	blockParser.Next(lfIsToken) // skip switch key word
-	blockParser.parser.unExpectNewLineAndSkip()
-	statementSwitch.EndPos = blockParser.parser.mkPos()
+	bp.Next(lfIsToken) // skip switch key word
+	bp.parser.unExpectNewLineAndSkip()
+	statementSwitch.EndPos = bp.parser.mkPos()
 	var err error
-	statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+	statementSwitch.Condition, err = bp.parser.ExpressionParser.parseExpression(false)
 	if err != nil {
-		blockParser.consume(untilLc)
+		bp.consume(untilLc)
 	}
-	blockParser.parser.ifTokenIsLfThenSkip()
-	for blockParser.parser.token.Type == lex.TokenSemicolon {
+	bp.parser.ifTokenIsLfThenSkip()
+	for bp.parser.token.Type == lex.TokenSemicolon {
 		if statementSwitch.Condition != nil {
 			statementSwitch.PrefixExpressions = append(statementSwitch.PrefixExpressions, statementSwitch.Condition)
 			statementSwitch.Condition = nil
 		}
-		blockParser.parser.Next(lfNotToken)
-		statementSwitch.Condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+		bp.parser.Next(lfNotToken)
+		statementSwitch.Condition, err = bp.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
-			blockParser.consume(untilLc)
+			bp.consume(untilLc)
 		}
-		blockParser.parser.ifTokenIsLfThenSkip()
+		bp.parser.ifTokenIsLfThenSkip()
 	}
-	if blockParser.parser.token.Type != lex.TokenLc {
+	if bp.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		blockParser.consume(untilLc)
+			bp.parser.errMsgPrefix(), bp.parser.token.Description)
+		bp.parser.errs = append(bp.parser.errs, err)
+		bp.consume(untilLc)
 	}
-	blockParser.Next(lfIsToken) // skip {  , must be case
-	blockParser.parser.expectNewLineAndSkip()
-	if blockParser.parser.token.Type != lex.TokenCase {
+	bp.Next(lfIsToken) // skip {  , must be case
+	bp.parser.expectNewLineAndSkip()
+	if bp.parser.token.Type != lex.TokenCase {
 		err = fmt.Errorf("%s expect 'case',but '%s'",
-			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
+			bp.parser.errMsgPrefix(), bp.parser.token.Description)
+		bp.parser.errs = append(bp.parser.errs, err)
 		return nil, err
 	}
-	for blockParser.parser.token.Type == lex.TokenCase {
-		blockParser.Next(lfIsToken) // skip case
-		blockParser.parser.unExpectNewLineAndSkip()
-		es, err := blockParser.parser.ExpressionParser.parseExpressions(lex.TokenColon)
+	for bp.parser.token.Type == lex.TokenCase {
+		bp.Next(lfIsToken) // skip case
+		bp.parser.unExpectNewLineAndSkip()
+		es, err := bp.parser.ExpressionParser.parseExpressions(lex.TokenColon)
 		if err != nil {
 			return statementSwitch, err
 		}
-		if blockParser.parser.token.Type != lex.TokenColon {
+		if bp.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s expect ':',but '%s'",
-				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
+				bp.parser.errMsgPrefix(), bp.parser.token.Description)
+			bp.parser.errs = append(bp.parser.errs, err)
 			return statementSwitch, err
 		}
-		blockParser.Next(lfIsToken) // skip :
-		blockParser.parser.expectNewLineAndSkip()
+		bp.Next(lfIsToken) // skip :
+		bp.parser.expectNewLineAndSkip()
 		var block *ast.Block
-		if blockParser.parser.token.Type != lex.TokenCase &&
-			blockParser.parser.token.Type != lex.TokenDefault &&
-			blockParser.parser.token.Type != lex.TokenRc {
+		if bp.parser.token.Type != lex.TokenCase &&
+			bp.parser.token.Type != lex.TokenDefault &&
+			bp.parser.token.Type != lex.TokenRc {
 			block = &ast.Block{}
 			block.IsSwitchBlock = true
-			blockParser.parseStatementList(block, false)
+			bp.parseStatementList(block, false)
 		}
 		statementSwitch.StatementSwitchCases = append(statementSwitch.StatementSwitchCases, &ast.StatementSwitchCase{
 			Matches: es,
@@ -74,31 +74,31 @@ func (blockParser *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 		})
 	}
 	//default value
-	if blockParser.parser.token.Type == lex.TokenDefault {
-		blockParser.Next(lfIsToken) // skip default key word
-		blockParser.parser.unExpectNewLineAndSkip()
-		if blockParser.parser.token.Type != lex.TokenColon {
+	if bp.parser.token.Type == lex.TokenDefault {
+		bp.Next(lfIsToken) // skip default key word
+		bp.parser.unExpectNewLineAndSkip()
+		if bp.parser.token.Type != lex.TokenColon {
 			err = fmt.Errorf("%s missing colon after 'default'",
-				blockParser.parser.errMsgPrefix())
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
+				bp.parser.errMsgPrefix())
+			bp.parser.errs = append(bp.parser.errs, err)
 		} else {
-			blockParser.Next(lfIsToken)
+			bp.Next(lfIsToken)
 		}
-		blockParser.parser.expectNewLineAndSkip()
-		if blockParser.parser.token.Type != lex.TokenRc {
+		bp.parser.expectNewLineAndSkip()
+		if bp.parser.token.Type != lex.TokenRc {
 			block := ast.Block{}
 			block.IsSwitchBlock = true
-			blockParser.parseStatementList(&block, false)
+			bp.parseStatementList(&block, false)
 			statementSwitch.Default = &block
 		}
 	}
-	if blockParser.parser.token.Type != lex.TokenRc {
+	if bp.parser.token.Type != lex.TokenRc {
 		err = fmt.Errorf("%s expect '}',but '%s'",
-			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
+			bp.parser.errMsgPrefix(), bp.parser.token.Description)
+		bp.parser.errs = append(bp.parser.errs, err)
 		return statementSwitch, err
 	}
-	statementSwitch.EndPos = blockParser.parser.mkEndPos()
-	blockParser.Next(lfNotToken) //  skip }
+	statementSwitch.EndPos = bp.parser.mkEndPos()
+	bp.Next(lfNotToken) //  skip }
 	return statementSwitch, nil
 }

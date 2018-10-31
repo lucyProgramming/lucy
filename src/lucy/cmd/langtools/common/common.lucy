@@ -46,7 +46,7 @@ public fn getLucyPath()->(paths []string){
 
 
 
-public fn findPackageLiesIn(lucyPaths []string , packageName string)->(which string ){
+public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->(which string ){
 	ps := []string{}  
 	for _,v := range lucyPaths {
 		if true == new io.File(v + "/src/" + packageName).isDirectory() {

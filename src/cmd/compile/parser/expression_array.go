@@ -7,23 +7,23 @@ import (
 )
 
 // []int{1,2,3}
-func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
-	expressionParser.parser.Next(lfIsToken) // skip [
-	expressionParser.parser.unExpectNewLineAndSkip()
+func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
+	ep.parser.Next(lfIsToken) // skip [
+	ep.parser.unExpectNewLineAndSkip()
 	var err error
-	if expressionParser.parser.token.Type != lex.TokenRb {
+	if ep.parser.token.Type != lex.TokenRb {
 		/*
 			[1 ,2]
 		*/
 		arr := &ast.ExpressionArray{}
-		arr.Expressions, err = expressionParser.parseExpressions(lex.TokenRb)
-		expressionParser.parser.ifTokenIsLfThenSkip()
-		if expressionParser.parser.token.Type != lex.TokenRb {
-			err = fmt.Errorf("%s '[' and ']' not match", expressionParser.parser.errMsgPrefix())
+		arr.Expressions, err = ep.parseExpressions(lex.TokenRb)
+		ep.parser.ifTokenIsLfThenSkip()
+		if ep.parser.token.Type != lex.TokenRb {
+			err = fmt.Errorf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
 			return nil, err
 		}
-		pos := expressionParser.parser.mkPos()
-		expressionParser.Next(lfIsToken) // skip ]
+		pos := ep.parser.mkPos()
+		ep.Next(lfIsToken) // skip ]
 		return &ast.Expression{
 			Type: ast.ExpressionTypeArray,
 			Data: arr,
@@ -31,26 +31,26 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 			Op:   "arrayLiteral",
 		}, err
 	}
-	expressionParser.Next(lfIsToken) // skip ]
-	expressionParser.parser.unExpectNewLineAndSkip()
-	array, err := expressionParser.parser.parseType()
+	ep.Next(lfIsToken) // skip ]
+	ep.parser.unExpectNewLineAndSkip()
+	array, err := ep.parser.parseType()
 	if err != nil {
 		return nil, err
 	}
-	pos := expressionParser.parser.mkPos()
-	if expressionParser.parser.token.Type == lex.TokenLp {
+	pos := ep.parser.mkPos()
+	if ep.parser.token.Type == lex.TokenLp {
 		/*
 			[]byte("1111111111")
 		*/
-		expressionParser.Next(lfNotToken) // skip (
-		e, err := expressionParser.parseExpression(false)
+		ep.Next(lfNotToken) // skip (
+		e, err := ep.parseExpression(false)
 		if err != nil {
 			return nil, err
 		}
-		if expressionParser.parser.token.Type != lex.TokenRp {
+		if ep.parser.token.Type != lex.TokenRp {
 			err = fmt.Errorf("%s '(' and  ')' not match",
-				expressionParser.parser.errMsgPrefix())
-			expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+				ep.parser.errMsgPrefix())
+			ep.parser.errs = append(ep.parser.errs, err)
 			return nil, err
 		}
 		ret := &ast.Expression{}
@@ -64,10 +64,10 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		data.Type.Array = array
 		data.Expression = e
 		ret.Data = data
-		expressionParser.Next(lfIsToken) // skip )
+		ep.Next(lfIsToken) // skip )
 		return ret, nil
 	}
-	expressionParser.parser.unExpectNewLineAndSkip()
+	ep.parser.unExpectNewLineAndSkip()
 	arr := &ast.ExpressionArray{}
 	if array != nil {
 		arr.Type = &ast.Type{}
@@ -79,7 +79,7 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 		[]int { 1, 2}
 	*/
 
-	arr.Expressions, err = expressionParser.parseArrayValues()
+	arr.Expressions, err = ep.parseArrayValues()
 	return &ast.Expression{
 		Type: ast.ExpressionTypeArray,
 		Data: arr,
@@ -90,30 +90,30 @@ func (expressionParser *ExpressionParser) parseArrayExpression() (*ast.Expressio
 }
 
 //{1,2,3}  {{1,2,3},{456}}
-func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
-	if expressionParser.parser.token.Type != lex.TokenLc {
+func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
+	if ep.parser.token.Type != lex.TokenLc {
 		err := fmt.Errorf("%s expect '{',but '%s'",
-			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
-		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
+			ep.parser.errMsgPrefix(), ep.parser.token.Description)
+		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
 	}
-	expressionParser.Next(lfNotToken) // skip {
+	ep.Next(lfNotToken) // skip {
 	es := []*ast.Expression{}
-	for expressionParser.parser.token.Type != lex.TokenEof &&
-		expressionParser.parser.token.Type != lex.TokenRc {
-		if expressionParser.parser.token.Type == lex.TokenComment ||
-			expressionParser.parser.token.Type == lex.TokenMultiLineComment {
-			expressionParser.Next(lfIsToken)
+	for ep.parser.token.Type != lex.TokenEof &&
+		ep.parser.token.Type != lex.TokenRc {
+		if ep.parser.token.Type == lex.TokenComment ||
+			ep.parser.token.Type == lex.TokenMultiLineComment {
+			ep.Next(lfIsToken)
 			continue
 		}
-		if expressionParser.parser.token.Type == lex.TokenLc {
-			ees, err := expressionParser.parseArrayValues()
+		if ep.parser.token.Type == lex.TokenLc {
+			ees, err := ep.parseArrayValues()
 			if err != nil {
 				return es, err
 			}
 			arrayExpression := &ast.Expression{
 				Type: ast.ExpressionTypeArray,
-				Pos:  expressionParser.parser.mkPos(),
+				Pos:  ep.parser.mkPos(),
 			}
 			arrayExpression.Op = "arrayLiteral"
 			data := ast.ExpressionArray{}
@@ -121,7 +121,7 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 			arrayExpression.Data = data
 			es = append(es, arrayExpression)
 		} else {
-			e, err := expressionParser.parseExpression(false)
+			e, err := ep.parseExpression(false)
 			if e != nil {
 				es = append(es, e)
 			}
@@ -129,19 +129,19 @@ func (expressionParser *ExpressionParser) parseArrayValues() ([]*ast.Expression,
 				return es, err
 			}
 		}
-		if expressionParser.parser.token.Type == lex.TokenComma {
-			expressionParser.Next(lfNotToken) // skip ,
+		if ep.parser.token.Type == lex.TokenComma {
+			ep.Next(lfNotToken) // skip ,
 		} else {
 			break
 		}
 	}
-	expressionParser.parser.ifTokenIsLfThenSkip()
-	if expressionParser.parser.token.Type != lex.TokenRc {
+	ep.parser.ifTokenIsLfThenSkip()
+	if ep.parser.token.Type != lex.TokenRc {
 		err := fmt.Errorf("%s expect '}',but '%s'",
-			expressionParser.parser.errMsgPrefix(), expressionParser.parser.token.Description)
-		expressionParser.parser.errs = append(expressionParser.parser.errs, err)
-		expressionParser.parser.consume(untilRc)
+			ep.parser.errMsgPrefix(), ep.parser.token.Description)
+		ep.parser.errs = append(ep.parser.errs, err)
+		ep.parser.consume(untilRc)
 	}
-	expressionParser.Next(lfIsToken)
+	ep.Next(lfIsToken)
 	return es, nil
 }

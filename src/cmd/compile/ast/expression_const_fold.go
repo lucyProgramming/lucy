@@ -430,7 +430,7 @@ func (e *Expression) getDoubleValue() float64 {
 	return 0
 }
 
-func (e *Expression) convertNumberLiteralTo(to VariableTypeKind) {
+func (e *Expression) convertLiteralToNumberType(to VariableTypeKind) {
 	if e.isNumber() == false {
 		panic("not a number")
 	}

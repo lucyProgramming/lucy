@@ -15,7 +15,7 @@ final class Test {
 	
 	//real test method
 	public fn test(){
-    	w := common.findPackageLiesIn(this.lucyPaths , this.packageName)
+    	w := common.findPackageInWhichDirectory(this.lucyPaths , this.packageName)
 		//check is test exist
 		dir := w + "/src/" + this.packageName + "/test" 
 		if f := new io.File(dir) ;  f.isDirectory() == false {

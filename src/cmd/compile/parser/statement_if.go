@@ -7,120 +7,120 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (blockParser *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
+func (bp *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 	statementIf = &ast.StatementIf{
-		Pos: blockParser.parser.mkPos(),
+		Pos: bp.parser.mkPos(),
 	}
-	blockParser.Next(lfIsToken) // skip if
+	bp.Next(lfIsToken) // skip if
 	var condition *ast.Expression
-	blockParser.parser.unExpectNewLineAndSkip()
-	condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
+	bp.parser.unExpectNewLineAndSkip()
+	condition, err = bp.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
-		blockParser.consume(untilLc)
-		blockParser.Next(lfNotToken)
+		bp.consume(untilLc)
+		bp.Next(lfNotToken)
 	}
 	statementIf.Condition = condition
-	blockParser.parser.ifTokenIsLfThenSkip()
-	for blockParser.parser.token.Type == lex.TokenSemicolon {
+	bp.parser.ifTokenIsLfThenSkip()
+	for bp.parser.token.Type == lex.TokenSemicolon {
 		if statementIf.Condition != nil {
 			statementIf.PrefixExpressions = append(statementIf.PrefixExpressions, statementIf.Condition)
 		}
-		blockParser.Next(lfNotToken) // skip ;
-		statementIf.Condition, err = blockParser.parser.ExpressionParser.parseExpression(true)
+		bp.Next(lfNotToken) // skip ;
+		statementIf.Condition, err = bp.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
-			blockParser.consume(untilLc)
-			blockParser.Next(lfNotToken)
+			bp.consume(untilLc)
+			bp.Next(lfNotToken)
 		}
 	}
-	blockParser.parser.ifTokenIsLfThenSkip()
-	if blockParser.parser.token.Type != lex.TokenLc {
+	bp.parser.ifTokenIsLfThenSkip()
+	if bp.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s missing '{' after condtion,but '%s'",
-			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-		blockParser.parser.errs = append(blockParser.parser.errs, err)
-		blockParser.consume(untilLc)
+			bp.parser.errMsgPrefix(), bp.parser.token.Description)
+		bp.parser.errs = append(bp.parser.errs, err)
+		bp.consume(untilLc)
 	}
-	blockParser.Next(lfNotToken) //skip {
-	blockParser.parseStatementList(&statementIf.Block, false)
-	if blockParser.parser.token.Type != lex.TokenRc {
-		blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
-			blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description))
-		blockParser.consume(untilRc)
+	bp.Next(lfNotToken) //skip {
+	bp.parseStatementList(&statementIf.Block, false)
+	if bp.parser.token.Type != lex.TokenRc {
+		bp.parser.errs = append(bp.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+			bp.parser.errMsgPrefix(), bp.parser.token.Description))
+		bp.consume(untilRc)
 	}
-	blockParser.Next(lfIsToken) // skip }
-	if blockParser.parser.token.Type == lex.TokenLf {
-		pos := blockParser.parser.mkPos()
-		blockParser.Next(lfNotToken)
-		if blockParser.parser.token.Type == lex.TokenElseif ||
-			blockParser.parser.token.Type == lex.TokenElse {
-			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s unexpected new line",
-				blockParser.parser.errMsgPrefix(pos)))
+	bp.Next(lfIsToken) // skip }
+	if bp.parser.token.Type == lex.TokenLf {
+		pos := bp.parser.mkPos()
+		bp.Next(lfNotToken)
+		if bp.parser.token.Type == lex.TokenElseif ||
+			bp.parser.token.Type == lex.TokenElse {
+			bp.parser.errs = append(bp.parser.errs, fmt.Errorf("%s unexpected new line",
+				bp.parser.errMsgPrefix(pos)))
 		}
 	}
-	if blockParser.parser.token.Type == lex.TokenElseif {
-		statementIf.ElseIfList, err = blockParser.parseElseIfList()
+	if bp.parser.token.Type == lex.TokenElseif {
+		statementIf.ElseIfList, err = bp.parseElseIfList()
 		if err != nil {
 			return statementIf, err
 		}
 	}
-	if blockParser.parser.token.Type == lex.TokenLf {
-		pos := blockParser.parser.mkPos()
-		blockParser.Next(lfNotToken)
-		if blockParser.parser.token.Type == lex.TokenElse {
-			blockParser.parser.errs = append(blockParser.parser.errs, fmt.Errorf("%s unexpected new line",
-				blockParser.parser.errMsgPrefix(pos)))
+	if bp.parser.token.Type == lex.TokenLf {
+		pos := bp.parser.mkPos()
+		bp.Next(lfNotToken)
+		if bp.parser.token.Type == lex.TokenElse {
+			bp.parser.errs = append(bp.parser.errs, fmt.Errorf("%s unexpected new line",
+				bp.parser.errMsgPrefix(pos)))
 		}
 	}
-	if blockParser.parser.token.Type == lex.TokenElse {
-		blockParser.Next(lfNotToken)
-		if blockParser.parser.token.Type != lex.TokenLc {
-			err = fmt.Errorf("%s missing '{' after else", blockParser.parser.errMsgPrefix())
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
-			blockParser.consume(untilLc)
+	if bp.parser.token.Type == lex.TokenElse {
+		bp.Next(lfNotToken)
+		if bp.parser.token.Type != lex.TokenLc {
+			err = fmt.Errorf("%s missing '{' after else", bp.parser.errMsgPrefix())
+			bp.parser.errs = append(bp.parser.errs, err)
+			bp.consume(untilLc)
 		}
-		blockParser.Next(lfNotToken) // skip {
+		bp.Next(lfNotToken) // skip {
 		statementIf.Else = &ast.Block{}
-		blockParser.parseStatementList(statementIf.Else, false)
-		if blockParser.parser.token.Type != lex.TokenRc {
+		bp.parseStatementList(statementIf.Else, false)
+		if bp.parser.token.Type != lex.TokenRc {
 			err = fmt.Errorf("%s expect '}', but '%s'",
-				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-			blockParser.parser.errs = append(blockParser.parser.errs, err)
-			blockParser.consume(untilRc)
+				bp.parser.errMsgPrefix(), bp.parser.token.Description)
+			bp.parser.errs = append(bp.parser.errs, err)
+			bp.consume(untilRc)
 		}
-		blockParser.Next(lfNotToken) // skip }
+		bp.Next(lfNotToken) // skip }
 	}
 	return statementIf, err
 }
 
-func (blockParser *BlockParser) parseElseIfList() (elseIfList []*ast.StatementElseIf, err error) {
+func (bp *BlockParser) parseElseIfList() (elseIfList []*ast.StatementElseIf, err error) {
 	elseIfList = []*ast.StatementElseIf{}
 	var condition *ast.Expression
-	for blockParser.parser.token.Type == lex.TokenElseif {
-		blockParser.Next(lfIsToken) // skip elseif token
-		blockParser.parser.unExpectNewLineAndSkip()
-		condition, err = blockParser.parser.ExpressionParser.parseExpression(false)
+	for bp.parser.token.Type == lex.TokenElseif {
+		bp.Next(lfIsToken) // skip elseif token
+		bp.parser.unExpectNewLineAndSkip()
+		condition, err = bp.parser.ExpressionParser.parseExpression(false)
 		if err != nil {
-			blockParser.consume(untilLc)
+			bp.consume(untilLc)
 		}
-		if blockParser.parser.token.Type != lex.TokenLc {
+		if bp.parser.token.Type != lex.TokenLc {
 			err = fmt.Errorf("%s not '{' after a expression,but '%s'",
-				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-			blockParser.parser.errs = append(blockParser.parser.errs)
-			blockParser.consume(untilLc)
+				bp.parser.errMsgPrefix(), bp.parser.token.Description)
+			bp.parser.errs = append(bp.parser.errs)
+			bp.consume(untilLc)
 		}
-		blockParser.Next(lfNotToken) // skip {
+		bp.Next(lfNotToken) // skip {
 		block := &ast.Block{}
-		blockParser.parseStatementList(block, false)
+		bp.parseStatementList(block, false)
 		elseIfList = append(elseIfList, &ast.StatementElseIf{
 			Condition: condition,
 			Block:     block,
 		})
-		if blockParser.parser.token.Type != lex.TokenRc {
+		if bp.parser.token.Type != lex.TokenRc {
 			err = fmt.Errorf("%s expect '}', but '%s'",
-				blockParser.parser.errMsgPrefix(), blockParser.parser.token.Description)
-			blockParser.parser.errs = append(blockParser.parser.errs)
-			blockParser.consume(untilRc)
+				bp.parser.errMsgPrefix(), bp.parser.token.Description)
+			bp.parser.errs = append(bp.parser.errs)
+			bp.consume(untilRc)
 		}
-		blockParser.Next(lfIsToken) // skip }
+		bp.Next(lfIsToken) // skip }
 	}
 	return elseIfList, err
 }

@@ -109,7 +109,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 				errMsgPrefix(amount.Pos), amount.TypeString()))
 	} else {
 		if amount.Type == VariableTypeLong {
-			newArray.Args[0].convertToNumber(VariableTypeLong)
+			newArray.Args[0].convertToNumberType(VariableTypeLong)
 		}
 		if newArray.Args[0].isLiteral() {
 			if a := newArray.Args[0].getIntValue(); a < 0 {

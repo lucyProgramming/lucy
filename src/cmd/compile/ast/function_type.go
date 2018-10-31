@@ -205,10 +205,11 @@ func (ft *FunctionType) callArgsHasNoNil(ts []*Type) bool {
 	return true
 }
 
-func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
-	callArgsTypes []*Type, f *Function) (vArgs *CallVariableArgs, err error) {
-	//trying to convert literal
-	convertExpressionsToNeeds(*args, ft.getParameterTypes(), callArgsTypes)
+func (ft *FunctionType) fitArgs(
+	from *Pos,
+	args *CallArgs,
+	callArgsTypes []*Type,
+	f *Function) (vArgs *CallVariableArgs, err error) {
 	if ft.VArgs != nil {
 		vArgs = &CallVariableArgs{}
 		vArgs.NoArgs = true
@@ -275,17 +276,21 @@ func (ft *FunctionType) fitArgs(from *Pos, args *CallArgs,
 			return
 		}
 	}
+
 	for k, v := range ft.ParameterList {
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
-			if false == v.Type.assignAble(&errs, callArgsTypes[k]) {
-				errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
-					errMsgPrefix(callArgsTypes[k].Pos),
-					callArgsTypes[k].TypeString(), v.Type.TypeString())
-				err = fmt.Errorf(errMsg)
-				return
+			if v.Type.assignAble(&errs, callArgsTypes[k]) {
+				continue
 			}
+			//TODO :: convert or not ???
+			errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
+				errMsgPrefix(callArgsTypes[k].Pos),
+				callArgsTypes[k].TypeString(), v.Type.TypeString())
+			err = fmt.Errorf(errMsg)
+			return
 		}
 	}
+
 	return
 }
 

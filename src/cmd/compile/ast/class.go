@@ -397,8 +397,12 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	return nil
 }
 
-func (c *Class) accessConstructionFunction(pos *Pos, errs *[]error, newCase *ExpressionNew,
-	callFatherCase *ExpressionMethodCall, callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
+func (c *Class) accessConstructionFunction(
+	pos *Pos,
+	errs *[]error,
+	newCase *ExpressionNew,
+	callFatherCase *ExpressionMethodCall,
+	callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
 	err = c.loadSelf(pos)
 	if err != nil {
 		return nil, false, err

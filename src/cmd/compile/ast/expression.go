@@ -272,9 +272,9 @@ func (e *Expression) convertTo(to *Type) {
 	e.Data = c
 }
 
-func (e *Expression) convertToNumber(typ VariableTypeKind) {
+func (e *Expression) convertToNumberType(typ VariableTypeKind) {
 	if e.isLiteral() {
-		e.convertNumberLiteralTo(typ)
+		e.convertLiteralToNumberType(typ)
 		e.Value = &Type{
 			Type: typ,
 			Pos:  e.Pos,
@@ -598,7 +598,6 @@ type ExpressionAssign struct {
 type ExpressionArray struct {
 	Type        *Type
 	Expressions []*Expression
-	Length      int // elements length
 }
 
 func (e *Expression) IsIdentifier(identifier string) bool {
