@@ -1,9 +1,9 @@
 package lc
 
-type ResourceKind int
+type resourceKind int
 
 const (
-	_ ResourceKind = iota
+	_ resourceKind = iota
 	resourceKindJavaClass
 	resourceKindJavaPackage
 	resourceKindLucyClass
@@ -11,7 +11,7 @@ const (
 )
 
 type Resource struct {
-	kind     ResourceKind
+	kind     resourceKind
 	realPath string
 	name     string
 }

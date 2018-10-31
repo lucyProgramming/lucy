@@ -27,6 +27,27 @@ func (p *Package) isSame(compare *Package) bool {
 	return p.Name == compare.Name
 }
 
+func (p *Package) markBuildIn() {
+	for _, v := range p.Block.Variables {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Constants {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Enums {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Classes {
+		v.IsBuildIn = true
+	}
+	for _, v := range p.Block.Functions {
+		v.IsBuildIn = true
+		v.LoadedFromCorePackage = true
+	}
+	for _, v := range p.Block.TypeAliases {
+		v.IsBuildIn = true
+	}
+}
 func (p *Package) loadCorePackage() error {
 	if p.Name == common.CorePackage {
 		return nil
@@ -36,25 +57,7 @@ func (p *Package) loadCorePackage() error {
 		return err
 	}
 	lucyBuildInPackage = pp.(*Package)
-	for _, v := range lucyBuildInPackage.Block.Variables {
-		v.IsBuildIn = true
-	}
-	for _, v := range lucyBuildInPackage.Block.Constants {
-		v.IsBuildIn = true
-	}
-	for _, v := range lucyBuildInPackage.Block.Enums {
-		v.IsBuildIn = true
-	}
-	for _, v := range lucyBuildInPackage.Block.Classes {
-		v.IsBuildIn = true
-	}
-	for _, v := range lucyBuildInPackage.Block.Functions {
-		v.IsBuildIn = true
-		v.LoadedFromCorePackage = true
-	}
-	for _, v := range lucyBuildInPackage.Block.TypeAliases {
-		v.IsBuildIn = true
-	}
+	lucyBuildInPackage.markBuildIn()
 	p.Block.Outer = &lucyBuildInPackage.Block
 	return nil
 }
@@ -194,6 +197,9 @@ func (p *Package) TypeCheck() []error {
 					meta.pos.ErrMsgPrefix(), f.Name))
 		}
 	}
+	if p.shouldStop(nil) {
+		return p.errors
+	}
 	p.errors = append(p.errors, p.checkUnUsedPackage()...)
 	return p.errors
 }
@@ -221,6 +227,9 @@ func (p *Package) load(resource string) (interface{}, error) {
 	if pp, ok := t.(*Package); ok && pp != nil {
 		PackageBeenCompile.LoadedPackages[resource] = pp
 		p.mkClassCache(pp)
+		if pp.Name == common.CorePackage {
+			pp.markBuildIn()
+		}
 	}
 	if c, ok := t.(*Class); ok && c != nil {
 		if c.IsJava == false {

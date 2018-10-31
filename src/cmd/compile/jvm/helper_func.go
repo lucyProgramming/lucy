@@ -33,33 +33,33 @@ func copyOPs(code *cg.AttributeCode, op ...byte) {
 
 func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 	switch value {
-	case -1:
+	case int32(-1):
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
 		code.CodeLength++
-	case 0:
+	case int32(0):
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
-	case 1:
+	case int32(1):
 		code.Codes[code.CodeLength] = cg.OP_iconst_1
 		code.CodeLength++
-	case 2:
+	case int32(2):
 		code.Codes[code.CodeLength] = cg.OP_iconst_2
 		code.CodeLength++
-	case 3:
+	case int32(3):
 		code.Codes[code.CodeLength] = cg.OP_iconst_3
 		code.CodeLength++
-	case 4:
+	case int32(4):
 		code.Codes[code.CodeLength] = cg.OP_iconst_4
 		code.CodeLength++
-	case 5:
+	case int32(5):
 		code.Codes[code.CodeLength] = cg.OP_iconst_5
 		code.CodeLength++
 	default:
-		if -127 >= value && value <= 128 {
+		if -128 <= value && value <= 127 {
 			code.Codes[code.CodeLength] = cg.OP_bipush
 			code.Codes[code.CodeLength+1] = byte(value)
 			code.CodeLength += 2
-		} else if -32768 <= value && 32767 >= value {
+		} else if -32768 <= value && value <= 32767 {
 			code.Codes[code.CodeLength] = cg.OP_sipush
 			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
 			code.Codes[code.CodeLength+2] = byte(value)

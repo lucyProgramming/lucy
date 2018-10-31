@@ -585,7 +585,8 @@ func (typ *Type) canBeBindWithType(ft *FunctionType, mkParameterTypes map[string
 	return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), typ.TypeString())
 }
 
-func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
+func (typ *Type) assignAble(errs *[]error, rightValue *Type) bool {
+	leftValue := typ
 	if leftValue == rightValue { // equal
 		return true
 	}
@@ -651,39 +652,40 @@ func (leftValue *Type) assignAble(errs *[]error, rightValue *Type) bool {
 }
 
 func (typ *Type) Equal(compareTo *Type) bool {
-	if typ.Type != compareTo.Type {
+	leftValue := typ
+	if leftValue.Type != compareTo.Type {
 		return false //early check
 	}
-	if typ.IsPrimitive() {
+	if leftValue.IsPrimitive() {
 		return true //
 	}
-	if typ.Type == VariableTypeArray ||
-		typ.Type == VariableTypeJavaArray {
-		if typ.Type == VariableTypeJavaArray {
-			if typ.Type == VariableTypeJavaArray &&
-				typ.IsVariableArgs != compareTo.IsVariableArgs {
+	if leftValue.Type == VariableTypeArray ||
+		leftValue.Type == VariableTypeJavaArray {
+		if leftValue.Type == VariableTypeJavaArray {
+			if leftValue.Type == VariableTypeJavaArray &&
+				leftValue.IsVariableArgs != compareTo.IsVariableArgs {
 				return false
 			}
 		}
-		return typ.Array.Equal(compareTo.Array)
+		return leftValue.Array.Equal(compareTo.Array)
 	}
-	if typ.Type == VariableTypeMap {
-		if false == typ.Map.K.Equal(compareTo.Map.K) {
+	if leftValue.Type == VariableTypeMap {
+		if false == leftValue.Map.K.Equal(compareTo.Map.K) {
 			return false
 		}
-		return typ.Map.V.Equal(compareTo.Map.V)
+		return leftValue.Map.V.Equal(compareTo.Map.V)
 	}
-	if typ.Type == VariableTypeEnum {
-		return typ.Enum.Name == compareTo.Enum.Name
+	if leftValue.Type == VariableTypeEnum {
+		return leftValue.Enum.Name == compareTo.Enum.Name
 	}
-	if typ.Type == VariableTypeObject {
-		return typ.Class.Name == compareTo.Class.Name
+	if leftValue.Type == VariableTypeObject {
+		return leftValue.Class.Name == compareTo.Class.Name
 	}
-	if typ.Type == VariableTypeVoid {
+	if leftValue.Type == VariableTypeVoid {
 		return true
 	}
-	if typ.Type == VariableTypeFunction {
-		return typ.FunctionType.equal(compareTo.FunctionType)
+	if leftValue.Type == VariableTypeFunction {
+		return leftValue.FunctionType.equal(compareTo.FunctionType)
 	}
 	return false
 }

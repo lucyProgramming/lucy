@@ -394,7 +394,7 @@ func (e *Expression) methodAccessAble(block *Block, method *ClassMethod) error {
 			return fmt.Errorf("%s method '%s' is static",
 				e.Pos.ErrMsgPrefix(), method.Function.Name)
 		}
-		if false == e.IsIdentifier(THIS) {
+		if false == e.IsIdentifier(ThisPointerName) {
 			if e.Value.Class.LoadFromOutSide {
 				if e.Value.Class.IsPublic() == false {
 					return fmt.Errorf("%s class '%s' is not public",
@@ -443,7 +443,7 @@ func (e *Expression) fieldAccessAble(block *Block, field *ClassField) error {
 			return fmt.Errorf("%s field '%s' is static",
 				e.Pos.ErrMsgPrefix(), field.Name)
 		}
-		if false == e.IsIdentifier(THIS) {
+		if false == e.IsIdentifier(ThisPointerName) {
 			if e.Value.Class.LoadFromOutSide {
 				if e.Value.Class.IsPublic() == false {
 					return fmt.Errorf("%s class '%s' is not public",

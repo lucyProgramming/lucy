@@ -1,7 +1,6 @@
 package jvm
 
 import (
-	"encoding/binary"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -51,14 +50,7 @@ func (buildExpression *BuildExpression) buildUnary(
 				maxStack = 2
 			}
 		case ast.VariableTypeShort:
-			code.Codes[code.CodeLength] = cg.OP_sipush
-			code.Codes[code.CodeLength+1] = 255
-			code.Codes[code.CodeLength+2] = 255
-			code.Codes[code.CodeLength+3] = cg.OP_ixor
-			code.CodeLength += 4
-			if 2 > maxStack {
-				maxStack = 2
-			}
+			fallthrough
 		case ast.VariableTypeChar:
 			code.Codes[code.CodeLength] = cg.OP_sipush
 			code.Codes[code.CodeLength+1] = 255
@@ -90,17 +82,18 @@ func (buildExpression *BuildExpression) buildUnary(
 	if e.Type == ast.ExpressionTypeNot {
 		ee := e.Data.(*ast.Expression)
 		maxStack = buildExpression.build(class, code, ee, context, state)
-		context.MakeStackMap(code, state, code.CodeLength+7)
+		exit := (&cg.Exit{}).Init(cg.OP_ifeq, code)
+		code.Codes[code.CodeLength] = cg.OP_iconst_0
+		code.CodeLength++
+		exit2 := (&cg.Exit{}).Init(cg.OP_goto, code)
+		context.MakeStackMap(code, state, code.CodeLength)
+		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_iconst_1
+		code.CodeLength++
 		state.pushStack(class, ee.Value)
-		context.MakeStackMap(code, state, code.CodeLength+8)
-		state.popStack(1)
-		code.Codes[code.CodeLength] = cg.OP_ifeq
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:], 7)
-		code.Codes[code.CodeLength+3] = cg.OP_iconst_0
-		code.Codes[code.CodeLength+4] = cg.OP_goto
-		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:], 4)
-		code.Codes[code.CodeLength+7] = cg.OP_iconst_1
-		code.CodeLength += 8
+		defer state.popStack(1)
+		writeExits([]*cg.Exit{exit2}, code.CodeLength)
+		context.MakeStackMap(code, state, code.CodeLength)
 	}
 	return
 }

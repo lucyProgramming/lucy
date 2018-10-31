@@ -80,7 +80,8 @@ const (
 )
 
 type Expression struct {
-	Type ExpressionTypeKind
+	NegativeExpression *Expression
+	Type               ExpressionTypeKind
 	/*
 		only for global variable definition
 		public hello := "hai...."
@@ -122,6 +123,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
 			return bin.Left
 		}
+
 	case ExpressionTypeMul:
 		// a * 0 == 0
 		bin := e.Data.(*ExpressionBinary)
@@ -150,11 +152,11 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		bin := e.Data.(*ExpressionBinary)
 		if bin.Left.Value.Type == VariableTypeBool {
 			// true == a
-			if bin.Left.IsBoolLiteral(true) {
+			if bin.Left.isBoolLiteral(true) {
 				return bin.Right
 			}
 			// a == true
-			if bin.Right.IsBoolLiteral(true) {
+			if bin.Right.isBoolLiteral(true) {
 				return bin.Left
 			}
 		}
@@ -162,39 +164,39 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		bin := e.Data.(*ExpressionBinary)
 		if bin.Left.Value.Type == VariableTypeBool {
 			// false != a
-			if bin.Left.IsBoolLiteral(false) {
+			if bin.Left.isBoolLiteral(false) {
 				return bin.Right
 			}
 			// a != false
-			if bin.Right.IsBoolLiteral(false) {
+			if bin.Right.isBoolLiteral(false) {
 				return bin.Left
 			}
 		}
 	case ExpressionTypeLogicalAnd:
 		bin := e.Data.(*ExpressionBinary)
 		// true && a
-		if bin.Left.IsBoolLiteral(true) {
+		if bin.Left.isBoolLiteral(true) {
 			return bin.Right
 		}
 		// a && true
-		if bin.Right.IsBoolLiteral(true) {
+		if bin.Right.isBoolLiteral(true) {
 			return bin.Left
 		}
 	case ExpressionTypeLogicalOr:
 		bin := e.Data.(*ExpressionBinary)
 		// false || a
-		if bin.Left.IsBoolLiteral(false) {
+		if bin.Left.isBoolLiteral(false) {
 			return bin.Right
 		}
 		// a || false
-		if bin.Right.IsBoolLiteral(false) {
+		if bin.Right.isBoolLiteral(false) {
 			return bin.Left
 		}
 	}
 	return nil
 }
 
-func (e *Expression) IsBoolLiteral(b bool) bool {
+func (e *Expression) isBoolLiteral(b bool) bool {
 	if e.Type != ExpressionTypeBool {
 		return false
 	}

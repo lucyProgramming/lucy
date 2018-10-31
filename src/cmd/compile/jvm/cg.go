@@ -25,12 +25,9 @@ func (buildPackage *BuildPackage) Make(p *ast.Package) {
 	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
 	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
-	if mainClass.SourceFiles == nil {
-		mainClass.SourceFiles = make(map[string]struct{})
-	}
 	if p.Block.Functions != nil {
 		for _, v := range p.Block.Functions {
-			mainClass.SourceFiles[v.Pos.Filename] = struct{}{}
+			mainClass.InsertSourceFile(v.Pos.Filename)
 			break
 		}
 	}
@@ -96,8 +93,7 @@ func (buildPackage *BuildPackage) putClass(class *cg.ClassHighLevel) {
 func (buildPackage *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = e.Name
-	class.SourceFiles = make(map[string]struct{})
-	class.SourceFiles[e.Pos.Filename] = struct{}{}
+	class.InsertSourceFile(e.Pos.Filename)
 	class.AccessFlags = e.AccessFlags
 	class.SuperClass = ast.JavaRootClass
 	class.Fields = make(map[string]*cg.FieldHighLevel)
@@ -156,7 +152,6 @@ func (buildPackage *BuildPackage) mkGlobalTypeAlias() {
 		if v.Alias != nil {
 			t.Comment = v.Alias.Comment
 		}
-
 		buildPackage.mainClass.Class.TypeAlias = append(buildPackage.mainClass.Class.TypeAlias, t)
 	}
 }
@@ -296,8 +291,7 @@ func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *as
 func (buildPackage *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = astClass.Name
-	class.SourceFiles = make(map[string]struct{})
-	class.SourceFiles[astClass.Pos.Filename] = struct{}{}
+	class.InsertSourceFile(astClass.Pos.Filename)
 	class.AccessFlags = astClass.AccessFlags
 	if astClass.SuperClass != nil {
 		class.SuperClass = astClass.SuperClass.Name

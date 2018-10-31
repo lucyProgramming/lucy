@@ -131,7 +131,8 @@ func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
 	code.CodeLength += 2
 	state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
 	defer state.popStack(1)
-	stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
+	stack := buildExpression.buildCallArgs(
+		class, code, call.Args, call.VArgs,
 		context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t

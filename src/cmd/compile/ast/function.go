@@ -118,12 +118,16 @@ func (f *Function) makeLastReturnStatement() {
 		Pos:             f.Block.EndPos,
 	})
 }
+
 func (f *Function) IsGlobalMain() bool {
 	return f.IsGlobal &&
 		f.Name == MainFunctionName
 }
 
-func (f *Function) checkParametersAndReturns(errs *[]error, checkReturnVarExpression bool, isAbstract bool) {
+func (f *Function) checkParametersAndReturns(
+	errs *[]error,
+	checkReturnVarExpression bool,
+	isAbstract bool) {
 	var err error
 	for k, v := range f.Type.ParameterList {
 		v.IsFunctionParameter = true

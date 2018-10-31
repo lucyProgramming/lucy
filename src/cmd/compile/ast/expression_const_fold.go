@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"math"
 )
 
 func (e *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is bool, err error) {
@@ -37,6 +38,99 @@ func (e *Expression) makeWrongOpErr(typ1, typ2 string) error {
 
 func (e *Expression) constantFold() (is bool, err error) {
 	if e.isLiteral() {
+		switch e.Type {
+		case ExpressionTypeByte:
+			t := e.Data.(int64)
+			if e.NegativeExpression == nil {
+				if t > int64(math.MaxInt8) {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s byte constant %d exceeds [-128 , 127 ]", e.Pos.ErrMsgPrefix(), t))
+				}
+				e.Data = byte(t)
+			} else {
+				if t > (int64(math.MaxInt8) + 1) {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s byte constant %d exceeds [-128 , 127 ]", e.Pos.ErrMsgPrefix(), -t))
+				}
+				if t == (int64(math.MaxInt8) + 1) {
+					e.NegativeExpression.Data = byte(1 << 7)
+				} else {
+					e.NegativeExpression.Data = -byte(t)
+				}
+				e.NegativeExpression.Type = ExpressionTypeByte
+			}
+		case ExpressionTypeShort:
+			t := e.Data.(int64)
+			if e.NegativeExpression == nil {
+				if t > int64(math.MaxInt16) {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s short constant %d exceeds [-32768 , 32767 ]",
+							e.Pos.ErrMsgPrefix(), t))
+				}
+				e.Data = int32(t)
+			} else {
+				if t > (int64(math.MaxInt16) + 1) {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s short constant %d exceeds [-128 , 127 ]",
+							e.Pos.ErrMsgPrefix(), -t))
+				}
+				if t == (int64(math.MaxInt16) + 1) {
+					e.NegativeExpression.Data = int32(math.MinInt16)
+				} else {
+					e.NegativeExpression.Data = -int32(t)
+				}
+				e.NegativeExpression.Type = ExpressionTypeShort
+			}
+		case ExpressionTypeChar:
+			t := e.Data.(int64)
+			if t > int64(math.MaxUint16) {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+					fmt.Errorf("%s char constant %d exceeds [0 , 65535 ]",
+						e.Pos.ErrMsgPrefix(), t))
+			}
+			e.Data = int32(t)
+		case ExpressionTypeInt:
+			t := e.Data.(int64)
+			if e.NegativeExpression == nil {
+				if t > int64(math.MaxInt32) {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s short constant %d exceeds [-32768 , 32767 ]",
+							e.Pos.ErrMsgPrefix(), t))
+				}
+				e.Data = int32(t)
+			} else {
+				if t > (int64(math.MaxInt32) + 1) {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s int constant %d exceeds [-2147483648 , 2147483647 ]",
+							e.Pos.ErrMsgPrefix(), -t))
+				}
+				if t == (int64(math.MaxInt32) + 1) {
+					e.NegativeExpression.Data = int32(math.MinInt32)
+				} else {
+					e.NegativeExpression.Data = -int32(t)
+				}
+				e.NegativeExpression.Type = ExpressionTypeInt
+
+			}
+		case ExpressionTypeLong:
+			t := e.Data.(int64)
+			if e.NegativeExpression == nil {
+				if t>>63 != 0 {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s long constant  exceeds [-9223372036854775808 , 9223372036854775807 ]",
+							e.Pos.ErrMsgPrefix()))
+				}
+			} else {
+				if (t>>63 != 0) &&
+					(t<<1) != 0 {
+					PackageBeenCompile.errors = append(PackageBeenCompile.errors,
+						fmt.Errorf("%s long constant exceeds [-9223372036854775808 , 9223372036854775807 ]",
+							e.Pos.ErrMsgPrefix()))
+				}
+				e.NegativeExpression.Data = -e.Data.(int64)
+				e.NegativeExpression.Type = ExpressionTypeLong
+			}
+		}
 		return true, nil
 	}
 	// ~
@@ -81,38 +175,6 @@ func (e *Expression) constantFold() (is bool, err error) {
 		e.Data = !ee.Data.(bool)
 		return
 	}
-	if e.Type == ExpressionTypeNegative {
-		ee := e.Data.(*Expression)
-		is, err = ee.constantFold()
-		if err != nil || is == false {
-			return
-		}
-		if ee.isNumber() == false {
-			is = false
-			err = fmt.Errorf("%s cannot apply '-' on '%s'",
-				e.Pos.ErrMsgPrefix(), ee.Op)
-			return
-		}
-		e.Type = ee.Type
-		switch ee.Type {
-		case ExpressionTypeByte:
-			e.Data = -ee.Data.(byte)
-		case ExpressionTypeShort:
-			e.Data = -ee.Data.(int32)
-		case ExpressionTypeChar:
-			e.Data = -ee.Data.(int32)
-		case ExpressionTypeInt:
-			e.Data = -ee.Data.(int32)
-		case ExpressionTypeLong:
-			e.Data = -ee.Data.(int64)
-		case ExpressionTypeFloat:
-			e.Data = -ee.Data.(float32)
-		case ExpressionTypeDouble:
-			e.Data = -ee.Data.(float64)
-		}
-		return
-	}
-
 	// && and ||
 	if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
 		f := func(bin *ExpressionBinary) (is bool, err error) {

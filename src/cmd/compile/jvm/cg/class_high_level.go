@@ -23,6 +23,13 @@ type ClassHighLevel struct {
 	TemplateFunctions        []*AttributeTemplateFunction
 }
 
+func (classHighLevel *ClassHighLevel) InsertSourceFile(filename string) {
+	if classHighLevel.SourceFiles == nil {
+		classHighLevel.SourceFiles = make(map[string]struct{})
+	}
+	classHighLevel.SourceFiles[filename] = struct{}{}
+}
+
 func (classHighLevel *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level,
 	location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertMethodrefConst(mr))

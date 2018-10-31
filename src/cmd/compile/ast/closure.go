@@ -31,8 +31,7 @@ func (c *Closure) CaptureCount(f *Function) int {
 		if f == v {
 			continue
 		}
-		if v.IsClosureFunction ||
-			v.Closure.CaptureCount(f) > 0 {
+		if v.IsClosureFunction {
 			sum++
 		}
 	}

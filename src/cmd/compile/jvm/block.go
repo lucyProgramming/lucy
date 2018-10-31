@@ -31,7 +31,6 @@ func (buildPackage *BuildPackage) buildBlock(
 		if maxStack > code.MaxStack {
 			code.MaxStack = maxStack
 		}
-
 		if len(state.Stacks) > 0 {
 			var ss []string
 			for _, v := range state.Stacks {

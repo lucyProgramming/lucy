@@ -46,7 +46,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 		if matched {
 			call.Class = javaStringClass
-			if false == call.Expression.IsIdentifier(THIS) &&
+			if false == call.Expression.IsIdentifier(ThisPointerName) &&
 				ms[0].IsPublic() == false {
 				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", e.Pos.ErrMsgPrefix(), call.Name))
 			}
@@ -132,7 +132,7 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 */
 func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]error, object *Type) {
 	call := e.Data.(*ExpressionMethodCall)
-	if call.Expression.IsIdentifier(THIS) == false {
+	if call.Expression.IsIdentifier(ThisPointerName) == false {
 		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'thi.super()'",
 			e.Pos.ErrMsgPrefix()))
 		return
