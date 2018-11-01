@@ -122,21 +122,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			if (left.isInteger() && right.isInteger()) ||
 				(left.isFloat() && right.isFloat()) {
 				if left.assignAble(errs, right) == false {
-					switch {
-					case bin.Left.isLiteral() == false && bin.Right.isLiteral() == false:
-						*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-					case bin.Left.isLiteral() && bin.Right.isLiteral():
-						if bin.Right.Value.Type > bin.Left.Value.Type {
-							bin.Left.convertToNumberType(bin.Right.Value.Type)
-						} else {
-							bin.Right.convertToNumberType(bin.Left.Value.Type)
-						}
-					default:
-						if bin.Left.isLiteral() {
-							bin.Left.convertToNumberType(right.Type)
-						} else {
-							bin.Right.convertToNumberType(left.Type)
-						}
+					if left.Type < right.Type {
+						bin.Left.convertToNumberType(right.Type)
+					} else {
+						bin.Right.convertToNumberType(left.Type)
 					}
 				}
 			} else {
@@ -210,21 +199,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if (left.isInteger() && right.isInteger()) ||
 			(left.isFloat() && right.isFloat()) {
 			if left.assignAble(errs, right) == false {
-				switch {
-				case bin.Left.isLiteral() == false && bin.Right.isLiteral() == false:
-					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
-				case bin.Left.isLiteral() && bin.Right.isLiteral():
-					if bin.Right.Value.Type > bin.Left.Value.Type {
-						bin.Left.convertToNumberType(bin.Right.Value.Type)
-					} else {
-						bin.Right.convertToNumberType(bin.Left.Value.Type)
-					}
-				default:
-					if bin.Left.isLiteral() {
-						bin.Left.convertToNumberType(right.Type)
-					} else {
-						bin.Right.convertToNumberType(left.Type)
-					}
+				if left.Type < right.Type {
+					bin.Left.convertToNumberType(right.Type)
+				} else {
+					bin.Right.convertToNumberType(left.Type)
 				}
 			}
 		} else {

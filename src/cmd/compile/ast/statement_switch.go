@@ -58,20 +58,12 @@ func (s *StatementSwitch) check(block *Block) []error {
 			s.EndPos.ErrMsgPrefix()))
 		return errs
 	}
-	byteMap := make(map[int64]*Pos)
-	shortMap := make(map[int64]*Pos)
-	intMap := make(map[int64]*Pos)
-	charMap := make(map[int64]*Pos)
 	longMap := make(map[int64]*Pos)
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
 	enumNamesMap := make(map[string]*Pos)
 	enumPackageName := ""
-	var byteValue int64
-	var shortValue int64
-	var intValue int64
-	var charValue int64
 	var longValue int64
 	var floatValue float32
 	var doubleValue float64
@@ -113,13 +105,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 				if e.isLiteral() {
 					switch e.Type {
 					case ExpressionTypeByte:
-						byteValue = e.Data.(int64)
+						fallthrough
 					case ExpressionTypeShort:
-						shortValue = e.Data.(int64)
+						fallthrough
 					case ExpressionTypeChar:
-						charValue = e.Data.(int64)
+						fallthrough
 					case ExpressionTypeInt:
-						intValue = e.Data.(int64)
+						fallthrough
 					case ExpressionTypeLong:
 						longValue = e.Data.(int64)
 					case ExpressionTypeFloat:
@@ -149,33 +141,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 				}
 				switch conditionType.Type {
 				case VariableTypeByte:
-					if first, ok := byteMap[byteValue]; ok {
-						errs = append(errs, errMsg(first, byteValue))
-						continue // no check body
-					} else {
-						byteMap[byteValue] = e.Pos
-					}
+					fallthrough
 				case VariableTypeShort:
-					if first, ok := shortMap[shortValue]; ok {
-						errs = append(errs, errMsg(first, shortValue))
-						continue // no check body
-					} else {
-						shortMap[shortValue] = e.Pos
-					}
+					fallthrough
 				case VariableTypeChar:
-					if first, ok := charMap[charValue]; ok {
-						errs = append(errs, errMsg(first, charValue))
-						continue // no check body
-					} else {
-						charMap[charValue] = e.Pos
-					}
+					fallthrough
 				case VariableTypeInt:
-					if first, ok := intMap[intValue]; ok {
-						errs = append(errs, errMsg(first, intValue))
-						continue // no check body
-					} else {
-						intMap[intValue] = e.Pos
-					}
+					fallthrough
 				case VariableTypeLong:
 					if first, ok := longMap[longValue]; ok {
 						errs = append(errs, errMsg(first, longValue))

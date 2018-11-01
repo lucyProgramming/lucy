@@ -35,7 +35,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 				on.Start.convertToNumberType(VariableTypeInt)
 			}
 			if on.Start.isLiteral() {
-				startIndexValue := on.Start.getIntValue()
+				startIndexValue := on.Start.getLongValue()
 				if startIndexValue < 0 {
 					*errs = append(*errs,
 						fmt.Errorf("%s startIndex '%d' is negative",
@@ -57,7 +57,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 					on.End.convertToNumberType(VariableTypeInt)
 				}
 				if on.End.isLiteral() {
-					endIndexValue := on.End.getIntValue()
+					endIndexValue := on.End.getLongValue()
 					if endIndexValue < 0 {
 						*errs = append(*errs,
 							fmt.Errorf("%s endIndex '%d' is negative",
@@ -66,10 +66,10 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 					if startType != nil &&
 						startType.isInteger() &&
 						on.Start.isLiteral() {
-						if on.Start.getIntValue() > endIndexValue {
+						if on.Start.getLongValue() > endIndexValue {
 							*errs = append(*errs,
 								fmt.Errorf("%s startIndex '%d' is greater than endIndex '%d'",
-									endType.Pos.ErrMsgPrefix(), on.Start.getIntValue(), endIndexValue))
+									endType.Pos.ErrMsgPrefix(), on.Start.getLongValue(), endIndexValue))
 						}
 					}
 				}

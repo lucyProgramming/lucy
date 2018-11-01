@@ -28,10 +28,16 @@ public class Command{
 
 	public fn getProcess() -> (p Process  = this.p ) { }
 	
-	public fn start() -> (err error) {
+	public fn startCatchError() -> (err error){
+		defer {
+			err = catch()
+		}
+		this.start() 
+	}
+	
+	public fn start()  {
 		if this.cmd == null || this.cmd == "" {
-			err = new error("cmd is not set")
-			return 
+			panic(new error("cmd is not set")) 
 		} 
 		if this.file != null  {
 			if this.envs == null {
@@ -88,7 +94,6 @@ public class Command{
 			err = new error("errcode:" + code )
 		}
 	}
-	
 	
 }
 

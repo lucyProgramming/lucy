@@ -12,7 +12,7 @@ func (buildExpression *BuildExpression) buildVar(
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	vs := e.Data.(*ast.ExpressionVar)
-	// make_node_objects offset
+	//
 	for _, v := range vs.Variables {
 		v.LocalValOffset = code.MaxLocals
 		if v.BeenCapturedAsLeftValue > 0 {

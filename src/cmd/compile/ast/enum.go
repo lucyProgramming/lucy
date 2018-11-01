@@ -45,7 +45,7 @@ func (e *Enum) check() (errs []error) {
 					e.Pos.ErrMsgPrefix())
 				errs = append(errs, err)
 			} else {
-				initV = e.Init.getIntValue()
+				initV = int32(e.Init.getLongValue())
 			}
 		}
 	}

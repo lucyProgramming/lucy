@@ -54,9 +54,16 @@ func (e *Expression) intExceeds(t int64) error {
 		e.Pos.ErrMsgPrefix(), t)
 }
 func (e *Expression) longExceeds(t int64) error {
-	return fmt.Errorf("%s constant  exceeds [-9223372036854775808 , 9223372036854775807 ]",
+	return fmt.Errorf("%s constant exceeds [-9223372036854775808 , 9223372036854775807 ]",
 		e.Pos.ErrMsgPrefix())
 }
+func (e *Expression) floatExceeds() error {
+	return fmt.Errorf("%s float constant exceeds", e.Pos.ErrMsgPrefix())
+}
+func (e *Expression) doubleExceeds() error {
+	return fmt.Errorf("%s double constant exceeds", e.Pos.ErrMsgPrefix())
+}
+
 func (e *Expression) constantFold() (is bool, err error) {
 	if e.isLiteral() {
 		if e.checkRangeCalled {
@@ -233,9 +240,9 @@ func (e *Expression) constantFold() (is bool, err error) {
 				fallthrough
 			case ExpressionTypeLong:
 				if e.Type == ExpressionTypeLsh {
-					e.Data = bin.Left.Data.(int64) << bin.Right.getByteValue()
+					e.Data = bin.Left.Data.(int64) << byte(bin.Right.getLongValue())
 				} else {
-					e.Data = bin.Left.Data.(int64) >> bin.Right.getByteValue()
+					e.Data = bin.Left.Data.(int64) >> byte(bin.Right.getLongValue())
 				}
 			}
 			if e.Type == ExpressionTypeLsh {
@@ -349,96 +356,29 @@ func (e *Expression) constantFold() (is bool, err error) {
 	return
 }
 
-func (e *Expression) getByteValue() byte {
-	if e.isNumber() == false {
-		panic("not number")
-	}
-	switch e.Type {
-	case ExpressionTypeByte:
-		fallthrough
-	case ExpressionTypeChar:
-		fallthrough
-	case ExpressionTypeShort:
-		fallthrough
-	case ExpressionTypeInt:
-		fallthrough
-	case ExpressionTypeLong:
-		return byte(e.Data.(int64))
-	case ExpressionTypeFloat:
-		return byte(e.Data.(float32))
-	case ExpressionTypeDouble:
-		return byte(e.Data.(float64))
-	}
-	return 0
-}
-
-func (e *Expression) getShortValue() int32 {
-	if e.isNumber() == false {
-		panic("not number")
-	}
-	switch e.Type {
-	case ExpressionTypeByte:
-		fallthrough
-	case ExpressionTypeChar:
-		fallthrough
-	case ExpressionTypeShort:
-		fallthrough
-	case ExpressionTypeInt:
-		fallthrough
-	case ExpressionTypeLong:
-		return int32(e.Data.(int64))
-	case ExpressionTypeFloat:
-		return int32(e.Data.(float32))
-	case ExpressionTypeDouble:
-		return int32(e.Data.(float64))
-	}
-	return 0
-}
-
-func (e *Expression) getCharValue() int32 {
-	if e.isNumber() == false {
-		panic("not number")
-	}
-	switch e.Type {
-	case ExpressionTypeByte:
-		fallthrough
-	case ExpressionTypeChar:
-		fallthrough
-	case ExpressionTypeShort:
-		fallthrough
-	case ExpressionTypeInt:
-		fallthrough
-	case ExpressionTypeLong:
-		return int32(e.Data.(int64))
-	case ExpressionTypeFloat:
-		return int32(e.Data.(float32))
-	case ExpressionTypeDouble:
-		return int32(e.Data.(float64))
-	}
-	return 0
-}
-func (e *Expression) getIntValue() int32 {
-	if e.isNumber() == false {
-		panic("not number")
-	}
-	switch e.Type {
-	case ExpressionTypeByte:
-		fallthrough
-	case ExpressionTypeChar:
-		fallthrough
-	case ExpressionTypeShort:
-		fallthrough
-	case ExpressionTypeInt:
-		fallthrough
-	case ExpressionTypeLong:
-		return int32(e.Data.(int64))
-	case ExpressionTypeFloat:
-		return int32(e.Data.(float32))
-	case ExpressionTypeDouble:
-		return int32(e.Data.(float64))
-	}
-	return 0
-}
+//
+//func (e *Expression) getIntValue() int32 {
+//	if e.isNumber() == false {
+//		panic("not number")
+//	}
+//	switch e.Type {
+//	case ExpressionTypeByte:
+//		fallthrough
+//	case ExpressionTypeChar:
+//		fallthrough
+//	case ExpressionTypeShort:
+//		fallthrough
+//	case ExpressionTypeInt:
+//		fallthrough
+//	case ExpressionTypeLong:
+//		return int32(e.Data.(int64))
+//	case ExpressionTypeFloat:
+//		return int32(e.Data.(float32))
+//	case ExpressionTypeDouble:
+//		return int32(e.Data.(float64))
+//	}
+//	return 0
+//}
 
 func (e *Expression) getLongValue() int64 {
 	if e.isNumber() == false {
@@ -459,28 +399,6 @@ func (e *Expression) getLongValue() int64 {
 		return int64(e.Data.(float32))
 	case ExpressionTypeDouble:
 		return int64(e.Data.(float64))
-	}
-	return 0
-}
-func (e *Expression) getFloatValue() float32 {
-	if e.isNumber() == false {
-		panic("not number")
-	}
-	switch e.Type {
-	case ExpressionTypeByte:
-		fallthrough
-	case ExpressionTypeChar:
-		fallthrough
-	case ExpressionTypeShort:
-		fallthrough
-	case ExpressionTypeInt:
-		fallthrough
-	case ExpressionTypeLong:
-		return float32(e.Data.(int64))
-	case ExpressionTypeFloat:
-		return float32(e.Data.(float32))
-	case ExpressionTypeDouble:
-		return float32(e.Data.(float64))
 	}
 	return 0
 }
@@ -529,7 +447,7 @@ func (e *Expression) convertLiteralToNumberType(to VariableTypeKind) {
 		e.Data = e.getLongValue()
 		e.Type = ExpressionTypeLong
 	case VariableTypeFloat:
-		e.Data = e.getFloatValue()
+		e.Data = float32(e.getDoubleValue())
 		e.Type = ExpressionTypeFloat
 	case VariableTypeDouble:
 		e.Data = e.getDoubleValue()

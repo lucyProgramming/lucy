@@ -60,17 +60,11 @@ func (fd *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.Att
 			v.DefaultValueExpression.Data =
 				binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info) != 0
 		case ast.VariableTypeByte:
-			v.DefaultValueExpression.Type = ast.ExpressionTypeByte
-			v.DefaultValueExpression.Data =
-				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+			fallthrough
 		case ast.VariableTypeShort:
-			v.DefaultValueExpression.Type = ast.ExpressionTypeShort
-			v.DefaultValueExpression.Data =
-				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+			fallthrough
 		case ast.VariableTypeChar:
-			v.DefaultValueExpression.Type = ast.ExpressionTypeChar
-			v.DefaultValueExpression.Data =
-				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+			fallthrough
 		case ast.VariableTypeInt:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeInt
 			v.DefaultValueExpression.Data =

@@ -271,11 +271,11 @@ func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *as
 			index = c.Class.InsertIntConst(0)
 		}
 	case ast.VariableTypeByte:
-		index = c.Class.InsertIntConst(int32(v.(byte)))
+		index = c.Class.InsertIntConst(int32(v.(int64)))
 	case ast.VariableTypeShort:
-		index = c.Class.InsertIntConst(v.(int32))
+		index = c.Class.InsertIntConst(int32(v.(int64)))
 	case ast.VariableTypeInt:
-		index = c.Class.InsertIntConst(v.(int32))
+		index = c.Class.InsertIntConst(int32(v.(int64)))
 	case ast.VariableTypeLong:
 		index = c.Class.InsertLongConst(v.(int64))
 	case ast.VariableTypeFloat:

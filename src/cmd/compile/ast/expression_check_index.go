@@ -22,7 +22,7 @@ func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
 					index.Index.convertToNumberType(VariableTypeInt) //  convert to int
 				}
 				if index.Index.isLiteral() {
-					indexValue := index.Index.getIntValue()
+					indexValue := index.Index.getLongValue()
 					if indexValue < 0 {
 						*errs = append(*errs,
 							fmt.Errorf("%s index '%d' is negative",

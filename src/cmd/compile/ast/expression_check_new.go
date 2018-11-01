@@ -112,7 +112,7 @@ func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionN
 			newArray.Args[0].convertToNumberType(VariableTypeLong)
 		}
 		if newArray.Args[0].isLiteral() {
-			if a := newArray.Args[0].getIntValue(); a < 0 {
+			if a := newArray.Args[0].getLongValue(); a < 0 {
 				*errs = append(*errs,
 					fmt.Errorf("%s '%d' is negative ",
 						errMsgPrefix(amount.Pos), a))

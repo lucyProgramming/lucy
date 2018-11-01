@@ -70,17 +70,29 @@ func (makeNodes *MakeNodesObjects) makeImport(i *ast.Import) interface{} {
 func (makeNodes *MakeNodesObjects) makeFunction(fn *ast.Function) interface{} {
 	ret := make(map[string]interface{})
 	{
-		var t []interface{}
-		for _, v := range fn.Type.ParameterList {
-			p := map[string]interface{}{}
-			p["name"] = v.Name
-			p["type"] = v.Type.TypeString()
-			if v.DefaultValueExpression != nil {
-				p["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+		if len(fn.Type.ParameterList) == 1 {
+			for _, v := range fn.Type.ParameterList {
+				p := map[string]interface{}{}
+				p["name"] = v.Name
+				p["type"] = v.Type.TypeString()
+				if v.DefaultValueExpression != nil {
+					p["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+				}
+				ret["parameterlist"] = p
 			}
-			t = append(t, p)
+		} else {
+			var t []interface{}
+			for _, v := range fn.Type.ParameterList {
+				p := map[string]interface{}{}
+				p["name"] = v.Name
+				p["type"] = v.Type.TypeString()
+				if v.DefaultValueExpression != nil {
+					p["defaultValue"] = makeNodes.makeExpression(v.DefaultValueExpression)
+				}
+				t = append(t, p)
+			}
+			ret["parameterlist"] = t
 		}
-		ret["parameterlist"] = t
 	}
 	if fn.Type.VoidReturn() == false {
 		if len(fn.Type.ParameterList) == 1 {
@@ -106,9 +118,8 @@ func (makeNodes *MakeNodesObjects) makeFunction(fn *ast.Function) interface{} {
 			}
 			ret["returnlist"] = t
 		}
-
 	} else {
-		ret["returnlist"] = "VOID"
+		ret["returnlist"] = nil
 	}
 	ret["block"] = makeNodes.makeBlock(&fn.Block)
 	return map[string]interface{}{

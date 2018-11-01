@@ -24,13 +24,13 @@ func (c *Constant) mkDefaultValue() {
 	case VariableTypeBool:
 		c.Value = false
 	case VariableTypeByte:
-		c.Value = byte(0)
+		c.Value = int64(0)
 	case VariableTypeShort:
-		c.Value = int32(0)
+		c.Value = int64(0)
 	case VariableTypeChar:
-		c.Value = int32(0)
+		c.Value = int64(0)
 	case VariableTypeInt:
-		c.Value = int32(0)
+		c.Value = int64(0)
 	case VariableTypeLong:
 		c.Value = int64(0)
 	case VariableTypeFloat:

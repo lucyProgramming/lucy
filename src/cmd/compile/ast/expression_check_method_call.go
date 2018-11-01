@@ -130,7 +130,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 /*
 	this.super()
 */
-func (e *Expression) checkMethodCallExpressionOnSuper(block *Block, errs *[]error, object *Type) {
+func (e *Expression) checkMethodCallExpressionOnSuper(
+	block *Block,
+	errs *[]error,
+	object *Type) {
 	call := e.Data.(*ExpressionMethodCall)
 	if call.Expression.IsIdentifier(ThisPointerName) == false {
 		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'thi.super()'",
@@ -236,7 +239,10 @@ func (e *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs *[]
 	return nil
 }
 
-func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]error, p *Package) []*Type {
+func (e *Expression) checkMethodCallExpressionOnPackage(
+	block *Block,
+	errs *[]error,
+	p *Package) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	d, exists := p.Block.NameExists(call.Name)
 	if exists == false {
@@ -351,7 +357,10 @@ func (e *Expression) checkMethodCallExpressionOnPackage(block *Block, errs *[]er
 		return nil
 	}
 }
-func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]error, array *Type) []*Type {
+func (e *Expression) checkMethodCallExpressionOnArray(
+	block *Block,
+	errs *[]error,
+	array *Type) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
 	case common.ArrayMethodSize,
@@ -411,7 +420,10 @@ func (e *Expression) checkMethodCallExpressionOnArray(block *Block, errs *[]erro
 	}
 	return nil
 }
-func (e *Expression) checkMethodCallExpressionOnMap(block *Block, errs *[]error, m *Map) []*Type {
+func (e *Expression) checkMethodCallExpressionOnMap(
+	block *Block,
+	errs *[]error,
+	m *Map) []*Type {
 	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
 	case common.MapMethodKeyExist:

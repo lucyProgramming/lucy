@@ -84,6 +84,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		switch e.Type {
 		case ExpressionTypeAdd:
 			e.Data = left + right
+
 		case ExpressionTypeSub:
 			e.Data = left - right
 		case ExpressionTypeMul:
@@ -101,7 +102,11 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		//TODO :: check overflow
+		if e.Type == ExpressionTypeAdd {
+			if t := e.Data.(int64) < 0; t != (bin.Left.Data.(int64) < 0) && t != (bin.Left.Data.(int64) < 0) {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.longExceeds(e.Data.(int64)))
+			}
+		}
 		e.Type = ExpressionTypeLong
 		is = true
 		return
@@ -128,7 +133,11 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		//TODO :: check overflow
+		if e.Type == ExpressionTypeAdd {
+			if t := e.Data.(float32) < 0; t != (bin.Left.Data.(float32) < 0) && t != (bin.Left.Data.(float32) < 0) {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.floatExceeds())
+			}
+		}
 		e.Type = ExpressionTypeFloat
 		is = true
 		return
@@ -155,7 +164,11 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		//TODO :: check overflow
+		if e.Type == ExpressionTypeAdd {
+			if t := e.Data.(float64) < 0; t != (bin.Left.Data.(float64) < 0) && t != (bin.Left.Data.(float64) < 0) {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.floatExceeds())
+			}
+		}
 		e.Type = ExpressionTypeDouble
 		is = true
 		return
@@ -163,8 +176,12 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		left := bin.Left.Data.(string)
 		right := bin.Right.Data.(string)
 		if e.Type == ExpressionTypeAdd {
-			e.Type = ExpressionTypeString
-			e.Data = left + right
+			if len(left)+len(right) < 65536 {
+				e.Type = ExpressionTypeString
+				e.Data = left + right
+			} else {
+				return false, nil
+			}
 		} else {
 			return false, nil
 		}
