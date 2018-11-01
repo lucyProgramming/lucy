@@ -22,7 +22,7 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		on.Start.Pos = e.Pos
 		on.Start.Op = "intLiteral"
 		on.Start.Type = ExpressionTypeInt
-		on.Start.Data = int32(0)
+		on.Start.Data = int64(0)
 	}
 	startType, es := on.Start.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)

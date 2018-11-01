@@ -29,10 +29,10 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	if m.Type.Map == nil {
 		m.Type.Map = &Map{}
 	}
-	byteMap := make(map[byte]*Pos)
-	shortMap := make(map[int32]*Pos)
-	intMap := make(map[int32]*Pos)
-	charMap := make(map[int32]*Pos)
+	byteMap := make(map[int64]*Pos)
+	shortMap := make(map[int64]*Pos)
+	intMap := make(map[int64]*Pos)
+	charMap := make(map[int64]*Pos)
 	longMap := make(map[int64]*Pos)
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
@@ -79,28 +79,28 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 			}
 			switch m.Type.Map.K.Type {
 			case VariableTypeByte:
-				value := v.Key.Data.(byte)
+				value := v.Key.Data.(int64)
 				if first, ok := byteMap[value]; ok {
 					*errs = append(*errs, errMsg(v.Key.Pos, first, v.Key.Data))
 				} else {
 					byteMap[value] = v.Key.Pos
 				}
 			case VariableTypeChar:
-				value := v.Key.Data.(int32)
+				value := v.Key.Data.(int64)
 				if first, ok := charMap[value]; ok {
 					*errs = append(*errs, errMsg(v.Key.Pos, first, v.Key.Data))
 				} else {
 					charMap[value] = v.Key.Pos
 				}
 			case VariableTypeShort:
-				value := v.Key.Data.(int32)
+				value := v.Key.Data.(int64)
 				if first, ok := shortMap[value]; ok {
 					*errs = append(*errs, errMsg(v.Key.Pos, first, v.Key.Data))
 				} else {
 					shortMap[value] = v.Key.Pos
 				}
 			case VariableTypeInt:
-				value := v.Key.Data.(int32)
+				value := v.Key.Data.(int64)
 				if first, ok := intMap[value]; ok {
 					*errs = append(*errs, errMsg(v.Key.Pos, first, v.Key.Data))
 				} else {

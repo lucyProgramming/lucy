@@ -80,7 +80,8 @@ const (
 )
 
 type Expression struct {
-	Type ExpressionTypeKind
+	checkRangeCalled bool
+	Type             ExpressionTypeKind
 	/*
 		only for global variable definition
 		public hello := "hai...."
@@ -305,16 +306,16 @@ func (e *Expression) fromConst(c *Constant) {
 		e.Data = c.Value.(bool)
 	case VariableTypeByte:
 		e.Type = ExpressionTypeByte
-		e.Data = c.Value.(byte)
+		e.Data = c.Value.(int64)
 	case VariableTypeShort:
 		e.Type = ExpressionTypeShort
-		e.Data = c.Value.(int32)
+		e.Data = c.Value.(int64)
 	case VariableTypeChar:
 		e.Type = ExpressionTypeChar
-		e.Data = c.Value.(int32)
+		e.Data = c.Value.(int64)
 	case VariableTypeInt:
 		e.Type = ExpressionTypeInt
-		e.Data = c.Value.(int32)
+		e.Data = c.Value.(int64)
 	case VariableTypeLong:
 		e.Type = ExpressionTypeLong
 		e.Data = c.Value.(int64)

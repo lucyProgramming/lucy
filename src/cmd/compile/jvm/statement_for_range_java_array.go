@@ -58,9 +58,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	code.CodeLength++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements)...)
-	code.Codes[code.CodeLength] = cg.OP_iconst_m1
-	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 
 	code.Codes[code.CodeLength] = cg.OP_iconst_m1
 	code.CodeLength++
@@ -101,7 +98,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 
-	// load start
+	// load  k
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 
 	// load end
@@ -109,7 +106,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	if 2 > maxStack {
 		maxStack = 2
 	}
-	rangeEnd := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
+	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
 	//load elements
 	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
@@ -217,8 +214,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)
 	}
-	//pop index on stack
-	writeExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
-	context.MakeStackMap(code, forState, code.CodeLength)
+
 	return
 }

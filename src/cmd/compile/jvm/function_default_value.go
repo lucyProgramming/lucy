@@ -24,12 +24,12 @@ func (fd *DefaultValueParse) Encode(
 			}
 		case ast.ExpressionTypeByte:
 			ret.Constants = append(ret.Constants, class.Class.InsertIntConst(
-				int32(f.Type.ParameterList[i].DefaultValueExpression.Data.(byte))))
+				int32(f.Type.ParameterList[i].DefaultValueExpression.Data.(int64))))
 		case ast.ExpressionTypeShort:
 			fallthrough
 		case ast.ExpressionTypeInt:
-			ret.Constants = append(ret.Constants, class.Class.InsertIntConst(
-				f.Type.ParameterList[i].DefaultValueExpression.Data.(int32)))
+			t := f.Type.ParameterList[i].DefaultValueExpression.Data.(int64)
+			ret.Constants = append(ret.Constants, class.Class.InsertIntConst(int32(t)))
 		case ast.ExpressionTypeLong:
 			ret.Constants = append(ret.Constants, class.Class.InsertLongConst(
 				f.Type.ParameterList[i].DefaultValueExpression.Data.(int64)))
@@ -62,19 +62,19 @@ func (fd *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.Att
 		case ast.VariableTypeByte:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeByte
 			v.DefaultValueExpression.Data =
-				byte(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeShort:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeShort
 			v.DefaultValueExpression.Data =
-				int32(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeChar:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeChar
 			v.DefaultValueExpression.Data =
-				int32(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeInt:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeInt
 			v.DefaultValueExpression.Data =
-				int32(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeLong:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeLong
 			v.DefaultValueExpression.Data =

@@ -165,7 +165,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	if isHex && haveFloatPart {
 		token.Type = TokenLiteralInt
-		token.Data = 0
+		token.Data = int64(0)
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
@@ -207,7 +207,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	}
 	if isHex && isScientificNotation {
 		token.Type = TokenLiteralInt
-		token.Data = 0
+		token.Data = int64(0)
 		token.Description = "0"
 		err = fmt.Errorf("mix up hex and seientific notation")
 		return
@@ -286,7 +286,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	if t, _ := lex.parseInt64(integerPart); t > 10 && t < 1 {
 		err = fmt.Errorf("wrong format of scientific notation")
 		token.Type = TokenLiteralInt
-		token.Data = int32(0)
+		token.Data = int64(0)
 		return
 	}
 	var p int
@@ -360,13 +360,13 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		token.Data = notationLongValue
 	} else if isByte {
 		token.Type = TokenLiteralByte
-		token.Data = byte(notationLongValue)
+		token.Data = notationLongValue
 		if notationIsDouble {
 			err = fmt.Errorf("number literal defined as 'byte' but notation is float")
 		}
 	} else if isShort {
 		token.Type = TokenLiteralShort
-		token.Data = int32(notationLongValue)
+		token.Data = notationLongValue
 		if notationIsDouble {
 			err = fmt.Errorf("number literal defined as 'short' but notation is float")
 		}

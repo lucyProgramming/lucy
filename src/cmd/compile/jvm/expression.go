@@ -33,11 +33,11 @@ func (buildExpression *BuildExpression) build(
 		maxStack = 1
 	case ast.ExpressionTypeByte:
 		code.Codes[code.CodeLength] = cg.OP_bipush
-		code.Codes[code.CodeLength+1] = e.Data.(byte)
+		code.Codes[code.CodeLength+1] = byte(e.Data.(int64))
 		code.CodeLength += 2
 		maxStack = 1
 	case ast.ExpressionTypeInt, ast.ExpressionTypeShort, ast.ExpressionTypeChar:
-		loadInt32(class, code, e.Data.(int32))
+		loadInt32(class, code, int32(e.Data.(int64)))
 		maxStack = 1
 	case ast.ExpressionTypeLong:
 		if e.Data.(int64) == 0 {

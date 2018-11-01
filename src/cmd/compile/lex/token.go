@@ -91,10 +91,10 @@ const (
 	TokenLiteralChar                // 'a'
 	TokenLiteralShort               // 1s
 	TokenLiteralInt                 // 123
-	TokenLiteralString              // ""
+	TokenLiteralLong                // 100L
 	TokenLiteralFloat               // 0.000
 	TokenLiteralDouble              // 0.0d
-	TokenLiteralLong                // 100L
+	TokenLiteralString              // ""
 	TokenDefer                      // defer
 	TokenTypeAlias                  // type
 	TokenArrow                      // ->

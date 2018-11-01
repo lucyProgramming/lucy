@@ -402,21 +402,21 @@ func (makeNodes *MakeNodesObjects) makeExpression(e *ast.Expression) interface{}
 	case ast.ExpressionTypeNull:
 		return "null"
 	case ast.ExpressionTypeBool:
-		return e.Data.(bool)
+		fallthrough
 	case ast.ExpressionTypeByte:
-		return e.Data.(byte)
+		fallthrough
 	case ast.ExpressionTypeShort:
-		return e.Data.(int32)
+		fallthrough
 	case ast.ExpressionTypeChar:
-		return e.Data.(int32)
+		fallthrough
 	case ast.ExpressionTypeInt:
-		return e.Data.(int32)
+		fallthrough
 	case ast.ExpressionTypeLong:
-		return e.Data.(int64)
+		fallthrough
 	case ast.ExpressionTypeFloat:
-		return e.Data.(float32)
+		fallthrough
 	case ast.ExpressionTypeDouble:
-		return e.Data.(float64)
+		return e.Data
 	case ast.ExpressionTypeString:
 		return fmt.Sprintf(`literal string@%d "%s"`, e.Pos.Line, e.Data.(string))
 	case ast.ExpressionTypeArray:

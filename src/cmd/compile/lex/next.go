@@ -266,10 +266,10 @@ func (lex *Lexer) Next() (token *Token, err error) {
 			} else { // correct token
 				if isChar {
 					token.Type = TokenLiteralChar
-					token.Data = int32(t[0])
+					token.Data = int64(t[0])
 				} else {
 					token.Type = TokenLiteralByte
-					token.Data = byte(t[0])
+					token.Data = int64(t[0])
 				}
 			}
 		}

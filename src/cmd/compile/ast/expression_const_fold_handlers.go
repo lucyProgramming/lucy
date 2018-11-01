@@ -6,8 +6,8 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 	}
 	switch bin.Left.Type {
 	case ExpressionTypeByte:
-		left := bin.Left.Data.(byte)
-		right := bin.Right.Data.(byte)
+		left := bin.Left.Data.(int64)
+		right := bin.Right.Data.(int64)
 		switch e.Type {
 		case ExpressionTypeAdd:
 			e.Data = left + right
@@ -28,6 +28,9 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
+		if t := e.Data.(int64); (t >> 8) != 0 {
+			PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.byteExceeds(t))
+		}
 		e.Type = ExpressionTypeByte
 		is = true
 		return
@@ -36,8 +39,8 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 	case ExpressionTypeChar:
 		fallthrough
 	case ExpressionTypeInt:
-		left := bin.Left.Data.(int32)
-		right := bin.Right.Data.(int32)
+		left := bin.Left.Data.(int64)
+		right := bin.Right.Data.(int64)
 		switch e.Type {
 		case ExpressionTypeAdd:
 			e.Data = left + right
@@ -57,6 +60,20 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 			e.Data = left
 		default:
 			return false, nil
+		}
+		switch e.Type {
+		case ExpressionTypeShort:
+			if t := e.Data.(int64); (t >> 16) != 0 {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.shortExceeds(t))
+			}
+		case ExpressionTypeChar:
+			if t := e.Data.(int64); (t >> 16) != 0 {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.charExceeds(t))
+			}
+		case ExpressionTypeInt:
+			if t := e.Data.(int64); (t >> 32) != 0 {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.intExceeds(t))
+			}
 		}
 		e.Type = bin.Left.Type
 		is = true
@@ -84,6 +101,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
+		//TODO :: check overflow
 		e.Type = ExpressionTypeLong
 		is = true
 		return
@@ -110,6 +128,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
+		//TODO :: check overflow
 		e.Type = ExpressionTypeFloat
 		is = true
 		return
@@ -136,6 +155,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
+		//TODO :: check overflow
 		e.Type = ExpressionTypeDouble
 		is = true
 		return
@@ -189,49 +209,13 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 		e.Type = ExpressionTypeBool
 		return
 	case ExpressionTypeByte:
-		left := bin.Left.Data.(byte)
-		right := bin.Right.Data.(byte)
-		switch e.Type {
-		case ExpressionTypeEq:
-			e.Data = left == right
-		case ExpressionTypeNe:
-			e.Data = left != right
-		case ExpressionTypeGe:
-			e.Data = left >= right
-		case ExpressionTypeGt:
-			e.Data = left > right
-		case ExpressionTypeLe:
-			e.Data = left <= right
-		case ExpressionTypeLt:
-			e.Data = left < right
-		}
-		is = true
-		e.Type = ExpressionTypeBool
-		return
+		fallthrough
 	case ExpressionTypeShort:
 		fallthrough
 	case ExpressionTypeChar:
 		fallthrough
 	case ExpressionTypeInt:
-		left := bin.Left.Data.(int32)
-		right := bin.Right.Data.(int32)
-		switch e.Type {
-		case ExpressionTypeEq:
-			e.Data = left == right
-		case ExpressionTypeNe:
-			e.Data = left != right
-		case ExpressionTypeGe:
-			e.Data = left >= right
-		case ExpressionTypeGt:
-			e.Data = left > right
-		case ExpressionTypeLe:
-			e.Data = left <= right
-		case ExpressionTypeLt:
-			e.Data = left < right
-		}
-		is = true
-		e.Type = ExpressionTypeBool
-		return
+		fallthrough
 	case ExpressionTypeLong:
 		left := bin.Left.Data.(int64)
 		right := bin.Right.Data.(int64)
@@ -293,6 +277,5 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 		e.Type = ExpressionTypeBool
 		return
 	}
-
 	return
 }

@@ -58,20 +58,20 @@ func (s *StatementSwitch) check(block *Block) []error {
 			s.EndPos.ErrMsgPrefix()))
 		return errs
 	}
-	byteMap := make(map[byte]*Pos)
-	shortMap := make(map[int32]*Pos)
-	intMap := make(map[int32]*Pos)
-	charMap := make(map[int32]*Pos)
+	byteMap := make(map[int64]*Pos)
+	shortMap := make(map[int64]*Pos)
+	intMap := make(map[int64]*Pos)
+	charMap := make(map[int64]*Pos)
 	longMap := make(map[int64]*Pos)
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
 	stringMap := make(map[string]*Pos)
 	enumNamesMap := make(map[string]*Pos)
 	enumPackageName := ""
-	var byteValue byte
-	var shortValue int32
-	var intValue int32
-	var charValue int32
+	var byteValue int64
+	var shortValue int64
+	var intValue int64
+	var charValue int64
 	var longValue int64
 	var floatValue float32
 	var doubleValue float64
@@ -113,13 +113,13 @@ func (s *StatementSwitch) check(block *Block) []error {
 				if e.isLiteral() {
 					switch e.Type {
 					case ExpressionTypeByte:
-						byteValue = e.Data.(byte)
+						byteValue = e.Data.(int64)
 					case ExpressionTypeShort:
-						shortValue = e.Data.(int32)
+						shortValue = e.Data.(int64)
 					case ExpressionTypeChar:
-						charValue = e.Data.(int32)
+						charValue = e.Data.(int64)
 					case ExpressionTypeInt:
-						intValue = e.Data.(int32)
+						intValue = e.Data.(int64)
 					case ExpressionTypeLong:
 						longValue = e.Data.(int64)
 					case ExpressionTypeFloat:
