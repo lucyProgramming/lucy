@@ -28,8 +28,10 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		if t := e.Data.(int64); (t >> 8) != 0 {
-			PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.byteExceeds(t))
+		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
+			if t := e.Data.(int64); (t >> 8) != 0 {
+				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.byteExceeds(t))
+			}
 		}
 		e.Type = ExpressionTypeByte
 		is = true
@@ -102,7 +104,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd {
+		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
 			if t := e.Data.(int64) < 0; t != (bin.Left.Data.(int64) < 0) && t != (bin.Left.Data.(int64) < 0) {
 				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.longExceeds(e.Data.(int64)))
 			}
@@ -133,7 +135,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd {
+		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
 			if t := e.Data.(float32) < 0; t != (bin.Left.Data.(float32) < 0) && t != (bin.Left.Data.(float32) < 0) {
 				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.floatExceeds())
 			}
@@ -164,7 +166,7 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd {
+		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
 			if t := e.Data.(float64) < 0; t != (bin.Left.Data.(float64) < 0) && t != (bin.Left.Data.(float64) < 0) {
 				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.floatExceeds())
 			}

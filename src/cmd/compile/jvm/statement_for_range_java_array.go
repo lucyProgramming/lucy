@@ -31,12 +31,12 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	state.popStack(1)
 	forState := (&StackMapState{}).initFromLast(state)
 	defer state.addTop(forState) // add top
-
+	attr := s.RangeAttr
 	var autoVar AutoVariableForRangeJavaArray
 	{
 		autoVar.Elements = code.MaxLocals
 		code.MaxLocals++
-		forState.appendLocals(class, s.RangeAttr.RangeOn.Value)
+		forState.appendLocals(class, attr.RangeOn.Value)
 		// K
 		autoVar.K = code.MaxLocals
 		code.MaxLocals++
@@ -65,23 +65,23 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if s.RangeAttr.IdentifierValue != nil &&
-			s.RangeAttr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
-			closure.createClosureVar(class, code, s.RangeAttr.IdentifierValue.Variable.Type)
-			s.RangeAttr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
+		if attr.IdentifierValue != nil &&
+			attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
+			closure.createClosureVar(class, code, attr.IdentifierValue.Variable.Type)
+			attr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOPs(code,
-				storeLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
+				storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
 			forState.appendLocals(class,
-				forState.newObjectVariableType(closure.getMeta(s.RangeAttr.RangeOn.Value.Array.Type).className))
+				forState.newObjectVariableType(closure.getMeta(attr.RangeOn.Value.Array.Type).className))
 		}
-		if s.RangeAttr.IdentifierKey != nil &&
-			s.RangeAttr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
-			closure.createClosureVar(class, code, s.RangeAttr.IdentifierKey.Variable.Type)
-			s.RangeAttr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
+		if attr.IdentifierKey != nil &&
+			attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
+			closure.createClosureVar(class, code, attr.IdentifierKey.Variable.Type)
+			attr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
 			copyOPs(code,
-				storeLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
+				storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.LocalValOffset)...)
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(ast.VariableTypeInt).className))
 		}
@@ -108,14 +108,14 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	}
 	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
 	//load elements
-	if s.RangeAttr.IdentifierValue != nil || s.RangeAttr.ExpressionValue != nil {
+	if attr.IdentifierValue != nil || attr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 		if 2 > maxStack {
 			maxStack = 2
 		}
 		// load value
-		switch s.RangeAttr.RangeOn.Value.Array.Type {
+		switch attr.RangeOn.Value.Array.Type {
 		case ast.VariableTypeBool:
 			fallthrough
 		case ast.VariableTypeByte:
@@ -140,61 +140,61 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 		code.CodeLength++
 		// v
 		autoVar.V = code.MaxLocals
-		code.MaxLocals += jvmSlotSize(s.RangeAttr.RangeOn.Value.Array)
+		code.MaxLocals += jvmSlotSize(attr.RangeOn.Value.Array)
 		//store to v tmp
 		copyOPs(code,
-			storeLocalVariableOps(s.RangeAttr.RangeOn.Value.Array.Type,
+			storeLocalVariableOps(attr.RangeOn.Value.Array.Type,
 				autoVar.V)...)
 
-		blockState.appendLocals(class, s.RangeAttr.RangeOn.Value.Array)
+		blockState.appendLocals(class, attr.RangeOn.Value.Array)
 	}
 	//current stack is 0
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if s.RangeAttr.IdentifierValue != nil {
-			if s.RangeAttr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, s.RangeAttr.IdentifierValue.Variable.LocalValOffset)...)
+		if attr.IdentifierValue != nil {
+			if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
 				copyOPs(code,
-					loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Array.Type,
+					loadLocalVariableOps(attr.RangeOn.Value.Array.Type,
 						autoVar.V)...)
-				buildPackage.storeLocalVar(class, code, s.RangeAttr.IdentifierValue.Variable)
+				buildPackage.storeLocalVar(class, code, attr.IdentifierValue.Variable)
 			} else {
-				s.RangeAttr.IdentifierValue.Variable.LocalValOffset = autoVar.V
+				attr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
 		}
-		if s.RangeAttr.IdentifierKey != nil {
-			if s.RangeAttr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
+		if attr.IdentifierKey != nil {
+			if attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
-					s.RangeAttr.IdentifierKey.Variable.LocalValOffset)...)
+					attr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-				buildPackage.storeLocalVar(class, code, s.RangeAttr.IdentifierKey.Variable)
+				buildPackage.storeLocalVar(class, code, attr.IdentifierKey.Variable)
 			} else {
-				s.RangeAttr.IdentifierKey.Variable.LocalValOffset = autoVar.K
+				attr.IdentifierKey.Variable.LocalValOffset = autoVar.K
 			}
 		}
 	} else { // for k,v = range arr
 		// store v
 		//get ops,make_node_objects ops ready
-		if s.RangeAttr.ExpressionValue != nil {
+		if attr.ExpressionValue != nil {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := buildPackage.BuildExpression.getLeftValue(class,
-				code, s.RangeAttr.ExpressionValue, context, blockState)
+				code, attr.ExpressionValue, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
 			}
 			//load v
-			copyOPs(code, loadLocalVariableOps(s.RangeAttr.RangeOn.Value.Array.Type,
+			copyOPs(code, loadLocalVariableOps(attr.RangeOn.Value.Array.Type,
 				autoVar.V)...)
-			if t := remainStack + jvmSlotSize(s.RangeAttr.RangeOn.Value.Array); t > maxStack {
+			if t := remainStack + jvmSlotSize(attr.RangeOn.Value.Array); t > maxStack {
 				maxStack = t
 			}
 			copyOPs(code, ops...)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
-		if s.RangeAttr.ExpressionKey != nil { // set to k
+		if attr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := buildPackage.BuildExpression.getLeftValue(class,
-				code, s.RangeAttr.ExpressionKey, context, blockState)
+				code, attr.ExpressionKey, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
 			}

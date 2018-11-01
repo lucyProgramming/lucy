@@ -27,8 +27,16 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 	case VariableTypeJavaArray:
 		return e.checkMethodCallExpressionOnJavaArray(block, errs, object)
 	case VariableTypeDynamicSelector:
+		if call.Name == "finalize" {
+			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name))
+			return nil
+		}
 		return e.checkMethodCallExpressionOnDynamicSelector(block, errs, object)
 	case VariableTypeString:
+		if call.Name == "finalize" {
+			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name))
+			return nil
+		}
 		if err := loadJavaStringClass(e.Pos); err != nil {
 			*errs = append(*errs, err)
 			return nil
@@ -58,6 +66,10 @@ func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*T
 		}
 
 	case VariableTypeObject, VariableTypeClass:
+		if call.Name == "finalize" {
+			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name))
+			return nil
+		}
 		call.Class = object.Class
 		errsLength := len(*errs)
 		callArgTypes := checkExpressions(block, call.Args, errs, true)

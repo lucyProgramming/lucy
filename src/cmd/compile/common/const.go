@@ -26,7 +26,3 @@ const (
 	BuildInFunctionBlockHole    = "blackHole"
 	BuildInFunctionAssert       = "assert"
 )
-
-const (
-	MainClassName = "main.class"
-)

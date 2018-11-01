@@ -356,30 +356,6 @@ func (e *Expression) constantFold() (is bool, err error) {
 	return
 }
 
-//
-//func (e *Expression) getIntValue() int32 {
-//	if e.isNumber() == false {
-//		panic("not number")
-//	}
-//	switch e.Type {
-//	case ExpressionTypeByte:
-//		fallthrough
-//	case ExpressionTypeChar:
-//		fallthrough
-//	case ExpressionTypeShort:
-//		fallthrough
-//	case ExpressionTypeInt:
-//		fallthrough
-//	case ExpressionTypeLong:
-//		return int32(e.Data.(int64))
-//	case ExpressionTypeFloat:
-//		return int32(e.Data.(float32))
-//	case ExpressionTypeDouble:
-//		return int32(e.Data.(float64))
-//	}
-//	return 0
-//}
-
 func (e *Expression) getLongValue() int64 {
 	if e.isNumber() == false {
 		panic("not number")
@@ -394,7 +370,7 @@ func (e *Expression) getLongValue() int64 {
 	case ExpressionTypeInt:
 		fallthrough
 	case ExpressionTypeLong:
-		return int64(e.Data.(int64))
+		return e.Data.(int64)
 	case ExpressionTypeFloat:
 		return int64(e.Data.(float32))
 	case ExpressionTypeDouble:
@@ -421,7 +397,7 @@ func (e *Expression) getDoubleValue() float64 {
 	case ExpressionTypeFloat:
 		return float64(e.Data.(float32))
 	case ExpressionTypeDouble:
-		return float64(e.Data.(float64))
+		return e.Data.(float64)
 	}
 	return 0
 }
