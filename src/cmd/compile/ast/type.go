@@ -659,30 +659,26 @@ func (typ *Type) Equal(compareTo *Type) bool {
 	if leftValue.IsPrimitive() {
 		return true //
 	}
+	if leftValue.Type == VariableTypeVoid {
+		return true
+	}
 	if leftValue.Type == VariableTypeArray ||
 		leftValue.Type == VariableTypeJavaArray {
-		if leftValue.Type == VariableTypeJavaArray {
-			if leftValue.Type == VariableTypeJavaArray &&
-				leftValue.IsVariableArgs != compareTo.IsVariableArgs {
-				return false
-			}
+		if leftValue.Type == VariableTypeJavaArray &&
+			leftValue.IsVariableArgs != compareTo.IsVariableArgs {
+			return false
 		}
 		return leftValue.Array.Equal(compareTo.Array)
 	}
 	if leftValue.Type == VariableTypeMap {
-		if false == leftValue.Map.K.Equal(compareTo.Map.K) {
-			return false
-		}
-		return leftValue.Map.V.Equal(compareTo.Map.V)
+		return leftValue.Map.K.Equal(compareTo.Map.K) &&
+			leftValue.Map.V.Equal(compareTo.Map.V)
 	}
 	if leftValue.Type == VariableTypeEnum {
 		return leftValue.Enum.Name == compareTo.Enum.Name
 	}
 	if leftValue.Type == VariableTypeObject {
 		return leftValue.Class.Name == compareTo.Class.Name
-	}
-	if leftValue.Type == VariableTypeVoid {
-		return true
 	}
 	if leftValue.Type == VariableTypeFunction {
 		return leftValue.FunctionType.equal(compareTo.FunctionType)
