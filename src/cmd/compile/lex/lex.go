@@ -2,6 +2,7 @@ package lex
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type Lexer struct {
@@ -169,7 +170,6 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
-
 	isScientificNotation := false
 	power := []byte{}
 	powerPositive := true
@@ -231,53 +231,39 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	} else {
 		lex.unGetChar()
 	}
-	/*
-		parse float part
-	*/
-	parseFloat64 := func(bs []byte) float64 {
-		index := len(bs) - 1
-		var fp float64
-		for index >= 0 {
-			fp = fp*0.1 + (float64(lex.hexByte2ByteValue(bs[index])) / 10.0)
-			index--
-		}
-		return fp
-	}
+
 	token.EndLine = lex.line
 	token.EndColumn = lex.column
 	if isScientificNotation == false {
-		int64Part, e := lex.parseInt64(integerPart)
-		if e != nil {
-			err = e
-		}
-		floatPart := parseFloat64(floatPart)
+		integerPart = append(integerPart, '.')
+		floatValue, _ := strconv.ParseFloat(string(append(integerPart, floatPart...)), 64)
 		if haveFloatPart {
 			if isDouble {
 				token.Type = TokenLiteralDouble
-				token.Data = float64(int64Part) + floatPart
+				token.Data = floatValue
 			} else {
 				token.Type = TokenLiteralFloat
-				token.Data = float32(int64Part) + float32(floatPart)
+				token.Data = float32(floatValue)
 			}
 		} else {
 			if isDouble {
 				token.Type = TokenLiteralDouble
-				token.Data = float64(int64Part)
+				token.Data = float64(floatValue)
 			} else if isFloat {
 				token.Type = TokenLiteralFloat
-				token.Data = float32(int64Part)
+				token.Data = float32(floatValue)
 			} else if isLong {
 				token.Type = TokenLiteralLong
-				token.Data = int64Part
+				token.Data = int64(floatValue)
 			} else if isByte {
 				token.Type = TokenLiteralByte
-				token.Data = int64Part
+				token.Data = int64(floatValue)
 			} else if isShort {
 				token.Type = TokenLiteralShort
-				token.Data = int64Part
+				token.Data = int64(floatValue)
 			} else {
 				token.Type = TokenLiteralInt
-				token.Data = int64Part
+				token.Data = int64(floatValue)
 			}
 		}
 		return
@@ -314,13 +300,10 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 			}
 		} else { // float
 			integerPart = append(integerPart, floatPart[:p]...)
+			integerPart = append(integerPart, '.')
+			integerPart = append(integerPart, floatPart[p:]...)
 			notationIsDouble = true
-			var e error
-			notationLongValue, e = lex.parseInt64(integerPart)
-			if e != nil {
-				err = e
-			}
-			notationDoubleValue = float64(notationLongValue) + parseFloat64(floatPart[p:])
+			notationDoubleValue, _ = strconv.ParseFloat(string(integerPart), 64)
 		}
 	} else { // power is negative,must be float number
 		b := make([]byte, p-len(integerPart))
@@ -330,7 +313,7 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		b = append(b, integerPart...)
 		b = append(b, floatPart...)
 		notationIsDouble = true
-		notationDoubleValue = parseFloat64(b)
+		notationDoubleValue, _ = strconv.ParseFloat("0."+string(integerPart), 64)
 	}
 	if isDouble == false &&
 		isFloat == false &&

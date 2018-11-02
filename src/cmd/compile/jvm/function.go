@@ -169,7 +169,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		for _, v := range f.Type.ParameterList {
 			p := &cg.MethodParameter{}
 			p.Name = v.Name
-			p.AccessFlags = cg.METHOD_PARAMETER_TYPE_ACC_MANDATED
+			p.AccessFlags = cg.MethodParameterTypeAccMandated
 			method.AttributeMethodParameters.Parameters = append(method.AttributeMethodParameters.Parameters, p)
 		}
 	}
@@ -178,7 +178,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		for _, v := range f.Type.ReturnList {
 			p := &cg.MethodParameter{}
 			p.Name = v.Name
-			p.AccessFlags = cg.METHOD_PARAMETER_TYPE_ACC_MANDATED
+			p.AccessFlags = cg.MethodParameterTypeAccMandated
 			method.AttributeLucyReturnListNames.Parameters =
 				append(method.AttributeLucyReturnListNames.Parameters, p)
 		}

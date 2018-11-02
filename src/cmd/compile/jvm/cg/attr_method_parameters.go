@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	METHOD_PARAMETER_TYPE_ACC_FINAL     = 0x0010
-	METHOD_PARAMETER_TYPE_ACC_SYNTHETIC = 0x1000
-	METHOD_PARAMETER_TYPE_ACC_MANDATED  = 0x8000
+	MethodParameterTypeAccFinal     = 0x0010
+	MethodParameterTypeAccSynthetic = 0x1000
+	MethodParameterTypeAccMandated  = 0x8000
 )
 
 type AttributeMethodParameters struct {
