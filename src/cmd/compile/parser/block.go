@@ -338,7 +338,7 @@ func (bp *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				statement.Pos = pos
 				class.FinalPos = finalPos
 				if isFinal {
-					class.AccessFlags |= cg.ACC_CLASS_FINAL
+					class.AccessFlags |= cg.AccClassFinal
 				}
 				statement.Type = ast.StatementTypeClass
 				statement.Class = class

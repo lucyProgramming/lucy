@@ -99,13 +99,6 @@ type Expression struct {
 	AsSubForNegative      *Expression
 }
 
-func (e *Expression) IsStringLiteral(s string) bool {
-	if e.Type != ExpressionTypeString {
-		return false
-	}
-	return e.Data.(string) == s
-}
-
 func (e *Expression) binaryExpressionDependOnSub() *Expression {
 	switch e.Type {
 	case ExpressionTypeAdd:

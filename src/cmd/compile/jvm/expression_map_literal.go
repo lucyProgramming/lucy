@@ -17,7 +17,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(
 	code.CodeLength += 4
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -50,7 +50,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(
 		}
 		// put in hashmap
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "put",
 			Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",

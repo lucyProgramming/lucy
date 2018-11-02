@@ -19,7 +19,7 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			meta := closure.getMeta(identifier.Variable.Type.Type)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      class.Name,
 				Field:      identifier.Variable.Name,
 				Descriptor: "L" + meta.className + ";",
@@ -29,7 +29,7 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(
 		} else {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      class.Name,
 				Field:      identifier.Variable.Name,
 				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
@@ -65,7 +65,7 @@ func (buildExpression *BuildExpression) buildIdentifier(
 		return buildExpression.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
 	case identifier.Variable.IsGlobal:
 		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      buildExpression.BuildPackage.mainClass.Name,
 			Field:      identifier.Name,
 			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),

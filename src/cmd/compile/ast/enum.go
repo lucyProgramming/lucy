@@ -21,7 +21,7 @@ type Enum struct {
 }
 
 func (e *Enum) isPublic() bool {
-	return e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
+	return e.AccessFlags&cg.AccClassPublic != 0
 }
 
 type EnumName struct {

@@ -31,7 +31,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnMap(
 			typeConverter.packPrimitives(class, code, variableType)
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
@@ -63,7 +63,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnMap(
 			}
 			//call remove
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      mapClass,
 				Method:     "remove",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
@@ -76,7 +76,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnMap(
 		}
 	case common.MapMethodRemoveAll:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "clear",
 			Descriptor: "()V",
@@ -84,7 +84,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnMap(
 		code.CodeLength += 3
 	case common.MapMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "size",
 			Descriptor: "()I",

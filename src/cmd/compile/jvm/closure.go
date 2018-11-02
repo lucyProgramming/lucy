@@ -141,7 +141,7 @@ func (closure *Closure) createClosureVar(class *cg.ClassHighLevel,
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      meta.className,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -185,7 +185,7 @@ func (closure *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.
 		meta = closure.ClosureObjectMetas[ClosureClassObject]
 	}
 	code.Codes[code.CodeLength] = cg.OP_putfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      meta.fieldName,
 		Descriptor: meta.fieldDescription,
@@ -242,7 +242,7 @@ func (closure *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
 		meta = closure.ClosureObjectMetas[ClosureClassObject]
 	}
 	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      meta.fieldName,
 		Descriptor: meta.fieldDescription,

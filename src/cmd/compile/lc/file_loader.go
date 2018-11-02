@@ -199,7 +199,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
-		if (v.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
+		if (v.AccessFlags & cg.AccMethodVarargs) != 0 {
 			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
@@ -275,7 +275,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			if err != nil {
 				return nil, err
 			}
-			if f.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.ACC_METHOD_VARARGS != 0 {
+			if f.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
 				if f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1].Type.Type !=
 					ast.VariableTypeJavaArray {
 					panic("not a java array")
@@ -324,7 +324,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		if err != nil {
 			return nil, err
 		}
-		if (v.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
+		if (v.AccessFlags & cg.AccMethodVarargs) != 0 {
 			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
 			if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")
@@ -347,6 +347,7 @@ func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
 		e.Name = string(c.ConstPool[nameIndex].Info)
 	}
+	e.LoadFromOutSide = true
 	e.AccessFlags = c.AccessFlag
 	for _, v := range c.Fields {
 		en := &ast.EnumName{}
@@ -365,13 +366,13 @@ func (loader *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) 
 	case ast.VariableTypeBool:
 		return binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info) != 0
 	case ast.VariableTypeByte:
-		return byte(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
+		fallthrough
 	case ast.VariableTypeShort:
 		fallthrough
 	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
-		return int32(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
+		fallthrough
 	case ast.VariableTypeLong:
 		return int64(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeFloat:
@@ -431,7 +432,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 				if err != nil {
 					return err
 				}
-				if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.ACC_METHOD_VARARGS != 0 {
+				if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
 					if vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1].Type.Type !=
 						ast.VariableTypeJavaArray {
 						panic("not a java array")
@@ -490,7 +491,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 			jvm.DefaultValueParser.Decode(c, function, dp)
 		}
 
-		if (function.AccessFlags & cg.ACC_METHOD_VARARGS) != 0 {
+		if (function.AccessFlags & cg.AccMethodVarargs) != 0 {
 			function.Type.VArgs = function.Type.ParameterList[len(function.Type.ParameterList)-1]
 			if function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
 				panic("variable args is not array")

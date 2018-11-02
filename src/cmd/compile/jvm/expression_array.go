@@ -55,7 +55,7 @@ func (buildExpression *BuildExpression) buildArray(
 		index++
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      meta.className,
 		Method:     specialMethodInit,
 		Descriptor: meta.constructorFuncDescriptor,

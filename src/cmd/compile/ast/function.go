@@ -43,7 +43,7 @@ type Function struct {
 }
 
 func (f *Function) IsPublic() bool {
-	return f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0
+	return f.AccessFlags&cg.AccMethodPublic != 0
 }
 
 func (f *Function) NameLiteralFunction() string {

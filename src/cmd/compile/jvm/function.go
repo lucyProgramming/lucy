@@ -100,7 +100,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
 	}()
 	state := &StackMapState{}
-	if method.AccessFlags&cg.ACC_METHOD_STATIC == 0 {
+	if method.AccessFlags&cg.AccMethodStatic == 0 {
 		if method.IsConstruction { // construction method
 			method.Code.MaxLocals = 1
 			t := &cg.StackMapVerificationTypeInfo{}
@@ -132,7 +132,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 			code.MaxStack = 3
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     specialMethodInit,
 			Descriptor: meta.constructorFuncDescriptor,
@@ -228,7 +228,7 @@ func (buildPackage *BuildPackage) mkFieldDefaultValue(class *cg.ClassHighLevel, 
 		}
 		state.popStack(1)
 		code.Codes[code.CodeLength] = cg.OP_putfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      class.Name,
 			Field:      v.Name,
 			Descriptor: Descriptor.typeDescriptor(v.Type),

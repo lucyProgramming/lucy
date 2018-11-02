@@ -71,11 +71,11 @@ func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err e
 	isInterface := cp.parser.token.Type == lex.TokenInterface
 	classDefinition = &ast.Class{}
 	if isInterface {
-		classDefinition.AccessFlags |= cg.ACC_CLASS_INTERFACE
-		classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+		classDefinition.AccessFlags |= cg.AccClassInterface
+		classDefinition.AccessFlags |= cg.AccClassAbstract
 	}
 	if isAbstract {
-		classDefinition.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+		classDefinition.AccessFlags |= cg.AccClassAbstract
 	}
 	cp.Next(lfIsToken) // skip class key word
 	cp.parser.unExpectNewLineAndSkip()
@@ -304,24 +304,24 @@ func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err e
 			if accessControlToken != nil {
 				switch accessControlToken.Type {
 				case lex.TokenPrivate:
-					m.Function.AccessFlags |= cg.ACC_METHOD_PRIVATE
+					m.Function.AccessFlags |= cg.AccMethodPrivate
 				case lex.TokenProtected:
-					m.Function.AccessFlags |= cg.ACC_METHOD_PROTECTED
+					m.Function.AccessFlags |= cg.AccMethodProtected
 				case lex.TokenPublic:
-					m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
+					m.Function.AccessFlags |= cg.AccMethodPublic
 				}
 			}
 			if isSynchronized {
-				m.Function.AccessFlags |= cg.ACC_METHOD_SYNCHRONIZED
+				m.Function.AccessFlags |= cg.AccMethodSynchronized
 			}
 			if isStatic {
-				f.AccessFlags |= cg.ACC_METHOD_STATIC
+				f.AccessFlags |= cg.AccMethodStatic
 			}
 			if isAbstract {
-				f.AccessFlags |= cg.ACC_METHOD_ABSTRACT
+				f.AccessFlags |= cg.AccMethodAbstract
 			}
 			if isFinal {
-				f.AccessFlags |= cg.ACC_METHOD_FINAL
+				f.AccessFlags |= cg.AccMethodFinal
 			}
 			if f.Name == classDefinition.Name && isInterface == false {
 				f.Name = ast.SpecialMethodInit
@@ -420,20 +420,20 @@ func (cp *ClassParser) parseField(
 		}
 		f.Comment = fieldComment
 		if isStatic {
-			f.AccessFlags |= cg.ACC_FIELD_STATIC
+			f.AccessFlags |= cg.AccFieldStatic
 		}
 		if accessControlToken != nil {
 			switch accessControlToken.Type {
 			case lex.TokenPublic:
-				f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+				f.AccessFlags |= cg.AccFieldPublic
 			case lex.TokenProtected:
-				f.AccessFlags |= cg.ACC_FIELD_PROTECTED
+				f.AccessFlags |= cg.AccFieldProtected
 			default: // private
-				f.AccessFlags |= cg.ACC_FIELD_PRIVATE
+				f.AccessFlags |= cg.AccFieldPrivate
 			}
 		}
 		if isVolatile {
-			f.AccessFlags |= cg.ACC_FIELD_VOLATILE
+			f.AccessFlags |= cg.AccFieldVolatile
 		}
 		classDefinition.Fields[v.Name] = f
 	}

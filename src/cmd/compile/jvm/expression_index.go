@@ -31,7 +31,7 @@ func (buildExpression *BuildExpression) buildIndex(
 	if index.Expression.Value.Type == ast.VariableTypeArray {
 		meta := ArrayMetas[e.Value.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "get",
 			Descriptor: meta.getMethodDescription,
@@ -81,7 +81,7 @@ func (buildExpression *BuildExpression) buildStringIndex(
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack = buildExpression.build(class, code, index.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaStringClass,
 		Method:     "getBytes",
 		Descriptor: "()[B",
@@ -120,7 +120,7 @@ func (buildExpression *BuildExpression) buildMapIndex(
 		typeConverter.packPrimitives(class, code, index.Expression.Value.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     "get",
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",

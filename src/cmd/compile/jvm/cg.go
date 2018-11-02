@@ -20,9 +20,9 @@ func (buildPackage *BuildPackage) Make(p *ast.Package) {
 	buildPackage.Package = p
 	mainClass := &cg.ClassHighLevel{}
 	buildPackage.mainClass = mainClass
-	mainClass.AccessFlags |= cg.ACC_CLASS_PUBLIC
-	mainClass.AccessFlags |= cg.ACC_CLASS_FINAL
-	mainClass.AccessFlags |= cg.ACC_CLASS_SYNTHETIC
+	mainClass.AccessFlags |= cg.AccClassPublic
+	mainClass.AccessFlags |= cg.AccClassFinal
+	mainClass.AccessFlags |= cg.AccClassSynthetic
 	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
 	if p.Block.Functions != nil {
@@ -105,10 +105,10 @@ func (buildPackage *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 	}
 	for _, v := range e.Enums {
 		field := &cg.FieldHighLevel{}
-		if e.AccessFlags&cg.ACC_CLASS_PUBLIC != 0 {
-			field.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		if e.AccessFlags&cg.AccClassPublic != 0 {
+			field.AccessFlags |= cg.AccFieldPublic
 		} else {
-			field.AccessFlags |= cg.ACC_FIELD_PRIVATE
+			field.AccessFlags |= cg.AccFieldPrivate
 		}
 		if v.Comment != "" {
 			field.AttributeLucyComment = &cg.AttributeLucyComment{
@@ -127,10 +127,10 @@ func (buildPackage *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
 func (buildPackage *BuildPackage) mkGlobalConstants() {
 	for k, v := range buildPackage.Package.Block.Constants {
 		f := &cg.FieldHighLevel{}
-		f.AccessFlags |= cg.ACC_FIELD_STATIC
-		f.AccessFlags |= cg.ACC_FIELD_FINAL
-		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
-			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		f.AccessFlags |= cg.AccFieldStatic
+		f.AccessFlags |= cg.AccFieldFinal
+		if v.AccessFlags&cg.AccFieldPublic != 0 {
+			f.AccessFlags |= cg.AccFieldPublic
 		}
 		f.Name = v.Name
 		f.AttributeConstantValue = &cg.AttributeConstantValue{}
@@ -159,18 +159,18 @@ func (buildPackage *BuildPackage) mkGlobalTypeAlias() {
 func (buildPackage *BuildPackage) mkGlobalVariables() {
 	for k, v := range buildPackage.Package.Block.Variables {
 		f := &cg.FieldHighLevel{}
-		f.AccessFlags |= cg.ACC_FIELD_STATIC
+		f.AccessFlags |= cg.AccFieldStatic
 		f.Descriptor = Descriptor.typeDescriptor(v.Type)
-		if v.AccessFlags&cg.ACC_FIELD_PUBLIC != 0 {
-			f.AccessFlags |= cg.ACC_FIELD_PUBLIC
+		if v.AccessFlags&cg.AccFieldPublic != 0 {
+			f.AccessFlags |= cg.AccFieldPublic
 		}
-		f.AccessFlags |= cg.ACC_FIELD_VOLATILE
+		f.AccessFlags |= cg.AccFieldVolatile
 		if LucyFieldSignatureParser.Need(v.Type) {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
 			if v.Type.Type == ast.VariableTypeFunction {
 				f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
-					cg.ACC_METHOD_VARARGS
+					cg.AccMethodVarargs
 			}
 		}
 		if v.Comment != "" {
@@ -200,9 +200,9 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 	for _, v := range buildPackage.Package.InitFunctions {
 		method := &cg.MethodHighLevel{}
 		blockMethods = append(blockMethods, method)
-		method.AccessFlags |= cg.ACC_METHOD_STATIC
-		method.AccessFlags |= cg.ACC_METHOD_FINAL
-		method.AccessFlags |= cg.ACC_METHOD_PRIVATE
+		method.AccessFlags |= cg.AccMethodStatic
+		method.AccessFlags |= cg.AccMethodFinal
+		method.AccessFlags |= cg.AccMethodPrivate
 		method.Name = buildPackage.mainClass.NewMethodName("block")
 		method.Class = buildPackage.mainClass
 		method.Descriptor = "()V"
@@ -211,7 +211,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 		buildPackage.mainClass.AppendMethod(method)
 	}
 	method := &cg.MethodHighLevel{}
-	method.AccessFlags |= cg.ACC_METHOD_STATIC
+	method.AccessFlags |= cg.AccMethodStatic
 	method.Name = "<clinit>"
 	method.Descriptor = "()V"
 	codes := make([]byte, 65536)
@@ -222,7 +222,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 			continue
 		}
 		codes[codeLength] = cg.OP_invokestatic
-		buildPackage.mainClass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		buildPackage.mainClass.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      v.Name + "/main", // main class
 			Method:     v.TriggerPackageInitMethodName,
 			Descriptor: "()V",
@@ -231,7 +231,7 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 	}
 	for _, v := range blockMethods {
 		codes[codeLength] = cg.OP_invokestatic
-		buildPackage.mainClass.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		buildPackage.mainClass.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      buildPackage.mainClass.Name,
 			Method:     v.Name,
 			Descriptor: "()V",
@@ -248,10 +248,10 @@ func (buildPackage *BuildPackage) mkInitFunctions() {
 	// trigger init
 	trigger := &cg.MethodHighLevel{}
 	trigger.Name = buildPackage.mainClass.NewMethodName("triggerPackageInit")
-	trigger.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	trigger.AccessFlags |= cg.ACC_METHOD_BRIDGE
-	trigger.AccessFlags |= cg.ACC_METHOD_STATIC
-	trigger.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
+	trigger.AccessFlags |= cg.AccMethodPublic
+	trigger.AccessFlags |= cg.AccMethodBridge
+	trigger.AccessFlags |= cg.AccMethodStatic
+	trigger.AccessFlags |= cg.AccMethodSynthetic
 	trigger.Descriptor = "()V"
 	trigger.Code = &cg.AttributeCode{}
 	trigger.Code.Codes = make([]byte, 1)
@@ -348,10 +348,10 @@ func (buildPackage *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighL
 		method.Name = name
 		method.AccessFlags = vv.Function.AccessFlags
 		if vv.Function.Type.VArgs != nil {
-			method.AccessFlags |= cg.ACC_METHOD_VARARGS
+			method.AccessFlags |= cg.AccMethodVarargs
 		}
 		if vv.IsCompilerAuto {
-			method.AccessFlags |= cg.ACC_METHOD_SYNTHETIC
+			method.AccessFlags |= cg.AccMethodSynthetic
 		}
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
@@ -392,9 +392,9 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 			method.Descriptor = Descriptor.methodDescriptor(&f.Type)
 		}
 		method.AccessFlags = 0
-		method.AccessFlags |= cg.ACC_METHOD_STATIC
-		if f.AccessFlags&cg.ACC_METHOD_PUBLIC != 0 || f.Name == ast.MainFunctionName {
-			method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+		method.AccessFlags |= cg.AccMethodStatic
+		if f.AccessFlags&cg.AccMethodPublic != 0 || f.Name == ast.MainFunctionName {
+			method.AccessFlags |= cg.AccMethodPublic
 		}
 		if f.Comment != "" {
 			method.AttributeLucyComment = &cg.AttributeLucyComment{
@@ -402,7 +402,7 @@ func (buildPackage *BuildPackage) mkGlobalFunctions() {
 			}
 		}
 		if f.Type.VArgs != nil {
-			method.AccessFlags |= cg.ACC_METHOD_VARARGS
+			method.AccessFlags |= cg.AccMethodVarargs
 		}
 		ms[k] = method
 		f.Entrance = method
@@ -450,14 +450,14 @@ func (buildPackage *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHigh
 	method := &cg.MethodHighLevel{}
 	method.Name = specialMethodInit
 	method.Descriptor = "()V"
-	method.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	method.AccessFlags |= cg.AccMethodPublic
 	method.Code = &cg.AttributeCode{}
 	method.Code.Codes = make([]byte, 5)
 	method.Code.CodeLength = 5
 	method.Code.MaxLocals = 1
 	method.Code.Codes[0] = cg.OP_aload_0
 	method.Code.Codes[1] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      class.SuperClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -473,7 +473,7 @@ func (buildPackage *BuildPackage) storeGlobalVariable(class *cg.ClassHighLevel, 
 	if v.JvmDescriptor == "" {
 		v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
 	}
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      buildPackage.mainClass.Name,
 		Field:      v.Name,
 		Descriptor: v.JvmDescriptor,

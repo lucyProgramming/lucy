@@ -28,7 +28,19 @@ func (e *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is
 
 type binaryConstFolder func(bin *ExpressionBinary) (is bool, err error)
 
-func (e *Expression) makeWrongOpErr(typ1, typ2 string) error {
+func (e *Expression) binaryWrongOpErr() error {
+	var typ1, typ2 string
+	bin := e.Data.(*ExpressionBinary)
+	if bin.Left.Value != nil {
+		typ1 = bin.Left.Value.TypeString()
+	} else {
+		typ1 = bin.Left.Op
+	}
+	if bin.Right.Value != nil {
+		typ2 = bin.Right.Value.TypeString()
+	} else {
+		typ2 = bin.Right.Op
+	}
 	return fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
 		e.Pos.ErrMsgPrefix(),
 		e.Op,
@@ -200,7 +212,7 @@ func (e *Expression) constantFold() (is bool, err error) {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.Type != ExpressionTypeBool ||
 				bin.Right.Type != ExpressionTypeBool {
-				err = e.makeWrongOpErr(bin.Left.Op, bin.Right.Op)
+				err = e.binaryWrongOpErr()
 				return
 			}
 			is = true

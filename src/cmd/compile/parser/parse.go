@@ -152,7 +152,7 @@ func (parser *Parser) Parse() []error {
 			e.Comment = comment.Comment
 			isPublic := isPublic()
 			if isPublic {
-				e.AccessFlags |= cg.ACC_CLASS_PUBLIC
+				e.AccessFlags |= cg.AccClassPublic
 			}
 			if e != nil {
 				*parser.tops = append(*parser.tops, &ast.TopNode{
@@ -169,7 +169,7 @@ func (parser *Parser) Parse() []error {
 			f.Comment = comment.Comment
 			isPublic := isPublic()
 			if isPublic {
-				f.AccessFlags |= cg.ACC_METHOD_PUBLIC
+				f.AccessFlags |= cg.AccMethodPublic
 			}
 			*parser.tops = append(*parser.tops, &ast.TopNode{
 				Node: f,
@@ -201,13 +201,13 @@ func (parser *Parser) Parse() []error {
 			})
 			isPublic := isPublic()
 			if isPublic {
-				c.AccessFlags |= cg.ACC_CLASS_PUBLIC
+				c.AccessFlags |= cg.AccClassPublic
 			}
 			if isAbstract {
-				c.AccessFlags |= cg.ACC_CLASS_ABSTRACT
+				c.AccessFlags |= cg.AccClassAbstract
 			}
 			if isFinal {
-				c.AccessFlags |= cg.ACC_CLASS_FINAL
+				c.AccessFlags |= cg.AccClassFinal
 				c.FinalPos = finalPos
 			}
 			resetProperty()
@@ -223,7 +223,7 @@ func (parser *Parser) Parse() []error {
 			isPublic := isPublic()
 			for _, v := range cs {
 				if isPublic {
-					v.AccessFlags |= cg.ACC_FIELD_PUBLIC
+					v.AccessFlags |= cg.AccFieldPublic
 				}
 				*parser.tops = append(*parser.tops, &ast.TopNode{
 					Node: v,

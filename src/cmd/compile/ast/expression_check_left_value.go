@@ -107,7 +107,7 @@ func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
 			switch variable.(type) {
 			case *Variable:
 				v := variable.(*Variable)
-				if v.AccessFlags&cg.ACC_FIELD_PUBLIC == 0 &&
+				if v.AccessFlags&cg.AccFieldPublic == 0 &&
 					object.Package.isSame(&PackageBeenCompile) == false {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
 						e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))

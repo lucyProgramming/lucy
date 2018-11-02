@@ -65,7 +65,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	}
 	meta := ArrayMetas[attr.RangeOn.Value.Array.Type]
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      "elements",
 		Descriptor: meta.elementsFieldDescriptor,
@@ -85,7 +85,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	//get start
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      "start",
 		Descriptor: "I",
@@ -98,7 +98,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
 	//get end
 	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      "end",
 		Descriptor: "I",
@@ -162,14 +162,13 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	if 2 > maxStack {
 		maxStack = 2
 	}
-	rangeEnd := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
+	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
+
 	//load elements
-	if attr.IdentifierValue != nil || attr.ExpressionValue != nil {
+	if attr.IdentifierValue != nil ||
+		attr.ExpressionValue != nil {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
-		if 2 > maxStack {
-			maxStack = 2
-		}
 		// load value
 		switch attr.RangeOn.Value.Array.Type {
 		case ast.VariableTypeBool:
@@ -208,7 +207,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if attr.IdentifierValue != nil {
 			if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
+					attr.IdentifierValue.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(attr.RangeOn.Value.Array.Type,
 						autoVar.V)...)
@@ -270,8 +270,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForArray(
 	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)
 	}
-	//pop index on stack
-	writeExits([]*cg.Exit{rangeEnd}, code.CodeLength) // jump to here
-	context.MakeStackMap(code, forState, code.CodeLength)
+
 	return
 }

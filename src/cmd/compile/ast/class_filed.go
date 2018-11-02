@@ -18,16 +18,16 @@ type ClassField struct {
 }
 
 func (f *ClassField) IsStatic() bool {
-	return (f.AccessFlags & cg.ACC_FIELD_STATIC) != 0
+	return (f.AccessFlags & cg.AccFieldStatic) != 0
 }
 func (f *ClassField) IsPublic() bool {
-	return (f.AccessFlags & cg.ACC_FIELD_PUBLIC) != 0
+	return (f.AccessFlags & cg.AccFieldPublic) != 0
 }
 func (f *ClassField) IsProtected() bool {
-	return (f.AccessFlags & cg.ACC_FIELD_PROTECTED) != 0
+	return (f.AccessFlags & cg.AccFieldProtected) != 0
 }
 func (f *ClassField) IsPrivate() bool {
-	return (f.AccessFlags & cg.ACC_FIELD_PRIVATE) != 0
+	return (f.AccessFlags & cg.AccFieldPrivate) != 0
 }
 func (f *ClassField) ableAccessFromSubClass() bool {
 	return f.IsPublic() ||

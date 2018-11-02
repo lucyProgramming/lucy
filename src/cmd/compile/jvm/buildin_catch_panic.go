@@ -35,7 +35,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 			state.popStack(2)
 			maxStack = 2 + stack
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      className,
 				Method:     specialMethodInit,
 				Descriptor: "(Ljava/lang/Throwable;)V",
@@ -64,7 +64,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaExceptionClass,
 			Method:     specialMethodInit,
 			Descriptor: "(Ljava/lang/String;)V",

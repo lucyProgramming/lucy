@@ -1,28 +1,28 @@
 package cg
 
-type CONSTANT_NameAndType_info_high_level struct {
+type ConstantInfoNameAndTypeHighLevel struct {
 	Name       string
 	Descriptor string
 }
 
-type CONSTANT_Methodref_info_high_level struct {
+type ConstantInfoMethodrefHighLevel struct {
 	Class      string
 	Method     string
 	Descriptor string
 }
 
-type CONSTANT_InterfaceMethodref_info_high_level struct {
+type ConstantInfoInterfaceMethodrefHighLevel struct {
 	Class      string
 	Method     string
 	Descriptor string
 }
 
-type CONSTANT_Fieldref_info_high_level struct {
+type ConstantInfoFieldrefHighLevel struct {
 	Class      string
 	Field      string
 	Descriptor string
 }
 
-type CONSTANT_MethodType_info_high_level struct {
+type ConstantInfoMethodTypeHighLevel struct {
 	Descriptor string
 }

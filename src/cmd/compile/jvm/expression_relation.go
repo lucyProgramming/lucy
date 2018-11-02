@@ -152,7 +152,7 @@ func (buildExpression *BuildExpression) buildRelations(
 		state.pushStack(class, bin.Left.Value)
 		stack := buildExpression.build(class, code, bin.Right, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "compareTo",
 			Descriptor: "(Ljava/lang/String;)I",

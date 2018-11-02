@@ -42,16 +42,16 @@ func (c *Class) HaveStaticsCodes() bool {
 }
 
 func (c *Class) IsInterface() bool {
-	return c.AccessFlags&cg.ACC_CLASS_INTERFACE != 0
+	return c.AccessFlags&cg.AccClassInterface != 0
 }
 func (c *Class) IsAbstract() bool {
-	return c.AccessFlags&cg.ACC_CLASS_ABSTRACT != 0
+	return c.AccessFlags&cg.AccClassAbstract != 0
 }
 func (c *Class) IsFinal() bool {
-	return c.AccessFlags&cg.ACC_CLASS_FINAL != 0
+	return c.AccessFlags&cg.AccClassFinal != 0
 }
 func (c *Class) IsPublic() bool {
-	return c.AccessFlags&cg.ACC_CLASS_PUBLIC != 0
+	return c.AccessFlags&cg.AccClassPublic != 0
 }
 
 func (c *Class) loadSelf(pos *Pos) error {
@@ -80,7 +80,7 @@ func (c *Class) mkDefaultConstruction() {
 	m := &ClassMethod{}
 	m.IsCompilerAuto = true
 	m.Function = &Function{}
-	m.Function.AccessFlags |= cg.ACC_METHOD_PUBLIC
+	m.Function.AccessFlags |= cg.AccMethodPublic
 	m.Function.Pos = c.Pos
 	m.Function.Block.IsFunctionBlock = true
 	m.Function.Block.Fn = m.Function
@@ -128,10 +128,10 @@ func (c *Class) mkClassInitMethod() {
 		f.Block.Statements[k] = s
 	}
 	f.makeLastReturnStatement()
-	f.AccessFlags |= cg.ACC_METHOD_PUBLIC
-	f.AccessFlags |= cg.ACC_METHOD_STATIC
-	f.AccessFlags |= cg.ACC_METHOD_FINAL
-	f.AccessFlags |= cg.ACC_METHOD_BRIDGE
+	f.AccessFlags |= cg.AccMethodPublic
+	f.AccessFlags |= cg.AccMethodStatic
+	f.AccessFlags |= cg.AccMethodFinal
+	f.AccessFlags |= cg.AccMethodBridge
 	f.Name = classInitMethod
 	f.Block.IsFunctionBlock = true
 	f.Block.Fn = method.Function
@@ -283,8 +283,12 @@ func (c *Class) resolveInterfaces() []error {
 	return errs
 }
 
-func (c *Class) implementMethod(pos *Pos, m *ClassMethod,
-	nameMatched **ClassMethod, fromSub bool, errs *[]error) *ClassMethod {
+func (c *Class) implementMethod(
+	pos *Pos,
+	m *ClassMethod,
+	nameMatched **ClassMethod,
+	fromSub bool,
+	errs *[]error) *ClassMethod {
 	if c.Methods != nil {
 		for _, v := range c.Methods[m.Function.Name] {
 			if v.IsAbstract() {
@@ -397,7 +401,7 @@ func (c *Class) loadSuperClass(pos *Pos) error {
 	return nil
 }
 
-func (c *Class) accessConstructionFunction(
+func (c *Class) accessConstructionMethod(
 	pos *Pos,
 	errs *[]error,
 	newCase *ExpressionNew,
@@ -407,7 +411,6 @@ func (c *Class) accessConstructionFunction(
 	if err != nil {
 		return nil, false, err
 	}
-
 	var args *CallArgs
 	if newCase != nil {
 		args = &newCase.Args
@@ -437,7 +440,10 @@ func (c *Class) accessConstructionFunction(
 /*
 	ret is *ClassField or *ClassMethod
 */
-func (c *Class) getFieldOrMethod(pos *Pos, name string, fromSub bool) (interface{}, error) {
+func (c *Class) getFieldOrMethod(
+	pos *Pos,
+	name string,
+	fromSub bool) (interface{}, error) {
 	err := c.loadSelf(pos)
 	if err != nil {
 		return nil, err

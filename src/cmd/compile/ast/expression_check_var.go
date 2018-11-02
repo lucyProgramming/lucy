@@ -101,7 +101,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 		}
 		if e.IsPublic {
 			for _, v := range ev.Variables {
-				v.AccessFlags |= cg.ACC_FIELD_PUBLIC
+				v.AccessFlags |= cg.AccFieldPublic
 			}
 		}
 	}

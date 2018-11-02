@@ -38,7 +38,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(
 			code.CodeLength++
 		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      javaStringClass,
 				Method:     "compareTo",
 				Descriptor: "(Ljava/lang/String;)I",

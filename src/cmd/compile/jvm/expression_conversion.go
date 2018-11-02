@@ -215,7 +215,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(Z)Ljava/lang/String;",
@@ -223,7 +223,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		code.CodeLength += 3
 	case ast.VariableTypeChar:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(C)Ljava/lang/String;",
@@ -237,7 +237,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(I)Ljava/lang/String;",
@@ -245,7 +245,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		code.CodeLength += 3
 	case ast.VariableTypeLong:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(J)Ljava/lang/String;",
@@ -253,7 +253,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		code.CodeLength += 3
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(F)Ljava/lang/String;",
@@ -261,7 +261,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		code.CodeLength += 3
 	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/String;",
@@ -286,7 +286,7 @@ func (buildExpression *BuildExpression) stackTop2String(class *cg.ClassHighLevel
 		code.Codes[code.CodeLength+7] = cg.OP_goto
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+8:code.CodeLength+10], 6)
 		code.Codes[code.CodeLength+10] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/Object",
 			Method:     "toString",
 			Descriptor: "()Ljava/lang/String;",

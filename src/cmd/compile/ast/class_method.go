@@ -39,30 +39,30 @@ func (m *ClassMethod) accessString() string {
 
 func (m *ClassMethod) isAccessFlagDefault() bool {
 	return m.Function.AccessFlags&
-		(cg.ACC_METHOD_PUBLIC|
-			cg.ACC_METHOD_PRIVATE|
-			cg.ACC_METHOD_PROTECTED) == 0
+		(cg.AccMethodPublic|
+			cg.AccMethodPrivate|
+			cg.AccMethodProtected) == 0
 }
 
 func (m *ClassMethod) IsPublic() bool {
-	return (m.Function.AccessFlags & cg.ACC_METHOD_PUBLIC) != 0
+	return (m.Function.AccessFlags & cg.AccMethodPublic) != 0
 }
 func (m *ClassMethod) IsProtected() bool {
-	return (m.Function.AccessFlags & cg.ACC_METHOD_PROTECTED) != 0
+	return (m.Function.AccessFlags & cg.AccMethodProtected) != 0
 }
 
 func (m *ClassMethod) IsStatic() bool {
-	return (m.Function.AccessFlags & cg.ACC_METHOD_STATIC) != 0
+	return (m.Function.AccessFlags & cg.AccMethodStatic) != 0
 }
 
 func (m *ClassMethod) IsPrivate() bool {
-	return (m.Function.AccessFlags & cg.ACC_METHOD_PRIVATE) != 0
+	return (m.Function.AccessFlags & cg.AccMethodPrivate) != 0
 }
 func (m *ClassMethod) IsFinal() bool {
-	return (m.Function.AccessFlags & cg.ACC_METHOD_FINAL) != 0
+	return (m.Function.AccessFlags & cg.AccMethodFinal) != 0
 }
 func (m *ClassMethod) IsAbstract() bool {
-	return (m.Function.AccessFlags & cg.ACC_METHOD_ABSTRACT) != 0
+	return (m.Function.AccessFlags & cg.AccMethodAbstract) != 0
 }
 
 func (m *ClassMethod) ableAccessFromSubClass() bool {

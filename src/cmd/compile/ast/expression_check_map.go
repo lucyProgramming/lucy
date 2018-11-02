@@ -17,7 +17,8 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	noType := m.Type == nil
 	if noType && len(m.KeyValuePairs) == 0 {
 		*errs = append(*errs,
-			fmt.Errorf("%s map literal has no type and no initiational values,cannot inference it`s type",
+			fmt.Errorf("%s map literal has no type and no initiational values,"+
+				"cannot inference it`s type",
 				errMsgPrefix(e.Pos)))
 		return nil
 	}
@@ -29,7 +30,6 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	if m.Type.Map == nil {
 		m.Type.Map = &Map{}
 	}
-
 	longMap := make(map[int64]*Pos)
 	floatMap := make(map[float32]*Pos)
 	doubleMap := make(map[float64]*Pos)
@@ -113,7 +113,6 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 				}
 			}
 		}
-
 		// map v
 		vType, es := v.Value.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)

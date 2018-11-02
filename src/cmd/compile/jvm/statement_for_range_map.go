@@ -45,14 +45,14 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 	}
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     "keySet",
 		Descriptor: "()Ljava/util/Set;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokeinterface
-	class.InsertInterfaceMethodrefConst(cg.CONSTANT_InterfaceMethodref_info_high_level{
+	class.InsertInterfaceMethodrefConst(cg.ConstantInfoInterfaceMethodrefHighLevel{
 		Class:      "java/util/Set",
 		Method:     "toArray",
 		Descriptor: "()[Ljava/lang/Object;",
@@ -135,7 +135,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 	if 2 > maxStack {
 		maxStack = 2
 	}
-	exit := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
+	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
 	if attr.IdentifierValue != nil || attr.ExpressionValue != nil {
 		// load k sets
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
@@ -151,7 +151,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "get",
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
@@ -193,7 +193,8 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
 		if attr.IdentifierValue != nil {
 			if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
+					attr.IdentifierValue.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(attr.IdentifierValue.Variable.Type.Type,
 						autoVar.V)...)
@@ -251,7 +252,6 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)
 	}
-	writeExits([]*cg.Exit{exit}, code.CodeLength)
-	context.MakeStackMap(code, forState, code.CodeLength)
+
 	return
 }

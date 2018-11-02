@@ -21,7 +21,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
 	code.Codes[code.CodeLength] = cg.OP_getstatic
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      "java/lang/System",
 		Field:      "out",
 		Descriptor: "Ljava/io/PrintStream;",
@@ -68,7 +68,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(
 		index++
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaPrintStreamClass,
 		Method:     "printf",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;",

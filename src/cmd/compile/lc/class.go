@@ -48,7 +48,7 @@ func (c *ClassDecoder) parseConstPool() error {
 	c.bs = c.bs[2:]
 	for i := 0; i < int(length); i++ {
 		switch c.bs[0] {
-		case cg.CONSTANT_POOL_TAG_Utf8:
+		case cg.ConstantPoolTagUtf8:
 			p := &cg.ConstPool{}
 			length := binary.BigEndian.Uint16(c.bs[1:])
 			p.Tag = c.bs[0]
@@ -56,81 +56,81 @@ func (c *ClassDecoder) parseConstPool() error {
 			p.Info = c.bs[:length]
 			c.bs = c.bs[length:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_Integer:
+		case cg.ConstantPoolTagInteger:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_Float:
+		case cg.ConstantPoolTagFloat:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_Fieldref:
+		case cg.ConstantPoolTagFieldref:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_Methodref:
+		case cg.ConstantPoolTagMethodref:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_InterfaceMethodref:
+		case cg.ConstantPoolTagInterfaceMethodref:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_NameAndType:
+		case cg.ConstantPoolTagNameAndType:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_InvokeDynamic:
+		case cg.ConstantPoolTagInvokeDynamic:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:5]
 			c.bs = c.bs[5:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_Long:
+		case cg.ConstantPoolTagLong:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:9]
 			c.bs = c.bs[9:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p, nil)
 			i++ // increment twice
-		case cg.CONSTANT_POOL_TAG_Double:
+		case cg.ConstantPoolTagDouble:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:9]
 			c.bs = c.bs[9:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p, nil)
 			i++ // increment twice
-		case cg.CONSTANT_POOL_TAG_Class:
+		case cg.ConstantPoolTagClass:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:3]
 			c.bs = c.bs[3:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_String:
+		case cg.ConstantPoolTagString:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:3]
 			c.bs = c.bs[3:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_MethodType:
+		case cg.ConstantPoolTagMethodType:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:3]
 			c.bs = c.bs[3:]
 			c.classFile.ConstPool = append(c.classFile.ConstPool, p)
-		case cg.CONSTANT_POOL_TAG_MethodHandle:
+		case cg.ConstantPoolTagMethodHandle:
 			p := &cg.ConstPool{}
 			p.Tag = c.bs[0]
 			p.Info = c.bs[1:4]
@@ -193,7 +193,7 @@ func (c *ClassDecoder) parseAttributes() (cg.AttributeGroupedByName, error) {
 	for i := uint16(0); i < length; i++ {
 		a := &cg.AttributeInfo{}
 		a.NameIndex = binary.BigEndian.Uint16(c.bs)
-		if c.classFile.ConstPool[a.NameIndex].Tag != cg.CONSTANT_POOL_TAG_Utf8 {
+		if c.classFile.ConstPool[a.NameIndex].Tag != cg.ConstantPoolTagUtf8 {
 			return ret, fmt.Errorf("name index %d is not a utf8 const", a.NameIndex)
 		}
 		length := binary.BigEndian.Uint32(c.bs[2:])

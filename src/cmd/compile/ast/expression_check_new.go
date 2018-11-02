@@ -52,7 +52,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	if len(*errs) > errsLength {
 		return ret
 	}
-	ms, matched, err := no.Type.Class.accessConstructionFunction(e.Pos, errs, no, nil, callArgTypes)
+	ms, matched, err := no.Type.Class.accessConstructionMethod(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))
 		return ret

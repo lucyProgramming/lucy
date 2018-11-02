@@ -41,7 +41,7 @@ func (buildExpression *BuildExpression) buildNew(
 	if d == "" {
 		d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
 	}
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      n.Type.Class.Name,
 		Method:     specialMethodInit,
 		Descriptor: d,
@@ -61,7 +61,7 @@ func (buildExpression *BuildExpression) buildNewMap(
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -148,7 +148,7 @@ func (buildExpression *BuildExpression) buildNewArray(
 		state.popStack(1)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      meta.className,
 		Method:     specialMethodInit,
 		Descriptor: meta.constructorFuncDescriptor,

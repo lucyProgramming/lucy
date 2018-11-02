@@ -19,7 +19,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      c,
 			Method:     "booleanValue",
 			Descriptor: "()Z",
@@ -31,7 +31,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      c,
 			Method:     "byteValue",
 			Descriptor: "()B",
@@ -43,7 +43,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      c,
 			Method:     "shortValue",
 			Descriptor: "()S",
@@ -55,7 +55,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(c, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      c,
 			Method:     "shortValue",
 			Descriptor: "()C",
@@ -68,7 +68,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaIntegerClass,
 			Method:     "intValue",
 			Descriptor: "()I",
@@ -79,7 +79,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(javaLongClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaLongClass,
 			Method:     "longValue",
 			Descriptor: "()J",
@@ -90,7 +90,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(javaFloatClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaFloatClass,
 			Method:     "floatValue",
 			Descriptor: "()F",
@@ -101,7 +101,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		class.InsertClassConst(javaDoubleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaDoubleClass,
 			Method:     "doubleValue",
 			Descriptor: "()D",
@@ -124,25 +124,25 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(
 	bs[0] = cg.OP_invokestatic
 	switch t.Type {
 	case ast.VariableTypeBool:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/Boolean",
 			Method:     "valueOf",
 			Descriptor: "(Z)Ljava/lang/Boolean;",
 		}, bs[1:3])
 	case ast.VariableTypeByte:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/Byte",
 			Method:     "valueOf",
 			Descriptor: "(B)Ljava/lang/Byte;",
 		}, bs[1:3])
 	case ast.VariableTypeShort:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/Short",
 			Method:     "valueOf",
 			Descriptor: "(S)Ljava/lang/Short;",
 		}, bs[1:3])
 	case ast.VariableTypeChar:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/Character",
 			Method:     "valueOf",
 			Descriptor: "(C)Ljava/lang/Character;",
@@ -150,25 +150,25 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(
 	case ast.VariableTypeEnum:
 		fallthrough
 	case ast.VariableTypeInt:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaIntegerClass,
 			Method:     "valueOf",
 			Descriptor: "(I)Ljava/lang/Integer;",
 		}, bs[1:3])
 	case ast.VariableTypeLong:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaLongClass,
 			Method:     "valueOf",
 			Descriptor: "(J)Ljava/lang/Long;",
 		}, bs[1:3])
 	case ast.VariableTypeFloat:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaFloatClass,
 			Method:     "valueOf",
 			Descriptor: "(F)Ljava/lang/Float;",
 		}, bs[1:3])
 	case ast.VariableTypeDouble:
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaDoubleClass,
 			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/Double;",

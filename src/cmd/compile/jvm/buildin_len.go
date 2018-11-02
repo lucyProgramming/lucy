@@ -35,7 +35,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(
 	} else if a0.Value.Type == ast.VariableTypeArray {
 		meta := ArrayMetas[a0.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
@@ -43,7 +43,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(
 		code.CodeLength += 3
 	} else if a0.Value.Type == ast.VariableTypeMap {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "size",
 			Descriptor: "()I",
@@ -51,7 +51,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(
 		code.CodeLength += 3
 	} else if a0.Value.Type == ast.VariableTypeString {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "length",
 			Descriptor: "()I",

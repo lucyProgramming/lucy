@@ -16,7 +16,7 @@ type Constant struct {
 }
 
 func (c *Constant) isPublic() bool {
-	return c.AccessFlags|cg.ACC_FIELD_PUBLIC != 0
+	return c.AccessFlags|cg.AccFieldPublic != 0
 }
 
 func (c *Constant) mkDefaultValue() {

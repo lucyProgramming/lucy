@@ -18,7 +18,7 @@ func (buildExpression *BuildExpression) buildFunctionPointerCall(
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      "java/lang/invoke/MethodHandle",
 		Method:     methodHandleInvokeMethodName,
 		Descriptor: Descriptor.methodDescriptor(call.Expression.Value.FunctionType),
@@ -52,7 +52,7 @@ func (buildExpression *BuildExpression) buildFunctionCall(
 	if call.Function.IsClosureFunction == false {
 		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Entrance.Name,
 			Descriptor: call.Function.Entrance.Descriptor,
@@ -64,7 +64,7 @@ func (buildExpression *BuildExpression) buildFunctionCall(
 		if context.function.Closure.ClosureFunctionExist(call.Function) {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      class.Name,
 				Field:      call.Function.Name,
 				Descriptor: "L" + call.Function.Entrance.Class.Name + ";",
@@ -80,7 +80,7 @@ func (buildExpression *BuildExpression) buildFunctionCall(
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Name,
 			Descriptor: call.Function.Entrance.Descriptor,

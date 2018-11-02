@@ -18,7 +18,7 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      class.Name,
 			Field:      identifier.Name,
 			Descriptor: "L" + meta.className + ";",
@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	remainStack = 1
 	ops = make([]byte, 3)
 	ops[0] = cg.OP_putfield
-	class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      meta.fieldName,
 		Descriptor: meta.fieldDescription,
@@ -68,7 +68,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     "put",
 		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
@@ -97,7 +97,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			ops = make([]byte, 3)
 			leftValueType = LeftValueKindPutStatic
 			ops[0] = cg.OP_putstatic
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      buildExpression.BuildPackage.mainClass.Name,
 				Field:      identifier.Name,
 				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
@@ -121,7 +121,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			meta := ArrayMetas[index.Expression.Value.Array.Type]
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      meta.className,
 				Method:     "set",
 				Descriptor: meta.setMethodDescription,
@@ -186,7 +186,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			if selection.PackageVariable.JvmDescriptor == "" {
 				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(selection.PackageVariable.Type)
 			}
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
 				Descriptor: selection.PackageVariable.JvmDescriptor,
@@ -211,7 +211,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
 			}
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Class.Name,
 				Field:      selection.Name,
 				Descriptor: selection.Field.JvmDescriptor,
@@ -221,7 +221,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
 			}
-			class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Class.Name,
 				Field:      selection.Name,
 				Descriptor: selection.Field.JvmDescriptor,

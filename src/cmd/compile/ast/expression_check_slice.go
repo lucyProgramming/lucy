@@ -43,7 +43,6 @@ func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
 				}
 			}
 		}
-
 	}
 	if on.End != nil {
 		endType, es := on.End.checkSingleValueContextExpression(block)

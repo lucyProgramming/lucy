@@ -30,7 +30,7 @@ func (buildExpression *BuildExpression) buildStringSlice(
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "substring",
 			Descriptor: "(II)Ljava/lang/String;",
@@ -38,7 +38,7 @@ func (buildExpression *BuildExpression) buildStringSlice(
 		code.CodeLength += 3
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "substring",
 			Descriptor: "(I)Ljava/lang/String;",
@@ -76,7 +76,7 @@ func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, cod
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
@@ -91,7 +91,7 @@ func (buildExpression *BuildExpression) buildSlice(class *cg.ClassHighLevel, cod
 		code.CodeLength++
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      meta.className,
 		Method:     "slice",
 		Descriptor: meta.sliceDescriptor,

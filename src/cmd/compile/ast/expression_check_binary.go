@@ -35,7 +35,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		}
 		if left.Type != VariableTypeBool ||
 			right.Type != VariableTypeBool {
-			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		return result
 	}
@@ -57,7 +57,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			return nil
 		}
 		if left.isInteger() == false || left.assignAble(errs, right) == false {
-			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		result = left.Clone()
 		result.Pos = e.Pos
@@ -73,8 +73,9 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			}
 			return nil
 		}
-		if false == left.isInteger() || right.isInteger() == false {
-			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+		if false == left.isInteger() ||
+			right.isInteger() == false {
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		if right.Type == VariableTypeLong {
 			bin.Right.convertToNumberType(VariableTypeInt)
@@ -100,11 +101,11 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		switch left.Type {
 		case VariableTypeBool:
 			if right.Type != VariableTypeBool || e.isEqOrNe() == false {
-				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		case VariableTypeEnum:
 			if left.assignAble(errs, right) == false {
-				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		case VariableTypeByte:
 			fallthrough
@@ -129,17 +130,17 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 					}
 				}
 			} else {
-				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		case VariableTypeString:
 			if right.Type == VariableTypeNull {
 				if e.Type != ExpressionTypeEq && ExpressionTypeNe != e.Type {
-					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+					*errs = append(*errs, e.binaryWrongOpErr())
 
 				}
 			} else {
 				if right.Type != VariableTypeString {
-					*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+					*errs = append(*errs, e.binaryWrongOpErr())
 				}
 			}
 		case VariableTypeNull:
@@ -159,10 +160,10 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 			fallthrough
 		case VariableTypeFunction:
 			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
-				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		default:
-			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		return result
 	}
@@ -189,7 +190,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 		if left.Type == VariableTypeString ||
 			right.Type == VariableTypeString { // string is always ok
 			if e.Type != ExpressionTypeAdd {
-				*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 			result = &Type{}
 			result.Type = VariableTypeString
@@ -206,7 +207,7 @@ func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result 
 				}
 			}
 		} else {
-			*errs = append(*errs, e.makeWrongOpErr(left.TypeString(), right.TypeString()))
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		result = left.Clone()
 		result.Pos = e.Pos

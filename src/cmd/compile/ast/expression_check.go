@@ -305,11 +305,6 @@ func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error
 		f := e.Data.(*Function)
 		PackageBeenCompile.statementLevelFunctions =
 			append(PackageBeenCompile.statementLevelFunctions, f)
-		if e.IsStatementExpression == false && f.Name != "" {
-			errs = append(errs,
-				fmt.Errorf("%s function literal named '%s' expect no name",
-					e.Pos.ErrMsgPrefix(), f.Name))
-		}
 		if e.IsStatementExpression {
 			err := block.Insert(f.Name, f.Pos, f)
 			if err != nil {

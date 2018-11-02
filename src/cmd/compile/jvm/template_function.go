@@ -16,12 +16,12 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(
 		method := &cg.MethodHighLevel{}
 		method.Class = class
 		method.Name = class.NewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
-		method.AccessFlags |= cg.ACC_CLASS_PUBLIC
-		method.AccessFlags |= cg.ACC_CLASS_FINAL
-		method.AccessFlags |= cg.ACC_METHOD_STATIC
-		method.AccessFlags |= cg.ACC_METHOD_BRIDGE
+		method.AccessFlags |= cg.AccClassPublic
+		method.AccessFlags |= cg.AccClassFinal
+		method.AccessFlags |= cg.AccMethodStatic
+		method.AccessFlags |= cg.AccMethodBridge
 		if call.TemplateFunctionCallPair.Function.Type.VArgs != nil {
-			method.AccessFlags |= cg.ACC_METHOD_VARARGS
+			method.AccessFlags |= cg.AccMethodVarargs
 		}
 		method.Descriptor = Descriptor.methodDescriptor(&call.TemplateFunctionCallPair.Function.Type)
 		method.Code = &cg.AttributeCode{}
@@ -33,7 +33,7 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(
 	}
 	maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      call.TemplateFunctionCallPair.Entrance.Class.Name,
 		Method:     call.TemplateFunctionCallPair.Entrance.Name,
 		Descriptor: call.TemplateFunctionCallPair.Entrance.Descriptor,

@@ -99,7 +99,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 				continue
 			}
 			if e.IsPublic { // only use when is is global
-				vd.AccessFlags |= cg.ACC_FIELD_PUBLIC
+				vd.AccessFlags |= cg.AccFieldPublic
 			}
 		}
 	}

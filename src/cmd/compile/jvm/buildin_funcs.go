@@ -16,7 +16,7 @@ func (buildExpression *BuildExpression) mkBuildInFunctionCall(
 	if call.Function.LoadedFromCorePackage {
 		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Name,
 			Descriptor: call.Function.Entrance.Descriptor,

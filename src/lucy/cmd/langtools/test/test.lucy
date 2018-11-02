@@ -44,12 +44,10 @@ final class Test {
 		if lucyFiles.size() == 0 {  // no lucy files
 		    return 
 		}
-        args  := new string[](5)
+        args  := new string[](3)
         args[0] = "run"  
 		args[1] = "-v"
-		args[2] = "-cf" 
-		args[3] = "-disable-check-unuse"
-		args[4] =  packageName
+		args[2] =  packageName
         cmd := new os.Command(this.lucyRoot + "/bin/lucy", args  , null ,null)
         cmd.stdout = os.stdout 
         cmd.stderr = os.stderr  

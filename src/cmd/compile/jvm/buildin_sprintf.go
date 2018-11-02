@@ -54,7 +54,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(
 		state.popStack(2)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaStringClass,
 		Method:     "format",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;",

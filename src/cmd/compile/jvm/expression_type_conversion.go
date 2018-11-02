@@ -91,7 +91,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 			maxStack = 3
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaExceptionClass,
 			Method:     specialMethodInit,
 			Descriptor: "(Ljava/lang/String;)V",
@@ -109,7 +109,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "getBytes",
 			Descriptor: "()[B",
@@ -120,7 +120,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		}
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     specialMethodInit,
 			Descriptor: meta.constructorFuncDescriptor,
@@ -133,7 +133,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "getBytes",
 			Descriptor: "()[B",
@@ -166,7 +166,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		code.CodeLength++
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      meta.className,
 			Field:      "start",
 			Descriptor: "I",
@@ -176,7 +176,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
@@ -184,7 +184,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		code.CodeLength += 3
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      meta.className,
 			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,
@@ -199,7 +199,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 			maxStack = 6
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     specialMethodInit,
 			Descriptor: "([BIILjava/lang/String;)V",
@@ -211,7 +211,7 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 	if conversion.Type.Type == ast.VariableTypeString &&
 		conversion.Expression.Value.Equal(ast.JavaBytesType) {
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     specialMethodInit,
 			Descriptor: "([B)V",

@@ -179,7 +179,7 @@ func (e *Expression) checkMethodCallExpressionOnSuper(
 	if len(*errs) > errsLength {
 		return
 	}
-	ms, matched, err := object.Class.SuperClass.accessConstructionFunction(e.Pos, errs,
+	ms, matched, err := object.Class.SuperClass.accessConstructionMethod(e.Pos, errs,
 		nil, call, callArgsTypes)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))

@@ -46,7 +46,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 		common.ArrayMethodEnd:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     call.Name,
 			Descriptor: "()I",
@@ -71,7 +71,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      meta.className,
 				Method:     "append",
 				Descriptor: meta.appendDescriptor,
@@ -97,7 +97,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 			}
 			//get elements field
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.CONSTANT_Methodref_info_high_level{
+			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      meta.className,
 				Method:     "append",
 				Descriptor: meta.appendAllDescriptor,
@@ -110,7 +110,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 	case common.ArrayMethodGetUnderlyingArray:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.CONSTANT_Fieldref_info_high_level{
+		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      meta.className,
 			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,

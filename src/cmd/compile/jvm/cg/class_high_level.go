@@ -30,7 +30,7 @@ func (classHighLevel *ClassHighLevel) InsertSourceFile(filename string) {
 	classHighLevel.SourceFiles[filename] = struct{}{}
 }
 
-func (classHighLevel *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref_info_high_level,
+func (classHighLevel *ClassHighLevel) InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertMethodrefConst(mr))
 }
@@ -38,7 +38,7 @@ func (classHighLevel *ClassHighLevel) InsertMethodRefConst(mr CONSTANT_Methodref
 func (classHighLevel *ClassHighLevel) InsertMethodCall(code *AttributeCode, op byte,
 	className, method, descriptor string) {
 	code.Codes[code.CodeLength] = op
-	classHighLevel.InsertMethodRefConst(CONSTANT_Methodref_info_high_level{
+	classHighLevel.InsertMethodRefConst(ConstantInfoMethodrefHighLevel{
 		Class:      className,
 		Method:     method,
 		Descriptor: descriptor,
@@ -89,19 +89,19 @@ func (classHighLevel *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
 }
 
 func (classHighLevel *ClassHighLevel) InsertInterfaceMethodrefConst(
-	constant CONSTANT_InterfaceMethodref_info_high_level,
+	constant ConstantInfoInterfaceMethodrefHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location,
 		classHighLevel.Class.InsertInterfaceMethodrefConst(constant))
 }
 
-func (classHighLevel *ClassHighLevel) InsertMethodTypeConst(constant CONSTANT_MethodType_info_high_level,
+func (classHighLevel *ClassHighLevel) InsertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location,
 		classHighLevel.Class.InsertMethodTypeConst(constant))
 }
 
-func (classHighLevel *ClassHighLevel) InsertFieldRefConst(constant CONSTANT_Fieldref_info_high_level,
+func (classHighLevel *ClassHighLevel) InsertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location,
 		classHighLevel.Class.InsertFieldRefConst(constant))

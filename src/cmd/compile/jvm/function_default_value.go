@@ -23,8 +23,7 @@ func (fd *DefaultValueParse) Encode(
 				ret.Constants = append(ret.Constants, class.Class.InsertIntConst(0))
 			}
 		case ast.ExpressionTypeByte:
-			ret.Constants = append(ret.Constants, class.Class.InsertIntConst(
-				int32(f.Type.ParameterList[i].DefaultValueExpression.Data.(int64))))
+			fallthrough
 		case ast.ExpressionTypeShort:
 			fallthrough
 		case ast.ExpressionTypeInt:
